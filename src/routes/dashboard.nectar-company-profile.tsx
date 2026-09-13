@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/card";
 import { RequireRole } from "@/components/rbac-guard";
 import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
-import { onboardingLSKey } from "@/hooks/use-onboarding-progress";
+import { notifyOnboardingChanged, onboardingLSKey } from "@/hooks/use-onboarding-progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -135,6 +135,7 @@ function NectarCompanyProfilePage() {
     try {
       window.localStorage.setItem(onboardingLSKey(orgId, "profile"), JSON.stringify(draft));
       window.localStorage.setItem(onboardingLSKey(orgId, "profile_saved"), JSON.stringify(true));
+      notifyOnboardingChanged();
       setSaved(true);
       toast.success("Got it — I've calibrated to your agency.");
     } catch {
@@ -145,7 +146,7 @@ function NectarCompanyProfilePage() {
   return (
     <div className="space-y-4">
       <OnboardingReturnBar />
-      <OnboardingGuidanceBanner step={2} />
+      <OnboardingGuidanceBanner step={1} />
 
       <header className="flex items-start gap-3">
         <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--amber-500,var(--hive-gold))]/15 text-[color:var(--amber-600,#d97706)]">

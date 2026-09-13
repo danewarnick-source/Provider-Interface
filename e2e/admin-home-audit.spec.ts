@@ -83,6 +83,14 @@ test.describe("Admin Home + obligations / audit-readiness", () => {
       "title",
       /True North Supports/,
     );
+    const nectarOnboarding = page.getByRole("region", { name: /NECTAR onboarding/i });
+    await expect(nectarOnboarding).toBeVisible();
+    await expect(nectarOnboarding.getByText(/Tell NECTAR about your agency/i)).toBeVisible();
+    await expect(nectarOnboarding.getByText(/Company documents \(optional\)/i)).toBeVisible();
+    await expect(nectarOnboarding.getByText(/you do not upload a Scope of Work to finish setup/i)).toBeVisible();
+    await expect(nectarOnboarding.getByText(/State Scope of Work/i)).toHaveCount(0);
+    await expect(nectarOnboarding.getByText(/Upload your authoritative sources/i)).toHaveCount(0);
+    await expect(nectarOnboarding.getByText(/Complete Step 1 first/i)).toHaveCount(0);
     await expect(page.getByTestId("this-week")).toBeVisible();
     await expect(page.getByRole("heading", { name: /^This week$/i })).toBeVisible();
     await expect(page.getByTestId("decision-card")).toHaveCount(3);

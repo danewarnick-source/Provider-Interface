@@ -322,7 +322,7 @@ export function EmployeesPage() {
   return (
     <div className="space-y-6">
       <OnboardingReturnBar />
-      <OnboardingGuidanceBanner step={3} />
+      <OnboardingGuidanceBanner step={2} />
 
       <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
         <div>

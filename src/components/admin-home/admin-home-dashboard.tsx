@@ -9,6 +9,7 @@ import { PI_GRAIN_SVG, PI_THEME } from "@/lib/pi-theme";
 import { cn } from "@/lib/utils";
 import { greetingWord, useAdminHomeData } from "@/components/admin-home/use-admin-home-data";
 import { AdminHomeWelcome } from "@/components/admin-home/admin-home-welcome";
+import { NectarOnboardingPanel } from "@/components/onboarding/nectar-onboarding-panel";
 import { ThisWeekPlanCards } from "@/components/compliance/this-week-plan-cards";
 import { generateMyReview, getReviewDayMeta, listPackWhatChanged } from "@/lib/obligations/review-pack.functions";
 import {
@@ -197,6 +198,7 @@ function AdminHomeDashboardInner({ welcomeFlag = false }: { welcomeFlag?: boolea
         <Suspense fallback={null}>
           <AdminHomeWelcome welcomeFlag={welcomeFlag} />
         </Suspense>
+        {orgId ? <NectarOnboardingPanel welcomeFlag={welcomeFlag} /> : null}
         <div>
           <div className="text-lg font-semibold" style={{ ...SERIF, color: PI_THEME.cream }}>
             Good {greetingWord(now)}, {firstName}. Here's what needs your attention.

@@ -154,6 +154,7 @@ describe("Admin Home Step 3 — welcome banner", () => {
     const welcome = read("../components/admin-home/admin-home-welcome.tsx");
     assert.match(index, /welcomeFlag=\{!!search\.welcome\}/);
     assert.match(dash, /<AdminHomeWelcome welcomeFlag=\{welcomeFlag\} \/>/);
+    assert.match(dash, /NectarOnboardingPanel/);
     assert.match(dash, /<Suspense fallback=\{null\}>/);
     const greetingIdx = dash.indexOf("Good {greetingWord");
     const bannerIdx = dash.indexOf("<AdminHomeWelcome");
