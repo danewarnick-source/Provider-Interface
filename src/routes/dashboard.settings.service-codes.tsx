@@ -31,7 +31,7 @@ function ServiceCodesPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <OnboardingReturnBar />
-      <OnboardingGuidanceBanner step={5} />
+      <OnboardingGuidanceBanner step={4} />
 
       <header>
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">

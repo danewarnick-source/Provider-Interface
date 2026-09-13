@@ -141,7 +141,7 @@ export function NectarDocsPage() {
   return (
     <div className="space-y-4">
       <OnboardingReturnBar />
-      <OnboardingGuidanceBanner step={6} />
+      <OnboardingGuidanceBanner step={5} />
 
       <header className="space-y-1">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
@@ -249,7 +249,7 @@ export function NectarDocsPage() {
         )}
         {!isLoading && docs.length === 0 && (
           <div className="rounded-xl border border-dashed border-border/60 bg-card/30 p-8 text-center text-sm text-muted-foreground">
-            No documents yet. Upload a PCSP, SOW or certification to seed NECTAR.
+            No documents yet. Upload a PCSP, contract, or certification when you have files to store.
           </div>
         )}
         {docs.map((d) => (

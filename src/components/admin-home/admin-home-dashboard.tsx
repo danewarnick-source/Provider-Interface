@@ -9,7 +9,9 @@ import { PI_GRAIN_SVG, PI_THEME } from "@/lib/pi-theme";
 import { cn } from "@/lib/utils";
 import { greetingWord, useAdminHomeData } from "@/components/admin-home/use-admin-home-data";
 import { AdminHomeWelcome } from "@/components/admin-home/admin-home-welcome";
+import { NectarOnboardingPanel } from "@/components/onboarding/nectar-onboarding-panel";
 import { ThisWeekPlanCards } from "@/components/compliance/this-week-plan-cards";
+import { useOrgFeatures } from "@/hooks/use-feature-enabled";
 import { generateMyReview, getReviewDayMeta, listPackWhatChanged } from "@/lib/obligations/review-pack.functions";
 import {
   formatReviewDayMeta,
@@ -154,6 +156,8 @@ function WhatChangedPanel({
 function AdminHomeDashboardInner({ welcomeFlag = false }: { welcomeFlag?: boolean }) {
   const data = useAdminHomeData();
   const { org, orgId, orgName, orgLoading, now, firstName, dateLine } = data;
+  const { isEnabled } = useOrgFeatures();
+  const showNectarOnboarding = !!orgId && isEnabled("nectar");
   const [tab, setTab] = useState<HomeTab>("this-week");
 
   const canManage = org
@@ -197,6 +201,7 @@ function AdminHomeDashboardInner({ welcomeFlag = false }: { welcomeFlag?: boolea
         <Suspense fallback={null}>
           <AdminHomeWelcome welcomeFlag={welcomeFlag} />
         </Suspense>
+        {showNectarOnboarding ? <NectarOnboardingPanel welcomeFlag={welcomeFlag} /> : null}
         <div>
           <div className="text-lg font-semibold" style={{ ...SERIF, color: PI_THEME.cream }}>
             Good {greetingWord(now)}, {firstName}. Here's what needs your attention.

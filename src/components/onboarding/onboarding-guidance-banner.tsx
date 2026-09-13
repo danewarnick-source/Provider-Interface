@@ -5,34 +5,29 @@ import { Button } from "@/components/ui/button";
 
 const COPY: Record<number, { title: string; body: string }> = {
   1: {
-    title: "Upload your governing documents",
-    body:
-      "Upload your governing documents here. Start with your State Scope of Work — it's the most important. Drag and drop or browse for each file, choose its document type, and I'll read it and start using it to guide your compliance. Once your SOW is uploaded and you've signed off, your other setup steps unlock.",
-  },
-  2: {
     title: "Tell me about your operations",
     body:
       "Tell me about your operations — the services you provide, how many clients and staff you have, and any specializations. This calibrates how I guide your scheduling, documentation, and compliance.",
   },
-  3: {
+  2: {
     title: "Add your staff members",
     body:
       "Add your staff members here. Add employee collects the full file first, then you can send a join email or copy a temporary password. Once they're in the system, I can help you schedule them and track their credentials.",
   },
-  4: {
+  3: {
     title: "Add your clients",
     body:
       "Add your clients here. Their profiles, PCSPs, and service authorizations are what I use to make sure every shift and medication pass is documented correctly.",
   },
-  5: {
+  4: {
     title: "Configure your service codes",
     body:
       "Set up the billing codes for the services you provide. This connects your shifts to Medicaid billing and EVV, and lets me flag mismatches automatically.",
   },
-  6: {
+  5: {
     title: "Your company documents hub",
     body:
-      "This is where all your agency documents live. I read everything you upload and use it to answer questions and flag compliance gaps.",
+      "This is optional evidence storage for agency files — contracts, policies, certifications. You do not need to upload a Scope of Work to finish setup.",
   },
 };
 

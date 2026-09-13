@@ -4,11 +4,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   CheckCircle2,
-  Lock,
   ArrowRight,
   Hexagon,
   Sparkles,
-  Upload,
   Building2,
   Users,
   UserSquare2,
@@ -25,12 +23,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { AuthoritativeSourceDrop } from "@/components/nectar/authoritative-source-drop";
-import { AttestationBanner } from "@/components/nectar/attestation-banner";
 import { OnboardingPipelineCard } from "@/components/company-overview/onboarding-pipeline-card";
-import { useOnboardingProgress } from "@/hooks/use-onboarding-progress";
+import {
+  notifyOnboardingChanged,
+  useOnboardingProgress,
+} from "@/hooks/use-onboarding-progress";
 import { dismissAdminWelcome } from "@/lib/admin-home-welcome.functions";
 import { cn } from "@/lib/utils";
 
@@ -94,10 +92,10 @@ export function NectarOnboardingPanel({
     user?.email?.split("@")[0] ||
     "there";
 
-  // --- Persistent local state -----------------------------------------------
   const [dismissedNow, setDismissedNow] = useState(false);
   const [profileSavedLocal, setProfileSavedLocal] = useState(false);
   const [servicesVisited, setServicesVisited] = useState(false);
+  const [docsSkippedLocal, setDocsSkippedLocal] = useState(false);
   const [profileDraft, setProfileDraft] = useState<ProfileDraft>(EMPTY_PROFILE);
   const [activeStepOverride, setActiveStepOverride] = useState<number | null>(null);
 
@@ -105,56 +103,42 @@ export function NectarOnboardingPanel({
     if (!orgId) return;
     setProfileSavedLocal(readLS(lsKey(orgId, "profile_saved"), false));
     setServicesVisited(readLS(lsKey(orgId, "services_visited"), false));
+    setDocsSkippedLocal(readLS(lsKey(orgId, "docs_skipped"), false));
     setProfileDraft(readLS<ProfileDraft>(lsKey(orgId, "profile"), EMPTY_PROFILE));
   }, [orgId]);
 
-  // --- Detection queries (shared hook — single source of truth) -------------
-  const { counts: c, dismissed: dismissedFromOrg, refetch: refetchCounts } = useOnboardingProgress();
+  const { counts: c, dismissed: dismissedFromOrg } = useOnboardingProgress();
   const dismissed = dismissedNow || dismissedFromOrg;
 
-  // --- Step completion ------------------------------------------------------
-  const step1Complete = c.sowCount > 0 && c.attestationCount > 0;
-  const step2Complete = (c as any).profileSaved || profileSavedLocal;
-  const step3Complete = c.memberCount > 1; // beyond the founding owner
-  const step4Complete = c.clientCount > 0;
-  const step5Complete = (c as any).serviceCodesCount > 0;
-  const step6Complete = c.docsCount > 0;
+  const step1Complete = c.profileSaved || profileSavedLocal;
+  const step2Complete = c.memberCount > 1;
+  const step3Complete = c.clientCount > 0;
+  const step4Complete = c.serviceCodesCount > 0;
+  const step5Complete = c.docsCount > 0 || docsSkippedLocal;
 
   const steps = useMemo(
     () => [
-      { n: 1, key: "sources", title: "Upload your authoritative sources", done: step1Complete, locked: false, href: "/dashboard/authoritative-sources" as const },
-      { n: 2, key: "profile", title: "Tell NECTAR about your agency", done: step2Complete, locked: !step1Complete, href: "/dashboard/nectar-company-profile" as const },
-      { n: 3, key: "staff", title: "Add your staff", done: step3Complete, locked: !step1Complete, href: "/dashboard/employees" as const },
-      { n: 4, key: "clients", title: "Add your clients", done: step4Complete, locked: !step1Complete, href: "/dashboard/clients" as const },
-      { n: 5, key: "services", title: "Configure your service codes", done: step5Complete, locked: !step1Complete, href: "/dashboard/settings/service-codes" as const },
-      { n: 6, key: "docs", title: "Company Documents hub", done: step6Complete, locked: !step1Complete, href: "/dashboard/nectar-docs" as const },
+      { n: 1, key: "profile", title: "Tell NECTAR about your agency", done: step1Complete, required: true, href: "/dashboard/nectar-company-profile" as const },
+      { n: 2, key: "staff", title: "Add your staff", done: step2Complete, required: true, href: "/dashboard/employees" as const },
+      { n: 3, key: "clients", title: "Add your clients", done: step3Complete, required: true, href: "/dashboard/clients" as const },
+      { n: 4, key: "services", title: "Configure your service codes", done: step4Complete, required: true, href: "/dashboard/settings/service-codes" as const },
+      { n: 5, key: "docs", title: "Company documents (optional)", done: step5Complete, required: false, href: "/dashboard/nectar-docs" as const },
     ],
-    [step1Complete, step2Complete, step3Complete, step4Complete, step5Complete, step6Complete],
+    [step1Complete, step2Complete, step3Complete, step4Complete, step5Complete],
   );
 
+  const requiredSteps = steps.filter((s) => s.required);
+  const completedCount = requiredSteps.filter((s) => s.done).length;
+  const allComplete = requiredSteps.every((s) => s.done);
 
-  const completedCount = steps.filter((s) => s.done).length;
-  const allComplete = completedCount === steps.length;
-
-  // First unfinished, unlocked step is "active" by default
   const defaultActiveStep =
-    steps.find((s) => !s.done && !s.locked)?.n ?? steps.find((s) => !s.done)?.n ?? 1;
+    steps.find((s) => !s.done)?.n ?? 1;
   const activeStep = activeStepOverride ?? defaultActiveStep;
 
-  // --- Visibility -----------------------------------------------------------
-  // Hide if: dismissed, no org loaded, or all complete and not freshly welcomed
   const shouldShow =
     !!orgId &&
     !dismissed &&
     (welcomeFlag || !allComplete);
-
-  // Auto-dismiss once all complete (one-time)
-  useEffect(() => {
-    if (orgId && allComplete && !dismissed) {
-      // Don't auto-dismiss on the same render; let the user see the success state.
-      // Provide a button below to dismiss.
-    }
-  }, [orgId, allComplete, dismissed]);
 
   if (!shouldShow || !orgId) return null;
 
@@ -172,14 +156,14 @@ export function NectarOnboardingPanel({
 
   const saveProfile = async () => {
     try {
-      await supabase
+      await (supabase as any)
         .from("organizations")
         .update({
           services_offered: profileDraft.services ?? [],
           approx_client_count: Number(profileDraft.clientCount) || null,
           specializations: profileDraft.specializations?.trim() || null,
           nectar_profile_saved_at: new Date().toISOString(),
-        } as any)
+        })
         .eq("id", orgId);
     } catch (err) {
       console.warn("[onboarding] nectar profile DB write failed — localStorage fallback active", err);
@@ -187,12 +171,21 @@ export function NectarOnboardingPanel({
     writeLS(lsKey(orgId, "profile"), profileDraft);
     writeLS(lsKey(orgId, "profile_saved"), true);
     setProfileSavedLocal(true);
-    setActiveStepOverride(3);
+    notifyOnboardingChanged();
+    setActiveStepOverride(2);
   };
 
   const markServicesVisited = () => {
     writeLS(lsKey(orgId, "services_visited"), true);
     setServicesVisited(true);
+    notifyOnboardingChanged();
+  };
+
+  const skipDocs = () => {
+    writeLS(lsKey(orgId, "docs_skipped"), true);
+    setDocsSkippedLocal(true);
+    notifyOnboardingChanged();
+    void queryClient.invalidateQueries({ queryKey: ["nectar-onboarding-progress", orgId] });
   };
 
   return (
@@ -200,12 +193,10 @@ export function NectarOnboardingPanel({
       className="relative overflow-hidden rounded-2xl border border-[color:var(--amber-400,var(--hive-gold))]/40 bg-gradient-to-br from-[#0b1733] via-[#0d1a3a] to-[#0b1733] text-amber-50 shadow-xl"
       aria-label="NECTAR onboarding"
     >
-      {/* Hex backdrop accent */}
       <div className="pointer-events-none absolute -right-12 -top-12 opacity-20">
         <Hexagon className="h-56 w-56 text-[color:var(--amber-400,var(--hive-gold))]" strokeWidth={1} />
       </div>
 
-      {/* Header */}
       <div className="relative flex flex-col gap-4 border-b border-amber-300/15 px-5 py-5 sm:px-7">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
@@ -237,11 +228,10 @@ export function NectarOnboardingPanel({
 
         <p className="max-w-3xl text-sm leading-relaxed text-amber-100/90">
           {allComplete
-            ? `I've read ${orgName}'s governing documents, I know your team and your clients, and I'm ready to help. Ask me anything from the NECTAR panel at any time.`
-            : `Before I can help you schedule, document, or audit anything accurately, I need to understand ${orgName}'s authoritative sources: your Scope of Work, your policies, and your operating requirements. Let's get those uploaded first — everything else follows from there.`}
+            ? `I know ${orgName}'s team, clients, and service codes, and I'm ready to help. Ask me anything from the NECTAR panel at any time.`
+            : `A few facts about ${orgName} help me guide scheduling, documentation, and billing. Add staff, clients, and service codes when you are ready. Statewide requirements are already in Provider Interface — you do not upload a Scope of Work to finish setup.`}
         </p>
 
-        {/* Progress */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-wide text-amber-200/80">
             <span>Setup progress</span>
@@ -266,24 +256,20 @@ export function NectarOnboardingPanel({
         )}
       </div>
 
-      {/* Body */}
       {!allComplete && (
         <div className="relative grid gap-4 px-5 py-5 sm:px-7 lg:grid-cols-[260px_1fr]">
-          {/* Checklist rail */}
           <ol className="space-y-1.5">
             {steps.map((s) => {
               const Icon =
-                s.key === "sources"
-                  ? Upload
-                  : s.key === "profile"
-                    ? Building2
-                    : s.key === "staff"
-                      ? Users
-                      : s.key === "clients"
-                        ? UserSquare2
-                        : s.key === "services"
-                          ? SettingsIcon
-                          : FolderOpen;
+                s.key === "profile"
+                  ? Building2
+                  : s.key === "staff"
+                    ? Users
+                    : s.key === "clients"
+                      ? UserSquare2
+                      : s.key === "services"
+                        ? SettingsIcon
+                        : FolderOpen;
               const isActive = activeStep === s.n;
               const cardClass = cn(
                 "flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition",
@@ -291,106 +277,66 @@ export function NectarOnboardingPanel({
                   ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-100"
                   : isActive
                     ? "border-[color:var(--amber-400,var(--hive-gold))]/60 bg-amber-400/10 text-amber-50"
-                    : s.locked
-                      ? "cursor-not-allowed border-white/5 bg-white/[0.02] text-amber-100/40"
-                      : "border-white/10 bg-white/[0.03] text-amber-100/80 hover:border-amber-300/30 hover:bg-white/[0.05]",
-              );
-              const iconBubble = (
-                <span
-                  className={cn(
-                    "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
-                    s.done
-                      ? "bg-emerald-500/20 text-emerald-200"
-                      : s.locked
-                        ? "bg-white/5 text-amber-100/30"
-                        : "bg-[color:var(--amber-500,var(--hive-gold))]/20 text-[color:var(--amber-400,var(--hive-gold))]",
-                  )}
-                >
-                  {s.done ? (
-                    <CheckCircle2 className="h-4 w-4" />
-                  ) : s.locked ? (
-                    <Lock className="h-3.5 w-3.5" />
-                  ) : (
-                    <Icon className="h-3.5 w-3.5" />
-                  )}
-                </span>
-              );
-              const labelBlock = (
-                <span className="min-w-0">
-                  <span className="block text-[10px] uppercase tracking-wide opacity-70">
-                    Step {s.n}
-                  </span>
-                  <span className="block text-xs font-medium leading-tight">{s.title}</span>
-                  {s.locked && (
-                    <span className="mt-0.5 block text-[10px] opacity-60">
-                      Complete Step 1 first
-                    </span>
-                  )}
-                </span>
+                    : "border-white/10 bg-white/[0.03] text-amber-100/80 hover:border-amber-300/30 hover:bg-white/[0.05]",
               );
               return (
                 <li key={s.key}>
-                  {s.locked ? (
-                    <button
-                      type="button"
-                      disabled
-                      title="Complete Step 1 first."
-                      aria-label={`${s.title} — locked until Step 1 is complete`}
-                      className={cardClass}
+                  <Link
+                    to={s.href}
+                    search={{ from: "onboarding", step: s.n } as never}
+                    onClick={() => setActiveStepOverride(s.n)}
+                    className={cardClass}
+                  >
+                    <span
+                      className={cn(
+                        "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
+                        s.done
+                          ? "bg-emerald-500/20 text-emerald-200"
+                          : "bg-[color:var(--amber-500,var(--hive-gold))]/20 text-[color:var(--amber-400,var(--hive-gold))]",
+                      )}
                     >
-                      {iconBubble}
-                      {labelBlock}
-                    </button>
-                  ) : (
-                    <Link
-                      to={s.href}
-                      search={{ from: "onboarding", step: s.n } as never}
-                      onClick={() => setActiveStepOverride(s.n)}
-                      className={cardClass}
-                    >
-                      {iconBubble}
-                      {labelBlock}
-                    </Link>
-                  )}
+                      {s.done ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-3.5 w-3.5" />}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-[10px] uppercase tracking-wide opacity-70">
+                        Step {s.n}
+                        {s.key === "docs" ? " · Optional" : ""}
+                      </span>
+                      <span className="block text-xs font-medium leading-tight">{s.title}</span>
+                    </span>
+                  </Link>
                 </li>
               );
             })}
           </ol>
 
-
-          {/* Active step body */}
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-amber-50/95 backdrop-blur">
             {activeStep === 1 && (
-              <Step1Sources
-                orgId={orgId}
-                counts={c}
-                onChanged={() => refetchCounts()}
-              />
-            )}
-            {activeStep === 2 && (
-              <Step2Profile
+              <Step1Profile
                 draft={profileDraft}
                 setDraft={setProfileDraft}
                 onSave={saveProfile}
-                disabled={!step1Complete}
                 saved={profileSavedLocal}
               />
             )}
+            {activeStep === 2 && (
+              <Step2Staff memberCount={c.memberCount} />
+            )}
             {activeStep === 3 && (
-              <Step3Staff orgId={orgId} memberCount={c.memberCount} disabled={!step1Complete} />
+              <Step3Clients clientCount={c.clientCount} />
             )}
             {activeStep === 4 && (
-              <Step4Clients clientCount={c.clientCount} disabled={!step1Complete} />
-            )}
-            {activeStep === 5 && (
-              <Step5Services
-                disabled={!step1Complete}
+              <Step4Services
                 visited={servicesVisited}
                 onVisit={markServicesVisited}
               />
             )}
-            {activeStep === 6 && (
-              <Step6Docs docsCount={c.docsCount} disabled={!step1Complete} />
+            {activeStep === 5 && (
+              <Step5Docs
+                docsCount={c.docsCount}
+                skipped={docsSkippedLocal}
+                onSkip={skipDocs}
+              />
             )}
           </div>
         </div>
@@ -399,143 +345,17 @@ export function NectarOnboardingPanel({
   );
 }
 
-// --------------------------------------------------------------------------
-// Step 1 — Authoritative sources
-// --------------------------------------------------------------------------
-
-const DOC_TYPES: Array<{
-  kind: "state_sow" | "other" | "provider_contract" | "dspd_requirement" | "dhs_requirement";
-  label: string;
-  required?: boolean;
-  hint: string;
-}> = [
-  { kind: "state_sow", label: "State Scope of Work (SOW)", required: true, hint: "The most important — start here." },
-  { kind: "other", label: "Agency policies & procedures", hint: "Your internal operating policies." },
-  { kind: "provider_contract", label: "Provider contract", hint: "Your DSPD provider contract." },
-  { kind: "dspd_requirement", label: "DSPD requirement documents", hint: "Any active DSPD requirement memos." },
-  { kind: "dhs_requirement", label: "DHS requirement documents", hint: "Licensing and DHS requirement docs." },
-];
-
-function Step1Sources({
-  orgId,
-  counts,
-  onChanged,
-}: {
-  orgId: string;
-  counts: { sowCount: number; authSourcesCount: number; attestationCount: number };
-  onChanged: () => void;
-}) {
-  const sowUploaded = counts.sowCount > 0;
-  const canAttest = sowUploaded && counts.attestationCount === 0;
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
-          Step 1 · Required
-        </div>
-        <h3 className="mt-0.5 font-display text-lg font-semibold text-amber-50">
-          Upload your authoritative sources
-        </h3>
-        <p className="mt-1 text-sm leading-relaxed text-amber-100/85">
-          These are the documents that define what you're required to do and how.
-          Once uploaded, I'll read them and use them to guide your scheduling,
-          documentation, incident reporting, and billing. Start with your State
-          Scope of Work — it's the most important.
-        </p>
-      </div>
-
-      <AuthoritativeSourceDrop orgId={orgId} onUploaded={onChanged}>
-        <ul className="space-y-2">
-          {DOC_TYPES.map((dt) => (
-            <li key={dt.kind}>
-              <Link
-                to="/dashboard/authoritative-sources"
-                search={{ from: "onboarding", step: 1, type: dt.kind } as never}
-                className={cn(
-                  "flex items-start gap-3 rounded-xl border px-3 py-2.5 transition hover:border-[color:var(--amber-400,var(--hive-gold))]/60 hover:bg-amber-400/10",
-                  dt.required && !sowUploaded
-                    ? "border-[color:var(--amber-400,var(--hive-gold))]/50 bg-amber-400/5"
-                    : "border-white/10 bg-white/[0.03]",
-                )}
-              >
-                <span
-                  className={cn(
-                    "mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md",
-                    dt.kind === "state_sow" && sowUploaded
-                      ? "bg-emerald-500/20 text-emerald-200"
-                      : "bg-white/10 text-amber-200",
-                  )}
-                >
-                  {dt.kind === "state_sow" && sowUploaded ? (
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                  ) : (
-                    <Upload className="h-3.5 w-3.5" />
-                  )}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-medium text-amber-50">{dt.label}</span>
-                    {dt.required && (
-                      <span className="rounded-full bg-[color:var(--amber-500,var(--hive-gold))]/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
-                        Required
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-amber-100/70">{dt.hint}</p>
-                </div>
-                <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-amber-100/40" />
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-xs text-amber-100/70">
-          Drag any document onto this page to add it — I'll propose a label,
-          you confirm, and it joins the source-of-truth set.
-        </p>
-      </AuthoritativeSourceDrop>
-
-
-      {sowUploaded && (
-        <div className="rounded-xl border border-emerald-400/30 bg-emerald-400/5 p-3 text-sm text-emerald-100">
-          <strong className="font-semibold">Got it.</strong> I've read your SOW
-          and I'm already using it. Upload more or move on — but first, please
-          attest below.
-        </div>
-      )}
-
-      {sowUploaded && (
-        <AttestationBanner
-          organizationId={orgId}
-          scope="document_upload"
-          mode={canAttest ? "confirm" : "nudge"}
-          statement="I confirm these documents accurately represent our agency's current governing requirements and that I am authorized to upload them on behalf of this organization."
-          onConfirmed={onChanged}
-        />
-      )}
-    </div>
-  );
-}
-
-// --------------------------------------------------------------------------
-// Step 2 — Company profile
-// --------------------------------------------------------------------------
-
-function Step2Profile({
+function Step1Profile({
   draft,
   setDraft,
   onSave,
-  disabled,
   saved,
 }: {
   draft: ProfileDraft;
   setDraft: (d: ProfileDraft) => void;
   onSave: () => void;
-  disabled: boolean;
   saved: boolean;
 }) {
-  if (disabled) return <LockedNotice />;
-
   const toggleService = (s: Service) => {
     setDraft({
       ...draft,
@@ -549,7 +369,7 @@ function Step2Profile({
     <div className="space-y-4">
       <div>
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
-          Step 2
+          Step 1
         </div>
         <h3 className="mt-0.5 font-display text-lg font-semibold text-amber-50">
           Tell me a bit about your operations
@@ -642,20 +462,7 @@ function Step2Profile({
   );
 }
 
-// --------------------------------------------------------------------------
-// Step 3 — Staff
-// --------------------------------------------------------------------------
-
-function Step3Staff({
-  memberCount,
-  disabled,
-}: {
-  orgId: string;
-  memberCount: number;
-  disabled: boolean;
-}) {
-  if (disabled) return <LockedNotice />;
-  // memberCount includes the founding admin — show meaningful counts.
+function Step2Staff({ memberCount }: { memberCount: number }) {
   const invited = 0;
   const inProgress = 0;
   const complete = Math.max(0, memberCount);
@@ -664,14 +471,14 @@ function Step3Staff({
     <div className="space-y-4">
       <div>
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
-          Step 3
+          Step 2
         </div>
         <h3 className="mt-0.5 font-display text-lg font-semibold text-amber-50">
           Add your staff
         </h3>
         <p className="mt-1 text-sm leading-relaxed text-amber-100/85">
-          Add your staff members here. Once they're in the system, I can help
-          you schedule them, track their credentials, and make sure they're
+          Add your staff members here. Once they are in the system, I can help
+          you schedule them, track their credentials, and make sure they are
           compliant.
         </p>
       </div>
@@ -689,17 +496,12 @@ function Step3Staff({
   );
 }
 
-// --------------------------------------------------------------------------
-// Step 4 — Clients
-// --------------------------------------------------------------------------
-
-function Step4Clients({ clientCount, disabled }: { clientCount: number; disabled: boolean }) {
-  if (disabled) return <LockedNotice />;
+function Step3Clients({ clientCount }: { clientCount: number }) {
   return (
     <div className="space-y-4">
       <div>
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
-          Step 4
+          Step 3
         </div>
         <h3 className="mt-0.5 font-display text-lg font-semibold text-amber-50">
           Add your clients
@@ -723,32 +525,25 @@ function Step4Clients({ clientCount, disabled }: { clientCount: number; disabled
   );
 }
 
-// --------------------------------------------------------------------------
-// Step 5 — Service codes
-// --------------------------------------------------------------------------
-
-function Step5Services({
-  disabled,
+function Step4Services({
   visited,
   onVisit,
 }: {
-  disabled: boolean;
   visited: boolean;
   onVisit: () => void;
 }) {
-  if (disabled) return <LockedNotice />;
   return (
     <div className="space-y-4">
       <div>
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
-          Step 5
+          Step 4
         </div>
         <h3 className="mt-0.5 font-display text-lg font-semibold text-amber-50">
           Configure your service codes
         </h3>
         <p className="mt-1 text-sm leading-relaxed text-amber-100/85">
           Set up the billing codes for the services you provide. This is what
-          connects your shifts to Medicaid billing and EVV — I'll flag any
+          connects your shifts to Medicaid billing and EVV — I will flag any
           mismatches automatically.
         </p>
       </div>
@@ -768,56 +563,53 @@ function Step5Services({
   );
 }
 
-// --------------------------------------------------------------------------
-// Step 6 — Docs hub
-// --------------------------------------------------------------------------
-
-function Step6Docs({ docsCount, disabled }: { docsCount: number; disabled: boolean }) {
-  if (disabled) return <LockedNotice />;
+function Step5Docs({
+  docsCount,
+  skipped,
+  onSkip,
+}: {
+  docsCount: number;
+  skipped: boolean;
+  onSkip: () => void;
+}) {
   return (
     <div className="space-y-4">
       <div>
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
-          Step 6
+          Step 5 · Optional
         </div>
         <h3 className="mt-0.5 font-display text-lg font-semibold text-amber-50">
           Company documents hub
         </h3>
         <p className="mt-1 text-sm leading-relaxed text-amber-100/85">
-          This is where all your agency documents live — PCSPs, intake records,
-          certifications, training records, and everything else. I read every
-          document you upload and use it to answer questions and flag
-          compliance gaps.
+          Store agency files here when you have them — contracts, policies,
+          certifications, and training records. This is evidence storage, not
+          a required setup gate. You can skip it and come back later.
         </p>
       </div>
       <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-amber-100/85">
         <strong className="font-semibold text-amber-50">{docsCount}</strong>{" "}
-        document{docsCount === 1 ? "" : "s"} on file (authoritative sources count too).
+        document{docsCount === 1 ? "" : "s"} on file.
       </div>
-      <Button asChild className="bg-[color:var(--amber-500,var(--hive-gold))] text-[#0b1733] hover:bg-[color:var(--amber-400,var(--hive-gold))]">
-        <Link to="/dashboard/nectar-docs">
-          Open Company Documents <ArrowRight className="ml-1 h-4 w-4" />
-        </Link>
-      </Button>
-    </div>
-  );
-}
-
-function LockedNotice() {
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-amber-100/70">
-      <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-      <div>
-        <p className="font-medium text-amber-50">Complete Step 1 first.</p>
-        <p>
-          I need to read your authoritative sources before the rest of setup
-          unlocks — that's what lets me give accurate guidance everywhere else.
-        </p>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild className="bg-[color:var(--amber-500,var(--hive-gold))] text-[#0b1733] hover:bg-[color:var(--amber-400,var(--hive-gold))]">
+          <Link to="/dashboard/nectar-docs">
+            Open Company Documents <ArrowRight className="ml-1 h-4 w-4" />
+          </Link>
+        </Button>
+        {!skipped && docsCount === 0 && (
+          <Button
+            variant="outline"
+            onClick={onSkip}
+            className="border-amber-300/40 bg-transparent text-amber-50 hover:bg-white/10"
+          >
+            Skip for now
+          </Button>
+        )}
       </div>
     </div>
   );
 }
 
-// Keep eslint happy when chevron icons aren't used in this file's body
 void ChevronDown;
 void ChevronUp;

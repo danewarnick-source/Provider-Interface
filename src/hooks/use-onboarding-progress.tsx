@@ -17,11 +17,19 @@ function readLS<T>(key: string, fallback: T): T {
   }
 }
 
+export const ONBOARDING_CHANGED_EVENT = "nectar-onboarding-changed";
+
+export function notifyOnboardingChanged() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(ONBOARDING_CHANGED_EVENT));
+}
+
 /**
  * Shared onboarding completion source-of-truth used by the NECTAR
  * onboarding panel, the persistent return bar, and the per-page guidance
- * banners. Step 1/3/4/6 derive from real DB counts; Step 2/5 derive from
- * per-org localStorage flags written from the panel/profile page.
+ * banners. Required steps: agency profile, staff, clients, service codes.
+ * Company documents are optional evidence storage. Statewide SOW upload
+ * is not an onboarding gate.
  */
 export function useOnboardingProgress() {
   const { data: org } = useCurrentOrg();
@@ -32,25 +40,25 @@ export function useOnboardingProgress() {
 
   useEffect(() => {
     if (!orgId) return;
-    setProfileSaved(readLS(lsKey(orgId, "profile_saved"), false));
-    setServicesVisited(readLS(lsKey(orgId, "services_visited"), false));
-    // Re-read on focus so completion flips immediately after returning
-    // from a destination page that just wrote the flag.
-    const onFocus = () => {
+    const sync = () => {
       setProfileSaved(readLS(lsKey(orgId, "profile_saved"), false));
       setServicesVisited(readLS(lsKey(orgId, "services_visited"), false));
     };
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
+    sync();
+    // Re-read on focus / same-tab writes so completion flips immediately
+    // after returning from a destination page that just wrote a flag.
+    window.addEventListener("focus", sync);
+    window.addEventListener(ONBOARDING_CHANGED_EVENT, sync);
+    return () => {
+      window.removeEventListener("focus", sync);
+      window.removeEventListener(ONBOARDING_CHANGED_EVENT, sync);
+    };
   }, [orgId]);
 
   const q = useQuery({
     enabled: !!orgId,
     queryKey: ["nectar-onboarding-progress", orgId],
     queryFn: async (): Promise<{
-      authSourcesCount: number;
-      sowCount: number;
-      attestationCount: number;
       memberCount: number;
       clientCount: number;
       serviceCodeCount: number;
@@ -59,51 +67,35 @@ export function useOnboardingProgress() {
       profileSaved: boolean;
       welcomeDismissedAt: string | null;
     }> => {
-      const [authDocs, attestations, members, clients, codes, allDocs, activeCodes, orgProfile] =
-        await Promise.all([
-          supabase
-            .from("nectar_documents")
-            .select("id, authoritative_kind", { count: "exact" })
-            .eq("organization_id", orgId!)
-            .eq("is_authoritative_source", true),
-          supabase
-            .from("nectar_attestations")
-            .select("id", { count: "exact", head: true })
-            .eq("organization_id", orgId!)
-            .eq("scope", "document_upload"),
-          supabase
-            .from("organization_members")
-            .select("user_id", { count: "exact", head: true })
-            .eq("organization_id", orgId!),
-          supabase
-            .from("clients")
-            .select("id", { count: "exact", head: true })
-            .eq("organization_id", orgId!),
-          supabase
-            .from("service_codes")
-            .select("id", { count: "exact", head: true })
-            .eq("organization_id", orgId!),
-          supabase
-            .from("nectar_documents")
-            .select("id", { count: "exact", head: true })
-            .eq("organization_id", orgId!),
-          supabase
-            .from("service_codes")
-            .select("id", { count: "exact", head: true })
-            .eq("organization_id", orgId!)
-            .eq("is_active", true),
-          supabase
-            .from("organizations")
-            .select("nectar_profile_saved_at, welcome_dismissed_at")
-            .eq("id", orgId!)
-            .maybeSingle(),
-        ]);
-      const authRows = (authDocs.data ?? []) as Array<{ authoritative_kind: string | null }>;
-      const sowCount = authRows.filter((r) => r.authoritative_kind === "state_sow").length;
+      const [members, clients, codes, allDocs, activeCodes, orgProfile] = await Promise.all([
+        (supabase as any)
+          .from("organization_members")
+          .select("user_id", { count: "exact", head: true })
+          .eq("organization_id", orgId!),
+        (supabase as any)
+          .from("clients")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", orgId!),
+        (supabase as any)
+          .from("service_codes")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", orgId!),
+        (supabase as any)
+          .from("nectar_documents")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", orgId!),
+        (supabase as any)
+          .from("service_codes")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", orgId!)
+          .eq("is_active", true),
+        (supabase as any)
+          .from("organizations")
+          .select("nectar_profile_saved_at, welcome_dismissed_at")
+          .eq("id", orgId!)
+          .maybeSingle(),
+      ]);
       return {
-        authSourcesCount: authDocs.count ?? authRows.length,
-        sowCount,
-        attestationCount: attestations.count ?? 0,
         memberCount: members.count ?? 0,
         clientCount: clients.count ?? 0,
         serviceCodeCount: codes.count ?? 0,
@@ -118,9 +110,6 @@ export function useOnboardingProgress() {
   });
 
   const c = q.data ?? {
-    authSourcesCount: 0,
-    sowCount: 0,
-    attestationCount: 0,
     memberCount: 0,
     clientCount: 0,
     serviceCodeCount: 0,
@@ -130,20 +119,15 @@ export function useOnboardingProgress() {
     welcomeDismissedAt: null,
   };
 
-  const step1 = c.sowCount > 0 && c.attestationCount > 0;
-  const step5 = c.serviceCodesCount > 0;
-
   const steps = {
-    1: step1,
-    2: c.profileSaved || profileSaved,
-    3: c.memberCount > 1,
-    4: c.clientCount > 0,
-    5: step5,
-    6: c.docsCount > 0,
+    1: c.profileSaved || profileSaved,
+    2: c.memberCount > 1,
+    3: c.clientCount > 0,
+    4: c.serviceCodesCount > 0,
   } as const;
 
   const completedCount = Object.values(steps).filter(Boolean).length;
-  const totalSteps = 6;
+  const totalSteps = 4;
   const allComplete = completedCount === totalSteps;
   const dismissed = !!c.welcomeDismissedAt;
 
@@ -151,7 +135,8 @@ export function useOnboardingProgress() {
     orgId,
     counts: c,
     steps,
-    step1Complete: step1,
+    step1Complete: steps[1],
+    servicesVisited,
     completedCount,
     totalSteps,
     allComplete,

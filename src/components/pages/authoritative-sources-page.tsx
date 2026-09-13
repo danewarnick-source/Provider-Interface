@@ -62,7 +62,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SourceCitationChip } from "@/components/nectar/source-citation-chip";
 import { AuthoritativeSourceDrop } from "@/components/nectar/authoritative-source-drop";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
-import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { ingestDocument } from "@/lib/nectar-documents.functions";
 import {
@@ -208,7 +207,6 @@ export function AuthoritativeSourcesPage() {
   const content = (
     <div className="space-y-6">
       <OnboardingReturnBar />
-      <OnboardingGuidanceBanner step={1} />
       <NectarFocusBanner />
       <header className="flex flex-col gap-3">
 
@@ -408,9 +406,10 @@ function SourcesPanel({
           </p>
         ) : (data?.sources?.length ?? 0) === 0 ? (
           <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
-            No authoritative sources uploaded yet. Upload your State SOW and
-            provider contracts to ground HIVE's checklists in your own
-            documents.
+            No agency documents uploaded yet. Contracts and policies can live
+            here when you have them. Statewide DHHS91172 duties are already
+            encoded in Provider Interface — you do not need to upload a Scope
+            of Work to finish setup.
           </div>
         ) : (
           <ul className="divide-y divide-border/40">

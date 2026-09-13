@@ -331,7 +331,7 @@ export function ClientsPage() {
   return (
     <div className="space-y-5">
       <OnboardingReturnBar />
-      <OnboardingGuidanceBanner step={4} />
+      <OnboardingGuidanceBanner step={3} />
 
       {pendingClientCount > 0 && (
         <Link
