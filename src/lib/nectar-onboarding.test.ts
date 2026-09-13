@@ -45,11 +45,10 @@ describe("NECTAR onboarding — no SOW upload gate", () => {
     assert.match(docs, /when you have files to store/);
   });
 
-  it("mounts the wizard on Admin Home when NECTAR is on, without RequirePermission", () => {
+  it("mounts the wizard on Admin Home when an org is loaded, without RequirePermission", () => {
     const dash = read("../components/admin-home/admin-home-dashboard.tsx");
     assert.match(dash, /NectarOnboardingPanel/);
-    assert.match(dash, /isEnabled\("nectar"\)/);
-    assert.match(dash, /!!orgId/);
+    assert.match(dash, /orgId \? <NectarOnboardingPanel/);
     assert.doesNotMatch(dash, /RequirePermission/);
   });
 });
