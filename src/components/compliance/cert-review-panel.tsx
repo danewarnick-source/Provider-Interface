@@ -58,6 +58,7 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
       return;
     }
     let cancelled = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any).storage
       .from("obligation-evidence")
       .createSignedUrl(review.uploadPath, 300)
@@ -122,6 +123,10 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
       toast.success("Correction requested.");
       void qc.invalidateQueries({ queryKey: ["cert-review", orgId, completionId] });
       void qc.invalidateQueries({ queryKey: ["pending-cert-reviews", orgId] });
+      void qc.invalidateQueries({ queryKey: ["compliance-packet"] });
+      void qc.invalidateQueries({ queryKey: ["my-obligation-instances"] });
+      void qc.invalidateQueries({ queryKey: ["my-obligation-completions"] });
+      void qc.invalidateQueries({ queryKey: ["staff-obligation-files"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -144,7 +149,8 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
     );
   }
 
-  const isImage = !!review.uploadFilename && /\.(png|jpe?g|gif|webp|bmp)$/i.test(review.uploadFilename);
+  const isImage =
+    !!review.uploadFilename && /\.(png|jpe?g|gif|webp|bmp)$/i.test(review.uploadFilename);
 
   return (
     <section data-testid="cert-review" className="space-y-5">
@@ -216,7 +222,9 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
           ) : null}
           <p className="text-xs text-muted-foreground">{CERT_REVIEW_AI_NOTE}</p>
           {review.nectarValidationReasons.length > 0 ? (
-            <p className="text-xs text-muted-foreground">{review.nectarValidationReasons.join("; ")}</p>
+            <p className="text-xs text-muted-foreground">
+              {review.nectarValidationReasons.join("; ")}
+            </p>
           ) : null}
 
           <div className="space-y-1.5">

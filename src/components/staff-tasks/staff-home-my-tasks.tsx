@@ -18,7 +18,8 @@ import {
 } from "@/lib/in-hive-training.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { toDisplayNameCase } from "@/lib/person-name";
-import { buildStaffTask } from "@/lib/staff-my-tasks";
+import { isCorrectionRequestedNote } from "@/lib/cert-review";
+import { buildStaffTask, dedupeOpenTasksByInstance } from "@/lib/staff-my-tasks";
 import { MyTasksQueue } from "@/components/staff-tasks/my-tasks-queue";
 import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
 import {
@@ -109,7 +110,7 @@ export function StaffHomeMyTasks() {
     return m;
   }, [completionsQ.data]);
 
-  const tasks = instances
+  const mappedTasks = instances
     .filter((row) => completionByInstance.get(row.id)?.nectar_validation_status !== "passed")
     .map((row) => {
       const override = activeOverrideForTarget(overridesQ.data ?? [], {
@@ -129,14 +130,15 @@ export function StaffHomeMyTasks() {
         dueAt: row.due_at,
         instanceStatus: row.status,
         nectarValidationStatus: completionByInstance.get(row.id)?.nectar_validation_status,
-        correctionRequested: String(completionByInstance.get(row.id)?.admin_notes ?? "").startsWith(
-          "Correction requested:",
+        correctionRequested: isCorrectionRequestedNote(
+          completionByInstance.get(row.id)?.admin_notes,
         ),
         courseProgress: progressQ.data?.get(row.id) ?? null,
         overridden: !!override,
         overrideUntil: overrideUntilLabel(override?.expires_at),
       });
     });
+  const tasks = dedupeOpenTasksByInstance(mappedTasks);
 
   if (!orgId || !user) return null;
   if (listQ.isLoading || (instances.length > 0 && completionsQ.isLoading)) return null;

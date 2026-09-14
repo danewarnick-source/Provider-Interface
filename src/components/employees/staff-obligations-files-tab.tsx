@@ -32,6 +32,7 @@ import {
 import {
   hasValidObligationEvidence,
   isAwaitingEvidenceReview,
+  isCorrectionRequestedEvidence,
   liveObligationTitle,
   obligationFileStatus,
   obligationFileStatusLabel,
@@ -64,6 +65,7 @@ type FileRow = {
   evidenceFilename: string | null;
   cycle: "current" | "previous";
   awaitingReview: boolean;
+  correctionRequested: boolean;
   evidenceTypeUsed: string | null;
   canUpload: boolean;
   overridden: boolean;
@@ -106,6 +108,10 @@ function buildRows(
     const awaitingReview = isAwaitingEvidenceReview({
       instanceStatus: instance.status,
       nectarValidationStatus: completion?.nectar_validation_status ?? null,
+      adminNotes: completion?.admin_notes ?? null,
+    });
+    const correctionRequested = isCorrectionRequestedEvidence({
+      adminNotes: completion?.admin_notes ?? null,
     });
     const evidenceTypeUsed = completion?.evidence_type_used ?? null;
     const dutyKey = dutyKeyFromObligation(instance.obligation);
@@ -131,6 +137,7 @@ function buildRows(
       evidenceFilename: completion?.upload_filename ?? instance.upload_filename,
       cycle,
       awaitingReview,
+      correctionRequested,
       evidenceTypeUsed,
       canUpload:
         cycle === "current" &&
@@ -452,7 +459,9 @@ export function StaffObligationsFilesTab({
                     <Badge variant="outline" className={statusBadgeClass(row.status)}>
                       {obligationFileStatusLabel(row.status)}
                     </Badge>
-                    {row.awaitingReview ? (
+                    {row.correctionRequested ? (
+                      <p className="mt-1 text-xs text-amber-900">Correction requested</p>
+                    ) : row.awaitingReview ? (
                       <p className="mt-1 text-xs text-amber-900">Awaiting review</p>
                     ) : null}
                     {row.overridden ? (

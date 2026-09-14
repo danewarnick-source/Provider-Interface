@@ -14,12 +14,14 @@ import {
   resolveScopeFromSnapshot,
   type ResolvedScope,
 } from "@/lib/obligations/scope";
+import { isCorrectionRequestedNote, staffSurfaceReviewKind } from "@/lib/cert-review";
 import {
   buildPacket,
   hiddenAgencyCardKeys,
   hiddenClientCardKeys,
   type Packet,
   type PacketClock,
+  type PacketReviewState,
   type PacketSubjectKind,
 } from "@/lib/obligations/packet";
 
@@ -107,6 +109,61 @@ async function loadPacketClocks(
     for (const clock of clocks) {
       if (clock.staffUserId || !clock.instanceId) continue;
       clock.staffUserId = firstByInstance.get(clock.instanceId) ?? null;
+    }
+  }
+
+  const openIds = clocks
+    .filter(
+      (c) => c.instanceId && (c.instanceStatus === "pending" || c.instanceStatus === "overdue"),
+    )
+    .map((c) => c.instanceId!)
+    .filter(Boolean);
+  if (openIds.length) {
+    const reviews: Array<{
+      instance_id: string;
+      staff_id: string;
+      nectar_validation_status: string | null;
+      admin_notes: string | null;
+    }> = [];
+    for (const ids of chunkIds(openIds)) {
+      const { data, error } = await supabase
+        .from("company_obligation_completions")
+        .select("instance_id, staff_id, nectar_validation_status, admin_notes")
+        .eq("organization_id", organizationId)
+        .in("instance_id", ids);
+      if (error) break;
+      reviews.push(
+        ...((data ?? []) as Array<{
+          instance_id: string;
+          staff_id: string;
+          nectar_validation_status: string | null;
+          admin_notes: string | null;
+        }>),
+      );
+    }
+    const byInstanceStaff = new Map<string, PacketReviewState>();
+    const byInstance = new Map<string, PacketReviewState>();
+    for (const row of reviews) {
+      const kind = staffSurfaceReviewKind({
+        nectarValidationStatus: row.nectar_validation_status,
+        adminNotes: row.admin_notes,
+        correctionRequested: isCorrectionRequestedNote(row.admin_notes),
+      });
+      const state: PacketReviewState =
+        kind === "correction_requested" || kind === "awaiting_review" ? kind : "none";
+      if (state === "none") continue;
+      byInstanceStaff.set(`${row.instance_id}:${row.staff_id}`, state);
+      const prev = byInstance.get(row.instance_id);
+      if (prev !== "correction_requested") byInstance.set(row.instance_id, state);
+    }
+    for (const clock of clocks) {
+      if (!clock.instanceId) continue;
+      clock.reviewState =
+        (clock.staffUserId
+          ? byInstanceStaff.get(`${clock.instanceId}:${clock.staffUserId}`)
+          : undefined) ??
+        byInstance.get(clock.instanceId) ??
+        "none";
     }
   }
 

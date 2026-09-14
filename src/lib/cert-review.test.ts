@@ -6,10 +6,15 @@ import {
   certReviewAcceptBlockReason,
   certReviewStatus,
   certReviewStatusLabel,
+  correctionNoteFromAdminNotes,
+  correctionReminderRecurrenceKey,
+  isCorrectionRequestedNote,
   nectarReviewDisposition,
   nextRenewalDueFromRules,
   renewalDueFromExpiration,
   resolvedCertExpiration,
+  shouldReplaceCompletionForResubmit,
+  staffSurfaceReviewKind,
   usesCertExpirationCadence,
 } from "./cert-review.ts";
 
@@ -168,6 +173,80 @@ describe("cert review rules", () => {
       }),
       "correction_requested",
     );
+    assert.equal(certReviewStatusLabel("correction_requested"), "Correction requested");
+  });
+
+  it("maps staff surfaces to correction, not leftover pending review", () => {
+    assert.equal(
+      staffSurfaceReviewKind({
+        nectarValidationStatus: "failed",
+        instanceStatus: "pending",
+        adminNotes: "Correction requested: Show the expiration date.",
+      }),
+      "correction_requested",
+    );
+    assert.equal(
+      staffSurfaceReviewKind({
+        nectarValidationStatus: "failed",
+        instanceStatus: "overdue",
+        correctionRequested: true,
+      }),
+      "correction_requested",
+    );
+    assert.equal(
+      staffSurfaceReviewKind({
+        nectarValidationStatus: "needs_review",
+        instanceStatus: "pending",
+      }),
+      "awaiting_review",
+    );
+    assert.equal(
+      staffSurfaceReviewKind({
+        instanceStatus: "pending",
+      }),
+      "none",
+    );
+    assert.equal(
+      isCorrectionRequestedNote("Correction requested: Re-upload a clearer scan."),
+      true,
+    );
+    assert.equal(isCorrectionRequestedNote("Admin accepted evidence."), false);
+    assert.equal(
+      correctionNoteFromAdminNotes("Correction requested: Show the printed expiration."),
+      "Show the printed expiration.",
+    );
+  });
+
+  it("replaces the same-period completion and dedupes the correction reminder", () => {
+    assert.equal(
+      shouldReplaceCompletionForResubmit({
+        nectarValidationStatus: "failed",
+        adminNotes: "Correction requested: Re-upload.",
+      }),
+      true,
+    );
+    assert.equal(
+      shouldReplaceCompletionForResubmit({
+        nectarValidationStatus: "failed",
+        adminNotes: null,
+      }),
+      false,
+    );
+    assert.equal(
+      shouldReplaceCompletionForResubmit({
+        nectarValidationStatus: "needs_review",
+        adminNotes: "Uploaded — awaiting review.",
+      }),
+      false,
+    );
+    assert.equal(
+      correctionReminderRecurrenceKey("inst-1", "staff-1"),
+      "obligation_correction_inst-1_staff-1",
+    );
+    assert.equal(
+      correctionReminderRecurrenceKey("inst-1", "staff-1"),
+      correctionReminderRecurrenceKey("inst-1", "staff-1"),
+    );
   });
 
   it("detects cert-expiration cadence from due_day_config", () => {
@@ -199,6 +278,15 @@ describe("cert review surface lock", () => {
     assert.match(panel, /certReviewStatusLabel/);
     assert.match(panel, /Accept evidence/);
     assert.match(panel, /Request correction/);
+    assert.match(engine, /CORRECTION_REQUESTED_PREFIX/);
+    assert.match(engine, /shouldReplaceCompletionForResubmit/);
+    const fns = readFileSync(
+      new URL("./company-obligations.functions.ts", import.meta.url),
+      "utf8",
+    );
+    assert.match(fns, /shouldReplaceCompletionForResubmit/);
+    assert.match(fns, /correctionReminderRecurrenceKey/);
+    assert.match(fns, /resolveInstanceNotifications/);
     assert.match(panel, /certReviewAcceptBlockReason/);
     assert.match(engine, /Confirm expiration before acceptance/);
     assert.match(staffFile, /cert-review/);

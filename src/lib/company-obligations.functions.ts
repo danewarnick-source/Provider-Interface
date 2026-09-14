@@ -51,11 +51,15 @@ import { ORPHAN_OBLIGATION_CREATE_GONE } from "./compliance-spine";
 import {
   canAcceptCertEvidence,
   certReviewAcceptBlockReason,
+  correctionReminderRecurrenceKey,
+  CORRECTION_REQUESTED_PREFIX,
+  isCorrectionRequestedNote,
   isNativePlatformEvidence,
   isUploadEvidenceType,
   nectarReviewDisposition,
   nextRenewalDueFromRules,
   resolvedCertExpiration,
+  shouldReplaceCompletionForResubmit,
   usesCertExpirationCadence,
 } from "./cert-review";
 
@@ -1508,6 +1512,7 @@ export type StaffObligationCompletion = {
   completed_at: string | null;
   evidence_type_used: string | null;
   nectar_validation_status: string | null;
+  admin_notes?: string | null;
 };
 
 export type StaffObligationFileRow = MyObligationInstanceRow & {
@@ -1598,7 +1603,7 @@ export const listStaffObligationInstances = createServerFn({ method: "POST" })
     const { data: completions, error: cErr } = await supabase
       .from("company_obligation_completions")
       .select(
-        "id, instance_id, upload_path, upload_filename, completed_at, evidence_type_used, nectar_validation_status",
+        "id, instance_id, upload_path, upload_filename, completed_at, evidence_type_used, nectar_validation_status, admin_notes",
       )
       .eq("organization_id", data.organizationId)
       .eq("staff_id", data.staffId)
@@ -2749,7 +2754,24 @@ export const recordCompletion = createServerFn({ method: "POST" })
       };
     }
 
-    const { error: cErr } = await supabase.from("company_obligation_completions").insert({
+    const { data: existingCompletion, error: existingErr } = await supabase
+      .from("company_obligation_completions")
+      .select("id, nectar_validation_status, admin_notes")
+      .eq("instance_id", data.instanceId)
+      .eq("staff_id", targetStaffId)
+      .order("completed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (existingErr) throw new Error(existingErr.message);
+
+    const replaceId = shouldReplaceCompletionForResubmit({
+      nectarValidationStatus: existingCompletion?.nectar_validation_status ?? null,
+      adminNotes: existingCompletion?.admin_notes ?? null,
+    })
+      ? (existingCompletion?.id as string | undefined)
+      : undefined;
+
+    const completionPayload = {
       instance_id: data.instanceId,
       organization_id: data.organizationId,
       staff_id: targetStaffId,
@@ -2773,7 +2795,17 @@ export const recordCompletion = createServerFn({ method: "POST" })
       nectar_extracted_expires_date: validation.expires_date,
       nectar_name_match: validation.name_match,
       nectar_confidence: validation.confidence,
-    });
+      admin_notes: null,
+    };
+
+    const { error: cErr } = replaceId
+      ? await supabase
+          .from("company_obligation_completions")
+          .update(completionPayload)
+          .eq("id", replaceId)
+          .eq("instance_id", data.instanceId)
+          .eq("staff_id", targetStaffId)
+      : await supabase.from("company_obligation_completions").insert(completionPayload);
     if (cErr) throw new Error(cErr.message);
 
     // A failed NECTAR validation saves the completion record (so the UI can
@@ -3192,13 +3224,16 @@ export const requestObligationCorrection = createServerFn({ method: "POST" })
     const { error: upErr } = await supabase
       .from("company_obligation_completions")
       .update({
-        admin_notes: `Correction requested: ${note}`,
+        admin_notes: `${CORRECTION_REQUESTED_PREFIX} ${note}`,
         nectar_validation_status: "failed",
       })
       .eq("id", data.completionId);
     if (upErr) throw new Error(upErr.message);
 
-    const { error: nErr } = await supabase.from("notifications").insert({
+    await resolveInstanceNotifications(supabase, data.instanceId);
+
+    const recurrenceKey = correctionReminderRecurrenceKey(data.instanceId, completion.staff_id);
+    const reminderRow = {
       organization_id: data.organizationId,
       recipient_user_id: completion.staff_id,
       recipient_role: "staff",
@@ -3209,7 +3244,19 @@ export const requestObligationCorrection = createServerFn({ method: "POST" })
       link_to: "/dashboard/my-obligations",
       related_id: data.instanceId,
       related_type: "company_obligation_instance",
-    });
+      recurrence_key: recurrenceKey,
+      resolved_at: null,
+    };
+    const { data: existingReminder, error: existingReminderErr } = await supabase
+      .from("notifications")
+      .select("id")
+      .eq("organization_id", data.organizationId)
+      .eq("recurrence_key", recurrenceKey)
+      .maybeSingle();
+    if (existingReminderErr) throw new Error(existingReminderErr.message);
+    const { error: nErr } = existingReminder
+      ? await supabase.from("notifications").update(reminderRow).eq("id", existingReminder.id)
+      : await supabase.from("notifications").insert(reminderRow);
     if (nErr) throw new Error(nErr.message);
     return { ok: true };
   });
@@ -3288,7 +3335,7 @@ export const getCertReview = createServerFn({ method: "POST" })
       usesCertExpiration:
         usesCertExpirationCadence(ob.due_day_config) ||
         sowCatalogEntry(ob.title)?.due_rule.kind === "cert_expiration",
-      correctionRequested: String(completion.admin_notes ?? "").startsWith("Correction requested:"),
+      correctionRequested: isCorrectionRequestedNote(completion.admin_notes),
       instanceStatus: inst.status,
     };
   });
@@ -3368,7 +3415,7 @@ export const listPendingCertReviews = createServerFn({ method: "POST" })
           usesCertExpiration:
             usesCertExpirationCadence(ob.due_day_config) ||
             sowCatalogEntry(ob.title)?.due_rule.kind === "cert_expiration",
-          correctionRequested: String(row.admin_notes ?? "").startsWith("Correction requested:"),
+          correctionRequested: isCorrectionRequestedNote(row.admin_notes as string | null),
           instanceStatus: inst.status,
         },
       ];

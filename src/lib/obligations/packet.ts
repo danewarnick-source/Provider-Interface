@@ -29,6 +29,8 @@ export { computeObligationApplicability, obligationFactApplicability };
 
 export type PacketSubjectKind = "staff" | "client" | "agency";
 
+export type PacketReviewState = "none" | "awaiting_review" | "correction_requested";
+
 export type PacketClock = {
   obligationKey: string;
   title: string;
@@ -38,6 +40,7 @@ export type PacketClock = {
   hasValidEvidence: boolean;
   staffUserId?: string | null;
   clientId?: string | null;
+  reviewState?: PacketReviewState;
 };
 
 export type BuildPacketInput = {
@@ -70,6 +73,7 @@ export type PacketItem = {
   href: string;
   staffUserId: string | null;
   clientId: string | null;
+  reviewState: PacketReviewState;
 };
 
 export type PacketNextAction = {
@@ -183,35 +187,63 @@ function itemStatus(
   });
 }
 
+export function nextActionCopyForItem(args: {
+  reviewState?: PacketReviewState | null;
+  overdue: boolean;
+  unanswered: boolean;
+  missing: boolean;
+}): { reason: string; urgency: PacketNextAction["urgency"]; rank: number } {
+  if (args.reviewState === "correction_requested") {
+    return {
+      reason: "Correction requested — re-upload this first.",
+      urgency: "critical",
+      rank: 0,
+    };
+  }
+  if (args.unanswered) {
+    return {
+      reason: "Still deciding whether this applies.",
+      urgency: "high",
+      rank: 2,
+    };
+  }
+  if (args.reviewState === "awaiting_review") {
+    return { reason: "Awaiting review.", urgency: "high", rank: 3 };
+  }
+  if (args.overdue) {
+    return { reason: "Overdue — complete this first.", urgency: "critical", rank: 1 };
+  }
+  if (args.missing) {
+    return { reason: "Missing from the file.", urgency: "high", rank: 2 };
+  }
+  return { reason: "Due soon.", urgency: "normal", rank: 4 };
+}
+
 function nextActionFromItems(items: PacketItem[], now: Date): PacketNextAction | null {
-  const candidates: Array<PacketNextAction & { sortDue: number }> = [];
+  const candidates: Array<PacketNextAction & { sortDue: number; rank: number }> = [];
   for (const item of items) {
     if (item.status === "on_file" || item.status === "does_not_apply") continue;
     const overdue =
       item.status === "missing" && !!item.dueAt && new Date(item.dueAt).getTime() < now.getTime();
-    let urgency: PacketNextAction["urgency"] = "normal";
-    let reason = "Due soon.";
-    if (item.status === "unanswered") {
-      urgency = "high";
-      reason = "Still deciding whether this applies.";
-    } else if (overdue) {
-      urgency = "critical";
-      reason = "Overdue — complete this first.";
-    } else if (item.status === "missing") {
-      urgency = "high";
-      reason = "Missing from the file.";
-    }
+    const copy = nextActionCopyForItem({
+      reviewState: item.reviewState,
+      overdue,
+      unanswered: item.status === "unanswered",
+      missing: item.status === "missing",
+    });
     candidates.push({
       obligationKey: item.obligationKey,
       title: item.title,
-      reason,
+      reason: copy.reason,
       href: item.href,
-      urgency,
+      urgency: copy.urgency,
       dueAt: item.dueAt,
       sortDue: item.dueAt ? new Date(item.dueAt).getTime() : Number.POSITIVE_INFINITY,
+      rank: copy.rank,
     });
   }
   candidates.sort((a, b) => {
+    if (a.rank !== b.rank) return a.rank - b.rank;
     const u = URGENCY_ORDER[a.urgency] - URGENCY_ORDER[b.urgency];
     if (u !== 0) return u;
     return a.sortDue - b.sortDue;
@@ -333,6 +365,7 @@ export function buildPacket(input: BuildPacketInput): Packet {
       href: packetItemHref(input.subject, clock.instanceId),
       staffUserId: clock.staffUserId ?? (input.subject === "staff" ? input.subjectId : null),
       clientId: clock.clientId ?? (input.subject === "client" ? input.subjectId : null),
+      reviewState: clock.reviewState ?? "none",
     });
   }
 
@@ -366,6 +399,7 @@ export function buildPacket(input: BuildPacketInput): Packet {
       href: packetItemHref(input.subject, null),
       staffUserId: input.subject === "staff" ? input.subjectId : null,
       clientId: input.subject === "client" ? input.subjectId : null,
+      reviewState: "none",
     });
   }
 
