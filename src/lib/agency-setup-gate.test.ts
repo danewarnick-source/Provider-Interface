@@ -288,6 +288,13 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
     assert.equal(isSetupGatedPath("/dashboard/settings/compliance-setup"), false);
   });
 
+  it("setup page previews applicability from useAgencySetup facts, not a leftover factsQuery", () => {
+    const setupPage = read("../routes/dashboard.settings.compliance-setup.tsx");
+    assert.match(setupPage, /const \{ facts, status, isLoading \} = useAgencySetup\(\)/);
+    assert.match(setupPage, /\.\.\.facts,/);
+    assert.doesNotMatch(setupPage, /factsQuery/);
+  });
+
   it("keeps Home available for incomplete-setup guidance", () => {
     const home = read("../components/admin-home/admin-home-dashboard.tsx");
     assert.match(home, /NectarOnboardingPanel/);

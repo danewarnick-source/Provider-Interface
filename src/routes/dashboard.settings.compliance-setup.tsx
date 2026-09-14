@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { resolveCatalogExceptions } from "@/lib/obligations/catalog-exceptions";
 import {
-  EMPTY_ORG_FACTS,
   ORG_FACT_DEFINITIONS,
   computeObligationApplicability,
   listUnansweredFacts,
@@ -114,7 +113,7 @@ function ComplianceSetupPage() {
   }
 
   const merged: OrgFacts = {
-    ...(factsQuery.data ?? EMPTY_ORG_FACTS),
+    ...facts,
     operates_ol_site: draft.operates_ol_site,
     uses_volunteers: draft.uses_volunteers,
     has_governing_board: draft.has_governing_board,
