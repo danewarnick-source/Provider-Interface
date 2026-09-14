@@ -170,6 +170,8 @@ const PREDICATE_KIND_SET = new Set<string>([
   "signature_attestation",
   "billing_restriction",
   "pba_assignment",
+  "universal_staff",
+  "contractor_standing_file",
   "product_default_reminder",
   "change_impact",
   "audit_export",

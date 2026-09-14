@@ -39,6 +39,8 @@ export const PREDICATE_KINDS = [
   "signature_attestation",
   "billing_restriction",
   "pba_assignment",
+  "universal_staff",
+  "contractor_standing_file",
   "product_default_reminder",
   "change_impact",
   "audit_export",

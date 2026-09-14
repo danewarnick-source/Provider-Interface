@@ -102,6 +102,7 @@ const STAFF_ASSIGNMENT_FACT_IDS = new Set([
   "LIVE-service_documentation_assignment",
   "LIVE-evv_assignment",
   "LIVE-personal_funds_assistance",
+  "LIVE-staff_personnel_file",
 ]);
 
 function awardedCodesFromQuestion(question: string): string[] {
@@ -128,7 +129,8 @@ export function liveSourceForCatalogFact(fact: CatalogFact): CatalogFactLiveSour
     fact.fact_id === "LIVE-periodic_report_assignment" ||
     fact.fact_id === "LIVE-service_documentation_assignment" ||
     fact.fact_id === "LIVE-evv_assignment" ||
-    fact.fact_id === "LIVE-personal_funds_assistance"
+    fact.fact_id === "LIVE-personal_funds_assistance" ||
+    fact.fact_id === "LIVE-staff_personnel_file"
   ) {
     return "staff_assignment";
   }
