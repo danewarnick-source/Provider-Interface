@@ -11,20 +11,21 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Imported parents | 760 |
 | Imported elements | 607 |
 | Imported rows | 1367 |
-| Executable (live key mapped) | 48 |
+| Executable (live key mapped) | 50 |
 | Verified / activatable | 0 |
 | Published | 0 |
 | Blocked (rule-specific gap, no live key) | 0 |
 | Live mapped (clock) | 26 |
 | System / standing behavior | 427 |
-| Draft unwired | 285 |
+| Draft unwired | 283 |
 | Element of parent | 607 |
 | Wired first batch (unpublished) | 5 |
 | Wired second batch (unpublished) | 6 |
 | Wired third batch (unpublished) | 3 |
 | Wired fourth batch (unpublished) | 4 |
 | Wired fifth batch (unpublished) | 2 |
-| Wired shared-behavior batches (unpublished) | 20 |
+| Wired sixth batch (unpublished) | 2 |
+| Wired shared-behavior batches (unpublished) | 22 |
 
 ## Parents
 
@@ -160,7 +161,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-1.28.2 | DHHS91172-A-0291 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.28.3 | DHHS91172-A-0292 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.28.4 | DHHS91172-A-0293 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.28.5 | DHHS91172-A-0294 | Assigned DSP / supervisor | Mark complete with attachment/attestation | monthly |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.28.5 | DHHS91172-A-0294 | Assigned DSP / supervisor | Mark complete with attachment/attestation | monthly | pba_financial_review | live_artifact | Unanswered applicability fact: Does the agency assist the client with personal funds? |
 | REQ-1.28.6 | DHHS91172-A-0295 | Assigned DSP / supervisor | Mark complete with attachment/attestation | before any restriction on access or spending limits |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.28.7 | DHHS91172-A-0296 | Administrator | Automated check (no user action) or attestation | per claim / continuous check | emergency_loan_record | live_artifact | Rule has no applicability predicates. |
 | REQ-1.28.7.A | DHHS91172-A-0297 | Assigned DSP / supervisor | Generate/upload report and mark sent | 24 hours / emergency resolved |  | draft_unwired | Rule has no applicability predicates. |
@@ -448,7 +449,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-15.3.4 | DHHS91172-A-0946 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-15.3.5 | DHHS91172-A-0947 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-15.3.6 | DHHS91172-A-0948 | PBA fiduciary staff | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-15.3.7 | DHHS91172-A-0949 | PBA fiduciary staff | Complete in platform form/record | monthly (admin review) + quarterly (10% third-person sample) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-15.3.7 | DHHS91172-A-0949 | PBA fiduciary staff | Complete in platform form/record | monthly (admin review) + quarterly (10% third-person sample) | pba_financial_review | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-15.3.8 | DHHS91172-A-0950 | PBA fiduciary staff | Generate/upload report and mark sent | 30 calendar days after month end / period end / event / monthly |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-15.3.9 | DHHS91172-A-0951 | PBA fiduciary staff | Generate/upload report and mark sent | client changes contractor or payee |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-15.3.10 | DHHS91172-A-0952 | PBA fiduciary staff | Mark complete with attachment/attestation | per SSA policy / death of the Person |  | draft_unwired | Rule has no applicability predicates. |

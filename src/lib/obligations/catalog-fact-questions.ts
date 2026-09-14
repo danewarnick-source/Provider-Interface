@@ -67,6 +67,7 @@ const AWARDED_FACT_CODES: Record<string, string[]> = {
   "LIVE-sjd_monthly_caseload": ["SJD"],
   "LIVE-cmp_cms_monthly_caseload": ["CMP", "CMS"],
   "LIVE-hhs_daily_caseload": ["HHS"],
+  "LIVE-pba_caseload": ["PBA"],
 };
 
 const ORG_FACT_IDS: Record<string, CatalogFactLiveSource> = {
@@ -100,6 +101,7 @@ const STAFF_ASSIGNMENT_FACT_IDS = new Set([
   "LIVE-periodic_report_assignment",
   "LIVE-service_documentation_assignment",
   "LIVE-evv_assignment",
+  "LIVE-personal_funds_assistance",
 ]);
 
 function awardedCodesFromQuestion(question: string): string[] {
@@ -125,7 +127,8 @@ export function liveSourceForCatalogFact(fact: CatalogFact): CatalogFactLiveSour
     fact.fact_id === "LIVE-sjd_discovery" ||
     fact.fact_id === "LIVE-periodic_report_assignment" ||
     fact.fact_id === "LIVE-service_documentation_assignment" ||
-    fact.fact_id === "LIVE-evv_assignment"
+    fact.fact_id === "LIVE-evv_assignment" ||
+    fact.fact_id === "LIVE-personal_funds_assistance"
   ) {
     return "staff_assignment";
   }

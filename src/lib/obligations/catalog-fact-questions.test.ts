@@ -167,4 +167,26 @@ describe("catalog applicability facts", () => {
     assert.equal(hhs.status, "unanswered");
     assert.deepEqual(hhs.awardedCodes, ["HHS"]);
   });
+
+  it("maps sixth-batch PBA / personal-funds facts without coercing N/A", () => {
+    const funds = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-personal_funds_assistance",
+        question: "Which persons does this contractor assist with personal funds?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(funds.source, "staff_assignment");
+    assert.equal(funds.status, "unanswered");
+    const pba = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-pba_caseload",
+        question: "Which persons have a PBA assignment?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(pba.source, "awarded_service_codes");
+    assert.equal(pba.status, "unanswered");
+    assert.deepEqual(pba.awardedCodes, ["PBA"]);
+  });
 });

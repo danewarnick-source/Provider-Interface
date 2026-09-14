@@ -4,20 +4,21 @@
     "importedParents": 760,
     "importedElements": 607,
     "importedRows": 1367,
-    "executable": 48,
+    "executable": 50,
     "verified": 0,
     "published": 0,
     "blocked": 0,
     "liveMapped": 26,
     "systemBehavior": 427,
-    "draftUnwired": 285,
+    "draftUnwired": 283,
     "elementOfParent": 607,
     "wiredFirstBatch": 5,
     "wiredSecondBatch": 6,
     "wiredThirdBatch": 3,
     "wiredFourthBatch": 4,
     "wiredFifthBatch": 2,
-    "wired": 20
+    "wiredSixthBatch": 2,
+    "wired": 22
   },
   "parents": [
     {
@@ -3815,28 +3816,23 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "monthly",
       "renewal": "Renews each month",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "pba_financial_review",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-058"
+        "FACT-058",
+        "LIVE-personal_funds_assistance"
       ],
       "unansweredFacts": [
-        "Does the agency assist the client with personal funds?"
+        "Does the agency assist the client with personal funds?",
+        "Which persons does this contractor assist with personal funds?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each month",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
-        "Unanswered applicability fact: Does the agency assist the client with personal funds?"
+        "Unanswered applicability fact: Does the agency assist the client with personal funds?",
+        "Unanswered applicability fact: Which persons does this contractor assist with personal funds?"
       ]
     },
     {
@@ -12988,29 +12984,23 @@
       "completionMethod": "Complete in platform form/record",
       "timing": "monthly (admin review) + quarterly (10% third-person sample)",
       "renewal": "Renews each quarter",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "pba_financial_review",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
         "FACT-005",
-        "FACT-018"
+        "FACT-018",
+        "LIVE-pba_caseload"
       ],
       "unansweredFacts": [
         "Agency awarded PBA?",
-        "Is the agency a representative payee / does it assist with personal funds?"
+        "Is the agency a representative payee / does it assist with personal funds?",
+        "Which persons have a PBA assignment?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each quarter",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Is the agency a representative payee / does it assist with personal funds?"
       ]
