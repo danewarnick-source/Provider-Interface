@@ -1,32 +1,36 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, ClipboardList } from "lucide-react";
 import { useEffect, useState } from "react";
 import { UnansweredFactsCard } from "@/components/obligations/unanswered-facts-card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { supabase } from "@/integrations/supabase/client";
 import { resolveCatalogExceptions } from "@/lib/obligations/catalog-exceptions";
 import {
   EMPTY_ORG_FACTS,
   ORG_FACT_DEFINITIONS,
   computeObligationApplicability,
   listUnansweredFacts,
-  loadOrgFacts,
-  persistOrgFacts,
   type FactAnswer,
   type OrgFacts,
-  type PersistOrgFactsInput,
 } from "@/lib/obligations/applicability";
 import {
   AWARDED_CODE_CHOICES,
   LIVE_PATH_SETUP_QUESTIONS,
 } from "@/lib/obligations/setup-facts";
+import { persistAgencySetupFacts } from "@/lib/agency-setup-gate.functions";
+import { REQUIRED_SETUP_QUESTIONS } from "@/lib/agency-setup-gate";
+import { agencySetupQueryKey, useAgencySetup } from "@/hooks/use-agency-setup";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/settings/compliance-setup")({
-  head: () => ({ meta: [{ title: "Compliance setup — Provider Interface" }] }),
+  head: () => ({ meta: [{ title: "Agency setup — Provider Interface" }] }),
+  validateSearch: (s: Record<string, unknown>): { reason?: string } => ({
+    reason: typeof s.reason === "string" ? s.reason : undefined,
+  }),
   component: ComplianceSetupPage,
 });
 
@@ -36,52 +40,68 @@ const FACT_CHOICES: Array<{ value: FactAnswer; label: string }> = [
   { value: null, label: "Not yet answered" },
 ];
 
+type SetupDraft = {
+  operates_ol_site: FactAnswer;
+  uses_volunteers: FactAnswer;
+  has_governing_board: FactAnswer;
+  servicesOffered: string[];
+  approxClientCount: string;
+  serviceArea: string;
+};
+
 function ComplianceSetupPage() {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();
+  const search = useSearch({ strict: false }) as { reason?: string };
+  const persistFacts = useServerFn(persistAgencySetupFacts);
+  const { facts, status, isLoading } = useAgencySetup();
   const orgId = org?.organization_id ?? null;
   const canEdit =
     org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
 
-  const factsQuery = useQuery({
-    queryKey: ["org-compliance-facts", orgId],
-    enabled: !!orgId,
-    queryFn: async () => {
-      if (!orgId) return EMPTY_ORG_FACTS;
-      const loaded = await loadOrgFacts(supabase as any, orgId);
-      return loaded ?? EMPTY_ORG_FACTS;
-    },
-  });
-
-  const [draft, setDraft] = useState<PersistOrgFactsInput>({
+  const [draft, setDraft] = useState<SetupDraft>({
     operates_ol_site: null,
     uses_volunteers: null,
     has_governing_board: null,
     servicesOffered: [],
+    approxClientCount: "",
+    serviceArea: "",
   });
 
   useEffect(() => {
-    if (!factsQuery.data) return;
     setDraft({
-      operates_ol_site: factsQuery.data.operates_ol_site,
-      uses_volunteers: factsQuery.data.uses_volunteers,
-      has_governing_board: factsQuery.data.has_governing_board,
-      servicesOffered: factsQuery.data.servicesOffered,
+      operates_ol_site: facts.operates_ol_site,
+      uses_volunteers: facts.uses_volunteers,
+      has_governing_board: facts.has_governing_board,
+      servicesOffered: facts.servicesOffered,
+      approxClientCount: facts.approxClientCount == null ? "" : String(facts.approxClientCount),
+      serviceArea: facts.serviceArea ?? "",
     });
-  }, [factsQuery.data]);
+  }, [facts]);
 
   const save = useMutation({
     mutationFn: async () => {
       if (!orgId || !user?.id) throw new Error("No organization selected.");
-      return persistOrgFacts(supabase as any, orgId, user.id, draft);
+      const count = draft.approxClientCount.trim() === "" ? null : Number(draft.approxClientCount);
+      return persistFacts({
+        data: {
+          organizationId: orgId,
+          operates_ol_site: draft.operates_ol_site,
+          uses_volunteers: draft.uses_volunteers,
+          has_governing_board: draft.has_governing_board,
+          servicesOffered: draft.servicesOffered,
+          approxClientCount: Number.isFinite(count as number) ? (count as number) : null,
+          serviceArea: draft.serviceArea.trim() || null,
+        },
+      });
     },
     onSuccess: async () => {
-      toast.success("Compliance setup saved");
-      await qc.invalidateQueries({ queryKey: ["org-compliance-facts", orgId] });
+      toast.success("Agency setup saved");
+      await qc.invalidateQueries({ queryKey: agencySetupQueryKey(orgId) });
     },
     onError: (err: unknown) => {
-      toast.error(err instanceof Error ? err.message : "Could not save compliance setup");
+      toast.error(err instanceof Error ? err.message : "Could not save agency setup");
     },
   });
 
@@ -116,23 +136,29 @@ function ComplianceSetupPage() {
 
       <div>
         <h1 className="flex items-center gap-2 text-xl font-semibold">
-          <ClipboardList className="h-5 w-5" /> Compliance setup
+          <ClipboardList className="h-5 w-5" /> Agency setup
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Record awarded service codes and operational facts. Questions are concrete — never whether
-          a SOW article applies. Unanswered facts stay unanswered and keep those rows visible.
+          a SOW article applies. Staff and client creation stay closed until all required facts are
+          saved ({status.progressLabel}).
         </p>
       </div>
 
+      {search.reason === "setup_incomplete" ? (
+        <div
+          data-testid="setup-redirect-reason"
+          className="rounded-xl border border-amber-300/50 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+        >
+          Staff and client screens stay closed until required operating questions are answered.
+          Skip is disabled at {status.progressLabel}.
+        </div>
+      ) : null}
+
       <UnansweredFactsCard unanswered={unanswered} showSetupLink={false} />
 
-      {factsQuery.isLoading ? (
+      {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading setup facts…</p>
-      ) : factsQuery.isError ? (
-        <p className="text-sm text-muted-foreground">
-          Could not load setup facts. If Soft Core has not applied the Step 5 SQL yet, columns will
-          appear after that paste.
-        </p>
       ) : (
         <form
           className="space-y-5 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]"
@@ -187,6 +213,30 @@ function ComplianceSetupPage() {
               })}
             </div>
           </fieldset>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">{REQUIRED_SETUP_QUESTIONS[4]?.question}</label>
+              <Input
+                inputMode="numeric"
+                disabled={!canEdit}
+                value={draft.approxClientCount}
+                onChange={(e) =>
+                  setDraft((prev) => ({ ...prev, approxClientCount: e.target.value }))
+                }
+                placeholder="e.g. 24"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">{REQUIRED_SETUP_QUESTIONS[5]?.question}</label>
+              <Input
+                disabled={!canEdit}
+                value={draft.serviceArea}
+                onChange={(e) => setDraft((prev) => ({ ...prev, serviceArea: e.target.value }))}
+                placeholder="e.g. Salt Lake, Davis"
+              />
+            </div>
+          </div>
 
           {ORG_FACT_DEFINITIONS.map((def) => (
             <fieldset key={def.key} className="space-y-2">

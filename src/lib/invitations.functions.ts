@@ -21,6 +21,7 @@ import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { inviteJoinUrl } from "@/lib/join-invite";
 import { stripFakeDisplayLabel } from "@/lib/managed-from";
 import { canSendImportInvite } from "@/lib/import-invite";
+import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
 
 const ORG_ID = z.string().uuid();
 const INVITE_ROLE = z.enum(["admin", "manager", "employee"]);
@@ -185,6 +186,7 @@ export const createInvitation = createServerFn({ method: "POST" })
       data.organization_id,
       "invite_staff",
     );
+    await assertAgencySetupCompleteForOrg(supabase, data.organization_id);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existing, error: existErr } = await (supabase as any)
@@ -322,6 +324,7 @@ async function upsertPendingInviteAndSend(args: {
   siteOrigin: string;
 }): Promise<{ invitation: InvitationRow; email_sent: boolean; email_error: string | null }> {
   const { supabase, organizationId, userId, email, role, siteOrigin } = args;
+  await assertAgencySetupCompleteForOrg(supabase, organizationId);
   const expires = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
 
   const { data: pending, error: pendingErr } = await supabase

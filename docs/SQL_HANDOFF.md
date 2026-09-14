@@ -1,5 +1,94 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
+## ACTION — Agency setup gate before staff/client create (2026-09-14) — Core flag
+
+Server-authoritative setup completion from saved operating facts. Blocks
+`clients`, additional `organization_members`, and `invitations` inserts until
+all six required facts are recorded. Additive. No DROP TABLE / DROP COLUMN.
+Does **not** publish or activate DHHS91172 catalog rules.
+
+Matches `supabase/migrations/20260914120000_agency_setup_gate.sql`.
+
+Do **not** apply from CI. Propose-only until Core pastes in Lovable
+(clear the editor first). App create screens already refuse incomplete orgs;
+this paste is the RLS/trigger backstop.
+
+### Probe
+
+Clear the editor, paste:
+
+```sql
+SELECT string_agg(kind || '=' || name, ' | ' ORDER BY kind, name)
+FROM (
+  SELECT 'fn' AS kind, p.proname AS name
+  FROM pg_proc p
+  JOIN pg_namespace n ON n.oid = p.pronamespace
+  WHERE n.nspname = 'public'
+    AND p.proname IN ('org_setup_is_complete', 'enforce_org_setup_before_create')
+  UNION ALL
+  SELECT 'trg', t.tgname
+  FROM pg_trigger t
+  JOIN pg_class c ON c.oid = t.tgrelid
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'public'
+    AND t.tgname IN (
+      'trg_clients_require_org_setup',
+      'trg_org_members_require_org_setup',
+      'trg_invitations_require_org_setup'
+    )
+    AND NOT t.tgisinternal
+) s;
+```
+
+**What you'll see:** `NULL` until this ACTION runs.
+
+### Apply
+
+Clear the editor, paste the full file
+`supabase/migrations/20260914120000_agency_setup_gate.sql`.
+
+**What you'll see:** `CREATE FUNCTION` × 2, `CREATE TRIGGER` × 3,
+`CREATE POLICY` × 3 (restrictive insert checks).
+
+### Verify
+
+Clear the editor, paste:
+
+```sql
+SELECT
+  public.org_setup_is_complete('00000000-0000-0000-0000-000000000000') AS missing_org_false,
+  (SELECT count(*) FROM pg_trigger
+     WHERE tgname IN (
+       'trg_clients_require_org_setup',
+       'trg_org_members_require_org_setup',
+       'trg_invitations_require_org_setup'
+     ) AND NOT tgisinternal) AS setup_triggers,
+  (SELECT string_agg(polname, ',' ORDER BY polname)
+     FROM pg_policy
+     WHERE polname IN (
+       'clients_insert_requires_setup',
+       'org_members_insert_requires_setup',
+       'invitations_insert_requires_setup'
+     )) AS setup_policies;
+```
+
+**What you'll see:** `f | 3 | clients_insert_requires_setup,invitations_insert_requires_setup,org_members_insert_requires_setup`.
+
+### RLS intent
+
+- Completion is computed from saved org facts only (`services_offered`,
+  `fact_*`, `approx_client_count`, `specializations` service-area line).
+- First `organization_members` row (workspace bootstrap) is allowed.
+- Later staff/client/invite inserts require `org_setup_is_complete`.
+- Triggers fire even when service-role writes bypass RLS.
+- No PHI. No catalog publish.
+
+### Seed
+
+None. Existing orgs stay unanswered until the owner records the six facts.
+
+---
+
 ## NOTE — Compliance revamp Step 10: stop-writes only (2026-09-11)
 
 No Soft migration. Do not DROP tables. Do not run Soft SQL for this change.

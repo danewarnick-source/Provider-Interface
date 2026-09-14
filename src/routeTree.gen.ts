@@ -23,10 +23,12 @@ import { Route as ManagerRouteImport } from './routes/manager'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as EmployeesRouteImport } from './routes/employees'
 import { Route as EmployeeRouteImport } from './routes/employee'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ClientsRouteImport } from './routes/clients'
 import { Route as ClassesRouteImport } from './routes/classes'
 import { Route as BillingLockedRouteImport } from './routes/billing-locked'
 import { Route as BaaRouteImport } from './routes/baa'
@@ -34,12 +36,15 @@ import { Route as AuditorRouteImport } from './routes/auditor'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EmployeesIndexRouteImport } from './routes/employees.index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as ClientsIndexRouteImport } from './routes/clients.index'
 import { Route as AuditPortalIndexRouteImport } from './routes/audit-portal.index'
 import { Route as VerifyCodeRouteImport } from './routes/verify.$code'
 import { Route as TrainingCourseRouteImport } from './routes/training.course'
 import { Route as TrainingConfirmRouteImport } from './routes/training.confirm'
 import { Route as SignPolicyDocumentIdRouteImport } from './routes/sign-policy.$documentId'
+import { Route as EmployeesNewRouteImport } from './routes/employees.new'
 import { Route as E2eComplianceDeskRouteImport } from './routes/e2e.compliance-desk'
 import { Route as DashboardTracksRouteImport } from './routes/dashboard.tracks'
 import { Route as DashboardTimeclockRouteImport } from './routes/dashboard.timeclock'
@@ -106,6 +111,7 @@ import { Route as DashboardAuditRouteImport } from './routes/dashboard.audit'
 import { Route as DashboardAssignmentsRouteImport } from './routes/dashboard.assignments'
 import { Route as DashboardAskNectarRouteImport } from './routes/dashboard.ask-nectar'
 import { Route as DashboardAgencyDocumentsRouteImport } from './routes/dashboard.agency-documents'
+import { Route as ClientsNewRouteImport } from './routes/clients.new'
 import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 import { Route as AuditPortalSetPasswordRouteImport } from './routes/audit-portal.set-password'
 import { Route as AuditPortalPackageIdRouteImport } from './routes/audit-portal.$packageId'
@@ -183,6 +189,7 @@ import { Route as DashboardFinancialGrossRouteImport } from './routes/dashboard.
 import { Route as DashboardFinancialEmployeesRouteImport } from './routes/dashboard.financial.employees'
 import { Route as DashboardFinancialDistributionsRouteImport } from './routes/dashboard.financial.distributions'
 import { Route as DashboardFinancialContractorsRouteImport } from './routes/dashboard.financial.contractors'
+import { Route as DashboardEmployeesNewRouteImport } from './routes/dashboard.employees.new'
 import { Route as DashboardEmployeesHireDatesRouteImport } from './routes/dashboard.employees.hire-dates'
 import { Route as DashboardEmployeesStaffIdRouteImport } from './routes/dashboard.employees.$staffId'
 import { Route as DashboardCoursesPersonRouteImport } from './routes/dashboard.courses.person'
@@ -193,6 +200,7 @@ import { Route as DashboardCoursesCeRouteImport } from './routes/dashboard.cours
 import { Route as DashboardCoursesCourseIdRouteImport } from './routes/dashboard.courses.$courseId'
 import { Route as DashboardClientsRhsBoardRouteImport } from './routes/dashboard.clients.rhs-board'
 import { Route as DashboardClientsPendingRouteImport } from './routes/dashboard.clients.pending'
+import { Route as DashboardClientsNewRouteImport } from './routes/dashboard.clients.new'
 import { Route as DashboardClientsClientIdRouteImport } from './routes/dashboard.clients.$clientId'
 import { Route as DashboardClientTrainingClientIdRouteImport } from './routes/dashboard.client-training.$clientId'
 import { Route as DashboardClientIntakeClientIdRouteImport } from './routes/dashboard.client-intake.$clientId'
@@ -306,6 +314,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmployeesRoute = EmployeesRouteImport.update({
+  id: '/employees',
+  path: '/employees',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmployeeRoute = EmployeeRouteImport.update({
   id: '/employee',
   path: '/employee',
@@ -324,6 +337,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientsRoute = ClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClassesRoute = ClassesRouteImport.update({
@@ -361,10 +379,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmployeesIndexRoute = EmployeesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EmployeesRoute,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const ClientsIndexRoute = ClientsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClientsRoute,
 } as any)
 const AuditPortalIndexRoute = AuditPortalIndexRouteImport.update({
   id: '/audit-portal/',
@@ -390,6 +418,11 @@ const SignPolicyDocumentIdRoute = SignPolicyDocumentIdRouteImport.update({
   id: '/sign-policy/$documentId',
   path: '/sign-policy/$documentId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const EmployeesNewRoute = EmployeesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => EmployeesRoute,
 } as any)
 const E2eComplianceDeskRoute = E2eComplianceDeskRouteImport.update({
   id: '/e2e/compliance-desk',
@@ -736,6 +769,11 @@ const DashboardAgencyDocumentsRoute =
     path: '/agency-documents',
     getParentRoute: () => DashboardRoute,
   } as any)
+const ClientsNewRoute = ClientsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => ClientsRoute,
+} as any)
 const CertificateCodeRoute = CertificateCodeRouteImport.update({
   id: '/certificate/$code',
   path: '/certificate/$code',
@@ -1168,6 +1206,11 @@ const DashboardFinancialContractorsRoute =
     path: '/contractors',
     getParentRoute: () => DashboardFinancialRoute,
   } as any)
+const DashboardEmployeesNewRoute = DashboardEmployeesNewRouteImport.update({
+  id: '/employees/new',
+  path: '/employees/new',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardEmployeesHireDatesRoute =
   DashboardEmployeesHireDatesRouteImport.update({
     id: '/employees/hire-dates',
@@ -1221,6 +1264,11 @@ const DashboardClientsRhsBoardRoute =
 const DashboardClientsPendingRoute = DashboardClientsPendingRouteImport.update({
   id: '/pending',
   path: '/pending',
+  getParentRoute: () => DashboardClientsRoute,
+} as any)
+const DashboardClientsNewRoute = DashboardClientsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
   getParentRoute: () => DashboardClientsRoute,
 } as any)
 const DashboardClientsClientIdRoute =
@@ -1471,10 +1519,12 @@ export interface FileRoutesByFullPath {
   '/baa': typeof BaaRoute
   '/billing-locked': typeof BillingLockedRoute
   '/classes': typeof ClassesRoute
+  '/clients': typeof ClientsRouteWithChildren
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/demo': typeof DemoRoute
   '/employee': typeof EmployeeRoute
+  '/employees': typeof EmployeesRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
@@ -1494,6 +1544,7 @@ export interface FileRoutesByFullPath {
   '/audit-portal/$packageId': typeof AuditPortalPackageIdRoute
   '/audit-portal/set-password': typeof AuditPortalSetPasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
+  '/clients/new': typeof ClientsNewRoute
   '/dashboard/agency-documents': typeof DashboardAgencyDocumentsRoute
   '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
@@ -1560,12 +1611,15 @@ export interface FileRoutesByFullPath {
   '/dashboard/timeclock': typeof DashboardTimeclockRoute
   '/dashboard/tracks': typeof DashboardTracksRouteWithChildren
   '/e2e/compliance-desk': typeof E2eComplianceDeskRoute
+  '/employees/new': typeof EmployeesNewRoute
   '/sign-policy/$documentId': typeof SignPolicyDocumentIdRoute
   '/training/confirm': typeof TrainingConfirmRoute
   '/training/course': typeof TrainingCourseRoute
   '/verify/$code': typeof VerifyCodeRoute
   '/audit-portal/': typeof AuditPortalIndexRoute
+  '/clients/': typeof ClientsIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/employees/': typeof EmployeesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/aws/db': typeof ApiAwsDbRoute
@@ -1585,6 +1639,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/client-intake/$clientId': typeof DashboardClientIntakeClientIdRoute
   '/dashboard/client-training/$clientId': typeof DashboardClientTrainingClientIdRoute
   '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
+  '/dashboard/clients/new': typeof DashboardClientsNewRoute
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
   '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRouteWithChildren
@@ -1595,6 +1650,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
   '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
+  '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
   '/dashboard/financial/distributions': typeof DashboardFinancialDistributionsRoute
   '/dashboard/financial/employees': typeof DashboardFinancialEmployeesRoute
@@ -1721,6 +1777,7 @@ export interface FileRoutesByTo {
   '/audit-portal/$packageId': typeof AuditPortalPackageIdRoute
   '/audit-portal/set-password': typeof AuditPortalSetPasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
+  '/clients/new': typeof ClientsNewRoute
   '/dashboard/agency-documents': typeof DashboardAgencyDocumentsRoute
   '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
@@ -1781,12 +1838,15 @@ export interface FileRoutesByTo {
   '/dashboard/timeclock': typeof DashboardTimeclockRoute
   '/dashboard/tracks': typeof DashboardTracksRouteWithChildren
   '/e2e/compliance-desk': typeof E2eComplianceDeskRoute
+  '/employees/new': typeof EmployeesNewRoute
   '/sign-policy/$documentId': typeof SignPolicyDocumentIdRoute
   '/training/confirm': typeof TrainingConfirmRoute
   '/training/course': typeof TrainingCourseRoute
   '/verify/$code': typeof VerifyCodeRoute
   '/audit-portal': typeof AuditPortalIndexRoute
+  '/clients': typeof ClientsIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/employees': typeof EmployeesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/aws/db': typeof ApiAwsDbRoute
@@ -1806,6 +1866,7 @@ export interface FileRoutesByTo {
   '/dashboard/client-intake/$clientId': typeof DashboardClientIntakeClientIdRoute
   '/dashboard/client-training/$clientId': typeof DashboardClientTrainingClientIdRoute
   '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
+  '/dashboard/clients/new': typeof DashboardClientsNewRoute
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
   '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRouteWithChildren
@@ -1816,6 +1877,7 @@ export interface FileRoutesByTo {
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
   '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
+  '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
   '/dashboard/financial/distributions': typeof DashboardFinancialDistributionsRoute
   '/dashboard/financial/employees': typeof DashboardFinancialEmployeesRoute
@@ -1921,10 +1983,12 @@ export interface FileRoutesById {
   '/baa': typeof BaaRoute
   '/billing-locked': typeof BillingLockedRoute
   '/classes': typeof ClassesRoute
+  '/clients': typeof ClientsRouteWithChildren
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/demo': typeof DemoRoute
   '/employee': typeof EmployeeRoute
+  '/employees': typeof EmployeesRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
@@ -1944,6 +2008,7 @@ export interface FileRoutesById {
   '/audit-portal/$packageId': typeof AuditPortalPackageIdRoute
   '/audit-portal/set-password': typeof AuditPortalSetPasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
+  '/clients/new': typeof ClientsNewRoute
   '/dashboard/agency-documents': typeof DashboardAgencyDocumentsRoute
   '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
@@ -2010,12 +2075,15 @@ export interface FileRoutesById {
   '/dashboard/timeclock': typeof DashboardTimeclockRoute
   '/dashboard/tracks': typeof DashboardTracksRouteWithChildren
   '/e2e/compliance-desk': typeof E2eComplianceDeskRoute
+  '/employees/new': typeof EmployeesNewRoute
   '/sign-policy/$documentId': typeof SignPolicyDocumentIdRoute
   '/training/confirm': typeof TrainingConfirmRoute
   '/training/course': typeof TrainingCourseRoute
   '/verify/$code': typeof VerifyCodeRoute
   '/audit-portal/': typeof AuditPortalIndexRoute
+  '/clients/': typeof ClientsIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/employees/': typeof EmployeesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/aws/db': typeof ApiAwsDbRoute
@@ -2035,6 +2103,7 @@ export interface FileRoutesById {
   '/dashboard/client-intake/$clientId': typeof DashboardClientIntakeClientIdRoute
   '/dashboard/client-training/$clientId': typeof DashboardClientTrainingClientIdRoute
   '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
+  '/dashboard/clients/new': typeof DashboardClientsNewRoute
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
   '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRouteWithChildren
@@ -2045,6 +2114,7 @@ export interface FileRoutesById {
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
   '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
+  '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
   '/dashboard/financial/distributions': typeof DashboardFinancialDistributionsRoute
   '/dashboard/financial/employees': typeof DashboardFinancialEmployeesRoute
@@ -2151,10 +2221,12 @@ export interface FileRouteTypes {
     | '/baa'
     | '/billing-locked'
     | '/classes'
+    | '/clients'
     | '/contact'
     | '/dashboard'
     | '/demo'
     | '/employee'
+    | '/employees'
     | '/forgot-password'
     | '/join'
     | '/login'
@@ -2174,6 +2246,7 @@ export interface FileRouteTypes {
     | '/audit-portal/$packageId'
     | '/audit-portal/set-password'
     | '/certificate/$code'
+    | '/clients/new'
     | '/dashboard/agency-documents'
     | '/dashboard/ask-nectar'
     | '/dashboard/assignments'
@@ -2240,12 +2313,15 @@ export interface FileRouteTypes {
     | '/dashboard/timeclock'
     | '/dashboard/tracks'
     | '/e2e/compliance-desk'
+    | '/employees/new'
     | '/sign-policy/$documentId'
     | '/training/confirm'
     | '/training/course'
     | '/verify/$code'
     | '/audit-portal/'
+    | '/clients/'
     | '/dashboard/'
+    | '/employees/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/aws/db'
@@ -2265,6 +2341,7 @@ export interface FileRouteTypes {
     | '/dashboard/client-intake/$clientId'
     | '/dashboard/client-training/$clientId'
     | '/dashboard/clients/$clientId'
+    | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
     | '/dashboard/courses/$courseId'
@@ -2275,6 +2352,7 @@ export interface FileRouteTypes {
     | '/dashboard/courses/person'
     | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
+    | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
     | '/dashboard/financial/distributions'
     | '/dashboard/financial/employees'
@@ -2401,6 +2479,7 @@ export interface FileRouteTypes {
     | '/audit-portal/$packageId'
     | '/audit-portal/set-password'
     | '/certificate/$code'
+    | '/clients/new'
     | '/dashboard/agency-documents'
     | '/dashboard/ask-nectar'
     | '/dashboard/assignments'
@@ -2461,12 +2540,15 @@ export interface FileRouteTypes {
     | '/dashboard/timeclock'
     | '/dashboard/tracks'
     | '/e2e/compliance-desk'
+    | '/employees/new'
     | '/sign-policy/$documentId'
     | '/training/confirm'
     | '/training/course'
     | '/verify/$code'
     | '/audit-portal'
+    | '/clients'
     | '/dashboard'
+    | '/employees'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/aws/db'
@@ -2486,6 +2568,7 @@ export interface FileRouteTypes {
     | '/dashboard/client-intake/$clientId'
     | '/dashboard/client-training/$clientId'
     | '/dashboard/clients/$clientId'
+    | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
     | '/dashboard/courses/$courseId'
@@ -2496,6 +2579,7 @@ export interface FileRouteTypes {
     | '/dashboard/courses/person'
     | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
+    | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
     | '/dashboard/financial/distributions'
     | '/dashboard/financial/employees'
@@ -2600,10 +2684,12 @@ export interface FileRouteTypes {
     | '/baa'
     | '/billing-locked'
     | '/classes'
+    | '/clients'
     | '/contact'
     | '/dashboard'
     | '/demo'
     | '/employee'
+    | '/employees'
     | '/forgot-password'
     | '/join'
     | '/login'
@@ -2623,6 +2709,7 @@ export interface FileRouteTypes {
     | '/audit-portal/$packageId'
     | '/audit-portal/set-password'
     | '/certificate/$code'
+    | '/clients/new'
     | '/dashboard/agency-documents'
     | '/dashboard/ask-nectar'
     | '/dashboard/assignments'
@@ -2689,12 +2776,15 @@ export interface FileRouteTypes {
     | '/dashboard/timeclock'
     | '/dashboard/tracks'
     | '/e2e/compliance-desk'
+    | '/employees/new'
     | '/sign-policy/$documentId'
     | '/training/confirm'
     | '/training/course'
     | '/verify/$code'
     | '/audit-portal/'
+    | '/clients/'
     | '/dashboard/'
+    | '/employees/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/aws/db'
@@ -2714,6 +2804,7 @@ export interface FileRouteTypes {
     | '/dashboard/client-intake/$clientId'
     | '/dashboard/client-training/$clientId'
     | '/dashboard/clients/$clientId'
+    | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
     | '/dashboard/courses/$courseId'
@@ -2724,6 +2815,7 @@ export interface FileRouteTypes {
     | '/dashboard/courses/person'
     | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
+    | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
     | '/dashboard/financial/distributions'
     | '/dashboard/financial/employees'
@@ -2829,10 +2921,12 @@ export interface RootRouteChildren {
   BaaRoute: typeof BaaRoute
   BillingLockedRoute: typeof BillingLockedRoute
   ClassesRoute: typeof ClassesRoute
+  ClientsRoute: typeof ClientsRouteWithChildren
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   DemoRoute: typeof DemoRoute
   EmployeeRoute: typeof EmployeeRoute
+  EmployeesRoute: typeof EmployeesRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   JoinRoute: typeof JoinRoute
   LoginRoute: typeof LoginRoute
@@ -2975,6 +3069,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/employees': {
+      id: '/employees'
+      path: '/employees'
+      fullPath: '/employees'
+      preLoaderRoute: typeof EmployeesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/employee': {
       id: '/employee'
       path: '/employee'
@@ -3001,6 +3102,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clients': {
+      id: '/clients'
+      path: '/clients'
+      fullPath: '/clients'
+      preLoaderRoute: typeof ClientsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/classes': {
@@ -3052,12 +3160,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/employees/': {
+      id: '/employees/'
+      path: '/'
+      fullPath: '/employees/'
+      preLoaderRoute: typeof EmployeesIndexRouteImport
+      parentRoute: typeof EmployeesRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/clients/': {
+      id: '/clients/'
+      path: '/'
+      fullPath: '/clients/'
+      preLoaderRoute: typeof ClientsIndexRouteImport
+      parentRoute: typeof ClientsRoute
     }
     '/audit-portal/': {
       id: '/audit-portal/'
@@ -3093,6 +3215,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/sign-policy/$documentId'
       preLoaderRoute: typeof SignPolicyDocumentIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/employees/new': {
+      id: '/employees/new'
+      path: '/new'
+      fullPath: '/employees/new'
+      preLoaderRoute: typeof EmployeesNewRouteImport
+      parentRoute: typeof EmployeesRoute
     }
     '/e2e/compliance-desk': {
       id: '/e2e/compliance-desk'
@@ -3555,6 +3684,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/agency-documents'
       preLoaderRoute: typeof DashboardAgencyDocumentsRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/clients/new': {
+      id: '/clients/new'
+      path: '/new'
+      fullPath: '/clients/new'
+      preLoaderRoute: typeof ClientsNewRouteImport
+      parentRoute: typeof ClientsRoute
     }
     '/certificate/$code': {
       id: '/certificate/$code'
@@ -4095,6 +4231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFinancialContractorsRouteImport
       parentRoute: typeof DashboardFinancialRoute
     }
+    '/dashboard/employees/new': {
+      id: '/dashboard/employees/new'
+      path: '/employees/new'
+      fullPath: '/dashboard/employees/new'
+      preLoaderRoute: typeof DashboardEmployeesNewRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/employees/hire-dates': {
       id: '/dashboard/employees/hire-dates'
       path: '/employees/hire-dates'
@@ -4163,6 +4306,13 @@ declare module '@tanstack/react-router' {
       path: '/pending'
       fullPath: '/dashboard/clients/pending'
       preLoaderRoute: typeof DashboardClientsPendingRouteImport
+      parentRoute: typeof DashboardClientsRoute
+    }
+    '/dashboard/clients/new': {
+      id: '/dashboard/clients/new'
+      path: '/new'
+      fullPath: '/dashboard/clients/new'
+      preLoaderRoute: typeof DashboardClientsNewRouteImport
       parentRoute: typeof DashboardClientsRoute
     }
     '/dashboard/clients/$clientId': {
@@ -4462,6 +4612,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ClientsRouteChildren {
+  ClientsNewRoute: typeof ClientsNewRoute
+  ClientsIndexRoute: typeof ClientsIndexRoute
+}
+
+const ClientsRouteChildren: ClientsRouteChildren = {
+  ClientsNewRoute: ClientsNewRoute,
+  ClientsIndexRoute: ClientsIndexRoute,
+}
+
+const ClientsRouteWithChildren =
+  ClientsRoute._addFileChildren(ClientsRouteChildren)
+
 interface DashboardBillingRouteChildren {
   DashboardBillingClientIdRoute: typeof DashboardBillingClientIdRoute
   DashboardBillingForm520Route: typeof DashboardBillingForm520Route
@@ -4485,6 +4648,7 @@ const DashboardBillingRouteWithChildren =
 
 interface DashboardClientsRouteChildren {
   DashboardClientsClientIdRoute: typeof DashboardClientsClientIdRoute
+  DashboardClientsNewRoute: typeof DashboardClientsNewRoute
   DashboardClientsPendingRoute: typeof DashboardClientsPendingRoute
   DashboardClientsRhsBoardRoute: typeof DashboardClientsRhsBoardRoute
   DashboardClientsIndexRoute: typeof DashboardClientsIndexRoute
@@ -4492,6 +4656,7 @@ interface DashboardClientsRouteChildren {
 
 const DashboardClientsRouteChildren: DashboardClientsRouteChildren = {
   DashboardClientsClientIdRoute: DashboardClientsClientIdRoute,
+  DashboardClientsNewRoute: DashboardClientsNewRoute,
   DashboardClientsPendingRoute: DashboardClientsPendingRoute,
   DashboardClientsRhsBoardRoute: DashboardClientsRhsBoardRoute,
   DashboardClientsIndexRoute: DashboardClientsIndexRoute,
@@ -4847,6 +5012,7 @@ interface DashboardRouteChildren {
   DashboardCoursesPersonRoute: typeof DashboardCoursesPersonRoute
   DashboardEmployeesStaffIdRoute: typeof DashboardEmployeesStaffIdRoute
   DashboardEmployeesHireDatesRoute: typeof DashboardEmployeesHireDatesRoute
+  DashboardEmployeesNewRoute: typeof DashboardEmployeesNewRoute
   DashboardHhsHubClientIdRoute: typeof DashboardHhsHubClientIdRoute
   DashboardHubClientsRoute: typeof DashboardHubClientsRoute
   DashboardHubDocumentationRoute: typeof DashboardHubDocumentationRoute
@@ -4950,6 +5116,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardCoursesPersonRoute: DashboardCoursesPersonRoute,
   DashboardEmployeesStaffIdRoute: DashboardEmployeesStaffIdRoute,
   DashboardEmployeesHireDatesRoute: DashboardEmployeesHireDatesRoute,
+  DashboardEmployeesNewRoute: DashboardEmployeesNewRoute,
   DashboardHhsHubClientIdRoute: DashboardHhsHubClientIdRoute,
   DashboardHubClientsRoute: DashboardHubClientsRoute,
   DashboardHubDocumentationRoute: DashboardHubDocumentationRoute,
@@ -4980,6 +5147,20 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface EmployeesRouteChildren {
+  EmployeesNewRoute: typeof EmployeesNewRoute
+  EmployeesIndexRoute: typeof EmployeesIndexRoute
+}
+
+const EmployeesRouteChildren: EmployeesRouteChildren = {
+  EmployeesNewRoute: EmployeesNewRoute,
+  EmployeesIndexRoute: EmployeesIndexRoute,
+}
+
+const EmployeesRouteWithChildren = EmployeesRoute._addFileChildren(
+  EmployeesRouteChildren,
+)
+
 interface TrainingRouteChildren {
   TrainingConfirmRoute: typeof TrainingConfirmRoute
   TrainingCourseRoute: typeof TrainingCourseRoute
@@ -5002,10 +5183,12 @@ const rootRouteChildren: RootRouteChildren = {
   BaaRoute: BaaRoute,
   BillingLockedRoute: BillingLockedRoute,
   ClassesRoute: ClassesRoute,
+  ClientsRoute: ClientsRouteWithChildren,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRouteWithChildren,
   DemoRoute: DemoRoute,
   EmployeeRoute: EmployeeRoute,
+  EmployeesRoute: EmployeesRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   JoinRoute: JoinRoute,
   LoginRoute: LoginRoute,

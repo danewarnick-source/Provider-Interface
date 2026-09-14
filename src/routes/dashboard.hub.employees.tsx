@@ -4,6 +4,7 @@ import { HubShell, type HubTab } from "@/components/admin-hubs/hub-shell";
 import { RequirePermission } from "@/components/rbac-guard";
 import { usePermissions } from "@/hooks/use-permissions";
 import { EmployeesPage } from "./dashboard.employees.index";
+import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { HrAdminPage, EmployeeLoansPage } from "./dashboard.hr-admin";
 import { HostsPage } from "@/components/hosts/hosts-page";
 
@@ -44,7 +45,11 @@ function EmployeesHub() {
       </RequirePermission>
     ),
   });
-  return <HubShell title="Employees" basePath="/dashboard/hub/employees" tabs={tabs} />;
+  return (
+    <AgencySetupCreateGate>
+      <HubShell title="Employees" basePath="/dashboard/hub/employees" tabs={tabs} />
+    </AgencySetupCreateGate>
+  );
 }
 
 export const Route = createFileRoute("/dashboard/hub/employees")({
