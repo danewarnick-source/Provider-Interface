@@ -25,7 +25,44 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired fourth batch (unpublished) | 4 |
 | Wired fifth batch (unpublished) | 2 |
 | Wired sixth batch (unpublished) | 2 |
-| Wired shared-behavior batches (unpublished) | 22 |
+| Wired seventh batch / Mega A (unpublished) | 10 |
+| Wired shared-behavior batches (unpublished) | 32 |
+| Remaining executable (live key, not yet wired) | 18 |
+
+## Remaining executable (live key, not wired)
+
+18 imported parents have a live company_obligations key but no fixture overlay yet. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.
+
+| Key | Live key | Status |
+| --- | --- | --- |
+| REQ-1.9 | ce_12h_annual | live_mapped |
+| REQ-1.10.11 | grievance_acknowledgment | live_artifact |
+| REQ-1.11 | zoning_life_safety | live_artifact |
+| REQ-1.14 | governing_board_records | live_artifact |
+| REQ-1.18 | operating_policies | live_artifact |
+| REQ-1.21 | human_rights_plan | live_artifact |
+| REQ-1.22.c | person_discharge_process | live_artifact |
+| REQ-1.23 | health_support_policies | live_artifact |
+| REQ-1.24.5 | support_strategies | live_mapped |
+| REQ-1.28.7 | emergency_loan_record | live_artifact |
+| REQ-1.28.7.G | large_loan_disclosure_process | live_artifact |
+| REQ-1.28.9 | no_gifts_process | live_artifact |
+| REQ-1.35 | housemate_informed_choice | live_artifact |
+| REQ-11.3.5 | belongings_inventory | live_artifact |
+| REQ-11.3.9 | hhs_room_board_agreement | live_artifact |
+| REQ-11.5 | hhs_home_cert_annual | live_mapped |
+| REQ-21.3.1 | rhs_lease_agreement | live_artifact |
+| REQ-21.5 | ol_rhs_license_4plus | live_artifact |
+
+## Draft-unwired blocker categories
+
+283 draft-unwired parents. Categories only — not a row novel.
+
+| Category | Count |
+| --- | ---: |
+| no_live_key + no_predicates | 283 |
+
+427 additional parents are system_behavior (creates_user_task=no / SYSTEM handling) — not draft-unwired and not a live clock.
 
 ## Parents
 
@@ -33,19 +70,19 @@ Parents connect to the existing live obligation engine. Child elements are check
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | REQ-1.2 | DHHS91172-A-0030 | Administrator | Automated check (no user action) or attestation | Ongoing |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.3 | DHHS91172-A-0031 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.4.1 | DHHS91172-A-0033 | Administrator | Upload license/approval to agency profile | Maintain approval; reverify on status change or authority-defined renewal | medicaid_enrollment | live_artifact | Rule has no applicability predicates. |
-| REQ-1.4.2 | DHHS91172-A-0034 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. | usteps_upi_accounts | live_artifact | Rule has no applicability predicates. |
+| REQ-1.4.1 | DHHS91172-A-0033 | Administrator | Upload license/approval to agency profile | Maintain approval; reverify on status change or authority-defined renewal | medicaid_enrollment | live_artifact | Unanswered applicability fact: Medicaid provider IDs per waiver (CSW, CTW, ABI) |
+| REQ-1.4.2 | DHHS91172-A-0034 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | usteps_upi_accounts | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
 | REQ-1.4.3 | DHHS91172-A-0035 | Administrator | Upload license/approval to agency profile | continuous; re-verify at each expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.5 | DHHS91172-A-0036 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | at hire |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.6 | DHHS91172-A-0040 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | volunteer_training_file | live_artifact | Rule has no applicability predicates. |
+| REQ-1.6 | DHHS91172-A-0040 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | volunteer_training_file | live_artifact | Unanswered applicability fact: Does the agency use volunteers? |
 | REQ-1.6.1 | DHHS91172-A-0041 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.6.2 | DHHS91172-A-0042 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.6.2.B | DHHS91172-A-0044 | Assigned DSP / supervisor | Mark complete with attachment/attestation | before start / before a volunteer takes a Person overnight |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.6.3 | DHHS91172-A-0045 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / volunteer first regularly-scheduled shift / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.6.3.B | DHHS91172-A-0047 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.6.3.F | DHHS91172-A-0051 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.7.1 | DHHS91172-A-0053 | Administrator | Upload license/approval to agency profile | 30 calendar days / fully executed contract / annual | medicaid_101_contractor | live_mapped | Rule has no applicability predicates. |
-| REQ-1.7.2 | DHHS91172-A-0054 | Administrator | Upload license/approval to agency profile | 90 calendar days / fully executed contract / annual | medicaid_manuals_memo | live_mapped | Rule has no applicability predicates. |
+| REQ-1.7.1 | DHHS91172-A-0053 | Administrator | Upload license/approval to agency profile | 30 calendar days / fully executed contract / annual | medicaid_101_contractor | live_mapped |  |
+| REQ-1.7.2 | DHHS91172-A-0054 | Administrator | Upload license/approval to agency profile | 90 calendar days / fully executed contract / annual | medicaid_manuals_memo | live_mapped | Unanswered applicability fact: Which OL licenses/certifications does the agency hold, per location? |
 | REQ-1.7.3 | DHHS91172-A-0055 | Administrator | Upload license/approval to agency profile | annual (recommended) |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.7.4 | DHHS91172-A-0056 | Administrator | Upload license/approval to agency profile | annual (recommended) |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.8.1 | DHHS91172-A-0058 | Administrator | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | system_behavior | Rule has no applicability predicates. |
@@ -57,18 +94,18 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-1.8.7 | DHHS91172-A-0097 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | employment year 2 | ce_12h_annual | live_mapped | Unanswered applicability fact: Which staff have a direct-support assignment? |
 | REQ-1.8.8 | DHHS91172-A-0098 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | Before first solo service to a person with ABI / staff-client assignment + first_solo_service_at / once; re-verify on renewal/expiry | abi_training | live_mapped | Unanswered applicability fact: Does the client have an ABI? |
 | REQ-1.9 | DHHS91172-A-0105 | Administrator | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. | ce_12h_annual | live_mapped | Rule has no applicability predicates. |
-| REQ-1.9.2 | DHHS91172-A-0107 | Staff (verified by Administrator/HR) | Authorized external screening; upload/verify result. Automated initiation only through an authorized supported integration | Not specified by this records clause; evaluate applicable screening authority before clearance / hire / before working with Persons / Agency proposal: annual after initial; external legal cadence requires verification | background_screening_annual | live_mapped | Rule has no applicability predicates. |
-| REQ-1.9.4 | DHHS91172-A-0109 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | Timing is missing-information. Do not invent an interval or annual-from-completion. | educational_credentials | live_mapped | Rule has no applicability predicates. |
-| REQ-1.9.7 | DHHS91172-A-0112 | Staff (verified by Administrator/HR) | Official exclusion source or authorized integration; human review of possible matches | Agency proposal: annual after initial; verify applicable exclusion-screening cadence before release | medicaid_exclusion_annual | live_mapped | Rule has no applicability predicates. |
+| REQ-1.9.2 | DHHS91172-A-0107 | Staff (verified by Administrator/HR) | Authorized external screening; upload/verify result. Automated initiation only through an authorized supported integration | employment year 1 | background_screening_annual | live_mapped | Unanswered applicability fact: Which staff have an active employment record? |
+| REQ-1.9.4 | DHHS91172-A-0109 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | hire + 30 days | educational_credentials | live_mapped | Unanswered applicability fact: Which OL licenses/certifications does the agency hold, per location? |
+| REQ-1.9.7 | DHHS91172-A-0112 | Staff (verified by Administrator/HR) | Official exclusion source or authorized integration; human review of possible matches | employment year 1 | medicaid_exclusion_annual | live_mapped | Unanswered applicability fact: Which staff have an active employment record? |
 | REQ-1.10 | DHHS91172-A-0113 | Assigned DSP / supervisor | Complete in platform form/record | annual and upon material change |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.10.7 | DHHS91172-A-0120 | Assigned DSP / supervisor | Complete in platform form/record | Per instance of service. Template is chosen on the service date. No invented extra interval. | timesheets_attendance | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-1.10.11 | DHHS91172-A-0130 | Assigned DSP / supervisor | Mark complete with attachment/attestation | admission / first service | grievance_acknowledgment | live_artifact | Rule has no applicability predicates. |
 | REQ-1.10.14 | DHHS91172-A-0133 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.11 | DHHS91172-A-0134 | Site supervisor | Mark complete with attachment/attestation | continuous; re-verify at renewal | zoning_life_safety | live_artifact | Rule has no applicability predicates. |
 | REQ-1.12 | DHHS91172-A-0135 | Administrator | Automated check (no user action) or attestation | per claim / continuous check | evv_visit_verification | live_artifact | Unanswered applicability fact: Does the agency provide respite? Overnight? |
-| REQ-1.13 | DHHS91172-A-0136 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry | medicaid_enrollment | live_artifact | Rule has no applicability predicates. |
+| REQ-1.13 | DHHS91172-A-0136 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry | medicaid_enrollment | live_artifact |  |
 | REQ-1.13.1 | DHHS91172-A-0137 | Administrator | Generate/upload report and mark sent | 7 calendar days / written request from DSPD |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.13.2 | DHHS91172-A-0138 | Administrator | Email to DSPD (address in clause); log in platform | 7 calendar days / change of phone, address or email | medicaid_change_notifications | live_artifact | Rule has no applicability predicates. |
+| REQ-1.13.2 | DHHS91172-A-0138 | Administrator | Email to DSPD (address in clause); log in platform | 7 calendar days / change of phone, address or email | medicaid_change_notifications | live_artifact |  |
 | REQ-1.13.3 | DHHS91172-A-0139 | Administrator | Generate/upload report and mark sent | 30 calendar days / change of ownership, legal name or tax ID |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.13.4 | DHHS91172-A-0140 | Administrator | Upload license/approval to agency profile | as offered by DIH/DSPD |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.13.5 | DHHS91172-A-0141 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / hire date / at hire and annually |  | draft_unwired | Rule has no applicability predicates. |

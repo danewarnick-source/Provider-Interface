@@ -453,6 +453,19 @@ function predicateStatus(
     }
     return codesOverlapSet(codes, ["PBA"]) ? "applies" : "does_not_apply";
   }
+  if (predicate.kind === "universal_staff") {
+    const catalogKey = predicate.catalogKey;
+    if (!catalogKey) return "unanswered";
+    return evaluateStaffDuty({ dutyKey: catalogKey, staff, orgFacts }).status;
+  }
+  if (predicate.kind === "contractor_standing_file") {
+    const catalogKey = predicate.catalogKey;
+    if (catalogKey === "volunteer_training_file") {
+      if (orgFacts.uses_volunteers === null) return "unanswered";
+      return orgFacts.uses_volunteers ? "applies" : "does_not_apply";
+    }
+    return "applies";
+  }
   if (
     predicate.kind === "product_default_reminder" ||
     predicate.kind === "change_impact" ||

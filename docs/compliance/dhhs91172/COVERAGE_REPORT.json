@@ -18,7 +18,9 @@
     "wiredFourthBatch": 4,
     "wiredFifthBatch": 2,
     "wiredSixthBatch": 2,
-    "wired": 22
+    "wiredSeventhBatch": 10,
+    "wired": 32,
+    "remainingExecutable": 18
   },
   "parents": [
     {
@@ -86,7 +88,7 @@
       "liveKey": "medicaid_enrollment",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -96,13 +98,6 @@
         "Medicaid provider IDs per waiver (CSW, CTW, ABI)"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Use verified enrollment requirements; no annual renewal stated in this clause",
         "Unanswered applicability fact: Medicaid provider IDs per waiver (CSW, CTW, ABI)"
       ]
     },
@@ -113,12 +108,12 @@
       "title": "have a current active USTEPS, and UPI account. Comply with USTEPS/UPI requirements,…",
       "owner": "Administrator",
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "None",
       "liveKey": "usteps_upi_accounts",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -128,12 +123,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
     },
@@ -208,7 +197,7 @@
       "liveKey": "volunteer_training_file",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -218,12 +207,6 @@
         "Does the agency use volunteers?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
         "Unanswered applicability fact: Does the agency use volunteers?"
       ]
     },
@@ -430,20 +413,12 @@
       "liveKey": "medicaid_101_contractor",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.7.2",
@@ -457,7 +432,7 @@
       "liveKey": "medicaid_manuals_memo",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -467,13 +442,6 @@
         "Which OL licenses/certifications does the agency hold, per location?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
         "Unanswered applicability fact: Which OL licenses/certifications does the agency hold, per location?"
       ]
     },
@@ -771,24 +739,22 @@
       "title": "results of background checks completed through the DHHS/Office of Background Processing",
       "owner": "Staff (verified by Administrator/HR)",
       "completionMethod": "Authorized external screening; upload/verify result. Automated initiation only through an authorized supported integration",
-      "timing": "Not specified by this records clause; evaluate applicable screening authority before clearance / hire / before working with Persons / Agency proposal: annual after initial; external legal cadence requires verification",
+      "timing": "employment year 1",
       "renewal": "Annual agency policy is not a verified DHHS screening interval",
       "liveKey": "background_screening_annual",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-staff_personnel_file"
+      ],
+      "unansweredFacts": [
+        "Which staff have an active employment record?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual agency policy is not a verified DHHS screening interval"
+        "Unanswered applicability fact: Which staff have an active employment record?"
       ]
     },
     {
@@ -798,29 +764,25 @@
       "title": "copies of educational transcripts, degrees, letters, licenses, and certifications, when applicable, to…",
       "owner": "Staff (verified by Administrator/HR)",
       "completionMethod": "Upload credential/training record to staff profile",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "hire + 30 days",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
       "liveKey": "educational_credentials",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-006"
+        "FACT-006",
+        "LIVE-staff_personnel_file"
       ],
       "unansweredFacts": [
-        "Which OL licenses/certifications does the agency hold, per location?"
+        "Which OL licenses/certifications does the agency hold, per location?",
+        "Which staff have an active employment record?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "Unanswered applicability fact: Which OL licenses/certifications does the agency hold, per location?"
+        "Unanswered applicability fact: Which OL licenses/certifications does the agency hold, per location?",
+        "Unanswered applicability fact: Which staff have an active employment record?"
       ]
     },
     {
@@ -830,24 +792,22 @@
       "title": "evidence of Medicaid Fraud Exclusion check. The Contractor shall complete checks at…",
       "owner": "Staff (verified by Administrator/HR)",
       "completionMethod": "Official exclusion source or authorized integration; human review of possible matches",
-      "timing": "Agency proposal: annual after initial; verify applicable exclusion-screening cadence before release",
+      "timing": "employment year 1",
       "renewal": "Do not treat annual screening as a verified legal interval",
       "liveKey": "medicaid_exclusion_annual",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-staff_personnel_file"
+      ],
+      "unansweredFacts": [
+        "Which staff have an active employment record?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Do not treat annual screening as a verified legal interval"
+        "Unanswered applicability fact: Which staff have an active employment record?"
       ]
     },
     {
@@ -1037,19 +997,12 @@
       "liveKey": "medicaid_enrollment",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review"
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.13.1",
@@ -1091,20 +1044,12 @@
       "liveKey": "medicaid_change_notifications",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs"
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.13.3",

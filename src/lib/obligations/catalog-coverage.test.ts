@@ -18,7 +18,9 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredFourthBatch, 4);
     assert.equal(report.counts.wiredFifthBatch, 2);
     assert.equal(report.counts.wiredSixthBatch, 2);
-    assert.equal(report.counts.wired, 22);
+    assert.equal(report.counts.wiredSeventhBatch, 10);
+    assert.equal(report.counts.wired, 32);
+    assert.equal(report.counts.remainingExecutable, 18);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -84,6 +86,24 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(evv.canPublish, true);
     assert.equal(evv.canActivate, false);
     assert.equal(evv.mintsStaffTask, false);
+
+    const background = report.rows.find((r) => r.requirementKey === "REQ-1.9.2");
+    assert.ok(background);
+    assert.equal(background.liveKey, "background_screening_annual");
+    assert.equal(background.canPublish, true);
+    assert.equal(background.canActivate, false);
+    assert.equal(background.mintsStaffTask, false);
+    const medicaid101 = report.rows.find((r) => r.requirementKey === "REQ-1.7.1");
+    assert.ok(medicaid101);
+    assert.equal(medicaid101.liveKey, "medicaid_101_contractor");
+    assert.equal(medicaid101.canPublish, true);
+    const enrollment = report.rows.find((r) => r.requirementKey === "REQ-1.4.1");
+    assert.ok(enrollment);
+    assert.equal(enrollment.liveKey, "medicaid_enrollment");
+    assert.equal(enrollment.canPublish, true);
+    const umbrella = report.rows.find((r) => r.requirementKey === "REQ-1.9");
+    assert.ok(umbrella);
+    assert.equal(umbrella.canPublish, false);
 
     const personReview = report.rows.find((r) => r.requirementKey === "REQ-1.28.5");
     assert.ok(personReview);

@@ -53,6 +53,11 @@ import {
   applySixthExecutableBatchOverlayAll,
   sixthBatchParentIsWired,
 } from "./sixth-executable-batch.ts";
+import {
+  applySeventhExecutableBatchOverlay,
+  applySeventhExecutableBatchOverlayAll,
+  seventhBatchParentIsWired,
+} from "./seventh-executable-batch.ts";
 
 export type CatalogCoverageRow = {
   requirementKey: string;
@@ -95,6 +100,8 @@ export type CatalogCoverageCounts = {
   wiredFourthBatch: number;
   wiredFifthBatch: number;
   wiredSixthBatch: number;
+  wiredSeventhBatch: number;
+  remainingExecutable: number;
 };
 
 export type CatalogCoverageReport = {
@@ -153,11 +160,13 @@ function elementRow(el: CatalogSheetRow, parent: LoadedDraftRule | undefined): C
 }
 
 function parentRow(rule: LoadedDraftRule, orgFacts: OrgFacts): CatalogCoverageRow {
-  const executable = applySixthExecutableBatchOverlay(
-    applyFifthExecutableBatchOverlay(
-      applyFourthExecutableBatchOverlay(
-        applyThirdExecutableBatchOverlay(
-          applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+  const executable = applySeventhExecutableBatchOverlay(
+    applySixthExecutableBatchOverlay(
+      applyFifthExecutableBatchOverlay(
+        applyFourthExecutableBatchOverlay(
+          applyThirdExecutableBatchOverlay(
+            applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+          ),
         ),
       ),
     ),
@@ -216,12 +225,14 @@ export function buildCatalogCoverageReport(
   orgFacts: OrgFacts = EMPTY_ORG_FACTS,
 ): CatalogCoverageReport {
   const parents = applyVerifiedPublicationOverlay(
-    applySixthExecutableBatchOverlayAll(
-      applyFifthExecutableBatchOverlayAll(
-        applyFourthExecutableBatchOverlayAll(
-          applyThirdExecutableBatchOverlayAll(
-            applySecondExecutableBatchOverlayAll(
-              applyFirstExecutableBatchOverlayAll(loaded.parents),
+    applySeventhExecutableBatchOverlayAll(
+      applySixthExecutableBatchOverlayAll(
+        applyFifthExecutableBatchOverlayAll(
+          applyFourthExecutableBatchOverlayAll(
+            applyThirdExecutableBatchOverlayAll(
+              applySecondExecutableBatchOverlayAll(
+                applyFirstExecutableBatchOverlayAll(loaded.parents),
+              ),
             ),
           ),
         ),
@@ -253,6 +264,7 @@ export function buildCatalogCoverageReport(
     wiredFourthBatch: parents.filter((rule) => fourthBatchParentIsWired(rule)).length,
     wiredFifthBatch: parents.filter((rule) => fifthBatchParentIsWired(rule)).length,
     wiredSixthBatch: parents.filter((rule) => sixthBatchParentIsWired(rule)).length,
+    wiredSeventhBatch: parents.filter((rule) => seventhBatchParentIsWired(rule)).length,
     wired: parents.filter(
       (rule) =>
         firstBatchParentIsWired(rule) ||
@@ -260,14 +272,82 @@ export function buildCatalogCoverageReport(
         thirdBatchParentIsWired(rule) ||
         fourthBatchParentIsWired(rule) ||
         fifthBatchParentIsWired(rule) ||
-        sixthBatchParentIsWired(rule),
+        sixthBatchParentIsWired(rule) ||
+        seventhBatchParentIsWired(rule),
     ).length,
+    remainingExecutable: parentOnly.filter((r) => r.liveKey != null && r.canPublish === false)
+      .length,
   };
   return {
     workbookSha256: loaded.manifest.sha256,
     counts,
     rows,
   };
+}
+
+function remainingExecutableParents(report: CatalogCoverageReport): CatalogCoverageRow[] {
+  return report.rows.filter(
+    (r) => r.role === "parent" && r.liveKey != null && r.canPublish === false,
+  );
+}
+
+function formatRemainingExecutableMarkdown(report: CatalogCoverageReport): string[] {
+  const remaining = remainingExecutableParents(report);
+  const lines = [
+    "## Remaining executable (live key, not wired)",
+    "",
+    `${remaining.length} imported parents have a live company_obligations key but no fixture overlay yet. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.`,
+    "",
+    "| Key | Live key | Status |",
+    "| --- | --- | --- |",
+  ];
+  for (const row of remaining) {
+    lines.push(`| ${row.requirementKey} | ${row.liveKey} | ${row.implementationStatus} |`);
+  }
+  return lines;
+}
+
+function draftUnwiredBlockerCategory(blockers: string[]): string {
+  const text = blockers.join(" | ");
+  if (/No live company_obligations key/i.test(text) && /no applicability predicates/i.test(text)) {
+    return "no_live_key + no_predicates";
+  }
+  if (/No live company_obligations key/i.test(text)) return "no_live_key";
+  if (/Release_Gaps/i.test(text)) return "release_gaps";
+  if (/publication_gap/i.test(text)) return "publication_gap";
+  if (/no applicability predicates/i.test(text)) return "no_predicates_only";
+  if (/Unanswered applicability fact/i.test(text)) return "unanswered_facts";
+  return "other";
+}
+
+function formatDraftUnwiredBlockerMarkdown(report: CatalogCoverageReport): string[] {
+  const unwired = report.rows.filter(
+    (r) => r.role === "parent" && r.implementationStatus === "draft_unwired",
+  );
+  const cats = new Map<string, number>();
+  for (const row of unwired) {
+    const cat = draftUnwiredBlockerCategory(row.blockers);
+    cats.set(cat, (cats.get(cat) ?? 0) + 1);
+  }
+  const lines = [
+    "## Draft-unwired blocker categories",
+    "",
+    `${unwired.length} draft-unwired parents. Categories only — not a row novel.`,
+    "",
+    "| Category | Count |",
+    "| --- | ---: |",
+  ];
+  for (const [cat, n] of [...cats.entries()].sort((a, b) => b[1] - a[1])) {
+    lines.push(`| ${cat} | ${n} |`);
+  }
+  const system = report.rows.filter(
+    (r) => r.role === "parent" && r.implementationStatus === "system_behavior",
+  ).length;
+  lines.push("");
+  lines.push(
+    `${system} additional parents are system_behavior (creates_user_task=no / SYSTEM handling) — not draft-unwired and not a live clock.`,
+  );
+  return lines;
 }
 
 export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): string {
@@ -300,7 +380,13 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Wired fourth batch (unpublished) | ${c.wiredFourthBatch} |`,
     `| Wired fifth batch (unpublished) | ${c.wiredFifthBatch} |`,
     `| Wired sixth batch (unpublished) | ${c.wiredSixthBatch} |`,
+    `| Wired seventh batch / Mega A (unpublished) | ${c.wiredSeventhBatch} |`,
     `| Wired shared-behavior batches (unpublished) | ${c.wired} |`,
+    `| Remaining executable (live key, not yet wired) | ${c.remainingExecutable} |`,
+    "",
+    ...formatRemainingExecutableMarkdown(report),
+    "",
+    ...formatDraftUnwiredBlockerMarkdown(report),
     "",
     "## Parents",
     "",
