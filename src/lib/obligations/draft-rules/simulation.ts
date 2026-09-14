@@ -13,7 +13,7 @@ import { sowCatalogEntryByKey } from "../../sow-obligation-catalog.ts";
 import { liveObligationKeyForRequirement, staffTaskPolicyForRule } from "../catalog-live-bridge.ts";
 import { buildStaffTask, type StaffTask } from "../../staff-my-tasks.ts";
 import { allRequiredTopicsComplete } from "../../in-hive-training.ts";
-import type { OrgFacts } from "../applicability.ts";
+import { humanRightsPlanStatus, type OrgFacts } from "../applicability.ts";
 import { awardedCodesUnanswered } from "../setup-facts.ts";
 import {
   evaluateStaffDuty,
@@ -463,6 +463,17 @@ function predicateStatus(
     if (catalogKey === "volunteer_training_file") {
       if (orgFacts.uses_volunteers === null) return "unanswered";
       return orgFacts.uses_volunteers ? "applies" : "does_not_apply";
+    }
+    if (catalogKey === "zoning_life_safety") {
+      if (orgFacts.operates_ol_site === null) return "unanswered";
+      return orgFacts.operates_ol_site ? "applies" : "does_not_apply";
+    }
+    if (catalogKey === "governing_board_records") {
+      if (orgFacts.has_governing_board === null) return "unanswered";
+      return orgFacts.has_governing_board ? "applies" : "does_not_apply";
+    }
+    if (catalogKey === "human_rights_plan") {
+      return humanRightsPlanStatus(orgFacts.servicesOffered);
     }
     return "applies";
   }

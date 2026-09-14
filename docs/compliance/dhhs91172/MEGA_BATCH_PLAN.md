@@ -2,16 +2,17 @@
 
 Soft=none. `VERIFIED_PUBLICATIONS` stays empty. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents: those live keys exist on the pack, but **no imported parent maps to them**.
 
-Measured on main `733ec35e` after batches 1–6, then Mega A in this PR.
+Measured on main `733ec35e` after batches 1–6, Mega A, then Mega B in this PR.
 
 | Measure | Count |
 | --- | ---: |
 | Imported parents | 760 |
 | Executable (live key) | 50 |
 | Wired 1–6 | 22 |
-| Wired Mega A (this PR) | 10 |
-| Wired total after Mega A | 32 |
-| Remaining executable | 18 |
+| Wired Mega A | 10 |
+| Wired Mega B (this PR) | 9 |
+| Wired total after Mega B | 41 |
+| Remaining executable | 9 |
 | Verified / published | 0 / 0 |
 | Draft unwired | 283 |
 | System behavior | 427 |
@@ -27,7 +28,7 @@ Draft-unwired blockers (283/283): **no live key + no applicability predicates**.
 5. Docs/EVV (2)
 6. PBA financial (2)
 
-## Mega A — THIS PR (10 parents)
+## Mega A — already wired (10 parents)
 
 **Family:** Article 1 provider enrollment + hire/annual credential files.
 
@@ -46,21 +47,23 @@ Draft-unwired blockers (283/283): **no live key + no applicability predicates**.
 
 REQ-1.9.6 / `medicaid_disclosure_annual` is a live obligation key with **no imported parent** — not invented here. REQ-1.9 (umbrella) citation-collides onto `ce_12h_annual` (already batch 1) — left for Mega C.
 
-## Mega B — next (9 parents)
+## Mega B — THIS PR (9 parents)
 
 **Family:** Article 1 standing org policy / process files. File-independent of Mega C.
 
-| Rule | Live key |
-| --- | --- |
-| REQ-1.11 | zoning_life_safety |
-| REQ-1.14 | governing_board_records |
-| REQ-1.18 | operating_policies |
-| REQ-1.21 | human_rights_plan |
-| REQ-1.22.c | person_discharge_process |
-| REQ-1.23 | health_support_policies |
-| REQ-1.28.7 | emergency_loan_record |
-| REQ-1.28.7.G | large_loan_disclosure_process |
-| REQ-1.28.9 | no_gifts_process |
+| Rule | Live key | Disposition |
+| --- | --- | --- |
+| REQ-1.11 | zoning_life_safety | standing |
+| REQ-1.14 | governing_board_records | standing |
+| REQ-1.18 | operating_policies | standing |
+| REQ-1.21 | human_rights_plan | standing |
+| REQ-1.22.c | person_discharge_process | standing |
+| REQ-1.23 | health_support_policies | standing |
+| REQ-1.28.7 | emergency_loan_record | by_design |
+| REQ-1.28.7.G | large_loan_disclosure_process | standing |
+| REQ-1.28.9 | no_gifts_process | standing |
+
+Child elements (board minutes, discharge notices, loan notices, §1.18/§1.23 items) stay on the parent. Soft=none.
 
 ## Mega C — next (9 parents)
 
