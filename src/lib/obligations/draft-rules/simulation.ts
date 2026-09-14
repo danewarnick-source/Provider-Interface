@@ -13,7 +13,7 @@ import { sowCatalogEntryByKey } from "../../sow-obligation-catalog.ts";
 import { liveObligationKeyForRequirement, staffTaskPolicyForRule } from "../catalog-live-bridge.ts";
 import { buildStaffTask, type StaffTask } from "../../staff-my-tasks.ts";
 import { allRequiredTopicsComplete } from "../../in-hive-training.ts";
-import { humanRightsPlanStatus, type OrgFacts } from "../applicability.ts";
+import { awardedCodeDutyStatus, humanRightsPlanStatus, type OrgFacts } from "../applicability.ts";
 import { awardedCodesUnanswered } from "../setup-facts.ts";
 import {
   evaluateStaffDuty,
@@ -476,6 +476,22 @@ function predicateStatus(
       return humanRightsPlanStatus(orgFacts.servicesOffered);
     }
     return "applies";
+  }
+  if (predicate.kind === "person_file_intake") {
+    if (!staff.assignmentsKnown) return "unanswered";
+    if (staff.assignedClientIds.length > 0) return "applies";
+    return staffDutyFootprint(staff) === "office" ? "does_not_apply" : "unanswered";
+  }
+  if (predicate.kind === "awarded_service_codes") {
+    const catalogKey = predicate.catalogKey;
+    if (!catalogKey) return "unanswered";
+    const codes = sowCatalogEntryByKey(catalogKey)?.service_codes ?? [];
+    return awardedCodeDutyStatus(codes, orgFacts.servicesOffered);
+  }
+  if (predicate.kind === "support_strategies_assignment") {
+    const catalogKey = predicate.catalogKey;
+    if (!catalogKey) return "unanswered";
+    return evaluateStaffDuty({ dutyKey: catalogKey, staff, orgFacts }).status;
   }
   if (
     predicate.kind === "product_default_reminder" ||

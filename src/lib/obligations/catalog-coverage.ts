@@ -63,6 +63,11 @@ import {
   applyEighthExecutableBatchOverlayAll,
   eighthBatchParentIsWired,
 } from "./eighth-executable-batch.ts";
+import {
+  applyMegaCExecutableBatchOverlay,
+  applyMegaCExecutableBatchOverlayAll,
+  megaCBatchParentIsWired,
+} from "./mega-c-executable-batch.ts";
 
 export type CatalogCoverageRow = {
   requirementKey: string;
@@ -107,6 +112,7 @@ export type CatalogCoverageCounts = {
   wiredSixthBatch: number;
   wiredSeventhBatch: number;
   wiredEighthBatch: number;
+  wiredMegaC: number;
   remainingExecutable: number;
 };
 
@@ -166,13 +172,15 @@ function elementRow(el: CatalogSheetRow, parent: LoadedDraftRule | undefined): C
 }
 
 function parentRow(rule: LoadedDraftRule, orgFacts: OrgFacts): CatalogCoverageRow {
-  const executable = applyEighthExecutableBatchOverlay(
-    applySeventhExecutableBatchOverlay(
-      applySixthExecutableBatchOverlay(
-        applyFifthExecutableBatchOverlay(
-          applyFourthExecutableBatchOverlay(
-            applyThirdExecutableBatchOverlay(
-              applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+  const executable = applyMegaCExecutableBatchOverlay(
+    applyEighthExecutableBatchOverlay(
+      applySeventhExecutableBatchOverlay(
+        applySixthExecutableBatchOverlay(
+          applyFifthExecutableBatchOverlay(
+            applyFourthExecutableBatchOverlay(
+              applyThirdExecutableBatchOverlay(
+                applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+              ),
             ),
           ),
         ),
@@ -233,14 +241,16 @@ export function buildCatalogCoverageReport(
   orgFacts: OrgFacts = EMPTY_ORG_FACTS,
 ): CatalogCoverageReport {
   const parents = applyVerifiedPublicationOverlay(
-    applyEighthExecutableBatchOverlayAll(
-      applySeventhExecutableBatchOverlayAll(
-        applySixthExecutableBatchOverlayAll(
-          applyFifthExecutableBatchOverlayAll(
-            applyFourthExecutableBatchOverlayAll(
-              applyThirdExecutableBatchOverlayAll(
-                applySecondExecutableBatchOverlayAll(
-                  applyFirstExecutableBatchOverlayAll(loaded.parents),
+    applyMegaCExecutableBatchOverlayAll(
+      applyEighthExecutableBatchOverlayAll(
+        applySeventhExecutableBatchOverlayAll(
+          applySixthExecutableBatchOverlayAll(
+            applyFifthExecutableBatchOverlayAll(
+              applyFourthExecutableBatchOverlayAll(
+                applyThirdExecutableBatchOverlayAll(
+                  applySecondExecutableBatchOverlayAll(
+                    applyFirstExecutableBatchOverlayAll(loaded.parents),
+                  ),
                 ),
               ),
             ),
@@ -276,6 +286,7 @@ export function buildCatalogCoverageReport(
     wiredSixthBatch: parents.filter((rule) => sixthBatchParentIsWired(rule)).length,
     wiredSeventhBatch: parents.filter((rule) => seventhBatchParentIsWired(rule)).length,
     wiredEighthBatch: parents.filter((rule) => eighthBatchParentIsWired(rule)).length,
+    wiredMegaC: parents.filter((rule) => megaCBatchParentIsWired(rule)).length,
     wired: parents.filter(
       (rule) =>
         firstBatchParentIsWired(rule) ||
@@ -285,7 +296,8 @@ export function buildCatalogCoverageReport(
         fifthBatchParentIsWired(rule) ||
         sixthBatchParentIsWired(rule) ||
         seventhBatchParentIsWired(rule) ||
-        eighthBatchParentIsWired(rule),
+        eighthBatchParentIsWired(rule) ||
+        megaCBatchParentIsWired(rule),
     ).length,
     remainingExecutable: parentOnly.filter((r) => r.liveKey != null && r.canPublish === false)
       .length,
@@ -394,6 +406,7 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Wired sixth batch (unpublished) | ${c.wiredSixthBatch} |`,
     `| Wired seventh batch / Mega A (unpublished) | ${c.wiredSeventhBatch} |`,
     `| Wired eighth batch / Mega B (unpublished) | ${c.wiredEighthBatch} |`,
+    `| Wired Mega C person-file / site leftovers (unpublished) | ${c.wiredMegaC} |`,
     `| Wired shared-behavior batches (unpublished) | ${c.wired} |`,
     `| Remaining executable (live key, not yet wired) | ${c.remainingExecutable} |`,
     "",

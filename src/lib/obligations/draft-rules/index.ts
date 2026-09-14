@@ -196,6 +196,15 @@ export {
   eighthExecutableBatchParents,
 } from "../eighth-executable-batch.ts";
 export {
+  applyMegaCExecutableBatchOverlay,
+  applyMegaCExecutableBatchOverlayAll,
+  MEGA_C_BATCH_DEMO_PATH,
+  MEGA_C_EXECUTABLE_BATCH_ID,
+  MEGA_C_EXECUTABLE_BATCH_LIVE_KEYS,
+  MEGA_C_EXECUTABLE_BATCH_RULE_IDS,
+  megaCExecutableBatchParents,
+} from "../mega-c-executable-batch.ts";
+export {
   countQualifiedDesignatedBenefits,
   employmentYearDue,
   hirePlusDaysDue,
