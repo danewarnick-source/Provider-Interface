@@ -58,6 +58,7 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
       return;
     }
     let cancelled = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any).storage
       .from("obligation-evidence")
       .createSignedUrl(review.uploadPath, 300)

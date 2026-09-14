@@ -1313,7 +1313,8 @@ export async function notifyObligationManagersInternal(
 
   const cadenceDesc = cadenceShortLabel(ob.cadence);
   const lastCompletion = (completions ?? [])[completions.length - 1] as
-    { staff_name: string; completed_at: string; evidence_type_used: string } | undefined;
+    | { staff_name: string; completed_at: string; evidence_type_used: string }
+    | undefined;
 
   let title: string;
   let body: string;
