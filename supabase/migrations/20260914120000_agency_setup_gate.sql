@@ -31,22 +31,22 @@ ALTER TABLE public.organizations
   ADD COLUMN IF NOT EXISTS setup_create_gate_exempt boolean;
 
 -- Choice (b), snapshot not live predicate:
--- Orgs that already have ≥1 member OR ≥1 client when this first runs are
--- grandfathered so hire/add-client does not break the moment SQL lands.
--- NULL = not yet decided. Re-applying only fills remaining NULLs, so a new
--- org created after the first apply (DEFAULT false) stays gated.
+-- Exempt only orgs that already have ≥1 client OR members > 1.
+-- A workspace with only the initial owner (1 member, 0 clients) is gated
+-- and must complete the six questions. TNS (6 members / 4 clients) qualifies.
+-- NULL = not yet decided. Re-applying only fills remaining NULLs.
 UPDATE public.organizations o
 SET setup_create_gate_exempt = (
   EXISTS (
     SELECT 1
-    FROM public.organization_members om
-    WHERE om.organization_id = o.id
-  )
-  OR EXISTS (
-    SELECT 1
     FROM public.clients c
     WHERE c.organization_id = o.id
   )
+  OR (
+    SELECT count(*)
+    FROM public.organization_members om
+    WHERE om.organization_id = o.id
+  ) > 1
 )
 WHERE o.setup_create_gate_exempt IS NULL;
 

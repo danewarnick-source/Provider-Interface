@@ -65,9 +65,9 @@ After SQL is applied to an **isolated test project or local Supabase only**:
 5. Save all six operating facts (`service_area` is its own column).
 6. Repeat the create APIs — expect success.
 7. Confirm Agency A cannot read Agency B staff/clients.
-8. On a pre-existing org that already had staff/clients when SQL landed
-   (TNS if that isolated DB copied it), confirm the staff/client lists
-   still load and hire still works (`setup_create_gate_exempt = true`).
+8. On a pre-existing org with ≥1 client or members > 1 when SQL landed
+   (TNS: 6 members / 4 clients), confirm lists still load and hire still
+   works (`setup_create_gate_exempt = true`). Owner-only orgs stay gated.
 9. Confirm company-profile save does **not** unlock create by itself
    (six facts / `useAgencySetup` only). The amber banner is an optional
    checklist and does not calculate eligibility.

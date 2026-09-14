@@ -416,6 +416,10 @@ describe("unit: SQL source review (not a live database)", () => {
       sql,
       /IF current_user IN \('service_role', 'postgres', 'supabase_admin'\) THEN\s+RETURN NEW;\s+END IF;\s+RAISE EXCEPTION/,
     );
+    assert.match(
+      sql,
+      /SELECT count\(\*\)\s+FROM public\.organization_members om\s+WHERE om\.organization_id = o\.id\s+\) > 1/,
+    );
   });
 
   it("does not write service area into specializations", () => {

@@ -24,9 +24,10 @@ Repo inventory is not a live query. From product docs (`CLAUDE.md`,
 `GO_LIVE.md`, billing-exempt notes): **True North Supports LLC**
 `7fabcf5d-f826-487f-8730-8b0c3f1969bb` is the first live tenant, not a
 synthetic-only test org. Prefer truth over convenience: **keep**
-`setup_create_gate_exempt` so TNS (and any other org that already has
-members or clients when this first runs) can still hire / add-client the
-moment SQL lands.
+`setup_create_gate_exempt` so TNS (6 members / 4 clients) and any other
+org that already has **≥1 client or members > 1** can still hire /
+add-client the moment SQL lands. Owner-only orgs (1 member, 0 clients)
+must complete the six questions.
 
 Tony / Core: run the inventory probe below in Lovable **before** paste.
 This agent must not query Hive-Platform. If the probe shows only
@@ -40,10 +41,10 @@ We do **not** invent answers to mark live orgs “complete.” We also do
 skip setup the moment its first owner exists.
 
 `organizations.setup_create_gate_exempt` is snapshotted **once**: orgs that
-already have ≥1 `organization_members` row OR ≥1 `clients` row when this
-SQL first runs are exempt. NULL means not yet decided; re-pasting only
-fills remaining NULLs. Orgs created after the first apply get
-`DEFAULT false`.
+already have ≥1 `clients` row **or** `organization_members` count > 1
+when this SQL first runs are exempt. Owner-only (1 member, 0 clients)
+is **not** exempt. NULL means not yet decided; re-pasting only fills
+remaining NULLs. Orgs created after the first apply get `DEFAULT false`.
 
 ### Fail-closed exempt lock
 
@@ -56,8 +57,9 @@ trigger is authoritative.
 
 ### Plain-language risk
 
-- First paste: TNS and any other org that already has staff or clients
-  keep hiring and adding clients. Lists do not go blank.
+- First paste: TNS and any other org with ≥1 client or more than one
+  member keep hiring and adding clients. Lists do not go blank.
+  Owner-only workspaces stay gated until the six questions are saved.
 - A brand-new workspace created after this paste cannot hire or add
   clients until the six operating questions are saved (including
   dedicated `organizations.service_area` — not a line inside
@@ -166,14 +168,14 @@ UPDATE public.organizations o
 SET setup_create_gate_exempt = (
   EXISTS (
     SELECT 1
-    FROM public.organization_members om
-    WHERE om.organization_id = o.id
-  )
-  OR EXISTS (
-    SELECT 1
     FROM public.clients c
     WHERE c.organization_id = o.id
   )
+  OR (
+    SELECT count(*)
+    FROM public.organization_members om
+    WHERE om.organization_id = o.id
+  ) > 1
 )
 WHERE o.setup_create_gate_exempt IS NULL;
 
@@ -211,8 +213,8 @@ GRANT EXECUTE ON FUNCTION public.protect_setup_create_gate_exempt() TO PUBLIC;
 ```
 
 **What you'll see:** `ALTER TABLE` / `UPDATE` / `CREATE FUNCTION` /
-`CREATE TRIGGER`. Existing orgs with members or clients get
-`setup_create_gate_exempt = true`.
+`CREATE TRIGGER`. Existing orgs with ≥1 client or members > 1 get
+`setup_create_gate_exempt = true`. Owner-only orgs stay `false`.
 
 #### Paste 2 — functions
 
@@ -470,8 +472,8 @@ SELECT
 
 ### Seed
 
-Grandfather snapshot only (KEEP for TNS + any other org that already
-has people). No invented fact answers.
+Grandfather snapshot only (KEEP for TNS + any org with ≥1 client or
+members > 1). Owner-only orgs stay gated. No invented fact answers.
 
 ### Isolated full-project RLS (not this agent)
 

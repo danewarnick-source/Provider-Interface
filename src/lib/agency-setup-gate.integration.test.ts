@@ -24,6 +24,10 @@ const ORG_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2";
 const USER_B = "22222222-2222-4222-8222-222222222222";
 const ORG_EXISTING = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee5";
 const USER_EXISTING = "55555555-5555-4555-8555-555555555555";
+const ORG_TNS = "7fabcf5d-f826-487f-8730-8b0c3f1969bb";
+const ORG_TWO = "dddddddd-dddd-4ddd-8ddd-ddddddddddd4";
+const USER_TWO = "44444444-4444-4444-8444-444444444444";
+const USER_TWO_B = "44444444-4444-4444-8444-444444444445";
 const ORG_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1";
 const USER_A = "11111111-1111-4111-8111-111111111111";
 const USER_A2 = "11111111-1111-4111-8111-111111111112";
@@ -176,6 +180,42 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
        VALUES ($1, $2, 'admin')`,
       [ORG_EXISTING, USER_EXISTING],
     );
+    await client.query(
+      `INSERT INTO public.clients (organization_id, first_name, last_name)
+       VALUES ($1, 'Pat', 'Resident')`,
+      [ORG_EXISTING],
+    );
+
+    await client.query(
+      `INSERT INTO public.organizations (id, name, slug)
+       VALUES ($1, 'True North Supports LLC', 'true-north-supports')`,
+      [ORG_TNS],
+    );
+    for (let i = 1; i <= 6; i++) {
+      await client.query(
+        `INSERT INTO public.organization_members (organization_id, user_id, role)
+         VALUES ($1, $2, 'employee')`,
+        [ORG_TNS, `7fabcf5d-f826-487f-8730-8b0c3f1969b${i}`],
+      );
+    }
+    for (const name of ["Ann", "Bea", "Cal", "Dee"]) {
+      await client.query(
+        `INSERT INTO public.clients (organization_id, first_name, last_name)
+         VALUES ($1, $2, 'Client')`,
+        [ORG_TNS, name],
+      );
+    }
+
+    await client.query(
+      `INSERT INTO public.organizations (id, name, slug)
+       VALUES ($1, 'Two Staff Home', 'two-staff-home')`,
+      [ORG_TWO],
+    );
+    await client.query(
+      `INSERT INTO public.organization_members (organization_id, user_id, role)
+       VALUES ($1, $2, 'admin'), ($1, $3, 'employee')`,
+      [ORG_TWO, USER_TWO, USER_TWO_B],
+    );
 
     await client.query(readRel("../../supabase/migrations/20260914120000_agency_setup_gate.sql"));
   });
@@ -184,17 +224,35 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     await client.end();
   });
 
-  it("grandfathers orgs that already had members; new orgs stay gated", async () => {
+  it("grandfathers ≥1 client or members > 1; owner-only orgs stay gated", async () => {
     const existing = await client.query(
       "SELECT setup_create_gate_exempt FROM public.organizations WHERE id = $1",
       [ORG_EXISTING],
+    );
+    const tns = await client.query(
+      "SELECT setup_create_gate_exempt FROM public.organizations WHERE id = $1",
+      [ORG_TNS],
+    );
+    const two = await client.query(
+      "SELECT setup_create_gate_exempt FROM public.organizations WHERE id = $1",
+      [ORG_TWO],
     );
     const b = await client.query(
       "SELECT setup_create_gate_exempt FROM public.organizations WHERE id = $1",
       [ORG_B],
     );
     assert.equal(existing.rows[0].setup_create_gate_exempt, true);
-    assert.equal(b.rows[0].setup_create_gate_exempt, true);
+    assert.equal(tns.rows[0].setup_create_gate_exempt, true);
+    assert.equal(two.rows[0].setup_create_gate_exempt, true);
+    assert.equal(b.rows[0].setup_create_gate_exempt, false);
+    const allowed = await client.query(
+      `SELECT
+         public.org_setup_allows_create($1) AS tns,
+         public.org_setup_allows_create($2) AS owner_only`,
+      [ORG_TNS, ORG_B],
+    );
+    assert.equal(allowed.rows[0].tns, true);
+    assert.equal(allowed.rows[0].owner_only, false);
 
     await client.query(
       `INSERT INTO public.organizations (id, name, slug)
