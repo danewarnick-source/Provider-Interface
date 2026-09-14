@@ -136,4 +136,35 @@ describe("catalog applicability facts", () => {
     assert.equal(seiMonthly.status, "unanswered");
     assert.deepEqual(seiMonthly.awardedCodes, ["SEI"]);
   });
+
+  it("maps fifth-batch documentation / EVV facts without coercing N/A", () => {
+    const notes = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-service_documentation_assignment",
+        question: "Which persons received a documented service?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(notes.source, "staff_assignment");
+    assert.equal(notes.status, "unanswered");
+    const evv = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-evv_assignment",
+        question: "Which staff are assigned an EVV-mandated service code?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(evv.source, "staff_assignment");
+    assert.equal(evv.status, "unanswered");
+    const hhs = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-hhs_daily_caseload",
+        question: "Which persons have an HHS authorization and an overnight stay?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(hhs.source, "awarded_service_codes");
+    assert.equal(hhs.status, "unanswered");
+    assert.deepEqual(hhs.awardedCodes, ["HHS"]);
+  });
 });

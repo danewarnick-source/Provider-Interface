@@ -16,7 +16,8 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredSecondBatch, 6);
     assert.equal(report.counts.wiredThirdBatch, 3);
     assert.equal(report.counts.wiredFourthBatch, 4);
-    assert.equal(report.counts.wired, 18);
+    assert.equal(report.counts.wiredFifthBatch, 2);
+    assert.equal(report.counts.wired, 20);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -69,6 +70,19 @@ describe("DHHS91172 catalog coverage", () => {
     assert.ok(sjdMonthly);
     assert.equal(sjdMonthly.liveKey, "sjd_monthly_summary_upi");
     assert.equal(sjdMonthly.canPublish, true);
+
+    const notes = report.rows.find((r) => r.requirementKey === "REQ-1.10.7");
+    assert.ok(notes);
+    assert.equal(notes.liveKey, "timesheets_attendance");
+    assert.equal(notes.canPublish, true);
+    assert.equal(notes.canActivate, false);
+    assert.equal(notes.mintsStaffTask, false);
+    const evv = report.rows.find((r) => r.requirementKey === "REQ-1.12");
+    assert.ok(evv);
+    assert.equal(evv.liveKey, "evv_visit_verification");
+    assert.equal(evv.canPublish, true);
+    assert.equal(evv.canActivate, false);
+    assert.equal(evv.mintsStaffTask, false);
 
     const elements = report.rows.filter((r) => r.role === "element");
     assert.equal(elements.length, 607);

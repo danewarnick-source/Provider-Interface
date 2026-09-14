@@ -31,6 +31,7 @@ export const EXPLICIT_REQ_TO_LIVE_KEY: Readonly<Record<string, string>> = {
   "REQ-1.9.6": "medicaid_disclosure_annual",
   "REQ-1.9.7": "medicaid_exclusion_annual",
   "REQ-1.11": "zoning_life_safety",
+  "REQ-1.10.7": "timesheets_attendance",
   "REQ-1.12": "evv_visit_verification",
   "REQ-1.14": "governing_board_records",
   "REQ-1.17": "personnel_policies",

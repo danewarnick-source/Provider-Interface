@@ -156,6 +156,17 @@ export {
   fourthExecutableBatchParents,
 } from "../fourth-executable-batch.ts";
 export {
+  applyFifthExecutableBatchOverlay,
+  applyFifthExecutableBatchOverlayAll,
+  FIFTH_BATCH_DEMO_PATH,
+  FIFTH_EXECUTABLE_BATCH_COMPANION_RULE_IDS,
+  FIFTH_EXECUTABLE_BATCH_FIXTURE_IDS,
+  FIFTH_EXECUTABLE_BATCH_ID,
+  FIFTH_EXECUTABLE_BATCH_LIVE_KEYS,
+  FIFTH_EXECUTABLE_BATCH_RULE_IDS,
+  fifthExecutableBatchParents,
+} from "../fifth-executable-batch.ts";
+export {
   countQualifiedDesignatedBenefits,
   employmentYearDue,
   hirePlusDaysDue,

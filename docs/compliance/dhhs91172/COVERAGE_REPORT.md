@@ -23,7 +23,8 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired second batch (unpublished) | 6 |
 | Wired third batch (unpublished) | 3 |
 | Wired fourth batch (unpublished) | 4 |
-| Wired shared-behavior batches (unpublished) | 18 |
+| Wired fifth batch (unpublished) | 2 |
+| Wired shared-behavior batches (unpublished) | 20 |
 
 ## Parents
 
@@ -59,11 +60,11 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-1.9.4 | DHHS91172-A-0109 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | Timing is missing-information. Do not invent an interval or annual-from-completion. | educational_credentials | live_mapped | Rule has no applicability predicates. |
 | REQ-1.9.7 | DHHS91172-A-0112 | Staff (verified by Administrator/HR) | Official exclusion source or authorized integration; human review of possible matches | Agency proposal: annual after initial; verify applicable exclusion-screening cadence before release | medicaid_exclusion_annual | live_mapped | Rule has no applicability predicates. |
 | REQ-1.10 | DHHS91172-A-0113 | Assigned DSP / supervisor | Complete in platform form/record | annual and upon material change |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.10.7 | DHHS91172-A-0120 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. | timesheets_attendance | live_artifact | Rule has no applicability predicates. |
+| REQ-1.10.7 | DHHS91172-A-0120 | Assigned DSP / supervisor | Complete in platform form/record | Per instance of service. Template is chosen on the service date. No invented extra interval. | timesheets_attendance | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-1.10.11 | DHHS91172-A-0130 | Assigned DSP / supervisor | Mark complete with attachment/attestation | admission / first service | grievance_acknowledgment | live_artifact | Rule has no applicability predicates. |
 | REQ-1.10.14 | DHHS91172-A-0133 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.11 | DHHS91172-A-0134 | Site supervisor | Mark complete with attachment/attestation | continuous; re-verify at renewal | zoning_life_safety | live_artifact | Rule has no applicability predicates. |
-| REQ-1.12 | DHHS91172-A-0135 | Administrator | Automated check (no user action) or attestation | per claim / continuous check | evv_visit_verification | live_artifact | Rule has no applicability predicates. |
+| REQ-1.12 | DHHS91172-A-0135 | Administrator | Automated check (no user action) or attestation | per claim / continuous check | evv_visit_verification | live_artifact | Unanswered applicability fact: Does the agency provide respite? Overnight? |
 | REQ-1.13 | DHHS91172-A-0136 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry | medicaid_enrollment | live_artifact | Rule has no applicability predicates. |
 | REQ-1.13.1 | DHHS91172-A-0137 | Administrator | Generate/upload report and mark sent | 7 calendar days / written request from DSPD |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.13.2 | DHHS91172-A-0138 | Administrator | Email to DSPD (address in clause); log in platform | 7 calendar days / change of phone, address or email | medicaid_change_notifications | live_artifact | Rule has no applicability predicates. |

@@ -17,6 +17,10 @@ import {
   FOURTH_BATCH_DEMO_PATH,
   FOURTH_EXECUTABLE_BATCH_FIXTURE_IDS,
   FOURTH_EXECUTABLE_BATCH_RULE_IDS,
+  FIFTH_BATCH_DEMO_PATH,
+  FIFTH_EXECUTABLE_BATCH_COMPANION_RULE_IDS,
+  FIFTH_EXECUTABLE_BATCH_FIXTURE_IDS,
+  FIFTH_EXECUTABLE_BATCH_RULE_IDS,
   WORKBOOK_DESIGN_REVISION,
   WORKBOOK_SOURCE_TITLE,
   draftRuleAdminRow,
@@ -24,6 +28,7 @@ import {
   secondExecutableBatchParents,
   thirdExecutableBatchParents,
   fourthExecutableBatchParents,
+  fifthExecutableBatchParents,
 } from "@/lib/obligations/draft-rules";
 
 const WIRED_BATCH_IDS = new Set<string>([
@@ -33,6 +38,9 @@ const WIRED_BATCH_IDS = new Set<string>([
   ...THIRD_EXECUTABLE_BATCH_FIXTURE_IDS,
   ...FOURTH_EXECUTABLE_BATCH_RULE_IDS,
   ...FOURTH_EXECUTABLE_BATCH_FIXTURE_IDS,
+  ...FIFTH_EXECUTABLE_BATCH_RULE_IDS,
+  ...FIFTH_EXECUTABLE_BATCH_FIXTURE_IDS,
+  ...FIFTH_EXECUTABLE_BATCH_COMPANION_RULE_IDS,
 ]);
 
 export const Route = createFileRoute("/dashboard/settings/draft-rules")({
@@ -87,6 +95,24 @@ function DraftRulesSimulationPage() {
     },
   });
 
+  const fifthBatchQuery = useQuery({
+    queryKey: ["draft-rules-fifth-batch", WORKBOOK_DESIGN_REVISION],
+    queryFn: async () => {
+      const loaded = loadCommittedCatalog();
+      const imported = fifthExecutableBatchParents(loaded.parents).map((rule) => ({
+        ...draftRuleAdminRow(rule),
+        liveKey: rule.catalogKeys[0] ?? null,
+      }));
+      const companions = CORE_RULE_LOGIC_SLICE.filter((rule) =>
+        (FIFTH_EXECUTABLE_BATCH_COMPANION_RULE_IDS as readonly string[]).includes(rule.id),
+      ).map((rule) => ({
+        ...draftRuleAdminRow(rule),
+        liveKey: rule.catalogKeys[0] ?? null,
+      }));
+      return [...imported, ...companions];
+    },
+  });
+
   const rowsQuery = useQuery({
     queryKey: ["draft-rules-simulation", WORKBOOK_DESIGN_REVISION],
     queryFn: async () =>
@@ -119,6 +145,7 @@ function DraftRulesSimulationPage() {
   const secondBatch = secondBatchQuery.data ?? [];
   const thirdBatch = thirdBatchQuery.data ?? [];
   const fourthBatch = fourthBatchQuery.data ?? [];
+  const fifthBatch = fifthBatchQuery.data ?? [];
   const rows = rowsQuery.data ?? [];
   const counts = catalogQuery.data?.counts;
 
@@ -156,7 +183,8 @@ function DraftRulesSimulationPage() {
             <li>
               Executable (live key) {counts.executable} · wired {counts.wired} (first{" "}
               {counts.wiredFirstBatch} · second {counts.wiredSecondBatch} · third{" "}
-              {counts.wiredThirdBatch} · fourth {counts.wiredFourthBatch}) · verified{" "}
+              {counts.wiredThirdBatch} · fourth {counts.wiredFourthBatch} · fifth{" "}
+              {counts.wiredFifthBatch}) · verified{" "}
               {counts.verified} · published {counts.published} · blocked {counts.blocked} · unwired{" "}
               {counts.draftUnwired}
             </li>
@@ -362,6 +390,86 @@ function DraftRulesSimulationPage() {
           </ol>
           <ul className="space-y-4">
             {fourthBatch.map((row) => {
+              const ready = row.canPublish && !row.canActivate;
+              return (
+                <li
+                  key={row.id}
+                  className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold">{row.title}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {row.id}
+                        {row.liveKey ? ` · live ${row.liveKey}` : ""} · {row.clauseIds.join(", ")}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <Badge variant="outline">status={row.lifecycle}</Badge>
+                      <Badge variant="outline">{row.publication}</Badge>
+                      {row.canActivate ? (
+                        <Badge>activatable</Badge>
+                      ) : ready ? (
+                        <Badge variant="outline">wired — ready for per-rule publish</Badge>
+                      ) : (
+                        <Badge variant="outline">draft</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                    {row.gaps.length === 0 ? (
+                      <li>
+                        Wired to the live engine. Unrelated workbook Release_Gaps do not block this
+                        rule. Record an explicit approval to publish this rule only.
+                      </li>
+                    ) : (
+                      row.gaps.map((gap) => <li key={gap.key}>{gap.reason}</li>)
+                    )}
+                  </ul>
+                  <Button
+                    className="mt-3"
+                    variant="outline"
+                    disabled
+                    title={
+                      row.canActivate
+                        ? "This rule is individually verified."
+                        : ready
+                          ? "Record approval in the verified-publication overlay. This screen does not flip tenants."
+                          : row.gaps.map((g) => g.reason).join(" ")
+                    }
+                  >
+                    {row.canActivate ? "Published (this rule)" : "Publish this rule"}
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
+
+      {fifthBatchQuery.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading fifth executable batch…</p>
+      ) : fifthBatch.length > 0 ? (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold">
+            Fifth executable batch — service documentation and EVV
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            §1.10(7) service notes and §1.12 EVV reuse the live timesheet, HHS billable-day, and
+            geofence engine. One parent assignment. The note, timesheet, EVV punch, and signature
+            stay independent lanes. HHS uses the host-home daily note plus overnight confirmation.
+            Child elements stay on the parent. Missing assignment facts stay questions. Not
+            published. HIVE does not invent UEVV transmission success.
+          </p>
+          <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
+            {FIFTH_BATCH_DEMO_PATH.map((step) => (
+              <li key={step.step}>
+                <span className="font-medium text-foreground">{step.title}.</span> {step.detail}
+              </li>
+            ))}
+          </ol>
+          <ul className="space-y-4">
+            {fifthBatch.map((row) => {
               const ready = row.canPublish && !row.canActivate;
               return (
                 <li
