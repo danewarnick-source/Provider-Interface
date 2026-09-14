@@ -9,13 +9,14 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.importedParents, 760);
     assert.equal(report.counts.importedElements, 607);
     assert.equal(report.counts.importedRows, 1367);
-    assert.ok(report.counts.executable >= 44);
+    assert.ok(report.counts.executable >= 48);
     assert.equal(report.counts.published, 0);
     assert.equal(report.counts.verified, 0);
     assert.equal(report.counts.wiredFirstBatch, 5);
     assert.equal(report.counts.wiredSecondBatch, 6);
     assert.equal(report.counts.wiredThirdBatch, 3);
-    assert.equal(report.counts.wired, 14);
+    assert.equal(report.counts.wiredFourthBatch, 4);
+    assert.equal(report.counts.wired, 18);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -50,6 +51,24 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(sjdCe.liveKey, "customized_employment_usu");
     assert.equal(sjdCe.canPublish, true);
     assert.equal(sjdCe.canActivate, false);
+
+    const periodic = report.rows.find((r) => r.requirementKey === "REQ-1.25");
+    assert.ok(periodic);
+    assert.equal(periodic.liveKey, "sei_monthly_summary_upi");
+    assert.equal(periodic.canPublish, true);
+    assert.equal(periodic.canActivate, false);
+    const seiMonthly = report.rows.find((r) => r.requirementKey === "REQ-30.3.4");
+    assert.ok(seiMonthly);
+    assert.equal(seiMonthly.liveKey, "sei_monthly_summary_upi");
+    assert.equal(seiMonthly.canPublish, true);
+    const cmpMonthly = report.rows.find((r) => r.requirementKey === "REQ-32.3.2");
+    assert.ok(cmpMonthly);
+    assert.equal(cmpMonthly.liveKey, "cmp_cms_monthly_summaries");
+    assert.equal(cmpMonthly.canPublish, true);
+    const sjdMonthly = report.rows.find((r) => r.requirementKey === "REQ-33.3.4");
+    assert.ok(sjdMonthly);
+    assert.equal(sjdMonthly.liveKey, "sjd_monthly_summary_upi");
+    assert.equal(sjdMonthly.canPublish, true);
 
     const elements = report.rows.filter((r) => r.role === "element");
     assert.equal(elements.length, 607);

@@ -11,18 +11,19 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Imported parents | 760 |
 | Imported elements | 607 |
 | Imported rows | 1367 |
-| Executable (live key mapped) | 44 |
+| Executable (live key mapped) | 48 |
 | Verified / activatable | 0 |
 | Published | 0 |
 | Blocked (rule-specific gap, no live key) | 0 |
-| Live mapped (clock) | 22 |
+| Live mapped (clock) | 26 |
 | System / standing behavior | 427 |
-| Draft unwired | 289 |
+| Draft unwired | 285 |
 | Element of parent | 607 |
 | Wired first batch (unpublished) | 5 |
 | Wired second batch (unpublished) | 6 |
 | Wired third batch (unpublished) | 3 |
-| Wired shared-behavior batches (unpublished) | 14 |
+| Wired fourth batch (unpublished) | 4 |
+| Wired shared-behavior batches (unpublished) | 18 |
 
 ## Parents
 
@@ -144,7 +145,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-1.24.7 | DHHS91172-A-0269 | Assigned DSP / supervisor | Mark complete with attachment/attestation | admission and each PCSP update |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.24.8 | DHHS91172-A-0270 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.24.9 | DHHS91172-A-0271 | Assigned DSP / supervisor | Mark complete with attachment/attestation | 12 months / last PCSP meeting date / annual (within 12 months of last PCSP meeting) |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.25 | DHHS91172-A-0272 | Assigned DSP / supervisor | Generate/upload report and mark sent | 15 calendar days after the end of the quarter / period end / event |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.25 | DHHS91172-A-0272 | Assigned DSP / supervisor | Generate/upload report and mark sent | 15 calendar days after the end of the quarter / period end / event | sei_monthly_summary_upi | live_mapped | Unanswered applicability fact: Codes where monthly summaries replace the quarterly: CMP, CMS, PN1, PN2, SEI, SJD; PBA monthly financial statement replaces; BC1-3 quarterly must also meet BC section requirements |
 | REQ-1.26 | DHHS91172-A-0279 | Assigned DSP / supervisor | Email to DSPD (address in clause); log in platform | family within 24 hours; Support Coordinator and DSPD Waiver Manager (waivermanager@utah.gov) by end of next calendar day / discovery of death |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.27.1 | DHHS91172-A-0281 | Assigned DSP / supervisor | Generate/upload report and mark sent | 24 hours / discovery of an incident requiring an incident report: |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.27.1.A | DHHS91172-A-0282 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 24 hours / discovery of reportable incident |  | draft_unwired | Rule has no applicability predicates. |
@@ -687,7 +688,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-30.3.1 | DHHS91172-A-1449 | Administrator | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.3.2 | DHHS91172-A-1450 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.3.3 | DHHS91172-A-1451 | Employment specialist / job coach | Generate/upload report and mark sent | one business day / discovery/event |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-30.3.4 | DHHS91172-A-1452 | Administrator | External: complete in UPI/USTEPS, record completion in platform | the 15th of the month following the month of service / period end / monthly |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-30.3.4 | DHHS91172-A-1452 | Administrator | External: complete in UPI/USTEPS, record completion in platform | monthly | sei_monthly_summary_upi | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-30.3.5 | DHHS91172-A-1460 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 15th of the month following service month / period end / monthly |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-30.3.6 | DHHS91172-A-1461 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 2 weeks / PCSP update |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-30.4.1 | DHHS91172-A-1463 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -720,7 +721,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-32.2.2 | DHHS91172-A-1524 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.2.3 | DHHS91172-A-1525 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.3.1 | DHHS91172-A-1527 | Administrator | Mark complete with attachment/attestation | daily / per service |  | system_behavior | Rule has no applicability predicates. |
-| REQ-32.3.2 | DHHS91172-A-1528 | Assigned DSP / supervisor | Generate/upload report and mark sent | 15 calendar days after the end of each month / period end / event |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-32.3.2 | DHHS91172-A-1528 | Assigned DSP / supervisor | Generate/upload report and mark sent | monthly | cmp_cms_monthly_summaries | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-32.4.1 | DHHS91172-A-1536 | Administrator | Automated check (no user action) or attestation | before start / service/assignment start / per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.4.2 | DHHS91172-A-1537 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.4.3 | DHHS91172-A-1538 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -750,7 +751,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-33.3.1 | DHHS91172-A-1611 | Employment specialist / job coach | External: USOR, record completion in platform | monthly |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-33.3.2 | DHHS91172-A-1612 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-33.3.3 | DHHS91172-A-1613 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-33.3.4 | DHHS91172-A-1614 | Administrator | External: complete in UPI/USTEPS, record completion in platform | the 15th of the month following the month of service / period end / monthly |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-33.3.4 | DHHS91172-A-1614 | Administrator | External: complete in UPI/USTEPS, record completion in platform | monthly | sjd_monthly_summary_upi | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-33.3.4.I | DHHS91172-A-1623 | Employment specialist / job coach | External: USOR, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-33.3.5 | DHHS91172-A-1624 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 2 weeks / PCSP update |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-33.3.6 | DHHS91172-A-1625 | Administrator | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
