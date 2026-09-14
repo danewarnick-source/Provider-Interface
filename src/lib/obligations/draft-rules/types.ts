@@ -222,5 +222,9 @@ export type DraftRule = {
   approval: ApprovalRecord | null;
 };
 
-/** Activation stays locked for every draft fixture and catalog row (Stages 1–5). */
+/**
+ * Draft claim simulation never auto-rejects or writes live claim blocks.
+ * Publication / activation is per-rule — this flag is not a catalog-wide
+ * canActivate lock.
+ */
 export const STAGE1_ACTIVATION_LOCKED = true;

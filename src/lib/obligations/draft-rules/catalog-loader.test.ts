@@ -69,7 +69,7 @@ describe("committed DHHS91172 catalog files", () => {
     assert.equal(summary.expectedParentCount, 760);
     assert.equal(summary.ruleStatus, "draft");
     assert.equal(summary.executionStatus, "not_published");
-    assert.equal(summary.canActivate, false);
+    assert.equal(summary.canActivateAny, false);
     assert.equal(summary.sourceIndex, "ARCHIVE METADATA");
     assert.equal(loaded.ingestStatus, "loaded");
     assert.equal(loaded.parents.length, 760);

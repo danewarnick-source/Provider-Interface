@@ -206,8 +206,8 @@ export async function persistAgencySetupFactsInternal(
     organizationId,
     facts,
   });
-  if (snapshot.canActivateAny || snapshot.draft.activatedRules) {
-    throw new Error("Draft catalog rules cannot activate from setup re-evaluation.");
+  if (snapshot.draft.activatedRules || snapshot.draft.createdLiveAssignments) {
+    throw new Error("Setup re-evaluation cannot mint or activate draft catalog rules.");
   }
   void canActivate;
   return {

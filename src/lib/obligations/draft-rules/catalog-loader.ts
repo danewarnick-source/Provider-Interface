@@ -1,7 +1,7 @@
 /**
  * Stage 5: load the Dane-finalized DHHS91172 catalog as draft simulation data.
- * Every mapped row is rule_status=draft / execution_status=not_published.
- * Source_index is archive metadata. Activation stays locked.
+ * Every mapped row starts rule_status=draft / execution_status=not_published.
+ * Source_index is archive metadata. Publication is per verified rule.
  * Missing legal facts stay missing-information — never invented.
  */
 
@@ -142,9 +142,13 @@ export type CatalogLoadSummary = {
   loadedRequirementCount: number;
   loadedElementCount: number;
   ingestStatus: CatalogIngestStatus;
-  ruleStatus: "draft";
-  executionStatus: "not_published";
-  canActivate: false;
+  ruleStatus: "draft" | "mixed";
+  executionStatus: "not_published" | "mixed";
+  /** True only when at least one individually verified rule can activate. */
+  canActivateAny: boolean;
+  importedParentCount: number;
+  importedElementCount: number;
+  publishedCount: number;
   sourceIndex: "ARCHIVE METADATA";
 };
 
@@ -404,6 +408,8 @@ export function catalogIngestStatus(parentCount: number, expected: number): Cata
 }
 
 export function catalogLoadSummary(loaded: LoadedCatalog): CatalogLoadSummary {
+  const published = loaded.parents.filter((r) => r.publication === "published");
+  const mixed = published.length > 0 && published.length < loaded.parents.length;
   return {
     workbookSha256: loaded.manifest.sha256,
     daneDeclared: loaded.manifest.dane_declared,
@@ -414,9 +420,12 @@ export function catalogLoadSummary(loaded: LoadedCatalog): CatalogLoadSummary {
     loadedRequirementCount: loaded.requirementRows.length,
     loadedElementCount: loaded.elements.length,
     ingestStatus: loaded.ingestStatus,
-    ruleStatus: "draft",
-    executionStatus: "not_published",
-    canActivate: false,
+    ruleStatus: mixed ? "mixed" : published.length > 0 ? "mixed" : "draft",
+    executionStatus: mixed || published.length > 0 ? "mixed" : "not_published",
+    canActivateAny: false,
+    importedParentCount: loaded.parents.length,
+    importedElementCount: loaded.elements.length,
+    publishedCount: published.length,
     sourceIndex: "ARCHIVE METADATA",
   };
 }

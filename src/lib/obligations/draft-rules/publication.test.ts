@@ -101,12 +101,12 @@ describe("Stage 1 draft fixtures stay unpublished", () => {
 });
 
 describe("publication gate", () => {
-  it("canPublish is true for structurally complete rules; Release_Gaps stay unpublished; canActivate stays false", () => {
+  it("canPublish is true for structurally complete rules; unpublished fixtures stay inactive", () => {
     for (const rule of CORE_RULE_LOGIC_SLICE) {
       assert.equal(canActivate(rule), false, rule.id);
       const row = draftRuleAdminRow(rule);
       assert.equal(row.canActivate, false);
-      assert.ok(row.gaps.some((g) => g.key === "stage1_lock"));
+      assert.equal(row.gaps.some((g) => g.key === "stage1_lock"), false);
       assert.ok(row.gaps.some((g) => g.key === "not_published_flag"));
       if (rule.releaseGaps.length > 0) {
         assert.equal(canPublish(rule), false, rule.id);
@@ -182,5 +182,29 @@ describe("publication gate", () => {
     };
     assert.equal(canPublish(reviewed), true);
     assert.equal(canActivate(reviewed), false);
+  });
+
+  it("activates only the verified rule — catalog-wide Release_Gaps do not blanket-lock it", () => {
+    const published = clone(REQ_1_8_4_ORIENTATION);
+    published.lifecycle = "published";
+    published.publication = "published";
+    published.approval = {
+      actorId: "admin-1",
+      actorLabel: "Reviewer",
+      approvedAt: "2026-09-14T00:00:00.000Z",
+    };
+    published.releaseGaps = [
+      "WORKBOOK-GAP-01",
+      "Narrative fields are not tested executable predicates",
+    ];
+    assert.equal(canPublish(published), true);
+    assert.equal(canActivate(published), true);
+
+    const evv = clone(REQ_1_12_EVV);
+    evv.lifecycle = "published";
+    evv.publication = "published";
+    evv.approval = published.approval;
+    assert.equal(canActivate(evv), false);
+    assert.ok(structuralPublicationGaps(evv).some((g) => g.key === "release_gaps"));
   });
 });

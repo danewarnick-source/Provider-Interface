@@ -10,6 +10,7 @@
 
 import { addDaysUTC, addMonthsUTC, addYearsUTC, utcDay } from "../../obligation-due-dates.ts";
 import { sowCatalogEntryByKey } from "../../sow-obligation-catalog.ts";
+import { liveObligationKeyForRequirement, staffTaskPolicyForRule } from "../catalog-live-bridge.ts";
 import { buildStaffTask, type StaffTask } from "../../staff-my-tasks.ts";
 import { allRequiredTopicsComplete } from "../../in-hive-training.ts";
 import type { OrgFacts } from "../applicability.ts";
@@ -1118,7 +1119,10 @@ function evaluateRuleForStaff(
     topicCodes.length === 0 ? true : allRequiredTopicsComplete(topicCodes, completedTopicSet);
 
   const dueAt = dueFromAnchor(rule.timing, staff, input.now, undefined, input.seiAwardDate ?? null);
-  const emitTask = applicability === "applies" && rule.group.parentAssignment === "one";
+  const emitTask =
+    applicability === "applies" &&
+    staffTaskPolicyForRule(rule).mintsStaffTask &&
+    rule.group.parentAssignment !== "per_member";
   const task = emitTask
     ? parentTask(
         rule,
@@ -1275,19 +1279,7 @@ export function simulationDutyApplies(
   staff: StaffDutyFacts,
   orgFacts: OrgFacts,
 ): boolean {
-  const catalogByRule: Record<string, string> = {
-    "REQ-1.8.4": "orientation_30_day",
-    "REQ-1.8.5": "cpr_first_aid_initial",
-    "REQ-1.8.7": "ce_12h_annual",
-    "REQ-1.8.8": "abi_training",
-    "REQ-30.6.b": "acre_sei",
-    "REQ-30.6.c": "acre_sei",
-    "REQ-1.8.6": "behavior_intervention_cert",
-    "REQ-32.5": "cmp_cms_caregiver_comp",
-    "REQ-33.5.b-c": "acre_sjd",
-    "REQ-1.8.5-cpr-current": "cpr_first_aid_renewal",
-  };
-  const key = catalogByRule[ruleId];
+  const key = liveObligationKeyForRequirement(ruleId);
   if (!key) return false;
   const duty = evaluateStaffDuty({ dutyKey: key, staff, orgFacts });
   return staffReceivesDutyClock(duty);
@@ -1298,19 +1290,7 @@ export function simulationDutyVisible(
   staff: StaffDutyFacts,
   orgFacts: OrgFacts,
 ): boolean {
-  const catalogByRule: Record<string, string> = {
-    "REQ-1.8.4": "orientation_30_day",
-    "REQ-1.8.5": "cpr_first_aid_initial",
-    "REQ-1.8.7": "ce_12h_annual",
-    "REQ-1.8.8": "abi_training",
-    "REQ-30.6.b": "acre_sei",
-    "REQ-30.6.c": "acre_sei",
-    "REQ-1.8.6": "behavior_intervention_cert",
-    "REQ-32.5": "cmp_cms_caregiver_comp",
-    "REQ-33.5.b-c": "acre_sjd",
-    "REQ-1.8.5-cpr-current": "cpr_first_aid_renewal",
-  };
-  const key = catalogByRule[ruleId];
+  const key = liveObligationKeyForRequirement(ruleId);
   if (!key) return false;
   return staffSeesDuty(evaluateStaffDuty({ dutyKey: key, staff, orgFacts }));
 }
