@@ -13263,6 +13263,11 @@ export type Database = {
           aliases: string[]
           applied_pack_version: string | null
           approx_client_count: number | null
+          fact_has_governing_board: boolean | null
+          fact_operates_ol_site: boolean | null
+          fact_uses_volunteers: boolean | null
+          service_area: string | null
+          setup_create_gate_exempt: boolean | null
           billing_exempt: boolean
           billing_sms_phone: string | null
           created_at: string
@@ -13297,6 +13302,11 @@ export type Database = {
           aliases?: string[]
           applied_pack_version?: string | null
           approx_client_count?: number | null
+          fact_has_governing_board?: boolean | null
+          fact_operates_ol_site?: boolean | null
+          fact_uses_volunteers?: boolean | null
+          service_area?: string | null
+          setup_create_gate_exempt?: boolean | null
           billing_exempt?: boolean
           billing_sms_phone?: string | null
           created_at?: string
@@ -13331,6 +13341,11 @@ export type Database = {
           aliases?: string[]
           applied_pack_version?: string | null
           approx_client_count?: number | null
+          fact_has_governing_board?: boolean | null
+          fact_operates_ol_site?: boolean | null
+          fact_uses_volunteers?: boolean | null
+          service_area?: string | null
+          setup_create_gate_exempt?: boolean | null
           billing_exempt?: boolean
           billing_sms_phone?: string | null
           created_at?: string

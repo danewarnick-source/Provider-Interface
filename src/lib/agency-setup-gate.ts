@@ -4,16 +4,10 @@
  * question has a recorded answer. Banner math is display-only.
  */
 
+import { AWARDED_SERVICE_CODES_FACT_KEY } from "./obligations/setup-facts.ts";
 import {
-  AWARDED_SERVICE_CODES_FACT_KEY,
-  awardedCodesUnanswered,
-} from "./obligations/setup-facts.ts";
-import {
-  EMPTY_ORG_FACTS,
   ORG_FACT_DEFINITIONS,
   computeObligationApplicability,
-  parseFactAnswer,
-  type FactAnswer,
   type ObligationApplicability,
   type OrgFacts,
 } from "./obligations/applicability.ts";
@@ -24,33 +18,40 @@ import {
   type SimulationResult,
   type SyntheticStaff,
 } from "./obligations/draft-rules/index.ts";
+import {
+  AGENCY_SETUP_COMPLETION_SPEC,
+  factsAreComplete,
+  isRequiredSetupFactAnswered,
+  type AgencySetupFacts,
+} from "./agency-setup-completion.ts";
+
+export {
+  AGENCY_SETUP_COMPLETION_SPEC,
+  EMPTY_AGENCY_SETUP_FACTS,
+  factAnswerOrNull,
+  parseApproxCount,
+  parseServiceAreaColumn,
+  setupFactsFromOrgRow,
+  type AgencySetupFacts,
+} from "./agency-setup-completion.ts";
 
 export const AGENCY_SETUP_PATH = "/dashboard/settings/compliance-setup" as const;
 
 export const AGENCY_SETUP_INCOMPLETE_MESSAGE =
   "Agency setup is incomplete. Answer the required operating questions before creating staff or clients.";
 
-export const REQUIRED_SETUP_FACT_KEYS = [
-  AWARDED_SERVICE_CODES_FACT_KEY,
+export const REQUIRED_SETUP_FACT_KEYS = AGENCY_SETUP_COMPLETION_SPEC.requiredFacts.map(
+  (fact) => fact.key,
+) as unknown as readonly [
+  typeof AWARDED_SERVICE_CODES_FACT_KEY,
   "operates_ol_site",
   "uses_volunteers",
   "has_governing_board",
   "approx_client_count",
   "service_area",
-] as const;
+];
 
 export type RequiredSetupFactKey = (typeof REQUIRED_SETUP_FACT_KEYS)[number];
-
-export type AgencySetupFacts = OrgFacts & {
-  approxClientCount: number | null;
-  serviceArea: string | null;
-};
-
-export const EMPTY_AGENCY_SETUP_FACTS: AgencySetupFacts = {
-  ...EMPTY_ORG_FACTS,
-  approxClientCount: null,
-  serviceArea: null,
-};
 
 export type RequiredSetupQuestion = {
   key: RequiredSetupFactKey;
@@ -99,6 +100,14 @@ export type AgencySetupStatus = {
   answeredKeys: RequiredSetupFactKey[];
   progressLabel: string;
   message: string | null;
+  /** One-time SQL snapshot: org already had staff/clients when the gate landed. */
+  createGateExempt: boolean;
+  /** complete OR createGateExempt — the create/invite/redirect authority. */
+  createAllowed: boolean;
+};
+
+export type ComputeAgencySetupStatusOptions = {
+  createGateExempt?: boolean;
 };
 
 export const SETUP_GATED_PATHS = [
@@ -124,66 +133,20 @@ export const SETUP_CREATE_APIS = [
   "smartImportCommitStaff",
 ] as const;
 
-const SERVICE_AREA_PREFIX = "Service area:";
-
-export function parseServiceAreaFromSpecializations(
-  specializations: string | null | undefined,
-): string | null {
-  if (!specializations) return null;
-  const match = specializations.match(/^Service area:\s*(.+)$/m);
-  const value = match?.[1]?.trim() ?? "";
-  return value.length > 0 ? value : null;
-}
-
-export function mergeServiceAreaIntoSpecializations(
-  specializations: string | null | undefined,
-  serviceArea: string | null | undefined,
-): string | null {
-  const other = (specializations ?? "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0 && !/^Service area:/i.test(line));
-  const area = (serviceArea ?? "").trim();
-  if (area) other.push(`${SERVICE_AREA_PREFIX} ${area}`);
-  return other.length ? other.join("\n") : null;
-}
-
-export function parseApproxCount(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
-    return Math.floor(value);
-  }
-  if (typeof value === "string" && value.trim() !== "") {
-    const n = Number(value);
-    if (Number.isFinite(n) && n >= 0) return Math.floor(n);
-  }
-  return null;
-}
-
-function isFactAnswered(key: RequiredSetupFactKey, facts: AgencySetupFacts): boolean {
-  switch (key) {
-    case AWARDED_SERVICE_CODES_FACT_KEY:
-      return !awardedCodesUnanswered(facts.servicesOffered);
-    case "operates_ol_site":
-    case "uses_volunteers":
-    case "has_governing_board":
-      return facts[key] === true || facts[key] === false;
-    case "approx_client_count":
-      return facts.approxClientCount !== null;
-    case "service_area":
-      return Boolean(facts.serviceArea && facts.serviceArea.trim().length > 0);
-    default:
-      return false;
-  }
-}
-
-export function computeAgencySetupStatus(facts: AgencySetupFacts): AgencySetupStatus {
-  const unanswered = REQUIRED_SETUP_QUESTIONS.filter((q) => !isFactAnswered(q.key, facts));
-  const answeredKeys = REQUIRED_SETUP_QUESTIONS.filter((q) => isFactAnswered(q.key, facts)).map(
-    (q) => q.key,
+export function computeAgencySetupStatus(
+  facts: AgencySetupFacts,
+  options: ComputeAgencySetupStatusOptions = {},
+): AgencySetupStatus {
+  const unanswered = REQUIRED_SETUP_QUESTIONS.filter(
+    (q) => !isRequiredSetupFactAnswered(q.key, facts),
   );
+  const answeredKeys = REQUIRED_SETUP_QUESTIONS.filter((q) =>
+    isRequiredSetupFactAnswered(q.key, facts),
+  ).map((q) => q.key);
   const answeredCount = answeredKeys.length;
   const requiredCount = REQUIRED_SETUP_QUESTIONS.length;
-  const complete = unanswered.length === 0;
+  const complete = unanswered.length === 0 && factsAreComplete(facts);
+  const createGateExempt = options.createGateExempt === true;
   return {
     complete,
     answeredCount,
@@ -192,6 +155,8 @@ export function computeAgencySetupStatus(facts: AgencySetupFacts): AgencySetupSt
     answeredKeys,
     progressLabel: `${answeredCount} of ${requiredCount}`,
     message: complete ? null : AGENCY_SETUP_INCOMPLETE_MESSAGE,
+    createGateExempt,
+    createAllowed: complete || createGateExempt,
   };
 }
 
@@ -200,11 +165,11 @@ export function canSkipAgencySetup(status: AgencySetupStatus): boolean {
 }
 
 export function shouldBlockStaffClientCreate(status: AgencySetupStatus): boolean {
-  return !status.complete;
+  return !status.createAllowed;
 }
 
 export function assertAgencySetupComplete(status: AgencySetupStatus): void {
-  if (!status.complete) {
+  if (!status.createAllowed) {
     throw new Error(AGENCY_SETUP_INCOMPLETE_MESSAGE);
   }
 }
@@ -223,7 +188,7 @@ export function setupRedirectForPath(
   pathname: string,
   status: AgencySetupStatus,
 ): { to: typeof AGENCY_SETUP_PATH; search: { reason: string } } | null {
-  if (status.complete) return null;
+  if (status.createAllowed) return null;
   if (!isSetupGatedPath(pathname)) return null;
   return {
     to: AGENCY_SETUP_PATH,
@@ -310,31 +275,4 @@ export function orgFactsFromSetup(facts: AgencySetupFacts): OrgFacts {
     has_governing_board: facts.has_governing_board,
     servicesOffered: facts.servicesOffered,
   };
-}
-
-export function setupFactsFromOrgRow(row: {
-  fact_operates_ol_site?: unknown;
-  fact_uses_volunteers?: unknown;
-  fact_has_governing_board?: unknown;
-  services_offered?: unknown;
-  approx_client_count?: unknown;
-  specializations?: unknown;
-}): AgencySetupFacts {
-  const services = Array.isArray(row.services_offered)
-    ? row.services_offered.map((c) => String(c).trim().toUpperCase()).filter(Boolean)
-    : [];
-  return {
-    operates_ol_site: parseFactAnswer(row.fact_operates_ol_site),
-    uses_volunteers: parseFactAnswer(row.fact_uses_volunteers),
-    has_governing_board: parseFactAnswer(row.fact_has_governing_board),
-    servicesOffered: services,
-    approxClientCount: parseApproxCount(row.approx_client_count),
-    serviceArea: parseServiceAreaFromSpecializations(
-      typeof row.specializations === "string" ? row.specializations : null,
-    ),
-  };
-}
-
-export function factAnswerOrNull(value: FactAnswer): FactAnswer {
-  return value === true || value === false ? value : null;
 }

@@ -19,8 +19,7 @@ import {
   isolateOrgRecords,
   isDashboardHomePath,
   isSetupGatedPath,
-  mergeServiceAreaIntoSpecializations,
-  parseServiceAreaFromSpecializations,
+  parseServiceAreaColumn,
   reevaluateAgencyRequirements,
   setupFactsFromOrgRow,
   setupRedirectForPath,
@@ -121,7 +120,7 @@ const AGENCY_B = {
   clients: [{ organizationId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2", id: "client-b-1" }],
 };
 
-describe("agency setup gate — required operating facts", () => {
+describe("unit: agency setup gate — required operating facts", () => {
   it("defines six concrete operating questions — never whether a section applies", () => {
     assert.equal(REQUIRED_SETUP_QUESTIONS.length, 6);
     assert.deepEqual(
@@ -150,6 +149,8 @@ describe("agency setup gate — required operating facts", () => {
     assert.equal(status.progressLabel, "0 of 6");
     assert.equal(canSkipAgencySetup(status), false);
     assert.equal(shouldBlockStaffClientCreate(status), true);
+    assert.equal(status.createAllowed, false);
+    assert.equal(status.createGateExempt, false);
     assert.equal(status.message, AGENCY_SETUP_INCOMPLETE_MESSAGE);
   });
 
@@ -171,6 +172,7 @@ describe("agency setup gate — required operating facts", () => {
     assert.equal(status.progressLabel, "6 of 6");
     assert.equal(canSkipAgencySetup(status), true);
     assert.equal(shouldBlockStaffClientCreate(status), false);
+    assert.equal(status.createAllowed, true);
     assert.equal(status.message, null);
   });
 
@@ -181,17 +183,21 @@ describe("agency setup gate — required operating facts", () => {
     assert.ok(status.answeredKeys.includes("uses_volunteers"));
   });
 
-  it("parses service area from specializations without inventing a second catalog", () => {
-    assert.equal(parseServiceAreaFromSpecializations(null), null);
-    assert.equal(parseServiceAreaFromSpecializations("Behavioral support"), null);
-    assert.equal(
-      parseServiceAreaFromSpecializations("Service area: Salt Lake\nBehavioral support"),
-      "Salt Lake",
-    );
-    assert.equal(
-      mergeServiceAreaIntoSpecializations("Behavioral support", "Utah County"),
-      "Behavioral support\nService area: Utah County",
-    );
+  it("reads service_area from the dedicated column — never specializations", () => {
+    assert.equal(parseServiceAreaColumn(null), null);
+    assert.equal(parseServiceAreaColumn("   "), null);
+    assert.equal(parseServiceAreaColumn("Utah County"), "Utah County");
+    const ignored = setupFactsFromOrgRow({
+      services_offered: ["HHS"],
+      fact_operates_ol_site: true,
+      fact_uses_volunteers: false,
+      fact_has_governing_board: true,
+      approx_client_count: 1,
+      service_area: null,
+      specializations: "Service area: Salt Lake",
+    } as { service_area?: unknown; specializations?: unknown });
+    assert.equal(ignored.serviceArea, null);
+    assert.equal(computeAgencySetupStatus(ignored).complete, false);
   });
 
   it("reads completion from a saved org row — not localStorage", () => {
@@ -201,7 +207,7 @@ describe("agency setup gate — required operating facts", () => {
       fact_uses_volunteers: null,
       fact_has_governing_board: null,
       approx_client_count: null,
-      specializations: null,
+      service_area: null,
     });
     assert.equal(computeAgencySetupStatus(incomplete).progressLabel, "1 of 6");
 
@@ -211,13 +217,26 @@ describe("agency setup gate — required operating facts", () => {
       fact_uses_volunteers: true,
       fact_has_governing_board: false,
       approx_client_count: 8,
-      specializations: "Service area: Utah County",
+      service_area: "Utah County",
     });
     assert.equal(computeAgencySetupStatus(complete).complete, true);
   });
+
+  it("lets a grandfathered org create while Skip stays disabled", () => {
+    const incomplete = computeAgencySetupStatus(
+      { ...EMPTY_AGENCY_SETUP_FACTS, servicesOffered: ["HHS"] },
+      { createGateExempt: true },
+    );
+    assert.equal(incomplete.complete, false);
+    assert.equal(incomplete.createGateExempt, true);
+    assert.equal(incomplete.createAllowed, true);
+    assert.equal(canSkipAgencySetup(incomplete), false);
+    assert.equal(shouldBlockStaffClientCreate(incomplete), false);
+    assert.equal(setupRedirectForPath("/dashboard/employees", incomplete), null);
+  });
 });
 
-describe("agency setup gate — skip, create, redirect", () => {
+describe("unit: agency setup gate — skip, create, redirect", () => {
   it("disables skip while required questions are unanswered", () => {
     const incomplete = computeAgencySetupStatus({
       ...EMPTY_AGENCY_SETUP_FACTS,
@@ -276,7 +295,7 @@ describe("agency setup gate — skip, create, redirect", () => {
   });
 });
 
-describe("agency setup gate — two synthetic agencies stay isolated", () => {
+describe("unit: agency setup helpers on in-memory arrays (not database isolation)", () => {
   it("computes different requirements from different services, roles, and client needs", () => {
     const a = reevaluateAgencyRequirements({
       organizationId: AGENCY_A.organizationId,
@@ -360,12 +379,109 @@ describe("agency setup gate — two synthetic agencies stay isolated", () => {
 
   it("does not publish or activate draft catalog rules after re-evaluation", () => {
     const persist = read("./obligations/applicability.ts");
-    const gate = read("./agency-setup-gate.functions.ts");
+    const gate = read("./agency-setup-persist.ts");
     assert.match(persist, /persistApplicabilityRows/);
     assert.match(gate, /reevaluateAgencyRequirements/);
     assert.match(gate, /canActivate/);
     assert.doesNotMatch(gate, /canActivate\s*=\s*true/);
     assert.doesNotMatch(gate, /execution_status:\s*"published"/);
+  });
+});
+
+describe("unit: SQL source review (not a live database)", () => {
+  it("correlates first-owner EXISTS to the inserted organization_members row", () => {
+    const sql = read("../../supabase/migrations/20260914120000_agency_setup_gate.sql");
+    assert.match(sql, /om\.organization_id = NEW\.organization_id/);
+    assert.match(
+      sql,
+      /existing_member\.organization_id = organization_members\.organization_id/,
+    );
+    assert.doesNotMatch(
+      sql,
+      /WHERE om\.organization_id = organization_id\s*\n/,
+    );
+    assert.match(sql, /service_area IS NOT NULL/);
+    assert.match(sql, /length\(trim\(o\.service_area\)\) > 0/);
+    assert.doesNotMatch(sql, /o\.specializations ~\*/);
+    assert.match(sql, /FOR INSERT/);
+    assert.doesNotMatch(sql, /FOR SELECT[\s\S]*requires_setup/);
+  });
+
+  it("does not write service area into specializations", () => {
+    const fns = read("./agency-setup-persist.ts");
+    const profile = read("../routes/dashboard.nectar-company-profile.tsx");
+    assert.doesNotMatch(fns, /Service area:/);
+    assert.doesNotMatch(fns, /mergeServiceAreaIntoSpecializations/);
+    assert.match(fns, /service_area: nextArea/);
+    assert.doesNotMatch(profile, /Service area: \$\{/);
+    assert.match(profile, /service_area: draft\.serviceArea/);
+  });
+});
+
+describe("unit: persist rollback when a later step fails", () => {
+  it("restores the org snapshot if applicability persist throws", async () => {
+    const { persistAgencySetupFactsInternal } = await import("./agency-setup-persist.ts");
+    const orgId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1";
+    const snapshot = {
+      fact_operates_ol_site: null,
+      fact_uses_volunteers: null,
+      fact_has_governing_board: null,
+      services_offered: ["HHS"],
+      approx_client_count: null,
+      service_area: null,
+      setup_create_gate_exempt: false,
+      fact_answers_updated_at: null,
+      fact_answers_updated_by: null,
+    };
+    const updates: unknown[] = [];
+    const supabase = {
+      from(table: string) {
+        return {
+          select() {
+            return {
+              eq() {
+                return {
+                  maybeSingle: async () => ({ data: { ...snapshot }, error: null }),
+                };
+              },
+            };
+          },
+          update(payload: unknown) {
+            updates.push({ table, payload });
+            return {
+              eq: async () => {
+                if (table === "obligation_applicability") {
+                  return { error: { message: "simulated applicability failure" } };
+                }
+                return { error: null };
+              },
+            };
+          },
+          upsert() {
+            return Promise.resolve({
+              error: { message: "simulated applicability failure" },
+            });
+          },
+        };
+      },
+    };
+
+    await assert.rejects(
+      () =>
+        persistAgencySetupFactsInternal(supabase, orgId, "11111111-1111-4111-8111-111111111111", {
+          operates_ol_site: true,
+          uses_volunteers: false,
+          has_governing_board: true,
+          servicesOffered: ["HHS", "RHS"],
+          approxClientCount: 12,
+          serviceArea: "Salt Lake",
+        }),
+      /simulated applicability failure/,
+    );
+    assert.ok(updates.length >= 2);
+    const restore = updates.at(-1) as { payload: Record<string, unknown> };
+    assert.equal(restore.payload.service_area, null);
+    assert.deepEqual(restore.payload.services_offered, ["HHS"]);
   });
 });
 

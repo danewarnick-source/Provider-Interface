@@ -2,16 +2,48 @@
 
 ## ACTION — Agency setup gate before staff/client create (2026-09-14) — Core flag
 
-Server-authoritative setup completion from saved operating facts. Blocks
-`clients`, additional `organization_members`, and `invitations` inserts until
-all six required facts are recorded. Additive. No DROP TABLE / DROP COLUMN.
-Does **not** publish or activate DHHS91172 catalog rules.
+**Do not Soft-apply / execute against Hive-Platform production from this PR.**
+Core pastes one change at a time after Dane go. Clear the editor first.
+
+Server-authoritative setup completion from saved operating facts. Restrictive
+INSERT policies + BEFORE INSERT triggers block new staff, clients, and
+invitations until the six required facts are recorded **or** the org was
+grandfathered. Additive. No DROP TABLE / DROP COLUMN. Does **not** publish or
+activate DHHS91172 catalog rules. SELECT/UPDATE on members, clients, and
+profiles are unchanged — existing people stay visible and editable.
 
 Matches `supabase/migrations/20260914120000_agency_setup_gate.sql`.
 
-Do **not** apply from CI. Propose-only until Core pastes in Lovable
-(clear the editor first). App create screens already refuse incomplete orgs;
-this paste is the RLS/trigger backstop.
+### Existing orgs — choice (b), one-time snapshot (not a live predicate)
+
+We do **not** invent answers to mark live orgs “complete.” We also do **not**
+use a live “has ≥1 member” check — that would let a brand-new org skip setup
+the moment its first owner exists.
+
+Instead, `organizations.setup_create_gate_exempt` is snapshotted **once**:
+orgs that already have ≥1 `organization_members` row OR ≥1 `clients` row when
+this SQL first runs are exempt from the create gate. NULL means not yet
+decided; re-pasting only fills remaining NULLs. Orgs created after the first
+apply get `DEFAULT false` and must answer the six questions before hire /
+add-client / invite.
+
+### Plain-language risk
+
+- First paste: live TNS and any other org that already has staff or clients
+  keep hiring and adding clients. Lists do not go blank.
+- A brand-new workspace created after this paste cannot hire or add clients
+  until the six operating questions are saved (including dedicated
+  `organizations.service_area` — not a line inside `specializations`).
+- Re-pasting is safe for already-decided rows. It will not un-exempt live
+  orgs, and it will not newly exempt post-apply orgs that only have a first
+  owner.
+- Triggers fire for `service_role` too. Server hire cannot walk around the
+  gate.
+- First-owner INSERT is correlated to **the organization ID of the row being
+  inserted** (`NEW.organization_id` / `organization_members.organization_id`).
+  Agency A can still bootstrap when Agency B already has members. The old
+  bare `EXISTS (... WHERE om.organization_id = organization_id)` could bind
+  both sides to `om` and block every new owner.
 
 ### Probe
 
@@ -24,7 +56,7 @@ FROM (
   FROM pg_proc p
   JOIN pg_namespace n ON n.oid = p.pronamespace
   WHERE n.nspname = 'public'
-    AND p.proname IN ('org_setup_is_complete', 'enforce_org_setup_before_create')
+    AND p.proname IN ('org_setup_is_complete', 'org_setup_allows_create', 'enforce_org_setup_before_create')
   UNION ALL
   SELECT 'trg', t.tgname
   FROM pg_trigger t
@@ -40,15 +72,19 @@ FROM (
 ) s;
 ```
 
-**What you'll see:** `NULL` until this ACTION runs.
+**What you'll see:** `NULL` until this ACTION runs. After apply, function
+and trigger names including `org_setup_allows_create` and
+`org_setup_is_complete`.
 
 ### Apply
 
 Clear the editor, paste the full file
 `supabase/migrations/20260914120000_agency_setup_gate.sql`.
 
-**What you'll see:** `CREATE FUNCTION` × 2, `CREATE TRIGGER` × 3,
-`CREATE POLICY` × 3 (restrictive insert checks).
+**What you'll see:** `CREATE FUNCTION` × 3 (`org_setup_is_complete`,
+`org_setup_allows_create`, `enforce_org_setup_before_create`),
+`CREATE TRIGGER` × 3, `CREATE POLICY` × 3 (restrictive INSERT only),
+plus `service_area` / `setup_create_gate_exempt` columns.
 
 ### Verify
 
@@ -69,23 +105,30 @@ SELECT
        'clients_insert_requires_setup',
        'org_members_insert_requires_setup',
        'invitations_insert_requires_setup'
-     )) AS setup_policies;
+     )) AS setup_policies,
+  (SELECT count(*) FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = 'organizations'
+       AND column_name IN ('service_area', 'setup_create_gate_exempt')) AS new_columns;
 ```
 
-**What you'll see:** `f | 3 | clients_insert_requires_setup,invitations_insert_requires_setup,org_members_insert_requires_setup`.
+**What you'll see:** `f | 3 | clients_insert_requires_setup,invitations_insert_requires_setup,org_members_insert_requires_setup | 2`.
 
 ### RLS intent
 
-- Completion is computed from saved org facts only (`services_offered`,
-  `fact_*`, `approx_client_count`, `specializations` service-area line).
-- First `organization_members` row (workspace bootstrap) is allowed.
-- Later staff/client/invite inserts require `org_setup_is_complete`.
+- Completion (`org_setup_is_complete`) uses the same six facts as
+  `src/lib/agency-setup-completion.ts`: awarded codes, OL site, volunteers,
+  governing board, approx client count, **dedicated `service_area`**.
+  `specializations` is not read for the gate.
+- Create/invite uses `org_setup_allows_create` = complete OR exempt.
+- First `organization_members` row for **that** `organization_id` is
+  bootstrap (trigger: `om.organization_id = NEW.organization_id`; RLS:
+  `existing_member.organization_id = organization_members.organization_id`).
 - Triggers fire even when service-role writes bypass RLS.
 - No PHI. No catalog publish.
 
 ### Seed
 
-None. Existing orgs stay unanswered until the owner records the six facts.
+Grandfather snapshot only (choice b). No invented fact answers.
 
 ---
 

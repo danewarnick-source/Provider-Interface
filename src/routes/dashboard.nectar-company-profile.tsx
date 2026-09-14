@@ -85,15 +85,11 @@ function NectarCompanyProfilePage() {
   const save = async () => {
     if (!orgId) return;
     try {
-      const specializations = [
-        draft.specializations?.trim(),
-        draft.serviceArea?.trim() ? `Service area: ${draft.serviceArea.trim()}` : "",
-      ].filter(Boolean).join("\n") || null;
-
       await (supabase.from("organizations") as any).update({
         services_offered: draft.services ?? [],
         approx_client_count: Number(draft.clientCount) || null,
-        specializations,
+        service_area: draft.serviceArea?.trim() || null,
+        specializations: draft.specializations?.trim() || null,
         nectar_profile_saved_at: new Date().toISOString(),
         provider_approver_email: draft.providerEmail?.trim() || null,
       }).eq("id", orgId);
