@@ -4,18 +4,19 @@
     "importedParents": 760,
     "importedElements": 607,
     "importedRows": 1367,
-    "executable": 44,
+    "executable": 48,
     "verified": 0,
     "published": 0,
     "blocked": 0,
-    "liveMapped": 22,
+    "liveMapped": 26,
     "systemBehavior": 427,
-    "draftUnwired": 289,
+    "draftUnwired": 285,
     "elementOfParent": 607,
     "wiredFirstBatch": 5,
     "wiredSecondBatch": 6,
     "wiredThirdBatch": 3,
-    "wired": 14
+    "wiredFourthBatch": 4,
+    "wired": 18
   },
   "parents": [
     {
@@ -3386,26 +3387,23 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "15 calendar days after the end of the quarter / period end / event",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sei_monthly_summary_upi",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-077"
+        "FACT-077",
+        "LIVE-periodic_report_assignment"
       ],
       "unansweredFacts": [
-        "Codes where monthly summaries replace the quarterly: CMP, CMS, PN1, PN2, SEI, SJD; PBA monthly financial statement replaces; BC1-3 quarterly must also meet BC section requirements"
+        "Codes where monthly summaries replace the quarterly: CMP, CMS, PN1, PN2, SEI, SJD; PBA monthly financial statement replaces; BC1-3 quarterly must also meet BC section requirements",
+        "Which persons received a service that requires a monthly or quarterly progress report?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
-        "Unanswered applicability fact: Codes where monthly summaries replace the quarterly: CMP, CMS, PN1, PN2, SEI, SJD; PBA monthly financial statement replaces; BC1-3 quarterly must also meet BC section requirements"
+        "Unanswered applicability fact: Codes where monthly summaries replace the quarterly: CMP, CMS, PN1, PN2, SEI, SJD; PBA monthly financial statement replaces; BC1-3 quarterly must also meet BC section requirements",
+        "Unanswered applicability fact: Which persons received a service that requires a monthly or quarterly progress report?"
       ]
     },
     {
@@ -20847,30 +20845,25 @@
       "title": "enter (not upload) monthly summaries into UPI by the 15th of the…",
       "owner": "Administrator",
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
-      "timing": "the 15th of the month following the month of service / period end / monthly",
+      "timing": "monthly",
       "renewal": "Renews each month",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sei_monthly_summary_upi",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
         "FACT-008",
-        "FACT-009"
+        "FACT-009",
+        "LIVE-sei_monthly_caseload"
       ],
       "unansweredFacts": [
         "Agency awarded SEI?",
-        "Which staff hold UPI access?"
+        "Which staff hold UPI access?",
+        "Which persons have an active SEI authorization this month?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each month",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
@@ -21904,27 +21897,23 @@
       "title": "when providing CMP or CMS, create a written monthly summary for each…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Generate/upload report and mark sent",
-      "timing": "15 calendar days after the end of each month / period end / event",
+      "timing": "monthly",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "cmp_cms_monthly_summaries",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-020"
+        "FACT-020",
+        "LIVE-cmp_cms_monthly_caseload"
       ],
       "unansweredFacts": [
-        "Agency awarded CMP,CMS,SLN?"
+        "Agency awarded CMP,CMS,SLN?",
+        "Which persons have an active CMP or CMS authorization this month?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -22889,30 +22878,25 @@
       "title": "enter (not upload) monthly summaries into UPI by the 15th of the…",
       "owner": "Administrator",
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
-      "timing": "the 15th of the month following the month of service / period end / monthly",
+      "timing": "monthly",
       "renewal": "Renews each month",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_monthly_summary_upi",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
         "FACT-002",
-        "FACT-009"
+        "FACT-009",
+        "LIVE-sjd_monthly_caseload"
       ],
       "unansweredFacts": [
         "Agency awarded SJD?",
-        "Which staff hold UPI access?"
+        "Which staff hold UPI access?",
+        "Which persons have an active SJD authorization this month?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each month",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]

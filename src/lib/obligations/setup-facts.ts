@@ -30,6 +30,9 @@ export type LivePathId =
   | "acre_sjd"
   | "sjd_discovery"
   | "usor_sei"
+  | "sei_monthly"
+  | "sjd_monthly"
+  | "cmp_cms_monthly"
   | "cmp_cms"
   | "designated_benefits"
   | "code_of_conduct"
@@ -148,6 +151,33 @@ export const LIVE_PATH_SETUP_QUESTIONS: LivePathSetupQuestion[] = [
     source: "awarded_codes",
     factKey: "sei_award_date",
     ownerAnswers: true,
+  },
+  {
+    path: "sei_monthly",
+    dutyKeys: ["sei_monthly_summary_upi"],
+    question: "Which persons have an active SEI authorization this month?",
+    help: "SEI monthly summaries are typed into UPI by the 15th of the following month. Staff never touch UPI — admin attests after entry. Empty caseload stays unanswered.",
+    source: "authorization_1056",
+    factKey: "sei_monthly_caseload",
+    ownerAnswers: false,
+  },
+  {
+    path: "sjd_monthly",
+    dutyKeys: ["sjd_monthly_summary_upi"],
+    question: "Which persons have an active SJD authorization this month?",
+    help: "SJD monthly summaries are typed into UPI by the 15th of the following month. Staff never touch UPI — admin attests after entry. Empty caseload stays unanswered.",
+    source: "authorization_1056",
+    factKey: "sjd_monthly_caseload",
+    ownerAnswers: false,
+  },
+  {
+    path: "cmp_cms_monthly",
+    dutyKeys: ["cmp_cms_monthly_summaries"],
+    question: "Which persons have an active CMP or CMS authorization this month?",
+    help: "CMP/CMS monthly summaries go to the Support Coordinator by the 15th of the following month. Not UPI. SLN stays quarterly. HIVE does not email the SC.",
+    source: "authorization_1056",
+    factKey: "cmp_cms_monthly_caseload",
+    ownerAnswers: false,
   },
   {
     path: "cmp_cms",

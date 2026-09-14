@@ -113,4 +113,27 @@ describe("catalog applicability facts", () => {
     );
     assert.equal(award.status, "unanswered");
   });
+
+  it("maps fourth-batch periodic monthly facts without coercing N/A", () => {
+    const periodic = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-periodic_report_assignment",
+        question:
+          "Which persons received a service that requires a monthly or quarterly progress report?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(periodic.source, "staff_assignment");
+    assert.equal(periodic.status, "unanswered");
+    const seiMonthly = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-sei_monthly_caseload",
+        question: "Which persons have an active SEI authorization this month?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(seiMonthly.source, "awarded_service_codes");
+    assert.equal(seiMonthly.status, "unanswered");
+    assert.deepEqual(seiMonthly.awardedCodes, ["SEI"]);
+  });
 });

@@ -14,12 +14,16 @@ import {
   THIRD_BATCH_DEMO_PATH,
   THIRD_EXECUTABLE_BATCH_FIXTURE_IDS,
   THIRD_EXECUTABLE_BATCH_RULE_IDS,
+  FOURTH_BATCH_DEMO_PATH,
+  FOURTH_EXECUTABLE_BATCH_FIXTURE_IDS,
+  FOURTH_EXECUTABLE_BATCH_RULE_IDS,
   WORKBOOK_DESIGN_REVISION,
   WORKBOOK_SOURCE_TITLE,
   draftRuleAdminRow,
   firstExecutableBatchParents,
   secondExecutableBatchParents,
   thirdExecutableBatchParents,
+  fourthExecutableBatchParents,
 } from "@/lib/obligations/draft-rules";
 
 const WIRED_BATCH_IDS = new Set<string>([
@@ -27,6 +31,8 @@ const WIRED_BATCH_IDS = new Set<string>([
   ...SECOND_EXECUTABLE_BATCH_RULE_IDS,
   ...THIRD_EXECUTABLE_BATCH_RULE_IDS,
   ...THIRD_EXECUTABLE_BATCH_FIXTURE_IDS,
+  ...FOURTH_EXECUTABLE_BATCH_RULE_IDS,
+  ...FOURTH_EXECUTABLE_BATCH_FIXTURE_IDS,
 ]);
 
 export const Route = createFileRoute("/dashboard/settings/draft-rules")({
@@ -70,6 +76,17 @@ function DraftRulesSimulationPage() {
     },
   });
 
+  const fourthBatchQuery = useQuery({
+    queryKey: ["draft-rules-fourth-batch", WORKBOOK_DESIGN_REVISION],
+    queryFn: async () => {
+      const loaded = loadCommittedCatalog();
+      return fourthExecutableBatchParents(loaded.parents).map((rule) => ({
+        ...draftRuleAdminRow(rule),
+        liveKey: rule.catalogKeys[0] ?? null,
+      }));
+    },
+  });
+
   const rowsQuery = useQuery({
     queryKey: ["draft-rules-simulation", WORKBOOK_DESIGN_REVISION],
     queryFn: async () =>
@@ -101,6 +118,7 @@ function DraftRulesSimulationPage() {
   const firstBatch = firstBatchQuery.data ?? [];
   const secondBatch = secondBatchQuery.data ?? [];
   const thirdBatch = thirdBatchQuery.data ?? [];
+  const fourthBatch = fourthBatchQuery.data ?? [];
   const rows = rowsQuery.data ?? [];
   const counts = catalogQuery.data?.counts;
 
@@ -138,8 +156,9 @@ function DraftRulesSimulationPage() {
             <li>
               Executable (live key) {counts.executable} · wired {counts.wired} (first{" "}
               {counts.wiredFirstBatch} · second {counts.wiredSecondBatch} · third{" "}
-              {counts.wiredThirdBatch}) · verified {counts.verified} · published {counts.published}{" "}
-              · blocked {counts.blocked} · unwired {counts.draftUnwired}
+              {counts.wiredThirdBatch} · fourth {counts.wiredFourthBatch}) · verified{" "}
+              {counts.verified} · published {counts.published} · blocked {counts.blocked} · unwired{" "}
+              {counts.draftUnwired}
             </li>
             <li>
               Source_index={catalogQuery.data.sourceIndex} · canActivateAny=
@@ -262,6 +281,87 @@ function DraftRulesSimulationPage() {
           </ol>
           <ul className="space-y-4">
             {thirdBatch.map((row) => {
+              const ready = row.canPublish && !row.canActivate;
+              return (
+                <li
+                  key={row.id}
+                  className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold">{row.title}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {row.id}
+                        {row.liveKey ? ` · live ${row.liveKey}` : ""} · {row.clauseIds.join(", ")}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <Badge variant="outline">status={row.lifecycle}</Badge>
+                      <Badge variant="outline">{row.publication}</Badge>
+                      {row.canActivate ? (
+                        <Badge>activatable</Badge>
+                      ) : ready ? (
+                        <Badge variant="outline">wired — ready for per-rule publish</Badge>
+                      ) : (
+                        <Badge variant="outline">draft</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                    {row.gaps.length === 0 ? (
+                      <li>
+                        Wired to the live engine. Unrelated workbook Release_Gaps do not block this
+                        rule. Record an explicit approval to publish this rule only.
+                      </li>
+                    ) : (
+                      row.gaps.map((gap) => <li key={gap.key}>{gap.reason}</li>)
+                    )}
+                  </ul>
+                  <Button
+                    className="mt-3"
+                    variant="outline"
+                    disabled
+                    title={
+                      row.canActivate
+                        ? "This rule is individually verified."
+                        : ready
+                          ? "Record approval in the verified-publication overlay. This screen does not flip tenants."
+                          : row.gaps.map((g) => g.reason).join(" ")
+                    }
+                  >
+                    {row.canActivate ? "Published (this rule)" : "Publish this rule"}
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
+
+      {fourthBatchQuery.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading fourth executable batch…</p>
+      ) : fourthBatch.length > 0 ? (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold">
+            Fourth executable batch — periodic monthly summaries
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            §1.25 monthly substitutes reuse the live obligation engine: SEI and SJD monthly UPI
+            attestation, and CMP/CMS monthly summaries to the Support Coordinator. One parent
+            assignment. One report per code — never monthly plus quarterly on the same code. SLN
+            stays quarterly. Child elements stay on the parent. Missing awarded-code or caseload
+            facts stay questions. Not published. HIVE does not transmit to UPI or email the Support
+            Coordinator.
+          </p>
+          <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
+            {FOURTH_BATCH_DEMO_PATH.map((step) => (
+              <li key={step.step}>
+                <span className="font-medium text-foreground">{step.title}.</span> {step.detail}
+              </li>
+            ))}
+          </ol>
+          <ul className="space-y-4">
+            {fourthBatch.map((row) => {
               const ready = row.canPublish && !row.canActivate;
               return (
                 <li
