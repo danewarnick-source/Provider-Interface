@@ -9,7 +9,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.importedParents, 760);
     assert.equal(report.counts.importedElements, 607);
     assert.equal(report.counts.importedRows, 1367);
-    assert.ok(report.counts.executable >= 48);
+    assert.ok(report.counts.executable >= 50);
     assert.equal(report.counts.published, 0);
     assert.equal(report.counts.verified, 0);
     assert.equal(report.counts.wiredFirstBatch, 5);
@@ -17,7 +17,8 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredThirdBatch, 3);
     assert.equal(report.counts.wiredFourthBatch, 4);
     assert.equal(report.counts.wiredFifthBatch, 2);
-    assert.equal(report.counts.wired, 20);
+    assert.equal(report.counts.wiredSixthBatch, 2);
+    assert.equal(report.counts.wired, 22);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -83,6 +84,19 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(evv.canPublish, true);
     assert.equal(evv.canActivate, false);
     assert.equal(evv.mintsStaffTask, false);
+
+    const personReview = report.rows.find((r) => r.requirementKey === "REQ-1.28.5");
+    assert.ok(personReview);
+    assert.equal(personReview.liveKey, "pba_financial_review");
+    assert.equal(personReview.canPublish, true);
+    assert.equal(personReview.canActivate, false);
+    assert.equal(personReview.mintsStaffTask, false);
+    const pbaReviews = report.rows.find((r) => r.requirementKey === "REQ-15.3.7");
+    assert.ok(pbaReviews);
+    assert.equal(pbaReviews.liveKey, "pba_financial_review");
+    assert.equal(pbaReviews.canPublish, true);
+    assert.equal(pbaReviews.canActivate, false);
+    assert.equal(pbaReviews.mintsStaffTask, false);
 
     const elements = report.rows.filter((r) => r.role === "element");
     assert.equal(elements.length, 607);
