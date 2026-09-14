@@ -7,6 +7,7 @@ import {
   buildStaffTask,
   staffTaskAction,
   staffTaskWhyRequired,
+  staffTasksWithoutElementDuplicates,
 } from "./staff-my-tasks.ts";
 
 const NOW = new Date("2026-09-11T18:00:00.000Z");
@@ -148,6 +149,21 @@ describe("staff My tasks engine", () => {
       staffTaskWhyRequired({ source: "provider", description: "Host home visit attestation." }),
       "Host home visit attestation.",
     );
+  });
+});
+
+describe("catalog parent/child task collapse", () => {
+  it("drops element cards so orientation topics do not mint a second queue item", () => {
+    const kept = staffTasksWithoutElementDuplicates([
+      { instanceId: "parent", requirementRole: "parent" as const, parentRequirementKey: null },
+      {
+        instanceId: "child",
+        requirementRole: "element" as const,
+        parentRequirementKey: "REQ-1.8.4",
+      },
+    ]);
+    assert.equal(kept.length, 1);
+    assert.equal(kept[0]?.instanceId, "parent");
   });
 });
 

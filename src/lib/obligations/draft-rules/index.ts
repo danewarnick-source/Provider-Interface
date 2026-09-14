@@ -105,9 +105,19 @@ export {
   canActivate,
   canPublish,
   draftRuleAdminRow,
+  isCatalogWideReleaseGap,
+  isGenericReviewPublicationGap,
   publicationGaps,
+  ruleSpecificReleaseGaps,
   structuralPublicationGaps,
+  CATALOG_WIDE_RELEASE_GAP_IDS,
 } from "./publication.ts";
+export {
+  applyVerifiedPublication,
+  applyVerifiedPublicationOverlay,
+  verifiedPublicationFor,
+  VERIFIED_PUBLICATIONS,
+} from "./verified-publication.ts";
 export {
   countQualifiedDesignatedBenefits,
   employmentYearDue,

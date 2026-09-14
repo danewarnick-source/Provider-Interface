@@ -2,10 +2,12 @@
  * Workbook publication gate (System_Design §Publication).
  * Schema/simulation first. A published rule needs predicates, groups, timing,
  * evidence, source, and positive/negative/boundary tests. Unresolved
- * renewal/alternative blocks activation. Stage 1 lock never activates.
+ * renewal/alternative blocks that rule only. Catalog-wide Release_Gaps and
+ * the generic review publication_gap do not blanket-lock verified rules.
+ * STAGE1_ACTIVATION_LOCKED still blocks silent claim rejection — not publish.
  */
 
-import { STAGE1_ACTIVATION_LOCKED, type DraftRule, type RuleTestKind } from "./types.ts";
+import type { DraftRule, RuleTestKind } from "./types.ts";
 import { sourceIndexGrantsPublication } from "./source.ts";
 
 export const PUBLICATION_GAP_KEYS = [
@@ -25,8 +27,40 @@ export const PUBLICATION_GAP_KEYS = [
   "missing_approval",
   "not_published_flag",
   "source_index_is_not_permission",
-  "stage1_lock",
 ] as const;
+
+/** Workbook-wide gaps. They stay listed on the catalog; they do not block an unrelated verified rule. */
+export const CATALOG_WIDE_RELEASE_GAP_IDS = [
+  "WORKBOOK-GAP-01",
+  "WORKBOOK-GAP-09",
+  "WORKBOOK-GAP-11",
+  "WORKBOOK-GAP-12",
+] as const;
+
+const GENERIC_REVIEW_PUBLICATION_GAP =
+  /approve source interpretation,\s*typed predicates,\s*due-date anchor,\s*evidence criteria and tests before activating/i;
+
+export function isGenericReviewPublicationGap(value: string | null | undefined): boolean {
+  return !!value && GENERIC_REVIEW_PUBLICATION_GAP.test(value.trim());
+}
+
+export function isCatalogWideReleaseGap(gap: string): boolean {
+  const text = gap.trim();
+  if (!text) return false;
+  if (CATALOG_WIDE_RELEASE_GAP_IDS.some((id) => text === id || text.startsWith(`${id}:`))) {
+    return true;
+  }
+  const n = text.toLowerCase();
+  if (/narrative fields are not tested executable predicates/.test(n)) return true;
+  if (/inline roman numerals combine multiple obligations/.test(n)) return true;
+  if (/1,693 retained rows/.test(n)) return true;
+  if (/design controls do not establish deployed hipaa/.test(n)) return true;
+  return false;
+}
+
+export function ruleSpecificReleaseGaps(gaps: readonly string[]): string[] {
+  return gaps.filter((gap) => !isCatalogWideReleaseGap(gap));
+}
 
 export type PublicationGapKey = (typeof PUBLICATION_GAP_KEYS)[number];
 
@@ -146,16 +180,21 @@ export function structuralPublicationGaps(rule: DraftRule): PublicationGap[] {
       reason: `Unresolved renewals: ${rule.unresolvedRenewals.join("; ")}`,
     });
   }
-  if (rule.publicationGap && rule.publicationGap.trim().length > 0) {
+  if (
+    rule.publicationGap &&
+    rule.publicationGap.trim().length > 0 &&
+    !isGenericReviewPublicationGap(rule.publicationGap)
+  ) {
     gaps.push({
       key: "publication_gap",
       reason: `publication_gap is set (do not invent a fix): ${rule.publicationGap}`,
     });
   }
-  if (rule.releaseGaps.length > 0) {
+  const specificGaps = ruleSpecificReleaseGaps(rule.releaseGaps);
+  if (specificGaps.length > 0) {
     gaps.push({
       key: "release_gaps",
-      reason: `Release_Gaps (do not invent a fix): ${rule.releaseGaps.join("; ")}`,
+      reason: `Release_Gaps (do not invent a fix): ${specificGaps.join("; ")}`,
     });
   }
   return gaps;
@@ -187,12 +226,6 @@ export function activationBlockReasons(rule: DraftRule): PublicationGap[] {
       reason: "Source_index label is archive metadata, not publication permission.",
     });
   }
-  if (STAGE1_ACTIVATION_LOCKED) {
-    gaps.push({
-      key: "stage1_lock",
-      reason: "Stage 1 lock — draft rules are not activated on any tenant.",
-    });
-  }
   return gaps;
 }
 
@@ -201,16 +234,19 @@ export function publicationGaps(rule: DraftRule): PublicationGap[] {
 }
 
 /**
- * Structural publishability: predicates, group, timing, evidence, source,
- * tests, and no unresolved alternatives/renewals. Does not activate.
+ * Structural publishability for THIS rule: predicates, group, timing,
+ * evidence, source, tests, and no unresolved alternatives/renewals or
+ * rule-specific gaps. Catalog-wide Release_Gaps do not fail this.
  */
 export function canPublish(rule: DraftRule): boolean {
   return structuralPublicationGaps(rule).length === 0;
 }
 
-/** Live activation. Stage 1 always false. */
+/**
+ * Live activation for one verified rule. Unpublished siblings stay draft.
+ * Source_index never grants this. Claim auto-reject stays locked separately.
+ */
 export function canActivate(rule: DraftRule): boolean {
-  if (STAGE1_ACTIVATION_LOCKED) return false;
   if (rule.lifecycle !== "published") return false;
   if (rule.publication !== "published") return false;
   if (!rule.approval) return false;
