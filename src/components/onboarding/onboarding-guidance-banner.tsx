@@ -32,10 +32,11 @@ const COPY: Record<number, { title: string; body: string }> = {
 };
 
 /**
- * Amber NECTAR guidance banner shown at the top of a destination page when
- * the user arrived from the onboarding flow (?from=onboarding&step=N).
- * Dismissible per-step via sessionStorage so it stays out of the way once
- * the operator has read it for that visit.
+ * Optional NECTAR feature checklist copy shown when the user arrived from
+ * Home with ?from=onboarding&step=N. Dismissible per-step via sessionStorage.
+ *
+ * This banner NEVER calculates setup eligibility or create unlock.
+ * Completion / hire unlock is only useAgencySetup + the six saved facts.
  */
 export function OnboardingGuidanceBanner({ step }: { step: number }) {
   const search = useSearch({ strict: false }) as
@@ -64,7 +65,7 @@ export function OnboardingGuidanceBanner({ step }: { step: number }) {
         </span>
         <div className="min-w-0 flex-1">
           <div className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
-            NECTAR · Setup step {step}
+            NECTAR · Optional checklist — does not unlock create
           </div>
           <h3 className="mt-0.5 font-display text-base font-semibold text-amber-50">
             {copy.title}

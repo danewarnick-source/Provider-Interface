@@ -149,6 +149,12 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     await client.query(readRel("../../supabase/tests/agency-setup-gate/isolated-schema.sql"));
     await client.query("GRANT authenticated TO CURRENT_USER");
     await client.query("GRANT service_role TO CURRENT_USER");
+    await client.query("GRANT anon TO CURRENT_USER");
+    await client.query("GRANT hive_it_untrusted TO CURRENT_USER");
+    await client.query("GRANT USAGE ON SCHEMA public TO anon, hive_it_untrusted");
+    await client.query(
+      "GRANT SELECT, UPDATE ON public.organizations TO anon, hive_it_untrusted",
+    );
 
     await client.query(
       `INSERT INTO public.organizations (id, name, slug, services_offered)
@@ -488,6 +494,64 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
         }),
       /Agency setup is incomplete/,
     );
+  });
+
+  it("fail-closed: untrusted roles cannot flip setup_create_gate_exempt", async () => {
+    for (const role of ["anon", "hive_it_untrusted"] as const) {
+      await assert.rejects(
+        async () => {
+          try {
+            await client.query("ROLLBACK");
+          } catch {
+            /* not in a transaction */
+          }
+          await client.query("RESET ROLE");
+          await client.query(`SET ROLE ${role}`);
+          try {
+            await client.query(
+              `UPDATE public.organizations SET setup_create_gate_exempt = true WHERE id = $1`,
+              [ORG_C],
+            );
+          } finally {
+            await client.query("RESET ROLE");
+          }
+        },
+        /setup_create_gate_exempt is locked/i,
+      );
+    }
+
+    const afterUntrusted = await client.query(
+      "SELECT setup_create_gate_exempt FROM public.organizations WHERE id = $1",
+      [ORG_C],
+    );
+    assert.equal(afterUntrusted.rows[0].setup_create_gate_exempt, false);
+
+    await client.query("BEGIN");
+    await client.query("SET LOCAL ROLE service_role");
+    await client.query(
+      `UPDATE public.organizations SET setup_create_gate_exempt = true WHERE id = $1`,
+      [ORG_C],
+    );
+    await client.query("COMMIT");
+
+    const flipped = await client.query(
+      "SELECT setup_create_gate_exempt FROM public.organizations WHERE id = $1",
+      [ORG_C],
+    );
+    assert.equal(flipped.rows[0].setup_create_gate_exempt, true);
+
+    await client.query("BEGIN");
+    await client.query("SET LOCAL ROLE service_role");
+    await client.query(
+      `UPDATE public.organizations SET setup_create_gate_exempt = false WHERE id = $1`,
+      [ORG_C],
+    );
+    await client.query("COMMIT");
+    const reset = await client.query(
+      "SELECT setup_create_gate_exempt FROM public.organizations WHERE id = $1",
+      [ORG_C],
+    );
+    assert.equal(reset.rows[0].setup_create_gate_exempt, false);
   });
 
   it("rolls back org facts when a later setup-save step fails", async () => {

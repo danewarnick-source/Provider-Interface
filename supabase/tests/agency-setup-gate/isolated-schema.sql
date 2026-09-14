@@ -1,5 +1,8 @@
 -- Isolated schema for agency-setup-gate integration tests.
 -- Not production. Never run against Hive-Platform (dhrrukdcigiiqksibdfb).
+-- This is a simplified stand-in — NOT the full project RLS/schema.
+-- Full-project proof needs `supabase start` / db reset (see
+-- scripts/agency-setup-gate-preview.md).
 
 CREATE SCHEMA IF NOT EXISTS auth;
 
@@ -18,6 +21,12 @@ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
     CREATE ROLE service_role NOINHERIT BYPASSRLS;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    CREATE ROLE anon NOINHERIT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'hive_it_untrusted') THEN
+    CREATE ROLE hive_it_untrusted NOINHERIT;
   END IF;
 END
 $$;
@@ -148,6 +157,19 @@ DROP POLICY IF EXISTS invitations_insert_own_org ON public.invitations;
 CREATE POLICY invitations_insert_own_org
   ON public.invitations FOR INSERT TO authenticated
   WITH CHECK (public.is_org_member(organization_id));
+
+-- So untrusted-role UPDATE reaches the fail-closed exempt trigger (FORCE RLS
+-- would otherwise hide the row and skip the trigger). SELECT is required
+-- for WHERE id = ...; pair it with a SELECT policy.
+DROP POLICY IF EXISTS organizations_untrusted_select_for_lock_it ON public.organizations;
+CREATE POLICY organizations_untrusted_select_for_lock_it
+  ON public.organizations FOR SELECT TO anon, hive_it_untrusted
+  USING (true);
+DROP POLICY IF EXISTS organizations_untrusted_update_for_lock_it ON public.organizations;
+CREATE POLICY organizations_untrusted_update_for_lock_it
+  ON public.organizations FOR UPDATE TO anon, hive_it_untrusted
+  USING (true)
+  WITH CHECK (true);
 
 GRANT USAGE ON SCHEMA public TO authenticated, service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated, service_role;

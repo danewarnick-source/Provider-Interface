@@ -29,6 +29,11 @@ describe("NECTAR onboarding — agency setup gate, no SOW upload", () => {
     assert.doesNotMatch(banner, /Once your SOW is uploaded/);
     assert.doesNotMatch(banner, /State Scope of Work/);
     assert.match(banner, /You do not need to upload a Scope of Work to finish setup/);
+    assert.match(banner, /Optional checklist — does not unlock create/);
+    assert.doesNotMatch(banner, /Setup step \{step\}/);
+    assert.match(banner, /NEVER calculates setup eligibility/);
+    assert.doesNotMatch(hook, /localStorage\.|onboardingLSKey\(|profile_saved:/);
+    assert.match(hook, /useAgencySetup/);
   });
 
   it("keeps the company documents hub as optional storage, not a SOW gate", () => {

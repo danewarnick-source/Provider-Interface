@@ -2,6 +2,11 @@
 -- Blocks staff/client/invite INSERT until operating questions are recorded,
 -- except a one-time grandfather snapshot for orgs that already have people.
 --
+-- KEEP grandfather: True North Supports LLC is a real first operating tenant
+-- (not synthetic-only). See docs/SQL_HANDOFF.md — Tony/Core must probe live
+-- inventory before paste. Fail-closed exempt lock: only service_role /
+-- postgres / supabase_admin may change setup_create_gate_exempt.
+--
 -- Idempotent. No DROP TABLE / DROP COLUMN. No catalog publish/activation.
 -- INSERT-only RESTRICTIVE policies — SELECT/UPDATE on members, clients, and
 -- profiles are not touched. Existing staff/clients stay readable/editable.
@@ -201,15 +206,13 @@ BEGIN
   IF NEW.setup_create_gate_exempt IS NOT DISTINCT FROM OLD.setup_create_gate_exempt THEN
     RETURN NEW;
   END IF;
-  -- service_role / postgres retain; authenticated cannot flip the snapshot.
+  -- Fail-closed: only these roles may change the snapshot. anon / authenticated /
+  -- unknown roles ERROR. No fall-through RETURN NEW.
   IF current_user IN ('service_role', 'postgres', 'supabase_admin') THEN
     RETURN NEW;
   END IF;
-  IF current_user = 'authenticated' THEN
-    RAISE EXCEPTION 'setup_create_gate_exempt is locked. Authenticated roles cannot change the grandfather flag.'
-      USING ERRCODE = '42501';
-  END IF;
-  RETURN NEW;
+  RAISE EXCEPTION 'setup_create_gate_exempt is locked. Only service_role, postgres, or supabase_admin may change the grandfather flag.'
+    USING ERRCODE = '42501';
 END;
 $$;
 
@@ -219,6 +222,7 @@ CREATE TRIGGER trg_protect_setup_create_gate_exempt
   FOR EACH ROW
   EXECUTE FUNCTION public.protect_setup_create_gate_exempt();
 
+-- EXECUTE is public so any role that can UPDATE the row still reaches the
+-- fail-closed EXCEPTION instead of a missing-execute miss.
 REVOKE ALL ON FUNCTION public.protect_setup_create_gate_exempt() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.protect_setup_create_gate_exempt() TO authenticated;
-GRANT EXECUTE ON FUNCTION public.protect_setup_create_gate_exempt() TO service_role;
+GRANT EXECUTE ON FUNCTION public.protect_setup_create_gate_exempt() TO PUBLIC;
