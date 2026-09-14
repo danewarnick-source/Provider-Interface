@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import {
   canAcceptCertEvidence,
   certReviewAcceptBlockReason,
+  certReviewExpirationAdvisory,
   certReviewStatus,
   certReviewStatusLabel,
   correctionNoteFromAdminNotes,
@@ -21,17 +22,28 @@ import {
 } from "./cert-review.ts";
 
 describe("cert review rules", () => {
-  it("disables accept when a cert-expiration clock has no detected or confirmed date", () => {
+  it("allows accept without extracted expiry and does not invent a date", () => {
     const missing = {
       usesCertExpiration: true,
       extractedExpiresOn: null,
       confirmedExpiresOn: null,
     };
-    assert.equal(canAcceptCertEvidence(missing), false);
-    assert.match(certReviewAcceptBlockReason(missing) ?? "", /Confirm expiration/);
+    assert.equal(canAcceptCertEvidence(missing), true);
+    assert.equal(certReviewAcceptBlockReason(missing), null);
+    assert.match(certReviewExpirationAdvisory(missing) ?? "", /not detected/);
     assert.equal(resolvedCertExpiration(missing), null);
     assert.equal(renewalDueFromExpiration(null), null);
     assert.equal(renewalDueFromExpiration("2026-09-10"), "2026-09-10");
+    assert.equal(
+      nextRenewalDueFromRules({
+        usesCertExpiration: true,
+        extractedExpiresOn: null,
+        confirmedExpiresOn: null,
+        authoritativeCompletedOn: "2026-09-11",
+        everyNMonths: 24,
+      }),
+      null,
+    );
   });
 
   it("accepts after the admin confirms expiration, and uses extracted when present", () => {
@@ -314,6 +326,17 @@ describe("cert review rules", () => {
     };
     assert.equal(canAcceptCertEvidence(afterReplace), true);
     assert.equal(certReviewAcceptBlockReason(afterReplace), null);
+
+    const afterReplaceNoExpiry = {
+      usesCertExpiration: true,
+      extractedExpiresOn: null as string | null,
+      confirmedExpiresOn: null as string | null,
+      correctionRequested: false,
+    };
+    assert.equal(canAcceptCertEvidence(afterReplaceNoExpiry), true);
+    assert.equal(certReviewAcceptBlockReason(afterReplaceNoExpiry), null);
+    assert.match(certReviewExpirationAdvisory(afterReplaceNoExpiry) ?? "", /not detected/);
+    assert.equal(resolvedCertExpiration(afterReplaceNoExpiry), null);
   });
 
   it("detects cert-expiration cadence from due_day_config", () => {
@@ -345,6 +368,7 @@ describe("cert review surface lock", () => {
     assert.match(panel, /certReviewStatusLabel/);
     assert.match(panel, /Accept evidence/);
     assert.match(panel, /Request correction/);
+    assert.match(panel, /Leave blank to accept without inventing/);
     assert.match(engine, /CORRECTION_REQUESTED_PREFIX/);
     assert.match(engine, /shouldReplaceCompletionForResubmit/);
     assert.match(engine, /pickStaffCompletionForSurface/);
@@ -358,7 +382,9 @@ describe("cert review surface lock", () => {
     assert.match(fns, /correctionReminderRecurrenceKey/);
     assert.match(fns, /resolveInstanceNotifications/);
     assert.match(panel, /certReviewAcceptBlockReason/);
-    assert.match(engine, /Confirm expiration before acceptance/);
+    assert.match(panel, /certReviewExpirationAdvisory/);
+    assert.match(engine, /accept without inventing/);
+    assert.match(engine, /certReviewExpirationAdvisory/);
     assert.match(staffFile, /cert-review/);
     assert.doesNotMatch(panel, /from\("certificate_reviews"\)/);
     const personFile = readFileSync(

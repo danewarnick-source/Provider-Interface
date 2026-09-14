@@ -10,6 +10,7 @@ import { describe, it } from "node:test";
 import {
   canAcceptCertEvidence,
   certReviewAcceptBlockReason,
+  certReviewExpirationAdvisory,
   certReviewStatus,
   nectarReviewDisposition,
   nextRenewalDueFromRules,
@@ -628,8 +629,8 @@ describe("DoD 4: remediation ≠ complete; overrides with authority still don’
   });
 });
 
-describe("DoD 5: evidence upload ≠ accept; Accept still needs expiration; renewal cycle preserved", () => {
-  it("uploaded CPR stays unaccepted until expiration is confirmed; prior cycle stays previous", () => {
+describe("DoD 5: evidence upload ≠ accept; Accept without extracted expiry; renewal cycle preserved", () => {
+  it("uploaded CPR stays unaccepted until review; Accept does not invent expiration; prior cycle stays previous", () => {
     const upload = nectarReviewDisposition({
       evidenceTypeUsed: "upload",
       isManualEntry: false,
@@ -660,8 +661,9 @@ describe("DoD 5: evidence upload ≠ accept; Accept still needs expiration; rene
       extractedExpiresOn: null,
       confirmedExpiresOn: null,
     };
-    assert.equal(canAcceptCertEvidence(missingExpiration), false);
-    assert.match(certReviewAcceptBlockReason(missingExpiration) ?? "", /Confirm expiration/);
+    assert.equal(canAcceptCertEvidence(missingExpiration), true);
+    assert.equal(certReviewAcceptBlockReason(missingExpiration), null);
+    assert.match(certReviewExpirationAdvisory(missingExpiration) ?? "", /not detected/);
     assert.equal(
       nextRenewalDueFromRules({
         usesCertExpiration: true,
