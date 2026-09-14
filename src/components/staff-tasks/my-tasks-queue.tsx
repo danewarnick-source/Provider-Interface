@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { STAFF_TASKS_FOOTER, type StaffTask, type StaffTaskActionKind } from "@/lib/staff-my-tasks";
+import {
+  STAFF_TASKS_FOOTER,
+  staffTaskReviewLabel,
+  type StaffTask,
+  type StaffTaskActionKind,
+} from "@/lib/staff-my-tasks";
 import { OVERRIDE_STATE_LABEL, OVERRIDE_STILL_REQUIRED } from "@/lib/obligations/overrides";
 
 export function MyTasksQueue({
@@ -40,76 +45,78 @@ export function MyTasksQueue({
         </p>
       ) : (
         <ul className="grid gap-3">
-          {shown.map((task) => (
-            <li
-              key={task.instanceId}
-              data-testid="my-task-row"
-              className="rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="font-semibold leading-snug">{task.title}</p>
-                  {task.correctionRequested ? (
-                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                      Correction requested — re-upload
-                    </p>
-                  ) : task.pendingReview ? (
-                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                      Pending review
-                    </p>
-                  ) : null}
-                  {task.overridden ? (
-                    <p
-                      data-testid="override-state"
-                      className="text-sm font-medium text-amber-800 dark:text-amber-200"
-                    >
-                      {OVERRIDE_STATE_LABEL}
-                      {task.overrideUntil ? ` until ${task.overrideUntil}` : ""}.{" "}
-                      {OVERRIDE_STILL_REQUIRED}
-                    </p>
-                  ) : null}
-                  {task.progressLabel ? (
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{task.progressLabel}</p>
-                      <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
-                        <div
-                          className="h-full rounded-full bg-emerald-600"
-                          style={{
-                            width: progressWidth(task.progressLabel),
-                          }}
-                        />
+          {shown.map((task) => {
+            const reviewLabel = staffTaskReviewLabel(task);
+            return (
+              <li
+                key={task.instanceId}
+                data-testid="my-task-row"
+                className="rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="font-semibold leading-snug">{task.title}</p>
+                    {reviewLabel ? (
+                      <p
+                        data-testid="my-task-review"
+                        className="text-sm font-medium text-amber-800 dark:text-amber-200"
+                      >
+                        {reviewLabel}
+                      </p>
+                    ) : null}
+                    {task.overridden ? (
+                      <p
+                        data-testid="override-state"
+                        className="text-sm font-medium text-amber-800 dark:text-amber-200"
+                      >
+                        {OVERRIDE_STATE_LABEL}
+                        {task.overrideUntil ? ` until ${task.overrideUntil}` : ""}.{" "}
+                        {OVERRIDE_STILL_REQUIRED}
+                      </p>
+                    ) : null}
+                    {task.progressLabel ? (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">{task.progressLabel}</p>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
+                          <div
+                            className="h-full rounded-full bg-emerald-600"
+                            style={{
+                              width: progressWidth(task.progressLabel),
+                            }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ) : null}
-                  <p
-                    className={`text-sm font-medium ${task.overdue ? "text-destructive" : "text-muted-foreground"}`}
-                  >
-                    {task.dueText}
-                  </p>
+                    ) : null}
+                    <p
+                      className={`text-sm font-medium ${task.overdue ? "text-destructive" : "text-muted-foreground"}`}
+                    >
+                      {task.dueText}
+                    </p>
+                    <button
+                      type="button"
+                      className="text-left text-xs font-medium text-muted-foreground underline-offset-2 hover:underline"
+                      onClick={() =>
+                        setWhyOpen((cur) => (cur === task.instanceId ? null : task.instanceId))
+                      }
+                    >
+                      Why is this required?
+                    </button>
+                    {whyOpen === task.instanceId ? (
+                      <p className="text-sm text-muted-foreground">{task.whyRequired}</p>
+                    ) : null}
+                  </div>
                   <button
                     type="button"
-                    className="text-left text-xs font-medium text-muted-foreground underline-offset-2 hover:underline"
-                    onClick={() =>
-                      setWhyOpen((cur) => (cur === task.instanceId ? null : task.instanceId))
-                    }
+                    data-testid="my-task-action"
+                    className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
+                    onClick={() => onAction(task, task.action)}
                   >
-                    Why is this required?
+                    {task.actionLabel}
                   </button>
-                  {whyOpen === task.instanceId ? (
-                    <p className="text-sm text-muted-foreground">{task.whyRequired}</p>
-                  ) : null}
                 </div>
-                <button
-                  type="button"
-                  data-testid="my-task-action"
-                  className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
-                  onClick={() => onAction(task, task.action)}
-                >
-                  {task.actionLabel}
-                </button>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
       {extra > 0 ? (

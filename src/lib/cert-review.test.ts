@@ -8,9 +8,11 @@ import {
   certReviewStatusLabel,
   correctionNoteFromAdminNotes,
   correctionReminderRecurrenceKey,
+  indexCompletionsByInstance,
   isCorrectionRequestedNote,
   nectarReviewDisposition,
   nextRenewalDueFromRules,
+  pickStaffCompletionForSurface,
   renewalDueFromExpiration,
   resolvedCertExpiration,
   shouldReplaceCompletionForResubmit,
@@ -210,6 +212,10 @@ describe("cert review rules", () => {
       isCorrectionRequestedNote("Correction requested: Re-upload a clearer scan."),
       true,
     );
+    assert.equal(
+      isCorrectionRequestedNote("Correction requested — show the printed expiration."),
+      true,
+    );
     assert.equal(isCorrectionRequestedNote("Admin accepted evidence."), false);
     assert.equal(
       correctionNoteFromAdminNotes("Correction requested: Show the printed expiration."),
@@ -230,12 +236,19 @@ describe("cert review rules", () => {
         nectarValidationStatus: "failed",
         adminNotes: null,
       }),
-      false,
+      true,
     );
     assert.equal(
       shouldReplaceCompletionForResubmit({
         nectarValidationStatus: "needs_review",
         adminNotes: "Uploaded — awaiting review.",
+      }),
+      true,
+    );
+    assert.equal(
+      shouldReplaceCompletionForResubmit({
+        nectarValidationStatus: "manually_confirmed",
+        adminNotes: "Admin accepted evidence.",
       }),
       false,
     );
@@ -247,6 +260,60 @@ describe("cert review rules", () => {
       correctionReminderRecurrenceKey("inst-1", "staff-1"),
       correctionReminderRecurrenceKey("inst-1", "staff-1"),
     );
+  });
+
+  it("prefers the correction-requested completion when the same instance has a leftover failed row", () => {
+    const picked = pickStaffCompletionForSurface([
+      {
+        instance_id: "cpr-1",
+        admin_notes: null,
+        nectar_validation_status: "failed",
+        completed_at: "2026-09-14T18:00:00.000Z",
+      },
+      {
+        instance_id: "cpr-1",
+        admin_notes: "Correction requested: Show the expiration date.",
+        nectar_validation_status: "failed",
+        completed_at: "2026-09-10T18:00:00.000Z",
+      },
+    ]);
+    assert.equal(picked?.admin_notes?.startsWith("Correction requested:"), true);
+
+    const byInstance = indexCompletionsByInstance([
+      {
+        instance_id: "cpr-1",
+        admin_notes: null,
+        nectar_validation_status: "failed",
+        completed_at: "2026-09-14T18:00:00.000Z",
+      },
+      {
+        instance_id: "cpr-1",
+        admin_notes: "Correction requested: Show the expiration date.",
+        nectar_validation_status: "failed",
+        completed_at: "2026-09-10T18:00:00.000Z",
+      },
+    ]);
+    assert.equal(isCorrectionRequestedNote(byInstance.get("cpr-1")?.admin_notes), true);
+  });
+
+  it("blocks accept while correction is outstanding and re-enables after the replacement clears the note", () => {
+    const duringCorrection = {
+      usesCertExpiration: true,
+      extractedExpiresOn: "2027-01-15" as string | null,
+      confirmedExpiresOn: "2027-01-15" as string | null,
+      correctionRequested: true,
+    };
+    assert.equal(canAcceptCertEvidence(duringCorrection), false);
+    assert.match(certReviewAcceptBlockReason(duringCorrection) ?? "", /re-upload/);
+
+    const afterReplace = {
+      usesCertExpiration: true,
+      extractedExpiresOn: null as string | null,
+      confirmedExpiresOn: "2027-01-15" as string | null,
+      correctionRequested: false,
+    };
+    assert.equal(canAcceptCertEvidence(afterReplace), true);
+    assert.equal(certReviewAcceptBlockReason(afterReplace), null);
   });
 
   it("detects cert-expiration cadence from due_day_config", () => {
@@ -280,11 +347,14 @@ describe("cert review surface lock", () => {
     assert.match(panel, /Request correction/);
     assert.match(engine, /CORRECTION_REQUESTED_PREFIX/);
     assert.match(engine, /shouldReplaceCompletionForResubmit/);
+    assert.match(engine, /pickStaffCompletionForSurface/);
+    assert.match(engine, /Waiting for the staff member to re-upload/);
     const fns = readFileSync(
       new URL("./company-obligations.functions.ts", import.meta.url),
       "utf8",
     );
     assert.match(fns, /shouldReplaceCompletionForResubmit/);
+    assert.match(fns, /pickStaffCompletionForSurface|indexCompletionsByInstance/);
     assert.match(fns, /correctionReminderRecurrenceKey/);
     assert.match(fns, /resolveInstanceNotifications/);
     assert.match(panel, /certReviewAcceptBlockReason/);

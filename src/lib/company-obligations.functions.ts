@@ -57,7 +57,9 @@ import {
   isNativePlatformEvidence,
   isUploadEvidenceType,
   nectarReviewDisposition,
+  indexCompletionsByInstance,
   nextRenewalDueFromRules,
+  pickStaffCompletionForSurface,
   resolvedCertExpiration,
   shouldReplaceCompletionForResubmit,
   usesCertExpirationCadence,
@@ -1313,8 +1315,7 @@ export async function notifyObligationManagersInternal(
 
   const cadenceDesc = cadenceShortLabel(ob.cadence);
   const lastCompletion = (completions ?? [])[completions.length - 1] as
-    | { staff_name: string; completed_at: string; evidence_type_used: string }
-    | undefined;
+    { staff_name: string; completed_at: string; evidence_type_used: string } | undefined;
 
   let title: string;
   let body: string;
@@ -1611,20 +1612,9 @@ export const listStaffObligationInstances = createServerFn({ method: "POST" })
       .order("completed_at", { ascending: false });
     if (cErr) throw new Error(cErr.message);
 
-    const completionByInstance = new Map<string, StaffObligationCompletion>();
-    for (const row of (completions ?? []) as StaffObligationCompletion[]) {
-      const existing = completionByInstance.get(row.instance_id);
-      if (!existing) {
-        completionByInstance.set(row.instance_id, row);
-        continue;
-      }
-      if (
-        existing.nectar_validation_status === "failed" &&
-        row.nectar_validation_status !== "failed"
-      ) {
-        completionByInstance.set(row.instance_id, row);
-      }
-    }
+    const completionByInstance = indexCompletionsByInstance(
+      (completions ?? []) as StaffObligationCompletion[],
+    );
 
     return (instances ?? [])
       .map((i: ObligationInstanceRow) => {
@@ -2754,21 +2744,27 @@ export const recordCompletion = createServerFn({ method: "POST" })
       };
     }
 
-    const { data: existingCompletion, error: existingErr } = await supabase
+    const { data: existingRows, error: existingErr } = await supabase
       .from("company_obligation_completions")
-      .select("id, nectar_validation_status, admin_notes")
+      .select("id, nectar_validation_status, admin_notes, completed_at")
       .eq("instance_id", data.instanceId)
       .eq("staff_id", targetStaffId)
-      .order("completed_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order("completed_at", { ascending: false });
     if (existingErr) throw new Error(existingErr.message);
+    const existingCompletion = pickStaffCompletionForSurface(
+      (existingRows ?? []) as Array<{
+        id: string;
+        nectar_validation_status: string | null;
+        admin_notes: string | null;
+        completed_at: string | null;
+      }>,
+    );
 
     const replaceId = shouldReplaceCompletionForResubmit({
       nectarValidationStatus: existingCompletion?.nectar_validation_status ?? null,
       adminNotes: existingCompletion?.admin_notes ?? null,
     })
-      ? (existingCompletion?.id as string | undefined)
+      ? existingCompletion?.id
       : undefined;
 
     const completionPayload = {
@@ -2807,6 +2803,9 @@ export const recordCompletion = createServerFn({ method: "POST" })
           .eq("staff_id", targetStaffId)
       : await supabase.from("company_obligation_completions").insert(completionPayload);
     if (cErr) throw new Error(cErr.message);
+    if (replaceId) {
+      await resolveInstanceNotifications(supabase, data.instanceId);
+    }
 
     // A failed NECTAR validation saves the completion record (so the UI can
     // show what was uploaded and why it didn't pass) but does NOT close the
@@ -3084,6 +3083,7 @@ export const confirmFailedObligationCompletion = createServerFn({ method: "POST"
       usesCertExpiration: certClock,
       extractedExpiresOn: (completion.nectar_extracted_expires_date as string | null) ?? null,
       confirmedExpiresOn: data.confirmedExpiresDate ?? null,
+      correctionRequested: isCorrectionRequestedNote(completion.admin_notes as string | null),
     };
     if (!canAcceptCertEvidence(decision)) {
       throw new Error(

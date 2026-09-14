@@ -152,7 +152,10 @@ async function loadPacketClocks(
       const state: PacketReviewState =
         kind === "correction_requested" || kind === "awaiting_review" ? kind : "none";
       if (state === "none") continue;
-      byInstanceStaff.set(`${row.instance_id}:${row.staff_id}`, state);
+      const staffKey = `${row.instance_id}:${row.staff_id}`;
+      if (byInstanceStaff.get(staffKey) !== "correction_requested") {
+        byInstanceStaff.set(staffKey, state);
+      }
       const prev = byInstance.get(row.instance_id);
       if (prev !== "correction_requested") byInstance.set(row.instance_id, state);
     }
