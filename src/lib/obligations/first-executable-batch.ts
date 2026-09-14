@@ -67,7 +67,9 @@ export type FirstExecutableBatchRuleId = (typeof FIRST_EXECUTABLE_BATCH_RULE_IDS
 export type FirstExecutableBatchLiveKey = (typeof FIRST_EXECUTABLE_BATCH_LIVE_KEYS)[number];
 
 export type FirstBatchLiveFactKey =
-  "direct_support_assignment" | "abi_caseload" | "behavior_risk_assignment";
+  | "direct_support_assignment"
+  | "abi_caseload"
+  | "behavior_risk_assignment";
 
 export type FirstBatchEngineBinding = {
   ruleId: string;
