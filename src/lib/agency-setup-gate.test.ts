@@ -405,6 +405,9 @@ describe("unit: SQL source review (not a live database)", () => {
     assert.doesNotMatch(sql, /o\.specializations ~\*/);
     assert.match(sql, /FOR INSERT/);
     assert.doesNotMatch(sql, /FOR SELECT[\s\S]*requires_setup/);
+    assert.match(sql, /REVOKE UPDATE \(setup_create_gate_exempt\)/);
+    assert.match(sql, /trg_protect_setup_create_gate_exempt/);
+    assert.match(sql, /current_user = 'authenticated'/);
   });
 
   it("does not write service area into specializations", () => {
@@ -413,6 +416,7 @@ describe("unit: SQL source review (not a live database)", () => {
     assert.doesNotMatch(fns, /Service area:/);
     assert.doesNotMatch(fns, /mergeServiceAreaIntoSpecializations/);
     assert.match(fns, /service_area: nextArea/);
+    assert.doesNotMatch(fns, /setup_create_gate_exempt:/);
     assert.doesNotMatch(profile, /Service area: \$\{/);
     assert.match(profile, /service_area: draft\.serviceArea/);
   });

@@ -184,3 +184,41 @@ CREATE POLICY invitations_insert_requires_setup
   FOR INSERT
   TO authenticated
   WITH CHECK (public.org_setup_allows_create(invitations.organization_id));
+
+-- Lock the grandfather flag. App omitting the field is not enough:
+-- authenticated org admins have table-level UPDATE on organizations.
+-- Column REVOKE is defense-in-depth; the trigger is authoritative because
+-- table-level UPDATE still includes this column.
+REVOKE UPDATE (setup_create_gate_exempt) ON public.organizations FROM authenticated;
+GRANT SELECT (setup_create_gate_exempt) ON public.organizations TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.protect_setup_create_gate_exempt()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.setup_create_gate_exempt IS NOT DISTINCT FROM OLD.setup_create_gate_exempt THEN
+    RETURN NEW;
+  END IF;
+  -- service_role / postgres retain; authenticated cannot flip the snapshot.
+  IF current_user IN ('service_role', 'postgres', 'supabase_admin') THEN
+    RETURN NEW;
+  END IF;
+  IF current_user = 'authenticated' THEN
+    RAISE EXCEPTION 'setup_create_gate_exempt is locked. Authenticated roles cannot change the grandfather flag.'
+      USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_protect_setup_create_gate_exempt ON public.organizations;
+CREATE TRIGGER trg_protect_setup_create_gate_exempt
+  BEFORE UPDATE ON public.organizations
+  FOR EACH ROW
+  EXECUTE FUNCTION public.protect_setup_create_gate_exempt();
+
+REVOKE ALL ON FUNCTION public.protect_setup_create_gate_exempt() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.protect_setup_create_gate_exempt() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.protect_setup_create_gate_exempt() TO service_role;

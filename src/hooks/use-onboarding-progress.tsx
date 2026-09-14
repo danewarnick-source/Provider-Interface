@@ -1,20 +1,9 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 
 function lsKey(orgId: string, suffix: string) {
   return `hive_onboarding_${orgId}_${suffix}`;
-}
-
-function readLS<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
 }
 
 export const ONBOARDING_CHANGED_EVENT = "nectar-onboarding-changed";
@@ -25,35 +14,17 @@ export function notifyOnboardingChanged() {
 }
 
 /**
- * Shared onboarding completion source-of-truth used by the NECTAR
- * onboarding panel, the persistent return bar, and the per-page guidance
- * banners. Required steps: agency profile, staff, clients, service codes.
- * Company documents are optional evidence storage. Statewide SOW upload
- * is not an onboarding gate.
+ * Legacy destination-page counts (staff/clients/codes). Not the create gate.
+ * Create/invite authority is computeAgencySetupStatus / org_setup_is_complete.
+ * Return bar reads useAgencySetup. localStorage is not completion.
  */
 export function useOnboardingProgress() {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
 
-  const [profileSaved, setProfileSaved] = useState(false);
-  const [servicesVisited, setServicesVisited] = useState(false);
-
-  useEffect(() => {
-    if (!orgId) return;
-    const sync = () => {
-      setProfileSaved(readLS(lsKey(orgId, "profile_saved"), false));
-      setServicesVisited(readLS(lsKey(orgId, "services_visited"), false));
-    };
-    sync();
-    // Re-read on focus / same-tab writes so completion flips immediately
-    // after returning from a destination page that just wrote a flag.
-    window.addEventListener("focus", sync);
-    window.addEventListener(ONBOARDING_CHANGED_EVENT, sync);
-    return () => {
-      window.removeEventListener("focus", sync);
-      window.removeEventListener(ONBOARDING_CHANGED_EVENT, sync);
-    };
-  }, [orgId]);
+  // localStorage is not the completion authority. Profile saved is the
+  // organizations.nectar_profile_saved_at column. The create/invite gate
+  // uses computeAgencySetupStatus / org_setup_is_complete.
 
   const q = useQuery({
     enabled: !!orgId,
@@ -120,7 +91,7 @@ export function useOnboardingProgress() {
   };
 
   const steps = {
-    1: c.profileSaved || profileSaved,
+    1: c.profileSaved,
     2: c.memberCount > 1,
     3: c.clientCount > 0,
     4: c.serviceCodesCount > 0,
@@ -136,7 +107,7 @@ export function useOnboardingProgress() {
     counts: c,
     steps,
     step1Complete: steps[1],
-    servicesVisited,
+    servicesVisited: false,
     completedCount,
     totalSteps,
     allComplete,

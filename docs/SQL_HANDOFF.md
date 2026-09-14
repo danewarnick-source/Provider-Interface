@@ -44,6 +44,10 @@ add-client / invite.
   Agency A can still bootstrap when Agency B already has members. The old
   bare `EXISTS (... WHERE om.organization_id = organization_id)` could bind
   both sides to `om` and block every new owner.
+- `setup_create_gate_exempt` is locked for `authenticated`. Org admins
+  cannot UPDATE it to skip setup. `REVOKE UPDATE (setup_create_gate_exempt)`
+  plus a BEFORE UPDATE trigger (`trg_protect_setup_create_gate_exempt`).
+  `service_role` / `postgres` retain. App omitting the field is not enough.
 
 ### Probe
 
@@ -56,7 +60,12 @@ FROM (
   FROM pg_proc p
   JOIN pg_namespace n ON n.oid = p.pronamespace
   WHERE n.nspname = 'public'
-    AND p.proname IN ('org_setup_is_complete', 'org_setup_allows_create', 'enforce_org_setup_before_create')
+    AND p.proname IN (
+      'org_setup_is_complete',
+      'org_setup_allows_create',
+      'enforce_org_setup_before_create',
+      'protect_setup_create_gate_exempt'
+    )
   UNION ALL
   SELECT 'trg', t.tgname
   FROM pg_trigger t
@@ -66,7 +75,8 @@ FROM (
     AND t.tgname IN (
       'trg_clients_require_org_setup',
       'trg_org_members_require_org_setup',
-      'trg_invitations_require_org_setup'
+      'trg_invitations_require_org_setup',
+      'trg_protect_setup_create_gate_exempt'
     )
     AND NOT t.tgisinternal
 ) s;
@@ -81,9 +91,9 @@ and trigger names including `org_setup_allows_create` and
 Clear the editor, paste the full file
 `supabase/migrations/20260914120000_agency_setup_gate.sql`.
 
-**What you'll see:** `CREATE FUNCTION` × 3 (`org_setup_is_complete`,
-`org_setup_allows_create`, `enforce_org_setup_before_create`),
-`CREATE TRIGGER` × 3, `CREATE POLICY` × 3 (restrictive INSERT only),
+**What you'll see:** `CREATE FUNCTION` × 4 (adds
+`protect_setup_create_gate_exempt`), `CREATE TRIGGER` × 4 (adds lock on
+`setup_create_gate_exempt`), `CREATE POLICY` × 3 (restrictive INSERT only),
 plus `service_area` / `setup_create_gate_exempt` columns.
 
 ### Verify
@@ -97,7 +107,8 @@ SELECT
      WHERE tgname IN (
        'trg_clients_require_org_setup',
        'trg_org_members_require_org_setup',
-       'trg_invitations_require_org_setup'
+       'trg_invitations_require_org_setup',
+       'trg_protect_setup_create_gate_exempt'
      ) AND NOT tgisinternal) AS setup_triggers,
   (SELECT string_agg(polname, ',' ORDER BY polname)
      FROM pg_policy
@@ -111,7 +122,7 @@ SELECT
        AND column_name IN ('service_area', 'setup_create_gate_exempt')) AS new_columns;
 ```
 
-**What you'll see:** `f | 3 | clients_insert_requires_setup,invitations_insert_requires_setup,org_members_insert_requires_setup | 2`.
+**What you'll see:** `f | 4 | clients_insert_requires_setup,invitations_insert_requires_setup,org_members_insert_requires_setup | 2`.
 
 ### RLS intent
 
@@ -124,6 +135,8 @@ SELECT
   bootstrap (trigger: `om.organization_id = NEW.organization_id`; RLS:
   `existing_member.organization_id = organization_members.organization_id`).
 - Triggers fire even when service-role writes bypass RLS.
+- `setup_create_gate_exempt` cannot be flipped by `authenticated` (column
+  REVOKE + BEFORE UPDATE trigger). `service_role` / `postgres` retain.
 - No PHI. No catalog publish.
 
 ### Seed

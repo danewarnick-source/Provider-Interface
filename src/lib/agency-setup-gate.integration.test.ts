@@ -446,6 +446,50 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     await client.query("ROLLBACK");
   });
 
+  it("blocks an authenticated admin from flipping setup_create_gate_exempt", async () => {
+    const before = await client.query(
+      `SELECT setup_create_gate_exempt,
+              public.org_setup_is_complete($1) AS complete,
+              public.org_setup_allows_create($1) AS allowed
+       FROM public.organizations WHERE id = $1`,
+      [ORG_C],
+    );
+    assert.equal(before.rows[0].setup_create_gate_exempt, false);
+    assert.equal(before.rows[0].complete, false);
+    assert.equal(before.rows[0].allowed, false);
+
+    await assert.rejects(
+      () =>
+        asUser(client, USER_C, async () => {
+          await client.query(
+            `UPDATE public.organizations SET setup_create_gate_exempt = true WHERE id = $1`,
+            [ORG_C],
+          );
+        }),
+      /locked|privilege|permission denied|42501/i,
+    );
+
+    const after = await client.query(
+      `SELECT setup_create_gate_exempt, public.org_setup_allows_create($1) AS allowed
+       FROM public.organizations WHERE id = $1`,
+      [ORG_C],
+    );
+    assert.equal(after.rows[0].setup_create_gate_exempt, false);
+    assert.equal(after.rows[0].allowed, false);
+
+    await assert.rejects(
+      () =>
+        asUser(client, USER_C, async () => {
+          await client.query(
+            `INSERT INTO public.clients (organization_id, first_name, last_name)
+             VALUES ($1, 'Skip', 'Setup')`,
+            [ORG_C],
+          );
+        }),
+      /Agency setup is incomplete/,
+    );
+  });
+
   it("rolls back org facts when a later setup-save step fails", async () => {
     const before = await client.query(
       `SELECT services_offered, service_area, fact_operates_ol_site

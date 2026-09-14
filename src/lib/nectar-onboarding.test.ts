@@ -33,6 +33,10 @@ describe("NECTAR onboarding — agency setup gate, no SOW upload", () => {
 
   it("keeps the company documents hub as optional storage, not a SOW gate", () => {
     const docs = read("../components/pages/nectar-docs-page.tsx");
+    const bar = read("../components/onboarding/onboarding-return-bar.tsx");
+    assert.match(bar, /useAgencySetup/);
+    assert.match(bar, /AGENCY_SETUP_PATH/);
+    assert.doesNotMatch(bar, /useOnboardingProgress/);
     assert.match(docs, /OnboardingGuidanceBanner step=\{5\}/);
     assert.doesNotMatch(docs, /Upload a PCSP, SOW or certification to seed NECTAR/);
     assert.match(docs, /when you have files to store/);
