@@ -86,6 +86,7 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
         nectarValidationStatus: review.nectarValidationStatus,
         instanceStatus: review.instanceStatus,
         correctionRequested: review.correctionRequested,
+        adminNotes: review.adminNotes,
       })
     : "awaiting_review";
 
@@ -271,8 +272,8 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Acceptance updates the staff file. A renewal task opens only from a printed
-            or confirmed expiration — never from the upload date.
+            Acceptance updates the staff file. A renewal task opens only from a printed or confirmed
+            expiration — never from the upload date.
           </p>
           <Link
             to="/dashboard/compliance"
