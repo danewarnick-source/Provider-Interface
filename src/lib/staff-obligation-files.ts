@@ -1,4 +1,5 @@
 import { toDisplayNameCase } from "./person-name.ts";
+import { isCorrectionRequestedNote } from "./cert-review.ts";
 
 export const OBLIGATION_FILE_STATUS_LABEL = {
   on_file: "On file",
@@ -27,10 +28,18 @@ export function isAwaitingEvidenceReview(args: {
   instanceStatus: "pending" | "completed" | "overdue" | "waived";
   nectarValidationStatus?: string | null;
   correctionRequested?: boolean;
+  adminNotes?: string | null;
 }): boolean {
-  if (args.correctionRequested) return true;
+  if (isCorrectionRequestedEvidence(args)) return false;
   if (args.instanceStatus === "completed" || args.instanceStatus === "waived") return false;
   return args.nectarValidationStatus === "failed" || args.nectarValidationStatus === "needs_review";
+}
+
+export function isCorrectionRequestedEvidence(args: {
+  correctionRequested?: boolean;
+  adminNotes?: string | null;
+}): boolean {
+  return args.correctionRequested === true || isCorrectionRequestedNote(args.adminNotes);
 }
 
 export function staffFileCycleKind(args: {

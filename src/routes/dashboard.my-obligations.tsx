@@ -53,7 +53,12 @@ import { useCompliancePacket } from "@/hooks/use-compliance-packet";
 import { AttentionStrip } from "@/components/staff-mobile/attention-strip";
 import { ThreadsPanel } from "@/components/threads/threads-panel";
 import { MyTasksQueue } from "@/components/staff-tasks/my-tasks-queue";
-import { buildStaffTask, STAFF_TASKS_FOOTER } from "@/lib/staff-my-tasks";
+import { correctionNoteFromAdminNotes, isCorrectionRequestedNote } from "@/lib/cert-review";
+import {
+  buildStaffTask,
+  dedupeOpenTasksByInstance,
+  STAFF_TASKS_FOOTER,
+} from "@/lib/staff-my-tasks";
 import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
 import {
   activeOverrideForTarget,
@@ -238,6 +243,7 @@ function OpenCard({
   courseProgress,
   overridden = false,
   overrideUntil = null,
+  correctionNote = null,
 }: {
   orgId: string;
   instance: MyObligationInstanceRow;
@@ -245,6 +251,7 @@ function OpenCard({
   courseProgress?: { completed: number; total: number } | null;
   overridden?: boolean;
   overrideUntil?: string | null;
+  correctionNote?: string | null;
 }) {
   const recordFn = useServerFn(recordCompletion);
   const policyFn = useServerFn(getAgencyPolicyForInstance);
@@ -393,6 +400,12 @@ function OpenCard({
         )
       )}
       <p className="mt-1 text-sm font-medium text-muted-foreground">{cadenceDescription(ob)}</p>
+      {correctionNote ? (
+        <div className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          <p className="font-medium">Correction requested — re-upload</p>
+          <p className="mt-1">{correctionNote}</p>
+        </div>
+      ) : null}
       {obligationIsRequired(ob) ? (
         <p
           className={`mt-1 text-lg font-semibold ${due.overdue ? "text-destructive" : "text-warning-foreground"}`}
@@ -829,10 +842,15 @@ function MyObligationsPage() {
   const [tab, setTab] = useState<"all" | "missing" | "due_soon" | "on_file">("all");
 
   // A completion in review stays out of "On file" — uploaded ≠ accepted.
+  // Correction requested is a staff action, not a waiting-on-admin state.
   const isPendingReview = (instId: string) => {
-    const status = completionByInstance.get(instId)?.nectar_validation_status;
+    const completion = completionByInstance.get(instId);
+    if (isCorrectionRequestedNote(completion?.admin_notes)) return false;
+    const status = completion?.nectar_validation_status;
     return status === "failed" || status === "needs_review";
   };
+  const isCorrectionNeeded = (instId: string) =>
+    isCorrectionRequestedNote(completionByInstance.get(instId)?.admin_notes);
 
   const formDoneByClientKind = useMemo(() => {
     const done = new Set<string>();
@@ -929,6 +947,7 @@ function MyObligationsPage() {
     qc.invalidateQueries({ queryKey: ["my-obligation-completions"] });
     qc.invalidateQueries({ queryKey: ["my-client-training-statuses"] });
     qc.invalidateQueries({ queryKey: ["in-hive-progress"] });
+    qc.invalidateQueries({ queryKey: ["compliance-packet"] });
   };
 
   if (!user || !org) {
@@ -956,25 +975,27 @@ function MyObligationsPage() {
 
       {tab !== "on_file" ? (
         <MyTasksQueue
-          tasks={open.map((inst) =>
-            buildStaffTask({
-              instanceId: inst.id,
-              title: resolveObligationTitle(inst.obligation, inst),
-              description: inst.obligation.description,
-              source: inst.obligation.source,
-              sourcePolicySection: inst.obligation.source_policy_section,
-              evidenceType: inst.obligation.evidence_type,
-              linkedFormId: inst.obligation.linked_form_id,
-              dueAt: inst.due_at,
-              instanceStatus: inst.status,
-              nectarValidationStatus: completionByInstance.get(inst.id)?.nectar_validation_status,
-              correctionRequested: String(
-                completionByInstance.get(inst.id)?.admin_notes ?? "",
-              ).startsWith("Correction requested:"),
-              courseProgress: courseProgressByInstance.get(inst.id) ?? null,
-              overridden: !!overrideFor(inst),
-              overrideUntil: overrideUntilLabel(overrideFor(inst)?.expires_at),
-            }),
+          tasks={dedupeOpenTasksByInstance(
+            open.map((inst) =>
+              buildStaffTask({
+                instanceId: inst.id,
+                title: resolveObligationTitle(inst.obligation, inst),
+                description: inst.obligation.description,
+                source: inst.obligation.source,
+                sourcePolicySection: inst.obligation.source_policy_section,
+                evidenceType: inst.obligation.evidence_type,
+                linkedFormId: inst.obligation.linked_form_id,
+                dueAt: inst.due_at,
+                instanceStatus: inst.status,
+                nectarValidationStatus: completionByInstance.get(inst.id)?.nectar_validation_status,
+                correctionRequested: isCorrectionRequestedNote(
+                  completionByInstance.get(inst.id)?.admin_notes,
+                ),
+                courseProgress: courseProgressByInstance.get(inst.id) ?? null,
+                overridden: !!overrideFor(inst),
+                overrideUntil: overrideUntilLabel(overrideFor(inst)?.expires_at),
+              }),
+            ),
           )}
           staffLabel={user.email ? `${user.email} · Staff` : "Staff"}
           emptyLabel="Nothing needs you on this list."
@@ -1076,6 +1097,22 @@ function MyObligationsPage() {
                     key={inst.id}
                     instance={inst}
                     completion={completionByInstance.get(inst.id)!}
+                  />
+                );
+              }
+              if (isCorrectionNeeded(inst.id)) {
+                return (
+                  <OpenCard
+                    key={inst.id}
+                    orgId={orgId!}
+                    instance={inst}
+                    onCompleted={onCompleted}
+                    courseProgress={courseProgressByInstance.get(inst.id) ?? null}
+                    overridden={!!overrideFor(inst)}
+                    overrideUntil={overrideUntilLabel(overrideFor(inst)?.expires_at)}
+                    correctionNote={correctionNoteFromAdminNotes(
+                      completionByInstance.get(inst.id)?.admin_notes,
+                    )}
                   />
                 );
               }

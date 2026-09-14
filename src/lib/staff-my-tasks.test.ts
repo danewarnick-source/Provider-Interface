@@ -5,6 +5,7 @@ import {
   STAFF_TASK_ACTION_LABEL,
   STAFF_TASKS_FOOTER,
   buildStaffTask,
+  dedupeOpenTasksByInstance,
   staffTaskAction,
   staffTaskWhyRequired,
   staffTasksWithoutElementDuplicates,
@@ -111,7 +112,23 @@ describe("staff My tasks engine", () => {
       now: NOW,
     });
     assert.equal(pending.pendingReview, true);
+    assert.equal(pending.correctionRequested, false);
     assert.equal(pending.action, "fix_submission");
+
+    const correction = buildStaffTask({
+      instanceId: "i2c",
+      title: "CPR/First Aid Certification — Renewal",
+      evidenceType: "upload",
+      dueAt: "2026-09-20T00:00:00.000Z",
+      instanceStatus: "overdue",
+      nectarValidationStatus: "failed",
+      correctionRequested: true,
+      now: NOW,
+    });
+    assert.equal(correction.pendingReview, false);
+    assert.equal(correction.correctionRequested, true);
+    assert.equal(correction.action, "fix_submission");
+    assert.equal(correction.actionLabel, "Fix submission");
 
     const awaiting = buildStaffTask({
       instanceId: "i3",
@@ -152,6 +169,19 @@ describe("staff My tasks engine", () => {
   });
 });
 
+describe("open-task dedupe", () => {
+  it("keeps one row per instance after correction so a re-upload does not mint a second task", () => {
+    const kept = dedupeOpenTasksByInstance([
+      { instanceId: "cpr-1", title: "CPR original" },
+      { instanceId: "cpr-1", title: "CPR correction duplicate" },
+      { instanceId: "ce-1", title: "CE" },
+    ]);
+    assert.equal(kept.length, 2);
+    assert.equal(kept[0]?.instanceId, "cpr-1");
+    assert.equal(kept[1]?.instanceId, "ce-1");
+  });
+});
+
 describe("catalog parent/child task collapse", () => {
   it("drops element cards so orientation topics do not mint a second queue item", () => {
     const kept = staffTasksWithoutElementDuplicates([
@@ -178,14 +208,21 @@ describe("Staff My tasks surface lock", () => {
       new URL("../components/staff-tasks/staff-home-my-tasks.tsx", import.meta.url),
       "utf8",
     );
+    const queue = readFileSync(
+      new URL("../components/staff-tasks/my-tasks-queue.tsx", import.meta.url),
+      "utf8",
+    );
     const nav = readFileSync(new URL("../routes/dashboard.tsx", import.meta.url), "utf8");
     assert.match(page, /MyTasksQueue/);
+    assert.match(page, /isCorrectionNeeded|Correction requested — re-upload/);
     assert.match(page, /My tasks/);
     assert.match(page, /STAFF_TASKS_FOOTER/);
     assert.match(page, /title: "Staff file/);
     assert.match(home, /StaffHomeMyTasks/);
     assert.match(page, /overridden/);
     assert.match(homeTasks, /overridden/);
+    assert.match(queue, /Correction requested — re-upload/);
+    assert.match(queue, /Pending review/);
     assert.match(nav, /to: "\/dashboard\/my-obligations", label: "Staff file"/);
     assert.doesNotMatch(page, /from\("staff_tasks"\)/);
     assert.doesNotMatch(page, /from\("my_tasks"\)/);

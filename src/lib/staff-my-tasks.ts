@@ -10,6 +10,7 @@ import { dueLabel } from "./staff-obligation-files.ts";
 import { inHiveCourseIdForTitle, staffCourseProgressLabel } from "./in-hive-training.ts";
 import { clientFormKindForTitle } from "./client-form-obligations.ts";
 import { isFormUuid } from "./resolve-obligation-form.ts";
+import { staffSurfaceReviewKind } from "./cert-review.ts";
 
 export const STAFF_TASK_ACTIONS = [
   "take_training",
@@ -61,6 +62,7 @@ export type StaffTask = {
   actionLabel: string;
   progressLabel: string | null;
   pendingReview: boolean;
+  correctionRequested: boolean;
   evidence: StaffTaskEvidence;
   overridden: boolean;
   overrideUntil: string | null;
@@ -68,6 +70,20 @@ export type StaffTask = {
 
 export function isPendingCertReview(status: string | null | undefined): boolean {
   return status === "failed" || status === "needs_review";
+}
+
+/** Open My-tasks cards for the same instance collapse to one actionable row. */
+export function dedupeOpenTasksByInstance<T extends { instanceId: string }>(
+  tasks: readonly T[],
+): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const task of tasks) {
+    if (seen.has(task.instanceId)) continue;
+    seen.add(task.instanceId);
+    out.push(task);
+  }
+  return out;
 }
 
 export function staffTaskWhyRequired(input: {
@@ -117,7 +133,11 @@ export function staffTaskProgressLabel(input: StaffTaskInput): string | null {
 export function buildStaffTask(input: StaffTaskInput): StaffTask {
   const due = dueLabel(input.dueAt, input.now);
   const action = staffTaskAction(input);
-  const pendingReview = isPendingCertReview(input.nectarValidationStatus);
+  const review = staffSurfaceReviewKind({
+    nectarValidationStatus: input.nectarValidationStatus,
+    instanceStatus: input.instanceStatus,
+    correctionRequested: input.correctionRequested,
+  });
   return {
     instanceId: input.instanceId,
     title: input.title,
@@ -127,7 +147,8 @@ export function buildStaffTask(input: StaffTaskInput): StaffTask {
     action,
     actionLabel: STAFF_TASK_ACTION_LABEL[action],
     progressLabel: staffTaskProgressLabel(input),
-    pendingReview,
+    pendingReview: review === "awaiting_review",
+    correctionRequested: review === "correction_requested",
     evidence: staffTaskEvidence(input),
     overridden: !!input.overridden,
     overrideUntil: input.overrideUntil ?? null,

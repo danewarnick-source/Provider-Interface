@@ -49,7 +49,11 @@ export function MyTasksQueue({
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="font-semibold leading-snug">{task.title}</p>
-                  {task.pendingReview ? (
+                  {task.correctionRequested ? (
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                      Correction requested — re-upload
+                    </p>
+                  ) : task.pendingReview ? (
                     <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
                       Pending review
                     </p>

@@ -254,6 +254,57 @@ describe("buildPacket", () => {
     assert.equal(packet.nextAction?.urgency, "critical");
   });
 
+  it("next action after correction asks for a re-upload, not pending review", () => {
+    const packet = buildPacket({
+      organizationId: TNS_ORG_ID,
+      subject: "staff",
+      subjectId: STAFF,
+      viewerUserId: VIEWER,
+      scope: orgWideResolvedScope(TNS_ORG_ID, VIEWER),
+      facts: TNS_FACTS,
+      clocks: [
+        clock({
+          obligationKey: "cpr_first_aid_initial",
+          title: "CPR/First Aid Certification — Initial",
+          instanceStatus: "overdue",
+          dueAt: "2026-08-01T00:00:00.000Z",
+          reviewState: "correction_requested",
+        }),
+        clock({
+          obligationKey: "ce_12h_annual",
+          title: "Annual 12-Hour Continuing Education",
+          instanceStatus: "overdue",
+          dueAt: "2026-07-01T00:00:00.000Z",
+        }),
+      ],
+      now: NOW,
+    });
+    assert.equal(packet.nextAction?.obligationKey, "cpr_first_aid_initial");
+    assert.equal(packet.nextAction?.reason, "Correction requested — re-upload this first.");
+    assert.equal(packet.nextAction?.urgency, "critical");
+
+    const awaiting = buildPacket({
+      organizationId: TNS_ORG_ID,
+      subject: "staff",
+      subjectId: STAFF,
+      viewerUserId: VIEWER,
+      scope: orgWideResolvedScope(TNS_ORG_ID, VIEWER),
+      facts: TNS_FACTS,
+      clocks: [
+        clock({
+          obligationKey: "cpr_first_aid_initial",
+          title: "CPR/First Aid Certification — Initial",
+          instanceStatus: "overdue",
+          dueAt: "2026-08-01T00:00:00.000Z",
+          reviewState: "awaiting_review",
+        }),
+      ],
+      now: NOW,
+    });
+    assert.equal(awaiting.nextAction?.reason, "Awaiting review.");
+    assert.doesNotMatch(awaiting.nextAction?.reason ?? "", /Pending review/);
+  });
+
   it("Harvey house-manager packet exposes one next action", () => {
     const harvey = "harvey-alisa-house-manager";
     const scope = resolveScope({

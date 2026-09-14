@@ -8,6 +8,63 @@ import { addMonthsUTC } from "./obligation-due-dates.ts";
 
 export type CertReviewStatus = "awaiting_review" | "accepted" | "correction_requested";
 
+/** Written onto company_obligation_completions.admin_notes by requestObligationCorrection. */
+export const CORRECTION_REQUESTED_PREFIX = "Correction requested:";
+
+export function isCorrectionRequestedNote(adminNotes: string | null | undefined): boolean {
+  return String(adminNotes ?? "").startsWith(CORRECTION_REQUESTED_PREFIX);
+}
+
+export function correctionNoteFromAdminNotes(adminNotes: string | null | undefined): string | null {
+  if (!isCorrectionRequestedNote(adminNotes)) return null;
+  const note = String(adminNotes).slice(CORRECTION_REQUESTED_PREFIX.length).trim();
+  return note || null;
+}
+
+/** One reminder row per instance + staff after correction/reject. */
+export function correctionReminderRecurrenceKey(instanceId: string, staffId: string): string {
+  return `obligation_correction_${instanceId}_${staffId}`;
+}
+
+/**
+ * Re-upload after correction/reject updates this completion instead of
+ * inserting a second row for the same obligation period.
+ */
+export function shouldReplaceCompletionForResubmit(args: {
+  nectarValidationStatus?: string | null;
+  adminNotes?: string | null;
+}): boolean {
+  return isCorrectionRequestedNote(args.adminNotes);
+}
+
+export type StaffSurfaceReviewKind = "none" | CertReviewStatus;
+
+/** Staff-facing review state. Correction wins over a leftover Nectar failed/needs_review flag. */
+export function staffSurfaceReviewKind(args: {
+  nectarValidationStatus?: string | null;
+  instanceStatus?: string | null;
+  adminNotes?: string | null;
+  correctionRequested?: boolean;
+}): StaffSurfaceReviewKind {
+  const correctionRequested =
+    args.correctionRequested === true || isCorrectionRequestedNote(args.adminNotes);
+  const status = certReviewStatus({
+    nectarValidationStatus: args.nectarValidationStatus,
+    instanceStatus: args.instanceStatus,
+    correctionRequested,
+  });
+  if (status === "correction_requested") return "correction_requested";
+  if (status === "accepted") return "accepted";
+  if (
+    args.nectarValidationStatus === "failed" ||
+    args.nectarValidationStatus === "needs_review" ||
+    args.nectarValidationStatus === "passed"
+  ) {
+    return "awaiting_review";
+  }
+  return "none";
+}
+
 /** Same token in-Hive / PI course completions write onto company_obligation_completions. */
 export const NATIVE_PLATFORM_EVIDENCE = "in_hive_course";
 

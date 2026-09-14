@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   hasValidObligationEvidence,
   isAwaitingEvidenceReview,
+  isCorrectionRequestedEvidence,
   dueLabel,
   liveObligationTitle,
   missingPersonnelCsv,
@@ -124,6 +125,28 @@ describe("hasValidObligationEvidence", () => {
       isAwaitingEvidenceReview({
         instanceStatus: "pending",
         nectarValidationStatus: "needs_review",
+      }),
+      true,
+    );
+    assert.equal(
+      isAwaitingEvidenceReview({
+        instanceStatus: "pending",
+        nectarValidationStatus: "failed",
+        correctionRequested: true,
+      }),
+      false,
+    );
+    assert.equal(
+      isAwaitingEvidenceReview({
+        instanceStatus: "overdue",
+        nectarValidationStatus: "failed",
+        adminNotes: "Correction requested: Show the expiration date.",
+      }),
+      false,
+    );
+    assert.equal(
+      isCorrectionRequestedEvidence({
+        adminNotes: "Correction requested: Show the expiration date.",
       }),
       true,
     );
@@ -337,6 +360,7 @@ describe("Org-wide Staff file lock", () => {
       "utf8",
     );
     assert.match(filesTab, /Record override/);
+    assert.match(filesTab, /Correction requested/);
     assert.match(filesTab, /override-state/);
     assert.match(filesTab, /OVERRIDE_STILL_REQUIRED/);
   });
