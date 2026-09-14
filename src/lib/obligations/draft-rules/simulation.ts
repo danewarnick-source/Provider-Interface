@@ -10,10 +10,7 @@
 
 import { addDaysUTC, addMonthsUTC, addYearsUTC, utcDay } from "../../obligation-due-dates.ts";
 import { sowCatalogEntryByKey } from "../../sow-obligation-catalog.ts";
-import {
-  liveObligationKeyForRequirement,
-  staffTaskPolicyForRule,
-} from "../catalog-live-bridge.ts";
+import { liveObligationKeyForRequirement, staffTaskPolicyForRule } from "../catalog-live-bridge.ts";
 import { buildStaffTask, type StaffTask } from "../../staff-my-tasks.ts";
 import { allRequiredTopicsComplete } from "../../in-hive-training.ts";
 import type { OrgFacts } from "../applicability.ts";

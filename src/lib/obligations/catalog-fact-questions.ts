@@ -114,9 +114,19 @@ export function evaluateCatalogFact(
   if (source === "awarded_service_codes") {
     status = awardedCodeDutyStatus(awardedCodes, orgFacts.servicesOffered);
   } else if (source === "operates_ol_site") {
-    status = orgFacts.operates_ol_site === null ? "unanswered" : orgFacts.operates_ol_site ? "applies" : "does_not_apply";
+    status =
+      orgFacts.operates_ol_site === null
+        ? "unanswered"
+        : orgFacts.operates_ol_site
+          ? "applies"
+          : "does_not_apply";
   } else if (source === "uses_volunteers") {
-    status = orgFacts.uses_volunteers === null ? "unanswered" : orgFacts.uses_volunteers ? "applies" : "does_not_apply";
+    status =
+      orgFacts.uses_volunteers === null
+        ? "unanswered"
+        : orgFacts.uses_volunteers
+          ? "applies"
+          : "does_not_apply";
   } else if (source === "has_governing_board") {
     status =
       orgFacts.has_governing_board === null
@@ -136,7 +146,8 @@ export function evaluateCatalogFact(
 
   const prompt =
     status === "unanswered"
-      ? fact.question.trim() || "This applicability fact is unanswered. Record it — do not mark N/A."
+      ? fact.question.trim() ||
+        "This applicability fact is unanswered. Record it — do not mark N/A."
       : fact.question.trim();
 
   return {
@@ -162,10 +173,7 @@ export function unansweredCatalogFactQuestions(
  * Owner-facing prompts for unanswered catalog facts. Awarded-code facts
  * collapse to the existing company-profile question when codes are empty.
  */
-export function catalogFactPrompts(
-  facts: readonly CatalogFact[],
-  orgFacts: OrgFacts,
-): string[] {
+export function catalogFactPrompts(facts: readonly CatalogFact[], orgFacts: OrgFacts): string[] {
   const unanswered = unansweredCatalogFactQuestions(facts, orgFacts);
   const prompts: string[] = [];
   const awardedOpen = unanswered.some((row) => row.source === "awarded_service_codes");

@@ -16,12 +16,12 @@ import {
   type LiveImplementationStatus,
 } from "./catalog-live-bridge.ts";
 import { EMPTY_ORG_FACTS, type OrgFacts } from "./applicability.ts";
-import type { CatalogSheetRow, LoadedCatalog, LoadedDraftRule } from "./draft-rules/catalog-loader.ts";
-import {
-  canActivate,
-  canPublish,
-  structuralPublicationGaps,
-} from "./draft-rules/publication.ts";
+import type {
+  CatalogSheetRow,
+  LoadedCatalog,
+  LoadedDraftRule,
+} from "./draft-rules/catalog-loader.ts";
+import { canActivate, canPublish, structuralPublicationGaps } from "./draft-rules/publication.ts";
 import { applyVerifiedPublicationOverlay } from "./draft-rules/verified-publication.ts";
 
 export type CatalogCoverageRow = {
@@ -79,7 +79,8 @@ function timingLabel(rule: LoadedDraftRule): string {
   const recurrence = cell(rule.workbookRow, "recurrence");
   if (rule.timing.kind === "hire_plus_days") return `hire + ${rule.timing.days} days`;
   if (rule.timing.kind === "employment_year") return `employment year ${rule.timing.startYear}`;
-  if (rule.timing.kind === "certificate_expiry") return `certificate expiry (${rule.timing.certKey})`;
+  if (rule.timing.kind === "certificate_expiry")
+    return `certificate expiry (${rule.timing.certKey})`;
   if (rule.timing.kind === "calendar_period") return rule.timing.cadence;
   const narrative = [deadline, trigger, recurrence].filter(Boolean).join(" / ");
   return narrative || rule.timing.reason;
@@ -94,8 +95,12 @@ function elementRow(el: CatalogSheetRow, parent: LoadedDraftRule | undefined): C
     title: cell(el, "clause_text") || cell(el, "requirement_name") || cell(el, "title"),
     sourceClauseId: cell(el, "clause_id") || cell(el, "source_clause_id"),
     sectionRef: cell(el, "section_ref"),
-    applicabilityFacts: parent?.applicabilityFacts.map((f) => evaluateCatalogFact(f, EMPTY_ORG_FACTS)) ?? [],
-    owner: cell(el, "default_owner_role") || cell(parent?.workbookRow, "default_owner_role") || "Administrator",
+    applicabilityFacts:
+      parent?.applicabilityFacts.map((f) => evaluateCatalogFact(f, EMPTY_ORG_FACTS)) ?? [],
+    owner:
+      cell(el, "default_owner_role") ||
+      cell(parent?.workbookRow, "default_owner_role") ||
+      "Administrator",
     completionMethod: "Element of parent — checklist / form field, not a staff task",
     timing: cell(parent?.workbookRow, "deadline") || "Follows parent",
     renewal: cell(parent?.workbookRow, "renewal_rule") || "Follows parent",
@@ -115,13 +120,18 @@ function parentRow(rule: LoadedDraftRule, orgFacts: OrgFacts): CatalogCoverageRo
   const policy = staffTaskPolicyForRule(published);
   const liveKey = liveObligationKeyForRule(published);
   const blocked = gaps.length > 0 && !liveKey;
-  const status = implementationStatusForRule(published, gaps.some((g) => g.key === "publication_gap" || g.key === "release_gaps") && !liveKey);
+  const status = implementationStatusForRule(
+    published,
+    gaps.some((g) => g.key === "publication_gap" || g.key === "release_gaps") && !liveKey,
+  );
   const factQuestions = published.applicabilityFacts.map((f) => evaluateCatalogFact(f, orgFacts));
   const factPrompts = catalogFactPrompts(published.applicabilityFacts, orgFacts);
   const blockers = [
     ...gaps.map((g) => g.reason),
     ...(!liveKey && status === "draft_unwired"
-      ? ["No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."]
+      ? [
+          "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
+        ]
       : []),
     ...factPrompts.map((q) => `Unanswered applicability fact: ${q}`),
   ];
@@ -130,12 +140,15 @@ function parentRow(rule: LoadedDraftRule, orgFacts: OrgFacts): CatalogCoverageRo
     role: "parent",
     parentKey: null,
     title: published.title,
-    sourceClauseId: published.source.clauseIds[0] ?? cell(published.workbookRow, "source_clause_id"),
+    sourceClauseId:
+      published.source.clauseIds[0] ?? cell(published.workbookRow, "source_clause_id"),
     sectionRef: cell(published.workbookRow, "section_ref"),
     applicabilityFacts: factQuestions,
     owner: cell(published.workbookRow, "default_owner_role") || "Administrator",
     completionMethod:
-      cell(published.workbookRow, "completion_method") || published.evidence.summary || published.completionRoutes.join(", "),
+      cell(published.workbookRow, "completion_method") ||
+      published.evidence.summary ||
+      published.completionRoutes.join(", "),
     timing: timingLabel(published),
     renewal: cell(published.workbookRow, "renewal_rule") || "None stated",
     liveKey,
@@ -144,7 +157,10 @@ function parentRow(rule: LoadedDraftRule, orgFacts: OrgFacts): CatalogCoverageRo
     canPublish: canPublish(published),
     canActivate: canActivate(published),
     mintsStaffTask: policy.mintsStaffTask && !liveKey && canActivate(published),
-    blockers: blocked || status === "draft_unwired" || factPrompts.length > 0 ? blockers : gaps.map((g) => g.reason),
+    blockers:
+      blocked || status === "draft_unwired" || factPrompts.length > 0
+        ? blockers
+        : gaps.map((g) => g.reason),
   };
 }
 
@@ -217,7 +233,9 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     );
   }
   lines.push("", "## Elements (no staff task)", "");
-  lines.push(`${c.importedElements} child elements attach to a parent requirement. They are not listed individually here to avoid a duplicate task register.`);
+  lines.push(
+    `${c.importedElements} child elements attach to a parent requirement. They are not listed individually here to avoid a duplicate task register.`,
+  );
   lines.push("");
   return `${lines.join("\n")}\n`;
 }

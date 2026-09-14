@@ -185,9 +185,7 @@ function citationSectionsFromText(citation: string): string[] {
 }
 
 function citationLiveMatches(ruleId: string, clauseIds: readonly string[]): SowCatalogEntry[] {
-  const want = new Set(
-    [ruleId, ...clauseIds].map(normalizeSection).filter((s) => s.length > 0),
-  );
+  const want = new Set([ruleId, ...clauseIds].map(normalizeSection).filter((s) => s.length > 0));
   if (want.size === 0) return [];
   return allSowCatalogEntries().filter((entry) => {
     const sections = citationSectionsFromText(entry.citation);
@@ -205,10 +203,9 @@ export function liveObligationKeyForRequirement(
 ): string | null {
   const explicit = EXPLICIT_REQ_TO_LIVE_KEY[ruleId];
   if (explicit && sowCatalogEntryByKey(explicit)) return explicit;
-  const hinted = [
-    ...(extras?.catalogKeys ?? []),
-    ...(extras?.predicateKeys ?? []),
-  ].filter((k): k is string => !!k && sowCatalogEntryByKey(k) != null);
+  const hinted = [...(extras?.catalogKeys ?? []), ...(extras?.predicateKeys ?? [])].filter(
+    (k): k is string => !!k && sowCatalogEntryByKey(k) != null,
+  );
   if (hinted[0]) return hinted[0];
   const matches = citationLiveMatches(ruleId, extras?.clauseIds ?? []);
   if (matches.length === 1) return matches[0].key;
@@ -241,7 +238,10 @@ export function implementationStatusForRule(
   if (live) {
     return live.disposition === "obligation" ? "live_mapped" : "live_artifact";
   }
-  if (!policy.createsUserTask && rowString((rule as LoadedDraftRule).workbookRow, "handling_label") === "SYSTEM") {
+  if (
+    !policy.createsUserTask &&
+    rowString((rule as LoadedDraftRule).workbookRow, "handling_label") === "SYSTEM"
+  ) {
     return "system_behavior";
   }
   if (!policy.mintsStaffTask && !policy.createsUserTask) return "system_behavior";
@@ -249,9 +249,11 @@ export function implementationStatusForRule(
 }
 
 /** Drop child-element cards when a parent (or live key) is already in the queue. */
-export function filterDuplicateElementTasks<T extends {
-  requirementRole?: string;
-  parentRequirementKey?: string | null;
-}>(tasks: readonly T[]): T[] {
+export function filterDuplicateElementTasks<
+  T extends {
+    requirementRole?: string;
+    parentRequirementKey?: string | null;
+  },
+>(tasks: readonly T[]): T[] {
   return tasks.filter((task) => task.requirementRole !== "element");
 }

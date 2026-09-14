@@ -67,9 +67,9 @@ function DraftRulesSimulationPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           {WORKBOOK_SOURCE_TITLE} design revision {WORKBOOK_DESIGN_REVISION}. Imported catalog
           parents reuse the live obligation engine (assignments, evidence, training, forms,
-          reminders, admin review). Child elements stay on the parent and do not mint a second
-          staff task. Publication is per verified rule — unrelated Release_Gaps do not lock the
-          catalog. Source_index is archive metadata, not permission.
+          reminders, admin review). Child elements stay on the parent and do not mint a second staff
+          task. Publication is per verified rule — unrelated Release_Gaps do not lock the catalog.
+          Source_index is archive metadata, not permission.
         </p>
       </div>
 
@@ -127,8 +127,8 @@ function DraftRulesSimulationPage() {
                 <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
                   {row.gaps.length === 0 ? (
                     <li>
-                      Structurally complete. Unrelated workbook Release_Gaps do not block this
-                      rule. Record an explicit approval to publish this rule only.
+                      Structurally complete. Unrelated workbook Release_Gaps do not block this rule.
+                      Record an explicit approval to publish this rule only.
                     </li>
                   ) : (
                     row.gaps.map((gap) => <li key={gap.key}>{gap.reason}</li>)
