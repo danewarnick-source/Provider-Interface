@@ -41,6 +41,7 @@ export const EXPLICIT_REQ_TO_LIVE_KEY: Readonly<Record<string, string>> = {
   "REQ-1.23": "health_support_policies",
   "REQ-1.27": "incident_reporting_process",
   "REQ-1.30": "driving_record_transport",
+  "REQ-28.4": "acre_sed",
   "REQ-1.35": "housemate_informed_choice",
   "REQ-8.6": "dsi_annual_outcome",
   "REQ-11.3": "hhs_evac_drills_quarterly",
@@ -256,4 +257,22 @@ export function filterDuplicateElementTasks<
   },
 >(tasks: readonly T[]): T[] {
   return tasks.filter((task) => task.requirementRole !== "element");
+}
+
+/** One My tasks card per live company_obligations key. Shared parents stay on that card. */
+export function collapseParentTasksByLiveKey<
+  T extends {
+    liveKey?: string | null;
+    requirementRole?: string;
+  },
+>(tasks: readonly T[]): T[] {
+  const seen = new Set<string>();
+  return tasks.filter((task) => {
+    if (task.requirementRole === "element") return false;
+    const key = task.liveKey;
+    if (!key) return true;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }

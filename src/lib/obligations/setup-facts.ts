@@ -4,10 +4,7 @@
 // stay on the live records the engine already reads.
 
 import { allSowCatalogEntries } from "../sow-obligation-catalog.ts";
-import {
-  resolveCatalogExceptions,
-  type CatalogExceptions,
-} from "./catalog-exceptions.ts";
+import { resolveCatalogExceptions, type CatalogExceptions } from "./catalog-exceptions.ts";
 
 export const AWARDED_SERVICE_CODES_FACT_KEY = "awarded_service_codes" as const;
 
@@ -29,6 +26,9 @@ export type LivePathId =
   | "transport"
   | "client_specific"
   | "acre_sei"
+  | "acre_sed"
+  | "cmp_cms"
+  | "designated_benefits"
   | "code_of_conduct"
   | "org_profile"
   | "awarded_codes"
@@ -108,6 +108,34 @@ export const LIVE_PATH_SETUP_QUESTIONS: LivePathSetupQuestion[] = [
     help: "ACRE follows the SEI assignment code. There is no SEI fact_key and no 'does SEI apply?' question.",
     source: "staff_assignment",
     factKey: "sei_assignment",
+    ownerAnswers: false,
+  },
+  {
+    path: "acre_sed",
+    dutyKeys: ["acre_sed"],
+    question: "Which staff are assigned to an SED authorization?",
+    help: "ACRE-SED follows the SED assignment code. Unknown assignment stays unanswered.",
+    source: "staff_assignment",
+    factKey: "sed_assignment",
+    ownerAnswers: false,
+  },
+  {
+    path: "cmp_cms",
+    dutyKeys: ["cmp_cms_caregiver_comp"],
+    question: "Which staff are assigned CMP or CMS?",
+    help: "Official DSPD caregiver-compensation training follows CMP/CMS assignment, not SLN alone.",
+    source: "staff_assignment",
+    factKey: "cmp_cms_assignment",
+    ownerAnswers: false,
+  },
+  {
+    path: "designated_benefits",
+    dutyKeys: ["sei_ssi_benefits"],
+    question:
+      "Which staff is designated as the qualified SSI / Title II / Medicaid earned-income person?",
+    help: "SEI benefits knowledge is a designated-person count, not every SEI or office staff member. Unknown designation stays unanswered.",
+    source: "staff_assignment",
+    factKey: "designated_benefits_staff",
     ownerAnswers: false,
   },
   {

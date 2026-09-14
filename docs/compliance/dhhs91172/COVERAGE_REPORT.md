@@ -20,6 +20,8 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Draft unwired | 292 |
 | Element of parent | 607 |
 | Wired first batch (unpublished) | 5 |
+| Wired second batch (unpublished) | 6 |
+| Wired shared-behavior batches (unpublished) | 11 |
 
 ## Parents
 
@@ -172,7 +174,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-1.28.10 | DHHS91172-A-0308 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.29.1 | DHHS91172-A-0310 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.29.2 | DHHS91172-A-0311 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.30 | DHHS91172-A-0312 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. | driving_record_transport | live_mapped | Rule has no applicability predicates. |
+| REQ-1.30 | DHHS91172-A-0312 | Administrator | Mark complete with attachment/attestation | employment year 1 | driving_record_transport | live_mapped | Unanswered applicability fact: Does the agency provide transportation? |
 | REQ-1.30.1 | DHHS91172-A-0313 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.30.2 | DHHS91172-A-0314 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff first transports a Person / annual |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.30.3 | DHHS91172-A-0315 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff first transports a Person / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
@@ -659,7 +661,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-28.3.1 | DHHS91172-A-1388 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-28.3.2 | DHHS91172-A-1389 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-28.3.3 | DHHS91172-A-1390 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-28.4 | DHHS91172-A-1391 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff delivers SED / once; re-verify on renewal/expiry | acre_sed | live_mapped | Rule has no applicability predicates. |
+| REQ-28.4 | DHHS91172-A-1391 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff delivers SED / once; re-verify on renewal/expiry | acre_sed | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-28.5.c | DHHS91172-A-1398 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-29.2.a | DHHS91172-A-1402 | Employment specialist / job coach | Mark complete with attachment/attestation | start of SEE |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-29.2.b | DHHS91172-A-1403 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -692,10 +694,10 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-30.4.3 | DHHS91172-A-1465 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.4.4 | DHHS91172-A-1466 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.4.5 | DHHS91172-A-1467 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-30.5 | DHHS91172-A-1468 | Administrator | Upload credential/training record to staff profile | before start / service/assignment start / once; re-verify on renewal/expiry | sei_ssi_benefits | live_mapped | Rule has no applicability predicates. |
+| REQ-30.5 | DHHS91172-A-1468 | Administrator | Upload credential/training record to staff profile | before start / service/assignment start / once; re-verify on renewal/expiry | sei_ssi_benefits | live_mapped | Unanswered applicability fact: Which staff is designated as the qualified SSI / Title II / Medicaid earned-income person? |
 | REQ-30.6.a | DHHS91172-A-1469 | Administrator | External: USOR, record completion in platform | Existing SEI before 2026-07-01: 2027-01-31; new SEI awards: award date + 6 calendar months / SEI service history; SEI award date / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-30.6.b | DHHS91172-A-1470 | Administrator | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | acre_sei | live_mapped | Rule has no applicability predicates. |
-| REQ-30.6.c | DHHS91172-A-1471 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | Before providing SEI / first_SEI_service_at / once; re-verify on renewal/expiry | acre_sei | live_mapped | Rule has no applicability predicates. |
+| REQ-30.6.b | DHHS91172-A-1470 | Administrator | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | acre_sei | live_mapped | Unanswered applicability fact: Which staff are assigned to an SEI authorization? |
+| REQ-30.6.c | DHHS91172-A-1471 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | Before providing SEI / first_SEI_service_at / once; re-verify on renewal/expiry | acre_sei | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-30.7.c | DHHS91172-A-1481 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-30.8 | DHHS91172-A-1482 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.8.1 | DHHS91172-A-1483 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
@@ -724,7 +726,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-32.4.4 | DHHS91172-A-1539 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.4.5 | DHHS91172-A-1540 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.4.6 | DHHS91172-A-1541 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-32.5 | DHHS91172-A-1542 | Staff (verified by Administrator/HR) | Complete official DSPD New Caregiver Compensation training; retain successful result | Before applicable service under rule effective 2026-07-01 / July 1, 2026 or before staff delivers CMP/CMS / once; re-verify on renewal/expiry | cmp_cms_caregiver_comp | live_mapped | Rule has no applicability predicates. |
+| REQ-32.5 | DHHS91172-A-1542 | Staff (verified by Administrator/HR) | Complete official DSPD New Caregiver Compensation training; retain successful result | Before applicable service under rule effective 2026-07-01 / July 1, 2026 or before staff delivers CMP/CMS / once; re-verify on renewal/expiry | cmp_cms_caregiver_comp | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-32.6.a | DHHS91172-A-1544 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.6.b | DHHS91172-A-1545 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.6.c | DHHS91172-A-1546 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |

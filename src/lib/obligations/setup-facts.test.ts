@@ -17,12 +17,15 @@ describe("live-path setup questions", () => {
     const paths = LIVE_PATH_SETUP_QUESTIONS.map((q) => q.path).sort();
     assert.deepEqual(paths, [
       "abi",
+      "acre_sed",
       "acre_sei",
       "awarded_codes",
       "billing_1056",
       "client_specific",
+      "cmp_cms",
       "code_of_conduct",
       "cpr",
+      "designated_benefits",
       "org_profile",
       "orientation",
       "transport",

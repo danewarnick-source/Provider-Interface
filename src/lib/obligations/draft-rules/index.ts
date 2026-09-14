@@ -127,6 +127,15 @@ export {
   firstExecutableBatchParents,
 } from "../first-executable-batch.ts";
 export {
+  applySecondExecutableBatchOverlay,
+  applySecondExecutableBatchOverlayAll,
+  SECOND_BATCH_DEMO_PATH,
+  SECOND_EXECUTABLE_BATCH_ID,
+  SECOND_EXECUTABLE_BATCH_LIVE_KEYS,
+  SECOND_EXECUTABLE_BATCH_RULE_IDS,
+  secondExecutableBatchParents,
+} from "../second-executable-batch.ts";
+export {
   countQualifiedDesignatedBenefits,
   employmentYearDue,
   hirePlusDaysDue,
