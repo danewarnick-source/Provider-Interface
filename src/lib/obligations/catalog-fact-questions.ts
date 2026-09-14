@@ -74,7 +74,12 @@ const ORG_FACT_IDS: Record<string, CatalogFactLiveSource> = {
   "FACT-070": "has_governing_board",
 };
 
-const TRANSPORT_FACT_IDS = new Set(["FACT-003", "FACT-080", "FACT-081"]);
+const TRANSPORT_FACT_IDS = new Set([
+  "FACT-003",
+  "FACT-080",
+  "FACT-081",
+  "LIVE-transport_assignment",
+]);
 const ABI_FACT_IDS = new Set(["FACT-056", "FACT-067", "LIVE-abi_caseload"]);
 const STAFF_ASSIGNMENT_FACT_IDS = new Set([
   "FACT-009",
@@ -82,6 +87,10 @@ const STAFF_ASSIGNMENT_FACT_IDS = new Set([
   "FACT-085",
   "LIVE-direct_support_assignment",
   "LIVE-behavior_risk_assignment",
+  "LIVE-sei_assignment",
+  "LIVE-sed_assignment",
+  "LIVE-cmp_cms_assignment",
+  "LIVE-designated_benefits_staff",
 ]);
 
 function awardedCodesFromQuestion(question: string): string[] {
@@ -95,9 +104,14 @@ function awardedCodesFromQuestion(question: string): string[] {
 
 export function liveSourceForCatalogFact(fact: CatalogFact): CatalogFactLiveSource {
   if (fact.fact_id === "LIVE-abi_caseload") return "abi_caseload";
+  if (fact.fact_id === "LIVE-transport_assignment") return "transport_assignment";
   if (
     fact.fact_id === "LIVE-direct_support_assignment" ||
-    fact.fact_id === "LIVE-behavior_risk_assignment"
+    fact.fact_id === "LIVE-behavior_risk_assignment" ||
+    fact.fact_id === "LIVE-sei_assignment" ||
+    fact.fact_id === "LIVE-sed_assignment" ||
+    fact.fact_id === "LIVE-cmp_cms_assignment" ||
+    fact.fact_id === "LIVE-designated_benefits_staff"
   ) {
     return "staff_assignment";
   }

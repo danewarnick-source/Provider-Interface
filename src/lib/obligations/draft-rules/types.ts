@@ -29,6 +29,8 @@ export const PREDICATE_KINDS = [
   "designated_benefits_staff",
   "usor_sei_vendor",
   "cmp_cms_assignment",
+  "transport_assignment",
+  "sed_assignment",
   "sjd_assignment",
   "periodic_report",
   "service_documentation",

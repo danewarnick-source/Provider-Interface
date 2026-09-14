@@ -9,11 +9,19 @@ import { loadCommittedCatalog } from "@/lib/obligations/draft-rules/catalog-comm
 import {
   CORE_RULE_LOGIC_SLICE,
   FIRST_EXECUTABLE_BATCH_RULE_IDS,
+  SECOND_BATCH_DEMO_PATH,
+  SECOND_EXECUTABLE_BATCH_RULE_IDS,
   WORKBOOK_DESIGN_REVISION,
   WORKBOOK_SOURCE_TITLE,
   draftRuleAdminRow,
   firstExecutableBatchParents,
+  secondExecutableBatchParents,
 } from "@/lib/obligations/draft-rules";
+
+const WIRED_BATCH_IDS = new Set<string>([
+  ...FIRST_EXECUTABLE_BATCH_RULE_IDS,
+  ...SECOND_EXECUTABLE_BATCH_RULE_IDS,
+]);
 
 export const Route = createFileRoute("/dashboard/settings/draft-rules")({
   head: () => ({ meta: [{ title: "Draft rules (simulation) — Provider Interface" }] }),
@@ -34,12 +42,21 @@ function DraftRulesSimulationPage() {
     },
   });
 
+  const secondBatchQuery = useQuery({
+    queryKey: ["draft-rules-second-batch", WORKBOOK_DESIGN_REVISION],
+    queryFn: async () => {
+      const loaded = loadCommittedCatalog();
+      return secondExecutableBatchParents(loaded.parents).map((rule) => ({
+        ...draftRuleAdminRow(rule),
+        liveKey: rule.catalogKeys[0] ?? null,
+      }));
+    },
+  });
+
   const rowsQuery = useQuery({
     queryKey: ["draft-rules-simulation", WORKBOOK_DESIGN_REVISION],
     queryFn: async () =>
-      CORE_RULE_LOGIC_SLICE.filter(
-        (rule) => !(FIRST_EXECUTABLE_BATCH_RULE_IDS as readonly string[]).includes(rule.id),
-      ).map(draftRuleAdminRow),
+      CORE_RULE_LOGIC_SLICE.filter((rule) => !WIRED_BATCH_IDS.has(rule.id)).map(draftRuleAdminRow),
   });
 
   const catalogQuery = useQuery({
@@ -65,6 +82,7 @@ function DraftRulesSimulationPage() {
   }
 
   const firstBatch = firstBatchQuery.data ?? [];
+  const secondBatch = secondBatchQuery.data ?? [];
   const rows = rowsQuery.data ?? [];
   const counts = catalogQuery.data?.counts;
 
@@ -100,9 +118,10 @@ function DraftRulesSimulationPage() {
               {catalogQuery.data.ingestStatus})
             </li>
             <li>
-              Executable (live key) {counts.executable} · wired first batch {counts.wired} ·
-              verified {counts.verified} · published {counts.published} · blocked {counts.blocked} ·
-              unwired {counts.draftUnwired}
+              Executable (live key) {counts.executable} · wired {counts.wired} (first{" "}
+              {counts.wiredFirstBatch} · second {counts.wiredSecondBatch}) · verified{" "}
+              {counts.verified} · published {counts.published} · blocked {counts.blocked} · unwired{" "}
+              {counts.draftUnwired}
             </li>
             <li>
               Source_index={catalogQuery.data.sourceIndex} · canActivateAny=
@@ -111,6 +130,29 @@ function DraftRulesSimulationPage() {
           </ul>
         </div>
       ) : null}
+
+      <div className="rounded-2xl border border-border bg-card p-4 text-sm shadow-[var(--shadow-card)]">
+        <h2 className="text-sm font-semibold">Demo path — assignment clocks</h2>
+        <p className="mt-1 text-muted-foreground">
+          Reese walk: facts, then one parent{" "}
+          <Link to="/dashboard/my-obligations" className="underline underline-offset-2">
+            My tasks
+          </Link>{" "}
+          card, then evidence, then admin review on{" "}
+          <Link to="/dashboard/company-obligations" className="underline underline-offset-2">
+            Company obligations
+          </Link>
+          , then the live due rule. Child items stay on the parent. ACRE SEI (30.6.b / 30.6.c) is
+          one card.
+        </p>
+        <ol className="mt-3 list-decimal space-y-2 pl-5 text-muted-foreground">
+          {SECOND_BATCH_DEMO_PATH.map((step) => (
+            <li key={step.step}>
+              <span className="font-medium text-foreground">{step.title}.</span> {step.detail}
+            </li>
+          ))}
+        </ol>
+      </div>
 
       {firstBatchQuery.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading first executable batch…</p>
@@ -124,6 +166,78 @@ function DraftRulesSimulationPage() {
           </p>
           <ul className="space-y-4">
             {firstBatch.map((row) => {
+              const ready = row.canPublish && !row.canActivate;
+              return (
+                <li
+                  key={row.id}
+                  className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold">{row.title}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {row.id}
+                        {row.liveKey ? ` · live ${row.liveKey}` : ""} · {row.clauseIds.join(", ")}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <Badge variant="outline">status={row.lifecycle}</Badge>
+                      <Badge variant="outline">{row.publication}</Badge>
+                      {row.canActivate ? (
+                        <Badge>activatable</Badge>
+                      ) : ready ? (
+                        <Badge variant="outline">wired — ready for per-rule publish</Badge>
+                      ) : (
+                        <Badge variant="outline">draft</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                    {row.gaps.length === 0 ? (
+                      <li>
+                        Wired to the live engine. Unrelated workbook Release_Gaps do not block this
+                        rule. Record an explicit approval to publish this rule only.
+                      </li>
+                    ) : (
+                      row.gaps.map((gap) => <li key={gap.key}>{gap.reason}</li>)
+                    )}
+                  </ul>
+                  <Button
+                    className="mt-3"
+                    variant="outline"
+                    disabled
+                    title={
+                      row.canActivate
+                        ? "This rule is individually verified."
+                        : ready
+                          ? "Record approval in the verified-publication overlay. This screen does not flip tenants."
+                          : row.gaps.map((g) => g.reason).join(" ")
+                    }
+                  >
+                    {row.canActivate ? "Published (this rule)" : "Publish this rule"}
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
+
+      {secondBatchQuery.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading second executable batch…</p>
+      ) : secondBatch.length > 0 ? (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold">
+            Second executable batch — service assignment clocks
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Driving record, ACRE SEI/SED, SEI benefits designation, and CMP/CMS caregiver
+            compensation reuse the live obligation engine. One parent assignment. REQ-30.6.b and
+            REQ-30.6.c share the ACRE SEI card. Missing assignment facts stay questions. Not
+            published.
+          </p>
+          <ul className="space-y-4">
+            {secondBatch.map((row) => {
               const ready = row.canPublish && !row.canActivate;
               return (
                 <li

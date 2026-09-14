@@ -13,6 +13,8 @@ describe("catalog live bridge", () => {
     assert.equal(liveObligationKeyForRequirement("REQ-1.8.4"), "orientation_30_day");
     assert.equal(liveObligationKeyForRequirement("REQ-1.8.8"), "abi_training");
     assert.equal(liveObligationKeyForRequirement("REQ-1.12"), "evv_visit_verification");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.30"), "driving_record_transport");
+    assert.equal(liveObligationKeyForRequirement("REQ-28.4"), "acre_sed");
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.8.4"] ?? ""));
   });
 
@@ -38,6 +40,9 @@ describe("catalog live bridge", () => {
       { requirementRole: "parent", parentRequirementKey: null, id: "p" },
       { requirementRole: "element", parentRequirementKey: "REQ-1.8.4", id: "e" },
     ]);
-    assert.deepEqual(filtered.map((t) => t.id), ["p"]);
+    assert.deepEqual(
+      filtered.map((t) => t.id),
+      ["p"],
+    );
   });
 });

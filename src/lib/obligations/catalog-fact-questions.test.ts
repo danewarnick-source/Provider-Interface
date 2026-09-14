@@ -63,4 +63,25 @@ describe("catalog applicability facts", () => {
     assert.equal(abi.source, "abi_caseload");
     assert.equal(abi.status, "unanswered");
   });
+
+  it("maps second-batch assignment facts without coercing N/A", () => {
+    const transport = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-transport_assignment",
+        question: "Which staff transport persons?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(transport.source, "transport_assignment");
+    assert.equal(transport.status, "unanswered");
+    const sei = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-sei_assignment",
+        question: "Which staff are assigned to an SEI authorization?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(sei.source, "staff_assignment");
+    assert.equal(sei.status, "unanswered");
+  });
 });

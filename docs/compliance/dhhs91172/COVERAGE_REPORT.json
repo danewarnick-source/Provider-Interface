@@ -12,7 +12,9 @@
     "systemBehavior": 427,
     "draftUnwired": 292,
     "elementOfParent": 607,
-    "wired": 5
+    "wiredFirstBatch": 5,
+    "wiredSecondBatch": 6,
+    "wired": 11
   },
   "parents": [
     {
@@ -4290,28 +4292,25 @@
       "title": "Transportation. If the Contractor is providing transportation, the Contractor shall",
       "owner": "Administrator",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "employment year 1",
       "renewal": "None",
       "liveKey": "driving_record_transport",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-080"
+        "FACT-080",
+        "LIVE-transport_assignment"
       ],
       "unansweredFacts": [
-        "Does the agency provide transportation?"
+        "Does the agency provide transportation?",
+        "Which staff transport persons?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unanswered applicability fact: Does the agency provide transportation?"
+        "Unanswered applicability fact: Does the agency provide transportation?",
+        "Unanswered applicability fact: Which staff transport persons?"
       ]
     },
     {
@@ -20044,22 +20043,20 @@
       "liveKey": "acre_sed",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-030"
+        "FACT-030",
+        "LIVE-sed_assignment"
       ],
       "unansweredFacts": [
-        "Agency awarded SED?"
+        "Agency awarded SED?",
+        "Which staff are assigned to an SED authorization?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
+        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
+        "Unanswered applicability fact: Which staff are assigned to an SED authorization?"
       ]
     },
     {
@@ -21116,18 +21113,17 @@
       "liveKey": "sei_ssi_benefits",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-designated_benefits_staff"
+      ],
+      "unansweredFacts": [
+        "Which staff is designated as the qualified SSI / Title II / Medicaid earned-income person?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review"
+        "Unanswered applicability fact: Which staff is designated as the qualified SSI / Title II / Medicaid earned-income person?"
       ]
     },
     {
@@ -21177,18 +21173,17 @@
       "liveKey": "acre_sei",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-sei_assignment"
+      ],
+      "unansweredFacts": [
+        "Which staff are assigned to an SEI authorization?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: BOTH at least one ACRE-certified staff AND every SEI staff member has an ACRE-certified supervisor"
+        "Unanswered applicability fact: Which staff are assigned to an SEI authorization?"
       ]
     },
     {
@@ -21203,22 +21198,20 @@
       "liveKey": "acre_sei",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-008"
+        "FACT-008",
+        "LIVE-sei_assignment"
       ],
       "unansweredFacts": [
-        "Agency awarded SEI?"
+        "Agency awarded SEI?",
+        "Which staff are assigned to an SEI authorization?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: ANY one route: historical BEST OR USU Workplace Supports OR USU Effective Job Coach. Do not mix with separate ACRE supervision rule",
-        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
+        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
+        "Unanswered applicability fact: Which staff are assigned to an SEI authorization?"
       ]
     },
     {
@@ -22148,23 +22141,20 @@
       "liveKey": "cmp_cms_caregiver_comp",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-020"
+        "FACT-020",
+        "LIVE-cmp_cms_assignment"
       ],
       "unansweredFacts": [
-        "Agency awarded CMP,CMS,SLN?"
+        "Agency awarded CMP,CMS,SLN?",
+        "Which staff are assigned CMP or CMS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Applies to CMP and CMS; do not assign solely because staff provides SLN",
-        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
+        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
+        "Unanswered applicability fact: Which staff are assigned CMP or CMS?"
       ]
     },
     {

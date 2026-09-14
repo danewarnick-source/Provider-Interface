@@ -2,7 +2,10 @@
  * Staff "My tasks" — one queue over existing obligation instances.
  * No second checklist table family. Catalog child elements never add a card.
  */
-import { filterDuplicateElementTasks } from "./obligations/catalog-live-bridge.ts";
+import {
+  collapseParentTasksByLiveKey,
+  filterDuplicateElementTasks,
+} from "./obligations/catalog-live-bridge.ts";
 import { dueLabel } from "./staff-obligation-files.ts";
 import { inHiveCourseIdForTitle, staffCourseProgressLabel } from "./in-hive-training.ts";
 import { clientFormKindForTitle } from "./client-form-obligations.ts";
@@ -139,7 +142,11 @@ export const STAFF_TASKS_FOOTER = "Your submissions and certificates stay in you
 
 /** Catalog elements ride on the parent live clock — drop duplicate child cards. */
 export function staffTasksWithoutElementDuplicates<
-  T extends { requirementRole?: string; parentRequirementKey?: string | null },
+  T extends {
+    requirementRole?: string;
+    parentRequirementKey?: string | null;
+    liveKey?: string | null;
+  },
 >(tasks: readonly T[]): T[] {
-  return filterDuplicateElementTasks(tasks);
+  return collapseParentTasksByLiveKey(filterDuplicateElementTasks(tasks));
 }

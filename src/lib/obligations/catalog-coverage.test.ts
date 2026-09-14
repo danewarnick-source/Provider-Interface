@@ -12,7 +12,16 @@ describe("DHHS91172 catalog coverage", () => {
     assert.ok(report.counts.executable >= 41);
     assert.equal(report.counts.published, 0);
     assert.equal(report.counts.verified, 0);
-    assert.equal(report.counts.wired, 5);
+    assert.equal(report.counts.wiredFirstBatch, 5);
+    assert.equal(report.counts.wiredSecondBatch, 6);
+    assert.equal(report.counts.wired, 11);
+
+    const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
+    assert.ok(driving);
+    assert.equal(driving.liveKey, "driving_record_transport");
+    assert.equal(driving.canPublish, true);
+    assert.equal(driving.canActivate, false);
+    assert.equal(driving.mintsStaffTask, false);
     assert.equal(report.counts.elementOfParent, 607);
 
     const orientation = report.rows.find((r) => r.requirementKey === "REQ-1.8.4");
