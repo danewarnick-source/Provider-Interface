@@ -136,6 +136,16 @@ export {
   secondExecutableBatchParents,
 } from "../second-executable-batch.ts";
 export {
+  applyThirdExecutableBatchOverlay,
+  applyThirdExecutableBatchOverlayAll,
+  THIRD_BATCH_DEMO_PATH,
+  THIRD_EXECUTABLE_BATCH_FIXTURE_IDS,
+  THIRD_EXECUTABLE_BATCH_ID,
+  THIRD_EXECUTABLE_BATCH_LIVE_KEYS,
+  THIRD_EXECUTABLE_BATCH_RULE_IDS,
+  thirdExecutableBatchParents,
+} from "../third-executable-batch.ts";
+export {
   countQualifiedDesignatedBenefits,
   employmentYearDue,
   hirePlusDaysDue,

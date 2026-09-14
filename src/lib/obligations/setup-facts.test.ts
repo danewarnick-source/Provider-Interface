@@ -19,6 +19,7 @@ describe("live-path setup questions", () => {
       "abi",
       "acre_sed",
       "acre_sei",
+      "acre_sjd",
       "awarded_codes",
       "billing_1056",
       "client_specific",
@@ -28,7 +29,9 @@ describe("live-path setup questions", () => {
       "designated_benefits",
       "org_profile",
       "orientation",
+      "sjd_discovery",
       "transport",
+      "usor_sei",
     ]);
     for (const q of LIVE_PATH_SETUP_QUESTIONS) {
       assert.equal(setupQuestionAsksWhetherSectionApplies(q.question), false, q.question);

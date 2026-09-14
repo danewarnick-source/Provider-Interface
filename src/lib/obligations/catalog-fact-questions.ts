@@ -91,6 +91,8 @@ const STAFF_ASSIGNMENT_FACT_IDS = new Set([
   "LIVE-sed_assignment",
   "LIVE-cmp_cms_assignment",
   "LIVE-designated_benefits_staff",
+  "LIVE-sjd_assignment",
+  "LIVE-sjd_discovery",
 ]);
 
 function awardedCodesFromQuestion(question: string): string[] {
@@ -111,7 +113,9 @@ export function liveSourceForCatalogFact(fact: CatalogFact): CatalogFactLiveSour
     fact.fact_id === "LIVE-sei_assignment" ||
     fact.fact_id === "LIVE-sed_assignment" ||
     fact.fact_id === "LIVE-cmp_cms_assignment" ||
-    fact.fact_id === "LIVE-designated_benefits_staff"
+    fact.fact_id === "LIVE-designated_benefits_staff" ||
+    fact.fact_id === "LIVE-sjd_assignment" ||
+    fact.fact_id === "LIVE-sjd_discovery"
   ) {
     return "staff_assignment";
   }

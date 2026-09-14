@@ -84,4 +84,33 @@ describe("catalog applicability facts", () => {
     assert.equal(sei.source, "staff_assignment");
     assert.equal(sei.status, "unanswered");
   });
+
+  it("maps third-batch SJD / Discovery facts without coercing N/A", () => {
+    const sjd = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-sjd_assignment",
+        question: "Which staff are assigned to an SJD authorization?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(sjd.source, "staff_assignment");
+    assert.equal(sjd.status, "unanswered");
+    const discovery = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-sjd_discovery",
+        question: "Which SJD staff perform Discovery?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(discovery.source, "staff_assignment");
+    assert.equal(discovery.status, "unanswered");
+    const award = evaluateCatalogFact(
+      {
+        fact_id: "LIVE-sei_award_date",
+        question: "When was this contractor awarded SEI?",
+      },
+      EMPTY_ORG_FACTS,
+    );
+    assert.equal(award.status, "unanswered");
+  });
 });

@@ -15,6 +15,9 @@ describe("catalog live bridge", () => {
     assert.equal(liveObligationKeyForRequirement("REQ-1.12"), "evv_visit_verification");
     assert.equal(liveObligationKeyForRequirement("REQ-1.30"), "driving_record_transport");
     assert.equal(liveObligationKeyForRequirement("REQ-28.4"), "acre_sed");
+    assert.equal(liveObligationKeyForRequirement("REQ-30.6.a"), "usor_job_coaching_sei");
+    assert.equal(liveObligationKeyForRequirement("REQ-33.5.b"), "acre_sjd");
+    assert.equal(liveObligationKeyForRequirement("REQ-33.5.c"), "customized_employment_usu");
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.8.4"] ?? ""));
   });
 

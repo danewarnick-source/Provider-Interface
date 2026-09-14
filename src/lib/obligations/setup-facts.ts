@@ -27,6 +27,9 @@ export type LivePathId =
   | "client_specific"
   | "acre_sei"
   | "acre_sed"
+  | "acre_sjd"
+  | "sjd_discovery"
+  | "usor_sei"
   | "cmp_cms"
   | "designated_benefits"
   | "code_of_conduct"
@@ -118,6 +121,33 @@ export const LIVE_PATH_SETUP_QUESTIONS: LivePathSetupQuestion[] = [
     source: "staff_assignment",
     factKey: "sed_assignment",
     ownerAnswers: false,
+  },
+  {
+    path: "acre_sjd",
+    dutyKeys: ["acre_sjd"],
+    question: "Which staff are assigned to an SJD authorization?",
+    help: "SJD ACRE (60 days, supervised while pending) follows the SJD assignment. Unknown assignment stays unanswered.",
+    source: "staff_assignment",
+    factKey: "sjd_assignment",
+    ownerAnswers: false,
+  },
+  {
+    path: "sjd_discovery",
+    dutyKeys: ["customized_employment_usu"],
+    question: "Which SJD staff perform Discovery?",
+    help: "Customized Employment applies only when the staff performs Discovery. Do not copy SEI named-course alternatives onto SJD. Unknown Discovery stays unanswered.",
+    source: "staff_assignment",
+    factKey: "sjd_discovery",
+    ownerAnswers: false,
+  },
+  {
+    path: "usor_sei",
+    dutyKeys: ["usor_job_coaching_sei"],
+    question: "When was this contractor awarded SEI?",
+    help: "USOR job-coaching vendor proof follows the SEI award date. Existing awards before 2026-07-01 use 2027-01-31; later awards use award plus six months. Empty award date stays unanswered. Do not invent a destination email.",
+    source: "awarded_codes",
+    factKey: "sei_award_date",
+    ownerAnswers: true,
   },
   {
     path: "cmp_cms",

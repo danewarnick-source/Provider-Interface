@@ -9,12 +9,13 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.importedParents, 760);
     assert.equal(report.counts.importedElements, 607);
     assert.equal(report.counts.importedRows, 1367);
-    assert.ok(report.counts.executable >= 41);
+    assert.ok(report.counts.executable >= 44);
     assert.equal(report.counts.published, 0);
     assert.equal(report.counts.verified, 0);
     assert.equal(report.counts.wiredFirstBatch, 5);
     assert.equal(report.counts.wiredSecondBatch, 6);
-    assert.equal(report.counts.wired, 11);
+    assert.equal(report.counts.wiredThirdBatch, 3);
+    assert.equal(report.counts.wired, 14);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -33,6 +34,22 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(orientation.canPublish, true);
     assert.equal(orientation.canActivate, false);
     assert.equal(orientation.publication, "not_published");
+
+    const usor = report.rows.find((r) => r.requirementKey === "REQ-30.6.a");
+    assert.ok(usor);
+    assert.equal(usor.liveKey, "usor_job_coaching_sei");
+    assert.equal(usor.canPublish, true);
+    assert.equal(usor.canActivate, false);
+    const sjdAcre = report.rows.find((r) => r.requirementKey === "REQ-33.5.b");
+    assert.ok(sjdAcre);
+    assert.equal(sjdAcre.liveKey, "acre_sjd");
+    assert.equal(sjdAcre.canPublish, true);
+    assert.equal(sjdAcre.canActivate, false);
+    const sjdCe = report.rows.find((r) => r.requirementKey === "REQ-33.5.c");
+    assert.ok(sjdCe);
+    assert.equal(sjdCe.liveKey, "customized_employment_usu");
+    assert.equal(sjdCe.canPublish, true);
+    assert.equal(sjdCe.canActivate, false);
 
     const elements = report.rows.filter((r) => r.role === "element");
     assert.equal(elements.length, 607);
