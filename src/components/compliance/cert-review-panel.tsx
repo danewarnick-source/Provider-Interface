@@ -15,6 +15,7 @@ import {
   CERT_REVIEW_AI_NOTE,
   canAcceptCertEvidence,
   certReviewAcceptBlockReason,
+  certReviewExpirationAdvisory,
   certReviewStatus,
   certReviewStatusLabel,
 } from "@/lib/cert-review";
@@ -78,6 +79,8 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
   };
   const canAccept = review ? canAcceptCertEvidence(decision) : false;
   const block = review ? certReviewAcceptBlockReason(decision) : null;
+  const expirationAdvisory = review ? certReviewExpirationAdvisory(decision) : null;
+  const warn = block ?? expirationAdvisory;
   const status = review
     ? certReviewStatus({
         nectarValidationStatus: review.nectarValidationStatus,
@@ -213,12 +216,12 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
               <dd className="font-medium">{review.extractedExpiresOn ?? "Not detected"}</dd>
             </div>
           </dl>
-          {block ? (
+          {warn ? (
             <p
               data-testid="cert-review-expiration-warn"
               className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950"
             >
-              {block}
+              {warn}
             </p>
           ) : null}
           <p className="text-xs text-muted-foreground">{CERT_REVIEW_AI_NOTE}</p>
@@ -236,6 +239,9 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
               value={confirmedExpires}
               onChange={(e) => setConfirmedExpires(e.target.value)}
             />
+            <p className="text-xs text-muted-foreground">
+              Printed date only. Leave blank to accept without inventing an expiration.
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="correction-note">Request correction note</Label>
@@ -265,7 +271,8 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Acceptance updates the staff file and the renewal task.
+            Acceptance updates the staff file. A renewal task opens only from a printed
+            or confirmed expiration — never from the upload date.
           </p>
           <Link
             to="/dashboard/compliance"

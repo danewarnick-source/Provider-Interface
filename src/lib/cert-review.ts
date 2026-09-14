@@ -146,9 +146,14 @@ export function expirationMissing(input: CertReviewDecisionInput): boolean {
   return resolvedCertExpiration(input) === null;
 }
 
+/**
+ * Accept is allowed once review is otherwise complete (evidence on the
+ * row, correction/resubmit cleared). Missing extracted expiration is not
+ * a block — admin may confirm a printed date, or accept without one.
+ * Never invent a date from the upload.
+ */
 export function canAcceptCertEvidence(input: CertReviewDecisionInput): boolean {
   if (input.correctionRequested) return false;
-  if (expirationMissing(input)) return false;
   return true;
 }
 
@@ -267,8 +272,13 @@ export function certReviewAcceptBlockReason(input: CertReviewDecisionInput): str
   if (input.correctionRequested) {
     return "Waiting for the staff member to re-upload. Accept after the replacement is in.";
   }
+  return null;
+}
+
+/** Advisory only — does not disable Accept. */
+export function certReviewExpirationAdvisory(input: CertReviewDecisionInput): string | null {
   if (!expirationMissing(input)) return null;
-  return "Confirm expiration before acceptance. Expiration was not detected on the upload.";
+  return "Expiration was not detected on the upload. Enter the printed date if you can see it, or accept without inventing one.";
 }
 
 export function certReviewStatus(args: {
