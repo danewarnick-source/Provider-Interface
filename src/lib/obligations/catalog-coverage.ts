@@ -33,6 +33,11 @@ import {
   applySecondExecutableBatchOverlayAll,
   secondBatchParentIsWired,
 } from "./second-executable-batch.ts";
+import {
+  applyThirdExecutableBatchOverlay,
+  applyThirdExecutableBatchOverlayAll,
+  thirdBatchParentIsWired,
+} from "./third-executable-batch.ts";
 
 export type CatalogCoverageRow = {
   requirementKey: string;
@@ -71,6 +76,7 @@ export type CatalogCoverageCounts = {
   wired: number;
   wiredFirstBatch: number;
   wiredSecondBatch: number;
+  wiredThirdBatch: number;
 };
 
 export type CatalogCoverageReport = {
@@ -129,7 +135,9 @@ function elementRow(el: CatalogSheetRow, parent: LoadedDraftRule | undefined): C
 }
 
 function parentRow(rule: LoadedDraftRule, orgFacts: OrgFacts): CatalogCoverageRow {
-  const executable = applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule));
+  const executable = applyThirdExecutableBatchOverlay(
+    applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+  );
   const published = applyVerifiedPublicationOverlay([executable])[0] ?? executable;
   const gaps = structuralPublicationGaps(published);
   const policy = staffTaskPolicyForRule(published);
@@ -184,7 +192,9 @@ export function buildCatalogCoverageReport(
   orgFacts: OrgFacts = EMPTY_ORG_FACTS,
 ): CatalogCoverageReport {
   const parents = applyVerifiedPublicationOverlay(
-    applySecondExecutableBatchOverlayAll(applyFirstExecutableBatchOverlayAll(loaded.parents)),
+    applyThirdExecutableBatchOverlayAll(
+      applySecondExecutableBatchOverlayAll(applyFirstExecutableBatchOverlayAll(loaded.parents)),
+    ),
   );
   const byId = new Map(parents.map((p) => [p.id, p]));
   const parentRows = parents.map((rule) => parentRow(rule, orgFacts));
@@ -207,8 +217,13 @@ export function buildCatalogCoverageReport(
     elementOfParent: elementRows.length,
     wiredFirstBatch: parents.filter((rule) => firstBatchParentIsWired(rule)).length,
     wiredSecondBatch: parents.filter((rule) => secondBatchParentIsWired(rule)).length,
-    wired: parents.filter((rule) => firstBatchParentIsWired(rule) || secondBatchParentIsWired(rule))
-      .length,
+    wiredThirdBatch: parents.filter((rule) => thirdBatchParentIsWired(rule)).length,
+    wired: parents.filter(
+      (rule) =>
+        firstBatchParentIsWired(rule) ||
+        secondBatchParentIsWired(rule) ||
+        thirdBatchParentIsWired(rule),
+    ).length,
   };
   return {
     workbookSha256: loaded.manifest.sha256,
@@ -243,6 +258,7 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Element of parent | ${c.elementOfParent} |`,
     `| Wired first batch (unpublished) | ${c.wiredFirstBatch} |`,
     `| Wired second batch (unpublished) | ${c.wiredSecondBatch} |`,
+    `| Wired third batch (unpublished) | ${c.wiredThirdBatch} |`,
     `| Wired shared-behavior batches (unpublished) | ${c.wired} |`,
     "",
     "## Parents",

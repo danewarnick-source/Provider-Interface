@@ -4,17 +4,18 @@
     "importedParents": 760,
     "importedElements": 607,
     "importedRows": 1367,
-    "executable": 41,
+    "executable": 44,
     "verified": 0,
     "published": 0,
     "blocked": 0,
-    "liveMapped": 19,
+    "liveMapped": 22,
     "systemBehavior": 427,
-    "draftUnwired": 292,
+    "draftUnwired": 289,
     "elementOfParent": 607,
     "wiredFirstBatch": 5,
     "wiredSecondBatch": 6,
-    "wired": 11
+    "wiredThirdBatch": 3,
+    "wired": 14
   },
   "parents": [
     {
@@ -21135,30 +21136,26 @@
       "completionMethod": "External: USOR, record completion in platform",
       "timing": "Existing SEI before 2026-07-01: 2027-01-31; new SEI awards: award date + 6 calendar months / SEI service history; SEI award date / once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "usor_job_coaching_sei",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
         "FACT-008",
-        "FACT-036"
+        "FACT-036",
+        "LIVE-sei_award_date"
       ],
       "unansweredFacts": [
         "Agency awarded SEI?",
-        "Is the agency a USOR-approved vendor?"
+        "Is the agency a USOR-approved vendor?",
+        "When was this contractor awarded SEI?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Conditional deadline branches; maintain approval once obtained. Verify misspelled destination email before submission",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
-        "Unanswered applicability fact: Is the agency a USOR-approved vendor?"
+        "Unanswered applicability fact: Is the agency a USOR-approved vendor?",
+        "Unanswered applicability fact: When was this contractor awarded SEI?"
       ]
     },
     {
@@ -23227,35 +23224,31 @@
       "title": "ensure Staff providing SJD are certified in ACRE training through Utah State…",
       "owner": "Staff (verified by Administrator/HR)",
       "completionMethod": "Upload credential/training record to staff profile",
-      "timing": "New hire: hire_date + 60 days; supervision required until ACRE completed / hire_date; first_SJD_service_at / once; re-verify on renewal/expiry",
+      "timing": "hire + 60 days",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "acre_sjd",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
         "FACT-002",
         "FACT-006",
-        "FACT-041"
+        "FACT-041",
+        "LIVE-sjd_assignment"
       ],
       "unansweredFacts": [
         "Agency awarded SJD?",
         "Which OL licenses/certifications does the agency hold, per location?",
-        "Who supervises the staff for this service?"
+        "Who supervises the staff for this service?",
+        "Which staff are assigned to an SJD authorization?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: New-hire grace period plus ACRE-certified supervision; not an unconditional pre-service ACRE block",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Which OL licenses/certifications does the agency hold, per location?",
-        "Unanswered applicability fact: Who supervises the staff for this service?"
+        "Unanswered applicability fact: Who supervises the staff for this service?",
+        "Unanswered applicability fact: Which staff are assigned to an SJD authorization?"
       ]
     },
     {
@@ -23267,22 +23260,23 @@
       "completionMethod": "Upload credential/training record to staff profile",
       "timing": "once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "customized_employment_usu",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-sjd_assignment",
+        "LIVE-sjd_discovery"
+      ],
+      "unansweredFacts": [
+        "Which staff are assigned to an SJD authorization?",
+        "Which SJD staff perform Discovery?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Customized Employment training applies when staff completes Discovery; approved alternate accredited training allowed",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
+        "Unanswered applicability fact: Which staff are assigned to an SJD authorization?",
+        "Unanswered applicability fact: Which SJD staff perform Discovery?"
       ]
     },
     {

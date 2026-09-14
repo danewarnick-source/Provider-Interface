@@ -54,6 +54,7 @@ export const EXPLICIT_REQ_TO_LIVE_KEY: Readonly<Record<string, string>> = {
   "REQ-21.5": "ol_rhs_license_4plus",
   "REQ-30.3": "sei_monthly_summary_upi",
   "REQ-30.5": "sei_ssi_benefits",
+  "REQ-30.6.a": "usor_job_coaching_sei",
   "REQ-30.6.b": "acre_sei",
   "REQ-30.6.c": "acre_sei",
   "REQ-30.7": "sei_annual_outcome",
@@ -61,7 +62,9 @@ export const EXPLICIT_REQ_TO_LIVE_KEY: Readonly<Record<string, string>> = {
   "REQ-32.5": "cmp_cms_caregiver_comp",
   "REQ-33.3": "sjd_monthly_summary_upi",
   "REQ-33.5": "acre_sjd",
+  "REQ-33.5.b": "acre_sjd",
   "REQ-33.5.b-c": "acre_sjd",
+  "REQ-33.5.c": "customized_employment_usu",
 };
 
 export type CatalogRole = "parent" | "element";
