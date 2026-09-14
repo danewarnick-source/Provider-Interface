@@ -43,6 +43,11 @@ import {
   applyFourthExecutableBatchOverlayAll,
   fourthBatchParentIsWired,
 } from "./fourth-executable-batch.ts";
+import {
+  applyFifthExecutableBatchOverlay,
+  applyFifthExecutableBatchOverlayAll,
+  fifthBatchParentIsWired,
+} from "./fifth-executable-batch.ts";
 
 export type CatalogCoverageRow = {
   requirementKey: string;
@@ -83,6 +88,7 @@ export type CatalogCoverageCounts = {
   wiredSecondBatch: number;
   wiredThirdBatch: number;
   wiredFourthBatch: number;
+  wiredFifthBatch: number;
 };
 
 export type CatalogCoverageReport = {
@@ -141,9 +147,11 @@ function elementRow(el: CatalogSheetRow, parent: LoadedDraftRule | undefined): C
 }
 
 function parentRow(rule: LoadedDraftRule, orgFacts: OrgFacts): CatalogCoverageRow {
-  const executable = applyFourthExecutableBatchOverlay(
-    applyThirdExecutableBatchOverlay(
-      applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+  const executable = applyFifthExecutableBatchOverlay(
+    applyFourthExecutableBatchOverlay(
+      applyThirdExecutableBatchOverlay(
+        applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+      ),
     ),
   );
   const published = applyVerifiedPublicationOverlay([executable])[0] ?? executable;
@@ -200,9 +208,11 @@ export function buildCatalogCoverageReport(
   orgFacts: OrgFacts = EMPTY_ORG_FACTS,
 ): CatalogCoverageReport {
   const parents = applyVerifiedPublicationOverlay(
-    applyFourthExecutableBatchOverlayAll(
-      applyThirdExecutableBatchOverlayAll(
-        applySecondExecutableBatchOverlayAll(applyFirstExecutableBatchOverlayAll(loaded.parents)),
+    applyFifthExecutableBatchOverlayAll(
+      applyFourthExecutableBatchOverlayAll(
+        applyThirdExecutableBatchOverlayAll(
+          applySecondExecutableBatchOverlayAll(applyFirstExecutableBatchOverlayAll(loaded.parents)),
+        ),
       ),
     ),
   );
@@ -229,12 +239,14 @@ export function buildCatalogCoverageReport(
     wiredSecondBatch: parents.filter((rule) => secondBatchParentIsWired(rule)).length,
     wiredThirdBatch: parents.filter((rule) => thirdBatchParentIsWired(rule)).length,
     wiredFourthBatch: parents.filter((rule) => fourthBatchParentIsWired(rule)).length,
+    wiredFifthBatch: parents.filter((rule) => fifthBatchParentIsWired(rule)).length,
     wired: parents.filter(
       (rule) =>
         firstBatchParentIsWired(rule) ||
         secondBatchParentIsWired(rule) ||
         thirdBatchParentIsWired(rule) ||
-        fourthBatchParentIsWired(rule),
+        fourthBatchParentIsWired(rule) ||
+        fifthBatchParentIsWired(rule),
     ).length,
   };
   return {
@@ -272,6 +284,7 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Wired second batch (unpublished) | ${c.wiredSecondBatch} |`,
     `| Wired third batch (unpublished) | ${c.wiredThirdBatch} |`,
     `| Wired fourth batch (unpublished) | ${c.wiredFourthBatch} |`,
+    `| Wired fifth batch (unpublished) | ${c.wiredFifthBatch} |`,
     `| Wired shared-behavior batches (unpublished) | ${c.wired} |`,
     "",
     "## Parents",

@@ -12,6 +12,7 @@ describe("catalog live bridge", () => {
   it("maps imported parents onto existing live keys — no second checklist", () => {
     assert.equal(liveObligationKeyForRequirement("REQ-1.8.4"), "orientation_30_day");
     assert.equal(liveObligationKeyForRequirement("REQ-1.8.8"), "abi_training");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.10.7"), "timesheets_attendance");
     assert.equal(liveObligationKeyForRequirement("REQ-1.12"), "evv_visit_verification");
     assert.equal(liveObligationKeyForRequirement("REQ-1.30"), "driving_record_transport");
     assert.equal(liveObligationKeyForRequirement("REQ-28.4"), "acre_sed");

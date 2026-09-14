@@ -33,6 +33,9 @@ export type LivePathId =
   | "sei_monthly"
   | "sjd_monthly"
   | "cmp_cms_monthly"
+  | "service_notes"
+  | "evv"
+  | "hhs_daily"
   | "cmp_cms"
   | "designated_benefits"
   | "code_of_conduct"
@@ -177,6 +180,33 @@ export const LIVE_PATH_SETUP_QUESTIONS: LivePathSetupQuestion[] = [
     help: "CMP/CMS monthly summaries go to the Support Coordinator by the 15th of the following month. Not UPI. SLN stays quarterly. HIVE does not email the SC.",
     source: "authorization_1056",
     factKey: "cmp_cms_monthly_caseload",
+    ownerAnswers: false,
+  },
+  {
+    path: "service_notes",
+    dutyKeys: ["timesheets_attendance"],
+    question: "Which persons received a documented service?",
+    help: "Service notes, timesheets, and signatures follow the service record. Completing the note does not satisfy EVV, payroll, or signature. Unknown assignment stays unanswered.",
+    source: "staff_assignment",
+    factKey: "service_documentation_assignment",
+    ownerAnswers: false,
+  },
+  {
+    path: "evv",
+    dutyKeys: ["evv_visit_verification"],
+    question: "Which staff are assigned an EVV-mandated service code?",
+    help: "EVV applies only to mandated codes in evv-codes.ts. HHS, DSI, and SEI are not EVV-mandated. A note never absorbs this lane. Unknown assignment stays unanswered.",
+    source: "staff_assignment",
+    factKey: "evv_assignment",
+    ownerAnswers: false,
+  },
+  {
+    path: "hhs_daily",
+    dutyKeys: ["hhs_billable_day"],
+    question: "Which persons have an HHS authorization and an overnight stay?",
+    help: "HHS billable day is attendance Present plus the host-home daily note and overnight confirmation. The general five-field punch note does not substitute. Empty caseload stays unanswered.",
+    source: "authorization_1056",
+    factKey: "hhs_daily_caseload",
     ownerAnswers: false,
   },
   {

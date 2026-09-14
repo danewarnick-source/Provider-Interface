@@ -16,7 +16,8 @@
     "wiredSecondBatch": 6,
     "wiredThirdBatch": 3,
     "wiredFourthBatch": 4,
-    "wired": 18
+    "wiredFifthBatch": 2,
+    "wired": 20
   },
   "parents": [
     {
@@ -882,22 +883,25 @@
       "title": "documentation for all services provided to and billed on behalf of the…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Per instance of service. Template is chosen on the service date. No invented extra interval.",
       "renewal": "None",
       "liveKey": "timesheets_attendance",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-service_documentation_assignment",
+        "LIVE-hhs_daily_caseload"
+      ],
+      "unansweredFacts": [
+        "Which persons received a documented service?",
+        "Which persons have an HHS authorization and an overnight stay?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Unless otherwise specified in the individual DHHS service code description, the Contractor shall ensure that written documentation of service delivery for each service code shall include:"
+        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
+        "Unanswered applicability fact: Which persons received a documented service?"
       ]
     },
     {
@@ -1004,23 +1008,20 @@
       "liveKey": "evv_visit_verification",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-016"
+        "FACT-016",
+        "LIVE-evv_assignment"
       ],
       "unansweredFacts": [
-        "Does the agency provide respite? Overnight?"
+        "Does the agency provide respite? Overnight?",
+        "Which staff are assigned an EVV-mandated service code?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: exception of RP4, RP5, RPS)",
-        "Unanswered applicability fact: Does the agency provide respite? Overnight?"
+        "Unanswered applicability fact: Does the agency provide respite? Overnight?",
+        "Unanswered applicability fact: Which staff are assigned an EVV-mandated service code?"
       ]
     },
     {
