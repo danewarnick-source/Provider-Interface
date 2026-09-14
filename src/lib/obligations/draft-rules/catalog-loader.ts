@@ -42,6 +42,20 @@ export type CatalogManifest = {
 };
 
 export type CatalogSheetRow = {
+  requirement_key?: string;
+  requirement_role?: string;
+  source_clause_id?: string;
+  requirement_name?: string;
+  clause_text?: string;
+  handling_label?: string;
+  required_evidence?: string;
+  completion_group_logic?: string;
+  exceptions_alternatives?: string;
+  renewal_rule?: string;
+  fact_ids?: string;
+  element_count?: number | string;
+  /** Complete original workbook row; narrative is never silently compiled into law. */
+  [key: string]: unknown;
   id?: string;
   requirement_id?: string;
   parent_id?: string | null;
@@ -98,9 +112,13 @@ export type ReleaseGapRow = {
 };
 
 export type LoadedDraftRule = DraftRule & {
+  workbookRow: CatalogSheetRow;
+  applicabilityFacts: CatalogFact[];
   rule_status: "draft";
   execution_status: "not_published";
 };
+
+export type CatalogFact = { fact_id: string; question: string; [key: string]: unknown };
 
 export type CatalogIngestStatus = "awaiting_batches" | "loaded";
 
@@ -154,10 +172,13 @@ const PREDICATE_KIND_SET = new Set<string>([
 ]);
 
 function rowId(row: CatalogSheetRow): string {
-  return (row.id ?? row.requirement_id ?? "").trim();
+  if (row.requirement_role === "element") return row.clause_id ?? "";
+  return (row.requirement_key ?? row.id ?? row.requirement_id ?? "").trim();
 }
 
 export function isCatalogParentRow(row: CatalogSheetRow): boolean {
+  if (row.requirement_role === "element") return false;
+  if (row.requirement_role === "requirement") return true;
   if (row.row_kind === "element") return false;
   if (row.row_kind === "parent") return true;
   if (row.parent_id && String(row.parent_id).trim().length > 0) return false;
@@ -165,6 +186,7 @@ export function isCatalogParentRow(row: CatalogSheetRow): boolean {
 }
 
 function clauseIdsFor(row: CatalogSheetRow): string[] {
+  if (row.source_clause_id?.trim()) return [row.source_clause_id.trim()];
   if (Array.isArray(row.clause_ids) && row.clause_ids.length > 0) {
     return row.clause_ids.filter((c) => typeof c === "string" && c.trim().length > 0);
   }
@@ -266,7 +288,7 @@ function mapMembers(
   if (childElements.length > 0) {
     return childElements.map((el, i) => ({
       id: rowId(el) || `element-${i + 1}`,
-      label: el.title?.trim() || rowId(el),
+      label: el.clause_text?.trim() || el.title?.trim() || rowId(el),
       sourceClauseId: clauseIdsFor(el)[0] || clauseIdsFor(row)[0] || rowId(el),
       catalogKey: null,
       completionRoutes: defaultRoutes(),
@@ -292,15 +314,24 @@ export function mapCatalogRowsToDraftRules(
       const id = rowId(row);
       if (!id) return null;
       const clauses = clauseIdsFor(row);
-      const children = elements.filter((el) => String(el.parent_id ?? "").trim() === id);
+      const children = elements.filter(
+        (el) => String(el.parent_id ?? el.requirement_key ?? "").trim() === id,
+      );
+      const route = ["IN_PLATFORM", "UPLOAD", "EXTERNAL", "SYSTEM"].includes(
+        row.handling_label ?? "",
+      )
+        ? (row.handling_label as CompletionRoute)
+        : null;
       const publicationGap =
         typeof row.publication_gap === "string" && row.publication_gap.trim().length > 0
           ? row.publication_gap.trim()
           : null;
       const mapped: LoadedDraftRule = {
+        workbookRow: { ...row },
+        applicabilityFacts: [],
         id,
         version: 1,
-        title: row.title?.trim() || id,
+        title: row.requirement_name?.trim() || row.title?.trim() || id,
         catalogKeys: Array.isArray(row.catalog_keys) ? row.catalog_keys : [],
         lifecycle: "draft",
         publication: "not_published",
@@ -316,15 +347,23 @@ export function mapCatalogRowsToDraftRules(
         },
         timing: mapTiming(row),
         evidence: {
-          summary: "",
-          routes: [],
-          defaultHandlingLabel: "",
+          summary: row.required_evidence ?? "",
+          routes: route ? [route] : [],
+          defaultHandlingLabel: row.handling_label ?? "",
           automaticEquivalency: false,
         },
-        completionRoutes: defaultRoutes(),
+        completionRoutes: route ? [route] : defaultRoutes(),
         tests: mapTests(row),
-        unresolvedAlternatives: [],
-        unresolvedRenewals: [],
+        unresolvedAlternatives:
+          row.requirement_key && !row.group_logic
+            ? [
+                row.exceptions_alternatives ||
+                  row.completion_group_logic ||
+                  "Explicit completion logic requires review",
+              ]
+            : [],
+        unresolvedRenewals:
+          row.renewal_rule && row.renewal_rule !== "None" ? [row.renewal_rule] : [],
         releaseGaps: resolveReleaseGaps(row, gapIndex),
         publicationGap,
         approval: null,
@@ -348,8 +387,16 @@ export function assembleCatalogRows(
   fallback?: unknown,
 ): CatalogSheetRow[] {
   const fromBatches = batches.flatMap((batch) => rowsFromUnknown(batch));
-  if (fromBatches.length > 0) return fromBatches;
-  return rowsFromUnknown(fallback);
+  const rows = fromBatches.length > 0 ? fromBatches : rowsFromUnknown(fallback);
+  const seen = new Set<string>();
+  for (const row of rows) {
+    const id = rowId(row);
+    if (!id || id === "requirement_key")
+      throw new Error("Invalid catalog row: missing ID or spreadsheet header");
+    if (seen.has(id)) throw new Error(`Duplicate catalog ID: ${id}`);
+    seen.add(id);
+  }
+  return rows;
 }
 
 export function catalogIngestStatus(parentCount: number, expected: number): CatalogIngestStatus {
@@ -381,15 +428,60 @@ export function buildLoadedCatalog(input: {
   requirements?: unknown;
   releaseGaps?: readonly ReleaseGapRow[];
   coreRuleLogic?: unknown;
+  applicabilityFacts?: { rows?: CatalogFact[] };
 }): LoadedCatalog {
   const assembled = assembleCatalogRows(input.batchFiles ?? [], input.requirementCatalog);
   const releaseGaps = input.releaseGaps ?? [];
-  const parents = mapCatalogRowsToDraftRules(assembled, releaseGaps);
-  const elements = assembled.filter((r) => !isCatalogParentRow(r));
   const requirementRows = rowsFromUnknown(input.requirements);
+  const elements =
+    requirementRows.length > 0
+      ? requirementRows.filter((r) => !isCatalogParentRow(r))
+      : assembled.filter((r) => !isCatalogParentRow(r));
+  const parentRows = assembled.filter(isCatalogParentRow);
+  const ids = new Set(parentRows.map(rowId));
+  if (requirementRows.length > 0) {
+    const canonicalIds = new Set(requirementRows.filter(isCatalogParentRow).map(rowId));
+    if (ids.size !== canonicalIds.size || [...ids].some((id) => !canonicalIds.has(id))) {
+      throw new Error("Catalog parents do not match canonical Requirements");
+    }
+    const clauseIds = requirementRows.map((row) => row.clause_id).filter(Boolean);
+    if (new Set(clauseIds).size !== clauseIds.length)
+      throw new Error("Duplicate requirement source clause ID");
+    for (const parent of parentRows) {
+      const children = elements.filter((row) => row.requirement_key === rowId(parent));
+      if (parent.element_count !== undefined && children.length !== Number(parent.element_count)) {
+        throw new Error(`Element count mismatch on ${rowId(parent)}`);
+      }
+    }
+  }
+  for (const element of elements) {
+    const parentId = String(element.parent_id ?? element.requirement_key ?? "");
+    if (!ids.has(parentId))
+      throw new Error(`Orphan element: ${rowId(element)} references ${parentId}`);
+  }
+  const parents = mapCatalogRowsToDraftRules([...parentRows, ...elements], releaseGaps);
+  if (input.applicabilityFacts) {
+    const facts = new Map((input.applicabilityFacts.rows ?? []).map((f) => [f.fact_id, f]));
+    if (facts.size !== (input.applicabilityFacts.rows ?? []).length)
+      throw new Error("Duplicate fact ID");
+    for (const parent of parents) {
+      const refs = (parent.workbookRow.fact_ids ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      parent.applicabilityFacts = refs.map((id) => {
+        const fact = facts.get(id);
+        if (!fact) throw new Error(`Unknown fact ${id} on ${parent.id}`);
+        return fact;
+      });
+    }
+  }
   const coreRows = rowsFromUnknown(input.coreRuleLogic);
   const coreRuleLogic = mapCatalogRowsToDraftRules(coreRows, releaseGaps);
-  const ingestStatus = catalogIngestStatus(parents.length, input.manifest.catalog_rows);
+  const ingestStatus =
+    requirementRows.length === input.manifest.requirements_rows
+      ? catalogIngestStatus(parents.length, input.manifest.catalog_rows)
+      : "awaiting_batches";
   return {
     manifest: input.manifest,
     ingestStatus,

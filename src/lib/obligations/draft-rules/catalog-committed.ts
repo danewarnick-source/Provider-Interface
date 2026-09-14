@@ -1,6 +1,6 @@
 /**
  * Browser-safe committed catalog imports for the read-only Admin list.
- * Batch files stay placeholders until Tony lands the JSON payloads.
+ * Workbook rows are imported as draft metadata, never live compliance rules.
  */
 
 import applicabilityFacts from "../../../../docs/compliance/dhhs91172/Applicability_Facts.json" with { type: "json" };
@@ -49,6 +49,7 @@ export function loadCommittedCatalog(): LoadedCatalog {
     requirements,
     releaseGaps: (releaseGapsFile.rows ?? []) as ReleaseGapRow[],
     coreRuleLogic,
+    applicabilityFacts,
   });
 }
 

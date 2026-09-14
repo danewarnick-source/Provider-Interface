@@ -1,0 +1,125 @@
+{
+  "sheet": "Core_Rule_Logic",
+  "workbook_sha256": "aba9f6c4debc0b19e207a55f1a2f1fc2b3397d94f8f18a52c6fbc6b0f9d2dbd6",
+  "rows": [
+    {
+      "Rule / source": "1.8(4) orientation",
+      "Subject and facts": "staff.id; staff.hire_date; assignment.first_solo_at; client-specific needs",
+      "Applicability / grouping": "SOW-defined Staff; ALL applicable A–W topics. One parent assignment. Client-specific learning links to assignments.",
+      "Timing and evidence": "Due MIN(hire+30 calendar days, first solo service). Completion proves every required topic.",
+      "UI / evaluation": "My tasks: Complete orientation. No ANY-topic shortcut."
+    },
+    {
+      "Rule / source": "1.8(5) 90-day training",
+      "Subject and facts": "staff.hire_date; first_aid credential; CPR credential; person_centered completion",
+      "Applicability / grouping": "ALL(first aid, CPR, person-centered). Distinct credentials and expiry.",
+      "Timing and evidence": "Initial due hire+90 days; first aid/CPR current thereafter; no invented person-centered expiry.",
+      "UI / evaluation": "One onboarding group, separate renewable credential records."
+    },
+    {
+      "Rule / source": "1.8(6) behavior certification",
+      "Subject and facts": "active staff-client assignments; client.behavior_risk; certification; alternative approval",
+      "Applicability / grouping": "EXISTS assigned person likely aggressive/self-injurious/destructive AND ANY approved complete route.",
+      "Timing and evidence": "Hire+180 days; maintain certification. Newly arising assignment risks and elapsed hire deadline require review before scheduling.",
+      "UI / evaluation": "Assign only to affected staff; show why."
+    },
+    {
+      "Rule / source": "1.8(8) ABI",
+      "Subject and facts": "active staff-client assignments; client.has_ABI; first_solo_at",
+      "Applicability / grouping": "EXISTS assigned ABI client; ALL required ABI topics. General ABI orientation is a separate requirement.",
+      "Timing and evidence": "Before solo support for ABI person; no default annual expiry.",
+      "UI / evaluation": "Client assignment triggers matching staff task."
+    },
+    {
+      "Rule / source": "1.8(7) annual hours",
+      "Subject and facts": "staff.hire_date; accepted training event dates/hours",
+      "Applicability / grouping": "Employment years 2 onward; sum unique eligible classroom and documented on-job hours >=12 within each window.",
+      "Timing and evidence": "Employment anniversary anchored; no double counting one event through multiple requirement links.",
+      "UI / evaluation": "Progress bar e.g. 8 of 12 hours with next anniversary deadline."
+    },
+    {
+      "Rule / source": "30.6(b) SEI coverage",
+      "Subject and facts": "agency.service_awards; staff.service_codes; supervisor links; ACRE evidence",
+      "Applicability / grouping": "Agency has >=1 ACRE staff AND every SEI staff has qualifying supervisor.",
+      "Timing and evidence": "Re-evaluate on hire, assignment, supervisor or evidence change.",
+      "UI / evaluation": "Agency coverage alert plus affected staff readiness."
+    },
+    {
+      "Rule / source": "30.6(c) SEI training",
+      "Subject and facts": "staff provides SEI; course credential history",
+      "Applicability / grouping": "ANY(historical BEST, USU Workplace Supports, USU Effective Job Coach); independent from 30.6(b).",
+      "Timing and evidence": "Before SEI services. Verify named course evidence.",
+      "UI / evaluation": "One training task with approved alternative routes."
+    },
+    {
+      "Rule / source": "30.5 SEI benefits",
+      "Subject and facts": "agency SEI award; benefits-qualified designated staff",
+      "Applicability / grouping": "COUNT(qualified staff)>=1; not every SEI or office staff.",
+      "Timing and evidence": "Before services; keep adequate coverage.",
+      "UI / evaluation": "Agency-level coverage requirement."
+    },
+    {
+      "Rule / source": "30.6(a) USOR",
+      "Subject and facts": "agency SEI service start history; award date; approval and receipt",
+      "Applicability / grouping": "Before 2026-07-01 cohort vs award on/after date; retain distinct branches.",
+      "Timing and evidence": "2027-01-31 existing cohort; award+6 months new cohort. Verify source email typo.",
+      "UI / evaluation": "Agency task with official proof submission."
+    },
+    {
+      "Rule / source": "32.5 caregiver training",
+      "Subject and facts": "staff provides CMP/CMS; official DSPD course result",
+      "Applicability / grouping": "service_code IN(CMP,CMS) AND score>=80. SLN alone does not trigger.",
+      "Timing and evidence": "Official New Caregiver Compensation course; effective 2026-07-01.",
+      "UI / evaluation": "External course button and verified proof."
+    },
+    {
+      "Rule / source": "33.5(b–c) SJD",
+      "Subject and facts": "hire date; ACRE; qualified supervisor; performs Discovery",
+      "Applicability / grouping": "ACRE new hire within60 days with qualified supervision pending; Customized Employment training if Discovery.",
+      "Timing and evidence": "Do not copy SEI alternatives to SJD. Verify source SJB typo in 33.5(a).",
+      "UI / evaluation": "Separate SJD pathway with conditional Discovery training."
+    },
+    {
+      "Rule / source": "1.25 periodic reports",
+      "Subject and facts": "client-service assignments; reporting period; code",
+      "Applicability / grouping": "Default quarterly; monthly substitutes for CMP/CMS/PN1/PN2/SEI/SJD; PBA financial substitute; BC additional content.",
+      "Timing and evidence": "General quarterly due15 calendar days after quarter; code-specific monthly deadline/destination overrides.",
+      "UI / evaluation": "One applicable report, not duplicate monthly and quarterly tasks."
+    },
+    {
+      "Rule / source": "1.10(7) notes; service articles",
+      "Subject and facts": "service code; unit type; service date; staff/client; applicable source elements",
+      "Applicability / grouping": "General note schema unless explicit service-specific override. Form fields ALL unless source conditional.",
+      "Timing and evidence": "Use full raw source fields; preserve independent EVV, payroll/timesheet, signatures and reporting requirements.",
+      "UI / evaluation": "Code-specific note form with missing-field validation."
+    },
+    {
+      "Rule / source": "1.12 EVV",
+      "Subject and facts": "code; waiver; unit type; service setting; verified Medicaid mapping",
+      "Applicability / grouping": "SOW family mapping is not enough to certify every billing-code/unit scenario. Verify external EVV matrix.",
+      "Timing and evidence": "Local PI capture reported in uploaded file is not proof of required state integration or acceptance.",
+      "UI / evaluation": "Until verified, show EVV mapping review; no invented integration success."
+    },
+    {
+      "Rule / source": "2 general billing restrictions",
+      "Subject and facts": "client/service date; authorization; hospitalization; incarceration; overlapping services; exception approvals",
+      "Applicability / grouping": "Apply all general restrictions with exact service-specific exceptions. Any overlap is not automatically prohibited.",
+      "Timing and evidence": "Evaluate actual date/time and unit; preserve admission/discharge and incoming/outgoing provider distinctions.",
+      "UI / evaluation": "Claim-specific explanation and source-linked resolution."
+    },
+    {
+      "Rule / source": "15 PBA funds",
+      "Subject and facts": "client payee role; ledger; reviewer; transactions; reporting period",
+      "Applicability / grouping": "Distinct monthly person review, monthly administrator review and quarterly third-person sample; reviewers differ as source specifies.",
+      "Timing and evidence": "Link itemized financial evidence, statements and distribution receipts. Do not satisfy all with one generic attestation.",
+      "UI / evaluation": "PBA workspace with scheduled reviews and ledger-backed reports."
+    },
+    {
+      "Rule / source": "1.32 transition",
+      "Subject and facts": "site/cohort; historical approval/submission evidence",
+      "Applicability / grouping": "Past fixed deadline does not mean retired; determine if requirement applied and evidence exists.",
+      "Timing and evidence": "2026-02-28 source inconsistency requires clarification.",
+      "UI / evaluation": "Historical overdue/needs review rather than silently compliant."
+    }
+  ]
+}

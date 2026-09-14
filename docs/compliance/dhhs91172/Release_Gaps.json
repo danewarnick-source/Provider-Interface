@@ -2,79 +2,150 @@
   "sheet": "Release_Gaps",
   "status": "open",
   "open_count": 12,
-  "note": "Publication blockers. Do not invent the missing legal fact. Leave each gap open until a reviewed source/version exists.",
   "rows": [
     {
-      "id": "RG-1.12-EVV",
-      "topic": "EVV mapping / UEVV / state integration",
-      "clause": "SOW §1.12",
-      "gap": "needs EVV mapping review — do not invent UEVV / state integration success"
+      "Priority": "High",
+      "Source / scope": "All rules",
+      "Issue": "Narrative fields are not tested executable predicates",
+      "Required resolution": "Publish only after source review, typed conditions, timing, evidence and tests. This revision is a build specification, not a verified production catalog.",
+      "Owner": "Compliance lead + developer",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-01",
+      "topic": "Narrative fields are not tested executable predicates",
+      "clause": "All rules",
+      "gap": "Publish only after source review, typed conditions, timing, evidence and tests. This revision is a build specification, not a verified production catalog."
     },
     {
-      "id": "RG-SCREENING-INTERVAL",
-      "topic": "Screening interval",
-      "clause": null,
-      "gap": "Annual (or other) screening interval is not published. Do not invent a renewal from completion."
+      "Priority": "High",
+      "Source / scope": "1.9(2), 1.9(7)",
+      "Issue": "Uploaded answers set annual screening without legal source",
+      "Required resolution": "Verify governing background/exclusion requirements. Keep annual request as agency policy only; verify authorized automation.",
+      "Owner": "Compliance lead",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-02",
+      "topic": "Uploaded answers set annual screening without legal source",
+      "clause": "1.9(2), 1.9(7)",
+      "gap": "Verify governing background/exclusion requirements. Keep annual request as agency policy only; verify authorized automation."
     },
     {
-      "id": "RG-1.32-DATE",
-      "topic": "1.32 transition date",
-      "clause": "SOW §1.32",
-      "gap": "Transition date is unknown. Do not invent a 1.32 date."
+      "Priority": "High",
+      "Source / scope": "1.12",
+      "Issue": "EVV code/unit/waiver applicability and PI integration not verified",
+      "Required resolution": "Confirm applicable Medicaid rules and actual capture/submission acknowledgments.",
+      "Owner": "Billing lead",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-03",
+      "topic": "EVV code/unit/waiver applicability and PI integration not verified",
+      "clause": "1.12",
+      "gap": "Confirm applicable Medicaid rules and actual capture/submission acknowledgments."
     },
     {
-      "id": "RG-USOR-EMAIL",
-      "topic": "USOR destination email",
-      "clause": "SOW §30.6(a)",
-      "gap": "Published destination stays osrprovider@utah.gov. Do not invent a corrected address."
+      "Priority": "High",
+      "Source / scope": "3.4(1)(H)",
+      "Issue": "Source says updated at least every three without a unit",
+      "Required resolution": "Obtain authoritative correction. Do not infer BC1 graph frequency from BC2/BC3.",
+      "Owner": "Compliance lead",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-04",
+      "topic": "Source says updated at least every three without a unit",
+      "clause": "3.4(1)(H)",
+      "gap": "Obtain authoritative correction. Do not infer BC1 graph frequency from BC2/BC3."
     },
     {
-      "id": "RG-SJB-TYPO",
-      "topic": "SJB typo",
-      "clause": "SOW §33.5",
-      "gap": "Workbook typo SJB is a publication gap. Encoded service code is SJD. Do not treat SJB as a live code."
+      "Priority": "High",
+      "Source / scope": "1.32(a)",
+      "Issue": "2026-02-28 deadline precedes stated effective date",
+      "Required resolution": "Confirm transition cohort and history; preserve overdue evidence obligation where applicable.",
+      "Owner": "Compliance lead",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-05",
+      "topic": "2026-02-28 deadline precedes stated effective date",
+      "clause": "1.32(a)",
+      "gap": "Confirm transition cohort and history; preserve overdue evidence obligation where applicable."
     },
     {
-      "id": "RG-CHA",
-      "topic": "CHA",
-      "clause": null,
-      "gap": "CHA is not encoded. Do not invent CHA operational rules."
+      "Priority": "High",
+      "Source / scope": "30.6(a), 33.5(a)",
+      "Issue": "Misspelled email / SJB reference in SJD article",
+      "Required resolution": "Confirm destination and intended code before external submission or rule activation.",
+      "Owner": "Compliance lead",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-06",
+      "topic": "Misspelled email / SJB reference in SJD article",
+      "clause": "30.6(a), 33.5(a)",
+      "gap": "Confirm destination and intended code before external submission or rule activation."
     },
     {
-      "id": "RG-RP2",
-      "topic": "RP2",
-      "clause": null,
-      "gap": "RP2 is not encoded. Do not invent RP2 operational rules."
+      "Priority": "High",
+      "Source / scope": "24.3(2), 25.3(2)",
+      "Issue": "RP2/RP3 references occur inside RP4/RP5 articles",
+      "Required resolution": "Resolve intended applicability; article code alone cannot correct source authority.",
+      "Owner": "Compliance lead",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-07",
+      "topic": "RP2/RP3 references occur inside RP4/RP5 articles",
+      "clause": "24.3(2), 25.3(2)",
+      "gap": "Resolve intended applicability; article code alone cannot correct source authority."
     },
     {
-      "id": "RG-RP3",
-      "topic": "RP3",
-      "clause": null,
-      "gap": "RP3 is not encoded. Do not invent RP3 operational rules."
+      "Priority": "High",
+      "Source / scope": "1.21",
+      "Issue": "Only CHA/HSQ/PBA exemption includes CHA without a service article",
+      "Required resolution": "Resolve CHA code meaning; apply whole-agency only condition, not exemption for every multi-service agency providing HSQ/PBA.",
+      "Owner": "Compliance lead",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-08",
+      "topic": "Only CHA/HSQ/PBA exemption includes CHA without a service article",
+      "clause": "1.21",
+      "gap": "Resolve CHA code meaning; apply whole-agency only condition, not exemption for every multi-service agency providing HSQ/PBA."
     },
     {
-      "id": "RG-RETENTION",
-      "topic": "Universal retention period",
-      "clause": "Workbook System_Design — Audit export",
-      "gap": "Universal retention period is unknown. Field stays from applicable authority. Do not invent a default interval."
+      "Priority": "High",
+      "Source / scope": "Alternatives and nested source text",
+      "Issue": "Inline roman numerals combine multiple obligations in one source row",
+      "Required resolution": "Split into atomic fields/conditions with same source link; review all alternative qualifications and exceptions.",
+      "Owner": "Compliance lead + developer",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-09",
+      "topic": "Inline roman numerals combine multiple obligations in one source row",
+      "clause": "Alternatives and nested source text",
+      "gap": "Split into atomic fields/conditions with same source link; review all alternative qualifications and exceptions."
     },
     {
-      "id": "RG-REMINDERS-PRODUCT",
-      "topic": "Reminder / escalation offsets",
-      "clause": "Workbook System_Design — Reminders (product defaults)",
-      "gap": "Offsets are product defaults, not SOW mandates. Do not publish them as legal intervals."
+      "Priority": "Medium",
+      "Source / scope": "16.2(9), 17.2(9)",
+      "Issue": "Regularly scheduled has no fixed visit interval",
+      "Required resolution": "Use documented client care schedule; do not impose an invented monthly legal requirement.",
+      "Owner": "Clinical lead",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-10",
+      "topic": "Regularly scheduled has no fixed visit interval",
+      "clause": "16.2(9), 17.2(9)",
+      "gap": "Use documented client care schedule; do not impose an invented monthly legal requirement."
     },
     {
-      "id": "RG-MAR-EMAR",
-      "topic": "MAR / eMAR",
-      "clause": null,
-      "gap": "MAR/eMAR is not encoded as a published rule. Do not invent medication-administration compliance."
+      "Priority": "High",
+      "Source / scope": "Source completeness",
+      "Issue": "1,693 retained rows and all 36 articles do not independently prove whole-document completeness",
+      "Required resolution": "Reconcile source hash/text and all incorporated external authorities before claiming complete legal coverage. Official page effective date checked 2026-09-12.",
+      "Owner": "Compliance lead",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-11",
+      "topic": "1,693 retained rows and all 36 articles do not independently prove whole-document completeness",
+      "clause": "Source completeness",
+      "gap": "Reconcile source hash/text and all incorporated external authorities before claiming complete legal coverage. Official page effective date checked 2026-09-12."
     },
     {
-      "id": "RG-SOFT-SEI",
-      "topic": "Soft SEI columns",
-      "clause": "SOW §30",
-      "gap": "Soft SEI columns are not published. Do not invent them."
+      "Priority": "High",
+      "Source / scope": "HIPAA / external services",
+      "Issue": "Design controls do not establish deployed HIPAA compliance",
+      "Required resolution": "Verify actual hosting, vendor BAAs when applicable, access controls, data flows, retention and incident processes.",
+      "Owner": "Security lead",
+      "Status": "Open",
+      "id": "WORKBOOK-GAP-12",
+      "topic": "Design controls do not establish deployed HIPAA compliance",
+      "clause": "HIPAA / external services",
+      "gap": "Verify actual hosting, vendor BAAs when applicable, access controls, data flows, retention and incident processes."
     }
   ]
 }

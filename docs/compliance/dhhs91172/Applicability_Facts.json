@@ -1,52 +1,857 @@
 {
   "sheet": "Applicability_Facts",
-  "design_revision": "2026-09-12",
   "unknown_policy": "question_or_missing_information",
   "never": "automatic_compliance",
   "rows": [
     {
-      "fact": "direct_support_assignment",
-      "unknown": "missing-information"
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded PPS?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "38",
+      "fact_id": "FACT-001",
+      "linked_requirement_keys": "REQ-20.2.1, REQ-20.2.2, REQ-20.2.3, REQ-20.2.4, REQ-20.2.5, REQ-20.2.6, REQ-20.2.7, REQ-20.2.8, REQ-20.3.1, REQ-20.3.2, REQ-20.3.2.F, REQ-20.3.3, REQ-20.3.4, REQ-20.3.5, REQ-20.3.6, REQ-20.3.7, REQ-20.3.8, REQ-20.3.9, REQ-20.3.10, REQ-20.3.11, REQ-20.4.1, REQ-20.4.2, REQ-20.4.3, REQ-20.4.4, REQ-20.4.5, REQ-20.4.6, REQ-20.4.7, REQ-20.4.8, REQ-20.4.9, REQ-20.5.1, REQ-20.5.2, REQ-20.6, REQ-20.7.c, REQ-20.8.a, REQ-20.8.b, REQ-20.8.c, REQ-20.8.c.1, REQ-20.8.c.2",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     },
     {
-      "fact": "abi_caseload",
-      "unknown": "missing-information"
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded SJD?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "35",
+      "fact_id": "FACT-002",
+      "linked_requirement_keys": "REQ-33.2.a, REQ-33.2.b, REQ-33.2.c, REQ-33.2.c.3, REQ-33.2.d, REQ-33.2.e, REQ-33.2.f, REQ-33.2.g, REQ-33.2.h, REQ-33.2.h.11, REQ-33.2.i, REQ-33.2.j, REQ-33.2.k, REQ-33.2.l, REQ-33.2.m, REQ-33.3.1, REQ-33.3.2, REQ-33.3.3, REQ-33.3.4, REQ-33.3.4.I, REQ-33.3.5, REQ-33.3.6, REQ-33.3.7, REQ-33.4.1, REQ-33.4.2, REQ-33.4.3, REQ-33.4.4, REQ-33.5.a, REQ-33.5.b, REQ-33.6.c, REQ-33.7, REQ-33.7.1, REQ-33.7.2, REQ-33.7.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     },
     {
-      "fact": "sei_assignment",
-      "unknown": "missing-information"
+      "fact_scope": "staff",
+      "question": "Does the agency provide transportation? Which staff drive?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "33",
+      "fact_id": "FACT-003",
+      "linked_requirement_keys": "REQ-1.18.2, REQ-1.18.7, REQ-1.30.1, REQ-1.30.3, REQ-2.1.5.B, REQ-2.1.5.E, REQ-3.5.3, REQ-4.5.3, REQ-5.5.3, REQ-7.2.5, REQ-7.6.a, REQ-8.2.6, REQ-8.4.4, REQ-9.2.7, REQ-10.2.3, REQ-11.2.8, REQ-13.2.1, REQ-13.2.2, REQ-13.3.1, REQ-13.3.2, REQ-13.4.1, REQ-13.4.2, REQ-14.2.5, REQ-20.2.8, REQ-21.2.7, REQ-28.2.5, REQ-29.2.d, REQ-30.2.6, REQ-31.2.4, REQ-32.2.3, REQ-33.2.b, REQ-33.2.h.11, REQ-33.2.l",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     },
     {
-      "fact": "org_acre_coverage",
-      "unknown": "missing-information"
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded HHS?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "31",
+      "fact_id": "FACT-004",
+      "linked_requirement_keys": "REQ-11.2.1, REQ-11.2.2, REQ-11.2.3, REQ-11.2.4, REQ-11.2.5, REQ-11.2.6, REQ-11.2.7, REQ-11.2.8, REQ-11.3.1, REQ-11.3.2, REQ-11.3.3, REQ-11.3.4, REQ-11.3.5, REQ-11.3.6, REQ-11.3.7, REQ-11.3.8, REQ-11.3.9, REQ-11.3.10, REQ-11.3.11, REQ-11.4.1, REQ-11.4.2, REQ-11.4.3, REQ-11.4.4, REQ-11.4.5, REQ-11.4.6, REQ-11.4.7, REQ-11.4.8, REQ-11.4.9, REQ-11.5, REQ-11.6, REQ-11.7.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     },
     {
-      "fact": "staff_acre_supervisor",
-      "unknown": "missing-information"
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded PBA?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "30",
+      "fact_id": "FACT-005",
+      "linked_requirement_keys": "REQ-15.2.1, REQ-15.2.2, REQ-15.2.3, REQ-15.2.4, REQ-15.2.5, REQ-15.2.6, REQ-15.2.7, REQ-15.2.7.B, REQ-15.2.8, REQ-15.2.9, REQ-15.2.10, REQ-15.3.1, REQ-15.3.2, REQ-15.3.3, REQ-15.3.3.C, REQ-15.3.4, REQ-15.3.5, REQ-15.3.6, REQ-15.3.7, REQ-15.3.8, REQ-15.3.9, REQ-15.3.10, REQ-15.3.11, REQ-15.4.1, REQ-15.4.2, REQ-15.4.3, REQ-15.4.4, REQ-15.4.5, REQ-15.4.6, REQ-15.5.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     },
     {
-      "fact": "behavior_risk_assignment",
-      "unknown": "missing-information"
+      "fact_scope": "site",
+      "question": "Which OL licenses/certifications does the agency hold, per location?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "29",
+      "fact_id": "FACT-006",
+      "linked_requirement_keys": "REQ-1.4.3, REQ-1.7.2, REQ-1.9.4, REQ-1.27.4, REQ-1.31.2, REQ-1.32.b, REQ-1.32.c, REQ-1.34, REQ-2.1.5.G, REQ-7.3.5, REQ-7.5.c, REQ-8.3.3, REQ-8.5.c, REQ-9.3.5, REQ-9.4.4, REQ-9.6.b, REQ-11.5, REQ-16.4, REQ-17.4, REQ-19.2.1, REQ-19.5.a, REQ-20.5.1, REQ-22.3.3, REQ-23.3.4, REQ-24.3.3, REQ-25.3.4, REQ-26.3.2, REQ-33.5.b",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     },
     {
-      "fact": "designated_benefits_staff",
-      "unknown": "missing-information"
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded RHS?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "29",
+      "fact_id": "FACT-007",
+      "linked_requirement_keys": "REQ-21.2.1, REQ-21.2.2, REQ-21.2.3, REQ-21.2.4, REQ-21.2.5, REQ-21.2.6, REQ-21.2.7, REQ-21.3.1, REQ-21.3.2, REQ-21.3.3, REQ-21.3.4, REQ-21.3.5, REQ-21.3.6, REQ-21.3.7, REQ-21.3.8.A, REQ-21.3.8.B, REQ-21.3.8.C, REQ-21.3.9, REQ-21.4.1, REQ-21.4.2, REQ-21.4.3, REQ-21.5, REQ-21.6.c, REQ-21.7.a, REQ-21.7.b, REQ-21.7.c, REQ-21.7.d, REQ-21.7.d.1, REQ-21.7.d.2",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     },
     {
-      "fact": "usor_sei_vendor",
-      "unknown": "missing-information"
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded SEI?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "28",
+      "fact_id": "FACT-008",
+      "linked_requirement_keys": "REQ-30.2.1, REQ-30.2.2, REQ-30.2.3, REQ-30.2.4, REQ-30.2.5, REQ-30.2.6, REQ-30.2.7, REQ-30.2.8, REQ-30.3.1, REQ-30.3.2, REQ-30.3.3, REQ-30.3.4, REQ-30.3.5, REQ-30.3.6, REQ-30.4.1, REQ-30.4.2, REQ-30.4.3, REQ-30.4.4, REQ-30.4.5, REQ-30.6.a, REQ-30.6.c, REQ-30.7.c, REQ-30.8, REQ-30.8.1, REQ-30.8.2, REQ-30.8.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     },
     {
-      "fact": "cmp_cms_assignment",
-      "unknown": "missing-information"
+      "fact_scope": "staff",
+      "question": "Which staff hold UPI access?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "27",
+      "fact_id": "FACT-009",
+      "linked_requirement_keys": "REQ-1.4.2, REQ-1.15.1, REQ-1.15.2, REQ-1.15.3, REQ-1.15.4, REQ-1.15.7, REQ-1.15.8, REQ-1.15.9, REQ-1.15.12, REQ-1.15.14, REQ-1.15.15, REQ-1.27.1.A, REQ-1.27.2, REQ-1.27.3, REQ-1.27.4, REQ-30.3.4, REQ-30.3.5, REQ-30.3.6, REQ-30.8.1, REQ-30.8.2, REQ-30.8.3, REQ-33.3.4, REQ-33.3.5, REQ-33.3.7, REQ-33.7.1, REQ-33.7.2, REQ-33.7.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     },
     {
-      "fact": "sjd_assignment",
-      "unknown": "missing-information"
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded BC1?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "26",
+      "fact_id": "FACT-010",
+      "linked_requirement_keys": "REQ-3.2.1, REQ-3.2.2, REQ-3.2.3, REQ-3.2.4, REQ-3.2.5, REQ-3.2.6, REQ-3.3.1, REQ-3.3.2, REQ-3.3.3, REQ-3.3.4, REQ-3.3.5, REQ-3.3.6, REQ-3.3.7, REQ-3.3.8, REQ-3.4.1, REQ-3.4.2, REQ-3.4.3, REQ-3.4.4, REQ-3.4.5, REQ-3.4.6, REQ-3.4.7, REQ-3.5.1, REQ-3.5.2, REQ-3.5.3, REQ-3.6, REQ-3.7.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     },
     {
-      "fact": "pba_assignment",
-      "unknown": "missing-information"
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded BC3?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "26",
+      "fact_id": "FACT-011",
+      "linked_requirement_keys": "REQ-5.2.1, REQ-5.2.2, REQ-5.2.3, REQ-5.2.4, REQ-5.2.5, REQ-5.2.6, REQ-5.3.1, REQ-5.3.2, REQ-5.3.3, REQ-5.3.4, REQ-5.3.5, REQ-5.3.6, REQ-5.3.7, REQ-5.3.8, REQ-5.4.1, REQ-5.4.2, REQ-5.4.3, REQ-5.4.4, REQ-5.4.5, REQ-5.4.6, REQ-5.4.7, REQ-5.5.1, REQ-5.5.2, REQ-5.5.3, REQ-5.6, REQ-5.7.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded EPR?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "26",
+      "fact_id": "FACT-012",
+      "linked_requirement_keys": "REQ-9.2.1, REQ-9.2.2, REQ-9.2.3, REQ-9.2.4, REQ-9.2.5, REQ-9.2.5.C, REQ-9.2.5.E, REQ-9.2.6, REQ-9.2.7, REQ-9.2.8, REQ-9.2.9, REQ-9.3.1, REQ-9.3.2, REQ-9.3.3, REQ-9.3.4, REQ-9.3.5, REQ-9.3.6, REQ-9.4.1, REQ-9.4.2, REQ-9.4.3, REQ-9.4.4, REQ-9.5.1, REQ-9.5.2, REQ-9.6.a, REQ-9.6.b, REQ-9.7.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded BC2?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "25",
+      "fact_id": "FACT-013",
+      "linked_requirement_keys": "REQ-4.2.1, REQ-4.2.2, REQ-4.2.3, REQ-4.2.4, REQ-4.2.5, REQ-4.2.6, REQ-4.3.1, REQ-4.3.2, REQ-4.3.3, REQ-4.3.4, REQ-4.3.5, REQ-4.3.6, REQ-4.3.7, REQ-4.4.1, REQ-4.4.2, REQ-4.4.3, REQ-4.4.4, REQ-4.4.5, REQ-4.4.6, REQ-4.4.7, REQ-4.5.1, REQ-4.5.2, REQ-4.5.3, REQ-4.6, REQ-4.7.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded PN2?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "24",
+      "fact_id": "FACT-014",
+      "linked_requirement_keys": "REQ-19.2.1, REQ-19.2.1.B, REQ-19.2.2, REQ-19.2.3, REQ-19.2.4, REQ-19.2.5, REQ-19.2.6, REQ-19.2.7, REQ-19.2.8, REQ-19.2.8.A, REQ-19.2.8.B, REQ-19.2.9, REQ-19.2.9.A, REQ-19.2.9.B, REQ-19.2.10, REQ-19.3, REQ-19.4.1, REQ-19.4.2, REQ-19.4.3, REQ-19.4.4, REQ-19.4.5, REQ-19.5.a, REQ-19.6.c, REQ-19.7",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded DSG,DSP?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "19",
+      "fact_id": "FACT-015",
+      "linked_requirement_keys": "REQ-7.2.1, REQ-7.2.2, REQ-7.2.3, REQ-7.2.4, REQ-7.2.5, REQ-7.3.2, REQ-7.3.3, REQ-7.3.4, REQ-7.3.5, REQ-7.3.6, REQ-7.4.1, REQ-7.4.2, REQ-7.4.3, REQ-7.5.c, REQ-7.6.a, REQ-7.6.b, REQ-7.6.c, REQ-7.6.d, REQ-7.7.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Does the agency provide respite? Overnight?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "17",
+      "fact_id": "FACT-016",
+      "linked_requirement_keys": "REQ-1.12, REQ-1.23.f.1, REQ-1.23.f.2, REQ-1.23.g, REQ-1.23.h, REQ-1.29.1, REQ-11.3.3, REQ-11.3.11, REQ-11.4.7, REQ-11.4.9, REQ-20.3.3, REQ-20.3.11, REQ-20.4.9, REQ-21.4.3, REQ-26.2.1, REQ-31.4.3, REQ-32.4.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the client have a legal guardian?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "16",
+      "fact_id": "FACT-017",
+      "linked_requirement_keys": "REQ-1.6.2.B, REQ-1.28.7.C, REQ-1.28.7.F, REQ-1.35, REQ-2.1.1, REQ-11.4.3, REQ-15.2.9, REQ-16.2.8, REQ-17.2.8, REQ-20.3.9, REQ-20.4.3, REQ-21.3.8.C, REQ-21.4.1, REQ-32.4.5, REQ-32.6.a, REQ-32.6.b",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Is the agency a representative payee / does it assist with personal funds?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "16",
+      "fact_id": "FACT-018",
+      "linked_requirement_keys": "REQ-1.18.5, REQ-1.22.a.6, REQ-1.28.2, REQ-11.4.1, REQ-15.2.1, REQ-15.2.2, REQ-15.2.3, REQ-15.3.2, REQ-15.3.7, REQ-15.3.9, REQ-15.3.11, REQ-15.4.1, REQ-15.4.6, REQ-20.4.1, REQ-20.8.c.1, REQ-21.7.d.1",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded DSI?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "15",
+      "fact_id": "FACT-019",
+      "linked_requirement_keys": "REQ-8.2.1, REQ-8.2.2, REQ-8.2.3, REQ-8.2.4, REQ-8.2.5, REQ-8.2.6, REQ-8.3.2, REQ-8.3.3, REQ-8.4.1, REQ-8.4.2, REQ-8.4.3, REQ-8.4.4, REQ-8.4.5, REQ-8.5.c, REQ-8.6.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded CMP,CMS,SLN?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "15",
+      "fact_id": "FACT-020",
+      "linked_requirement_keys": "REQ-32.2.1, REQ-32.2.2, REQ-32.2.3, REQ-32.3.2, REQ-32.4.1, REQ-32.4.2, REQ-32.4.3, REQ-32.4.4, REQ-32.4.5, REQ-32.4.6, REQ-32.5, REQ-32.6.a, REQ-32.6.b, REQ-32.6.c, REQ-32.7.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Who is the host/professional parent for the client?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "14",
+      "fact_id": "FACT-021",
+      "linked_requirement_keys": "REQ-1.22.b, REQ-11.3.3, REQ-11.3.4, REQ-11.3.11, REQ-11.4.1, REQ-11.4.2, REQ-11.4.6, REQ-11.4.8, REQ-11.5, REQ-11.6, REQ-20.3.3, REQ-20.3.4, REQ-20.3.11, REQ-20.4.8",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "site",
+      "question": "Is the service delivered in a site-based facility? Which locations?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "14",
+      "fact_id": "FACT-022",
+      "linked_requirement_keys": "REQ-2.1.5.E, REQ-2.1.5.H, REQ-7.3.5, REQ-8.3.3, REQ-8.4.5, REQ-9.3.1, REQ-9.3.5, REQ-22.3.3, REQ-23.3.4, REQ-24.3.3, REQ-25.3.4, REQ-26.3.2, REQ-28.2.3, REQ-29.2.a",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded PM1?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "14",
+      "fact_id": "FACT-023",
+      "linked_requirement_keys": "REQ-16.2.1, REQ-16.2.2, REQ-16.2.3, REQ-16.2.4, REQ-16.2.5, REQ-16.2.6, REQ-16.2.7, REQ-16.2.8, REQ-16.2.9, REQ-16.2.10, REQ-16.2.11, REQ-16.3, REQ-16.4, REQ-16.5.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded PM2?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "14",
+      "fact_id": "FACT-024",
+      "linked_requirement_keys": "REQ-17.2.1, REQ-17.2.2, REQ-17.2.3, REQ-17.2.4, REQ-17.2.5, REQ-17.2.6, REQ-17.2.7, REQ-17.2.8, REQ-17.2.9, REQ-17.2.10, REQ-17.2.11, REQ-17.3, REQ-17.4, REQ-17.5.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Is the client a DCFS/DJJYS client or in state custody?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "13",
+      "fact_id": "FACT-025",
+      "linked_requirement_keys": "REQ-12.3.2, REQ-13.4.4, REQ-20.8.a, REQ-20.8.c.1, REQ-21.7.b, REQ-21.7.d.1, REQ-22.4.1, REQ-23.4.1, REQ-24.4.1, REQ-25.4.1, REQ-31.4.2, REQ-32.4.2, REQ-36.3.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded ELS?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "12",
+      "fact_id": "FACT-026",
+      "linked_requirement_keys": "REQ-10.2.1, REQ-10.2.2, REQ-10.2.3, REQ-10.3.1, REQ-10.3.2, REQ-10.4.1, REQ-10.4.2, REQ-10.4.3, REQ-10.4.4, REQ-10.5, REQ-10.6.c, REQ-10.7",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded SEE?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "12",
+      "fact_id": "FACT-027",
+      "linked_requirement_keys": "REQ-29.2.a, REQ-29.2.b, REQ-29.2.c, REQ-29.2.d, REQ-29.2.e, REQ-29.3.1, REQ-29.3.2, REQ-29.3.3, REQ-29.3.4, REQ-29.4.1, REQ-29.4.2, REQ-29.5.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded RP5?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "11",
+      "fact_id": "FACT-028",
+      "linked_requirement_keys": "REQ-25.2.1, REQ-25.2.2, REQ-25.3.1, REQ-25.3.3, REQ-25.3.4, REQ-25.3.5, REQ-25.4.1, REQ-25.4.2, REQ-25.4.3, REQ-25.5.c, REQ-25.6",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded RPS?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "11",
+      "fact_id": "FACT-029",
+      "linked_requirement_keys": "REQ-26.2.1, REQ-26.2.2, REQ-26.2.3, REQ-26.3.2, REQ-26.3.3, REQ-26.4.1, REQ-26.4.2, REQ-26.4.3, REQ-26.4.4, REQ-26.4.5, REQ-26.5.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded SED?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "11",
+      "fact_id": "FACT-030",
+      "linked_requirement_keys": "REQ-28.2.1, REQ-28.2.2, REQ-28.2.3, REQ-28.2.4, REQ-28.2.5, REQ-28.2.6, REQ-28.3.1, REQ-28.3.2, REQ-28.3.3, REQ-28.4, REQ-28.5.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded MTP?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "10",
+      "fact_id": "FACT-031",
+      "linked_requirement_keys": "REQ-13.2.1, REQ-13.2.2, REQ-13.3.1, REQ-13.3.2, REQ-13.3.3, REQ-13.4.1, REQ-13.4.2, REQ-13.4.3, REQ-13.4.4, REQ-13.5.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded RP3?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "10",
+      "fact_id": "FACT-032",
+      "linked_requirement_keys": "REQ-23.2.1, REQ-23.2.2, REQ-23.3.1, REQ-23.3.3, REQ-23.3.4, REQ-23.3.5, REQ-23.4.1, REQ-23.4.2, REQ-23.5.c, REQ-23.6",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded RP4?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "10",
+      "fact_id": "FACT-033",
+      "linked_requirement_keys": "REQ-24.2.1, REQ-24.2.2, REQ-24.3.2, REQ-24.3.3, REQ-24.3.4, REQ-24.4.1, REQ-24.4.2, REQ-24.4.3, REQ-24.5.c, REQ-24.6",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded SLH?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "10",
+      "fact_id": "FACT-034",
+      "linked_requirement_keys": "REQ-31.2.1, REQ-31.2.2, REQ-31.2.3, REQ-31.2.4, REQ-31.3.3, REQ-31.4.1, REQ-31.4.2, REQ-31.4.3, REQ-31.4.4, REQ-31.5.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Does the agency use volunteers?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "9",
+      "fact_id": "FACT-035",
+      "linked_requirement_keys": "REQ-1.6, REQ-1.6.1, REQ-1.6.2, REQ-1.6.2.B, REQ-1.6.3, REQ-1.6.3.F, REQ-26.4.4, REQ-27.4.3, REQ-28.3.3, REQ-29.3.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Is the agency a USOR-approved vendor?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "9",
+      "fact_id": "FACT-036",
+      "linked_requirement_keys": "REQ-2.1.5.D, REQ-9.2.8, REQ-30.2.5, REQ-30.6.a, REQ-33.3.1, REQ-33.3.4.I, REQ-33.5.a, REQ-34.4.1, REQ-35.4.1",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded PN1?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "9",
+      "fact_id": "FACT-037",
+      "linked_requirement_keys": "REQ-18.2.1, REQ-18.2.3, REQ-18.3.1, REQ-18.3.2, REQ-18.4.1, REQ-18.4.2, REQ-18.4.3, REQ-18.5, REQ-18.6.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded RP2?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "9",
+      "fact_id": "FACT-038",
+      "linked_requirement_keys": "REQ-22.2.1, REQ-22.2.2, REQ-22.3.2, REQ-22.3.3, REQ-22.3.4, REQ-22.4.1, REQ-22.4.2, REQ-22.5.c, REQ-22.6",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded SEC?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "9",
+      "fact_id": "FACT-039",
+      "linked_requirement_keys": "REQ-27.2.1, REQ-27.2.2, REQ-27.3, REQ-27.4.1, REQ-27.4.2, REQ-27.4.3, REQ-27.5, REQ-27.6.c, REQ-27.7",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded TFB?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "9",
+      "fact_id": "FACT-040",
+      "linked_requirement_keys": "REQ-36.2.1, REQ-36.2.2, REQ-36.2.3, REQ-36.3.1, REQ-36.3.2, REQ-36.3.3, REQ-36.4.1, REQ-36.4.2, REQ-36.5.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "staff",
+      "question": "Who supervises the staff for this service?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "8",
+      "fact_id": "FACT-041",
+      "linked_requirement_keys": "REQ-9.4.3, REQ-9.5.2, REQ-15.3.2, REQ-27.4.1, REQ-29.4.2, REQ-30.2.2, REQ-33.5.b",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded PAC?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "8",
+      "fact_id": "FACT-042",
+      "linked_requirement_keys": "REQ-14.2.1, REQ-14.2.2, REQ-14.2.3, REQ-14.2.4, REQ-14.2.5, REQ-14.3, REQ-14.4.c, REQ-14.5",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the agency receive WHX/WRX maintenance payments for the client?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "8",
+      "fact_id": "FACT-043",
+      "linked_requirement_keys": "REQ-20.8.a, REQ-20.8.b, REQ-20.8.c, REQ-20.8.c.2, REQ-21.7.b, REQ-21.7.c, REQ-21.7.d, REQ-21.7.d.2",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Is the staff/host an Immediate Relative of the client?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "7",
+      "fact_id": "FACT-044",
+      "linked_requirement_keys": "REQ-11.4.3, REQ-11.4.4, REQ-20.4.3, REQ-20.4.5, REQ-21.4.1, REQ-26.4.2, REQ-36.2.1",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded HSQ?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "7",
+      "fact_id": "FACT-045",
+      "linked_requirement_keys": "REQ-12.2.1, REQ-12.2.2, REQ-12.3.1, REQ-12.3.3, REQ-12.3.2, REQ-12.4, REQ-12.5.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the agency have primary responsibility for the client's medication?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "6",
+      "fact_id": "FACT-046",
+      "linked_requirement_keys": "REQ-1.23.c, REQ-1.23.e, REQ-16.2.4, REQ-16.2.5, REQ-17.2.4, REQ-17.2.5",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded COM?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "6",
+      "fact_id": "FACT-047",
+      "linked_requirement_keys": "REQ-6.2, REQ-6.3, REQ-6.4.1, REQ-6.4.2, REQ-6.5.c, REQ-6.6",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "staff",
+      "question": "Is the service delivered in the staff's private residence?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "6",
+      "fact_id": "FACT-048",
+      "linked_requirement_keys": "REQ-8.4.3, REQ-22.3.2, REQ-23.3.3, REQ-24.3.2, REQ-25.3.3, REQ-26.4.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded SJP?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "6",
+      "fact_id": "FACT-049",
+      "linked_requirement_keys": "REQ-34.2, REQ-34.3, REQ-34.4.1, REQ-34.4.2, REQ-34.5, REQ-34.6.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency (service award)",
+      "question": "Agency awarded SJR?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "6",
+      "fact_id": "FACT-050",
+      "linked_requirement_keys": "REQ-35.2, REQ-35.3, REQ-35.4.1, REQ-35.4.2, REQ-35.5, REQ-35.6.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "staff",
+      "question": "Where is respite delivered (facility 1:6, staff residence 1:3, community)?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "5",
+      "fact_id": "FACT-051",
+      "linked_requirement_keys": "REQ-22.3.1, REQ-23.3.2, REQ-24.3.1, REQ-25.3.2, REQ-26.3.1",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the client have a Public Housing Authority voucher?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "4",
+      "fact_id": "FACT-052",
+      "linked_requirement_keys": "REQ-21.3.8, REQ-21.3.8.A, REQ-21.3.8.B, REQ-21.3.8.C",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Is the staff the client's parent/guardian/spouse (SLN vs CMP/CMS)?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "4",
+      "fact_id": "FACT-053",
+      "linked_requirement_keys": "REQ-32.4.5, REQ-32.6.a, REQ-32.6.b, REQ-32.6.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Client age",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "3",
+      "fact_id": "FACT-054",
+      "linked_requirement_keys": "REQ-1.32.b, REQ-11.2.1, REQ-33.4.2",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Client living situation (alone/roommates/spouse/with relatives)",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "3",
+      "fact_id": "FACT-055",
+      "linked_requirement_keys": "REQ-31.3.1, REQ-31.3.2, REQ-32.3.1",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the client have an ABI?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "2",
+      "fact_id": "FACT-056",
+      "linked_requirement_keys": "REQ-1.8.8, REQ-36.4.2",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Is the agency governed by a board?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "2",
+      "fact_id": "FACT-057",
+      "linked_requirement_keys": "REQ-1.14.1, REQ-1.14.4",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the agency assist the client with personal funds?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "2",
+      "fact_id": "FACT-058",
+      "linked_requirement_keys": "REQ-1.28.4, REQ-1.28.5",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the client's DSPD Worksheet require enhanced/2:1 staffing?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "2",
+      "fact_id": "FACT-059",
+      "linked_requirement_keys": "REQ-1.33.2, REQ-21.3.4",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Is the staff member a legal guardian/Immediate Relative/grandparent of the client? (relationship flag on assignment)",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "2",
+      "fact_id": "FACT-060",
+      "linked_requirement_keys": "REQ-2.1.2, REQ-2.1.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "site",
+      "question": "Is the program site-based, community-based, or both? Which locations?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "2",
+      "fact_id": "FACT-061",
+      "linked_requirement_keys": "REQ-7.3.1, REQ-8.3.1",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Persons served per location (4+ requires Day Treatment license; 3 or fewer requires certification)",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "2",
+      "fact_id": "FACT-062",
+      "linked_requirement_keys": "REQ-7.5.a, REQ-8.5.a",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Total Persons served in the community program (4+ requires Day Treatment license)",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "2",
+      "fact_id": "FACT-063",
+      "linked_requirement_keys": "REQ-7.5.b, REQ-8.5.b",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Medicaid provider IDs per waiver (CSW, CTW, ABI)",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-064",
+      "linked_requirement_keys": "REQ-1.4.1",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the agency use volunteers? Which clients?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-065",
+      "linked_requirement_keys": "REQ-1.6.1",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Is the client likely to engage in aggressive/self-injurious/destructive behavior? (client flag activates this for assigned staff)",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-066",
+      "linked_requirement_keys": "",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the client have an ABI? (client flag)",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-067",
+      "linked_requirement_keys": "REQ-1.8.8",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the client have a DNR order?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-068",
+      "linked_requirement_keys": "REQ-1.10.14",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "site",
+      "question": "Which sites are licensed and require zoning/Life Safety/fire documentation?",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-069",
+      "linked_requirement_keys": "REQ-1.11",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Is the agency governed by a governing or policy-making board?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-070",
+      "linked_requirement_keys": "REQ-1.14",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Does the agency provide ONLY CHA, HSQ or PBA? (if yes, not required)",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-071",
+      "linked_requirement_keys": "REQ-1.21",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Is the discharge initiated by the agency?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-072",
+      "linked_requirement_keys": "REQ-1.22.c",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Does the agency support self-directed self-administration of medication?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-073",
+      "linked_requirement_keys": "REQ-1.23.b",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the client self-administer medication?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-074",
+      "linked_requirement_keys": "REQ-1.23.d",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the client attend school, day services or overnight respite with another provider?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-075",
+      "linked_requirement_keys": "REQ-1.23.f",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Service codes exempt from Support Strategies: ELS, MTP, PBA, PM1/PM2, Respite",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-076",
+      "linked_requirement_keys": "REQ-1.24.5",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Codes where monthly summaries replace the quarterly: CMP, CMS, PN1, PN2, SEI, SJD; PBA monthly financial statement replaces; BC1-3 quarterly must also meet BC section requirements",
+      "answer_type": "selection / list",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-077",
+      "linked_requirement_keys": "REQ-1.25",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Is the agency a Social Security representative payee for any client?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-078",
+      "linked_requirement_keys": "REQ-1.28.1",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Is the agency the client's SSA representative payee?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-079",
+      "linked_requirement_keys": "REQ-1.28.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "agency",
+      "question": "Does the agency provide transportation?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-080",
+      "linked_requirement_keys": "REQ-1.18.2, REQ-1.18.7, REQ-1.30, REQ-1.30.1, REQ-1.30.3, REQ-2.1.5.B, REQ-2.1.5.E, REQ-3.5.3, REQ-4.5.3, REQ-5.5.3, REQ-7.2.5, REQ-7.6.a, REQ-8.2.6, REQ-8.4.4, REQ-9.2.7, REQ-10.2.3, REQ-11.2.8, REQ-13.2.1, REQ-13.2.2, REQ-13.3.1, REQ-13.3.2, REQ-13.4.1, REQ-13.4.2, REQ-14.2.5, REQ-20.2.8, REQ-21.2.7, REQ-28.2.5, REQ-29.2.d, REQ-30.2.6, REQ-31.2.4, REQ-32.2.3, REQ-33.2.b, REQ-33.2.h.11, REQ-33.2.l",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does this staff member drive Persons? Own vehicle?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-081",
+      "linked_requirement_keys": "REQ-1.30.2",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Is the client a DCFS/DJJYS client?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-082",
+      "linked_requirement_keys": "REQ-6.4.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Does the client's PCSP require EPR?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-083",
+      "linked_requirement_keys": "REQ-9.4.5",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "client",
+      "question": "Is the client school-age?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-084",
+      "linked_requirement_keys": "REQ-10.3.3",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
+    },
+    {
+      "fact_scope": "staff",
+      "question": "Is the PN2 staff an LPN working under RN delegation?",
+      "answer_type": "yes/no",
+      "answered_by": "Owner / administrator",
+      "requirements_affected": "1",
+      "fact_id": "FACT-085",
+      "linked_requirement_keys": "REQ-19.5.b",
+      "collection_rule": "Collect at owning entity; use existing records first. Split compound questions into typed facts; unknown is not false."
     }
   ]
 }

@@ -11,6 +11,7 @@ import {
   CATALOG_BATCH_IDS,
   type CatalogManifest,
   type ReleaseGapRow,
+  type CatalogFact,
 } from "./catalog-loader.ts";
 
 const REPO_ROOT = fileURLToPath(new URL("../../../../", import.meta.url));
@@ -36,6 +37,7 @@ export function readCommittedCatalog() {
     requirements: readJson("Requirements.json"),
     releaseGaps: releaseFile.rows ?? [],
     coreRuleLogic: readJson("Core_Rule_Logic.json"),
+    applicabilityFacts: readJson("Applicability_Facts.json") as { rows: CatalogFact[] },
   });
 }
 

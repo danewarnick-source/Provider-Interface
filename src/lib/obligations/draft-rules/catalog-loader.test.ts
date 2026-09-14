@@ -61,7 +61,7 @@ describe("committed DHHS91172 catalog files", () => {
     assert.equal(WORKBOOK_DESIGN_REVISION, "2026-09-12");
   });
 
-  it("loads 760 parents once catalog batches land; placeholders stay awaiting", () => {
+  it("loads the complete committed catalog; empty or partial imports cannot pass", () => {
     const loaded = readCommittedCatalog();
     assert.equal(loaded.manifest.catalog_rows, 760);
     assert.equal(loaded.releaseGaps.length, 12);
@@ -71,13 +71,55 @@ describe("committed DHHS91172 catalog files", () => {
     assert.equal(summary.executionStatus, "not_published");
     assert.equal(summary.canActivate, false);
     assert.equal(summary.sourceIndex, "ARCHIVE METADATA");
-    if (loaded.ingestStatus === "loaded") {
-      assert.equal(loaded.parents.length, 760, "finalized catalog must load 760 parents");
-      assert.equal(loaded.requirementRows.length, 1367);
-    } else {
-      assert.equal(loaded.ingestStatus, "awaiting_batches");
-      assert.equal(loaded.parents.length, 0);
+    assert.equal(loaded.ingestStatus, "loaded");
+    assert.equal(loaded.parents.length, 760);
+    assert.equal(loaded.requirementRows.length, 1367);
+    assert.equal(loaded.elements.length, 607);
+    assert.equal(new Set(loaded.parents.map((r) => r.id)).size, 760);
+    assert.equal(
+      loaded.parents.some((r) => r.id === "requirement_key"),
+      false,
+    );
+    for (const rule of loaded.parents) {
+      assert.equal(rule.group.members.length, Number(rule.workbookRow.element_count), rule.id);
+      assert.equal(rule.title, rule.workbookRow.requirement_name, rule.id);
+      assert.deepEqual(rule.source.clauseIds, [rule.workbookRow.source_clause_id], rule.id);
+      assert.ok(rule.workbookRow.clause_text, rule.id);
+      assert.equal(rule.evidence.summary, rule.workbookRow.required_evidence, rule.id);
+      assert.equal(rule.lifecycle, "draft");
+      assert.equal(rule.publication, "not_published");
+      assert.equal(canActivate(rule), false);
+      const ids = (rule.workbookRow.fact_ids ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      assert.deepEqual(
+        rule.applicabilityFacts.map((f) => f.fact_id),
+        ids,
+        rule.id,
+      );
     }
+  });
+
+  it("preserves exact orientation topics and renewal instructions without compiling guesses", () => {
+    const loaded = readCommittedCatalog();
+    const orientation = loaded.parents.find((r) => r.id === "REQ-1.8.4")!;
+    assert.equal(orientation.group.members.length, 25);
+    assert.match(orientation.workbookRow.deadline as string, /Earlier of/);
+    assert.match(orientation.group.members[0].label, /911/);
+    const sei = loaded.parents.find((r) => r.id === "REQ-30.6.c")!;
+    assert.match(sei.workbookRow.exceptions_alternatives!, /ANY one route/);
+    assert.ok(sei.unresolvedAlternatives.length > 0);
+    assert.equal(canPublish(sei), false);
+    const annual = loaded.parents.find((r) => r.id === "REQ-1.8.7")!;
+    assert.match(annual.workbookRow.renewal_rule!, /employment-year/);
+  });
+
+  it("retains workbook release gaps rather than unrelated pilot gaps", () => {
+    const gaps = readCommittedCatalog().releaseGaps;
+    assert.ok(gaps.some((g) => g.clause === "3.4(1)(H)" && g.topic.includes("three")));
+    assert.ok(gaps.some((g) => g.clause === "24.3(2), 25.3(2)" && g.topic.includes("RP4/RP5")));
+    assert.ok(gaps.some((g) => g.clause === "HIPAA / external services"));
   });
 
   it("keeps every committed Core_Rule_Logic extract row draft / not_published", () => {
@@ -124,6 +166,44 @@ describe("committed DHHS91172 catalog files", () => {
 });
 
 describe("catalog loader tiny fixture", () => {
+  it("rejects headers, duplicates, unresolved fact IDs and orphan elements", () => {
+    assert.throws(
+      () => assembleCatalogRows([{ rows: [{ requirement_key: "requirement_key" }] }]),
+      /header/,
+    );
+    assert.throws(
+      () =>
+        assembleCatalogRows([
+          { rows: [{ requirement_key: "REQ-1" }, { requirement_key: "REQ-1" }] },
+        ]),
+      /Duplicate/,
+    );
+    assert.throws(
+      () =>
+        buildLoadedCatalog({
+          manifest: TINY_MANIFEST,
+          batchFiles: [{ rows: [{ requirement_key: "REQ-1", fact_ids: "FACT-MISSING" }] }],
+          applicabilityFacts: { rows: [] },
+        }),
+      /Unknown fact/,
+    );
+    assert.throws(
+      () =>
+        buildLoadedCatalog({
+          manifest: TINY_MANIFEST,
+          requirements: {
+            rows: [
+              {
+                requirement_key: "REQ-MISSING",
+                requirement_role: "element",
+                clause_id: "SOURCE-1",
+              },
+            ],
+          },
+        }),
+      /Orphan/,
+    );
+  });
   it("maps parents, rolls elements, and forces draft / not_published", () => {
     const rows = tinyRows();
     assert.equal(rows.filter(isCatalogParentRow).length, 5);

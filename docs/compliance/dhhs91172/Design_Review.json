@@ -1,0 +1,174 @@
+{
+  "sheet": "Design_Review",
+  "workbook_sha256": "aba9f6c4debc0b19e207a55f1a2f1fc2b3397d94f8f18a52c6fbc6b0f9d2dbd6",
+  "rows": [
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.2",
+      "Previous issue": "None",
+      "Revised behavior": "No annual attestation interval stated here",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.4.1",
+      "Previous issue": "Renews annually from the last completion date",
+      "Revised behavior": "Use verified enrollment requirements; no annual renewal stated in this clause",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.4.2",
+      "Previous issue": "None",
+      "Revised behavior": "None",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.8.2",
+      "Previous issue": "Alternative options allowed — see elements (any one complete option satisfies)",
+      "Revised behavior": "Training creators/conductors need BOTH relevant knowledge AND experience; not alternative routes",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.8.4",
+      "Previous issue": "Alternative options allowed — see elements (any one complete option satisfies)",
+      "Revised behavior": "ALL applicable topics A–W; client-specific subtopics use actual client needs. Never ANY-one-topic.",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.8.5",
+      "Previous issue": "None",
+      "Revised behavior": "ALL three areas required; first aid and CPR each retain independent certificate expiry",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.8.6",
+      "Previous issue": "Alternative options allowed — see elements (any one complete option satisfies)",
+      "Revised behavior": "ANY one approved certification route; each selected route must satisfy ALL its conditions. Prior written DSPD approval for an alternative program.",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.8.7",
+      "Previous issue": "Renews annually from the last completion date",
+      "Revised behavior": "12 documented hours per employment-year window; completion does not reset the anniversary",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.8.8",
+      "Previous issue": "None",
+      "Revised behavior": "ALL listed ABI topics; applies to staff serving people with ABI",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.9.2",
+      "Previous issue": "Renews annually from the last completion date",
+      "Revised behavior": "Annual agency policy is not a verified DHHS screening interval",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.9.7",
+      "Previous issue": "Renews annually from the last completion date",
+      "Revised behavior": "Do not treat annual screening as a verified legal interval",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-1.32.a",
+      "Previous issue": "None",
+      "Revised behavior": "None",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-30.5",
+      "Previous issue": "None",
+      "Revised behavior": "None",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-30.6.a",
+      "Previous issue": "Alternative options allowed — see elements (any one complete option satisfies)",
+      "Revised behavior": "Conditional deadline branches; maintain approval once obtained. Verify misspelled destination email before submission",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-30.6.b",
+      "Previous issue": "Alternative options allowed — see elements (any one complete option satisfies)",
+      "Revised behavior": "BOTH at least one ACRE-certified staff AND every SEI staff member has an ACRE-certified supervisor",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-30.6.c",
+      "Previous issue": "Alternative options allowed — see elements (any one complete option satisfies)",
+      "Revised behavior": "ANY one route: historical BEST OR USU Workplace Supports OR USU Effective Job Coach. Do not mix with separate ACRE supervision rule",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-32.5",
+      "Previous issue": "Alternative options allowed — see elements (any one complete option satisfies)",
+      "Revised behavior": "Applies to CMP and CMS; do not assign solely because staff provides SLN",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-33.5.b",
+      "Previous issue": "Alternative options allowed — see elements (any one complete option satisfies)",
+      "Revised behavior": "New-hire grace period plus ACRE-certified supervision; not an unconditional pre-service ACRE block",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Corrected rule",
+      "Affected area": "REQ-33.5.c",
+      "Previous issue": "Alternative options allowed — see elements (any one complete option satisfies)",
+      "Revised behavior": "Customized Employment training applies when staff completes Discovery; approved alternate accredited training allowed",
+      "Remaining action": "Review and test before publishing"
+    },
+    {
+      "Change": "Preserve source",
+      "Affected area": "Source_index",
+      "Previous issue": "Source and draft mapping mixed together",
+      "Revised behavior": "All 1,693 source rows retained unchanged. Source_index labels are historical; revised Requirements owns operational mapping.",
+      "Remaining action": ""
+    },
+    {
+      "Change": "Draft publication gate",
+      "Affected area": "All operational rows",
+      "Previous issue": "All 765 parent rows labeled reviewed_ok",
+      "Revised behavior": "All operational rules set to draft pending explicit approval and executable predicates; corrected mappings do not claim regulatory certification.",
+      "Remaining action": ""
+    },
+    {
+      "Change": "Consolidate orientation",
+      "Affected area": "1.8(4)(A–W)",
+      "Previous issue": "Five topics generated separate parent requirements",
+      "Revised behavior": "One orientation assignment with all topic elements; source clause identifiers retained.",
+      "Remaining action": ""
+    },
+    {
+      "Change": "Remove inferred alternatives",
+      "Affected area": "Catalog-wide",
+      "Previous issue": "Generic ANY language misclassified mandatory lists",
+      "Revised behavior": "Unresolved groups require explicit ALL/ANY/conditional structure; specific core training groups corrected.",
+      "Remaining action": ""
+    },
+    {
+      "Change": "Separate legal and policy dates",
+      "Affected area": "Catalog-wide",
+      "Previous issue": "Annual-from-completion default could shift legal deadlines",
+      "Revised behavior": "Annual anchor must come from authority; screening annual choices remain labeled agency proposals.",
+      "Remaining action": ""
+    }
+  ]
+}

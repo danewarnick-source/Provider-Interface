@@ -1,0 +1,181 @@
+{
+  "sheet": "System_Design",
+  "workbook_sha256": "aba9f6c4debc0b19e207a55f1a2f1fc2b3397d94f8f18a52c6fbc6b0f9d2dbd6",
+  "rows": [
+    {
+      "Area": "Setup",
+      "Final behavior": "Owner or delegated administrator enters service awards and operating facts once. HR and supervisors maintain staff/client details.",
+      "Backend / mapping": "Effective-dated agency, site, staff, client, service authorization, relationship and assignment entities. Reuse existing records.",
+      "User experience": "Ask relevant follow-up questions only; no checklist of all SOW obligations.",
+      "Acceptance test": "Changing one client ABI fact updates only assigned staff requirements."
+    },
+    {
+      "Area": "Applicability",
+      "Final behavior": "General obligations + awarded code obligations + relevant duties/client/site conditions.",
+      "Backend / mapping": "Typed boolean/enum/date/number predicates with ALL, ANY, NOT, EXISTS, COUNT and date operators; unknown result opens a missing-information issue.",
+      "User experience": "Show Why this applies, source clause and specific triggering fact.",
+      "Acceptance test": "Office title alone neither exempts all general staff training nor adds SEI training."
+    },
+    {
+      "Area": "Source and version",
+      "Final behavior": "Retain whole SOW, including definitions, restrictions, outcomes and historical provisions.",
+      "Backend / mapping": "Immutable source version/hash; rule-source many-to-many links; draft > reviewed > published > superseded. Explicit approval actor/date.",
+      "User experience": "Admin sees only changes affecting the agency.",
+      "Acceptance test": "New rule version does not rewrite prior service-date compliance."
+    },
+    {
+      "Area": "Assignments",
+      "Final behavior": "Create one actionable assignment per applicable subject and period/event.",
+      "Backend / mapping": "Unique key tenant + requirement version + subject + period/event. Durable jobs, retry and reconciliation. Coverage links allow equivalent evidence reuse.",
+      "User experience": "My tasks has one card per meaningful obligation, not one card per clause or topic.",
+      "Acceptance test": "Replaying a hire event three times creates one orientation assignment."
+    },
+    {
+      "Area": "Elements",
+      "Final behavior": "Checklist fields and curriculum topics belong to a parent form/course.",
+      "Backend / mapping": "Keep clause IDs; split multiple inline subitems into atomic field/topic definitions; preserve ALL/ANY and conditional branches.",
+      "User experience": "One form with only relevant fields.",
+      "Acceptance test": "Missing one mandatory topic prevents completion of an ALL group."
+    },
+    {
+      "Area": "Completion routes",
+      "Final behavior": "Offer Do here, Upload proof, or Open official system only where the rule permits.",
+      "Backend / mapping": "Allowed methods are a set per requirement version; default handling label is not proof of equivalency.",
+      "User experience": "One card offers the permitted buttons; an upload is not automatically accepted.",
+      "Acceptance test": "A generic quiz cannot replace an official DSPD course or external CPR credential."
+    },
+    {
+      "Area": "Training",
+      "Final behavior": "Platform courses can cover approved internal content, with verifiable successful completion.",
+      "Backend / mapping": "Course version, trainer qualifications, topic map, assessment criteria, attempts, completion date and staff identity; no invented SOW pass score.",
+      "User experience": "Complete course or submit equivalent accepted proof.",
+      "Acceptance test": "Orientation completion requires all applicable topics and person-specific instruction."
+    },
+    {
+      "Area": "Policies and forms",
+      "Final behavior": "Draft, approve, publish and collect required signatures/acknowledgments.",
+      "Backend / mapping": "Template version and signed immutable snapshot; author, approver, signer, timestamp, purpose and amendment chain.",
+      "User experience": "Transportation policy can be created here; affected drivers receive acknowledgment only when required or agency policy specifies.",
+      "Acceptance test": "Editing a published policy creates a new version and does not change prior signed evidence."
+    },
+    {
+      "Area": "Evidence reuse",
+      "Final behavior": "One accepted record may satisfy several matching requirements.",
+      "Backend / mapping": "Evidence-to-requirement links check subject, issuer, scope, coverage, dates and version. No cross-tenant reuse.",
+      "User experience": "Upload once; see exactly what it satisfies and what remains.",
+      "Acceptance test": "One certificate with insufficient topic coverage does not complete the entire orientation."
+    },
+    {
+      "Area": "Renewals",
+      "Final behavior": "Legal deadline and reminder schedule are separate.",
+      "Backend / mapping": "Due-date anchor + offset + calendar/business-day type + timezone + holiday calendar; certificate expiry, employment year and plan year are distinct.",
+      "User experience": "Upcoming work appears before expiry; overdue reason is explicit.",
+      "Acceptance test": "Early completion of annual hours does not shift the next employment-year deadline."
+    },
+    {
+      "Area": "Reminders",
+      "Final behavior": "Automatically remind and escalate according to agency configuration.",
+      "Backend / mapping": "Suggested 30/14/7/1-day reminders are product defaults, not SOW mandates; deduplicate notifications and resolve on verified completion.",
+      "User experience": "Staff get a short daily digest; admin sees exceptions and review queue.",
+      "Acceptance test": "A pending review produces a reviewer reminder, not repeated upload demands to staff."
+    },
+    {
+      "Area": "Lifecycle",
+      "Final behavior": "Not started, in progress, submitted, needs correction, accepted, expired and superseded.",
+      "Backend / mapping": "Separate applicability, evidence status, deadline status and readiness. Not applicable requires reason/evidence; unknown cannot be compliant.",
+      "User experience": "Plain labels: Do now, Waiting for review, Needs correction, Complete, Expires soon.",
+      "Acceptance test": "Uploading a file moves to submitted; only validated acceptance changes compliance."
+    },
+    {
+      "Area": "Service documentation",
+      "Final behavior": "Select client, actual service code and service date; open the matching note.",
+      "Backend / mapping": "Versioned code-to-template mapping: general 1.10(7) fields overridden only by explicit code rules; additional EVV/timesheet data remain separate.",
+      "User experience": "Auto-fill known facts; staff enter actual support, observations and required plan fields.",
+      "Acceptance test": "A code with a five-field daily note does not silently delete separate EVV or employment timesheet requirements."
+    },
+    {
+      "Area": "Billing checks",
+      "Final behavior": "Evaluate each claim/service using rules effective on the service date.",
+      "Backend / mapping": "Authorization 1056, units, service code, qualified staff, documentation, overlap restrictions, exceptions, ratios and conditional EVV. Code + unit type drive calculation.",
+      "User experience": "Billing view explains each issue and links to the exact fix; no global red status that blocks unrelated services.",
+      "Acceptance test": "Expired CPR affects applicable future work; unrelated agency policy acknowledgment does not automatically block every claim."
+    },
+    {
+      "Area": "Hard blocks",
+      "Final behavior": "Use hard blocks only for approved explicit prerequisites/prohibitions.",
+      "Backend / mapping": "Separate source-mandated block, review hold and agency-policy warning; reversible resolution, authority evidence and audit. Draft rules may be simulated but cannot silently reject claims.",
+      "User experience": "Show rule, affected person/code/date and permitted resolution.",
+      "Acceptance test": "An unapproved interpretation creates a review issue, not an automatic denial."
+    },
+    {
+      "Area": "External submissions",
+      "Final behavior": "Prepare and track official submissions; local completion is not external submission.",
+      "Backend / mapping": "Destination + required format + submission receipt/status + retry. Use only supported authorized integrations.",
+      "User experience": "Open UPI/official site, then attach receipt or receive verified integration status.",
+      "Acceptance test": "SEI monthly data entered in UPI cannot be satisfied solely by uploading a local PDF."
+    },
+    {
+      "Area": "Certificate import",
+      "Final behavior": "Import from authorized issuer/LMS API or staff-approved mailbox where supported.",
+      "Backend / mapping": "Integration account, consent/scope, webhook/poll checkpoint, raw receipt, identity matching, duplicate hash and review queue.",
+      "User experience": "Staff upload remains available when no integration exists.",
+      "Acceptance test": "No API or issuer access means no claim that certificates are automatically retrieved."
+    },
+    {
+      "Area": "AI assistance",
+      "Final behavior": "Extract certificate fields, suggest mappings, draft notes from actual recorded facts and identify possible rule changes.",
+      "Backend / mapping": "AI output is a proposal with source spans; deterministic approved rules calculate due dates and applicability. Never fabricate service delivery or approvals.",
+      "User experience": "Ask user to confirm uncertain names, dates and evidence matches.",
+      "Acceptance test": "A low-confidence expiry date cannot automatically mark someone qualified."
+    },
+    {
+      "Area": "Privacy and access",
+      "Final behavior": "Limit staff to their duties and assigned clients; isolate agency data.",
+      "Backend / mapping": "Tenant isolation, role/access checks, encryption, MFA, access/audit logs, backups, retention policy and approved vendor configuration. PHI to AI only with applicable BAA and minimum necessary data.",
+      "User experience": "No sensitive client details in reminder email; secure sign-in opens task.",
+      "Acceptance test": "Cross-tenant access denied; PHI is excluded from general model prompts and application logs."
+    },
+    {
+      "Area": "Reviews and exceptions",
+      "Final behavior": "Admin oversees rejected evidence, unknown facts, expiring qualifications and requested exceptions.",
+      "Backend / mapping": "Exception record contains authority, scope, date range, source, approver and attachment. Agency admin cannot waive a DHHS requirement without authority.",
+      "User experience": "One prioritized review inbox.",
+      "Acceptance test": "Expired DSPD exception no longer permits affected billing."
+    },
+    {
+      "Area": "Client workspace",
+      "Final behavior": "Client-specific plans, consent, assignments, service notes, incidents and financial records.",
+      "Backend / mapping": "Permissions segregate clinical, employment and financial information; staff-client relationship is effective-dated.",
+      "User experience": "Only relevant tabs and tasks for that client/code.",
+      "Acceptance test": "PBA financial records are not visible to unrelated DSP staff."
+    },
+    {
+      "Area": "Agency and locations",
+      "Final behavior": "Track licenses, policies, committees, outcomes and site-specific safety duties.",
+      "Backend / mapping": "Do not turn outcome metrics into individual staff tasks; link metric definitions to actual annual report assignments.",
+      "User experience": "Admin sees agency and per-location compliance with evidence links.",
+      "Acceptance test": "A missing site license affects the applicable site/services, not unrelated locations."
+    },
+    {
+      "Area": "Offboarding and changes",
+      "Final behavior": "Recalculate when role, assignment, client needs, credentials or supervisor change.",
+      "Backend / mapping": "End relationships; preserve historical evidence; create required access-removal events and replacement coverage issues.",
+      "User experience": "Admin receives a concise impact list.",
+      "Acceptance test": "Departing ACRE supervisor triggers reassignment review for their SEI staff."
+    },
+    {
+      "Area": "Audit export",
+      "Final behavior": "Export source-linked evidence for selected agency/site/staff/client and time range.",
+      "Backend / mapping": "Include rule version, source clause, assignment, evidence, acceptance, timestamps, exceptions and amendments. Retention comes from applicable authorities, not a guessed universal period.",
+      "User experience": "One filtered audit packet.",
+      "Acceptance test": "Auditor can reconstruct why a person was ready on a past service date."
+    },
+    {
+      "Area": "Publication",
+      "Final behavior": "Grok builds from reviewed mappings; do not load historical Source_index labels as active rules.",
+      "Backend / mapping": "Implement schema and simulation first. For each published rule require predicates, groups, timing, evidence, source and positive/negative/boundary tests.",
+      "User experience": "Admin receives proposed change summary before a rule release.",
+      "Acceptance test": "An unresolved renewal or alternative route prevents automatic activation of that rule."
+    }
+  ]
+}

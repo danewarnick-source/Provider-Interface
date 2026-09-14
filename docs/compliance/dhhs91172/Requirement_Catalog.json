@@ -1,10 +1,8 @@
 {
   "sheet": "Requirement_Catalog",
-  "rolls": "parents+elements",
   "canonical_parents_from": "Requirements",
   "expected_parent_count": 760,
-  "ingest_status": "awaiting_batches",
-  "rule_status": "draft",
-  "execution_status": "not_published",
+  "ingest_status": "loaded",
+  "storage": "catalog_batches/catalog_00.json through catalog_09.json",
   "rows": []
 }
