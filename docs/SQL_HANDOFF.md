@@ -1,5 +1,495 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
+## ACTION — Agency setup gate before staff/client create (2026-09-14) — Core flag
+
+**Do not Soft-apply / execute against Hive-Platform production from this PR.**
+Core pastes one change at a time after Dane go. Clear the editor first.
+Catalog publishing stays untouched (`canActivate=false` / `not_published`).
+
+Server-authoritative setup completion from saved operating facts. Restrictive
+INSERT policies + BEFORE INSERT triggers block new staff, clients, and
+invitations until the six required facts are recorded **or** the org was
+grandfathered. Additive. No DROP TABLE / DROP COLUMN. Does **not** publish or
+activate DHHS91172 catalog rules. SELECT/UPDATE on members, clients, and
+profiles are unchanged — existing people stay visible and editable.
+
+Matches `supabase/migrations/20260914120000_agency_setup_gate.sql`.
+App completion is **only** `useAgencySetup` + the six saved facts. Browser
+localStorage / `useOnboardingProgress` / company-profile drafts do **not**
+unlock create.
+
+### Grandfather decision — KEEP (TNS is a real operating org)
+
+Repo inventory is not a live query. From product docs (`CLAUDE.md`,
+`GO_LIVE.md`, billing-exempt notes): **True North Supports LLC**
+`7fabcf5d-f826-487f-8730-8b0c3f1969bb` is the first live tenant, not a
+synthetic-only test org. Prefer truth over convenience: **keep**
+`setup_create_gate_exempt` so TNS (6 members / 4 clients) and any other
+org that already has **≥1 client or members > 1** can still hire /
+add-client the moment SQL lands. Owner-only orgs (1 member, 0 clients)
+must complete the six questions.
+
+Tony / Core: run the inventory probe below in Lovable **before** paste.
+This agent must not query Hive-Platform. If the probe shows only
+synthetic/demo orgs besides TNS, still KEEP the snapshot because TNS is
+real. If Core later wants TNS to complete the six facts and drop the
+flag, flip `setup_create_gate_exempt` with `postgres` / `service_role` /
+`supabase_admin` only after those facts are saved.
+
+We do **not** invent answers to mark live orgs “complete.” We also do
+**not** use a live “has ≥1 member” check — that would let a brand-new org
+skip setup the moment its first owner exists.
+
+`organizations.setup_create_gate_exempt` is snapshotted **once**: orgs that
+already have ≥1 `clients` row **or** `organization_members` count > 1
+when this SQL first runs are exempt. Owner-only (1 member, 0 clients)
+is **not** exempt. NULL means not yet decided; re-pasting only fills
+remaining NULLs. Orgs created after the first apply get `DEFAULT false`.
+
+### Fail-closed exempt lock
+
+`protect_setup_create_gate_exempt` ERRORs unless `current_user` is
+exactly `service_role`, `postgres`, or `supabase_admin`. No fall-through
+`RETURN NEW` for `authenticated`, `anon`, Hive Exec, or unknown roles.
+Unchanged values still `RETURN NEW`. Column `REVOKE UPDATE
+(setup_create_gate_exempt) FROM authenticated` is defense-in-depth; the
+trigger is authoritative.
+
+### Plain-language risk
+
+- First paste: TNS and any other org with ≥1 client or more than one
+  member keep hiring and adding clients. Lists do not go blank.
+  Owner-only workspaces stay gated until the six questions are saved.
+- A brand-new workspace created after this paste cannot hire or add
+  clients until the six operating questions are saved (including
+  dedicated `organizations.service_area` — not a line inside
+  `specializations`).
+- Re-pasting is safe for already-decided rows. It will not un-exempt
+  live orgs, and it will not newly exempt post-apply orgs that only have
+  a first owner.
+- Triggers fire for `service_role` too. Server hire cannot walk around
+  the gate.
+- First-owner INSERT is correlated to **the organization ID of the row
+  being inserted**. Agency A can still bootstrap when Agency B already
+  has members.
+- Org admins / Hive Exec (`authenticated`) cannot flip
+  `setup_create_gate_exempt` to skip setup.
+
+### RESTRICTIVE INSERT vs existing PERMISSIVE policies
+
+Postgres: a command must pass **at least one PERMISSIVE** policy **and
+every RESTRICTIVE** policy for that command. These three new policies
+are `AS RESTRICTIVE FOR INSERT TO authenticated` only. They AND with
+existing permissive INSERT paths. They do **not** add SELECT/UPDATE
+restrictions.
+
+**organizations** (no new INSERT/SELECT policy from this ACTION):
+
+- Permissive: `members read org` (SELECT), `admins update org` (UPDATE,
+  admin), `admins delete org`, `auth create org` (INSERT
+  `created_by = auth.uid()`), `hive execs update organizations` (UPDATE
+  if Hive Exec).
+- Composes: `trg_protect_setup_create_gate_exempt` and
+  `trg_protect_billing_exempt` both fire BEFORE UPDATE. Independent.
+  Hive Exec can still edit other org columns; they **cannot** flip
+  exempt (they are `authenticated`, not a trusted lock role).
+- Conflict: none that would allow an authenticated exempt flip.
+
+**organization_members:**
+
+- Permissive: `members read members` (SELECT), `admins manage members`
+  (FOR ALL, admin), `self insert member` (INSERT `user_id = auth.uid()`
+  AND `role = 'employee'` after role-hardening).
+- Restrictive `org_members_insert_requires_setup` ANDs with those.
+  First-owner exception: restrictive OR “no other member of **this**
+  org”; trigger also allows the first member of **that**
+  `NEW.organization_id`.
+- **Conflict to call out:** first owner is typically inserted as
+  `role = 'admin'` via **service_role** (`signup-workspace` /
+  `hireEmployeeInternal`). Authenticated self-insert is employee-only —
+  first-owner-as-admin via authenticated RLS fails `self insert member`
+  even if the setup restrictive policy would pass. Server hire uses
+  service_role (bypasses RLS, **still hits the trigger**). After a first
+  admin exists, `admins manage members` can INSERT more people if setup
+  allows.
+
+**clients:**
+
+- Permissive: `caseload or admin read clients` (SELECT; replaced
+  `members read clients`), `managers write clients` (FOR ALL,
+  admin/manager or super_admin).
+- Restrictive `clients_insert_requires_setup` ANDs WITH CHECK on INSERT.
+  SELECT/UPDATE unchanged. Incomplete setup denies INSERT even when
+  `managers write clients` would allow it — intended.
+
+**invitations:**
+
+- Permissive: `admins manage invites` (FOR ALL), `invitee read own`
+  (SELECT).
+- Restrictive `invitations_insert_requires_setup` ANDs. SELECT
+  unchanged.
+
+`service_role` BYPASSRLS skips policies but **does not** skip triggers.
+
+### Soft paste order (clear the editor before each paste)
+
+Do **not** paste the whole file in one shot unless Dane says so. Order:
+
+1. **Columns + grandfather snapshot + exempt lock**
+2. **Functions** (`org_setup_is_complete`, `org_setup_allows_create`,
+   `enforce_org_setup_before_create`)
+3. **INSERT triggers** (clients, members, invitations)
+4. **One RESTRICTIVE policy at a time** — clients, then members, then
+   invitations
+
+Source of truth remains
+`supabase/migrations/20260914120000_agency_setup_gate.sql` (idempotent
+full file). Blocks below are the same SQL split for Soft.
+
+#### Paste 1 — columns + snapshot + lock
+
+```sql
+ALTER TABLE public.organizations
+  ADD COLUMN IF NOT EXISTS fact_operates_ol_site boolean;
+ALTER TABLE public.organizations
+  ADD COLUMN IF NOT EXISTS fact_uses_volunteers boolean;
+ALTER TABLE public.organizations
+  ADD COLUMN IF NOT EXISTS fact_has_governing_board boolean;
+ALTER TABLE public.organizations
+  ADD COLUMN IF NOT EXISTS fact_answers_updated_at timestamptz;
+ALTER TABLE public.organizations
+  ADD COLUMN IF NOT EXISTS fact_answers_updated_by uuid;
+ALTER TABLE public.organizations
+  ADD COLUMN IF NOT EXISTS service_area text;
+ALTER TABLE public.organizations
+  ADD COLUMN IF NOT EXISTS setup_create_gate_exempt boolean;
+
+UPDATE public.organizations o
+SET setup_create_gate_exempt = (
+  EXISTS (
+    SELECT 1
+    FROM public.clients c
+    WHERE c.organization_id = o.id
+  )
+  OR (
+    SELECT count(*)
+    FROM public.organization_members om
+    WHERE om.organization_id = o.id
+  ) > 1
+)
+WHERE o.setup_create_gate_exempt IS NULL;
+
+ALTER TABLE public.organizations
+  ALTER COLUMN setup_create_gate_exempt SET DEFAULT false;
+
+REVOKE UPDATE (setup_create_gate_exempt) ON public.organizations FROM authenticated;
+GRANT SELECT (setup_create_gate_exempt) ON public.organizations TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.protect_setup_create_gate_exempt()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.setup_create_gate_exempt IS NOT DISTINCT FROM OLD.setup_create_gate_exempt THEN
+    RETURN NEW;
+  END IF;
+  IF current_user IN ('service_role', 'postgres', 'supabase_admin') THEN
+    RETURN NEW;
+  END IF;
+  RAISE EXCEPTION 'setup_create_gate_exempt is locked. Only service_role, postgres, or supabase_admin may change the grandfather flag.'
+    USING ERRCODE = '42501';
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_protect_setup_create_gate_exempt ON public.organizations;
+CREATE TRIGGER trg_protect_setup_create_gate_exempt
+  BEFORE UPDATE ON public.organizations
+  FOR EACH ROW
+  EXECUTE FUNCTION public.protect_setup_create_gate_exempt();
+
+REVOKE ALL ON FUNCTION public.protect_setup_create_gate_exempt() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.protect_setup_create_gate_exempt() TO PUBLIC;
+```
+
+**What you'll see:** `ALTER TABLE` / `UPDATE` / `CREATE FUNCTION` /
+`CREATE TRIGGER`. Existing orgs with ≥1 client or members > 1 get
+`setup_create_gate_exempt = true`. Owner-only orgs stay `false`.
+
+#### Paste 2 — functions
+
+```sql
+CREATE OR REPLACE FUNCTION public.org_setup_is_complete(p_org_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE((
+    SELECT
+      COALESCE(cardinality(ARRAY(
+        SELECT trim(c)
+        FROM unnest(COALESCE(o.services_offered, ARRAY[]::text[])) AS c
+        WHERE length(trim(c)) > 0
+      )), 0) > 0
+      AND o.fact_operates_ol_site IS NOT NULL
+      AND o.fact_uses_volunteers IS NOT NULL
+      AND o.fact_has_governing_board IS NOT NULL
+      AND o.approx_client_count IS NOT NULL
+      AND o.service_area IS NOT NULL
+      AND length(trim(o.service_area)) > 0
+    FROM public.organizations o
+    WHERE o.id = p_org_id
+  ), false);
+$$;
+
+CREATE OR REPLACE FUNCTION public.org_setup_allows_create(p_org_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE((
+    SELECT
+      public.org_setup_is_complete(p_org_id)
+      OR COALESCE(o.setup_create_gate_exempt, false)
+    FROM public.organizations o
+    WHERE o.id = p_org_id
+  ), false);
+$$;
+
+REVOKE ALL ON FUNCTION public.org_setup_is_complete(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.org_setup_is_complete(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.org_setup_is_complete(uuid) TO service_role;
+REVOKE ALL ON FUNCTION public.org_setup_allows_create(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.org_setup_allows_create(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.org_setup_allows_create(uuid) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.enforce_org_setup_before_create()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF TG_TABLE_NAME = 'organization_members' THEN
+    IF NOT EXISTS (
+      SELECT 1
+      FROM public.organization_members om
+      WHERE om.organization_id = NEW.organization_id
+        AND om.id IS DISTINCT FROM NEW.id
+    ) THEN
+      RETURN NEW;
+    END IF;
+  END IF;
+
+  IF public.org_setup_allows_create(NEW.organization_id) THEN
+    RETURN NEW;
+  END IF;
+
+  RAISE EXCEPTION 'Agency setup is incomplete. Answer the required operating questions before creating staff or clients.'
+    USING ERRCODE = '42501';
+END;
+$$;
+```
+
+**What you'll see:** `CREATE FUNCTION` × 3.
+
+#### Paste 3 — INSERT triggers
+
+```sql
+DROP TRIGGER IF EXISTS trg_clients_require_org_setup ON public.clients;
+CREATE TRIGGER trg_clients_require_org_setup
+  BEFORE INSERT ON public.clients
+  FOR EACH ROW
+  EXECUTE FUNCTION public.enforce_org_setup_before_create();
+
+DROP TRIGGER IF EXISTS trg_org_members_require_org_setup ON public.organization_members;
+CREATE TRIGGER trg_org_members_require_org_setup
+  BEFORE INSERT ON public.organization_members
+  FOR EACH ROW
+  EXECUTE FUNCTION public.enforce_org_setup_before_create();
+
+DROP TRIGGER IF EXISTS trg_invitations_require_org_setup ON public.invitations;
+CREATE TRIGGER trg_invitations_require_org_setup
+  BEFORE INSERT ON public.invitations
+  FOR EACH ROW
+  EXECUTE FUNCTION public.enforce_org_setup_before_create();
+```
+
+**What you'll see:** `CREATE TRIGGER` × 3. Hire via service_role now
+hits the gate.
+
+#### Paste 4a — clients restrictive INSERT
+
+```sql
+DROP POLICY IF EXISTS clients_insert_requires_setup ON public.clients;
+CREATE POLICY clients_insert_requires_setup
+  ON public.clients
+  AS RESTRICTIVE
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (public.org_setup_allows_create(clients.organization_id));
+```
+
+#### Paste 4b — members restrictive INSERT
+
+```sql
+DROP POLICY IF EXISTS org_members_insert_requires_setup ON public.organization_members;
+CREATE POLICY org_members_insert_requires_setup
+  ON public.organization_members
+  AS RESTRICTIVE
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    public.org_setup_allows_create(organization_members.organization_id)
+    OR NOT EXISTS (
+      SELECT 1
+      FROM public.organization_members existing_member
+      WHERE existing_member.organization_id = organization_members.organization_id
+        AND existing_member.id IS DISTINCT FROM organization_members.id
+    )
+  );
+```
+
+#### Paste 4c — invitations restrictive INSERT
+
+```sql
+DROP POLICY IF EXISTS invitations_insert_requires_setup ON public.invitations;
+CREATE POLICY invitations_insert_requires_setup
+  ON public.invitations
+  AS RESTRICTIVE
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (public.org_setup_allows_create(invitations.organization_id));
+```
+
+### Probe — functions / triggers (after any paste)
+
+Clear the editor, paste:
+
+```sql
+SELECT string_agg(kind || '=' || name, ' | ' ORDER BY kind, name)
+FROM (
+  SELECT 'fn' AS kind, p.proname AS name
+  FROM pg_proc p
+  JOIN pg_namespace n ON n.oid = p.pronamespace
+  WHERE n.nspname = 'public'
+    AND p.proname IN (
+      'org_setup_is_complete',
+      'org_setup_allows_create',
+      'enforce_org_setup_before_create',
+      'protect_setup_create_gate_exempt'
+    )
+  UNION ALL
+  SELECT 'trg', t.tgname
+  FROM pg_trigger t
+  JOIN pg_class c ON c.oid = t.tgrelid
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'public'
+    AND t.tgname IN (
+      'trg_clients_require_org_setup',
+      'trg_org_members_require_org_setup',
+      'trg_invitations_require_org_setup',
+      'trg_protect_setup_create_gate_exempt'
+    )
+    AND NOT t.tgisinternal
+) s;
+```
+
+**What you'll see:** `NULL` until paste 1–3 land. After all pastes,
+function and trigger names including `org_setup_allows_create`.
+
+### Probe — live org inventory (Tony / Core, before paste; no PHI)
+
+Clear the editor, paste:
+
+```sql
+SELECT string_agg(
+  o.id::text || ' | ' || coalesce(o.name, '(unnamed)')
+    || ' | members=' || (
+      SELECT count(*)::text FROM public.organization_members om
+      WHERE om.organization_id = o.id
+    )
+    || ' | clients=' || (
+      SELECT count(*)::text FROM public.clients c
+      WHERE c.organization_id = o.id
+    )
+    || ' | demo=' || coalesce(o.is_demo::text, 'f'),
+  E'\n' ORDER BY o.name
+) AS orgs
+FROM public.organizations o;
+```
+
+**What you'll see:** one line per org (id, name, member count, client
+count, is_demo). Confirm TNS
+`7fabcf5d-f826-487f-8730-8b0c3f1969bb` is present and who else would
+receive the grandfather snapshot. Ask Dane if an unexpected live org
+appears.
+
+### Verify
+
+Clear the editor, paste:
+
+```sql
+SELECT
+  public.org_setup_is_complete('00000000-0000-0000-0000-000000000000') AS missing_org_false,
+  (SELECT count(*) FROM pg_trigger
+     WHERE tgname IN (
+       'trg_clients_require_org_setup',
+       'trg_org_members_require_org_setup',
+       'trg_invitations_require_org_setup',
+       'trg_protect_setup_create_gate_exempt'
+     ) AND NOT tgisinternal) AS setup_triggers,
+  (SELECT string_agg(polname, ',' ORDER BY polname)
+     FROM pg_policy
+     WHERE polname IN (
+       'clients_insert_requires_setup',
+       'org_members_insert_requires_setup',
+       'invitations_insert_requires_setup'
+     )) AS setup_policies,
+  (SELECT count(*) FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = 'organizations'
+       AND column_name IN ('service_area', 'setup_create_gate_exempt')) AS new_columns;
+```
+
+**What you'll see:** `f | 4 | clients_insert_requires_setup,invitations_insert_requires_setup,org_members_insert_requires_setup | 2`.
+
+### RLS intent
+
+- Completion (`org_setup_is_complete`) uses the same six facts as
+  `src/lib/agency-setup-completion.ts`: awarded codes, OL site,
+  volunteers, governing board, approx client count, **dedicated
+  `service_area`**. `specializations` is not read for the gate.
+- Create/invite uses `org_setup_allows_create` = complete OR exempt.
+- First `organization_members` row for **that** `organization_id` is
+  bootstrap.
+- Triggers fire even when service-role writes bypass RLS.
+- Exempt lock is fail-closed (trusted roles only).
+- No PHI. No catalog publish.
+
+### Seed
+
+Grandfather snapshot only (KEEP for TNS + any org with ≥1 client or
+members > 1). Owner-only orgs stay gated. No invented fact answers.
+
+### Isolated full-project RLS (not this agent)
+
+This cloud agent has no Docker, no `supabase` CLI, and no dedicated
+non-prod project. It must not use Hive-Platform
+(`dhrrukdcigiiqksibdfb`). Integration tests used a **simplified**
+local schema (`supabase/tests/agency-setup-gate/isolated-schema.sql`)
+plus this migration — that is **not** full-project RLS proof.
+
+Reese / Core: `supabase start` then `supabase db reset` on a laptop or
+a dedicated non-prod project, then
+`scripts/agency-setup-gate-preview.md`. Live UI / two-agency
+authenticated preview waits on that isolated DB URL.
+
+---
+
 ## NOTE — Compliance revamp Step 10: stop-writes only (2026-09-11)
 
 No Soft migration. Do not DROP tables. Do not run Soft SQL for this change.

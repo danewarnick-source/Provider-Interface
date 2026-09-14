@@ -37,6 +37,10 @@ import { useClientIntakeProgress } from "@/hooks/use-client-intake-progress";
 import { DeleteClientDialog } from "@/components/clients/delete-client-dialog";
 import { ClientCompliancePanel } from "@/components/clients/client-compliance-panel";
 import { backfillOrgHomePinsFromAddresses } from "@/lib/home-pin.functions";
+import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
+import { useAgencySetup } from "@/hooks/use-agency-setup";
+import { getAgencySetupStatus } from "@/lib/agency-setup-gate.functions";
+import { assertAgencySetupComplete, shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -162,6 +166,9 @@ export const Route = createFileRoute("/dashboard/clients")({
 export function ClientsPage() {
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();
+  const { status: setupStatus } = useAgencySetup();
+  const loadSetup = useServerFn(getAgencySetupStatus);
+  const createBlocked = shouldBlockStaffClientCreate(setupStatus);
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [rosterTab, setRosterTab] = useState<"active" | "archived">("active");
@@ -253,6 +260,8 @@ export function ClientsPage() {
 
   const addMutation = useMutation({
     mutationFn: async (input: ClientFormValues & { intake_mode: "intake" | "profile-only" }) => {
+      if (!org?.organization_id) throw new Error("No organization selected.");
+      assertAgencySetupComplete(await loadSetup({ data: { organizationId: org.organization_id } }));
       const coords = await resolveCoords(input.physical_address);
       const isOwn = input.is_own_guardian ?? true;
       const { data, error } = await (supabase as any).from("clients").insert({
@@ -329,6 +338,7 @@ export function ClientsPage() {
   // ── Directory view ────────────────────────────────────────────────────────
 
   return (
+    <AgencySetupCreateGate>
     <div className="space-y-5">
       <OnboardingReturnBar />
       <OnboardingGuidanceBanner step={3} />
@@ -382,7 +392,7 @@ export function ClientsPage() {
 
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
             <DialogTrigger asChild>
-              <Button size="sm">
+              <Button size="sm" disabled={createBlocked} data-testid="add-client-button">
                 <UserPlus className="mr-2 h-4 w-4" /> Add New Client
               </Button>
             </DialogTrigger>
@@ -709,6 +719,7 @@ export function ClientsPage() {
         />
       )}
     </div>
+    </AgencySetupCreateGate>
   );
 }
 

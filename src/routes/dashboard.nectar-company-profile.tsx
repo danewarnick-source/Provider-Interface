@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Building2 } from "lucide-react";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { agencySetupQueryKey } from "@/hooks/use-agency-setup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +13,6 @@ import { Card } from "@/components/ui/card";
 import { RequireRole } from "@/components/rbac-guard";
 import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
-import { notifyOnboardingChanged, onboardingLSKey } from "@/hooks/use-onboarding-progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -51,28 +52,46 @@ const EMPTY: ProfileDraft = {
   specializations: "",
 };
 
-function readLS<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
 function NectarCompanyProfilePage() {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [draft, setDraft] = useState<ProfileDraft>(EMPTY);
-  const [saved, setSaved] = useState(false);
+
+  const { data: orgRow } = useQuery({
+    queryKey: ["nectar-company-profile-org", orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("organizations")
+        .select(
+          "services_offered, approx_client_count, service_area, specializations, nectar_profile_saved_at",
+        )
+        .eq("id", orgId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
 
   useEffect(() => {
-    if (!orgId) return;
-    setDraft(readLS<ProfileDraft>(onboardingLSKey(orgId, "profile"), EMPTY));
-    setSaved(readLS<boolean>(onboardingLSKey(orgId, "profile_saved"), false));
-  }, [orgId]);
+    if (!orgRow) return;
+    const offered = Array.isArray(orgRow.services_offered) ? orgRow.services_offered : [];
+    setDraft({
+      providerEmail: "",
+      services: offered.filter((code): code is Service =>
+        (SERVICE_OPTIONS as readonly string[]).includes(code),
+      ),
+      clientCount:
+        orgRow.approx_client_count == null ? "" : String(orgRow.approx_client_count),
+      staffCount: "",
+      serviceArea: orgRow.service_area ?? "",
+      specializations: orgRow.specializations ?? "",
+    });
+  }, [orgRow]);
+
+  const saved = !!orgRow?.nectar_profile_saved_at;
 
   const toggleService = (s: Service) => {
     setDraft((d) => ({
@@ -81,41 +100,42 @@ function NectarCompanyProfilePage() {
     }));
   };
 
-  // Both this route and the onboarding panel write to the same org columns; keep them in sync.
-  const save = async () => {
-    if (!orgId) return;
+  // Writes org columns only. This page does not calculate setup completion
+  // or create unlock — that is useAgencySetup + the six operating facts.
+  const save = async (): Promise<boolean> => {
+    if (!orgId) return false;
     try {
-      const specializations = [
-        draft.specializations?.trim(),
-        draft.serviceArea?.trim() ? `Service area: ${draft.serviceArea.trim()}` : "",
-      ].filter(Boolean).join("\n") || null;
+      const { error } = await supabase
+        .from("organizations")
+        .update({
+          services_offered: draft.services ?? [],
+          approx_client_count: Number(draft.clientCount) || null,
+          service_area: draft.serviceArea?.trim() || null,
+          specializations: draft.specializations?.trim() || null,
+          nectar_profile_saved_at: new Date().toISOString(),
+          // Live-only column used by 520 billing; not a setup-completion fact.
+          provider_approver_email: draft.providerEmail?.trim() || null,
+        } as never)
+        .eq("id", orgId);
+      if (error) throw error;
 
-      await (supabase.from("organizations") as any).update({
-        services_offered: draft.services ?? [],
-        approx_client_count: Number(draft.clientCount) || null,
-        specializations,
-        nectar_profile_saved_at: new Date().toISOString(),
-        provider_approver_email: draft.providerEmail?.trim() || null,
-      }).eq("id", orgId);
-
-      // Mirror the awarded codes into provider_interest_outline.codes_held,
-      // which is where NECTAR's code-routing classifier reads. Best-effort:
-      // if the row exists we update just codes_held; if not we insert a
-      // minimal Default outline. RLS errors are non-fatal — the fallback
-      // in fetchTenantIdentity reads services_offered directly.
+      // Mirror awarded codes into provider_interest_outline.codes_held for
+      // NECTAR routing. Best-effort; RLS errors are non-fatal.
       try {
         const codes = (draft.services ?? []).map((c) => String(c).toUpperCase());
-        const { data: existing } = await (supabase.from("provider_interest_outline") as any)
+        const { data: existing } = await supabase
+          .from("provider_interest_outline")
           .select("id")
           .eq("organization_id", orgId)
           .eq("name", "Default")
           .maybeSingle();
         if (existing?.id) {
-          await (supabase.from("provider_interest_outline") as any)
+          await supabase
+            .from("provider_interest_outline")
             .update({ codes_held: codes })
             .eq("id", existing.id);
         } else {
-          await (supabase.from("provider_interest_outline") as any).insert({
+          await supabase.from("provider_interest_outline").insert({
             organization_id: orgId,
             name: "Default",
             location_mode: "anywhere",
@@ -129,17 +149,14 @@ function NectarCompanyProfilePage() {
       } catch (err) {
         console.warn("[nectar-profile] provider_interest_outline sync skipped", err);
       }
-    } catch (err) {
-      console.warn("[nectar-profile] DB write pending; localStorage fallback active", err);
-    }
-    try {
-      window.localStorage.setItem(onboardingLSKey(orgId, "profile"), JSON.stringify(draft));
-      window.localStorage.setItem(onboardingLSKey(orgId, "profile_saved"), JSON.stringify(true));
-      notifyOnboardingChanged();
-      setSaved(true);
+
+      await qc.invalidateQueries({ queryKey: ["nectar-company-profile-org", orgId] });
+      await qc.invalidateQueries({ queryKey: agencySetupQueryKey(orgId) });
       toast.success("Got it — I've calibrated to your agency.");
-    } catch {
-      toast.error("Couldn't save profile.");
+      return true;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't save profile.");
+      return false;
     }
   };
 
@@ -157,7 +174,9 @@ function NectarCompanyProfilePage() {
             NECTAR — Company profile
           </h1>
           <p className="text-sm text-muted-foreground">
-            A few details so NECTAR can calibrate its guidance to your agency.
+            A few details so NECTAR can calibrate its guidance. Saving this
+            page does not unlock hire or add-client — that is the six
+            operating facts on Home / compliance setup.
           </p>
         </div>
       </header>
@@ -244,8 +263,8 @@ function NectarCompanyProfilePage() {
         <div className="flex items-center justify-end gap-2 pt-1">
           <Button
             onClick={async () => {
-              await save();
-              navigate({ to: "/dashboard", search: { welcome: true } });
+              const ok = await save();
+              if (ok) navigate({ to: "/dashboard", search: { welcome: true } });
             }}
           >
             {saved ? "Update profile" : "Save & return to setup"}

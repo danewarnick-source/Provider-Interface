@@ -6,7 +6,7 @@ function read(rel: string) {
   return readFileSync(new URL(rel, import.meta.url), "utf8");
 }
 
-describe("NECTAR onboarding — no SOW upload gate", () => {
+describe("NECTAR onboarding — agency setup gate, no SOW upload", () => {
   it("does not require SOW upload or document_upload attestation to finish setup", () => {
     const hook = read("../hooks/use-onboarding-progress.tsx");
     const panel = read("../components/onboarding/nectar-onboarding-panel.tsx");
@@ -16,30 +16,32 @@ describe("NECTAR onboarding — no SOW upload gate", () => {
     assert.doesNotMatch(hook, /attestationCount/);
     assert.doesNotMatch(hook, /document_upload/);
     assert.doesNotMatch(hook, /authoritative_kind/);
-    assert.match(hook, /totalSteps = 4/);
-    assert.match(hook, /c\.profileSaved \|\| profileSaved/);
-    assert.match(hook, /c\.memberCount > 1/);
-    assert.match(hook, /c\.clientCount > 0/);
-    assert.match(hook, /c\.serviceCodesCount > 0/);
 
     assert.doesNotMatch(panel, /AuthoritativeSourceDrop/);
     assert.doesNotMatch(panel, /AttestationBanner/);
     assert.doesNotMatch(panel, /state_sow/);
-    assert.doesNotMatch(panel, /Complete Step 1 first/);
-    assert.doesNotMatch(panel, /locked: !step1Complete/);
-    assert.match(panel, /Company documents \(optional\)/);
-    assert.match(panel, /required: false/);
     assert.match(panel, /you do not upload a Scope of Work to finish setup/);
     assert.doesNotMatch(panel, /Hive Certify|Hive Platform/);
     assert.doesNotMatch(panel, /[\u{1F300}-\u{1FAFF}]/u);
+    assert.match(panel, /canSkipAgencySetup/);
+    assert.match(panel, /disabled=\{!canSkip\}/);
 
     assert.doesNotMatch(banner, /Once your SOW is uploaded/);
     assert.doesNotMatch(banner, /State Scope of Work/);
     assert.match(banner, /You do not need to upload a Scope of Work to finish setup/);
+    assert.match(banner, /Optional checklist — does not unlock create/);
+    assert.doesNotMatch(banner, /Setup step \{step\}/);
+    assert.match(banner, /NEVER calculates setup eligibility/);
+    assert.doesNotMatch(hook, /localStorage\.|onboardingLSKey\(|profile_saved:/);
+    assert.match(hook, /useAgencySetup/);
   });
 
   it("keeps the company documents hub as optional storage, not a SOW gate", () => {
     const docs = read("../components/pages/nectar-docs-page.tsx");
+    const bar = read("../components/onboarding/onboarding-return-bar.tsx");
+    assert.match(bar, /useAgencySetup/);
+    assert.match(bar, /AGENCY_SETUP_PATH/);
+    assert.doesNotMatch(bar, /useOnboardingProgress/);
     assert.match(docs, /OnboardingGuidanceBanner step=\{5\}/);
     assert.doesNotMatch(docs, /Upload a PCSP, SOW or certification to seed NECTAR/);
     assert.match(docs, /when you have files to store/);

@@ -7,6 +7,7 @@ import {
   reevaluateStaffDutiesInternal,
 } from "@/lib/staff-assignment-hooks.functions";
 import { resolveAccountUsername } from "@/lib/account-username";
+import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
 
 const RoleEnum = z.enum(["admin", "program_manager", "manager", "employee", "committee_member"]);
 
@@ -55,6 +56,8 @@ export async function hireEmployeeInternal(
   actorUserId: string,
   createdVia: "manual_admin" | "smart_import" = "manual_admin",
 ): Promise<{ userId: string; email: string; created: boolean }> {
+  await assertAgencySetupCompleteForOrg(supabaseAdmin, data.organizationId);
+
   const effectiveEmail = data.email.trim().toLowerCase();
   const startDate = data.startDate || data.hireDate || null;
   const endDate = data.endDate || null;

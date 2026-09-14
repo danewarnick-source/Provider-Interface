@@ -184,7 +184,7 @@ describe("Admin Home Step 3 — welcome banner", () => {
     const fn = read("./admin-home-welcome.functions.ts");
     assert.doesNotMatch(panel, /hive_onboarding_\$\{orgId\}_dismissed|lsKey\(orgId, "dismissed"\)/);
     assert.match(panel, /dismissAdminWelcome/);
-    assert.match(hook, /welcome_dismissed_at/);
+    assert.doesNotMatch(hook, /localStorage\.|onboardingLSKey\(/);
     assert.match(fn, /requireSupabaseAuth/);
     assert.match(fn, /requireOrgMembership/);
     assert.match(fn, /welcome_dismissed_at/);

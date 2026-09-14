@@ -5,6 +5,7 @@ import { RequirePermission } from "@/components/rbac-guard";
 import { RequireRole } from "@/components/rbac-guard";
 import { usePermissions } from "@/hooks/use-permissions";
 import { ClientsPage } from "./dashboard.clients";
+import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { TeamsPage } from "./dashboard.teams";
 import { PbaLedgerPage } from "./dashboard.pba-ledger";
 import { ClientLoansPage } from "./dashboard.client-loans";
@@ -67,7 +68,11 @@ function ClientsHub() {
       ),
     },
   );
-  return <HubShell title="Clients" basePath="/dashboard/hub/clients" tabs={tabs} />;
+  return (
+    <AgencySetupCreateGate>
+      <HubShell title="Clients" basePath="/dashboard/hub/clients" tabs={tabs} />
+    </AgencySetupCreateGate>
+  );
 }
 
 export const Route = createFileRoute("/dashboard/hub/clients")({

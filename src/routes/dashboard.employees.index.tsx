@@ -79,6 +79,9 @@ import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-b
 import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
 
 import { RequirePermission } from "@/components/rbac-guard";
+import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
+import { useAgencySetup } from "@/hooks/use-agency-setup";
+import { shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
 import { PersonAvatar } from "@/components/person/person-avatar";
 import type { Position } from "@/lib/employee-positions";
 
@@ -96,6 +99,8 @@ export const Route = createFileRoute("/dashboard/employees/")({
 export function EmployeesPage() {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
+  const { status: setupStatus } = useAgencySetup();
+  const createBlocked = shouldBlockStaffClientCreate(setupStatus);
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
@@ -320,6 +325,7 @@ export function EmployeesPage() {
   });
 
   return (
+    <AgencySetupCreateGate>
     <div className="space-y-6">
       <OnboardingReturnBar />
       <OnboardingGuidanceBanner step={2} />
@@ -335,8 +341,8 @@ export function EmployeesPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <EmployeeRosterUploadButton onClick={() => setUploadOpen(true)} disabled={!org} />
-          <AddEmployeeButton onClick={() => setAddOpen(true)} disabled={!org} />
+          <EmployeeRosterUploadButton onClick={() => setUploadOpen(true)} disabled={!org || createBlocked} />
+          <AddEmployeeButton onClick={() => setAddOpen(true)} disabled={!org || createBlocked} />
           <Button variant="outline" onClick={() => setStaffFieldsOpen(true)}>
             <Settings className="mr-2 h-4 w-4" /> Settings
           </Button>
@@ -933,6 +939,7 @@ export function EmployeesPage() {
         />
       )}
     </div>
+    </AgencySetupCreateGate>
   );
 }
 

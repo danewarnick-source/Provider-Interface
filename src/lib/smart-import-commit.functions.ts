@@ -301,6 +301,8 @@ export async function runJobCommit(
   const { data: subjects } = await subjectsQ;
 
   const orgId = (job.source === "white_glove" ? job.target_org_id : job.org_id) as string;
+  const { assertAgencySetupCompleteForOrg } = await import("@/lib/agency-setup-gate.functions");
+  await assertAgencySetupCompleteForOrg(sb, orgId);
   const results: Array<{
     subjectId: string;
     display_name: string;
