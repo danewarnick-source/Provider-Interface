@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -53,10 +53,16 @@ import { useCompliancePacket } from "@/hooks/use-compliance-packet";
 import { AttentionStrip } from "@/components/staff-mobile/attention-strip";
 import { ThreadsPanel } from "@/components/threads/threads-panel";
 import { MyTasksQueue } from "@/components/staff-tasks/my-tasks-queue";
-import { correctionNoteFromAdminNotes, isCorrectionRequestedNote } from "@/lib/cert-review";
+import {
+  correctionNoteFromAdminNotes,
+  indexCompletionsByInstance,
+  isCorrectionRequestedNote,
+} from "@/lib/cert-review";
 import {
   buildStaffTask,
   dedupeOpenTasksByInstance,
+  staffFileExpandIdFromHash,
+  staffTaskOpensUpload,
   STAFF_TASKS_FOOTER,
 } from "@/lib/staff-my-tasks";
 import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
@@ -705,6 +711,7 @@ function MyObligationsPage() {
   const navigate = useNavigate();
   const orgId = org?.organization_id;
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const locationHash = useRouterState({ select: (s) => s.location.hash });
   const packetQ = useCompliancePacket(orgId, "staff", user?.id ?? null);
   const qc = useQueryClient();
   const listFn = useServerFn(listMyObligationInstances);
@@ -825,11 +832,21 @@ function MyObligationsPage() {
     },
   });
 
-  const completionByInstance = useMemo(() => {
-    const m = new Map<string, MyCompletionRow>();
-    for (const c of myCompletions) m.set(c.instance_id, c);
-    return m;
-  }, [myCompletions]);
+  const completionByInstance = useMemo(
+    () => indexCompletionsByInstance(myCompletions),
+    [myCompletions],
+  );
+
+  useEffect(() => {
+    const fromHash = staffFileExpandIdFromHash(locationHash);
+    if (fromHash) setExpandedId(fromHash);
+  }, [locationHash]);
+
+  useEffect(() => {
+    if (!expandedId) return;
+    const el = document.getElementById(`packet-${expandedId}`);
+    el?.scrollIntoView({ block: "start" });
+  }, [expandedId, myCompletions]);
 
   const overrideFor = (inst: MyObligationInstanceRow) =>
     activeOverrideForTarget(overridesQ.data ?? [], {
@@ -988,6 +1005,7 @@ function MyObligationsPage() {
                 dueAt: inst.due_at,
                 instanceStatus: inst.status,
                 nectarValidationStatus: completionByInstance.get(inst.id)?.nectar_validation_status,
+                adminNotes: completionByInstance.get(inst.id)?.admin_notes,
                 correctionRequested: isCorrectionRequestedNote(
                   completionByInstance.get(inst.id)?.admin_notes,
                 ),
@@ -1022,8 +1040,11 @@ function MyObligationsPage() {
               window.location.href = `/dashboard/forms/${inst.obligation.linked_form_id}/fill?obligation_instance=${inst.id}`;
               return;
             }
+            if (staffTaskOpensUpload(task)) {
+              setExpandedId(inst.id);
+              return;
+            }
             setExpandedId(inst.id);
-            document.getElementById(`packet-${inst.id}`)?.scrollIntoView({ block: "start" });
           }}
         />
       ) : null}
@@ -1091,16 +1112,9 @@ function MyObligationsPage() {
         <div className="grid w-full gap-3">
           {(() => {
             const renderCard = (inst: MyObligationInstanceRow) => {
-              if (isPendingReview(inst.id)) {
-                return (
-                  <PendingReviewCard
-                    key={inst.id}
-                    instance={inst}
-                    completion={completionByInstance.get(inst.id)!}
-                  />
-                );
-              }
-              if (isCorrectionNeeded(inst.id)) {
+              const correctionNeeded = isCorrectionNeeded(inst.id);
+              const openUpload = expandedId === inst.id || correctionNeeded;
+              if (openUpload) {
                 return (
                   <OpenCard
                     key={inst.id}
@@ -1113,6 +1127,15 @@ function MyObligationsPage() {
                     correctionNote={correctionNoteFromAdminNotes(
                       completionByInstance.get(inst.id)?.admin_notes,
                     )}
+                  />
+                );
+              }
+              if (isPendingReview(inst.id)) {
+                return (
+                  <PendingReviewCard
+                    key={inst.id}
+                    instance={inst}
+                    completion={completionByInstance.get(inst.id)!}
                   />
                 );
               }

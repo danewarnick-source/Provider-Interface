@@ -18,8 +18,12 @@ import {
 } from "@/lib/in-hive-training.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { toDisplayNameCase } from "@/lib/person-name";
-import { isCorrectionRequestedNote } from "@/lib/cert-review";
-import { buildStaffTask, dedupeOpenTasksByInstance } from "@/lib/staff-my-tasks";
+import { indexCompletionsByInstance, isCorrectionRequestedNote } from "@/lib/cert-review";
+import {
+  buildStaffTask,
+  dedupeOpenTasksByInstance,
+  staffTaskOpensUpload,
+} from "@/lib/staff-my-tasks";
 import { MyTasksQueue } from "@/components/staff-tasks/my-tasks-queue";
 import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
 import {
@@ -101,14 +105,10 @@ export function StaffHomeMyTasks() {
     },
   });
 
-  const completionByInstance = useMemo(() => {
-    const m = new Map<
-      string,
-      { nectar_validation_status: string | null; admin_notes: string | null }
-    >();
-    for (const row of completionsQ.data ?? []) m.set(row.instance_id, row);
-    return m;
-  }, [completionsQ.data]);
+  const completionByInstance = useMemo(
+    () => indexCompletionsByInstance(completionsQ.data ?? []),
+    [completionsQ.data],
+  );
 
   const mappedTasks = instances
     .filter((row) => completionByInstance.get(row.id)?.nectar_validation_status !== "passed")
@@ -130,6 +130,7 @@ export function StaffHomeMyTasks() {
         dueAt: row.due_at,
         instanceStatus: row.status,
         nectarValidationStatus: completionByInstance.get(row.id)?.nectar_validation_status,
+        adminNotes: completionByInstance.get(row.id)?.admin_notes,
         correctionRequested: isCorrectionRequestedNote(
           completionByInstance.get(row.id)?.admin_notes,
         ),
@@ -170,6 +171,13 @@ export function StaffHomeMyTasks() {
         }
         if (task.action === "complete_form" && isFormUuid(inst.obligation.linked_form_id)) {
           window.location.href = `/dashboard/forms/${inst.obligation.linked_form_id}/fill?obligation_instance=${inst.id}`;
+          return;
+        }
+        if (staffTaskOpensUpload(task)) {
+          void navigate({
+            to: "/dashboard/my-obligations",
+            hash: `packet-${inst.id}`,
+          });
           return;
         }
         void navigate({ to: "/dashboard/my-obligations" });

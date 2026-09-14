@@ -11,14 +11,55 @@ export type CertReviewStatus = "awaiting_review" | "accepted" | "correction_requ
 /** Written onto company_obligation_completions.admin_notes by requestObligationCorrection. */
 export const CORRECTION_REQUESTED_PREFIX = "Correction requested:";
 
+const CORRECTION_NOTE_RE = /^\s*correction requested\b/i;
+const CORRECTION_NOTE_BODY_RE = /^\s*correction requested\s*[:—–-]?\s*/i;
+
 export function isCorrectionRequestedNote(adminNotes: string | null | undefined): boolean {
-  return String(adminNotes ?? "").startsWith(CORRECTION_REQUESTED_PREFIX);
+  return CORRECTION_NOTE_RE.test(String(adminNotes ?? ""));
 }
 
 export function correctionNoteFromAdminNotes(adminNotes: string | null | undefined): string | null {
   if (!isCorrectionRequestedNote(adminNotes)) return null;
-  const note = String(adminNotes).slice(CORRECTION_REQUESTED_PREFIX.length).trim();
+  const note = String(adminNotes).replace(CORRECTION_NOTE_BODY_RE, "").trim();
   return note || null;
+}
+
+/** Same-period completion used on staff surfaces. Correction note wins over a leftover Nectar failed row. */
+export function pickStaffCompletionForSurface<
+  T extends {
+    admin_notes?: string | null;
+    nectar_validation_status?: string | null;
+    completed_at?: string | null;
+  },
+>(rows: readonly T[]): T | undefined {
+  if (!rows.length) return undefined;
+  const correction = rows.find((row) => isCorrectionRequestedNote(row.admin_notes));
+  if (correction) return correction;
+  return [...rows].sort((a, b) =>
+    String(b.completed_at ?? "").localeCompare(String(a.completed_at ?? "")),
+  )[0];
+}
+
+export function indexCompletionsByInstance<
+  T extends {
+    instance_id: string;
+    admin_notes?: string | null;
+    nectar_validation_status?: string | null;
+    completed_at?: string | null;
+  },
+>(rows: readonly T[]): Map<string, T> {
+  const grouped = new Map<string, T[]>();
+  for (const row of rows) {
+    const list = grouped.get(row.instance_id) ?? [];
+    list.push(row);
+    grouped.set(row.instance_id, list);
+  }
+  const out = new Map<string, T>();
+  for (const [instanceId, list] of grouped) {
+    const picked = pickStaffCompletionForSurface(list);
+    if (picked) out.set(instanceId, picked);
+  }
+  return out;
 }
 
 /** One reminder row per instance + staff after correction/reject. */
@@ -34,7 +75,8 @@ export function shouldReplaceCompletionForResubmit(args: {
   nectarValidationStatus?: string | null;
   adminNotes?: string | null;
 }): boolean {
-  return isCorrectionRequestedNote(args.adminNotes);
+  if (isCorrectionRequestedNote(args.adminNotes)) return true;
+  return args.nectarValidationStatus === "failed" || args.nectarValidationStatus === "needs_review";
 }
 
 export type StaffSurfaceReviewKind = "none" | CertReviewStatus;
@@ -83,6 +125,7 @@ export type CertReviewDecisionInput = {
   extractedExpiresOn: string | null | undefined;
   confirmedExpiresOn: string | null | undefined;
   nectarStatus?: string | null;
+  correctionRequested?: boolean;
 };
 
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -104,6 +147,7 @@ export function expirationMissing(input: CertReviewDecisionInput): boolean {
 }
 
 export function canAcceptCertEvidence(input: CertReviewDecisionInput): boolean {
+  if (input.correctionRequested) return false;
   if (expirationMissing(input)) return false;
   return true;
 }
@@ -220,6 +264,9 @@ export function nextRenewalDueFromRules(args: {
 }
 
 export function certReviewAcceptBlockReason(input: CertReviewDecisionInput): string | null {
+  if (input.correctionRequested) {
+    return "Waiting for the staff member to re-upload. Accept after the replacement is in.";
+  }
   if (!expirationMissing(input)) return null;
   return "Confirm expiration before acceptance. Expiration was not detected on the upload.";
 }

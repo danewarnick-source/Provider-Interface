@@ -6,7 +6,11 @@ import {
   STAFF_TASKS_FOOTER,
   buildStaffTask,
   dedupeOpenTasksByInstance,
+  staffFileExpandIdFromHash,
   staffTaskAction,
+  staffTaskOpenHref,
+  staffTaskOpensUpload,
+  staffTaskReviewLabel,
   staffTaskWhyRequired,
   staffTasksWithoutElementDuplicates,
 } from "./staff-my-tasks.ts";
@@ -129,6 +133,32 @@ describe("staff My tasks engine", () => {
     assert.equal(correction.correctionRequested, true);
     assert.equal(correction.action, "fix_submission");
     assert.equal(correction.actionLabel, "Fix submission");
+    assert.equal(staffTaskReviewLabel(correction), "Correction requested — re-upload");
+    assert.equal(staffTaskReviewLabel(pending), "Pending review");
+    assert.equal(staffTaskOpensUpload(correction), true);
+    assert.equal(
+      staffTaskOpenHref(correction.instanceId),
+      `/dashboard/my-obligations#packet-${correction.instanceId}`,
+    );
+    assert.equal(
+      staffFileExpandIdFromHash(`#packet-${correction.instanceId}`),
+      correction.instanceId,
+    );
+
+    const fromNotes = buildStaffTask({
+      instanceId: "i2n",
+      title: "CPR/First Aid Certification — Renewal",
+      evidenceType: "upload",
+      dueAt: "2026-09-20T00:00:00.000Z",
+      instanceStatus: "overdue",
+      nectarValidationStatus: "failed",
+      adminNotes: "Correction requested — show the printed expiration.",
+      now: NOW,
+    });
+    assert.equal(fromNotes.pendingReview, false);
+    assert.equal(fromNotes.correctionRequested, true);
+    assert.equal(fromNotes.action, "fix_submission");
+    assert.equal(staffTaskOpensUpload(fromNotes), true);
 
     const awaiting = buildStaffTask({
       instanceId: "i3",
@@ -215,14 +245,19 @@ describe("Staff My tasks surface lock", () => {
     const nav = readFileSync(new URL("../routes/dashboard.tsx", import.meta.url), "utf8");
     assert.match(page, /MyTasksQueue/);
     assert.match(page, /isCorrectionNeeded|Correction requested — re-upload/);
+    assert.match(page, /staffTaskOpensUpload|staffFileExpandIdFromHash/);
+    assert.match(page, /indexCompletionsByInstance/);
+    assert.match(page, /openUpload/);
     assert.match(page, /My tasks/);
     assert.match(page, /STAFF_TASKS_FOOTER/);
     assert.match(page, /title: "Staff file/);
     assert.match(home, /StaffHomeMyTasks/);
     assert.match(page, /overridden/);
     assert.match(homeTasks, /overridden/);
-    assert.match(queue, /Correction requested — re-upload/);
-    assert.match(queue, /Pending review/);
+    assert.match(homeTasks, /staffTaskOpensUpload/);
+    assert.match(homeTasks, /hash: `packet-\$\{inst.id\}`/);
+    assert.match(queue, /staffTaskReviewLabel/);
+    assert.match(queue, /Correction requested — re-upload|staffTaskReviewLabel/);
     assert.match(nav, /to: "\/dashboard\/my-obligations", label: "Staff file"/);
     assert.doesNotMatch(page, /from\("staff_tasks"\)/);
     assert.doesNotMatch(page, /from\("my_tasks"\)/);

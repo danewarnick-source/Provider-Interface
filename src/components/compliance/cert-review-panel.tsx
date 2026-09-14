@@ -74,6 +74,7 @@ export function CertReviewPanel({ completionId }: { completionId: string }) {
     usesCertExpiration: review?.usesCertExpiration ?? false,
     extractedExpiresOn: review?.extractedExpiresOn ?? null,
     confirmedExpiresOn: confirmedExpires.trim() || null,
+    correctionRequested: review?.correctionRequested === true,
   };
   const canAccept = review ? canAcceptCertEvidence(decision) : false;
   const block = review ? certReviewAcceptBlockReason(decision) : null;

@@ -45,6 +45,7 @@ export type StaffTaskInput = {
   dueAt: string;
   instanceStatus: "pending" | "completed" | "overdue" | "waived";
   nectarValidationStatus?: string | null;
+  adminNotes?: string | null;
   correctionRequested?: boolean;
   courseProgress?: { completed: number; total: number } | null;
   overridden?: boolean;
@@ -110,8 +111,41 @@ export function staffTaskEvidence(input: StaffTaskInput): StaffTaskEvidence {
   return "attestation";
 }
 
+export function staffTaskReviewLabel(
+  task: Pick<StaffTask, "correctionRequested" | "pendingReview">,
+): string | null {
+  if (task.correctionRequested) return "Correction requested — re-upload";
+  if (task.pendingReview) return "Pending review";
+  return null;
+}
+
+/** Fix submission and certificate upload open the same-period file form. */
+export function staffTaskOpensUpload(
+  task: Pick<StaffTask, "action" | "correctionRequested">,
+): boolean {
+  return (
+    task.action === "fix_submission" ||
+    task.action === "upload_certificate" ||
+    task.correctionRequested
+  );
+}
+
+export function staffTaskOpenHref(instanceId: string): string {
+  return `/dashboard/my-obligations#packet-${instanceId}`;
+}
+
+export function staffFileExpandIdFromHash(hash: string | null | undefined): string | null {
+  const raw = String(hash ?? "").trim();
+  if (!raw) return null;
+  const id = raw.startsWith("#") ? raw.slice(1) : raw;
+  const match = /^packet-(.+)$/.exec(id);
+  return match?.[1] ?? null;
+}
+
 export function staffTaskAction(input: StaffTaskInput): StaffTaskActionKind {
-  if (input.correctionRequested || input.nectarValidationStatus === "failed") {
+  const correction =
+    input.correctionRequested === true || staffSurfaceReviewKind(input) === "correction_requested";
+  if (correction || input.nectarValidationStatus === "failed") {
     return "fix_submission";
   }
   const evidence = staffTaskEvidence(input);
@@ -136,6 +170,7 @@ export function buildStaffTask(input: StaffTaskInput): StaffTask {
   const review = staffSurfaceReviewKind({
     nectarValidationStatus: input.nectarValidationStatus,
     instanceStatus: input.instanceStatus,
+    adminNotes: input.adminNotes,
     correctionRequested: input.correctionRequested,
   });
   return {
