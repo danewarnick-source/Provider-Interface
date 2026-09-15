@@ -128,6 +128,11 @@ export type DraftPredicate = {
   kind: PredicateKind;
   /** Existing pack key when the predicate reuses duty applicability. */
   catalogKey: string | null;
+  /**
+   * Article awarded codes when the shared family key's pack codes are narrower
+   * than this twin (FY Google Form family on hhs_annual_outcome, etc.).
+   */
+  serviceCodes?: readonly string[];
 };
 
 export type GroupMember = {

@@ -78,7 +78,11 @@ export type CatalogSheetRow = {
   rule_status?: string;
   execution_status?: string;
   catalog_keys?: string[];
-  predicates?: Array<{ kind?: string; catalogKey?: string | null }>;
+  predicates?: Array<{
+    kind?: string;
+    catalogKey?: string | null;
+    serviceCodes?: string[];
+  }>;
   tests?: Array<{ kind?: string; assert?: string }>;
   members?: Array<{
     id?: string;
@@ -254,6 +258,9 @@ function mapPredicates(row: CatalogSheetRow): DraftPredicate[] {
     out.push({
       kind: pred.kind as PredicateKind,
       catalogKey: pred.catalogKey ?? null,
+      ...(pred.serviceCodes && pred.serviceCodes.length > 0
+        ? { serviceCodes: pred.serviceCodes }
+        : {}),
     });
   }
   return out;

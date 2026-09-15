@@ -1,26 +1,27 @@
 # DHHS91172 executable finalize
 
-Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents: those live keys exist on the pack, but **no imported parent maps to them**.
+Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
 
-Measured after BC FBA/BSP tenth-batch wiring stacked on the UPI/USTEPS ninth-batch tip.
+Measured after FY Google Form eleventh-batch wiring stacked on the BC FBA/BSP tenth-batch tip.
 
 | Measure                        | Count |
 | ------------------------------ | ----: |
 | Imported parents               |   760 |
-| Executable (live key)          |   106 |
+| Executable (live key)          |   140 |
 | Wired 1–6                      |    22 |
 | Wired Mega A                   |    10 |
 | Wired Mega B (already on main) |     9 |
 | Wired Mega C (already on main) |     9 |
 | Wired ninth / UPI-USTEPS ops   |    15 |
 | Wired tenth / BC FBA-BSP twins |    41 |
-| Wired total                    |   106 |
+| Wired eleventh / FY Google Form |    34 |
+| Wired total                    |   140 |
 | Remaining executable           |     0 |
 | Verified / published           | 50 / 50 |
-| Draft unwired                  |   233 |
+| Draft unwired                  |   199 |
 | System behavior                |   421 |
 
-Draft-unwired blockers (233/233): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
+Draft-unwired blockers (199/199): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
 
 ## Already wired (1–6) — do not re-cut
 
@@ -84,7 +85,7 @@ Child elements (board minutes, discharge notices, loan notices, §1.18/§1.23 it
 | REQ-21.3.1  | rhs_lease_agreement       | intake                                                     |
 | REQ-21.5    | ol_rhs_license_4plus      | standing                                                   |
 
-Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_drills_quarterly`, `rhs_evac_drills_quarterly`, `pps_evac_drills_quarterly`, `hhs_annual_outcome`, `dsi_annual_outcome`, `sei_annual_outcome`, `sl_annual_outcome`, `pps_foster_license`, `medicaid_disclosure_annual`, `usor_job_development_sjd`, employment-data UPI keys, `client_specific_training`.
+Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_drills_quarterly`, `rhs_evac_drills_quarterly`, `pps_evac_drills_quarterly`, `pps_foster_license`, `medicaid_disclosure_annual`, `usor_job_development_sjd`, employment-data UPI keys, `client_specific_training`. Annual-outcome pack keys now attach to imported FY Google Form `.c` twins (eleventh batch) — do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
 
 ## Ninth — UPI / USTEPS ops (wired, unpublished)
 
@@ -128,3 +129,15 @@ Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_
 | REQ-3.4.5, REQ-4.4.5, REQ-5.4.5 | fba_bsp | BSP reevaluation within 30 Calendar Days / 30 days |
 | REQ-3.4.6, REQ-4.4.6, REQ-5.4.6 | fba_bsp | Submit BSP within 14 Calendar Days |
 | REQ-3.4.7, REQ-4.4.7, REQ-5.4.7 | fba_bsp | Maintain the BSP in the Person's file |
+
+## Eleventh — FY Google Form annual twins (wired, unpublished)
+
+**Family:** Service-article fiscal-year Google Form / August 30 / 60-days-after-FY-end twins. Same card shape as `fba_bsp`. Reuses existing pack keys where they already fit. Other articles share the `hhs_annual_outcome` family card. Unpublished. Hold merge for Dane. Do not publish these 34. Do not invent SOW text. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7. REQ-18.6.c / REQ-19.6.c are FY-form twins only — do not invent PN1/PN2 monthly-summary keys. Do not start Cluster B (SEI/SJD UPI employment).
+
+| Rule | Live key | Awarded codes |
+| ---- | -------- | ------------- |
+| REQ-11.7.c plus the 29 twins without a dedicated pack title | hhs_annual_outcome | article awarded codes |
+| REQ-8.6.c | dsi_annual_outcome | DSI |
+| REQ-30.7.c | sei_annual_outcome | SEI |
+| REQ-31.5.c | sl_annual_outcome | SLH |
+| REQ-32.7.c | sl_annual_outcome | CMP, CMS, SLN |

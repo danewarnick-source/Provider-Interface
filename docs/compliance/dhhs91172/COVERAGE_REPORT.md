@@ -11,13 +11,13 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Imported parents | 760 |
 | Imported elements | 607 |
 | Imported rows | 1367 |
-| Executable (live key mapped) | 106 |
+| Executable (live key mapped) | 140 |
 | Verified / activatable | 50 |
 | Published | 50 |
 | Blocked (rule-specific gap, no live key) | 0 |
-| Live mapped (clock) | 26 |
+| Live mapped (clock) | 60 |
 | System / standing behavior | 421 |
-| Draft unwired | 233 |
+| Draft unwired | 199 |
 | Element of parent | 607 |
 | Wired first batch (fixture overlay) | 5 |
 | Wired second batch (fixture overlay) | 6 |
@@ -30,7 +30,8 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired Mega C person-file / site leftovers (fixture overlay) | 9 |
 | Wired ninth batch / UPI-USTEPS ops (fixture overlay) | 15 |
 | Wired tenth batch / BC FBA-BSP twins (fixture overlay) | 41 |
-| Wired shared-behavior batches (fixture overlay) | 106 |
+| Wired eleventh batch / FY Google Form annual twins (fixture overlay) | 34 |
+| Wired shared-behavior batches (fixture overlay) | 140 |
 | Remaining executable (live key, not yet wired) | 0 |
 
 ## Controlled publication (Soft=none)
@@ -39,15 +40,15 @@ Wiring is not publication. `VERIFIED_PUBLICATIONS` has 50 published / 50 verifie
 
 ## Remaining executable (live key, not wired)
 
-None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.
+None. All 140 live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents — those live keys have no matching imported parent. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
 
 ## Draft-unwired blocker categories
 
-233 draft-unwired parents. Categories only — not a row novel.
+199 draft-unwired parents. Categories only — not a row novel.
 
 | Category | Count |
 | --- | ---: |
-| no_live_key + no_predicates | 233 |
+| no_live_key + no_predicates | 199 |
 
 421 additional parents are system_behavior (creates_user_task=no / SYSTEM handling) — not draft-unwired and not a live clock.
 
@@ -260,7 +261,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-3.5.2 | DHHS91172-A-0414 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-3.5.3 | DHHS91172-A-0415 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-3.6 | DHHS91172-A-0416 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff delivers BC service / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.7.c | DHHS91172-A-0429 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-3.7.c | DHHS91172-A-0429 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-4.2.1 | DHHS91172-A-0434 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-4.2.2 | DHHS91172-A-0435 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-4.2.3 | DHHS91172-A-0436 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -285,7 +286,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-4.5.2 | DHHS91172-A-0485 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-4.5.3 | DHHS91172-A-0486 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-4.6 | DHHS91172-A-0487 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff delivers BC service / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-4.7.c | DHHS91172-A-0515 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-4.7.c | DHHS91172-A-0515 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-5.2.1 | DHHS91172-A-0520 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-5.2.2 | DHHS91172-A-0521 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-5.2.3 | DHHS91172-A-0522 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -311,13 +312,13 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-5.5.2 | DHHS91172-A-0572 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-5.5.3 | DHHS91172-A-0573 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-5.6 | DHHS91172-A-0574 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff delivers BC service / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.7.c | DHHS91172-A-0602 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-5.7.c | DHHS91172-A-0602 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-6.2 | DHHS91172-A-0606 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-6.3 | DHHS91172-A-0613 | Assigned DSP / supervisor | Complete in platform form/record | daily / per service |  | system_behavior | Rule has no applicability predicates. |
 | REQ-6.4.1 | DHHS91172-A-0620 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-6.4.2 | DHHS91172-A-0621 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-6.4.3 | DHHS91172-A-0622 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-6.5.c | DHHS91172-A-0625 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-6.5.c | DHHS91172-A-0625 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-6.6 | DHHS91172-A-0628 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-7.2.1 | DHHS91172-A-0631 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-7.2.2 | DHHS91172-A-0632 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -340,7 +341,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-7.6.b | DHHS91172-A-0668 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-7.6.c | DHHS91172-A-0669 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-7.6.d | DHHS91172-A-0670 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-7.7.c | DHHS91172-A-0675 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-7.7.c | DHHS91172-A-0675 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-8.2.1 | DHHS91172-A-0680 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-8.2.2 | DHHS91172-A-0681 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-8.2.3 | DHHS91172-A-0687 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -358,7 +359,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-8.5.a | DHHS91172-A-0702 | Administrator | Upload license/approval to agency profile | continuous; re-verify at expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-8.5.b | DHHS91172-A-0705 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-8.5.c | DHHS91172-A-0708 | Administrator | Automated check (no user action) or attestation | january 1, 2027 / period end / per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-8.6.c | DHHS91172-A-0713 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-8.6.c | DHHS91172-A-0713 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | dsi_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-9.2.1 | DHHS91172-A-0718 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-9.2.2 | DHHS91172-A-0719 | Assigned DSP / supervisor | Mark complete with attachment/attestation | 60 days / start of EPR |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-9.2.3 | DHHS91172-A-0720 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -385,7 +386,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-9.5.2 | DHHS91172-A-0760 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | 90 calendar days / hire of EPR supervisory staff / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-9.6.a | DHHS91172-A-0762 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-9.6.b | DHHS91172-A-0765 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-9.7.c | DHHS91172-A-0769 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-9.7.c | DHHS91172-A-0769 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-10.2.1 | DHHS91172-A-0774 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-10.2.2 | DHHS91172-A-0775 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-10.2.3 | DHHS91172-A-0776 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -397,7 +398,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-10.4.3 | DHHS91172-A-0784 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-10.4.4 | DHHS91172-A-0785 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-10.5 | DHHS91172-A-0790 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-10.6.c | DHHS91172-A-0794 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-10.6.c | DHHS91172-A-0794 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-10.7 | DHHS91172-A-0797 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.2.1 | DHHS91172-A-0800 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.2.2 | DHHS91172-A-0801 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -429,14 +430,14 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-11.4.9 | DHHS91172-A-0859 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.5 | DHHS91172-A-0860 | Site supervisor | Mark complete with attachment/attestation | before start / before HHS begins in the home / annual | hhs_home_cert_annual | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-11.6 | DHHS91172-A-0861 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-11.7.c | DHHS91172-A-0864 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-11.7.c | DHHS91172-A-0864 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-12.2.1 | DHHS91172-A-0869 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-12.2.2 | DHHS91172-A-0870 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-12.3.1 | DHHS91172-A-0872 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-12.3.3 | DHHS91172-A-0873 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-12.3.2 | DHHS91172-A-0874 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-12.4 | DHHS91172-A-0875 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff delivers HSQ / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-12.5.c | DHHS91172-A-0878 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-12.5.c | DHHS91172-A-0878 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-13.2.1 | DHHS91172-A-0883 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-13.2.2 | DHHS91172-A-0884 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-13.3.1 | DHHS91172-A-0886 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
@@ -446,14 +447,14 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-13.4.2 | DHHS91172-A-0897 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-13.4.3 | DHHS91172-A-0898 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-13.4.4 | DHHS91172-A-0899 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-13.5.c | DHHS91172-A-0902 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-13.5.c | DHHS91172-A-0902 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-14.2.1 | DHHS91172-A-0907 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-14.2.2 | DHHS91172-A-0908 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-14.2.3 | DHHS91172-A-0909 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-14.2.4 | DHHS91172-A-0910 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-14.2.5 | DHHS91172-A-0911 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-14.3 | DHHS91172-A-0912 | Assigned DSP / supervisor | Complete in platform form/record | daily / per service |  | system_behavior | Rule has no applicability predicates. |
-| REQ-14.4.c | DHHS91172-A-0920 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-14.4.c | DHHS91172-A-0920 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-14.5 | DHHS91172-A-0923 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-15.2.1 | DHHS91172-A-0926 | PBA fiduciary staff | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-15.2.2 | DHHS91172-A-0927 | PBA fiduciary staff | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -484,7 +485,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-15.4.4 | DHHS91172-A-0958 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-15.4.5 | DHHS91172-A-0959 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-15.4.6 | DHHS91172-A-0960 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-15.5.c | DHHS91172-A-0963 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-15.5.c | DHHS91172-A-0963 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-16.2.1 | DHHS91172-A-0968 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-16.2.2 | DHHS91172-A-0969 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-16.2.3 | DHHS91172-A-0970 | Nurse (PM/PN staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
@@ -498,7 +499,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-16.2.11 | DHHS91172-A-0989 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-16.3 | DHHS91172-A-0990 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-16.4 | DHHS91172-A-0991 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-16.5.c | DHHS91172-A-0994 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-16.5.c | DHHS91172-A-0994 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-17.2.1 | DHHS91172-A-0999 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-17.2.2 | DHHS91172-A-1000 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-17.2.3 | DHHS91172-A-1001 | Nurse (PM/PN staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
@@ -512,7 +513,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-17.2.11 | DHHS91172-A-1020 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-17.3 | DHHS91172-A-1021 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-17.4 | DHHS91172-A-1022 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-17.5.c | DHHS91172-A-1025 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-17.5.c | DHHS91172-A-1025 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-18.2.1 | DHHS91172-A-1030 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-18.2.3 | DHHS91172-A-1036 | Nurse (PM/PN staff) | Generate/upload report and mark sent | per Medical Care Plan (at least monthly, 19.2(7)(E)) |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-18.3.1 | DHHS91172-A-1038 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -521,7 +522,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-18.4.2 | DHHS91172-A-1047 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-18.4.3 | DHHS91172-A-1048 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-18.5 | DHHS91172-A-1049 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before PN1 staff serves the client / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-18.6.c | DHHS91172-A-1052 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-18.6.c | DHHS91172-A-1052 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-19.2.1 | DHHS91172-A-1057 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.2.1.B | DHHS91172-A-1059 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.2.2 | DHHS91172-A-1062 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -545,7 +546,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-19.4.5 | DHHS91172-A-1093 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.5.a | DHHS91172-A-1094 | Administrator | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-19.5.b | DHHS91172-A-1095 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-19.6.c | DHHS91172-A-1098 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-19.6.c | DHHS91172-A-1098 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-19.7 | DHHS91172-A-1101 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-20.2.1 | DHHS91172-A-1104 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-20.2.2 | DHHS91172-A-1105 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -579,7 +580,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-20.5.1 | DHHS91172-A-1165 | Administrator | External: DHHS Office of Licensing/DLBC portal, record completion in platform | continuous; re-verify at expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-20.5.2 | DHHS91172-A-1166 | Administrator | External: DHHS Office of Licensing/DLBC portal, record completion in platform | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-20.6 | DHHS91172-A-1167 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-20.7.c | DHHS91172-A-1170 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-20.7.c | DHHS91172-A-1170 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-20.8.a | DHHS91172-A-1173 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-20.8.b | DHHS91172-A-1174 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-20.8.c | DHHS91172-A-1175 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -608,7 +609,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-21.4.2 | DHHS91172-A-1226 | Administrator | Automated check (no user action) or attestation | before start / service/assignment start / per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.4.3 | DHHS91172-A-1227 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.5 | DHHS91172-A-1228 | Administrator | External: DHHS Office of Licensing/DLBC portal, record completion in platform | once; re-verify on renewal/expiry | ol_rhs_license_4plus | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
-| REQ-21.6.c | DHHS91172-A-1233 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-21.6.c | DHHS91172-A-1233 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-21.7.a | DHHS91172-A-1236 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.7.b | DHHS91172-A-1237 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.7.c | DHHS91172-A-1238 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -623,7 +624,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-22.3.4 | DHHS91172-A-1250 | Assigned DSP / supervisor | Complete in platform form/record | daily / per service |  | system_behavior | Rule has no applicability predicates. |
 | REQ-22.4.1 | DHHS91172-A-1257 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-22.4.2 | DHHS91172-A-1258 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-22.5.c | DHHS91172-A-1261 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-22.5.c | DHHS91172-A-1261 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-22.6 | DHHS91172-A-1264 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-23.2.1 | DHHS91172-A-1267 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-23.2.2 | DHHS91172-A-1268 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -634,7 +635,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-23.3.5 | DHHS91172-A-1274 | Assigned DSP / supervisor | Complete in platform form/record | daily / per service |  | system_behavior | Rule has no applicability predicates. |
 | REQ-23.4.1 | DHHS91172-A-1281 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-23.4.2 | DHHS91172-A-1282 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-23.5.c | DHHS91172-A-1285 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-23.5.c | DHHS91172-A-1285 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-23.6 | DHHS91172-A-1288 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-24.2.1 | DHHS91172-A-1291 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-24.2.2 | DHHS91172-A-1292 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -645,7 +646,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-24.4.1 | DHHS91172-A-1304 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-24.4.2 | DHHS91172-A-1305 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-24.4.3 | DHHS91172-A-1306 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-24.5.c | DHHS91172-A-1309 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-24.5.c | DHHS91172-A-1309 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-24.6 | DHHS91172-A-1312 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-25.2.1 | DHHS91172-A-1315 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-25.2.2 | DHHS91172-A-1316 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -657,7 +658,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-25.4.1 | DHHS91172-A-1329 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-25.4.2 | DHHS91172-A-1330 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-25.4.3 | DHHS91172-A-1331 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-25.5.c | DHHS91172-A-1334 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-25.5.c | DHHS91172-A-1334 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-25.6 | DHHS91172-A-1337 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-26.2.1 | DHHS91172-A-1340 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-26.2.2 | DHHS91172-A-1341 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -670,7 +671,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-26.4.3 | DHHS91172-A-1355 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-26.4.4 | DHHS91172-A-1356 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-26.4.5 | DHHS91172-A-1357 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-26.5.c | DHHS91172-A-1360 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-26.5.c | DHHS91172-A-1360 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-27.2.1 | DHHS91172-A-1365 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-27.2.2 | DHHS91172-A-1366 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-27.3 | DHHS91172-A-1367 | Employment specialist / job coach | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
@@ -678,7 +679,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-27.4.2 | DHHS91172-A-1370 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-27.4.3 | DHHS91172-A-1371 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-27.5 | DHHS91172-A-1372 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-27.6.c | DHHS91172-A-1375 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-27.6.c | DHHS91172-A-1375 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-27.7 | DHHS91172-A-1378 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-28.2.1 | DHHS91172-A-1381 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-28.2.2 | DHHS91172-A-1382 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -690,7 +691,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-28.3.2 | DHHS91172-A-1389 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-28.3.3 | DHHS91172-A-1390 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-28.4 | DHHS91172-A-1391 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff delivers SED / once; re-verify on renewal/expiry | acre_sed | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
-| REQ-28.5.c | DHHS91172-A-1398 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-28.5.c | DHHS91172-A-1398 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-29.2.a | DHHS91172-A-1402 | Employment specialist / job coach | Mark complete with attachment/attestation | start of SEE |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-29.2.b | DHHS91172-A-1403 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-29.2.c | DHHS91172-A-1412 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -702,7 +703,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-29.3.4 | DHHS91172-A-1419 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-29.4.1 | DHHS91172-A-1421 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff delivers SEE / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-29.4.2 | DHHS91172-A-1424 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-29.5.c | DHHS91172-A-1427 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-29.5.c | DHHS91172-A-1427 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-30.2.1 | DHHS91172-A-1432 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.2.2 | DHHS91172-A-1441 | Employment specialist / job coach | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.2.3 | DHHS91172-A-1442 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -726,7 +727,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-30.6.a | DHHS91172-A-1469 | Administrator | External: USOR, record completion in platform | Existing SEI before 2026-07-01: 2027-01-31; new SEI awards: award date + 6 calendar months / SEI service history; SEI award date / once; re-verify on renewal/expiry | usor_job_coaching_sei | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-30.6.b | DHHS91172-A-1470 | Administrator | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | acre_sei | live_mapped | Unanswered applicability fact: Which staff are assigned to an SEI authorization? |
 | REQ-30.6.c | DHHS91172-A-1471 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | Before providing SEI / first_SEI_service_at / once; re-verify on renewal/expiry | acre_sei | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
-| REQ-30.7.c | DHHS91172-A-1481 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-30.7.c | DHHS91172-A-1481 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | sei_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-30.8 | DHHS91172-A-1482 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.8.1 | DHHS91172-A-1483 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-30.8.2 | DHHS91172-A-1484 | Administrator | External: complete in UPI/USTEPS, record completion in platform | per pay period |  | draft_unwired | Rule has no applicability predicates. |
@@ -742,7 +743,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-31.4.2 | DHHS91172-A-1508 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-31.4.3 | DHHS91172-A-1509 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-31.4.4 | DHHS91172-A-1510 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-31.5.c | DHHS91172-A-1513 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-31.5.c | DHHS91172-A-1513 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | sl_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-32.2.1 | DHHS91172-A-1518 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.2.2 | DHHS91172-A-1524 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.2.3 | DHHS91172-A-1525 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -758,7 +759,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-32.6.a | DHHS91172-A-1544 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.6.b | DHHS91172-A-1545 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-32.6.c | DHHS91172-A-1546 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-32.7.c | DHHS91172-A-1549 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-32.7.c | DHHS91172-A-1549 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | sl_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-33.2.a | DHHS91172-A-1553 | Employment specialist / job coach | Mark complete with attachment/attestation | start of SJD |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-33.2.b | DHHS91172-A-1556 | Employment specialist / job coach | Mark complete with attachment/attestation | start of SJD |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-33.2.c | DHHS91172-A-1557 | Employment specialist / job coach | Mark complete with attachment/attestation | Discovery Process chosen |  | draft_unwired | Rule has no applicability predicates. |
@@ -789,7 +790,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-33.5.a | DHHS91172-A-1634 | Administrator | External: USOR, record completion in platform | 6 months / SJD contract / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-33.5.b | DHHS91172-A-1635 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | hire + 60 days | acre_sjd | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-33.5.c | DHHS91172-A-1636 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | customized_employment_usu | live_mapped | Unanswered applicability fact: Which staff are assigned to an SJD authorization? |
-| REQ-33.6.c | DHHS91172-A-1644 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-33.6.c | DHHS91172-A-1644 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-33.7 | DHHS91172-A-1645 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-33.7.1 | DHHS91172-A-1646 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-33.7.2 | DHHS91172-A-1647 | Administrator | External: complete in UPI/USTEPS, record completion in platform | per pay period |  | draft_unwired | Rule has no applicability predicates. |
@@ -799,13 +800,13 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-34.4.1 | DHHS91172-A-1657 | Administrator | External: USOR, record completion in platform | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-34.4.2 | DHHS91172-A-1658 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-34.5 | DHHS91172-A-1659 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-34.6.c | DHHS91172-A-1662 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-34.6.c | DHHS91172-A-1662 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-35.2 | DHHS91172-A-1664 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-35.3 | DHHS91172-A-1665 | Administrator | Automated check (no user action) or attestation | SJR milestone met / per claim / continuous check |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-35.4.1 | DHHS91172-A-1671 | Administrator | External: USOR, record completion in platform | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-35.4.2 | DHHS91172-A-1672 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-35.5 | DHHS91172-A-1673 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-35.6.c | DHHS91172-A-1676 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-35.6.c | DHHS91172-A-1676 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-36.2.1 | DHHS91172-A-1679 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-36.2.2 | DHHS91172-A-1680 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-36.2.3 | DHHS91172-A-1681 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -814,7 +815,7 @@ None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, qu
 | REQ-36.3.3 | DHHS91172-A-1685 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-36.4.1 | DHHS91172-A-1687 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-36.4.2 | DHHS91172-A-1688 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-36.5.c | DHHS91172-A-1691 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-36.5.c | DHHS91172-A-1691 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 
 ## Elements (no staff task)
 
