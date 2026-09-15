@@ -2,7 +2,6 @@
 
 export * from '../agency-documents.functions';
 export * from '../agency-policies.functions';
-export * from '../document-attestations.functions';
 export * from '../document-effective-dating.functions';
 export * from '../document-extraction';
 export * from '../effective-document.functions';
