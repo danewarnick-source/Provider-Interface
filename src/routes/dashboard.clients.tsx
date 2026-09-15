@@ -163,14 +163,14 @@ export const Route = createFileRoute("/dashboard/clients")({
 
 // ─── Clients Page ─────────────────────────────────────────────────────────────
 
-export function ClientsPage() {
+export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: boolean } = {}) {
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();
   const { status: setupStatus } = useAgencySetup();
   const loadSetup = useServerFn(getAgencySetupStatus);
   const createBlocked = shouldBlockStaffClientCreate(setupStatus);
   const [search, setSearch] = useState("");
-  const [addOpen, setAddOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(startWithAddOpen);
   const [rosterTab, setRosterTab] = useState<"active" | "archived">("active");
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [compliancePanelClient, setCompliancePanelClient] = useState<{ id: string; name: string } | null>(null);

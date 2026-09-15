@@ -1,4 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
@@ -10,6 +11,12 @@ import { setOrgPricingScheduleFn } from "@/lib/hive-pricing.functions";
 import { MasterController } from "@/components/hive-exec/master-controller";
 
 export const Route = createFileRoute("/dashboard/hive-exec/$orgId")({
+  beforeLoad: ({ params }) => {
+    redirectUnlessUuidParam(params.orgId, {
+      createTo: "/dashboard/hive-exec/new-company",
+      fallbackTo: "/dashboard/hive-exec",
+    });
+  },
   component: CompanyDetailPage,
 });
 
@@ -32,6 +39,7 @@ function CompanyDetailPage() {
 
 
   const detailQ = useQuery({
+    enabled: isRouteUuid(orgId),
     queryKey: ["hive-exec-company", orgId],
     queryFn: () => detailFn({ data: { organizationId: orgId } }),
     refetchInterval: 30_000,

@@ -9,6 +9,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -171,6 +172,12 @@ const search = z.object({
 export const Route = createFileRoute("/dashboard/clients/$clientId")({
   head: () => ({ meta: [{ title: "Client Profile — Provider Interface" }] }),
   validateSearch: search,
+  beforeLoad: ({ params }) => {
+    redirectUnlessUuidParam(params.clientId, {
+      createTo: "/dashboard/clients/new",
+      fallbackTo: "/dashboard/clients",
+    });
+  },
   component: () => (
     <RequirePermission perm="view_clients">
       <ClientProfileHub />
@@ -245,7 +252,7 @@ function ClientProfileHub() {
   const chartAuditLogged = useRef(false);
 
   useEffect(() => {
-    if (!orgId || !clientId || chartAuditLogged.current) return;
+    if (!orgId || !isRouteUuid(clientId) || chartAuditLogged.current) return;
     chartAuditLogged.current = true;
     void recordAccessFn({
       data: {
@@ -268,7 +275,7 @@ function ClientProfileHub() {
   };
 
   const clientQ = useQuery({
-    enabled: !!orgId,
+    enabled: !!orgId && isRouteUuid(clientId),
     queryKey: ["client-profile", orgId, clientId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -304,7 +311,7 @@ function ClientProfileHub() {
   const { enabled: emarFeatureEnabled } = useClientFeature(featureClient, "emar");
   const { data: hasMedications } = useQuery({
     queryKey: ["client-profile-has-meds", clientId],
-    enabled: !!clientId,
+    enabled: isRouteUuid(clientId),
     queryFn: async () => {
       const { count } = await supabase
         .from("client_medications")

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -27,6 +28,12 @@ import { getAuthStatus, AuthStatusBadge } from "@/lib/billing-auth-status";
 
 export const Route = createFileRoute("/dashboard/billing/$clientId")({
   head: () => ({ meta: [{ title: "Client Billing — Provider Interface" }] }),
+  beforeLoad: ({ params }) => {
+    redirectUnlessUuidParam(params.clientId, {
+      createTo: "/dashboard/clients/new",
+      fallbackTo: "/dashboard/billing",
+    });
+  },
   component: ClientBillingDetail,
 });
 
@@ -41,7 +48,7 @@ function ClientBillingDetail() {
   const { data: budgets } = useClientBudget(clientId);
 
   const clientQ = useQuery({
-    enabled: !!org?.organization_id && !!clientId,
+    enabled: !!org?.organization_id && isRouteUuid(clientId),
     queryKey: ["billing-client", org?.organization_id, clientId],
     queryFn: async (): Promise<ClientRow | null> => {
       const { data, error } = await supabase

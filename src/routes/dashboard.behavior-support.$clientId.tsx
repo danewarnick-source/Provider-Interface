@@ -1,4 +1,5 @@
 import { createFileRoute, Navigate, useRouter } from "@tanstack/react-router";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,12 @@ import { SowDeadlinesPanel } from "@/components/behavior-support/sow-deadlines";
 
 export const Route = createFileRoute("/dashboard/behavior-support/$clientId")({
   head: () => ({ meta: [{ title: "Behavior Support — Provider Interface" }] }),
+  beforeLoad: ({ params }) => {
+    redirectUnlessUuidParam(params.clientId, {
+      createTo: "/dashboard/clients/new",
+      fallbackTo: "/dashboard/clients",
+    });
+  },
   component: BehaviorSupportClientPage,
 });
 
@@ -27,7 +34,7 @@ function BehaviorSupportClientPage() {
   const orgId = org?.organization_id;
 
   const { data, isLoading } = useQuery({
-    enabled: !!orgId && !!user?.id,
+    enabled: !!orgId && !!user?.id && isRouteUuid(clientId),
     queryKey: ["bs-client-page", clientId],
     queryFn: async () => {
       const [{ data: client }, { data: bsc }] = await Promise.all([

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -41,6 +42,12 @@ function resolveTab(tab: SearchTab | undefined): ProfileTab {
 }
 
 export const Route = createFileRoute("/dashboard/employees/$staffId")({
+  beforeLoad: ({ params }) => {
+    redirectUnlessUuidParam(params.staffId, {
+      createTo: "/dashboard/employees/new",
+      fallbackTo: "/dashboard/employees",
+    });
+  },
   validateSearch: (s: Record<string, unknown>): { tab?: SearchTab; override_perm?: Permission } => {
     const out: { tab?: SearchTab; override_perm?: Permission } = {};
     if (
@@ -80,7 +87,7 @@ function StaffProfilePage() {
   const orgId = org?.organization_id;
 
   const memberQ = useQuery({
-    enabled: !!orgId && !!staffId,
+    enabled: !!orgId && isRouteUuid(staffId),
     queryKey: staffProfileIdentityQueryKey(orgId, staffId),
     queryFn: () => {
       if (!orgId) throw new Error("No organization selected.");

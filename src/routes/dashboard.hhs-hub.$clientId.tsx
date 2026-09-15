@@ -1,5 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -50,6 +51,12 @@ const hhsSearch = z.object({
 export const Route = createFileRoute("/dashboard/hhs-hub/$clientId")({
   head: () => ({ meta: [{ title: "Host Home Client Hub — Provider Interface" }] }),
   validateSearch: hhsSearch,
+  beforeLoad: ({ params }) => {
+    redirectUnlessUuidParam(params.clientId, {
+      createTo: "/dashboard/clients/new",
+      fallbackTo: "/dashboard/clients",
+    });
+  },
   component: HhsClientHubRoute,
 });
 
@@ -85,7 +92,7 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
 
 
   const { data: client, isLoading } = useQuery({
-    enabled: !!clientId,
+    enabled: isRouteUuid(clientId),
     queryKey: ["hhs-client", clientId],
     queryFn: async () => {
       const { data } = await supabase
@@ -98,7 +105,7 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
   });
 
   const { data: meds = [] } = useQuery({
-    enabled: !!clientId,
+    enabled: isRouteUuid(clientId),
     queryKey: ["hhs-meds", clientId],
     queryFn: async () => {
       const { data } = await supabase

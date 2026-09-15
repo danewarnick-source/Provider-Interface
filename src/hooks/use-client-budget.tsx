@@ -12,6 +12,7 @@ import {
 } from "@/lib/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { isNonAnswer } from "@/lib/nectar-quality";
+import { isRouteUuid } from "@/lib/route-uuid";
 
 /**
  * Live per-code budget ledger. For each authorized billing code we
@@ -59,7 +60,7 @@ export function useClientBudget(clientId: string | undefined) {
   const { data: allCodes } = useAllClientBillingCodes();
 
   return useQuery({
-    enabled: !!org?.organization_id && !!clientId && !!allCodes,
+    enabled: !!org?.organization_id && isRouteUuid(clientId) && !!allCodes,
     queryKey: ["client-budget", org?.organization_id, clientId, allCodes?.length],
     refetchInterval: 60_000,
     queryFn: async (): Promise<CodeBudget[]> => {

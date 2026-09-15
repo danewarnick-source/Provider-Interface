@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { isRouteUuid } from "@/lib/route-uuid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -99,7 +100,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   });
 
   const docsQ = useQuery({
-    enabled: !!orgId,
+    enabled: !!orgId && isRouteUuid(clientId),
     queryKey: ["client-profile-tab-docs", orgId, clientId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -114,7 +115,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   });
 
   const contactsQ = useQuery({
-    enabled: !!orgId,
+    enabled: !!orgId && isRouteUuid(clientId),
     queryKey: ["client-emergency-contacts", orgId, clientId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -128,7 +129,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   });
 
   const restrictionsQ = useQuery({
-    enabled: !!orgId,
+    enabled: !!orgId && isRouteUuid(clientId),
     queryKey: ["client-restrictions", clientId],
     queryFn: async () => {
       const { data, error } = await supabase

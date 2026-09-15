@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { z } from "zod";
 import { useCaseload } from "@/hooks/use-caseload";
 import { useMyAssignments, allowedCodesFor, clientAuthorizedCodes } from "@/hooks/use-my-assignments";
@@ -63,6 +64,12 @@ const workspaceSearch = z.object({
 export const Route = createFileRoute("/dashboard/workspace/$clientId")({
   head: () => ({ meta: [{ title: "Client Workspace — Provider Interface" }] }),
   validateSearch: workspaceSearch,
+  beforeLoad: ({ params }) => {
+    redirectUnlessUuidParam(params.clientId, {
+      createTo: "/dashboard/clients/new",
+      fallbackTo: "/dashboard/clients",
+    });
+  },
   component: ClientWorkspace,
 });
 
@@ -84,7 +91,7 @@ function ClientWorkspace() {
   // Banner/identity bind to the route client id — never a leftover caseload row.
   const liveClientQ = useQuery({
     queryKey: ["workspace-client-row", clientId],
-    enabled: !!clientId,
+    enabled: isRouteUuid(clientId),
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("clients")
