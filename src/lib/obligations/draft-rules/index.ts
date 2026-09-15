@@ -278,6 +278,15 @@ export {
   fifteenthExecutableBatchParents,
 } from "../fifteenth-executable-batch.ts";
 export {
+  applySixteenthExecutableBatchOverlay,
+  applySixteenthExecutableBatchOverlayAll,
+  SIXTEENTH_BATCH_DEMO_PATH,
+  SIXTEENTH_EXECUTABLE_BATCH_ID,
+  SIXTEENTH_EXECUTABLE_BATCH_LIVE_KEYS,
+  SIXTEENTH_EXECUTABLE_BATCH_RULE_IDS,
+  sixteenthExecutableBatchParents,
+} from "../sixteenth-executable-batch.ts";
+export {
   countQualifiedDesignatedBenefits,
   employmentYearDue,
   hirePlusDaysDue,

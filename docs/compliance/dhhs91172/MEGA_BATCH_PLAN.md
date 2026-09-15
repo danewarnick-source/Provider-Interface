@@ -1,13 +1,13 @@
 # DHHS91172 executable finalize
 
-Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Quarterly evac drill leftovers are wired unpublished (fourteenth batch / imported `.6` parents). Article 1 standing leftover children are wired unpublished (fifteenth batch / existing pack liveKeys). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3 / REQ-1.17.
+Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Quarterly evac drill leftovers are wired unpublished (fourteenth batch / imported `.6` parents). Article 1 standing leftover children are wired unpublished (fifteenth batch / existing pack liveKeys). Remaining pack-key-ready leftovers are wired unpublished (sixteenth batch / incidents, HRC, service leftovers). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3 / REQ-1.17.
 
-Measured after Article 1 standing leftover-child fifteenth-batch wiring stacked on the #362 tip (`af7ac4fc`).
+Measured after remaining pack-key-ready sixteenth-batch wiring stacked on the #364 tip (`5cea5c39`).
 
 | Measure                        | Count |
 | ------------------------------ | ----: |
 | Imported parents               |   760 |
-| Executable (live key)          |   199 |
+| Executable (live key)          |   225 |
 | Wired 1–6                      |    22 |
 | Wired Mega A                   |    10 |
 | Wired Mega B (already on main) |     9 |
@@ -19,13 +19,14 @@ Measured after Article 1 standing leftover-child fifteenth-batch wiring stacked 
 | Wired thirteenth / OL Day Treatment Day Support |     5 |
 | Wired fourteenth / quarterly evac leftovers |     3 |
 | Wired fifteenth / Article 1 standing leftover children |    45 |
-| Wired total                    |   199 |
+| Wired sixteenth / remaining pack-key-ready leftovers |    26 |
+| Wired total                    |   225 |
 | Remaining executable           |     0 |
 | Verified / published           | 50 / 50 |
-| Draft unwired                  |   140 |
+| Draft unwired                  |   114 |
 | System behavior                |   421 |
 
-Draft-unwired blockers (140/140): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
+Draft-unwired blockers (114/114): **no live key + no applicability predicates**. No fixture. Not a per-row novel. Remaining rows need a new pack key or invented SOW — leave them invent-blocked.
 
 ## Already wired (1–6) — do not re-cut
 
@@ -89,7 +90,7 @@ Child elements (board minutes, discharge notices, loan notices, §1.18/§1.23 it
 | REQ-21.3.1  | rhs_lease_agreement       | intake                                                     |
 | REQ-21.5    | ol_rhs_license_4plus      | standing                                                   |
 
-Unmapped obligation keys with **no imported parent** (do not invent): `pps_foster_license`, `usor_job_development_sjd`, `client_specific_training`. `medicaid_disclosure_annual` now attaches to leftover REQ-1.13.5 (fifteenth batch) — do not invent REQ-1.9.6. Quarterly evac pack keys now attach to imported `.6` parents (fourteenth batch) — do not invent umbrella REQ-11.3 / REQ-20.3 / REQ-21.3. Employment-data / strategies / USOR-contact UPI keys now attach to imported SEI/SJD leftovers (twelfth batch). Annual-outcome pack keys attach to imported FY Google Form `.c` twins (eleventh batch) — do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7. There is no `sjd_employment_strategies_upi` pack sibling (that would need a catalog seed).
+Unmapped obligation keys with **no imported parent** (do not invent): `client_specific_training`. `pps_foster_license` now attaches to leftover REQ-20.5.1 / REQ-20.5.2 (sixteenth batch). `usor_job_development_sjd` now attaches to leftover REQ-33.5.a (sixteenth batch). `medicaid_disclosure_annual` now attaches to leftover REQ-1.13.5 (fifteenth batch) — do not invent REQ-1.9.6. Quarterly evac pack keys now attach to imported `.6` parents (fourteenth batch) — do not invent umbrella REQ-11.3 / REQ-20.3 / REQ-21.3. Employment-data / strategies / USOR-contact UPI keys now attach to imported SEI/SJD leftovers (twelfth batch). Annual-outcome pack keys attach to imported FY Google Form `.c` twins (eleventh batch) — do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7. There is no `sjd_employment_strategies_upi` pack sibling (that would need a catalog seed).
 
 ## Ninth — UPI / USTEPS ops (wired, unpublished)
 
@@ -183,7 +184,7 @@ Unmapped obligation keys with **no imported parent** (do not invent): `pps_foste
 
 ## Fifteenth — Article 1 standing leftover children (wired, unpublished)
 
-**Family:** MEGA A leftover-child attach. Same leftover move as FY `.c` twins and evac `.6`. Children stay on the existing parent card. Reuse existing predicates. App PR, no DB change. Unpublished. Hold merge for Dane. Do not publish these 45. Official catalog clauses only. Reuses existing pack liveKeys. Do not invent umbrella REQ-1.17 / REQ-1.9.6. Hold out REQ-1.13.4 and REQ-1.28.6 (MEGA B). Do not start MEGA B (incidents/HRC) or MEGA C (service leftovers).
+**Family:** MEGA A leftover-child attach. Same leftover move as FY `.c` twins and evac `.6`. Children stay on the existing parent card. Reuse existing predicates. App PR, no DB change. Unpublished. Hold merge for Dane. Do not publish these 45. Official catalog clauses only. Reuses existing pack liveKeys. Do not invent umbrella REQ-1.17 / REQ-1.9.6. REQ-1.13.4 stays invent-blocked. REQ-1.28.6 now attaches on the sixteenth batch / `rights_restriction_record`.
 
 | Rule | Live key |
 | ---- | -------- |
@@ -200,3 +201,19 @@ Unmapped obligation keys with **no imported parent** (do not invent): `pps_foste
 | REQ-1.23.h | medical_dental_exams |
 | REQ-1.28.7.A–D, REQ-1.28.7.H–I | emergency_loan_record |
 | REQ-1.30.2, REQ-1.30.3, REQ-1.30.3.G | driving_record_transport |
+
+## Sixteenth — remaining pack-key-ready leftovers (wired, unpublished)
+
+**Family:** Incidents + HRC + service leftovers. Same leftover-child attach as FY `.c`, evac `.6`, and Article 1 standing children. Children stay on the existing parent card. Reuse existing predicates. App PR, no DB change. Unpublished. Hold merge for Dane. Do not publish these 26. Official catalog clauses only. Reuses existing pack liveKeys. Punch pad stays the incident clock. Staff never touch UPI. EVV stays CSV only. Do not invent pack keys. Ceiling after MEGA A was 26 pack-key-ready imported parents — every remaining attachable row is in this batch.
+
+| Rule | Live key |
+| ---- | -------- |
+| REQ-1.27.1, REQ-1.27.1.A, REQ-1.27.1.B, REQ-1.27.2, REQ-1.27.3, REQ-1.27.4, REQ-1.27.5, REQ-1.27.6 | incident_reporting_process |
+| REQ-1.20.a | hrc_committee |
+| REQ-1.20.b, REQ-1.20.b.6, REQ-1.28.6, REQ-1.33.2 | rights_restriction_record |
+| REQ-20.3.5, REQ-21.3.7, REQ-31.3.3 | belongings_inventory |
+| REQ-20.3.9 | pps_room_board_agreement |
+| REQ-20.5.1, REQ-20.5.2 | pps_foster_license |
+| REQ-15.3.1, REQ-15.3.6, REQ-15.3.8, REQ-15.3.9, REQ-15.3.10 | pba_financial_review |
+| REQ-12.4 | hsq_safe_environment |
+| REQ-33.5.a | usor_job_development_sjd |

@@ -1,6 +1,6 @@
 # Controlled publication (Soft=none)
 
-Wiring is not publication. Live-key parents are on the obligation engine. `VERIFIED_PUBLICATIONS` has the Soft=none published 50. REQ-1.15.1–REQ-1.15.15 and later leftover-child batches, including the 45 Article 1 standing leftover children (fifteenth batch), are wired and stay unpublished until a human pastes a verified row.
+Wiring is not publication. Live-key parents are on the obligation engine. `VERIFIED_PUBLICATIONS` has the published 50. REQ-1.15.1–REQ-1.15.15 and later leftover-child batches, including the 45 Article 1 standing leftover children (fifteenth batch) and the 26 remaining pack-key-ready leftovers (sixteenth batch), are wired and stay unpublished until a human pastes a verified row.
 
 There is no tenant table and no global flip. Soft would need a table to persist approvals outside git; this path does not.
 
