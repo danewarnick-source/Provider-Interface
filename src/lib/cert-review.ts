@@ -13,8 +13,8 @@ export const CORRECTION_REQUESTED_PREFIX = "Correction requested:";
 
 /**
  * Written onto company_obligation_completions.admin_notes by Accept.
- * Live CHECK only allows nectar_validation_status `passed` | `failed`, so
- * Accept writes `passed` and this prefix is the admin-accepted marker.
+ * Accept writes nectar_validation_status `manually_confirmed`; this prefix
+ * keeps Admin Accepted distinguishable from OCR auto-pass (`passed`).
  */
 export const ADMIN_ACCEPTED_PREFIX = "Admin accepted evidence.";
 
