@@ -8,5 +8,4 @@ export * from '../name-matching';
 export * from '../error-capture';
 export * from '../error-chain';
 export * from '../current-org';
-export * from '../avatar-tint';
 export * from '../person-name';
