@@ -251,6 +251,15 @@ export {
   twelfthExecutableBatchParents,
 } from "../twelfth-executable-batch.ts";
 export {
+  applyThirteenthExecutableBatchOverlay,
+  applyThirteenthExecutableBatchOverlayAll,
+  THIRTEENTH_BATCH_DEMO_PATH,
+  THIRTEENTH_EXECUTABLE_BATCH_ID,
+  THIRTEENTH_EXECUTABLE_BATCH_LIVE_KEYS,
+  THIRTEENTH_EXECUTABLE_BATCH_RULE_IDS,
+  thirteenthExecutableBatchParents,
+} from "../thirteenth-executable-batch.ts";
+export {
   countQualifiedDesignatedBenefits,
   employmentYearDue,
   hirePlusDaysDue,

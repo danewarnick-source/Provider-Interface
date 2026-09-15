@@ -1,13 +1,13 @@
 # DHHS91172 executable finalize
 
-Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
+Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
 
-Measured after SEI/SJD UPI employment twelfth-batch wiring stacked on the FY Google Form eleventh-batch tip (#358).
+Measured after OL Day Treatment / Day Support thirteenth-batch wiring stacked on the SEI/SJD UPI twelfth-batch tip (#359).
 
 | Measure                        | Count |
 | ------------------------------ | ----: |
 | Imported parents               |   760 |
-| Executable (live key)          |   146 |
+| Executable (live key)          |   151 |
 | Wired 1–6                      |    22 |
 | Wired Mega A                   |    10 |
 | Wired Mega B (already on main) |     9 |
@@ -16,13 +16,14 @@ Measured after SEI/SJD UPI employment twelfth-batch wiring stacked on the FY Goo
 | Wired tenth / BC FBA-BSP twins |    41 |
 | Wired eleventh / FY Google Form |    34 |
 | Wired twelfth / SEI-SJD UPI employment |     6 |
-| Wired total                    |   146 |
+| Wired thirteenth / OL Day Treatment Day Support |     5 |
+| Wired total                    |   151 |
 | Remaining executable           |     0 |
 | Verified / published           | 50 / 50 |
-| Draft unwired                  |   193 |
+| Draft unwired                  |   188 |
 | System behavior                |   421 |
 
-Draft-unwired blockers (193/193): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
+Draft-unwired blockers (188/188): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
 
 ## Already wired (1–6) — do not re-cut
 
@@ -155,3 +156,15 @@ Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_
 | REQ-33.3.7 | sjd_employment_data_upi | SJD | unused pack key |
 | REQ-33.3.1 | sjd_usor_contact_monthly | SJD | optional, existing pack key |
 | REQ-33.3.4.I | sjd_usor_contact_monthly | SJD | optional, shares USOR contact card |
+
+## Thirteenth — OL Day Treatment / Day Support twins (wired, unpublished)
+
+**Family:** Article 7/8/9 OL Day Treatment license (4+) and Day Support certification (3 or fewer). App PR, no DB change. Unpublished. Hold merge for Dane. Do not publish these 5. Official catalog clauses only. Same standing OL-file shape as wired REQ-21.5 / `ol_rhs_license_4plus`. Community-based certification reuses `ol_day_support_cert_3or_fewer` — do not mint a third community-based key. Do not invent umbrella REQ-1.4.3 / REQ-1.34. Hold out REQ-10.5, grandfather REQ-7.5.c / REQ-8.5.c / REQ-9.6.b, and vague-comply twins REQ-7.3.5 / REQ-8.3.3 / REQ-9.3.5. Do not start Cluster #2 (evac).
+
+| Rule | Live key | Awarded | Note |
+| ---- | -------- | ------- | ---- |
+| REQ-7.5.a | ol_day_tx_license_4plus | DSG, DSP | site-based; unused pack key |
+| REQ-7.5.b | ol_day_support_cert_3or_fewer | DSG, DSP | community; reuses 3-or-fewer key |
+| REQ-8.5.a | ol_day_tx_license_4plus | DSI | site-based; shares license key |
+| REQ-8.5.b | ol_day_support_cert_3or_fewer | DSI | community; shares cert key |
+| REQ-9.6.a | ol_day_tx_license_4plus | EPR | shares license key |

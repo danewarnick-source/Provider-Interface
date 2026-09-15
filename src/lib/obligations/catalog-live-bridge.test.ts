@@ -28,6 +28,14 @@ describe("catalog live bridge", () => {
     assert.equal(liveObligationKeyForRequirement("REQ-33.3.7"), "sjd_employment_data_upi");
     assert.equal(liveObligationKeyForRequirement("REQ-33.3.1"), "sjd_usor_contact_monthly");
     assert.equal(liveObligationKeyForRequirement("REQ-33.3.4.I"), "sjd_usor_contact_monthly");
+    assert.equal(liveObligationKeyForRequirement("REQ-7.5.a"), "ol_day_tx_license_4plus");
+    assert.equal(liveObligationKeyForRequirement("REQ-7.5.b"), "ol_day_support_cert_3or_fewer");
+    assert.equal(liveObligationKeyForRequirement("REQ-8.5.a"), "ol_day_tx_license_4plus");
+    assert.equal(liveObligationKeyForRequirement("REQ-8.5.b"), "ol_day_support_cert_3or_fewer");
+    assert.equal(liveObligationKeyForRequirement("REQ-9.6.a"), "ol_day_tx_license_4plus");
+    assert.equal(liveObligationKeyForRequirement("REQ-7.5.c"), null);
+    assert.equal(liveObligationKeyForRequirement("REQ-1.4.3"), null);
+    assert.equal(liveObligationKeyForRequirement("REQ-1.34"), null);
     assert.equal(liveObligationKeyForRequirement("REQ-1.28.5"), "pba_financial_review");
     assert.equal(liveObligationKeyForRequirement("REQ-15.3.7"), "pba_financial_review");
     assert.equal(liveObligationKeyForRequirement("REQ-1.11"), "zoning_life_safety");
@@ -58,6 +66,10 @@ describe("catalog live bridge", () => {
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.8.4"] ?? ""));
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.15.1"] ?? ""));
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-3.3.1"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-7.5.a"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-7.5.b"] ?? ""));
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-7.5.a"], "ol_day_tx_license_4plus");
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-7.5.b"], "ol_day_support_cert_3or_fewer");
   });
 
   it("never mints a staff task for child elements", () => {
