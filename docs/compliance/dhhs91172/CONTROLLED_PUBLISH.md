@@ -31,4 +31,4 @@ npm run propose:verified-publication -- --rule REQ-1.8.4 --rule REQ-1.8.5
 - Bulk-fill `VERIFIED_PUBLICATIONS`
 - Treat Source_index or catalog-wide Release_Gaps as permission
 - Invent PN1/PN2, quarterly evac, or annual-outcome parents
-- Restore Accept → `manually_confirmed` here (held until Soft CHECK + Reese)
+- Restore Accept → `manually_confirmed` here (Soft CHECK is live on Hive-Platform; Accept restore waits Reese #351)
