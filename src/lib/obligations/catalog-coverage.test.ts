@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import { buildCatalogCoverageReport, formatCatalogCoverageMarkdown } from "./catalog-coverage.ts";
+import {
+  applyExecutableBatchOverlays,
+  buildCatalogCoverageReport,
+  formatCatalogCoverageMarkdown,
+} from "./catalog-coverage.ts";
 import { DHHS91172_CATALOG_DIR, readCommittedCatalog } from "./draft-rules/catalog-fs.ts";
 import { VERIFIED_PUBLICATIONS } from "./draft-rules/verified-publication.ts";
 import { committedPublicationIssues } from "./draft-rules/controlled-publication.ts";
@@ -14,8 +18,8 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.importedElements, 607);
     assert.equal(report.counts.importedRows, 1367);
     assert.ok(report.counts.executable >= 50);
-    assert.equal(report.counts.published, 0);
-    assert.equal(report.counts.verified, 0);
+    assert.equal(report.counts.published, 50);
+    assert.equal(report.counts.verified, 50);
     assert.equal(report.counts.wiredFirstBatch, 5);
     assert.equal(report.counts.wiredSecondBatch, 6);
     assert.equal(report.counts.wiredThirdBatch, 3);
@@ -27,8 +31,11 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredMegaC, 9);
     assert.equal(report.counts.wired, 50);
     assert.equal(report.counts.remainingExecutable, 0);
-    assert.equal(VERIFIED_PUBLICATIONS.length, 0);
-    assert.deepEqual(committedPublicationIssues(readCommittedCatalog().parents), []);
+    assert.equal(VERIFIED_PUBLICATIONS.length, 50);
+    assert.deepEqual(
+      committedPublicationIssues(applyExecutableBatchOverlays(readCommittedCatalog().parents)),
+      [],
+    );
 
     const committed = JSON.parse(
       readFileSync(join(DHHS91172_CATALOG_DIR, "COVERAGE_REPORT.json"), "utf8"),
@@ -42,7 +49,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.ok(driving);
     assert.equal(driving.liveKey, "driving_record_transport");
     assert.equal(driving.canPublish, true);
-    assert.equal(driving.canActivate, false);
+    assert.equal(driving.canActivate, true);
     assert.equal(driving.mintsStaffTask, false);
     assert.equal(report.counts.elementOfParent, 607);
 
@@ -53,30 +60,30 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(orientation.implementationStatus, "live_mapped");
     assert.equal(orientation.mintsStaffTask, false);
     assert.equal(orientation.canPublish, true);
-    assert.equal(orientation.canActivate, false);
-    assert.equal(orientation.publication, "not_published");
+    assert.equal(orientation.canActivate, true);
+    assert.equal(orientation.publication, "published");
 
     const usor = report.rows.find((r) => r.requirementKey === "REQ-30.6.a");
     assert.ok(usor);
     assert.equal(usor.liveKey, "usor_job_coaching_sei");
     assert.equal(usor.canPublish, true);
-    assert.equal(usor.canActivate, false);
+    assert.equal(usor.canActivate, true);
     const sjdAcre = report.rows.find((r) => r.requirementKey === "REQ-33.5.b");
     assert.ok(sjdAcre);
     assert.equal(sjdAcre.liveKey, "acre_sjd");
     assert.equal(sjdAcre.canPublish, true);
-    assert.equal(sjdAcre.canActivate, false);
+    assert.equal(sjdAcre.canActivate, true);
     const sjdCe = report.rows.find((r) => r.requirementKey === "REQ-33.5.c");
     assert.ok(sjdCe);
     assert.equal(sjdCe.liveKey, "customized_employment_usu");
     assert.equal(sjdCe.canPublish, true);
-    assert.equal(sjdCe.canActivate, false);
+    assert.equal(sjdCe.canActivate, true);
 
     const periodic = report.rows.find((r) => r.requirementKey === "REQ-1.25");
     assert.ok(periodic);
     assert.equal(periodic.liveKey, "sei_monthly_summary_upi");
     assert.equal(periodic.canPublish, true);
-    assert.equal(periodic.canActivate, false);
+    assert.equal(periodic.canActivate, true);
     const seiMonthly = report.rows.find((r) => r.requirementKey === "REQ-30.3.4");
     assert.ok(seiMonthly);
     assert.equal(seiMonthly.liveKey, "sei_monthly_summary_upi");
@@ -94,20 +101,20 @@ describe("DHHS91172 catalog coverage", () => {
     assert.ok(notes);
     assert.equal(notes.liveKey, "timesheets_attendance");
     assert.equal(notes.canPublish, true);
-    assert.equal(notes.canActivate, false);
+    assert.equal(notes.canActivate, true);
     assert.equal(notes.mintsStaffTask, false);
     const evv = report.rows.find((r) => r.requirementKey === "REQ-1.12");
     assert.ok(evv);
     assert.equal(evv.liveKey, "evv_visit_verification");
     assert.equal(evv.canPublish, true);
-    assert.equal(evv.canActivate, false);
+    assert.equal(evv.canActivate, true);
     assert.equal(evv.mintsStaffTask, false);
 
     const background = report.rows.find((r) => r.requirementKey === "REQ-1.9.2");
     assert.ok(background);
     assert.equal(background.liveKey, "background_screening_annual");
     assert.equal(background.canPublish, true);
-    assert.equal(background.canActivate, false);
+    assert.equal(background.canActivate, true);
     assert.equal(background.mintsStaffTask, false);
     const medicaid101 = report.rows.find((r) => r.requirementKey === "REQ-1.7.1");
     assert.ok(medicaid101);
@@ -121,7 +128,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.ok(umbrella);
     assert.equal(umbrella.liveKey, "ce_12h_annual");
     assert.equal(umbrella.canPublish, true);
-    assert.equal(umbrella.canActivate, false);
+    assert.equal(umbrella.canActivate, true);
     const grievance = report.rows.find((r) => r.requirementKey === "REQ-1.10.11");
     assert.ok(grievance);
     assert.equal(grievance.liveKey, "grievance_acknowledgment");
@@ -159,7 +166,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.ok(zoning);
     assert.equal(zoning.liveKey, "zoning_life_safety");
     assert.equal(zoning.canPublish, true);
-    assert.equal(zoning.canActivate, false);
+    assert.equal(zoning.canActivate, true);
     assert.equal(zoning.mintsStaffTask, false);
     const board = report.rows.find((r) => r.requirementKey === "REQ-1.14");
     assert.ok(board);
@@ -198,13 +205,13 @@ describe("DHHS91172 catalog coverage", () => {
     assert.ok(personReview);
     assert.equal(personReview.liveKey, "pba_financial_review");
     assert.equal(personReview.canPublish, true);
-    assert.equal(personReview.canActivate, false);
+    assert.equal(personReview.canActivate, true);
     assert.equal(personReview.mintsStaffTask, false);
     const pbaReviews = report.rows.find((r) => r.requirementKey === "REQ-15.3.7");
     assert.ok(pbaReviews);
     assert.equal(pbaReviews.liveKey, "pba_financial_review");
     assert.equal(pbaReviews.canPublish, true);
-    assert.equal(pbaReviews.canActivate, false);
+    assert.equal(pbaReviews.canActivate, true);
     assert.equal(pbaReviews.mintsStaffTask, false);
 
     const elements = report.rows.filter((r) => r.role === "element");

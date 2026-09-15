@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { applyExecutableBatchOverlays } from "../catalog-coverage.ts";
 import { REQ_1_8_4_ORIENTATION, REQ_1_12_EVV } from "./fixtures.ts";
 import { canActivate } from "./publication.ts";
+import { readCommittedCatalog } from "./catalog-fs.ts";
 import {
   committedPublicationIssues,
   formatVerifiedPublicationSnippet,
@@ -17,9 +19,12 @@ const APPROVAL = {
 };
 
 describe("controlled publication path", () => {
-  it("keeps the committed overlay empty — this PR does not publish", () => {
-    assert.equal(VERIFIED_PUBLICATIONS.length, 0);
-    assert.deepEqual(committedPublicationIssues([REQ_1_8_4_ORIENTATION, REQ_1_12_EVV]), []);
+  it("records Dane's Soft=none overlay; live catalog rows pass the committed gate", () => {
+    assert.equal(VERIFIED_PUBLICATIONS.length, 50);
+    assert.deepEqual(
+      committedPublicationIssues(applyExecutableBatchOverlays(readCommittedCatalog().parents)),
+      [],
+    );
   });
 
   it("accepts one complete rule and leaves a gapped sibling draft with reasons", () => {
@@ -38,10 +43,11 @@ describe("controlled publication path", () => {
 
     const merged = mergeVerifiedPublications(VERIFIED_PUBLICATIONS, decision.accepted);
     const overlay = applyVerifiedPublicationOverlay([REQ_1_8_4_ORIENTATION, REQ_1_12_EVV]);
-    // Overlay reads the committed list, not the proposed merge.
-    assert.equal(VERIFIED_PUBLICATIONS.length, 0);
-    assert.equal(merged.length, 1);
-    assert.equal(overlay[0]?.publication, "not_published");
+    // Overlay reads the committed list. Fixture REQ-1.12 stays draft (gaps);
+    // live catalog REQ-1.12 is READY via the batch overlay.
+    assert.equal(VERIFIED_PUBLICATIONS.length, 50);
+    assert.equal(merged.length, 50);
+    assert.equal(overlay[0]?.publication, "published");
     assert.equal(overlay[1]?.publication, "not_published");
     assert.equal(canActivate(REQ_1_12_EVV), false);
   });
@@ -73,7 +79,7 @@ describe("controlled publication path", () => {
     });
     assert.equal(blank.accepted.length, 0);
     assert.ok(blank.unresolved[0]?.reasons.some((reason) => /approval/i.test(reason)));
-    assert.equal(VERIFIED_PUBLICATIONS.length, 0);
+    assert.equal(VERIFIED_PUBLICATIONS.length, 50);
   });
 
   it("fails the committed gate when a listed row cannot publish", () => {

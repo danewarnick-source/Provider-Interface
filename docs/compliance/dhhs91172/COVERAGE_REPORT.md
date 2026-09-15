@@ -12,28 +12,28 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Imported elements | 607 |
 | Imported rows | 1367 |
 | Executable (live key mapped) | 50 |
-| Verified / activatable | 0 |
-| Published | 0 |
+| Verified / activatable | 50 |
+| Published | 50 |
 | Blocked (rule-specific gap, no live key) | 0 |
 | Live mapped (clock) | 26 |
 | System / standing behavior | 427 |
 | Draft unwired | 283 |
 | Element of parent | 607 |
-| Wired first batch (unpublished) | 5 |
-| Wired second batch (unpublished) | 6 |
-| Wired third batch (unpublished) | 3 |
-| Wired fourth batch (unpublished) | 4 |
-| Wired fifth batch (unpublished) | 2 |
-| Wired sixth batch (unpublished) | 2 |
-| Wired seventh batch / Mega A (unpublished) | 10 |
-| Wired eighth batch / Mega B (unpublished) | 9 |
-| Wired Mega C person-file / site leftovers (unpublished) | 9 |
-| Wired shared-behavior batches (unpublished) | 50 |
+| Wired first batch (fixture overlay) | 5 |
+| Wired second batch (fixture overlay) | 6 |
+| Wired third batch (fixture overlay) | 3 |
+| Wired fourth batch (fixture overlay) | 4 |
+| Wired fifth batch (fixture overlay) | 2 |
+| Wired sixth batch (fixture overlay) | 2 |
+| Wired seventh batch / Mega A (fixture overlay) | 10 |
+| Wired eighth batch / Mega B (fixture overlay) | 9 |
+| Wired Mega C person-file / site leftovers (fixture overlay) | 9 |
+| Wired shared-behavior batches (fixture overlay) | 50 |
 | Remaining executable (live key, not yet wired) | 0 |
 
 ## Controlled publication (Soft=none)
 
-Wiring is not publication. `VERIFIED_PUBLICATIONS` has 0 published / 0 verified rows. Unresolved stay draft with reasons. One rule or a named READY batch is pasted into `src/lib/obligations/draft-rules/verified-publication.ts` after `npm run propose:verified-publication`. No global flip. No Soft table. See `docs/compliance/dhhs91172/CONTROLLED_PUBLISH.md`.
+Wiring is not publication. `VERIFIED_PUBLICATIONS` has 50 published / 50 verified rows. Unresolved stay draft with reasons. One rule or a named READY batch is pasted into `src/lib/obligations/draft-rules/verified-publication.ts` after `npm run propose:verified-publication`. No global flip. No Soft table. See `docs/compliance/dhhs91172/CONTROLLED_PUBLISH.md`.
 
 ## Remaining executable (live key, not wired)
 

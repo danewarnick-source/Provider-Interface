@@ -103,7 +103,7 @@ export type CatalogCoverageCounts = {
   systemBehavior: number;
   draftUnwired: number;
   elementOfParent: number;
-  /** Shared-behavior batches: live key + fixture overlay, still unpublished. */
+  /** Shared-behavior batches: live key + fixture overlay. */
   wired: number;
   wiredFirstBatch: number;
   wiredSecondBatch: number;
@@ -419,16 +419,16 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| System / standing behavior | ${c.systemBehavior} |`,
     `| Draft unwired | ${c.draftUnwired} |`,
     `| Element of parent | ${c.elementOfParent} |`,
-    `| Wired first batch (unpublished) | ${c.wiredFirstBatch} |`,
-    `| Wired second batch (unpublished) | ${c.wiredSecondBatch} |`,
-    `| Wired third batch (unpublished) | ${c.wiredThirdBatch} |`,
-    `| Wired fourth batch (unpublished) | ${c.wiredFourthBatch} |`,
-    `| Wired fifth batch (unpublished) | ${c.wiredFifthBatch} |`,
-    `| Wired sixth batch (unpublished) | ${c.wiredSixthBatch} |`,
-    `| Wired seventh batch / Mega A (unpublished) | ${c.wiredSeventhBatch} |`,
-    `| Wired eighth batch / Mega B (unpublished) | ${c.wiredEighthBatch} |`,
-    `| Wired Mega C person-file / site leftovers (unpublished) | ${c.wiredMegaC} |`,
-    `| Wired shared-behavior batches (unpublished) | ${c.wired} |`,
+    `| Wired first batch (fixture overlay) | ${c.wiredFirstBatch} |`,
+    `| Wired second batch (fixture overlay) | ${c.wiredSecondBatch} |`,
+    `| Wired third batch (fixture overlay) | ${c.wiredThirdBatch} |`,
+    `| Wired fourth batch (fixture overlay) | ${c.wiredFourthBatch} |`,
+    `| Wired fifth batch (fixture overlay) | ${c.wiredFifthBatch} |`,
+    `| Wired sixth batch (fixture overlay) | ${c.wiredSixthBatch} |`,
+    `| Wired seventh batch / Mega A (fixture overlay) | ${c.wiredSeventhBatch} |`,
+    `| Wired eighth batch / Mega B (fixture overlay) | ${c.wiredEighthBatch} |`,
+    `| Wired Mega C person-file / site leftovers (fixture overlay) | ${c.wiredMegaC} |`,
+    `| Wired shared-behavior batches (fixture overlay) | ${c.wired} |`,
     `| Remaining executable (live key, not yet wired) | ${c.remainingExecutable} |`,
     "",
     ...formatControlledPublicationMarkdown(report),

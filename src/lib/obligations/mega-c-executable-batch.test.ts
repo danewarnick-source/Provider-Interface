@@ -68,13 +68,13 @@ describe("mega C executable batch — person-file and site leftovers", () => {
     const loaded = readCommittedCatalog();
     const batch = megaCExecutableBatchParents(loaded.parents);
     assert.equal(batch.length, MEGA_C_EXECUTABLE_BATCH_RULE_IDS.length);
-    assert.equal(VERIFIED_PUBLICATIONS.length, 0);
+    assert.equal(VERIFIED_PUBLICATIONS.length, 50);
     for (const rule of batch) {
       assert.equal(rule.lifecycle, "draft", rule.id);
       assert.equal(rule.publication, "not_published", rule.id);
       assert.ok(canPublish(rule), `${rule.id} ${JSON.stringify(rule.predicates)}`);
       assert.equal(canActivate(rule), false, rule.id);
-      assert.ok(megaCBatchPublicationStaysDeliberate(rule), rule.id);
+      assert.equal(megaCBatchPublicationStaysDeliberate(rule), false, rule.id);
       assert.ok(megaCBatchParentIsWired(rule), rule.id);
       assert.equal(rule.group.parentAssignment, "one", rule.id);
       assert.ok(liveObligationKeyForRule(rule), rule.id);
