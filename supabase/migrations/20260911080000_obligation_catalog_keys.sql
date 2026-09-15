@@ -178,5 +178,19 @@ VALUES
   ('UT', 'UT-2026.07', 'sec_pass_documentation', 'added'),
   ('UT', 'UT-2026.07', 'see_staff_training', 'added'),
   ('UT', 'UT-2026.07', 'sei_job_termination', 'added'),
-  ('UT', 'UT-2026.07', 'tfb_staff_qualifications', 'added')
+  ('UT', 'UT-2026.07', 'tfb_staff_qualifications', 'added'),
+  ('UT', 'UT-2026.07', 'ol_capacity_comply', 'added'),
+  ('UT', 'UT-2026.07', 'upi_employee_registry', 'added'),
+  ('UT', 'UT-2026.07', 'upi_employee_timesheet', 'added'),
+  ('UT', 'UT-2026.07', 'agency_license_register', 'added'),
+  ('UT', 'UT-2026.07', 'els_residential_eligibility', 'added'),
+  ('UT', 'UT-2026.07', 'home_condition_checklist', 'added'),
+  ('UT', 'UT-2026.07', 'sec_requires_sei', 'added'),
+  ('UT', 'UT-2026.07', 'sjp_requires_sjd', 'added'),
+  ('UT', 'UT-2026.07', 'sjr_requires_see_or_sei', 'added'),
+  ('UT', 'UT-2026.07', 'group_service_review_historical', 'added'),
+  ('UT', 'UT-2026.07', 'dlbc_group_variance', 'added'),
+  ('UT', 'UT-2026.07', 'medicaid_provider_training_offered', 'added'),
+  ('UT', 'UT-2026.07', 'person_record_file', 'added'),
+  ('UT', 'UT-2026.07', 'staff_minimum_age', 'added')
 ON CONFLICT (state_code, pack_version, obligation_key, change_kind) DO NOTHING;

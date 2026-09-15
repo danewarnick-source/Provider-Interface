@@ -1185,7 +1185,7 @@ WHERE table_schema = 'public'
 Clear the editor, paste the full file
 `supabase/migrations/20260911080000_obligation_catalog_keys.sql`.
 
-**What you'll see:** `ALTER TABLE` × 4, `CREATE INDEX`, `CREATE TABLE`, grants, then 132 `pack_changelog` added rows for `UT-2026.07` (ON CONFLICT DO NOTHING).
+**What you'll see:** `ALTER TABLE` × 4, `CREATE INDEX`, `CREATE TABLE`, grants, then 146 `pack_changelog` added rows for `UT-2026.07` (ON CONFLICT DO NOTHING).
 
 ### Verify
 

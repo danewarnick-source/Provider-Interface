@@ -1864,6 +1864,197 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
       "Bachelor's degree in social or behavioral sciences plus one year in the past five of training people with ID.RC and/or ABI and their families.",
     calendar_is_reminder_only: true,
   },
+  {
+    title: "OL Capacity Comply Leftovers",
+    citation: "DHHS91172 SOW §7.3(5) / §8.3(3) / §9.3(5) / §22.3(3) / §23.3(4) / §24.3(3) / §25.3(4) / §26.3(2)",
+    category: "licensing",
+    fulfillment: "standing",
+    fulfillment_note:
+      "Standing OL-capacity comply card. Official catalog clauses only. Not a calendar and not an ol_* license-file attachment.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["DSG", "DSP", "DSI", "EPR", "RP2", "RP3", "RP4", "RP5", "RPS"],
+    evidence_standard:
+      "Site-based facility stays within the capacity allowed under its OL license or certification.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Employee Registry Leftovers",
+    citation: "DHHS91172 SOW §30.8(1) / §33.7(1)",
+    category: "employment",
+    fulfillment: "standing",
+    fulfillment_note:
+      "Administrator-only UPI employee-registry leftover. Staff never touch UPI. Never a DSP My Tasks card. Do not reuse Provider Interface or SEI employment-data keys.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: ["SEI", "SJD"],
+    evidence_standard:
+      "Administrator attestation that each staff unique identifier is set up in the UPI employee registry.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Employee Timesheet Leftovers",
+    citation: "DHHS91172 SOW §30.8(2) / §33.7(2)",
+    category: "employment",
+    fulfillment: "standing",
+    fulfillment_note:
+      "Administrator-only UPI pay-period timesheet leftover. Staff never touch UPI. Never a DSP My Tasks card. Punch pad stays the clock. EVV stays CSV only.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: ["SEI", "SJD"],
+    evidence_standard:
+      "Administrator attestation that pay-period staff timesheets were submitted as individual UPI payments.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Agency License Register Leftovers",
+    citation: "DHHS91172 SOW §1.4(3) / §1.34",
+    category: "licensing",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing agency license register. Official catalog clauses only. Do not reuse per-article ol_* service keys.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Current licenses and certificates required by individual service-code descriptions, R501, and Utah Code §58-1.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "ELS Residential Eligibility Leftovers",
+    citation: "DHHS91172 SOW §10.5",
+    category: "licensing",
+    fulfillment: "standing",
+    fulfillment_note:
+      "Eligibility gate: awarded ELS plus at least one of RHS, PPS, or HHS. Official catalog clauses only. Do not attach to els_school_age.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: ["ELS"],
+    evidence_standard: "Awarded ELS plus at least one of RHS, PPS, or HHS.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Home Condition Checklist Leftovers",
+    citation: "DHHS91172 SOW §11.3(2) / §20.3(2) / §21.3(2)",
+    category: "safety",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing HHS/PPS/RHS home-condition checklist. Official catalog clauses only. Children (A)–(G) stay on the parent. Do not invent umbrella REQ-11.3 / REQ-20.3 / REQ-21.3.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["HHS", "PPS", "RHS"],
+    evidence_standard:
+      "Home is integrated, accessible, autonomy-supporting, private, free from coercion, and selected after residential options are offered.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "SEC Requires SEI Leftovers",
+    citation: "DHHS91172 SOW §27.5",
+    category: "employment",
+    fulfillment: "standing",
+    fulfillment_note:
+      "Eligibility gate: awarded SEC plus awarded SEI. Official catalog clauses only. Do not attach to milestone_rfs or sec_pass_documentation.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: ["SEC"],
+    evidence_standard: "Awarded SEC plus awarded SEI.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "SJP Requires SJD Leftovers",
+    citation: "DHHS91172 SOW §34.5",
+    category: "employment",
+    fulfillment: "standing",
+    fulfillment_note:
+      "Eligibility gate: awarded SJP plus a current DHHS91172 SJD contract. Official catalog clauses only. Do not attach to milestone_rfs.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: ["SJP"],
+    evidence_standard: "Awarded SJP plus a current DHHS91172 SJD contract.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "SJR Requires SEE or SEI Leftovers",
+    citation: "DHHS91172 SOW §35.5",
+    category: "employment",
+    fulfillment: "standing",
+    fulfillment_note:
+      "Eligibility gate: awarded SJR plus a current DHHS91172 SEE or SEI contract. Official catalog clauses only. Do not attach to milestone_rfs.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: ["SJR"],
+    evidence_standard: "Awarded SJR plus a current DHHS91172 SEE or SEI contract.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Historical Group Service Review Leftovers",
+    citation: "DHHS91172 SOW §1.32(a)",
+    category: "licensing",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Historical Group Service Review leftover for the existing-contractor cohort. Official catalog clauses only. Do not reuse residential_group_mix.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard: "Submitted Group Service Review form for the existing-contractor cohort.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "DLBC Group Variance Leftovers",
+    citation: "DHHS91172 SOW §1.32(c)",
+    category: "licensing",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "DLBC portal variance leftover when group services are delivered at an OL-licensed site. Event-triggered. Official catalog clauses only. Do not reuse residential_group_mix.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: [],
+    evidence_standard:
+      "DLBC provider-portal variance approval before group services at an OL-licensed site.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "As-Offered Medicaid Provider Training Leftovers",
+    citation: "DHHS91172 SOW §1.13(4)",
+    category: "training",
+    fulfillment: "standing",
+    fulfillment_note:
+      "As-offered DIH/DSPD Medicaid Provider training leftover. Admin-supplied offered date. Official catalog clauses only. Do not invent a calendar interval.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator record of participation when DIH or DSPD offered the training.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Person Record File Leftovers",
+    citation: "DHHS91172 SOW §1.10",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing person-record parent file. Official catalog clauses only. Already-wired 1.10 children stay on their own cards.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: [],
+    evidence_standard:
+      "Separate Person record updated at least annually and on material change.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Staff Minimum Age System Check Leftovers",
+    citation: "DHHS91172 SOW §1.5",
+    category: "screening",
+    fulfillment: "standing",
+    fulfillment_note:
+      "System-check from staff date of birth. Official catalog clauses only. Do not reuse host_staff_qualifications. Do not invent a training upload card.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Staff date of birth shows age 16 or older unless a listed exception applies.",
+    calendar_is_reminder_only: true,
+  },
 ];
 
 function finalizeCatalogEntry(raw: SowCatalogDraft): SowCatalogEntry {

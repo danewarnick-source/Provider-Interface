@@ -80,6 +80,8 @@ export const CATALOG_EXCEPTIONS_BY_KEY: Record<string, CatalogExceptions> = {
   upi_remove_discharged_person: { nonwaivable: true, sei_only: false, assignment_gated: false },
   upi_annual_access_review: { nonwaivable: true, sei_only: false, assignment_gated: false },
   upi_notify_usteps_termination: { nonwaivable: true, sei_only: false, assignment_gated: false },
+  upi_employee_registry: { nonwaivable: true, sei_only: false, assignment_gated: false },
+  upi_employee_timesheet: { nonwaivable: true, sei_only: false, assignment_gated: false },
   ce_12h_annual: { nonwaivable: true, sei_only: false, assignment_gated: true },
   medicaid_enrollment: { nonwaivable: true, sei_only: false, assignment_gated: false },
 };
@@ -808,6 +810,88 @@ export const CATALOG_IDENTITY_BY_TITLE: Record<string, CatalogIdentity> = {
     disposition: "standing",
     evidence_template:
       "Bachelor's degree in social or behavioral sciences plus one year in the past five of training people with ID.RC and/or ABI and their families.",
+  },
+  "OL Capacity Comply Leftovers": {
+    key: "ol_capacity_comply",
+    disposition: "standing",
+    evidence_template:
+      "Standing comply-card that the site-based facility does not exceed its OL license or certification capacity. Not a calendar and not a license-file attachment.",
+  },
+  "UPI Employee Registry Leftovers": {
+    key: "upi_employee_registry",
+    disposition: "standing",
+    evidence_template:
+      "Administrator attestation that each staff unique identifier is set up in the UPI employee registry. Staff never touch UPI.",
+  },
+  "UPI Employee Timesheet Leftovers": {
+    key: "upi_employee_timesheet",
+    disposition: "standing",
+    evidence_template:
+      "Administrator attestation that pay-period staff timesheets were submitted as individual UPI payments. Staff never touch UPI.",
+  },
+  "Agency License Register Leftovers": {
+    key: "agency_license_register",
+    disposition: "standing",
+    evidence_template:
+      "Agency-wide register of licenses and certificates required by individual service-code descriptions, R501, and Utah Code §58-1.",
+  },
+  "ELS Residential Eligibility Leftovers": {
+    key: "els_residential_eligibility",
+    disposition: "standing",
+    evidence_template:
+      "Eligibility gate: awarded ELS plus at least one of RHS, PPS, or HHS. Not the school-age ELS leftover.",
+  },
+  "Home Condition Checklist Leftovers": {
+    key: "home_condition_checklist",
+    disposition: "standing",
+    evidence_template:
+      "HHS/PPS/RHS home-condition checklist. Children (A)–(G) stay on the parent. Do not invent umbrella REQ-11.3 / REQ-20.3 / REQ-21.3.",
+  },
+  "SEC Requires SEI Leftovers": {
+    key: "sec_requires_sei",
+    disposition: "standing",
+    evidence_template: "Eligibility gate: awarded SEC plus awarded SEI.",
+  },
+  "SJP Requires SJD Leftovers": {
+    key: "sjp_requires_sjd",
+    disposition: "standing",
+    evidence_template: "Eligibility gate: awarded SJP plus a current DHHS91172 SJD contract.",
+  },
+  "SJR Requires SEE or SEI Leftovers": {
+    key: "sjr_requires_see_or_sei",
+    disposition: "standing",
+    evidence_template:
+      "Eligibility gate: awarded SJR plus a current DHHS91172 SEE or SEI contract.",
+  },
+  "Historical Group Service Review Leftovers": {
+    key: "group_service_review_historical",
+    disposition: "standing",
+    evidence_template:
+      "Historical Group Service Review form for the existing-contractor cohort. Not the residential group-mix approval card.",
+  },
+  "DLBC Group Variance Leftovers": {
+    key: "dlbc_group_variance",
+    disposition: "standing",
+    evidence_template:
+      "DLBC provider-portal variance approval before group services at an OL-licensed site. Event-triggered. Not the residential group-mix approval card.",
+  },
+  "As-Offered Medicaid Provider Training Leftovers": {
+    key: "medicaid_provider_training_offered",
+    disposition: "standing",
+    evidence_template:
+      "Participation in DIH and DSPD Medicaid Provider trainings when offered. Admin-supplied offered date. Not a calendar interval.",
+  },
+  "Person Record File Leftovers": {
+    key: "person_record_file",
+    disposition: "standing",
+    evidence_template:
+      "Separate Person record updated at least annually and on material change. Already-wired 1.10 children stay on their own cards.",
+  },
+  "Staff Minimum Age System Check Leftovers": {
+    key: "staff_minimum_age",
+    disposition: "standing",
+    evidence_template:
+      "System-check from staff date of birth that staff are at least 16 unless a listed exception applies. Not a training upload and not the HHS/PPS host-age card.",
   },
 };
 

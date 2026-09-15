@@ -1,13 +1,13 @@
 # DHHS91172 executable finalize
 
-Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Quarterly evac drill leftovers are wired unpublished (fourteenth batch / imported `.6` parents). Article 1 standing leftover children are wired unpublished (fifteenth batch / existing pack liveKeys). Remaining pack-key-ready leftovers are wired unpublished (sixteenth batch / incidents, HRC, service leftovers). Professional nursing leftovers are wired unpublished (seventeenth batch / invented `pm_nursing_file` + `pn_medical_care_plan`). Combined inventable leftovers are wired unpublished (eighteenth batch / invented leftover-family liveKeys). Remaining inventable leftovers are wired unpublished (nineteenth batch / invented leftover-family liveKeys). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent a second PN1/PN2 monthly-summary key. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3 / REQ-1.17.
+Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Quarterly evac drill leftovers are wired unpublished (fourteenth batch / imported `.6` parents). Article 1 standing leftover children are wired unpublished (fifteenth batch / existing pack liveKeys). Remaining pack-key-ready leftovers are wired unpublished (sixteenth batch / incidents, HRC, service leftovers). Professional nursing leftovers are wired unpublished (seventeenth batch / invented `pm_nursing_file` + `pn_medical_care_plan`). Combined inventable leftovers are wired unpublished (eighteenth batch / invented leftover-family liveKeys). Remaining inventable leftovers are wired unpublished (nineteenth batch / invented leftover-family liveKeys). Unlocked blocked leftovers are wired unpublished (twentieth batch / invented leftover-family liveKeys). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent a second PN1/PN2 monthly-summary key. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3 / REQ-1.17.
 
-Measured after remaining inventable nineteenth-batch invent stacked on the #368 tip (`9cb259c8`).
+Measured after unlocked blocked twentieth-batch invent stacked on the #369 tip (`4ff2af11`).
 
 | Measure                        | Count |
 | ------------------------------ | ----: |
 | Imported parents               |   760 |
-| Executable (live key)          |   314 |
+| Executable (live key)          |   340 |
 | Wired 1–6                      |    22 |
 | Wired Mega A                   |    10 |
 | Wired Mega B (already on main) |     9 |
@@ -23,13 +23,14 @@ Measured after remaining inventable nineteenth-batch invent stacked on the #368 
 | Wired seventeenth / professional nursing leftovers |    21 |
 | Wired eighteenth / combined inventable leftovers |    43 |
 | Wired nineteenth / remaining inventable leftovers |    25 |
-| Wired total                    |   314 |
+| Wired twentieth / unlocked blocked leftovers |    26 |
+| Wired total                    |   340 |
 | Remaining executable           |     0 |
 | Verified / published           | 50 / 50 |
-| Draft unwired                  |    26 |
+| Draft unwired                  |     0 |
 | System behavior                |   420 |
 
-Draft-unwired blockers (26/26): **no live key + no applicability predicates**. No fixture. Not a per-row novel. Remaining rows are product-blocked (vague-comply OL, UPI staff registry, license umbrellas, grandfather, home-condition umbrellas, contractor-qualification umbrellas, as-offered trainings, person-records umbrella, CST-only). Do not invent them.
+Draft-unwired blockers (0): every remaining imported parent after #369 is on a twentieth-batch fixture overlay. Unpublished. Official workbook clause_text only.
 
 ## Already wired (1–6) — do not re-cut
 
@@ -273,4 +274,25 @@ Dropped from the proposed 4-count SJP/SJR cluster: REQ-34.5 / REQ-35.5. Those cl
 | REQ-30.3.3 | sei_job_termination | 1 |
 | REQ-36.4.1, REQ-36.4.2 | tfb_staff_qualifications | 2 |
 
-Why under 30: invent-1 (21 nursing) and invent-2 (43 combined) already took the large leftover families. The 25 remaining inventable rows are smaller event/form/staff-qual clusters. The other 26 draft-unwired parents are product-blocked.
+Why under 30: invent-1 (21 nursing) and invent-2 (43 combined) already took the large leftover families. The 25 remaining inventable rows are smaller event/form/staff-qual clusters. The other 26 leftover parents are now the twentieth batch.
+
+## Twentieth — unlocked blocked leftovers (wired, unpublished)
+
+**Family:** MEGA invent-4. Fourteen invented leftover-family liveKeys. Dane unlocked all 26 remaining draft-unwired parents after #369. Children stay on the parent card. Awarded-code, eligibility-gate, event, cohort, and standing-file predicates. App PR. Pack-changelog seed only — no schema change. Unpublished. Hold merge for Dane. Do not publish these 26. Official catalog clauses only. Do not invent umbrella REQ-11.3 / REQ-20.3 / REQ-21.3. Never delete MAR/eMAR. Punch pad stays the incident clock. Staff never touch UPI. EVV stays CSV only.
+
+| Rule | Live key | Count |
+| ---- | -------- | ----: |
+| REQ-7.3.5, REQ-8.3.3, REQ-9.3.5, REQ-22.3.3, REQ-23.3.4, REQ-24.3.3, REQ-25.3.4, REQ-26.3.2 | ol_capacity_comply | 8 |
+| REQ-30.8.1, REQ-33.7.1 | upi_employee_registry | 2 |
+| REQ-30.8.2, REQ-33.7.2 | upi_employee_timesheet | 2 |
+| REQ-1.4.3, REQ-1.34 | agency_license_register | 2 |
+| REQ-10.5 | els_residential_eligibility | 1 |
+| REQ-11.3.2, REQ-20.3.2, REQ-21.3.2 | home_condition_checklist | 3 |
+| REQ-27.5 | sec_requires_sei | 1 |
+| REQ-34.5 | sjp_requires_sjd | 1 |
+| REQ-35.5 | sjr_requires_see_or_sei | 1 |
+| REQ-1.32.a | group_service_review_historical | 1 |
+| REQ-1.32.c | dlbc_group_variance | 1 |
+| REQ-1.13.4 | medicaid_provider_training_offered | 1 |
+| REQ-1.10 | person_record_file | 1 |
+| REQ-1.5 | staff_minimum_age | 1 |
