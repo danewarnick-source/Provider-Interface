@@ -62,6 +62,12 @@ describe("catalog live bridge", () => {
     assert.equal(liveObligationKeyForRequirement("REQ-12.4"), "hsq_safe_environment");
     assert.equal(liveObligationKeyForRequirement("REQ-33.5.a"), "usor_job_development_sjd");
     assert.equal(liveObligationKeyForRequirement("REQ-15.3.8"), "pba_financial_review");
+    assert.equal(liveObligationKeyForRequirement("REQ-16.2.3"), "pm_nursing_file");
+    assert.equal(liveObligationKeyForRequirement("REQ-17.4"), "pm_nursing_file");
+    assert.equal(liveObligationKeyForRequirement("REQ-18.5"), "pn_medical_care_plan");
+    assert.equal(liveObligationKeyForRequirement("REQ-19.2.10"), "pn_medical_care_plan");
+    assert.equal(liveObligationKeyForRequirement("REQ-7.3.5"), null);
+    assert.equal(liveObligationKeyForRequirement("REQ-30.8.1"), null);
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-11.3"], undefined);
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-20.3"], undefined);
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-21.3"], undefined);

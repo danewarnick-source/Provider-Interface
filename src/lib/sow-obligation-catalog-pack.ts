@@ -642,6 +642,18 @@ export const CATALOG_IDENTITY_BY_TITLE: Record<string, CatalogIdentity> = {
     key: "hhs_billable_day",
     disposition: "by_design",
   },
+  "PM1/PM2 Nursing File — Medication Program Leftovers": {
+    key: "pm_nursing_file",
+    disposition: "standing",
+    evidence_template:
+      "PM1/PM2 medical data sheet, medication-error review, 24-hour illness notice, face-to-face assessment, and current DOPL license. Does not replace MAR/eMAR.",
+  },
+  "PN1/PN2 Medical Care Plan — Nursing Leftovers": {
+    key: "pn_medical_care_plan",
+    disposition: "standing",
+    evidence_template:
+      "Current Medical Care Plan, PN1 reports to PN2, delegated-staff training, urgent-risk notes, and DOPL licenses. Monthly summary text stays a leftover child — not a second monthly-summary clock.",
+  },
 };
 
 /**

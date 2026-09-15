@@ -11,13 +11,13 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Imported parents | 760 |
 | Imported elements | 607 |
 | Imported rows | 1367 |
-| Executable (live key mapped) | 225 |
+| Executable (live key mapped) | 246 |
 | Verified / activatable | 50 |
 | Published | 50 |
 | Blocked (rule-specific gap, no live key) | 0 |
 | Live mapped (clock) | 79 |
 | System / standing behavior | 421 |
-| Draft unwired | 114 |
+| Draft unwired | 93 |
 | Element of parent | 607 |
 | Wired first batch (fixture overlay) | 5 |
 | Wired second batch (fixture overlay) | 6 |
@@ -36,7 +36,8 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired fourteenth batch / quarterly evac drill leftovers (fixture overlay) | 3 |
 | Wired fifteenth batch / Article 1 standing leftover children (fixture overlay) | 45 |
 | Wired sixteenth batch / remaining pack-key-ready leftovers (fixture overlay) | 26 |
-| Wired shared-behavior batches (fixture overlay) | 225 |
+| Wired seventeenth batch / professional nursing leftovers (fixture overlay) | 21 |
+| Wired shared-behavior batches (fixture overlay) | 246 |
 | Remaining executable (live key, not yet wired) | 0 |
 
 ## Controlled publication (Soft=none)
@@ -45,15 +46,15 @@ Wiring is not publication. `VERIFIED_PUBLICATIONS` has 50 published / 50 verifie
 
 ## Remaining executable (live key, not wired)
 
-None. All 225 live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3.
+None. All 246 live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3.
 
 ## Draft-unwired blocker categories
 
-114 draft-unwired parents. Categories only — not a row novel.
+93 draft-unwired parents. Categories only — not a row novel.
 
 | Category | Count |
 | --- | ---: |
-| no_live_key + no_predicates | 114 |
+| no_live_key + no_predicates | 93 |
 
 421 additional parents are system_behavior (creates_user_task=no / SYSTEM handling) — not draft-unwired and not a live clock.
 
@@ -493,40 +494,40 @@ None. All 225 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-15.5.c | DHHS91172-A-0963 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-16.2.1 | DHHS91172-A-0968 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-16.2.2 | DHHS91172-A-0969 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-16.2.3 | DHHS91172-A-0970 | Nurse (PM/PN staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-16.2.3 | DHHS91172-A-0970 | Nurse (PM/PN staff) | Complete in platform form/record | Standing nursing leftover file — keep current. Do not invent hire+N, annual-from-completion, or a PN1/PN2 monthly-summary key. | pm_nursing_file | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-16.2.4 | DHHS91172-A-0971 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-16.2.5 | DHHS91172-A-0972 | Nurse (PM/PN staff) | Generate/upload report and mark sent | one calendar day / discovery/event / daily / per service |  | system_behavior | Rule has no applicability predicates. |
 | REQ-16.2.6 | DHHS91172-A-0973 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-16.2.7 | DHHS91172-A-0974 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | medication error reported |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-16.2.8 | DHHS91172-A-0981 | Nurse (PM/PN staff) | Generate/upload report and mark sent | 24 hours / the development of a person's medical illness or injury requiring a medical appointment or an emergency room visit |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-16.2.9 | DHHS91172-A-0982 | Nurse (PM/PN staff) | Complete in platform form/record | regularly scheduled (frequency per client plan) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-16.2.7 | DHHS91172-A-0974 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | medication error reported | pm_nursing_file | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-16.2.8 | DHHS91172-A-0981 | Nurse (PM/PN staff) | Generate/upload report and mark sent | 24 hours / the development of a person's medical illness or injury requiring a medical appointment or an emergency room visit | pm_nursing_file | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-16.2.9 | DHHS91172-A-0982 | Nurse (PM/PN staff) | Complete in platform form/record | regularly scheduled (frequency per client plan) | pm_nursing_file | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-16.2.10 | DHHS91172-A-0988 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-16.2.11 | DHHS91172-A-0989 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-16.3 | DHHS91172-A-0990 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-16.4 | DHHS91172-A-0991 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-16.4 | DHHS91172-A-0991 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | pm_nursing_file | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-16.5.c | DHHS91172-A-0994 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-17.2.1 | DHHS91172-A-0999 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-17.2.2 | DHHS91172-A-1000 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-17.2.3 | DHHS91172-A-1001 | Nurse (PM/PN staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-17.2.3 | DHHS91172-A-1001 | Nurse (PM/PN staff) | Complete in platform form/record | Standing nursing leftover file — keep current. Do not invent hire+N, annual-from-completion, or a PN1/PN2 monthly-summary key. | pm_nursing_file | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-17.2.4 | DHHS91172-A-1002 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-17.2.5 | DHHS91172-A-1003 | Nurse (PM/PN staff) | Generate/upload report and mark sent | one calendar day / discovery/event / daily / per service |  | system_behavior | Rule has no applicability predicates. |
 | REQ-17.2.6 | DHHS91172-A-1004 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-17.2.7 | DHHS91172-A-1005 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | medication error reported |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-17.2.8 | DHHS91172-A-1012 | Nurse (PM/PN staff) | Generate/upload report and mark sent | 24 hours / the development of a person's medical illness or injury requiring a medical appointment or an emergency room visit |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-17.2.9 | DHHS91172-A-1013 | Nurse (PM/PN staff) | Complete in platform form/record | regularly scheduled (frequency per client plan) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-17.2.7 | DHHS91172-A-1005 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | medication error reported | pm_nursing_file | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-17.2.8 | DHHS91172-A-1012 | Nurse (PM/PN staff) | Generate/upload report and mark sent | 24 hours / the development of a person's medical illness or injury requiring a medical appointment or an emergency room visit | pm_nursing_file | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-17.2.9 | DHHS91172-A-1013 | Nurse (PM/PN staff) | Complete in platform form/record | regularly scheduled (frequency per client plan) | pm_nursing_file | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-17.2.10 | DHHS91172-A-1019 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-17.2.11 | DHHS91172-A-1020 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-17.3 | DHHS91172-A-1021 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-17.4 | DHHS91172-A-1022 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-17.4 | DHHS91172-A-1022 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | pm_nursing_file | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-17.5.c | DHHS91172-A-1025 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-18.2.1 | DHHS91172-A-1030 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-18.2.3 | DHHS91172-A-1036 | Nurse (PM/PN staff) | Generate/upload report and mark sent | per Medical Care Plan (at least monthly, 19.2(7)(E)) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-18.2.3 | DHHS91172-A-1036 | Nurse (PM/PN staff) | Generate/upload report and mark sent | per Medical Care Plan (at least monthly, 19.2(7)(E)) | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-18.3.1 | DHHS91172-A-1038 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-18.3.2 | DHHS91172-A-1039 | Nurse (PM/PN staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-18.4.1 | DHHS91172-A-1046 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-18.4.2 | DHHS91172-A-1047 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-18.4.3 | DHHS91172-A-1048 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-18.5 | DHHS91172-A-1049 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before PN1 staff serves the client / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-18.5 | DHHS91172-A-1049 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before PN1 staff serves the client / once; re-verify on renewal/expiry | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-18.6.c | DHHS91172-A-1052 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-19.2.1 | DHHS91172-A-1057 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.2.1.B | DHHS91172-A-1059 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -535,22 +536,22 @@ None. All 225 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-19.2.4 | DHHS91172-A-1064 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.2.5 | DHHS91172-A-1065 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.2.6 | DHHS91172-A-1066 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-19.2.7 | DHHS91172-A-1069 | Nurse (PM/PN staff) | Email to DSPD (address in clause); log in platform | start of PN2 |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-19.2.8 | DHHS91172-A-1075 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | annual |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-19.2.8.A | DHHS91172-A-1076 | Nurse (PM/PN staff) | Complete in platform form/record | 7 calendar days / discovery of medical change |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-19.2.8.B | DHHS91172-A-1077 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before delegated staff serves after plan change |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-19.2.7 | DHHS91172-A-1069 | Nurse (PM/PN staff) | Email to DSPD (address in clause); log in platform | start of PN2 | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-19.2.8 | DHHS91172-A-1075 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | annual | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-19.2.8.A | DHHS91172-A-1076 | Nurse (PM/PN staff) | Complete in platform form/record | 7 calendar days / discovery of medical change | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-19.2.8.B | DHHS91172-A-1077 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before delegated staff serves after plan change | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-19.2.9 | DHHS91172-A-1078 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-19.2.9.A | DHHS91172-A-1079 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | immediate health/safety risk |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-19.2.9.B | DHHS91172-A-1080 | Nurse (PM/PN staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-19.2.10 | DHHS91172-A-1081 | Nurse (PM/PN staff) | Generate/upload report and mark sent | 15 calendar days after the service month ended / period end / event |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-19.2.9.A | DHHS91172-A-1079 | Nurse (PM/PN staff) | Mark complete with attachment/attestation | immediate health/safety risk | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-19.2.9.B | DHHS91172-A-1080 | Nurse (PM/PN staff) | Complete in platform form/record | Standing nursing leftover file — keep current. Do not invent hire+N, annual-from-completion, or a PN1/PN2 monthly-summary key. | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-19.2.10 | DHHS91172-A-1081 | Nurse (PM/PN staff) | Generate/upload report and mark sent | 15 calendar days after the service month ended / period end / event | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-19.3 | DHHS91172-A-1082 | Nurse (PM/PN staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.4.1 | DHHS91172-A-1089 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.4.2 | DHHS91172-A-1090 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.4.3 | DHHS91172-A-1091 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.4.4 | DHHS91172-A-1092 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-19.4.5 | DHHS91172-A-1093 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-19.5.a | DHHS91172-A-1094 | Administrator | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-19.5.b | DHHS91172-A-1095 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-19.5.a | DHHS91172-A-1094 | Administrator | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-19.5.b | DHHS91172-A-1095 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | pn_medical_care_plan | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-19.6.c | DHHS91172-A-1098 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) | hhs_annual_outcome | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-19.7 | DHHS91172-A-1101 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-20.2.1 | DHHS91172-A-1104 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
