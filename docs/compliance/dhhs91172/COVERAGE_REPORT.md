@@ -11,13 +11,13 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Imported parents | 760 |
 | Imported elements | 607 |
 | Imported rows | 1367 |
-| Executable (live key mapped) | 140 |
+| Executable (live key mapped) | 146 |
 | Verified / activatable | 50 |
 | Published | 50 |
 | Blocked (rule-specific gap, no live key) | 0 |
-| Live mapped (clock) | 60 |
+| Live mapped (clock) | 66 |
 | System / standing behavior | 421 |
-| Draft unwired | 199 |
+| Draft unwired | 193 |
 | Element of parent | 607 |
 | Wired first batch (fixture overlay) | 5 |
 | Wired second batch (fixture overlay) | 6 |
@@ -31,7 +31,8 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired ninth batch / UPI-USTEPS ops (fixture overlay) | 15 |
 | Wired tenth batch / BC FBA-BSP twins (fixture overlay) | 41 |
 | Wired eleventh batch / FY Google Form annual twins (fixture overlay) | 34 |
-| Wired shared-behavior batches (fixture overlay) | 140 |
+| Wired twelfth batch / SEI-SJD UPI employment leftovers (fixture overlay) | 6 |
+| Wired shared-behavior batches (fixture overlay) | 146 |
 | Remaining executable (live key, not yet wired) | 0 |
 
 ## Controlled publication (Soft=none)
@@ -40,15 +41,15 @@ Wiring is not publication. `VERIFIED_PUBLICATIONS` has 50 published / 50 verifie
 
 ## Remaining executable (live key, not wired)
 
-None. All 140 live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents — those live keys have no matching imported parent. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
+None. All 146 live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents — those live keys have no matching imported parent. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
 
 ## Draft-unwired blocker categories
 
-199 draft-unwired parents. Categories only — not a row novel.
+193 draft-unwired parents. Categories only — not a row novel.
 
 | Category | Count |
 | --- | ---: |
-| no_live_key + no_predicates | 199 |
+| no_live_key + no_predicates | 193 |
 
 421 additional parents are system_behavior (creates_user_task=no / SYSTEM handling) — not draft-unwired and not a live clock.
 
@@ -716,8 +717,8 @@ None. All 140 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-30.3.2 | DHHS91172-A-1450 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.3.3 | DHHS91172-A-1451 | Employment specialist / job coach | Generate/upload report and mark sent | one business day / discovery/event |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-30.3.4 | DHHS91172-A-1452 | Administrator | External: complete in UPI/USTEPS, record completion in platform | monthly | sei_monthly_summary_upi | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
-| REQ-30.3.5 | DHHS91172-A-1460 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 15th of the month following service month / period end / monthly |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-30.3.6 | DHHS91172-A-1461 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 2 weeks / PCSP update |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-30.3.5 | DHHS91172-A-1460 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 15th of the month following service month / period end / monthly | sei_employment_data_upi | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-30.3.6 | DHHS91172-A-1461 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 2 weeks / PCSP update | sei_employment_strategies_upi | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-30.4.1 | DHHS91172-A-1463 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.4.2 | DHHS91172-A-1464 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-30.4.3 | DHHS91172-A-1465 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -775,14 +776,14 @@ None. All 140 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-33.2.k | DHHS91172-A-1598 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-33.2.l | DHHS91172-A-1599 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-33.2.m | DHHS91172-A-1600 | Employment specialist / job coach | Mark complete with attachment/attestation | 30 days of job retention support / employment obtained |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-33.3.1 | DHHS91172-A-1611 | Employment specialist / job coach | External: USOR, record completion in platform | monthly |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-33.3.1 | DHHS91172-A-1611 | Employment specialist / job coach | External: USOR, record completion in platform | monthly | sjd_usor_contact_monthly | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-33.3.2 | DHHS91172-A-1612 | Employment specialist / job coach | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-33.3.3 | DHHS91172-A-1613 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-33.3.4 | DHHS91172-A-1614 | Administrator | External: complete in UPI/USTEPS, record completion in platform | monthly | sjd_monthly_summary_upi | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
-| REQ-33.3.4.I | DHHS91172-A-1623 | Employment specialist / job coach | External: USOR, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-33.3.5 | DHHS91172-A-1624 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 2 weeks / PCSP update |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-33.3.4.I | DHHS91172-A-1623 | Employment specialist / job coach | External: USOR, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. | sjd_usor_contact_monthly | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-33.3.5 | DHHS91172-A-1624 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 2 weeks / PCSP update | sei_employment_strategies_upi | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-33.3.6 | DHHS91172-A-1625 | Administrator | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-33.3.7 | DHHS91172-A-1628 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 15th of the month following service month / monthly |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-33.3.7 | DHHS91172-A-1628 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 15th of the month following service month / monthly | sjd_employment_data_upi | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-33.4.1 | DHHS91172-A-1630 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-33.4.2 | DHHS91172-A-1631 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-33.4.3 | DHHS91172-A-1632 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |

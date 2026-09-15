@@ -2,12 +2,12 @@
 
 Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
 
-Measured after FY Google Form eleventh-batch wiring stacked on the BC FBA/BSP tenth-batch tip.
+Measured after SEI/SJD UPI employment twelfth-batch wiring stacked on the FY Google Form eleventh-batch tip (#358).
 
 | Measure                        | Count |
 | ------------------------------ | ----: |
 | Imported parents               |   760 |
-| Executable (live key)          |   140 |
+| Executable (live key)          |   146 |
 | Wired 1–6                      |    22 |
 | Wired Mega A                   |    10 |
 | Wired Mega B (already on main) |     9 |
@@ -15,13 +15,14 @@ Measured after FY Google Form eleventh-batch wiring stacked on the BC FBA/BSP te
 | Wired ninth / UPI-USTEPS ops   |    15 |
 | Wired tenth / BC FBA-BSP twins |    41 |
 | Wired eleventh / FY Google Form |    34 |
-| Wired total                    |   140 |
+| Wired twelfth / SEI-SJD UPI employment |     6 |
+| Wired total                    |   146 |
 | Remaining executable           |     0 |
 | Verified / published           | 50 / 50 |
-| Draft unwired                  |   199 |
+| Draft unwired                  |   193 |
 | System behavior                |   421 |
 
-Draft-unwired blockers (199/199): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
+Draft-unwired blockers (193/193): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
 
 ## Already wired (1–6) — do not re-cut
 
@@ -85,7 +86,7 @@ Child elements (board minutes, discharge notices, loan notices, §1.18/§1.23 it
 | REQ-21.3.1  | rhs_lease_agreement       | intake                                                     |
 | REQ-21.5    | ol_rhs_license_4plus      | standing                                                   |
 
-Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_drills_quarterly`, `rhs_evac_drills_quarterly`, `pps_evac_drills_quarterly`, `pps_foster_license`, `medicaid_disclosure_annual`, `usor_job_development_sjd`, employment-data UPI keys, `client_specific_training`. Annual-outcome pack keys now attach to imported FY Google Form `.c` twins (eleventh batch) — do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
+Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_drills_quarterly`, `rhs_evac_drills_quarterly`, `pps_evac_drills_quarterly`, `pps_foster_license`, `medicaid_disclosure_annual`, `usor_job_development_sjd`, `client_specific_training`. Employment-data / strategies / USOR-contact UPI keys now attach to imported SEI/SJD leftovers (twelfth batch). Annual-outcome pack keys attach to imported FY Google Form `.c` twins (eleventh batch) — do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7. There is no `sjd_employment_strategies_upi` pack sibling (that would need a catalog seed).
 
 ## Ninth — UPI / USTEPS ops (wired, unpublished)
 
@@ -141,3 +142,16 @@ Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_
 | REQ-30.7.c | sei_annual_outcome | SEI |
 | REQ-31.5.c | sl_annual_outcome | SLH |
 | REQ-32.7.c | sl_annual_outcome | CMP, CMS, SLN |
+
+## Twelfth — SEI/SJD UPI employment leftovers (wired, unpublished)
+
+**Family:** Article 30/33 employment-file leftovers. App PR, no DB change. Unpublished. Hold merge for Dane. Do not publish these 6. Official catalog clauses only. Adjacent to wired REQ-30.3.4 / REQ-33.3.4 monthly summaries. Staff never touch UPI. Do not include FY Google Form Cluster A REQs.
+
+| Rule | Live key | Awarded | Note |
+| ---- | -------- | ------- | ---- |
+| REQ-30.3.5 | sei_employment_data_upi | SEI | unused pack key |
+| REQ-30.3.6 | sei_employment_strategies_upi | SEI | unused pack key |
+| REQ-33.3.5 | sei_employment_strategies_upi | SJD | shares strategies key — pack has no SJD sibling |
+| REQ-33.3.7 | sjd_employment_data_upi | SJD | unused pack key |
+| REQ-33.3.1 | sjd_usor_contact_monthly | SJD | optional, existing pack key |
+| REQ-33.3.4.I | sjd_usor_contact_monthly | SJD | optional, shares USOR contact card |
