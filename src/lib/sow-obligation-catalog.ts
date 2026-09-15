@@ -1502,6 +1502,146 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
       "Current Medical Care Plan, PN1 reports to PN2, delegated-staff training, urgent-risk notes, and DOPL licenses.",
     calendar_is_reminder_only: true,
   },
+  {
+    title: "SJD Discovery / Vocational Assessment Leftovers",
+    citation: "DHHS91172 SOW §33.2",
+    category: "employment",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing SJD discovery / vocational leftover file. Official catalog clauses only. Staff never touch UPI.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["SJD"],
+    evidence_standard:
+      "Discovery-or-vocational choice, transportation assessment, discovery assessment, vocational Employment Plan, benefits analysis, weekly progress notes, and 30-day job-retention support.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Household 12+ Background Screening Leftovers",
+    citation: "DHHS91172 SOW §11.3 / §20.3 / §22.3 / §23.3 / §24.3 / §25.3",
+    category: "screening",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing household 12+ background leftover file for HHS, PPS, and staff-residence respite. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["HHS", "PPS", "RP2", "RP3", "RP4", "RP5"],
+    evidence_standard:
+      "Background screening for individuals 12 or older who resided in the home for any cumulative 30 days of the past 12 months.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Medicaid Eligibility Review Assistance Leftovers",
+    citation: "DHHS91172 SOW §11.2 / §20.2 / §21.2 / §31.2",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing Medicaid eligibility-review assistance leftover file for HHS, PPS, RHS, and SLH. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["HHS", "PPS", "RHS", "SLH"],
+    evidence_standard:
+      "Assistance completing Medicaid eligibility review documents and timely submission.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "DHHS Quality Remediation Plan Leftovers",
+    citation: "DHHS91172 SOW §1.19",
+    category: "standing_records",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing DHHS quality-management Remediation Plan leftover file. Official catalog clauses only. Contractor-wide — not an awarded-code clock.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Written Remediation Plan for each DHHS deficiency, submitted in the required timeframe, with a seven-day revision if rejected.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Day-to-Day Program Staff Leftovers",
+    citation: "DHHS91172 SOW §7.3 / §9.3 / §10.3 / §21.3",
+    category: "standing_records",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing day-to-day program-staff leftover file for DSG/DSP, EPR, ELS, and RHS sites. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["DSG", "DSP", "EPR", "ELS", "RHS"],
+    evidence_standard:
+      "Named staff responsible for day-to-day operations at each awarded program site.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "SED/SEE/SEI Assessment and Fade Leftovers",
+    citation: "DHHS91172 SOW §28.2 / §29.2 / §30.2",
+    category: "employment",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing SED/SEE assessment and SED/SEI fade leftover file. Official catalog clauses only. Staff never touch UPI.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["SED", "SEE", "SEI"],
+    evidence_standard:
+      "SED/SEE skill and barrier assessments plus written fade plans that increase on-the-job independence.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "SJP/SJR Milestone Request for Services Leftovers",
+    citation: "DHHS91172 SOW §34.3 / §35.3",
+    category: "employment",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing SJP/SJR milestone RFS leftover file. Official catalog clauses only. REQ-34.5 / REQ-35.5 stay invent-blocked contractor-qualification umbrellas. Staff never touch UPI.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: ["SJP", "SJR"],
+    evidence_standard:
+      "Written Support Coordinator request to complete an RFS for the SJP or SJR milestone payment, with the required documentation packet.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "EPR Program File Leftovers",
+    citation: "DHHS91172 SOW §9.2 / §9.5",
+    category: "employment",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing EPR leftover file: Informed Choice, 511 Career Counseling, pre-vocational staff training, and supervisory ACRE / Workplace Supports / Effective Job Coach. Do not reuse acre_sei / acre_sed / acre_sjd. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["EPR"],
+    evidence_standard:
+      "60-day Informed Choice conversation, annual 511 coordination with USOR, pre-vocational staff training, and EPR supervisory training proof.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "BC Staff Qualifications Leftovers",
+    citation: "DHHS91172 SOW §3.6 / §4.6 / §5.6",
+    category: "training",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing BC1/BC2/BC3 staff-qualification leftover file. Official catalog clauses only. Rights-modification twins stay unwired.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["BC1", "BC2", "BC3"],
+    evidence_standard:
+      "BC1 Option A or B, BC2 Option A–D, and BC3 Option A–D qualification files.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "RHS Housing Voucher Leftovers",
+    citation: "DHHS91172 SOW §21.3(8)",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing RHS housing-voucher leftover file. Official catalog clauses only. The Contractor or Support Coordinator may not request voucher termination.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["RHS"],
+    evidence_standard:
+      "PCPT voucher review at approval and annually, Public Housing Authority move coordination, and written Person/guardian termination request.",
+    calendar_is_reminder_only: true,
+  },
 ];
 
 function finalizeCatalogEntry(raw: SowCatalogDraft): SowCatalogEntry {

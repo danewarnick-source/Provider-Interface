@@ -114,6 +114,11 @@ import {
   applySeventeenthExecutableBatchOverlayAll,
   seventeenthBatchParentIsWired,
 } from "./seventeenth-executable-batch.ts";
+import {
+  applyEighteenthExecutableBatchOverlay,
+  applyEighteenthExecutableBatchOverlayAll,
+  eighteenthBatchParentIsWired,
+} from "./eighteenth-executable-batch.ts";
 
 export type CatalogCoverageRow = {
   requirementKey: string;
@@ -168,6 +173,7 @@ export type CatalogCoverageCounts = {
   wiredFifteenthBatch: number;
   wiredSixteenthBatch: number;
   wiredSeventeenthBatch: number;
+  wiredEighteenthBatch: number;
   remainingExecutable: number;
 };
 
@@ -179,7 +185,8 @@ export type CatalogCoverageReport = {
 
 /** Fixture overlays only. Publication is a separate VERIFIED_PUBLICATIONS step. */
 export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
-  return applySeventeenthExecutableBatchOverlay(
+  return applyEighteenthExecutableBatchOverlay(
+    applySeventeenthExecutableBatchOverlay(
     applySixteenthExecutableBatchOverlay(
     applyFifteenthExecutableBatchOverlay(
       applyFourteenthExecutableBatchOverlay(
@@ -211,11 +218,13 @@ export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
       ),
     ),
     ),
+    ),
   );
 }
 
 export function applyExecutableBatchOverlays<T extends DraftRule>(rules: readonly T[]): T[] {
-  return applySeventeenthExecutableBatchOverlayAll(
+  return applyEighteenthExecutableBatchOverlayAll(
+    applySeventeenthExecutableBatchOverlayAll(
     applySixteenthExecutableBatchOverlayAll(
     applyFifteenthExecutableBatchOverlayAll(
       applyFourteenthExecutableBatchOverlayAll(
@@ -247,6 +256,7 @@ export function applyExecutableBatchOverlays<T extends DraftRule>(rules: readonl
           ),
         ),
       ),
+    ),
     ),
     ),
   );
@@ -394,6 +404,7 @@ export function buildCatalogCoverageReport(
     wiredFifteenthBatch: parents.filter((rule) => fifteenthBatchParentIsWired(rule)).length,
     wiredSixteenthBatch: parents.filter((rule) => sixteenthBatchParentIsWired(rule)).length,
     wiredSeventeenthBatch: parents.filter((rule) => seventeenthBatchParentIsWired(rule)).length,
+    wiredEighteenthBatch: parents.filter((rule) => eighteenthBatchParentIsWired(rule)).length,
     wired: parents.filter(
       (rule) =>
         firstBatchParentIsWired(rule) ||
@@ -413,7 +424,8 @@ export function buildCatalogCoverageReport(
         fourteenthBatchParentIsWired(rule) ||
         fifteenthBatchParentIsWired(rule) ||
         sixteenthBatchParentIsWired(rule) ||
-        seventeenthBatchParentIsWired(rule),
+        seventeenthBatchParentIsWired(rule) ||
+        eighteenthBatchParentIsWired(rule),
     ).length,
     remainingExecutable: parentOnly.filter((r) => r.liveKey != null && r.canPublish === false)
       .length,
@@ -547,6 +559,7 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Wired fifteenth batch / Article 1 standing leftover children (fixture overlay) | ${c.wiredFifteenthBatch} |`,
     `| Wired sixteenth batch / remaining pack-key-ready leftovers (fixture overlay) | ${c.wiredSixteenthBatch} |`,
     `| Wired seventeenth batch / professional nursing leftovers (fixture overlay) | ${c.wiredSeventeenthBatch} |`,
+    `| Wired eighteenth batch / combined inventable leftovers (fixture overlay) | ${c.wiredEighteenthBatch} |`,
     `| Wired shared-behavior batches (fixture overlay) | ${c.wired} |`,
     `| Remaining executable (live key, not yet wired) | ${c.remainingExecutable} |`,
     "",

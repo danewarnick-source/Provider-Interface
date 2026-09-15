@@ -4,13 +4,13 @@
     "importedParents": 760,
     "importedElements": 607,
     "importedRows": 1367,
-    "executable": 246,
+    "executable": 289,
     "verified": 50,
     "published": 50,
     "blocked": 0,
     "liveMapped": 79,
-    "systemBehavior": 421,
-    "draftUnwired": 93,
+    "systemBehavior": 420,
+    "draftUnwired": 51,
     "elementOfParent": 607,
     "wiredFirstBatch": 5,
     "wiredSecondBatch": 6,
@@ -30,7 +30,8 @@
     "wiredFifteenthBatch": 45,
     "wiredSixteenthBatch": 26,
     "wiredSeventeenthBatch": 21,
-    "wired": 246,
+    "wiredEighteenthBatch": 43,
+    "wired": 289,
     "remainingExecutable": 0
   },
   "parents": [
@@ -1887,24 +1888,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "DHHS identifies a deficiency requiring a Remediation Plan",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "dhhs_quality_remediation",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.19.1",
@@ -1915,24 +1907,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "DHHS deficiency finding",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "dhhs_quality_remediation",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.19.2",
@@ -1943,24 +1926,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "timeframe set by DHHS",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "dhhs_quality_remediation",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.19.3",
@@ -1971,24 +1945,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "7 calendar days / DHHS determines response unacceptable",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "dhhs_quality_remediation",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.20.a",
@@ -5278,10 +5243,10 @@
       "completionMethod": "Upload credential/training record to staff profile",
       "timing": "before start / before staff delivers BC service / once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "bc_staff_qualifications",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -5291,12 +5256,6 @@
         "Agency awarded BC1?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -5974,10 +5933,10 @@
       "completionMethod": "Upload credential/training record to staff profile",
       "timing": "before start / before staff delivers BC service / once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "bc_staff_qualifications",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -5987,12 +5946,6 @@
         "Agency awarded BC2?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -6695,10 +6648,10 @@
       "completionMethod": "Upload credential/training record to staff profile",
       "timing": "before start / before staff delivers BC service / once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "bc_staff_qualifications",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -6708,12 +6661,6 @@
         "Agency awarded BC3?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -7211,12 +7158,12 @@
       "title": "each DSG/DSP program has Staff responsible for the day to day operations…",
       "owner": "Site supervisor",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing invent-2 leftover file — keep current. Do not invent hire+N, annual-from-completion, UPI employee-registry clocks, or contractor-qualification umbrellas.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "program_day_to_day_staff",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -7226,13 +7173,6 @@
         "Agency awarded DSG,DSP?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -8257,10 +8197,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "60 days / start of EPR",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "epr_program_file",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -8270,14 +8210,6 @@
         "Agency awarded EPR?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -8511,10 +8443,10 @@
       "completionMethod": "External: USOR, record completion in platform",
       "timing": "annual",
       "renewal": "Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "epr_program_file",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -8526,14 +8458,6 @@
         "Is the agency a USOR-approved vendor?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Is the agency a USOR-approved vendor?"
       ]
@@ -8673,12 +8597,12 @@
       "title": "each EPR program has Staff responsible for the day to day operations…",
       "owner": "Site supervisor",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing invent-2 leftover file — keep current. Do not invent hire+N, annual-from-completion, UPI employee-registry clocks, or contractor-qualification umbrellas.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "program_day_to_day_staff",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -8688,13 +8612,6 @@
         "Agency awarded EPR?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -8937,10 +8854,10 @@
       "completionMethod": "Upload credential/training record to staff profile",
       "timing": "before start / service/assignment start / once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "epr_program_file",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -8950,13 +8867,6 @@
         "Agency awarded EPR?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -8969,10 +8879,10 @@
       "completionMethod": "Upload credential/training record to staff profile",
       "timing": "90 calendar days / hire of EPR supervisory staff / once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "epr_program_file",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -8984,13 +8894,6 @@
         "Who supervises the staff for this service?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Who supervises the staff for this service?"
       ]
@@ -9185,12 +9088,12 @@
       "title": "for each ELS site, there is a Staff who is responsible for…",
       "owner": "Site supervisor",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing invent-2 leftover file — keep current. Do not invent hire+N, annual-from-completion, UPI employee-registry clocks, or contractor-qualification umbrellas.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "program_day_to_day_staff",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -9200,13 +9103,6 @@
         "Agency awarded ELS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -9683,10 +9579,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "Medicaid eligibility review due",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medicaid_eligibility_assist",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -9696,14 +9592,6 @@
         "Agency awarded HHS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -9753,10 +9641,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "before start / any individual 12+ residing in the home 30 cumulative days in past 12 months",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "household_12plus_background",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -9766,14 +9654,6 @@
         "Agency awarded HHS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -14202,10 +14082,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "Medicaid eligibility review due",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medicaid_eligibility_assist",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -14215,14 +14095,6 @@
         "Agency awarded PPS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -14272,10 +14144,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "before start / any individual 12+ residing in the home 30 cumulative days in past 12 months",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "household_12plus_background",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -14285,14 +14157,6 @@
         "Agency awarded PPS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -15383,10 +15247,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "Medicaid eligibility review due",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medicaid_eligibility_assist",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -15396,14 +15260,6 @@
         "Agency awarded RHS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -15574,12 +15430,12 @@
       "title": "have a Staff that is responsible for the day to day operations…",
       "owner": "Site supervisor",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing invent-2 leftover file — keep current. Do not invent hire+N, annual-from-completion, UPI employee-registry clocks, or contractor-qualification umbrellas.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "program_day_to_day_staff",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -15589,13 +15445,6 @@
         "Agency awarded RHS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -15656,27 +15505,24 @@
       "title": "when a Person receives a Public Housing Authority voucher",
       "owner": "Administrator",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing invent-2 leftover file — keep current. Do not invent hire+N, annual-from-completion, UPI employee-registry clocks, or contractor-qualification umbrellas.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "system_behavior",
+      "liveKey": "rhs_housing_voucher",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-052"
+        "FACT-052",
+        "FACT-007"
       ],
       "unansweredFacts": [
-        "Does the client have a Public Housing Authority voucher?"
+        "Does the client have a Public Housing Authority voucher?",
+        "Agency awarded RHS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
+        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Does the client have a Public Housing Authority voucher?"
       ]
     },
@@ -15689,10 +15535,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "annual (PCPT meeting) and at voucher approval",
       "renewal": "Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "rhs_housing_voucher",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -15704,14 +15550,6 @@
         "Does the client have a Public Housing Authority voucher?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Does the client have a Public Housing Authority voucher?"
       ]
@@ -15725,10 +15563,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "before start / client intends to move",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "rhs_housing_voucher",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -15740,14 +15578,6 @@
         "Does the client have a Public Housing Authority voucher?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Does the client have a Public Housing Authority voucher?"
       ]
@@ -15761,10 +15591,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "before terminating voucher / voucher termination considered",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "rhs_housing_voucher",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -15778,14 +15608,6 @@
         "Does the client have a Public Housing Authority voucher?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Does the client have a legal guardian?",
         "Unanswered applicability fact: Does the client have a Public Housing Authority voucher?"
@@ -16282,10 +16104,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "before start / respite in staff private residence",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "household_12plus_background",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -16297,14 +16119,6 @@
         "Is the service delivered in the staff's private residence?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Is the service delivered in the staff's private residence?"
       ]
@@ -16634,10 +16448,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "before start / respite in staff private residence",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "household_12plus_background",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -16649,14 +16463,6 @@
         "Is the service delivered in the staff's private residence?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Is the service delivered in the staff's private residence?"
       ]
@@ -16953,10 +16759,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "before start / respite in staff private residence",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "household_12plus_background",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -16968,14 +16774,6 @@
         "Is the service delivered in the staff's private residence?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Is the service delivered in the staff's private residence?"
       ]
@@ -17336,10 +17134,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "before start / respite in staff private residence",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "household_12plus_background",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -17351,14 +17149,6 @@
         "Is the service delivered in the staff's private residence?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Is the service delivered in the staff's private residence?"
       ]
@@ -18322,10 +18112,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "start of SED",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "employment_assessment_fade",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -18337,14 +18127,6 @@
         "Agency awarded SED?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Is the service delivered in a site-based facility? Which locations?"
       ]
@@ -18424,12 +18206,12 @@
       "title": "maintain written plans, supports and strategies intended to increase on-the-job independence and…",
       "owner": "Employment specialist / job coach",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing invent-2 leftover file — keep current. Do not invent hire+N, annual-from-completion, UPI employee-registry clocks, or contractor-qualification umbrellas.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "employment_assessment_fade",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -18439,14 +18221,6 @@
         "Agency awarded SED?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -18608,10 +18382,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "start of SEE",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "employment_assessment_fade",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -18623,14 +18397,6 @@
         "Agency awarded SEE?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Is the service delivered in a site-based facility? Which locations?"
       ]
@@ -19186,12 +18952,12 @@
       "title": "maintain written plans, supports and strategies intended to increase on-the-job independence and…",
       "owner": "Employment specialist / job coach",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing invent-2 leftover file — keep current. Do not invent hire+N, annual-from-completion, UPI employee-registry clocks, or contractor-qualification umbrellas.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "employment_assessment_fade",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -19201,14 +18967,6 @@
         "Agency awarded SEI?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -19919,10 +19677,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "Medicaid eligibility review due",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medicaid_eligibility_assist",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -19932,14 +19690,6 @@
         "Agency awarded SLH?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -20746,10 +20496,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "start of SJD",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_discovery_vocational",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -20759,13 +20509,6 @@
         "Agency awarded SJD?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: unless the Contractor:",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -20778,10 +20521,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "start of SJD",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_discovery_vocational",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -20795,14 +20538,6 @@
         "Does the agency provide transportation?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Does the agency provide transportation? Which staff drive?",
         "Unanswered applicability fact: Does the agency provide transportation?"
@@ -20817,10 +20552,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "Discovery Process chosen",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_discovery_vocational",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -20830,13 +20565,6 @@
         "Agency awarded SJD?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Unless determined as outlined above in 33",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -20880,10 +20608,10 @@
       "completionMethod": "Complete in platform form/record",
       "timing": "Discovery Process complete",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_discovery_vocational",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -20893,13 +20621,6 @@
         "Agency awarded SJD?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -20912,10 +20633,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "30 calendar day(s) / PCST chooses Vocational Assessment",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_discovery_vocational",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -20925,13 +20646,6 @@
         "Agency awarded SJD?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -21069,12 +20783,12 @@
       "title": "conduct an analysis on potential employment pay and benefits to determine how…",
       "owner": "Employment specialist / job coach",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing invent-2 leftover file — keep current. Do not invent hire+N, annual-from-completion, UPI employee-registry clocks, or contractor-qualification umbrellas.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_discovery_vocational",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -21084,13 +20798,6 @@
         "Agency awarded SJD?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -21103,10 +20810,10 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "weekly",
       "renewal": "Renews each week",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_discovery_vocational",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -21116,13 +20823,6 @@
         "Agency awarded SJD?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each week",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -21203,10 +20903,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "30 days of job retention support / employment obtained",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_discovery_vocational",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -21216,13 +20916,6 @@
         "Agency awarded SJD?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -21878,10 +21571,10 @@
       "completionMethod": "Automated check (no user action) or attestation",
       "timing": "SJP milestone met / per claim / continuous check",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "milestone_rfs",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -21891,13 +21584,6 @@
         "Agency awarded SJP?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -22063,10 +21749,10 @@
       "completionMethod": "Automated check (no user action) or attestation",
       "timing": "SJR milestone met / per claim / continuous check",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "milestone_rfs",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -22076,13 +21762,6 @@
         "Agency awarded SJR?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },

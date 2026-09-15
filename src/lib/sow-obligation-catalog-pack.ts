@@ -654,6 +654,66 @@ export const CATALOG_IDENTITY_BY_TITLE: Record<string, CatalogIdentity> = {
     evidence_template:
       "Current Medical Care Plan, PN1 reports to PN2, delegated-staff training, urgent-risk notes, and DOPL licenses. Monthly summary text stays a leftover child — not a second monthly-summary clock.",
   },
+  "SJD Discovery / Vocational Assessment Leftovers": {
+    key: "sjd_discovery_vocational",
+    disposition: "standing",
+    evidence_template:
+      "Discovery-or-vocational choice, transportation assessment, Individualized Strengths-based Job Discovery Assessment, vocational Employment Plan, benefits analysis, weekly progress notes, and 30-day job-retention support.",
+  },
+  "Household 12+ Background Screening Leftovers": {
+    key: "household_12plus_background",
+    disposition: "standing",
+    evidence_template:
+      "Background screening for individuals 12 or older who resided in the HHS, PPS, or staff-residence home for any cumulative 30 days of the past 12 months.",
+  },
+  "Medicaid Eligibility Review Assistance Leftovers": {
+    key: "medicaid_eligibility_assist",
+    disposition: "standing",
+    evidence_template:
+      "Assistance completing Medicaid eligibility review documents and timely submission for HHS, PPS, RHS, and SLH.",
+  },
+  "DHHS Quality Remediation Plan Leftovers": {
+    key: "dhhs_quality_remediation",
+    disposition: "standing",
+    evidence_template:
+      "Written Remediation Plan responding to each DHHS quality-management deficiency, submitted in the required timeframe, with a seven-day revision if DHHS rejects the first response.",
+  },
+  "Day-to-Day Program Staff Leftovers": {
+    key: "program_day_to_day_staff",
+    disposition: "standing",
+    evidence_template:
+      "Named staff responsible for day-to-day operations at each DSG/DSP, EPR, ELS, and RHS program site.",
+  },
+  "SED/SEE/SEI Assessment and Fade Leftovers": {
+    key: "employment_assessment_fade",
+    disposition: "standing",
+    evidence_template:
+      "SED/SEE skill and barrier assessments plus written SED/SEI fade plans that increase on-the-job independence.",
+  },
+  "SJP/SJR Milestone Request for Services Leftovers": {
+    key: "milestone_rfs",
+    disposition: "standing",
+    evidence_template:
+      "Written request to the Support Coordinator to complete an RFS for the SJP or SJR milestone payment, with the required documentation packet.",
+  },
+  "EPR Program File Leftovers": {
+    key: "epr_program_file",
+    disposition: "standing",
+    evidence_template:
+      "60-day Informed Choice conversation, annual 511 Career Counseling coordination with USOR, pre-vocational staff training, and EPR supervisory ACRE / Workplace Supports / Effective Job Coach proof.",
+  },
+  "BC Staff Qualifications Leftovers": {
+    key: "bc_staff_qualifications",
+    disposition: "standing",
+    evidence_template:
+      "BC1 Option A or B, BC2 Option A–D, and BC3 Option A–D qualification files for staff who deliver BC services.",
+  },
+  "RHS Housing Voucher Leftovers": {
+    key: "rhs_housing_voucher",
+    disposition: "standing",
+    evidence_template:
+      "PCPT housing-voucher review at approval and annually, Public Housing Authority move coordination, and written Person/guardian request before any voucher termination.",
+  },
 };
 
 /**
