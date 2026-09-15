@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { readFileSync } from "node:fs";
 import {
+  ADMIN_ACCEPTED_PREFIX,
   canAcceptCertEvidence,
   certReviewAcceptBlockReason,
   certReviewExpirationAdvisory,
@@ -10,6 +11,7 @@ import {
   correctionNoteFromAdminNotes,
   correctionReminderRecurrenceKey,
   indexCompletionsByInstance,
+  isAdminAcceptedNote,
   isCorrectionRequestedNote,
   nectarReviewDisposition,
   nextRenewalDueFromRules,
@@ -84,7 +86,8 @@ describe("cert review rules", () => {
     assert.doesNotMatch(fn, /months from upload date/);
     assert.doesNotMatch(fn, /addMonthsUTC\(new Date\(completedAt\)/);
     assert.match(fn, /nextRenewalDueFromRules|nectarReviewDisposition/);
-    assert.match(fn, /manually_confirmed/);
+    assert.match(fn, /nectar_validation_status: "passed"/);
+    assert.doesNotMatch(fn, /nectar_validation_status: "manually_confirmed"/);
     assert.doesNotMatch(due, /months from the last verified upload/);
     assert.match(due, /never taken from the upload date/);
     assert.doesNotMatch(baseline, /default_validity_months &&/);
@@ -174,7 +177,26 @@ describe("cert review rules", () => {
     assert.equal(certReviewStatusLabel("awaiting_review"), "Awaiting review");
     assert.equal(
       certReviewStatus({
-        nectarValidationStatus: "manually_confirmed",
+        nectarValidationStatus: "passed",
+        instanceStatus: "pending",
+        adminNotes: ADMIN_ACCEPTED_PREFIX,
+      }),
+      "accepted",
+    );
+    assert.equal(
+      certReviewStatus({
+        nectarValidationStatus: "passed",
+        instanceStatus: "pending",
+      }),
+      "awaiting_review",
+    );
+    assert.equal(
+      isAdminAcceptedNote(`${ADMIN_ACCEPTED_PREFIX} Expiration confirmed 2027-09-14.`),
+      true,
+    );
+    assert.equal(
+      certReviewStatus({
+        nectarValidationStatus: "passed",
         instanceStatus: "completed",
       }),
       "accepted",
@@ -228,7 +250,16 @@ describe("cert review rules", () => {
       isCorrectionRequestedNote("Correction requested — show the printed expiration."),
       true,
     );
-    assert.equal(isCorrectionRequestedNote("Admin accepted evidence."), false);
+    assert.equal(isCorrectionRequestedNote(ADMIN_ACCEPTED_PREFIX), false);
+    assert.equal(isAdminAcceptedNote(ADMIN_ACCEPTED_PREFIX), true);
+    assert.equal(
+      staffSurfaceReviewKind({
+        nectarValidationStatus: "passed",
+        instanceStatus: "pending",
+        adminNotes: ADMIN_ACCEPTED_PREFIX,
+      }),
+      "accepted",
+    );
     assert.equal(
       correctionNoteFromAdminNotes("Correction requested: Show the printed expiration."),
       "Show the printed expiration.",
@@ -259,8 +290,8 @@ describe("cert review rules", () => {
     );
     assert.equal(
       shouldReplaceCompletionForResubmit({
-        nectarValidationStatus: "manually_confirmed",
-        adminNotes: "Admin accepted evidence.",
+        nectarValidationStatus: "passed",
+        adminNotes: ADMIN_ACCEPTED_PREFIX,
       }),
       false,
     );
@@ -381,6 +412,11 @@ describe("cert review surface lock", () => {
     assert.match(fns, /pickStaffCompletionForSurface|indexCompletionsByInstance/);
     assert.match(fns, /correctionReminderRecurrenceKey/);
     assert.match(fns, /resolveInstanceNotifications/);
+    assert.match(fns, /ADMIN_ACCEPTED_PREFIX/);
+    assert.match(fns, /nectar_validation_status: "passed"/);
+    assert.doesNotMatch(fns, /nectar_validation_status: "manually_confirmed"/);
+    assert.match(engine, /ADMIN_ACCEPTED_PREFIX/);
+    assert.match(panel, /adminNotes: review.adminNotes/);
     assert.match(panel, /certReviewAcceptBlockReason/);
     assert.match(panel, /certReviewExpirationAdvisory/);
     assert.match(engine, /accept without inventing/);

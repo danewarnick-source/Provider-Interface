@@ -49,6 +49,7 @@ import { toIsoDateDay } from "./iso-date-day";
 import { isPackSentinel, obligationIsRequired } from "./obligation-packs";
 import { ORPHAN_OBLIGATION_CREATE_GONE } from "./compliance-spine";
 import {
+  ADMIN_ACCEPTED_PREFIX,
   canAcceptCertEvidence,
   certReviewAcceptBlockReason,
   correctionReminderRecurrenceKey,
@@ -1315,7 +1316,8 @@ export async function notifyObligationManagersInternal(
 
   const cadenceDesc = cadenceShortLabel(ob.cadence);
   const lastCompletion = (completions ?? [])[completions.length - 1] as
-    { staff_name: string; completed_at: string; evidence_type_used: string } | undefined;
+    | { staff_name: string; completed_at: string; evidence_type_used: string }
+    | undefined;
 
   let title: string;
   let body: string;
@@ -3104,11 +3106,11 @@ export const confirmFailedObligationCompletion = createServerFn({ method: "POST"
         is_manual_entry: true,
         manual_entry_by: userId,
         manual_entry_by_name: adminDir?.full_name ?? "an admin",
-        nectar_validation_status: "manually_confirmed",
+        nectar_validation_status: "passed",
         nectar_extracted_expires_date: expiresOn,
         admin_notes: expiresOn
-          ? `Admin accepted evidence. Expiration confirmed ${expiresOn}.`
-          : "Admin accepted evidence.",
+          ? `${ADMIN_ACCEPTED_PREFIX} Expiration confirmed ${expiresOn}.`
+          : ADMIN_ACCEPTED_PREFIX,
       })
       .eq("id", data.completionId);
     if (upErr) throw new Error(upErr.message);
@@ -3279,6 +3281,7 @@ export type CertReviewRow = {
   usesCertExpiration: boolean;
   correctionRequested: boolean;
   instanceStatus: string;
+  adminNotes: string | null;
 };
 
 export const getCertReview = createServerFn({ method: "POST" })
@@ -3337,6 +3340,7 @@ export const getCertReview = createServerFn({ method: "POST" })
         sowCatalogEntry(ob.title)?.due_rule.kind === "cert_expiration",
       correctionRequested: isCorrectionRequestedNote(completion.admin_notes),
       instanceStatus: inst.status,
+      adminNotes: (completion.admin_notes as string | null) ?? null,
     };
   });
 
@@ -3417,6 +3421,7 @@ export const listPendingCertReviews = createServerFn({ method: "POST" })
             sowCatalogEntry(ob.title)?.due_rule.kind === "cert_expiration",
           correctionRequested: isCorrectionRequestedNote(row.admin_notes as string | null),
           instanceStatus: inst.status,
+          adminNotes: (row.admin_notes as string | null) ?? null,
         },
       ];
     });

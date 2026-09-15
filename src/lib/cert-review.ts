@@ -11,6 +11,17 @@ export type CertReviewStatus = "awaiting_review" | "accepted" | "correction_requ
 /** Written onto company_obligation_completions.admin_notes by requestObligationCorrection. */
 export const CORRECTION_REQUESTED_PREFIX = "Correction requested:";
 
+/**
+ * Written onto company_obligation_completions.admin_notes by Accept.
+ * Live CHECK only allows nectar_validation_status `passed` | `failed`, so
+ * Accept writes `passed` and this prefix is the admin-accepted marker.
+ */
+export const ADMIN_ACCEPTED_PREFIX = "Admin accepted evidence.";
+
+export function isAdminAcceptedNote(adminNotes: string | null | undefined): boolean {
+  return String(adminNotes ?? "").startsWith(ADMIN_ACCEPTED_PREFIX);
+}
+
 const CORRECTION_NOTE_RE = /^\s*correction requested\b/i;
 const CORRECTION_NOTE_BODY_RE = /^\s*correction requested\s*[:—–-]?\s*/i;
 
@@ -94,6 +105,7 @@ export function staffSurfaceReviewKind(args: {
     nectarValidationStatus: args.nectarValidationStatus,
     instanceStatus: args.instanceStatus,
     correctionRequested,
+    adminNotes: args.adminNotes,
   });
   if (status === "correction_requested") return "correction_requested";
   if (status === "accepted") return "accepted";
@@ -285,9 +297,11 @@ export function certReviewStatus(args: {
   nectarValidationStatus?: string | null;
   instanceStatus?: string | null;
   correctionRequested?: boolean;
+  adminNotes?: string | null;
 }): CertReviewStatus {
   if (args.correctionRequested) return "correction_requested";
   if (args.nectarValidationStatus === "manually_confirmed") return "accepted";
+  if (isAdminAcceptedNote(args.adminNotes)) return "accepted";
   if (args.instanceStatus === "completed" || args.instanceStatus === "waived") {
     if (args.nectarValidationStatus === "failed") return "awaiting_review";
     return "accepted";
