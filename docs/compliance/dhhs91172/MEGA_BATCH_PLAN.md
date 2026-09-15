@@ -1,13 +1,13 @@
 # DHHS91172 executable finalize
 
-Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Quarterly evac drill leftovers are wired unpublished (fourteenth batch / imported `.6` parents). Article 1 standing leftover children are wired unpublished (fifteenth batch / existing pack liveKeys). Remaining pack-key-ready leftovers are wired unpublished (sixteenth batch / incidents, HRC, service leftovers). Professional nursing leftovers are wired unpublished (seventeenth batch / invented `pm_nursing_file` + `pn_medical_care_plan`). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent a second PN1/PN2 monthly-summary key. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3 / REQ-1.17.
+Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Quarterly evac drill leftovers are wired unpublished (fourteenth batch / imported `.6` parents). Article 1 standing leftover children are wired unpublished (fifteenth batch / existing pack liveKeys). Remaining pack-key-ready leftovers are wired unpublished (sixteenth batch / incidents, HRC, service leftovers). Professional nursing leftovers are wired unpublished (seventeenth batch / invented `pm_nursing_file` + `pn_medical_care_plan`). Combined inventable leftovers are wired unpublished (eighteenth batch / invented leftover-family liveKeys). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent a second PN1/PN2 monthly-summary key. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3 / REQ-1.17.
 
-Measured after professional-nursing seventeenth-batch invent stacked on the #365 tip (`ec0e11f1`).
+Measured after combined inventable eighteenth-batch invent stacked on the #367 tip (`558adfe8`).
 
 | Measure                        | Count |
 | ------------------------------ | ----: |
 | Imported parents               |   760 |
-| Executable (live key)          |   246 |
+| Executable (live key)          |   289 |
 | Wired 1–6                      |    22 |
 | Wired Mega A                   |    10 |
 | Wired Mega B (already on main) |     9 |
@@ -21,13 +21,14 @@ Measured after professional-nursing seventeenth-batch invent stacked on the #365
 | Wired fifteenth / Article 1 standing leftover children |    45 |
 | Wired sixteenth / remaining pack-key-ready leftovers |    26 |
 | Wired seventeenth / professional nursing leftovers |    21 |
-| Wired total                    |   246 |
+| Wired eighteenth / combined inventable leftovers |    43 |
+| Wired total                    |   289 |
 | Remaining executable           |     0 |
 | Verified / published           | 50 / 50 |
-| Draft unwired                  |    93 |
-| System behavior                |   421 |
+| Draft unwired                  |    51 |
+| System behavior                |   420 |
 
-Draft-unwired blockers (93/93): **no live key + no applicability predicates**. No fixture. Not a per-row novel. Remaining rows need a new pack key or invented SOW — leave them invent-blocked.
+Draft-unwired blockers (51/51): **no live key + no applicability predicates**. No fixture. Not a per-row novel. Remaining rows need a new pack key or invented SOW — leave them invent-blocked.
 
 ## Already wired (1–6) — do not re-cut
 
@@ -228,3 +229,22 @@ Unmapped obligation keys with **no imported parent** (do not invent): `client_sp
 | REQ-16.2.3, REQ-16.2.7, REQ-16.2.8, REQ-16.2.9, REQ-16.4 | pm_nursing_file |
 | REQ-17.2.3, REQ-17.2.7, REQ-17.2.8, REQ-17.2.9, REQ-17.4 | pm_nursing_file |
 | REQ-18.2.3, REQ-18.5, REQ-19.2.7, REQ-19.2.8, REQ-19.2.8.A, REQ-19.2.8.B, REQ-19.2.9.A, REQ-19.2.9.B, REQ-19.2.10, REQ-19.5.a, REQ-19.5.b | pn_medical_care_plan |
+
+## Eighteenth — combined inventable leftovers (wired, unpublished)
+
+**Family:** MEGA invent-2. Ten invented leftover-family liveKeys. Children stay on the parent card. Awarded-code predicates except DHHS quality (contractor standing file). App PR. Pack-changelog seed only — no schema change. Unpublished. Hold merge for Dane. Do not publish these 43. Official catalog clauses only. REQ-34.5 / REQ-35.5 stay invent-blocked contractor-qualification umbrellas (must hold another DHHS91172 code) — not RFS packets. Do not reuse `acre_sei` / `acre_sed` / `acre_sjd` for EPR supervisory training. Never delete MAR/eMAR. Punch pad stays the incident clock. Staff never touch UPI. EVV stays CSV only.
+
+| Rule | Live key | Count |
+| ---- | -------- | ----: |
+| REQ-33.2.a, REQ-33.2.b, REQ-33.2.c, REQ-33.2.d, REQ-33.2.e, REQ-33.2.i, REQ-33.2.j, REQ-33.2.m | sjd_discovery_vocational | 8 |
+| REQ-11.3.1, REQ-20.3.1, REQ-22.3.2, REQ-23.3.3, REQ-24.3.2, REQ-25.3.3 | household_12plus_background | 6 |
+| REQ-11.2.7, REQ-20.2.7, REQ-21.2.6, REQ-31.2.3 | medicaid_eligibility_assist | 4 |
+| REQ-1.19, REQ-1.19.1, REQ-1.19.2, REQ-1.19.3 | dhhs_quality_remediation | 4 |
+| REQ-7.3.4, REQ-9.3.4, REQ-10.3.1, REQ-21.3.5 | program_day_to_day_staff | 4 |
+| REQ-28.2.3, REQ-28.2.6, REQ-29.2.a, REQ-30.2.7 | employment_assessment_fade | 4 |
+| REQ-34.3, REQ-35.3 | milestone_rfs | 2 |
+| REQ-9.2.2, REQ-9.2.8, REQ-9.5.1, REQ-9.5.2 | epr_program_file | 4 |
+| REQ-3.6, REQ-4.6, REQ-5.6 | bc_staff_qualifications | 3 |
+| REQ-21.3.8, REQ-21.3.8.A, REQ-21.3.8.B, REQ-21.3.8.C | rhs_housing_voucher | 4 |
+
+Dropped from the proposed 4-count SJP/SJR cluster: REQ-34.5 / REQ-35.5. Those clauses require a current SJD / SEE / SEI contract under DHHS91172 — contractor-qualification umbrellas, not milestone RFS packets. Mapping them onto `milestone_rfs` would invent a SOW attachment.

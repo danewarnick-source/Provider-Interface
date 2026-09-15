@@ -152,5 +152,15 @@ VALUES
   ('UT', 'UT-2026.07', 'billing_service_match', 'added'),
   ('UT', 'UT-2026.07', 'hhs_billable_day', 'added'),
   ('UT', 'UT-2026.07', 'pm_nursing_file', 'added'),
-  ('UT', 'UT-2026.07', 'pn_medical_care_plan', 'added')
+  ('UT', 'UT-2026.07', 'pn_medical_care_plan', 'added'),
+  ('UT', 'UT-2026.07', 'sjd_discovery_vocational', 'added'),
+  ('UT', 'UT-2026.07', 'household_12plus_background', 'added'),
+  ('UT', 'UT-2026.07', 'medicaid_eligibility_assist', 'added'),
+  ('UT', 'UT-2026.07', 'dhhs_quality_remediation', 'added'),
+  ('UT', 'UT-2026.07', 'program_day_to_day_staff', 'added'),
+  ('UT', 'UT-2026.07', 'employment_assessment_fade', 'added'),
+  ('UT', 'UT-2026.07', 'milestone_rfs', 'added'),
+  ('UT', 'UT-2026.07', 'epr_program_file', 'added'),
+  ('UT', 'UT-2026.07', 'bc_staff_qualifications', 'added'),
+  ('UT', 'UT-2026.07', 'rhs_housing_voucher', 'added')
 ON CONFLICT (state_code, pack_version, obligation_key, change_kind) DO NOTHING;

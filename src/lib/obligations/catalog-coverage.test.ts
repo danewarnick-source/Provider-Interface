@@ -17,7 +17,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.importedParents, 760);
     assert.equal(report.counts.importedElements, 607);
     assert.equal(report.counts.importedRows, 1367);
-    assert.ok(report.counts.executable >= 246);
+    assert.ok(report.counts.executable >= 289);
     assert.equal(report.counts.published, 50);
     assert.equal(report.counts.verified, 50);
     assert.equal(report.counts.wiredFirstBatch, 5);
@@ -38,7 +38,8 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredFifteenthBatch, 45);
     assert.equal(report.counts.wiredSixteenthBatch, 26);
     assert.equal(report.counts.wiredSeventeenthBatch, 21);
-    assert.equal(report.counts.wired, 246);
+    assert.equal(report.counts.wiredEighteenthBatch, 43);
+    assert.equal(report.counts.wired, 289);
     assert.equal(report.counts.remainingExecutable, 0);
     assert.equal(VERIFIED_PUBLICATIONS.length, 50);
     assert.deepEqual(
@@ -52,7 +53,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.deepEqual(committed.counts, report.counts);
     const markdown = formatCatalogCoverageMarkdown(report);
     assert.match(markdown, /Controlled publication \(Soft=none\)/);
-    assert.match(markdown, /None\. All 246 live-key parents have a fixture overlay/);
+    assert.match(markdown, /None\. All 289 live-key parents have a fixture overlay/);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -408,6 +409,45 @@ describe("DHHS91172 catalog coverage", () => {
     const upiRegistry = report.rows.find((r) => r.requirementKey === "REQ-30.8.1");
     assert.ok(upiRegistry);
     assert.equal(upiRegistry.liveKey, null);
+    const sjdDiscovery = report.rows.find((r) => r.requirementKey === "REQ-33.2.a");
+    assert.ok(sjdDiscovery);
+    assert.equal(sjdDiscovery.liveKey, "sjd_discovery_vocational");
+    assert.equal(sjdDiscovery.canPublish, true);
+    assert.equal(sjdDiscovery.canActivate, false);
+    assert.equal(sjdDiscovery.publication, "not_published");
+    const household = report.rows.find((r) => r.requirementKey === "REQ-11.3.1");
+    assert.ok(household);
+    assert.equal(household.liveKey, "household_12plus_background");
+    const medicaidAssist = report.rows.find((r) => r.requirementKey === "REQ-31.2.3");
+    assert.ok(medicaidAssist);
+    assert.equal(medicaidAssist.liveKey, "medicaid_eligibility_assist");
+    const quality = report.rows.find((r) => r.requirementKey === "REQ-1.19.1");
+    assert.ok(quality);
+    assert.equal(quality.liveKey, "dhhs_quality_remediation");
+    const dayToDay = report.rows.find((r) => r.requirementKey === "REQ-7.3.4");
+    assert.ok(dayToDay);
+    assert.equal(dayToDay.liveKey, "program_day_to_day_staff");
+    const fade = report.rows.find((r) => r.requirementKey === "REQ-30.2.7");
+    assert.ok(fade);
+    assert.equal(fade.liveKey, "employment_assessment_fade");
+    const rfs = report.rows.find((r) => r.requirementKey === "REQ-34.3");
+    assert.ok(rfs);
+    assert.equal(rfs.liveKey, "milestone_rfs");
+    const epr = report.rows.find((r) => r.requirementKey === "REQ-9.2.2");
+    assert.ok(epr);
+    assert.equal(epr.liveKey, "epr_program_file");
+    const bcQual = report.rows.find((r) => r.requirementKey === "REQ-3.6");
+    assert.ok(bcQual);
+    assert.equal(bcQual.liveKey, "bc_staff_qualifications");
+    const voucherParent = report.rows.find((r) => r.requirementKey === "REQ-21.3.8");
+    assert.ok(voucherParent);
+    assert.equal(voucherParent.liveKey, "rhs_housing_voucher");
+    const voucher = report.rows.find((r) => r.requirementKey === "REQ-21.3.8.C");
+    assert.ok(voucher);
+    assert.equal(voucher.liveKey, "rhs_housing_voucher");
+    const sjpQual = report.rows.find((r) => r.requirementKey === "REQ-34.5");
+    assert.ok(sjpQual);
+    assert.equal(sjpQual.liveKey, null);
 
     const personReview = report.rows.find((r) => r.requirementKey === "REQ-1.28.5");
     assert.ok(personReview);
