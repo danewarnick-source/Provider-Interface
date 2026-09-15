@@ -54,6 +54,7 @@ import { displayMedicaidId } from "@/lib/medicaid-id";
 import { ClientBudgetPanel } from "@/components/clients/client-budget-panel";
 import { ClientMealPlannerMount } from "@/components/clients/client-meal-planner-mount";
 import { ChoreChartForClient } from "@/components/chores/chore-chart-mount";
+import { ComplianceFactsPanel } from "@/components/compliance/compliance-facts-panel";
 
 import { CaseloadEditor } from "@/components/clients/caseload-editor";
 import {
@@ -539,6 +540,13 @@ function ClientProfileHub() {
               <RightsRestrictionsPanel clientId={clientId} />
             </SectionPanel>
           </SectionGroup>
+          <ComplianceFactsPanel
+            scope="client"
+            entityId={clientId}
+            organizationId={orgId ?? ""}
+            canEdit={!!orgId}
+            title="Client compliance facts"
+          />
           <CustomFieldsForSection clientId={clientId} section="compliance" />
         </TabsContent>
       </Tabs>

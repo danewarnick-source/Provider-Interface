@@ -9,10 +9,7 @@ import { readFileSync } from "node:fs";
 import { describe, it, before, after } from "node:test";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
-import {
-  computeAgencySetupStatus,
-  setupFactsFromOrgRow,
-} from "./agency-setup-gate.ts";
+import { computeAgencySetupStatus, setupFactsFromOrgRow } from "./agency-setup-gate.ts";
 import { persistAgencySetupFactsInternal } from "./agency-setup-persist.ts";
 
 const HIVE_PLATFORM_REF = "dhrrukdcigiiqksibdfb";
@@ -156,9 +153,7 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     await client.query("GRANT anon TO CURRENT_USER");
     await client.query("GRANT hive_it_untrusted TO CURRENT_USER");
     await client.query("GRANT USAGE ON SCHEMA public TO anon, hive_it_untrusted");
-    await client.query(
-      "GRANT SELECT, UPDATE ON public.organizations TO anon, hive_it_untrusted",
-    );
+    await client.query("GRANT SELECT, UPDATE ON public.organizations TO anon, hive_it_untrusted");
 
     await client.query(
       `INSERT INTO public.organizations (id, name, slug, services_offered)
@@ -218,6 +213,9 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     );
 
     await client.query(readRel("../../supabase/migrations/20260914120000_agency_setup_gate.sql"));
+    await client.query(
+      readRel("../../supabase/migrations/20260915080000_agency_setup_questionnaire.sql"),
+    );
   });
 
   after(async () => {
@@ -317,11 +315,10 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     );
   });
 
-  it("matches TypeScript and SQL completion on the dedicated service_area column", async () => {
-    const before = await client.query(
-      "SELECT public.org_setup_is_complete($1) AS complete",
-      [ORG_A],
-    );
+  it("matches TypeScript and SQL completion on the full registry-driven fact set", async () => {
+    const before = await client.query("SELECT public.org_setup_is_complete($1) AS complete", [
+      ORG_A,
+    ]);
     assert.equal(before.rows[0].complete, false);
 
     await client.query(
@@ -330,38 +327,79 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
          fact_operates_ol_site = true,
          fact_uses_volunteers = false,
          fact_has_governing_board = true,
+         fact_provides_respite_overnight = false,
+         fact_is_usor_vendor = false,
+         fact_supports_self_administered_medication = false,
+         fact_acts_as_representative_payee = false,
+         fact_provides_transportation = true,
          approx_client_count = 12,
          service_area = 'Salt Lake, Davis',
+         dhhs_provider_id = '1234567890',
          specializations = 'Behavioral support'
        WHERE id = $1`,
       [ORG_A],
     );
     const row = await client.query(
       `SELECT fact_operates_ol_site, fact_uses_volunteers, fact_has_governing_board,
-              services_offered, approx_client_count, service_area, specializations
+              fact_provides_respite_overnight, fact_is_usor_vendor,
+              fact_supports_self_administered_medication, fact_acts_as_representative_payee,
+              fact_provides_transportation, services_offered, approx_client_count,
+              service_area, dhhs_provider_id, sei_award_date, specializations
        FROM public.organizations WHERE id = $1`,
       [ORG_A],
     );
     const facts = setupFactsFromOrgRow(row.rows[0]);
     assert.equal(facts.serviceArea, "Salt Lake, Davis");
     assert.equal(computeAgencySetupStatus(facts).complete, true);
-    const after = await client.query(
-      "SELECT public.org_setup_is_complete($1) AS complete",
-      [ORG_A],
-    );
+    const after = await client.query("SELECT public.org_setup_is_complete($1) AS complete", [
+      ORG_A,
+    ]);
     assert.equal(after.rows[0].complete, true);
 
-    await client.query(
-      `UPDATE public.organizations SET service_area = NULL WHERE id = $1`,
-      [ORG_A],
-    );
-    const blank = await client.query(
-      "SELECT public.org_setup_is_complete($1) AS complete",
-      [ORG_A],
-    );
+    await client.query(`UPDATE public.organizations SET service_area = NULL WHERE id = $1`, [
+      ORG_A,
+    ]);
+    const blank = await client.query("SELECT public.org_setup_is_complete($1) AS complete", [
+      ORG_A,
+    ]);
     assert.equal(blank.rows[0].complete, false);
     await client.query(
       `UPDATE public.organizations SET service_area = 'Salt Lake, Davis' WHERE id = $1`,
+      [ORG_A],
+    );
+  });
+
+  it("requires the SEI award date in SQL only once SEI is awarded — TypeScript and SQL agree", async () => {
+    const withoutSei = await client.query("SELECT public.org_setup_is_complete($1) AS complete", [
+      ORG_A,
+    ]);
+    assert.equal(withoutSei.rows[0].complete, true);
+
+    await client.query(
+      `UPDATE public.organizations SET services_offered = ARRAY['HHS','RHS','SEI'] WHERE id = $1`,
+      [ORG_A],
+    );
+    const seiNoDate = await client.query("SELECT public.org_setup_is_complete($1) AS complete", [
+      ORG_A,
+    ]);
+    assert.equal(
+      seiNoDate.rows[0].complete,
+      false,
+      "awarding SEI without a date must reopen the gate",
+    );
+
+    await client.query(
+      `UPDATE public.organizations SET sei_award_date = '2026-01-15' WHERE id = $1`,
+      [ORG_A],
+    );
+    const seiWithDate = await client.query("SELECT public.org_setup_is_complete($1) AS complete", [
+      ORG_A,
+    ]);
+    assert.equal(seiWithDate.rows[0].complete, true);
+
+    // Revert so later tests keep seeing ORG_A as complete under HHS/RHS only.
+    await client.query(
+      `UPDATE public.organizations SET services_offered = ARRAY['HHS','RHS'], sei_award_date = NULL WHERE id = $1`,
       [ORG_A],
     );
   });
@@ -556,26 +594,23 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
 
   it("fail-closed: untrusted roles cannot flip setup_create_gate_exempt", async () => {
     for (const role of ["anon", "hive_it_untrusted"] as const) {
-      await assert.rejects(
-        async () => {
-          try {
-            await client.query("ROLLBACK");
-          } catch {
-            /* not in a transaction */
-          }
+      await assert.rejects(async () => {
+        try {
+          await client.query("ROLLBACK");
+        } catch {
+          /* not in a transaction */
+        }
+        await client.query("RESET ROLE");
+        await client.query(`SET ROLE ${role}`);
+        try {
+          await client.query(
+            `UPDATE public.organizations SET setup_create_gate_exempt = true WHERE id = $1`,
+            [ORG_C],
+          );
+        } finally {
           await client.query("RESET ROLE");
-          await client.query(`SET ROLE ${role}`);
-          try {
-            await client.query(
-              `UPDATE public.organizations SET setup_create_gate_exempt = true WHERE id = $1`,
-              [ORG_C],
-            );
-          } finally {
-            await client.query("RESET ROLE");
-          }
-        },
-        /setup_create_gate_exempt is locked/i,
-      );
+        }
+      }, /setup_create_gate_exempt is locked/i);
     }
 
     const afterUntrusted = await client.query(
@@ -639,5 +674,91 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     assert.deepEqual(after.rows[0].services_offered, before.rows[0].services_offered);
     assert.equal(after.rows[0].service_area, before.rows[0].service_area);
     assert.equal(after.rows[0].fact_operates_ol_site, before.rows[0].fact_operates_ol_site);
+  });
+
+  it("compliance_fact_answers (deferred staff/client/location facts) never gates agency setup and stays org-isolated", async () => {
+    const stillComplete = await client.query(
+      "SELECT public.org_setup_is_complete($1) AS complete",
+      [ORG_A],
+    );
+    assert.equal(
+      stillComplete.rows[0].complete,
+      true,
+      "a location/staff/client record having no answers must never re-close the gate",
+    );
+
+    const clientRow = await client.query(
+      `INSERT INTO public.clients (organization_id, first_name, last_name)
+       VALUES ($1, 'Deferred', 'Fact') RETURNING id`,
+      [ORG_A],
+    );
+    const clientId = clientRow.rows[0].id as string;
+
+    let insertedId = "";
+    await asUser(client, USER_A, async () => {
+      const inserted = await client.query(
+        `INSERT INTO public.compliance_fact_answers
+           (organization_id, scope, entity_id, fact_key, status, value, answered_by, answered_at)
+         VALUES ($1, 'client', $2, 'fact_66_aggressive_behavior', 'answered', 'false'::jsonb, $3, now())
+         RETURNING id`,
+        [ORG_A, clientId, USER_A],
+      );
+      insertedId = inserted.rows[0].id;
+    });
+    assert.ok(insertedId);
+
+    // Agency B cannot see or write Agency A's deferred-fact answer.
+    await asUser(client, USER_B, async () => {
+      const seen = await client.query(
+        "SELECT * FROM public.compliance_fact_answers WHERE organization_id = $1",
+        [ORG_A],
+      );
+      assert.equal(seen.rows.length, 0);
+    });
+    await assert.rejects(
+      () =>
+        asUser(client, USER_B, async () => {
+          await client.query(
+            `INSERT INTO public.compliance_fact_answers
+               (organization_id, scope, entity_id, fact_key, status, answered_by)
+             VALUES ($1, 'client', $2, 'sneak-in', 'answered', $3)`,
+            [ORG_A, clientId, USER_B],
+          );
+        }),
+      /row-level security|violates|permission denied/i,
+    );
+
+    // Agency A can read its own answer back.
+    await asUser(client, USER_A, async () => {
+      const mine = await client.query(
+        "SELECT fact_key, status FROM public.compliance_fact_answers WHERE organization_id = $1",
+        [ORG_A],
+      );
+      assert.equal(mine.rows.length, 1);
+      assert.equal(mine.rows[0].fact_key, "fact_66_aggressive_behavior");
+      assert.equal(mine.rows[0].status, "answered");
+    });
+  });
+
+  it("an authenticated admin cannot edit their own setup_completed_at / setup_questionnaire_version", async () => {
+    const before = await client.query(
+      "SELECT setup_completed_at, setup_questionnaire_version FROM public.organizations WHERE id = $1",
+      [ORG_A],
+    );
+    await assert.rejects(
+      () =>
+        asUser(client, USER_A, async () => {
+          await client.query(
+            `UPDATE public.organizations SET setup_completed_at = now(), setup_questionnaire_version = 999 WHERE id = $1`,
+            [ORG_A],
+          );
+        }),
+      /locked|privilege|permission denied|42501/i,
+    );
+    const after = await client.query(
+      "SELECT setup_completed_at, setup_questionnaire_version FROM public.organizations WHERE id = $1",
+      [ORG_A],
+    );
+    assert.deepEqual(after.rows[0], before.rows[0]);
   });
 });
