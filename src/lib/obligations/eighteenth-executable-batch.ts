@@ -100,7 +100,6 @@ export const EIGHTEENTH_BATCH_HOLD_OUT_RULE_IDS = [
   "REQ-8.3.3",
   "REQ-9.3.5",
   "REQ-10.5",
-  "REQ-23.3.1",
   "REQ-30.8.1",
   "REQ-30.8.2",
   "REQ-33.7.1",
