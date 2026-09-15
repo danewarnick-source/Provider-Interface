@@ -22,6 +22,7 @@ import type {
   LoadedDraftRule,
 } from "./draft-rules/catalog-loader.ts";
 import { canActivate, canPublish, structuralPublicationGaps } from "./draft-rules/publication.ts";
+import type { DraftRule } from "./draft-rules/types.ts";
 import { applyVerifiedPublicationOverlay } from "./draft-rules/verified-publication.ts";
 import {
   applyFirstExecutableBatchOverlay,
@@ -122,6 +123,43 @@ export type CatalogCoverageReport = {
   rows: CatalogCoverageRow[];
 };
 
+/** Fixture overlays only. Publication is a separate VERIFIED_PUBLICATIONS step. */
+export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
+  return applyMegaCExecutableBatchOverlay(
+    applyEighthExecutableBatchOverlay(
+      applySeventhExecutableBatchOverlay(
+        applySixthExecutableBatchOverlay(
+          applyFifthExecutableBatchOverlay(
+            applyFourthExecutableBatchOverlay(
+              applyThirdExecutableBatchOverlay(
+                applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+export function applyExecutableBatchOverlays<T extends DraftRule>(rules: readonly T[]): T[] {
+  return applyMegaCExecutableBatchOverlayAll(
+    applyEighthExecutableBatchOverlayAll(
+      applySeventhExecutableBatchOverlayAll(
+        applySixthExecutableBatchOverlayAll(
+          applyFifthExecutableBatchOverlayAll(
+            applyFourthExecutableBatchOverlayAll(
+              applyThirdExecutableBatchOverlayAll(
+                applySecondExecutableBatchOverlayAll(applyFirstExecutableBatchOverlayAll(rules)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 function cell(row: CatalogSheetRow | undefined, key: string): string {
   if (!row) return "";
   const value = row[key];
@@ -172,21 +210,7 @@ function elementRow(el: CatalogSheetRow, parent: LoadedDraftRule | undefined): C
 }
 
 function parentRow(rule: LoadedDraftRule, orgFacts: OrgFacts): CatalogCoverageRow {
-  const executable = applyMegaCExecutableBatchOverlay(
-    applyEighthExecutableBatchOverlay(
-      applySeventhExecutableBatchOverlay(
-        applySixthExecutableBatchOverlay(
-          applyFifthExecutableBatchOverlay(
-            applyFourthExecutableBatchOverlay(
-              applyThirdExecutableBatchOverlay(
-                applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
+  const executable = applyExecutableBatchOverlay(rule);
   const published = applyVerifiedPublicationOverlay([executable])[0] ?? executable;
   const gaps = structuralPublicationGaps(published);
   const policy = staffTaskPolicyForRule(published);
@@ -240,25 +264,7 @@ export function buildCatalogCoverageReport(
   loaded: LoadedCatalog,
   orgFacts: OrgFacts = EMPTY_ORG_FACTS,
 ): CatalogCoverageReport {
-  const parents = applyVerifiedPublicationOverlay(
-    applyMegaCExecutableBatchOverlayAll(
-      applyEighthExecutableBatchOverlayAll(
-        applySeventhExecutableBatchOverlayAll(
-          applySixthExecutableBatchOverlayAll(
-            applyFifthExecutableBatchOverlayAll(
-              applyFourthExecutableBatchOverlayAll(
-                applyThirdExecutableBatchOverlayAll(
-                  applySecondExecutableBatchOverlayAll(
-                    applyFirstExecutableBatchOverlayAll(loaded.parents),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
+  const parents = applyVerifiedPublicationOverlay(applyExecutableBatchOverlays(loaded.parents));
   const byId = new Map(parents.map((p) => [p.id, p]));
   const parentRows = parents.map((rule) => parentRow(rule, orgFacts));
   const elementRows = loaded.elements.map((el) =>
@@ -317,6 +323,13 @@ function remainingExecutableParents(report: CatalogCoverageReport): CatalogCover
 
 function formatRemainingExecutableMarkdown(report: CatalogCoverageReport): string[] {
   const remaining = remainingExecutableParents(report);
+  if (remaining.length === 0) {
+    return [
+      "## Remaining executable (live key, not wired)",
+      "",
+      `None. All ${report.counts.executable} live-key parents have a fixture overlay. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.`,
+    ];
+  }
   const lines = [
     "## Remaining executable (live key, not wired)",
     "",
@@ -329,6 +342,14 @@ function formatRemainingExecutableMarkdown(report: CatalogCoverageReport): strin
     lines.push(`| ${row.requirementKey} | ${row.liveKey} | ${row.implementationStatus} |`);
   }
   return lines;
+}
+
+function formatControlledPublicationMarkdown(report: CatalogCoverageReport): string[] {
+  return [
+    "## Controlled publication (Soft=none)",
+    "",
+    `Wiring is not publication. \`VERIFIED_PUBLICATIONS\` has ${report.counts.published} published / ${report.counts.verified} verified rows. Unresolved stay draft with reasons. One rule or a named READY batch is pasted into \`src/lib/obligations/draft-rules/verified-publication.ts\` after \`npm run propose:verified-publication\`. No global flip. No Soft table. See \`docs/compliance/dhhs91172/CONTROLLED_PUBLISH.md\`.`,
+  ];
 }
 
 function draftUnwiredBlockerCategory(blockers: string[]): string {
@@ -409,6 +430,8 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Wired Mega C person-file / site leftovers (unpublished) | ${c.wiredMegaC} |`,
     `| Wired shared-behavior batches (unpublished) | ${c.wired} |`,
     `| Remaining executable (live key, not yet wired) | ${c.remainingExecutable} |`,
+    "",
+    ...formatControlledPublicationMarkdown(report),
     "",
     ...formatRemainingExecutableMarkdown(report),
     "",

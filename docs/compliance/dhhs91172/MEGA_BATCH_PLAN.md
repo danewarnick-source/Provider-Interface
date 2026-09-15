@@ -1,22 +1,22 @@
-# DHHS91172 remaining executable — mega-batch cut
+# DHHS91172 executable finalize
 
-Soft=none. `VERIFIED_PUBLICATIONS` stays empty. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents: those live keys exist on the pack, but **no imported parent maps to them**.
+Soft=none. All 50 live-key parents are wired. `VERIFIED_PUBLICATIONS` stays empty. Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents: those live keys exist on the pack, but **no imported parent maps to them**.
 
-Measured after batches 1–6, Mega A, Mega B on `origin/main`, then Mega C in this PR.
+Measured on main `219bcb5f` after Mega C (#350). Coverage refreshed in the finalize PR.
 
-| Measure | Count |
-| --- | ---: |
-| Imported parents | 760 |
-| Executable (live key) | 50 |
-| Wired 1–6 | 22 |
-| Wired Mega A | 10 |
-| Wired Mega B (already on main) | 9 |
-| Wired Mega C (this PR) | 9 |
-| Wired total after Mega C | 50 |
-| Remaining executable | 0 |
-| Verified / published | 0 / 0 |
-| Draft unwired | 283 |
-| System behavior | 427 |
+| Measure                        | Count |
+| ------------------------------ | ----: |
+| Imported parents               |   760 |
+| Executable (live key)          |    50 |
+| Wired 1–6                      |    22 |
+| Wired Mega A                   |    10 |
+| Wired Mega B (already on main) |     9 |
+| Wired Mega C (already on main) |     9 |
+| Wired total after Mega C       |    50 |
+| Remaining executable           |     0 |
+| Verified / published           | 0 / 0 |
+| Draft unwired                  |   283 |
+| System behavior                |   427 |
 
 Draft-unwired blockers (283/283): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
 
@@ -52,21 +52,21 @@ REQ-1.9.6 / `medicaid_disclosure_annual` is a live obligation key with **no impo
 
 **Family:** Article 1 standing org policy / process files. File-independent of Mega C.
 
-| Rule | Live key | Disposition |
-| --- | --- | --- |
-| REQ-1.11 | zoning_life_safety | standing |
-| REQ-1.14 | governing_board_records | standing |
-| REQ-1.18 | operating_policies | standing |
-| REQ-1.21 | human_rights_plan | standing |
-| REQ-1.22.c | person_discharge_process | standing |
-| REQ-1.23 | health_support_policies | standing |
-| REQ-1.28.7 | emergency_loan_record | by_design |
-| REQ-1.28.7.G | large_loan_disclosure_process | standing |
-| REQ-1.28.9 | no_gifts_process | standing |
+| Rule         | Live key                      | Disposition |
+| ------------ | ----------------------------- | ----------- |
+| REQ-1.11     | zoning_life_safety            | standing    |
+| REQ-1.14     | governing_board_records       | standing    |
+| REQ-1.18     | operating_policies            | standing    |
+| REQ-1.21     | human_rights_plan             | standing    |
+| REQ-1.22.c   | person_discharge_process      | standing    |
+| REQ-1.23     | health_support_policies       | standing    |
+| REQ-1.28.7   | emergency_loan_record         | by_design   |
+| REQ-1.28.7.G | large_loan_disclosure_process | standing    |
+| REQ-1.28.9   | no_gifts_process              | standing    |
 
 Child elements (board minutes, discharge notices, loan notices, §1.18/§1.23 items) stay on the parent. Soft=none.
 
-## Mega C — THIS PR (9 parents)
+## Mega C — already on main (9 parents)
 
 **Family:** Person-file intake / site leftovers. Do not invent evac or annual-outcome parents.
 

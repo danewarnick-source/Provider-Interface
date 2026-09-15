@@ -31,12 +31,13 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired shared-behavior batches (unpublished) | 50 |
 | Remaining executable (live key, not yet wired) | 0 |
 
+## Controlled publication (Soft=none)
+
+Wiring is not publication. `VERIFIED_PUBLICATIONS` has 0 published / 0 verified rows. Unresolved stay draft with reasons. One rule or a named READY batch is pasted into `src/lib/obligations/draft-rules/verified-publication.ts` after `npm run propose:verified-publication`. No global flip. No Soft table. See `docs/compliance/dhhs91172/CONTROLLED_PUBLISH.md`.
+
 ## Remaining executable (live key, not wired)
 
-0 imported parents have a live company_obligations key but no fixture overlay yet. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.
-
-| Key | Live key | Status |
-| --- | --- | --- |
+None. All 50 live-key parents have a fixture overlay. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.
 
 ## Draft-unwired blocker categories
 
