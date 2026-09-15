@@ -485,7 +485,10 @@ function predicateStatus(
   if (predicate.kind === "awarded_service_codes") {
     const catalogKey = predicate.catalogKey;
     if (!catalogKey) return "unanswered";
-    const codes = sowCatalogEntryByKey(catalogKey)?.service_codes ?? [];
+    const codes =
+      predicate.serviceCodes && predicate.serviceCodes.length > 0
+        ? [...predicate.serviceCodes]
+        : sowCatalogEntryByKey(catalogKey)?.service_codes ?? [];
     return awardedCodeDutyStatus(codes, orgFacts.servicesOffered);
   }
   if (predicate.kind === "support_strategies_assignment") {
