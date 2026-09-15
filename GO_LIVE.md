@@ -4,7 +4,7 @@
 **First tenant:** True North Supports (TNS). Services TNS actually runs: **HHS, SLN, SLH, SEI, DSI**.
 **Test date:** Tuesday, September 1, 2026.
 **This audit:** Thursday, August 27, 2026. Read against repo `main` at merge of PR **#165**. No open PRs or GitHub issues at audit time.
-**Method:** Live code, routes, server functions, migrations, and CI config. Older reports (`LAUNCH_READINESS_AUDIT.md` June 9, `FEATURE_INVENTORY.md`, `docs/platform-qa-map.md` June 18) were treated as hypotheses and **re-checked**. Several of them are stale.
+**Method:** Live code, routes, server functions, migrations, and CI config. Older reports (`docs/audits/LAUNCH_READINESS_AUDIT.md` June 9, `docs/audits/FEATURE_INVENTORY.md`, `docs/platform-qa-map.md` June 18) were treated as hypotheses and **re-checked**. Several of them are stale.
 
 **Verdict for a real agency test:** An Owner (admin) and a Staff member **can complete core operational work** if you use the working paths below, seed the right records, and do not expect live UEVV transmission, invite-link onboarding, or NECTAR/HIVE Training unless those flags and AWS Bedrock are turned on. The product is a working operations platform with specific traps — not a demo shell, and not a finished state-submission system.
 
@@ -170,7 +170,7 @@ Project in repo: `mmknqtdrefbzwfdtykza` (`https://mmknqtdrefbzwfdtykza.supabase.
 | Live UEVV API | **Does not exist.** CSV export only. |
 | `accept_invitation` used by signup | **RPC exists in SQL; frontend never calls it.** |
 
-June `LAUNCH_READINESS_AUDIT.md` is historical. Do not treat it as current.
+June `docs/audits/LAUNCH_READINESS_AUDIT.md` is historical. Do not treat it as current.
 
 ---
 
