@@ -25,7 +25,7 @@
 import type { QuestionScope, AnswerType } from "./agency-setup-questions.ts";
 
 /** Workbook fact_ids intentionally split across an agency question AND a deferred fact. */
-export const COMPOUND_SPLIT_FACT_IDS = ["FACT-003"] as const;
+export const COMPOUND_SPLIT_FACT_IDS = ["FACT-003", "FACT-065"] as const;
 
 export type DeferredRecordKind =
   | "staff_record"
@@ -387,6 +387,26 @@ export const DEFERRED_FACTS: readonly DeferredFactDefinition[] = [
     storage: { kind: "generic", scope: "client" },
     sourceRequirementIdsRaw: "REQ-32.4.5, REQ-32.6.a, REQ-32.6.b, REQ-32.6.c",
     sourceNote: "Same staff-client-pair ambiguity as FACT-044/FACT-060.",
+  },
+  {
+    factId: "FACT-065",
+    scope: "client",
+    deferredTo: "client_record",
+    question: "Has this contractor used a regularly scheduled volunteer with this client?",
+    help:
+      'Only regularly scheduled volunteers, matching the agency-wide "uses volunteers" question — ' +
+      "not friends or natural supports the person chooses.",
+    answerType: "boolean",
+    storage: { kind: "generic", scope: "client" },
+    sourceRequirementIdsRaw: "REQ-1.6.1",
+    sourceNote:
+      'Client-level half of a compound fact ("Does the agency use volunteers? Which clients?") — ' +
+      'see COMPOUND_SPLIT_FACT_IDS and q_uses_volunteers. Previously only asserted in that ' +
+      "question's sourceNote as \"deferred to the client record\" with no actual entry here — the " +
+      'generated coverage table showed FACT-065 as fully answered by the agency-wide yes/no, which ' +
+      "was false: that question only ever collected whether volunteers are used at all, never which " +
+      "clients. This entry closes that gap for real, matching the workbook's own collection_rule for " +
+      'this row ("Split compound questions into typed facts; unknown is not false").',
   },
   {
     factId: "FACT-060",

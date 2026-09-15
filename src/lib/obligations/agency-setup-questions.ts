@@ -344,7 +344,8 @@ export const AGENCY_SETUP_QUESTIONS: readonly AgencySetupQuestionDefinition[] = 
     sourceFactIds: ["FACT-035", "FACT-065"],
     sourceRequirementIds: reqIdsFor("FACT-035", "FACT-065"),
     sourceNote:
-      'FACT-065 ("...which clients?") is the per-client tail of this fact, deferred to the client record.',
+      'FACT-065 ("...which clients?") is the per-client tail of this fact — see DEFERRED_FACTS for ' +
+      "the explicit fact_id mapping.",
   },
   {
     id: "q_has_governing_board",
