@@ -20,8 +20,9 @@
     "wiredSixthBatch": 2,
     "wiredSeventhBatch": 10,
     "wiredEighthBatch": 9,
-    "wired": 41,
-    "remainingExecutable": 9
+    "wiredMegaC": 9,
+    "wired": 50,
+    "remainingExecutable": 0
   },
   "parents": [
     {
@@ -715,22 +716,22 @@
       "title": "Staff Records. The Contractor shall maintain Staff records for its entire Staff.…",
       "owner": "Administrator",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Workbook timing is missing-information. The live ce_12h_annual clock stays on REQ-1.8.7 (employment year 2). Do not invent a second interval or annual-from-completion here.",
       "renewal": "None",
       "liveKey": "ce_12h_annual",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-direct_support_assignment"
+      ],
+      "unansweredFacts": [
+        "Which staff have a direct-support assignment?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review"
+        "Unanswered applicability fact: Which staff have a direct-support assignment?"
       ]
     },
     {
@@ -878,19 +879,17 @@
       "liveKey": "grievance_acknowledgment",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-person_file_intake"
+      ],
+      "unansweredFacts": [
+        "Which persons are admitted or receiving first service?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs"
+        "Unanswered applicability fact: Which persons are admitted or receiving first service?"
       ]
     },
     {
@@ -3159,24 +3158,20 @@
       "liveKey": "support_strategies",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-076"
+        "FACT-076",
+        "LIVE-support_strategies_assignment"
       ],
       "unansweredFacts": [
-        "Service codes exempt from Support Strategies: ELS, MTP, PBA, PM1/PM2, Respite"
+        "Service codes exempt from Support Strategies: ELS, MTP, PBA, PM1/PM2, Respite",
+        "Which staff are assigned to which persons?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: except for the following services: Extended Living Supports (\"ELS\") , Motor Transportation Payment (\"MTP\"), Personal Budget Assistance (\"PBA\"), Professional Medication Monitoring, and Respite | exception of the BSP and the Medical Care Plan, which shall be submitted to the Person's Support Coordinator within the timelines outlined in the Behavior Consultation service descriptions",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "Unanswered applicability fact: Service codes exempt from Support Strategies: ELS, MTP, PBA, PM1/PM2, Respite"
+        "Unanswered applicability fact: Service codes exempt from Support Strategies: ELS, MTP, PBA, PM1/PM2, Respite",
+        "Unanswered applicability fact: Which staff are assigned to which persons?"
       ]
     },
     {
@@ -4607,23 +4602,19 @@
       "liveKey": "housemate_informed_choice",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-017"
+        "FACT-017",
+        "LIVE-residential_housemates"
       ],
       "unansweredFacts": [
-        "Does the client have a legal guardian?"
+        "Does the client have a legal guardian?",
+        "Which DSPD service codes is this contractor awarded?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
+        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Does the client have a legal guardian?"
       ]
     },
@@ -10823,22 +10814,18 @@
       "liveKey": "belongings_inventory",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-004"
+        "FACT-004",
+        "LIVE-belongings_codes"
       ],
       "unansweredFacts": [
-        "Agency awarded HHS?"
+        "Agency awarded HHS?",
+        "Which DSPD service codes is this contractor awarded?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -10950,7 +10937,7 @@
       "liveKey": "hhs_room_board_agreement",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -10960,13 +10947,6 @@
         "Agency awarded HHS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renew before the expiry date on the credential/license; status becomes non-compliant at expiry",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -11357,7 +11337,7 @@
       "liveKey": "hhs_home_cert_annual",
       "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -11371,13 +11351,6 @@
         "Who is the host/professional parent for the client?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "Unresolved renewals: Renew before the expiry date on the credential/license; status becomes non-compliant at expiry",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Which OL licenses/certifications does the agency hold, per location?",
         "Unanswered applicability fact: Who is the host/professional parent for the client?"
@@ -16733,7 +16706,7 @@
       "liveKey": "rhs_lease_agreement",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -16743,12 +16716,6 @@
         "Agency awarded RHS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -17233,7 +17200,7 @@
       "liveKey": "ol_rhs_license_4plus",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -17243,12 +17210,6 @@
         "Agency awarded RHS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "Unresolved renewals: Renew before the expiry date on the credential/license; status becomes non-compliant at expiry",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },

@@ -27,24 +27,16 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired sixth batch (unpublished) | 2 |
 | Wired seventh batch / Mega A (unpublished) | 10 |
 | Wired eighth batch / Mega B (unpublished) | 9 |
-| Wired shared-behavior batches (unpublished) | 41 |
-| Remaining executable (live key, not yet wired) | 9 |
+| Wired Mega C person-file / site leftovers (unpublished) | 9 |
+| Wired shared-behavior batches (unpublished) | 50 |
+| Remaining executable (live key, not yet wired) | 0 |
 
 ## Remaining executable (live key, not wired)
 
-9 imported parents have a live company_obligations key but no fixture overlay yet. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.
+0 imported parents have a live company_obligations key but no fixture overlay yet. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.
 
 | Key | Live key | Status |
 | --- | --- | --- |
-| REQ-1.9 | ce_12h_annual | live_mapped |
-| REQ-1.10.11 | grievance_acknowledgment | live_artifact |
-| REQ-1.24.5 | support_strategies | live_mapped |
-| REQ-1.35 | housemate_informed_choice | live_artifact |
-| REQ-11.3.5 | belongings_inventory | live_artifact |
-| REQ-11.3.9 | hhs_room_board_agreement | live_artifact |
-| REQ-11.5 | hhs_home_cert_annual | live_mapped |
-| REQ-21.3.1 | rhs_lease_agreement | live_artifact |
-| REQ-21.5 | ol_rhs_license_4plus | live_artifact |
 
 ## Draft-unwired blocker categories
 
@@ -85,13 +77,13 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-1.8.6 | DHHS91172-A-0091 | Staff (verified by Administrator/HR) | External approved certification + verified upload or authorized issuer import | hire + 180 days | behavior_intervention_cert | live_mapped | Unanswered applicability fact: Which persons are likely to engage in aggressive, self-injurious, or destructive behavior, and which staff serve them? |
 | REQ-1.8.7 | DHHS91172-A-0097 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | employment year 2 | ce_12h_annual | live_mapped | Unanswered applicability fact: Which staff have a direct-support assignment? |
 | REQ-1.8.8 | DHHS91172-A-0098 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | Before first solo service to a person with ABI / staff-client assignment + first_solo_service_at / once; re-verify on renewal/expiry | abi_training | live_mapped | Unanswered applicability fact: Does the client have an ABI? |
-| REQ-1.9 | DHHS91172-A-0105 | Administrator | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. | ce_12h_annual | live_mapped | Rule has no applicability predicates. |
+| REQ-1.9 | DHHS91172-A-0105 | Administrator | Complete in platform form/record | Workbook timing is missing-information. The live ce_12h_annual clock stays on REQ-1.8.7 (employment year 2). Do not invent a second interval or annual-from-completion here. | ce_12h_annual | live_mapped | Unanswered applicability fact: Which staff have a direct-support assignment? |
 | REQ-1.9.2 | DHHS91172-A-0107 | Staff (verified by Administrator/HR) | Authorized external screening; upload/verify result. Automated initiation only through an authorized supported integration | employment year 1 | background_screening_annual | live_mapped | Unanswered applicability fact: Which staff have an active employment record? |
 | REQ-1.9.4 | DHHS91172-A-0109 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | hire + 30 days | educational_credentials | live_mapped | Unanswered applicability fact: Which OL licenses/certifications does the agency hold, per location? |
 | REQ-1.9.7 | DHHS91172-A-0112 | Staff (verified by Administrator/HR) | Official exclusion source or authorized integration; human review of possible matches | employment year 1 | medicaid_exclusion_annual | live_mapped | Unanswered applicability fact: Which staff have an active employment record? |
 | REQ-1.10 | DHHS91172-A-0113 | Assigned DSP / supervisor | Complete in platform form/record | annual and upon material change |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.10.7 | DHHS91172-A-0120 | Assigned DSP / supervisor | Complete in platform form/record | Per instance of service. Template is chosen on the service date. No invented extra interval. | timesheets_attendance | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
-| REQ-1.10.11 | DHHS91172-A-0130 | Assigned DSP / supervisor | Mark complete with attachment/attestation | admission / first service | grievance_acknowledgment | live_artifact | Rule has no applicability predicates. |
+| REQ-1.10.11 | DHHS91172-A-0130 | Assigned DSP / supervisor | Mark complete with attachment/attestation | admission / first service | grievance_acknowledgment | live_artifact | Unanswered applicability fact: Which persons are admitted or receiving first service? |
 | REQ-1.10.14 | DHHS91172-A-0133 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.11 | DHHS91172-A-0134 | Site supervisor | Mark complete with attachment/attestation | continuous; re-verify at renewal | zoning_life_safety | live_artifact | Unanswered applicability fact: Which sites are licensed and require zoning/Life Safety/fire documentation? |
 | REQ-1.12 | DHHS91172-A-0135 | Administrator | Automated check (no user action) or attestation | per claim / continuous check | evv_visit_verification | live_artifact | Unanswered applicability fact: Does the agency provide respite? Overnight? |
@@ -171,7 +163,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-1.24.2 | DHHS91172-A-0264 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.24.3 | DHHS91172-A-0265 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.24.4 | DHHS91172-A-0266 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.24.5 | DHHS91172-A-0267 | Assigned DSP / supervisor | Mark complete with attachment/attestation | 30 calendar day(s) / PCSP created or updated | support_strategies | live_mapped | Rule has no applicability predicates. |
+| REQ-1.24.5 | DHHS91172-A-0267 | Assigned DSP / supervisor | Mark complete with attachment/attestation | 30 calendar day(s) / PCSP created or updated | support_strategies | live_mapped | Unanswered applicability fact: Service codes exempt from Support Strategies: ELS, MTP, PBA, PM1/PM2, Respite |
 | REQ-1.24.6 | DHHS91172-A-0268 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.24.7 | DHHS91172-A-0269 | Assigned DSP / supervisor | Mark complete with attachment/attestation | admission and each PCSP update |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.24.8 | DHHS91172-A-0270 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
@@ -221,7 +213,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-1.33.1 | DHHS91172-A-0334 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.33.2 | DHHS91172-A-0335 | Assigned DSP / supervisor | Mark complete with attachment/attestation | DSPD Worksheet documents a 2:1 staffing need |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.34 | DHHS91172-A-0336 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.35 | DHHS91172-A-0337 | Assigned DSP / supervisor | Mark complete with attachment/attestation | placement or housemate change | housemate_informed_choice | live_artifact | Rule has no applicability predicates. |
+| REQ-1.35 | DHHS91172-A-0337 | Assigned DSP / supervisor | Mark complete with attachment/attestation | placement or housemate change | housemate_informed_choice | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-1.36.a | DHHS91172-A-0339 | Assigned DSP / supervisor | Mark complete with attachment/attestation | USDC transition |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.36.b | DHHS91172-A-0340 | Assigned DSP / supervisor | Mark complete with attachment/attestation | USDC transition |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-2.1.1 | DHHS91172-A-0342 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -416,11 +408,11 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-11.3.2 | DHHS91172-A-0810 | Site supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-11.3.3 | DHHS91172-A-0818 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.3.4 | DHHS91172-A-0819 | Administrator | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-11.3.5 | DHHS91172-A-0820 | Assigned DSP / supervisor | Complete in platform form/record | admission; update as items are added/discarded | belongings_inventory | live_artifact | Rule has no applicability predicates. |
+| REQ-11.3.5 | DHHS91172-A-0820 | Assigned DSP / supervisor | Complete in platform form/record | admission; update as items are added/discarded | belongings_inventory | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-11.3.6 | DHHS91172-A-0826 | Site supervisor | Mark complete with attachment/attestation | quarterly |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-11.3.7 | DHHS91172-A-0827 | Site supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.3.8 | DHHS91172-A-0835 | Assigned DSP / supervisor | Generate/upload report and mark sent | before start / host/professional-parent staff changes contractor |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-11.3.9 | DHHS91172-A-0836 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. | hhs_room_board_agreement | live_artifact | Rule has no applicability predicates. |
+| REQ-11.3.9 | DHHS91172-A-0836 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. | hhs_room_board_agreement | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-11.3.10 | DHHS91172-A-0837 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.3.11 | DHHS91172-A-0843 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.4.1 | DHHS91172-A-0851 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -432,7 +424,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-11.4.7 | DHHS91172-A-0857 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.4.8 | DHHS91172-A-0858 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.4.9 | DHHS91172-A-0859 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-11.5 | DHHS91172-A-0860 | Site supervisor | Mark complete with attachment/attestation | before start / before HHS begins in the home / annual | hhs_home_cert_annual | live_mapped | Rule has no applicability predicates. |
+| REQ-11.5 | DHHS91172-A-0860 | Site supervisor | Mark complete with attachment/attestation | before start / before HHS begins in the home / annual | hhs_home_cert_annual | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-11.6 | DHHS91172-A-0861 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-11.7.c | DHHS91172-A-0864 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-12.2.1 | DHHS91172-A-0869 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
@@ -597,7 +589,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-21.2.5 | DHHS91172-A-1184 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.2.6 | DHHS91172-A-1185 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Medicaid eligibility review due |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-21.2.7 | DHHS91172-A-1186 | Assigned DSP / supervisor | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-21.3.1 | DHHS91172-A-1188 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. | rhs_lease_agreement | live_artifact | Rule has no applicability predicates. |
+| REQ-21.3.1 | DHHS91172-A-1188 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. | rhs_lease_agreement | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-21.3.2 | DHHS91172-A-1196 | Site supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-21.3.3 | DHHS91172-A-1204 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.3.4 | DHHS91172-A-1205 | Assigned DSP / supervisor | Mark complete with attachment/attestation | before start / enhanced staffing (4+ hours/day 1:1) begins |  | draft_unwired | Rule has no applicability predicates. |
@@ -612,7 +604,7 @@ Parents connect to the existing live obligation engine. Child elements are check
 | REQ-21.4.1 | DHHS91172-A-1225 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.4.2 | DHHS91172-A-1226 | Administrator | Automated check (no user action) or attestation | before start / service/assignment start / per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.4.3 | DHHS91172-A-1227 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
-| REQ-21.5 | DHHS91172-A-1228 | Administrator | External: DHHS Office of Licensing/DLBC portal, record completion in platform | once; re-verify on renewal/expiry | ol_rhs_license_4plus | live_artifact | Rule has no applicability predicates. |
+| REQ-21.5 | DHHS91172-A-1228 | Administrator | External: DHHS Office of Licensing/DLBC portal, record completion in platform | once; re-verify on renewal/expiry | ol_rhs_license_4plus | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-21.6.c | DHHS91172-A-1233 | Administrator | External: submit via DSPD Google Form, record completion in platform | August 30 (60 days after fiscal year end) / fiscal year end (June 30) / annual (fiscal year) |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-21.7.a | DHHS91172-A-1236 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.7.b | DHHS91172-A-1237 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
