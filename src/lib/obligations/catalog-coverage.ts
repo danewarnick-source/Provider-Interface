@@ -104,6 +104,11 @@ import {
   applyFifteenthExecutableBatchOverlayAll,
   fifteenthBatchParentIsWired,
 } from "./fifteenth-executable-batch.ts";
+import {
+  applySixteenthExecutableBatchOverlay,
+  applySixteenthExecutableBatchOverlayAll,
+  sixteenthBatchParentIsWired,
+} from "./sixteenth-executable-batch.ts";
 
 export type CatalogCoverageRow = {
   requirementKey: string;
@@ -156,6 +161,7 @@ export type CatalogCoverageCounts = {
   wiredThirteenthBatch: number;
   wiredFourteenthBatch: number;
   wiredFifteenthBatch: number;
+  wiredSixteenthBatch: number;
   remainingExecutable: number;
 };
 
@@ -167,21 +173,23 @@ export type CatalogCoverageReport = {
 
 /** Fixture overlays only. Publication is a separate VERIFIED_PUBLICATIONS step. */
 export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
-  return applyFifteenthExecutableBatchOverlay(
-    applyFourteenthExecutableBatchOverlay(
-      applyThirteenthExecutableBatchOverlay(
-        applyTwelfthExecutableBatchOverlay(
-          applyEleventhExecutableBatchOverlay(
-            applyTenthExecutableBatchOverlay(
-              applyNinthExecutableBatchOverlay(
-                applyMegaCExecutableBatchOverlay(
-                  applyEighthExecutableBatchOverlay(
-                    applySeventhExecutableBatchOverlay(
-                      applySixthExecutableBatchOverlay(
-                        applyFifthExecutableBatchOverlay(
-                          applyFourthExecutableBatchOverlay(
-                            applyThirdExecutableBatchOverlay(
-                              applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+  return applySixteenthExecutableBatchOverlay(
+    applyFifteenthExecutableBatchOverlay(
+      applyFourteenthExecutableBatchOverlay(
+        applyThirteenthExecutableBatchOverlay(
+          applyTwelfthExecutableBatchOverlay(
+            applyEleventhExecutableBatchOverlay(
+              applyTenthExecutableBatchOverlay(
+                applyNinthExecutableBatchOverlay(
+                  applyMegaCExecutableBatchOverlay(
+                    applyEighthExecutableBatchOverlay(
+                      applySeventhExecutableBatchOverlay(
+                        applySixthExecutableBatchOverlay(
+                          applyFifthExecutableBatchOverlay(
+                            applyFourthExecutableBatchOverlay(
+                              applyThirdExecutableBatchOverlay(
+                                applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+                              ),
                             ),
                           ),
                         ),
@@ -199,22 +207,24 @@ export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
 }
 
 export function applyExecutableBatchOverlays<T extends DraftRule>(rules: readonly T[]): T[] {
-  return applyFifteenthExecutableBatchOverlayAll(
-    applyFourteenthExecutableBatchOverlayAll(
-      applyThirteenthExecutableBatchOverlayAll(
-        applyTwelfthExecutableBatchOverlayAll(
-          applyEleventhExecutableBatchOverlayAll(
-            applyTenthExecutableBatchOverlayAll(
-              applyNinthExecutableBatchOverlayAll(
-                applyMegaCExecutableBatchOverlayAll(
-                  applyEighthExecutableBatchOverlayAll(
-                    applySeventhExecutableBatchOverlayAll(
-                      applySixthExecutableBatchOverlayAll(
-                        applyFifthExecutableBatchOverlayAll(
-                          applyFourthExecutableBatchOverlayAll(
-                            applyThirdExecutableBatchOverlayAll(
-                              applySecondExecutableBatchOverlayAll(
-                                applyFirstExecutableBatchOverlayAll(rules),
+  return applySixteenthExecutableBatchOverlayAll(
+    applyFifteenthExecutableBatchOverlayAll(
+      applyFourteenthExecutableBatchOverlayAll(
+        applyThirteenthExecutableBatchOverlayAll(
+          applyTwelfthExecutableBatchOverlayAll(
+            applyEleventhExecutableBatchOverlayAll(
+              applyTenthExecutableBatchOverlayAll(
+                applyNinthExecutableBatchOverlayAll(
+                  applyMegaCExecutableBatchOverlayAll(
+                    applyEighthExecutableBatchOverlayAll(
+                      applySeventhExecutableBatchOverlayAll(
+                        applySixthExecutableBatchOverlayAll(
+                          applyFifthExecutableBatchOverlayAll(
+                            applyFourthExecutableBatchOverlayAll(
+                              applyThirdExecutableBatchOverlayAll(
+                                applySecondExecutableBatchOverlayAll(
+                                  applyFirstExecutableBatchOverlayAll(rules),
+                                ),
                               ),
                             ),
                           ),
@@ -372,6 +382,7 @@ export function buildCatalogCoverageReport(
     wiredThirteenthBatch: parents.filter((rule) => thirteenthBatchParentIsWired(rule)).length,
     wiredFourteenthBatch: parents.filter((rule) => fourteenthBatchParentIsWired(rule)).length,
     wiredFifteenthBatch: parents.filter((rule) => fifteenthBatchParentIsWired(rule)).length,
+    wiredSixteenthBatch: parents.filter((rule) => sixteenthBatchParentIsWired(rule)).length,
     wired: parents.filter(
       (rule) =>
         firstBatchParentIsWired(rule) ||
@@ -389,7 +400,8 @@ export function buildCatalogCoverageReport(
         twelfthBatchParentIsWired(rule) ||
         thirteenthBatchParentIsWired(rule) ||
         fourteenthBatchParentIsWired(rule) ||
-        fifteenthBatchParentIsWired(rule),
+        fifteenthBatchParentIsWired(rule) ||
+        sixteenthBatchParentIsWired(rule),
     ).length,
     remainingExecutable: parentOnly.filter((r) => r.liveKey != null && r.canPublish === false)
       .length,
@@ -521,6 +533,7 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Wired thirteenth batch / OL Day Treatment Day Support twins (fixture overlay) | ${c.wiredThirteenthBatch} |`,
     `| Wired fourteenth batch / quarterly evac drill leftovers (fixture overlay) | ${c.wiredFourteenthBatch} |`,
     `| Wired fifteenth batch / Article 1 standing leftover children (fixture overlay) | ${c.wiredFifteenthBatch} |`,
+    `| Wired sixteenth batch / remaining pack-key-ready leftovers (fixture overlay) | ${c.wiredSixteenthBatch} |`,
     `| Wired shared-behavior batches (fixture overlay) | ${c.wired} |`,
     `| Remaining executable (live key, not yet wired) | ${c.remainingExecutable} |`,
     "",

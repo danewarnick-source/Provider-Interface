@@ -51,9 +51,17 @@ describe("catalog live bridge", () => {
     assert.equal(liveObligationKeyForRequirement("REQ-1.28.7.A"), "emergency_loan_record");
     assert.equal(liveObligationKeyForRequirement("REQ-1.30.2"), "driving_record_transport");
     assert.equal(liveObligationKeyForRequirement("REQ-1.13.4"), null);
-    assert.equal(liveObligationKeyForRequirement("REQ-1.28.6"), null);
+    assert.equal(liveObligationKeyForRequirement("REQ-1.28.6"), "rights_restriction_record");
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.13.4"], undefined);
-    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.28.6"], undefined);
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.28.6"], "rights_restriction_record");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.27.1"), "incident_reporting_process");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.20.a"), "hrc_committee");
+    assert.equal(liveObligationKeyForRequirement("REQ-20.3.5"), "belongings_inventory");
+    assert.equal(liveObligationKeyForRequirement("REQ-20.3.9"), "pps_room_board_agreement");
+    assert.equal(liveObligationKeyForRequirement("REQ-20.5.1"), "pps_foster_license");
+    assert.equal(liveObligationKeyForRequirement("REQ-12.4"), "hsq_safe_environment");
+    assert.equal(liveObligationKeyForRequirement("REQ-33.5.a"), "usor_job_development_sjd");
+    assert.equal(liveObligationKeyForRequirement("REQ-15.3.8"), "pba_financial_review");
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-11.3"], undefined);
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-20.3"], undefined);
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-21.3"], undefined);
@@ -103,6 +111,12 @@ describe("catalog live bridge", () => {
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.17.a"] ?? ""));
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.23.b"] ?? ""));
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.23.h"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.27.1"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.20.a"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.28.6"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-20.5.1"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-12.4"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-33.5.a"] ?? ""));
   });
 
   it("never mints a staff task for child elements", () => {
