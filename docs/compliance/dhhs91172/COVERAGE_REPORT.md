@@ -11,13 +11,13 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Imported parents | 760 |
 | Imported elements | 607 |
 | Imported rows | 1367 |
-| Executable (live key mapped) | 151 |
+| Executable (live key mapped) | 154 |
 | Verified / activatable | 50 |
 | Published | 50 |
 | Blocked (rule-specific gap, no live key) | 0 |
-| Live mapped (clock) | 66 |
+| Live mapped (clock) | 69 |
 | System / standing behavior | 421 |
-| Draft unwired | 188 |
+| Draft unwired | 185 |
 | Element of parent | 607 |
 | Wired first batch (fixture overlay) | 5 |
 | Wired second batch (fixture overlay) | 6 |
@@ -33,7 +33,8 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired eleventh batch / FY Google Form annual twins (fixture overlay) | 34 |
 | Wired twelfth batch / SEI-SJD UPI employment leftovers (fixture overlay) | 6 |
 | Wired thirteenth batch / OL Day Treatment Day Support twins (fixture overlay) | 5 |
-| Wired shared-behavior batches (fixture overlay) | 151 |
+| Wired fourteenth batch / quarterly evac drill leftovers (fixture overlay) | 3 |
+| Wired shared-behavior batches (fixture overlay) | 154 |
 | Remaining executable (live key, not yet wired) | 0 |
 
 ## Controlled publication (Soft=none)
@@ -42,15 +43,15 @@ Wiring is not publication. `VERIFIED_PUBLICATIONS` has 50 published / 50 verifie
 
 ## Remaining executable (live key, not wired)
 
-None. All 151 live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents — those live keys have no matching imported parent. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
+None. All 154 live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3.
 
 ## Draft-unwired blocker categories
 
-188 draft-unwired parents. Categories only — not a row novel.
+185 draft-unwired parents. Categories only — not a row novel.
 
 | Category | Count |
 | --- | ---: |
-| no_live_key + no_predicates | 188 |
+| no_live_key + no_predicates | 185 |
 
 421 additional parents are system_behavior (creates_user_task=no / SYSTEM handling) — not draft-unwired and not a live clock.
 
@@ -415,7 +416,7 @@ None. All 151 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-11.3.3 | DHHS91172-A-0818 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.3.4 | DHHS91172-A-0819 | Administrator | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.3.5 | DHHS91172-A-0820 | Assigned DSP / supervisor | Complete in platform form/record | admission; update as items are added/discarded | belongings_inventory | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
-| REQ-11.3.6 | DHHS91172-A-0826 | Site supervisor | Mark complete with attachment/attestation | quarterly |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-11.3.6 | DHHS91172-A-0826 | Site supervisor | Mark complete with attachment/attestation | quarterly | hhs_evac_drills_quarterly | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-11.3.7 | DHHS91172-A-0827 | Site supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-11.3.8 | DHHS91172-A-0835 | Assigned DSP / supervisor | Generate/upload report and mark sent | before start / host/professional-parent staff changes contractor |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-11.3.9 | DHHS91172-A-0836 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. | hhs_room_board_agreement | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
@@ -564,7 +565,7 @@ None. All 151 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-20.3.3 | DHHS91172-A-1122 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-20.3.4 | DHHS91172-A-1123 | Administrator | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-20.3.5 | DHHS91172-A-1124 | Assigned DSP / supervisor | Complete in platform form/record | admission; update as items are added/discarded |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-20.3.6 | DHHS91172-A-1130 | Site supervisor | Mark complete with attachment/attestation | quarterly |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-20.3.6 | DHHS91172-A-1130 | Site supervisor | Mark complete with attachment/attestation | quarterly | pps_evac_drills_quarterly | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-20.3.7 | DHHS91172-A-1131 | Site supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-20.3.8 | DHHS91172-A-1139 | Assigned DSP / supervisor | Generate/upload report and mark sent | before start / host/professional-parent staff changes contractor |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-20.3.9 | DHHS91172-A-1140 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
@@ -600,7 +601,7 @@ None. All 151 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-21.3.3 | DHHS91172-A-1204 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.3.4 | DHHS91172-A-1205 | Assigned DSP / supervisor | Mark complete with attachment/attestation | before start / enhanced staffing (4+ hours/day 1:1) begins |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-21.3.5 | DHHS91172-A-1206 | Site supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-21.3.6 | DHHS91172-A-1207 | Site supervisor | Mark complete with attachment/attestation | quarterly |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-21.3.6 | DHHS91172-A-1207 | Site supervisor | Mark complete with attachment/attestation | quarterly | rhs_evac_drills_quarterly | live_mapped | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-21.3.7 | DHHS91172-A-1208 | Assigned DSP / supervisor | Complete in platform form/record | admission; update as items are added/discarded |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-21.3.8 | DHHS91172-A-1214 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-21.3.8.A | DHHS91172-A-1215 | Assigned DSP / supervisor | Mark complete with attachment/attestation | annual (PCPT meeting) and at voucher approval |  | draft_unwired | Rule has no applicability predicates. |

@@ -94,6 +94,11 @@ import {
   applyThirteenthExecutableBatchOverlayAll,
   thirteenthBatchParentIsWired,
 } from "./thirteenth-executable-batch.ts";
+import {
+  applyFourteenthExecutableBatchOverlay,
+  applyFourteenthExecutableBatchOverlayAll,
+  fourteenthBatchParentIsWired,
+} from "./fourteenth-executable-batch.ts";
 
 export type CatalogCoverageRow = {
   requirementKey: string;
@@ -144,6 +149,7 @@ export type CatalogCoverageCounts = {
   wiredEleventhBatch: number;
   wiredTwelfthBatch: number;
   wiredThirteenthBatch: number;
+  wiredFourteenthBatch: number;
   remainingExecutable: number;
 };
 
@@ -155,19 +161,21 @@ export type CatalogCoverageReport = {
 
 /** Fixture overlays only. Publication is a separate VERIFIED_PUBLICATIONS step. */
 export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
-  return applyThirteenthExecutableBatchOverlay(
-    applyTwelfthExecutableBatchOverlay(
-      applyEleventhExecutableBatchOverlay(
-        applyTenthExecutableBatchOverlay(
-          applyNinthExecutableBatchOverlay(
-            applyMegaCExecutableBatchOverlay(
-              applyEighthExecutableBatchOverlay(
-                applySeventhExecutableBatchOverlay(
-                  applySixthExecutableBatchOverlay(
-                    applyFifthExecutableBatchOverlay(
-                      applyFourthExecutableBatchOverlay(
-                        applyThirdExecutableBatchOverlay(
-                          applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+  return applyFourteenthExecutableBatchOverlay(
+    applyThirteenthExecutableBatchOverlay(
+      applyTwelfthExecutableBatchOverlay(
+        applyEleventhExecutableBatchOverlay(
+          applyTenthExecutableBatchOverlay(
+            applyNinthExecutableBatchOverlay(
+              applyMegaCExecutableBatchOverlay(
+                applyEighthExecutableBatchOverlay(
+                  applySeventhExecutableBatchOverlay(
+                    applySixthExecutableBatchOverlay(
+                      applyFifthExecutableBatchOverlay(
+                        applyFourthExecutableBatchOverlay(
+                          applyThirdExecutableBatchOverlay(
+                            applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+                          ),
                         ),
                       ),
                     ),
@@ -183,20 +191,22 @@ export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
 }
 
 export function applyExecutableBatchOverlays<T extends DraftRule>(rules: readonly T[]): T[] {
-  return applyThirteenthExecutableBatchOverlayAll(
-    applyTwelfthExecutableBatchOverlayAll(
-      applyEleventhExecutableBatchOverlayAll(
-        applyTenthExecutableBatchOverlayAll(
-          applyNinthExecutableBatchOverlayAll(
-            applyMegaCExecutableBatchOverlayAll(
-              applyEighthExecutableBatchOverlayAll(
-                applySeventhExecutableBatchOverlayAll(
-                  applySixthExecutableBatchOverlayAll(
-                    applyFifthExecutableBatchOverlayAll(
-                      applyFourthExecutableBatchOverlayAll(
-                        applyThirdExecutableBatchOverlayAll(
-                          applySecondExecutableBatchOverlayAll(
-                            applyFirstExecutableBatchOverlayAll(rules),
+  return applyFourteenthExecutableBatchOverlayAll(
+    applyThirteenthExecutableBatchOverlayAll(
+      applyTwelfthExecutableBatchOverlayAll(
+        applyEleventhExecutableBatchOverlayAll(
+          applyTenthExecutableBatchOverlayAll(
+            applyNinthExecutableBatchOverlayAll(
+              applyMegaCExecutableBatchOverlayAll(
+                applyEighthExecutableBatchOverlayAll(
+                  applySeventhExecutableBatchOverlayAll(
+                    applySixthExecutableBatchOverlayAll(
+                      applyFifthExecutableBatchOverlayAll(
+                        applyFourthExecutableBatchOverlayAll(
+                          applyThirdExecutableBatchOverlayAll(
+                            applySecondExecutableBatchOverlayAll(
+                              applyFirstExecutableBatchOverlayAll(rules),
+                            ),
                           ),
                         ),
                       ),
@@ -350,6 +360,7 @@ export function buildCatalogCoverageReport(
     wiredEleventhBatch: parents.filter((rule) => eleventhBatchParentIsWired(rule)).length,
     wiredTwelfthBatch: parents.filter((rule) => twelfthBatchParentIsWired(rule)).length,
     wiredThirteenthBatch: parents.filter((rule) => thirteenthBatchParentIsWired(rule)).length,
+    wiredFourteenthBatch: parents.filter((rule) => fourteenthBatchParentIsWired(rule)).length,
     wired: parents.filter(
       (rule) =>
         firstBatchParentIsWired(rule) ||
@@ -365,7 +376,8 @@ export function buildCatalogCoverageReport(
         tenthBatchParentIsWired(rule) ||
         eleventhBatchParentIsWired(rule) ||
         twelfthBatchParentIsWired(rule) ||
-        thirteenthBatchParentIsWired(rule),
+        thirteenthBatchParentIsWired(rule) ||
+        fourteenthBatchParentIsWired(rule),
     ).length,
     remainingExecutable: parentOnly.filter((r) => r.liveKey != null && r.canPublish === false)
       .length,
@@ -389,13 +401,13 @@ function formatRemainingExecutableMarkdown(report: CatalogCoverageReport): strin
     return [
       "## Remaining executable (live key, not wired)",
       "",
-      `None. All ${report.counts.executable} live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents — those live keys have no matching imported parent. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.`,
+      `None. All ${report.counts.executable} live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3.`,
     ];
   }
   const lines = [
     "## Remaining executable (live key, not wired)",
     "",
-    `${remaining.length} imported parents have a live company_obligations key but no fixture overlay yet. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents — those live keys have no matching imported parent. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.`,
+    `${remaining.length} imported parents have a live company_obligations key but no fixture overlay yet. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3.`,
     "",
     "| Key | Live key | Status |",
     "| --- | --- | --- |",
@@ -495,6 +507,7 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Wired eleventh batch / FY Google Form annual twins (fixture overlay) | ${c.wiredEleventhBatch} |`,
     `| Wired twelfth batch / SEI-SJD UPI employment leftovers (fixture overlay) | ${c.wiredTwelfthBatch} |`,
     `| Wired thirteenth batch / OL Day Treatment Day Support twins (fixture overlay) | ${c.wiredThirteenthBatch} |`,
+    `| Wired fourteenth batch / quarterly evac drill leftovers (fixture overlay) | ${c.wiredFourteenthBatch} |`,
     `| Wired shared-behavior batches (fixture overlay) | ${c.wired} |`,
     `| Remaining executable (live key, not yet wired) | ${c.remainingExecutable} |`,
     "",

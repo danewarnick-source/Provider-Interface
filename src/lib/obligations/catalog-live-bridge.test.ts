@@ -33,6 +33,12 @@ describe("catalog live bridge", () => {
     assert.equal(liveObligationKeyForRequirement("REQ-8.5.a"), "ol_day_tx_license_4plus");
     assert.equal(liveObligationKeyForRequirement("REQ-8.5.b"), "ol_day_support_cert_3or_fewer");
     assert.equal(liveObligationKeyForRequirement("REQ-9.6.a"), "ol_day_tx_license_4plus");
+    assert.equal(liveObligationKeyForRequirement("REQ-11.3.6"), "hhs_evac_drills_quarterly");
+    assert.equal(liveObligationKeyForRequirement("REQ-20.3.6"), "pps_evac_drills_quarterly");
+    assert.equal(liveObligationKeyForRequirement("REQ-21.3.6"), "rhs_evac_drills_quarterly");
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-11.3"], undefined);
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-20.3"], undefined);
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-21.3"], undefined);
     assert.equal(liveObligationKeyForRequirement("REQ-7.5.c"), null);
     assert.equal(liveObligationKeyForRequirement("REQ-1.4.3"), null);
     assert.equal(liveObligationKeyForRequirement("REQ-1.34"), null);
@@ -70,6 +76,10 @@ describe("catalog live bridge", () => {
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-7.5.b"] ?? ""));
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-7.5.a"], "ol_day_tx_license_4plus");
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-7.5.b"], "ol_day_support_cert_3or_fewer");
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-11.3.6"] ?? ""));
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-11.3.6"], "hhs_evac_drills_quarterly");
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-20.3.6"], "pps_evac_drills_quarterly");
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-21.3.6"], "rhs_evac_drills_quarterly");
   });
 
   it("never mints a staff task for child elements", () => {
