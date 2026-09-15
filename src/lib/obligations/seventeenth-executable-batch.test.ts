@@ -28,7 +28,7 @@ import {
 } from "./seventeenth-executable-batch.ts";
 import { applySixteenthExecutableBatchOverlay } from "./sixteenth-executable-batch.ts";
 import { evaluateCatalogFact } from "./catalog-fact-questions.ts";
-import { EXPLICIT_REQ_TO_LIVE_KEY, liveObligationKeyForRule, staffTaskPolicy } from "./catalog-live-bridge.ts";
+import { liveObligationKeyForRule, staffTaskPolicy } from "./catalog-live-bridge.ts";
 
 describe("seventeenth executable batch — professional nursing leftovers", () => {
   it("overlays fixture logic onto the 21 leftover children without publishing", () => {
@@ -71,7 +71,6 @@ describe("seventeenth executable batch — professional nursing leftovers", () =
       if (!parent) continue;
       assert.equal(applySeventeenthExecutableBatchOverlay(parent).predicates.length, 0, id);
       assert.equal(seventeenthBatchParentIsWired(parent), false, id);
-      assert.equal(EXPLICIT_REQ_TO_LIVE_KEY[id], undefined, id);
     }
     const sixteenth = loaded.parents.find((r) => r.id === "REQ-1.27.1");
     assert.ok(sixteenth);

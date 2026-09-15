@@ -100,7 +100,6 @@ describe("fifteenth executable batch — Article 1 standing leftover children", 
       assert.equal(applyFifteenthExecutableBatchOverlay(parent).predicates.length, 0, id);
       assert.equal(fifteenthBatchParentIsWired(parent), false, id);
     }
-    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.13.4"], undefined);
     assert.equal(loaded.parents.some((r) => r.id === "REQ-1.17"), false);
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.17"], "personnel_policies");
     for (const id of ["REQ-1.21", "REQ-1.35", "REQ-11.3.5", "REQ-11.3.6"]) {

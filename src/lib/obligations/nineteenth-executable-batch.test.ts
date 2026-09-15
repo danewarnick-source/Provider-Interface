@@ -28,7 +28,7 @@ import {
 } from "./nineteenth-executable-batch.ts";
 import { applyEighteenthExecutableBatchOverlay } from "./eighteenth-executable-batch.ts";
 import { evaluateCatalogFact } from "./catalog-fact-questions.ts";
-import { EXPLICIT_REQ_TO_LIVE_KEY, liveObligationKeyForRule, staffTaskPolicy } from "./catalog-live-bridge.ts";
+import { liveObligationKeyForRule, staffTaskPolicy } from "./catalog-live-bridge.ts";
 
 describe("nineteenth executable batch — remaining inventable leftovers", () => {
   it("overlays fixture logic onto the 25 leftover children without publishing", () => {
@@ -71,7 +71,6 @@ describe("nineteenth executable batch — remaining inventable leftovers", () =>
       if (!parent) continue;
       assert.equal(applyNineteenthExecutableBatchOverlay(parent).predicates.length, 0, id);
       assert.equal(nineteenthBatchParentIsWired(parent), false, id);
-      assert.equal(EXPLICIT_REQ_TO_LIVE_KEY[id], undefined, id);
     }
     const eighteenth = loaded.parents.find((r) => r.id === "REQ-33.2.a");
     assert.ok(eighteenth);

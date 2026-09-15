@@ -482,7 +482,7 @@ function predicateStatus(
     if (staff.assignedClientIds.length > 0) return "applies";
     return staffDutyFootprint(staff) === "office" ? "does_not_apply" : "unanswered";
   }
-  if (predicate.kind === "awarded_service_codes") {
+  if (predicate.kind === "awarded_service_codes" || predicate.kind === "eligibility_gate") {
     const catalogKey = predicate.catalogKey;
     if (!catalogKey) return "unanswered";
     const codes =
@@ -490,6 +490,13 @@ function predicateStatus(
         ? [...predicate.serviceCodes]
         : sowCatalogEntryByKey(catalogKey)?.service_codes ?? [];
     return awardedCodeDutyStatus(codes, orgFacts.servicesOffered);
+  }
+  if (
+    predicate.kind === "as_offered_event" ||
+    predicate.kind === "historical_cohort" ||
+    predicate.kind === "event_triggered"
+  ) {
+    return predicate.catalogKey ? "applies" : "unanswered";
   }
   if (predicate.kind === "support_strategies_assignment") {
     const catalogKey = predicate.catalogKey;
