@@ -82,13 +82,13 @@ describe("second executable batch — service assignment clocks", () => {
     const loaded = readCommittedCatalog();
     const batch = secondExecutableBatchParents(loaded.parents);
     assert.equal(batch.length, SECOND_EXECUTABLE_BATCH_RULE_IDS.length);
-    assert.equal(VERIFIED_PUBLICATIONS.length, 0);
+    assert.equal(VERIFIED_PUBLICATIONS.length, 50);
     for (const rule of batch) {
       assert.equal(rule.lifecycle, "draft", rule.id);
       assert.equal(rule.publication, "not_published", rule.id);
       assert.ok(canPublish(rule), `${rule.id} ${JSON.stringify(rule.predicates)}`);
       assert.equal(canActivate(rule), false, rule.id);
-      assert.ok(secondBatchPublicationStaysDeliberate(rule), rule.id);
+      assert.equal(secondBatchPublicationStaysDeliberate(rule), false, rule.id);
       assert.ok(secondBatchParentIsWired(rule), rule.id);
       assert.equal(rule.group.parentAssignment, "one", rule.id);
       assert.ok(liveObligationKeyForRule(rule), rule.id);

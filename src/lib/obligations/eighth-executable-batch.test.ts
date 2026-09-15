@@ -58,13 +58,13 @@ describe("eighth executable batch — Article 1 org policy / process files", () 
     const loaded = readCommittedCatalog();
     const batch = eighthExecutableBatchParents(loaded.parents);
     assert.equal(batch.length, EIGHTH_EXECUTABLE_BATCH_RULE_IDS.length);
-    assert.equal(VERIFIED_PUBLICATIONS.length, 0);
+    assert.equal(VERIFIED_PUBLICATIONS.length, 50);
     for (const rule of batch) {
       assert.equal(rule.lifecycle, "draft", rule.id);
       assert.equal(rule.publication, "not_published", rule.id);
       assert.ok(canPublish(rule), `${rule.id} ${JSON.stringify(rule.predicates)}`);
       assert.equal(canActivate(rule), false, rule.id);
-      assert.ok(eighthBatchPublicationStaysDeliberate(rule), rule.id);
+      assert.equal(eighthBatchPublicationStaysDeliberate(rule), false, rule.id);
       assert.ok(eighthBatchParentIsWired(rule), rule.id);
       assert.equal(rule.group.parentAssignment, "one", rule.id);
       assert.ok(liveObligationKeyForRule(rule), rule.id);

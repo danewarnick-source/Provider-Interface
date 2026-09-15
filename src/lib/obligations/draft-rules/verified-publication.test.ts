@@ -11,8 +11,18 @@ const APPROVAL = {
 };
 
 describe("per-rule verified publication", () => {
-  it("starts with an empty overlay — nothing is bulk-published", () => {
-    assert.equal(VERIFIED_PUBLICATIONS.length, 0);
+  it("holds Dane's Soft=none overlay for the 50 READY wired parents", () => {
+    assert.equal(VERIFIED_PUBLICATIONS.length, 50);
+    assert.ok(
+      VERIFIED_PUBLICATIONS.every(
+        (row) =>
+          row.approval.actorId === "dane" &&
+          row.approval.actorLabel === "Dane" &&
+          row.approval.approvedAt === "2026-09-15T02:25:00.000Z",
+      ),
+    );
+    const ids = VERIFIED_PUBLICATIONS.map((row) => row.ruleId);
+    assert.equal(new Set(ids).size, 50);
   });
 
   it("publishes one complete rule and leaves a gapped sibling draft", () => {

@@ -415,7 +415,7 @@ export function sixthBatchParentIsWired(rule: DraftRule): boolean {
   const policy = staffTaskPolicyForRule(overlaid);
   if (policy.role === "element") return false;
   if (overlaid.group.parentAssignment !== "one") return false;
-  return canPublish(overlaid) && !canActivate(overlaid);
+  return canPublish(overlaid);
 }
 
 export function sixthBatchKeepsReviewsIndependent(rule: DraftRule): boolean {
