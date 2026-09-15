@@ -4,13 +4,13 @@
     "importedParents": 760,
     "importedElements": 607,
     "importedRows": 1367,
-    "executable": 154,
+    "executable": 199,
     "verified": 50,
     "published": 50,
     "blocked": 0,
-    "liveMapped": 69,
+    "liveMapped": 75,
     "systemBehavior": 421,
-    "draftUnwired": 185,
+    "draftUnwired": 140,
     "elementOfParent": 607,
     "wiredFirstBatch": 5,
     "wiredSecondBatch": 6,
@@ -27,7 +27,8 @@
     "wiredTwelfthBatch": 6,
     "wiredThirteenthBatch": 5,
     "wiredFourteenthBatch": 3,
-    "wired": 154,
+    "wiredFifteenthBatch": 45,
+    "wired": 199,
     "remainingExecutable": 0
   },
   "parents": [
@@ -227,10 +228,10 @@
       "completionMethod": "Upload credential/training record to staff profile",
       "timing": "once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "volunteer_training_file",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -242,13 +243,6 @@
         "Does the agency use volunteers? Which clients?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency use volunteers?",
         "Unanswered applicability fact: Does the agency use volunteers? Which clients?"
       ]
@@ -292,10 +286,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "before start / before a volunteer takes a Person overnight",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "volunteer_training_file",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -307,14 +301,6 @@
         "Does the agency use volunteers?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the client have a legal guardian?",
         "Unanswered applicability fact: Does the agency use volunteers?"
       ]
@@ -328,10 +314,10 @@
       "completionMethod": "Upload credential/training record to staff profile",
       "timing": "before start / volunteer first regularly-scheduled shift / once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "volunteer_training_file",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -341,12 +327,6 @@
         "Does the agency use volunteers?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency use volunteers?"
       ]
     },
@@ -359,22 +339,20 @@
       "completionMethod": "Upload credential/training record to staff profile",
       "timing": "once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "volunteer_training_file",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "FACT-035"
+      ],
+      "unansweredFacts": [
+        "Does this contractor use regularly scheduled volunteers?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
+        "Unanswered applicability fact: Does this contractor use regularly scheduled volunteers?"
       ]
     },
     {
@@ -386,10 +364,10 @@
       "completionMethod": "Upload credential/training record to staff profile",
       "timing": "once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "volunteer_training_file",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -399,13 +377,6 @@
         "Does the agency use volunteers?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency use volunteers?"
       ]
     },
@@ -462,24 +433,15 @@
       "completionMethod": "Upload license/approval to agency profile",
       "timing": "annual (recommended)",
       "renewal": "Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medicaid_manuals_memo",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.7.4",
@@ -490,24 +452,15 @@
       "completionMethod": "Upload license/approval to agency profile",
       "timing": "annual (recommended)",
       "renewal": "Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medicaid_manuals_memo",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.8.1",
@@ -1012,24 +965,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "7 calendar days / written request from DSPD",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medicaid_change_notifications",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.13.2",
@@ -1059,24 +1003,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "30 calendar days / change of ownership, legal name or tax ID",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medicaid_change_notifications",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.13.4",
@@ -1112,25 +1047,22 @@
       "title": "and maintain Staff completion of the Medicaid Disclosure form at time of…",
       "owner": "Staff (verified by Administrator/HR)",
       "completionMethod": "Upload credential/training record to staff profile",
-      "timing": "before start / hire date / at hire and annually",
+      "timing": "employment year 1",
       "renewal": "Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medicaid_disclosure_annual",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-staff_personnel_file"
+      ],
+      "unansweredFacts": [
+        "Which staff have an active employment record?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
+        "Unanswered applicability fact: Which staff have an active employment record?"
       ]
     },
     {
@@ -1191,12 +1123,12 @@
       "title": "maintain the by-laws of its organization and its governing board",
       "owner": "Administrator",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "governing_board_records",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1206,14 +1138,6 @@
         "Is the agency governed by a board?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Is the agency governed by a board?"
       ]
     },
@@ -1226,23 +1150,20 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "quarterly",
       "renewal": "Renews each quarter",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "governing_board_records",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "FACT-057"
+      ],
+      "unansweredFacts": [
+        "Does this contractor have a governing or policy-making board?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each quarter",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
+        "Unanswered applicability fact: Does this contractor have a governing or policy-making board?"
       ]
     },
     {
@@ -1254,22 +1175,20 @@
       "completionMethod": "Complete in platform form/record",
       "timing": "per board meeting",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "governing_board_records",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "FACT-057"
+      ],
+      "unansweredFacts": [
+        "Does this contractor have a governing or policy-making board?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
+        "Unanswered applicability fact: Does this contractor have a governing or policy-making board?"
       ]
     },
     {
@@ -1281,10 +1200,10 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "3 calendar days / request from auditor/DHHS/DSPD",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "governing_board_records",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1294,14 +1213,6 @@
         "Is the agency governed by a board?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Is the agency governed by a board?"
       ]
     },
@@ -1834,26 +1745,17 @@
       "title": "have personnel policies and procedures to ensure adequate structure and organization for…",
       "owner": "Administrator",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "personnel_policies",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.17.b",
@@ -1862,26 +1764,17 @@
       "title": "The personal policies and procedures must have written job descriptions for each…",
       "owner": "Administrator",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "personnel_policies",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.18",
@@ -1909,12 +1802,12 @@
       "title": "if providing transportation, provisions that specify all transportation requirements pursuant to this…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "operating_policies",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1926,14 +1819,6 @@
         "Does the agency provide transportation?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency provide transportation? Which staff drive?",
         "Unanswered applicability fact: Does the agency provide transportation?"
       ]
@@ -1945,12 +1830,12 @@
       "title": "if the Contractor manages or assists with a Person's personal finances, provisions…",
       "owner": "Administrator",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "operating_policies",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1960,13 +1845,6 @@
         "Is the agency a representative payee / does it assist with personal funds?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Is the agency a representative payee / does it assist with personal funds?"
       ]
     },
@@ -1977,12 +1855,12 @@
       "title": "if the Contractor provides transportation, a policy that ensures compliance with all…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "operating_policies",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1994,14 +1872,6 @@
         "Does the agency provide transportation?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency provide transportation? Which staff drive?",
         "Unanswered applicability fact: Does the agency provide transportation?"
       ]
@@ -2234,23 +2104,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "at discharge (see 1.22(c)(3) and (d)) / discharge",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "person_discharge_process",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.22.a.6",
@@ -2259,12 +2121,12 @@
       "title": "if the Contractor is also the Person's social security representative payee or…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "person_discharge_process",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -2274,14 +2136,6 @@
         "Is the agency a representative payee / does it assist with personal funds?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Is the agency a representative payee / does it assist with personal funds?"
       ]
     },
@@ -2322,26 +2176,17 @@
       "title": "contact information for the behaviorist, social worker, therapist, psychiatrist and any clinician…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "person_discharge_process",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.22.b.4",
@@ -2350,26 +2195,17 @@
       "title": "contact information for all current health care providers including primary care, neurologist,…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "person_discharge_process",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.22.c",
@@ -2405,24 +2241,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "30 days prior to intended discharge date / agency decides to discharge",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "person_discharge_process",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.22.c.2",
@@ -2433,24 +2260,15 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "DSPD Director directs continuation",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "person_discharge_process",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.22.c.3",
@@ -2461,24 +2279,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "7 days / date notice of discharge was given",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "person_discharge_process",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.22.d",
@@ -2489,24 +2298,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "Person chooses to discharge",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "person_discharge_process",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.23",
@@ -2534,24 +2334,17 @@
       "title": "For all services involving Direct Support to Persons, the Contractor shall maintain…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "health_support_policies",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.23.b",
@@ -2560,12 +2353,12 @@
       "title": "If the Contractor supports Persons in their self-directed, self-administration of prescription medication,…",
       "owner": "Administrator",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medication_record",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -2575,13 +2368,6 @@
         "Does the agency support self-directed self-administration of medication?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency support self-directed self-administration of medication?"
       ]
     },
@@ -2618,12 +2404,12 @@
       "title": "If the Contractor provides Residential Habilitation Services (\"RHS\"), Professional Parent Supports (\"PPS\"),…",
       "owner": "Administrator",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medication_record",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -2633,13 +2419,6 @@
         "Does the agency have primary responsibility for the client's medication?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency have primary responsibility for the client's medication?"
       ]
     },
@@ -2650,12 +2429,12 @@
       "title": "If the Contractor will support Persons in their self-directed, self-administration of prescription…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medication_record",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -2665,12 +2444,6 @@
         "Does the client self-administer medication?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the client self-administer medication?"
       ]
     },
@@ -2681,26 +2454,17 @@
       "title": "instruction regarding routes of administration and dosage for each medication",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medication_record",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.23.e",
@@ -2709,12 +2473,12 @@
       "title": "If the Contractor provides RHS, PPS, or HHS, or has primary responsibility…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "health_support_policies",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -2724,14 +2488,6 @@
         "Does the agency have primary responsibility for the client's medication?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency have primary responsibility for the client's medication?"
       ]
     },
@@ -2775,10 +2531,10 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "admission and any relevant health change",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "health_support_policies",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -2788,14 +2544,6 @@
         "Does the agency provide respite? Overnight?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency provide respite? Overnight?"
       ]
     },
@@ -2870,24 +2618,15 @@
       "completionMethod": "Complete in platform form/record",
       "timing": "health/medical change during service",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "health_support_policies",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.23.g.2",
@@ -2922,12 +2661,12 @@
       "title": "maintain and document the following additional health and medical information in the…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "medical_dental_exams",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -2937,12 +2676,6 @@
         "Does the agency provide respite? Overnight?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency provide respite? Overnight?"
       ]
     },
@@ -3697,24 +3430,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "24 hours / emergency resolved",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "emergency_loan_record",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.28.7.B",
@@ -3723,26 +3447,17 @@
       "title": "document and maintain a loan record until the loan is paid in…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "emergency_loan_record",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.28.7.C",
@@ -3753,10 +3468,10 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "monthly until loan repaid",
       "renewal": "Renews each month",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "emergency_loan_record",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -3766,14 +3481,6 @@
         "Does the client have a legal guardian?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each month",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the client have a legal guardian?"
       ]
     },
@@ -3786,24 +3493,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "request from authorized individual",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "emergency_loan_record",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.28.7.E",
@@ -3890,24 +3588,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "client transfers to new contractor/Support Coordinator with open loan",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "emergency_loan_record",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.28.7.I",
@@ -3918,24 +3607,15 @@
       "completionMethod": "Generate/upload report and mark sent",
       "timing": "loan paid in full",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "emergency_loan_record",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.28.8",
@@ -4134,30 +3814,25 @@
       "title": "prior to Staff providing transportation, the Staff shall be in compliance with…",
       "owner": "Staff (verified by Administrator/HR)",
       "completionMethod": "Upload credential/training record to staff profile",
-      "timing": "before start / before staff first transports a Person / annual",
+      "timing": "employment year 1",
       "renewal": "Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "driving_record_transport",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-081"
+        "FACT-081",
+        "LIVE-transport_assignment"
       ],
       "unansweredFacts": [
-        "Does this staff member drive Persons? Own vehicle?"
+        "Does this staff member drive Persons? Own vehicle?",
+        "Which staff transport persons?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
-        "Unanswered applicability fact: Does this staff member drive Persons? Own vehicle?"
+        "Unanswered applicability fact: Does this staff member drive Persons? Own vehicle?",
+        "Unanswered applicability fact: Which staff transport persons?"
       ]
     },
     {
@@ -4167,31 +3842,28 @@
       "title": "Staff providing transportation are trained to ensure that",
       "owner": "Staff (verified by Administrator/HR)",
       "completionMethod": "Upload credential/training record to staff profile",
-      "timing": "before start / before staff first transports a Person / once; re-verify on renewal/expiry",
+      "timing": "employment year 1",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "driving_record_transport",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
         "FACT-003",
-        "FACT-080"
+        "FACT-080",
+        "LIVE-transport_assignment"
       ],
       "unansweredFacts": [
         "Does the agency provide transportation? Which staff drive?",
-        "Does the agency provide transportation?"
+        "Does the agency provide transportation?",
+        "Which staff transport persons?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Does the agency provide transportation? Which staff drive?",
-        "Unanswered applicability fact: Does the agency provide transportation?"
+        "Unanswered applicability fact: Does the agency provide transportation?",
+        "Unanswered applicability fact: Which staff transport persons?"
       ]
     },
     {
@@ -4201,24 +3873,22 @@
       "title": "no Persons are left alone to or from their destinations",
       "owner": "Administrator",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "employment year 1",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "driving_record_transport",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-transport_assignment"
+      ],
+      "unansweredFacts": [
+        "Which staff transport persons?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
+        "Unanswered applicability fact: Which staff transport persons?"
       ]
     },
     {

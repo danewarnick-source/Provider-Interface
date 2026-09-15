@@ -17,7 +17,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.importedParents, 760);
     assert.equal(report.counts.importedElements, 607);
     assert.equal(report.counts.importedRows, 1367);
-    assert.ok(report.counts.executable >= 154);
+    assert.ok(report.counts.executable >= 199);
     assert.equal(report.counts.published, 50);
     assert.equal(report.counts.verified, 50);
     assert.equal(report.counts.wiredFirstBatch, 5);
@@ -35,7 +35,8 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredTwelfthBatch, 6);
     assert.equal(report.counts.wiredThirteenthBatch, 5);
     assert.equal(report.counts.wiredFourteenthBatch, 3);
-    assert.equal(report.counts.wired, 154);
+    assert.equal(report.counts.wiredFifteenthBatch, 45);
+    assert.equal(report.counts.wired, 199);
     assert.equal(report.counts.remainingExecutable, 0);
     assert.equal(VERIFIED_PUBLICATIONS.length, 50);
     assert.deepEqual(
@@ -49,7 +50,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.deepEqual(committed.counts, report.counts);
     const markdown = formatCatalogCoverageMarkdown(report);
     assert.match(markdown, /Controlled publication \(Soft=none\)/);
-    assert.match(markdown, /None\. All 154 live-key parents have a fixture overlay/);
+    assert.match(markdown, /None\. All 199 live-key parents have a fixture overlay/);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -330,6 +331,32 @@ describe("DHHS91172 catalog coverage", () => {
       report.rows.some((r) => r.requirementKey === "REQ-11.3"),
       false,
     );
+
+    const volunteerChild = report.rows.find((r) => r.requirementKey === "REQ-1.6.1");
+    assert.ok(volunteerChild);
+    assert.equal(volunteerChild.liveKey, "volunteer_training_file");
+    assert.equal(volunteerChild.canPublish, true);
+    assert.equal(volunteerChild.canActivate, false);
+    assert.equal(volunteerChild.publication, "not_published");
+    const disclosure = report.rows.find((r) => r.requirementKey === "REQ-1.13.5");
+    assert.ok(disclosure);
+    assert.equal(disclosure.liveKey, "medicaid_disclosure_annual");
+    assert.equal(disclosure.canActivate, false);
+    const personnel = report.rows.find((r) => r.requirementKey === "REQ-1.17.a");
+    assert.ok(personnel);
+    assert.equal(personnel.liveKey, "personnel_policies");
+    const medRecord = report.rows.find((r) => r.requirementKey === "REQ-1.23.b");
+    assert.ok(medRecord);
+    assert.equal(medRecord.liveKey, "medication_record");
+    const dental = report.rows.find((r) => r.requirementKey === "REQ-1.23.h");
+    assert.ok(dental);
+    assert.equal(dental.liveKey, "medical_dental_exams");
+    const holdOutChange = report.rows.find((r) => r.requirementKey === "REQ-1.13.4");
+    assert.ok(holdOutChange);
+    assert.equal(holdOutChange.liveKey, null);
+    const holdOutLoan = report.rows.find((r) => r.requirementKey === "REQ-1.28.6");
+    assert.ok(holdOutLoan);
+    assert.equal(holdOutLoan.liveKey, null);
 
     const personReview = report.rows.find((r) => r.requirementKey === "REQ-1.28.5");
     assert.ok(personReview);
