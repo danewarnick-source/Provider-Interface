@@ -11,13 +11,13 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Imported parents | 760 |
 | Imported elements | 607 |
 | Imported rows | 1367 |
-| Executable (live key mapped) | 50 |
+| Executable (live key mapped) | 65 |
 | Verified / activatable | 50 |
 | Published | 50 |
 | Blocked (rule-specific gap, no live key) | 0 |
 | Live mapped (clock) | 26 |
 | System / standing behavior | 427 |
-| Draft unwired | 283 |
+| Draft unwired | 268 |
 | Element of parent | 607 |
 | Wired first batch (fixture overlay) | 5 |
 | Wired second batch (fixture overlay) | 6 |
@@ -28,7 +28,8 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired seventh batch / Mega A (fixture overlay) | 10 |
 | Wired eighth batch / Mega B (fixture overlay) | 9 |
 | Wired Mega C person-file / site leftovers (fixture overlay) | 9 |
-| Wired shared-behavior batches (fixture overlay) | 50 |
+| Wired ninth batch / UPI-USTEPS ops (fixture overlay) | 15 |
+| Wired shared-behavior batches (fixture overlay) | 65 |
 | Remaining executable (live key, not yet wired) | 0 |
 
 ## Controlled publication (Soft=none)
@@ -37,15 +38,15 @@ Wiring is not publication. `VERIFIED_PUBLICATIONS` has 50 published / 50 verifie
 
 ## Remaining executable (live key, not wired)
 
-None. All 50 live-key parents have a fixture overlay. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.
+None. All 65 live-key parents have a fixture overlay. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.
 
 ## Draft-unwired blocker categories
 
-283 draft-unwired parents. Categories only — not a row novel.
+268 draft-unwired parents. Categories only — not a row novel.
 
 | Category | Count |
 | --- | ---: |
-| no_live_key + no_predicates | 283 |
+| no_live_key + no_predicates | 268 |
 
 427 additional parents are system_behavior (creates_user_task=no / SYSTEM handling) — not draft-unwired and not a live clock.
 
@@ -100,21 +101,21 @@ None. All 50 live-key parents have a fixture overlay. Do not invent PN1/PN2, qua
 | REQ-1.14.2 | DHHS91172-A-0145 | Administrator | Mark complete with attachment/attestation | quarterly |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.14.3 | DHHS91172-A-0146 | Administrator | Complete in platform form/record | per board meeting |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.14.4 | DHHS91172-A-0147 | Administrator | Generate/upload report and mark sent | 3 calendar days / request from auditor/DHHS/DSPD |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.1 | DHHS91172-A-0149 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.2 | DHHS91172-A-0150 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.3 | DHHS91172-A-0151 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.4 | DHHS91172-A-0152 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 15 calendar days / new or adjusted 1056 created in UPI |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.5 | DHHS91172-A-0153 | Administrator | Mark complete with attachment/attestation | 1056 rejected |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.6 | DHHS91172-A-0154 | Administrator | Automated check (no user action) or attestation | units used approach 1056 allocation / per claim / continuous check |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.7 | DHHS91172-A-0155 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.8 | DHHS91172-A-0156 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.9 | DHHS91172-A-0157 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.10 | DHHS91172-A-0158 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.11 | DHHS91172-A-0159 | Administrator | Mark complete with attachment/attestation | 1 calendar day / staff termination / no longer needs access |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.12 | DHHS91172-A-0160 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 1 calendar day / staff termination / no longer needs access |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.13 | DHHS91172-A-0161 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.14 | DHHS91172-A-0162 | Administrator | External: complete in UPI/USTEPS, record completion in platform | annual |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.15.15 | DHHS91172-A-0163 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 1 calendar day / termination of staff with UPI access |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.15.1 | DHHS91172-A-0149 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_form_0_9_designee | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
+| REQ-1.15.2 | DHHS91172-A-0150 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_form_0_8_user | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
+| REQ-1.15.3 | DHHS91172-A-0151 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_need_to_know_access | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
+| REQ-1.15.4 | DHHS91172-A-0152 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 15 calendar days / new or adjusted 1056 created in UPI | upi_1056_decision | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
+| REQ-1.15.5 | DHHS91172-A-0153 | Administrator | Mark complete with attachment/attestation | 1056 rejected | upi_1056_reject_coordinate | live_artifact | Unanswered applicability fact: Which persons have an active 1056 authorization for each awarded code? |
+| REQ-1.15.6 | DHHS91172-A-0154 | Administrator | Automated check (no user action) or attestation | units used approach 1056 allocation / per claim / continuous check | upi_1056_utilization | live_artifact | Unanswered applicability fact: Which persons have an active 1056 authorization for each awarded code? |
+| REQ-1.15.7 | DHHS91172-A-0155 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_provider_organization | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
+| REQ-1.15.8 | DHHS91172-A-0156 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_staff_org_groups | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
+| REQ-1.15.9 | DHHS91172-A-0157 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_staff_notify_prefs | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
+| REQ-1.15.10 | DHHS91172-A-0158 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_person_org_groups | live_artifact |  |
+| REQ-1.15.11 | DHHS91172-A-0159 | Administrator | Mark complete with attachment/attestation | 1 calendar day / staff termination / no longer needs access | upi_remove_terminated_staff | live_artifact |  |
+| REQ-1.15.12 | DHHS91172-A-0160 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 1 calendar day / staff termination / no longer needs access | upi_remove_staff_need_to_know | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
+| REQ-1.15.13 | DHHS91172-A-0161 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_remove_discharged_person | live_artifact |  |
+| REQ-1.15.14 | DHHS91172-A-0162 | Administrator | External: complete in UPI/USTEPS, record completion in platform | annual | upi_annual_access_review | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
+| REQ-1.15.15 | DHHS91172-A-0163 | Administrator | External: complete in UPI/USTEPS, record completion in platform | 1 calendar day / termination of staff with UPI access | upi_notify_usteps_termination | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
 | REQ-1.16.1 | DHHS91172-A-0165 | Administrator | Automated check (no user action) or attestation | annual attestation (recommended) |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.16.2 | DHHS91172-A-0166 | Administrator | Automated check (no user action) or attestation | annual attestation (recommended) |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.16.3 | DHHS91172-A-0167 | Administrator | Automated check (no user action) or attestation | annual attestation (recommended) |  | system_behavior | Rule has no applicability predicates. |

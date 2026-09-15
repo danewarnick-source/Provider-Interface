@@ -4,13 +4,13 @@
     "importedParents": 760,
     "importedElements": 607,
     "importedRows": 1367,
-    "executable": 50,
+    "executable": 65,
     "verified": 50,
     "published": 50,
     "blocked": 0,
     "liveMapped": 26,
     "systemBehavior": 427,
-    "draftUnwired": 283,
+    "draftUnwired": 268,
     "elementOfParent": 607,
     "wiredFirstBatch": 5,
     "wiredSecondBatch": 6,
@@ -21,7 +21,8 @@
     "wiredSeventhBatch": 10,
     "wiredEighthBatch": 9,
     "wiredMegaC": 9,
-    "wired": 50,
+    "wiredNinthBatch": 15,
+    "wired": 65,
     "remainingExecutable": 0
   },
   "parents": [
@@ -1306,12 +1307,12 @@
       "title": "complete DSPD form \"0-9 USTEPS Provider Interface (UPI) Provider Company Designee Access…",
       "owner": "Administrator",
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_form_0_9_designee",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1321,13 +1322,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
     },
@@ -1338,12 +1332,12 @@
       "title": "complete DSPD form \"0-8 USTEPS Provider Interface (UPI) Individual User Access Form\"…",
       "owner": "Administrator",
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_form_0_8_user",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1353,13 +1347,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
     },
@@ -1370,12 +1357,12 @@
       "title": "access to UPI is granted only to Staff that need to know…",
       "owner": "Administrator",
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_need_to_know_access",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1385,13 +1372,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
     },
@@ -1404,28 +1384,23 @@
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
       "timing": "15 calendar days / new or adjusted 1056 created in UPI",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_1056_decision",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-009"
+        "FACT-009",
+        "LIVE-authorization_1056"
       ],
       "unansweredFacts": [
-        "Which staff hold UPI access?"
+        "Which staff hold UPI access?",
+        "Which persons have an active 1056 authorization for each awarded code?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
-        "Unanswered applicability fact: Which staff hold UPI access?"
+        "Unanswered applicability fact: Which staff hold UPI access?",
+        "Unanswered applicability fact: Which persons have an active 1056 authorization for each awarded code?"
       ]
     },
     {
@@ -1437,23 +1412,20 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "1056 rejected",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_1056_reject_coordinate",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-authorization_1056"
+      ],
+      "unansweredFacts": [
+        "Which persons have an active 1056 authorization for each awarded code?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
+        "Unanswered applicability fact: Which persons have an active 1056 authorization for each awarded code?"
       ]
     },
     {
@@ -1465,22 +1437,20 @@
       "completionMethod": "Automated check (no user action) or attestation",
       "timing": "units used approach 1056 allocation / per claim / continuous check",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_1056_utilization",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
-      "applicabilityFactIds": [],
-      "unansweredFacts": [],
+      "applicabilityFactIds": [
+        "LIVE-authorization_1056"
+      ],
+      "unansweredFacts": [
+        "Which persons have an active 1056 authorization for each awarded code?"
+      ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
+        "Unanswered applicability fact: Which persons have an active 1056 authorization for each awarded code?"
       ]
     },
     {
@@ -1490,12 +1460,12 @@
       "title": "use the UPI \"Provider Organization\" section to create and maintain a Contractor…",
       "owner": "Administrator",
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_provider_organization",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1505,13 +1475,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
     },
@@ -1522,12 +1485,12 @@
       "title": "assign and maintain Staff with UPI access to the appropriate organizational groups",
       "owner": "Administrator",
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_staff_org_groups",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1537,13 +1500,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
     },
@@ -1554,12 +1510,12 @@
       "title": "assign and maintain each Staff with UPI access, email, and notification preference",
       "owner": "Administrator",
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_staff_notify_prefs",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1569,13 +1525,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
     },
@@ -1586,25 +1535,17 @@
       "title": "assign and maintain each Person to the appropriate organizational groups",
       "owner": "Administrator",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion.",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_person_org_groups",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.15.11",
@@ -1615,24 +1556,15 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "1 calendar day / staff termination / no longer needs access",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_remove_terminated_staff",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.15.12",
@@ -1643,10 +1575,10 @@
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
       "timing": "1 calendar day / staff termination / no longer needs access",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_remove_staff_need_to_know",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1656,14 +1588,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
     },
@@ -1674,26 +1598,17 @@
       "title": "remove a Person from the \"Provider Organization\" when the Contractor is no…",
       "owner": "Administrator",
       "completionMethod": "Mark complete with attachment/attestation",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion.",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_remove_discharged_person",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.15.14",
@@ -1704,10 +1619,10 @@
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
       "timing": "annual",
       "renewal": "Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_annual_access_review",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1717,14 +1632,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
     },
@@ -1737,10 +1644,10 @@
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
       "timing": "1 calendar day / termination of staff with UPI access",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "upi_notify_usteps_termination",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1750,14 +1657,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
     },

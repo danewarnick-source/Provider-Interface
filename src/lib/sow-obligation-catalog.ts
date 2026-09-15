@@ -798,6 +798,215 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     calendar_is_reminder_only: true,
   },
   {
+    title: "UPI Form 0-9 — Provider Company Designee Access",
+    citation: "DHHS91172 SOW §1.15(1)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Complete DSPD form \"0-9 USTEPS Provider Interface (UPI) Provider Company Designee Access Form\". HIVE does not provision UPI. Staff never touch UPI. Record completion plus proof here.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation of the completed 0-9 company designee form plus screenshot or confirmation.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Form 0-8 — Individual User Access",
+    citation: "DHHS91172 SOW §1.15(2)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Complete DSPD form \"0-8 USTEPS Provider Interface (UPI) Individual User Access Form\" for at least one Staff. HIVE does not provision UPI. Staff never touch UPI.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation of at least one completed 0-8 individual user form plus screenshot or confirmation.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Need-to-Know Access",
+    citation: "DHHS91172 SOW §1.15(3)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Ensure that access to UPI is granted only to Staff that need to know the information in UPI to provide professional treatment or coordinate DSPD services. Which staff hold UPI access stays a recorded fact — never silent N/A.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation that current UPI users are limited to need-to-know staff, plus confirmation.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI 1056 Approve or Reject",
+    citation: "DHHS91172 SOW §1.15(4)",
+    category: "reporting",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Approve or reject the DSPD Service Authorization Form 1056 (\"1056\") through UPI within 15 Calendar Days of the creation of a new or adjusted 1056. Record the UPI decision here. No authorization → no shift, no billing.",
+    due_rule: { kind: "days_after_event", days: 15 },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation of the UPI approve/reject decision plus screenshot or confirmation.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI 1056 Rejection — Support Coordinator Coordination",
+    citation: "DHHS91172 SOW §1.15(5)",
+    category: "reporting",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "If the Contractor rejects the 1056, coordinate with the Person's Support Coordinator to either adjust the 1056, or start the process to discharge the Person from receiving Contractor's services and transition to a different contractor.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation of Support Coordinator coordination after a 1056 rejection, plus proof.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI 1056 Utilization Monitor",
+    citation: "DHHS91172 SOW §1.15(6)",
+    category: "reporting",
+    fulfillment: "in_hive",
+    fulfillment_note:
+      "Monitor the use of services by the Person to ensure that the utilization of services complies with the approved 1056. If the Person is at risk of exhausting the units allocated in the 1056, notify the Person's Support Coordinator and arrange for appropriate changes to the Person's PCSP. Live authorization remaining-units check — not a second checklist.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard: "Claim validation / remaining-units log when utilization approaches the 1056 allocation.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Provider Organization Structure",
+    citation: "DHHS91172 SOW §1.15(7)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Use the UPI \"Provider Organization\" section to create and maintain a Contractor organizational group structure that will restrict UPI users from seeing Person information not required to provide professional treatment or coordinate DSPD services.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation of the current UPI Provider Organization group structure plus confirmation.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Staff Organizational Groups",
+    citation: "DHHS91172 SOW §1.15(8)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Assign and maintain Staff with UPI access to the appropriate organizational groups. Admin-only — staff never touch UPI from this parent.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation that each UPI-access staff member is in the correct organizational group.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Staff Email and Notification Preference",
+    citation: "DHHS91172 SOW §1.15(9)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Assign and maintain each Staff with UPI access, email, and notification preference. Admin-only — staff never touch UPI from this parent.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation of current UPI email and notification preference for each UPI-access staff member.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Person Organizational Groups",
+    citation: "DHHS91172 SOW §1.15(10)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Assign and maintain each Person to the appropriate organizational groups in UPI. Record completion in the platform.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation that each Person is assigned to the appropriate UPI organizational groups.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Remove Terminated Staff — One Calendar Day",
+    citation: "DHHS91172 SOW §1.15(11)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Remove terminated Staff from the \"Provider Organization\" within one Calendar Day of termination.",
+    due_rule: { kind: "days_after_event", days: 1 },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation that the terminated staff member was removed from the UPI Provider Organization within one Calendar Day.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Remove Staff Need-to-Know — One Calendar Day",
+    citation: "DHHS91172 SOW §1.15(12)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Remove Staff from an organizational group within one Calendar Day of the Staff no longer needing to know the information in UPI to provide professional treatment or coordinate DSPD services.",
+    due_rule: { kind: "days_after_event", days: 1 },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation that the staff member was removed from the UPI organizational group within one Calendar Day of losing need-to-know.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Remove Discharged Person from Provider Organization",
+    citation: "DHHS91172 SOW §1.15(13)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Remove a Person from the \"Provider Organization\" when the Contractor is no longer providing services to that Person, and has completed all business requiring the Person to remain in the \"Provider Organization\".",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Administrator attestation that the discharged Person was removed from the UPI Provider Organization after remaining business was complete.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "UPI Annual Staff Access Review",
+    citation: "DHHS91172 SOW §1.15(14)",
+    category: "licensing",
+    fulfillment: "external",
+    fulfillment_note:
+      "Conduct and document an annual review of all staff with UPI access to ensure all Staff with UPI access have the correct UPI access and the UPI Provider Organization is correct and current. Annual anchor is missing-information — do not invent employment-year, fiscal-year, or annual-from-completion.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Documented annual review that UPI access and the UPI Provider Organization are correct and current.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Notify DSPD USTEPS of UPI Staff Termination — One Calendar Day",
+    citation: "DHHS91172 SOW §1.15(15)",
+    category: "reporting",
+    fulfillment: "external",
+    fulfillment_note:
+      "Notify the DSPD USTEPS team within one Calendar Day of the termination of Staff with UPI access. Staff never touch UPI from this parent.",
+    due_rule: { kind: "days_after_event", days: 1 },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Logged notice to the DSPD USTEPS team within one Calendar Day of UPI-access staff termination.",
+    calendar_is_reminder_only: true,
+  },
+  {
     title: "Medicaid Provider Enrollment — Current",
     citation: "DHHS91172 SOW §1.4(1) / §1.13",
     category: "licensing",

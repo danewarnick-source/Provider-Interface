@@ -1,6 +1,6 @@
 # Controlled publication (Soft=none)
 
-Wiring is not publication. All 50 live-key parents are on the obligation engine. `VERIFIED_PUBLICATIONS` stays empty until a human pastes a verified row.
+Wiring is not publication. Live-key parents are on the obligation engine. `VERIFIED_PUBLICATIONS` has the Soft=none published 50. REQ-1.15.1–REQ-1.15.15 are wired and stay unpublished until a human pastes a verified row.
 
 There is no tenant table and no global flip. Soft would need a table to persist approvals outside git; this path does not.
 
