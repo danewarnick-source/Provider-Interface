@@ -17,7 +17,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.importedParents, 760);
     assert.equal(report.counts.importedElements, 607);
     assert.equal(report.counts.importedRows, 1367);
-    assert.ok(report.counts.executable >= 146);
+    assert.ok(report.counts.executable >= 151);
     assert.equal(report.counts.published, 50);
     assert.equal(report.counts.verified, 50);
     assert.equal(report.counts.wiredFirstBatch, 5);
@@ -33,7 +33,8 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredTenthBatch, 41);
     assert.equal(report.counts.wiredEleventhBatch, 34);
     assert.equal(report.counts.wiredTwelfthBatch, 6);
-    assert.equal(report.counts.wired, 146);
+    assert.equal(report.counts.wiredThirteenthBatch, 5);
+    assert.equal(report.counts.wired, 151);
     assert.equal(report.counts.remainingExecutable, 0);
     assert.equal(VERIFIED_PUBLICATIONS.length, 50);
     assert.deepEqual(
@@ -47,7 +48,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.deepEqual(committed.counts, report.counts);
     const markdown = formatCatalogCoverageMarkdown(report);
     assert.match(markdown, /Controlled publication \(Soft=none\)/);
-    assert.match(markdown, /None\. All 146 live-key parents have a fixture overlay/);
+    assert.match(markdown, /None\. All 151 live-key parents have a fixture overlay/);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -286,6 +287,29 @@ describe("DHHS91172 catalog coverage", () => {
     const sjdUsorContact = report.rows.find((r) => r.requirementKey === "REQ-33.3.4.I");
     assert.ok(sjdUsorContact);
     assert.equal(sjdUsorContact.liveKey, "sjd_usor_contact_monthly");
+
+    const dayTxSite = report.rows.find((r) => r.requirementKey === "REQ-7.5.a");
+    assert.ok(dayTxSite);
+    assert.equal(dayTxSite.liveKey, "ol_day_tx_license_4plus");
+    assert.equal(dayTxSite.canPublish, true);
+    assert.equal(dayTxSite.canActivate, false);
+    assert.equal(dayTxSite.publication, "not_published");
+    const daySupportCommunity = report.rows.find((r) => r.requirementKey === "REQ-7.5.b");
+    assert.ok(daySupportCommunity);
+    assert.equal(daySupportCommunity.liveKey, "ol_day_support_cert_3or_fewer");
+    assert.equal(daySupportCommunity.canActivate, false);
+    const dsiSite = report.rows.find((r) => r.requirementKey === "REQ-8.5.a");
+    assert.ok(dsiSite);
+    assert.equal(dsiSite.liveKey, "ol_day_tx_license_4plus");
+    const dsiCommunity = report.rows.find((r) => r.requirementKey === "REQ-8.5.b");
+    assert.ok(dsiCommunity);
+    assert.equal(dsiCommunity.liveKey, "ol_day_support_cert_3or_fewer");
+    const eprOl = report.rows.find((r) => r.requirementKey === "REQ-9.6.a");
+    assert.ok(eprOl);
+    assert.equal(eprOl.liveKey, "ol_day_tx_license_4plus");
+    const grandfather = report.rows.find((r) => r.requirementKey === "REQ-7.5.c");
+    assert.ok(grandfather);
+    assert.equal(grandfather.liveKey, null);
 
     const personReview = report.rows.find((r) => r.requirementKey === "REQ-1.28.5");
     assert.ok(personReview);

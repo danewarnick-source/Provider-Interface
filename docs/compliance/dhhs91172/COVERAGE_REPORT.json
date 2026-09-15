@@ -4,13 +4,13 @@
     "importedParents": 760,
     "importedElements": 607,
     "importedRows": 1367,
-    "executable": 146,
+    "executable": 151,
     "verified": 50,
     "published": 50,
     "blocked": 0,
     "liveMapped": 66,
     "systemBehavior": 421,
-    "draftUnwired": 193,
+    "draftUnwired": 188,
     "elementOfParent": 607,
     "wiredFirstBatch": 5,
     "wiredSecondBatch": 6,
@@ -25,7 +25,8 @@
     "wiredTenthBatch": 41,
     "wiredEleventhBatch": 34,
     "wiredTwelfthBatch": 6,
-    "wired": 146,
+    "wiredThirteenthBatch": 5,
+    "wired": 151,
     "remainingExecutable": 0
   },
   "parents": [
@@ -7843,25 +7844,22 @@
       "completionMethod": "Upload license/approval to agency profile",
       "timing": "continuous; re-verify at expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "ol_day_tx_license_4plus",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-062"
+        "FACT-062",
+        "FACT-015"
       ],
       "unansweredFacts": [
-        "Persons served per location (4+ requires Day Treatment license; 3 or fewer requires certification)"
+        "Persons served per location (4+ requires Day Treatment license; 3 or fewer requires certification)",
+        "Agency awarded DSG,DSP?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
+        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Persons served per location (4+ requires Day Treatment license; 3 or fewer requires certification)"
       ]
     },
@@ -7874,25 +7872,22 @@
       "completionMethod": "Upload license/approval to agency profile",
       "timing": "once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "ol_day_support_cert_3or_fewer",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-063"
+        "FACT-063",
+        "FACT-015"
       ],
       "unansweredFacts": [
-        "Total Persons served in the community program (4+ requires Day Treatment license)"
+        "Total Persons served in the community program (4+ requires Day Treatment license)",
+        "Agency awarded DSG,DSP?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
+        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Total Persons served in the community program (4+ requires Day Treatment license)"
       ]
     },
@@ -8553,25 +8548,22 @@
       "completionMethod": "Upload license/approval to agency profile",
       "timing": "continuous; re-verify at expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "ol_day_tx_license_4plus",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-062"
+        "FACT-062",
+        "FACT-019"
       ],
       "unansweredFacts": [
-        "Persons served per location (4+ requires Day Treatment license; 3 or fewer requires certification)"
+        "Persons served per location (4+ requires Day Treatment license; 3 or fewer requires certification)",
+        "Agency awarded DSI?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
+        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Persons served per location (4+ requires Day Treatment license; 3 or fewer requires certification)"
       ]
     },
@@ -8584,25 +8576,22 @@
       "completionMethod": "Upload license/approval to agency profile",
       "timing": "once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "ol_day_support_cert_3or_fewer",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
-        "FACT-063"
+        "FACT-063",
+        "FACT-019"
       ],
       "unansweredFacts": [
-        "Total Persons served in the community program (4+ requires Day Treatment license)"
+        "Total Persons served in the community program (4+ requires Day Treatment license)",
+        "Agency awarded DSI?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
+        "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Total Persons served in the community program (4+ requires Day Treatment license)"
       ]
     },
@@ -9452,10 +9441,10 @@
       "completionMethod": "Upload license/approval to agency profile",
       "timing": "once; re-verify on renewal/expiry",
       "renewal": "None",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "ol_day_tx_license_4plus",
+      "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -9465,12 +9454,6 @@
         "Agency awarded EPR?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Explicit ALL/ANY/conditional grouping required. Preserve every source condition; do not infer alternatives from the word OR alone.",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
