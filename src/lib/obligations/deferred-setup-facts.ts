@@ -228,15 +228,25 @@ export const DEFERRED_FACTS: readonly DeferredFactDefinition[] = [
     deferredTo: "client_record",
     question:
       "Is this contractor a representative payee for this client, or does it assist with this client's personal funds?",
+    help:
+      "This is the yes/no/unknown status. If yes, also record WHO the payee is in the " +
+      '"Representative payee" custom field on this client\'s Finance section — that field is a ' +
+      "free-text name (e.g. a person or DSPD Trust), not a status, and is not replaced by this " +
+      "question.",
     answerType: "boolean",
     storage: {
-      kind: "existing_mechanism",
-      description:
-        'The client custom-field "representative_payee" (client-profile-fields.ts) already ' +
-        "records this as free text. It has no unanswered/unknown/not-applicable status tracking, " +
-        "which is a real gap this task's status model calls for — flagged here rather than silently " +
-        "declared solved; retrofitting custom-field status tracking is out of scope for this change.",
+      kind: "generic",
+      scope: "client",
     },
+    sourceNote:
+      'Previously piggybacked on the client custom-field "representative_payee" ' +
+      "(client-profile-fields.ts), which is free text recording WHO the payee is and has no " +
+      "unanswered/unknown/not-applicable status — collapsing a missing name into \"no\" would have " +
+      "been wrong (a payee can be known to exist before anyone has typed who it is). This question " +
+      "is now the authoritative WHETHER-a-payee-relationship-exists status, tracked with the same " +
+      "answered/unknown/unanswered states as every other compliance fact. The free-text field is " +
+      "untouched and keeps recording WHO, unrelated to and not migrated by this change — no existing " +
+      "value in it was read, altered, or reinterpreted as a yes/no answer.",
     sourceRequirementIdsRaw:
       "REQ-1.18.5, REQ-1.22.a.6, REQ-1.28.2, REQ-11.4.1, REQ-15.2.1, REQ-15.2.2, REQ-15.2.3, REQ-15.3.2, " +
       "REQ-15.3.7, REQ-15.3.9, REQ-15.3.11, REQ-15.4.1, REQ-15.4.6, REQ-20.4.1, REQ-20.8.c.1, REQ-21.7.d.1",
@@ -249,9 +259,10 @@ export const DEFERRED_FACTS: readonly DeferredFactDefinition[] = [
     question: "Does this contractor assist this client with personal funds?",
     answerType: "boolean",
     storage: {
-      kind: "existing_mechanism",
-      description: "Same representative_payee custom field as FACT-018.",
+      kind: "generic",
+      scope: "client",
     },
+    sourceNote: "Same status fact as FACT-018 (asks the same thing in different words).",
     sourceRequirementIdsRaw: "REQ-1.28.4, REQ-1.28.5",
   },
   {
@@ -262,9 +273,10 @@ export const DEFERRED_FACTS: readonly DeferredFactDefinition[] = [
     question: "Is this contractor this client's SSA representative payee?",
     answerType: "boolean",
     storage: {
-      kind: "existing_mechanism",
-      description: "Same representative_payee custom field as FACT-018.",
+      kind: "generic",
+      scope: "client",
     },
+    sourceNote: "Same status fact as FACT-018 (asks the same thing in different words).",
     sourceRequirementIdsRaw: "REQ-1.28.3",
   },
   {

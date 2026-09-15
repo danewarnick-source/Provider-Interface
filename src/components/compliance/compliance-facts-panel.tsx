@@ -9,6 +9,7 @@ import {
   type ComplianceAnswerValue,
 } from "@/components/compliance/compliance-answer-field";
 import {
+  deferredFact,
   deferredFactsForRecord,
   type DeferredRecordKind,
 } from "@/lib/obligations/deferred-setup-facts";
@@ -69,8 +70,20 @@ export function ComplianceFactsPanel({
   const [drafts, setDrafts] = useState<Record<string, ComplianceAnswerValue>>({});
 
   const facts = useMemo(() => deferredFactsForRecord(RECORD_KIND_BY_SCOPE[scope]), [scope]);
-  const generic = useMemo(() => facts.filter((f) => f.storage.kind === "generic"), [facts]);
-  const informational = useMemo(() => facts.filter((f) => f.storage.kind !== "generic"), [facts]);
+  // A fact with duplicateOf (e.g. FACT-058/FACT-079, both the same
+  // real-world question as FACT-018) is never independently editable, even
+  // when its own storage is "generic" — otherwise near-duplicate questions
+  // could be answered inconsistently with each other. It still needs
+  // *some* fact_key to save under; it always saves as its duplicate
+  // target's factId, so all three read and write the exact same row.
+  const generic = useMemo(
+    () => facts.filter((f) => f.storage.kind === "generic" && !f.duplicateOf),
+    [facts],
+  );
+  const informational = useMemo(
+    () => facts.filter((f) => f.storage.kind !== "generic" || f.duplicateOf),
+    [facts],
+  );
 
   const queryKey = ["compliance-fact-answers", organizationId, scope, entityId];
   const { data: rows = [], isLoading } = useQuery({
@@ -228,9 +241,13 @@ export function ComplianceFactsPanel({
                 <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>
                   <strong className="text-foreground">{f.question}</strong>{" "}
-                  {f.storage.kind === "existing_mechanism" || f.storage.kind === "derived"
-                    ? f.storage.description
-                    : null}
+                  {f.duplicateOf
+                    ? `Same question as one already answered above — see "${
+                        deferredFact(f.duplicateOf)?.question ?? f.duplicateOf
+                      }".`
+                    : f.storage.kind === "existing_mechanism" || f.storage.kind === "derived"
+                      ? f.storage.description
+                      : null}
                 </span>
               </li>
             ))}

@@ -185,6 +185,30 @@ describe("ComplianceFactsPanel keys every deferred fact by its real identifier",
     assert.match(panelSrc, /fact_key:\s*factKey/, "save must still write the DB column fact_key");
     assert.match(panelSrc, /byKey\.get\(f\.factId\)/, "lookup must key off the real factId");
   });
+
+  it("a duplicateOf fact is never independently editable, even with generic storage", () => {
+    // FACT-058 / FACT-079 ask the same real-world question as FACT-018 and
+    // now share its generic storage — if the panel's editable-set filter
+    // ever drops the !f.duplicateOf guard, a record could be answered
+    // "yes" on one and "no" on its duplicate, which is exactly the
+    // inconsistency representative-payee status must not have.
+    const panelSrc = readFileSync(
+      fileURLToPath(
+        new URL("../../components/compliance/compliance-facts-panel.tsx", import.meta.url),
+      ),
+      "utf8",
+    );
+    assert.match(panelSrc, /storage\.kind === "generic" && !f\.duplicateOf/);
+
+    const duplicates = DEFERRED_FACTS.filter((f) => f.duplicateOf);
+    assert.ok(duplicates.length > 0, "this test needs at least one real duplicateOf fixture");
+    for (const dup of duplicates) {
+      assert.ok(
+        DEFERRED_FACTS.some((f) => f.factId === dup.duplicateOf),
+        `${dup.factId} claims duplicateOf ${dup.duplicateOf}, which must exist`,
+      );
+    }
+  });
 });
 
 describe("deferred facts — every one has a real home, none is a fake placeholder", () => {

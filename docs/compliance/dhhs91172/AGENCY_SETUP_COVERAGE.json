@@ -633,7 +633,7 @@
     "scope": "client",
     "disposition": "Deferred to client record",
     "question": "Is this contractor a representative payee for this client, or does it assist with this client's personal funds?",
-    "detail": "The client custom-field \"representative_payee\" (client-profile-fields.ts) already records this as free text. It has no unanswered/unknown/not-applicable status tracking, which is a real gap this task's status model calls for — flagged here rather than silently declared solved; retrofitting custom-field status tracking is out of scope for this change.",
+    "detail": "New field on the client record. Previously piggybacked on the client custom-field \"representative_payee\" (client-profile-fields.ts), which is free text recording WHO the payee is and has no unanswered/unknown/not-applicable status — collapsing a missing name into \"no\" would have been wrong (a payee can be known to exist before anyone has typed who it is). This question is now the authoritative WHETHER-a-payee-relationship-exists status, tracked with the same answered/unknown/unanswered states as every other compliance fact. The free-text field is untouched and keeps recording WHO, unrelated to and not migrated by this change — no existing value in it was read, altered, or reinterpreted as a yes/no answer.",
     "requirementCount": 16,
     "requirementIds": [
       "REQ-1.18.5",
@@ -1383,7 +1383,7 @@
     "scope": "client",
     "disposition": "Deferred to client record",
     "question": "Does this contractor assist this client with personal funds?",
-    "detail": "Same representative_payee custom field as FACT-018.",
+    "detail": "New field on the client record. Same status fact as FACT-018 (asks the same thing in different words).",
     "requirementCount": 2,
     "requirementIds": [
       "REQ-1.28.4",
@@ -1618,7 +1618,7 @@
     "scope": "client",
     "disposition": "Deferred to client record",
     "question": "Is this contractor this client's SSA representative payee?",
-    "detail": "Same representative_payee custom field as FACT-018.",
+    "detail": "New field on the client record. Same status fact as FACT-018 (asks the same thing in different words).",
     "requirementCount": 1,
     "requirementIds": [
       "REQ-1.28.3"

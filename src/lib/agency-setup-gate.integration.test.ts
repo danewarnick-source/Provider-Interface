@@ -767,6 +767,92 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     assert.deepEqual(after.rows[0], before.rows[0]);
   });
 
+  it("representative-payee status (FACT-018) distinguishes all four states and never defaults missing to no", async () => {
+    const fact018 = deferredFact("FACT-018");
+    assert.ok(fact018, "FACT-018 must still exist in the deferred-facts registry");
+    assert.equal(fact018!.storage.kind, "generic", "must be a real tracked status, not a stand-in");
+
+    const clientRow = await client.query(
+      `INSERT INTO public.clients (organization_id, first_name, last_name)
+       VALUES ($1, 'RepPayee', 'Status') RETURNING id`,
+      [ORG_A],
+    );
+    const clientId = clientRow.rows[0].id as string;
+
+    // 1. Genuinely unanswered: no row exists yet. Must read as "unanswered",
+    // never silently coerced to a false/"no" answer.
+    await asUser(client, USER_A, async () => {
+      const none = await client.query(
+        `SELECT status FROM public.compliance_fact_answers
+         WHERE organization_id = $1 AND scope = 'client' AND entity_id = $2 AND fact_key = $3`,
+        [ORG_A, clientId, fact018!.factId],
+      );
+      assert.equal(none.rows.length, 0, "unanswered is the absence of a row, not a false value");
+    });
+
+    // 2. Explicitly answered "no" (value false) — a real, deliberate answer,
+    // distinct from state 1, and must survive as false (not null/true).
+    await asUser(client, USER_A, async () => {
+      await client.query(
+        `INSERT INTO public.compliance_fact_answers
+           (organization_id, scope, entity_id, fact_key, status, value, source, answered_by, answered_at)
+         VALUES ($1, 'client', $2, $3, 'answered', 'false'::jsonb, 'manual', $4, now())
+         ON CONFLICT (organization_id, scope, entity_id, fact_key)
+         DO UPDATE SET status = EXCLUDED.status, value = EXCLUDED.value, answered_at = EXCLUDED.answered_at`,
+        [ORG_A, clientId, fact018!.factId, USER_A],
+      );
+      const answered = await client.query(
+        `SELECT status, value FROM public.compliance_fact_answers
+         WHERE organization_id = $1 AND scope = 'client' AND entity_id = $2 AND fact_key = $3`,
+        [ORG_A, clientId, fact018!.factId],
+      );
+      assert.equal(answered.rows.length, 1);
+      assert.equal(answered.rows[0].status, "answered");
+      assert.equal(answered.rows[0].value, false, "explicit false must persist as false, not null");
+    });
+
+    // 3. Changed to "unknown" — must overwrite the prior explicit answer
+    // (same upsert target), not create a second competing row.
+    await asUser(client, USER_A, async () => {
+      await client.query(
+        `INSERT INTO public.compliance_fact_answers
+           (organization_id, scope, entity_id, fact_key, status, value, source, answered_by, answered_at)
+         VALUES ($1, 'client', $2, $3, 'unknown', NULL, 'manual', $4, now())
+         ON CONFLICT (organization_id, scope, entity_id, fact_key)
+         DO UPDATE SET status = EXCLUDED.status, value = EXCLUDED.value, answered_at = EXCLUDED.answered_at`,
+        [ORG_A, clientId, fact018!.factId, USER_A],
+      );
+      const unknown = await client.query(
+        `SELECT status, value FROM public.compliance_fact_answers
+         WHERE organization_id = $1 AND scope = 'client' AND entity_id = $2 AND fact_key = $3`,
+        [ORG_A, clientId, fact018!.factId],
+      );
+      assert.equal(unknown.rows.length, 1, "still exactly one row — unknown replaces, not appends");
+      assert.equal(unknown.rows[0].status, "unknown");
+    });
+
+    // 4. Explicitly answered "yes" (value true) — the fourth state, and the
+    // opposite of state 2, proving both booleans round-trip distinctly.
+    await asUser(client, USER_A, async () => {
+      await client.query(
+        `INSERT INTO public.compliance_fact_answers
+           (organization_id, scope, entity_id, fact_key, status, value, source, answered_by, answered_at)
+         VALUES ($1, 'client', $2, $3, 'answered', 'true'::jsonb, 'manual', $4, now())
+         ON CONFLICT (organization_id, scope, entity_id, fact_key)
+         DO UPDATE SET status = EXCLUDED.status, value = EXCLUDED.value, answered_at = EXCLUDED.answered_at`,
+        [ORG_A, clientId, fact018!.factId, USER_A],
+      );
+      const yes = await client.query(
+        `SELECT status, value FROM public.compliance_fact_answers
+         WHERE organization_id = $1 AND scope = 'client' AND entity_id = $2 AND fact_key = $3`,
+        [ORG_A, clientId, fact018!.factId],
+      );
+      assert.equal(yes.rows.length, 1);
+      assert.equal(yes.rows[0].status, "answered");
+      assert.equal(yes.rows[0].value, true);
+    });
+  });
+
   it("ComplianceFactsPanel's real save shape round-trips for an assignment-scope fact (FACT-060)", async () => {
     // Exercises exactly what compliance-facts-panel.tsx sends on save — keyed
     // by the real DeferredFactDefinition.factId, not a hand-typed string —
