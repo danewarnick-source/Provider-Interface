@@ -11,13 +11,13 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Imported parents | 760 |
 | Imported elements | 607 |
 | Imported rows | 1367 |
-| Executable (live key mapped) | 154 |
+| Executable (live key mapped) | 199 |
 | Verified / activatable | 50 |
 | Published | 50 |
 | Blocked (rule-specific gap, no live key) | 0 |
-| Live mapped (clock) | 69 |
+| Live mapped (clock) | 75 |
 | System / standing behavior | 421 |
-| Draft unwired | 185 |
+| Draft unwired | 140 |
 | Element of parent | 607 |
 | Wired first batch (fixture overlay) | 5 |
 | Wired second batch (fixture overlay) | 6 |
@@ -34,7 +34,8 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired twelfth batch / SEI-SJD UPI employment leftovers (fixture overlay) | 6 |
 | Wired thirteenth batch / OL Day Treatment Day Support twins (fixture overlay) | 5 |
 | Wired fourteenth batch / quarterly evac drill leftovers (fixture overlay) | 3 |
-| Wired shared-behavior batches (fixture overlay) | 154 |
+| Wired fifteenth batch / Article 1 standing leftover children (fixture overlay) | 45 |
+| Wired shared-behavior batches (fixture overlay) | 199 |
 | Remaining executable (live key, not yet wired) | 0 |
 
 ## Controlled publication (Soft=none)
@@ -43,15 +44,15 @@ Wiring is not publication. `VERIFIED_PUBLICATIONS` has 50 published / 50 verifie
 
 ## Remaining executable (live key, not wired)
 
-None. All 154 live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3.
+None. All 199 live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3.
 
 ## Draft-unwired blocker categories
 
-185 draft-unwired parents. Categories only — not a row novel.
+140 draft-unwired parents. Categories only — not a row novel.
 
 | Category | Count |
 | --- | ---: |
-| no_live_key + no_predicates | 185 |
+| no_live_key + no_predicates | 140 |
 
 421 additional parents are system_behavior (creates_user_task=no / SYSTEM handling) — not draft-unwired and not a live clock.
 
@@ -66,16 +67,16 @@ None. All 154 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-1.4.3 | DHHS91172-A-0035 | Administrator | Upload license/approval to agency profile | continuous; re-verify at each expiry |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.5 | DHHS91172-A-0036 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | at hire |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.6 | DHHS91172-A-0040 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | volunteer_training_file | live_artifact | Unanswered applicability fact: Does the agency use volunteers? |
-| REQ-1.6.1 | DHHS91172-A-0041 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.6.1 | DHHS91172-A-0041 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | volunteer_training_file | live_artifact | Unanswered applicability fact: Does the agency use volunteers? |
 | REQ-1.6.2 | DHHS91172-A-0042 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.6.2.B | DHHS91172-A-0044 | Assigned DSP / supervisor | Mark complete with attachment/attestation | before start / before a volunteer takes a Person overnight |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.6.3 | DHHS91172-A-0045 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / volunteer first regularly-scheduled shift / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.6.3.B | DHHS91172-A-0047 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.6.3.F | DHHS91172-A-0051 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.6.2.B | DHHS91172-A-0044 | Assigned DSP / supervisor | Mark complete with attachment/attestation | before start / before a volunteer takes a Person overnight | volunteer_training_file | live_artifact | Unanswered applicability fact: Does the client have a legal guardian? |
+| REQ-1.6.3 | DHHS91172-A-0045 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / volunteer first regularly-scheduled shift / once; re-verify on renewal/expiry | volunteer_training_file | live_artifact | Unanswered applicability fact: Does the agency use volunteers? |
+| REQ-1.6.3.B | DHHS91172-A-0047 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | volunteer_training_file | live_artifact | Unanswered applicability fact: Does this contractor use regularly scheduled volunteers? |
+| REQ-1.6.3.F | DHHS91172-A-0051 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | once; re-verify on renewal/expiry | volunteer_training_file | live_artifact | Unanswered applicability fact: Does the agency use volunteers? |
 | REQ-1.7.1 | DHHS91172-A-0053 | Administrator | Upload license/approval to agency profile | 30 calendar days / fully executed contract / annual | medicaid_101_contractor | live_mapped |  |
 | REQ-1.7.2 | DHHS91172-A-0054 | Administrator | Upload license/approval to agency profile | 90 calendar days / fully executed contract / annual | medicaid_manuals_memo | live_mapped | Unanswered applicability fact: Which OL licenses/certifications does the agency hold, per location? |
-| REQ-1.7.3 | DHHS91172-A-0055 | Administrator | Upload license/approval to agency profile | annual (recommended) |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.7.4 | DHHS91172-A-0056 | Administrator | Upload license/approval to agency profile | annual (recommended) |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.7.3 | DHHS91172-A-0055 | Administrator | Upload license/approval to agency profile | annual (recommended) | medicaid_manuals_memo | live_mapped |  |
+| REQ-1.7.4 | DHHS91172-A-0056 | Administrator | Upload license/approval to agency profile | annual (recommended) | medicaid_manuals_memo | live_mapped |  |
 | REQ-1.8.1 | DHHS91172-A-0058 | Administrator | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.8.2 | DHHS91172-A-0059 | Administrator | Upload credential/training record to staff profile | once; re-verify on renewal/expiry |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.8.3 | DHHS91172-A-0060 | Administrator | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
@@ -95,17 +96,17 @@ None. All 154 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-1.11 | DHHS91172-A-0134 | Site supervisor | Mark complete with attachment/attestation | continuous; re-verify at renewal | zoning_life_safety | live_artifact | Unanswered applicability fact: Which sites are licensed and require zoning/Life Safety/fire documentation? |
 | REQ-1.12 | DHHS91172-A-0135 | Administrator | Automated check (no user action) or attestation | per claim / continuous check | evv_visit_verification | live_artifact | Unanswered applicability fact: Does the agency provide respite? Overnight? |
 | REQ-1.13 | DHHS91172-A-0136 | Administrator | Upload license/approval to agency profile | once; re-verify on renewal/expiry | medicaid_enrollment | live_artifact |  |
-| REQ-1.13.1 | DHHS91172-A-0137 | Administrator | Generate/upload report and mark sent | 7 calendar days / written request from DSPD |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.13.1 | DHHS91172-A-0137 | Administrator | Generate/upload report and mark sent | 7 calendar days / written request from DSPD | medicaid_change_notifications | live_artifact |  |
 | REQ-1.13.2 | DHHS91172-A-0138 | Administrator | Email to DSPD (address in clause); log in platform | 7 calendar days / change of phone, address or email | medicaid_change_notifications | live_artifact |  |
-| REQ-1.13.3 | DHHS91172-A-0139 | Administrator | Generate/upload report and mark sent | 30 calendar days / change of ownership, legal name or tax ID |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.13.3 | DHHS91172-A-0139 | Administrator | Generate/upload report and mark sent | 30 calendar days / change of ownership, legal name or tax ID | medicaid_change_notifications | live_artifact |  |
 | REQ-1.13.4 | DHHS91172-A-0140 | Administrator | Upload license/approval to agency profile | as offered by DIH/DSPD |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.13.5 | DHHS91172-A-0141 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / hire date / at hire and annually |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.13.5 | DHHS91172-A-0141 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | employment year 1 | medicaid_disclosure_annual | live_mapped | Unanswered applicability fact: Which staff have an active employment record? |
 | REQ-1.13.6 | DHHS91172-A-0142 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.14 | DHHS91172-A-0143 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | governing_board_records | live_artifact | Unanswered applicability fact: Is the agency governed by a governing or policy-making board? |
-| REQ-1.14.1 | DHHS91172-A-0144 | Administrator | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.14.2 | DHHS91172-A-0145 | Administrator | Mark complete with attachment/attestation | quarterly |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.14.3 | DHHS91172-A-0146 | Administrator | Complete in platform form/record | per board meeting |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.14.4 | DHHS91172-A-0147 | Administrator | Generate/upload report and mark sent | 3 calendar days / request from auditor/DHHS/DSPD |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.14.1 | DHHS91172-A-0144 | Administrator | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | governing_board_records | live_artifact | Unanswered applicability fact: Is the agency governed by a board? |
+| REQ-1.14.2 | DHHS91172-A-0145 | Administrator | Mark complete with attachment/attestation | quarterly | governing_board_records | live_artifact | Unanswered applicability fact: Does this contractor have a governing or policy-making board? |
+| REQ-1.14.3 | DHHS91172-A-0146 | Administrator | Complete in platform form/record | per board meeting | governing_board_records | live_artifact | Unanswered applicability fact: Does this contractor have a governing or policy-making board? |
+| REQ-1.14.4 | DHHS91172-A-0147 | Administrator | Generate/upload report and mark sent | 3 calendar days / request from auditor/DHHS/DSPD | governing_board_records | live_artifact | Unanswered applicability fact: Is the agency governed by a board? |
 | REQ-1.15.1 | DHHS91172-A-0149 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_form_0_9_designee | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
 | REQ-1.15.2 | DHHS91172-A-0150 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_form_0_8_user | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
 | REQ-1.15.3 | DHHS91172-A-0151 | Administrator | External: complete in UPI/USTEPS, record completion in platform | Timing is missing-information. Standing UPI/USTEPS ops file — keep current. Do not invent hire+N or annual-from-completion. | upi_need_to_know_access | live_artifact | Unanswered applicability fact: Which staff hold UPI access? |
@@ -127,12 +128,12 @@ None. All 154 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-1.16.4 | DHHS91172-A-0168 | Administrator | Automated check (no user action) or attestation | annual attestation (recommended) |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.16.5 | DHHS91172-A-0169 | Administrator | Automated check (no user action) or attestation | annual attestation (recommended) |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.16.6 | DHHS91172-A-0170 | Administrator | Automated check (no user action) or attestation | annual attestation (recommended) |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.17.a | DHHS91172-A-0171 | Administrator | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.17.b | DHHS91172-A-0172 | Administrator | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.17.a | DHHS91172-A-0171 | Administrator | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | personnel_policies | live_artifact |  |
+| REQ-1.17.b | DHHS91172-A-0172 | Administrator | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | personnel_policies | live_artifact |  |
 | REQ-1.18 | DHHS91172-A-0173 | Administrator | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | operating_policies | live_artifact |  |
-| REQ-1.18.2 | DHHS91172-A-0175 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.18.5 | DHHS91172-A-0178 | Administrator | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.18.7 | DHHS91172-A-0180 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.18.2 | DHHS91172-A-0175 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | operating_policies | live_artifact | Unanswered applicability fact: Does the agency provide transportation? Which staff drive? |
+| REQ-1.18.5 | DHHS91172-A-0178 | Administrator | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | operating_policies | live_artifact | Unanswered applicability fact: Is the agency a representative payee / does it assist with personal funds? |
+| REQ-1.18.7 | DHHS91172-A-0180 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | operating_policies | live_artifact | Unanswered applicability fact: Does the agency provide transportation? Which staff drive? |
 | REQ-1.19 | DHHS91172-A-0181 | Administrator | Generate/upload report and mark sent | DHHS identifies a deficiency requiring a Remediation Plan |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.19.1 | DHHS91172-A-0182 | Administrator | Generate/upload report and mark sent | DHHS deficiency finding |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.19.2 | DHHS91172-A-0183 | Administrator | Generate/upload report and mark sent | timeframe set by DHHS |  | draft_unwired | Rule has no applicability predicates. |
@@ -141,31 +142,31 @@ None. All 154 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-1.20.b | DHHS91172-A-0186 | Assigned DSP / supervisor | Complete in platform form/record | any proposed human-rights modification |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.20.b.6 | DHHS91172-A-0192 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.21 | DHHS91172-A-0195 | Administrator | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | human_rights_plan | live_artifact | Unanswered applicability fact: Does the agency provide ONLY CHA, HSQ or PBA? (if yes, not required) |
-| REQ-1.22.a | DHHS91172-A-0203 | Assigned DSP / supervisor | Generate/upload report and mark sent | at discharge (see 1.22(c)(3) and (d)) / discharge |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.22.a.6 | DHHS91172-A-0209 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.22.a | DHHS91172-A-0203 | Assigned DSP / supervisor | Generate/upload report and mark sent | at discharge (see 1.22(c)(3) and (d)) / discharge | person_discharge_process | live_artifact |  |
+| REQ-1.22.a.6 | DHHS91172-A-0209 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | person_discharge_process | live_artifact | Unanswered applicability fact: Is the agency a representative payee / does it assist with personal funds? |
 | REQ-1.22.b | DHHS91172-A-0210 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.22.b.3 | DHHS91172-A-0213 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.22.b.4 | DHHS91172-A-0214 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.22.b.3 | DHHS91172-A-0213 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | person_discharge_process | live_artifact |  |
+| REQ-1.22.b.4 | DHHS91172-A-0214 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | person_discharge_process | live_artifact |  |
 | REQ-1.22.c | DHHS91172-A-0221 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | person_discharge_process | live_artifact | Unanswered applicability fact: Is the discharge initiated by the agency? |
-| REQ-1.22.c.1 | DHHS91172-A-0222 | Assigned DSP / supervisor | Generate/upload report and mark sent | 30 days prior to intended discharge date / agency decides to discharge |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.22.c.2 | DHHS91172-A-0223 | Assigned DSP / supervisor | Mark complete with attachment/attestation | DSPD Director directs continuation |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.22.c.3 | DHHS91172-A-0224 | Assigned DSP / supervisor | Generate/upload report and mark sent | 7 days / date notice of discharge was given |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.22.d | DHHS91172-A-0225 | Assigned DSP / supervisor | Generate/upload report and mark sent | Person chooses to discharge |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.22.c.1 | DHHS91172-A-0222 | Assigned DSP / supervisor | Generate/upload report and mark sent | 30 days prior to intended discharge date / agency decides to discharge | person_discharge_process | live_artifact |  |
+| REQ-1.22.c.2 | DHHS91172-A-0223 | Assigned DSP / supervisor | Mark complete with attachment/attestation | DSPD Director directs continuation | person_discharge_process | live_artifact |  |
+| REQ-1.22.c.3 | DHHS91172-A-0224 | Assigned DSP / supervisor | Generate/upload report and mark sent | 7 days / date notice of discharge was given | person_discharge_process | live_artifact |  |
+| REQ-1.22.d | DHHS91172-A-0225 | Assigned DSP / supervisor | Generate/upload report and mark sent | Person chooses to discharge | person_discharge_process | live_artifact |  |
 | REQ-1.23 | DHHS91172-A-0226 | Administrator | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | health_support_policies | live_artifact |  |
-| REQ-1.23.a | DHHS91172-A-0227 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.23.b | DHHS91172-A-0232 | Administrator | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.23.a | DHHS91172-A-0227 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | health_support_policies | live_artifact |  |
+| REQ-1.23.b | DHHS91172-A-0232 | Administrator | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | medication_record | live_artifact | Unanswered applicability fact: Does the agency support self-directed self-administration of medication? |
 | REQ-1.23.b.5 | DHHS91172-A-0237 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.23.c | DHHS91172-A-0238 | Administrator | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.23.d | DHHS91172-A-0244 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.23.d.2 | DHHS91172-A-0246 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.23.e | DHHS91172-A-0249 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.23.c | DHHS91172-A-0238 | Administrator | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | medication_record | live_artifact | Unanswered applicability fact: Does the agency have primary responsibility for the client's medication? |
+| REQ-1.23.d | DHHS91172-A-0244 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | medication_record | live_artifact | Unanswered applicability fact: Does the client self-administer medication? |
+| REQ-1.23.d.2 | DHHS91172-A-0246 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | medication_record | live_artifact |  |
+| REQ-1.23.e | DHHS91172-A-0249 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | health_support_policies | live_artifact | Unanswered applicability fact: Does the agency have primary responsibility for the client's medication? |
 | REQ-1.23.f | DHHS91172-A-0250 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.23.f.1 | DHHS91172-A-0251 | Assigned DSP / supervisor | Generate/upload report and mark sent | admission and any relevant health change |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.23.f.1 | DHHS91172-A-0251 | Assigned DSP / supervisor | Generate/upload report and mark sent | admission and any relevant health change | health_support_policies | live_artifact | Unanswered applicability fact: Does the agency provide respite? Overnight? |
 | REQ-1.23.f.2 | DHHS91172-A-0252 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.23.g | DHHS91172-A-0253 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.23.g.1 | DHHS91172-A-0254 | Assigned DSP / supervisor | Complete in platform form/record | health/medical change during service |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.23.g.1 | DHHS91172-A-0254 | Assigned DSP / supervisor | Complete in platform form/record | health/medical change during service | health_support_policies | live_artifact |  |
 | REQ-1.23.g.2 | DHHS91172-A-0255 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.23.h | DHHS91172-A-0256 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.23.h | DHHS91172-A-0256 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | medical_dental_exams | live_artifact | Unanswered applicability fact: Does the agency provide respite? Overnight? |
 | REQ-1.24.1 | DHHS91172-A-0263 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.24.2 | DHHS91172-A-0264 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.24.3 | DHHS91172-A-0265 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
@@ -192,15 +193,15 @@ None. All 154 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-1.28.5 | DHHS91172-A-0294 | Assigned DSP / supervisor | Mark complete with attachment/attestation | monthly | pba_financial_review | live_artifact | Unanswered applicability fact: Does the agency assist the client with personal funds? |
 | REQ-1.28.6 | DHHS91172-A-0295 | Assigned DSP / supervisor | Mark complete with attachment/attestation | before any restriction on access or spending limits |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.28.7 | DHHS91172-A-0296 | Administrator | Automated check (no user action) or attestation | per claim / continuous check | emergency_loan_record | live_artifact |  |
-| REQ-1.28.7.A | DHHS91172-A-0297 | Assigned DSP / supervisor | Generate/upload report and mark sent | 24 hours / emergency resolved |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.28.7.B | DHHS91172-A-0298 | Assigned DSP / supervisor | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.28.7.C | DHHS91172-A-0299 | Assigned DSP / supervisor | Generate/upload report and mark sent | monthly until loan repaid |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.28.7.D | DHHS91172-A-0300 | Assigned DSP / supervisor | Generate/upload report and mark sent | request from authorized individual |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.28.7.A | DHHS91172-A-0297 | Assigned DSP / supervisor | Generate/upload report and mark sent | 24 hours / emergency resolved | emergency_loan_record | live_artifact |  |
+| REQ-1.28.7.B | DHHS91172-A-0298 | Assigned DSP / supervisor | Complete in platform form/record | Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N. | emergency_loan_record | live_artifact |  |
+| REQ-1.28.7.C | DHHS91172-A-0299 | Assigned DSP / supervisor | Generate/upload report and mark sent | monthly until loan repaid | emergency_loan_record | live_artifact | Unanswered applicability fact: Does the client have a legal guardian? |
+| REQ-1.28.7.D | DHHS91172-A-0300 | Assigned DSP / supervisor | Generate/upload report and mark sent | request from authorized individual | emergency_loan_record | live_artifact |  |
 | REQ-1.28.7.E | DHHS91172-A-0301 | Assigned DSP / supervisor | Mark complete with attachment/attestation | before start / service/assignment start |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.28.7.F | DHHS91172-A-0302 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.28.7.G | DHHS91172-A-0303 | Administrator | Generate/upload report and mark sent | annual | large_loan_disclosure_process | live_artifact |  |
-| REQ-1.28.7.H | DHHS91172-A-0304 | Assigned DSP / supervisor | Generate/upload report and mark sent | client transfers to new contractor/Support Coordinator with open loan |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.28.7.I | DHHS91172-A-0305 | Assigned DSP / supervisor | Generate/upload report and mark sent | loan paid in full |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.28.7.H | DHHS91172-A-0304 | Assigned DSP / supervisor | Generate/upload report and mark sent | client transfers to new contractor/Support Coordinator with open loan | emergency_loan_record | live_artifact |  |
+| REQ-1.28.7.I | DHHS91172-A-0305 | Assigned DSP / supervisor | Generate/upload report and mark sent | loan paid in full | emergency_loan_record | live_artifact |  |
 | REQ-1.28.8 | DHHS91172-A-0306 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.28.9 | DHHS91172-A-0307 | Administrator | Automated check (no user action) or attestation | per claim / continuous check | no_gifts_process | live_artifact |  |
 | REQ-1.28.10 | DHHS91172-A-0308 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -208,9 +209,9 @@ None. All 154 live-key parents have a fixture overlay. Do not invent PN1/PN2 mon
 | REQ-1.29.2 | DHHS91172-A-0311 | Assigned DSP / supervisor | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.30 | DHHS91172-A-0312 | Administrator | Mark complete with attachment/attestation | employment year 1 | driving_record_transport | live_mapped | Unanswered applicability fact: Does the agency provide transportation? |
 | REQ-1.30.1 | DHHS91172-A-0313 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-1.30.2 | DHHS91172-A-0314 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff first transports a Person / annual |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.30.3 | DHHS91172-A-0315 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | before start / before staff first transports a Person / once; re-verify on renewal/expiry |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-1.30.3.G | DHHS91172-A-0322 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-1.30.2 | DHHS91172-A-0314 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | employment year 1 | driving_record_transport | live_mapped | Unanswered applicability fact: Does this staff member drive Persons? Own vehicle? |
+| REQ-1.30.3 | DHHS91172-A-0315 | Staff (verified by Administrator/HR) | Upload credential/training record to staff profile | employment year 1 | driving_record_transport | live_mapped | Unanswered applicability fact: Does the agency provide transportation? Which staff drive? |
+| REQ-1.30.3.G | DHHS91172-A-0322 | Administrator | Mark complete with attachment/attestation | employment year 1 | driving_record_transport | live_mapped | Unanswered applicability fact: Which staff transport persons? |
 | REQ-1.31.1 | DHHS91172-A-0324 | Administrator | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
 | REQ-1.31.2 | DHHS91172-A-0325 | Administrator | Generate/upload report and mark sent | Support Coordinator request |  | draft_unwired | Rule has no applicability predicates. |
 | REQ-1.31.3 | DHHS91172-A-0326 | Administrator | Generate/upload report and mark sent | 3 calendar days / Support Coordinator request |  | draft_unwired | Rule has no applicability predicates. |

@@ -36,6 +36,24 @@ describe("catalog live bridge", () => {
     assert.equal(liveObligationKeyForRequirement("REQ-11.3.6"), "hhs_evac_drills_quarterly");
     assert.equal(liveObligationKeyForRequirement("REQ-20.3.6"), "pps_evac_drills_quarterly");
     assert.equal(liveObligationKeyForRequirement("REQ-21.3.6"), "rhs_evac_drills_quarterly");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.6.1"), "volunteer_training_file");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.6.3.F"), "volunteer_training_file");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.7.3"), "medicaid_manuals_memo");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.13.1"), "medicaid_change_notifications");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.13.5"), "medicaid_disclosure_annual");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.14.1"), "governing_board_records");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.17.a"), "personnel_policies");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.18.5"), "operating_policies");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.22.c.1"), "person_discharge_process");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.23.a"), "health_support_policies");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.23.b"), "medication_record");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.23.h"), "medical_dental_exams");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.28.7.A"), "emergency_loan_record");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.30.2"), "driving_record_transport");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.13.4"), null);
+    assert.equal(liveObligationKeyForRequirement("REQ-1.28.6"), null);
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.13.4"], undefined);
+    assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.28.6"], undefined);
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-11.3"], undefined);
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-20.3"], undefined);
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-21.3"], undefined);
@@ -80,6 +98,11 @@ describe("catalog live bridge", () => {
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-11.3.6"], "hhs_evac_drills_quarterly");
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-20.3.6"], "pps_evac_drills_quarterly");
     assert.equal(EXPLICIT_REQ_TO_LIVE_KEY["REQ-21.3.6"], "rhs_evac_drills_quarterly");
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.6.1"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.13.5"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.17.a"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.23.b"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.23.h"] ?? ""));
   });
 
   it("never mints a staff task for child elements", () => {
