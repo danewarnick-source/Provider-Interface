@@ -4,13 +4,13 @@
     "importedParents": 760,
     "importedElements": 607,
     "importedRows": 1367,
-    "executable": 140,
+    "executable": 146,
     "verified": 50,
     "published": 50,
     "blocked": 0,
-    "liveMapped": 60,
+    "liveMapped": 66,
     "systemBehavior": 421,
-    "draftUnwired": 199,
+    "draftUnwired": 193,
     "elementOfParent": 607,
     "wiredFirstBatch": 5,
     "wiredSecondBatch": 6,
@@ -24,7 +24,8 @@
     "wiredNinthBatch": 15,
     "wiredTenthBatch": 41,
     "wiredEleventhBatch": 34,
-    "wired": 140,
+    "wiredTwelfthBatch": 6,
+    "wired": 146,
     "remainingExecutable": 0
   },
   "parents": [
@@ -20092,10 +20093,10 @@
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
       "timing": "15th of the month following service month / period end / monthly",
       "renewal": "Renews each month",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sei_employment_data_upi",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -20107,14 +20108,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each month",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
@@ -20128,10 +20121,10 @@
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
       "timing": "2 weeks / PCSP update",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sei_employment_strategies_upi",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -20143,14 +20136,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
@@ -21973,10 +21958,10 @@
       "completionMethod": "External: USOR, record completion in platform",
       "timing": "monthly",
       "renewal": "Renews each month",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_usor_contact_monthly",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -21988,14 +21973,6 @@
         "Is the agency a USOR-approved vendor?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each month",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Is the agency a USOR-approved vendor?"
       ]
@@ -22101,10 +22078,10 @@
       "completionMethod": "External: USOR, record completion in platform",
       "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_usor_contact_monthly",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -22116,14 +22093,6 @@
         "Is the agency a USOR-approved vendor?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Is the agency a USOR-approved vendor?"
       ]
@@ -22137,10 +22106,10 @@
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
       "timing": "2 weeks / PCSP update",
       "renewal": "New instance each time the trigger event occurs",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sei_employment_strategies_upi",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -22152,14 +22121,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: New instance each time the trigger event occurs",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
@@ -22203,10 +22164,10 @@
       "completionMethod": "External: complete in UPI/USTEPS, record completion in platform",
       "timing": "15th of the month following service month / monthly",
       "renewal": "Renews each month",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "sjd_employment_data_upi",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -22218,14 +22179,6 @@
         "Which staff hold UPI access?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each month",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?",
         "Unanswered applicability fact: Which staff hold UPI access?"
       ]
