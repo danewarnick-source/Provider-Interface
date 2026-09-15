@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef } from "react";
@@ -22,6 +23,12 @@ import { FaceSheetInfoCard } from "@/components/clients/face-sheet-info-card";
 
 export const Route = createFileRoute("/dashboard/client-intake/$clientId")({
   head: () => ({ meta: [{ title: "New Client Intake — Provider Interface" }] }),
+  beforeLoad: ({ params }) => {
+    redirectUnlessUuidParam(params.clientId, {
+      createTo: "/dashboard/clients/new",
+      fallbackTo: "/dashboard/clients",
+    });
+  },
   component: () => (
     <RequirePermission perm="manage_client_intake">
       <IntakeRunner />
@@ -67,6 +74,7 @@ function IntakeRunner() {
   const seededRef = useRef(false);
 
   const clientQ = useQuery({
+    enabled: isRouteUuid(clientId),
     queryKey: ["client-intake-header", clientId],
     queryFn: async () => {
       const { data, error } = await supabase

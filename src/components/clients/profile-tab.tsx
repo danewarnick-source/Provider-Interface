@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { isRouteUuid } from "@/lib/route-uuid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -82,7 +83,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   const orgId = org?.organization_id;
 
   const clientQ = useQuery({
-    enabled: !!orgId,
+    enabled: !!orgId && isRouteUuid(clientId),
     queryKey: ["client-profile-tab", orgId, clientId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -99,7 +100,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   });
 
   const docsQ = useQuery({
-    enabled: !!orgId,
+    enabled: !!orgId && isRouteUuid(clientId),
     queryKey: ["client-profile-tab-docs", orgId, clientId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -114,7 +115,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   });
 
   const contactsQ = useQuery({
-    enabled: !!orgId,
+    enabled: !!orgId && isRouteUuid(clientId),
     queryKey: ["client-emergency-contacts", orgId, clientId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -128,7 +129,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   });
 
   const restrictionsQ = useQuery({
-    enabled: !!orgId,
+    enabled: !!orgId && isRouteUuid(clientId),
     queryKey: ["client-restrictions", clientId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -1180,16 +1181,20 @@ function ContactsCard({
 
   const mut = useMutation({
     mutationFn: async () => {
+      if (!isRouteUuid(clientId)) {
+        throw new Error("Save the client before adding emergency contacts.");
+      }
       for (const c of draft) {
-        if (c._deleted && c.id) {
-          const { error } = await supabase.from("client_emergency_contacts").delete().eq("id", c.id);
+        const rowId = isRouteUuid(c.id) ? c.id : undefined;
+        if (c._deleted && rowId) {
+          const { error } = await supabase.from("client_emergency_contacts").delete().eq("id", rowId);
           if (error) throw error;
         } else if (!c._deleted) {
           const name = c.name.trim();
           if (!name) continue;
           const payload = { organization_id: orgId, client_id: clientId, name, phone: c.phone.trim() || null, relationship: c.relationship.trim() || null };
-          if (c.id) {
-            const { error } = await supabase.from("client_emergency_contacts").update(payload).eq("id", c.id);
+          if (rowId) {
+            const { error } = await supabase.from("client_emergency_contacts").update(payload).eq("id", rowId);
             if (error) throw error;
           } else {
             const { error } = await supabase.from("client_emergency_contacts").insert(payload);

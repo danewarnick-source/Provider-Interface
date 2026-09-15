@@ -10,7 +10,7 @@ export const Route = createFileRoute("/dashboard/clients/new")({
 function AddClientRoute() {
   return (
     <AgencySetupCreateGate>
-      <ClientsPage />
+      <ClientsPage startWithAddOpen />
     </AgencySetupCreateGate>
   );
 }

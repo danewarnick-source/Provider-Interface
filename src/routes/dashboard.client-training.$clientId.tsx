@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -28,6 +29,12 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/dashboard/client-training/$clientId")({
   validateSearch: searchSchema,
+  beforeLoad: ({ params }) => {
+    redirectUnlessUuidParam(params.clientId, {
+      createTo: "/dashboard/clients/new",
+      fallbackTo: "/dashboard/clients",
+    });
+  },
   component: ClientTrainingViewer,
 });
 
@@ -56,6 +63,7 @@ function ClientTrainingViewer() {
 
   const queryKey = ["staff-client-training", clientId, trainingType, obligationInstance ?? null];
   const { data, isLoading, error } = useQuery({
+    enabled: isRouteUuid(clientId),
     queryKey,
     queryFn: () => getFn({ data: { clientId, trainingType } }),
     retry: false,
