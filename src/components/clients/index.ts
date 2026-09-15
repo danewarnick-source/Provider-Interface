@@ -18,5 +18,4 @@ export * from './healthcare-providers-card';
 export * from './home-pin-card';
 export * from './intake-progress';
 export * from './target-behaviors-panel';
-export * from './tracked-fields-card';
 export * from './visibility-toggles';
