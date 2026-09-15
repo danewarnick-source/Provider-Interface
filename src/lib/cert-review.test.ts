@@ -86,8 +86,9 @@ describe("cert review rules", () => {
     assert.doesNotMatch(fn, /months from upload date/);
     assert.doesNotMatch(fn, /addMonthsUTC\(new Date\(completedAt\)/);
     assert.match(fn, /nextRenewalDueFromRules|nectarReviewDisposition/);
-    assert.match(fn, /nectar_validation_status: "passed"/);
-    assert.doesNotMatch(fn, /nectar_validation_status: "manually_confirmed"/);
+    assert.match(fn, /nectar_validation_status: "manually_confirmed"/);
+    assert.match(fn, /nectar_validation_status: validation.ran \? validation.status/);
+    assert.match(fn, /nectar_validation_status: "failed"/);
     assert.doesNotMatch(due, /months from the last verified upload/);
     assert.match(due, /never taken from the upload date/);
     assert.doesNotMatch(baseline, /default_validity_months &&/);
@@ -177,6 +178,13 @@ describe("cert review rules", () => {
     assert.equal(certReviewStatusLabel("awaiting_review"), "Awaiting review");
     assert.equal(
       certReviewStatus({
+        nectarValidationStatus: "manually_confirmed",
+        instanceStatus: "pending",
+      }),
+      "accepted",
+    );
+    assert.equal(
+      certReviewStatus({
         nectarValidationStatus: "passed",
         instanceStatus: "pending",
         adminNotes: ADMIN_ACCEPTED_PREFIX,
@@ -254,6 +262,13 @@ describe("cert review rules", () => {
     assert.equal(isAdminAcceptedNote(ADMIN_ACCEPTED_PREFIX), true);
     assert.equal(
       staffSurfaceReviewKind({
+        nectarValidationStatus: "manually_confirmed",
+        instanceStatus: "pending",
+      }),
+      "accepted",
+    );
+    assert.equal(
+      staffSurfaceReviewKind({
         nectarValidationStatus: "passed",
         instanceStatus: "pending",
         adminNotes: ADMIN_ACCEPTED_PREFIX,
@@ -287,6 +302,13 @@ describe("cert review rules", () => {
         adminNotes: "Uploaded — awaiting review.",
       }),
       true,
+    );
+    assert.equal(
+      shouldReplaceCompletionForResubmit({
+        nectarValidationStatus: "manually_confirmed",
+        adminNotes: ADMIN_ACCEPTED_PREFIX,
+      }),
+      false,
     );
     assert.equal(
       shouldReplaceCompletionForResubmit({
@@ -413,8 +435,9 @@ describe("cert review surface lock", () => {
     assert.match(fns, /correctionReminderRecurrenceKey/);
     assert.match(fns, /resolveInstanceNotifications/);
     assert.match(fns, /ADMIN_ACCEPTED_PREFIX/);
-    assert.match(fns, /nectar_validation_status: "passed"/);
-    assert.doesNotMatch(fns, /nectar_validation_status: "manually_confirmed"/);
+    assert.match(fns, /nectar_validation_status: "manually_confirmed"/);
+    assert.match(fns, /nectar_validation_status: validation.ran \? validation.status/);
+    assert.match(fns, /nectar_validation_status: "failed"/);
     assert.match(engine, /ADMIN_ACCEPTED_PREFIX/);
     assert.match(panel, /adminNotes: review.adminNotes/);
     assert.match(panel, /certReviewAcceptBlockReason/);

@@ -3033,10 +3033,11 @@ async function resolveInstanceNotifications(
 }
 
 /**
- * Admin override for a completion NECTAR flagged as failed: the admin has
- * looked at the uploaded document themselves and confirms it's valid. Marks
- * that completion row as a manual entry (preserving the original NECTAR
- * fields for the audit trail) and closes the instance same as any other
+ * Admin override for a completion NECTAR flagged as failed/needs_review:
+ * the admin has looked at the uploaded document themselves and confirms
+ * it's valid. Writes nectar_validation_status `manually_confirmed` (OCR
+ * auto-pass stays `passed`). Marks the row as a manual entry (preserving
+ * original NECTAR fields) and closes the instance same as any other
  * completion.
  */
 export const confirmFailedObligationCompletion = createServerFn({ method: "POST" })
@@ -3106,7 +3107,7 @@ export const confirmFailedObligationCompletion = createServerFn({ method: "POST"
         is_manual_entry: true,
         manual_entry_by: userId,
         manual_entry_by_name: adminDir?.full_name ?? "an admin",
-        nectar_validation_status: "passed",
+        nectar_validation_status: "manually_confirmed",
         nectar_extracted_expires_date: expiresOn,
         admin_notes: expiresOn
           ? `${ADMIN_ACCEPTED_PREFIX} Expiration confirmed ${expiresOn}.`
