@@ -4,13 +4,13 @@
     "importedParents": 760,
     "importedElements": 607,
     "importedRows": 1367,
-    "executable": 151,
+    "executable": 154,
     "verified": 50,
     "published": 50,
     "blocked": 0,
-    "liveMapped": 66,
+    "liveMapped": 69,
     "systemBehavior": 421,
-    "draftUnwired": 188,
+    "draftUnwired": 185,
     "elementOfParent": 607,
     "wiredFirstBatch": 5,
     "wiredSecondBatch": 6,
@@ -26,7 +26,8 @@
     "wiredEleventhBatch": 34,
     "wiredTwelfthBatch": 6,
     "wiredThirteenthBatch": 5,
-    "wired": 151,
+    "wiredFourteenthBatch": 3,
+    "wired": 154,
     "remainingExecutable": 0
   },
   "parents": [
@@ -10352,10 +10353,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "quarterly",
       "renewal": "Renews each quarter",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "hhs_evac_drills_quarterly",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -10365,14 +10366,6 @@
         "Agency awarded HHS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each quarter",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -15116,10 +15109,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "quarterly",
       "renewal": "Renews each quarter",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "pps_evac_drills_quarterly",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -15129,14 +15122,6 @@
         "Agency awarded PPS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each quarter",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },
@@ -16292,10 +16277,10 @@
       "completionMethod": "Mark complete with attachment/attestation",
       "timing": "quarterly",
       "renewal": "Renews each quarter",
-      "liveKey": null,
-      "implementationStatus": "draft_unwired",
+      "liveKey": "rhs_evac_drills_quarterly",
+      "implementationStatus": "live_mapped",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -16305,14 +16290,6 @@
         "Agency awarded RHS?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Renews each quarter",
-        "No live company_obligations key mapped yet — reuse the existing engine, do not fork a second checklist.",
         "Unanswered applicability fact: Which DSPD service codes is this contractor awarded?"
       ]
     },

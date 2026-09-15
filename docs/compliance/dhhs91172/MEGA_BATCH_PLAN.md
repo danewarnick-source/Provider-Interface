@@ -1,13 +1,13 @@
 # DHHS91172 executable finalize
 
-Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2 monthly-summary keys or quarterly evac parents. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7.
+Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Quarterly evac drill leftovers are wired unpublished (fourteenth batch / imported `.6` parents). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3.
 
-Measured after OL Day Treatment / Day Support thirteenth-batch wiring stacked on the SEI/SJD UPI twelfth-batch tip (#359).
+Measured after quarterly evac fourteenth-batch wiring stacked on the rebased #361 tip (`54712649` on `cursor/wire-ol-day-tx-support-twins-e3d0`, post-#360 main).
 
 | Measure                        | Count |
 | ------------------------------ | ----: |
 | Imported parents               |   760 |
-| Executable (live key)          |   151 |
+| Executable (live key)          |   154 |
 | Wired 1–6                      |    22 |
 | Wired Mega A                   |    10 |
 | Wired Mega B (already on main) |     9 |
@@ -17,13 +17,14 @@ Measured after OL Day Treatment / Day Support thirteenth-batch wiring stacked on
 | Wired eleventh / FY Google Form |    34 |
 | Wired twelfth / SEI-SJD UPI employment |     6 |
 | Wired thirteenth / OL Day Treatment Day Support |     5 |
-| Wired total                    |   151 |
+| Wired fourteenth / quarterly evac leftovers |     3 |
+| Wired total                    |   154 |
 | Remaining executable           |     0 |
 | Verified / published           | 50 / 50 |
-| Draft unwired                  |   188 |
+| Draft unwired                  |   185 |
 | System behavior                |   421 |
 
-Draft-unwired blockers (188/188): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
+Draft-unwired blockers (185/185): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
 
 ## Already wired (1–6) — do not re-cut
 
@@ -87,7 +88,7 @@ Child elements (board minutes, discharge notices, loan notices, §1.18/§1.23 it
 | REQ-21.3.1  | rhs_lease_agreement       | intake                                                     |
 | REQ-21.5    | ol_rhs_license_4plus      | standing                                                   |
 
-Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_drills_quarterly`, `rhs_evac_drills_quarterly`, `pps_evac_drills_quarterly`, `pps_foster_license`, `medicaid_disclosure_annual`, `usor_job_development_sjd`, `client_specific_training`. Employment-data / strategies / USOR-contact UPI keys now attach to imported SEI/SJD leftovers (twelfth batch). Annual-outcome pack keys attach to imported FY Google Form `.c` twins (eleventh batch) — do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7. There is no `sjd_employment_strategies_upi` pack sibling (that would need a catalog seed).
+Unmapped obligation keys with **no imported parent** (do not invent): `pps_foster_license`, `medicaid_disclosure_annual`, `usor_job_development_sjd`, `client_specific_training`. Quarterly evac pack keys now attach to imported `.6` parents (fourteenth batch) — do not invent umbrella REQ-11.3 / REQ-20.3 / REQ-21.3. Employment-data / strategies / USOR-contact UPI keys now attach to imported SEI/SJD leftovers (twelfth batch). Annual-outcome pack keys attach to imported FY Google Form `.c` twins (eleventh batch) — do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7. There is no `sjd_employment_strategies_upi` pack sibling (that would need a catalog seed).
 
 ## Ninth — UPI / USTEPS ops (wired, unpublished)
 
@@ -168,3 +169,13 @@ Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_
 | REQ-8.5.a | ol_day_tx_license_4plus | DSI | site-based; shares license key |
 | REQ-8.5.b | ol_day_support_cert_3or_fewer | DSI | community; shares cert key |
 | REQ-9.6.a | ol_day_tx_license_4plus | EPR | shares license key |
+
+## Fourteenth — quarterly evac drill leftovers (wired, unpublished)
+
+**Family:** Imported `.6` site drill-log leftovers. Same leftover move as FY `.c` twins. One drill-log card family, quarter-end, awarded-code predicates. App PR, no DB change. Unpublished. Hold merge for Dane. Do not publish these 3. Official catalog clauses only. Reuses existing pack liveKeys. Do not invent umbrella REQ-11.3 / REQ-20.3 / REQ-21.3. Do not include OL Day twins.
+
+| Rule | Live key | Awarded | Note |
+| ---- | -------- | ------- | ---- |
+| REQ-11.3.6 | hhs_evac_drills_quarterly | HHS | imported `.6` parent; unused pack key |
+| REQ-20.3.6 | pps_evac_drills_quarterly | PPS | imported `.6` parent; unused pack key |
+| REQ-21.3.6 | rhs_evac_drills_quarterly | RHS | imported `.6` parent; unused pack key |

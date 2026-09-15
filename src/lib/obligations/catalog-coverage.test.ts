@@ -17,7 +17,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.importedParents, 760);
     assert.equal(report.counts.importedElements, 607);
     assert.equal(report.counts.importedRows, 1367);
-    assert.ok(report.counts.executable >= 151);
+    assert.ok(report.counts.executable >= 154);
     assert.equal(report.counts.published, 50);
     assert.equal(report.counts.verified, 50);
     assert.equal(report.counts.wiredFirstBatch, 5);
@@ -34,7 +34,8 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredEleventhBatch, 34);
     assert.equal(report.counts.wiredTwelfthBatch, 6);
     assert.equal(report.counts.wiredThirteenthBatch, 5);
-    assert.equal(report.counts.wired, 151);
+    assert.equal(report.counts.wiredFourteenthBatch, 3);
+    assert.equal(report.counts.wired, 154);
     assert.equal(report.counts.remainingExecutable, 0);
     assert.equal(VERIFIED_PUBLICATIONS.length, 50);
     assert.deepEqual(
@@ -48,7 +49,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.deepEqual(committed.counts, report.counts);
     const markdown = formatCatalogCoverageMarkdown(report);
     assert.match(markdown, /Controlled publication \(Soft=none\)/);
-    assert.match(markdown, /None\. All 151 live-key parents have a fixture overlay/);
+    assert.match(markdown, /None\. All 154 live-key parents have a fixture overlay/);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -310,6 +311,25 @@ describe("DHHS91172 catalog coverage", () => {
     const grandfather = report.rows.find((r) => r.requirementKey === "REQ-7.5.c");
     assert.ok(grandfather);
     assert.equal(grandfather.liveKey, null);
+
+    const hhsEvac = report.rows.find((r) => r.requirementKey === "REQ-11.3.6");
+    assert.ok(hhsEvac);
+    assert.equal(hhsEvac.liveKey, "hhs_evac_drills_quarterly");
+    assert.equal(hhsEvac.canPublish, true);
+    assert.equal(hhsEvac.canActivate, false);
+    assert.equal(hhsEvac.publication, "not_published");
+    const ppsEvac = report.rows.find((r) => r.requirementKey === "REQ-20.3.6");
+    assert.ok(ppsEvac);
+    assert.equal(ppsEvac.liveKey, "pps_evac_drills_quarterly");
+    assert.equal(ppsEvac.canActivate, false);
+    const rhsEvac = report.rows.find((r) => r.requirementKey === "REQ-21.3.6");
+    assert.ok(rhsEvac);
+    assert.equal(rhsEvac.liveKey, "rhs_evac_drills_quarterly");
+    assert.equal(rhsEvac.canActivate, false);
+    assert.equal(
+      report.rows.some((r) => r.requirementKey === "REQ-11.3"),
+      false,
+    );
 
     const personReview = report.rows.find((r) => r.requirementKey === "REQ-1.28.5");
     assert.ok(personReview);
