@@ -1,25 +1,26 @@
 # DHHS91172 executable finalize
 
-Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents: those live keys exist on the pack, but **no imported parent maps to them**. Do not start BC FBA/BSP batch B here.
+Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents: those live keys exist on the pack, but **no imported parent maps to them**.
 
-Measured after UPI/USTEPS ninth-batch wiring on post-#355 main.
+Measured after BC FBA/BSP tenth-batch wiring stacked on the UPI/USTEPS ninth-batch tip.
 
 | Measure                        | Count |
 | ------------------------------ | ----: |
 | Imported parents               |   760 |
-| Executable (live key)          |    65 |
+| Executable (live key)          |   106 |
 | Wired 1–6                      |    22 |
 | Wired Mega A                   |    10 |
 | Wired Mega B (already on main) |     9 |
 | Wired Mega C (already on main) |     9 |
 | Wired ninth / UPI-USTEPS ops   |    15 |
-| Wired total                    |    65 |
+| Wired tenth / BC FBA-BSP twins |    41 |
+| Wired total                    |   106 |
 | Remaining executable           |     0 |
 | Verified / published           | 50 / 50 |
-| Draft unwired                  |   268 |
-| System behavior                |   427 |
+| Draft unwired                  |   233 |
+| System behavior                |   421 |
 
-Draft-unwired blockers (283/283): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
+Draft-unwired blockers (233/233): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
 
 ## Already wired (1–6) — do not re-cut
 
@@ -106,3 +107,24 @@ Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_
 | REQ-1.15.13 | upi_remove_discharged_person     | standing    |
 | REQ-1.15.14 | upi_annual_access_review         | standing    |
 | REQ-1.15.15 | upi_notify_usteps_termination    | standing    |
+
+## Tenth — BC FBA/BSP twins (wired, unpublished)
+
+**Family:** Articles 3–5 FBA/BSP twins. One live key: `fba_bsp` (existing by_design behavior-support module). Soft=none. Hold merge for Dane. Do not publish these 41. Do not invent SOW text. Rights-modification twins REQ-3.4.3 / REQ-4.4.3 / REQ-5.4.3 stay unwired (not FBA/BSP). UPI 1.15 stays on the ninth batch.
+
+| Rule | Live key | Twin |
+| ---- | -------- | ---- |
+| REQ-3.3.1, REQ-4.3.1, REQ-5.3.1 | fba_bsp | Complete FBA of the Person's target behavior |
+| REQ-3.3.2, REQ-4.3.2, REQ-5.3.2 | fba_bsp | Written FBA that includes (SYSTEM fields) |
+| REQ-3.3.3, REQ-4.3.3, REQ-5.3.3 | fba_bsp | Initial FBA within 30 Calendar Days of BC approval |
+| REQ-3.3.4, REQ-4.3.4, REQ-5.3.4 | fba_bsp | FBA reevaluation within 30 Calendar Days |
+| REQ-3.3.5, REQ-4.3.5, REQ-5.3.5 | fba_bsp | Submit FBA within 14 Calendar Days |
+| REQ-3.3.6, REQ-5.3.6 | fba_bsp | Maintain the FBA in the Person's file (BC2 has no twin) |
+| REQ-3.3.7, REQ-4.3.6, REQ-5.3.7 | fba_bsp | Initial FBA after substantial life change (60 Calendar Days) |
+| REQ-3.3.8, REQ-4.3.7, REQ-5.3.8 | fba_bsp | FBA revisions within 30 Calendar Days of the change |
+| REQ-3.4.1, REQ-4.4.1, REQ-5.4.1 | fba_bsp | BSP development / implementation / training (SYSTEM fields) |
+| REQ-3.4.2, REQ-4.4.2, REQ-5.4.2 | fba_bsp | Reevaluate the BSP each month |
+| REQ-3.4.4, REQ-4.4.4, REQ-5.4.4 | fba_bsp | Complete the BSP within 30 Calendar Days of FBA completion |
+| REQ-3.4.5, REQ-4.4.5, REQ-5.4.5 | fba_bsp | BSP reevaluation within 30 Calendar Days / 30 days |
+| REQ-3.4.6, REQ-4.4.6, REQ-5.4.6 | fba_bsp | Submit BSP within 14 Calendar Days |
+| REQ-3.4.7, REQ-4.4.7, REQ-5.4.7 | fba_bsp | Maintain the BSP in the Person's file |

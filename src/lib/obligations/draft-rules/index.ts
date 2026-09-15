@@ -224,6 +224,15 @@ export {
   ninthExecutableBatchParents,
 } from "../ninth-executable-batch.ts";
 export {
+  applyTenthExecutableBatchOverlay,
+  applyTenthExecutableBatchOverlayAll,
+  TENTH_BATCH_DEMO_PATH,
+  TENTH_EXECUTABLE_BATCH_ID,
+  TENTH_EXECUTABLE_BATCH_LIVE_KEYS,
+  TENTH_EXECUTABLE_BATCH_RULE_IDS,
+  tenthExecutableBatchParents,
+} from "../tenth-executable-batch.ts";
+export {
   countQualifiedDesignatedBenefits,
   employmentYearDue,
   hirePlusDaysDue,

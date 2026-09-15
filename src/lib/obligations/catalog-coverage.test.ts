@@ -17,7 +17,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.importedParents, 760);
     assert.equal(report.counts.importedElements, 607);
     assert.equal(report.counts.importedRows, 1367);
-    assert.ok(report.counts.executable >= 65);
+    assert.ok(report.counts.executable >= 106);
     assert.equal(report.counts.published, 50);
     assert.equal(report.counts.verified, 50);
     assert.equal(report.counts.wiredFirstBatch, 5);
@@ -30,7 +30,8 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredEighthBatch, 9);
     assert.equal(report.counts.wiredMegaC, 9);
     assert.equal(report.counts.wiredNinthBatch, 15);
-    assert.equal(report.counts.wired, 65);
+    assert.equal(report.counts.wiredTenthBatch, 41);
+    assert.equal(report.counts.wired, 106);
     assert.equal(report.counts.remainingExecutable, 0);
     assert.equal(VERIFIED_PUBLICATIONS.length, 50);
     assert.deepEqual(
@@ -44,7 +45,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.deepEqual(committed.counts, report.counts);
     const markdown = formatCatalogCoverageMarkdown(report);
     assert.match(markdown, /Controlled publication \(Soft=none\)/);
-    assert.match(markdown, /None\. All 65 live-key parents have a fixture overlay/);
+    assert.match(markdown, /None\. All 106 live-key parents have a fixture overlay/);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -218,6 +219,21 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(upiNotify.liveKey, "upi_notify_usteps_termination");
     assert.equal(upiNotify.canPublish, true);
     assert.equal(upiNotify.canActivate, false);
+
+    const fbaInitial = report.rows.find((r) => r.requirementKey === "REQ-3.3.3");
+    assert.ok(fbaInitial);
+    assert.equal(fbaInitial.liveKey, "fba_bsp");
+    assert.equal(fbaInitial.canPublish, true);
+    assert.equal(fbaInitial.canActivate, false);
+    assert.equal(fbaInitial.publication, "not_published");
+    const bspSubmit = report.rows.find((r) => r.requirementKey === "REQ-5.4.6");
+    assert.ok(bspSubmit);
+    assert.equal(bspSubmit.liveKey, "fba_bsp");
+    assert.equal(bspSubmit.canPublish, true);
+    assert.equal(bspSubmit.canActivate, false);
+    const rightsMod = report.rows.find((r) => r.requirementKey === "REQ-3.4.3");
+    assert.ok(rightsMod);
+    assert.equal(rightsMod.liveKey, null);
 
     const personReview = report.rows.find((r) => r.requirementKey === "REQ-1.28.5");
     assert.ok(personReview);

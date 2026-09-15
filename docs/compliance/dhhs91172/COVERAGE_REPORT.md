@@ -11,13 +11,13 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Imported parents | 760 |
 | Imported elements | 607 |
 | Imported rows | 1367 |
-| Executable (live key mapped) | 65 |
+| Executable (live key mapped) | 106 |
 | Verified / activatable | 50 |
 | Published | 50 |
 | Blocked (rule-specific gap, no live key) | 0 |
 | Live mapped (clock) | 26 |
-| System / standing behavior | 427 |
-| Draft unwired | 268 |
+| System / standing behavior | 421 |
+| Draft unwired | 233 |
 | Element of parent | 607 |
 | Wired first batch (fixture overlay) | 5 |
 | Wired second batch (fixture overlay) | 6 |
@@ -29,7 +29,8 @@ Parents connect to the existing live obligation engine. Child elements are check
 | Wired eighth batch / Mega B (fixture overlay) | 9 |
 | Wired Mega C person-file / site leftovers (fixture overlay) | 9 |
 | Wired ninth batch / UPI-USTEPS ops (fixture overlay) | 15 |
-| Wired shared-behavior batches (fixture overlay) | 65 |
+| Wired tenth batch / BC FBA-BSP twins (fixture overlay) | 41 |
+| Wired shared-behavior batches (fixture overlay) | 106 |
 | Remaining executable (live key, not yet wired) | 0 |
 
 ## Controlled publication (Soft=none)
@@ -38,17 +39,17 @@ Wiring is not publication. `VERIFIED_PUBLICATIONS` has 50 published / 50 verifie
 
 ## Remaining executable (live key, not wired)
 
-None. All 65 live-key parents have a fixture overlay. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.
+None. All 106 live-key parents have a fixture overlay. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents — those live keys have no matching imported parent.
 
 ## Draft-unwired blocker categories
 
-268 draft-unwired parents. Categories only — not a row novel.
+233 draft-unwired parents. Categories only — not a row novel.
 
 | Category | Count |
 | --- | ---: |
-| no_live_key + no_predicates | 268 |
+| no_live_key + no_predicates | 233 |
 
-427 additional parents are system_behavior (creates_user_task=no / SYSTEM handling) — not draft-unwired and not a live clock.
+421 additional parents are system_behavior (creates_user_task=no / SYSTEM handling) — not draft-unwired and not a live clock.
 
 ## Parents
 
@@ -240,21 +241,21 @@ None. All 65 live-key parents have a fixture overlay. Do not invent PN1/PN2, qua
 | REQ-3.2.4 | DHHS91172-A-0365 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-3.2.5 | DHHS91172-A-0366 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-3.2.6 | DHHS91172-A-0367 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-3.3.1 | DHHS91172-A-0369 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | DSPD approval to provide BC service |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.3.2 | DHHS91172-A-0370 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-3.3.3 | DHHS91172-A-0379 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / dspd approval to provide bc1 services |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.3.4 | DHHS91172-A-0380 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar days / written request from Support Coordinator/PCPT or quarterly-summary indication |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.3.5 | DHHS91172-A-0381 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar day(s) / completion |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.3.6 | DHHS91172-A-0382 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.3.7 | DHHS91172-A-0383 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 60 calendar day(s) / the start of the initial fba |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.3.8 | DHHS91172-A-0384 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / the change |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.4.1 | DHHS91172-A-0386 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-3.4.2 | DHHS91172-A-0400 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-3.3.1 | DHHS91172-A-0369 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | DSPD approval to provide BC service | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.3.2 | DHHS91172-A-0370 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.3.3 | DHHS91172-A-0379 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / dspd approval to provide bc1 services | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.3.4 | DHHS91172-A-0380 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar days / written request from Support Coordinator/PCPT or quarterly-summary indication | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.3.5 | DHHS91172-A-0381 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar day(s) / completion | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.3.6 | DHHS91172-A-0382 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.3.7 | DHHS91172-A-0383 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 60 calendar day(s) / the start of the initial fba | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.3.8 | DHHS91172-A-0384 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / the change | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.4.1 | DHHS91172-A-0386 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.4.2 | DHHS91172-A-0400 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | Official workbook clause: reevaluate the BSP each month. Monthly anchor is missing-information. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-3.4.3 | DHHS91172-A-0401 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-3.4.4 | DHHS91172-A-0402 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / fba completion |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.4.5 | DHHS91172-A-0403 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / written request from the person's support coordinator |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.4.6 | DHHS91172-A-0404 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar days / BSP completion |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-3.4.7 | DHHS91172-A-0405 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-3.4.4 | DHHS91172-A-0402 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / fba completion | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.4.5 | DHHS91172-A-0403 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / written request from the person's support coordinator | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.4.6 | DHHS91172-A-0404 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar days / BSP completion | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-3.4.7 | DHHS91172-A-0405 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-3.5.1 | DHHS91172-A-0407 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-3.5.2 | DHHS91172-A-0414 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-3.5.3 | DHHS91172-A-0415 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -266,20 +267,20 @@ None. All 65 live-key parents have a fixture overlay. Do not invent PN1/PN2, qua
 | REQ-4.2.4 | DHHS91172-A-0437 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-4.2.5 | DHHS91172-A-0438 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-4.2.6 | DHHS91172-A-0439 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-4.3.1 | DHHS91172-A-0441 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | DSPD approval to provide BC service |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-4.3.2 | DHHS91172-A-0442 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-4.3.3 | DHHS91172-A-0451 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / dspd approval to provide bc2 services |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-4.3.4 | DHHS91172-A-0452 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar days / written request from Support Coordinator/PCPT or quarterly-summary indication |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-4.3.5 | DHHS91172-A-0453 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar day(s) / completion |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-4.3.6 | DHHS91172-A-0454 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 60 calendar day(s) / the start of the initial fba |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-4.3.7 | DHHS91172-A-0455 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / the change |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-4.4.1 | DHHS91172-A-0457 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-4.4.2 | DHHS91172-A-0471 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-4.3.1 | DHHS91172-A-0441 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | DSPD approval to provide BC service | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.3.2 | DHHS91172-A-0442 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.3.3 | DHHS91172-A-0451 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / dspd approval to provide bc2 services | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.3.4 | DHHS91172-A-0452 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar days / written request from Support Coordinator/PCPT or quarterly-summary indication | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.3.5 | DHHS91172-A-0453 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar day(s) / completion | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.3.6 | DHHS91172-A-0454 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 60 calendar day(s) / the start of the initial fba | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.3.7 | DHHS91172-A-0455 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / the change | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.4.1 | DHHS91172-A-0457 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.4.2 | DHHS91172-A-0471 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | Official workbook clause: reevaluate the BSP each month. Monthly anchor is missing-information. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-4.4.3 | DHHS91172-A-0472 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-4.4.4 | DHHS91172-A-0473 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / fba completion |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-4.4.5 | DHHS91172-A-0474 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / written request from the person's support coordinator |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-4.4.6 | DHHS91172-A-0475 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar days / BSP completion |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-4.4.7 | DHHS91172-A-0476 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-4.4.4 | DHHS91172-A-0473 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / fba completion | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.4.5 | DHHS91172-A-0474 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / written request from the person's support coordinator | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.4.6 | DHHS91172-A-0475 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar days / BSP completion | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-4.4.7 | DHHS91172-A-0476 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-4.5.1 | DHHS91172-A-0478 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-4.5.2 | DHHS91172-A-0485 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-4.5.3 | DHHS91172-A-0486 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
@@ -291,21 +292,21 @@ None. All 65 live-key parents have a fixture overlay. Do not invent PN1/PN2, qua
 | REQ-5.2.4 | DHHS91172-A-0523 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
 | REQ-5.2.5 | DHHS91172-A-0524 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-5.2.6 | DHHS91172-A-0525 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | continuous |  | system_behavior | Rule has no applicability predicates. |
-| REQ-5.3.1 | DHHS91172-A-0527 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | DSPD approval to provide BC service |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.3.2 | DHHS91172-A-0528 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-5.3.3 | DHHS91172-A-0537 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / dspd approval to provide bc3 services |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.3.4 | DHHS91172-A-0538 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar days / written request from Support Coordinator/PCPT or quarterly-summary indication |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.3.5 | DHHS91172-A-0539 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar day(s) / completion |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.3.6 | DHHS91172-A-0540 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.3.7 | DHHS91172-A-0541 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 60 calendar day(s) / the start of the initial fba |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.3.8 | DHHS91172-A-0542 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / the change |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.4.1 | DHHS91172-A-0544 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-5.4.2 | DHHS91172-A-0558 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-5.3.1 | DHHS91172-A-0527 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | DSPD approval to provide BC service | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.3.2 | DHHS91172-A-0528 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.3.3 | DHHS91172-A-0537 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / dspd approval to provide bc3 services | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.3.4 | DHHS91172-A-0538 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar days / written request from Support Coordinator/PCPT or quarterly-summary indication | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.3.5 | DHHS91172-A-0539 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar day(s) / completion | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.3.6 | DHHS91172-A-0540 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.3.7 | DHHS91172-A-0541 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 60 calendar day(s) / the start of the initial fba | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.3.8 | DHHS91172-A-0542 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / the change | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.4.1 | DHHS91172-A-0544 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.4.2 | DHHS91172-A-0558 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | Official workbook clause: reevaluate the BSP each month. Monthly anchor is missing-information. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-5.4.3 | DHHS91172-A-0559 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | system_behavior | Rule has no applicability predicates. |
-| REQ-5.4.4 | DHHS91172-A-0560 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / fba completion |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.4.5 | DHHS91172-A-0561 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / written request from the person's support coordinator |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.4.6 | DHHS91172-A-0562 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar days / BSP completion |  | draft_unwired | Rule has no applicability predicates. |
-| REQ-5.4.7 | DHHS91172-A-0563 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Do not invent an interval or annual-from-completion. |  | draft_unwired | Rule has no applicability predicates. |
+| REQ-5.4.4 | DHHS91172-A-0560 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / fba completion | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.4.5 | DHHS91172-A-0561 | Behavior consultant (BC staff) | Mark complete with attachment/attestation | 30 calendar day(s) / written request from the person's support coordinator | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.4.6 | DHHS91172-A-0562 | Behavior consultant (BC staff) | Generate/upload report and mark sent | 14 calendar days / BSP completion | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
+| REQ-5.4.7 | DHHS91172-A-0563 | Behavior consultant (BC staff) | Complete in platform form/record | Timing is missing-information. Standing fba_bsp file — keep current. Do not invent hire+N or annual-from-completion. | fba_bsp | live_artifact | Unanswered applicability fact: Which DSPD service codes is this contractor awarded? |
 | REQ-5.5.1 | DHHS91172-A-0565 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-5.5.2 | DHHS91172-A-0572 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
 | REQ-5.5.3 | DHHS91172-A-0573 | Administrator | Automated check (no user action) or attestation | per claim / continuous check |  | system_behavior | Rule has no applicability predicates. |
