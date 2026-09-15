@@ -8,7 +8,7 @@
  *
  * Also hits the real webhook HTTP route (unsigned → 400/503).
  *
- * Run: npx playwright test --config=playwright.stripe.config.ts
+ * Run: npx playwright test --config=e2e/configs/playwright.stripe.config.ts
  */
 import { test, expect } from "@playwright/test";
 import {

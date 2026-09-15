@@ -1,0 +1,27 @@
+{
+  "files.exclude": {
+    "playwright.1056.config.ts": true,
+    "playwright.admin-home.config.ts": true,
+    "playwright.daily-logs.config.ts": true,
+    "playwright.hive-exec-escape.config.ts": true,
+    "playwright.local.config.ts": true,
+    "playwright.roster.config.ts": true,
+    "playwright.scheduler.config.ts": true,
+    "playwright.signup.config.ts": true,
+    "playwright.staff-go-live.config.ts": true,
+    "playwright.stripe.config.ts": true,
+    "FEATURE_INVENTORY.md": true,
+    "LAUNCH_READINESS_AUDIT.md": true,
+    "REPO_CLEANUP.md": true,
+    "ROUTE_MAP.md": true,
+    "SCHEMA_AUDIT.md": true,
+    "SECURITY_AUDIT.md": true,
+    "bunfig.toml": true,
+    "package-lock.json": true,
+    "bun.lock": true,
+    ".dockerignore": true,
+    ".prettierignore": true,
+    ".prettierrc": true,
+    ".lovable": true
+  }
+}

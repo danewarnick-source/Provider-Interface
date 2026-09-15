@@ -2,7 +2,7 @@
  * Punch-pad GPS / home-pin geofence.
  *
  * Mocked auth + roster. Does not write live timesheets.
- * Run: npx playwright test --config=playwright.1056.config.ts e2e/punch-pad-gps.spec.ts
+ * Run: npx playwright test --config=e2e/configs/playwright.1056.config.ts e2e/punch-pad-gps.spec.ts
  */
 import { test, expect, type Page } from "@playwright/test";
 import fs from "node:fs";
