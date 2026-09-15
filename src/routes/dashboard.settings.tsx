@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Landmark, ArrowRight, ShieldCheck, Wand2, ListChecks, BookOpenCheck, CreditCard, Mail, Inbox, UserCircle2, Building2, Receipt, BadgeCheck, UserCog, SlidersHorizontal, ScrollText, ClipboardList, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
-import { CompanyOverviewSettings } from "@/components/company-overview-settings";
 import { OrgBrandingCard } from "@/components/settings/org-branding-card";
 import { ShiftBehaviorToggleCard } from "@/components/evv/shift-behavior-toggle-card";
 import { getAccountContact, updateAccountContact } from "@/lib/hive-exec.functions";
@@ -195,10 +194,6 @@ function SettingsPage() {
           )}
         </div>
       </section>
-
-      {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
-        <CompanyOverviewSettings />
-      )}
 
       <OrgBrandingCard />
 
