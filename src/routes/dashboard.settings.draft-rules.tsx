@@ -220,7 +220,8 @@ function DraftRulesSimulationPage() {
               {counts.wiredThirteenthBatch} · fourteenth{" "}
               {counts.wiredFourteenthBatch} · fifteenth{" "}
               {counts.wiredFifteenthBatch} · sixteenth{" "}
-              {counts.wiredSixteenthBatch}) · remaining{" "}
+              {counts.wiredSixteenthBatch} · seventeenth{" "}
+              {counts.wiredSeventeenthBatch}) · remaining{" "}
               {counts.remainingExecutable} · verified{" "}
               {counts.verified} · published {counts.published} · blocked {counts.blocked} · unwired{" "}
               {counts.draftUnwired}

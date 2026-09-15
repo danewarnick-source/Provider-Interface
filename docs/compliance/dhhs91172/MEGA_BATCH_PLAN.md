@@ -1,13 +1,13 @@
 # DHHS91172 executable finalize
 
-Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Quarterly evac drill leftovers are wired unpublished (fourteenth batch / imported `.6` parents). Article 1 standing leftover children are wired unpublished (fifteenth batch / existing pack liveKeys). Remaining pack-key-ready leftovers are wired unpublished (sixteenth batch / incidents, HRC, service leftovers). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3 / REQ-1.17.
+Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). BC §3/§4/§5 FBA/BSP twins are wired unpublished (tenth batch / shared `fba_bsp`). FY Google Form annual twins are wired unpublished (eleventh batch / annual-outcome family). OL Day Treatment / Day Support twins are wired unpublished (thirteenth batch / `ol_day_tx_license_4plus` + `ol_day_support_cert_3or_fewer`). Quarterly evac drill leftovers are wired unpublished (fourteenth batch / imported `.6` parents). Article 1 standing leftover children are wired unpublished (fifteenth batch / existing pack liveKeys). Remaining pack-key-ready leftovers are wired unpublished (sixteenth batch / incidents, HRC, service leftovers). Professional nursing leftovers are wired unpublished (seventeenth batch / invented `pm_nursing_file` + `pn_medical_care_plan`). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent a second PN1/PN2 monthly-summary key. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3 / REQ-1.17.
 
-Measured after remaining pack-key-ready sixteenth-batch wiring stacked on the #364 tip (`5cea5c39`).
+Measured after professional-nursing seventeenth-batch invent stacked on the #365 tip (`ec0e11f1`).
 
 | Measure                        | Count |
 | ------------------------------ | ----: |
 | Imported parents               |   760 |
-| Executable (live key)          |   225 |
+| Executable (live key)          |   246 |
 | Wired 1–6                      |    22 |
 | Wired Mega A                   |    10 |
 | Wired Mega B (already on main) |     9 |
@@ -20,13 +20,14 @@ Measured after remaining pack-key-ready sixteenth-batch wiring stacked on the #3
 | Wired fourteenth / quarterly evac leftovers |     3 |
 | Wired fifteenth / Article 1 standing leftover children |    45 |
 | Wired sixteenth / remaining pack-key-ready leftovers |    26 |
-| Wired total                    |   225 |
+| Wired seventeenth / professional nursing leftovers |    21 |
+| Wired total                    |   246 |
 | Remaining executable           |     0 |
 | Verified / published           | 50 / 50 |
-| Draft unwired                  |   114 |
+| Draft unwired                  |    93 |
 | System behavior                |   421 |
 
-Draft-unwired blockers (114/114): **no live key + no applicability predicates**. No fixture. Not a per-row novel. Remaining rows need a new pack key or invented SOW — leave them invent-blocked.
+Draft-unwired blockers (93/93): **no live key + no applicability predicates**. No fixture. Not a per-row novel. Remaining rows need a new pack key or invented SOW — leave them invent-blocked.
 
 ## Already wired (1–6) — do not re-cut
 
@@ -217,3 +218,13 @@ Unmapped obligation keys with **no imported parent** (do not invent): `client_sp
 | REQ-15.3.1, REQ-15.3.6, REQ-15.3.8, REQ-15.3.9, REQ-15.3.10 | pba_financial_review |
 | REQ-12.4 | hsq_safe_environment |
 | REQ-33.5.a | usor_job_development_sjd |
+
+## Seventeenth — professional nursing leftovers (wired, unpublished)
+
+**Family:** MEGA invent-1. PM1/PM2 twins plus PN1/PN2 medical-care-plan leftovers. Invents `pm_nursing_file` and `pn_medical_care_plan`. Children stay on the parent card. Reuse awarded-code predicates (FACT-023 / FACT-024 / FACT-037 / FACT-014). App PR. Pack-changelog seed only — no schema change. Unpublished. Hold merge for Dane. Do not publish these 21. Official catalog clauses only. REQ-19.2.10 stays a leftover child on the care-plan card — do not invent a PN1/PN2 monthly-summary key. Never delete MAR/eMAR. Punch pad stays the incident clock. Staff never touch UPI. EVV stays CSV only.
+
+| Rule | Live key |
+| ---- | -------- |
+| REQ-16.2.3, REQ-16.2.7, REQ-16.2.8, REQ-16.2.9, REQ-16.4 | pm_nursing_file |
+| REQ-17.2.3, REQ-17.2.7, REQ-17.2.8, REQ-17.2.9, REQ-17.4 | pm_nursing_file |
+| REQ-18.2.3, REQ-18.5, REQ-19.2.7, REQ-19.2.8, REQ-19.2.8.A, REQ-19.2.8.B, REQ-19.2.9.A, REQ-19.2.9.B, REQ-19.2.10, REQ-19.5.a, REQ-19.5.b | pn_medical_care_plan |

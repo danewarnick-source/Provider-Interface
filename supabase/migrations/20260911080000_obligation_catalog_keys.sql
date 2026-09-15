@@ -150,5 +150,7 @@ VALUES
   ('UT', 'UT-2026.07', 'timesheets_attendance', 'added'),
   ('UT', 'UT-2026.07', 'evv_visit_verification', 'added'),
   ('UT', 'UT-2026.07', 'billing_service_match', 'added'),
-  ('UT', 'UT-2026.07', 'hhs_billable_day', 'added')
+  ('UT', 'UT-2026.07', 'hhs_billable_day', 'added'),
+  ('UT', 'UT-2026.07', 'pm_nursing_file', 'added'),
+  ('UT', 'UT-2026.07', 'pn_medical_care_plan', 'added')
 ON CONFLICT (state_code, pack_version, obligation_key, change_kind) DO NOTHING;

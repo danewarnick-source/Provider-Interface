@@ -1474,6 +1474,34 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     evidence_standard: "Each billed Host Home day is attendance Present with a daily note.",
     calendar_is_reminder_only: true,
   },
+  {
+    title: "PM1/PM2 Nursing File — Medication Program Leftovers",
+    citation: "DHHS91172 SOW §16.2 / §16.4 / §17.2 / §17.4",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing PM1/PM2 nursing leftover file. Official catalog clauses only. Does not replace MAR/eMAR. medication_record stays the Article 1 med file.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["PM1", "PM2"],
+    evidence_standard:
+      "Medical data sheet, medication-error review, 24-hour illness notice, face-to-face assessment, and current LPN/RN DOPL license.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "PN1/PN2 Medical Care Plan — Nursing Leftovers",
+    citation: "DHHS91172 SOW §18.2 / §18.5 / §19.2 / §19.5",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing PN medical-care-plan leftover file. REQ-19.2.10 stays a child on this card. Do not invent a PN1/PN2 monthly-summary key. Staff never touch UPI.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["PN1", "PN2"],
+    evidence_standard:
+      "Current Medical Care Plan, PN1 reports to PN2, delegated-staff training, urgent-risk notes, and DOPL licenses.",
+    calendar_is_reminder_only: true,
+  },
 ];
 
 function finalizeCatalogEntry(raw: SowCatalogDraft): SowCatalogEntry {
