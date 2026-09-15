@@ -714,6 +714,101 @@ export const CATALOG_IDENTITY_BY_TITLE: Record<string, CatalogIdentity> = {
     evidence_template:
       "PCPT housing-voucher review at approval and annually, Public Housing Authority move coordination, and written Person/guardian request before any voucher termination.",
   },
+  "DNR Order Access Leftovers": {
+    key: "dnr_order_access",
+    disposition: "standing",
+    evidence_template:
+      "DNR order accessible to staff in the Person's service settings, with the Person's preferred location recorded.",
+  },
+  "PCSP Orientation and PCPT Review Leftovers": {
+    key: "pcsp_person_review",
+    disposition: "standing",
+    evidence_template:
+      "Orientation to the contractor portion of the PCSP plus an annual PCPT service-and-support review within 12 months of the last PCSP meeting.",
+  },
+  "Fatality Notification Leftovers": {
+    key: "fatality_notification",
+    disposition: "standing",
+    evidence_template:
+      "Family notice within 24 hours and Support Coordinator plus DSPD Waiver Manager notice by the end of the next calendar day. Punch pad stays the incident clock.",
+  },
+  "Support Coordinator Records-on-Request Leftovers": {
+    key: "sc_records_on_request",
+    disposition: "standing",
+    evidence_template:
+      "Licensing/site-certification copies on Support Coordinator request and timesheet copies within three calendar days of request.",
+  },
+  "Residential Group-Mix Approval Leftovers": {
+    key: "residential_group_mix",
+    disposition: "standing",
+    evidence_template:
+      "Written pre-placement approval when HHS or RHS certified settings mix adults with minors or DSPD-funded Persons with non-DSPD-funded individuals.",
+  },
+  "USDC Transition Coordination Leftovers": {
+    key: "usdc_transition",
+    disposition: "standing",
+    evidence_template:
+      "Coordination with the DHHS/DSPD Transition team for USDC admissions and discharges, including time with new staff when requested.",
+  },
+  "ELS School-Age Temporary Use Leftovers": {
+    key: "els_school_age",
+    disposition: "standing",
+    evidence_template:
+      "School-age ELS used only temporarily, or school-district shortened-hours documentation including the IEP for ongoing traditional-school-hour support.",
+  },
+  "HHS/PPS Host Contractor-Change Leftovers": {
+    key: "host_contractor_change",
+    disposition: "standing",
+    evidence_template:
+      "Both contractors notify the Support Coordinator before an HHS or PPS host changes contractor, and neither influences the Person's Informed Choice.",
+  },
+  "HHS/PPS Host Staff Age Leftovers": {
+    key: "host_staff_qualifications",
+    disposition: "standing",
+    evidence_template:
+      "HHS hosts and PPS staff are at least 21 years of age. Hosts never clock.",
+  },
+  "PBA Monthly Fiduciary Leftovers": {
+    key: "pba_monthly_fiduciary",
+    disposition: "standing",
+    evidence_template:
+      "Monthly asset-limit monitoring with notice when approaching limits, plus a monthly financial-record review with the Person separate from the administrative review.",
+  },
+  "RHS Form 930 Enhanced Staffing Leftovers": {
+    key: "rhs_form_930",
+    disposition: "standing",
+    evidence_template:
+      "Completed DSPD Form 930 before RHS enhanced staffing of four or more hours per day at a 1:1 Direct Support ratio.",
+  },
+  "Form 929 Exceptional-Care Respite Leftovers": {
+    key: "form_929_exceptional_care",
+    disposition: "standing",
+    evidence_template: "Completed DSPD Form 929 before RP3 or RP5 exceptional-care respite begins.",
+  },
+  "SEC Pass-Through and Co-Worker Support Leftovers": {
+    key: "sec_pass_documentation",
+    disposition: "standing",
+    evidence_template:
+      "Documentation of pass-through funds and co-worker supports the Person received under SEC.",
+  },
+  "SEE Staff Training Leftovers": {
+    key: "see_staff_training",
+    disposition: "standing",
+    evidence_template:
+      "SEE staff pre-service completions plus first-available USU Workplace Supports or Effective Job Coach training when supervised by ACRE or Customized Employment trained staff.",
+  },
+  "SEI Job-Termination Notice Leftovers": {
+    key: "sei_job_termination",
+    disposition: "standing",
+    evidence_template:
+      "USOR notice within one business day of job termination and a review that modifies the PCSP and employment goals. Staff never touch UPI.",
+  },
+  "TFB Staff Qualifications Leftovers": {
+    key: "tfb_staff_qualifications",
+    disposition: "standing",
+    evidence_template:
+      "Bachelor's degree in social or behavioral sciences plus one year in the past five of training people with ID.RC and/or ABI and their families.",
+  },
 };
 
 /**

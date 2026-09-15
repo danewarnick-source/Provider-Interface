@@ -1642,6 +1642,228 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
       "PCPT voucher review at approval and annually, Public Housing Authority move coordination, and written Person/guardian termination request.",
     calendar_is_reminder_only: true,
   },
+  {
+    title: "DNR Order Access Leftovers",
+    citation: "DHHS91172 SOW §1.10(14)",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing DNR-access leftover file. Official catalog clauses only. FACT-068 stays a question when unanswered.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: [],
+    evidence_standard:
+      "DNR order accessible to staff in the Person's service settings, with the Person's preferred location recorded.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "PCSP Orientation and PCPT Review Leftovers",
+    citation: "DHHS91172 SOW §1.24(7) / §1.24(9)",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing PCSP orientation / PCPT review leftover file. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: [],
+    evidence_standard:
+      "Orientation to the contractor portion of the PCSP and an annual PCPT review within 12 months of the last PCSP meeting.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Fatality Notification Leftovers",
+    citation: "DHHS91172 SOW §1.26",
+    category: "reporting",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing fatality-notification leftover file. Official catalog clauses only. Punch pad stays the incident clock.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: [],
+    evidence_standard:
+      "Family notice within 24 hours and Support Coordinator plus DSPD Waiver Manager notice by the end of the next calendar day.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Support Coordinator Records-on-Request Leftovers",
+    citation: "DHHS91172 SOW §1.31(2) / §1.31(3)",
+    category: "reporting",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing Support Coordinator records-on-request leftover file. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: [],
+    evidence_standard:
+      "Licensing/site-certification copies on request and timesheet copies within three calendar days of request.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Residential Group-Mix Approval Leftovers",
+    citation: "DHHS91172 SOW §1.32(b)",
+    category: "safety",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing HHS/RHS group-mix approval leftover file. Official catalog clauses only. Grandfather REQ-1.32.a and OL-portal REQ-1.32.c stay invent-blocked.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["HHS", "RHS"],
+    evidence_standard:
+      "Written pre-placement approval when certified HHS or RHS settings mix adults with minors or DSPD-funded Persons with non-DSPD-funded individuals.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "USDC Transition Coordination Leftovers",
+    citation: "DHHS91172 SOW §1.36",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing USDC transition leftover file. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: [],
+    evidence_standard:
+      "Coordination with the DHHS/DSPD Transition team for USDC admissions and discharges, including time with new staff when requested.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "ELS School-Age Temporary Use Leftovers",
+    citation: "DHHS91172 SOW §10.3(3)",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing ELS school-age leftover file. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["ELS"],
+    evidence_standard:
+      "School-age ELS used only temporarily, or school-district shortened-hours documentation including the IEP.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "HHS/PPS Host Contractor-Change Leftovers",
+    citation: "DHHS91172 SOW §11.3(8) / §20.3(8)",
+    category: "reporting",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing HHS/PPS host contractor-change leftover file. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["HHS", "PPS"],
+    evidence_standard:
+      "Both contractors notify the Support Coordinator before an HHS or PPS host changes contractor, and neither influences Informed Choice.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "HHS/PPS Host Staff Age Leftovers",
+    citation: "DHHS91172 SOW §11.6 / §20.6",
+    category: "training",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing HHS/PPS host and PPS staff age leftover file. Official catalog clauses only. Hosts never clock.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["HHS", "PPS"],
+    evidence_standard: "HHS hosts and PPS staff are at least 21 years of age.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "PBA Monthly Fiduciary Leftovers",
+    citation: "DHHS91172 SOW §15.2(6) / §15.2(10)",
+    category: "reporting",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing PBA monthly fiduciary leftover file. Official catalog clauses only. Separate from the 15.3 administrative review card.",
+    due_rule: { kind: "standing" },
+    owner: "admin",
+    service_codes: ["PBA"],
+    evidence_standard:
+      "Monthly asset-limit monitoring with notice when approaching limits, plus a monthly financial-record review with the Person.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "RHS Form 930 Enhanced Staffing Leftovers",
+    citation: "DHHS91172 SOW §21.3(4)",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing RHS Form 930 leftover file. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["RHS"],
+    evidence_standard:
+      "Completed DSPD Form 930 before RHS enhanced staffing of four or more hours per day at a 1:1 Direct Support ratio.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "Form 929 Exceptional-Care Respite Leftovers",
+    citation: "DHHS91172 SOW §23.3(1) / §25.3(1)",
+    category: "client_docs",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing DSPD Form 929 leftover file. Official catalog clauses only.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["RP3", "RP5"],
+    evidence_standard: "Completed DSPD Form 929 before RP3 or RP5 exceptional-care respite begins.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "SEC Pass-Through and Co-Worker Support Leftovers",
+    citation: "DHHS91172 SOW §27.3",
+    category: "employment",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing SEC pass-through leftover file. Official catalog clauses only. Staff never touch UPI.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["SEC"],
+    evidence_standard:
+      "Documentation of pass-through funds and co-worker supports the Person received.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "SEE Staff Training Leftovers",
+    citation: "DHHS91172 SOW §29.4",
+    category: "training",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing SEE staff-training leftover file. Official catalog clauses only. Do not reuse acre_sei / acre_sed / acre_sjd.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["SEE"],
+    evidence_standard:
+      "SEE staff pre-service completions plus first-available USU Workplace Supports or Effective Job Coach training.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "SEI Job-Termination Notice Leftovers",
+    citation: "DHHS91172 SOW §30.3(3)",
+    category: "employment",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing SEI job-termination leftover file. Official catalog clauses only. Notify USOR — staff never touch UPI.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["SEI"],
+    evidence_standard:
+      "USOR notice within one business day of job termination and a review that modifies the PCSP and employment goals.",
+    calendar_is_reminder_only: true,
+  },
+  {
+    title: "TFB Staff Qualifications Leftovers",
+    citation: "DHHS91172 SOW §36.4",
+    category: "training",
+    fulfillment: "hybrid",
+    fulfillment_note:
+      "Standing TFB staff-qualification leftover file. Official catalog clauses only. Do not invent a CST parent.",
+    due_rule: { kind: "standing" },
+    owner: "manager",
+    service_codes: ["TFB"],
+    evidence_standard:
+      "Bachelor's degree in social or behavioral sciences plus one year in the past five of training people with ID.RC and/or ABI and their families.",
+    calendar_is_reminder_only: true,
+  },
 ];
 
 function finalizeCatalogEntry(raw: SowCatalogDraft): SowCatalogEntry {

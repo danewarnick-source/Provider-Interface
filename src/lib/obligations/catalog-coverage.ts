@@ -119,6 +119,11 @@ import {
   applyEighteenthExecutableBatchOverlayAll,
   eighteenthBatchParentIsWired,
 } from "./eighteenth-executable-batch.ts";
+import {
+  applyNineteenthExecutableBatchOverlay,
+  applyNineteenthExecutableBatchOverlayAll,
+  nineteenthBatchParentIsWired,
+} from "./nineteenth-executable-batch.ts";
 
 export type CatalogCoverageRow = {
   requirementKey: string;
@@ -174,6 +179,7 @@ export type CatalogCoverageCounts = {
   wiredSixteenthBatch: number;
   wiredSeventeenthBatch: number;
   wiredEighteenthBatch: number;
+  wiredNineteenthBatch: number;
   remainingExecutable: number;
 };
 
@@ -185,7 +191,8 @@ export type CatalogCoverageReport = {
 
 /** Fixture overlays only. Publication is a separate VERIFIED_PUBLICATIONS step. */
 export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
-  return applyEighteenthExecutableBatchOverlay(
+  return applyNineteenthExecutableBatchOverlay(
+  applyEighteenthExecutableBatchOverlay(
     applySeventeenthExecutableBatchOverlay(
     applySixteenthExecutableBatchOverlay(
     applyFifteenthExecutableBatchOverlay(
@@ -219,11 +226,13 @@ export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
     ),
     ),
     ),
+  ),
   );
 }
 
 export function applyExecutableBatchOverlays<T extends DraftRule>(rules: readonly T[]): T[] {
-  return applyEighteenthExecutableBatchOverlayAll(
+  return applyNineteenthExecutableBatchOverlayAll(
+  applyEighteenthExecutableBatchOverlayAll(
     applySeventeenthExecutableBatchOverlayAll(
     applySixteenthExecutableBatchOverlayAll(
     applyFifteenthExecutableBatchOverlayAll(
@@ -259,6 +268,7 @@ export function applyExecutableBatchOverlays<T extends DraftRule>(rules: readonl
     ),
     ),
     ),
+  ),
   );
 }
 
@@ -405,6 +415,7 @@ export function buildCatalogCoverageReport(
     wiredSixteenthBatch: parents.filter((rule) => sixteenthBatchParentIsWired(rule)).length,
     wiredSeventeenthBatch: parents.filter((rule) => seventeenthBatchParentIsWired(rule)).length,
     wiredEighteenthBatch: parents.filter((rule) => eighteenthBatchParentIsWired(rule)).length,
+    wiredNineteenthBatch: parents.filter((rule) => nineteenthBatchParentIsWired(rule)).length,
     wired: parents.filter(
       (rule) =>
         firstBatchParentIsWired(rule) ||
@@ -425,7 +436,8 @@ export function buildCatalogCoverageReport(
         fifteenthBatchParentIsWired(rule) ||
         sixteenthBatchParentIsWired(rule) ||
         seventeenthBatchParentIsWired(rule) ||
-        eighteenthBatchParentIsWired(rule),
+        eighteenthBatchParentIsWired(rule) ||
+        nineteenthBatchParentIsWired(rule),
     ).length,
     remainingExecutable: parentOnly.filter((r) => r.liveKey != null && r.canPublish === false)
       .length,
@@ -449,7 +461,7 @@ function formatRemainingExecutableMarkdown(report: CatalogCoverageReport): strin
     return [
       "## Remaining executable (live key, not wired)",
       "",
-      `None. All ${report.counts.executable} live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3.`,
+      `None. All ${report.counts.executable} live-key parents have a fixture overlay. Do not invent PN1/PN2 monthly-summary keys. Do not invent umbrella REQ-8.6 / REQ-11.7 / REQ-30.7 / REQ-11.3 / REQ-20.3 / REQ-21.3 / REQ-1.17. Do not invent vague-comply OL, UPI staff-registry, license-umbrella, grandfather, home-condition, CST-only, or contractor-qualification leftovers.`,
     ];
   }
   const lines = [
@@ -560,6 +572,7 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Wired sixteenth batch / remaining pack-key-ready leftovers (fixture overlay) | ${c.wiredSixteenthBatch} |`,
     `| Wired seventeenth batch / professional nursing leftovers (fixture overlay) | ${c.wiredSeventeenthBatch} |`,
     `| Wired eighteenth batch / combined inventable leftovers (fixture overlay) | ${c.wiredEighteenthBatch} |`,
+    `| Wired nineteenth batch / remaining inventable leftovers (fixture overlay) | ${c.wiredNineteenthBatch} |`,
     `| Wired shared-behavior batches (fixture overlay) | ${c.wired} |`,
     `| Remaining executable (live key, not yet wired) | ${c.remainingExecutable} |`,
     "",

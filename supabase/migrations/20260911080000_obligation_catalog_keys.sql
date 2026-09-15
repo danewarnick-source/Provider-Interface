@@ -162,5 +162,21 @@ VALUES
   ('UT', 'UT-2026.07', 'milestone_rfs', 'added'),
   ('UT', 'UT-2026.07', 'epr_program_file', 'added'),
   ('UT', 'UT-2026.07', 'bc_staff_qualifications', 'added'),
-  ('UT', 'UT-2026.07', 'rhs_housing_voucher', 'added')
+  ('UT', 'UT-2026.07', 'rhs_housing_voucher', 'added'),
+  ('UT', 'UT-2026.07', 'dnr_order_access', 'added'),
+  ('UT', 'UT-2026.07', 'pcsp_person_review', 'added'),
+  ('UT', 'UT-2026.07', 'fatality_notification', 'added'),
+  ('UT', 'UT-2026.07', 'sc_records_on_request', 'added'),
+  ('UT', 'UT-2026.07', 'residential_group_mix', 'added'),
+  ('UT', 'UT-2026.07', 'usdc_transition', 'added'),
+  ('UT', 'UT-2026.07', 'els_school_age', 'added'),
+  ('UT', 'UT-2026.07', 'host_contractor_change', 'added'),
+  ('UT', 'UT-2026.07', 'host_staff_qualifications', 'added'),
+  ('UT', 'UT-2026.07', 'pba_monthly_fiduciary', 'added'),
+  ('UT', 'UT-2026.07', 'rhs_form_930', 'added'),
+  ('UT', 'UT-2026.07', 'form_929_exceptional_care', 'added'),
+  ('UT', 'UT-2026.07', 'sec_pass_documentation', 'added'),
+  ('UT', 'UT-2026.07', 'see_staff_training', 'added'),
+  ('UT', 'UT-2026.07', 'sei_job_termination', 'added'),
+  ('UT', 'UT-2026.07', 'tfb_staff_qualifications', 'added')
 ON CONFLICT (state_code, pack_version, obligation_key, change_kind) DO NOTHING;
