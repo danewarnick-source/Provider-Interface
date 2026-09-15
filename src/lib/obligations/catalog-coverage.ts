@@ -69,6 +69,11 @@ import {
   applyMegaCExecutableBatchOverlayAll,
   megaCBatchParentIsWired,
 } from "./mega-c-executable-batch.ts";
+import {
+  applyNinthExecutableBatchOverlay,
+  applyNinthExecutableBatchOverlayAll,
+  ninthBatchParentIsWired,
+} from "./ninth-executable-batch.ts";
 
 export type CatalogCoverageRow = {
   requirementKey: string;
@@ -114,6 +119,7 @@ export type CatalogCoverageCounts = {
   wiredSeventhBatch: number;
   wiredEighthBatch: number;
   wiredMegaC: number;
+  wiredNinthBatch: number;
   remainingExecutable: number;
 };
 
@@ -125,14 +131,16 @@ export type CatalogCoverageReport = {
 
 /** Fixture overlays only. Publication is a separate VERIFIED_PUBLICATIONS step. */
 export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
-  return applyMegaCExecutableBatchOverlay(
-    applyEighthExecutableBatchOverlay(
-      applySeventhExecutableBatchOverlay(
-        applySixthExecutableBatchOverlay(
-          applyFifthExecutableBatchOverlay(
-            applyFourthExecutableBatchOverlay(
-              applyThirdExecutableBatchOverlay(
-                applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+  return applyNinthExecutableBatchOverlay(
+    applyMegaCExecutableBatchOverlay(
+      applyEighthExecutableBatchOverlay(
+        applySeventhExecutableBatchOverlay(
+          applySixthExecutableBatchOverlay(
+            applyFifthExecutableBatchOverlay(
+              applyFourthExecutableBatchOverlay(
+                applyThirdExecutableBatchOverlay(
+                  applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+                ),
               ),
             ),
           ),
@@ -143,14 +151,16 @@ export function applyExecutableBatchOverlay<T extends DraftRule>(rule: T): T {
 }
 
 export function applyExecutableBatchOverlays<T extends DraftRule>(rules: readonly T[]): T[] {
-  return applyMegaCExecutableBatchOverlayAll(
-    applyEighthExecutableBatchOverlayAll(
-      applySeventhExecutableBatchOverlayAll(
-        applySixthExecutableBatchOverlayAll(
-          applyFifthExecutableBatchOverlayAll(
-            applyFourthExecutableBatchOverlayAll(
-              applyThirdExecutableBatchOverlayAll(
-                applySecondExecutableBatchOverlayAll(applyFirstExecutableBatchOverlayAll(rules)),
+  return applyNinthExecutableBatchOverlayAll(
+    applyMegaCExecutableBatchOverlayAll(
+      applyEighthExecutableBatchOverlayAll(
+        applySeventhExecutableBatchOverlayAll(
+          applySixthExecutableBatchOverlayAll(
+            applyFifthExecutableBatchOverlayAll(
+              applyFourthExecutableBatchOverlayAll(
+                applyThirdExecutableBatchOverlayAll(
+                  applySecondExecutableBatchOverlayAll(applyFirstExecutableBatchOverlayAll(rules)),
+                ),
               ),
             ),
           ),
@@ -293,6 +303,7 @@ export function buildCatalogCoverageReport(
     wiredSeventhBatch: parents.filter((rule) => seventhBatchParentIsWired(rule)).length,
     wiredEighthBatch: parents.filter((rule) => eighthBatchParentIsWired(rule)).length,
     wiredMegaC: parents.filter((rule) => megaCBatchParentIsWired(rule)).length,
+    wiredNinthBatch: parents.filter((rule) => ninthBatchParentIsWired(rule)).length,
     wired: parents.filter(
       (rule) =>
         firstBatchParentIsWired(rule) ||
@@ -303,7 +314,8 @@ export function buildCatalogCoverageReport(
         sixthBatchParentIsWired(rule) ||
         seventhBatchParentIsWired(rule) ||
         eighthBatchParentIsWired(rule) ||
-        megaCBatchParentIsWired(rule),
+        megaCBatchParentIsWired(rule) ||
+        ninthBatchParentIsWired(rule),
     ).length,
     remainingExecutable: parentOnly.filter((r) => r.liveKey != null && r.canPublish === false)
       .length,
@@ -428,6 +440,7 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Wired seventh batch / Mega A (fixture overlay) | ${c.wiredSeventhBatch} |`,
     `| Wired eighth batch / Mega B (fixture overlay) | ${c.wiredEighthBatch} |`,
     `| Wired Mega C person-file / site leftovers (fixture overlay) | ${c.wiredMegaC} |`,
+    `| Wired ninth batch / UPI-USTEPS ops (fixture overlay) | ${c.wiredNinthBatch} |`,
     `| Wired shared-behavior batches (fixture overlay) | ${c.wired} |`,
     `| Remaining executable (live key, not yet wired) | ${c.remainingExecutable} |`,
     "",

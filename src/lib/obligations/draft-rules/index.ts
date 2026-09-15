@@ -215,6 +215,15 @@ export {
   megaCExecutableBatchParents,
 } from "../mega-c-executable-batch.ts";
 export {
+  applyNinthExecutableBatchOverlay,
+  applyNinthExecutableBatchOverlayAll,
+  NINTH_BATCH_DEMO_PATH,
+  NINTH_EXECUTABLE_BATCH_ID,
+  NINTH_EXECUTABLE_BATCH_LIVE_KEYS,
+  NINTH_EXECUTABLE_BATCH_RULE_IDS,
+  ninthExecutableBatchParents,
+} from "../ninth-executable-batch.ts";
+export {
   countQualifiedDesignatedBenefits,
   employmentYearDue,
   hirePlusDaysDue,

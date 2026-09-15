@@ -329,8 +329,12 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
     citation: "SOW §1.15",
     title: "UPI access forms, 1056, billing in UPI",
     status: "encoded",
-    catalog_titles: ["USTEPS and UPI Contractor Accounts"],
-    note: "0-9 / 0-8 forms are this duty. 1056 accept/reject within 15 days and UPI billing are live authorization / billing artifacts.",
+    catalog_titles: [
+      "USTEPS and UPI Contractor Accounts",
+      "UPI Form 0-9 — Provider Company Designee Access",
+      "UPI Form 0-8 — Individual User Access",
+    ],
+    note: "REQ-1.4.2 keeps contractor accounts. REQ-1.15.1–15 are the upi_* ops family (unpublished Soft=none wiring). Staff never touch UPI.",
   },
   {
     id: "sow-1.15-1056",
@@ -338,7 +342,17 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
     citation: "SOW §1.15(4)",
     title: "Approve or reject 1056 within 15 calendar days",
     status: "live_artifact",
-    note: "client_billing_codes / authorization workflow. No authorization → no shift, no billing.",
+    catalog_titles: ["UPI 1056 Approve or Reject"],
+    note: "client_billing_codes / authorization workflow plus the upi_1056_decision record. No authorization → no shift, no billing.",
+  },
+  {
+    id: "sow-1.15-utilization",
+    source: "sow",
+    citation: "SOW §1.15(6)",
+    title: "Monitor 1056 utilization",
+    status: "live_artifact",
+    catalog_titles: ["UPI 1056 Utilization Monitor"],
+    note: "Live remaining-units check. Notify the Support Coordinator when units approach the 1056 allocation.",
   },
   {
     id: "sow-1.16",

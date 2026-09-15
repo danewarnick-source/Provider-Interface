@@ -29,7 +29,11 @@ describe("catalog live bridge", () => {
     assert.equal(liveObligationKeyForRequirement("REQ-1.28.7"), "emergency_loan_record");
     assert.equal(liveObligationKeyForRequirement("REQ-1.28.7.G"), "large_loan_disclosure_process");
     assert.equal(liveObligationKeyForRequirement("REQ-1.28.9"), "no_gifts_process");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.15.1"), "upi_form_0_9_designee");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.15.6"), "upi_1056_utilization");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.15.15"), "upi_notify_usteps_termination");
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.8.4"] ?? ""));
+    assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.15.1"] ?? ""));
   });
 
   it("never mints a staff task for child elements", () => {

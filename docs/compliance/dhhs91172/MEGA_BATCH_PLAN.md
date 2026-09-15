@@ -1,21 +1,22 @@
 # DHHS91172 executable finalize
 
-Soft=none. All 50 live-key parents are wired. `VERIFIED_PUBLICATIONS` stays empty. Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents: those live keys exist on the pack, but **no imported parent maps to them**.
+Soft=none. Live-key parents are wired. `VERIFIED_PUBLICATIONS` holds the published 50. REQ-1.15.1–REQ-1.15.15 are wired unpublished (ninth batch / `upi_*` family). Publication is one rule / named READY batch via [CONTROLLED_PUBLISH.md](./CONTROLLED_PUBLISH.md) — not a mega flip. Do not invent PN1/PN2, quarterly evac, or annual-outcome parents: those live keys exist on the pack, but **no imported parent maps to them**. Do not start BC FBA/BSP batch B here.
 
-Measured on main `219bcb5f` after Mega C (#350). Coverage refreshed in the finalize PR.
+Measured after UPI/USTEPS ninth-batch wiring on post-#355 main.
 
 | Measure                        | Count |
 | ------------------------------ | ----: |
 | Imported parents               |   760 |
-| Executable (live key)          |    50 |
+| Executable (live key)          |    65 |
 | Wired 1–6                      |    22 |
 | Wired Mega A                   |    10 |
 | Wired Mega B (already on main) |     9 |
 | Wired Mega C (already on main) |     9 |
-| Wired total after Mega C       |    50 |
+| Wired ninth / UPI-USTEPS ops   |    15 |
+| Wired total                    |    65 |
 | Remaining executable           |     0 |
-| Verified / published           | 0 / 0 |
-| Draft unwired                  |   283 |
+| Verified / published           | 50 / 50 |
+| Draft unwired                  |   268 |
 | System behavior                |   427 |
 
 Draft-unwired blockers (283/283): **no live key + no applicability predicates**. No fixture. Not a per-row novel.
@@ -83,3 +84,25 @@ Child elements (board minutes, discharge notices, loan notices, §1.18/§1.23 it
 | REQ-21.5    | ol_rhs_license_4plus      | standing                                                   |
 
 Unmapped obligation keys with **no imported parent** (do not invent): `hhs_evac_drills_quarterly`, `rhs_evac_drills_quarterly`, `pps_evac_drills_quarterly`, `hhs_annual_outcome`, `dsi_annual_outcome`, `sei_annual_outcome`, `sl_annual_outcome`, `pps_foster_license`, `medicaid_disclosure_annual`, `usor_job_development_sjd`, employment-data UPI keys, `client_specific_training`.
+
+## Ninth — UPI / USTEPS ops (wired, unpublished)
+
+**Family:** Article 1.15 Provider Interface / USTEPS ops. Adjacent to `usteps_upi_accounts` (REQ-1.4.2). Soft=none. Hold merge for Dane. Do not publish these 15.
+
+| Rule        | Live key                         | Disposition |
+| ----------- | -------------------------------- | ----------- |
+| REQ-1.15.1  | upi_form_0_9_designee            | standing    |
+| REQ-1.15.2  | upi_form_0_8_user                | standing    |
+| REQ-1.15.3  | upi_need_to_know_access          | standing    |
+| REQ-1.15.4  | upi_1056_decision                | standing    |
+| REQ-1.15.5  | upi_1056_reject_coordinate       | standing    |
+| REQ-1.15.6  | upi_1056_utilization             | by_design   |
+| REQ-1.15.7  | upi_provider_organization        | standing    |
+| REQ-1.15.8  | upi_staff_org_groups             | standing    |
+| REQ-1.15.9  | upi_staff_notify_prefs           | standing    |
+| REQ-1.15.10 | upi_person_org_groups            | standing    |
+| REQ-1.15.11 | upi_remove_terminated_staff      | standing    |
+| REQ-1.15.12 | upi_remove_staff_need_to_know    | standing    |
+| REQ-1.15.13 | upi_remove_discharged_person     | standing    |
+| REQ-1.15.14 | upi_annual_access_review         | standing    |
+| REQ-1.15.15 | upi_notify_usteps_termination    | standing    |

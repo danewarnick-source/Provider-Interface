@@ -17,7 +17,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.importedParents, 760);
     assert.equal(report.counts.importedElements, 607);
     assert.equal(report.counts.importedRows, 1367);
-    assert.ok(report.counts.executable >= 50);
+    assert.ok(report.counts.executable >= 65);
     assert.equal(report.counts.published, 50);
     assert.equal(report.counts.verified, 50);
     assert.equal(report.counts.wiredFirstBatch, 5);
@@ -29,7 +29,8 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredSeventhBatch, 10);
     assert.equal(report.counts.wiredEighthBatch, 9);
     assert.equal(report.counts.wiredMegaC, 9);
-    assert.equal(report.counts.wired, 50);
+    assert.equal(report.counts.wiredNinthBatch, 15);
+    assert.equal(report.counts.wired, 65);
     assert.equal(report.counts.remainingExecutable, 0);
     assert.equal(VERIFIED_PUBLICATIONS.length, 50);
     assert.deepEqual(
@@ -43,7 +44,7 @@ describe("DHHS91172 catalog coverage", () => {
     assert.deepEqual(committed.counts, report.counts);
     const markdown = formatCatalogCoverageMarkdown(report);
     assert.match(markdown, /Controlled publication \(Soft=none\)/);
-    assert.match(markdown, /None\. All 50 live-key parents have a fixture overlay/);
+    assert.match(markdown, /None\. All 65 live-key parents have a fixture overlay/);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -200,6 +201,23 @@ describe("DHHS91172 catalog coverage", () => {
     assert.ok(noGifts);
     assert.equal(noGifts.liveKey, "no_gifts_process");
     assert.equal(noGifts.canPublish, true);
+
+    const upiDesignee = report.rows.find((r) => r.requirementKey === "REQ-1.15.1");
+    assert.ok(upiDesignee);
+    assert.equal(upiDesignee.liveKey, "upi_form_0_9_designee");
+    assert.equal(upiDesignee.canPublish, true);
+    assert.equal(upiDesignee.canActivate, false);
+    assert.equal(upiDesignee.publication, "not_published");
+    const upiUtilization = report.rows.find((r) => r.requirementKey === "REQ-1.15.6");
+    assert.ok(upiUtilization);
+    assert.equal(upiUtilization.liveKey, "upi_1056_utilization");
+    assert.equal(upiUtilization.canPublish, true);
+    assert.equal(upiUtilization.canActivate, false);
+    const upiNotify = report.rows.find((r) => r.requirementKey === "REQ-1.15.15");
+    assert.ok(upiNotify);
+    assert.equal(upiNotify.liveKey, "upi_notify_usteps_termination");
+    assert.equal(upiNotify.canPublish, true);
+    assert.equal(upiNotify.canActivate, false);
 
     const personReview = report.rows.find((r) => r.requirementKey === "REQ-1.28.5");
     assert.ok(personReview);
