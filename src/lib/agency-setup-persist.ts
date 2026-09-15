@@ -37,6 +37,7 @@ const SETUP_ORG_COLUMNS = [
   "service_area",
   "dhhs_provider_id",
   "sei_award_date",
+  "fact_community_program_total_persons_served",
   "setup_create_gate_exempt",
 ].join(", ");
 
@@ -62,6 +63,7 @@ type OrgSetupSnapshot = {
   service_area: unknown;
   dhhs_provider_id: unknown;
   sei_award_date: unknown;
+  fact_community_program_total_persons_served: unknown;
   setup_create_gate_exempt?: unknown;
   fact_answers_updated_at?: unknown;
   fact_answers_updated_by?: unknown;
@@ -137,6 +139,7 @@ export type PersistAgencySetupInput = PersistOrgFactsInput & {
   supportsSelfAdministeredMedication?: boolean | null;
   actsAsRepresentativePayee?: boolean | null;
   providesTransportation?: boolean | null;
+  communityProgramTotalPersonsServed?: number | null;
 };
 
 async function readOrgSetupSnapshot(
@@ -193,6 +196,10 @@ export async function persistAgencySetupFactsInternal(
     answers.seiAwardDate !== undefined
       ? parseNullableTrimmedString(answers.seiAwardDate)
       : existingFacts.seiAwardDate;
+  const nextCommunityProgramTotal =
+    answers.communityProgramTotalPersonsServed !== undefined
+      ? parseApproxCount(answers.communityProgramTotalPersonsServed)
+      : existingFacts.communityProgramTotalPersonsServed;
 
   const factsForApplicability: AgencySetupFacts = {
     operates_ol_site:
@@ -230,6 +237,7 @@ export async function persistAgencySetupFactsInternal(
       answers.providesTransportation !== undefined
         ? answers.providesTransportation
         : existingFacts.providesTransportation,
+    communityProgramTotalPersonsServed: nextCommunityProgramTotal,
   };
 
   const willBeComplete = computeAgencySetupStatus(factsForApplicability, {
@@ -251,6 +259,9 @@ export async function persistAgencySetupFactsInternal(
     ...(answers.serviceArea !== undefined ? { service_area: nextArea } : {}),
     ...(answers.dhhsProviderId !== undefined ? { dhhs_provider_id: nextProviderId } : {}),
     ...(answers.seiAwardDate !== undefined ? { sei_award_date: nextSeiAwardDate } : {}),
+    ...(answers.communityProgramTotalPersonsServed !== undefined
+      ? { fact_community_program_total_persons_served: nextCommunityProgramTotal }
+      : {}),
     fact_answers_updated_at: new Date().toISOString(),
     fact_answers_updated_by: userId,
   };
@@ -295,6 +306,8 @@ export async function persistAgencySetupFactsInternal(
           service_area: existing.service_area,
           dhhs_provider_id: existing.dhhs_provider_id,
           sei_award_date: existing.sei_award_date,
+          fact_community_program_total_persons_served:
+            existing.fact_community_program_total_persons_served,
           fact_answers_updated_at: existing.fact_answers_updated_at ?? null,
           fact_answers_updated_by: existing.fact_answers_updated_by ?? null,
           setup_completed_at: existing.setup_completed_at ?? null,

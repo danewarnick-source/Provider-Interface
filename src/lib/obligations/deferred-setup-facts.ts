@@ -194,17 +194,11 @@ export const DEFERRED_FACTS: readonly DeferredFactDefinition[] = [
       'Workbook scopes this "client" (it\'s a headcount) but the fact is about the LOCATION, not ' +
       "any one client — reclassified to location scope.",
   },
-  {
-    factId: "FACT-063",
-    scope: "location",
-    deferredTo: "location_record",
-    question:
-      "Across all locations, how many persons does this community program serve (4+ requires a Day Treatment license)?",
-    answerType: "number",
-    storage: { kind: "generic", scope: "location" },
-    sourceRequirementIdsRaw: "REQ-7.5.b, REQ-8.5.b",
-    sourceNote: "Same reclassification as FACT-062 — a program-wide total, not a per-client fact.",
-  },
+  // FACT-063 is not here. It is an agency-level question
+  // (q_community_program_total_persons_served in agency-setup-questions.ts),
+  // not a deferred location-record fact — see that question's sourceNote
+  // for why: REQ-7.5.b/REQ-8.5.b's own applies_to is "agency", not "site",
+  // unlike FACT-062's sibling REQ-7.5.a/REQ-8.5.a which really is per-site.
 
   // --- client --------------------------------------------------------------
   {

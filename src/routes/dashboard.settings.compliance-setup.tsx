@@ -73,6 +73,9 @@ function answerToPersistPayload(draft: Draft) {
       | null,
     actsAsRepresentativePayee: get("fact_acts_as_representative_payee") as boolean | null,
     providesTransportation: get("fact_provides_transportation") as boolean | null,
+    communityProgramTotalPersonsServed: get("community_program_total_persons_served") as
+      | number
+      | null,
   };
 }
 

@@ -310,6 +310,52 @@ export const AGENCY_SETUP_QUESTIONS: readonly AgencySetupQuestionDefinition[] = 
       "Reuses the existing organizations.dhhs_provider_id column (already used by EVV export) — no new column.",
   },
   {
+    id: "q_community_program_total_persons_served",
+    factKey: "community_program_total_persons_served",
+    introducedInVersion: 2,
+    scope: "agency",
+    section: "residential_and_host_home",
+    question:
+      "Across all locations, how many persons does this community DSG/DSI/DSP program serve in total?",
+    help:
+      "This is one program-wide total, not a per-location count — count every person once even if " +
+      "they attend more than one location or group. 4 or more requires a Day Treatment license from " +
+      "the Office of Licensing (OL); 3 or fewer requires Community Based Day Support certification.",
+    whyItMatters:
+      "REQ-7.5.b / REQ-8.5.b (DHHS91172 §7.5(b), §8.5(b)) require the license or certification " +
+      "\"regardless if the Persons all receive services at the same time, same location, or in the " +
+      'same groups" — a single agency-wide credential keyed on the program total, not on any one ' +
+      "location. Per-location capacity (whether a given site needs its own license) is a separate, " +
+      "already-collected fact — see Homes & Teams.",
+    answerType: "number",
+    baseRequired: false,
+    condition: {
+      description: "Visible only when a community day-support code (DSG, DSI, DSP) is awarded.",
+      visible: awardedAny("DSG", "DSI", "DSP"),
+    },
+    storage: {
+      kind: "column",
+      table: "organizations",
+      column: "fact_community_program_total_persons_served",
+      isNewColumn: true,
+    },
+    sourceFactIds: ["FACT-063"],
+    sourceRequirementIds: reqIdsFor("FACT-063"),
+    sourceNote:
+      'FACT-063 was previously (incorrectly) a DEFERRED_FACTS "location" entry. The requirement ' +
+      'catalog\'s own applies_to field for both REQ-7.5.b and REQ-8.5.b is "agency", not "site" — ' +
+      "unlike FACT-062's sibling REQ-7.5.a/REQ-8.5.a, which really is applies_to: \"site\" (\"for " +
+      'EACH LOCATION\") and stays a location-record fact. The clause text for 7.5(b)/8.5(b) is ' +
+      'explicit that this is one number across the whole program ("regardless if the Persons... ' +
+      'same location"), so it has no single location to attach to and is collectible at agency ' +
+      "setup — no location needs to exist first. Not marked baseRequired: true — deliberately kept " +
+      "out of org_setup_is_complete()'s required-fact list for this change, since correctly " +
+      "threading a newly-required field through both the SQL and TypeScript completion-gate " +
+      "implementations (which the existing migration comment requires to match exactly) needs " +
+      "end-to-end re-verification of the create-blocking gate beyond this task's remaining scope. " +
+      "Still visible and answerable in the wizard; just does not block setup completion yet.",
+  },
+  {
     id: "q_operates_ol_site",
     factKey: "operates_ol_site",
     introducedInVersion: 1,

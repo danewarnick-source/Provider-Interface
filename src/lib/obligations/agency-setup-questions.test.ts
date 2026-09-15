@@ -131,7 +131,10 @@ describe("agency setup questions — conditional sections", () => {
   });
 
   it("sections group only their own questions and stay stable in count", () => {
-    const grouped = agencySetupQuestionsBySection({ awardedCodes: ["SEI", "RHS", "PBA"] });
+    // Every conditional question's trigger code must be present for this to
+    // genuinely cover AGENCY_SETUP_QUESTIONS.length — SEI for sei_award_date,
+    // DSG for community_program_total_persons_served.
+    const grouped = agencySetupQuestionsBySection({ awardedCodes: ["SEI", "RHS", "PBA", "DSG"] });
     const total = grouped.reduce((sum, s) => sum + s.questions.length, 0);
     assert.equal(total, AGENCY_SETUP_QUESTIONS.length);
   });

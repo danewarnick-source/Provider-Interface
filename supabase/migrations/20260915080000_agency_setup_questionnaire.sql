@@ -41,6 +41,13 @@ ALTER TABLE public.organizations
   ADD COLUMN IF NOT EXISTS fact_provides_transportation boolean;
 ALTER TABLE public.organizations
   ADD COLUMN IF NOT EXISTS sei_award_date date;
+-- Added for the FACT-063 scope fix: REQ-7.5.b/REQ-8.5.b's own applies_to is
+-- "agency" (a single program-wide total, not per-location like its sibling
+-- REQ-7.5.a/REQ-8.5.a) — was incorrectly a DEFERRED_FACTS "location" entry.
+-- Not read by org_setup_is_complete() below (not baseRequired) — see
+-- q_community_program_total_persons_served's sourceNote for why.
+ALTER TABLE public.organizations
+  ADD COLUMN IF NOT EXISTS fact_community_program_total_persons_served integer;
 
 -- ---------------------------------------------------------------------------
 -- 2. Versioning — lets a future questionnaire change request only the NEW

@@ -41,6 +41,8 @@ export type AgencySetupFacts = OrgFacts & {
   supportsSelfAdministeredMedication: FactAnswer;
   actsAsRepresentativePayee: FactAnswer;
   providesTransportation: FactAnswer;
+  /** FACT-063 — not baseRequired, so never affects completion; see its question's sourceNote. */
+  communityProgramTotalPersonsServed: number | null;
 };
 
 export const EMPTY_AGENCY_SETUP_FACTS: AgencySetupFacts = {
@@ -57,6 +59,7 @@ export const EMPTY_AGENCY_SETUP_FACTS: AgencySetupFacts = {
   supportsSelfAdministeredMedication: null,
   actsAsRepresentativePayee: null,
   providesTransportation: null,
+  communityProgramTotalPersonsServed: null,
 };
 
 export function parseApproxCount(value: unknown): number | null {
@@ -104,6 +107,7 @@ export function setupFactsFromOrgRow(row: {
   service_area?: unknown;
   dhhs_provider_id?: unknown;
   sei_award_date?: unknown;
+  fact_community_program_total_persons_served?: unknown;
 }): AgencySetupFacts {
   const services = Array.isArray(row.services_offered)
     ? row.services_offered.map((c) => String(c).trim().toUpperCase()).filter(Boolean)
@@ -124,6 +128,9 @@ export function setupFactsFromOrgRow(row: {
     serviceArea: parseNullableTrimmedString(row.service_area),
     dhhsProviderId: parseNullableTrimmedString(row.dhhs_provider_id),
     seiAwardDate: parseNullableTrimmedString(row.sei_award_date),
+    communityProgramTotalPersonsServed: parseApproxCount(
+      row.fact_community_program_total_persons_served,
+    ),
   };
 }
 
@@ -156,6 +163,8 @@ export function agencySetupFactValue(factKey: string, facts: AgencySetupFacts): 
       return facts.actsAsRepresentativePayee;
     case "fact_provides_transportation":
       return facts.providesTransportation;
+    case "community_program_total_persons_served":
+      return facts.communityProgramTotalPersonsServed;
     default:
       return undefined;
   }

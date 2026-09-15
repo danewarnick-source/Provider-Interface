@@ -37,40 +37,40 @@ type Row = {
   requirementIds: string[];
 };
 
-// Columns not read by src/lib/obligations/applicability.ts's loadOrgFacts()
-// (the only reader that feeds src/lib/obligations/duty-applicability.ts) as
-// of 793c6f8f + this session's changes — verified by direct source
-// inspection (grep + reading loadOrgFacts' own SELECT list), not inferred.
-// loadOrgFacts selects exactly: fact_operates_ol_site, fact_uses_volunteers,
-// fact_has_governing_board, services_offered. If this script starts failing
-// its own "verify" step below, either the column was wired in (update this
-// set) or it is still a real gap (keep it and update the fact's sourceNote
-// to stop implying otherwise).
-const AGENCY_COLUMNS_WITH_NO_DUTY_ENGINE_CONSUMER = new Set([
-  "fact_provides_respite_overnight",
-  "fact_is_usor_vendor",
-  "fact_supports_self_administered_medication",
-  "fact_acts_as_representative_payee",
-  "fact_provides_transportation",
-  "sei_award_date", // liveFactKey binding exists (third-executable-batch.ts)
-  // but nothing populates it from the real column — see AGENCY_SETUP_COVERAGE_AUDIT.md.
-]);
+// Derived from the real loadOrgFacts() source below, never hand-maintained —
+// a second, separately-updated list of "which columns have a consumer" is
+// exactly the kind of claim this script exists to stop trusting on faith
+// (this repo's own git history has one concrete instance: an early version
+// of this file kept such a list and it was already stale by the very next
+// commit that added a column). One parse, one source of truth, used by both
+// the Consumer column below and the throw-on-drift check in main().
+function loadOrgFactsSelectedColumns(): Set<string> {
+  const appPath = join(here, "../src/lib/obligations/applicability.ts");
+  const src = readFileSync(appPath, "utf8");
+  const match = src.match(/loadOrgFacts[\s\S]*?\.select\(\s*"([^"]+)"/);
+  if (!match) {
+    throw new Error(
+      "Could not find loadOrgFacts()'s .select(...) call in applicability.ts — update " +
+        "loadOrgFactsSelectedColumns() if that function moved or was renamed.",
+    );
+  }
+  return new Set(match[1].split(",").map((s) => s.trim()));
+}
 
-function consumerForAgencyQuestion(storage: {
-  kind: "column" | "derived" | "rule";
-  table?: string;
-  column?: string;
-}): string {
+function consumerForAgencyQuestion(
+  storage: { kind: "column" | "derived" | "rule"; table?: string; column?: string },
+  loadOrgFactsColumns: Set<string>,
+): string {
   if (storage.kind !== "column" || storage.table !== "organizations") {
     return "N/A (not an organizations column)";
   }
-  if (AGENCY_COLUMNS_WITH_NO_DUTY_ENGINE_CONSUMER.has(storage.column!)) {
+  if (!loadOrgFactsColumns.has(storage.column!)) {
     return "NONE — stored, but loadOrgFacts() does not select this column; duty-applicability.ts never sees it";
   }
   return "applicability.ts loadOrgFacts() -> OrgFacts -> duty-applicability.ts";
 }
 
-function buildRows(): Row[] {
+function buildRows(loadOrgFactsColumns: Set<string>): Row[] {
   const rows: Row[] = [];
 
   for (const q of AGENCY_SETUP_QUESTIONS) {
@@ -90,7 +90,7 @@ function buildRows(): Row[] {
         question: q.question,
         storage: storageText,
         requiredness,
-        consumer: consumerForAgencyQuestion(q.storage),
+        consumer: consumerForAgencyQuestion(q.storage, loadOrgFactsColumns),
         detail: q.sourceNote ?? "",
         requirementCount: Number(raw.requirements_affected) || 0,
         requirementIds: raw.linked_requirement_keys
@@ -223,46 +223,28 @@ function formatMarkdown(rows: Row[]): string {
   return lines.join("\n");
 }
 
-// Self-checking, not just asserted: re-reads applicability.ts's actual
-// loadOrgFacts() SELECT list every run, so AGENCY_COLUMNS_WITH_NO_DUTY_ENGINE_CONSUMER
-// cannot silently go stale in either direction (a column gets wired in and
-// this script keeps claiming it isn't, or someone edits the excluded-set
-// comment without the underlying code actually changing).
-function verifyDutyEngineConsumerClaim(): void {
-  const appPath = join(here, "../src/lib/obligations/applicability.ts");
-  const src = readFileSync(appPath, "utf8");
-  const match = src.match(/loadOrgFacts[\s\S]*?\.select\(\s*"([^"]+)"/);
-  if (!match) {
-    throw new Error(
-      "Could not find loadOrgFacts()'s .select(...) call in applicability.ts to verify the " +
-        "consumer claim against — update verifyDutyEngineConsumerClaim() if that function moved.",
-    );
-  }
-  const selected = new Set(match[1].split(",").map((s) => s.trim()));
-  const wronglyExcluded = [...AGENCY_COLUMNS_WITH_NO_DUTY_ENGINE_CONSUMER].filter((c) =>
-    selected.has(c),
-  );
-  if (wronglyExcluded.length > 0) {
-    throw new Error(
-      `applicability.ts now selects [${wronglyExcluded.join(", ")}] — loadOrgFacts() was updated ` +
-        "to read these. Remove them from AGENCY_COLUMNS_WITH_NO_DUTY_ENGINE_CONSUMER in this script " +
-        "(the columns now DO have a duty-engine consumer) and update the affected fact's sourceNote.",
-    );
-  }
+// Sanity check on the parse itself, not on a maintained list (there isn't
+// one anymore — consumerForAgencyQuestion() derives the claim live from
+// loadOrgFactsSelectedColumns() every run). If this throws, the regex above
+// stopped matching real code — e.g. loadOrgFacts() was refactored — and the
+// generated Consumer column would otherwise go quietly wrong instead of
+// loudly wrong.
+function sanityCheckOrgFactsParse(loadOrgFactsColumns: Set<string>): void {
   const expectedPresent = ["fact_operates_ol_site", "fact_uses_volunteers", "fact_has_governing_board"];
-  const missingExpected = expectedPresent.filter((c) => !selected.has(c));
+  const missingExpected = expectedPresent.filter((c) => !loadOrgFactsColumns.has(c));
   if (missingExpected.length > 0) {
     throw new Error(
-      `applicability.ts's loadOrgFacts() no longer selects [${missingExpected.join(", ")}] — this ` +
-        "script's consumer claim for those facts is stale in the other direction. Investigate before " +
-        "trusting the generated Consumer column.",
+      `applicability.ts's loadOrgFacts() does not select [${missingExpected.join(", ")}], which it ` +
+        "always has — loadOrgFactsSelectedColumns()'s regex likely no longer matches the real " +
+        "function. Fix the parse before trusting the generated Consumer column.",
     );
   }
 }
 
 function main(): void {
-  verifyDutyEngineConsumerClaim();
-  const rows = buildRows();
+  const loadOrgFactsColumns = loadOrgFactsSelectedColumns();
+  sanityCheckOrgFactsParse(loadOrgFactsColumns);
+  const rows = buildRows(loadOrgFactsColumns);
   const { missing, unexpectedDupes } = checkExhaustive(rows);
   if (missing.length > 0 || unexpectedDupes.length > 0) {
     throw new Error(

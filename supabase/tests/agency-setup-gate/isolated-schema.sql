@@ -54,6 +54,7 @@ CREATE TABLE public.organizations (
   fact_provides_transportation boolean,
   dhhs_provider_id text,
   sei_award_date date,
+  fact_community_program_total_persons_served integer,
   fact_answers_updated_at timestamptz,
   fact_answers_updated_by uuid,
   setup_completed_at timestamptz,

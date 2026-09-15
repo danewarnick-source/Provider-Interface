@@ -1630,12 +1630,12 @@
   {
     "factId": "FACT-063",
     "scope": "client",
-    "disposition": "Deferred to location record",
-    "question": "Across all locations, how many persons does this community program serve (4+ requires a Day Treatment license)?",
-    "storage": "compliance_fact_answers (scope=location) — new field on the location record",
-    "requiredness": "Not required for agency-setup completion (org_setup_is_complete never reads it); shown as an information task on the record once it exists",
-    "consumer": "NONE — compliance_fact_answers is not read by duty-applicability.ts or load-staff-duty-facts.functions.ts for any scope",
-    "detail": "Same reclassification as FACT-062 — a program-wide total, not a per-client fact.",
+    "disposition": "Agency questionnaire — \"Residential & host-home operations\"",
+    "question": "Across all locations, how many persons does this community DSG/DSI/DSP program serve in total?",
+    "storage": "organizations.fact_community_program_total_persons_served (new)",
+    "requiredness": "Conditional — Visible only when a community day-support code (DSG, DSI, DSP) is awarded.",
+    "consumer": "NONE — stored, but loadOrgFacts() does not select this column; duty-applicability.ts never sees it",
+    "detail": "FACT-063 was previously (incorrectly) a DEFERRED_FACTS \"location\" entry. The requirement catalog's own applies_to field for both REQ-7.5.b and REQ-8.5.b is \"agency\", not \"site\" — unlike FACT-062's sibling REQ-7.5.a/REQ-8.5.a, which really is applies_to: \"site\" (\"for EACH LOCATION\") and stays a location-record fact. The clause text for 7.5(b)/8.5(b) is explicit that this is one number across the whole program (\"regardless if the Persons... same location\"), so it has no single location to attach to and is collectible at agency setup — no location needs to exist first. Not marked baseRequired: true — deliberately kept out of org_setup_is_complete()'s required-fact list for this change, since correctly threading a newly-required field through both the SQL and TypeScript completion-gate implementations (which the existing migration comment requires to match exactly) needs end-to-end re-verification of the create-blocking gate beyond this task's remaining scope. Still visible and answerable in the wizard; just does not block setup completion yet.",
     "requirementCount": 2,
     "requirementIds": [
       "REQ-7.5.b",
@@ -1649,7 +1649,7 @@
     "question": "What is this contractor's Medicaid / DHHS provider ID?",
     "storage": "organizations.dhhs_provider_id",
     "requiredness": "Required (agency setup cannot complete without an answer)",
-    "consumer": "applicability.ts loadOrgFacts() -> OrgFacts -> duty-applicability.ts",
+    "consumer": "NONE — stored, but loadOrgFacts() does not select this column; duty-applicability.ts never sees it",
     "detail": "Reuses the existing organizations.dhhs_provider_id column (already used by EVV export) — no new column.",
     "requirementCount": 1,
     "requirementIds": [

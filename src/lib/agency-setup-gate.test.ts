@@ -136,7 +136,7 @@ const AGENCY_B = {
 
 describe("unit: agency setup gate — registry-driven operating questions", () => {
   it("defines concrete operating questions for every agency fact — never whether a section applies", () => {
-    assert.equal(AGENCY_SETUP_QUESTIONS.length, 11);
+    assert.equal(AGENCY_SETUP_QUESTIONS.length, 12);
     const keys = AGENCY_SETUP_QUESTIONS.map((q) => q.factKey)
       .slice()
       .sort();
@@ -144,6 +144,7 @@ describe("unit: agency setup gate — registry-driven operating questions", () =
       keys,
       [
         "awarded_service_codes",
+        "community_program_total_persons_served",
         "dhhs_provider_id",
         "fact_acts_as_representative_payee",
         "fact_is_usor_vendor",
