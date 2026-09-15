@@ -44,12 +44,25 @@ export function ComplianceFactsPanel({
   organizationId,
   canEdit,
   title = "Compliance facts",
+  reevaluate,
 }: {
   scope: ComplianceFactScope;
   entityId: string;
   organizationId: string;
   canEdit: boolean;
   title?: string;
+  /**
+   * Fired after a successful save, before the answer is treated as final —
+   * wires this scope's answer changes into the existing duty-reevaluation
+   * mechanism (onClientDutyFactsChanged / onStaffDutyFactsChanged). Optional
+   * because not every scope has a reevaluation target yet: "location" has no
+   * duty-reevaluation concept in this codebase, so its mounts correctly omit
+   * this prop rather than call something that doesn't exist. A save still
+   * succeeds if this rejects — reevaluation failure must never block the
+   * fact from being recorded — but the error is surfaced so a silent gap
+   * doesn't look like a clean save.
+   */
+  reevaluate?: () => Promise<unknown>;
 }) {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -104,8 +117,20 @@ export function ComplianceFactsPanel({
       );
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       qc.invalidateQueries({ queryKey });
+      if (!reevaluate) return;
+      try {
+        await reevaluate();
+      } catch (err) {
+        // The answer is already saved — a reevaluation failure must not
+        // look like the save failed, but it also must not be silent.
+        toast.error(
+          err instanceof Error
+            ? `Saved, but reevaluation failed: ${err.message}`
+            : "Saved, but reevaluation failed.",
+        );
+      }
     },
     onError: (err: unknown) => {
       toast.error(err instanceof Error ? err.message : "Could not save this answer");
@@ -115,7 +140,7 @@ export function ComplianceFactsPanel({
   if (facts.length === 0) return null;
 
   const unansweredCount = generic.filter(
-    (f) => (byKey.get(f.factKey)?.status ?? "unanswered") === "unanswered",
+    (f) => (byKey.get(f.factId)?.status ?? "unanswered") === "unanswered",
   ).length;
 
   return (
@@ -133,11 +158,11 @@ export function ComplianceFactsPanel({
 
       <div className="space-y-4">
         {generic.map((f) => {
-          const row = byKey.get(f.factKey);
+          const row = byKey.get(f.factId);
           const status = row?.status ?? "unanswered";
           const currentValue =
-            drafts[f.factKey] !== undefined
-              ? drafts[f.factKey]
+            drafts[f.factId] !== undefined
+              ? drafts[f.factId]
               : ((row?.value ?? null) as ComplianceAnswerValue);
           return (
             <div
@@ -159,7 +184,7 @@ export function ComplianceFactsPanel({
                   question={f}
                   value={currentValue}
                   disabled={!canEdit || save.isPending}
-                  onChange={(next) => setDrafts((prev) => ({ ...prev, [f.factKey]: next }))}
+                  onChange={(next) => setDrafts((prev) => ({ ...prev, [f.factId]: next }))}
                 />
                 {canEdit ? (
                   <>
@@ -168,7 +193,7 @@ export function ComplianceFactsPanel({
                       size="sm"
                       disabled={save.isPending}
                       onClick={() =>
-                        save.mutate({ factKey: f.factKey, status: "answered", value: currentValue })
+                        save.mutate({ factKey: f.factId, status: "answered", value: currentValue })
                       }
                     >
                       Save
@@ -179,7 +204,7 @@ export function ComplianceFactsPanel({
                       variant="ghost"
                       disabled={save.isPending}
                       onClick={() =>
-                        save.mutate({ factKey: f.factKey, status: "unknown", value: null })
+                        save.mutate({ factKey: f.factId, status: "unknown", value: null })
                       }
                     >
                       I don't know

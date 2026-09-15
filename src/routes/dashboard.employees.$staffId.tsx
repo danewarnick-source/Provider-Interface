@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { PersonAvatar } from "@/components/person/person-avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComplianceFactsPanel } from "@/components/compliance/compliance-facts-panel";
+import { onStaffDutyFactsChanged } from "@/lib/staff-assignment-hooks.functions";
 import { SectionPanel, SectionGroup } from "@/components/clients/section-panel";
 import { RequirePermission } from "@/components/rbac-guard";
 import { EmployeeFaceSheetButton } from "@/components/employees/employee-face-sheet-button";
@@ -86,6 +88,7 @@ function StaffProfilePage() {
   const activeTab = resolveTab(tab);
 
   const orgId = org?.organization_id;
+  const staffDutyFactsChangedFn = useServerFn(onStaffDutyFactsChanged);
 
   const memberQ = useQuery({
     enabled: !!orgId && isRouteUuid(staffId),
@@ -223,6 +226,11 @@ function StaffProfilePage() {
             organizationId={orgId ?? ""}
             canEdit={!!orgId}
             title="Staff compliance facts"
+            reevaluate={
+              orgId
+                ? () => staffDutyFactsChangedFn({ data: { organizationId: orgId, staffId } })
+                : undefined
+            }
           />
         </TabsContent>
 

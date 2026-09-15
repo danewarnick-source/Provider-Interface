@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import pg from "pg";
 import { computeAgencySetupStatus, setupFactsFromOrgRow } from "./agency-setup-gate.ts";
 import { persistAgencySetupFactsInternal } from "./agency-setup-persist.ts";
+import { deferredFact } from "./obligations/deferred-setup-facts.ts";
 
 const HIVE_PLATFORM_REF = "dhrrukdcigiiqksibdfb";
 const DEFAULT_URL =
@@ -708,10 +709,14 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     assert.ok(insertedId);
 
     // Agency B cannot see or write Agency A's deferred-fact answer.
+    // Scoped to this test's own entity_id (not just organization_id): this
+    // suite is not given a fresh database per run (there is no TRUNCATE in
+    // before()/after()), so a prior run's leftover ORG_A rows for other
+    // entity_ids must not make either assertion below flaky.
     await asUser(client, USER_B, async () => {
       const seen = await client.query(
-        "SELECT * FROM public.compliance_fact_answers WHERE organization_id = $1",
-        [ORG_A],
+        "SELECT * FROM public.compliance_fact_answers WHERE organization_id = $1 AND entity_id = $2",
+        [ORG_A, clientId],
       );
       assert.equal(seen.rows.length, 0);
     });
@@ -731,8 +736,8 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     // Agency A can read its own answer back.
     await asUser(client, USER_A, async () => {
       const mine = await client.query(
-        "SELECT fact_key, status FROM public.compliance_fact_answers WHERE organization_id = $1",
-        [ORG_A],
+        "SELECT fact_key, status FROM public.compliance_fact_answers WHERE organization_id = $1 AND entity_id = $2",
+        [ORG_A, clientId],
       );
       assert.equal(mine.rows.length, 1);
       assert.equal(mine.rows[0].fact_key, "fact_66_aggressive_behavior");
@@ -760,5 +765,71 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
       [ORG_A],
     );
     assert.deepEqual(after.rows[0], before.rows[0]);
+  });
+
+  it("ComplianceFactsPanel's real save shape round-trips for an assignment-scope fact (FACT-060)", async () => {
+    // Exercises exactly what compliance-facts-panel.tsx sends on save — keyed
+    // by the real DeferredFactDefinition.factId, not a hand-typed string —
+    // against the real NOT NULL / RLS-protected column. This is the proof a
+    // mocked screenshot cannot give: a save through the fixed component
+    // (f.factKey -> f.factId) actually persists, and the old bug
+    // (fact_key: undefined) would have failed the NOT NULL constraint here.
+    const fact060 = deferredFact("FACT-060");
+    assert.ok(fact060, "FACT-060 must still exist in the deferred-facts registry");
+    assert.equal(fact060!.scope, "assignment");
+
+    // No staff_assignments table in this simplified isolated schema (see
+    // isolated-schema.sql's own header note) — compliance_fact_answers.
+    // entity_id has no FK, so a fresh id stands in for one real assignment
+    // row, same as the live schema would supply from staff_assignments.id.
+    const assignmentEntityId = "99999999-9999-4999-8999-999999999901";
+
+    await asUser(client, USER_A, async () => {
+      await client.query(
+        `INSERT INTO public.compliance_fact_answers
+           (organization_id, scope, entity_id, fact_key, status, value, source, answered_by, answered_at)
+         VALUES ($1, 'assignment', $2, $3, 'answered', 'false'::jsonb, 'manual', $4, now())
+         ON CONFLICT (organization_id, scope, entity_id, fact_key)
+         DO UPDATE SET status = EXCLUDED.status, value = EXCLUDED.value, answered_at = EXCLUDED.answered_at`,
+        [ORG_A, assignmentEntityId, fact060!.factId, USER_A],
+      );
+    });
+
+    await asUser(client, USER_A, async () => {
+      // Scoped to this fact_key specifically — not just entity_id — so a
+      // rerun against the same (non-truncated) database isn't tripped up by
+      // the second fact this test also writes below.
+      const mine = await client.query(
+        `SELECT fact_key, status, value FROM public.compliance_fact_answers
+         WHERE organization_id = $1 AND scope = 'assignment' AND entity_id = $2 AND fact_key = $3`,
+        [ORG_A, assignmentEntityId, fact060!.factId],
+      );
+      assert.equal(mine.rows.length, 1, "one row per assignment+fact, not collapsed by a bad key");
+      assert.equal(mine.rows[0].status, "answered");
+      assert.equal(mine.rows[0].value, false, "false is a real answer, not treated as unanswered");
+    });
+
+    // A second, different fact on the SAME assignment must not collide with
+    // the first — this is exactly what `fact_key: undefined` broke (every
+    // fact on one entity fought over one row because the key was constant).
+    await asUser(client, USER_A, async () => {
+      await client.query(
+        `INSERT INTO public.compliance_fact_answers
+           (organization_id, scope, entity_id, fact_key, status, value, source, answered_by, answered_at)
+         VALUES ($1, 'assignment', $2, 'FACT-999-test-only', 'unknown', NULL, 'manual', $3, now())
+         ON CONFLICT (organization_id, scope, entity_id, fact_key)
+         DO UPDATE SET status = EXCLUDED.status, answered_at = EXCLUDED.answered_at`,
+        [ORG_A, assignmentEntityId, USER_A],
+      );
+      const both = await client.query(
+        `SELECT fact_key FROM public.compliance_fact_answers
+         WHERE organization_id = $1 AND scope = 'assignment' AND entity_id = $2 ORDER BY fact_key`,
+        [ORG_A, assignmentEntityId],
+      );
+      assert.deepEqual(
+        both.rows.map((r: { fact_key: string }) => r.fact_key),
+        ["FACT-060", "FACT-999-test-only"],
+      );
+    });
   });
 });

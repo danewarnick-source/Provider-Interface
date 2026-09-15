@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
+import { fileURLToPath } from "node:url";
 import {
   AGENCY_SETUP_QUESTIONS,
   NON_QUESTION_FACT_DISPOSITIONS,
@@ -150,6 +152,38 @@ describe("agency setup questions — required-ness reacts to answers, never eras
     const q = AGENCY_SETUP_QUESTIONS.find((x) => x.factKey === "operates_ol_site")!;
     assert.equal(isQuestionVisible(q, { awardedCodes: [] }), true);
     assert.equal(isQuestionRequired(q, { awardedCodes: [] }), true);
+  });
+});
+
+describe("ComplianceFactsPanel keys every deferred fact by its real identifier", () => {
+  it("DeferredFactDefinition has no factKey field — the panel must key off factId", () => {
+    // Guards a real bug found by an actual DB save, not a mocked screenshot:
+    // DeferredFactDefinition only ever had `factId` (e.g. "FACT-060"); the
+    // panel previously read `f.factKey`, which does not exist on this type
+    // and evaluates to undefined at runtime. That undefined flows straight
+    // into the compliance_fact_answers.fact_key NOT NULL column on save,
+    // and collapses every fact on one entity into a single drafts key. If
+    // this fails, someone reintroduced factKey on this type — the panel
+    // must be updated to match, not the other way around.
+    for (const f of DEFERRED_FACTS) {
+      assert.ok(
+        !("factKey" in f),
+        `${f.factId} has a factKey field — compliance-facts-panel.tsx must be re-verified`,
+      );
+      assert.ok(typeof f.factId === "string" && f.factId.length > 0, "factId must be a real id");
+    }
+  });
+
+  it("compliance-facts-panel.tsx never reads a non-existent .factKey off a deferred fact", () => {
+    const panelSrc = readFileSync(
+      fileURLToPath(
+        new URL("../../components/compliance/compliance-facts-panel.tsx", import.meta.url),
+      ),
+      "utf8",
+    );
+    assert.doesNotMatch(panelSrc, /\bf\.factKey\b/);
+    assert.match(panelSrc, /fact_key:\s*factKey/, "save must still write the DB column fact_key");
+    assert.match(panelSrc, /byKey\.get\(f\.factId\)/, "lookup must key off the real factId");
   });
 });
 
