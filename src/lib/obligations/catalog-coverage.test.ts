@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, it } from "node:test";
-import { buildCatalogCoverageReport } from "./catalog-coverage.ts";
-import { readCommittedCatalog } from "./draft-rules/catalog-fs.ts";
+import { buildCatalogCoverageReport, formatCatalogCoverageMarkdown } from "./catalog-coverage.ts";
+import { DHHS91172_CATALOG_DIR, readCommittedCatalog } from "./draft-rules/catalog-fs.ts";
+import { VERIFIED_PUBLICATIONS } from "./draft-rules/verified-publication.ts";
+import { committedPublicationIssues } from "./draft-rules/controlled-publication.ts";
 
 describe("DHHS91172 catalog coverage", () => {
   it("covers every imported parent and treats elements as children, not tasks", () => {
@@ -23,6 +27,16 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredMegaC, 9);
     assert.equal(report.counts.wired, 50);
     assert.equal(report.counts.remainingExecutable, 0);
+    assert.equal(VERIFIED_PUBLICATIONS.length, 0);
+    assert.deepEqual(committedPublicationIssues(readCommittedCatalog().parents), []);
+
+    const committed = JSON.parse(
+      readFileSync(join(DHHS91172_CATALOG_DIR, "COVERAGE_REPORT.json"), "utf8"),
+    ) as { counts: typeof report.counts };
+    assert.deepEqual(committed.counts, report.counts);
+    const markdown = formatCatalogCoverageMarkdown(report);
+    assert.match(markdown, /Controlled publication \(Soft=none\)/);
+    assert.match(markdown, /None\. All 50 live-key parents have a fixture overlay/);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);

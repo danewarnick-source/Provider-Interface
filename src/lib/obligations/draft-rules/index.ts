@@ -119,6 +119,16 @@ export {
   VERIFIED_PUBLICATIONS,
 } from "./verified-publication.ts";
 export {
+  committedPublicationIssues,
+  formatVerifiedPublicationSnippet,
+  mergeVerifiedPublications,
+  proposeVerifiedPublications,
+} from "./controlled-publication.ts";
+export type {
+  ControlledPublicationDecision,
+  UnresolvedPublication,
+} from "./controlled-publication.ts";
+export {
   applyFirstExecutableBatchOverlay,
   applyFirstExecutableBatchOverlayAll,
   FIRST_EXECUTABLE_BATCH_ID,
