@@ -370,6 +370,94 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     );
   });
 
+  it("zero is a valid answer for a required number field, on both SQL and TypeScript sides", async () => {
+    // approx_client_count = 0 is a real, deliberate answer ("we have no
+    // clients yet") — a falsy JS value that a naive `if (value)` check would
+    // wrongly treat as missing. isRequiredSetupFactAnswered's number branch
+    // is `typeof value === "number" && Number.isFinite(value)`, which is
+    // correct for zero; this proves the real column round-trips the same
+    // way, on both the TypeScript parser and the SQL completion function.
+    await client.query(
+      `UPDATE public.organizations SET approx_client_count = 0 WHERE id = $1`,
+      [ORG_A],
+    );
+    const row = await client.query(
+      `SELECT fact_operates_ol_site, fact_uses_volunteers, fact_has_governing_board,
+              fact_provides_respite_overnight, fact_is_usor_vendor,
+              fact_supports_self_administered_medication, fact_acts_as_representative_payee,
+              fact_provides_transportation, services_offered, approx_client_count,
+              service_area, dhhs_provider_id, sei_award_date, specializations
+       FROM public.organizations WHERE id = $1`,
+      [ORG_A],
+    );
+    const facts = setupFactsFromOrgRow(row.rows[0]);
+    assert.equal(facts.approxClientCount, 0, "0 must parse as 0, not null");
+    assert.equal(
+      computeAgencySetupStatus(facts).complete,
+      true,
+      "0 clients must not be read back as an unanswered required field (TypeScript side)",
+    );
+    const sql = await client.query("SELECT public.org_setup_is_complete($1) AS complete", [
+      ORG_A,
+    ]);
+    assert.equal(
+      sql.rows[0].complete,
+      true,
+      "0 clients must not be read back as an unanswered required field (SQL side)",
+    );
+    await client.query(`UPDATE public.organizations SET approx_client_count = 12 WHERE id = $1`, [
+      ORG_A,
+    ]);
+  });
+
+  it("an 'unknown' status on a deferred fact cannot satisfy or affect agency-setup completion", async () => {
+    // compliance_fact_answers is scoped to a different record entirely and
+    // org_setup_is_complete() never reads it (verified directly in
+    // AGENCY_SETUP_COVERAGE_AUDIT.md §1) — this proves it at the database
+    // level with an explicit status='unknown' row, not just an absent one.
+    const stillComplete = await client.query(
+      "SELECT public.org_setup_is_complete($1) AS complete",
+      [ORG_A],
+    );
+    assert.equal(stillComplete.rows[0].complete, true);
+
+    const clientRow = await client.query(
+      `INSERT INTO public.clients (organization_id, first_name, last_name)
+       VALUES ($1, 'Unknown', 'StatusFact') RETURNING id`,
+      [ORG_A],
+    );
+    const clientId = clientRow.rows[0].id as string;
+    await asUser(client, USER_A, async () => {
+      await client.query(
+        `INSERT INTO public.compliance_fact_answers
+           (organization_id, scope, entity_id, fact_key, status, value, source, answered_by, answered_at)
+         VALUES ($1, 'client', $2, 'fact_66_unknown_test', 'unknown', NULL, 'manual', $3, now())
+         ON CONFLICT (organization_id, scope, entity_id, fact_key)
+         DO UPDATE SET status = EXCLUDED.status, answered_at = EXCLUDED.answered_at`,
+        [ORG_A, clientId, USER_A],
+      );
+    });
+
+    const afterUnknown = await client.query(
+      "SELECT public.org_setup_is_complete($1) AS complete",
+      [ORG_A],
+    );
+    assert.equal(
+      afterUnknown.rows[0].complete,
+      true,
+      "an explicit 'unknown' deferred-fact status must not silently satisfy or reopen completion",
+    );
+
+    // Clean up: this test's own client row must not change ORG_A's client
+    // count for later tests in this file that count exact totals (this
+    // suite is not given a fresh database per run — see the note on the
+    // representative-payee-status test above).
+    await client.query(`DELETE FROM public.compliance_fact_answers WHERE entity_id = $1`, [
+      clientId,
+    ]);
+    await client.query(`DELETE FROM public.clients WHERE id = $1`, [clientId]);
+  });
+
   it("requires the SEI award date in SQL only once SEI is awarded — TypeScript and SQL agree", async () => {
     const withoutSei = await client.query("SELECT public.org_setup_is_complete($1) AS complete", [
       ORG_A,
