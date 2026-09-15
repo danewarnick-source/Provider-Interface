@@ -19,8 +19,9 @@
     "wiredFifthBatch": 2,
     "wiredSixthBatch": 2,
     "wiredSeventhBatch": 10,
-    "wired": 32,
-    "remainingExecutable": 18
+    "wiredEighthBatch": 9,
+    "wired": 41,
+    "remainingExecutable": 9
   },
   "parents": [
     {
@@ -937,7 +938,7 @@
       "liveKey": "zoning_life_safety",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -947,13 +948,6 @@
         "Which sites are licensed and require zoning/Life Safety/fire documentation?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)",
         "Unanswered applicability fact: Which sites are licensed and require zoning/Life Safety/fire documentation?"
       ]
     },
@@ -1167,12 +1161,12 @@
       "title": "Governing or Policy Making Board. If the Contractor is governed by a…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "None",
       "liveKey": "governing_board_records",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -1182,12 +1176,6 @@
         "Is the agency governed by a governing or policy-making board?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
         "Unanswered applicability fact: Is the agency governed by a governing or policy-making board?"
       ]
     },
@@ -1999,24 +1987,17 @@
       "title": "Operating Policies and Procedures. The Contractor shall have operating policies and procedures…",
       "owner": "Administrator",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
       "liveKey": "operating_policies",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)"
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.18.2",
@@ -2323,12 +2304,12 @@
       "title": "Human Rights Plan. Unless the Contractor only provides CHA, HSQ, or PBA,…",
       "owner": "Administrator",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "None",
       "liveKey": "human_rights_plan",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -2338,11 +2319,6 @@
         "Does the agency provide ONLY CHA, HSQ or PBA? (if yes, not required)"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: Unless the Contractor only provides CHA, HSQ, or PBA, the Contractor shall have a human rights plan that is in compliance with the HCBS Settings Rule and includes:",
         "Unanswered applicability fact: Does the agency provide ONLY CHA, HSQ or PBA? (if yes, not required)"
       ]
     },
@@ -2499,12 +2475,12 @@
       "title": "If the Contractor is initiating the discharge of a Person from its…",
       "owner": "Assigned DSP / supervisor",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "None",
       "liveKey": "person_discharge_process",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [
@@ -2514,12 +2490,6 @@
         "Is the discharge initiated by the agency?"
       ],
       "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
         "Unanswered applicability fact: Is the discharge initiated by the agency?"
       ]
     },
@@ -2642,25 +2612,17 @@
       "title": "Health Support Policies and Procedures. The Contractor shall take reasonable measures to…",
       "owner": "Administrator",
       "completionMethod": "Complete in platform form/record",
-      "timing": "Timing is missing-information. Do not invent an interval or annual-from-completion.",
+      "timing": "Standing live-pack file — keep current. Calendar is reminder-only. Do not invent hire+N.",
       "renewal": "Re-verify when the underlying facts change (admission, move, plan update)",
       "liveKey": "health_support_policies",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Re-verify when the underlying facts change (admission, move, plan update)"
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.23.a",
@@ -3820,19 +3782,12 @@
       "liveKey": "emergency_loan_record",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: unless there is an emergency situation"
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.28.7.A",
@@ -4020,20 +3975,12 @@
       "liveKey": "large_loan_disclosure_process",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review",
-        "Unresolved renewals: Annual anchor must be specified from source (employment year, plan year, fiscal year, fixed date or credential). Never default to last completion date."
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.28.7.H",
@@ -4129,19 +4076,12 @@
       "liveKey": "no_gifts_process",
       "implementationStatus": "live_artifact",
       "publication": "not_published",
-      "canPublish": false,
+      "canPublish": true,
       "canActivate": false,
       "mintsStaffTask": false,
       "applicabilityFactIds": [],
       "unansweredFacts": [],
-      "blockers": [
-        "Rule has no applicability predicates.",
-        "Rule is missing ALL/ANY/conditional group members.",
-        "Rule is missing a positive test.",
-        "Rule is missing a negative test.",
-        "Rule is missing a boundary test.",
-        "Unresolved alternatives: See exceptions_alternatives; unresolved groups require review"
-      ]
+      "blockers": []
     },
     {
       "requirementKey": "REQ-1.28.10",

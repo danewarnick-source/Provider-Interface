@@ -58,6 +58,11 @@ import {
   applySeventhExecutableBatchOverlayAll,
   seventhBatchParentIsWired,
 } from "./seventh-executable-batch.ts";
+import {
+  applyEighthExecutableBatchOverlay,
+  applyEighthExecutableBatchOverlayAll,
+  eighthBatchParentIsWired,
+} from "./eighth-executable-batch.ts";
 
 export type CatalogCoverageRow = {
   requirementKey: string;
@@ -101,6 +106,7 @@ export type CatalogCoverageCounts = {
   wiredFifthBatch: number;
   wiredSixthBatch: number;
   wiredSeventhBatch: number;
+  wiredEighthBatch: number;
   remainingExecutable: number;
 };
 
@@ -160,12 +166,14 @@ function elementRow(el: CatalogSheetRow, parent: LoadedDraftRule | undefined): C
 }
 
 function parentRow(rule: LoadedDraftRule, orgFacts: OrgFacts): CatalogCoverageRow {
-  const executable = applySeventhExecutableBatchOverlay(
-    applySixthExecutableBatchOverlay(
-      applyFifthExecutableBatchOverlay(
-        applyFourthExecutableBatchOverlay(
-          applyThirdExecutableBatchOverlay(
-            applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+  const executable = applyEighthExecutableBatchOverlay(
+    applySeventhExecutableBatchOverlay(
+      applySixthExecutableBatchOverlay(
+        applyFifthExecutableBatchOverlay(
+          applyFourthExecutableBatchOverlay(
+            applyThirdExecutableBatchOverlay(
+              applySecondExecutableBatchOverlay(applyFirstExecutableBatchOverlay(rule)),
+            ),
           ),
         ),
       ),
@@ -225,13 +233,15 @@ export function buildCatalogCoverageReport(
   orgFacts: OrgFacts = EMPTY_ORG_FACTS,
 ): CatalogCoverageReport {
   const parents = applyVerifiedPublicationOverlay(
-    applySeventhExecutableBatchOverlayAll(
-      applySixthExecutableBatchOverlayAll(
-        applyFifthExecutableBatchOverlayAll(
-          applyFourthExecutableBatchOverlayAll(
-            applyThirdExecutableBatchOverlayAll(
-              applySecondExecutableBatchOverlayAll(
-                applyFirstExecutableBatchOverlayAll(loaded.parents),
+    applyEighthExecutableBatchOverlayAll(
+      applySeventhExecutableBatchOverlayAll(
+        applySixthExecutableBatchOverlayAll(
+          applyFifthExecutableBatchOverlayAll(
+            applyFourthExecutableBatchOverlayAll(
+              applyThirdExecutableBatchOverlayAll(
+                applySecondExecutableBatchOverlayAll(
+                  applyFirstExecutableBatchOverlayAll(loaded.parents),
+                ),
               ),
             ),
           ),
@@ -265,6 +275,7 @@ export function buildCatalogCoverageReport(
     wiredFifthBatch: parents.filter((rule) => fifthBatchParentIsWired(rule)).length,
     wiredSixthBatch: parents.filter((rule) => sixthBatchParentIsWired(rule)).length,
     wiredSeventhBatch: parents.filter((rule) => seventhBatchParentIsWired(rule)).length,
+    wiredEighthBatch: parents.filter((rule) => eighthBatchParentIsWired(rule)).length,
     wired: parents.filter(
       (rule) =>
         firstBatchParentIsWired(rule) ||
@@ -273,7 +284,8 @@ export function buildCatalogCoverageReport(
         fourthBatchParentIsWired(rule) ||
         fifthBatchParentIsWired(rule) ||
         sixthBatchParentIsWired(rule) ||
-        seventhBatchParentIsWired(rule),
+        seventhBatchParentIsWired(rule) ||
+        eighthBatchParentIsWired(rule),
     ).length,
     remainingExecutable: parentOnly.filter((r) => r.liveKey != null && r.canPublish === false)
       .length,
@@ -381,6 +393,7 @@ export function formatCatalogCoverageMarkdown(report: CatalogCoverageReport): st
     `| Wired fifth batch (unpublished) | ${c.wiredFifthBatch} |`,
     `| Wired sixth batch (unpublished) | ${c.wiredSixthBatch} |`,
     `| Wired seventh batch / Mega A (unpublished) | ${c.wiredSeventhBatch} |`,
+    `| Wired eighth batch / Mega B (unpublished) | ${c.wiredEighthBatch} |`,
     `| Wired shared-behavior batches (unpublished) | ${c.wired} |`,
     `| Remaining executable (live key, not yet wired) | ${c.remainingExecutable} |`,
     "",

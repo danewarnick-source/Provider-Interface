@@ -24,6 +24,11 @@ describe("catalog live bridge", () => {
     assert.equal(liveObligationKeyForRequirement("REQ-33.3.4"), "sjd_monthly_summary_upi");
     assert.equal(liveObligationKeyForRequirement("REQ-1.28.5"), "pba_financial_review");
     assert.equal(liveObligationKeyForRequirement("REQ-15.3.7"), "pba_financial_review");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.11"), "zoning_life_safety");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.22.c"), "person_discharge_process");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.28.7"), "emergency_loan_record");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.28.7.G"), "large_loan_disclosure_process");
+    assert.equal(liveObligationKeyForRequirement("REQ-1.28.9"), "no_gifts_process");
     assert.ok(sowCatalogEntryByKey(EXPLICIT_REQ_TO_LIVE_KEY["REQ-1.8.4"] ?? ""));
   });
 

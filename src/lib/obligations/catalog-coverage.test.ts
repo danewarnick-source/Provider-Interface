@@ -19,8 +19,9 @@ describe("DHHS91172 catalog coverage", () => {
     assert.equal(report.counts.wiredFifthBatch, 2);
     assert.equal(report.counts.wiredSixthBatch, 2);
     assert.equal(report.counts.wiredSeventhBatch, 10);
-    assert.equal(report.counts.wired, 32);
-    assert.equal(report.counts.remainingExecutable, 18);
+    assert.equal(report.counts.wiredEighthBatch, 9);
+    assert.equal(report.counts.wired, 41);
+    assert.equal(report.counts.remainingExecutable, 9);
 
     const driving = report.rows.find((r) => r.requirementKey === "REQ-1.30");
     assert.ok(driving);
@@ -104,6 +105,45 @@ describe("DHHS91172 catalog coverage", () => {
     const umbrella = report.rows.find((r) => r.requirementKey === "REQ-1.9");
     assert.ok(umbrella);
     assert.equal(umbrella.canPublish, false);
+
+    const zoning = report.rows.find((r) => r.requirementKey === "REQ-1.11");
+    assert.ok(zoning);
+    assert.equal(zoning.liveKey, "zoning_life_safety");
+    assert.equal(zoning.canPublish, true);
+    assert.equal(zoning.canActivate, false);
+    assert.equal(zoning.mintsStaffTask, false);
+    const board = report.rows.find((r) => r.requirementKey === "REQ-1.14");
+    assert.ok(board);
+    assert.equal(board.liveKey, "governing_board_records");
+    assert.equal(board.canPublish, true);
+    const operating = report.rows.find((r) => r.requirementKey === "REQ-1.18");
+    assert.ok(operating);
+    assert.equal(operating.liveKey, "operating_policies");
+    assert.equal(operating.canPublish, true);
+    const hrp = report.rows.find((r) => r.requirementKey === "REQ-1.21");
+    assert.ok(hrp);
+    assert.equal(hrp.liveKey, "human_rights_plan");
+    assert.equal(hrp.canPublish, true);
+    const discharge = report.rows.find((r) => r.requirementKey === "REQ-1.22.c");
+    assert.ok(discharge);
+    assert.equal(discharge.liveKey, "person_discharge_process");
+    assert.equal(discharge.canPublish, true);
+    const health = report.rows.find((r) => r.requirementKey === "REQ-1.23");
+    assert.ok(health);
+    assert.equal(health.liveKey, "health_support_policies");
+    assert.equal(health.canPublish, true);
+    const loan = report.rows.find((r) => r.requirementKey === "REQ-1.28.7");
+    assert.ok(loan);
+    assert.equal(loan.liveKey, "emergency_loan_record");
+    assert.equal(loan.canPublish, true);
+    const largeLoan = report.rows.find((r) => r.requirementKey === "REQ-1.28.7.G");
+    assert.ok(largeLoan);
+    assert.equal(largeLoan.liveKey, "large_loan_disclosure_process");
+    assert.equal(largeLoan.canPublish, true);
+    const noGifts = report.rows.find((r) => r.requirementKey === "REQ-1.28.9");
+    assert.ok(noGifts);
+    assert.equal(noGifts.liveKey, "no_gifts_process");
+    assert.equal(noGifts.canPublish, true);
 
     const personReview = report.rows.find((r) => r.requirementKey === "REQ-1.28.5");
     assert.ok(personReview);

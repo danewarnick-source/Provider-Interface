@@ -187,6 +187,15 @@ export {
   seventhExecutableBatchParents,
 } from "../seventh-executable-batch.ts";
 export {
+  applyEighthExecutableBatchOverlay,
+  applyEighthExecutableBatchOverlayAll,
+  EIGHTH_BATCH_DEMO_PATH,
+  EIGHTH_EXECUTABLE_BATCH_ID,
+  EIGHTH_EXECUTABLE_BATCH_LIVE_KEYS,
+  EIGHTH_EXECUTABLE_BATCH_RULE_IDS,
+  eighthExecutableBatchParents,
+} from "../eighth-executable-batch.ts";
+export {
   countQualifiedDesignatedBenefits,
   employmentYearDue,
   hirePlusDaysDue,
