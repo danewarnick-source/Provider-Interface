@@ -38,7 +38,6 @@ import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { reviewExceptions } from "@/lib/records-review-rules";
 import { RecordsReviewActions } from "@/components/records/records-review-actions";
-import { ThreadsPanel } from "@/components/threads/threads-panel";
 import { useAllClientBillingCodes } from "@/hooks/use-client-billing-codes";
 import { evaluateEntryReadiness, factsFromTimesheet, matchAuthRow } from "@/lib/dspd-entry-readiness";
 import { EntryReadinessPanel } from "@/components/billing/billing-holds";
@@ -815,8 +814,6 @@ export function ComplianceDeskPage() {
           </Button>
         </div>
       </header>
-
-      <ThreadsPanel variant="admin" />
 
       {/* 🤖 AI Vector Search — submits ONLY on click or Enter. No keystroke parsing. */}
       <div className="space-y-1.5">

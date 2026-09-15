@@ -37,8 +37,6 @@ import { ManualTimesheetDialog } from "@/components/records/manual-timesheet-dia
 import { RecordsExportDialog, type ExportRow } from "@/components/records/records-export-dialog";
 import { HistoricalRecordBadge } from "@/components/shared/historical-record-badge";
 import { RecordsReviewActions } from "@/components/records/records-review-actions";
-import { ThreadsPanel } from "@/components/threads/threads-panel";
-
 import { UtahExportDialog } from "@/components/evv/utah-export-dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
@@ -722,7 +720,6 @@ export function RecordsTab() {
 
   return (
     <div className="space-y-3">
-      <ThreadsPanel variant="admin" />
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <h3 className="text-base font-semibold text-[var(--hive-text)]">Records review</h3>

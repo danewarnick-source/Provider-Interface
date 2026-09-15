@@ -51,7 +51,6 @@ import { isPackSentinel, obligationIsRequired } from "@/lib/obligation-packs";
 import { PacketNextActionCard } from "@/components/compliance/packet-next-action";
 import { useCompliancePacket } from "@/hooks/use-compliance-packet";
 import { AttentionStrip } from "@/components/staff-mobile/attention-strip";
-import { ThreadsPanel } from "@/components/threads/threads-panel";
 import { MyTasksQueue } from "@/components/staff-tasks/my-tasks-queue";
 import {
   correctionNoteFromAdminNotes,
@@ -983,7 +982,6 @@ function MyObligationsPage() {
       </div>
 
       <AttentionStrip />
-      <ThreadsPanel variant="staff" />
 
       <PacketNextActionCard
         nextAction={packetQ.data?.packet?.nextAction}
