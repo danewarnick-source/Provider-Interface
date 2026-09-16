@@ -22,7 +22,6 @@ import {
 } from "./authoritative-sources.server";
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import { classifyServiceCodes } from "./nectar-code-classifier";
-import { dualWriteNectarAttestation } from "./compliance-store-dual-write";
 
 // =============================================================
 // Foundation B — Authoritative sources, derived requirements,
@@ -750,14 +749,6 @@ export const setRequirementReviewStatus = createServerFn({ method: "POST" })
         user_acknowledged: !!data.attestStatement,
       },
     });
-    await dualWriteNectarAttestation({
-      supabase,
-      organizationId: req.organization_id as string,
-      attestedBy: userId,
-      scope: "requirement_verify",
-      requirementTitle: req.title as string,
-      statement,
-    });
 
     return { ok: true };
   });
@@ -844,14 +835,6 @@ export const verifyRequirement = createServerFn({ method: "POST" })
         scope_ref_type: "nectar_requirement",
         statement: data.attestStatement,
         context: { requirement_title: req.title },
-      });
-      await dualWriteNectarAttestation({
-        supabase,
-        organizationId: req.organization_id as string,
-        attestedBy: userId,
-        scope: "requirement_verify",
-        requirementTitle: req.title as string,
-        statement: data.attestStatement,
       });
     }
     return { ok: true };

@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { dualWriteNectarAttestation } from "./compliance-store-dual-write";
 
 // =============================================================
 // Foundation D — NECTAR Requirements Engine.
@@ -958,14 +957,6 @@ export const confirmRequirementWithScopes = createServerFn({ method: "POST" })
         scopes_confirmed: scopesConfirmed,
         nectar_prefilled: true,
       },
-    });
-    await dualWriteNectarAttestation({
-      supabase,
-      organizationId: req.organization_id as string,
-      attestedBy: userId,
-      scope: "requirement_verify",
-      requirementTitle: req.title as string,
-      statement,
     });
 
     return { ok: true, scopesConfirmed };

@@ -4,7 +4,6 @@ import { describe, it } from "node:test";
 import {
   COMPLIANCE_STORE_TABLES,
   TRANSPORT_OPT_OUT_FACT_KEY,
-  bestEffortComplianceWrite,
   writeAttestation,
   writeFileRecord,
   writeObligationAssignee,
@@ -20,59 +19,8 @@ function read(rel: string) {
   return readFileSync(new URL(rel, import.meta.url), "utf8");
 }
 
-function fakeSupabase(handler: (table: string, method: string) => { data?: unknown; error?: { message: string } }) {
-  return {
-    from(table: string) {
-      const api = {
-        select() {
-          return api;
-        },
-        eq() {
-          return api;
-        },
-        is() {
-          return api;
-        },
-        maybeSingle: async () => handler(table, "select"),
-        insert() {
-          return {
-            select() {
-              return {
-                maybeSingle: async () => handler(table, "insert"),
-              };
-            },
-          };
-        },
-        update() {
-          return {
-            eq() {
-              return {
-                select() {
-                  return {
-                    maybeSingle: async () => handler(table, "update"),
-                  };
-                },
-              };
-            },
-          };
-        },
-        upsert() {
-          return {
-            select() {
-              return {
-                maybeSingle: async () => handler(table, "upsert"),
-              };
-            },
-          };
-        },
-      };
-      return api;
-    },
-  };
-}
-
-describe("compliance store writers", () => {
-  it("lists the nine core tables and the transport opt-out key", () => {
+describe("compliance store phase 1 stubs", () => {
+  it("lists the nine core tables and does not write", () => {
     assert.deepEqual([...COMPLIANCE_STORE_TABLES], [
       "requirement_defs",
       "org_facts",
@@ -85,106 +33,81 @@ describe("compliance store writers", () => {
       "requirement_applicability",
     ]);
     assert.equal(TRANSPORT_OPT_OUT_FACT_KEY, "does_not_transport");
-  });
 
-  it("upserts obligation instances and swallows writer failures", async () => {
     const orgId = "00000000-0000-0000-0000-000000000001";
-    const staffId = "00000000-0000-0000-0000-000000000002";
-    const writes: string[] = [];
-    const sb = fakeSupabase((table, method) => {
-      writes.push(`${method}:${table}`);
-      if (method === "select") return { data: null };
-      return { data: { id: "00000000-0000-0000-0000-000000000099" } };
-    });
-
-    const instance = await writeObligationInstance(sb, {
-      organizationId: orgId,
-      requirementKey: "background_screening_annual",
-      subjectKind: "staff",
-      subjectId: staffId,
-      status: "due",
-    });
-    assert.equal(instance.written, true);
-    assert.ok(instance.id);
-
-    const def = await writeRequirementDef(sb, {
-      organizationId: null,
-      requirementKey: "background_screening_annual",
-      subjectKind: "staff",
-      layer: "all_staff_clock",
-    });
-    assert.equal(def.written, true);
-
-    const swallowed = await bestEffortComplianceWrite("boom", async () => {
-      throw new Error("new store down");
-    });
-    assert.equal(swallowed.written, false);
-    assert.match(swallowed.reason ?? "", /new store down/);
-
-    await writeOrgFact(sb, {
-      organizationId: orgId,
-      subjectKind: "staff",
-      subjectId: staffId,
-      factKey: TRANSPORT_OPT_OUT_FACT_KEY,
-      factValue: true,
-    });
-    await writeObligationAssignee(sb, {
-      organizationId: orgId,
-      instanceId: instance.id ?? "x",
-      staffId,
-    });
-    await writeFileRecord(sb, {
-      organizationId: orgId,
-      subjectKind: "staff",
-      storagePath: `${orgId}/example.pdf`,
-    });
-    await writeAttestation(sb, {
-      organizationId: orgId,
-      subjectKind: "staff",
-      attestedBy: staffId,
-    });
-    await writeTrainingRun(sb, {
-      organizationId: orgId,
-      subjectId: staffId,
-      requirementKey: "orientation_30_day",
-    });
-    await writeReview(sb, {
-      organizationId: orgId,
-      subjectKind: "org",
-      reviewKind: "nectar_advisory",
-    });
-    await writeRequirementApplicability(sb, {
-      organizationId: orgId,
-      requirementKey: "driving_record_transport",
-      subjectKind: "staff",
-      subjectId: staffId,
-      applies: true,
-    });
-    assert.ok(writes.some((w) => w.includes("obligation_instances")));
+    const results = [
+      writeRequirementDef({
+        organizationId: orgId,
+        requirementKey: "background_screening_annual",
+        subjectKind: "staff",
+        layer: "all_staff_clock",
+      }),
+      writeOrgFact({
+        organizationId: orgId,
+        subjectKind: "staff",
+        subjectId: "00000000-0000-0000-0000-000000000002",
+        factKey: TRANSPORT_OPT_OUT_FACT_KEY,
+        factValue: true,
+      }),
+      writeObligationInstance({
+        organizationId: orgId,
+        requirementKey: "background_screening_annual",
+        subjectKind: "staff",
+        subjectId: "00000000-0000-0000-0000-000000000002",
+        status: "missing",
+      }),
+      writeObligationAssignee({
+        organizationId: orgId,
+        instanceId: "00000000-0000-0000-0000-000000000003",
+        staffId: "00000000-0000-0000-0000-000000000002",
+      }),
+      writeFileRecord({
+        organizationId: orgId,
+        subjectKind: "staff",
+        storagePath: `${orgId}/example.pdf`,
+      }),
+      writeAttestation({
+        organizationId: orgId,
+        subjectKind: "staff",
+        attestedBy: "00000000-0000-0000-0000-000000000002",
+      }),
+      writeTrainingRun({
+        organizationId: orgId,
+        subjectId: "00000000-0000-0000-0000-000000000002",
+      }),
+      writeReview({
+        organizationId: orgId,
+        subjectKind: "org",
+        reviewKind: "nectar_advisory",
+      }),
+      writeRequirementApplicability({
+        organizationId: orgId,
+        requirementKey: "driving_record_transport",
+        subjectKind: "staff",
+        subjectId: "00000000-0000-0000-0000-000000000002",
+        applies: true,
+      }),
+    ];
+    for (const result of results) {
+      assert.equal(result.written, false);
+      assert.match(result.reason, /phase1_stub/);
+    }
   });
 
-  it("live locked-SOW writers import the dual-write helpers", () => {
+  it("stubs are not imported by live obligation or training writers", () => {
     const live = [
       "./company-obligations.functions.ts",
-      "./ensure-staff-obligation.ts",
       "./in-hive-training.functions.ts",
-      "./in-hive-training-pct.functions.ts",
-      "./client-specific-training.functions.ts",
-      "./external-compliance.functions.ts",
-      "./nectar-engine.functions.ts",
-      "./authoritative-sources.functions.ts",
-      "./obligations/applicability.ts",
-      "./agency-setup-persist.ts",
+      "./hr-training-hours.functions.ts",
+      "./compliance-spine.ts",
     ];
     for (const file of live) {
       const src = read(file);
-      assert.match(src, /compliance-store-dual-write/);
+      assert.doesNotMatch(src, /compliance-store/);
     }
-    const punch = read("../components/evv/punch-pad.tsx");
-    assert.doesNotMatch(punch, /compliance-store/);
   });
 
-  it("core-table migration stays additive", () => {
+  it("migration is additive and names the core tables", () => {
     const sql = readFileSync(
       new URL(
         "../../supabase/migrations/20260916120000_compliance_training_core_tables.sql",
@@ -196,6 +119,32 @@ describe("compliance store writers", () => {
     assert.doesNotMatch(sql, /DROP COLUMN/);
     for (const table of COMPLIANCE_STORE_TABLES) {
       assert.match(sql, new RegExp(`CREATE TABLE IF NOT EXISTS public\\.${table}`));
+      assert.match(sql, /ENABLE ROW LEVEL SECURITY/);
+      assert.match(sql, /is_org_member\(organization_id, auth\.uid\(\)\)/);
     }
+    assert.match(sql, /missing.*due.*complete.*waived/s);
+    assert.match(sql, /does_not_transport/);
+    assert.match(sql, /staff_shelf/);
+    assert.match(sql, /staff_exception/);
+  });
+
+  it("cutlist exists and uses the four dispositions", () => {
+    const cutlist = readFileSync(
+      new URL("../../docs/compliance-training-consolidation-cutlist.md", import.meta.url),
+      "utf8",
+    );
+    assert.match(cutlist, /company_obligations/);
+    assert.match(cutlist, /nectar_requirements/);
+    assert.match(cutlist, /hive_training_assignments/);
+    assert.match(cutlist, /pack_changelog/);
+    assert.match(cutlist, /training_completions/);
+    assert.match(cutlist, /state_requirement_sources/);
+    assert.match(cutlist, /MERGE_INTO:obligation_instances/);
+    assert.match(cutlist, /MERGE_INTO:requirement_defs/);
+    assert.match(cutlist, /\bKEEP\b/);
+    assert.match(cutlist, /\bFREEZE\b/);
+    assert.match(cutlist, /\bDROP_LATER\b/);
+    assert.match(cutlist, /DEFAULT ON/);
+    assert.doesNotMatch(cutlist, /DROP TABLE/);
   });
 });

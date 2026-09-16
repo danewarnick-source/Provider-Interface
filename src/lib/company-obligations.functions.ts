@@ -65,10 +65,6 @@ import {
   shouldReplaceCompletionForResubmit,
   usesCertExpirationCadence,
 } from "./cert-review";
-import {
-  dualWriteCompanyObligationCompletion,
-  dualWriteCompanyObligationInstance,
-} from "./compliance-store-dual-write";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -418,20 +414,6 @@ export async function snapshotAssigneesInternal(
     if (error) throw new Error(error.message);
   }
 
-  const { data: inst } = await supabase
-    .from("company_obligation_instances")
-    .select("*")
-    .eq("id", instanceId)
-    .maybeSingle();
-  if (inst) {
-    await dualWriteCompanyObligationInstance(
-      supabase,
-      ob,
-      inst as ObligationInstanceRow,
-      filtered,
-    );
-  }
-
   return filtered;
 }
 
@@ -728,19 +710,6 @@ async function generatePerPersonInstancesInternal(
       );
       if (assErr) throw new Error(assErr.message);
 
-      await dualWriteCompanyObligationInstance(
-        supabase,
-        ob,
-        inserted as ObligationInstanceRow,
-        [
-          {
-            staff_id: a.staff_id,
-            staff_name: a.staff_name,
-            staff_role: a.staff_role,
-          },
-        ],
-      );
-
       // Reminder scheduling must never block instance creation.
       try {
         await scheduleRemindersInternal(supabase, organizationId, inserted.id, ob);
@@ -940,19 +909,6 @@ async function generatePerClientInstancesInternal(
       { onConflict: "instance_id,staff_id", ignoreDuplicates: true },
     );
     if (assErr) throw new Error(assErr.message);
-
-    await dualWriteCompanyObligationInstance(
-      supabase,
-      ob,
-      inserted as ObligationInstanceRow,
-      [
-        {
-          staff_id: a.staff_id,
-          staff_name: staffNameById.get(a.staff_id) ?? "Unknown",
-          staff_role: "employee",
-        },
-      ],
-    );
 
     await scheduleRemindersInternal(supabase, organizationId, inserted.id, ob);
     created.push(inserted as ObligationInstanceRow);
@@ -1182,7 +1138,6 @@ async function generatePerHomeInstancesInternal(
           const idx = existing.findIndex((r) => r.id === orphan.id);
           if (idx >= 0) existing[idx] = next;
           created.push(next);
-          await dualWriteCompanyObligationInstance(supabase, ob, next);
         }
         continue;
       }
@@ -1207,7 +1162,6 @@ async function generatePerHomeInstancesInternal(
       const row = inserted as ObligationInstanceRow;
       existing.push(row);
       created.push(row);
-      await dualWriteCompanyObligationInstance(supabase, ob, row);
       try {
         await scheduleRemindersInternal(supabase, organizationId, row.id, ob);
       } catch (remErr) {
@@ -2851,14 +2805,6 @@ export const recordCompletion = createServerFn({ method: "POST" })
           .eq("staff_id", targetStaffId)
       : await supabase.from("company_obligation_completions").insert(completionPayload);
     if (cErr) throw new Error(cErr.message);
-    await dualWriteCompanyObligationCompletion(supabase, ob, inst as ObligationInstanceRow, {
-      staff_id: targetStaffId,
-      attestation_text_snapshot: data.attestationTextSnapshot ?? null,
-      attestation_signed_at: data.attestationSignedAt ?? null,
-      upload_path: data.uploadPath ?? null,
-      upload_filename: data.uploadFilename ?? null,
-      completed_at: completedAt,
-    });
     if (replaceId) {
       await resolveInstanceNotifications(supabase, data.instanceId);
     }
@@ -3058,12 +3004,6 @@ async function openNextRenewalInstanceInternal(
     .select("*")
     .maybeSingle();
   if (nextErr || !nextInst) return;
-  await dualWriteCompanyObligationInstance(
-    supabase,
-    ob,
-    nextInst as ObligationInstanceRow,
-    [{ staff_id: staffId, staff_name: staffName, staff_role: "employee" }],
-  );
   await supabase.from("company_obligation_instance_assignees").upsert(
     [
       {
@@ -3231,11 +3171,6 @@ export const confirmFailedObligationCompletion = createServerFn({ method: "POST"
         }
       }
     }
-
-    await dualWriteCompanyObligationCompletion(supabase, ob, updatedInstance, {
-      staff_id: completion.staff_id as string,
-      completed_at: nowIso,
-    });
 
     if (expiresOn && obligationCreatesInstances(ob) && updatedInstance.status === "completed") {
       await openNextRenewalInstanceInternal(
@@ -3601,19 +3536,12 @@ export const waiveInstance = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: false };
     await requireOrgMembership(supabase, userId, data.organizationId, "manager");
 
-    const { data: waived, error: upErr } = await supabase
+    const { error: upErr } = await supabase
       .from("company_obligation_instances")
       .update({ status: "waived", waive_reason: data.waiveReason })
       .eq("id", data.instanceId)
-      .eq("organization_id", data.organizationId)
-      .select("*")
-      .maybeSingle();
+      .eq("organization_id", data.organizationId);
     if (upErr) throw new Error(upErr.message);
-    if (waived) {
-      const waivedInst = waived as ObligationInstanceRow;
-      const waivedOb = await fetchObligation(supabase, data.organizationId, waivedInst.obligation_id);
-      await dualWriteCompanyObligationInstance(supabase, waivedOb, waivedInst);
-    }
 
     await resolveInstanceNotifications(supabase, data.instanceId);
 
@@ -3739,18 +3667,6 @@ async function generateEventInstancesForClientInternal(
       { onConflict: "instance_id,staff_id", ignoreDuplicates: true },
     );
     if (assErr) throw new Error(assErr.message);
-    await dualWriteCompanyObligationInstance(
-      supabase,
-      ob,
-      inserted as ObligationInstanceRow,
-      [
-        {
-          staff_id: a.staff_id,
-          staff_name: staffNameById.get(a.staff_id) ?? "Unknown",
-          staff_role: "employee",
-        },
-      ],
-    );
     try {
       await scheduleRemindersInternal(supabase, organizationId, inserted.id, ob);
     } catch (remErr) {

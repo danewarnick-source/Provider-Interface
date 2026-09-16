@@ -4,10 +4,6 @@
 
 import { allSowCatalogEntries, sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
 import {
-  dualWriteOrgProfileFacts,
-  dualWriteRequirementApplicabilityRows,
-} from "../compliance-store-dual-write.ts";
-import {
   AWARDED_CODES_QUESTION,
   AWARDED_SERVICE_CODES_FACT_KEY,
   awardedCodesUnanswered,
@@ -342,15 +338,6 @@ export async function persistOrgFacts(
     throw new Error(updateErr.message);
   }
 
-  await dualWriteOrgProfileFacts({
-    supabase,
-    organizationId,
-    recordedBy: userId,
-    operates_ol_site: answers.operates_ol_site,
-    uses_volunteers: answers.uses_volunteers,
-    has_governing_board: answers.has_governing_board,
-  });
-
   const facts: OrgFacts = {
     operates_ol_site: answers.operates_ol_site,
     uses_volunteers: answers.uses_volunteers,
@@ -385,14 +372,4 @@ export async function persistApplicabilityRows(
     .upsert(payload, { onConflict: "organization_id,obligation_key" });
   if (error && columnsMissing(error.message)) return;
   if (error) throw new Error(error.message);
-  await dualWriteRequirementApplicabilityRows({
-    supabase,
-    organizationId,
-    rows: rows.map((row) => ({
-      obligationKey: row.obligationKey,
-      factKey: row.factKey,
-      applies: row.applies,
-      unanswered: row.unanswered,
-    })),
-  });
 }
