@@ -18,6 +18,7 @@ import {
   type AgencySetupFacts,
   type AgencySetupStatus,
 } from "./agency-setup-gate.ts";
+import { dualWriteOrgProfileFacts } from "./compliance-store-dual-write.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -166,6 +167,15 @@ export async function persistAgencySetupFactsInternal(
     }
     throw new Error(updateErr.message);
   }
+
+  await dualWriteOrgProfileFacts({
+    supabase,
+    organizationId,
+    recordedBy: userId,
+    operates_ol_site: answers.operates_ol_site,
+    uses_volunteers: answers.uses_volunteers,
+    has_governing_board: answers.has_governing_board,
+  });
 
   const factsForApplicability: AgencySetupFacts = {
     operates_ol_site: answers.operates_ol_site,

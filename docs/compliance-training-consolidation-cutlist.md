@@ -233,3 +233,15 @@ Punch notes, EVV, and timeclock stay on existing shift/EVV tables.
 4. Do not invent SOW text or seed `requirement_defs`.
 5. Do not restore mar-calendar. Do not hard-reset.
 6. Hold merge for Dane.
+
+## Phase 2 (dual-write)
+
+Production reads still stay on the legacy tables. Locked SOW writes also
+best-effort upsert the unified register (`compliance-store.ts`). A new-store
+error is logged and swallowed — the legacy write remains the source of truth.
+
+Platform `requirement_defs` (`organization_id IS NULL`) are seeded from the
+locked DHHS91172 catalog overlay (`src/lib/compliance-requirement-catalog.ts`)
+— titles and citations only; no invented SOW body text. Additive INSERT/upsert
+by `requirement_key`. 132 trackable keys (obligation + standing + intake).
+retired / by_design code-work-product keys are not seeded.

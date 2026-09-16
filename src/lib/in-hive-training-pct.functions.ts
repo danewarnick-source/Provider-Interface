@@ -21,6 +21,10 @@ import {
   type PctPublicQuizItem,
 } from "./in-hive-training-pct.ts";
 import contentJson from "./person-centered-training-content.json";
+import {
+  dualWriteInHiveTrainingCompletion,
+  resolveWriterOrganizationId,
+} from "./compliance-store-dual-write.ts";
 
 const PCT_CONTENT = contentJson as PctContentFile;
 const COURSE_ID = PCT_COURSE_ID as InHiveCourseId;
@@ -133,6 +137,15 @@ export const gradePctFormativeFn = createServerFn({ method: "POST" })
     if (proof.error && !/duplicate|unique/i.test(proof.error.message ?? "")) {
       throw new Error(proof.error.message ?? "Could not save the topic record.");
     }
+    const organizationId = await resolveWriterOrganizationId(supabase, userId);
+    await dualWriteInHiveTrainingCompletion({
+      supabase,
+      organizationId,
+      staffId: userId,
+      courseId: COURSE_ID,
+      completedAt,
+      passed: true,
+    });
     return result;
   });
 
@@ -211,6 +224,17 @@ export const submitPctExamFn = createServerFn({ method: "POST" })
         completed_at: completedAt,
       });
       if (inserted.error) throw new Error(inserted.error.message ?? "Could not save the exam.");
+      const organizationId = await resolveWriterOrganizationId(supabase, userId);
+      await dualWriteInHiveTrainingCompletion({
+        supabase,
+        organizationId,
+        staffId: userId,
+        courseId: COURSE_ID,
+        completedAt,
+        passed: snapshot.passed,
+        score: snapshot.scorePct,
+        attestationText: `${title} — competency record (hire-level PCT).`,
+      });
 
       const progress = await supabase.from("training_topic_progress").upsert(
         {

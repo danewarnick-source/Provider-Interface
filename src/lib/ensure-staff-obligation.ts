@@ -7,6 +7,7 @@
  * and only when disposition is obligation.
  */
 
+import { dualWriteCompanyObligationInstance } from "./compliance-store-dual-write.ts";
 import { hireDueDaysForTitle } from "./obligation-auto-assign.ts";
 import { addDaysUTC, endOfDayUTC, formatShort } from "./obligation-due-dates.ts";
 import { obligationCreatesInstances, sowCatalogEntryByKey } from "./sow-obligation-catalog.ts";
@@ -141,6 +142,25 @@ export async function ensureOpenStaffObligationInternal(
       },
     ],
     { onConflict: "instance_id,staff_id", ignoreDuplicates: true },
+  );
+  await dualWriteCompanyObligationInstance(
+    supabase,
+    ob,
+    {
+      id: inserted.id as string,
+      organization_id: organizationId,
+      period_key: periodKey,
+      due_at: endOfDayUTC(due),
+      status: "pending",
+      assignee_staff_id: staff.id,
+    },
+    [
+      {
+        staff_id: staff.id,
+        staff_name: staff.full_name ?? "Staff",
+        staff_role: staff.role,
+      },
+    ],
   );
   return { id: inserted.id as string };
 }

@@ -12,6 +12,7 @@ import {
   ensureOpenStaffObligationInternal,
   loadStaffForEnsure,
 } from "@/lib/ensure-staff-obligation";
+import { dualWriteCompanyObligationCompletion } from "@/lib/compliance-store-dual-write";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -84,11 +85,12 @@ async function closeObligationWithCard(
     .eq("staff_id", staff.id)
     .limit(1);
   if (((already ?? []) as Array<{ id: string }>).length) {
+    const nowIso = new Date().toISOString();
     await sb
       .from("company_obligation_instances")
       .update({
         status: "completed",
-        completed_at: new Date().toISOString(),
+        completed_at: nowIso,
         completed_by_id: staff.id,
         completed_by_name: staff.full_name ?? "Staff",
         evidence_type_used: "upload",
@@ -97,6 +99,23 @@ async function closeObligationWithCard(
       })
       .eq("id", opened.id)
       .in("status", ["pending", "overdue"]);
+    await dualWriteCompanyObligationCompletion(
+      sb,
+      { title: titles[0] ?? null },
+      {
+        id: opened.id,
+        organization_id: organizationId,
+        status: "completed",
+        completed_at: nowIso,
+        assignee_staff_id: staff.id,
+      },
+      {
+        staff_id: staff.id,
+        upload_path: uploadPath,
+        upload_filename: uploadFilename,
+        completed_at: nowIso,
+      },
+    );
     return;
   }
 
@@ -129,6 +148,23 @@ async function closeObligationWithCard(
     })
     .eq("id", opened.id)
     .in("status", ["pending", "overdue"]);
+  await dualWriteCompanyObligationCompletion(
+    sb,
+    { title: titles[0] ?? null },
+    {
+      id: opened.id,
+      organization_id: organizationId,
+      status: "completed",
+      completed_at: nowIso,
+      assignee_staff_id: staff.id,
+    },
+    {
+      staff_id: staff.id,
+      upload_path: uploadPath,
+      upload_filename: uploadFilename,
+      completed_at: nowIso,
+    },
+  );
 }
 
 export const createTrainingClassCardUploadUrl = createServerFn({ method: "POST" })
