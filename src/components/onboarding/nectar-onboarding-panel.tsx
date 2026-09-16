@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, ClipboardList, Hexagon, Sparkles, X } from "lucide-react";
+import { ArrowRight, ClipboardList, X } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -124,25 +125,21 @@ export function NectarOnboardingPanel({
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl border border-[color:var(--amber-400,var(--hive-gold))]/40 bg-gradient-to-br from-[#0b1733] via-[#0d1a3a] to-[#0b1733] text-amber-50 shadow-xl"
+      className="relative overflow-hidden rounded-2xl border border-[var(--hive-border)] bg-[var(--hive-surface)] text-[var(--hive-text)] shadow-[var(--shadow-card)]"
       aria-label="Agency setup"
       data-testid="agency-setup-panel"
     >
-      <div className="pointer-events-none absolute -right-12 -top-12 opacity-20">
-        <Hexagon className="h-56 w-56 text-[color:var(--amber-400,var(--hive-gold))]" strokeWidth={1} />
-      </div>
-
-      <div className="relative flex flex-col gap-4 border-b border-amber-300/15 px-5 py-5 sm:px-7">
+      <div className="relative flex flex-col gap-4 border-b border-[var(--hive-border)] px-5 py-5 sm:px-7">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--amber-500,var(--hive-gold))] text-[#0b1733]">
-              <Sparkles className="h-5 w-5" />
+            <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--hive-sidebar)] text-[var(--hive-gold)]">
+              <PiMark className="h-5 w-5" />
             </span>
             <div>
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-400,var(--hive-gold))]">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--hive-text-muted)]">
                 NECTAR · Agency setup
               </div>
-              <h2 className="font-display text-xl font-semibold tracking-tight text-amber-50 sm:text-2xl">
+              <h2 className="text-xl font-semibold tracking-tight text-[var(--hive-text)] sm:text-2xl">
                 {status.complete ? "Operating facts are on file." : `Tell me about ${orgName}.`}
               </h2>
             </div>
@@ -153,37 +150,37 @@ export function NectarOnboardingPanel({
             onClick={dismiss}
             disabled={!canSkip}
             data-testid="agency-setup-skip"
-            className="shrink-0 text-amber-100 hover:bg-white/10 hover:text-amber-50 disabled:opacity-40"
+            className="shrink-0 disabled:opacity-40"
           >
             {status.complete ? <X className="h-4 w-4" /> : "Skip"}
           </Button>
         </div>
 
-        <p className="max-w-3xl text-sm leading-relaxed text-amber-100/90">
+        <p className="max-w-3xl text-sm leading-relaxed text-[var(--hive-text-muted)]">
           {status.complete
             ? "Staff and client records can be added now. Statewide requirements stay in Provider Interface — you do not upload a Scope of Work to finish setup."
             : "Answer the required operating questions before adding staff or clients. Skip stays off until every required fact is saved. Statewide requirements are already in Provider Interface — you do not upload a Scope of Work to finish setup."}
         </p>
 
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-wide text-amber-200/80">
+          <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-wide text-[var(--hive-text-muted)]">
             <span>Setup progress</span>
             <span data-testid="agency-setup-progress">{status.progressLabel} complete</span>
           </div>
           <Progress
             value={(status.answeredCount / status.requiredCount) * 100}
-            className="h-2 bg-white/10 [&>div]:bg-[color:var(--amber-400,var(--hive-gold))]"
+            className="h-2 bg-[var(--hive-muted-surface)] [&>div]:bg-[var(--hive-gold)]"
           />
         </div>
 
         {!canSkip ? (
-          <p className="text-xs text-amber-100/80">
+          <p className="text-xs text-[var(--hive-text-muted)]">
             Skip is disabled until all required operating questions are answered.
           </p>
         ) : (
           <Button
             onClick={dismiss}
-            className="self-start bg-[color:var(--amber-500,var(--hive-gold))] text-[#0b1733] hover:bg-[color:var(--amber-400,var(--hive-gold))]"
+            className="self-start"
           >
             Dismiss and go to dashboard
             <ArrowRight className="ml-1 h-4 w-4" />
@@ -222,8 +219,8 @@ export function NectarOnboardingPanel({
                     className={cn(
                       "rounded-full border px-3 py-1 text-xs font-medium",
                       selected
-                        ? "border-[color:var(--amber-400,var(--hive-gold))] bg-[color:var(--amber-500,var(--hive-gold))] text-[#0b1733]"
-                        : "border-white/15 bg-white/[0.04] text-amber-100/80",
+                        ? "border-[var(--hive-gold)] bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+                        : "border-[var(--hive-border)] bg-[var(--hive-canvas)] text-[var(--hive-text-muted)] hover:bg-[var(--hive-muted-surface)]",
                     )}
                   >
                     {code}
@@ -254,8 +251,8 @@ export function NectarOnboardingPanel({
                       className={cn(
                         "rounded-md border px-3 py-1.5 text-sm",
                         selected
-                          ? "border-[color:var(--amber-400,var(--hive-gold))] bg-amber-400/15"
-                          : "border-white/15 bg-white/[0.04] text-amber-100/80",
+                          ? "border-[var(--hive-gold)] bg-[var(--hive-gold-soft)] text-[var(--hive-text)]"
+                          : "border-[var(--hive-border)] bg-[var(--hive-canvas)] text-[var(--hive-text-muted)] hover:bg-[var(--hive-muted-surface)]",
                       )}
                     >
                       {choice.label}
@@ -268,45 +265,36 @@ export function NectarOnboardingPanel({
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <Label className="text-xs text-amber-100/90">
+              <Label className="text-xs text-[var(--hive-text-muted)]">
                 {REQUIRED_SETUP_QUESTIONS[4]?.question}
               </Label>
               <Input
                 inputMode="numeric"
                 value={draft.clientCount}
                 onChange={(e) => setDraft((prev) => ({ ...prev, clientCount: e.target.value }))}
-                className="mt-1 border-white/15 bg-white/5 text-amber-50"
+                className="mt-1"
                 placeholder="e.g. 24"
               />
             </div>
             <div>
-              <Label className="text-xs text-amber-100/90">
+              <Label className="text-xs text-[var(--hive-text-muted)]">
                 {REQUIRED_SETUP_QUESTIONS[5]?.question}
               </Label>
               <Input
                 value={draft.serviceArea}
                 onChange={(e) => setDraft((prev) => ({ ...prev, serviceArea: e.target.value }))}
-                className="mt-1 border-white/15 bg-white/5 text-amber-50"
+                className="mt-1"
                 placeholder="e.g. Salt Lake, Davis"
               />
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <Button
-              type="submit"
-              disabled={save.isPending}
-              className="bg-[color:var(--amber-500,var(--hive-gold))] text-[#0b1733] hover:bg-[color:var(--amber-400,var(--hive-gold))]"
-            >
+            <Button type="submit" disabled={save.isPending}>
               {save.isPending ? "Saving…" : "Save operating facts"}
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              asChild
-              className="border-amber-300/40 bg-transparent text-amber-50 hover:bg-white/10"
-            >
+            <Button type="button" variant="outline" asChild>
               <Link to={AGENCY_SETUP_PATH}>
                 <ClipboardList className="mr-1 h-4 w-4" />
                 Open full setup

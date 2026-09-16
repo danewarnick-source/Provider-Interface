@@ -46,8 +46,9 @@ describe("feeling-hero B (parked for Step 3)", () => {
     assert.doesNotMatch(welcome, /AdminHomeScheduleTablet/);
     assert.doesNotMatch(dash, /ADMIN_HOME_HEADLINE|AdminHomeScheduleTablet/);
     assert.doesNotMatch(welcome, /#F3E5AB|ADMIN_HOME_PALE_GOLD/);
-    assert.match(welcome, /PI_THEME\.cream/);
-    assert.match(welcome, /PI_THEME\.buttons\.primaryBg/);
+    // Home sits on the shared light canvas — no bespoke navy palette here.
+    assert.doesNotMatch(welcome, /PI_THEME/);
+    assert.doesNotMatch(dash, /PI_THEME/);
   });
 
   it("lets the shell main scroll — page must not clip at 100% height", () => {
@@ -55,9 +56,9 @@ describe("feeling-hero B (parked for Step 3)", () => {
     const index = read("../routes/dashboard.index.tsx");
     const sectionOpen = dash.slice(
       dash.indexOf('data-testid="admin-home-dashboard"'),
-      dash.indexOf("<PageGlow"),
+      dash.indexOf('data-testid="home-column"'),
     );
-    assert.match(sectionOpen, /className="relative isolate min-h-full"/);
+    assert.match(sectionOpen, /className="relative isolate min-h-full/);
     assert.doesNotMatch(sectionOpen, /overflow-hidden/);
     assert.doesNotMatch(sectionOpen, /["\s]h-full["\s]/);
     assert.match(index, /showAdmin \? "min-h-full"/);
@@ -132,7 +133,8 @@ describe("Admin Home Step 2 — demote command-center and compliance-desk", () =
     assert.match(dash, /review-day-meta/);
     assert.doesNotMatch(dash, /\{c\.change_kind\}: \{c\.obligation_key\}/);
     assert.match(dash, /home-column/);
-    assert.match(dash, /PI_THEME\.c50/);
+    assert.doesNotMatch(dash, /PI_THEME/);
+    assert.match(dash, /var\(--hive-text-muted\)/);
     assert.match(dash, /AdminHomeWelcome/);
   });
 
