@@ -4,10 +4,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { CLIENT_FORM_LABEL, clientFormKindForTitle } from "@/lib/client-form-obligations";
-import {
-  dualWriteClientTrainingCompletion,
-  dualWriteCompanyObligationCompletion,
-} from "@/lib/compliance-store-dual-write";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -1334,15 +1330,6 @@ export const completeClientSpecificTraining = createServerFn({ method: "POST" })
       .select("id")
       .maybeSingle();
     if (tcErr || !tc) throw new Error(tcErr?.message ?? "Could not record completion.");
-    await dualWriteClientTrainingCompletion({
-      supabase,
-      organizationId: m.organization_id,
-      staffId: userId,
-      clientId: data.clientId,
-      trainingType,
-      completedAt: new Date().toISOString(),
-      attestationText: training.attestation_statement,
-    });
 
     // 2) Per-(staff, client) requirement satisfaction row.
     //    Both nectar_requirements (provisioning) and staff_checklist_completion
@@ -1424,14 +1411,14 @@ async function closeMatchingClientFormObligations(
 
   const { data: instances, error: iErr } = await supabase
     .from("company_obligation_instances")
-    .select("id, obligation_id")
+    .select("id")
     .eq("organization_id", organizationId)
     .eq("client_id", clientId)
     .eq("assignee_staff_id", staffId)
     .in("obligation_id", matchingIds)
     .in("status", ["pending", "overdue"]);
   if (iErr) throw new Error(iErr.message);
-  const open = (instances ?? []) as Array<{ id: string; obligation_id: string }>;
+  const open = (instances ?? []) as Array<{ id: string }>;
   if (!open.length) return;
 
   const { data: dir } = await supabase
@@ -1462,7 +1449,7 @@ async function closeMatchingClientFormObligations(
       });
       if (cErr && (cErr as { code?: string }).code !== "23505") throw new Error(cErr.message);
     }
-    const { data: closed, error: upErr } = await supabase
+    const { error: upErr } = await supabase
       .from("company_obligation_instances")
       .update({
         status: "completed",
@@ -1472,21 +1459,8 @@ async function closeMatchingClientFormObligations(
         evidence_type_used: "form",
       })
       .eq("id", inst.id)
-      .in("status", ["pending", "overdue"])
-      .select("*")
-      .maybeSingle();
+      .in("status", ["pending", "overdue"]);
     if (upErr) throw new Error(upErr.message);
-    if (closed) {
-      const match = ((obligations ?? []) as Array<{ id: string; title: string }>).find(
-        (o) => o.id === inst.obligation_id,
-      );
-      await dualWriteCompanyObligationCompletion(
-        supabase,
-        { title: match?.title ?? null },
-        closed,
-        { staff_id: staffId, completed_at: nowIso },
-      );
-    }
   }
 }
 

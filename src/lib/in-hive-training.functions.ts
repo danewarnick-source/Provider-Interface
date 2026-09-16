@@ -14,10 +14,6 @@ import {
   parseInHiveCertificateRecord,
   type ThirtyDayCertificateRecord,
 } from "@/lib/in-hive-training";
-import {
-  dualWriteInHiveTrainingCompletion,
-  resolveWriterOrganizationId,
-} from "@/lib/compliance-store-dual-write";
 
 export async function loadInHiveTopicProgress(
   userId: string,
@@ -166,16 +162,6 @@ export async function insertInHiveSegmentProof(args: {
     completed_at: args.proof.completedAt,
   });
   if (error && !/duplicate|unique/i.test(error.message ?? "")) throw error;
-  const organizationId = await resolveWriterOrganizationId(supabase, args.userId);
-  await dualWriteInHiveTrainingCompletion({
-    supabase,
-    organizationId,
-    staffId: args.userId,
-    courseId: args.courseId,
-    completedAt: args.proof.completedAt,
-    passed: args.proof.passed,
-    score: args.proof.total ? args.proof.correctCount / args.proof.total : null,
-  });
 }
 
 export async function insertInHiveCourseCertificate(args: {
@@ -202,16 +188,6 @@ export async function insertInHiveCourseCertificate(args: {
     completed_at: args.certificate.completedAt,
   });
   if (error && !/duplicate|unique/i.test(error.message ?? "")) throw error;
-  const organizationId = await resolveWriterOrganizationId(supabase, args.userId);
-  await dualWriteInHiveTrainingCompletion({
-    supabase,
-    organizationId,
-    staffId: args.userId,
-    courseId: args.courseId,
-    completedAt: args.certificate.completedAt,
-    passed: true,
-    attestationText: `${args.certificate.courseName} certificate — ${args.certificate.citation}.`,
-  });
 }
 
 export async function loadInHiveCourseCertificate(
@@ -294,17 +270,6 @@ export async function insertInHiveExamAttempt(args: {
     completed_at: args.snapshot.completedAt,
   });
   if (error) throw error;
-  const organizationId = await resolveWriterOrganizationId(supabase, args.userId);
-  await dualWriteInHiveTrainingCompletion({
-    supabase,
-    organizationId,
-    staffId: args.userId,
-    courseId: args.courseId,
-    completedAt: args.snapshot.completedAt,
-    passed: args.snapshot.passed,
-    score: args.snapshot.scorePct,
-    attestationText: `${title} — competency record (SOW exam).`,
-  });
 
   await (supabase as any).from("training_topic_progress").upsert(
     {
