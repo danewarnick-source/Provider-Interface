@@ -916,7 +916,7 @@ html.pi-html-landing:has(.pi-home) body {
   color: #0a0f1c;
 }
 
-.pi-home-cream-card input,
+.pi-home-cream-card input:not([type="checkbox"]):not([type="radio"]),
 .pi-home-cream-card textarea {
   width: 100%;
   border: 1px solid rgba(10, 15, 28, 0.14);
@@ -996,4 +996,107 @@ html.pi-html-landing:has(.pi-home) body {
     grid-template-columns: 1fr 1fr;
     align-items: start;
   }
+}
+
+/* ------------------------------------------------------------------------
+   Paper surface (sign in / sign up): the navy header and footer are pixel-
+   identical to the marketing pages and to the dashboard chrome; the body sits
+   on the app canvas so the hand-off into the dashboard is seamless.
+   ------------------------------------------------------------------------ */
+html.pi-html-landing:has(.pi-home-paper),
+html.pi-html-landing:has(.pi-home-paper) body {
+  background: var(--hive-canvas) !important;
+  color: var(--hive-text);
+}
+
+.pi-home.pi-landing-root.pi-home-paper {
+  --ink: var(--hive-text);
+  --ink2: var(--hive-text-muted);
+  --ink3: var(--hive-text-muted);
+  --line: var(--hive-border);
+  background: var(--hive-canvas);
+  color: var(--hive-text);
+  font-family: var(--font-sans);
+}
+
+.pi-home-paper .pi-home-nav,
+.pi-home-paper .pi-home-foot {
+  --ink: var(--hive-chrome-text);
+  --ink2: var(--hive-chrome-text-muted);
+  --ink3: var(--hive-chrome-text-muted);
+  --line: var(--hive-chrome-border);
+  background: var(--hive-sidebar);
+  color: var(--hive-chrome-text);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.pi-home-paper .pi-home-nav {
+  border-bottom-color: var(--hive-chrome-border);
+}
+
+/* No marketing glow or grain behind the app canvas. */
+.pi-landing-root.pi-home-paper::before,
+.pi-landing-root.pi-home-paper .grain {
+  display: none;
+}
+
+.pi-home-paper .pi-home-foot {
+  border-top-color: var(--hive-chrome-border);
+}
+
+.pi-home-paper h1,
+.pi-home-paper h2,
+.pi-home-paper .pi-home-cream-card h1,
+.pi-home-paper .pi-home-cream-card h2,
+.pi-home-paper.pi-landing-root .pi-home-cream-card h1 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--hive-text);
+}
+
+.pi-home-paper .pi-home-cream-card {
+  background: var(--hive-surface);
+  color: var(--hive-text);
+  border: 1px solid var(--hive-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.pi-home-paper .pi-home-cream-card p,
+.pi-home-paper .pi-home-cream-card label,
+.pi-home-paper .pi-home-cream-card dt,
+.pi-home-paper .pi-home-lede,
+.pi-home-paper .pi-home-signup-account {
+  color: var(--hive-text-muted);
+}
+
+.pi-home-paper .pi-home-cream-card .pi-home-field label,
+.pi-home-paper .pi-home-signup-account a {
+  color: var(--hive-text);
+}
+
+.pi-home-paper .pi-home-cream-card input,
+.pi-home-paper .pi-home-cream-card textarea {
+  border-color: var(--hive-border);
+  color: var(--hive-text);
+  font-family: var(--font-sans);
+}
+
+.pi-home-paper .pi-home-btn.gold {
+  background: var(--hive-gold);
+  color: var(--hive-on-gold);
+  box-shadow: none;
+}
+
+.pi-home-paper .pi-home-btn.gold:hover {
+  background: var(--hive-gold-hover);
+}
+
+.pi-home-paper.pi-landing-root .pi-home-signup h1,
+.pi-home-paper.pi-landing-root .pi-home-auth h1 {
+  font-size: clamp(24px, 3vw, 30px);
+  line-height: 1.2;
+  margin: 0 0 8px;
 }

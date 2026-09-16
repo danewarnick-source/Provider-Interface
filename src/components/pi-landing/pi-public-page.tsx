@@ -20,17 +20,24 @@ export function usePiPublicPageScroll() {
   }, [pathname, hash]);
 }
 
+/**
+ * `surface="paper"` keeps the identical navy header/footer but places the page
+ * body on the app's pale canvas, so sign-in / sign-up already look like the
+ * dashboard the user is about to enter (navy chrome, paper canvas, one font).
+ */
 export function PiPublicPage({
   children,
   home = false,
+  surface = "navy",
 }: {
   children: ReactNode;
   home?: boolean;
+  surface?: "navy" | "paper";
 }) {
   usePiLandingHtmlClass();
   usePiPublicPageScroll();
   return (
-    <div className="pi-landing-root pi-home">
+    <div className={surface === "paper" ? "pi-landing-root pi-home pi-home-paper" : "pi-landing-root pi-home"}>
       <PiPublicHeader home={home} />
       {children}
       <PiPublicFooter />
