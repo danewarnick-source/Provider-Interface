@@ -48,7 +48,7 @@ import { listSoloLapsesForStaff } from "@/lib/obligations/remediation.functions"
 import type { SoloLapse } from "@/lib/obligations/solo-lapse";
 import { denverYmd } from "@/lib/denver-date";
 import { layoutShiftBars } from "@/lib/scheduler/recurrence";
-import { HiveMark } from "@/components/brand/hive-mark";
+import { PiBrand } from "@/components/brand/pi-brand";
 
 export const Route = createFileRoute("/dashboard/scheduler")({
   head: () => ({
@@ -177,11 +177,9 @@ function SchedulerPage() {
       <div className="px-4 pt-4"><NectarFocusBanner /></div>
       {/* Brand bar with tabs — light work area, gold jewelry only */}
       <div className="flex flex-wrap items-center gap-3 border-b border-[var(--hive-border)] bg-[var(--hive-surface)] px-4 py-3 text-[var(--hive-text)]">
-        <div className="flex items-center gap-2">
-          <HiveMark className="h-8 w-8 text-[var(--hive-text)]" />
-          <div>
-            <div className="text-sm font-bold tracking-[0.14em] text-[var(--hive-text)]">SCHEDULER</div>
-          </div>
+        <div className="flex items-center gap-3">
+          <PiBrand tone="on-light" size="sm" />
+          <div className="text-sm font-bold tracking-[0.14em] text-[var(--hive-text)]">Scheduler</div>
         </div>
         <div className="ml-2 flex items-center gap-1">
           <TabBtn label="Schedule" active={tab === "schedule"} onClick={() => setTab("schedule")} />

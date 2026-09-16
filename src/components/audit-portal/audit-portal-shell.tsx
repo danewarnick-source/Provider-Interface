@@ -2,7 +2,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ShieldCheck, LogOut, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { LogOut, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { PiBrand } from "@/components/brand/pi-brand";
+import { PageShell } from "@/components/layout/page-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 import { useAuth } from "@/hooks/use-auth";
@@ -40,7 +42,7 @@ export function AuditPortalShell({ children }: Props) {
 
   if (authLoading || (session?.user?.id && ctxQ.isLoading)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--hive-canvas)]">
         <div className="text-sm text-muted-foreground">Loading auditor portal…</div>
       </div>
     );
@@ -56,16 +58,14 @@ export function AuditPortalShell({ children }: Props) {
 
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <Link to="/audit-portal" className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--hive-text)] text-white">
-              <ShieldCheck className="h-5 w-5" />
-            </span>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">HIVE</div>
-              <div className="font-display text-lg font-semibold text-[var(--hive-text)]">State Audit Portal</div>
+    <div className="min-h-screen bg-[var(--hive-canvas)]">
+      <header className="border-b border-border bg-card shadow-sm">
+        <PageShell width="wide" className="flex items-center justify-between gap-4 py-3">
+          <Link to="/audit-portal" className="flex items-center gap-3">
+            <PiBrand tone="on-light" size="sm" />
+            <div className="border-l border-border pl-3">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">State audit</div>
+              <div className="font-display text-base font-semibold text-foreground">Audit portal</div>
             </div>
           </Link>
           <div className="flex items-center gap-3 text-sm">
@@ -78,14 +78,14 @@ export function AuditPortalShell({ children }: Props) {
                 await completeClientSignOut(() => supabase.auth.signOut());
                 window.location.href = "/audit-portal";
               }}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+              className="inline-flex min-h-[var(--height-button)] items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-[var(--hive-muted-surface)]"
             >
               <LogOut className="h-3.5 w-3.5" /> Sign out
             </button>
           </div>
-        </div>
+        </PageShell>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">{children(auditor)}</main>
+      <PageShell width="wide">{children(auditor)}</PageShell>
     </div>
   );
 }

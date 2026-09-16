@@ -9,7 +9,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
-import { HiveMark } from "@/components/brand/hive-mark";
+import { PiBrand } from "@/components/brand/pi-brand";
 
 const NAV = [
   { icon: LayoutDashboard, label: "Overview", active: true },
@@ -44,7 +44,7 @@ export function LandingAppPreview() {
     >
       <div className="flex min-h-[420px]">
         <div className="hidden w-[72px] shrink-0 flex-col items-center gap-3 bg-[var(--hive-sidebar)] py-4 sm:flex">
-          <HiveMark className="h-7 w-7" />
+          <PiBrand tone="chrome" size="sm" />
           <div className="mt-2 flex w-full flex-col items-center gap-1 px-1.5">
             {NAV.map(({ icon: Icon, label, active }) => (
               <div
@@ -121,7 +121,7 @@ export function LandingAppPreview() {
 
         <div className="hidden w-[168px] shrink-0 flex-col border-l border-[var(--hive-border)] bg-[var(--hive-sidebar)] p-3 lg:flex">
           <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--hive-gold)]">
-            <HiveMark className="h-3.5 w-3.5" />
+            <PiBrand tone="chrome" size="sm" markClassName="h-3.5 w-3.5" textClassName="text-[9px]" />
             Nectar
           </div>
           <p className="mt-3 text-[10px] leading-relaxed text-[var(--hive-text-muted)]">

@@ -64,14 +64,14 @@ describe("feeling-hero B (parked for Step 3)", () => {
     assert.doesNotMatch(index, /showAdmin \? "h-full min-h-full"/);
   });
 
-  it("puts a π-only mark in the sidebar and never a NECTAR wordmark there", () => {
+  it("puts the π + PI brand lockup in the sidebar and never a NECTAR wordmark there", () => {
     const shell = read("../routes/dashboard.tsx");
     const markSlot = shell.slice(
-      shell.indexOf("aria-label=\"Provider Interface\""),
+      shell.indexOf("<PiBrand to=\"/dashboard\""),
       shell.indexOf("{(isAdminCapable || isExecutive) &&"),
     );
-    assert.match(markSlot, /HiveMark/);
-    assert.doesNotMatch(markSlot, /HiveWordmark|NECTAR|PiWordmark/);
+    assert.match(markSlot, /PiBrand/);
+    assert.doesNotMatch(markSlot, /NECTAR|PiWordmark/);
   });
 
   it("wraps the shell org subtitle and keeps the full name on title", () => {

@@ -13,7 +13,7 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
-import { HiveMark } from "@/components/brand/hive-mark";
+import { PiBrand } from "@/components/brand/pi-brand";
 
 function InitialsAvatar({
   initials,
@@ -46,7 +46,7 @@ export function HeroPhone({ className = "" }: { className?: string }) {
 
         <div className="flex items-center justify-between bg-[var(--hive-sidebar)] px-3 pb-2.5 pt-8">
           <div className="flex items-center gap-1.5">
-            <HiveMark className="h-5 w-5" />
+            <PiBrand tone="chrome" size="sm" markClassName="h-5 w-5" textClassName="text-[10px]" />
             <span className="font-display text-[15px] font-semibold tracking-tight text-[var(--hive-chrome-text)]">
               Hive
             </span>

@@ -20,15 +20,15 @@ const buttonVariants = cva(
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
           "border border-[var(--hive-border)] bg-[var(--hive-surface)] text-[var(--hive-text)] hover:bg-[var(--hive-canvas)]",
-        ghost: "text-[var(--hive-text)] hover:bg-[#eef1f4] hover:text-[var(--hive-text)]",
+        ghost: "text-[var(--hive-text)] hover:bg-[var(--hive-muted-surface)] hover:text-[var(--hive-text)]",
         link: "text-[var(--hive-text)] underline-offset-4 hover:underline",
         life: "bg-[var(--hive-gold)] text-[var(--hive-on-gold)] hover:bg-[var(--hive-gold-hover)]",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3 text-xs",
-        lg: "h-11 rounded-lg px-5 text-[15px]",
-        icon: "h-10 w-10",
+        default: "h-[var(--height-button)] px-4 py-2",
+        sm: "h-[var(--height-button-sm)] rounded-md px-3 text-xs",
+        lg: "h-[var(--height-button-lg)] rounded-lg px-5 text-[15px]",
+        icon: "h-[var(--height-button)] w-[var(--height-button)]",
       },
     },
     defaultVariants: {

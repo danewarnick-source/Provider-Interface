@@ -3,6 +3,7 @@ import { Link, useSearch } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { UpgradeGate, FeatureLockedRoute } from "@/components/upgrade-gate";
 import { useOrgFeatures } from "@/hooks/use-feature-enabled";
+import { PageHeader } from "@/components/layout/page-shell";
 
 export type HubTab = {
   key: string;
@@ -33,10 +34,7 @@ export function HubShell({ title, subtitle, tabs, basePath }: Props) {
 
   return (
     <div className="flex min-h-full flex-col">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-      </div>
+      <PageHeader title={title} description={subtitle} dense />
 
       {tabs.length > 1 && (
         <div className="mb-4 border-b border-border">

@@ -133,7 +133,7 @@ export function PiBrandLockup({
 export function PiWordmark({
   className,
   compact = false,
-  short = false,
+  short = true,
   to,
   tone = "chrome",
   markClassName,
@@ -141,7 +141,7 @@ export function PiWordmark({
 }: {
   className?: string;
   compact?: boolean;
-  /** Compact chrome: π + PI. Full marketing: π + PROVIDER INTERFACE. */
+  /** Compact chrome: π + PI. Full marketing: π + PROVIDER INTERFACE. Defaults true in app chrome. */
   short?: boolean;
   to?: "/";
   /** chrome = cream on dusk; canvas = cream on dusk public pages. */

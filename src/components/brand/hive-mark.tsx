@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
-import { PiMark, PiWordmark } from "@/components/pi-landing/pi-mark";
+import { PiBrand } from "@/components/brand/pi-brand";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 
-/** Product mark is the straight-bar π. File name kept; visible chrome is PI. */
+/** @deprecated Prefer PiBrand — kept for gradual migration. */
 export function HiveMark({
   className,
   title,
@@ -12,29 +13,32 @@ export function HiveMark({
   return <PiMark className={className} title={title} />;
 }
 
+/** Canonical chrome wordmark: π + PI. */
 export function HiveWordmark({
   className,
   markClassName,
-  wordClassName,
+  textClassName,
   to,
   tone = "chrome",
-  short = false,
+  size = "md",
 }: {
   className?: string;
   markClassName?: string;
-  wordClassName?: string;
+  textClassName?: string;
   to?: "/";
-  tone?: "chrome" | "canvas";
-  short?: boolean;
+  tone?: "chrome" | "canvas" | "on-light";
+  size?: "sm" | "md" | "lg";
 }) {
   return (
-    <PiWordmark
-      className={cn("gap-2.5", className)}
-      markClassName={cn("h-8 w-8 shrink-0", markClassName)}
-      wordClassName={wordClassName}
+    <PiBrand
+      className={className}
+      markClassName={markClassName}
+      textClassName={textClassName}
       to={to}
       tone={tone}
-      short={short}
+      size={size}
     />
   );
 }
+
+export { PiBrand } from "@/components/brand/pi-brand";

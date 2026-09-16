@@ -8,9 +8,15 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground",
+        default: "border-border bg-card text-foreground",
         destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+          "border-[var(--hive-danger)]/40 bg-[var(--hive-danger-soft)] text-[var(--hive-danger-fg)] [&>svg]:text-[var(--hive-danger)]",
+        success:
+          "border-[var(--hive-ok)]/40 bg-[var(--hive-ok-soft)] text-[var(--hive-ok-fg)] [&>svg]:text-[var(--hive-ok)]",
+        warning:
+          "border-[var(--hive-gold)]/40 bg-[var(--hive-gold-soft)] text-[var(--hive-on-gold)] [&>svg]:text-[var(--hive-gold)]",
+        info:
+          "border-[var(--hive-info)]/40 bg-[var(--hive-info-soft)] text-[var(--hive-info-fg)] [&>svg]:text-[var(--hive-info)]",
       },
     },
     defaultVariants: {

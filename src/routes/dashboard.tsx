@@ -93,7 +93,7 @@ import {
   writeSessionHint,
 } from "@/lib/auth-session-boot";
 import { PortalViewSwitcher } from "@/components/portal-view-switcher";
-import { HiveMark } from "@/components/brand/hive-mark";
+import { PiBrand } from "@/components/brand/pi-brand";
 import { PI_THEME } from "@/lib/pi-theme";
 
 import { BillingBanner } from "@/components/billing/billing-banner";
@@ -1207,14 +1207,7 @@ function SidebarBody({
         className="flex h-16 items-center px-5"
         style={{ borderBottom: `1px solid ${PI_THEME.c08}` }}
       >
-        <Link
-          to="/dashboard"
-          className="inline-flex items-center"
-          aria-label="Provider Interface"
-          style={{ color: PI_THEME.cream }}
-        >
-          <HiveMark className="h-8 w-8" title="Provider Interface" />
-        </Link>
+        <PiBrand to="/dashboard" tone="chrome" size="md" />
       </div>
 
       {(isAdminCapable || isExecutive) && (
@@ -1270,8 +1263,8 @@ function SidebarBody({
                           <span
                             className={`rounded-full px-1.5 text-[9px] font-semibold uppercase tracking-wider ${
                               isActive
-                                ? "bg-emerald-100 text-emerald-800"
-                                : "bg-slate-200 text-slate-600"
+                                ? "hive-status-active"
+                                : "bg-[var(--hive-muted-surface)] text-[var(--hive-text-muted)]"
                             }`}
                           >
                             {isActive
@@ -1459,8 +1452,8 @@ function SidebarBody({
         {showNectarCluster && (
           <div className="mt-5 border-t border-sidebar-border pt-5">
             <div className="mb-2.5 flex items-start gap-2.5 px-3">
-              <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center">
-                <HiveMark className="h-6 w-6" />
+              <span className="mt-0.5 inline-flex shrink-0 items-center">
+                <PiBrand tone="chrome" size="sm" showText={false} markClassName="h-6 w-6" />
               </span>
               <div className="min-w-0">
                 <span className="text-sm font-bold tracking-wide text-[var(--hive-chrome-text)]">Nectar</span>

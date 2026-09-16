@@ -40,6 +40,8 @@
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
   --color-surface-warm: var(--surface-warm);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -181,7 +183,7 @@
   /* === HIVE rebrand surfaces (raw hex) === */
   --surface:        var(--hive-surface);
   --surface-2:      var(--hive-canvas);
-  --surface-3:      #eef1f4;
+  --surface-3:      var(--hive-muted-surface);
   --border-light:   var(--hive-border);
   --border-dark:    var(--hive-border);
 
@@ -237,10 +239,10 @@
   --accent-2: var(--hive-gold);
   --accent-3: var(--hive-ok);
 
-  --secondary: #eef1f4;
+  --secondary: var(--hive-muted-surface);
   --secondary-foreground: var(--hive-text);
 
-  --muted: #eef1f4;
+  --muted: var(--hive-muted-surface);
   --muted-foreground: var(--hive-text-muted);
 
   --destructive: var(--hive-danger);
@@ -250,6 +252,8 @@
   --success-foreground: #ffffff;
   --warning: var(--hive-gold);
   --warning-foreground: var(--hive-on-gold);
+  --info: var(--hive-info);
+  --info-foreground: #ffffff;
 
   --border: var(--hive-border);
   --input: var(--hive-border);
@@ -294,9 +298,9 @@
   --popover-foreground: var(--hive-text);
   --primary: var(--hive-ink);
   --primary-foreground: #ffffff;
-  --secondary: #eef1f4;
+  --secondary: var(--hive-muted-surface);
   --secondary-foreground: var(--hive-text);
-  --muted: #eef1f4;
+  --muted: var(--hive-muted-surface);
   --muted-foreground: var(--hive-text-muted);
   --accent: var(--hive-gold);
   --accent-foreground: var(--hive-on-gold);
@@ -335,9 +339,16 @@
     line-height: 1.15;
     font-weight: 600;
   }
-  h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
-  h2 { font-size: 1.5rem; }
-  h3 { font-size: 1.25rem; }
+  h1 { font-size: var(--text-3xl); font-weight: 700; letter-spacing: -0.02em; }
+  h2 { font-size: var(--text-2xl); }
+  h3 { font-size: var(--text-xl); }
+
+  @media (min-width: 768px) {
+    :root {
+      --page-padding-x: 1.5rem;
+      --page-padding-y: 2rem;
+    }
+  }
   .text-display { font-family: var(--font-display); font-size: 2.5rem; font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
 }
 

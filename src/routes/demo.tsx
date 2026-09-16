@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowRight, Calendar, CheckCircle2 } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiBrand } from "@/components/brand/pi-brand";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
@@ -56,10 +56,7 @@ function DemoPage() {
       style={{ background: NAVY_BG, fontFamily: JAKARTA }}
     >
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-        <Link to="/" className="flex items-center gap-2 text-[#f3efe6]">
-          <PiMark className="h-6 w-6" />
-          <span className="text-sm font-medium uppercase tracking-[0.18em]">Provider Interface</span>
-        </Link>
+        <PiBrand to="/" tone="canvas" size="sm" />
         <nav className="flex items-center gap-3 text-sm">
           <Link to="/pricing" className="text-white/70 hover:text-white">
             Pricing

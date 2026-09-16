@@ -24,7 +24,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { HiveMark } from "@/components/brand/hive-mark";
+import { PiBrand } from "@/components/brand/pi-brand";
 import { NectarBadge, NectarMark } from "@/components/nectar/nectar-brand";
 
 const ADMIN_NAV: { label: string; icon: LucideIcon }[] = [
@@ -67,7 +67,7 @@ function ProductChrome({
       <div className="flex min-h-inherit">
         <aside className="hidden w-[88px] shrink-0 flex-col bg-[var(--hive-sidebar)] py-3 sm:flex">
           <div className="flex justify-center pb-2">
-            <HiveMark className="h-7 w-7" />
+            <PiBrand tone="chrome" size="sm" />
           </div>
           <nav className="flex flex-1 flex-col gap-0.5 px-1.5">
             {nav.map(({ label, icon: Icon }) => {
