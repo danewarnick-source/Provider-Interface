@@ -1,5 +1,105 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
+## ACTION — Compliance + training core tables phase 1 (2026-09-16) — hold for Dane
+
+**Do not Soft-apply / execute against Hive-Platform production from this PR.**
+Tony/Core pastes after Dane go. Clear the editor first. Additive only —
+never drop existing tables or columns. No catalog publish. No production
+read switch. Empty writer stubs stay unused.
+
+Creates the unified register next to live `company_obligations*` /
+`nectar_*` / training stacks:
+
+`requirement_defs`, `org_facts`, `file_records`, `obligation_instances`,
+`obligation_instance_assignees`, `attestations`, `training_runs`,
+`reviews`, `requirement_applicability`.
+
+Matches `supabase/migrations/20260916120000_compliance_training_core_tables.sql`.
+Cutlist: `docs/compliance-training-consolidation-cutlist.md`.
+
+Transport pack stays default-on: do not seed a `does_not_transport` fact.
+Punch / EVV / notes stay on existing shift tables.
+
+### Probe
+
+Clear the editor, paste:
+
+```sql
+SELECT string_agg(table_name, ' | ' ORDER BY table_name)
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN (
+    'requirement_defs',
+    'org_facts',
+    'file_records',
+    'obligation_instances',
+    'obligation_instance_assignees',
+    'attestations',
+    'training_runs',
+    'reviews',
+    'requirement_applicability'
+  );
+```
+
+**What you'll see:** `NULL` until this ACTION runs. After apply:
+the nine names above, pipe-separated.
+
+### Apply
+
+Clear the editor, paste the full file
+`supabase/migrations/20260916120000_compliance_training_core_tables.sql`.
+
+**What you'll see:** `CREATE TABLE` (or already-exists notices), indexes,
+grants, RLS on, member/admin policies, `set_updated_at` triggers.
+
+### Verify
+
+Clear the editor, paste:
+
+```sql
+SELECT
+  (SELECT string_agg(c.relname, ',' ORDER BY c.relname)
+     FROM pg_class c
+     JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'public'
+       AND c.relkind = 'r'
+       AND c.relname IN (
+         'requirement_defs','org_facts','file_records','obligation_instances',
+         'obligation_instance_assignees','attestations','training_runs',
+         'reviews','requirement_applicability'
+       )) AS tables,
+  (SELECT count(*) FROM pg_class c
+     JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'public'
+       AND c.relname IN (
+         'requirement_defs','org_facts','file_records','obligation_instances',
+         'obligation_instance_assignees','attestations','training_runs',
+         'reviews','requirement_applicability'
+       )
+       AND c.relrowsecurity) AS rls_on_count,
+  (SELECT string_agg(c.relname || ':' || p.polname, ' | ' ORDER BY c.relname, p.polname)
+     FROM pg_policy p
+     JOIN pg_class c ON c.oid = p.polrelid
+     JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'public'
+       AND c.relname IN (
+         'requirement_defs','org_facts','file_records','obligation_instances',
+         'obligation_instance_assignees','attestations','training_runs',
+         'reviews','requirement_applicability'
+       )) AS policies;
+```
+
+**What you'll see:** nine table names, `rls_on_count = 9`, and two policies
+per table (select member + write admin/member). Row counts stay 0.
+
+### RLS intent
+
+Org-scoped via `is_org_member` / `is_org_admin_or_manager` (+ Hive Exec).
+`requirement_defs.organization_id IS NULL` is platform catalog (not PHI).
+Never `USING (true)` on org/PHI rows. No seed. No dual-write this paste.
+
+---
+
 ## ACTION — Agency setup gate before staff/client create (2026-09-14) — Core flag
 
 **Do not Soft-apply / execute against Hive-Platform production from this PR.**
