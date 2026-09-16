@@ -101,7 +101,7 @@ export function NectarTaskCenter({ trigger, open, onOpenChange, initialGoal, sur
           <button
             onClick={() => goal.trim().length >= 3 && planM.mutate(goal.trim())}
             disabled={planM.isPending || goal.trim().length < 3 || !orgId}
-            className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md bg-[var(--hive-gold)] px-4 py-2 text-sm font-semibold text-[var(--hive-on-gold)] hover:bg-[var(--hive-gold-hover)] disabled:opacity-60"
+            className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md bg-[var(--hive-primary)] px-4 py-2 text-sm font-semibold text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)] disabled:opacity-60"
           >
             {planM.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             Build my task list
@@ -201,7 +201,7 @@ function GuideCard({
                     <button
                       onClick={() => onStartTour(t)}
                       disabled={!hasSteps || t.status === "done"}
-                      className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-[var(--hive-gold)] px-2 py-1 text-[11px] font-semibold text-[var(--hive-on-gold)] hover:bg-[var(--hive-gold-hover)] disabled:opacity-50"
+                      className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-[var(--hive-primary)] px-2 py-1 text-[11px] font-semibold text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)] disabled:opacity-50"
                       title={hasSteps ? "" : "No on-screen steps — read the explanation."}
                     >
                       <PlayCircle className="h-3 w-3" /> Show me

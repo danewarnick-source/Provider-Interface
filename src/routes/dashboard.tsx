@@ -1151,7 +1151,7 @@ function SidebarBody({
   return (
     <>
       <div className="flex h-16 items-center border-b border-[var(--hive-chrome-border)] px-5">
-        <PiBrand to="/dashboard" tone="chrome" size="md" />
+        <PiBrand to="/dashboard" tone="chrome" size="md" stacked />
       </div>
 
       {(isAdminCapable || isExecutive) && (

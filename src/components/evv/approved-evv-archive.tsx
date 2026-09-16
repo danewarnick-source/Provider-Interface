@@ -381,7 +381,7 @@ export function EvvArchivePage() {
               className={`min-h-[36px] rounded px-3 py-1 text-xs font-medium capitalize transition ${
                 billing === k
                   ? "bg-[var(--hive-ink)] text-white"
-                  : "text-muted-foreground hover:bg-accent"
+                  : "text-muted-foreground hover:bg-[var(--hive-hover)]"
               }`}
             >
               {k === "all" ? "All" : k}
@@ -431,7 +431,7 @@ export function EvvArchivePage() {
               const inTs = r.corrected_clock_in ?? r.clock_in_timestamp;
               const outTs = r.corrected_clock_out ?? r.clock_out_timestamp;
               return (
-                <tr key={r.id} className="border-t border-border hover:bg-accent/40">
+                <tr key={r.id} className="border-t border-border hover:bg-[var(--hive-hover)]">
                   <td className="px-3 py-2">{r.staff_name}</td>
                   <td className="px-3 py-2">
                     <Link

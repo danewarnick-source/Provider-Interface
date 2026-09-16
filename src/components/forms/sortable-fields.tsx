@@ -319,7 +319,7 @@ function SortableItem({
   const handle = (
     <button
       type="button"
-      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent cursor-grab active:cursor-grabbing touch-none"
+      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-[var(--hive-hover)] cursor-grab active:cursor-grabbing touch-none"
       aria-label="Drag to reorder"
       {...attributes}
       {...listeners}

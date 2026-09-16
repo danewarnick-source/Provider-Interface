@@ -1060,7 +1060,7 @@ function MyObligationsPage() {
             key={key}
             type="button"
             onClick={() => setTab(key)}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium ${tab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"}`}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium ${tab === key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-[var(--hive-hover)]"}`}
           >
             {label}
           </button>

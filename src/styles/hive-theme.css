@@ -43,6 +43,9 @@
   --hive-info-fg: #1e3a52;
   --hive-info-soft: #e4ecf2;
   --hive-muted-surface: #eef1f4;
+  /* Light control hover — the grey-blue used on outline/ghost buttons.
+     Never gold. Gold is the logo, not a hover fill. */
+  --hive-hover: var(--hive-muted-surface);
 
   /* Typography scale */
   --text-xs: 0.75rem;
@@ -232,11 +235,11 @@
   }
 
   .hive-gold-btn {
-    background-color: var(--hive-gold);
-    color: var(--hive-on-gold);
+    background-color: var(--hive-primary);
+    color: var(--hive-primary-fg);
   }
   .hive-gold-btn:hover {
-    background-color: var(--hive-gold-hover);
+    background-color: var(--hive-primary-hover);
   }
 
   .hive-ghost-btn {

@@ -310,7 +310,7 @@ export function NotificationBell({
               )}
             </div>
             <button type="button" onClick={() => setOpen(false)}
-              className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground">
+              className="rounded p-1 text-muted-foreground hover:bg-[var(--hive-hover)] hover:text-foreground">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -329,7 +329,7 @@ export function NotificationBell({
                   <li key={n.id} className={`group ${!n.read_at ? "bg-muted/30" : ""}`}>
                     <div className={`${urgencyRing(n.urgency)} relative`}>
                       <button type="button" onClick={() => handleClick(n)}
-                        className="w-full px-4 py-3 text-left transition hover:bg-accent/50">
+                        className="w-full px-4 py-3 text-left transition hover:bg-[var(--hive-hover)]">
                         <div className="flex items-start gap-2.5">
                           {synthetic ? <GraduationCap className="h-4 w-4 shrink-0 text-amber-500" /> : urgencyIcon(n.urgency)}
                           <div className="min-w-0 flex-1">
@@ -356,7 +356,7 @@ export function NotificationBell({
                       )}
                       {!synthetic && (
                         <button type="button" onClick={(e) => { e.stopPropagation(); dismissMut.mutate(n.id); }}
-                          className="absolute right-2 top-2 rounded p-0.5 text-muted-foreground/50 opacity-0 transition hover:bg-accent hover:text-foreground group-hover:opacity-100"
+                          className="absolute right-2 top-2 rounded p-0.5 text-muted-foreground/50 opacity-0 transition hover:bg-[var(--hive-hover)] hover:text-foreground group-hover:opacity-100"
                           aria-label="Dismiss">
                           <X className="h-3 w-3" />
                         </button>

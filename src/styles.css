@@ -127,6 +127,8 @@
   --color-hive-gold-hover: var(--hive-gold-hover);
   --color-hive-gold-soft: var(--hive-gold-soft);
   --color-hive-on-gold: var(--hive-on-gold);
+  --color-hive-hover: var(--hive-hover);
+  --color-hive-primary: var(--hive-primary);
   --color-hive-text: var(--hive-text);
   --color-hive-text-muted: var(--hive-text-muted);
   --color-hive-ink: var(--hive-ink);

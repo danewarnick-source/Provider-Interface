@@ -72,6 +72,7 @@ describe("feeling-hero B (parked for Step 3)", () => {
       shell.indexOf("{(isAdminCapable || isExecutive) &&"),
     );
     assert.match(markSlot, /PiBrand/);
+    assert.match(markSlot, /stacked/);
     assert.doesNotMatch(markSlot, /NECTAR|PiWordmark/);
   });
 

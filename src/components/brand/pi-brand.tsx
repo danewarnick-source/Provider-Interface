@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { PI_PRODUCT_NAME, PI_PRODUCT_SHORT } from "@/lib/pi-landing";
+import { PI_PRODUCT_NAME, PI_PRODUCT_SHORT, PI_WORDMARK } from "@/lib/pi-landing";
 import { PiMark } from "@/components/pi-landing/pi-mark";
 
 /**
@@ -31,10 +31,16 @@ const toneText: Record<PiBrandTone, string> = {
   "on-light": "text-[var(--hive-text)]",
 };
 
+const toneMuted: Record<PiBrandTone, string> = {
+  chrome: "text-[var(--hive-chrome-text-muted)]",
+  canvas: "text-[var(--hive-chrome-text-muted)]",
+  "on-light": "text-[var(--hive-text-muted)]",
+};
+
 /**
  * Canonical PI brand lockup: π mark + "PI" wordmark.
- * Use everywhere the product logo appears in the UI (headers, sidebars, auth).
- * Favicons remain icon-only.
+ * `stacked` is option 4 — the logged-in sidebar: 38px mark, "PI", then
+ * "PROVIDER INTERFACE" in smaller letters. Fits the 64px header band.
  */
 export function PiBrand({
   className,
@@ -43,6 +49,8 @@ export function PiBrand({
   to,
   /** When false, render mark only (e.g. nested inside an existing wordmark). */
   showText = true,
+  /** π + PI + PROVIDER INTERFACE, the logged-in sidebar lockup. */
+  stacked = false,
   markClassName,
   textClassName,
 }: {
@@ -51,6 +59,7 @@ export function PiBrand({
   size?: PiBrandSize;
   to?: "/" | "/dashboard";
   showText?: boolean;
+  stacked?: boolean;
   markClassName?: string;
   textClassName?: string;
 }) {
@@ -58,20 +67,42 @@ export function PiBrand({
     <span className={cn("inline-flex min-w-0 items-center gap-3", toneText[tone], className)}>
       <PiMark
         variant="gold"
-        className={cn(markSizes[size], "shrink-0", markClassName)}
+        className={cn(stacked ? "h-[38px] w-[38px]" : markSizes[size], "shrink-0", markClassName)}
         title={PI_PRODUCT_NAME}
       />
       {showText ? (
-        <span
-          className={cn(
-            "font-sans font-bold uppercase leading-none tracking-[0.22em]",
-            textSizes[size],
-            toneText[tone],
-            textClassName,
-          )}
-        >
-          {PI_PRODUCT_SHORT}
-        </span>
+        stacked ? (
+          <span className="flex min-w-0 flex-col gap-0.5 leading-none">
+            <span
+              className={cn(
+                "font-sans text-[15px] font-bold uppercase tracking-[0.22em]",
+                toneText[tone],
+                textClassName,
+              )}
+            >
+              {PI_PRODUCT_SHORT}
+            </span>
+            <span
+              className={cn(
+                "font-sans text-[10px] font-medium uppercase tracking-[0.2em]",
+                toneMuted[tone],
+              )}
+            >
+              {PI_WORDMARK}
+            </span>
+          </span>
+        ) : (
+          <span
+            className={cn(
+              "font-sans font-bold uppercase leading-none tracking-[0.22em]",
+              textSizes[size],
+              toneText[tone],
+              textClassName,
+            )}
+          >
+            {PI_PRODUCT_SHORT}
+          </span>
+        )
       ) : null}
     </span>
   );

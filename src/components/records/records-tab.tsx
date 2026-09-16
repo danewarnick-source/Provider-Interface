@@ -735,7 +735,7 @@ export function RecordsTab() {
           type="button"
           onClick={() => setMode("all")}
           className={`flex min-h-[36px] items-center gap-2 px-3 py-1.5 text-xs font-medium transition ${
-            mode === "all" ? "bg-[var(--hive-ink)] text-white" : "bg-card text-muted-foreground hover:bg-accent"
+            mode === "all" ? "bg-[var(--hive-ink)] text-white" : "bg-card text-muted-foreground hover:bg-[var(--hive-hover)]"
           }`}
         >
           <ListChecks className="h-3.5 w-3.5" /> All records
@@ -744,7 +744,7 @@ export function RecordsTab() {
           type="button"
           onClick={() => setMode("attention")}
           className={`flex min-h-[36px] items-center gap-2 border-l border-border px-3 py-1.5 text-xs font-medium transition ${
-            mode === "attention" ? "bg-[var(--hive-ink)] text-white" : "bg-card text-muted-foreground hover:bg-accent"
+            mode === "attention" ? "bg-[var(--hive-ink)] text-white" : "bg-card text-muted-foreground hover:bg-[var(--hive-hover)]"
           }`}
         >
           <AlertCircle className="h-3.5 w-3.5" /> Needs attention
@@ -768,7 +768,7 @@ export function RecordsTab() {
             type="button"
             onClick={() => setType(k)}
             className={`min-h-[36px] rounded px-3 py-1 text-xs font-medium transition ${
-              type === k ? "bg-[var(--hive-ink)] text-white" : "text-muted-foreground hover:bg-accent"
+              type === k ? "bg-[var(--hive-ink)] text-white" : "text-muted-foreground hover:bg-[var(--hive-hover)]"
             }`}
           >
             {label}
@@ -928,7 +928,7 @@ export function RecordsTab() {
                     <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">No non-billable records match these filters.</td></tr>
                   )}
                   {(generalQ.data ?? []).map((g) => (
-                    <tr key={g.id} className="border-t border-border hover:bg-accent/40">
+                    <tr key={g.id} className="border-t border-border hover:bg-[var(--hive-hover)]">
                       <td className="px-3 py-2">{g.staff_name}</td>
                       <td className="px-3 py-2 font-mono text-xs">{g.category}</td>
                       <td className="px-3 py-2">{formatPunchDateSpan(g.clock_in_timestamp, g.clock_out_timestamp)}</td>
@@ -977,7 +977,7 @@ export function RecordsTab() {
                       <tr
                         key={r.id}
                         onClick={() => setSelectedRow(r)}
-                        className="cursor-pointer border-t border-border hover:bg-accent/40"
+                        className="cursor-pointer border-t border-border hover:bg-[var(--hive-hover)]"
                       >
                         <td className="px-3 py-2">{r.staff_name}</td>
                         <td className="px-3 py-2 text-[var(--hive-text)]">
@@ -1212,7 +1212,7 @@ function InlineTimeCell({
   const outTs = row.corrected_clock_out ?? row.clock_out_timestamp;
   return (
     <td
-      className="cursor-text px-3 py-2 hover:bg-accent/60"
+      className="cursor-text px-3 py-2 hover:bg-[var(--hive-hover)]"
       onClick={(e) => {
         e.stopPropagation();
         setInVal(toLocalInput(row.clock_in_timestamp));
@@ -1283,7 +1283,7 @@ function InlineManagerNoteCell({
 
   return (
     <td
-      className="max-w-[200px] cursor-text px-3 py-2 align-top hover:bg-accent/60"
+      className="max-w-[200px] cursor-text px-3 py-2 align-top hover:bg-[var(--hive-hover)]"
       onClick={(e) => {
         e.stopPropagation();
         setValue(row.manager_note_text ?? "");

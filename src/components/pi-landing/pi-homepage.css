@@ -1084,14 +1084,16 @@ html.pi-html-landing:has(.pi-home-paper) body {
   font-family: var(--font-sans);
 }
 
-.pi-home-paper .pi-home-btn.gold {
-  background: var(--hive-gold);
-  color: var(--hive-on-gold);
+.pi-home-paper .pi-home-btn.gold,
+.pi-home-paper .pi-home-btn.primary {
+  background: var(--hive-primary);
+  color: var(--hive-primary-fg);
   box-shadow: none;
 }
 
-.pi-home-paper .pi-home-btn.gold:hover {
-  background: var(--hive-gold-hover);
+.pi-home-paper .pi-home-btn.gold:hover,
+.pi-home-paper .pi-home-btn.primary:hover {
+  background: var(--hive-primary-hover);
 }
 
 .pi-home-paper.pi-landing-root .pi-home-signup h1,

@@ -326,7 +326,7 @@ function LoginPage() {
             Saves your email on this device. You still click Sign in.
           </p>
 
-          <button type="submit" disabled={busy} className="pi-home-btn gold" style={{ width: "100%" }}>
+          <button type="submit" disabled={busy} className="pi-home-btn primary" style={{ width: "100%" }}>
             {busy ? "Signing in…" : "Sign in"}
           </button>
         </form>

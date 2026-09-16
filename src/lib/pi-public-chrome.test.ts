@@ -75,4 +75,19 @@ describe("public pages share homepage marketing chrome", () => {
     assert.doesNotMatch(contact, /careacademy/);
     assert.match(contact, /pi-home-btn gold/);
   });
+
+  it("keeps Sign in on the paper auth surface as the platform primary, not gold", () => {
+    const login = read("../routes/login.tsx");
+    const forgot = read("../routes/forgot-password.tsx");
+    const homeCss = read("../components/pi-landing/pi-homepage.css");
+    assert.match(login, /pi-home-btn primary/);
+    assert.doesNotMatch(login, /pi-home-btn gold/);
+    assert.match(forgot, /pi-home-btn primary/);
+    assert.match(homeCss, /\.pi-home-paper \.pi-home-btn\.primary \{/);
+    assert.match(homeCss, /background: var\(--hive-primary\)/);
+    assert.doesNotMatch(
+      homeCss.slice(homeCss.indexOf(".pi-home-paper .pi-home-btn.gold")),
+      /background: var\(--hive-gold\)/,
+    );
+  });
 });

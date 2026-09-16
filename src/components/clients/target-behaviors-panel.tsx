@@ -133,7 +133,7 @@ function BehaviorRow({
           type="button"
           onClick={() => { setDraft({ behavior_name: b.behavior_name, description: b.description }); setEditing(true); }}
           disabled={busy}
-          className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-accent text-muted-foreground hover:text-foreground"
+          className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--hive-hover)] text-muted-foreground hover:text-foreground"
           aria-label="Edit"
         >
           <Pencil className="h-3.5 w-3.5" />

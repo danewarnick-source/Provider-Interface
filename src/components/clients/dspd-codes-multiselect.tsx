@@ -104,7 +104,7 @@ export function DspdCodesMultiSelect({ value, onChange, onOpenChange }: Props) {
             e.stopPropagation();
             setOpenBoth(!open);
           }}
-          className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-accent"
+          className="ml-auto inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-[var(--hive-hover)]"
           aria-label="Toggle DSPD code list"
         >
           <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
@@ -138,7 +138,7 @@ export function DspdCodesMultiSelect({ value, onChange, onOpenChange }: Props) {
                     type="button"
                     onClick={() => toggle(c.code)}
                     className={cn(
-                      "flex w-full items-start gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent",
+                      "flex w-full items-start gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-[var(--hive-hover)]",
                       selected && "bg-accent/60",
                     )}
                   >

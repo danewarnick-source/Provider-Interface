@@ -114,7 +114,7 @@ function BehavioristCaseload() {
                 key={r.client_id}
                 to="/dashboard/behavior-support/$clientId"
                 params={{ clientId: r.client_id }}
-                className="group rounded-lg border border-border bg-background p-4 transition hover:border-primary hover:bg-accent"
+                className="group rounded-lg border border-border bg-background p-4 transition hover:border-primary hover:bg-[var(--hive-hover)]"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">

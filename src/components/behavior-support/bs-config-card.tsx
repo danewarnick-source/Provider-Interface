@@ -177,7 +177,7 @@ export function BehaviorSupportConfigCard({
                   className={`relative min-h-[64px] rounded-lg border px-3 py-2 text-left transition ${
                     selected
                       ? `${s.tile.bg} ${s.tile.fg} ring-2 ${s.tile.ring} border-transparent`
-                      : "border-border bg-background hover:bg-accent"
+                      : "border-border bg-background hover:bg-[var(--hive-hover)]"
                   }`}
                 >
                   <div className="text-sm font-bold">{c}</div>

@@ -1050,7 +1050,7 @@ function AIImportDialog({
             onClick={() => fileRef.current?.click()}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-            className="cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center hover:bg-accent/30 transition"
+            className="cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center hover:bg-[var(--hive-hover)] transition"
           >
             {parsing ? (
               <><Loader2 className="mx-auto h-6 w-6 animate-spin" /><p className="mt-2 text-sm">Parsing with NECTAR...</p></>
