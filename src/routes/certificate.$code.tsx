@@ -73,7 +73,7 @@ function CertificatePage() {
           <p className="mt-4 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
             Certificate of Completion
           </p>
-          <h1 className="mt-6 font-serif text-4xl font-semibold tracking-tight md:text-5xl">
+          <h1 className="mt-6 text-4xl font-semibold tracking-tight md:text-5xl">
             {data.recipient_name ?? "Recipient"}
           </h1>
           <p className="mt-6 text-sm text-muted-foreground">has successfully completed</p>

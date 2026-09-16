@@ -205,10 +205,10 @@ function TourOverlay({
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
-        <div className="font-display text-sm font-semibold text-[var(--hive-text)]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <div className="font-display text-sm font-semibold text-[var(--hive-text)]">
           {tour.task.title}
         </div>
-        <p className="mt-1 text-sm text-[var(--hive-text)]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <p className="mt-1 text-sm text-[var(--hive-text)]">
           {step?.instruction ?? "—"}
         </p>
         {looking && (

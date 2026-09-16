@@ -40,7 +40,6 @@ export function InHiveCertificate({
           background: PI_THEME.cream,
           borderColor: "rgba(10, 17, 32, 0.12)",
           color: PI_THEME.navy,
-          fontFamily: PI_THEME.sans,
         }}
       >
         <p
@@ -49,10 +48,7 @@ export function InHiveCertificate({
         >
           Provider Interface
         </p>
-        <h2
-          className="mt-2 text-2xl font-medium tracking-tight"
-          style={{ fontFamily: PI_THEME.serif }}
-        >
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight">
           {record.courseName}
         </h2>
         <p className="mt-1 text-xs opacity-70">{record.citation}</p>
