@@ -359,9 +359,9 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Client Directory</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+        <div className="max-w-xl self-center">
+          <h2 className="sr-only">Client Directory</h2>
+          <p className="text-sm text-muted-foreground">
             Manage individuals served, authorized service codes, and care configurations.
           </p>
         </div>

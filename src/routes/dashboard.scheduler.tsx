@@ -48,7 +48,6 @@ import { listSoloLapsesForStaff } from "@/lib/obligations/remediation.functions"
 import type { SoloLapse } from "@/lib/obligations/solo-lapse";
 import { denverYmd } from "@/lib/denver-date";
 import { layoutShiftBars } from "@/lib/scheduler/recurrence";
-import { PiBrand } from "@/components/brand/pi-brand";
 
 export const Route = createFileRoute("/dashboard/scheduler")({
   head: () => ({
@@ -170,18 +169,11 @@ function SchedulerPage() {
   }
 
   return (
-    <div
-      className="min-h-0 min-w-0 max-w-full overflow-x-hidden rounded-xl border border-[var(--hive-border)] bg-[var(--hive-surface)]"
-      style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-    >
+    <div className="min-h-0 min-w-0 max-w-full overflow-x-hidden rounded-xl border border-[var(--hive-border)] bg-[var(--hive-surface)]">
       <div className="px-4 pt-4"><NectarFocusBanner /></div>
-      {/* Brand bar with tabs — light work area, gold jewelry only */}
+      {/* Toolbar with tabs — the page title lives in the shell header, not here */}
       <div className="flex flex-wrap items-center gap-3 border-b border-[var(--hive-border)] bg-[var(--hive-surface)] px-4 py-3 text-[var(--hive-text)]">
-        <div className="flex items-center gap-3">
-          <PiBrand tone="on-light" size="sm" />
-          <div className="text-sm font-bold tracking-[0.14em] text-[var(--hive-text)]">Scheduler</div>
-        </div>
-        <div className="ml-2 flex items-center gap-1">
+        <div className="flex items-center gap-1">
           <TabBtn label="Schedule" active={tab === "schedule"} onClick={() => setTab("schedule")} />
           <TabBtn label="Day Program" active={tab === "day-program"} onClick={() => setTab("day-program")} />
           <TabBtn label="Staff view" active={tab === "staff-view"} onClick={() => setTab("staff-view")} />

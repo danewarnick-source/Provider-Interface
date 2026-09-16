@@ -41,7 +41,6 @@ import {
   type ContinuousSpeechSession,
 } from "@/lib/continuous-speech";
 import { OriginalSpeechAudit } from "@/components/staff-mobile/original-speech-audit";
-import { StaffPageHeader } from "@/components/staff-mobile/staff-page-header";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 
@@ -196,12 +195,9 @@ function StaffDailyJournal() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <NectarFocusBanner />
-      <StaffPageHeader
-        eyebrow="Host Home · Daily Compliance Journal"
-        eyebrowIcon={ClipboardCheck}
-        title="Daily Logs"
-        subtitle="Select a client to submit today's PCSP narrative and signature."
-      />
+      <p className="text-sm text-muted-foreground">
+        Select a client to submit today's PCSP narrative and signature.
+      </p>
 
 
       {/* Rejected logs — needs resubmission */}

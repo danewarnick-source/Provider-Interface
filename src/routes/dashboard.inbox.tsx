@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Mail, Paperclip, Inbox as InboxIcon, Download, ArrowLeft, AlertCircle, Info, ShieldCheck, MessageSquare } from "lucide-react";
+import { Mail, Paperclip, Download, ArrowLeft, AlertCircle, Info, ShieldCheck, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCurrentOrg } from "@/hooks/use-org";
@@ -223,15 +223,9 @@ function InboxPage() {
   return (
     <div className="space-y-4">
       <header className="flex items-end justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <InboxIcon className="h-4 w-4" /> <span>Admin · Inbox</span>
-          </div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">Inbox</h1>
-          <p className="text-sm text-muted-foreground">
-            Messages from HIVE Executives to your organization.
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Messages from Provider Interface executives to your organization.
+        </p>
       </header>
 
       <BillingApprovalsInboxSection orgId={orgId} />

@@ -103,12 +103,9 @@ function FinancesHub() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold tracking-tight">Finances</h2>
-        <p className="text-sm text-muted-foreground">
-          Billing and financial overview · {periodLabel}
-        </p>
-      </div>
+      <p className="mb-6 text-sm text-muted-foreground">
+        Billing and financial overview · {periodLabel}
+      </p>
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* ─── Billing card ─────────────────────────────────────────── */}
