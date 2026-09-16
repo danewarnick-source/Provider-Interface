@@ -152,9 +152,9 @@
   --btn-gold: var(--hive-gold);
   --btn-gold-hover: var(--hive-gold-hover);
   --btn-gold-active: var(--hive-gold);
-  --btn-primary: var(--hive-gold);
-  --btn-primary-hover: var(--hive-gold-hover);
-  --btn-primary-active: var(--hive-gold);
+  --btn-primary: var(--hive-primary);
+  --btn-primary-hover: var(--hive-primary-hover);
+  --btn-primary-active: var(--hive-primary);
 }
 
 .dark {

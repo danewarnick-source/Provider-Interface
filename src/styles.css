@@ -213,7 +213,7 @@
   --training-glow:      0 0 0 1px color-mix(in srgb, var(--hive-gold) 28%, transparent),
     0 20px 60px -20px color-mix(in srgb, var(--hive-gold) 22%, transparent);
 
-  --btn-primary:        var(--hive-gold);  --btn-primary-hover: var(--hive-gold-hover);  --btn-primary-active: var(--hive-gold);
+  --btn-primary:        var(--hive-primary);  --btn-primary-hover: var(--hive-primary-hover);  --btn-primary-active: var(--hive-primary);
   --btn-gold:           var(--hive-gold);  --btn-gold-hover:    var(--hive-gold-hover);  --btn-gold-active:    var(--hive-gold);
   --btn-violet:         var(--hive-sidebar);  --btn-violet-hover:  #35475a;  --btn-violet-active:  #2c3c4d;
   --btn-teal:           var(--hive-ink);  --btn-teal-hover:    #35475a;  --btn-teal-active:    #2c3c4d;
