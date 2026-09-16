@@ -1,39 +1,34 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { PI_PRODUCT_NAME, PI_PRODUCT_SHORT } from "@/lib/pi-landing";
-import { PiMark, type PiMarkVariant } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 
+/**
+ * chrome  = on the dark navy sidebar / top bar (cream wordmark)
+ * canvas  = on a dark public/auth backdrop (cream wordmark)
+ * on-light = on the pale canvas or a white card (ink wordmark)
+ * The π mark itself is the same antique-gold gradient on every tone.
+ */
 export type PiBrandTone = "chrome" | "canvas" | "on-light";
 export type PiBrandSize = "sm" | "md" | "lg";
 
 const markSizes: Record<PiBrandSize, string> = {
   sm: "h-6 w-6",
-  md: "h-8 w-8",
-  lg: "h-9 w-9",
+  md: "h-[30px] w-[30px]",
+  lg: "h-10 w-10",
 };
 
+/* Mirrors .pi-home-logo-pi on the public homepage: bold, 0.22em tracking, uppercase. */
 const textSizes: Record<PiBrandSize, string> = {
-  sm: "text-[11px] tracking-[0.18em]",
-  md: "text-xs tracking-[0.2em]",
-  lg: "text-sm tracking-[0.22em]",
+  sm: "text-[11px]",
+  md: "text-[13px]",
+  lg: "text-[15px]",
 };
 
-const toneClasses: Record<PiBrandTone, { wrap: string; text: string; mark: PiMarkVariant }> = {
-  chrome: {
-    wrap: "text-[var(--hive-chrome-text)]",
-    text: "text-[var(--hive-chrome-text)]",
-    mark: "cream",
-  },
-  canvas: {
-    wrap: "text-[var(--hive-chrome-text)]",
-    text: "text-[var(--hive-chrome-text)]",
-    mark: "cream",
-  },
-  "on-light": {
-    wrap: "text-[var(--hive-text)]",
-    text: "text-[var(--hive-text)]",
-    mark: "inherit",
-  },
+const toneText: Record<PiBrandTone, string> = {
+  chrome: "text-[var(--hive-chrome-text)]",
+  canvas: "text-[var(--hive-chrome-text)]",
+  "on-light": "text-[var(--hive-text)]",
 };
 
 /**
@@ -54,32 +49,24 @@ export function PiBrand({
   className?: string;
   tone?: PiBrandTone;
   size?: PiBrandSize;
-  to?: "/";
+  to?: "/" | "/dashboard";
   showText?: boolean;
   markClassName?: string;
   textClassName?: string;
 }) {
-  const toneStyle = toneClasses[tone];
-
   const inner = (
-    <span
-      className={cn(
-        "inline-flex min-w-0 items-center gap-2",
-        toneStyle.wrap,
-        className,
-      )}
-    >
+    <span className={cn("inline-flex min-w-0 items-center gap-3", toneText[tone], className)}>
       <PiMark
-        variant={toneStyle.mark}
+        variant="gold"
         className={cn(markSizes[size], "shrink-0", markClassName)}
         title={PI_PRODUCT_NAME}
       />
       {showText ? (
         <span
           className={cn(
-            "font-sans font-semibold uppercase",
+            "font-sans font-bold uppercase leading-none tracking-[0.22em]",
             textSizes[size],
-            toneStyle.text,
+            toneText[tone],
             textClassName,
           )}
         >
