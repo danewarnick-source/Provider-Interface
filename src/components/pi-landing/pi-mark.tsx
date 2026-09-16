@@ -3,11 +3,16 @@ import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { PI_PRODUCT_NAME, PI_PRODUCT_SHORT, PI_WORDMARK } from "@/lib/pi-landing";
 
-export type PiMarkVariant = "inherit" | "cream" | "hero";
+export type PiMarkVariant = "inherit" | "cream" | "hero" | "gold";
+
+/** The one brand gradient — antique gold to cream. Same stops on the homepage and in app chrome. */
+export const PI_MARK_GRADIENT = { from: "#e8d5a0", to: "#b8985a" } as const;
 
 /**
- * Squared π: three cream rects (x4 y4 w28 h5; x9 y9 w5 h23; x22 y9 w5 h23).
+ * Squared π: three rects (x4 y4 w28 h5; x9 y9 w5 h23; x22 y9 w5 h23).
  * viewBox 0 0 36 36. Not a squiggly mathematical pi. Not a honeycomb.
+ * `gold` is the product mark used everywhere the logo appears (PiBrand).
+ * `inherit` is for icon-sized uses that follow the surrounding text color.
  * Never pair this mark with a NECTAR wordmark in chrome.
  */
 export function PiMark({
@@ -25,8 +30,12 @@ export function PiMark({
 }) {
   const rawId = useId();
   const gid = `pi-mark-g-${rawId.replace(/:/g, "")}`;
-  const fill =
-    variant === "hero" ? `url(#${gid})` : variant === "cream" ? "#f3efe6" : "currentColor";
+  const gradient = variant === "hero" || variant === "gold";
+  const fill = gradient ? `url(#${gid})` : variant === "cream" ? "#f3efe6" : "currentColor";
+  const stops =
+    variant === "gold"
+      ? { from: PI_MARK_GRADIENT.from, to: PI_MARK_GRADIENT.to }
+      : { from: "#fbf8f1", to: "#d9c98e" };
 
   return (
     <svg
@@ -39,11 +48,11 @@ export function PiMark({
       className={cn("text-current", className)}
     >
       {title ? <title>{title}</title> : null}
-      {variant === "hero" ? (
+      {gradient ? (
         <defs>
           <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#fbf8f1" />
-            <stop offset="1" stopColor="#d9c98e" />
+            <stop offset="0" stopColor={stops.from} />
+            <stop offset="1" stopColor={stops.to} />
           </linearGradient>
         </defs>
       ) : null}
@@ -55,8 +64,8 @@ export function PiMark({
 }
 
 /**
- * Public homepage π only. 30×30 viewBox, antique-gold gradient.
- * Do not use this mark in Admin / staff chrome — those keep PiMark (36×36).
+ * Public homepage π. 30×30 viewBox, the same antique-gold gradient as
+ * PiMark variant="gold" so the logo reads identically on every surface.
  */
 export function PiHomepageMark({
   className,
@@ -83,8 +92,8 @@ export function PiHomepageMark({
       {title ? <title>{title}</title> : null}
       <defs>
         <linearGradient id={gid} x1="15" y1="3" x2="15" y2="27.5">
-          <stop offset="0" stopColor="#e8d5a0" />
-          <stop offset="1" stopColor="#b8985a" />
+          <stop offset="0" stopColor={PI_MARK_GRADIENT.from} />
+          <stop offset="1" stopColor={PI_MARK_GRADIENT.to} />
         </linearGradient>
       </defs>
       <rect x="2" y="3" width="26" height="5.5" rx="1" fill={`url(#${gid})`} />
@@ -121,7 +130,7 @@ export function PiBrandLockup({
 }) {
   return (
     <Link to={to} className="logo" aria-label={PI_PRODUCT_NAME}>
-      <PiMark variant="cream" width={markSize} height={markSize} className="mark" />
+      <PiMark variant="gold" width={markSize} height={markSize} className="mark" />
       <div className="name">
         {PI_PRODUCT_SHORT}
         <small>{PI_PRODUCT_NAME}</small>
@@ -133,7 +142,7 @@ export function PiBrandLockup({
 export function PiWordmark({
   className,
   compact = false,
-  short = false,
+  short = true,
   to,
   tone = "chrome",
   markClassName,
@@ -141,7 +150,7 @@ export function PiWordmark({
 }: {
   className?: string;
   compact?: boolean;
-  /** Compact chrome: π + PI. Full marketing: π + PROVIDER INTERFACE. */
+  /** Compact chrome: π + PI. Full marketing: π + PROVIDER INTERFACE. Defaults true in app chrome. */
   short?: boolean;
   to?: "/";
   /** chrome = cream on dusk; canvas = cream on dusk public pages. */

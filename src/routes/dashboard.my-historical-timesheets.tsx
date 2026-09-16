@@ -9,7 +9,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CheckCircle2, Flag, Loader2, Save, X, Archive, Info, Sparkles, Hexagon, Mic, MicOff, Pencil } from "lucide-react";
+import { CheckCircle2, Flag, Loader2, Save, X, Archive, Info, Sparkles, Mic, MicOff, Pencil } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
@@ -247,7 +248,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
         >
           <div className="rounded-lg border-2 border-dashed border-amber-400 bg-amber-50/60 px-3 py-3">
             <div className="mb-2 flex items-center gap-2">
-              <Hexagon className="h-4 w-4 text-amber-700" />
+              <PiMark className="h-4 w-4 text-amber-700" />
               <div className="flex-1">
                 <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">NECTAR Infusion</div>
                 <div className="text-sm font-semibold">Draft with NECTAR</div>
@@ -291,7 +292,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
             {nectarDraft && (
               <div className="mt-3 rounded-md border-2 border-amber-500 bg-white px-3 py-2.5 shadow-sm">
                 <div className="mb-1.5 flex items-center gap-2">
-                  <Hexagon className="h-3.5 w-3.5 text-amber-600" fill="currentColor" />
+                  <PiMark className="h-3.5 w-3.5 text-amber-600" />
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
                     NECTAR draft — review before confirming
                   </span>
@@ -322,7 +323,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
           Shift note
           {nectarUsed && (
             <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-amber-400 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
-              <Hexagon className="h-2.5 w-2.5" fill="currentColor" /> AI-drafted — your review required
+              <PiMark className="h-2.5 w-2.5" /> AI-drafted — your review required
             </span>
           )}
         </label>

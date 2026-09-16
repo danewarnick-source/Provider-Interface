@@ -1,12 +1,13 @@
 /**
  * Admin Home — decisions this week, not escalation tiles.
  * Welcome banner (AdminHomeWelcome) sits above the greeting.
+ * Sits on the shared pale canvas like every other Admin page.
  */
 import { Suspense, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { PI_GRAIN_SVG, PI_THEME } from "@/lib/pi-theme";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { greetingWord, useAdminHomeData } from "@/components/admin-home/use-admin-home-data";
 import { AdminHomeWelcome } from "@/components/admin-home/admin-home-welcome";
 import { NectarOnboardingPanel } from "@/components/onboarding/nectar-onboarding-panel";
@@ -24,42 +25,10 @@ import { isAdminLevelRole } from "@/lib/obligations/escalation";
 import "@/components/compliance/decision-card.css";
 import "./admin-home-decisions.css";
 
-const SERIF = { fontFamily: PI_THEME.serif } as const;
-const SANS = { fontFamily: PI_THEME.sans } as const;
-
 type HomeTab = "this-week" | "review-day" | "what-changed";
 
-function Grain() {
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-0"
-      style={{
-        opacity: PI_THEME.grainOpacity,
-        mixBlendMode: "overlay",
-        backgroundImage: `url("${PI_GRAIN_SVG}")`,
-      }}
-    />
-  );
-}
-
-function PageGlow() {
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-0"
-      style={{ background: PI_THEME.pageGlow }}
-    />
-  );
-}
-
 function Skeleton({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn("animate-pulse rounded-md", className)}
-      style={{ background: PI_THEME.c08 }}
-    />
-  );
+  return <div className={cn("animate-pulse rounded-md bg-[var(--hive-muted-surface)]", className)} />;
 }
 
 function ReviewDayPanel({ orgId }: { orgId: string }) {
@@ -84,44 +53,30 @@ function ReviewDayPanel({ orgId }: { orgId: string }) {
 
   return (
     <section data-testid="review-day" className="space-y-4">
-      <h2 className="text-[22px] font-semibold leading-tight" style={{ color: PI_THEME.cream }}>
+      <h2 className="text-xl font-semibold leading-tight tracking-tight text-[var(--hive-text)]">
         Review day
       </h2>
-      <p className="text-sm" style={{ color: PI_THEME.c50 }}>
+      <p className="text-sm text-[var(--hive-text-muted)]">
         Draft a DSPD review from this week. A human must attest. Nothing publishes itself.
       </p>
       {metaLine ? (
-        <p data-testid="review-day-meta" className="text-sm" style={{ color: PI_THEME.c50 }}>
+        <p data-testid="review-day-meta" className="text-sm text-[var(--hive-text-muted)]">
           {metaLine}
         </p>
       ) : null}
-      <button
-        type="button"
-        className="act-btn"
-        style={{
-          background: PI_THEME.buttons.primaryBg,
-          color: PI_THEME.buttons.primaryFg,
-          boxShadow: PI_THEME.buttons.primaryShadow,
-        }}
-        onClick={() => mut.mutate()}
-      >
+      <Button type="button" onClick={() => mut.mutate()} disabled={mut.isPending}>
         Generate my DSPD review
-      </button>
+      </Button>
       {mut.isPending ? (
-        <p className="text-sm" style={{ color: PI_THEME.c50 }}>
-          Generating draft.
-        </p>
+        <p className="text-sm text-[var(--hive-text-muted)]">Generating draft.</p>
       ) : null}
       {mut.isError ? (
-        <p className="text-sm" style={{ color: PI_THEME.c50 }}>
-          Could not generate the review.
-        </p>
+        <p className="text-sm text-[var(--hive-danger-fg)]">Could not generate the review.</p>
       ) : null}
       {reviewText ? (
         <pre
           data-testid="review-pack-text"
-          className="whitespace-pre-wrap text-sm"
-          style={{ color: PI_THEME.c70 }}
+          className="whitespace-pre-wrap rounded-lg border border-[var(--hive-border)] bg-[var(--hive-surface)] p-4 font-sans text-sm text-[var(--hive-text)]"
         >
           {reviewText}
         </pre>
@@ -138,12 +93,15 @@ function WhatChangedPanel({
   const notes = changes.filter((c) => isHumanPackNote(c.note));
   return (
     <section data-testid="what-changed" className="space-y-3">
-      <h2 className="text-[22px] font-semibold leading-tight" style={{ color: PI_THEME.cream }}>
+      <h2 className="text-xl font-semibold leading-tight tracking-tight text-[var(--hive-text)]">
         {whatChangedTitle(PACK_VERSION)}
       </h2>
       <ul className="space-y-2">
         {notes.map((c) => (
-          <li key={`${c.change_kind}:${c.obligation_key}`} className="text-sm" style={{ color: PI_THEME.c70 }}>
+          <li
+            key={`${c.change_kind}:${c.obligation_key}`}
+            className="text-sm text-[var(--hive-text)]"
+          >
             {c.note!.trim()}
           </li>
         ))}
@@ -189,26 +147,23 @@ function AdminHomeDashboardInner({ welcomeFlag = false }: { welcomeFlag?: boolea
   return (
     <section
       data-testid="admin-home-dashboard"
-      className="relative isolate min-h-full"
-      style={{ background: PI_THEME.navy, color: PI_THEME.cream, ...SANS }}
+      className="relative isolate min-h-full text-[var(--hive-text)]"
     >
-      <PageGlow />
-      <Grain />
       <div data-testid="home-column" className="home-column relative z-10 space-y-6">
         <Suspense fallback={null}>
           <AdminHomeWelcome welcomeFlag={welcomeFlag} />
         </Suspense>
         {orgId ? <NectarOnboardingPanel welcomeFlag={welcomeFlag} /> : null}
         <div>
-          <div className="text-lg font-semibold" style={{ ...SERIF, color: PI_THEME.cream }}>
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--hive-text)]">
             Good {greetingWord(now)}, {firstName}. Here's what needs your attention.
-          </div>
-          <div className="text-sm" style={{ color: PI_THEME.c50 }}>
+          </h2>
+          <p className="mt-1 text-sm text-[var(--hive-text-muted)]">
             {org ? `${orgName} · ${dateLine}` : dateLine}
-          </div>
+          </p>
         </div>
 
-        <nav data-testid="home-tabs" className="home-tabs" aria-label="Home">
+        <nav data-testid="home-tabs" className="home-tabs border-b border-[var(--hive-border)]" aria-label="Home">
           {tabs
             .filter((t) => !t.hidden)
             .map((t) => (
@@ -216,9 +171,13 @@ function AdminHomeDashboardInner({ welcomeFlag = false }: { welcomeFlag?: boolea
                 key={t.id}
                 type="button"
                 role="tab"
-                className="home-tab"
+                className={cn(
+                  "home-tab",
+                  activeTab === t.id
+                    ? "text-[var(--hive-text)]"
+                    : "text-[var(--hive-text-muted)] hover:text-[var(--hive-text)]",
+                )}
                 aria-selected={activeTab === t.id}
-                style={{ color: activeTab === t.id ? PI_THEME.cream : PI_THEME.c50 }}
                 onClick={() => setTab(t.id)}
               >
                 {t.label}
@@ -240,17 +199,12 @@ export function AdminHomeDashboard({ welcomeFlag = false }: { welcomeFlag?: bool
       fallback={
         <section
           data-testid="admin-home-dashboard"
-          className="relative isolate min-h-full"
-          style={{ background: PI_THEME.navy, color: PI_THEME.cream }}
+          className="relative isolate min-h-full text-[var(--hive-text)]"
         >
-          <PageGlow />
-          <Grain />
           <div data-testid="home-column" className="home-column relative z-10 space-y-4">
             <div>
-              <div className="text-lg font-semibold">Good day</div>
-              <div className="text-sm" style={{ color: PI_THEME.c50 }}>
-                Loading workspace…
-              </div>
+              <div className="text-xl font-semibold tracking-tight">Good day</div>
+              <div className="mt-1 text-sm text-[var(--hive-text-muted)]">Loading workspace…</div>
             </div>
             <Skeleton className="h-[220px] rounded-xl" />
           </div>

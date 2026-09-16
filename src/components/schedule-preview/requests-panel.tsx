@@ -100,7 +100,6 @@ export function RequestsPanel({ weekStart, staff }: { weekStart: Date; staff: St
         display: "grid",
         gridTemplateColumns: expanded ? "220px 1fr" : "1fr",
         gap: 14, marginTop: 14,
-        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
       }}
       className="sched-weekstrip"
     >

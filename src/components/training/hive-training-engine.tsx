@@ -2145,7 +2145,7 @@ export function TrainingModule({
   };
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", ...card }}>
+    <div style={card}>
       <div style={{ background: NAVY, padding: "13px 17px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
           <span style={{ width: 26, height: 26, background: GOLD, clipPath: "polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)" }} />

@@ -7,7 +7,7 @@ import {
   useNavigate,
   useRouterState,
 } from "@tanstack/react-router";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -75,7 +75,7 @@ import {
 } from "@/lib/staff-phone-chrome";
 import { NectarTaskCenter } from "@/components/nectar/nectar-task-center";
 import { NectarSearchBar } from "@/components/nectar/nectar-search-bar";
-import { ListChecks, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { FeatureLockedRoute, UpgradeGate } from "@/components/upgrade-gate";
 import { useActionRequiredQueue } from "@/hooks/use-action-required-queue";
 import { useYieldToAdminHomeQueries } from "@/hooks/use-yield-to-admin-home";
@@ -93,8 +93,8 @@ import {
   writeSessionHint,
 } from "@/lib/auth-session-boot";
 import { PortalViewSwitcher } from "@/components/portal-view-switcher";
-import { HiveMark } from "@/components/brand/hive-mark";
-import { PI_THEME } from "@/lib/pi-theme";
+import { PiBrand } from "@/components/brand/pi-brand";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 
 import { BillingBanner } from "@/components/billing/billing-banner";
 import { orgDashboardIsLocked, pathBypassesBillingLock } from "@/lib/billing-lock-client";
@@ -144,13 +144,9 @@ function DashboardShellError({ error }: { error: Error; reset: () => void }) {
   );
 }
 
-const NEWSREADER =
-  "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap";
-
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [{ title: "Dashboard — Provider Interface" }],
-    links: [{ rel: "stylesheet", href: NEWSREADER }],
   }),
   // Lockout gate — runs on every dashboard navigation. Paid+active orgs stay
   // in the app. Unpaid / missing org_subscriptions rows go to /billing-locked.
@@ -743,10 +739,6 @@ function DashboardLayout() {
   const pageTitle =
     allNav.find((n) => (n.exact ? pathname === n.to : pathname.startsWith(n.to)))?.label ??
     "Dashboard";
-  const immersiveAdminHome =
-    isAdminHomePath(pathname) &&
-    ((isAdminCapable && effectiveView === "admin") ||
-      (effectiveView === "state_preview" && subView === "admin"));
   const inboxUnread = unreadQ.data?.count ?? 0;
 
   const sidebarProps: Omit<SidebarBodyProps, "onNavigate"> = {
@@ -805,29 +797,17 @@ function DashboardLayout() {
                 : "grid min-h-0 min-w-0 w-full flex-1 md:grid-cols-[260px_minmax(0,1fr)]"
             }
           >
-            <aside
-              className="hidden h-full flex-col overflow-y-auto text-sidebar-foreground md:flex"
-              style={{
-                background: `linear-gradient(180deg, ${PI_THEME.sideTop}, ${PI_THEME.sideBot})`,
-                color: PI_THEME.cream,
-              }}
-            >
+            <aside className="hive-chrome hidden h-full flex-col overflow-y-auto border-r border-[var(--hive-chrome-border)] md:flex">
               <SidebarBody {...sidebarProps} />
             </aside>
 
             <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
               <header
-                className="flex shrink-0 items-center justify-between gap-2 px-4 md:px-6 min-h-16"
+                className="hive-chrome flex min-h-16 shrink-0 items-center justify-between gap-2 border-b border-[var(--hive-chrome-border)] px-4 md:px-6"
                 style={{
                   paddingTop: "env(safe-area-inset-top)",
                   paddingLeft: "max(1rem, env(safe-area-inset-left))",
                   paddingRight: "max(1rem, env(safe-area-inset-right))",
-                  background: `linear-gradient(to bottom, rgba(10, 17, 32, 0.92), rgba(10, 17, 32, 0.78))`,
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                  borderBottom: `1px solid ${PI_THEME.c08}`,
-                  boxShadow: "0 1px 0 rgba(255, 255, 255, 0.03) inset",
-                  color: PI_THEME.cream,
                 }}
               >
                 <div className="flex items-center gap-2 min-w-0">
@@ -836,27 +816,17 @@ function DashboardLayout() {
                   {!isStaffPhoneChrome && (
                     <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                       <SheetTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="md:hidden shrink-0 hover:bg-white/10"
+                        <button
+                          type="button"
+                          className="hive-chrome-btn h-10 w-10 shrink-0 md:hidden"
                           aria-label="Open menu"
-                          style={{
-                            border: `1px solid ${PI_THEME.c14}`,
-                            background: PI_THEME.c08,
-                            color: PI_THEME.cream,
-                          }}
                         >
                           <Menu className="h-5 w-5" />
-                        </Button>
+                        </button>
                       </SheetTrigger>
                       <SheetContent
                         side="left"
-                        className="w-[280px] p-0 text-sidebar-foreground [&>button]:text-sidebar-foreground"
-                        style={{
-                          background: `linear-gradient(180deg, ${PI_THEME.sideTop}, ${PI_THEME.sideBot})`,
-                          color: PI_THEME.cream,
-                        }}
+                        className="hive-chrome w-[280px] p-0 [&>button]:text-[var(--hive-chrome-text)]"
                         onPointerDownOutside={preventSheetDismissForPortalViewMenu}
                         onFocusOutside={preventSheetDismissForPortalViewMenu}
                         onInteractOutside={preventSheetDismissForPortalViewMenu}
@@ -869,13 +839,12 @@ function DashboardLayout() {
                     </Sheet>
                   )}
                   <div className="min-w-0">
-                    <h1 className="truncate text-lg font-semibold tracking-tight" style={{ color: PI_THEME.cream }}>
+                    <h1 className="truncate text-lg font-semibold tracking-tight text-[var(--hive-chrome-text)]">
                       {pageTitle}
                     </h1>
                     <p
                       data-testid="shell-org-subtitle"
-                      className="text-xs leading-snug whitespace-normal break-words"
-                      style={{ color: PI_THEME.c50 }}
+                      className="text-xs leading-snug whitespace-normal break-words text-[var(--hive-chrome-text-muted)]"
                       title={
                         isHiveExecView
                           ? "Provider Interface · Exec"
@@ -923,12 +892,7 @@ function DashboardLayout() {
                       aria-label={mobileSearchOpen ? "Close NECTAR search" : "Open NECTAR search"}
                       aria-expanded={mobileSearchOpen}
                       onClick={() => setMobileSearchOpen((v) => !v)}
-                      className="grid h-11 w-11 place-items-center rounded-md md:hidden"
-                      style={{
-                        border: `1px solid ${PI_THEME.c14}`,
-                        background: PI_THEME.c08,
-                        color: PI_THEME.cream,
-                      }}
+                      className="hive-chrome-btn h-10 w-10 md:hidden"
                     >
                       <Search className="h-4 w-4" />
                     </button>
@@ -937,31 +901,30 @@ function DashboardLayout() {
                     type="button"
                     onClick={() => setTaskCenterOpen(true)}
                     data-tour="nav.help"
-                    className="inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium"
+                    className="hive-chrome-btn h-10 px-3 text-xs font-semibold"
                     title="Open Nectar"
-                    style={{
-                      background: PI_THEME.buttons.primaryBg,
-                      color: PI_THEME.buttons.primaryFg,
-                      boxShadow: PI_THEME.buttons.primaryShadow,
-                      border: "none",
-                    }}
                   >
-                    <ListChecks className="h-3.5 w-3.5" />{" "}
+                    <PiMark className="h-3.5 w-3.5 text-[var(--hive-gold)]" />
                     <span className="hidden md:inline">Nectar</span>
                   </button>
                   {isAdminCapable && effectiveView === "admin" && <DraftJobsHeaderPill />}
                   {isAdminCapable && effectiveView === "admin" && (
                     <NotificationBell deadlinesEnabled={layoutReady} />
                   )}
-                  <Button onClick={signOut} variant="ghost" size="sm" className="md:hidden">
+                  <button
+                    type="button"
+                    onClick={() => void signOut()}
+                    className="hive-chrome-btn h-10 w-10 md:hidden"
+                    aria-label="Sign out"
+                  >
                     <LogOut className="h-4 w-4" />
-                  </Button>
+                  </button>
                 </div>
               </header>
               {/* Collapsed-by-default NECTAR ask bar on phones — expands from the
               header icon; the desktop inline bar is unchanged. */}
-              {mobileSearchOpen && !isHiveExecView && !isStaffPhoneChrome && !immersiveAdminHome && (
-                <div className="border-b border-[var(--hive-border)] bg-[var(--hive-sidebar)] px-4 py-2 md:hidden">
+              {mobileSearchOpen && !isHiveExecView && !isStaffPhoneChrome && (
+                <div className="hive-chrome border-b border-[var(--hive-chrome-border)] px-4 py-2 md:hidden">
                   <NectarSearchBar
                     nav={allNav.map((n) => ({ to: n.to, label: n.label }))}
                     isAdminCapable={isAdminCapable && effectiveView === "admin"}
@@ -975,7 +938,7 @@ function DashboardLayout() {
                 onOpenChange={setTaskCenterOpen}
                 surface={effectiveView === "staff" ? "staff" : "admin"}
               />
-              {!isHiveExecView && !isStatePreview && !immersiveAdminHome && <DemoOrgBanner />}
+              {!isHiveExecView && !isStatePreview && <DemoOrgBanner />}
 
               {isStatePreview && (
                 <div className="flex items-center justify-between gap-3 border-b border-[var(--hive-gold)]/30 bg-[var(--hive-gold)]/[0.08] px-4 py-2 text-xs md:px-6">
@@ -1002,20 +965,16 @@ function DashboardLayout() {
                 </div>
               )}
 
-              {isAdminCapable && effectiveView === "admin" && org?.organization_id && !immersiveAdminHome && (
+              {isAdminCapable && effectiveView === "admin" && org?.organization_id && (
                 <BillingBanner organizationId={org.organization_id} isAdmin />
               )}
 
               <DashboardMain
-                immersive={immersiveAdminHome}
                 className={
-                  immersiveAdminHome
-                    ? "min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-0"
-                    : isMobilePreview
+                  isMobilePreview
                     ? "min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--hive-canvas)]"
                     : "min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--hive-canvas)] px-4 py-6 md:px-8"
                 }
-                style={immersiveAdminHome ? { background: PI_THEME.navy } : undefined}
               >
                 {isStatePreview && !stateCode ? (
                   <div className="mx-auto max-w-xl rounded-lg border border-dashed border-border bg-background p-8 text-center text-sm text-muted-foreground">
@@ -1098,17 +1057,7 @@ function CompanyClientsBridge({
  * Resets to top on route change. iOS safe-area is applied via styles.css
  * on [data-dashboard-scroller].
  */
-function DashboardMain({
-  immersive,
-  className,
-  style,
-  children,
-}: {
-  immersive: boolean;
-  className: string;
-  style?: CSSProperties;
-  children: ReactNode;
-}) {
+function DashboardMain({ className, children }: { className: string; children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const mainRef = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
@@ -1118,9 +1067,7 @@ function DashboardMain({
     <main
       ref={mainRef}
       data-dashboard-scroller=""
-      data-immersive={immersive ? "" : undefined}
       className={className}
-      style={style}
     >
       {children}
     </main>
@@ -1203,18 +1150,8 @@ function SidebarBody({
   }, [activeExecDomain]);
   return (
     <>
-      <div
-        className="flex h-16 items-center px-5"
-        style={{ borderBottom: `1px solid ${PI_THEME.c08}` }}
-      >
-        <Link
-          to="/dashboard"
-          className="inline-flex items-center"
-          aria-label="Provider Interface"
-          style={{ color: PI_THEME.cream }}
-        >
-          <HiveMark className="h-8 w-8" title="Provider Interface" />
-        </Link>
+      <div className="flex h-16 items-center border-b border-[var(--hive-chrome-border)] px-5">
+        <PiBrand to="/dashboard" tone="chrome" size="md" />
       </div>
 
       {(isAdminCapable || isExecutive) && (
@@ -1270,8 +1207,8 @@ function SidebarBody({
                           <span
                             className={`rounded-full px-1.5 text-[9px] font-semibold uppercase tracking-wider ${
                               isActive
-                                ? "bg-emerald-100 text-emerald-800"
-                                : "bg-slate-200 text-slate-600"
+                                ? "hive-status-active"
+                                : "bg-[var(--hive-muted-surface)] text-[var(--hive-text-muted)]"
                             }`}
                           >
                             {isActive
@@ -1459,8 +1396,8 @@ function SidebarBody({
         {showNectarCluster && (
           <div className="mt-5 border-t border-sidebar-border pt-5">
             <div className="mb-2.5 flex items-start gap-2.5 px-3">
-              <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center">
-                <HiveMark className="h-6 w-6" />
+              <span className="mt-0.5 inline-flex shrink-0 items-center">
+                <PiBrand tone="chrome" size="sm" showText={false} markClassName="h-6 w-6" />
               </span>
               <div className="min-w-0">
                 <span className="text-sm font-bold tracking-wide text-[var(--hive-chrome-text)]">Nectar</span>

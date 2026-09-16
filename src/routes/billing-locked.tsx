@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Building2, CreditCard, Loader2, LogOut, Mail } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiBrand } from "@/components/brand/pi-brand";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -235,9 +235,8 @@ function BillingLockedPage() {
   return (
     <div className="min-h-screen bg-[#0F1A2E] px-4 py-12 text-white" data-testid="billing-paywall">
       <div className="mx-auto flex max-w-xl flex-col items-center text-center">
-        <div className="mb-6 flex items-center gap-2">
-          <PiMark className="h-7 w-7 text-[#f3efe6]" />
-          <span className="text-xl font-semibold tracking-tight">Provider Interface</span>
+        <div className="mb-6">
+          <PiBrand tone="canvas" size="lg" />
         </div>
 
         <h1 className="text-2xl font-bold sm:text-3xl">

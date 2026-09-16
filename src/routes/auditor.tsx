@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiBrand } from "@/components/brand/pi-brand";
 import {
   ShieldCheck,
   Loader2,
@@ -47,8 +47,6 @@ function AuditorPortal() {
   const { session, loading } = useAuth();
   const search = useSearch({ from: "/auditor" });
   const navigate = useNavigate({ from: "/auditor" });
-  const navy = "#141a3d";
-
   if (loading) {
     return (
       <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">
@@ -67,12 +65,11 @@ function AuditorPortal() {
     >
       <header className="border-b border-[color:var(--border-light)] bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center gap-2 font-semibold" style={{ color: navy }}>
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#0b1220] text-[#f3efe6]">
-              <PiMark className="h-4 w-4" />
+          <Link to="/" className="flex items-center gap-3">
+            <span className="inline-flex items-center rounded-lg bg-[var(--hive-sidebar)] px-2 py-1.5">
+              <PiBrand tone="chrome" size="sm" showText />
             </span>
-            Provider Interface
-            <span className="text-xs font-normal text-muted-foreground border-l border-[color:var(--border-light)] ml-2 pl-2">
+            <span className="text-xs font-normal text-muted-foreground border-l border-border pl-3">
               Auditor Portal
             </span>
           </Link>

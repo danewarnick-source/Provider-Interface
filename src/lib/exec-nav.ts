@@ -1,3 +1,5 @@
+import type { ComponentType } from "react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import {
   Building2,
   Plus,
@@ -9,7 +11,6 @@ import {
   LifeBuoy,
   ArrowRightLeft,
   Mail,
-  Hexagon,
   Sparkles,
   FileSignature,
   ToggleRight,
@@ -24,7 +25,7 @@ import type { ExecCapability } from "@/lib/exec-capabilities";
 export type ExecNavItem = {
   to: string;
   label: string;
-  icon: LucideIcon;
+  icon: LucideIcon | ComponentType<{ className?: string }>;
   exact?: boolean;
   capability: ExecCapability;
   badgeKey?: "upgrade_requests_pending";
@@ -85,7 +86,7 @@ export const EXEC_DOMAINS: ExecDomain[] = [
       { to: "/dashboard/hive-exec/tickets", label: "Support Queue", icon: LifeBuoy, capability: "support.manage" },
       { to: "/dashboard/hive-exec/functionality", label: "IT / Functionality", icon: Wrench, capability: "support.manage" },
       { to: "/dashboard/hive-exec/messages", label: "Message Center", icon: Mail, capability: "support.manage" },
-      { to: "/dashboard/hive-exec/nectar", label: "NECTAR", icon: Hexagon, capability: "steve.use" },
+      { to: "/dashboard/hive-exec/nectar", label: "NECTAR", icon: PiMark, capability: "steve.use" },
       { to: "/dashboard/hive-exec/training", label: "Training fulfillment", icon: GraduationCap, capability: "training.manage" },
       { to: "/dashboard/hive-exec/classes", label: "Training", icon: GraduationCap, capability: "training.manage" },
     ],

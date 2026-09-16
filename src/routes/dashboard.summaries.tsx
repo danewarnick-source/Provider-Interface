@@ -195,10 +195,7 @@ function SummariesPage() {
     <div className="p-4 md:p-8 space-y-6">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <FileText className="size-6" /> Summaries
-          </h1>
-          <p className="text-sm text-muted-foreground max-w-2xl mt-1">
+          <p className="text-sm text-muted-foreground max-w-2xl">
             Open a person, draft goal progress with Nectar from code-tagged HIVE notes, finalize with
             attestation, download the packet, then mark sent to the Support Coordinator — or entered in UPI for SEI/SJD.
           </p>

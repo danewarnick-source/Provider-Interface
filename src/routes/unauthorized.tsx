@@ -5,6 +5,8 @@ import { ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PageShell } from "@/components/layout/page-shell";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { ALL_PERMISSIONS, PERMISSION_LABEL, type Permission } from "@/lib/rbac";
 import { requestPermission } from "@/lib/permissions.functions";
@@ -48,8 +50,8 @@ function UnauthorizedPage() {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-secondary/40 px-6">
-      <div className="max-w-md rounded-2xl border border-border bg-card p-10 text-center shadow-[var(--shadow-card)]">
+    <div className="grid min-h-screen place-items-center bg-[var(--hive-canvas)] px-6">
+      <PageShell width="narrow" padding={false} className="rounded-2xl border border-border bg-card p-10 text-center shadow-[var(--shadow-card)]">
         <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
           <ShieldAlert className="h-6 w-6" />
         </span>
@@ -87,13 +89,15 @@ function UnauthorizedPage() {
         )}
 
         {sent && (
-          <p className="mt-6 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
-            Your request has been sent to your organization's owners.
-          </p>
+          <Alert variant="success" className="mt-6 text-left">
+            <AlertDescription>
+              Your request has been sent to your organization&apos;s owners.
+            </AlertDescription>
+          </Alert>
         )}
 
-        <Button asChild variant="outline" className="mt-6"><Link to="/dashboard">Back to your dashboard</Link></Button>
-      </div>
+        <Button asChild variant="outline" className="mt-6"><Link to="/dashboard">Back to dashboard</Link></Button>
+      </PageShell>
     </div>
   );
 }

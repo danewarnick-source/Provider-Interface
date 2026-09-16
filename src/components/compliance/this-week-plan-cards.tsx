@@ -37,7 +37,6 @@ import {
   thisWeekStatusLine,
   type ThisWeekResult,
 } from "@/lib/obligations/this-week.functions";
-import { PI_THEME } from "@/lib/pi-theme";
 import "./decision-card.css";
 
 /** PlanCard shim — keep 30 days while callers move to DecisionCard. */
@@ -199,12 +198,10 @@ export function ThisWeekPlanCards() {
   return (
     <section data-testid="this-week" className="space-y-4">
       <div>
-        <h2 className="text-[22px] font-semibold leading-tight" style={{ color: PI_THEME.cream }}>
+        <h2 className="text-xl font-semibold leading-tight tracking-tight text-[var(--hive-text)]">
           This week
         </h2>
-        <p className="mt-1 text-sm" style={{ color: PI_THEME.c50 }}>
-          {countLine}
-        </p>
+        <p className="mt-1 text-sm text-[var(--hive-text-muted)]">{countLine}</p>
       </div>
       {!q.isLoading && !q.isError && items.length > 0 ? (
         <ul className="flex flex-col gap-3">
@@ -242,8 +239,7 @@ export function ThisWeekPlanCards() {
       {extra > 0 ? (
         <Link
           to="/dashboard/compliance"
-          className="inline-flex text-sm font-medium hover:underline"
-          style={{ color: PI_THEME.gold }}
+          className="inline-flex text-sm font-medium text-[var(--hive-text)] underline-offset-4 hover:underline"
         >
           {extra} more this week →
         </Link>
@@ -251,33 +247,18 @@ export function ThisWeekPlanCards() {
       {assignedText ? (
         <div
           data-testid="already-assigned"
-          className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm"
-          style={{
-            background: PI_THEME.c04,
-            color: PI_THEME.c70,
-            border: `1px solid ${PI_THEME.hairlines.faint}`,
-          }}
+          className="flex items-center justify-between gap-3 rounded-xl border border-[var(--hive-border)] bg-[var(--hive-surface)] px-4 py-3 text-sm text-[var(--hive-text-muted)]"
         >
           <div>
-            <p className="font-medium" style={{ color: PI_THEME.cream }}>
-              Already assigned
-            </p>
+            <p className="font-medium text-[var(--hive-text)]">Already assigned</p>
             <p>{assignedText}</p>
           </div>
         </div>
       ) : null}
-      <div
-        data-testid="quiet-line"
-        className="quiet-line"
-        style={{
-          background: PI_THEME.c04,
-          color: PI_THEME.c50,
-          border: `1px solid ${PI_THEME.hairlines.faint}`,
-        }}
-      >
+      <div data-testid="quiet-line" className="quiet-line">
         {quietText}
       </div>
-      <p data-testid="automation-line" className="text-xs" style={{ color: PI_THEME.c50 }}>
+      <p data-testid="automation-line" className="text-xs text-[var(--hive-text-muted)]">
         {automationText}
       </p>
       {activeItem ? (

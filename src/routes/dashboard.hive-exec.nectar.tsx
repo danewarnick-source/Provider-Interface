@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import {
-  Hexagon,
   Sparkles,
   AlertTriangle,
   ShieldAlert,
@@ -18,6 +17,7 @@ import {
   ClipboardList,
   Plus,
 } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { toast } from "sonner";
 import { listCompanies } from "@/lib/hive-exec.functions";
 import {
@@ -315,7 +315,7 @@ function HiveNectarPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-gold)] text-white">
-              <Hexagon className="h-5 w-5" />
+              <PiMark className="h-5 w-5" />
             </span>
             <div>
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#9a3412]">
@@ -624,7 +624,7 @@ function TicketCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-md border border-[#fed7aa] bg-[#fff7ed] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#9a3412]">
-              <Hexagon className="h-3 w-3" /> {o.source === "auto" ? "NECTAR auto" : "Manual"}
+              <PiMark className="h-3 w-3" /> {o.source === "auto" ? "NECTAR auto" : "Manual"}
             </span>
             <span className="inline-flex items-center rounded-md border border-border bg-muted/40 px-2 py-0.5 text-[11px] font-medium text-foreground">
               {CATEGORY_LABEL[o.category]}

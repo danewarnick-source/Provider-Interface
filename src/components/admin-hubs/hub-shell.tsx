@@ -22,6 +22,8 @@ type Props = {
 /**
  * Thin shell: a horizontal tab bar (URL-driven via ?tab=) above the active tab's
  * existing page component. Does not modify any wrapped page's behavior.
+ * The visible page title lives in the shell top bar — the hub only exposes it
+ * to assistive tech so the heading is not printed twice on screen.
  */
 export function HubShell({ title, subtitle, tabs, basePath }: Props) {
   const search = useSearch({ strict: false }) as { tab?: string };
@@ -33,10 +35,8 @@ export function HubShell({ title, subtitle, tabs, basePath }: Props) {
 
   return (
     <div className="flex min-h-full flex-col">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-      </div>
+      <h2 className="sr-only">{title}</h2>
+      {subtitle ? <p className="mb-4 text-sm text-muted-foreground">{subtitle}</p> : null}
 
       {tabs.length > 1 && (
         <div className="mb-4 border-b border-border">

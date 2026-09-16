@@ -1,5 +1,4 @@
-import { type LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { PiMark } from "@/components/pi-landing/pi-mark";
 
 /**
@@ -21,7 +20,7 @@ export function StaffPageHeader({
   variant = "default",
 }: {
   eyebrow: string;
-  eyebrowIcon?: LucideIcon;
+  eyebrowIcon?: ComponentType<{ className?: string; strokeWidth?: number }>;
   title: ReactNode;
   subtitle?: ReactNode;
   actions?: ReactNode;
@@ -42,11 +41,10 @@ export function StaffPageHeader({
           <EyebrowIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
           <span className="truncate">{eyebrow}</span>
         </div>
-        <h1 className="mt-1.5 text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">
-          {title}
-        </h1>
+        {/* The page title already appears in the top bar (mobile and desktop) — keep it for a11y only. */}
+        <h1 className="sr-only">{title}</h1>
         {subtitle && (
-          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             {subtitle}
           </p>
         )}

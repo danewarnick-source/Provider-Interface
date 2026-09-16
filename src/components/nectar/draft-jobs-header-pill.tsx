@@ -15,10 +15,10 @@ export function DraftJobsHeaderPill() {
   return (
     <Link
       to="/dashboard/authoritative-sources"
-      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-md border border-[color:var(--amber-500,var(--hive-gold))]/40 bg-[color:var(--amber-500,var(--hive-gold))]/10 px-2.5 py-1 text-xs font-medium text-[color:var(--amber-900,#78350f)] hover:bg-[color:var(--amber-500,var(--hive-gold))]/20 dark:text-[color:var(--amber-200,#fde68a)]"
+      className="hive-chrome-btn h-10 px-3 text-xs font-semibold"
       title="NECTAR is drafting requirements from your authoritative sources"
     >
-      <Sparkles className="h-3.5 w-3.5 animate-pulse text-[color:var(--amber-600,#d97706)]" />
+      <Sparkles className="h-3.5 w-3.5 animate-pulse text-[var(--hive-gold)]" />
       <span>
         Drafting {activeCount} source{activeCount === 1 ? "" : "s"}
       </span>

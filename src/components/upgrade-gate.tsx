@@ -46,7 +46,7 @@ export function UpgradeGate({ featureKey, open, onOpenChange }: Props) {
       }),
     onSuccess: () => {
       setSubmitted(true);
-      toast.success("Upgrade request sent to your HIVE Executive.");
+      toast.success("Upgrade request sent to the Provider Interface team.");
     },
     onError: (e: unknown) => {
       const msg = e instanceof Error ? e.message : "Could not send request";
@@ -85,16 +85,16 @@ export function UpgradeGate({ featureKey, open, onOpenChange }: Props) {
         </DialogHeader>
 
         {submitted ? (
-          <div className="flex items-start gap-2 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+          <div className="flex items-start gap-2 rounded-md border border-[var(--hive-ok)]/30 bg-[var(--hive-ok-soft)] p-3 text-sm text-[var(--hive-ok-fg)]">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
             <div>
-              Request sent. A HIVE Executive will review and enable{" "}
+              Request sent. The Provider Interface team will review and enable{" "}
               <span className="font-medium">{label}</span> for your organization.
             </div>
           </div>
         ) : (
           <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
-            Requesting access notifies a HIVE Executive to enable this feature
+            Requesting access notifies the Provider Interface team to enable this feature
             for your organization. Nothing changes until they approve.
           </div>
         )}

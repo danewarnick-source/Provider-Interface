@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Hexagon, Send, ShieldCheck, GraduationCap, AlertTriangle, FileCheck2, X } from "lucide-react";
+import { Send, ShieldCheck, GraduationCap, AlertTriangle, FileCheck2, X } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { cn } from "@/lib/utils";
 
 const PROMPTS = [
@@ -47,7 +48,7 @@ export function NectarRail({
     >
       <div className="flex items-center justify-between border-b border-[var(--hive-border)] px-4 py-3">
         <div className="flex items-center gap-2">
-          <Hexagon className="h-4 w-4 text-[var(--hive-gold)]" strokeWidth={1.6} />
+          <PiMark className="h-4 w-4 text-[var(--hive-gold)]" />
           <h2 className="font-display text-sm font-semibold tracking-tight text-[var(--hive-gold)]">
             Nectar
           </h2>

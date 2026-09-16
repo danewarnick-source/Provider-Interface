@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Hexagon, Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import {
   Dialog,
   DialogContent,
@@ -106,7 +107,7 @@ export function NectarDocumentActionsDialog({
           ) : offer.data ? (
             <>
               <div className="flex items-start gap-2 rounded-xl border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
-                <Hexagon className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--amber-600,#d97706)]" />
+                <PiMark className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--amber-600,#d97706)]" />
                 <div className="space-y-1">
                   <div className="text-foreground">{offer.data.prompt}</div>
                   <div className="flex items-center gap-2">

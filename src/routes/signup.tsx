@@ -50,7 +50,6 @@ import {
 } from "@/lib/stripe-checkout.functions";
 import { formatUsdFromCents, type BillingInterval } from "@/lib/hive-pricing";
 import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_SIGNUP_PRICE_LINE } from "@/lib/pi-landing";
-import { PI_HOME_SERIF } from "@/lib/pi-homepage";
 import {
   SIGNUP_AGENCY_PLACEHOLDER,
   SIGNUP_TRAINING_ADDONS,
@@ -91,8 +90,9 @@ export const Route = createFileRoute("/signup")({
 
 /* ──────────────────────────── design tokens ──────────────────────────── */
 
-const JAKARTA = '"Inter", ui-sans-serif, system-ui, sans-serif';
-const AMBER = "#f3efe6";
+const JAKARTA = "var(--font-sans)";
+const AMBER = "var(--hive-text)";
+const STEP_FILL = "var(--hive-gold)";
 
 const inputStyle: React.CSSProperties = {
   background: "var(--hive-surface)",
@@ -164,7 +164,7 @@ function Stepper({ step }: { step: number }) {
           <div
             key={i}
             className="h-1.5 flex-1 rounded-full transition-colors"
-            style={{ background: i <= step ? AMBER : "var(--hive-border)" }}
+            style={{ background: i <= step ? STEP_FILL : "var(--hive-border)" }}
           />
         ))}
       </div>
@@ -230,7 +230,7 @@ function NavButtons({
           onClick={onNext}
           disabled={nextDisabled || loading}
           data-testid={nextTestId}
-          className="group h-11 w-full border-0 bg-[#0b1220] text-[#f3efe6] hover:bg-[#111827] sm:w-auto sm:min-w-[160px]"
+          className="group h-11 w-full border-0 bg-[var(--hive-sidebar)] text-[var(--hive-chrome-text)] hover:bg-[var(--hive-ink)] sm:w-auto sm:min-w-[160px]"
           style={{ fontFamily: JAKARTA, fontWeight: 700 }}
         >
           {loading ? (
@@ -328,7 +328,7 @@ function SignupPage() {
   const goBack = () => setStep((s) => Math.max(0, s - 1));
 
   return (
-    <PiPublicPage>
+    <PiPublicPage surface="paper">
       <main className="wrap pi-home-signup">
         <p className="pi-home-signup-account">
           Already have an account?{" "}
@@ -336,7 +336,7 @@ function SignupPage() {
         </p>
         <Stepper step={step} />
           <div
-            className="rounded-2xl border border-white/[0.10] bg-[#f3efe6] p-6 text-[#0b1220] shadow-[0_24px_60px_-30px_rgba(0,0,0,0.55)] sm:p-8"
+            className="rounded-2xl border border-[var(--hive-border)] bg-[var(--hive-surface)] p-6 text-[var(--hive-text)] shadow-[var(--shadow-card)] sm:p-8"
             data-testid="signup-new-agency"
           >
             {step === 0 && (
@@ -711,7 +711,7 @@ function Step1Account({
           checked={form.acceptedTos}
           onChange={(e) => update("acceptedTos", e.target.checked)}
           data-testid="signup-tos-checkbox"
-          className="mt-1 h-4 w-4 shrink-0 rounded border-[var(--hive-border)] accent-[#0b1220]"
+          className="mt-1 h-4 w-4 shrink-0 rounded border-[var(--hive-border)] accent-[var(--hive-sidebar)]"
         />
         <span>
           I agree to the{" "}
@@ -719,7 +719,7 @@ function Step1Account({
             href="/terms"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-[#8a6d32] underline underline-offset-2 hover:text-[#0b1220]"
+            className="font-medium text-[var(--hive-text)] underline underline-offset-2 hover:text-[var(--hive-ink)]"
             data-testid="signup-tos-link"
           >
             Terms
@@ -737,7 +737,7 @@ function Step1Account({
           checked={form.acceptedBaa}
           onChange={(e) => update("acceptedBaa", e.target.checked)}
           data-testid="signup-baa-checkbox"
-          className="mt-1 h-4 w-4 shrink-0 rounded border-[var(--hive-border)] accent-[#0b1220]"
+          className="mt-1 h-4 w-4 shrink-0 rounded border-[var(--hive-border)] accent-[var(--hive-sidebar)]"
         />
         <span>
           I am authorized to bind this agency. I have read the{" "}
@@ -745,7 +745,7 @@ function Step1Account({
             href="/baa"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-[#8a6d32] underline underline-offset-2 hover:text-[#0b1220]"
+            className="font-medium text-[var(--hive-text)] underline underline-offset-2 hover:text-[var(--hive-ink)]"
             data-testid="signup-baa-link"
           >
             Business Associate Agreement
@@ -1244,7 +1244,7 @@ function Step5Training({
                     key={addon.id}
                     className="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm"
                     style={{
-                      borderColor: selected ? "#0b1220" : "var(--hive-border)",
+                      borderColor: selected ? "var(--hive-sidebar)" : "var(--hive-border)",
                       background: selected ? "rgba(11,18,32,0.06)" : "transparent",
                     }}
                   >
@@ -1254,7 +1254,7 @@ function Step5Training({
                       checked={selected}
                       onChange={() => updatePerson(person.id, { sku: addon.id })}
                       data-testid={`signup-training-sku-${index}-${addon.id}`}
-                      className="accent-[#0b1220]"
+                      className="accent-[var(--hive-sidebar)]"
                     />
                     <span className="font-medium text-[var(--hive-text)]">{addon.name}</span>
                   </label>
@@ -1470,8 +1470,7 @@ function Header({ title, subtitle }: { title: string; subtitle: React.ReactNode 
   return (
     <div className="mb-6">
       <h1
-        className="text-2xl tracking-tight text-[#0a0f1c] sm:text-3xl"
-        style={{ fontFamily: PI_HOME_SERIF, fontWeight: 400, letterSpacing: "-0.02em" }}
+        className="text-2xl font-semibold tracking-tight text-[var(--hive-text)] sm:text-3xl"
       >
         {title}
       </h1>

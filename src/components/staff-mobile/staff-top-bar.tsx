@@ -19,7 +19,7 @@ import { usePermissions } from "@/hooks/use-permissions";
 import { usePortalView } from "@/hooks/use-portal-view";
 import { ROLE_LABEL, type Role } from "@/lib/rbac";
 import { toast } from "sonner";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiBrand } from "@/components/brand/pi-brand";
 import {
   preventSheetDismissForPortalViewMenu,
   resolvePortalSwitcherPath,
@@ -65,8 +65,8 @@ export function StaffTopBar({ title, framed = false }: { title: string; framed?:
     >
       <div className="flex h-14 w-full items-center justify-between gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
-          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/[0.06] text-[#f3efe6]">
-            <PiMark className="h-5 w-5" title="Provider Interface" />
+          <span className="inline-flex shrink-0 items-center rounded-lg border border-white/15 bg-white/[0.06] px-2 py-1">
+            <PiBrand tone="chrome" size="sm" />
           </span>
           <h1 className="truncate text-base font-semibold tracking-tight">{title}</h1>
         </div>

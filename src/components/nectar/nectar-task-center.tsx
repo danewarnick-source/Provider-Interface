@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Loader2, ListChecks, Sparkles, PlayCircle, MessageSquare, Check, Trash2, X } from "lucide-react";
+import { Loader2, Sparkles, PlayCircle, MessageSquare, Check, Trash2, X } from "lucide-react";
 import { listNectarGuides, planNectarGuide, updateGuideTask, deleteGuide, type Guide, type GuideTask } from "@/lib/nectar-guide.functions";
 import { useGuidedTour } from "@/components/nectar/guided-tour-provider";
 import { useCurrentOrg } from "@/hooks/use-org";
@@ -71,13 +72,13 @@ export function NectarTaskCenter({ trigger, open, onOpenChange, initialGoal, sur
   }
 
   const body = (
-    <SheetContent side="right" className="w-full max-w-md overflow-y-auto border-[var(--hive-border)] bg-[var(--hive-sidebar)] p-0 text-[var(--hive-text)]">
+    <SheetContent side="right" className="w-full max-w-md overflow-y-auto border-[var(--hive-border)] bg-[var(--hive-canvas)] p-0 text-[var(--hive-text)] hive-chrome-sheet">
       <div className="flex h-full flex-col">
-        <div className="border-b border-[var(--hive-border)] bg-[var(--hive-sidebar)] px-5 py-4">
-          <SheetTitle className="flex items-center gap-2 font-display text-lg font-bold text-[var(--hive-gold)]">
-            <ListChecks className="h-5 w-5 text-[var(--hive-gold)]" /> Nectar
+        <div className="hive-chrome border-b border-[var(--hive-chrome-border)] px-5 py-4">
+          <SheetTitle className="flex items-center gap-2.5 text-lg font-semibold text-[var(--hive-chrome-text)]">
+            <PiMark variant="gold" className="h-5 w-5" /> Nectar
           </SheetTitle>
-          <p className="mt-1 text-xs text-[var(--hive-text-muted)]">
+          <p className="mt-1 text-xs text-[var(--hive-chrome-text-muted)]">
             Tell Nectar a goal and it'll build a shared task list, then walk you through each step.
           </p>
         </div>
@@ -160,7 +161,7 @@ function GuideCard({
       <div className="flex items-start justify-between gap-2 border-b border-[var(--hive-border)] px-4 py-3">
         <div className="min-w-0">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-gold)]">Guide</div>
-          <div className="truncate font-display text-sm font-bold text-[var(--hive-text)]">{guide.goal}</div>
+          <div className="truncate text-sm font-semibold text-[var(--hive-text)]">{guide.goal}</div>
           {guide.summary && <p className="mt-0.5 text-xs text-muted-foreground">{guide.summary}</p>}
           <div className="mt-1 text-[11px] text-muted-foreground">{done} of {guide.tasks.length} complete</div>
         </div>
@@ -226,7 +227,7 @@ function ExplainModal({ task, onClose }: { task: GuideTask; onClose: () => void 
         <div className="mb-2 flex items-start justify-between gap-2">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--hive-gold)]">Nectar · Explain</div>
-            <h3 className="font-display text-base font-bold text-[var(--hive-text)]">{task.title}</h3>
+            <h3 className="text-base font-semibold text-[var(--hive-text)]">{task.title}</h3>
           </div>
           <button onClick={onClose} className="rounded p-1 hover:bg-muted"><X className="h-4 w-4" /></button>
         </div>

@@ -1,22 +1,22 @@
-import { PI_THEME } from "@/lib/pi-theme";
 import type { Decision, DecisionActionKind } from "@/lib/obligations/this-week";
 import { decorateDecision } from "@/lib/obligations/this-week";
 import { OVERRIDE_STATE_LABEL, OVERRIDE_STILL_REQUIRED } from "@/lib/obligations/overrides";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import "./decision-card.css";
 
 function urgencyBar(urgency: Decision["urgency"]): string {
-  if (urgency === "critical") return PI_THEME.red;
-  if (urgency === "high") return PI_THEME.amber;
-  return PI_THEME.ok;
+  if (urgency === "critical") return "var(--hive-danger)";
+  if (urgency === "high") return "var(--hive-gold)";
+  return "var(--hive-ok)";
 }
 
-function pillTone(dueText: string): { bg: string; fg: string } {
-  if (dueText === "Done") return { bg: "rgba(95, 174, 127, 0.16)", fg: PI_THEME.ok };
+function pillClass(dueText: string): string {
+  if (dueText === "Done") return "hive-status-active";
   if (dueText === "Today" || /overdue/i.test(dueText) || dueText === "Yesterday") {
-    return { bg: "rgba(224, 138, 128, 0.16)", fg: PI_THEME.red };
+    return "hive-status-danger";
   }
-  return { bg: PI_THEME.goldSoft, fg: PI_THEME.amber };
+  return "hive-role-pill";
 }
 
 export function DecisionCard({
@@ -41,104 +41,63 @@ export function DecisionCard({
   const ownerText = decorated.ownerText ?? "You";
   const ifMissed = decorated.ifMissed ?? "Part IV finding";
   const action = decorated.action ?? { label: "Log a plan", kind: "log_plan" as const };
-  const pill = pillTone(dueText);
 
   return (
     <li
       data-testid="decision-card"
       className={cn("act", done && "act-done")}
-      style={{
-        background: PI_THEME.heroTileBg,
-        borderColor: PI_THEME.hairlines.faint,
-        borderLeftColor: urgencyBar(decorated.urgency),
-        color: PI_THEME.cream,
-      }}
+      style={{ borderLeftColor: urgencyBar(decorated.urgency) }}
     >
       <div className="act-head">
-        <div
-          data-testid="decision-headline"
-          className="act-headline"
-          style={{ color: PI_THEME.cream }}
-        >
+        <div data-testid="decision-headline" className="act-headline">
           {headline}
         </div>
-        <span
-          data-testid="decision-due"
-          className="act-pill"
-          style={{ background: pill.bg, color: pill.fg }}
-        >
+        <span data-testid="decision-due" className={cn("act-pill", pillClass(dueText))}>
           {dueText}
         </span>
       </div>
-      <p data-testid="decision-why" className="act-why" style={{ color: PI_THEME.c70 }}>
+      <p data-testid="decision-why" className="act-why">
         {why}
       </p>
       {item.overridden ? (
-        <p data-testid="override-state" className="act-why" style={{ color: PI_THEME.amber }}>
+        <p data-testid="override-state" className="act-why text-[var(--hive-on-gold)]">
           {OVERRIDE_STATE_LABEL}
           {item.overrideUntil ? ` until ${item.overrideUntil}` : ""}. {OVERRIDE_STILL_REQUIRED}
         </p>
       ) : null}
-      <div className="act-meta" style={{ color: PI_THEME.c50 }}>
+      <div className="act-meta">
         <span data-testid="decision-owner">Owner: {ownerText}</span>
         <span data-testid="decision-if-missed">If missed: {ifMissed}</span>
       </div>
       {done ? null : action.kind === "approve_plan" ? (
         <div data-testid="decision-action" className="flex flex-wrap gap-2">
-          <button
+          <Button
             type="button"
-            className="act-btn"
+            size="sm"
             disabled={reviewing}
-            style={{
-              background: PI_THEME.buttons.primaryBg,
-              color: PI_THEME.buttons.primaryFg,
-              boxShadow: PI_THEME.buttons.primaryShadow,
-            }}
             onClick={() => onAction("approve_plan", "approved")}
           >
             Approve
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="act-btn"
+            size="sm"
+            variant="outline"
             disabled={reviewing}
-            style={{
-              background: PI_THEME.buttons.secondaryBg,
-              color: PI_THEME.buttons.secondaryFg,
-              border: `1px solid ${PI_THEME.buttons.secondaryBorder}`,
-            }}
             onClick={() => onAction("approve_plan", "rejected")}
           >
             Reject
-          </button>
+          </Button>
         </div>
       ) : (
         <div data-testid="decision-action" className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className="act-btn"
-            style={{
-              background: PI_THEME.buttons.primaryBg,
-              color: PI_THEME.buttons.primaryFg,
-              boxShadow: PI_THEME.buttons.primaryShadow,
-            }}
-            onClick={() => onAction(action.kind, "open")}
-          >
+          <Button type="button" size="sm" onClick={() => onAction(action.kind, "open")}>
             {action.label}
-          </button>
+          </Button>
           {onRecordOverride ? (
-            <button
-              type="button"
-              className="act-btn"
-              style={{
-                background: PI_THEME.buttons.secondaryBg,
-                color: PI_THEME.buttons.secondaryFg,
-                border: `1px solid ${PI_THEME.buttons.secondaryBorder}`,
-              }}
-              onClick={onRecordOverride}
-            >
+            <Button type="button" size="sm" variant="outline" onClick={onRecordOverride}>
               Record override
-            </button>
+            </Button>
           ) : null}
         </div>
       )}

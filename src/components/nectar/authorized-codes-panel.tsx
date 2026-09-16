@@ -3,7 +3,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  Hexagon,
   Plus,
   Trash2,
   Loader2,
@@ -12,6 +11,7 @@ import {
   CheckCircle2,
   Info,
 } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import {
   listAuthorizedCodes,
   upsertAuthorizedCode,
@@ -96,7 +96,7 @@ export function AuthorizedCodesPanel({ orgId }: { orgId: string }) {
     <div className="space-y-4">
       <div className="rounded-2xl border border-amber-300/40 bg-amber-50/40 dark:bg-amber-500/5 p-4">
         <div className="flex items-start gap-3">
-          <Hexagon className="h-5 w-5 text-amber-600 dark:text-amber-300 mt-0.5" />
+          <PiMark className="h-5 w-5 text-amber-600 dark:text-amber-300 mt-0.5" />
           <div className="text-sm">
             <div className="font-semibold text-foreground">
               Coverage follows the contract — not current activity

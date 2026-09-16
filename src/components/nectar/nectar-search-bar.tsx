@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, Hexagon, MapPin, Users, Contact2, ArrowRight } from "lucide-react";
+import { Search, MapPin, Users, Contact2, ArrowRight } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { searchOrgEntities } from "@/lib/nectar-search.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 
@@ -194,7 +195,7 @@ export function NectarSearchBar({
   return (
     <div ref={wrapRef} className={wrapCls}>
       <div className="relative">
-        <Hexagon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--hive-gold)]" />
+        <PiMark className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--hive-gold)]" />
         <input
           ref={inputRef}
           type="text"
@@ -312,5 +313,5 @@ function KindIcon({ kind }: { kind: ResultKind }) {
   if (kind === "page") return <MapPin className={`${cls} text-muted-foreground`} />;
   if (kind === "client") return <Contact2 className={`${cls} text-[var(--hive-text)]`} />;
   if (kind === "staff") return <Users className={`${cls} text-[var(--hive-text)]`} />;
-  return <Hexagon className={`${cls} text-[var(--hive-gold)]`} />;
+  return <PiMark className={`${cls} text-[var(--hive-gold)]`} />;
 }

@@ -74,7 +74,7 @@ function persistPreferredOrgFromRows(
 
 function AuthFrame({ children }: { children: ReactNode }) {
   return (
-    <PiPublicPage>
+    <PiPublicPage surface="paper">
       <main className="wrap pi-home-auth">{children}</main>
     </PiPublicPage>
   );
@@ -247,21 +247,21 @@ function LoginPage() {
   };
 
   const fieldClass =
-    "flex h-12 w-full rounded-md border border-[#0a0f1c]/15 bg-white px-3 py-2 text-base text-[#0a0f1c] outline-none placeholder:text-[#0a0f1c]/40 focus:ring-2 focus:ring-[#c4a35a]/35";
+    "flex h-12 w-full rounded-md border border-[var(--hive-border)] bg-[var(--hive-surface)] px-3 py-2 text-base text-[var(--hive-text)] outline-none placeholder:text-[var(--hive-text-muted)] focus:border-[var(--hive-gold)] focus:ring-2 focus:ring-[var(--hive-gold)]/30";
 
   return (
     <AuthFrame>
       <div className="pi-home-cream-card pi-home-auth-card">
         <div className="mb-7 text-center">
           <h1>Welcome back</h1>
-          <p className="mt-1.5 text-sm text-[#0a0f1c]/65">
+          <p className="mt-1.5 text-sm text-[var(--hive-text-muted)]">
             Sign in to your Provider Interface account
           </p>
         </div>
 
         <form onSubmit={onSubmit} className="grid gap-4" data-testid="login-form">
           <div className="grid gap-2">
-            <Label htmlFor="identifier" className="text-[#0a0f1c]">
+            <Label htmlFor="identifier" className="text-[var(--hive-text)]">
               Email
             </Label>
             <input
@@ -280,7 +280,7 @@ function LoginPage() {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password" className="text-[#0a0f1c]">
+            <Label htmlFor="password" className="text-[var(--hive-text)]">
               Password
             </Label>
             <div className="relative">
@@ -296,7 +296,7 @@ function LoginPage() {
                 type="button"
                 tabIndex={-1}
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-[#0a0f1c]/45 hover:text-[#0a0f1c]"
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-[var(--hive-text-muted)] hover:text-[var(--hive-text)]"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -304,13 +304,13 @@ function LoginPage() {
             </div>
             <Link
               to="/forgot-password"
-              className="text-xs font-medium text-[#8a6d32] hover:text-[#0a0f1c]"
+              className="text-xs font-medium text-[var(--hive-text-muted)] underline underline-offset-4 hover:text-[var(--hive-text)]"
             >
               Forgot password?
             </Link>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-[#0a0f1c]/75">
+          <label className="flex items-center gap-2 text-sm text-[var(--hive-text)]">
             <input
               id="remember-me"
               name="rememberMe"
@@ -318,11 +318,11 @@ function LoginPage() {
               data-testid="remember-me"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-4 w-4 rounded border-[#0a0f1c]/25 bg-white"
+              className="h-4 w-4 rounded border-[var(--hive-border)] bg-white"
             />
             Remember me
           </label>
-          <p className="text-xs text-[#0a0f1c]/55">
+          <p className="text-xs text-[var(--hive-text-muted)]">
             Saves your email on this device. You still click Sign in.
           </p>
 
@@ -331,15 +331,15 @@ function LoginPage() {
           </button>
         </form>
 
-        <div className="relative my-6 text-center text-[11px] uppercase tracking-[0.18em] text-[#0a0f1c]/40">
-          <div className="absolute inset-x-0 top-1/2 h-px bg-[#0a0f1c]/10" />
-          <span className="relative bg-[#f1ecdf] px-3">or</span>
+        <div className="relative my-6 text-center text-[11px] uppercase tracking-[0.18em] text-[var(--hive-text-muted)]">
+          <div className="absolute inset-x-0 top-1/2 h-px bg-[var(--hive-border)]" />
+          <span className="relative bg-[var(--hive-surface)] px-3">or</span>
         </div>
 
         <Button
           asChild
           variant="outline"
-          className="h-11 w-full border-[#0a0f1c]/20 bg-white text-[#0a0f1c] hover:bg-white hover:text-[#0a0f1c]"
+          className="h-11 w-full border-[var(--hive-border)] bg-white text-[var(--hive-text)] hover:bg-white hover:text-[var(--hive-text)]"
         >
           <Link to="/signup">Get started</Link>
         </Button>
@@ -347,7 +347,7 @@ function LoginPage() {
         <button
           type="button"
           onClick={google}
-          className="mt-4 w-full text-center text-xs text-[#0a0f1c]/50 hover:text-[#0a0f1c]"
+          className="mt-4 w-full text-center text-xs text-[var(--hive-text-muted)] hover:text-[var(--hive-text)]"
         >
           Continue with Google
         </button>
@@ -374,7 +374,7 @@ export function AuthShell({
       <div className="pi-home-cream-card pi-home-auth-card">
         <div className="mb-7 text-center">
           <h1>{title}</h1>
-          <p className="mt-1.5 text-sm text-[#0a0f1c]/65">{subtitle}</p>
+          <p className="mt-1.5 text-sm text-[var(--hive-text-muted)]">{subtitle}</p>
         </div>
         {children}
       </div>

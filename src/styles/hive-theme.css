@@ -12,6 +12,10 @@
 :root {
   --hive-sidebar: #0a1120;
   --hive-chrome-text: #f3efe6;
+  --hive-chrome-text-muted: rgba(243, 239, 230, 0.6);
+  --hive-chrome-border: rgba(243, 239, 230, 0.12);
+  --hive-chrome-hover: rgba(243, 239, 230, 0.1);
+  --hive-chrome-control: rgba(243, 239, 230, 0.06);
   --hive-canvas: #f4f6f8;
   --hive-bg: #f4f6f8;
   --hive-surface: #ffffff;
@@ -30,6 +34,45 @@
   --hive-ok: #6b8f71;
   --hive-ok-fg: #2f4a35;
   --hive-ok-soft: #e4ede5;
+  --hive-info: #4a6d8c;
+  --hive-info-fg: #1e3a52;
+  --hive-info-soft: #e4ecf2;
+  --hive-muted-surface: #eef1f4;
+
+  /* Typography scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+
+  /* Spacing (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Component heights */
+  --height-input: 2.5rem;
+  --height-input-sm: 2.25rem;
+  --height-button: 2.5rem;
+  --height-button-sm: 2.25rem;
+  --height-button-lg: 2.75rem;
+  --height-row: 2.75rem;
+
+  /* Page layout */
+  --page-width-narrow: 28rem;
+  --page-width-default: 72rem;
+  --page-width-wide: 90rem;
+  --page-padding-x: 1rem;
+  --page-padding-y: 1.5rem;
 
   /* Semantic tokens — chrome is steel; canvas is pale stone-white. */
   --background: var(--hive-canvas);
@@ -48,9 +91,9 @@
   --accent-2: var(--hive-gold);
   --accent-3: var(--hive-ok);
 
-  --secondary: #eef1f4;
+  --secondary: var(--hive-muted-surface);
   --secondary-foreground: var(--hive-text);
-  --muted: #eef1f4;
+  --muted: var(--hive-muted-surface);
   --muted-foreground: var(--hive-text-muted);
 
   --destructive: var(--hive-danger);
@@ -59,6 +102,8 @@
   --success-foreground: #ffffff;
   --warning: var(--hive-gold);
   --warning-foreground: var(--hive-on-gold);
+  --info: var(--hive-info);
+  --info-foreground: #ffffff;
 
   --border: var(--hive-border);
   --input: var(--hive-border);
@@ -89,7 +134,7 @@
   --ink: var(--hive-text);
   --surface: var(--hive-surface);
   --surface-2: var(--hive-canvas);
-  --surface-3: #eef1f4;
+  --surface-3: var(--hive-muted-surface);
   --border-light: var(--hive-border);
   --border-dark: var(--hive-border);
   --navy-900: var(--hive-ink);
@@ -117,9 +162,9 @@
   --popover-foreground: var(--hive-text);
   --primary: var(--hive-ink);
   --primary-foreground: #ffffff;
-  --secondary: #eef1f4;
+  --secondary: var(--hive-muted-surface);
   --secondary-foreground: var(--hive-text);
-  --muted: #eef1f4;
+  --muted: var(--hive-muted-surface);
   --muted-foreground: var(--hive-text-muted);
   --accent: var(--hive-gold);
   --accent-foreground: var(--hive-on-gold);
@@ -131,10 +176,54 @@
 }
 
 @layer utilities {
-  .bg-hive-hex {
-    background-color: var(--hive-canvas);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='92'%3E%3Cpolygon points='40,2 78,24 78,68 40,90 2,68 2,24' fill='none' stroke='%23C9A227' stroke-opacity='0.10' stroke-width='1'/%3E%3C/svg%3E");
-    background-size: 80px 92px;
+  /* Dark chrome (sidebar + top bar share this exact surface). */
+  .hive-chrome {
+    background-color: var(--hive-sidebar);
+    color: var(--hive-chrome-text);
+  }
+
+  /* Ghost control that lives on the dark chrome (menu, search, Nectar, bell). */
+  .hive-chrome-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--hive-chrome-border);
+    background-color: var(--hive-chrome-control);
+    color: var(--hive-chrome-text);
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+  .hive-chrome-btn:hover {
+    background-color: var(--hive-chrome-hover);
+    border-color: color-mix(in srgb, var(--hive-chrome-text) 22%, transparent);
+    color: var(--hive-chrome-text);
+  }
+  .hive-chrome-btn:focus-visible {
+    outline: 2px solid var(--hive-gold);
+    outline-offset: 2px;
+  }
+
+  /* Sheets whose header sits on the dark chrome: restyle the built-in close X to match. */
+  .hive-chrome-sheet > button[data-state] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--hive-chrome-border);
+    background-color: var(--hive-chrome-control);
+    color: var(--hive-chrome-text);
+    opacity: 1;
+    box-shadow: none;
+  }
+  .hive-chrome-sheet > button[data-state]:hover {
+    background-color: var(--hive-chrome-hover);
+  }
+  .hive-chrome-sheet > button[data-state]:focus-visible {
+    outline: 2px solid var(--hive-gold);
+    outline-offset: 2px;
   }
 
   .hive-gold-btn {
@@ -151,7 +240,12 @@
     border: 1px solid var(--hive-border);
   }
   .hive-ghost-btn:hover {
-    background-color: #eef1f4;
+    background-color: var(--hive-muted-surface);
+  }
+
+  .hive-status-info {
+    background: var(--hive-info-soft);
+    color: var(--hive-info-fg);
   }
 
   /* Thin gold left bar — active nav. Never a gold fill box. */

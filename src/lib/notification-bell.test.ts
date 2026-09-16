@@ -24,7 +24,6 @@ describe("Admin notification bell", () => {
       shell,
       /isAdminCapable && effectiveView === "admin" && \(\s*<NotificationBell/,
     );
-    assert.match(shell, /backdropFilter: "blur\(12px\)"/);
     assert.match(
       shell,
       /<div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">/,

@@ -24,7 +24,6 @@ export const SCHED = {
 } as const;
 
 export const font: React.CSSProperties = {
-  fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
 };
 
 export const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
