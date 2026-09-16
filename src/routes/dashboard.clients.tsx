@@ -557,13 +557,13 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur supports-[backdrop-filter]:bg-muted/60">
                 <TableRow>
-                  <TableHead className="font-semibold">Full Name</TableHead>
-                  <TableHead className="font-semibold">Medicaid ID</TableHead>
-                  <TableHead className="font-semibold">Service Codes</TableHead>
-                  <TableHead className="font-semibold">Phone</TableHead>
-                  <TableHead className="font-semibold">Address</TableHead>
-                  <TableHead className="font-semibold w-[110px]">Intake</TableHead>
-                  <TableHead className="text-right font-semibold w-[160px]">Action</TableHead>
+                  <TableHead>Full Name</TableHead>
+                  <TableHead>Medicaid ID</TableHead>
+                  <TableHead>Service Codes</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Address</TableHead>
+                  <TableHead className="w-[110px]">Intake</TableHead>
+                  <TableHead className="text-right w-[160px]">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -582,7 +582,7 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
                         navigate({ to: "/dashboard/clients/$clientId", params: { clientId: c.id }, search: { tab: "overview" } });
                       }}
                     >
-                      <TableCell className="font-semibold whitespace-nowrap p-0">
+                      <TableCell className="font-medium whitespace-nowrap p-0">
                         <Link
                           to="/dashboard/clients/$clientId"
                           params={{ clientId: c.id }}
