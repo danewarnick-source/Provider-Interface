@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Trash2,
 } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { AgencySourcesPanel } from "@/components/nectar/agency-sources-panel";
 import { CodeActivationBanner } from "@/components/nectar/code-activation-banner";
@@ -97,7 +98,7 @@ import {
   prefillRequirementMappings,
   confirmRequirementWithScopes,
 } from "@/lib/nectar-engine.functions";
-import { Sparkle, X as XIcon, Hexagon } from "lucide-react";
+import { Sparkle, X as XIcon } from "lucide-react";
 import { AuthorizedCodesPanel } from "@/components/nectar/authorized-codes-panel";
 import { ExternalLink as ExternalLinkIcon, Building } from "lucide-react";
 import { attestExternalCompletion, inferClassification } from "@/lib/external-compliance.functions";
@@ -1780,7 +1781,7 @@ function CodeApplicabilitySection({ orgId }: { orgId: string }) {
         aria-expanded={open}
       >
         <span className="flex items-center gap-1.5">
-          <Hexagon className="h-3.5 w-3.5" /> Code applicability
+          <PiMark className="h-3.5 w-3.5" /> Code applicability
         </span>
         <ChevronDown
           className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}

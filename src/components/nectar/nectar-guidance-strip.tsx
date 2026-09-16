@@ -1,4 +1,5 @@
-import { Hexagon, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -33,10 +34,7 @@ export function NectarGuidanceStrip({
     >
       <div className="flex shrink-0 items-center gap-2">
         <span className="relative grid h-9 w-9 place-items-center">
-          <Hexagon
-            className="absolute inset-0 h-9 w-9 text-primary/30"
-            strokeWidth={1.25}
-          />
+          <PiMark className="absolute inset-0 h-9 w-9 text-primary/30" />
           <Sparkles className="relative h-4 w-4 text-primary" />
         </span>
         <div className="flex flex-col leading-tight">

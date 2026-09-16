@@ -24,11 +24,11 @@ import {
   Clock,
   Upload,
   PenLine,
-  Hexagon,
   Loader2,
   ExternalLink,
   FileText,
 } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import {
   getRequirementDrillDown,
   recordComplianceEvidence,
@@ -468,7 +468,7 @@ function EvidenceHistory({ evidence }: { evidence: Evidence[] }) {
           e.evidence_type === "upload" ? (
             <FileText className="h-3 w-3" />
           ) : e.evidence_type === "both" ? (
-            <Hexagon className="h-3 w-3" />
+            <PiMark className="h-3 w-3" />
           ) : (
             <PenLine className="h-3 w-3" />
           );

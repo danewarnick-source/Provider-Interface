@@ -16,9 +16,23 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
-  Play, Square, MapPin, Lock, Loader2, AlertTriangle, CheckCircle2, Clock, Wifi,
-  Hexagon, Mic, MicOff, Sparkles, Pencil, ShieldCheck, ExternalLink,
+  Play,
+  Square,
+  MapPin,
+  Lock,
+  Loader2,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Wifi,
+  Mic,
+  MicOff,
+  Sparkles,
+  Pencil,
+  ShieldCheck,
+  ExternalLink,
 } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode, maskMemberId, padMemberId } from "@/lib/evv-codes";
@@ -2185,7 +2199,7 @@ export function PunchPad({
           >
             <div className="rounded-lg border border-[color:var(--amber-300)] bg-[color:var(--amber-50)]/70 px-3 py-2.5">
               <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--amber-700)]">
-                <Hexagon className="h-3.5 w-3.5" /> NECTAR · Pre-flight
+                <PiMark className="h-3.5 w-3.5" /> NECTAR · Pre-flight
               </p>
               <p className="mt-1 text-[12px] leading-snug text-[color:var(--navy-900)]">
                 <span className="font-semibold">
@@ -2365,7 +2379,7 @@ export function PunchPad({
               aria-expanded={askOpen}
             >
               <span className="flex items-center gap-2 text-xs font-semibold text-[color:var(--navy-900)]">
-                <Hexagon className="h-3.5 w-3.5 text-[color:var(--amber-600)]" />
+                <PiMark className="h-3.5 w-3.5 text-[color:var(--amber-600)]" />
                 Ask NECTAR — "am I allowed to…?"
               </span>
               <span className="text-[11px] text-muted-foreground">{askOpen ? "Hide" : "Open"}</span>
@@ -2408,7 +2422,7 @@ export function PunchPad({
                       {askResult.escalate ? (
                         <><AlertTriangle className="h-3.5 w-3.5" /> Escalate now</>
                       ) : (
-                        <><Hexagon className="h-3.5 w-3.5" /> NECTAR · Confidence: {askResult.confidence}</>
+                        <><PiMark className="h-3.5 w-3.5" /> NECTAR · Confidence: {askResult.confidence}</>
                       )}
                     </p>
                     <p className="mt-1">{askResult.answer}</p>

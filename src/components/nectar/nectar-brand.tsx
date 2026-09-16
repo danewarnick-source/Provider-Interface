@@ -1,5 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
-import { Hexagon, Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 
 /**
  * Single source of truth for the NECTAR visual signature.
@@ -44,7 +45,7 @@ export function NectarMark({
         className,
       )}
     >
-      <Hexagon className={cn(hex)} fill="none" strokeWidth={1.6} />
+      <PiMark className={cn(hex)} />
       {ornament ? (
         <span className="absolute -right-0.5 -top-0.5 inline-flex items-center justify-center rounded-full bg-[var(--hive-gold)] p-[2px] text-[var(--hive-on-gold)] shadow-sm">
           <Sparkles className={spark} strokeWidth={2.5} />

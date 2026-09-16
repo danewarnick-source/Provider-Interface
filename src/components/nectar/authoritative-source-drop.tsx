@@ -6,12 +6,11 @@ import {
   AlertTriangle,
   CheckCircle2,
   FileText,
-  Hexagon,
   Loader2,
   Sparkles,
-  
   X,
 } from "lucide-react";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -337,7 +336,7 @@ export function AuthoritativeSourceDrop({
                   "linear-gradient(135deg, var(--amber-100, #fef3c7), var(--amber-200, #fde68a))",
               }}
             >
-              <Hexagon className="h-7 w-7 text-[color:var(--amber-600,#d97706)]" />
+              <PiMark className="h-7 w-7 text-[color:var(--amber-600,#d97706)]" />
             </span>
             <div className="text-lg font-semibold text-[color:var(--navy-900,#0b1733)]">
               Drop to add to Authoritative Sources
