@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
@@ -10,7 +9,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { getOrgCeRoster } from "@/lib/ce.functions";
 import { useDeadlines } from "@/hooks/use-deadlines";
 import { isUpiReminderFireDay } from "@/lib/upi-reminder-cadence";
 
@@ -193,35 +191,6 @@ export function NotificationBell({
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications", org?.organization_id] }),
   });
 
-  // CE roster signal — surfaces "N staff behind on CE" as a synthetic top entry.
-  const fetchRoster = useServerFn(getOrgCeRoster);
-  const { data: ceRoster } = useQuery({
-    enabled: !!user?.id && !!org?.organization_id,
-    queryKey: ["ce-roster-signal", org?.organization_id],
-    queryFn: () => fetchRoster(),
-    staleTime: 5 * 60_000,
-    refetchInterval: 5 * 60_000,
-    retry: false,
-  });
-  const ceBehind = ceRoster?.behindCount ?? 0;
-  const ceSynthetic = useMemo<AppNotification | null>(() => {
-    if (ceBehind <= 0) return null;
-    return {
-      id: "__ce_behind__",
-      organization_id: org?.organization_id ?? "",
-      type: "incident_deadline_warning",
-      urgency: "urgent",
-      title: `${ceBehind} staff behind on Continuing Education`,
-      body: "DSPD requires 12 CE hours per staff per year (Year 2+). Open Training Records to see who's behind.",
-      link_to: "/dashboard/hub/employees?tab=compliance",
-      related_id: null,
-      related_type: null,
-      read_at: null,
-      dismissed_at: null,
-      created_at: new Date().toISOString(),
-    };
-  }, [ceBehind, org?.organization_id]);
-
   // UPI attestation cadence reminders (prompts 20/21/25) — SEI monthly
   // summary, SEI employment data, and CMP/CMS monthly summary. These only
   // fire into the bell on the 1st/5th/10th of the month; the Deadlines panel
@@ -248,8 +217,8 @@ export function NotificationBell({
   }, [deadlineItems, org?.organization_id]);
 
   const merged = useMemo(
-    () => [...cadenceSynthetics, ...(ceSynthetic ? [ceSynthetic] : []), ...notifications],
-    [cadenceSynthetics, ceSynthetic, notifications],
+    () => [...cadenceSynthetics, ...notifications],
+    [cadenceSynthetics, notifications],
   );
 
   const unread = merged.filter((n) => !n.read_at);

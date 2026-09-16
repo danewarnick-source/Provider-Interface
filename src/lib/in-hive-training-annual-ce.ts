@@ -1,6 +1,6 @@
 /**
  * Annual 12-hour continuing education — placeholder in-PI shell.
- * No curriculum, quiz, or answer keys. Upload / CE ledger remain the SOW path.
+ * No curriculum, quiz, or answer keys. Upload / training-hours remain the SOW path.
  */
 
 export const ANNUAL_CE_COURSE_ID = "pi-annual-ce-12hr" as const;

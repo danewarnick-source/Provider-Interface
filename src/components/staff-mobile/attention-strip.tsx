@@ -1,10 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { FileText, GraduationCap, ChevronRight, BellRing, MessageSquare } from "lucide-react";
+import { FileText, ChevronRight, BellRing, MessageSquare } from "lucide-react";
 import { listMyThreads } from "@/lib/threads.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { getMyCeStatus } from "@/lib/ce.functions";
 import { listMyForms, getMyFormNotifications } from "@/lib/forms.functions";
 import { listSmartImportReminders } from "@/lib/smart-import-reminders.functions";
 import {
@@ -23,19 +22,17 @@ type Chip = {
 };
 
 /**
- * Compact attention chips for forms, CE, and cert reminders.
+ * Compact attention chips for forms and cert reminders.
  * Obligation items live on the Staff Obligations tab only.
  */
 export function AttentionStrip() {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id ?? null;
-  const fetchCe = useServerFn(getMyCeStatus);
   const fetchForms = useServerFn(listMyForms);
   const fetchBell = useServerFn(getMyFormNotifications);
   const fetchSI = useServerFn(listSmartImportReminders);
   const fetchThreads = useServerFn(listMyThreads);
 
-  const { data: ce } = useQuery({ queryKey: ["ce-status"], queryFn: () => fetchCe(), staleTime: 60_000 });
   const { data: formsData } = useQuery({ queryKey: ["my-forms"], queryFn: () => fetchForms(), staleTime: 60_000 });
   const { data: bell } = useQuery({ queryKey: ["my-form-notifs"], queryFn: () => fetchBell(), staleTime: 60_000 });
   const { data: si } = useQuery({ queryKey: ["my-smart-import-reminders"], queryFn: () => fetchSI({ data: { scope: "mine" } }), staleTime: 60_000 });
@@ -80,27 +77,6 @@ export function AttentionStrip() {
       label: `${unreadAssigned} new form${unreadAssigned === 1 ? "" : "s"}`,
     });
   }
-
-  // CE — only when behind or current module not done, mirroring CeReminderCard.
-  if (ce && ce.ceApplies) {
-    const remaining = Math.max(0, ce.goalHours - ce.hoursThisYear);
-    if (remaining > 0) {
-      const monthsIn = ce.ceYearStart
-        ? Math.min(12, Math.max(0, Math.round((Date.now() - new Date(ce.ceYearStart + "T00:00:00Z").getTime()) / (86_400_000 * 30))))
-        : 0;
-      const expected = Math.min(ce.goalHours, (ce.goalHours * monthsIn) / 12);
-      const behind = ce.hoursThisYear + 0.001 < expected;
-      const currentMonthDone = ce.currentModule?.status === "completed";
-      if (behind || !currentMonthDone) {
-        chips.push({
-          key: "ce", to: "/dashboard/courses/ce", icon: GraduationCap,
-          tone: behind ? "warn" : "info",
-          label: `${remaining.toFixed(1)} CE hrs left`,
-        });
-      }
-    }
-  }
-
 
   // Smart Import reminders for me — provisional/expiring certs needing upload.
   const siCount = (si?.reminders ?? []).length;

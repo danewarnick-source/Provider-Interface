@@ -55,7 +55,7 @@ compliance-flag tables can be safely dropped, if they ever should be.
 ## Training
 - `training_topics` + `training_topic_progress` — SOW §1.8 core training topics.
 - `training_person_modules` — Per-staff per-client training modules.
-- `ce_modules` + `ce_ledger` + `ce_settings` — Continuing education tracking. `ce_ledger` now also holds manual training-hour entries (`source = 'manual_entry'`), replacing the old `staff_training_hours_entries` table.
+- `ce_modules` + `ce_ledger` + `ce_settings` — Tables remain in place (no DROP). The Continuing Education generation product was removed from app code. `ce_ledger` still stores manual training-hour entries (`source = 'manual_entry'`), replacing the old `staff_training_hours_entries` table.
 - `client_specific_trainings` — Client-specific, support strategies, PCT content.
 - `policy_signatures` — Policy document e-signatures.
 - `training_products` + `training_purchases` + `training_enrollments` — Hive Training add-on.

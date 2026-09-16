@@ -85,7 +85,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/tracks",
 
   // Admin sub-routes
-  "/dashboard/admin/ce-hours",
   "/dashboard/admin/emar-audit",
   "/dashboard/behaviorist",
 
@@ -103,7 +102,6 @@ const STATIC_ROUTES: string[] = [
   // Courses
   "/dashboard/courses",
   "/dashboard/courses/core",
-  "/dashboard/courses/ce",
   "/dashboard/courses/mindsmith",
   "/dashboard/courses/other",
   "/dashboard/courses/person",
