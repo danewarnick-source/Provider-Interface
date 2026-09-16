@@ -1590,7 +1590,7 @@ export const nectarDraftFormFromPdf = createServerFn({ method: "POST" })
     adminGuard(m.role);
     assertBedrockConfigured();
 
-    const system = `You are NECTAR. You are given a PDF of an EXISTING paper/digital form used by a DSPD agency. Extract the form's STRUCTURE (sections, questions, input types) and re-express it as a HIVE custom form. Output STRICT JSON only — no markdown.
+    const system = `You are NECTAR. You are given a PDF of an EXISTING paper/digital form used by a DSPD agency. Extract the form's STRUCTURE (sections, questions, input types) and re-express it as a PI custom form. Output STRICT JSON only — no markdown.
 
 Schema:
 {

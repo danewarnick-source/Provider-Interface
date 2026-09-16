@@ -267,7 +267,7 @@ export const THIRTEENTH_BATCH_DEMO_PATH = [
     step: "evidence",
     title: "Complete in the OL/DLBC portal, then upload",
     detail:
-      "Day Treatment license (4+) and Day Support certification (3 or fewer) are EXTERNAL Office of Licensing plus UPLOAD proof. HIVE cannot transmit to OL.",
+      "Day Treatment license (4+) and Day Support certification (3 or fewer) are EXTERNAL Office of Licensing plus UPLOAD proof. PI cannot transmit to OL.",
   },
   {
     step: "review",
@@ -379,7 +379,7 @@ export function thirteenthBatchLiveEngineReady(row: ThirteenthBatchEngineBinding
     reasons.push("Child elements must not mint staff tasks.");
   }
   if (row.trainingTitle !== null) {
-    reasons.push("This batch does not invent an in-Hive course.");
+    reasons.push("This batch does not invent an in-PI course.");
   }
   if (row.formTitle !== null) {
     reasons.push("This batch does not invent a person form.");

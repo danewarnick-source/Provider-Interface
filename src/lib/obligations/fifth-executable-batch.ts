@@ -183,7 +183,7 @@ export const FIFTH_BATCH_DEMO_PATH = [
     step: "evidence",
     title: "Write the note; punch time; geofence only when mandated",
     detail:
-      "General five-field note unless the HHS host-home override applies. Timesheet is the attendance record. EVV is a geofence-valid punch for mandated codes only. HIVE does not invent UEVV transmission success.",
+      "General five-field note unless the HHS host-home override applies. Timesheet is the attendance record. EVV is a geofence-valid punch for mandated codes only. PI does not invent UEVV transmission success.",
   },
   {
     step: "review",
@@ -326,7 +326,7 @@ export function fifthBatchLiveEngineReady(binding: FifthBatchEngineBinding): {
     reasons.push("This batch does not mint a My tasks card — the live record is the parent.");
   }
   if (binding.trainingTitle !== null) {
-    reasons.push("This batch does not invent an in-Hive course.");
+    reasons.push("This batch does not invent an in-PI course.");
   }
   if (binding.formTitle !== null) {
     reasons.push("This batch does not invent a person form.");
@@ -343,7 +343,7 @@ export function fifthBatchLiveEngineReady(binding: FifthBatchEngineBinding): {
   const notes = sowCatalogEntryByKey("timesheets_attendance");
   if (binding.ruleId === "REQ-1.10.7") {
     if (notes?.fulfillment !== "in_hive") {
-      reasons.push("timesheets_attendance must stay the in-Hive attendance/note record.");
+      reasons.push("timesheets_attendance must stay the in-PI attendance/note record.");
     }
     if (!binding.liveKeys.includes("hhs_billable_day")) {
       reasons.push("REQ-1.10.7 must also bind hhs_billable_day for the host-home override.");
@@ -352,7 +352,7 @@ export function fifthBatchLiveEngineReady(binding: FifthBatchEngineBinding): {
   const evv = sowCatalogEntryByKey("evv_visit_verification");
   if (binding.ruleId === "REQ-1.12") {
     if (evv?.fulfillment !== "in_hive") {
-      reasons.push("evv_visit_verification must stay the in-Hive geofence path.");
+      reasons.push("evv_visit_verification must stay the in-PI geofence path.");
     }
     if (!isEvvLockedCode("SLN") || isEvvLockedCode("HHS") || isEvvLockedCode("SEI")) {
       reasons.push("EVV mandated-code table drifted — SLN is in, HHS/SEI stay out.");

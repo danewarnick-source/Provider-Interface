@@ -175,14 +175,14 @@ function OnboardingPage() {
           </span>
           <div>
             <div className="text-xs uppercase tracking-wider text-[#fed7aa]">
-              HIVE Executive · State template build
+              PI Executive · State template build
             </div>
             <h3 className="font-display text-base font-semibold">
               Build the {stateCode} template
             </h3>
             <p className="mt-1 max-w-3xl text-xs text-[#fed7aa]">
               Done once per state. Answers configure terminology, codes, training, EVV, and required docs.
-              Flag any answer that requires a platform build — those open HIVE NECTAR tickets on complete.
+              Flag any answer that requires a platform build — those open PI NECTAR tickets on complete.
             </p>
           </div>
         </div>
@@ -278,7 +278,7 @@ function OnboardingPage() {
         </h3>
         <p className="mt-1 text-xs text-muted-foreground">
           These items can't be handled by template configuration alone. Completing onboarding opens
-          a HIVE NECTAR ticket for each one so the structural work is tracked.
+          a PI NECTAR ticket for each one so the structural work is tracked.
         </p>
         {flags.length === 0 ? (
           <div className="mt-3 rounded-md border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">

@@ -100,7 +100,7 @@ function InvitationsPage() {
             {counts.revoked ? <Badge variant="secondary">{counts.revoked} revoked</Badge> : null}
           </div>
         </div>
-        <Button asChild className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]">
+        <Button asChild className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]">
           <Link to="/dashboard/hub/employees">
             <UserPlus className="mr-2 h-4 w-4" /> Add employee
           </Link>

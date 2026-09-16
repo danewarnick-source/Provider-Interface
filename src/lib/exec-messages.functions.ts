@@ -30,10 +30,10 @@ async function ensureHiveExecutive(
     .eq("active", true)
     .maybeSingle();
   if (error) throw error;
-  if (!data) throw new Error("Access denied — HIVE Executive permission required.");
+  if (!data) throw new Error("Access denied — PI Executive permission required.");
 }
 
-// ─── List all organizations (HIVE Exec only) ──────────────────────────────
+// ─── List all organizations (PI Exec only) ──────────────────────────────
 
 export const listAllOrganizationsForMessaging = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -42,7 +42,7 @@ export const listAllOrganizationsForMessaging = createServerFn({ method: "GET" }
     if (!supabase || !userId) return [];
     await ensureHiveExecutive(supabase, userId);
 
-    // HIVE Execs can read every organization via existing RLS
+    // PI Execs can read every organization via existing RLS
     // (organizations policy allows hive_executives). If a row is filtered,
     // surface it as a missing org rather than silently dropping.
     const { data, error } = await supabase
@@ -215,7 +215,7 @@ export const discardExecMessage = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// ─── Sent messages (HIVE Exec only) ───────────────────────────────────────
+// ─── Sent messages (PI Exec only) ───────────────────────────────────────
 
 export interface SentMessageRecipient {
   organization_id: string;
@@ -271,7 +271,7 @@ export const listSentExecMessages = createServerFn({ method: "GET" })
       read_at: string | null;
     }>;
 
-    // Org names (HIVE execs can read every org via existing RLS)
+    // Org names (PI execs can read every org via existing RLS)
     const orgIds = Array.from(new Set(recRows.map((r) => r.organization_id)));
     const { data: orgs, error: orgErr } = await supabase
       .from("organizations")

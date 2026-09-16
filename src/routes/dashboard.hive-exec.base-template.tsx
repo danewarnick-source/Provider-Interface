@@ -38,7 +38,7 @@ function BaseTemplatePage() {
             <Sparkles className="h-5 w-5" />
           </span>
           <div>
-            <h2 className="font-display text-lg font-semibold">HIVE base template versions</h2>
+            <h2 className="font-display text-lg font-semibold">PI base template versions</h2>
             <p className="text-xs text-muted-foreground">
               The base template is the state-neutral structure. Each state is stamped with the version it was built from; states on older versions can be updated without losing their entered values.
             </p>
@@ -105,7 +105,7 @@ function BaseTemplatePage() {
   );
 }
 
-// ─── Publish a new version (HIVE Executive only) ─────────────────────────────
+// ─── Publish a new version (PI Executive only) ─────────────────────────────
 
 function PublishNewVersion({ current }: { current: BaseTemplateVersion | null }) {
   const qc = useQueryClient();

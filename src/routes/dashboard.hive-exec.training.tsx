@@ -178,7 +178,7 @@ function TrainingFulfillmentPage() {
     <div className="space-y-4">
       <NectarHeader
         surface="navy"
-        eyebrow="HIVE Platform Operations"
+        eyebrow="PI Platform Operations"
         title="Training Fulfillment"
         description="Send training links, mark completions, and review uploaded certificates across every provider."
         right={<NectarBadge size="sm" label="EXEC ONLY" />}

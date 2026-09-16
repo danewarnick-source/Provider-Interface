@@ -7,7 +7,7 @@ import { loadOrgPersonnelFileIndex } from "@/lib/personnel-file-matrix.functions
 /**
  * Internal Audit (QA / audit-prep) — Foundation: NECTAR.
  *
- * Runs read-only checks against the company's actual HIVE data and surfaces
+ * Runs read-only checks against the company's actual PI data and surfaces
  * gaps the way a state auditor would. NECTAR identifies; the company acts.
  * This DOES NOT certify compliance — it's the company auditing itself so
  * issues are caught before a formal audit.
@@ -38,7 +38,7 @@ export interface AuditFinding {
   subjectKind: "client" | "staff" | "code" | "provider";
   subjectId?: string | null;
   subjectName?: string | null;
-  /** Deep-link path inside HIVE to the record that needs fixing. */
+  /** Deep-link path inside PI to the record that needs fixing. */
   fixHref?: string | null;
   fixLabel?: string | null;
   /** When the issue surfaced (record date / today). */

@@ -106,12 +106,12 @@ export function ExternalCompliancePage() {
                 <Sparkles className="h-3.5 w-3.5" /> NECTAR · External Resources &amp; Platform Compliance
               </div>
               <h1 className="font-display text-lg font-semibold text-[#7c2d12]">
-                Compliance steps that happen outside HIVE
+                Compliance steps that happen outside PI
               </h1>
               <p className="mt-1 max-w-3xl text-sm text-[#7c2d12]/80">
                 These requirements live on other systems (UPI/USTEPS, DACS, DWS, TAPS, QuickBooks)
                 or in the physical world (business license, DHS licenses, certifications).
-                HIVE can't hold the primary evidence — you attest here that the step was done so
+                PI can't hold the primary evidence — you attest here that the step was done so
                 the provider stays audit-ready.
               </p>
             </div>
@@ -180,8 +180,8 @@ export function ExternalCompliancePage() {
       ))}
 
       <div className="rounded-xl border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
-        <strong>Audit-readiness</strong> combines internal evidence (in HIVE) and external attestations
-        (produced here). HIVE records what was attested; it does not verify the external systems.
+        <strong>Audit-readiness</strong> combines internal evidence (in PI) and external attestations
+        (produced here). PI records what was attested; it does not verify the external systems.
         Counsel review recommended before relying on this as a legal record.
       </div>
     </div>
@@ -294,7 +294,7 @@ function ExternalRow({ item, orgId }: { item: Item; orgId: string }) {
           <div className="space-y-3 text-sm">
             <p className="rounded-md border border-[#fed7aa] bg-[#fff7ed] p-2 text-xs text-[#9a3412]">
               This step is performed in <strong>{item.external_system ?? "an external system"}</strong> —
-              HIVE is tracking it, not performing it. Your attestation is logged to the immutable trail.
+              PI is tracking it, not performing it. Your attestation is logged to the immutable trail.
             </p>
             <div>
               <Label htmlFor="completedOn">Completed on</Label>

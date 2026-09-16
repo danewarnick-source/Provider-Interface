@@ -6,7 +6,7 @@ export default defineTool({
   name: "list_tables",
   title: "List tables and columns",
   description:
-    "Lists tables (and optionally their columns) in the HIVE public schema so you can discover what's queryable. Read-only.",
+    "Lists tables (and optionally their columns) in the PI public schema so you can discover what's queryable. Read-only.",
   inputSchema: {
     include_columns: z
       .boolean()

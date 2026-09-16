@@ -195,7 +195,7 @@ export function NectarSearchBar({
   return (
     <div ref={wrapRef} className={wrapCls}>
       <div className="relative">
-        <PiMark className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--hive-gold)]" />
+        <PiMark variant="gold" className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2" />
         <input
           ref={inputRef}
           type="text"
@@ -313,5 +313,5 @@ function KindIcon({ kind }: { kind: ResultKind }) {
   if (kind === "page") return <MapPin className={`${cls} text-muted-foreground`} />;
   if (kind === "client") return <Contact2 className={`${cls} text-[var(--hive-text)]`} />;
   if (kind === "staff") return <Users className={`${cls} text-[var(--hive-text)]`} />;
-  return <PiMark className={`${cls} text-[var(--hive-gold)]`} />;
+  return <PiMark variant="gold" className={cls} />;
 }

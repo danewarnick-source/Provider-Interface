@@ -1,7 +1,7 @@
 /**
  * Locked auto-assign rules for company obligations.
  *
- * Hive writes the staff list. Staff never pick or self-enroll.
+ * PI writes the staff list. Staff never pick or self-enroll.
  * Calendar renewals stay on the existing cadence engine — this module
  * only decides *which* locked rows to open, and never invents a second clock.
  */

@@ -6,12 +6,12 @@ import type { Json } from "@/integrations/supabase/types";
 
 
 // ============================================================
-// HIVE Executive NECTAR — platform ticket queue.
+// PI Executive NECTAR — platform ticket queue.
 // Tickets are real DB rows, not seeded sample data. They come from
 // two sources:
 //   1. auto — NECTAR detects a platform-level event (parsing failure,
 //      no-extraction-found, AI error, etc.) and files a ticket.
-//   2. manual — a HIVE executive files one for issues NECTAR cannot
+//   2. manual — a PI executive files one for issues NECTAR cannot
 //      yet detect on its own (permission inconsistencies, UX gaps).
 // ============================================================
 
@@ -29,7 +29,7 @@ const STATUS = ["new", "in_progress", "resolved"] as const;
 // ---------------------------------------------------------------
 // Auto-report a platform event. Called from inside the company-side
 // flow (e.g. generateRequirementsFromSource) — the caller is a
-// company admin, not a HIVE exec, so this MUST use supabaseAdmin to
+// company admin, not a PI exec, so this MUST use supabaseAdmin to
 // bypass RLS for insert. Dedupes on (event_kind, dedupe_key) while
 // any prior ticket for the same key is still open.
 // ---------------------------------------------------------------
@@ -143,14 +143,14 @@ export async function reportPlatformEvent(input: {
       });
     }
   } catch (e) {
-    // NEVER block the company-side flow on a HIVE-queue write failure.
+    // NEVER block the company-side flow on a PI-queue write failure.
     // Log so the failure is visible in server logs for debugging.
     console.error("[hive-tickets] reportPlatformEvent threw", e);
   }
 }
 
 // ---------------------------------------------------------------
-// HIVE-exec-scoped reads/writes. RLS already restricts these to
+// PI-exec-scoped reads/writes. RLS already restricts these to
 // is_hive_executive — the user-scoped supabase client is fine.
 // ---------------------------------------------------------------
 
@@ -190,7 +190,7 @@ export const createPlatformTicket = createServerFn({ method: "POST" })
     const audit = [
       {
         ts: new Date().toISOString(),
-        actor: "HIVE Exec",
+        actor: "PI Exec",
         action: "Ticket filed manually",
       },
     ];

@@ -1,5 +1,5 @@
 /**
- * Annual 12-hour continuing education — placeholder in-Hive shell.
+ * Annual 12-hour continuing education — placeholder in-PI shell.
  * No curriculum, quiz, or answer keys. Upload / CE ledger remain the SOW path.
  */
 

@@ -27,7 +27,7 @@ export const Route = createFileRoute("/dashboard/hive-exec/company-migration")({
       {
         name: "description",
         content:
-          "HIVE-staff migration service: secure intake of a customer's export, prepped by HIVE staff and committed only after the receiving company's admin signs off.",
+          "PI-staff migration service: secure intake of a customer's export, prepped by PI staff and committed only after the receiving company's admin signs off.",
       },
     ],
   }),
@@ -102,7 +102,7 @@ function CompanyMigrationPage() {
     enabled: !!activeJob,
   });
 
-  // Log view-only access when a HIVE exec lands on a customer's active job.
+  // Log view-only access when a PI exec lands on a customer's active job.
   useEffect(() => {
     if (!activeJob) return;
     logFn({ data: { jobId: activeJob.id, action: "view_migration", details: { target_org_id: targetOrgId } } })
@@ -112,7 +112,7 @@ function CompanyMigrationPage() {
   const createM = useMutation({
     mutationFn: async () => {
       if (!targetCompany) throw new Error("Pick a target company first.");
-      // Job is owned by the HIVE org of the executive (their primary org),
+      // Job is owned by the PI org of the executive (their primary org),
       // but scoped to target_org_id so prep + commit land in the customer's data.
       // We pass the target org as the host org for the staging job too — the
       // commit fn re-routes writes to target_org_id on white_glove.
@@ -157,11 +157,11 @@ function CompanyMigrationPage() {
     <div className="space-y-5">
       <header className="space-y-1">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#fed7aa]">
-          <ArrowRightLeft className="h-3.5 w-3.5" /> HIVE Executive · Company Migration Service
+          <ArrowRightLeft className="h-3.5 w-3.5" /> PI Executive · Company Migration Service
         </div>
-        <h1 className="text-2xl font-semibold">Migrate a customer onto HIVE</h1>
+        <h1 className="text-2xl font-semibold">Migrate a customer onto PI</h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
-          Paid white-glove onboarding. HIVE staff prep the import using the shared
+          Paid white-glove onboarding. PI staff prep the import using the shared
           NECTAR engine; the receiving company's admin signs off before anything
           commits. Customer companies never see this tool.
         </p>
@@ -172,7 +172,7 @@ function CompanyMigrationPage() {
         <div className="text-amber-900 dark:text-amber-100">
           <strong>Internal only.</strong> Customer companies never see this page. Files
           are uploaded through the platform's private bucket under the BAA — never email.
-          Every HIVE-staff action on this customer's data is logged.
+          Every PI-staff action on this customer's data is logged.
         </div>
       </div>
 
@@ -255,7 +255,7 @@ function CompanyMigrationPage() {
       </Card>
 
       <NectarGuidanceStrip
-        title="One engine. HIVE preps; the customer signs off."
+        title="One engine. PI preps; the customer signs off."
         message={
           <>
             This page runs the same Smart Import engine the customer uses, just scoped
@@ -333,7 +333,7 @@ function CompanyMigrationPage() {
               <Lock className="mt-0.5 h-4 w-4 text-amber-700" />
               <div className="text-amber-900 dark:text-amber-100">
                 Commit is locked. The receiving company's admin must open the review
-                screen at the link above and record their sign-off. HIVE staff cannot
+                screen at the link above and record their sign-off. PI staff cannot
                 self-commit a customer's data.
               </div>
             </div>
@@ -377,7 +377,7 @@ function CompanyMigrationPage() {
       {/* Access log */}
       {activeJob && (accessLogQ.data?.length ?? 0) > 0 && (
         <Card className="border-border/60 p-5">
-          <div className="mb-2 text-sm font-semibold">HIVE access log (minimum necessary)</div>
+          <div className="mb-2 text-sm font-semibold">PI access log (minimum necessary)</div>
           <ul className="max-h-64 space-y-1 overflow-auto text-[11px]">
             {(accessLogQ.data ?? []).map((r: { id: string; actor_name: string; action: string; created_at: string; details: unknown }) => (
               <li key={r.id} className="flex items-center justify-between gap-2 rounded border border-border/60 px-2 py-1">

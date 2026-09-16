@@ -1,11 +1,11 @@
 // =============================================================
-// Provider ↔ HIVE Admin approval requests for external
+// Provider ↔ PI Admin approval requests for external
 // billing codes discovered in Smart-Import PCSPs.
 //
 // Provider self-attestation is GONE. To bill an outside-provider
-// code the provider must open a threaded conversation with HIVE
+// code the provider must open a threaded conversation with PI
 // Admin, provide justification, and receive an explicit approval
-// by a HIVE Admin. This module owns the entire lifecycle.
+// by a PI Admin. This module owns the entire lifecycle.
 // =============================================================
 
 import { createServerFn } from "@tanstack/react-start";
@@ -210,11 +210,11 @@ export const postApprovalMessage = createServerFn({ method: "POST" })
       side = "provider";
     }
 
-    // A resolution action is only valid from a HIVE Admin, on a pending request, with a signature.
+    // A resolution action is only valid from a PI Admin, on a pending request, with a signature.
     const sigName = (data.signatureName ?? "").trim();
     const sigAttested = data.signatureAttested === true;
     if (data.action) {
-      if (side !== "hive_admin") throw new Error("Only HIVE Admin can approve or deny");
+      if (side !== "hive_admin") throw new Error("Only PI Admin can approve or deny");
       if (req.status !== "pending") throw new Error(`Request is already ${req.status}`);
       if (!sigName || !sigAttested) throw new Error("Signature required to resolve. Type your full name and check the attestation.");
     }
@@ -304,7 +304,7 @@ export const listMyApprovalRequests = createServerFn({ method: "POST" })
     return listRequestsInternal(supabase, { organizationId: data.organizationId, viewerSide: "provider", viewerUserId: userId });
   });
 
-// ---------- list (HIVE Admin queue) ----------------------------
+// ---------- list (PI Admin queue) ----------------------------
 
 const ListHiveInput = z.object({ status: z.enum(["pending", "resolved", "all"]).default("pending") });
 
@@ -314,7 +314,7 @@ export const listPendingHiveApprovals = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<ApprovalRequestRow[]> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return [];
-    if (!(await isHiveExec(supabase, userId))) throw new Error("HIVE Admin only");
+    if (!(await isHiveExec(supabase, userId))) throw new Error("PI Admin only");
     return listRequestsInternal(supabase, { viewerSide: "hive_admin", viewerUserId: userId, statusFilter: data.status });
   });
 
@@ -587,7 +587,7 @@ export const getApprovalUnreadCount = createServerFn({ method: "POST" })
     return { count: count ?? 0 };
   });
 
-// Same shape for the HIVE Admin nav pill.
+// Same shape for the PI Admin nav pill.
 export const getHiveApprovalUnreadCount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ count: number; pending: number }> => {

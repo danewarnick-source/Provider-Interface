@@ -111,7 +111,7 @@ const TIMING = {
 } as const;
 
 const UPI_HANDLING =
-  "Complete in UPI, then administrator attests and attaches proof. Staff never touch UPI. HIVE cannot transmit to UPI.";
+  "Complete in UPI, then administrator attests and attaches proof. Staff never touch UPI. PI cannot transmit to UPI.";
 
 const USOR_HANDLING =
   "Verify USOR outreach and funding status outside the platform, then record completion. Staff never touch UPI.";
@@ -316,7 +316,7 @@ export const TWELFTH_BATCH_DEMO_PATH = [
     step: "evidence",
     title: "Complete in UPI or USOR, then record admin attestation",
     detail:
-      "Employment data and support strategies are EXTERNAL UPI entry plus UPLOAD proof. USOR contact is EXTERNAL verification plus recorded completion. HIVE cannot transmit to UPI. Staff never touch UPI.",
+      "Employment data and support strategies are EXTERNAL UPI entry plus UPLOAD proof. USOR contact is EXTERNAL verification plus recorded completion. PI cannot transmit to UPI. Staff never touch UPI.",
   },
   {
     step: "review",
@@ -425,7 +425,7 @@ export function twelfthBatchLiveEngineReady(row: TwelfthBatchEngineBinding): {
     reasons.push("Child elements must not mint staff tasks.");
   }
   if (row.trainingTitle !== null) {
-    reasons.push("This batch does not invent an in-Hive course.");
+    reasons.push("This batch does not invent an in-PI course.");
   }
   if (row.formTitle !== null) {
     reasons.push("This batch does not invent a person form.");

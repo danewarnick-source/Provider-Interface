@@ -276,10 +276,10 @@ export const NectarButton = forwardRef<HTMLButtonElement, NectarButtonProps>(
       "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hive-gold)]/50 focus-visible:ring-offset-2";
     const styles =
       variant === "amber"
-        ? "bg-[var(--hive-gold)] text-[var(--hive-on-gold)] hover:bg-[var(--hive-gold-hover)]"
+        ? "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]"
         : variant === "ghost"
         ? "border border-[var(--hive-gold)]/40 bg-[color-mix(in_srgb,var(--hive-gold)_10%,transparent)] text-[var(--hive-gold)] hover:bg-[color-mix(in_srgb,var(--hive-gold)_20%,transparent)]"
-        : "bg-[var(--hive-gold)] text-[var(--hive-on-gold)] hover:bg-[var(--hive-gold-hover)]";
+        : "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]";
     const leading = loading ? (
       <Loader2 className="h-4 w-4 animate-spin" />
     ) : (

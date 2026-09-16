@@ -92,7 +92,7 @@ export function SowDeadlinesPanel({
           ))}
         </ul>
         <p className="mt-3 rounded-md border border-dashed border-border bg-muted/30 px-2 py-1 text-[11px] italic text-muted-foreground">
-          HIVE tracks deliverables; the provider/clinician owns clinical content. Confirm against current Utah DSPD SOW.
+          PI tracks deliverables; the provider/clinician owns clinical content. Confirm against current Utah DSPD SOW.
         </p>
       </CardContent>
     </Card>

@@ -7,7 +7,7 @@
 // the paper tool are split here so a Host Home + SEI provider never sees RHS
 // licensing or PPS foster-care rows.
 //
-// Existing Company Obligations are attached by catalog key. HIVE
+// Existing Company Obligations are attached by catalog key. PI
 // features that already produce the evidence (HRC, summaries, EVV, belongings)
 // are linked rather than duplicated as a second to-do.
 
@@ -68,7 +68,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: ["DSI"],
     obligation_keys: ["ol_day_tx_license_4plus", "ol_day_support_cert_3or_fewer"],
     fulfillment: "external",
-    note: "Issued by the Office of Licensing. Upload the current license or certification in HIVE. Community-only DSI uses the Community Based Day Support certification when serving 3 or fewer.",
+    note: "Issued by the Office of Licensing. Upload the current license or certification in PI. Community-only DSI uses the Community Based Day Support certification when serving 3 or fewer.",
   },
   {
     id: "I-1-DSG",
@@ -104,7 +104,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: ["HHS"],
     obligation_keys: ["hhs_home_cert_annual"],
     fulfillment: "hybrid",
-    note: "Inspect each home with the DSPD Host Home Certification form (or a tool covering every element on that form). Upload the completed form in HIVE.",
+    note: "Inspect each home with the DSPD Host Home Certification form (or a tool covering every element on that form). Upload the completed form in PI.",
   },
   {
     id: "I-2-PPS",
@@ -127,9 +127,9 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: [],
     obligation_keys: ["hrc_committee"],
     hive_href: "/dashboard/hub/documentation?tab=hrc",
-    hive_label: "Human Rights Committee in HIVE",
+    hive_label: "Human Rights Committee in PI",
     fulfillment: "in_hive",
-    note: "HIVE holds the roster, meetings, and restriction records. The auditor wants proof the committee exists, meets, and records attendance.",
+    note: "PI holds the roster, meetings, and restriction records. The auditor wants proof the committee exists, meets, and records attendance.",
   },
   {
     id: "I-4",
@@ -152,9 +152,9 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: [],
     obligation_keys: ["incident_reporting_process"],
     hive_href: "/dashboard/hub/documentation?tab=incidents",
-    hive_label: "Incident reports in HIVE",
+    hive_label: "Incident reports in PI",
     fulfillment: "hybrid",
-    note: "Write and store the IR in HIVE. Timeliness is still checked in USTEPS/UPI — HIVE does not transmit the report to the state.",
+    note: "Write and store the IR in PI. Timeliness is still checked in USTEPS/UPI — PI does not transmit the report to the state.",
   },
   {
     id: "I-6",
@@ -222,9 +222,9 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: [],
     obligation_keys: ["large_loan_disclosure_process"],
     hive_href: "/dashboard/client-loans",
-    hive_label: "Client loans in HIVE",
+    hive_label: "Client loans in PI",
     fulfillment: "hybrid",
-    note: "HIVE stores the loan record. Disclosure to DHHS QA is outside HIVE.",
+    note: "PI stores the loan record. Disclosure to DHHS QA is outside PI.",
   },
   {
     id: "I-12",
@@ -263,7 +263,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: [],
     obligation_keys: ["medication_record"],
     hive_href: "/dashboard/emar",
-    hive_label: "eMAR in HIVE",
+    hive_label: "eMAR in PI",
     fulfillment: "in_hive",
     note: "N/A for a Person when this contractor does not support their medications. eMAR is the electronic record.",
   },
@@ -289,7 +289,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: ["BC1", "BC2", "BC3"],
     obligation_keys: ["fba_bsp"],
     hive_href: "/dashboard/behaviorist",
-    hive_label: "Behavior support in HIVE",
+    hive_label: "Behavior support in PI",
     fulfillment: "in_hive",
     note: "Only if this program provides Behavior Consultation.",
   },
@@ -307,7 +307,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
       "sei_ssi_benefits",
     ],
     fulfillment: "hybrid",
-    note: "For SEI, employment data and support strategies are entered in UPI. HIVE tracks the attestation that UPI is current.",
+    note: "For SEI, employment data and support strategies are entered in UPI. PI tracks the attestation that UPI is current.",
   },
   {
     id: "II-6",
@@ -323,9 +323,9 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
       "sjd_monthly_summary_upi",
     ],
     hive_href: "/dashboard/summaries",
-    hive_label: "Summaries in HIVE",
+    hive_label: "Summaries in PI",
     fulfillment: "hybrid",
-    note: "Write the summary in HIVE. SEI monthly summaries must also be typed into UPI by the 15th of the following month. Quarterly summaries for HHS, SLH, SLN, and DSI go to the Support Coordinator 15 days after quarter end.",
+    note: "Write the summary in PI. SEI monthly summaries must also be typed into UPI by the 15th of the following month. Quarterly summaries for HHS, SLH, SLN, and DSI go to the Support Coordinator 15 days after quarter end.",
   },
   {
     id: "II-7",
@@ -367,7 +367,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     hive_href: "/dashboard/hub/clients",
     hive_label: "Belongings inventory",
     fulfillment: "in_hive",
-    note: "HIVE's belongings register is the file. Applies to HHS, SLH, PPS, and RHS — not to SLN.",
+    note: "PI's belongings register is the file. Applies to HHS, SLH, PPS, and RHS — not to SLN.",
   },
   {
     id: "II-10-HHS",
@@ -445,7 +445,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     hive_href: "/dashboard/compliance-desk",
     hive_label: "Timesheets / compliance desk",
     fulfillment: "in_hive",
-    note: "HIVE time entries are the attendance record. HHS daily notes are the written summary for host-home days.",
+    note: "PI time entries are the attendance record. HHS daily notes are the written summary for host-home days.",
   },
   {
     id: "III-2",
@@ -472,7 +472,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     hive_href: "/dashboard/billing",
     hive_label: "Billing",
     fulfillment: "in_hive",
-    note: "Nectar flags mismatches; a human attests before a claim goes out. HIVE does not auto-publish billing.",
+    note: "Nectar flags mismatches; a human attests before a claim goes out. PI does not auto-publish billing.",
   },
   {
     id: "III-HHS",
@@ -486,7 +486,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     hive_href: "/dashboard/host-home-control",
     hive_label: "Host home control",
     fulfillment: "in_hive",
-    note: "A billable HHS day is Present + daily note. HIVE scores the last 30 days from the live daily-records view — it does not invent a second to-do.",
+    note: "A billable HHS day is Present + daily note. PI scores the last 30 days from the live daily-records view — it does not invent a second to-do.",
   },
 
   // ── PART IV ─────────────────────────────────────────────────────────────
@@ -500,7 +500,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: [],
     obligation_keys: ["background_screening_annual"],
     fulfillment: "hybrid",
-    note: "The screening is done through the state process. Upload the clearance in HIVE. Due on the hire anniversary unless a printed expiration is earlier.",
+    note: "The screening is done through the state process. Upload the clearance in PI. Due on the hire anniversary unless a printed expiration is earlier.",
   },
   {
     id: "IV-COC",
@@ -545,7 +545,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: [],
     obligation_keys: ["medicaid_exclusion_annual"],
     fulfillment: "hybrid",
-    note: "Run the check outside HIVE, then upload confirmation. Annual from hire date.",
+    note: "Run the check outside PI, then upload confirmation. Annual from hire date.",
   },
   {
     id: "IV-4",
@@ -569,7 +569,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: [],
     obligation_keys: ["training_file_maintained"],
     fulfillment: "standing",
-    note: "HIVE is that file. This row is standing — not a separate annual class.",
+    note: "PI is that file. This row is standing — not a separate annual class.",
   },
   {
     id: "IV-6",
@@ -642,7 +642,7 @@ export const DSPD_AUDIT_ITEMS: AuditItem[] = [
     applies_to_codes: ["SEI"],
     obligation_keys: ["usor_job_coaching_sei", "acre_sei"],
     fulfillment: "external",
-    note: "Vendor approval is outside HIVE (proof to osrprovider@utah.gov). Existing SEI providers have until January 31, 2027.",
+    note: "Vendor approval is outside PI (proof to osrprovider@utah.gov). Existing SEI providers have until January 31, 2027.",
   },
 ];
 

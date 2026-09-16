@@ -1,14 +1,14 @@
 // ============================================================
 // Prompt 36 — Internal vs. External compliance.
 //
-// Internal requirements: HIVE produces/holds the primary evidence
+// Internal requirements: PI produces/holds the primary evidence
 // (progress notes, EVV, 520s, daily logs). Confirmed via the
 // standard confirm + applicability flow.
 //
 // External requirements: the compliance step happens on another
 // system (UPI/USTEPS, DACS, DWS, TAPS, QuickBooks) or in the
 // physical world (business license, DHS licenses, certifications).
-// HIVE cannot perform them — but the admin attests they were done
+// PI cannot perform them — but the admin attests they were done
 // so the provider stays audit-ready.
 //
 // Classification + system are stored on `nectar_requirements.metadata`
@@ -269,7 +269,7 @@ export const attestExternalCompletion = createServerFn({ method: "POST" })
 
     const statement = `Attest the external compliance step "${req.title}" was completed in ${system}${
       data.completedOn ? ` on ${data.completedOn}` : ""
-    }${data.reference ? ` (ref: ${data.reference})` : ""}. HIVE is tracking this attestation; the action itself was performed outside HIVE.`;
+    }${data.reference ? ` (ref: ${data.reference})` : ""}. PI is tracking this attestation; the action itself was performed outside PI.`;
 
     const { error: aErr } = await supabase.from("nectar_attestations").insert({
       organization_id: req.organization_id,

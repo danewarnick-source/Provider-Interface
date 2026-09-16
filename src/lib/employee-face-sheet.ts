@@ -7,7 +7,7 @@
  *
  * Pulled together on demand from the same tables the profile UI reads:
  *   - profiles (identity, contact, position, hire date, emergency contact)
- *   - organization_members (HIVE role + active status)
+ *   - organization_members (PI role + active status)
  *   - staff_types + profiles.staff_type_keys (org title tier)
  *   - teams (team assignment)
  *   - certifications + external_certifications + baseline training
@@ -75,7 +75,7 @@ function fmtDate(d: string | null | undefined): string {
 
 type CertRow = {
   label: string;
-  source: string; // "HIVE cert" | "External cert" | "Baseline training"
+  source: string; // "PI cert" | "External cert" | "Baseline training"
   issued: string | null;
   expires: string | null;
 };
@@ -163,8 +163,8 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
     certification_type_code: string | null;
   }>) {
     certs.push({
-      label: r.course_title ?? r.certification_type_code ?? "HIVE certification",
-      source: "HIVE cert",
+      label: r.course_title ?? r.certification_type_code ?? "PI certification",
+      source: "PI cert",
       issued: r.issued_at,
       expires: r.expires_at,
     });
@@ -457,7 +457,7 @@ export async function generateEmployeeFaceSheet(
 
   const pdf = await PDFDocument.create();
   pdf.setTitle(`Employee Face Sheet - ${name}`);
-  pdf.setCreator("HIVE");
+  pdf.setCreator("Provider Interface");
   const helv = await pdf.embedFont(StandardFonts.Helvetica);
   const helvB = await pdf.embedFont(StandardFonts.HelveticaBold);
   const [logoImg, photoImg] = await Promise.all([

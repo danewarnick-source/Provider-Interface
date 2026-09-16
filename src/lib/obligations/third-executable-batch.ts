@@ -200,7 +200,7 @@ export const THIRD_BATCH_DEMO_PATH = [
     step: "evidence",
     title: "Upload on the parent",
     detail:
-      "USOR: official approved-vendor proof (destination stays the published spelling; HIVE stores the upload and does not send the email). SJD ACRE: official certificate plus qualified supervision while pending. Customized Employment: official program only if Discovery. No SEI named-course substitute.",
+      "USOR: official approved-vendor proof (destination stays the published spelling; PI stores the upload and does not send the email). SJD ACRE: official certificate plus qualified supervision while pending. Customized Employment: official program only if Discovery. No SEI named-course substitute.",
   },
   {
     step: "review",
@@ -332,7 +332,7 @@ export function thirdBatchLiveEngineReady(binding: ThirdBatchEngineBinding): {
     reasons.push("Child elements must not mint staff tasks.");
   }
   if (binding.trainingTitle !== null) {
-    reasons.push("This batch does not invent an in-Hive course.");
+    reasons.push("This batch does not invent an in-PI course.");
   }
   if (binding.formTitle !== null) {
     reasons.push("This batch does not invent a person form.");

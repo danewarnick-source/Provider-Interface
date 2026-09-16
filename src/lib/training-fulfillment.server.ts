@@ -1,5 +1,5 @@
 /**
- * Fulfill a HIVE Training catalog purchase (seats / assignments).
+ * Fulfill a PI Training catalog purchase (seats / assignments).
  * Used by the Stripe webhook and by the "included in plan / comped" skip-charge path.
  */
 

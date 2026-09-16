@@ -24,7 +24,7 @@ function TimeClockPage() {
       <div className="mb-3 grid grid-cols-2 gap-2">
         <Link
           to="/dashboard/ask-nectar"
-          className="flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/5 px-3 py-2.5 text-left transition hover:bg-accent/10"
+          className="flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/5 px-3 py-2.5 text-left transition hover:bg-[var(--hive-hover)]"
         >
           <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent">
             <Sparkles className="h-4 w-4" />

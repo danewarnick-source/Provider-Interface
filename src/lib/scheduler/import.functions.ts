@@ -106,7 +106,7 @@ export const nectarImportSchedule = createServerFn({ method: "POST" })
       data.file_name.toLowerCase().endsWith(".csv") ||
       data.file_name.toLowerCase().endsWith(".txt");
 
-    const system = `You are Nectar, a scheduling assistant for HIVE.
+    const system = `You are Nectar, a scheduling assistant for PI.
 Output strict JSON with shape: {"drafts": [{"staff_name": string|null, "client_name": string|null, "service_code": string|null, "starts_at": string|null, "ends_at": string|null, "notes": string|null}]}.
 Use ISO8601 UTC for starts_at/ends_at. The target week starts on ${data.week_start_iso}.
 Extract every shift you can find in the document.

@@ -8,7 +8,7 @@ export const CATALOG_STATE_CODES = ["UT", "ID", "WY"] as const;
 export type CatalogStateCode = (typeof CATALOG_STATE_CODES)[number];
 
 export const WY_EMPTY_SHELL_MESSAGE =
-  "Wyoming does not have a compliance catalog yet. Hive will add Wyoming requirements when that state pack is ready. Utah DSPD obligations do not apply to this organization.";
+  "Wyoming does not have a compliance catalog yet. PI will add Wyoming requirements when that state pack is ready. Utah DSPD obligations do not apply to this organization.";
 
 const EMPTY_CATALOG: SowCatalogEntry[] = [];
 
@@ -40,5 +40,5 @@ export function emptyCatalogShellMessage(stateCode: string | null | undefined): 
   const code = normalizeStateCode(stateCode);
   if (!code || code === "UT") return null;
   if (code === "WY") return WY_EMPTY_SHELL_MESSAGE;
-  return `${code} does not have a compliance catalog yet. Hive will add this state's requirements when that pack is ready.`;
+  return `${code} does not have a compliance catalog yet. PI will add this state's requirements when that pack is ready.`;
 }

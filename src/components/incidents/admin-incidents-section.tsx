@@ -565,7 +565,7 @@ export function AdminIncidentsSection({
               key={t.id}
               type="button"
               onClick={() => setView(t.id)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium ${view === t.id ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium ${view === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-[var(--hive-hover)] hover:text-foreground"}`}
             >
               {t.label}
             </button>

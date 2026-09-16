@@ -4,7 +4,7 @@ export default defineTool({
   name: "whoami",
   title: "Who am I",
   description:
-    "Returns the signed-in HIVE user's id and email as seen by the MCP server. Use to confirm the OAuth connection is working.",
+    "Returns the signed-in PI user's id and email as seen by the MCP server. Use to confirm the OAuth connection is working.",
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: (_input, ctx: ToolContext) => {

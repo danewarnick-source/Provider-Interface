@@ -144,20 +144,20 @@ function HelpPage() {
     mutationFn: async () => {
       const lastUser = [...messages].reverse().find((mm) => mm.role === "user");
       const context = messages.slice(-6).map((mm) => `${mm.role === "user" ? "Me" : "NECTAR"}: ${mm.text}`).join("\n");
-      const question = lastUser?.text ?? "I'd like to talk to a human at HIVE.";
+      const question = lastUser?.text ?? "I'd like to talk to a human at PI.";
       return escalate({ data: { question, context, organizationId: org?.organization_id ?? "" } });
     },
     onSuccess: (r) => {
       setTicketId(r.ticketId);
       setMessages((prev) => [...prev, {
         id: `n-esc-${Date.now()}`, role: "nectar",
-        text: "I've connected you with the HIVE team — someone will follow up shortly. You can keep chatting with me in the meantime.",
+        text: "I've connected you with the PI team — someone will follow up shortly. You can keep chatting with me in the meantime.",
       }]);
     },
     onError: (e) => {
       setMessages((prev) => [...prev, {
         id: `e-esc-${Date.now()}`, role: "nectar",
-        text: e instanceof Error ? e.message : "Couldn't reach the HIVE team — please try again.",
+        text: e instanceof Error ? e.message : "Couldn't reach the PI team — please try again.",
       }]);
     },
   });
@@ -176,7 +176,7 @@ function HelpPage() {
             </div>
             <h1 className="font-display text-xl font-bold tracking-tight text-[var(--hive-text)] sm:text-2xl">Ask NECTAR</h1>
             <p className="hidden text-sm text-muted-foreground sm:block">
-              Your friendly guide to using HIVE — ask where things live or how a workflow works.
+              Your friendly guide to using PI — ask where things live or how a workflow works.
             </p>
           </div>
         </div>
@@ -206,7 +206,7 @@ function HelpPage() {
             className="inline-flex min-h-[44px] items-center gap-1 rounded-md border border-[#fed7aa] bg-[#fff7ed] px-3 py-1 text-xs font-medium text-[#9a3412] hover:bg-[#ffedd5] disabled:opacity-60"
           >
             {escalateM.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LifeBuoy className="h-3.5 w-3.5" />}
-            {ticketId ? "Connected with HIVE" : "Ask the HIVE team"}
+            {ticketId ? "Connected with PI" : "Ask the PI team"}
           </button>
         </div>
       </header>
@@ -216,7 +216,7 @@ function HelpPage() {
         <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-[#bfdbfe] bg-[#eff6ff] px-3 py-2 text-xs text-[#1e40af]">
           <span className="inline-flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4" />
-            HIVE support ticket — status: <span className="font-semibold capitalize">{ticketQ.data.status.replace(/_/g, " ")}</span>
+            PI support ticket — status: <span className="font-semibold capitalize">{ticketQ.data.status.replace(/_/g, " ")}</span>
           </span>
           <span className="text-[10px] uppercase tracking-wide text-[#1e40af]/70">
             Updated {new Date(ticketQ.data.updated_at).toLocaleString()}
@@ -273,7 +273,7 @@ function HelpPage() {
           ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask NECTAR anything about HIVE…"
+          placeholder="Ask NECTAR anything about PI…"
           className="min-h-[44px] flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--hive-gold)]/40"
           disabled={m.isPending}
         />
@@ -310,7 +310,7 @@ function EmptyState({
         <div>
           <h2 className="font-display text-lg font-semibold text-[var(--hive-text)]">Hi! I'm NECTAR.</h2>
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
-            Ask me where things live in HIVE or how a workflow works — I'll point you straight to it.
+            Ask me where things live in PI or how a workflow works — I'll point you straight to it.
           </p>
         </div>
       </div>

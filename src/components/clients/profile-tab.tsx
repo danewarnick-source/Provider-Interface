@@ -1132,7 +1132,7 @@ function IdentityCard({ clientId, client }: { clientId: string; client: ClientRo
                   <Switch id="has-abi" checked={draft.has_abi} onCheckedChange={(v) => set("has_abi", v)} />
                   <Label htmlFor="has-abi" className="text-sm leading-tight">
                     Acquired brain injury (ABI)
-                    <div className="text-xs text-muted-foreground font-normal">When on, staff should have ABI training — HIVE reminds admins on the scheduler but does not block scheduling.</div>
+                    <div className="text-xs text-muted-foreground font-normal">When on, staff should have ABI training — PI reminds admins on the scheduler but does not block scheduling.</div>
                   </Label>
                 </div>
                 <div className="flex items-start gap-3">

@@ -3,7 +3,7 @@ import { HhsClientHub } from "./dashboard.hhs-hub.$clientId";
 
 /**
  * Local Playwright harness for HHS host-home daily notes + attendance.
- * Renders the real HHS hub without the dashboard shell (no Hive Executive
+ * Renders the real HHS hub without the dashboard shell (no PI Executive
  * gate, no Compass). Production never sets VITE_E2E_HARNESS, so this path
  * is a 404 and never loads client notes.
  */

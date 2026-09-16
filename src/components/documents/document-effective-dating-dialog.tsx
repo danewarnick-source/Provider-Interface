@@ -6,7 +6,7 @@
  * the same subject, and (b) captures effective dates.
  *
  * Provider-owns-it framing:
- *   - The provider sets/confirms effective dates. HIVE prompts; it does not
+ *   - The provider sets/confirms effective dates. PI prompts; it does not
  *     decide.
  *   - Three effective_to modes: fixed date, ongoing, until replaced.
  *   - When a replacement is confirmed, the old doc is auto-outdated and its
@@ -312,7 +312,7 @@ export function DocumentEffectiveDatingDialog({
             </div>
 
             <p className="rounded-md border border-border/60 bg-muted/40 p-2 text-xs text-muted-foreground">
-              You confirm and are responsible for the accuracy of these effective dates. HIVE surfaces
+              You confirm and are responsible for the accuracy of these effective dates. PI surfaces
               and prompts — it does not decide dates or keep files current for you.
               {detected
                 ? ` Saving as: ${dateSource === "from_document" ? "accepted NECTAR's read" : "provider-entered (edited)"}.`

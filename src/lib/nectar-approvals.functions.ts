@@ -1,15 +1,15 @@
 /**
- * Three-party approval chain for HIVE-assisted requirement intake.
+ * Three-party approval chain for PI-assisted requirement intake.
  *
- *   NECTAR drafts requirement   →   HIVE Executive approves the extraction
+ *   NECTAR drafts requirement   →   PI Executive approves the extraction
  *                                   →   Provider admin confirms applicability
  *
- * The HIVE Executive stage is explicitly a structural/accuracy check on what
+ * The PI Executive stage is explicitly a structural/accuracy check on what
  * NECTAR pulled from the authoritative source — NOT an endorsement of whether
  * the provider must follow the requirement. The provider is always the final
  * authority on their own obligations.
  *
- * Self-serve requirements (uploads where the provider did NOT request HIVE
+ * Self-serve requirements (uploads where the provider did NOT request PI
  * assistance) skip this chain entirely and continue to use review_status as
  * they always have. Assisted-chain requirements are identified by
  * `approval_state IS NOT NULL` on nectar_requirements.
@@ -22,7 +22,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Json } from "@/integrations/supabase/types";
 import { generatePlainLanguageExplanation } from "./authoritative-sources.server";
 
-// Requirement keys HIVE already has a first-class feature for — these don't
+// Requirement keys PI already has a first-class feature for — these don't
 // need an admin's individual judgment call, just a bulk rubber-stamp.
 const HIVE_MANAGED_KEYS = new Set<string>([
   "background_screening",
@@ -88,7 +88,7 @@ async function logEvent(input: {
 /**
  * Called by the drafting pipeline (authoritative-sources.functions.ts) right
  * after a requirement row is inserted, when the source was uploaded with
- * "Request HIVE-assisted setup" turned on. Sets initial approval_state and
+ * "Request PI-assisted setup" turned on. Sets initial approval_state and
  * logs the draft event.
  */
 export async function markDraftedByNectar(input: {
@@ -109,16 +109,16 @@ export async function markDraftedByNectar(input: {
   });
 }
 
-/** HIVE Executive queue — all requirements awaiting HIVE Exec approval. */
+/** PI Executive queue — all requirements awaiting PI Exec approval. */
 export const listPendingHiveExecApprovals = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     if (!context.supabase || !context.userId) return { items: [] };
-    // Guard: only HIVE Executives.
+    // Guard: only PI Executives.
     const { data: isExec } = await context.supabase.rpc("is_hive_executive", {
       _user: context.userId,
     });
-    if (!isExec) throw new Error("HIVE Executive access required");
+    if (!isExec) throw new Error("PI Executive access required");
 
     const { data: rows, error } = await supabaseAdmin
       .from("nectar_requirements")
@@ -189,7 +189,7 @@ export const listPendingHiveExecApprovals = createServerFn({ method: "GET" })
     };
   });
 
-/** HIVE Executive approves NECTAR's extraction → ball moves to provider. */
+/** PI Executive approves NECTAR's extraction → ball moves to provider. */
 export const hiveExecApproveRequirement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -205,7 +205,7 @@ export const hiveExecApproveRequirement = createServerFn({ method: "POST" })
     const { data: isExec } = await context.supabase.rpc("is_hive_executive", {
       _user: context.userId,
     });
-    if (!isExec) throw new Error("HIVE Executive access required");
+    if (!isExec) throw new Error("PI Executive access required");
 
     const { data: req, error: rErr } = await supabaseAdmin
       .from("nectar_requirements")
@@ -242,7 +242,7 @@ export const hiveExecApproveRequirement = createServerFn({ method: "POST" })
       type: "requirement_awaiting_confirmation",
       urgency: "normal",
       title: "Requirement ready for your final confirmation",
-      body: `NECTAR drafted "${(req.title as string).slice(0, 120)}" from one of your authoritative sources, and HIVE Executive has verified the extraction. Your confirmation is the final step before it becomes active.`,
+      body: `NECTAR drafted "${(req.title as string).slice(0, 120)}" from one of your authoritative sources, and PI Executive has verified the extraction. Your confirmation is the final step before it becomes active.`,
       link_to: "/dashboard/authoritative-sources",
       related_id: req.id,
       related_type: "nectar_requirement",
@@ -251,7 +251,7 @@ export const hiveExecApproveRequirement = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** HIVE Executive sends draft back to NECTAR (rejected for re-extraction). */
+/** PI Executive sends draft back to NECTAR (rejected for re-extraction). */
 export const hiveExecRejectRequirement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -267,7 +267,7 @@ export const hiveExecRejectRequirement = createServerFn({ method: "POST" })
     const { data: isExec } = await context.supabase.rpc("is_hive_executive", {
       _user: context.userId,
     });
-    if (!isExec) throw new Error("HIVE Executive access required");
+    if (!isExec) throw new Error("PI Executive access required");
 
     const { data: req, error: rErr } = await supabaseAdmin
       .from("nectar_requirements")
@@ -327,7 +327,7 @@ export const listProviderPendingConfirmations = createServerFn({ method: "GET" }
 /**
  * Provider view — same underlying queue as listProviderPendingConfirmations,
  * but sorted into three guided-review buckets:
- *   A. HIVE-managed  — requirement_key already has a first-class HIVE
+ *   A. PI-managed  — requirement_key already has a first-class PI
  *      feature behind it; no individual judgment call needed, bulk-confirm.
  *   B. Needs your decision — everything else; the admin reviews one at a
  *      time (or a page at a time) and confirms or skips.
@@ -429,7 +429,7 @@ export const providerConfirmRequirement = createServerFn({ method: "POST" })
 
     if (req.approval_state !== "hive_exec_approved") {
       throw new Error(
-        `Cannot confirm from state "${req.approval_state}". Awaits HIVE Executive approval first.`,
+        `Cannot confirm from state "${req.approval_state}". Awaits PI Executive approval first.`,
       );
     }
 
@@ -511,9 +511,9 @@ export const providerConfirmRequirement = createServerFn({ method: "POST" })
   });
 
 /**
- * Bulk-confirm a set of HIVE-managed requirements (bucket A of the guided
+ * Bulk-confirm a set of PI-managed requirements (bucket A of the guided
  * review) in one round trip — no per-item tracking prompt, since these are
- * already backed by a first-class HIVE feature.
+ * already backed by a first-class PI feature.
  */
 export const providerConfirmRequirementsBulk = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -565,7 +565,7 @@ export const providerConfirmRequirementsBulk = createServerFn({ method: "POST" }
         action: "confirmed",
         actorUserId: context.userId,
         actorLabel,
-        reason: "Bulk-confirmed as a HIVE-managed requirement.",
+        reason: "Bulk-confirmed as a PI-managed requirement.",
       });
     }
 
@@ -617,9 +617,9 @@ export const providerRejectRequirement = createServerFn({ method: "POST" })
       reason: data.reason,
     });
 
-    // Notify HIVE Execs via an in-platform ticket-like notification on the
+    // Notify PI Execs via an in-platform ticket-like notification on the
     // provider's behalf (recipient_role 'admin' inside provider org is fine —
-    // HIVE Exec portal reads its own queue independently). Keep it simple.
+    // PI Exec portal reads its own queue independently). Keep it simple.
     return { ok: true };
   });
 

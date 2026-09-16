@@ -119,7 +119,7 @@ export function staffSurfaceReviewKind(args: {
   return "none";
 }
 
-/** Same token in-Hive / PI course completions write onto company_obligation_completions. */
+/** Same token in-PI / PI course completions write onto company_obligation_completions. */
 export const NATIVE_PLATFORM_EVIDENCE = "in_hive_course";
 
 /** Below this, a "passed" OCR read is still uncertain and stays in review. */

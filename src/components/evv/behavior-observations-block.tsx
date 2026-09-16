@@ -138,7 +138,7 @@ export function BehaviorObservationsBlock({
               {options.map((name) => {
                 const sel = value.targetBehaviors.includes(name);
                 return (
-                  <div key={name} className="flex flex-col gap-1.5 rounded-md p-1.5 hover:bg-accent/40 md:flex-row md:items-center md:justify-between">
+                  <div key={name} className="flex flex-col gap-1.5 rounded-md p-1.5 hover:bg-[var(--hive-hover)] md:flex-row md:items-center md:justify-between">
                     <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-sm">
                       <input
                         type="checkbox"

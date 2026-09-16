@@ -917,7 +917,7 @@ export function ComplianceDeskPage() {
               type="button"
               data-testid={`compliance-tab-${id}`}
               onClick={() => setSub(id)}
-              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition ${sub === id ? "bg-accent text-accent-foreground shadow-soft" : "text-muted-foreground hover:text-foreground"}`}
+              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition ${sub === id ? "bg-primary text-primary-foreground shadow-soft" : "text-muted-foreground hover:bg-[var(--hive-hover)] hover:text-foreground"}`}
             >
               <Icon className="h-4 w-4" />
               {label}

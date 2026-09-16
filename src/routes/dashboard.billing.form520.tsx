@@ -74,8 +74,8 @@ type DraftWarning = {
 
 const ATTESTATION_TEXT =
   "I have reviewed this billing submission and confirm the hours and units reflect services actually provided. " +
-  "I understand HIVE/NECTAR presents data as entered by staff and does not verify its accuracy. " +
-  "I accept full responsibility for the accuracy of this submission to the State, and acknowledge HIVE is not liable " +
+  "I understand PI/NECTAR presents data as entered by staff and does not verify its accuracy. " +
+  "I accept full responsibility for the accuracy of this submission to the State, and acknowledge PI is not liable " +
   "for errors, omissions, or negligence by staff or provider in data submitted to or reviewed by me.";
 
 function startOfMonth(d = new Date()) { return new Date(d.getFullYear(), d.getMonth(), 1); }
@@ -359,7 +359,7 @@ function Billing520Page() {
 
   const visibleClientCount = useMemo(() => new Set(visibleRows.map((r) => r._client_id)).size, [visibleRows]);
 
-  // ─── Warning generation (HIVE-surfaced audit checks) ──────────────────────
+  // ─── Warning generation (PI-surfaced audit checks) ──────────────────────
   const draftWarnings = useMemo<DraftWarning[]>(() => {
     const out: DraftWarning[] = [];
 
@@ -918,7 +918,7 @@ function Billing520Page() {
               <p className="text-sm font-medium">
                 {draftWarnings.length === 0
                   ? "No audit warnings detected for this period."
-                  : `HIVE found ${draftWarnings.length} audit warning${draftWarnings.length === 1 ? "" : "s"} for this period.`}
+                  : `PI found ${draftWarnings.length} audit warning${draftWarnings.length === 1 ? "" : "s"} for this period.`}
               </p>
               <p className="mt-1 text-[12px] text-muted-foreground">
                 Open the submission to lock these warnings in and begin the attestation workflow.
@@ -940,7 +940,7 @@ function Billing520Page() {
                   <Alert className="border-emerald-500/30 bg-emerald-500/5">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                     <AlertTitle>Clean</AlertTitle>
-                    <AlertDescription>HIVE did not surface any audit warnings for this submission.</AlertDescription>
+                    <AlertDescription>PI did not surface any audit warnings for this submission.</AlertDescription>
                   </Alert>
                 ) : (
                   warnings.map((w) => (

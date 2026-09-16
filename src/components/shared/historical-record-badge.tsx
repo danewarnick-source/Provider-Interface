@@ -7,7 +7,7 @@ import { Archive } from "lucide-react";
 export function HistoricalRecordBadge({ className = "" }: { className?: string }) {
   return (
     <span
-      title="Imported from a historical spreadsheet — this did not happen live in HIVE."
+      title="Imported from a historical spreadsheet — this did not happen live in PI."
       className={`inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 ${className}`}
     >
       <Archive className="h-3 w-3" />

@@ -70,9 +70,9 @@ function Consent() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col justify-center p-8">
-      <h1 className="text-2xl font-semibold">Connect {clientName} to HIVE</h1>
+      <h1 className="text-2xl font-semibold">Connect {clientName} to PI</h1>
       <p className="mt-3 text-sm text-muted-foreground">
-        {clientName} is asking to access HIVE as you. Every action it takes will be
+        {clientName} is asking to access PI as you. Every action it takes will be
         scoped to your account and audited under your name. You can revoke access
         anytime from your account settings.
       </p>

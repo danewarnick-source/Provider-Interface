@@ -501,7 +501,7 @@ function DistributionsPage() {
                 <Info className="mt-0.5 h-4 w-4 text-amber-600" />
                 <p>
                   Distribution structures with tax or legal implications are worth confirming with your accountant or attorney.
-                  HIVE organizes the math; you own its accuracy.
+                  PI organizes the math; you own its accuracy.
                 </p>
               </div>
             )}

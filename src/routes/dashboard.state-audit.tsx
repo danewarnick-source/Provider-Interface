@@ -69,7 +69,7 @@ function StateAuditPage() {
         <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-300 bg-white/60 p-2 text-xs text-amber-900">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
           Auditor views currently render synthetic seed data. Real subject records
-          will flow through this same interface once HIVE's compliant host + BAA are
+          will flow through this same interface once PI's compliant host + BAA are
           in effect.
         </div>
       </header>
@@ -562,7 +562,7 @@ function ProvisionedAuditorsSection({ orgId, auditPackageId }: { orgId: string; 
       <p className="mb-3 text-xs text-muted-foreground">
         Creates a separate auditor account (not an org member). The invite email
         names this specific package, and the accept link lands them directly on
-        the package page — never the HIVE app.
+        the package page — never the PI app.
       </p>
 
       <ProvisionForm onSubmit={(v) => provisionMut.mutate(v)} busy={provisionMut.isPending} />

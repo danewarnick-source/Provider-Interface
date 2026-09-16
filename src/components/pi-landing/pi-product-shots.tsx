@@ -19,7 +19,7 @@ function ShotChrome({ title, action, children }: { title: string; action?: strin
       aria-hidden
     >
       <aside className="flex w-10 shrink-0 flex-col items-center gap-3 border-r border-white/[0.06] py-3 sm:w-11">
-        <PiMark className="h-5 w-5 text-[#f3efe6]" />
+        <PiMark variant="gold" className="h-5 w-5" />
         <span className="grid h-7 w-7 place-items-center rounded-md bg-white/[0.07]">
           <NavGlyph d="M5 7h14M5 12h14M5 17h10" />
         </span>

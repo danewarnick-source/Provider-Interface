@@ -71,7 +71,7 @@ export function SettingsModal({
                   <option value="weekly">Weekly</option>
                   <option value="daily">Daily</option>
                 </select>
-                <p className="text-xs text-muted-foreground">Reminders are computed when a staff member opens HIVE; no message is sent off-hours.</p>
+                <p className="text-xs text-muted-foreground">Reminders are computed when a staff member opens PI; no message is sent off-hours.</p>
               </div>
             )}
           </div>

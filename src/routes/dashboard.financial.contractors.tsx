@@ -195,7 +195,7 @@ function ContractorsPage() {
             <div>
               <h2 className="text-lg font-semibold">Contractors — Monthly Pay</h2>
               <p className="text-xs text-muted-foreground">
-                Gross = EVV hours × rate (auto). HHS pay pulls from Host Home. Net & taxes come from external payroll (input). HIVE knows gross, never net.
+                Gross = EVV hours × rate (auto). HHS pay pulls from Host Home. Net & taxes come from external payroll (input). PI knows gross, never net.
               </p>
             </div>
           </div>

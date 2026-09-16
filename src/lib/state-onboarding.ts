@@ -1,7 +1,7 @@
 // Shared definition of the New State Onboarding questionnaire.
-// HIVE Executives walk a state through these sections once. Answers feed the
+// PI Executives walk a state through these sections once. Answers feed the
 // state template (Prompt 47); items marked as needing a platform build open
-// HIVE NECTAR tickets so structural work is tracked rather than assumed.
+// PI NECTAR tickets so structural work is tracked rather than assumed.
 
 export type OnboardingFieldType = "text" | "textarea" | "list" | "number";
 

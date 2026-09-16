@@ -336,7 +336,7 @@ export function AuthoritativeSourceDrop({
                   "linear-gradient(135deg, var(--amber-100, #fef3c7), var(--amber-200, #fde68a))",
               }}
             >
-              <PiMark className="h-7 w-7 text-[color:var(--amber-600,#d97706)]" />
+              <PiMark variant="gold" className="h-7 w-7" />
             </span>
             <div className="text-lg font-semibold text-[color:var(--navy-900,#0b1733)]">
               Drop to add to Authoritative Sources
@@ -344,7 +344,7 @@ export function AuthoritativeSourceDrop({
             <p className="max-w-sm text-sm text-muted-foreground">
               Drop a PDF, scan, Word, or spreadsheet — NECTAR will read each
               document, propose a label, and add it to the source-of-truth set
-              the rest of HIVE reads from.
+              the rest of PI reads from.
             </p>
           </div>
         </div>
@@ -532,7 +532,7 @@ export function AuthoritativeSourceDrop({
                     rows={2}
                     value={current.notes}
                     onChange={(e) => updateCurrent({ notes: e.target.value })}
-                    placeholder="Anything HIVE/NECTAR should know about this document."
+                    placeholder="Anything PI/NECTAR should know about this document."
                   />
                 </div>
               </>

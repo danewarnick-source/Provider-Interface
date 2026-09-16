@@ -1,5 +1,5 @@
 /**
- * Hive Exec: mark a company billing-exempt (comped) so they never hit Checkout.
+ * PI Exec: mark a company billing-exempt (comped) so they never hit Checkout.
  */
 
 import { createServerFn } from "@tanstack/react-start";
@@ -21,7 +21,7 @@ async function ensureExecutive(
     .eq("active", true)
     .maybeSingle();
   if (error) throw error;
-  if (!data) throw new Error("Access denied — HIVE Executive permission required.");
+  if (!data) throw new Error("Access denied — PI Executive permission required.");
 }
 
 export const setOrgBillingExemptFn = createServerFn({ method: "POST" })

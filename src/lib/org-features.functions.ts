@@ -6,14 +6,14 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  * Organization Master Controller — feature registry + per-org toggles.
  *
  * The `feature_registry` table is the catalog of gatable capabilities in
- * HIVE (top-level tabs today, sub-tabs and NECTAR sub-features later).
+ * PI (top-level tabs today, sub-tabs and NECTAR sub-features later).
  * `organization_features` overlays a per-org on/off setting per key.
  *
  * Resolution: an org's effective feature map = registry.default_enabled
  * unless an explicit organization_features row exists, in which case that
  * row's `enabled` wins.
  *
- * Only HIVE executives can WRITE. Org members can READ their own org's
+ * Only PI executives can WRITE. Org members can READ their own org's
  * effective feature map (drives sidebar/route gating).
  */
 
@@ -71,7 +71,7 @@ function resolveEffective(
 }
 
 /**
- * Full bundle for the Master Controller UI (HIVE Exec only).
+ * Full bundle for the Master Controller UI (PI Exec only).
  */
 export const getOrgFeatureBundle = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -86,7 +86,7 @@ export const getOrgFeatureBundle = createServerFn({ method: "GET" })
       .eq("user_id", userId)
       .eq("active", true)
       .maybeSingle();
-    if (!execRow) throw new Error("Forbidden — HIVE executives only");
+    if (!execRow) throw new Error("Forbidden — PI executives only");
 
     const { data: registry } = await supabase
       .from("feature_registry")
@@ -207,7 +207,7 @@ export const setOrgFeature = createServerFn({ method: "POST" })
       .eq("user_id", userId)
       .eq("active", true)
       .maybeSingle();
-    if (!execRow) throw new Error("Forbidden — HIVE executives only");
+    if (!execRow) throw new Error("Forbidden — PI executives only");
 
     const { error } = await supabase
       .from("organization_features")
@@ -251,7 +251,7 @@ async function assertExec(
     .eq("user_id", userId)
     .eq("active", true)
     .maybeSingle();
-  if (!data) throw new Error("Forbidden — HIVE executives only");
+  if (!data) throw new Error("Forbidden — PI executives only");
 }
 
 /**

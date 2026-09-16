@@ -4,7 +4,7 @@
 // completions key off those ids). This catalog overlays each SOW title with
 // the fields a reviewer actually needs and that JSON cadence blobs cannot
 // express accurately:
-//   - where the work happens (in HIVE vs a state portal vs a standing file)
+//   - where the work happens (in PI vs a state portal vs a standing file)
 //   - the real due-date rule (period-following, hire-relative, cert expiration)
 //   - who it applies to, and who owns it
 //   - what evidence would satisfy a DSPD reviewer
@@ -62,7 +62,7 @@ export type SowCatalogEntry = {
   citation: string;
   category: ObligationCategory;
   fulfillment: FulfillmentChannel;
-  /** What HIVE can and cannot do for this duty. Shown on the card. */
+  /** What PI can and cannot do for this duty. Shown on the card. */
   fulfillment_note: string;
   due_rule: DueRule;
   owner: ObligationOwner;
@@ -102,9 +102,9 @@ export const CATEGORY_LABEL: Record<ObligationCategory, string> = {
 };
 
 export const FULFILLMENT_LABEL: Record<FulfillmentChannel, string> = {
-  in_hive: "Tracked in HIVE",
-  external: "Filed outside HIVE",
-  hybrid: "HIVE + outside filing",
+  in_hive: "Tracked in PI",
+  external: "Filed outside PI",
+  hybrid: "PI + outside filing",
   standing: "Standing record",
 };
 
@@ -128,7 +128,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "training",
     fulfillment: "in_hive",
     fulfillment_note:
-      "Staff open this from the staff file and complete the in-Hive 30-day course (SOW §1.8(4)(A)–(W) plus separately scored SAS essential topics, then a competency exam). Completing every topic and the exam greens the obligation and issues a checklist certificate. Paid agencies need a purchased 30-day or pack seat; True North Supports is always free. One-time hire requirement — annual hours are a separate obligation.",
+      "Staff open this from the staff file and complete the in-PI 30-day course (SOW §1.8(4)(A)–(W) plus separately scored SAS essential topics, then a competency exam). Completing every topic and the exam greens the obligation and issues a checklist certificate. Paid agencies need a purchased 30-day or pack seat; True North Supports is always free. One-time hire requirement — annual hours are a separate obligation.",
     due_rule: { kind: "days_after_hire", days: 30 },
     owner: "staff",
     service_codes: [],
@@ -141,7 +141,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "training",
     fulfillment: "in_hive",
     fulfillment_note:
-      "Upload CE certificates in HIVE, or log hours in the CE ledger. The in-platform 12-hour course is a Coming-soon placeholder and does not mark the card On file. Opening the placeholder uses the same 30-day / pack training seat as orientation; True North Supports is always free. Due on the hire anniversary starting the year after hire — not a calendar year.",
+      "Upload CE certificates in PI, or log hours in the CE ledger. The in-platform 12-hour course is a Coming-soon placeholder and does not mark the card On file. Opening the placeholder uses the same 30-day / pack training seat as orientation; True North Supports is always free. Due on the hire anniversary starting the year after hire — not a calendar year.",
     due_rule: { kind: "hire_anniversary", start_year: 2 },
     owner: "staff",
     service_codes: [],
@@ -154,7 +154,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "training",
     fulfillment: "in_hive",
     fulfillment_note:
-      "Upload the CPR/First Aid card in HIVE. SOW allows 90 days from hire for the initial cert. Renewal is tracked separately off the printed expiration.",
+      "Upload the CPR/First Aid card in PI. SOW allows 90 days from hire for the initial cert. Renewal is tracked separately off the printed expiration.",
     due_rule: { kind: "days_after_hire", days: 90 },
     owner: "staff",
     service_codes: [],
@@ -250,7 +250,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "employment",
     fulfillment: "in_hive",
     fulfillment_note:
-      "First-person attestation in HIVE. The knowledge itself is acquired outside HIVE (USOR / benefits training); HIVE records that the staff member attested before serving.",
+      "First-person attestation in PI. The knowledge itself is acquired outside PI (USOR / benefits training); PI records that the staff member attested before serving.",
     due_rule: { kind: "days_after_hire", days: 0 },
     owner: "staff",
     service_codes: ["SEI"],
@@ -274,7 +274,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "training",
     fulfillment: "hybrid",
     fulfillment_note:
-      "The course is taken on the DSPD site (80% passing score, effective 7/1/26). Upload the completion record in HIVE so the due date and assignee are tracked.",
+      "The course is taken on the DSPD site (80% passing score, effective 7/1/26). Upload the completion record in PI so the due date and assignee are tracked.",
     due_rule: { kind: "days_after_hire", days: 0 },
     owner: "staff",
     service_codes: ["CMP", "CMS"],
@@ -288,7 +288,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "screening",
     fulfillment: "hybrid",
     fulfillment_note:
-      "The screening itself is done through BCI / the state process. Upload the clearance in HIVE. Due on the hire anniversary; if a later cert prints an expiration, that date wins.",
+      "The screening itself is done through BCI / the state process. Upload the clearance in PI. Due on the hire anniversary; if a later cert prints an expiration, that date wins.",
     due_rule: { kind: "hire_anniversary", start_year: 1 },
     owner: "staff",
     service_codes: [],
@@ -300,7 +300,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "screening",
     fulfillment: "hybrid",
     fulfillment_note:
-      "Screen against OIG LEIE / Medicaid exclusion lists outside HIVE, then upload confirmation and attest. Annual from hire date.",
+      "Screen against OIG LEIE / Medicaid exclusion lists outside PI, then upload confirmation and attest. Annual from hire date.",
     due_rule: { kind: "hire_anniversary", start_year: 1 },
     owner: "staff",
     service_codes: [],
@@ -312,7 +312,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "screening",
     fulfillment: "hybrid",
     fulfillment_note:
-      "The form lives on the DSPD webpage. Complete it, then upload the signed copy in HIVE. Due on each hire anniversary.",
+      "The form lives on the DSPD webpage. Complete it, then upload the signed copy in PI. Due on each hire anniversary.",
     due_rule: { kind: "hire_anniversary", start_year: 1 },
     owner: "staff",
     service_codes: [],
@@ -336,7 +336,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "standing_records",
     fulfillment: "standing",
     fulfillment_note:
-      "Standing record: an external reviewer must be able to verify every required training. HIVE is the file. The generated annual date is a review reminder, not a SOW anniversary.",
+      "Standing record: an external reviewer must be able to verify every required training. PI is the file. The generated annual date is a review reminder, not a SOW anniversary.",
     due_rule: { kind: "standing" },
     owner: "admin",
     service_codes: [],
@@ -361,7 +361,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "licensing",
     fulfillment: "external",
     fulfillment_note:
-      "Issued by DHHS Office of Licensing. HIVE stores the uploaded license and tracks expiration; the license itself is obtained outside the platform.",
+      "Issued by DHHS Office of Licensing. PI stores the uploaded license and tracks expiration; the license itself is obtained outside the platform.",
     due_rule: { kind: "cert_expiration", fallback_months: 12 },
     owner: "staff",
     service_codes: ["PPS"],
@@ -375,7 +375,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "licensing",
     fulfillment: "external",
     fulfillment_note:
-      "Office of Licensing issues this. Upload the current license in HIVE. The July 1 date is an annual verification reminder — the real due date is the license expiration.",
+      "Office of Licensing issues this. Upload the current license in PI. The July 1 date is an annual verification reminder — the real due date is the license expiration.",
     due_rule: { kind: "calendar_year", month: 7, day: 1 },
     owner: "admin",
     service_codes: ["RHS"],
@@ -426,7 +426,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "licensing",
     fulfillment: "external",
     fulfillment_note:
-      "USOR vendor approval happens outside HIVE. Upload the approval letter and attest. This is a one-time (then keep-current) org qualification, not a staff training.",
+      "USOR vendor approval happens outside PI. Upload the approval letter and attest. This is a one-time (then keep-current) org qualification, not a staff training.",
     due_rule: { kind: "fixed_date", date: "2027-01-31" },
     owner: "admin",
     service_codes: ["SEI"],
@@ -438,7 +438,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "licensing",
     fulfillment: "external",
     fulfillment_note:
-      "Proof is submitted to osrprovider@utah.gov. HIVE stores the upload and attestation; it cannot submit to USOR.",
+      "Proof is submitted to osrprovider@utah.gov. PI stores the upload and attestation; it cannot submit to USOR.",
     due_rule: { kind: "days_after_service_start", days: 180 },
     owner: "admin",
     service_codes: ["SJD"],
@@ -450,7 +450,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "licensing",
     fulfillment: "standing",
     fulfillment_note:
-      "Keep current zoning, Life Safety Code, and fire/health documentation for licensed or certified sites. Upload in HIVE. July 1 is an annual verification reminder. SOW says 'when applicable' — this is an OL-site fact, not a service-code hide.",
+      "Keep current zoning, Life Safety Code, and fire/health documentation for licensed or certified sites. Upload in PI. July 1 is an annual verification reminder. SOW says 'when applicable' — this is an OL-site fact, not a service-code hide.",
     due_rule: { kind: "calendar_year", month: 7, day: 1 },
     owner: "admin",
     service_codes: [],
@@ -468,7 +468,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "reporting",
     fulfillment: "external",
     fulfillment_note:
-      "Submitted via the DSPD Google Form, not HIVE. Attest here after submitting. Due August 30 for the prior year.",
+      "Submitted via the DSPD Google Form, not PI. Attest here after submitting. Due August 30 for the prior year.",
     due_rule: { kind: "calendar_year", month: 8, day: 30 },
     owner: "admin",
     service_codes: ["HHS"],
@@ -481,7 +481,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "reporting",
     fulfillment: "hybrid",
     fulfillment_note:
-      "The summary is written in HIVE, but SEI monthly summaries must be typed into the state's UPI portal by the 15th of the following month. Staff never touch UPI — admin attests here after entry. HIVE cannot transmit to UPI.",
+      "The summary is written in PI, but SEI monthly summaries must be typed into the state's UPI portal by the 15th of the following month. Staff never touch UPI — admin attests here after entry. PI cannot transmit to UPI.",
     due_rule: { kind: "calendar_month", due_day: 15, period: "following_month" },
     owner: "admin",
     service_codes: ["SEI"],
@@ -493,7 +493,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "reporting",
     fulfillment: "external",
     fulfillment_note:
-      "Employment data is maintained directly in UPI. HIVE only captures the admin attestation that UPI is current.",
+      "Employment data is maintained directly in UPI. PI only captures the admin attestation that UPI is current.",
     due_rule: { kind: "calendar_month", due_day: 15, period: "following_month" },
     owner: "admin",
     service_codes: ["SEI"],
@@ -505,7 +505,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "reporting",
     fulfillment: "external",
     fulfillment_note:
-      "Enter updated employment support strategies into UPI within 14 days of a PCSP update. Log the PCSP-update event here to start the clock — HIVE does not watch UPI.",
+      "Enter updated employment support strategies into UPI within 14 days of a PCSP update. Log the PCSP-update event here to start the clock — PI does not watch UPI.",
     due_rule: { kind: "days_after_event", days: 14 },
     owner: "admin",
     service_codes: ["SEI"],
@@ -518,7 +518,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "reporting",
     fulfillment: "hybrid",
     fulfillment_note:
-      "Summary content can live in HIVE; UPI entry is outside HIVE by the 15th of the following month. Admin attests after entry.",
+      "Summary content can live in PI; UPI entry is outside PI by the 15th of the following month. Admin attests after entry.",
     due_rule: { kind: "calendar_month", due_day: 15, period: "following_month" },
     owner: "admin",
     service_codes: ["SJD"],
@@ -529,7 +529,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     citation: "DHHS91172 SOW §33.3",
     category: "reporting",
     fulfillment: "external",
-    fulfillment_note: "Maintained in UPI. HIVE captures the monthly attestation only.",
+    fulfillment_note: "Maintained in UPI. PI captures the monthly attestation only.",
     due_rule: { kind: "calendar_month", due_day: 15, period: "following_month" },
     owner: "admin",
     service_codes: ["SJD"],
@@ -541,7 +541,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "reporting",
     fulfillment: "hybrid",
     fulfillment_note:
-      "Verify with each SJD client whether they received USOR outreach this month and record funding status. Attest in HIVE; the contact itself is outside the platform.",
+      "Verify with each SJD client whether they received USOR outreach this month and record funding status. Attest in PI; the contact itself is outside the platform.",
     due_rule: { kind: "calendar_month", due_day: 15, period: "following_month" },
     owner: "admin",
     service_codes: ["SJD"],
@@ -553,7 +553,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "reporting",
     fulfillment: "hybrid",
     fulfillment_note:
-      "Monthly summaries for CMP/CMS are due to the Support Coordinator by the 15th of the following month. Write them in HIVE, then attest that they were sent. HIVE does not email the SC.",
+      "Monthly summaries for CMP/CMS are due to the Support Coordinator by the 15th of the following month. Write them in PI, then attest that they were sent. PI does not email the SC.",
     due_rule: { kind: "calendar_month", due_day: 15, period: "following_month" },
     owner: "admin",
     service_codes: ["CMP", "CMS"],
@@ -568,7 +568,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "safety",
     fulfillment: "in_hive",
     fulfillment_note:
-      "Drills happen at the home. Upload the drill log in HIVE. Due by the last day of the quarter — not the first day of the next quarter. HIVE opens one instance per active HHS home.",
+      "Drills happen at the home. Upload the drill log in PI. Due by the last day of the quarter — not the first day of the next quarter. PI opens one instance per active HHS home.",
     due_rule: { kind: "calendar_quarter_end" },
     owner: "manager",
     service_codes: ["HHS"],
@@ -602,7 +602,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "safety",
     fulfillment: "hybrid",
     fulfillment_note:
-      "Inspect each HHS home using the DSPD Host Home Certification form (outside HIVE), then upload the completed form. HIVE opens one instance per active HHS home — not a single agency packet.",
+      "Inspect each HHS home using the DSPD Host Home Certification form (outside PI), then upload the completed form. PI opens one instance per active HHS home — not a single agency packet.",
     due_rule: { kind: "calendar_year", month: 7, day: 1 },
     owner: "admin",
     service_codes: ["HHS"],
@@ -705,7 +705,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "licensing",
     fulfillment: "external",
     fulfillment_note:
-      "Issued by the carrier. Upload declarations pages in HIVE. July 1 is a verification reminder — the real due date is the printed expiration.",
+      "Issued by the carrier. Upload declarations pages in PI. July 1 is a verification reminder — the real due date is the printed expiration.",
     due_rule: { kind: "calendar_year", month: 7, day: 1 },
     owner: "admin",
     service_codes: [],
@@ -731,7 +731,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "training",
     fulfillment: "in_hive",
     fulfillment_note:
-      "Required before working alone with a person with acquired brain injury. Assigned only to staff on an ABI caseload (or flagged requires_abi). Staff open this from the staff file and complete the in-Hive ABI course plus competency exam. Opening the course uses the same 30-day / pack training seat as orientation; True North Supports is always free.",
+      "Required before working alone with a person with acquired brain injury. Assigned only to staff on an ABI caseload (or flagged requires_abi). Staff open this from the staff file and complete the in-PI ABI course plus competency exam. Opening the course uses the same 30-day / pack training seat as orientation; True North Supports is always free.",
     due_rule: { kind: "days_after_hire", days: 0 },
     owner: "staff",
     service_codes: [],
@@ -789,7 +789,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "licensing",
     fulfillment: "external",
     fulfillment_note:
-      "Keep a current USTEPS and UPI account, DSPD form 0-9 (company designee) and at least one form 0-8 (individual user). HIVE does not provision UPI. 1056 accept/reject within 15 days is a live authorization workflow, not this row.",
+      "Keep a current USTEPS and UPI account, DSPD form 0-9 (company designee) and at least one form 0-8 (individual user). PI does not provision UPI. 1056 accept/reject within 15 days is a live authorization workflow, not this row.",
     due_rule: { kind: "standing" },
     owner: "admin",
     service_codes: [],
@@ -803,7 +803,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "licensing",
     fulfillment: "external",
     fulfillment_note:
-      "Complete DSPD form \"0-9 USTEPS Provider Interface (UPI) Provider Company Designee Access Form\". HIVE does not provision UPI. Staff never touch UPI. Record completion plus proof here.",
+      "Complete DSPD form \"0-9 USTEPS Provider Interface (UPI) Provider Company Designee Access Form\". PI does not provision UPI. Staff never touch UPI. Record completion plus proof here.",
     due_rule: { kind: "standing" },
     owner: "admin",
     service_codes: [],
@@ -817,7 +817,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "licensing",
     fulfillment: "external",
     fulfillment_note:
-      "Complete DSPD form \"0-8 USTEPS Provider Interface (UPI) Individual User Access Form\" for at least one Staff. HIVE does not provision UPI. Staff never touch UPI.",
+      "Complete DSPD form \"0-8 USTEPS Provider Interface (UPI) Individual User Access Form\" for at least one Staff. PI does not provision UPI. Staff never touch UPI.",
     due_rule: { kind: "standing" },
     owner: "admin",
     service_codes: [],
@@ -1012,7 +1012,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "licensing",
     fulfillment: "external",
     fulfillment_note:
-      "Stay enrolled as a Medicaid provider for the Community Support, Community Transition, and ABI waivers (DIH / DSPD Medicaid Enrollment Manager). Upload current enrollment proof. HIVE cannot enroll the contractor.",
+      "Stay enrolled as a Medicaid provider for the Community Support, Community Transition, and ABI waivers (DIH / DSPD Medicaid Enrollment Manager). Upload current enrollment proof. PI cannot enroll the contractor.",
     due_rule: { kind: "standing" },
     owner: "admin",
     service_codes: [],
@@ -1143,7 +1143,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     category: "reporting",
     fulfillment: "external",
     fulfillment_note:
-      "Fiscal-year Day Supports outcome report via the DSPD Google Form by August 30. Attest here after submitting. HIVE cannot transmit the form.",
+      "Fiscal-year Day Supports outcome report via the DSPD Google Form by August 30. Attest here after submitting. PI cannot transmit the form.",
     due_rule: { kind: "calendar_year", month: 8, day: 30 },
     owner: "admin",
     service_codes: ["DSI"],
@@ -1279,7 +1279,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     due_rule: { kind: "standing" },
     owner: "admin",
     service_codes: [],
-    evidence_standard: "HRC roster, meeting records, and attendance in HIVE.",
+    evidence_standard: "HRC roster, meeting records, and attendance in PI.",
     calendar_is_reminder_only: true,
   },
   {
@@ -1431,7 +1431,7 @@ const RAW_SOW_ENTRIES: SowCatalogDraft[] = [
     citation: "DHHS91172 SOW §1.10(7); CST 55 & 56",
     category: "reporting",
     fulfillment: "in_hive",
-    fulfillment_note: "HIVE time entries are the attendance record. Not a second to-do.",
+    fulfillment_note: "PI time entries are the attendance record. Not a second to-do.",
     due_rule: { kind: "standing" },
     owner: "admin",
     service_codes: [],

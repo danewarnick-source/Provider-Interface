@@ -190,7 +190,7 @@ function RolesPage() {
                   </TableCell>
                   <TableCell>
                     {lockedInternal ? (
-                      <span className="text-xs text-muted-foreground">Managed by HIVE</span>
+                      <span className="text-xs text-muted-foreground">Managed by PI</span>
                     ) : (
                     <Select
                       value={isHiveInternalRole(role) ? "admin" : role}

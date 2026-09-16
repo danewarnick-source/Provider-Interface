@@ -385,7 +385,7 @@ export function EmployeeRosterUploadWizard({
               <Button
                 type="button"
                 disabled={!organizationId || !actionable.length || hasErrors || createMutation.isPending}
-                className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+                className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
                 onClick={() => createMutation.mutate()}
               >
                 {createMutation.isPending
@@ -468,7 +468,7 @@ export function EmployeeRosterUploadWizard({
               <Button
                 type="button"
                 disabled={!selected.length || inviteMutation.isPending || !organizationId}
-                className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+                className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
                 onClick={() => inviteMutation.mutate(selected)}
               >
                 <Mail className="mr-2 h-4 w-4" />

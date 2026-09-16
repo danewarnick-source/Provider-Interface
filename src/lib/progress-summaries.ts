@@ -185,8 +185,8 @@ export function summaryCadenceLabel(periodKind: string, serviceCodes: string[]):
 }
 
 /**
- * Single source of truth for "when does this client's HIVE summary clock start."
- * Later of org go-live and client HIVE start (hive_start_date → created_at).
+ * Single source of truth for "when does this client's PI summary clock start."
+ * Later of org go-live and client PI start (hive_start_date → created_at).
  * Callers still apply per-code service_start_date on top.
  * Periods whose period_end is strictly before this floor must never be generated.
  */

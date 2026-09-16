@@ -13,7 +13,7 @@ export default defineTool({
   name: "list_clients",
   title: "List clients",
   description:
-    "Lists clients the signed-in HIVE user can see (row-level security applies). Returns id, first/last name, and status. Read-only.",
+    "Lists clients the signed-in PI user can see (row-level security applies). Returns id, first/last name, and status. Read-only.",
   inputSchema: {
     limit: z
       .number()

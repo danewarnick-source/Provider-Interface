@@ -713,7 +713,7 @@ export function megaCBatchLiveEngineReady(binding: MegaCBatchEngineBinding): {
     reasons.push("Child elements must not mint staff tasks.");
   }
   if (binding.trainingTitle !== null) {
-    reasons.push("This batch does not invent an in-Hive course.");
+    reasons.push("This batch does not invent an in-PI course.");
   }
   if (binding.formTitle !== null) {
     const key = binding.liveKeys[0];

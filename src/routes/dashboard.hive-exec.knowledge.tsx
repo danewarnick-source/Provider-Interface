@@ -37,7 +37,7 @@ function KnowledgePage() {
         <div>
           <h1 className="font-display text-lg font-semibold text-[var(--hive-text)]">Knowledge Base</h1>
           <p className="text-sm text-muted-foreground">
-            HIVE's own how-to articles. Steve (Guide-me) answers exec questions by retrieving from
+            PI's own how-to articles. Steve (Guide-me) answers exec questions by retrieving from
             these entries. No org data or PHI belongs here — platform ops only.
           </p>
         </div>

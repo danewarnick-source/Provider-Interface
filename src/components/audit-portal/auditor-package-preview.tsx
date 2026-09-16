@@ -75,7 +75,7 @@ export function AuditorPackagePreview({ packageId, mode }: { packageId: string; 
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
             <div>
               <strong>Synthetic seed data.</strong> Real client and staff records will render
-              here once HIVE's compliant host and BAA are in effect. The layout is representative.
+              here once PI's compliant host and BAA are in effect. The layout is representative.
             </div>
           </div>
         )}

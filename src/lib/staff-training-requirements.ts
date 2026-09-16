@@ -2,7 +2,7 @@
  * Fixed baseline list of required staff trainings.
  *
  * Every employee is checked against this list automatically — there is no
- * admin setup required. Import and in-Hive roster use `isBaselineApplicable`
+ * admin setup required. Import and in-PI roster use `isBaselineApplicable`
  * so a brand-new hire with nothing on file stays visible, never "0 overdue".
  *
  * Pure module — no DB, no server imports — safe to use from client or server.

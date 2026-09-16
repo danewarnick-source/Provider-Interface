@@ -234,7 +234,7 @@ export function AuthoritativeSourcesPage() {
         <div className="flex items-center gap-2 rounded-lg border border-amber-300/40 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-900 dark:text-amber-200">
           <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
           <span className="flex-1">
-            Review recommended before relying on or submitting. HIVE/NECTAR
+            Review recommended before relying on or submitting. PI/NECTAR
             organizes what you upload but does not independently verify accuracy
             or guarantee compliance.
           </span>
@@ -1380,8 +1380,8 @@ function UploadCard({
             className="mt-0.5 shrink-0"
           />
           <span className="flex-1">
-            <strong className="block text-foreground">Request HIVE-assisted setup</strong>
-            NECTAR drafts the requirements, then a HIVE Executive verifies the
+            <strong className="block text-foreground">Request PI-assisted setup</strong>
+            NECTAR drafts the requirements, then a PI Executive verifies the
             extraction is faithful to this source before it lands in your queue
             for final confirmation. Leave unchecked to self-serve as normal.
           </span>
@@ -2863,7 +2863,7 @@ function RequirementRow({
             <Badge
               variant="outline"
               className="text-[10px] border-sky-500/40 text-sky-700 dark:text-sky-300"
-              title={`External action${externalSystem ? ` — happens in ${externalSystem}` : ""}. HIVE tracks your attestation; the action itself happens outside HIVE.`}
+              title={`External action${externalSystem ? ` — happens in ${externalSystem}` : ""}. PI tracks your attestation; the action itself happens outside PI.`}
             >
               <ExternalLinkIcon className="mr-1 h-3 w-3" />
               External{externalSystem ? ` · ${externalSystem}` : ""}
@@ -2872,7 +2872,7 @@ function RequirementRow({
             <Badge
               variant="outline"
               className="text-[10px] border-slate-500/30 text-muted-foreground"
-              title="HIVE produces and holds evidence for this requirement internally."
+              title="PI produces and holds evidence for this requirement internally."
             >
               <Building className="mr-1 h-3 w-3" />
               Internal
@@ -2908,7 +2908,7 @@ function RequirementRow({
                     <span>
                       <span className="font-medium text-foreground">↗ External</span>
                       <br />
-                      <span className="text-muted-foreground">requires action outside HIVE</span>
+                      <span className="text-muted-foreground">requires action outside PI</span>
                     </span>
                   </label>
                   <label className="flex cursor-pointer items-start gap-2 text-xs">
@@ -2916,13 +2916,13 @@ function RequirementRow({
                     <span>
                       <span className="font-medium text-foreground">⬡ Internal</span>
                       <br />
-                      <span className="text-muted-foreground">HIVE tracks this automatically</span>
+                      <span className="text-muted-foreground">PI tracks this automatically</span>
                     </span>
                   </label>
                 </RadioGroup>
                 {pendingVerifType === "internal" && (
                   <p className="mt-2 text-[11px] text-amber-700 dark:text-amber-300">
-                    Changing to Internal means HIVE will attempt to auto-verify this. Ensure the
+                    Changing to Internal means PI will attempt to auto-verify this. Ensure the
                     evidence source is connected.
                   </p>
                 )}
@@ -3350,7 +3350,7 @@ function AttestExternalDialog({
       qc.invalidateQueries({ queryKey: ["requirements", orgId] });
       qc.invalidateQueries({ queryKey: ["attestations", orgId] });
       toast.success("Attestation logged.", {
-        description: "HIVE recorded that this external action was completed.",
+        description: "PI recorded that this external action was completed.",
       });
       onOpenChange(false);
       setCompletedOn(""); setReference(""); setProofUrl(""); setNextRenewalAt(""); setNotes("");
@@ -3369,7 +3369,7 @@ function AttestExternalDialog({
             {externalSystem
               ? `Log that "${requirementTitle}" was completed in ${externalSystem}.`
               : `Log that "${requirementTitle}" was completed in the external system.`}{" "}
-            HIVE records this attestation — it does not verify the external system.
+            PI records this attestation — it does not verify the external system.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 py-2">
@@ -3530,7 +3530,7 @@ function AttestationsPanel({ orgId }: { orgId: string }) {
         </Badge>
       </div>
       <p className="mb-3 text-xs text-muted-foreground">
-        Every "Confirm" you click in HIVE is logged here with user, timestamp,
+        Every "Confirm" you click in PI is logged here with user, timestamp,
         and the exact statement you attested to. This log is append-only.
       </p>
       {isLoading ? (
@@ -3757,7 +3757,7 @@ function ApplicabilityPanel({
                 </span>
                 <Button
                   size="sm"
-                  className="h-8 bg-[var(--hive-gold)] text-white hover:bg-[#b86413]"
+                  className="h-8"
                   disabled={confirmAll.isPending}
                   onClick={() => confirmAll.mutate(pendingIds)}
                 >
@@ -4573,10 +4573,10 @@ function ReviewQueueDialog({
 }
 
 // ---------- Three-party approval chain: provider's guided-review queue ----------
-// The held queue (requirements HIVE Exec has verified and are now waiting on
+// The held queue (requirements PI Exec has verified and are now waiting on
 // the provider's own applicability call) is sorted into three buckets so the
 // admin isn't reading a flat list:
-//   A. Already tracked by HIVE — bulk-confirm, no individual review.
+//   A. Already tracked by PI — bulk-confirm, no individual review.
 //   B. Needs your decision — one page at a time, confirm or skip.
 //   C. Informational — rule/billing items, collapsed by default.
 
@@ -4720,7 +4720,7 @@ function AwaitingFinalConfirmationPanel({ orgId }: { orgId: string }) {
     mutationFn: (vars: { requirementId: string; reason: string }) =>
       rejectFn({ data: { requirementId: vars.requirementId, reason: vars.reason } }),
     onSuccess: () => {
-      toast.success("Sent back. NECTAR and HIVE Exec will see your note.");
+      toast.success("Sent back. NECTAR and PI Exec will see your note.");
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -4730,7 +4730,7 @@ function AwaitingFinalConfirmationPanel({ orgId }: { orgId: string }) {
     mutationFn: (ids: string[]) => bulkConfirmFn({ data: { requirementIds: ids } }),
     onSuccess: (res) => {
       toast.success(
-        `Confirmed ${res.confirmed} HIVE-managed requirement${res.confirmed === 1 ? "" : "s"} — now active.`,
+        `Confirmed ${res.confirmed} PI-managed requirement${res.confirmed === 1 ? "" : "s"} — now active.`,
       );
       invalidate();
     },
@@ -4770,7 +4770,7 @@ function AwaitingFinalConfirmationPanel({ orgId }: { orgId: string }) {
             Awaiting your final confirmation ({total})
           </h3>
           <p className="mt-0.5 max-w-3xl text-xs text-emerald-900/80 dark:text-emerald-100/80">
-            HIVE Executive verified that NECTAR extracted these requirements
+            PI Executive verified that NECTAR extracted these requirements
             faithfully from your authoritative sources. <strong>You</strong> are
             the final authority on whether they apply to your operation.
           </p>
@@ -4786,7 +4786,7 @@ function AwaitingFinalConfirmationPanel({ orgId }: { orgId: string }) {
           {bucketA.length > 0 && (
             <div className="rounded-xl border border-emerald-300 bg-background p-3">
               <p className="text-sm text-foreground">
-                HIVE already tracks {bucketA.length} requirement{bucketA.length === 1 ? "" : "s"}{" "}
+                PI already tracks {bucketA.length} requirement{bucketA.length === 1 ? "" : "s"}{" "}
                 from this document — {summarizeHiveManaged(bucketA)}.
               </p>
               <Button
@@ -4873,7 +4873,7 @@ function AwaitingFinalConfirmationPanel({ orgId }: { orgId: string }) {
             onClick={() => setCExpanded((v) => !v)}
             className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs font-medium text-muted-foreground"
           >
-            <span>Informational — no action needed in HIVE ({bucketC.length})</span>
+            <span>Informational — no action needed in PI ({bucketC.length})</span>
             <ChevronDown
               className={`h-3.5 w-3.5 transition-transform ${cExpanded ? "rotate-180" : ""}`}
             />

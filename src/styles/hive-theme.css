@@ -25,6 +25,11 @@
   --hive-gold-hover: #d4af37;
   --hive-gold-soft: #f3ebd4;
   --hive-on-gold: #243040;
+  /* Primary action fill. Gold is the brand/attention accent, never a button
+     fill, so "add", "save", and "confirm" read as one family platform-wide. */
+  --hive-primary: #243040;
+  --hive-primary-hover: #0a1120;
+  --hive-primary-fg: #ffffff;
   --hive-text: #243040;
   --hive-text-muted: #5a6570;
   --hive-ink: #243040;
@@ -38,6 +43,9 @@
   --hive-info-fg: #1e3a52;
   --hive-info-soft: #e4ecf2;
   --hive-muted-surface: #eef1f4;
+  /* Light control hover — the grey-blue used on outline/ghost buttons.
+     Never gold. Gold is the logo, not a hover fill. */
+  --hive-hover: var(--hive-muted-surface);
 
   /* Typography scale */
   --text-xs: 0.75rem;
@@ -147,9 +155,9 @@
   --btn-gold: var(--hive-gold);
   --btn-gold-hover: var(--hive-gold-hover);
   --btn-gold-active: var(--hive-gold);
-  --btn-primary: var(--hive-gold);
-  --btn-primary-hover: var(--hive-gold-hover);
-  --btn-primary-active: var(--hive-gold);
+  --btn-primary: var(--hive-primary);
+  --btn-primary-hover: var(--hive-primary-hover);
+  --btn-primary-active: var(--hive-primary);
 }
 
 .dark {
@@ -227,11 +235,11 @@
   }
 
   .hive-gold-btn {
-    background-color: var(--hive-gold);
-    color: var(--hive-on-gold);
+    background-color: var(--hive-primary);
+    color: var(--hive-primary-fg);
   }
   .hive-gold-btn:hover {
-    background-color: var(--hive-gold-hover);
+    background-color: var(--hive-primary-hover);
   }
 
   .hive-ghost-btn {

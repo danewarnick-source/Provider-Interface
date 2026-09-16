@@ -506,7 +506,7 @@ function DashboardLayout() {
   const isMobilePreview = rawView === "staff_mobile";
   const isHiveExecView = rawView === "hive_exec";
   const isStatePreview = rawView === "state_preview";
-  // HIVE Executive is its own context — never mixed with a company's admin/staff nav.
+  // PI Executive is its own context — never mixed with a company's admin/staff nav.
   const effectiveView: "staff" | "admin" | "hive_exec" = isHiveExecView
     ? "hive_exec"
     : isStatePreview
@@ -559,8 +559,8 @@ function DashboardLayout() {
     }
   }, [isStatePreview, stateCode, states, setStateCode]);
 
-  // Keep view and content strictly aligned: leaving HIVE View must also leave
-  // /dashboard/hive-exec, and entering HIVE View jumps to the platform landing.
+  // Keep view and content strictly aligned: leaving PI View must also leave
+  // /dashboard/hive-exec, and entering PI View jumps to the platform landing.
   useEffect(() => {
     // Don't reconcile view↔route until ALL bootstrap signals are ready:
     //   - executive status resolved (so allowedViews includes hive_exec)
@@ -812,7 +812,7 @@ function DashboardLayout() {
               >
                 <div className="flex items-center gap-2 min-w-0">
                   {/* Staff phones use the avatar drawer. Keep this control out of
-                  that tree so it is not a 0×0 ghost. Hive-exec + admin phones keep it. */}
+                  that tree so it is not a 0×0 ghost. PI-exec + admin phones keep it. */}
                   {!isStaffPhoneChrome && (
                     <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                       <SheetTrigger asChild>
@@ -904,7 +904,7 @@ function DashboardLayout() {
                     className="hive-chrome-btn h-10 px-3 text-xs font-semibold"
                     title="Open Nectar"
                   >
-                    <PiMark className="h-3.5 w-3.5 text-[var(--hive-gold)]" />
+                    <PiMark variant="gold" className="h-3.5 w-3.5" />
                     <span className="hidden md:inline">Nectar</span>
                   </button>
                   {isAdminCapable && effectiveView === "admin" && <DraftJobsHeaderPill />}
@@ -1151,7 +1151,7 @@ function SidebarBody({
   return (
     <>
       <div className="flex h-16 items-center border-b border-[var(--hive-chrome-border)] px-5">
-        <PiBrand to="/dashboard" tone="chrome" size="md" />
+        <PiBrand to="/dashboard" tone="chrome" size="md" stacked />
       </div>
 
       {(isAdminCapable || isExecutive) && (

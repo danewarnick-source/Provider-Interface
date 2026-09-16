@@ -22,10 +22,10 @@ const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unse
 
 export default defineMcp({
   name: "hive-mcp",
-  title: "HIVE",
+  title: "Provider Interface",
   version: "0.2.0",
   instructions:
-    "HIVE compliance-platform tools. Every call runs as the signed-in HIVE user and row-level security applies — you see exactly what that user sees in the app.\n\n" +
+    "PI compliance-platform tools. Every call runs as the signed-in PI user and row-level security applies — you see exactly what that user sees in the app.\n\n" +
     "Generic tools:\n" +
     "- `sql_query`: run any SELECT/WITH query. Best for ad-hoc questions.\n" +
     "- `table_read` / `table_write`: structured PostgREST-style reads and mutations against any table.\n" +

@@ -2,7 +2,7 @@
  * Agency Policies binder — contractor's own policies (SOW §1.8(4) topic P).
  *
  * One binder per agency. Admin adds a title, an audience, and a file or
- * pasted text. Hive turns that into a company obligation. Staff complete
+ * pasted text. PI turns that into a company obligation. Staff complete
  * it from My Obligations by reading or watching and attesting. This is
  * not a lesson authoring tool and does not replace the 30-day course.
  */

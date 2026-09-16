@@ -10,9 +10,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[var(--hive-gold)] text-[var(--hive-on-gold)] hover:bg-[var(--hive-gold-hover)]",
+          "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]",
         cta:
-          "bg-[var(--hive-gold)] text-[var(--hive-on-gold)] hover:bg-[var(--hive-gold-hover)]",
+          "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]",
         secondary:
           "bg-[var(--hive-surface)] text-[var(--hive-text)] border border-[var(--hive-border)] hover:bg-[var(--hive-canvas)]",
         ghostOnDark:
@@ -22,7 +22,7 @@ const buttonVariants = cva(
           "border border-[var(--hive-border)] bg-[var(--hive-surface)] text-[var(--hive-text)] hover:bg-[var(--hive-canvas)]",
         ghost: "text-[var(--hive-text)] hover:bg-[var(--hive-muted-surface)] hover:text-[var(--hive-text)]",
         link: "text-[var(--hive-text)] underline-offset-4 hover:underline",
-        life: "bg-[var(--hive-gold)] text-[var(--hive-on-gold)] hover:bg-[var(--hive-gold-hover)]",
+        life: "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)]",
       },
       size: {
         default: "h-[var(--height-button)] px-4 py-2",

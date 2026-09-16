@@ -1,9 +1,9 @@
 // Utah DSPD jurisdiction pack for DHHS91172.
 //
-// HIVE owns this pack. A tenant cannot edit locked titles, citations, or due
-// rules. Nectar may flag a pack gap to HIVE; it must not let a provider
+// PI owns this pack. A tenant cannot edit locked titles, citations, or due
+// rules. Nectar may flag a pack gap to PI; it must not let a provider
 // author the contract. Completing a duty attests that the work was done —
-// it does not attest that HIVE encoded the whole SOW.
+// it does not attest that PI encoded the whole SOW.
 //
 // Three layers can drift and must be checked together:
 //   1. This pack (catalog + coverage matrix) — product code
@@ -53,7 +53,7 @@ export const UTAH_DSPD_PACK = {
 
 export const PACK_STATUS_LABEL: Record<PackCoverageStatus, string> = {
   encoded: "Encoded duty",
-  live_artifact: "Live HIVE artifact",
+  live_artifact: "Live PI artifact",
   when_applicable: "When applicable",
   intentional_omit: "Intentionally omitted",
   gap: "Pack gap",

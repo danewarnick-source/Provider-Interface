@@ -92,7 +92,7 @@ export const listInboxMessages = createServerFn({ method: "POST" })
     const senderIds = Array.from(new Set(rows.map((r) => r.exec_messages.sender_user_id)));
     const messageIds = rows.map((r) => r.message_id);
 
-    // Sender names (best-effort; fall back to "HIVE Executive")
+    // Sender names (best-effort; fall back to "PI Executive")
     const { data: profiles } = await supabase
       .from("profiles")
       .select("id, full_name")
@@ -118,7 +118,7 @@ export const listInboxMessages = createServerFn({ method: "POST" })
       message_id: r.message_id,
       recipient_id: r.id,
       subject: r.exec_messages.subject,
-      sender_name: nameById.get(r.exec_messages.sender_user_id) ?? "HIVE Executive",
+      sender_name: nameById.get(r.exec_messages.sender_user_id) ?? "PI Executive",
       created_at: r.exec_messages.created_at,
       read_at: r.read_at,
       attachment_count: countByMsg.get(r.message_id) ?? 0,
@@ -172,7 +172,7 @@ export const openInboxMessage = createServerFn({ method: "POST" })
     if (msgErr) throw msgErr;
 
     // Sender display name
-    let senderName = "HIVE Executive";
+    let senderName = "PI Executive";
     const { data: prof } = await supabase
       .from("profiles")
       .select("full_name")

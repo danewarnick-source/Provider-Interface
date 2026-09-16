@@ -108,7 +108,7 @@ export function renderSummaryPdf(p: SummaryPdfPayload): Blob {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  doc.text("Prepared in HIVE", PAGE_WIDTH - PAGE_MARGIN, y + 26, { align: "right" });
+  doc.text("Prepared in PI", PAGE_WIDTH - PAGE_MARGIN, y + 26, { align: "right" });
   if (p.aiReviewAttested) {
     doc.text("Draft assist: Nectar", PAGE_WIDTH - PAGE_MARGIN, y + 38, { align: "right" });
   }
@@ -200,8 +200,8 @@ export function renderSummaryPdf(p: SummaryPdfPayload): Blob {
   doc.setFontSize(8.5);
   doc.setTextColor(...NAVY);
   const attest =
-    "I reviewed this summary against HIVE documentation for this person and period. " +
-    "Nectar drafted the narrative from staff/admin records in HIVE only; I confirm " +
+    "I reviewed this summary against PI documentation for this person and period. " +
+    "Nectar drafted the narrative from staff/admin records in PI only; I confirm " +
     "the content is accurate and complete to the best of my knowledge.";
   const attestLines = doc.splitTextToSize(
     (p.aiReviewAttested ? "☑ " : "☐ ") + attest,

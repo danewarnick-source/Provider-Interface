@@ -327,7 +327,7 @@ function BillingApprovalsInboxSection({ orgId }: { orgId: string }) {
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-emerald-600" />
-          <h2 className="text-sm font-semibold">Billing code approvals — conversations with HIVE Admin</h2>
+          <h2 className="text-sm font-semibold">Billing code approvals — conversations with PI Admin</h2>
           {unread > 0 && <Badge variant="destructive" className="text-[10px]">{unread} new reply{unread === 1 ? "" : "s"}</Badge>}
         </div>
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{rows.length} request{rows.length === 1 ? "" : "s"}</span>
@@ -339,7 +339,7 @@ function BillingApprovalsInboxSection({ orgId }: { orgId: string }) {
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">{r.code}</span>
                 <span className="font-medium">{r.provider_name_on_pcsp || "unspecified provider"}</span>
-                {r.status === "pending" && <Badge variant="outline" className="border-amber-500/60 text-amber-700">Pending HIVE review</Badge>}
+                {r.status === "pending" && <Badge variant="outline" className="border-amber-500/60 text-amber-700">Pending PI review</Badge>}
                 {r.status === "approved" && <Badge variant="outline" className="border-emerald-500/60 text-emerald-700">Approved</Badge>}
                 {r.status === "denied" && <Badge variant="outline" className="border-destructive/60 text-destructive">Denied</Badge>}
                 {r.status === "withdrawn" && <Badge variant="outline" className="text-muted-foreground">Withdrawn</Badge>}

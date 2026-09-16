@@ -260,7 +260,7 @@ export const grantAuditorAccess = createServerFn({ method: "POST" })
 
     // Package-specific invite email — sends the auditor a fresh set-password
     // link that lands on /audit-portal/set-password?packageId=…, so they end
-    // up directly on the granted package, never the HIVE homepage.
+    // up directly on the granted package, never the PI homepage.
     try {
       await sendAuditorPackageInvite({
         supabase,
@@ -812,7 +812,7 @@ export const listOrgAuditors = createServerFn({ method: "GET" })
  * Org admin creates an auditor account, grants access to a specific package,
  * and sends a branded, package-specific invite email (not Supabase's generic
  * app invite). The auditor's set-password link lands them directly on
- * /audit-portal/{packageId} — never the HIVE homepage.
+ * /audit-portal/{packageId} — never the PI homepage.
  */
 
 export const provisionOrgAuditor = createServerFn({ method: "POST" })
@@ -916,7 +916,7 @@ export const provisionOrgAuditor = createServerFn({ method: "POST" })
  * auditor and sends a branded, package-specific email via the send-email
  * edge function (Resend). The recovery link redirects to
  * /audit-portal/set-password?packageId={id}, so upon password set the
- * auditor lands directly on their granted package — never the HIVE homepage.
+ * auditor lands directly on their granted package — never the PI homepage.
  *
  * // notification seam — email/Slack alerts to execs could fire from here.
  */
@@ -980,7 +980,7 @@ async function sendAuditorPackageInvite(args: {
   const html = `
     <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#243040">
       <div style="border-bottom:2px solid #fed7aa;padding-bottom:12px;margin-bottom:20px">
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a3412">HIVE — State Audit Portal</div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a3412">PI — State Audit Portal</div>
         <div style="font-size:20px;font-weight:700;margin-top:4px">${escapeHtml(packageLabel)}</div>
       </div>
       <p>Hello ${escapeHtml((aud.full_name as string) ?? "auditor")},</p>
@@ -999,7 +999,7 @@ async function sendAuditorPackageInvite(args: {
         <span style="word-break:break-all">${actionLink}</span>
       </p>
       <p style="color:#666;font-size:12px;margin-top:24px">
-        You received this because a HIVE-provisioned auditor account was created for
+        You received this because a PI-provisioned auditor account was created for
         <strong>${escapeHtml(aud.email as string)}</strong>. If you did not expect this,
         you can ignore this email.
       </p>

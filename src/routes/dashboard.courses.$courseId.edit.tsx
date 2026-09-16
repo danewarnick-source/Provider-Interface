@@ -509,7 +509,7 @@ function LessonEditorDialog({
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave} className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]">
+          <Button onClick={handleSave} className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]">
             Save lesson
           </Button>
         </DialogFooter>

@@ -472,7 +472,7 @@ function CoursePlayer() {
                   <Button
                     onClick={goNext}
                     disabled={activeIdx >= flatLessons.length - 1}
-                    className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+                    className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
                   >
                     Next <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>

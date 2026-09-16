@@ -47,7 +47,7 @@ const WEEKDAY_NAMES = [
 
 /**
  * Compliance clocks for imported staff must not open already-years-overdue
- * because their real-world hire_date predates HIVE. Use the later of
+ * because their real-world hire_date predates PI. Use the later of
  * hire/start and the day the profile was created on the platform.
  * Hire date is still stored for HR; this only affects obligation due math.
  */
@@ -185,11 +185,11 @@ export function explainDueRule(rule: DueRule): string {
     }
     case "days_after_hire":
       return rule.days === 0
-        ? "Required before the staff member provides services (or within a 30-day window from when they were added to HIVE / when this requirement was added, whichever is later)."
-        : `Due ${rule.days} days after the staff member's compliance start (the later of hire date and the day they were added to HIVE).`;
+        ? "Required before the staff member provides services (or within a 30-day window from when they were added to PI / when this requirement was added, whichever is later)."
+        : `Due ${rule.days} days after the staff member's compliance start (the later of hire date and the day they were added to PI).`;
     case "hire_anniversary":
       return rule.start_year <= 1
-        ? "Due on each anniversary of the staff member's compliance start (later of hire date and HIVE add date)."
+        ? "Due on each anniversary of the staff member's compliance start (later of hire date and PI add date)."
         : `Due on the compliance-start anniversary beginning year ${rule.start_year}.`;
     case "cert_expiration":
       return "Due on the expiration date printed on the current certificate. If that date cannot be read, the upload stays in review until an admin confirms expiration — the due date is never taken from the upload date.";

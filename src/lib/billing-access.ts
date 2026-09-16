@@ -43,7 +43,7 @@ export function isBillingExempt(
 
 /**
  * Unpaid / cancelled companies cannot use the dashboard.
- * Exempt orgs (True North, or anyone Hive Exec marked comped) never lock.
+ * Exempt orgs (True North, or anyone PI Exec marked comped) never lock.
  *
  * Missing subscription row = unpaid new agency (fail closed).
  * locked_at set = locked.
@@ -107,8 +107,8 @@ export function entitlementsForOrg(opts: {
 }
 
 /**
- * Extra HIVE Training catalog purchases (one-time per staff).
- * - Comped orgs (True North, or Hive Exec exempt) never pay seats or training.
+ * Extra PI Training catalog purchases (one-time per staff).
+ * - Comped orgs (True North, or PI Exec exempt) never pay seats or training.
  * - Paying orgs are charged locked amounts: package $300, CPR $100, Mandt $200, 30-day $75.
  * - Training is not included in the per-staff subscription.
  */

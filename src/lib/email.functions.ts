@@ -148,7 +148,7 @@ export const updateOrgEmailSettings = createServerFn({ method: "POST" })
     const mode = data.send_mode ?? "hive_managed";
     if (mode === "own_domain") {
       throw new Error(
-        "Custom-domain sending isn't available yet. HIVE-managed sending is active and works with no DNS setup.",
+        "Custom-domain sending isn't available yet. PI-managed sending is active and works with no DNS setup.",
       );
     }
 
@@ -162,7 +162,7 @@ export const updateOrgEmailSettings = createServerFn({ method: "POST" })
           from_name: stripFakeDisplayLabel(data.from_name ?? "") || null,
           from_address: null, // Mode 1 uses managedFromAddress()
           reply_to: data.reply_to,
-          verified: true, // Mode 1 is trusted (shared HIVE sender)
+          verified: true, // Mode 1 is trusted (shared PI sender)
           updated_by: userId,
           updated_at: new Date().toISOString(),
         },

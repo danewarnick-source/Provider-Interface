@@ -544,12 +544,12 @@ export function DailyNotesImportWizard() {
           <div>
             <div className="font-semibold text-amber-800">Historical daily notes — imported from another platform</div>
             <p className="mt-1 text-muted-foreground">
-              Bring in past daily notes / shift notes from whatever platform you used before HIVE — including
+              Bring in past daily notes / shift notes from whatever platform you used before PI — including
               Host Home daily notes where nobody clocks in. The importer only accepts files that match the
               required template exactly: Staff Name, Client Name, Date, Narrative, and Goals Addressed (goals
-              may be blank). Every row must match a staff member and a client that already exist in HIVE;
+              may be blank). Every row must match a staff member and a client that already exist in PI;
               anything else is set aside for manual resolution and is never auto-created. Imported notes are
-              permanently marked as historical so they're never confused with a note written live in HIVE.
+              permanently marked as historical so they're never confused with a note written live in PI.
             </p>
           </div>
         </div>

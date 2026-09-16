@@ -299,9 +299,9 @@ export const sendEmployeeLoanForSignature = createServerFn({ method: "POST" })
     // Build sign URL
     const signUrl = `${data.base_url.replace(/\/$/, "")}/sign/employee-loan/${rawToken}`;
 
-    // Send email via the shared HIVE-managed sender (see email.functions.ts).
+    // Send email via the shared PI-managed sender (see email.functions.ts).
     // Reply-to = the address the provider configured in Settings → Email,
-    // so signer replies land in the provider's inbox, not the HIVE domain.
+    // so signer replies land in the provider's inbox, not the PI domain.
     let emailStatus: { ok: boolean; error?: string } = {
       ok: false,
       error: "Email send failed. The signing link is still valid — send it manually below.",

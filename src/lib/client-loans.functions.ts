@@ -20,12 +20,12 @@ achnowledge on behalf of my organization that:
 1. This is a recordkeeping tool for a financial arrangement the company and
 the client's support team have INDEPENDENTLY decided to enter into.
 
-2. HIVE does not provide legal advice and does not determine whether the
+2. PI does not provide legal advice and does not determine whether the
 arrangement is permissible. The provider is responsible for verifying
 permissibility under their state, DSPD, Medicaid, and rep-payee obligations.
 
 3. The provider confirms the arrangement was entered into voluntarily by the
-parties and acknowledges HIVE's role is limited to documentation and tracking.
+parties and acknowledges PI's role is limited to documentation and tracking.
 
 4. Any informational material surfaced by NECTAR or the platform is for
 review only and is not a legal conclusion. The platform and its operators

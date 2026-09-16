@@ -64,7 +64,7 @@ export const CAPABILITY_REGISTRY: ReadonlyArray<CapabilityAction> = [
     action_key: "add_to_authoritative_sources",
     label: "Add this to your authoritative sources",
     helper:
-      "Keeps it in the source-of-truth set the rest of HIVE reads from. You confirm the label.",
+      "Keeps it in the source-of-truth set the rest of PI reads from. You confirm the label.",
     applies_to_types: ALL_TYPES,
     is_live: true,
     handler: "add_to_authoritative_sources",
@@ -119,7 +119,7 @@ export const CAPABILITY_REGISTRY: ReadonlyArray<CapabilityAction> = [
   {
     action_key: "sow_requirement_mapping",
     label: "Map SOW clauses to platform requirements",
-    helper: "Link each clause to the requirement it drives in HIVE.",
+    helper: "Link each clause to the requirement it drives in PI.",
     applies_to_types: ["scope_of_work"],
     is_live: false,
     handler: "noop",

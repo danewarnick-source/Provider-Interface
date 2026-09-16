@@ -132,7 +132,7 @@ export const ensureCurrentSummaryPeriods = createServerFn({ method: "POST" })
     const today = new Date().toISOString().slice(0, 10);
 
     // Org-wide floor: a period that closed before this org actually started
-    // using HIVE should never be generated. Defaults to created_at when unset.
+    // using PI should never be generated. Defaults to created_at when unset.
     const { data: orgRow, error: orgErr } = await supabase
       .from("organizations")
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -149,7 +149,7 @@ export const ensureCurrentSummaryPeriods = createServerFn({ method: "POST" })
       .eq("organization_id", data.organizationId);
     if (codesErr) throw new Error(codesErr.message);
 
-    // Per-client HIVE start (hive_start_date → created_at) for summaryPeriodFloor.
+    // Per-client PI start (hive_start_date → created_at) for summaryPeriodFloor.
     // hive_start_date is optional until SQL handoff runs; fall back to created_at.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let clientRows: Array<{ id: string; hive_start_date: string | null; created_at: string }> | null = null;
@@ -773,7 +773,7 @@ export const finalizeSummary = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: true };
     await requireOrgMembership(supabase, userId, data.organizationId, "manager");
     if (!data.aiReviewAttested) {
-      throw new Error("Confirm you reviewed the Nectar draft against HIVE documentation before finalizing.");
+      throw new Error("Confirm you reviewed the Nectar draft against PI documentation before finalizing.");
     }
     const ts = new Date().toISOString();
 

@@ -97,7 +97,7 @@ export const CORE_CLIENT_FIELD_KEYS = new Set<string>([
   "pcsp_signed_by_client", "pcsp_signed_by_guardian",
 ]);
 
-export const SYSTEM_PROMPT = `You are NECTAR, an extraction engine for a Utah DSPD provider compliance platform (HIVE).
+export const SYSTEM_PROMPT = `You are NECTAR, an extraction engine for a Utah DSPD provider compliance platform (PI).
 You receive raw text from a document (PCSP, 1056 budget, SOW, referral, intake, assessment, certification, contract, etc.).
 Take your time. Accuracy is more important than speed. Extract EVERY field that appears in the document.
 

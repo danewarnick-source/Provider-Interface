@@ -59,7 +59,7 @@ function CertificatePage() {
         <div className="text-sm text-muted-foreground">
           Verification code: <span className="font-mono">{code}</span>
         </div>
-        <Button onClick={() => window.print()} className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]">
+        <Button onClick={() => window.print()} className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]">
           <Download className="mr-2 h-4 w-4" /> Download / Print PDF
         </Button>
       </div>

@@ -20,6 +20,7 @@ export const colors = {
     page: "var(--hive-canvas)",
     card: "var(--hive-surface)",
     muted: "var(--hive-muted-surface)",
+    hover: "var(--hive-hover)",
     sidebar: "var(--hive-sidebar)",
     modal: "var(--hive-surface)",
     input: "var(--hive-surface)",

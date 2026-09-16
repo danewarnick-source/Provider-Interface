@@ -1,6 +1,6 @@
 // Billing email dispatch.
 //
-// Renders Hive-branded templates from src/lib/billing-emails.ts and sends
+// Renders PI-branded templates from src/lib/billing-emails.ts and sends
 // via the existing `send-email` edge function when the org has a verified
 // sender configured in `org_email_settings`. If no sender is configured,
 // the call logs and returns gracefully — billing state changes must never

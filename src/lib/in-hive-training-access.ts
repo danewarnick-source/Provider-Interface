@@ -1,5 +1,5 @@
 /**
- * Who may open in-Hive courses that share the orientation / compliance seat.
+ * Who may open in-PI courses that share the orientation / compliance seat.
  * True North / billing-exempt orgs never pay and never need a roster seat.
  * Paid orgs need a paid or waived 30-day or package roster seat for that staff.
  *
@@ -39,7 +39,7 @@ export function courseUsesTrainingSeat(courseId: string | null | undefined): boo
 /** @deprecated Use courseUsesTrainingSeat — same family. */
 export const courseUsesThirtyDaySeat = courseUsesTrainingSeat;
 
-/** Live Hive-Platform `organizations` has no `billing_exempt` column. */
+/** Live PI-Platform `organizations` has no `billing_exempt` column. */
 export function orgSelectMissingBillingExempt(message: string | null | undefined): boolean {
   return /billing_exempt/i.test(message ?? "");
 }

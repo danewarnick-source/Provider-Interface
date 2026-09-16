@@ -24,7 +24,7 @@ export function CommandCenterLanding() {
         <section className="rounded-xl border border-[#fed7aa] bg-gradient-to-r from-[var(--hive-text)] to-[#1a2a5a] p-5 text-white shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <div className="text-xs uppercase tracking-wider text-[#fed7aa]">HIVE Platform</div>
+              <div className="text-xs uppercase tracking-wider text-[#fed7aa]">PI Platform</div>
               <h1 className="font-display text-2xl font-bold tracking-tight">Executive Command Center</h1>
               <p className="mt-1 text-sm text-white/80">Platform operations</p>
             </div>

@@ -1946,7 +1946,7 @@ function NewSummaryDialog({
       });
       if (floor && p.period_end < floor) {
         toast.error(
-          `Cannot create a summary for a period that ended before this client's HIVE start (${floor}).`,
+          `Cannot create a summary for a period that ended before this client's PI start (${floor}).`,
         );
         return;
       }

@@ -292,7 +292,6 @@ function SignPolicyGate() {
             <Button
               onClick={() => signMutation.mutate()}
               disabled={signMutation.isPending || !readToBottom || signature.trim().length < 2 || !esignConsent}
-              className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
             >
               <CheckCircle2 className="mr-1 h-4 w-4" />
               {signMutation.isPending ? "Saving…" : "Sign & continue"}

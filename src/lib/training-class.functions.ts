@@ -1,5 +1,5 @@
 /**
- * Admin class roster submit + Hive Exec Training tab.
+ * Admin class roster submit + PI Exec Training tab.
  */
 
 import { createServerFn } from "@tanstack/react-start";
@@ -57,7 +57,7 @@ async function ensureHiveExecutive(sb: AnySupabase, userId: string): Promise<voi
     .eq("active", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Access denied — Hive Executive permission required.");
+  if (!data) throw new Error("Access denied — PI Executive permission required.");
 }
 
 function mapClass(

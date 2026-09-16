@@ -202,12 +202,12 @@ function SettingsPage() {
 
       {(org?.role === "admin") && (
         <Link to="/dashboard/settings/team-access" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ShieldCheck className="h-5 w-5" /></div>
               <div>
                 <h2 className="text-base font-semibold">Team access</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Invite teammates by email and grant any combination of Staff, Admin, Company Executive, and (for HIVE staff) HIVE Executive roles per login.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Invite teammates by email and grant any combination of Staff, Admin, Company Executive, and (for PI staff) PI Executive roles per login.</p>
               </div>
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
@@ -217,7 +217,7 @@ function SettingsPage() {
 
       {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
         <Link to="/dashboard/settings/phi-access-audit" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ScrollText className="h-5 w-5" /></div>
               <div>
@@ -232,7 +232,7 @@ function SettingsPage() {
 
       {(org?.role === "admin") && (
         <Link to="/dashboard/roles" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><UserCog className="h-5 w-5" /></div>
               <div>
@@ -247,7 +247,7 @@ function SettingsPage() {
 
       {(org?.role === "admin") && (
         <Link to="/dashboard/permissions" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><SlidersHorizontal className="h-5 w-5" /></div>
               <div>
@@ -262,7 +262,7 @@ function SettingsPage() {
 
       {org?.role === "admin" && (
         <Link to="/dashboard/settings/bank-mapping" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Landmark className="h-5 w-5" /></div>
               <div>
@@ -277,7 +277,7 @@ function SettingsPage() {
 
       {org?.role === "admin" && (
         <Link to="/dashboard/settings/automation-rules" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Wand2 className="h-5 w-5" /></div>
               <div>
@@ -292,7 +292,7 @@ function SettingsPage() {
 
       {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
         <Link to="/dashboard/settings/service-codes" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><BookOpenCheck className="h-5 w-5" /></div>
               <div>
@@ -308,7 +308,7 @@ function SettingsPage() {
 
       {(org?.role === "admin") && (
         <Link to="/dashboard/billing/subscription" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><CreditCard className="h-5 w-5" /></div>
               <div>
@@ -323,12 +323,12 @@ function SettingsPage() {
 
       {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
         <Link to="/dashboard/settings/email" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Mail className="h-5 w-5" /></div>
               <div>
                 <h2 className="text-base font-semibold">Email Sender (Resend)</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Configure the From name / address used for every email HIVE sends — referral follow-ups, notifications. Refuses to send until you've verified a sending domain in Resend.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Configure the From name / address used for every email PI sends — referral follow-ups, notifications. Refuses to send until you've verified a sending domain in Resend.</p>
               </div>
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
@@ -338,7 +338,7 @@ function SettingsPage() {
 
       {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
         <Link to="/dashboard/settings/retention" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ListChecks className="h-5 w-5" /></div>
               <div>
@@ -353,7 +353,7 @@ function SettingsPage() {
 
       {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
         <Link to="/dashboard/settings/compliance-setup" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ClipboardList className="h-5 w-5" /></div>
               <div>
@@ -368,7 +368,7 @@ function SettingsPage() {
 
       {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
         <Link to="/dashboard/settings/draft-rules" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><FlaskConical className="h-5 w-5" /></div>
               <div>
@@ -383,7 +383,7 @@ function SettingsPage() {
 
       {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
         <Link to="/dashboard/settings/licensing" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><BadgeCheck className="h-5 w-5" /></div>
               <div>
@@ -398,7 +398,7 @@ function SettingsPage() {
 
       {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
         <Link to="/dashboard/settings/gmail" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-accent/30">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Inbox className="h-5 w-5" /></div>
               <div>

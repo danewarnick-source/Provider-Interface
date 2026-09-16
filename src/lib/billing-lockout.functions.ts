@@ -2,7 +2,7 @@
 //
 // Webhook handlers and cron jobs should import the server-side helpers
 // directly (see ./billing-lockout.server.ts). These createServerFn wrappers
-// are for the admin/HIVE-executive UI: testing, manual unlocks, etc.
+// are for the admin/PI-executive UI: testing, manual unlocks, etc.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -22,7 +22,7 @@ async function ensureHiveExecutive(
     .eq("active", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Access denied — HIVE Executive permission required.");
+  if (!data) throw new Error("Access denied — PI Executive permission required.");
 }
 
 export const recordPaymentFailureFn = createServerFn({ method: "POST" })

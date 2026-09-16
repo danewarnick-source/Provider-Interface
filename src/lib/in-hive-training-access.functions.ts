@@ -1,5 +1,5 @@
 /**
- * Server check: may this staff open the in-Hive 30-day course?
+ * Server check: may this staff open the in-PI 30-day course?
  * Roster tables are admin-only RLS — use the admin client.
  */
 import { createServerFn } from "@tanstack/react-start";

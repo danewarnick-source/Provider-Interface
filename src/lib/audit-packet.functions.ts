@@ -23,7 +23,7 @@ Your job is to extract:
 
 Real audit letters often request different document types for different, independently-random date windows within the same letter — e.g. "shift notes from May through July" and "incident reports from November through December" are two different windows, not one shared range. For each item, ALSO try to extract that item's OWN period_start/period_end (ISO yyyy-mm-dd) whenever the letter specifies a date range specific to that document type. Only set period_start/period_end on an item when the letter clearly gives it its own range — leave them null when the item is only covered by the letter's one overall timeline, so the packet-level timeline applies to it instead.
 
-For each item, set source_hint to one of these platform tables when the document is something HIVE typically tracks:
+For each item, set source_hint to one of these platform tables when the document is something PI typically tracks:
   evv_timesheets, billing_submissions, incident_reports, certifications, client_documents, profiles, courses, medications, pba_accounts, scheduled_shifts
 Use null if no source matches.
 
@@ -109,8 +109,8 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
     const timelineEnd = normalizeIsoDate(extraction.timeline_end);
 
     // If the requested timeline reaches back before this org went live on
-    // HIVE, surface a clear disclosure — those records were never captured
-    // in HIVE and must be sourced from the provider's prior system. Snapshot
+    // PI, surface a clear disclosure — those records were never captured
+    // in PI and must be sourced from the provider's prior system. Snapshot
     // the note at creation time so it doesn't silently change if go_live_date
     // is edited later.
     const { data: orgRow, error: orgErr } = await supabase
@@ -124,7 +124,7 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
     const goLiveDate = (org?.go_live_date ?? org?.created_at ?? "").slice(0, 10);
     const predatesGoLiveNote =
       timelineStart && goLiveDate && timelineStart < goLiveDate
-        ? `Note: this audit period includes dates before ${data.provider_name} began using Hive (${goLiveDate}). Records from ${timelineStart} to ${goLiveDate} were not captured in Hive and must be sourced from your prior records system.`
+        ? `Note: this audit period includes dates before ${data.provider_name} began using PI (${goLiveDate}). Records from ${timelineStart} to ${goLiveDate} were not captured in PI and must be sourced from your prior records system.`
         : null;
 
     const { data: packet, error: pkErr } = await supabase
@@ -149,7 +149,7 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
     if (pkErr) throw new Error(pkErr.message);
 
     // Insert items with default status 'missing'. When the packet's timeline
-    // predates the org's Hive go-live date, a pinned disclosure item is
+    // predates the org's PI go-live date, a pinned disclosure item is
     // inserted first so it is the very first checklist item a reviewer sees —
     // not a dismissable banner, an actual item row.
     const disclosureRows = predatesGoLiveNote
@@ -158,7 +158,7 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
             packet_id: packet.id,
             organization_id: data.organization_id,
             sub_folder: "admin" as const,
-            title: "Pre-Hive period disclosure",
+            title: "Pre-PI period disclosure",
             description: predatesGoLiveNote,
             source_hint: null,
             status: "confirmed" as const,

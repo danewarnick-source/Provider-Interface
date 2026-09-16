@@ -19,7 +19,7 @@ const KNOWN_GATED_FEATURES = new Set([
  * Single client-side gate for the Organization Master Controller.
  *
  * Reads the current user's org's effective feature map (registry defaults
- * overlaid with per-org overrides set by HIVE Executives). Use with the
+ * overlaid with per-org overrides set by PI Executives). Use with the
  * `feature` field on nav items to lock tabs, and inside route
  * components to block access.
  */

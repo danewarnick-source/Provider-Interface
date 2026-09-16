@@ -1,4 +1,4 @@
-// Types for the versioned generic HIVE base template.
+// Types for the versioned generic PI base template.
 // The base template is the state-neutral structure/field set. Each state's
 // filled-in template records which base version it was built from, so we can
 // flag states that need updating and bring them forward without losing their

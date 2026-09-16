@@ -6,7 +6,7 @@ export default defineTool({
   name: "sql_query",
   title: "Run SQL query (read-only)",
   description:
-    "Runs a read-only SQL query against the HIVE database as the signed-in user (row-level security applies). Only SELECT/WITH statements are allowed. Returns rows as JSON. Use this for any ad-hoc question about clients, shifts, timesheets, incidents, billing, certifications, etc.",
+    "Runs a read-only SQL query against the PI database as the signed-in user (row-level security applies). Only SELECT/WITH statements are allowed. Returns rows as JSON. Use this for any ad-hoc question about clients, shifts, timesheets, incidents, billing, certifications, etc.",
   inputSchema: {
     sql: z
       .string()

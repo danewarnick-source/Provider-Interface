@@ -38,7 +38,7 @@ function ForgotPassword() {
       ) : (
         <form onSubmit={onSubmit} className="grid gap-4">
           <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" required /></div>
-          <button type="submit" disabled={busy} className="pi-home-btn gold" style={{ width: "100%" }}>
+          <button type="submit" disabled={busy} className="pi-home-btn primary" style={{ width: "100%" }}>
             {busy ? "Sending…" : "Send reset link"}
           </button>
         </form>

@@ -177,7 +177,7 @@ export const LIVE_PATH_SETUP_QUESTIONS: LivePathSetupQuestion[] = [
     path: "cmp_cms_monthly",
     dutyKeys: ["cmp_cms_monthly_summaries"],
     question: "Which persons have an active CMP or CMS authorization this month?",
-    help: "CMP/CMS monthly summaries go to the Support Coordinator by the 15th of the following month. Not UPI. SLN stays quarterly. HIVE does not email the SC.",
+    help: "CMP/CMS monthly summaries go to the Support Coordinator by the 15th of the following month. Not UPI. SLN stays quarterly. PI does not email the SC.",
     source: "authorization_1056",
     factKey: "cmp_cms_monthly_caseload",
     ownerAnswers: false,

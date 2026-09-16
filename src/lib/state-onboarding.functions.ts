@@ -12,7 +12,7 @@ async function ensureExecutive(
 ): Promise<void> {
   const { data, error } = await supabase.rpc("is_hive_executive", { _user: userId });
   if (error) throw error;
-  if (!data) throw new Error("HIVE Executive permission required.");
+  if (!data) throw new Error("PI Executive permission required.");
 }
 
 export interface BuildFlag {
@@ -25,7 +25,7 @@ export interface BuildFlag {
 
 // ── Get-or-create the open onboarding session for a state ───────────────────
 // Accepts an optional `startFrom` starting-point:
-//   - "blank" (or omitted): generic HIVE base template, no pre-fill
+//   - "blank" (or omitted): generic PI base template, no pre-fill
 //   - a 2-letter state code: copy that state's current template values into
 //     the session answers as a starting point (only on first creation; an
 //     existing in-progress session is returned untouched so work isn't lost).
@@ -125,7 +125,7 @@ export const saveOnboardingProgress = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// ── Complete: project answers into state_templates, open HIVE tickets ───────
+// ── Complete: project answers into state_templates, open PI tickets ───────
 export const completeOnboardingSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
@@ -177,7 +177,7 @@ export const completeOnboardingSession = createServerFn({ method: "POST" })
         .insert({ state_code: data.stateCode, ...baseUpdate });
     }
 
-    // 3) open HIVE NECTAR tickets for each flagged build need
+    // 3) open PI NECTAR tickets for each flagged build need
     let ticketsCreated = 0;
     if (data.buildFlags.length > 0) {
       const rows = data.buildFlags.map((f) => ({

@@ -26,7 +26,7 @@ import { classifyServiceCodes } from "./nectar-code-classifier";
 // =============================================================
 // Foundation B — Authoritative sources, derived requirements,
 // and the immutable attestation log.
-// HIVE organizes; the company's uploaded documents are the source of truth.
+// PI organizes; the company's uploaded documents are the source of truth.
 // Shared helpers/prompts/schemas live in ./authoritative-sources.server.ts
 // to avoid ?tss-serverfn-split ReferenceErrors from sibling declarations.
 // =============================================================
@@ -81,7 +81,7 @@ export const ingestWebSource = createServerFn({ method: "POST" })
       const res = await fetch(parsedUrl.toString(), {
         headers: {
           "User-Agent":
-            "Mozilla/5.0 (compatible; HIVE-NECTAR/1.0; +https://hivecompliance.app)",
+            "Mozilla/5.0 (compatible; PI-NECTAR/1.0; +https://hivecompliance.app)",
           Accept: "text/html,application/xhtml+xml",
         },
         redirect: "follow",
@@ -920,7 +920,7 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
       const reason = looksLikePdf
         ? "Couldn't read enough text from this PDF — it may be a scanned image. Try uploading a text-based PDF (export from Word/Pages, or run OCR first). You can still add requirements by hand from the Requirements tab."
         : "No readable text was extracted from this file. You can still add requirements by hand from the Requirements tab.";
-      // Auto-file a HIVE Executive NECTAR ticket: this is the clearest
+      // Auto-file a PI Executive NECTAR ticket: this is the clearest
       // detectable platform-level problem (parsing pipeline can't see text).
       await reportPlatformEvent({
         eventKind: "parsing_no_text",
@@ -1211,8 +1211,8 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
 
     // --- Auto-emit: mapping_gap ---------------------------------------------
     // For each requirement the extractor SUCCESSFULLY read but couldn't map
-    // to a known HIVE category bucket (the system's only structural
-    // classification today), file a per-requirement HIVE ticket. Certain
+    // to a known PI category bucket (the system's only structural
+    // classification today), file a per-requirement PI ticket. Certain
     // signal: extraction returned it, item.category is null/unknown.
     const KNOWN_REQ_CATEGORIES = new Set([
       "audit_doc",
@@ -1233,7 +1233,7 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
         organizationId: doc.organization_id as string,
         organizationName: orgName,
         title: `Unmapped requirement — "${titleClean.slice(0, 120)}"`,
-        detail: `NECTAR extracted a requirement from document ${doc.id} ("${(doc.title as string) ?? doc.file_name}") but could not map it to a known HIVE category bucket (audit_doc / obligation / rule / billing). Extracted title: "${titleClean}". Citation: ${item.citation ?? "(none)"}. Applies to: ${item.applies_to ?? "(unset)"}.`,
+        detail: `NECTAR extracted a requirement from document ${doc.id} ("${(doc.title as string) ?? doc.file_name}") but could not map it to a known PI category bucket (audit_doc / obligation / rule / billing). Extracted title: "${titleClean}". Citation: ${item.citation ?? "(none)"}. Applies to: ${item.applies_to ?? "(unset)"}.`,
         category: "mapping_gap",
         severity: "low",
         dedupeKey: `requirement_unmapped:${doc.id}:${reqKey}`,
@@ -1251,8 +1251,8 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
     // --- Auto-emit: expansion_need (NARROW) ---------------------------------
     // Scan the source text for service-code-like tokens cited in canonical
     // DSPD patterns ("code XXX", "(XXX)", "XXX — Label"). Any token that
-    // doesn't appear in HIVE's known service-code registry is a wholly
-    // unknown code/structure HIVE has no template for — fire one ticket per
+    // doesn't appear in PI's known service-code registry is a wholly
+    // unknown code/structure PI has no template for — fire one ticket per
     // distinct unknown code, deduped globally so re-runs / other docs don't
     // duplicate. Strategic / addendum-pattern expansion stays MANUAL.
     const knownCodes = new Set(EVV_SERVICE_CODES.map((c) => c.code));
@@ -1283,8 +1283,8 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
         eventKind: "unknown_code_structure",
         organizationId: doc.organization_id as string,
         organizationName: orgName,
-        title: `Unknown code/structure "${code}" — no HIVE template`,
-        detail: `Authoritative source ${doc.id} ("${(doc.title as string) ?? doc.file_name}") references "${code}", which is not in HIVE's known service-code registry. HIVE has no template for this code/structure yet.${snippet ? ` Context: "${snippet.slice(0, 280)}"` : ""}`,
+        title: `Unknown code/structure "${code}" — no PI template`,
+        detail: `Authoritative source ${doc.id} ("${(doc.title as string) ?? doc.file_name}") references "${code}", which is not in PI's known service-code registry. PI has no template for this code/structure yet.${snippet ? ` Context: "${snippet.slice(0, 280)}"` : ""}`,
         category: "expansion_need",
         severity: "low",
         // Global dedupe on the code itself — same unknown code across docs/
@@ -1301,7 +1301,7 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
     if (inserted === 0) {
       // If any chunks failed to parse, this is an "extractor incomplete"
       // situation, not a "no obligations" one — say so clearly and file a
-      // distinct HIVE ticket. Re-clicking Draft retries.
+      // distinct PI ticket. Re-clicking Draft retries.
       if (chunkFailures.length > 0) {
         await reportPlatformEvent({
           eventKind: "ai_error",
@@ -1326,7 +1326,7 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
         };
       }
 
-      // Document parsed cleanly but yielded zero requirements. Worth a HIVE
+      // Document parsed cleanly but yielded zero requirements. Worth a PI
       // ticket for the platform team to investigate — either the extractor
       // missed obligation language, or the document genuinely has none.
       await reportPlatformEvent({
@@ -1385,7 +1385,7 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
 //
 // The monolithic generateRequirementsFromSource above stalls on long SOWs
 // because a single server-fn call has to do chunking, N Gemini calls,
-// dedup, batch inserts, and dozens of HIVE-ticket writes — easily blowing
+// dedup, batch inserts, and dozens of PI-ticket writes — easily blowing
 // past the worker wall-clock. The pipeline below splits the work into
 // three narrow server fns the client drives step-by-step, so each call
 // stays well inside the wall-clock and the client sees real progress.
@@ -2025,7 +2025,7 @@ export const finalizeRequirementsDraft = createServerFn({ method: "POST" })
       }
     }
 
-    // Fire-and-forget HIVE tickets for unmapped requirements / unknown codes.
+    // Fire-and-forget PI tickets for unmapped requirements / unknown codes.
     // Serialized on purpose (helper handles its own errors).
     const KNOWN_REQ_CATEGORIES = new Set([
       "audit_doc",
@@ -2046,7 +2046,7 @@ export const finalizeRequirementsDraft = createServerFn({ method: "POST" })
         organizationId: doc.organization_id as string,
         organizationName: orgName,
         title: `Unmapped requirement — "${titleClean.slice(0, 120)}"`,
-        detail: `NECTAR extracted a requirement from document ${doc.id} ("${(doc.title as string) ?? doc.file_name}") but could not map it to a known HIVE category bucket. Extracted title: "${titleClean}". Citation: ${item.citation ?? "(none)"}. Applies to: ${item.applies_to ?? "(unset)"}.`,
+        detail: `NECTAR extracted a requirement from document ${doc.id} ("${(doc.title as string) ?? doc.file_name}") but could not map it to a known PI category bucket. Extracted title: "${titleClean}". Citation: ${item.citation ?? "(none)"}. Applies to: ${item.applies_to ?? "(unset)"}.`,
         category: "mapping_gap",
         severity: "low",
         dedupeKey: `requirement_unmapped:${doc.id}:${reqKey}`,
@@ -2092,8 +2092,8 @@ export const finalizeRequirementsDraft = createServerFn({ method: "POST" })
         eventKind: "unknown_code_structure",
         organizationId: doc.organization_id as string,
         organizationName: orgName,
-        title: `Unknown code/structure "${code}" — no HIVE template`,
-        detail: `Authoritative source ${doc.id} ("${(doc.title as string) ?? doc.file_name}") references "${code}", which is not in HIVE's known service-code registry.${snippet ? ` Context: "${snippet.slice(0, 280)}"` : ""}`,
+        title: `Unknown code/structure "${code}" — no PI template`,
+        detail: `Authoritative source ${doc.id} ("${(doc.title as string) ?? doc.file_name}") references "${code}", which is not in PI's known service-code registry.${snippet ? ` Context: "${snippet.slice(0, 280)}"` : ""}`,
         category: "expansion_need",
         severity: "low",
         dedupeKey: `unknown_code_structure:${code}`,
@@ -2247,7 +2247,7 @@ export const listRequirementAttestations = createServerFn({ method: "POST" })
     return { attestations: rows ?? [] };
   });
 
-export const REDUCED_LIABILITY_NOTICE = `The documents, checklists, and data shown here are generated from materials you uploaded (including your contracts and State Scope of Work) and from information entered by your staff. HIVE/NECTAR organizes and surfaces this information but does not independently verify its accuracy or guarantee compliance with State requirements. You are strongly encouraged to review all forms and documents for accuracy. By proceeding, you confirm you have reviewed this information and accept responsibility for its accuracy and for your submissions to the State.`;
+export const REDUCED_LIABILITY_NOTICE = `The documents, checklists, and data shown here are generated from materials you uploaded (including your contracts and State Scope of Work) and from information entered by your staff. PI/NECTAR organizes and surfaces this information but does not independently verify its accuracy or guarantee compliance with State requirements. You are strongly encouraged to review all forms and documents for accuracy. By proceeding, you confirm you have reviewed this information and accept responsibility for its accuracy and for your submissions to the State.`;
 
 
 export const explainRequirement = createServerFn({ method: "POST" })

@@ -83,7 +83,7 @@ function ApprovalsPage() {
           </span>
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-[#9a3412]">
-              HIVE Executive · Extraction approval queue
+              PI Executive · Extraction approval queue
             </div>
             <h1 className="font-display text-lg font-semibold text-[#7c2d12]">
               Verify NECTAR read the source accurately

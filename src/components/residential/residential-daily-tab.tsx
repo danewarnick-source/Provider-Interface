@@ -84,8 +84,8 @@ export function ResidentialDailyTab({
   const start = from;
   const end = to;
 
-  // Org go-live floor: days before this org started documenting in Hive are
-  // never real gaps — those records simply weren't captured in Hive.
+  // Org go-live floor: days before this org started documenting in PI are
+  // never real gaps — those records simply weren't captured in PI.
   // Defaults to created_at when unset (conservative: never assumes
   // pre-adoption documentation exists).
   const orgGoLiveQ = useQuery({
@@ -347,7 +347,7 @@ export function ResidentialDailyTab({
     const map = new Map<string, Row>();
     for (const c of clients) {
       // "Days that need a note" starts from whichever is later: the
-      // client's own HHS service start, or the org's Hive go-live date.
+      // client's own HHS service start, or the org's PI go-live date.
       // Never flag a day before either as missing — that's the
       // go-live floor for OBLIGATION generation only, not visibility.
       const needsNoteFrom =

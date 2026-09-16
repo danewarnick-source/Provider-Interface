@@ -1608,7 +1608,7 @@ export function MarEmarTab({
   return (
     <div className="space-y-4">
 
-      {/* HIVE eMAR top bar — wordmark + DEMO chip + acting service indicator */}
+      {/* PI eMAR top bar — wordmark + DEMO chip + acting service indicator */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
         <div className="flex items-center gap-3">
           <div
@@ -1619,7 +1619,7 @@ export function MarEmarTab({
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M12 2 3 7v10l9 5 9-5V7z"/></svg>
           </div>
           <div className="leading-tight">
-            <p className="text-sm font-bold tracking-wide">HIVE</p>
+            <p className="text-sm font-bold tracking-wide">PI</p>
             <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
               eMAR · Medication Support
             </p>

@@ -1,6 +1,6 @@
 // Server-side permission gate. Mirrors client `can(perm)` via has_permission()
 // plus DEFAULT_MATRIX when the org has zero role_permissions rows (fresh
-// paid signup on live Hive-Platform). Throws so the server fn returns
+// paid signup on live PI-Platform). Throws so the server fn returns
 // 500/403 to the caller — never silently passes.
 
 import type { SupabaseClient } from "@supabase/supabase-js";

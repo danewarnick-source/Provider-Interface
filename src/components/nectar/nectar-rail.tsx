@@ -48,7 +48,7 @@ export function NectarRail({
     >
       <div className="flex items-center justify-between border-b border-[var(--hive-border)] px-4 py-3">
         <div className="flex items-center gap-2">
-          <PiMark className="h-4 w-4 text-[var(--hive-gold)]" />
+          <PiMark variant="gold" className="h-4 w-4" />
           <h2 className="font-display text-sm font-semibold tracking-tight text-[var(--hive-gold)]">
             Nectar
           </h2>
@@ -99,7 +99,7 @@ export function NectarRail({
           <button
             type="submit"
             aria-label="Send to Nectar"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-[var(--hive-gold)] text-[var(--hive-on-gold)] hover:bg-[var(--hive-gold-hover)] disabled:opacity-50"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] hover:bg-[var(--hive-primary-hover)] disabled:opacity-50"
             disabled={!question.trim()}
           >
             <Send className="h-4 w-4" />
