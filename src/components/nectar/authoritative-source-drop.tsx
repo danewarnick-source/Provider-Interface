@@ -344,7 +344,7 @@ export function AuthoritativeSourceDrop({
             <p className="max-w-sm text-sm text-muted-foreground">
               Drop a PDF, scan, Word, or spreadsheet — NECTAR will read each
               document, propose a label, and add it to the source-of-truth set
-              the rest of HIVE reads from.
+              the rest of PI reads from.
             </p>
           </div>
         </div>
@@ -532,7 +532,7 @@ export function AuthoritativeSourceDrop({
                     rows={2}
                     value={current.notes}
                     onChange={(e) => updateCurrent({ notes: e.target.value })}
-                    placeholder="Anything HIVE/NECTAR should know about this document."
+                    placeholder="Anything PI/NECTAR should know about this document."
                   />
                 </div>
               </>

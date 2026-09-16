@@ -1,7 +1,7 @@
 /**
  * Admin class roster + locked training prices (chunk 2).
  *
- * CPR / Mandt are EXTERNAL classes. 30-day is the in-Hive course from chunk 1.
+ * CPR / Mandt are EXTERNAL classes. 30-day is the in-PI course from chunk 1.
  * Package creates all three obligations for the same roster.
  * Staff never buy. True North / billing-exempt is always $0.
  */

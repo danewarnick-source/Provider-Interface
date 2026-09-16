@@ -18,7 +18,7 @@ export function useIsHiveExecutive() {
     retry: 1,
   });
   // Fail closed (not executive) once the check errors. Do not freeze every
-  // /dashboard/* shell on a failed Hive Executive RPC — that used to leave
+  // /dashboard/* shell on a failed PI Executive RPC — that used to leave
   // Admin Home on "Loading…" forever because `q.data === undefined` after error.
   // Still treat "no data yet" as loading so a queryClient.clear() cannot flash
   // isExecutive=false and bounce someone off /dashboard/hive-exec.

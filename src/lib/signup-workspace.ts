@@ -64,7 +64,7 @@ export function isRbacSeedTriggerError(message: string | null | undefined): bool
 }
 
 /**
- * Seed role_permissions for a newly provisioned org. Live Hive-Platform
+ * Seed role_permissions for a newly provisioned org. Live PI-Platform
  * never attached seed_role_permissions_after_org_insert, so owners hit
  * Access denied on Add client / Add staff. Idempotent (ON CONFLICT DO
  * NOTHING). Never logs name / phone / email.

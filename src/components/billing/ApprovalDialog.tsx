@@ -2,12 +2,12 @@
 // Billing-code approval dialog.
 // - Provider (no request yet): shows justification form + submit.
 // - Anyone with an existing request: shows the threaded
-//   conversation between the provider and HIVE Admin, with a
-//   reply composer. A HIVE Admin viewer sees Approve / Deny
+//   conversation between the provider and PI Admin, with a
+//   reply composer. A PI Admin viewer sees Approve / Deny
 //   buttons wired to postApprovalMessage(action=...).
 // This component is used both from the Smart Import review
 // (per external billing row) and from the provider Inbox and
-// the HIVE Admin queue for standalone thread viewing.
+// the PI Admin queue for standalone thread viewing.
 // =============================================================
 
 import { useEffect, useMemo, useState } from "react";
@@ -55,16 +55,16 @@ export interface ApprovalDialogProps {
   subjectId?: string | null;
   extractedFieldId?: string | null;
   onCreated?: (requestId: string) => void;
-  // Only true from the HIVE Executive route. Gates Approve/Deny + signature UI
+  // Only true from the PI Executive route. Gates Approve/Deny + signature UI
   // so provider-side surfaces (Inbox, Smart Import) never show them, even for
-  // users who also hold the HIVE Executive role.
+  // users who also hold the PI Executive role.
   allowResolution?: boolean;
 }
 
 function statusBadge(status: ApprovalRequestRow["status"]) {
   switch (status) {
     case "pending":
-      return <Badge variant="outline" className="border-amber-500/60 text-amber-700 dark:text-amber-300">Pending HIVE review</Badge>;
+      return <Badge variant="outline" className="border-amber-500/60 text-amber-700 dark:text-amber-300">Pending PI review</Badge>;
     case "approved":
       return <Badge variant="outline" className="border-emerald-500/60 text-emerald-700 dark:text-emerald-300"><ShieldCheck className="mr-1 h-3 w-3" />Approved</Badge>;
     case "denied":
@@ -141,7 +141,7 @@ function NewRequestForm({
         },
       }),
     onSuccess: (res) => {
-      toast.success("Request sent to HIVE Admin");
+      toast.success("Request sent to PI Admin");
       onCreated(res.requestId);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -151,10 +151,10 @@ function NewRequestForm({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Request HIVE Admin approval to bill {code}</DialogTitle>
+        <DialogTitle>Request PI Admin approval to bill {code}</DialogTitle>
         <DialogDescription>
           Explain why your organization needs to bill this code even though the PCSP lists another
-          provider ({providerNameOnPcsp || "unknown"}). HIVE Admin will review and reply here — you
+          provider ({providerNameOnPcsp || "unknown"}). PI Admin will review and reply here — you
           can keep the conversation going back and forth in your Inbox until it is resolved.
         </DialogDescription>
       </DialogHeader>
@@ -164,7 +164,7 @@ function NewRequestForm({
           <div><span className="text-muted-foreground">Provider on PCSP:</span> {providerNameOnPcsp || <span className="italic text-muted-foreground">unspecified</span>}</div>
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium">Justification for HIVE Admin</label>
+          <label className="mb-1 block text-xs font-medium">Justification for PI Admin</label>
           <Textarea
             rows={7}
             value={justification}
@@ -172,7 +172,7 @@ function NewRequestForm({
             placeholder={`Examples:
 • We have a signed subcontract with the listed provider for this authorization period.
 • The PCSP is out of date — the client transferred to us on <date> and a corrected PCSP is being issued.
-• We have a HIVE-approved cross-agency arrangement for continuity of care.`}
+• We have a PI-approved cross-agency arrangement for continuity of care.`}
           />
           <div className={`mt-1 text-[10px] ${remaining > 0 ? "text-muted-foreground" : "text-emerald-600"}`}>
             {remaining > 0 ? `Add at least ${remaining} more character${remaining === 1 ? "" : "s"}.` : "Ready to submit."}
@@ -183,7 +183,7 @@ function NewRequestForm({
         <Button variant="ghost" onClick={onCancel}>Cancel</Button>
         <Button onClick={() => m.mutate()} disabled={remaining > 0 || m.isPending}>
           {m.isPending && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
-          Send to HIVE Admin
+          Send to PI Admin
         </Button>
       </DialogFooter>
     </>
@@ -317,7 +317,7 @@ function ThreadView({ requestId, onClose, allowResolution }: { requestId: string
               ? "Reply to the provider, or click Approve / Deny to sign and resolve the ticket."
               : isHiveViewer
                 ? "Reply to the provider…"
-                : "Reply to HIVE Admin…"}
+                : "Reply to PI Admin…"}
           />
           <div className="flex flex-wrap items-center justify-end gap-2">
 
@@ -385,7 +385,7 @@ function ThreadView({ requestId, onClose, allowResolution }: { requestId: string
               className="mt-0.5"
             />
             <span>
-              I attest that this {signMode === "approve" ? "approval" : "denial"} is final, made in my official capacity as HIVE Admin, and recorded in the audit trail.
+              I attest that this {signMode === "approve" ? "approval" : "denial"} is final, made in my official capacity as PI Admin, and recorded in the audit trail.
             </span>
           </label>
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -426,7 +426,7 @@ function MessageBubble({ m, viewer }: { m: ApprovalMessageRow; viewer: SenderRol
     : m.sender_role === "hive_admin"
       ? "bg-amber-50 border-amber-300/50 dark:bg-amber-950/30"
       : "bg-card border-border";
-  const roleLabel = m.sender_role === "hive_admin" ? "HIVE Admin" : "Provider";
+  const roleLabel = m.sender_role === "hive_admin" ? "PI Admin" : "Provider";
   return (
     <li className={`flex flex-col ${align}`}>
       <div className={`max-w-[85%] rounded-lg border p-2.5 ${bubble}`}>

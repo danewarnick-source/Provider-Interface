@@ -237,7 +237,7 @@ function StartingPointChooser({
             />
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <Sparkles className="h-4 w-4 text-[var(--hive-gold)]" /> Generic HIVE state template
+                <Sparkles className="h-4 w-4 text-[var(--hive-gold)]" /> Generic PI state template
               </div>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Neutral, state-agnostic base. Structure is in place; state-specific fields are empty for you to fill in.

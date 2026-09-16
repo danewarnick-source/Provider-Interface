@@ -40,7 +40,7 @@ async function ensureExecutive(
 ): Promise<void> {
   const { data, error } = await supabase.rpc("is_hive_executive", { _user: userId });
   if (error) throw error;
-  if (!data) throw new Error("HIVE Executive permission required.");
+  if (!data) throw new Error("PI Executive permission required.");
 }
 
 export const listStateRequirementSources = createServerFn({ method: "GET" })

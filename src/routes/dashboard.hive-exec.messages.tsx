@@ -46,7 +46,7 @@ function MessageCenterPage() {
     <div className="space-y-4">
       <NectarHeader
         surface="navy"
-        eyebrow="HIVE Platform Operations"
+        eyebrow="PI Platform Operations"
         title="Message Center"
         description="Compose and send announcements or directives, and review what you've sent."
         right={<NectarBadge size="sm" label="EXEC ONLY" />}

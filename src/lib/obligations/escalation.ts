@@ -1,5 +1,5 @@
 // Escalation rules + evaluator (Compliance revamp Step 2).
-// Hive-authored catalog in SQL; this module is the only writer of
+// PI-authored catalog in SQL; this module is the only writer of
 // notifications.type = "escalation". Do not add a second overdue/escalation
 // fan-out.
 

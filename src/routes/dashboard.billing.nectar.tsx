@@ -299,7 +299,7 @@ function ReportBuilder() {
           <h2 className="font-display text-lg font-semibold">Ask NECTAR</h2>
           <NectarBadge size="xs" label="REPORTS" />
           <span className="hidden text-xs text-muted-foreground sm:inline">
-            Natural-language reports from HIVE data
+            Natural-language reports from PI data
           </span>
         </div>
       </div>

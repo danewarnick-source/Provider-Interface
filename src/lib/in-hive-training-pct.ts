@@ -1,5 +1,5 @@
 /**
- * Person-centered foundations — hire-level in-Hive course.
+ * Person-centered foundations — hire-level in-PI course.
  * Answer keys live only in person-centered-training-content.json and are
  * scored on the server. This module never imports that file.
  */

@@ -57,7 +57,7 @@ async function ensureExecutive(
     .eq("active", true)
     .maybeSingle();
   if (error) throw error;
-  if (!data) throw new Error("Access denied — HIVE Executive permission required.");
+  if (!data) throw new Error("Access denied — PI Executive permission required.");
 }
 
 async function audit(
@@ -285,7 +285,7 @@ export const updateMember = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// ───── HIVE Executive role grants ────────────────────────────────────────────
+// ───── PI Executive role grants ────────────────────────────────────────────
 
 export const listHiveExecutives = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -362,7 +362,7 @@ export const setHiveExecutiveByEmail = createServerFn({ method: "POST" })
       userId,
       data.grant ? "grant_hive_executive" : "revoke_hive_executive",
       null,
-      `${data.grant ? "Granted" : "Revoked"} HIVE Executive for ${data.email}`,
+      `${data.grant ? "Granted" : "Revoked"} PI Executive for ${data.email}`,
     );
     return { ok: true };
   });

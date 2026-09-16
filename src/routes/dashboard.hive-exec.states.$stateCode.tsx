@@ -318,7 +318,7 @@ function BasicsCard({
             value={notes}
             rows={2}
             onChange={(e) => { setNotes(e.target.value); setDirty(true); }}
-            placeholder="Anything HIVE Executives should know about this state's setup."
+            placeholder="Anything PI Executives should know about this state's setup."
             className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
           />
         </Field>
@@ -1116,7 +1116,7 @@ function InventoryTab({ stateCode }: { stateCode: string }) {
             <p className="mt-1 text-xs text-[#9a3412]/80">
               Every value the platform currently assumes is Utah. Items tagged{" "}
               <strong>config</strong> are (or will be) editable on each state's template.
-              Items tagged <strong>structural</strong> need real engineering — flag them to open a HIVE Executive ticket.
+              Items tagged <strong>structural</strong> need real engineering — flag them to open a PI Executive ticket.
             </p>
             <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-[#9a3412]/80">
               <span>{total} total · {extracted} extracted to template · {total - extracted} pending</span>
@@ -1180,7 +1180,7 @@ function InventoryTab({ stateCode }: { stateCode: string }) {
                             disabled={fileGap.isPending}
                             className="inline-flex min-h-[28px] items-center gap-1 rounded-md border border-rose-200 bg-white px-2 text-[10px] font-medium text-rose-900 hover:bg-rose-50 disabled:opacity-50"
                           >
-                            <AlertTriangle className="h-3 w-3" /> File HIVE ticket
+                            <AlertTriangle className="h-3 w-3" /> File PI ticket
                           </button>
                         )}
                       </td>
@@ -1199,7 +1199,7 @@ function InventoryTab({ stateCode }: { stateCode: string }) {
           <div className="text-xs text-muted-foreground">Loading…</div>
         ) : gaps.length === 0 ? (
           <div className="text-xs text-muted-foreground">
-            No structural gaps filed for {stateCode} yet. Use the "File HIVE ticket" buttons above to flag items that can't be solved with configuration.
+            No structural gaps filed for {stateCode} yet. Use the "File PI ticket" buttons above to flag items that can't be solved with configuration.
           </div>
         ) : (
           <ul className="space-y-1.5">

@@ -3,7 +3,7 @@
  *
  * Prefer RESEND_FROM or EMAIL_FROM when set (ops may use either).
  * Fallback is the Provider Interface mailbox — never Resend sandbox
- * (onboarding@resend.dev) and never Hive Certify branding.
+ * (onboarding@resend.dev) and never PI Certify branding.
  */
 
 export const DEFAULT_MANAGED_FROM_ADDRESS = "noreply@providerinterface.com";

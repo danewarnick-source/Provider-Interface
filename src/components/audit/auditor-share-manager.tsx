@@ -208,7 +208,7 @@ export function AuditorShareManager({ packetId, packetName, organizationId }: Pr
                 <ShieldAlert className="h-5 w-5 text-[color:var(--amber-600)]" /> Confirm auditor access
               </DialogTitle>
               <DialogDescription>
-                Review carefully before access goes live. Auditors verify their own email login — HIVE never creates accounts on their behalf.
+                Review carefully before access goes live. Auditors verify their own email login — PI never creates accounts on their behalf.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-2 text-sm">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ShiftRow } from "@/hooks/use-schedule-preview";
 
-// ── Design tokens ported from HIVE-Schedule-Demo-v6.html ──────────────
+// ── Design tokens ported from PI-Schedule-Demo-v6.html ──────────────
 export const SCHED = {
   navy: "var(--hive-sidebar)",
   gold: "var(--hive-gold)",

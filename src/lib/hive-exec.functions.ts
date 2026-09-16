@@ -140,7 +140,7 @@ async function ensureExecutive(
     .eq("active", true)
     .maybeSingle();
   if (error) throw error;
-  if (!data) throw new Error("Access denied — HIVE Executive permission required.");
+  if (!data) throw new Error("Access denied — PI Executive permission required.");
 }
 
 async function audit(
@@ -249,7 +249,7 @@ export const getExecKpis = createServerFn({ method: "GET" })
 
     return {
       active_companies,
-      trial_companies: 0, // no trial state in Hive — providers pay at signup
+      trial_companies: 0, // no trial state in PI — providers pay at signup
       past_due_companies: rows.filter((r) => r.status === "past_due").length,
       locked_companies: rows.filter((r) => r.status === "locked").length,
       mrr_cents,
@@ -511,7 +511,7 @@ export const getCompanyDetail = createServerFn({ method: "POST" })
       ((activeStaffRes.data ?? []) as Array<{ staff_id: string }>).map((r) => r.staff_id),
     );
 
-    // Live MRR override: when the subscription is on Hive Standard, the
+    // Live MRR override: when the subscription is on PI Standard, the
     // operator should see what the provider is currently billable for today,
     // not whatever was stamped at signup. Enterprise plans keep the stored value.
     const subStaff = (sub as { staff_count: number | null } | null)?.staff_count ?? null;
@@ -738,7 +738,7 @@ export const updateTicket = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// ───── Organization name fields update (HIVE Executive only) ───────────────
+// ───── Organization name fields update (PI Executive only) ───────────────
 
 function normName(v: unknown): string | null | undefined {
   if (v === undefined) return undefined;
@@ -883,7 +883,7 @@ function validateAccountContactInput(input: unknown): {
 
 /**
  * Update the org's account contact (name, email, phone).
- * Authorized for either: (a) a HIVE Executive, or (b) an admin/manager of
+ * Authorized for either: (a) a PI Executive, or (b) an admin/manager of
  * the target organization. Phone is stored on `billing_sms_phone` so the
  * billing SMS pipeline keeps working; name/email live on the new
  * `account_contact_*` columns.

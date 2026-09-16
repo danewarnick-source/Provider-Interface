@@ -1,10 +1,10 @@
 /**
- * Hive Training enrollment system — catalog, seat purchases, and per-staff
+ * PI Training enrollment system — catalog, seat purchases, and per-staff
  * enrollment through to certificate verification.
  *
  * Flow: org admin buys N seats of a `training_products` row
  * (`purchaseTrainingSeats`, invoice-based — Stripe isn't wired up yet) →
- * assigns seats to staff (`enrollStaffInTraining`) → Hive exec sends the
+ * assigns seats to staff (`enrollStaffInTraining`) → PI exec sends the
  * training link and later marks it completed, which flips the enrollment to
  * `certificate_pending` and notifies the org admin → org admin uploads the
  * certificate (`uploadTrainingCertificate`), which runs Nectar OCR and, on
@@ -59,7 +59,7 @@ async function ensureHiveExecutive(sb: AnySupabase, userId: string): Promise<voi
     .eq("active", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Access denied — HIVE Executive permission required.");
+  if (!data) throw new Error("Access denied — PI Executive permission required.");
 }
 
 async function notifyHiveExecInternal(
@@ -587,7 +587,7 @@ export const cancelEnrollment = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// ───── Hive-exec fulfillment actions ────────────────────────────────────
+// ───── PI-exec fulfillment actions ────────────────────────────────────
 
 export const markTrainingLinkSent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -858,7 +858,7 @@ export const uploadTrainingCertificate = createServerFn({ method: "POST" })
     return { ok: true, validation_status: validationStatus, reasons, expires_on: expiresOn };
   });
 
-/** Hive exec manual override when Nectar OCR failed but the admin confirms the cert is valid. */
+/** PI exec manual override when Nectar OCR failed but the admin confirms the cert is valid. */
 export const manuallyVerifyEnrollment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>

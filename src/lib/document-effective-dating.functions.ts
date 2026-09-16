@@ -1,7 +1,7 @@
 /**
  * Document effective-dating + replacement flow.
  *
- * Provider-owns-it model: HIVE surfaces and prompts; the provider confirms
+ * Provider-owns-it model: PI surfaces and prompts; the provider confirms
  * dates and is responsible for keeping documents current. NECTAR date
  * detection is stubbed in pass 1 — the flow always falls through to the
  * provider-entered prompt. Real extraction lands in a later pass.

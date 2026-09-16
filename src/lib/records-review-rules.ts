@@ -55,8 +55,8 @@ export function reviewExceptions(r: ReviewRuleInput, now: Date = new Date()): Re
     const requiresGoal = REQUIRES_PCSP_GOAL.has(r.service_type_code);
     const goalsEmpty = !r.goals_completed || r.goals_completed.length === 0;
 
-    // Historical imports predate Hive's goal tracking — the original shift
-    // never had a PCSP goal to check, and often predate Hive's note-length
+    // Historical imports predate PI's goal tracking — the original shift
+    // never had a PCSP goal to check, and often predate PI's note-length
     // conventions too. Once a staff member has actually attested the record
     // (staff_confirmed_at populated) through the Historical Records flow,
     // it's on file, signed, and retrievable for an auditor — flagging it

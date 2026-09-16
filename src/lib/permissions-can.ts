@@ -94,7 +94,7 @@ export function queryAwaitingFirstResult(opts: {
 }
 
 /**
- * Server-side companion to resolveCan. has_permission on live Hive-Platform
+ * Server-side companion to resolveCan. has_permission on live PI-Platform
  * returns false for view_clients / view_staff_records on unseeded orgs
  * (fallback list is legacy keys only). If the org has zero
  * role_permissions rows, honor DEFAULT_MATRIX so Invite staff and other

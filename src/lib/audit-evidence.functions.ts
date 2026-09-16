@@ -491,14 +491,14 @@ export async function getAuditEvidenceSnapshotInternal(
   });
   if (!incidentRows.length) {
     items["I-5"] = open(
-      "No incident reports in HIVE yet",
+      "No incident reports in PI yet",
       undefined,
       "/dashboard/hub/documentation?tab=incidents",
     );
   } else if (lateIncidents.length) {
     items["I-5"] = no(
       `${lateIncidents.length} incident${lateIncidents.length === 1 ? "" : "s"} past the state deadline`,
-      "Submit in USTEPS/UPI and record the confirmation in HIVE",
+      "Submit in USTEPS/UPI and record the confirmation in PI",
       "/dashboard/hub/documentation?tab=incidents",
     );
   } else {

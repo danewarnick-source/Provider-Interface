@@ -1,5 +1,5 @@
 /**
- * In-Hive staff courses opened from My Obligations.
+ * PI staff courses opened from My Obligations.
  * 30-day orientation (SOW §1.8(4)(A)–(W)), ABI (SOW §1.8(8)(A)–(F)),
  * hire-level Person-centered foundations (NCAPPS-informed; not official NCAPPS),
  * and the 12-hour CE placeholder (SOW §1.9 — no curriculum yet).
@@ -131,7 +131,7 @@ export const THIRTY_DAY_TOPIC_CITE: Record<string, string> = {
 
 /**
  * Live `training_topic_progress.ref_id` / `training_completions.ref_id` are
- * uuid columns. Encode the in-Hive ref as a stable UUID so we do not need a
+ * uuid columns. Encode the in-PI ref as a stable UUID so we do not need a
  * migration. Pattern: a11ce000-1e8f-4000-8000-00000000{course}{topic}.
  * Extra SAS topics use 00000001{course}{index} so A–W UUIDs never change.
  */

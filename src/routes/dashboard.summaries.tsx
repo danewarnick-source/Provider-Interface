@@ -196,7 +196,7 @@ function SummariesPage() {
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
         <div>
           <p className="text-sm text-muted-foreground max-w-2xl">
-            Open a person, draft goal progress with Nectar from code-tagged HIVE notes, finalize with
+            Open a person, draft goal progress with Nectar from code-tagged PI notes, finalize with
             attestation, download the packet, then mark sent to the Support Coordinator — or entered in UPI for SEI/SJD.
           </p>
         </div>
@@ -705,9 +705,9 @@ function SummaryReviewDialog({
       aiReviewAttested: !!(s.ai_review_attested_at || aiAttested),
       filingNote:
         filing === "upi"
-          ? "Filing: enter narrative in the state UPI portal, then attest in HIVE."
+          ? "Filing: enter narrative in the state UPI portal, then attest in PI."
           : filing === "support_coordinator"
-            ? "Filing: email/send this PDF to the Support Coordinator via your secure channel, then attest in HIVE."
+            ? "Filing: email/send this PDF to the Support Coordinator via your secure channel, then attest in PI."
             : null,
     });
     const url = URL.createObjectURL(blob);
@@ -912,7 +912,7 @@ function SummaryReviewDialog({
                     className="mt-0.5"
                   />
                   <span>
-                    I reviewed the Nectar draft against HIVE notes, shifts, and incidents for this period.
+                    I reviewed the Nectar draft against PI notes, shifts, and incidents for this period.
                     I take responsibility for the finalized summary.
                   </span>
                 </label>

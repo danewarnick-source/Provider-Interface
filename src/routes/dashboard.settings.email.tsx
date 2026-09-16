@@ -94,8 +94,8 @@ function EmailSettingsPage() {
         data: {
           organization_id: org.organization_id,
           to: testTo.trim(),
-          subject: force ? "HIVE — forced failure test" : "HIVE — Resend rail test",
-          html: `<p>This is a HIVE rail test from <strong>${org.organization_name}</strong>.</p>`,
+          subject: force ? "PI — forced failure test" : "PI — Resend rail test",
+          html: `<p>This is a PI rail test from <strong>${org.organization_name}</strong>.</p>`,
           forceFail: force,
         },
       });
@@ -130,9 +130,9 @@ function EmailSettingsPage() {
         <div className="flex items-start gap-3">
           <ShieldCheck className="mt-0.5 h-5 w-5 text-primary" />
           <div>
-            <div className="font-semibold">HIVE-managed sending is on</div>
+            <div className="font-semibold">PI-managed sending is on</div>
             <div className="text-muted-foreground">
-              Emails send immediately from HIVE's shared sender — no DNS setup needed.
+              Emails send immediately from PI's shared sender — no DNS setup needed.
               Sending from your own domain is coming later.
             </div>
           </div>
@@ -150,7 +150,7 @@ function EmailSettingsPage() {
           <div>
             <h1 className="text-lg font-semibold">Organization email sender</h1>
             <p className="text-sm text-muted-foreground">
-              Every email HIVE sends for {org.organization_name} (loan signatures,
+              Every email PI sends for {org.organization_name} (loan signatures,
               notifications, referral follow-ups) uses these settings.
             </p>
           </div>

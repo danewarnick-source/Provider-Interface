@@ -16,7 +16,7 @@ export function HistoricalTimesheetBadge({
       : "text-[10px] px-1.5 py-0.5";
   return (
     <span
-      title="Imported from a historical spreadsheet — this did not happen live in HIVE."
+      title="Imported from a historical spreadsheet — this did not happen live in PI."
       className={`inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 font-medium uppercase tracking-wider text-amber-700 ${cls} ${className}`}
     >
       <Archive className="h-3 w-3" />

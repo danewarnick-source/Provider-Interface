@@ -214,7 +214,7 @@ function CompanyDetailPage() {
           <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
             <Pencil className="h-4 w-4" /> Identifying information
           </h2>
-          <span className="text-[11px] text-muted-foreground">HIVE Executive · changes are audit-logged</span>
+          <span className="text-[11px] text-muted-foreground">PI Executive · changes are audit-logged</span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Company name (system)">

@@ -227,7 +227,7 @@ function HiveNectarPage() {
       severity?: Severity;
     }) => createFn({ data: vars }),
     onSuccess: () => {
-      toast.success("Ticket filed in HIVE Executive NECTAR queue.");
+      toast.success("Ticket filed in PI Executive NECTAR queue.");
       qc.invalidateQueries({ queryKey: ["hive-platform-tickets"] });
       setCreateOpen(false);
     },
@@ -243,7 +243,7 @@ function HiveNectarPage() {
         status: "in_progress",
         resolution: { ...o.resolution, state: nextState },
         appendAudit: {
-          actor: "HIVE Exec",
+          actor: "PI Exec",
           action: isOp
             ? "Approved (operational)"
             : "Approved → queued for implementation (architectural)",
@@ -256,7 +256,7 @@ function HiveNectarPage() {
       id: o.id,
       patch: {
         resolution: { ...o.resolution, state: "rejected" as ResolutionState },
-        appendAudit: { actor: "HIVE Exec", action: "Rejected proposal" },
+        appendAudit: { actor: "PI Exec", action: "Rejected proposal" },
       },
     });
   }
@@ -270,7 +270,7 @@ function HiveNectarPage() {
           state: "drafted" as ResolutionState,
         },
         appendAudit: {
-          actor: "HIVE Exec",
+          actor: "PI Exec",
           action: "Modified proposal",
           note: "Edited summary; awaiting re-approval",
         },
@@ -284,7 +284,7 @@ function HiveNectarPage() {
         status: "in_progress",
         resolution: { ...o.resolution, state: "applied" as ResolutionState },
         appendAudit: {
-          actor: "HIVE Exec",
+          actor: "PI Exec",
           action: "Applied operational fix; re-running affected documents",
         },
       },
@@ -326,7 +326,7 @@ function HiveNectarPage() {
               </h2>
               <p className="mt-1 max-w-3xl text-sm text-[#7c2d12]/80">
                 Tickets are filed live: NECTAR auto-creates them from detected
-                platform events (parsing failures, missing extractions), and HIVE
+                platform events (parsing failures, missing extractions), and PI
                 executives can file ones it can't detect yet.
               </p>
             </div>
@@ -498,7 +498,7 @@ function ManualTicketDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-lg rounded-xl border border-border bg-background p-4 shadow-xl">
         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Plus className="h-4 w-4" /> File a HIVE Executive NECTAR ticket
+          <Plus className="h-4 w-4" /> File a PI Executive NECTAR ticket
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
           Use this for issues NECTAR can't auto-detect yet (e.g. permission

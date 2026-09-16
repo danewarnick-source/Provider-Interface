@@ -189,7 +189,7 @@ export const askSteve = createServerFn({ method: "POST" })
     if (rows.length === 0) {
       return {
         answer:
-          "I couldn't find that in the HIVE knowledge base yet. Try rephrasing, or add an article for it in Configuration → Knowledge Base so I can answer next time.",
+          "I couldn't find that in the PI knowledge base yet. Try rephrasing, or add an article for it in Configuration → Knowledge Base so I can answer next time.",
         sources: [],
         found: false,
       };
@@ -203,7 +203,7 @@ export const askSteve = createServerFn({ method: "POST" })
       )
       .join("\n\n---\n\n");
 
-    const system = `You are Steve, the Executive Command Center assistant for HIVE. You are in "Guide-me" mode: a documentation retrieval assistant.
+    const system = `You are Steve, the Executive Command Center assistant for PI. You are in "Guide-me" mode: a documentation retrieval assistant.
 
 STRICT RULES:
 - Answer ONLY from the CONTEXT ARTICLES below.

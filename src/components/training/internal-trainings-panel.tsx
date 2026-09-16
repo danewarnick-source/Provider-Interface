@@ -124,7 +124,7 @@ export function InternalTrainingsPanel({ orgId }: { orgId: string }) {
         <div>
           <h2 className="font-display text-xl font-semibold text-[#1A2B47]">Internal trainings</h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            One binder for this agency. Add a policy, pick who it applies to, and Hive puts it on
+            One binder for this agency. Add a policy, pick who it applies to, and PI puts it on
             those staff members&apos; staff file. Staff read or watch it and attest. This
             is not a course builder and does not replace the 30-day orientation topics.
           </p>

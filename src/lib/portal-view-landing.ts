@@ -1,6 +1,6 @@
 /**
- * Post-login Portal View routing for Hive Executives who may also belong to
- * a company (e.g. Dane: Hive Exec + True North Owner).
+ * Post-login Portal View routing for PI Executives who may also belong to
+ * a company (e.g. Dane: PI Exec + True North Owner).
  *
  * Login used to always write `portal-view=hive_exec` for executives, which
  * trapped them on Command Center — especially on a phone, where Portal View

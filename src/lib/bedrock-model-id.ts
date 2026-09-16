@@ -11,7 +11,7 @@
 const GEO_PREFIX = /^(us|eu|apac|global)\./i;
 const FOUNDATION_PROVIDERS = /^(anthropic|amazon|meta|mistral|cohere|ai21)\./i;
 
-/** Short id that already appears in Hive Bedrock logs / cancelled draft jobs. */
+/** Short id that already appears in PI Bedrock logs / cancelled draft jobs. */
 const HIVE_KNOWN_SHORT: Record<string, string> = {
   "claude-sonnet-4-6": "us.anthropic.claude-sonnet-4-6",
 };

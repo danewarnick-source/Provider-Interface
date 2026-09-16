@@ -548,7 +548,7 @@ export const REQ_30_5_SEI_BENEFITS: DraftRule = draftBase({
       "Required of the designated qualified person before providing SEI. No invented renewal.",
   },
   evidence: evidence(
-    "Agency must have at least one qualified designated staff member. Knowledge is acquired outside HIVE; HIVE records the designated person's qualification. Not assigned to every SEI or office staff member.",
+    "Agency must have at least one qualified designated staff member. Knowledge is acquired outside PI; PI records the designated person's qualification. Not assigned to every SEI or office staff member.",
     ["EXTERNAL", "UPLOAD", "SYSTEM"],
     "Attestation or upload is a handling path for the designated person, not automatic equivalency for the whole SEI roster.",
   ),
@@ -596,7 +596,7 @@ export const REQ_30_6_A_USOR: DraftRule = draftBase({
     awardPlusMonths: 6,
   },
   evidence: evidence(
-    `Official USOR vendor proof. Published destination is ${USOR_PROOF_DESTINATION_AS_PUBLISHED} (Release_Gaps — do not invent a corrected address). HIVE stores the upload; it does not send the email.`,
+    `Official USOR vendor proof. Published destination is ${USOR_PROOF_DESTINATION_AS_PUBLISHED} (Release_Gaps — do not invent a corrected address). PI stores the upload; it does not send the email.`,
     ["UPLOAD", "EXTERNAL"],
     "Upload of the official proof is the handling path, not automatic equivalency for a missing vendor letter.",
   ),
@@ -916,7 +916,7 @@ export const REQ_1_10_7_TIMESHEET: DraftRule = draftBase({
     reason: "Per instance of service. Independent of the five-field note.",
   },
   evidence: evidence(
-    "HIVE time entries are the attendance record. Completing a daily note does not satisfy this lane.",
+    "PI time entries are the attendance record. Completing a daily note does not satisfy this lane.",
     ["SYSTEM", "IN_PLATFORM"],
     "Clock / timesheet is the default handling path, not equivalency for a narrative note.",
   ),

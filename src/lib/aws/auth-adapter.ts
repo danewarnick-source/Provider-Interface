@@ -252,7 +252,7 @@ export function createCognitoAuthAdapter(deps: CognitoAuthDeps) {
 let _browserAdapter: ReturnType<typeof createCognitoAuthAdapter> | null = null;
 
 /**
- * Lazy browser adapter that talks to Hive server functions for Cognito.
+ * Lazy browser adapter that talks to PI server functions for Cognito.
  * supabase.auth.signIn is never invoked on this path.
  */
 export function getBrowserCognitoAuth() {

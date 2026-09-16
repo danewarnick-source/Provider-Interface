@@ -1,5 +1,5 @@
 /**
- * Hive Launchpad clock-in / sole-worker gate.
+ * PI Launchpad clock-in / sole-worker gate.
  *
  * `profiles.has_passed_launchpad` is the live product flag. A handful of
  * internal test accounts may have it flipped true in staging so QA can

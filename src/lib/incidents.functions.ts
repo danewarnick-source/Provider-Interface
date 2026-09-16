@@ -9,9 +9,9 @@
  *   incident — UPI entry (initiation + detailed report) and the guardian
  *   notification duty, signed once.
  *
- * UPI is the state portal. Hive NEVER submits — these functions only record
+ * UPI is the state portal. PI NEVER submits — these functions only record
  * the provider's attestation that they performed the manual UPI step. UPI
- * itself notifies the Support Coordinator, so Hive has no separate SC-update
+ * itself notifies the Support Coordinator, so PI has no separate SC-update
  * duty to track.
  */
 import { createServerFn } from "@tanstack/react-start";

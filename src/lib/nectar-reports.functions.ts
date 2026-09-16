@@ -97,7 +97,7 @@ async function planFromPrompt(prompt: string): Promise<NectarReportPlan> {
   assertBedrockConfigured();
 
   const today = new Date().toISOString().slice(0, 10);
-  const system = `You translate an admin's plain-language reporting request into a strict JSON plan for the HIVE NECTAR report builder.
+  const system = `You translate an admin's plain-language reporting request into a strict JSON plan for the PI NECTAR report builder.
 
 Available intents:
 - "shifts": individual EVV shift punches (staff × client × code × times)

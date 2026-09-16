@@ -1,7 +1,7 @@
 /**
  * Stripe env + price mapping. Test / sandbox only for this release.
  *
- * Account: Hive sandbox / Hive (acct_1Ti6CMIQWmyptLnb)
+ * Account: PI sandbox / PI (acct_1Ti6CMIQWmyptLnb)
  * Dashboard: https://dashboard.stripe.com/acct_1Ti6CMIQWmyptLnb/test/dashboard
  *
  * Seat and training Price IDs below are public test-mode identifiers (not secrets).
@@ -19,7 +19,7 @@ import {
 } from "./hive-pricing.ts";
 import type { PiListQuote, SignupTrainingLine, SignupTrainingQuote } from "./pi-signup-pricing.ts";
 
-/** Hive sandbox (test mode). Not a secret. */
+/** PI sandbox (test mode). Not a secret. */
 export const STRIPE_TEST_ACCOUNT_ID = "acct_1Ti6CMIQWmyptLnb";
 
 /**
@@ -27,9 +27,9 @@ export const STRIPE_TEST_ACCOUNT_ID = "acct_1Ti6CMIQWmyptLnb";
  * is unset. Override in the host environment; never commit secret keys.
  */
 export const STRIPE_SANDBOX_PRICE_IDS = {
-  /** Hive seat list, $125/mo, prod_V9XjHA2R4jLnn3 — hive_staff only, never PI list signup */
+  /** PI seat list, $125/mo, prod_V9XjHA2R4jLnn3 — hive_staff only, never PI list signup */
   seatList: "price_1U9EeRIQWMytpLnbNurGi0Vq",
-  /** Hive seat founding, $79/mo, prod_V9XmH5qQO0TjHi — hive_staff only, never PI list signup */
+  /** PI seat founding, $79/mo, prod_V9XmH5qQO0TjHi — hive_staff only, never PI list signup */
   seatFounding: "price_1U9EgWIQWMytpLnbyBvs2f4L",
   /** PI list $69/client/mo — agency Checkout (signup + in-app pay) */
   piListPerClient: "price_1UBNUYIQWMytpLnbpygoWdLw",
@@ -166,7 +166,7 @@ export function stripeClientConfigured(env: StripePriceEnv = readStripeEnv()): {
 
 /**
  * Checkout needs the secret key. Seat / training Price IDs default to the
- * Hive sandbox products; env vars override those defaults.
+ * PI sandbox products; env vars override those defaults.
  */
 export function stripePaymentsConfigured(env: StripePriceEnv = readStripeEnv()): {
   ok: boolean;
@@ -248,7 +248,7 @@ export function stripeUnitAmountForTrainingSku(sku: string, catalogPriceCents?: 
   return trainingPriceCentsForSku(sku, catalogPriceCents);
 }
 
-/** Flat-plan helper kept for Enterprise/custom Hive Exec overrides only. Never a $499 default. */
+/** Flat-plan helper kept for Enterprise/custom PI Exec overrides only. Never a $499 default. */
 export function mrrCentsForPlan(plan: string): number {
   const id = (plan ?? "").toLowerCase();
   if (id === "enterprise" || id === "custom") return 0;

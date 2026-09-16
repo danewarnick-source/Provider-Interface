@@ -98,7 +98,7 @@ export const generateClientFaceSheet = createServerFn({ method: "POST" })
     // 4) Build PDF.
     const pdf = await PDFDocument.create();
     pdf.setTitle(`Client Face Sheet - ${client.first_name ?? ""} ${client.last_name ?? ""}`.trim());
-    pdf.setCreator("HIVE");
+    pdf.setCreator("Provider Interface");
     const page = pdf.addPage([612, 792]); // US Letter
     const helv = await pdf.embedFont(StandardFonts.Helvetica);
     const helvB = await pdf.embedFont(StandardFonts.HelveticaBold);

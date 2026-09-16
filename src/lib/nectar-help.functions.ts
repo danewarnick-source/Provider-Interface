@@ -27,7 +27,7 @@ function validate(input: unknown): AskInput {
   return { question, role, organizationId };
 }
 
-const HIVE_NAV_GUIDE = `HIVE NAVIGATION MAP (use these paths verbatim — never invent screens):
+const HIVE_NAV_GUIDE = `PI NAVIGATION MAP (use these paths verbatim — never invent screens):
 
 ADMIN AREA (admin/manager/super_admin):
 - /dashboard/compliance-desk — Records review: review submitted timesheets, daily logs, EVV punches, incidents.
@@ -399,7 +399,7 @@ export const askNectarHelp = createServerFn({ method: "POST" })
     await requireOrgMembership(supabase, userId, data.organizationId, "employee");
     const facts = await gatherFacts(supabase as unknown as SupabaseLike, userId, data.role, data.question, data.organizationId);
 
-    const system = `You are NECTAR, the expert system inside HIVE. You have direct access to the company's live data through the FACTS block below and you ANSWER FROM IT.
+    const system = `You are NECTAR, the expert system inside PI. You have direct access to the company's live data through the FACTS block below and you ANSWER FROM IT.
 
 ABSOLUTE RULES — never violate:
 1. NEVER say "I'm not sure without looking at your data", "you can check this yourself", "I'd need to look at your specific data", or any variant. The FACTS block IS the live data. Use it.
@@ -474,7 +474,7 @@ OUTPUT FORMAT — return STRICT JSON only:
     };
   });
 
-// ─── Escalation to HIVE team ───────────────────────────────────────────────
+// ─── Escalation to PI team ───────────────────────────────────────────────
 
 interface EscalateInput {
   question: string;

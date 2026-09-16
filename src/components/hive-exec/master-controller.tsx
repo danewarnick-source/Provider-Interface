@@ -7,7 +7,7 @@ import { getOrgFeatureBundle, setOrgFeature, type FeatureRegistryRow } from "@/l
 /**
  * Organization Master Controller.
  *
- * HIVE Executive-only surface for turning on/off tabs, sub-tabs, and NECTAR
+ * PI Executive-only surface for turning on/off tabs, sub-tabs, and NECTAR
  * sub-features per organization. Renders the feature_registry grouped by
  * parent_key with a toggle bound to organization_features.enabled.
  *

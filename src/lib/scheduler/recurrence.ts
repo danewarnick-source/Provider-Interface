@@ -1,7 +1,7 @@
 /**
  * Recurring-shift expansion and staff-calendar visibility.
  *
- * Hive stores each occurrence as a real `scheduled_shifts` row. Weekdays and
+ * PI stores each occurrence as a real `scheduled_shifts` row. Weekdays and
  * wall-clock times are America/Denver (Utah), never the server's local TZ and
  * never UTC `getDay()` / `setHours()`. A 10:00 AM Monday in Denver must stay
  * Monday even when the Node process is UTC.

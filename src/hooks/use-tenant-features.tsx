@@ -7,7 +7,7 @@ export type FeatureKey =
 
 /**
  * Legacy provider_tenants / tenant_features flags. That catalog is unused
- * (0 rows on Hive-Platform). Client feature visibility is driven by DSPD
+ * (0 rows on PI-Platform). Client feature visibility is driven by DSPD
  * codes + clients.feature_config — see client-features.ts.
  */
 export function useDisabledFeatures() {

@@ -1,6 +1,6 @@
 /**
  * Mark a public training-only order paid. No organization. No staff row.
- * Hive Executive Training lists the seats after this runs.
+ * PI Executive Training lists the seats after this runs.
  */
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";

@@ -419,7 +419,7 @@ function DraftRulesSimulationPage() {
             attestation, and CMP/CMS monthly summaries to the Support Coordinator. One parent
             assignment. One report per code — never monthly plus quarterly on the same code. SLN
             stays quarterly. Child elements stay on the parent. Missing awarded-code or caseload
-            facts stay questions. Not published. HIVE does not transmit to UPI or email the Support
+            facts stay questions. Not published. PI does not transmit to UPI or email the Support
             Coordinator.
           </p>
           <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
@@ -500,7 +500,7 @@ function DraftRulesSimulationPage() {
             geofence engine. One parent assignment. The note, timesheet, EVV punch, and signature
             stay independent lanes. HHS uses the host-home daily note plus overnight confirmation.
             Child elements stay on the parent. Missing assignment facts stay questions. Not
-            published. HIVE does not invent UEVV transmission success.
+            published. PI does not invent UEVV transmission success.
           </p>
           <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
             {FIFTH_BATCH_DEMO_PATH.map((step) => (

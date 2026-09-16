@@ -37,7 +37,7 @@ const ROLE_INFO: Array<{
   { key: "staff", label: "Company Staff", hint: "Mobile staff portal" },
   { key: "admin", label: "Company Admin", hint: "Full company admin portal" },
   { key: "company_executive", label: "Company Executive", hint: "Admin + executive/billing views" },
-  { key: "hive_executive", label: "HIVE Executive", hint: "Cross-company platform tools", restricted: true },
+  { key: "hive_executive", label: "PI Executive", hint: "Cross-company platform tools", restricted: true },
 ];
 
 function TeamAccessPage() {
@@ -114,7 +114,7 @@ function TeamAccessPage() {
   const toggle = (m: TeamMemberAccess, key: keyof TeamMemberAccess["grants"], next: boolean) => {
     if (key === "staff") return; // always-on baseline
     if (key === "hive_executive" && !isHiveExec) {
-      toast.error("Only HIVE executives may grant this role");
+      toast.error("Only PI executives may grant this role");
       return;
     }
     const grants = {
@@ -251,7 +251,7 @@ function TeamAccessPage() {
                               aria-label={`${r.label} for ${m.email}`}
                             />
                             {r.key === "hive_executive" && !isHiveExec && checked && (
-                              <Badge variant="outline" className="text-[10px]">HIVE-only</Badge>
+                              <Badge variant="outline" className="text-[10px]">PI-only</Badge>
                             )}
                           </div>
                         </td>
@@ -266,7 +266,7 @@ function TeamAccessPage() {
         {!isHiveExec && (
           <div className="border-t border-border p-3 text-xs text-muted-foreground">
             <Lock className="mr-1 inline h-3 w-3" />
-            HIVE Executive can only be granted by a HIVE staff account.
+            PI Executive can only be granted by a PI staff account.
           </div>
         )}
       </div>

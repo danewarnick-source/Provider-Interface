@@ -207,9 +207,9 @@ export async function renderMealPlanPdf(p: MealPlanPdfPayload): Promise<Uint8Arr
 
   const doc = await PDFDocument.create();
   doc.setTitle(`Weekly Menu — ${p.clientName} — ${p.weekLabel}`);
-  doc.setAuthor(p.orgName || "HIVE");
-  doc.setCreator("HIVE");
-  doc.setProducer("HIVE");
+  doc.setAuthor(p.orgName || "Provider Interface");
+  doc.setCreator("Provider Interface");
+  doc.setProducer("Provider Interface");
 
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);
@@ -543,9 +543,9 @@ export async function renderPlanVsActualPdf(p: PlanVsActualPdfPayload): Promise<
 
   const doc = await PDFDocument.create();
   doc.setTitle(`Meal Plan — Plan vs. Actual — ${p.clientName} — ${p.weekLabel}`);
-  doc.setAuthor(p.orgName || "HIVE");
-  doc.setCreator("HIVE");
-  doc.setProducer("HIVE");
+  doc.setAuthor(p.orgName || "Provider Interface");
+  doc.setCreator("Provider Interface");
+  doc.setProducer("Provider Interface");
 
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);

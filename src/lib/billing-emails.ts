@@ -1,7 +1,7 @@
-// Hive-branded billing email templates.
+// PI-branded billing email templates.
 //
 // Pure render functions — no provider dependencies. Returns subject + html + text.
-// Branded with Hive dark-navy header, amber accent, and clean transactional layout.
+// Branded with PI dark-navy header, amber accent, and clean transactional layout.
 // Wired into src/lib/billing-notifications.server.ts.
 
 const NAVY = "#0F1A2E";

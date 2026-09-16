@@ -1,4 +1,4 @@
-// Hire + client-assignment hooks. Hive writes the obligation list.
+// Hire + client-assignment hooks. PI writes the obligation list.
 // Staff never pick or self-enroll. All writes are idempotent.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";

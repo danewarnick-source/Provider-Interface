@@ -407,7 +407,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <p className="text-xs text-muted-foreground">
-            Based on the documents the provider uploaded. NECTAR places the standard from the SOW/contract alongside the training HIVE has on file so you can compare requirement vs. evidence directly.
+            Based on the documents the provider uploaded. NECTAR places the standard from the SOW/contract alongside the training PI has on file so you can compare requirement vs. evidence directly.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="rounded-md border border-[color:var(--border-light)] bg-white/70 p-3">
@@ -429,7 +429,7 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
             </div>
             <div className="rounded-md border border-[color:var(--border-light)] bg-white/70 p-3">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                HIVE training evidence
+                PI training evidence
               </div>
               <div className="space-y-1">
                 {(data.nectar.training_courses ?? []).slice(0, 8).map((c: any) => (

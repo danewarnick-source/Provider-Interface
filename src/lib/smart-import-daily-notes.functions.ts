@@ -1,7 +1,7 @@
 // Historical daily-notes / shift-notes spreadsheet import — commits reviewed
 // rows into daily_logs with a permanent `import_source='historical_import'`
 // marker and a link back to the parent import_jobs row so imported notes are
-// never confused with a note written live in HIVE. Authenticated and
+// never confused with a note written live in PI. Authenticated and
 // org-scoped; NEVER creates staff or client records.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";

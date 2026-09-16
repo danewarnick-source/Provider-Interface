@@ -286,7 +286,7 @@ const FAMILIES: Readonly<Record<SixteenthExecutableBatchLiveKey, FamilyMeta>> = 
     timing: USOR_NONE,
     routes: ["EXTERNAL", "UPLOAD"],
     handling:
-      "Upload of the official USOR approved-vendor proof is the handling path. HIVE stores the upload; it does not send the email. Staff never touch UPI.",
+      "Upload of the official USOR approved-vendor proof is the handling path. PI stores the upload; it does not send the email. Staff never touch UPI.",
     assignment: "org_award_reeval",
     evidence: "external_then_upload",
     adminReview: "upload_review",
@@ -739,7 +739,7 @@ export function sixteenthBatchLiveEngineReady(row: SixteenthBatchEngineBinding):
     reasons.push("Child elements must not mint staff tasks.");
   }
   if (row.trainingTitle !== null) {
-    reasons.push("This batch does not invent an in-Hive course.");
+    reasons.push("This batch does not invent an in-PI course.");
   }
   if (row.formTitle !== null) {
     reasons.push("This batch does not invent a person form.");

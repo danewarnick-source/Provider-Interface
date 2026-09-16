@@ -137,7 +137,7 @@ function RevenuePage() {
   // Honest labeling for the top band, depending on source mode.
   const topBandTitle = isManualMode
     ? "Billed Revenue (entered manually)"
-    : "HIVE-Verified Subtotal";
+    : "PI-Verified Subtotal";
   const topBandTone: "verified" | "manual" = isManualMode ? "manual" : "verified";
 
   return (
@@ -154,7 +154,7 @@ function RevenuePage() {
             ) : (
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                HIVE-Verified
+                PI-Verified
               </div>
             )}
             <CardTitle className="mt-0.5">Billed Revenue</CardTitle>
@@ -260,7 +260,7 @@ function RevenuePage() {
           <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <p>
-              Received amounts come from outside HIVE (your bank or accounting
+              Received amounts come from outside PI (your bank or accounting
               software).{" "}
               <Button asChild variant="link" className="h-auto p-0 text-xs">
                 <Link to="/dashboard/billing/imports">
@@ -328,8 +328,8 @@ function RevenuePage() {
             note={
               isManualMode
                 ? granularity === "monthly"
-                  ? `Manually entered for ${MONTH_LABELS[inputsMonth - 1]} ${year} — provider-entered, not HIVE-verified.`
-                  : "Manually entered for the periods above — provider-entered, not HIVE-verified."
+                  ? `Manually entered for ${MONTH_LABELS[inputsMonth - 1]} ${year} — provider-entered, not PI-verified.`
+                  : "Manually entered for the periods above — provider-entered, not PI-verified."
                 : granularity === "monthly"
                   ? `Billed for ${MONTH_LABELS[inputsMonth - 1]} ${year} — sourced from your billing, read-only.`
                   : "Billed for the periods above — sourced from your billing, read-only."

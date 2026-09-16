@@ -1,6 +1,6 @@
 /**
  * Locked public Terms draft. Legal name is Provider Interface LLC.
- * Dane is not a lawyer — keep this short. No Hive Certify. No DSPD fluff.
+ * Dane is not a lawyer — keep this short. No PI Certify. No DSPD fluff.
  */
 
 export const PI_LEGAL_NAME = "Provider Interface LLC";

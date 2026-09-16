@@ -9,7 +9,7 @@ export function RequireHiveExecutive({ children }: { children: ReactNode }) {
     if (!isLoading && !isExecutive) navigate({ to: "/unauthorized" });
   }, [isLoading, isExecutive, navigate]);
   if (isLoading || !isExecutive) {
-    return <div className="text-sm text-muted-foreground">Verifying HIVE Executive access…</div>;
+    return <div className="text-sm text-muted-foreground">Verifying PI Executive access…</div>;
   }
   return <>{children}</>;
 }

@@ -426,7 +426,7 @@ function RosterSummary({
 }
 
 
-// ---------------------------- WhiteGloveBanner (HIVE migration) ----------------------------
+// ---------------------------- WhiteGloveBanner (PI migration) ----------------------------
 function WhiteGloveBanner({
   job, onChanged,
 }: {
@@ -459,7 +459,7 @@ function WhiteGloveBanner({
       <div className="flex items-start gap-2">
         <ShieldCheck className="mt-0.5 h-4 w-4 text-amber-700" />
         <div className="text-amber-900 dark:text-amber-100">
-          <strong>White-glove migration.</strong> HIVE staff can prep this job, but
+          <strong>White-glove migration.</strong> PI staff can prep this job, but
           commit is locked until the receiving company's admin signs off below.
         </div>
       </div>
@@ -2094,7 +2094,7 @@ function BillingCodesEditor({
   const [adding, setAdding] = useState(false);
   const [removedIds, setRemovedIds] = useState<Set<string>>(() => new Set());
 
-  // Load persistent HIVE-approval status for every extracted-field row in
+  // Load persistent PI-approval status for every extracted-field row in
   // this billing table. Provider self-attestation is gone — status is
   // driven by billing_code_approval_requests / _messages.
   const { data: org } = useCurrentOrg();
@@ -2160,7 +2160,7 @@ function BillingCodesEditor({
             <details className="inline">
               <summary className="inline cursor-pointer text-primary underline underline-offset-2">Details</summary>
               <span className="ml-1">
-                For an external code, click <span className="font-medium">Not my organization</span> to keep it on the record without billing responsibility, or <span className="font-medium">Request HIVE approval</span> to have HIVE Admin review it in your Inbox.
+                For an external code, click <span className="font-medium">Not my organization</span> to keep it on the record without billing responsibility, or <span className="font-medium">Request PI approval</span> to have PI Admin review it in your Inbox.
               </span>
             </details>
           </div>
@@ -2231,10 +2231,10 @@ function BillingCodesEditor({
         <details className="mt-2 rounded-md border border-amber-300/60 bg-amber-50 p-2 text-[11px] text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
           <summary className="cursor-pointer font-semibold">
             {activeExternal.length} outside-provider code{activeExternal.length === 1 ? "" : "s"} on this PCSP
-            <span className="ml-1 font-normal">· {approvedCount} approved · {pendingCount} awaiting HIVE</span>
+            <span className="ml-1 font-normal">· {approvedCount} approved · {pendingCount} awaiting PI</span>
           </summary>
           <div className="mt-1.5">
-            Provider on {activeExternal.length === 1 ? "this line" : "these lines"} does not match <span className="font-medium">{orgLabel}</span>. Use <span className="font-medium">Not my organization</span> to keep it purely informational, or <span className="font-medium">Request HIVE approval</span> to have HIVE Admin review it.
+            Provider on {activeExternal.length === 1 ? "this line" : "these lines"} does not match <span className="font-medium">{orgLabel}</span>. Use <span className="font-medium">Not my organization</span> to keep it purely informational, or <span className="font-medium">Request PI approval</span> to have PI Admin review it.
           </div>
           <div className="mt-1 font-mono text-[10px]">
             {activeExternal.map((p) => `${p.row.service_code} → ${p.row.provider_name ?? "unknown"}`).join("  •  ")}
@@ -2370,7 +2370,7 @@ function BillingRowEditor({
             return <Badge variant="outline" className="whitespace-nowrap text-muted-foreground text-[10px] px-1.5 py-0">Unspecified</Badge>;
           }
           // Admin already acknowledged this external code is not ours.
-          // Row stays visible for the record; no HIVE approval required.
+          // Row stays visible for the record; no PI approval required.
           if (row.ownership_ack === "not_ours") {
             const clearAck = () => {
               const next: BillingRowShape = { ...row, ownership_ack: null };
@@ -2399,7 +2399,7 @@ function BillingRowEditor({
               </div>
             );
           }
-          // External provider: replace self-attest with a HIVE approval workflow.
+          // External provider: replace self-attest with a PI approval workflow.
           const ar = approvalRequest;
           const openDialog = () => onOpenApproval(row.service_code, row.provider_name ?? null, ar?.id ?? null);
           const markNotOurs = () => {
@@ -2421,12 +2421,12 @@ function BillingRowEditor({
           let btnLabel: string;
           if (!ar || ar.status === "withdrawn") {
             statusEl = null;
-            btnLabel = "Request HIVE approval";
+            btnLabel = "Request PI approval";
           } else if (ar.status === "pending") {
-            statusEl = <Badge variant="outline" className="whitespace-nowrap border-amber-500/60 text-amber-700 dark:text-amber-300 text-[10px] px-1.5 py-0">Awaiting HIVE</Badge>;
+            statusEl = <Badge variant="outline" className="whitespace-nowrap border-amber-500/60 text-amber-700 dark:text-amber-300 text-[10px] px-1.5 py-0">Awaiting PI</Badge>;
             btnLabel = "View thread";
           } else if (ar.status === "approved") {
-            statusEl = <Badge variant="outline" className="whitespace-nowrap border-emerald-500/60 text-emerald-700 dark:text-emerald-300 text-[10px] px-1.5 py-0"><ShieldCheck className="mr-1 h-2.5 w-2.5" />HIVE approved</Badge>;
+            statusEl = <Badge variant="outline" className="whitespace-nowrap border-emerald-500/60 text-emerald-700 dark:text-emerald-300 text-[10px] px-1.5 py-0"><ShieldCheck className="mr-1 h-2.5 w-2.5" />PI approved</Badge>;
             btnLabel = "View thread";
           } else {
             statusEl = <Badge variant="outline" className="whitespace-nowrap border-destructive/60 text-destructive text-[10px] px-1.5 py-0">Denied</Badge>;
@@ -2453,7 +2453,7 @@ function BillingRowEditor({
                   type="button"
                   className="text-[10px] text-primary underline underline-offset-2 text-left"
                   onClick={openDialog}
-                  title="Send a justification to HIVE Admin for review"
+                  title="Send a justification to PI Admin for review"
                 >
                   {btnLabel}
                   {ar && ar.unread_for_me > 0 && (
@@ -3108,7 +3108,7 @@ function ImportSummaryPanel({
                     let statusLabel = "Ours · will create";
                     let statusCls = "text-emerald-700 dark:text-emerald-300";
                     if (notOurs) { statusLabel = "Not my org · informational"; statusCls = "text-muted-foreground"; }
-                    else if (own === "external") { statusLabel = "External · coordination / HIVE"; statusCls = "text-amber-700 dark:text-amber-300"; }
+                    else if (own === "external") { statusLabel = "External · coordination / PI"; statusCls = "text-amber-700 dark:text-amber-300"; }
                     else if (own === "unknown") { statusLabel = "Provider unspecified"; statusCls = "text-muted-foreground"; }
                     return (
                       <tr key={i} className={`border-b border-border/40 ${notOurs ? "bg-muted/20 text-muted-foreground" : ""}`}>

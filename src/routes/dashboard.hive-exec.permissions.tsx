@@ -30,7 +30,7 @@ function PermissionsPage() {
   );
 }
 
-// ───── HIVE Executive grants ────────────────────────────────────────────────
+// ───── PI Executive grants ────────────────────────────────────────────────
 
 function HiveExecsSection() {
   const qc = useQueryClient();
@@ -44,7 +44,7 @@ function HiveExecsSection() {
     mutationFn: (vars: { email: string; grant: boolean; notes: string | null }) =>
       setFn({ data: vars }),
     onSuccess: () => {
-      toast.success("HIVE Executive role updated.");
+      toast.success("PI Executive role updated.");
       setEmail("");
       setNotes("");
       qc.invalidateQueries({ queryKey: ["hive-execs"] });
@@ -57,11 +57,11 @@ function HiveExecsSection() {
     <section className="rounded-xl border border-[#fed7aa] bg-card p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2">
         <ShieldCheck className="h-4 w-4 text-[var(--hive-gold)]" />
-        <h2 className="font-display text-lg font-semibold">HIVE Executive Role</h2>
+        <h2 className="font-display text-lg font-semibold">PI Executive Role</h2>
       </div>
       <p className="mb-3 text-xs text-muted-foreground">
-        HIVE Executives can access this platform-owner portal across every customer company.
-        Only existing HIVE Executives can grant or revoke this role.
+        PI Executives can access this platform-owner portal across every customer company.
+        Only existing PI Executives can grant or revoke this role.
       </p>
 
       <form
@@ -116,7 +116,7 @@ function HiveExecsSection() {
             {q.isLoading ? (
               <tr><td colSpan={5} className="p-4 text-center text-muted-foreground">Loading…</td></tr>
             ) : (q.data ?? []).length === 0 ? (
-              <tr><td colSpan={5} className="p-4 text-center text-muted-foreground">No HIVE Executives.</td></tr>
+              <tr><td colSpan={5} className="p-4 text-center text-muted-foreground">No PI Executives.</td></tr>
             ) : (q.data ?? []).map((r) => (
               <tr key={r.user_id} className="border-t border-border">
                 <td className="px-3 py-2">
@@ -138,7 +138,7 @@ function HiveExecsSection() {
                   {r.active && r.email ? (
                     <button
                       onClick={() => {
-                        if (confirm(`Revoke HIVE Executive role for ${r.email}?`)) {
+                        if (confirm(`Revoke PI Executive role for ${r.email}?`)) {
                           grant.mutate({ email: r.email!, grant: false, notes: null });
                         }
                       }}
@@ -308,7 +308,7 @@ function AuditSection() {
     <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2">
         <ScrollText className="h-4 w-4 text-[var(--hive-text)]" />
-        <h2 className="font-display text-lg font-semibold">HIVE Executive Audit Trail</h2>
+        <h2 className="font-display text-lg font-semibold">PI Executive Audit Trail</h2>
         <Shield className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
       </div>
       <div className="max-h-[400px] overflow-x-auto overflow-y-auto rounded-lg border border-border">

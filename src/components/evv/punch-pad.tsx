@@ -2604,8 +2604,8 @@ export function PunchPad({
                   </p>
                   <p className={`text-xs ${clockInSuccess?.evvClean ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}>
                     {clockInSuccess?.evvClean
-                      ? "GPS verified · Location confirmed · Timesheet saved in HIVE"
-                      : "Variance logged · Pending admin review · Timesheet saved in HIVE"}
+                      ? "GPS verified · Location confirmed · Timesheet saved in PI"
+                      : "Variance logged · Pending admin review · Timesheet saved in PI"}
                   </p>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 /**
- * Leftover Hive staff list / founding math. Public signup and checkout do not
+ * Leftover PI staff list / founding math. Public signup and checkout do not
  * use these dollars — those are $69 / client and $350 min in pi-landing.ts.
  *
  * Training cents below are still the locked add-on amounts: CPR $100, 30-day $75,
@@ -28,7 +28,7 @@ export const TRAINING_PRICE_CENTS = {
   cpr_first_aid: 10_000,
   mandt: 20_000,
   thirty_day: 7_500,
-  /** Alias for the in-Hive 30-day course. Kept so leftover catalog SKUs still resolve. */
+  /** Alias for the in-PI 30-day course. Kept so leftover catalog SKUs still resolve. */
   dspd_required: 7_500,
 } as const;
 

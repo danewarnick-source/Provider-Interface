@@ -181,12 +181,12 @@ export const setMemberGrants = createServerFn({ method: "POST" })
     if (e0) throw e0;
 
     let nextRole = cur.role;
-    // super_admin is never assignable here — Hive executives are managed
+    // super_admin is never assignable here — PI executives are managed
     // via hive_executives, not organization_members.role.
     if (data.explicit_role) {
       if ((data.explicit_role as string) === "super_admin") {
         throw new Error(
-          "super_admin is not assignable. Hive executives are granted through hive_executives.",
+          "super_admin is not assignable. PI executives are granted through hive_executives.",
         );
       }
       if (cur.role === "super_admin") {
@@ -234,7 +234,7 @@ export const setMemberGrants = createServerFn({ method: "POST" })
     });
     if (e2) throw e2;
 
-    // HIVE Executive — only HIVE execs may grant; ignore if caller isn't HIVE exec
+    // PI Executive — only PI execs may grant; ignore if caller isn't PI exec
     // and the value didn't change.
     if (isHiveExec) {
       const { error: e3 } = await supabase.rpc("set_hive_executive", {
@@ -243,7 +243,7 @@ export const setMemberGrants = createServerFn({ method: "POST" })
       });
       if (e3) throw e3;
     } else if (grants.hive_executive) {
-      throw new Error("Only HIVE executives may grant the HIVE Executive role");
+      throw new Error("Only PI executives may grant the PI Executive role");
     }
 
     return { ok: true };

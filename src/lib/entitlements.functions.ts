@@ -13,7 +13,7 @@ export interface MyEntitlements {
 /**
  * Returns the entitlements (tier + addons) for the current user's primary
  * organization. Used to drive feature gating (NECTAR Infusion, Internal
- * Audit, etc.) from the company's subscription tier — set by HIVE Executive
+ * Audit, etc.) from the company's subscription tier — set by PI Executive
  * in Plans & Billing.
  */
 export const getMyEntitlements = createServerFn({ method: "GET" })

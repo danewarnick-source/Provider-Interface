@@ -28,7 +28,7 @@ type Props = {
  * UpgradeGate — the bubble shown when a user clicks a locked feature.
  * Reads label / blurb / required_tier from the feature registry so copy
  * stays specific to the feature, and writes to feature_upgrade_requests
- * so HIVE Executives can fulfill by flipping the Master Controller toggle.
+ * so PI Executives can fulfill by flipping the Master Controller toggle.
  */
 export function UpgradeGate({ featureKey, open, onOpenChange }: Props) {
   const { getMeta, organizationId } = useOrgFeatures();

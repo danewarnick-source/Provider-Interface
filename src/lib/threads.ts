@@ -37,14 +37,14 @@ export function phiSafeAskNotify(input: {
   if (input.channel === "sms") {
     return {
       title: ASK_NOTIFICATION_TITLE,
-      body: "HIVE: A manager asked about a shift. Open Threads in HIVE to reply. No client details in this text.",
+      body: "PI: A manager asked about a shift. Open Threads in PI to reply. No client details in this text.",
     };
   }
   if (input.channel === "email") {
     return {
       title: ASK_NOTIFICATION_TITLE,
       subject: ASK_NOTIFICATION_TITLE,
-      body: "A manager asked a question about a shift. Sign in to HIVE and open Threads to reply. This message does not include client or clinical details.",
+      body: "A manager asked a question about a shift. Sign in to PI and open Threads to reply. This message does not include client or clinical details.",
     };
   }
   return {
@@ -69,14 +69,14 @@ export function advisoryMoveToClientThread(input: {
       advisory: true,
       canMove: false,
       message:
-        "Advisory only: a client thread would need a client on the shift. HIVE does not move this thread.",
+        "Advisory only: a client thread would need a client on the shift. PI does not move this thread.",
     };
   }
   return {
     advisory: true,
     canMove: false,
     message:
-      "Advisory only: this question may belong on the client thread. HIVE does not move or copy the thread.",
+      "Advisory only: this question may belong on the client thread. PI does not move or copy the thread.",
   };
 }
 

@@ -600,7 +600,7 @@ async function resolveAllAssigneesInternal(
 
 /**
  * Per-assignee clocks (onboarding / anniversary / cert windows).
- * Basis date = later of hire/start and profile.created_at (HIVE add date) so
+ * Basis date = later of hire/start and profile.created_at (PI add date) so
  * imported staff with ancient hire dates are not immediately years-overdue.
  * days_after_hire: due_at = basis + N days, with a further 30-day grace from
  * obligation.created_at when that would still land before the duty existed.
@@ -637,7 +637,7 @@ async function generatePerPersonInstancesInternal(
         if (!Number.isFinite(days)) continue;
         due = addDaysUTC(basisDate, days);
 
-        // Grace: if the duty was added to HIVE after this clock would already
+        // Grace: if the duty was added to PI after this clock would already
         // have expired, give 30 days from obligation creation instead.
         const obCreatedAt = new Date(ob.created_at ?? todayUTC.toISOString());
         if (due.getTime() < obCreatedAt.getTime()) {
@@ -922,7 +922,7 @@ function dueUtcDay(iso: string): string {
 
 /**
  * Org-wide floor for shared calendar periods: a period that closed before
- * this org actually started using HIVE cannot have been tracked here, so it
+ * this org actually started using PI cannot have been tracked here, so it
  * should never be manufactured as an overdue instance. Same convention as
  * ensureCurrentSummaryPeriods in progress-summaries.functions.ts. Defaults
  * to organizations.created_at when go_live_date is unset.
@@ -964,7 +964,7 @@ async function ensureSharedPeriodsInternal(
 ): Promise<ObligationInstanceRow | null> {
   if (!periods.length) return null;
 
-  // Drop any period that closed before the org went live on HIVE — e.g. the
+  // Drop any period that closed before the org went live on PI — e.g. the
   // "most recently elapsed" occurrence of an annual duty that hasn't yet
   // come due this year is a full prior cycle, which predates go-live for a
   // newly onboarded org. Keep at least one period (the latest) so a duty

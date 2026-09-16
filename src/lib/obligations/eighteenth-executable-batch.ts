@@ -1016,7 +1016,7 @@ export function eighteenthBatchLiveEngineReady(row: EighteenthBatchEngineBinding
     reasons.push("Child elements must not mint staff tasks.");
   }
   if (row.trainingTitle !== null) {
-    reasons.push("This batch does not invent an in-Hive course.");
+    reasons.push("This batch does not invent an in-PI course.");
   }
   if (row.formTitle !== null) {
     reasons.push("This batch does not invent a person form.");

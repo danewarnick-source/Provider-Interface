@@ -1,7 +1,7 @@
 // Inventory of platform values currently hardcoded for Utah. NECTAR uses
 // this list to drive the State Profile → Inventory tab: each item is tagged
 // either `config` (will be moved into the state template) or `structural`
-// (genuinely different work — opens a HIVE Executive ticket instead).
+// (genuinely different work — opens a PI Executive ticket instead).
 //
 // File:line references point at the canonical site for each value so future
 // extractions are quick to find. When a value gets moved into the template

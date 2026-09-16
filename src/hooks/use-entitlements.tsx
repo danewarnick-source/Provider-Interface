@@ -8,13 +8,13 @@ import type { AddonId, TierId } from "@/lib/hive-tiers";
 /**
  * Single source of truth for tier + add-on entitlements in the UI.
  *
- * Drives the visible-but-locked pattern across HIVE: components ask
+ * Drives the visible-but-locked pattern across PI: components ask
  * `hasAddon("internal_audit")` and render the AddonLock when it's false.
  * Server functions must independently enforce the same check
  * (see `assertAddon` in `entitlements.server.ts`) — the UI lock and the
  * server check must agree.
  *
- * A HIVE-Executive demo override (`hive.nectar.infusion = "on"` in
+ * A PI-Executive demo override (`hive.nectar.infusion = "on"` in
  * localStorage) force-enables the NECTAR Infusion add-on regardless of tier,
  * so platform staff can preview NECTAR-accelerated controls end-to-end.
  */

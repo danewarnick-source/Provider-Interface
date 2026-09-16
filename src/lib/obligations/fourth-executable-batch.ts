@@ -109,7 +109,7 @@ export const REQ_30_3_4_SEI_MONTHLY: DraftRule = {
     logic: "CONDITIONAL",
     parentAssignment: "one",
     conditionNote:
-      "Monthly substitute for SEI. Enter (not upload) the summary into UPI by the 15th of the following month. Staff never touch UPI — admin attests after entry. HIVE cannot transmit to UPI. Do not mint a quarterly clock for SEI.",
+      "Monthly substitute for SEI. Enter (not upload) the summary into UPI by the 15th of the following month. Staff never touch UPI — admin attests after entry. PI cannot transmit to UPI. Do not mint a quarterly clock for SEI.",
     members: [monthlyMember("sei_monthly_summary_upi", "SOW §30.3(4)")],
   },
   timing: { kind: "calendar_period", cadence: "monthly" },
@@ -137,7 +137,7 @@ export const REQ_32_3_2_CMP_CMS_MONTHLY: DraftRule = {
     logic: "CONDITIONAL",
     parentAssignment: "one",
     conditionNote:
-      "Monthly substitute for CMP and CMS only. Submit to the Person's Support Coordinator by the 15th of the following month. SLN stays quarterly — do not copy SLN onto this clock. Destination is the Support Coordinator, not UPI. HIVE does not email the SC.",
+      "Monthly substitute for CMP and CMS only. Submit to the Person's Support Coordinator by the 15th of the following month. SLN stays quarterly — do not copy SLN onto this clock. Destination is the Support Coordinator, not UPI. PI does not email the SC.",
     members: [monthlyMember("cmp_cms_monthly_summaries", "SOW §32.3(2)")],
   },
   timing: { kind: "calendar_period", cadence: "monthly" },
@@ -165,7 +165,7 @@ export const REQ_33_3_4_SJD_MONTHLY: DraftRule = {
     logic: "CONDITIONAL",
     parentAssignment: "one",
     conditionNote:
-      "Monthly substitute for SJD. Enter (not upload) the summary into UPI by the 15th of the following month. Staff never touch UPI — admin attests after entry. HIVE cannot transmit to UPI. Do not mint a quarterly clock for SJD.",
+      "Monthly substitute for SJD. Enter (not upload) the summary into UPI by the 15th of the following month. Staff never touch UPI — admin attests after entry. PI cannot transmit to UPI. Do not mint a quarterly clock for SJD.",
     members: [monthlyMember("sjd_monthly_summary_upi", "SOW §33.3(4)")],
   },
   timing: { kind: "calendar_period", cadence: "monthly" },
@@ -271,9 +271,9 @@ export const FOURTH_BATCH_DEMO_PATH = [
   },
   {
     step: "evidence",
-    title: "Draft in HIVE, attest the outside filing",
+    title: "Draft in PI, attest the outside filing",
     detail:
-      "SEI and SJD: write the narrative in HIVE, then admin attests UPI entry. Staff never touch UPI. CMP/CMS: write in HIVE, then attest send to the Support Coordinator. HIVE does not email the SC and does not transmit to UPI.",
+      "SEI and SJD: write the narrative in PI, then admin attests UPI entry. Staff never touch UPI. CMP/CMS: write in PI, then attest send to the Support Coordinator. PI does not email the SC and does not transmit to UPI.",
   },
   {
     step: "review",
@@ -404,7 +404,7 @@ export function fourthBatchLiveEngineReady(binding: FourthBatchEngineBinding): {
     reasons.push("Child elements must not mint staff tasks.");
   }
   if (binding.trainingTitle !== null) {
-    reasons.push("This batch does not invent an in-Hive course.");
+    reasons.push("This batch does not invent an in-PI course.");
   }
   if (binding.formTitle !== null) {
     reasons.push("This batch does not invent a person form.");

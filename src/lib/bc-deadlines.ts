@@ -1,4 +1,4 @@
-// SOW deadline math. HIVE tracks deliverables; it does not define them.
+// SOW deadline math. PI tracks deliverables; it does not define them.
 // Confirm against current Utah DSPD SOW.
 
 export type DeadlineRow = {

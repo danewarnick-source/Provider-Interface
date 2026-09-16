@@ -139,7 +139,7 @@ export function AuditPage() {
           <div>
             <h1 className="text-2xl font-semibold">Audit</h1>
             <p className="text-sm text-muted-foreground">
-              Audit folders organized by timeline. Upload a state audit letter and HIVE auto-produces the checklist, grounded in your uploaded SOW and contracts.
+              Audit folders organized by timeline. Upload a state audit letter and PI auto-produces the checklist, grounded in your uploaded SOW and contracts.
             </p>
           </div>
         </div>
@@ -231,7 +231,7 @@ function NewPacketDialog({ orgId, onClose }: { orgId: string; onClose: (newId?: 
         const txt = await f.text();
         setLetterText(txt);
       } else {
-        toast.info("Letter uploaded. Paste the letter text below so HIVE can extract requirements.");
+        toast.info("Letter uploaded. Paste the letter text below so PI can extract requirements.");
       }
     } catch (e: any) {
       toast.error(e.message ?? "Upload failed");
@@ -244,7 +244,7 @@ function NewPacketDialog({ orgId, onClose }: { orgId: string; onClose: (newId?: 
     mutationFn: async () => {
       if (!providerName.trim()) throw new Error("Provider name required");
       if (letterText.trim().length < 50)
-        throw new Error("Paste the letter text (or upload a .txt file) so HIVE can extract requirements.");
+        throw new Error("Paste the letter text (or upload a .txt file) so PI can extract requirements.");
       return produce({
         data: {
           organization_id: orgId,
@@ -314,7 +314,7 @@ function NewPacketDialog({ orgId, onClose }: { orgId: string; onClose: (newId?: 
               value={letterText}
               onChange={(e) => setLetterText(e.target.value)}
               rows={10}
-              placeholder="Paste the DHS / DSPD audit letter here. HIVE will extract the required items and auto-fill what we already have."
+              placeholder="Paste the DHS / DSPD audit letter here. PI will extract the required items and auto-fill what we already have."
             />
             <p className="text-xs text-muted-foreground mt-1">
               NECTAR proposes the checklist from this text. You'll confirm or override every item in the next step.

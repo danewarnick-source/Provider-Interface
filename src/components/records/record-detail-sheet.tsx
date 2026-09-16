@@ -280,7 +280,7 @@ export function RecordDetailSheet({
             <div className="sm:col-span-2 flex items-start gap-2 rounded-md border border-orange-300 bg-orange-50 px-3 py-2 text-xs text-orange-900 dark:border-orange-600 dark:bg-orange-950/40 dark:text-orange-200">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-500" />
               <span>
-                <span className="font-semibold">EVV record ({svc}).</span> Editing clock in/out times here updates HIVE's records but does <span className="font-semibold">not</span> amend data already transmitted to UEVV. The state's EVV record will continue to reflect the original GPS-captured times. Contact DHHS if the transmitted record needs correction.
+                <span className="font-semibold">EVV record ({svc}).</span> Editing clock in/out times here updates PI's records but does <span className="font-semibold">not</span> amend data already transmitted to UEVV. The state's EVV record will continue to reflect the original GPS-captured times. Contact DHHS if the transmitted record needs correction.
               </span>
             </div>
           )}

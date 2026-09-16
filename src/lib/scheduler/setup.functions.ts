@@ -510,7 +510,7 @@ export const nectarDraftShifts = createServerFn({ method: "POST" })
       authsByClient.set(a.client_id, set);
     }
 
-    const system = `You are Nectar, a scheduling assistant for HIVE.
+    const system = `You are Nectar, a scheduling assistant for PI.
 Output strict JSON with shape: {"drafts": [{"staff_name": string|null, "client_name": string|null, "service_code": string|null, "starts_at": string|null, "ends_at": string|null, "notes": string|null}]}.
 Use ISO8601 UTC for starts_at/ends_at. The current week starts on ${data.week_start_iso}.
 Only use staff and client names that appear in the lists below; if a name is ambiguous or missing, leave it null.

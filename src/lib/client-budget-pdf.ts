@@ -104,9 +104,9 @@ function colXs() {
 export async function renderClientBudgetPdf(p: BudgetPdfPayload): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   doc.setTitle(`Monthly Budget — ${p.clientName} — ${p.periodLabel}`);
-  doc.setAuthor(p.orgName || "HIVE");
-  doc.setCreator("HIVE");
-  doc.setProducer("HIVE");
+  doc.setAuthor(p.orgName || "Provider Interface");
+  doc.setCreator("Provider Interface");
+  doc.setProducer("Provider Interface");
 
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);

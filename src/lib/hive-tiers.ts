@@ -1,13 +1,13 @@
 /**
- * HIVE subscription tier catalog.
+ * PI subscription tier catalog.
  *
  * Entitlements (what features a company gets) live here.
- * Dollar amounts for self-serve Hive do NOT live here — public list is
+ * Dollar amounts for self-serve PI do NOT live here — public list is
  * $69 / client ($350 min) in src/lib/pi-landing.ts. Leftover staff math in
  * hive-pricing.ts is unused for checkout. Do not put $499 / $1,299 on these rows.
  *
  * Public checkout is PI list (hive_standard / pro). Enterprise is
- * contact-us — Hive Exec assigns it. Starter is comped / not self-serve.
+ * contact-us — PI Exec assigns it. Starter is comped / not self-serve.
  */
 
 export type TierId = "starter" | "pro" | "enterprise" | "custom";
@@ -117,7 +117,7 @@ export const TIER_CATALOG: TierDef[] = [
   },
 ];
 
-/** hive_standard is the live per-staff plan (same entitlements as Hive / pro). */
+/** hive_standard is the live per-staff plan (same entitlements as PI / pro). */
 export function normalizeTierId(id: string | null | undefined): TierId {
   if (id === "hive_standard") return "pro";
   if (id === "starter" || id === "pro" || id === "enterprise" || id === "custom") return id;

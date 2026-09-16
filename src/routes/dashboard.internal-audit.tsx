@@ -557,7 +557,7 @@ export function InternalAuditPage() {
       <AddonLock
         addon="internal_audit"
         featureName="Internal Audit"
-        benefit="Continuously audit your own HIVE data against your confirmed requirements and catch gaps before a state audit does. Includes whole-company and targeted runs, severity-ranked findings with source citations, and exportable QA reports."
+        benefit="Continuously audit your own PI data against your confirmed requirements and catch gaps before a state audit does. Includes whole-company and targeted runs, severity-ranked findings with source citations, and exportable QA reports."
       >
         {body}
       </AddonLock>

@@ -207,7 +207,7 @@ function SettingsPage() {
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ShieldCheck className="h-5 w-5" /></div>
               <div>
                 <h2 className="text-base font-semibold">Team access</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Invite teammates by email and grant any combination of Staff, Admin, Company Executive, and (for HIVE staff) HIVE Executive roles per login.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Invite teammates by email and grant any combination of Staff, Admin, Company Executive, and (for PI staff) PI Executive roles per login.</p>
               </div>
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
@@ -328,7 +328,7 @@ function SettingsPage() {
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Mail className="h-5 w-5" /></div>
               <div>
                 <h2 className="text-base font-semibold">Email Sender (Resend)</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Configure the From name / address used for every email HIVE sends — referral follow-ups, notifications. Refuses to send until you've verified a sending domain in Resend.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Configure the From name / address used for every email PI sends — referral follow-ups, notifications. Refuses to send until you've verified a sending domain in Resend.</p>
               </div>
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />

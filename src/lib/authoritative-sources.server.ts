@@ -82,8 +82,8 @@ Content rules:
     rule       = a constraint / prohibition (no overlapping services, staff-to-client ratio caps, etc.)
     billing    = a billing/reimbursement requirement (EVV, claim timeliness, prior auth)
 - "verification_type":
-    external = provider must act in a system outside HIVE — submit to UPI, run OIG search, file with Office of Licensing, submit a Google Form to DSPD, obtain a document from a third-party vendor, maintain governance records (board minutes, insurance certificates). Default to external when uncertain.
-    internal = provider satisfies this through actions inside their own operations that HIVE tracks — shift notes, incident documentation, support plans, training records, quarterly summaries, eMAR.
+    external = provider must act in a system outside PI — submit to UPI, run OIG search, file with Office of Licensing, submit a Google Form to DSPD, obtain a document from a third-party vendor, maintain governance records (board minutes, insurance certificates). Default to external when uncertain.
+    internal = provider satisfies this through actions inside their own operations that PI tracks — shift notes, incident documentation, support plans, training records, quarterly summaries, eMAR.
 - "compliance_pattern":
     one_time          = "upon hire", "one-time", "initial", "at time of"
     renewal            = "annually", "every N months/years", "renews", "expires"
@@ -179,9 +179,9 @@ export const ReqExtraction = z.object({
   requirements: z.array(ReqItem).max(500).default([]),
 });
 
-// Requirement text that references acting in a system outside HIVE — the
+// Requirement text that references acting in a system outside PI — the
 // provider must submit/search/file somewhere else, not just document inside
-// HIVE. Drives verification_type='external' (auto_regex, overrides the AI
+// PI. Drives verification_type='external' (auto_regex, overrides the AI
 // classification) and, unchanged, obligation_category='admin_external'.
 export const EXTERNAL_REGEX =
   /\b(DWS|DACS|UPI|USTEPS|DSPD\s*portal|state\s*portal|submit\s*to\s*state|OIG|DHHS|Office\s*of\s*Licensing|Google\s*Form|background\s*screen|background\s*check|BCI|third[\s-]party|driving\s*record|Life\s*Safety|PRISM|eligibility\s*check|board\s*minutes|governing\s*board|exclusion\s*check|exclusions\.oig|E-Verify|DACS\s*application|UPI\s*access)\b/i;
@@ -200,7 +200,7 @@ const FEATURE_LINK_MAP: Array<{ pattern: RegExp; link: FeatureLink }> = [
     pattern: /incident/i,
     link: {
       feature: "incidents",
-      create_new_label: "Log incident in HIVE",
+      create_new_label: "Log incident in PI",
       view_existing_label: "View incident reports",
       report_route: "/dashboard/documentation?tab=incidents",
     },
@@ -209,7 +209,7 @@ const FEATURE_LINK_MAP: Array<{ pattern: RegExp; link: FeatureLink }> = [
     pattern: /shift\s*note|service\s*deliver|written\s*summary/i,
     link: {
       feature: "shift_notes",
-      create_new_label: "Document shift in HIVE",
+      create_new_label: "Document shift in PI",
       view_existing_label: "View shift records",
       report_route: "/dashboard/documentation?tab=records",
     },
@@ -245,7 +245,7 @@ const FEATURE_LINK_MAP: Array<{ pattern: RegExp; link: FeatureLink }> = [
     pattern: /form|medical\s*appointment/i,
     link: {
       feature: "forms",
-      create_new_label: "Complete form in HIVE",
+      create_new_label: "Complete form in PI",
       view_existing_label: "View forms",
       report_route: "/dashboard/documentation?tab=forms",
     },

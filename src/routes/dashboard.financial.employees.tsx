@@ -26,7 +26,7 @@ import {
  * Financial → Employees tab. Mirrors Contractors but:
  *  - Filters profiles to worker_type = 'w2' (Contractors = '1099').
  *  - STRICTLY gross payroll: hours × rate (+ HHS/RHS if HHP, + Additional).
- *  - NO net pay, NO fed/state/FICA tax columns. HIVE never holds W2 net.
+ *  - NO net pay, NO fed/state/FICA tax columns. PI never holds W2 net.
  * Reuses the same EVV sum, HHP detection, and Host Home rate sources as
  * Contractors so there is one source of truth.
  */

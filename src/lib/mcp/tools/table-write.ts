@@ -8,7 +8,7 @@ export default defineTool({
   name: "table_write",
   title: "Insert / update / delete rows",
   description:
-    "Mutates a HIVE table (row-level security applies). Choose op = 'insert' | 'update' | 'delete'. Inserts take `values` (single object or array). Updates take `values` and `filters`. Deletes take `filters`. Returns affected rows.",
+    "Mutates a PI table (row-level security applies). Choose op = 'insert' | 'update' | 'delete'. Inserts take `values` (single object or array). Updates take `values` and `filters`. Deletes take `filters`. Returns affected rows.",
   inputSchema: {
     table: z.string().min(1),
     op: z.enum(["insert", "update", "delete"]),

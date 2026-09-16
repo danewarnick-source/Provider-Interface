@@ -309,7 +309,7 @@ export const getAuditorShareView = createServerFn({ method: "POST" })
       });
     }
 
-    // NECTAR: pull authoritative sources (SOW/contract) + HIVE training evidence
+    // NECTAR: pull authoritative sources (SOW/contract) + PI training evidence
     const [{ data: sources }, { data: courses }, { data: certs }] = await Promise.all([
       supabase
         .from("nectar_documents")

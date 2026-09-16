@@ -2,12 +2,12 @@
 //
 // Status meaning:
 //   encoded          — locked catalog + seedable duty exists
-//   live_artifact    — HIVE already produces the evidence; do not clone as a to-do
+//   live_artifact    — PI already produces the evidence; do not clone as a to-do
 //   when_applicable  — encoded, but the SOW itself is conditional
 //   intentional_omit — not a contractor calendar duty (definitions, operational
 //                      constraint, or a service this pack lists but does not
 //                      seed as a second register row)
-//   gap              — a real duty HIVE has not encoded yet (must be empty
+//   gap              — a real duty PI has not encoded yet (must be empty
 //                      for Article 1 contractor shalls)
 
 export type PackCoverageStatus =
@@ -61,7 +61,7 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
     citation: "SOW §1.4(1)",
     title: "Approved Medicaid provider (CSW / CTW / ABI)",
     status: "encoded",
-    note: "Contractor enrollment. HIVE stores proof; DIH enrolls.",
+    note: "Contractor enrollment. PI stores proof; DIH enrolls.",
     catalog_titles: ["Medicaid Provider Enrollment — Current"],
   },
   {
@@ -131,7 +131,7 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
     citation: "SOW §1.8(3)",
     title: "Process to track and document staff training",
     status: "encoded",
-    note: "HIVE is that file.",
+    note: "PI is that file.",
     catalog_titles: ["Training Documentation File — Maintained"],
     audit_item_ids: ["IV-5"],
   },
@@ -209,7 +209,7 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
     status: "encoded",
     catalog_titles: ["Background Screening — Annual"],
     audit_item_ids: ["IV-BG"],
-    note: "Staff-record element. Screening is done through OBP; HIVE stores the clearance.",
+    note: "Staff-record element. Screening is done through OBP; PI stores the clearance.",
   },
   {
     id: "sow-1.9-training",
@@ -263,7 +263,7 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
     citation: "SOW §1.10",
     title: "Person records (identity, photo, contacts, plans, DNR)",
     status: "live_artifact",
-    note: "The Person file in HIVE. Grievance acknowledgment is review-tool II-7.",
+    note: "The Person file in PI. Grievance acknowledgment is review-tool II-7.",
     audit_item_ids: ["II-7"],
   },
   {
@@ -395,7 +395,7 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
     citation: "SOW §1.20",
     title: "Human Rights Committee + restriction documentation",
     status: "live_artifact",
-    note: "HRC roster, meetings, and eight-element restriction records live in HIVE.",
+    note: "HRC roster, meetings, and eight-element restriction records live in PI.",
     audit_item_ids: ["I-3", "II-8"],
   },
   {
@@ -457,7 +457,7 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
       "SJD Monthly Summary — UPI Entry Attestation",
     ],
     audit_item_ids: ["II-6"],
-    note: "Write in HIVE. Quarterly (due 15 days after quarter end) for HHS/RHS/DSI/SLH/SLN; monthly for SEI, SJD, CMP/CMS, PN1/PN2.",
+    note: "Write in PI. Quarterly (due 15 days after quarter end) for HHS/RHS/DSI/SLH/SLN; monthly for SEI, SJD, CMP/CMS, PN1/PN2.",
   },
   {
     id: "sow-1.26",
@@ -474,7 +474,7 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
     title: "Critical incident reports",
     status: "live_artifact",
     audit_item_ids: ["I-5"],
-    note: "Write in HIVE. UPI entry within 24 hours is still outside HIVE.",
+    note: "Write in PI. UPI entry within 24 hours is still outside PI.",
   },
   {
     id: "sow-1.28-funds",
@@ -483,7 +483,7 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
     title: "Person funds, PBA, and emergency loans",
     status: "live_artifact",
     audit_item_ids: ["I-11", "II-PBA", "II-LOAN"],
-    note: "Client-loans register + PBA review when awarded. Disclosure to DHHS QA is outside HIVE.",
+    note: "Client-loans register + PBA review when awarded. Disclosure to DHHS QA is outside PI.",
   },
   {
     id: "sow-1.28-gifts",
@@ -889,7 +889,7 @@ export const UTAH_DSPD_COVERAGE: PackCoverageRow[] = [
     citation: "SOW Articles 6, 10, 13–14, 16–19, 22–27, 34–36",
     title: "Other service-code articles (COM, ELS, MTP, PAC, nursing, respite, SEC, SJP, SJR, TFB)",
     status: "intentional_omit",
-    note: "Delivery and billing constraints for codes this pack does not seed as extra register rows. If an org is awarded one, HIVE still applies EVV / unit math / timesheet rules. New contractor-file duties for those codes are a pack revision, not a tenant edit.",
+    note: "Delivery and billing constraints for codes this pack does not seed as extra register rows. If an org is awarded one, PI still applies EVV / unit math / timesheet rules. New contractor-file duties for those codes are a pack revision, not a tenant edit.",
   },
 
   // ── Client Service Terms on the review tool ─────────────────────────────

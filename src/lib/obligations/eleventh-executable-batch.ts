@@ -128,7 +128,7 @@ const TIMING: TimingAnchor = {
 };
 
 const HANDLING =
-  "Submit via the DSPD Google Form, then record the submission in the platform. HIVE cannot transmit the form. The live annual-outcome card is the handling path.";
+  "Submit via the DSPD Google Form, then record the submission in the platform. PI cannot transmit the form. The live annual-outcome card is the handling path.";
 
 type TwinSpec = {
   id: EleventhExecutableBatchRuleId;
@@ -289,7 +289,7 @@ export const ELEVENTH_BATCH_DEMO_PATH = [
     step: "evidence",
     title: "Submit the DSPD Google Form, then record the submission",
     detail:
-      "Official workbook completion is EXTERNAL via the DSPD Google Form by August 30. The platform records the submission (UPLOAD). HIVE cannot transmit the form.",
+      "Official workbook completion is EXTERNAL via the DSPD Google Form by August 30. The platform records the submission (UPLOAD). PI cannot transmit the form.",
   },
   {
     step: "review",
@@ -398,7 +398,7 @@ export function eleventhBatchLiveEngineReady(row: EleventhBatchEngineBinding): {
     reasons.push("Child elements must not mint staff tasks.");
   }
   if (row.trainingTitle !== null) {
-    reasons.push("This batch does not invent an in-Hive course.");
+    reasons.push("This batch does not invent an in-PI course.");
   }
   if (row.formTitle !== null) {
     reasons.push("This batch does not invent a person form.");

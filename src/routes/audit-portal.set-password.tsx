@@ -114,7 +114,7 @@ function SetPasswordPage() {
             <ShieldCheck className="h-6 w-6" />
           </span>
           <div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">HIVE</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">PI</div>
             <h1 className="font-display text-lg font-bold text-[var(--hive-text)]">State Audit Portal</h1>
           </div>
         </div>

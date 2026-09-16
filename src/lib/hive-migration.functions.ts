@@ -1,5 +1,5 @@
 // Executive Company Migration — engagement workflow + provider sign-off
-// gate + HIVE access logging on top of the shared Smart Import engine.
+// gate + PI access logging on top of the shared Smart Import engine.
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -15,7 +15,7 @@ async function assertHiveExec(
   const { data, error } = await sb.from("hive_executives")
     .select("id").eq("user_id", userId).eq("active", true).maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("HIVE executive access required.");
+  if (!data) throw new Error("PI executive access required.");
 }
 
 // List migration (white_glove) jobs for a target customer.
@@ -98,7 +98,7 @@ export const providerSignoff = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// HIVE staff explicit access log (view/edit a mapping, prep step).
+// PI staff explicit access log (view/edit a mapping, prep step).
 export const logHiveAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>

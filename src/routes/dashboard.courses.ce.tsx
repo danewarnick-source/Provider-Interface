@@ -133,7 +133,7 @@ function ContinuingEducation() {
               <div>
                 <div className="font-semibold">Demo mode for CE generation</div>
                 <p className="text-xs text-muted-foreground">
-                  Until HIVE's HIPAA-compliant AI path (AWS Bedrock under BAA) is live, Nectar will only generate CE modules for orgs explicitly opted in to demo mode. Enable on test/seeded orgs only.
+                  Until PI's HIPAA-compliant AI path (AWS Bedrock under BAA) is live, Nectar will only generate CE modules for orgs explicitly opted in to demo mode. Enable on test/seeded orgs only.
                 </p>
               </div>
             </div>

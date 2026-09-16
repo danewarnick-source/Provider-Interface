@@ -1,5 +1,5 @@
 /**
- * Hive Executive Training tab — public training-only orders.
+ * PI Executive Training tab — public training-only orders.
  * Dane sets the class date and sends access. Not agency staff.
  */
 
@@ -34,7 +34,7 @@ async function ensureHiveExecutive(sb: AnySupabase, userId: string): Promise<voi
     .eq("active", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("Access denied — Hive Executive permission required.");
+  if (!data) throw new Error("Access denied — PI Executive permission required.");
 }
 
 export type TrainingOnlyExecSeat = {

@@ -106,7 +106,7 @@ export const getReviewSubject = createServerFn({ method: "POST" })
         key: "org.codes_held_missing",
         severity: "warning",
         field: "billing_codes",
-        message: "Your agency hasn't told HIVE which DSPD service codes it's contracted to bill. Without that list, NECTAR can't automatically tell which codes on this PCSP are yours to bill vs. another provider's — it has to guess from the provider name printed on the plan.",
+        message: "Your agency hasn't told PI which DSPD service codes it's contracted to bill. Without that list, NECTAR can't automatically tell which codes on this PCSP are yours to bill vs. another provider's — it has to guess from the provider name printed on the plan.",
       });
     }
     const overrides = ((subject as { validation_overrides?: Record<string, boolean> }).validation_overrides) ?? {};
@@ -378,7 +378,7 @@ const BillingRowInput = z.object({
     plan_end: z.string().nullable().optional(),
     // Admin acknowledgment for an external code: "not_ours" means the code
     // belongs to another provider (SC, other agency) and this org accepts no
-    // billing responsibility. Row stays visible; no HIVE approval needed.
+    // billing responsibility. Row stays visible; no PI approval needed.
     ownership_ack: z.enum(["not_ours"]).nullable().optional(),
   }),
 });
@@ -1041,7 +1041,7 @@ export const removeAssignmentMapRow = createServerFn({ method: "POST" })
 // ---------- Submit job for setup ----------
 // Self-service: the Company Admin IS the signer — commit immediately, reusing
 // the same engine as the Done page's auto-run path. Idempotent.
-// White-glove (HIVE migration): keep advisory-only; commit waits for the
+// White-glove (PI migration): keep advisory-only; commit waits for the
 // receiving company's admin sign-off on the Done screen.
 export const submitForSetup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

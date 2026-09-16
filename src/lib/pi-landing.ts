@@ -185,8 +185,8 @@ export const PI_TRAINING_ADDONS = [
 
 /** Words that must not appear on public marketing. Nectar is required. */
 export const PI_FORBIDDEN_MARKETING = [
-  "Hive Certify",
-  "Ask Hive",
+  "PI Certify",
+  "Ask PI",
   "honeycomb",
   "Connecteam",
   "Relias",

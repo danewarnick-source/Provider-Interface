@@ -40,7 +40,7 @@ function ExecCommandCenterLayout() {
             </span>
             <div>
               <div className="text-xs uppercase tracking-wider text-[#fed7aa]">
-                HIVE Platform · Executive Command Center
+                PI Platform · Executive Command Center
               </div>
               <h1 className="font-display text-xl font-bold tracking-tight">Platform operations</h1>
             </div>

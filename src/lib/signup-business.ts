@@ -1,7 +1,7 @@
 /**
  * Business Details save helpers.
  *
- * Live Hive-Platform (2026-09-03):
+ * Live PI-Platform (2026-09-03):
  * - PI2: profile PATCH 204; organizations stayed NULL because
  *   ensureSignupWorkspace (service-role) threw before the org write.
  * - PI10: name/contact/state/provider wrote; billing_sms_phone stayed

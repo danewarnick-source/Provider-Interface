@@ -1,5 +1,5 @@
 // Behavior Support — single source of truth keyed by code.
-// HIVE tracks; it does NOT define. Always confirm against current Utah DSPD SOW.
+// PI tracks; it does NOT define. Always confirm against current Utah DSPD SOW.
 
 export type BcCode = "BC1" | "BC2" | "BC3";
 

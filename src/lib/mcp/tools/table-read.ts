@@ -10,7 +10,7 @@ export default defineTool({
   name: "table_read",
   title: "Read from a table",
   description:
-    "Structured read from any HIVE table (row-level security applies). Provide table name, optional columns to select, filters, ordering, and limit.",
+    "Structured read from any PI table (row-level security applies). Provide table name, optional columns to select, filters, ordering, and limit.",
   inputSchema: {
     table: z.string().min(1).describe("Table name in the public schema, e.g. 'clients'."),
     select: z

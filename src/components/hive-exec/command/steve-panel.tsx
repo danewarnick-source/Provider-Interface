@@ -63,7 +63,7 @@ export function SteveDockPanel({ routeContext = null, featureKeyContext = null, 
         <div className="flex-1">
           <div className="text-sm font-semibold text-foreground">Steve · Guide-me</div>
           <div className="text-[11px] text-muted-foreground">
-            Answers from HIVE's how-to library · no org data, no PHI
+            Answers from PI's how-to library · no org data, no PHI
           </div>
         </div>
       </header>
@@ -137,7 +137,7 @@ export function SteveDockPanel({ routeContext = null, featureKeyContext = null, 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
-          placeholder="Ask Steve how to use HIVE…"
+          placeholder="Ask Steve how to use PI…"
           disabled={m.isPending}
         />
         <Button size="sm" variant="secondary" onClick={submit} disabled={m.isPending || !input.trim()}>
