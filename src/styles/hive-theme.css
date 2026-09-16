@@ -25,6 +25,11 @@
   --hive-gold-hover: #d4af37;
   --hive-gold-soft: #f3ebd4;
   --hive-on-gold: #243040;
+  /* Primary action fill. Gold is the brand/attention accent, never a button
+     fill, so "add", "save", and "confirm" read as one family platform-wide. */
+  --hive-primary: #243040;
+  --hive-primary-hover: #0a1120;
+  --hive-primary-fg: #ffffff;
   --hive-text: #243040;
   --hive-text-muted: #5a6570;
   --hive-ink: #243040;

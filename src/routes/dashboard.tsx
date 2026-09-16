@@ -904,7 +904,7 @@ function DashboardLayout() {
                     className="hive-chrome-btn h-10 px-3 text-xs font-semibold"
                     title="Open Nectar"
                   >
-                    <PiMark className="h-3.5 w-3.5 text-[var(--hive-gold)]" />
+                    <PiMark variant="gold" className="h-3.5 w-3.5" />
                     <span className="hidden md:inline">Nectar</span>
                   </button>
                   {isAdminCapable && effectiveView === "admin" && <DraftJobsHeaderPill />}

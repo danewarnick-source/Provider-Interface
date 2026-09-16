@@ -3757,7 +3757,7 @@ function ApplicabilityPanel({
                 </span>
                 <Button
                   size="sm"
-                  className="h-8 bg-[var(--hive-gold)] text-white hover:bg-[#b86413]"
+                  className="h-8"
                   disabled={confirmAll.isPending}
                   onClick={() => confirmAll.mutate(pendingIds)}
                 >

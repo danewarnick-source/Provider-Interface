@@ -287,7 +287,7 @@ export function InternalAuditPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--hive-gold)]/15 ring-1 ring-[var(--hive-gold)]/30">
-              <PiMark className="h-5 w-5 text-[var(--hive-gold)]" />
+              <PiMark variant="gold" className="h-5 w-5" />
             </span>
             <div>
               <h2 className="font-display text-xl font-bold tracking-tight text-[var(--hive-text)]">

@@ -2379,7 +2379,7 @@ export function PunchPad({
               aria-expanded={askOpen}
             >
               <span className="flex items-center gap-2 text-xs font-semibold text-[color:var(--navy-900)]">
-                <PiMark className="h-3.5 w-3.5 text-[color:var(--amber-600)]" />
+                <PiMark variant="gold" className="h-3.5 w-3.5" />
                 Ask NECTAR — "am I allowed to…?"
               </span>
               <span className="text-[11px] text-muted-foreground">{askOpen ? "Hide" : "Open"}</span>

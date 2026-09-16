@@ -107,7 +107,7 @@ export function NectarDocumentActionsDialog({
           ) : offer.data ? (
             <>
               <div className="flex items-start gap-2 rounded-xl border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
-                <PiMark className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--amber-600,#d97706)]" />
+                <PiMark variant="gold" className="mt-0.5 h-4 w-4 shrink-0" />
                 <div className="space-y-1">
                   <div className="text-foreground">{offer.data.prompt}</div>
                   <div className="flex items-center gap-2">

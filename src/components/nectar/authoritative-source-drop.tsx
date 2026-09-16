@@ -336,7 +336,7 @@ export function AuthoritativeSourceDrop({
                   "linear-gradient(135deg, var(--amber-100, #fef3c7), var(--amber-200, #fde68a))",
               }}
             >
-              <PiMark className="h-7 w-7 text-[color:var(--amber-600,#d97706)]" />
+              <PiMark variant="gold" className="h-7 w-7" />
             </span>
             <div className="text-lg font-semibold text-[color:var(--navy-900,#0b1733)]">
               Drop to add to Authoritative Sources

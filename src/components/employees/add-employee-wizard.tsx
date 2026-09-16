@@ -317,7 +317,7 @@ export function AddEmployeeWizard({
                 <Button
                   type="submit"
                   disabled={createMutation.isPending || !organizationId}
-                  className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+                  className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
                 >
                   {createMutation.isPending
                     ? "Creating…"
@@ -368,7 +368,7 @@ export function AddEmployeeWizard({
               <Button
                 type="button"
                 disabled={!inviteIds.size || inviteMutation.isPending || !organizationId}
-                className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+                className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
                 onClick={() => inviteMutation.mutate(created.filter((row) => inviteIds.has(row.draftId)))}
               >
                 <Mail className="mr-2 h-4 w-4" />
@@ -554,7 +554,7 @@ function HireDraftFields({
 
 export function AddEmployeeButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
   return (
-    <Button className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]" onClick={onClick} disabled={disabled}>
+    <Button className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]" onClick={onClick} disabled={disabled}>
       <ShieldPlus className="mr-2 h-4 w-4" /> Add employee
     </Button>
   );

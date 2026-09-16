@@ -248,7 +248,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
         >
           <div className="rounded-lg border-2 border-dashed border-amber-400 bg-amber-50/60 px-3 py-3">
             <div className="mb-2 flex items-center gap-2">
-              <PiMark className="h-4 w-4 text-amber-700" />
+              <PiMark variant="gold" className="h-4 w-4" />
               <div className="flex-1">
                 <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">NECTAR Infusion</div>
                 <div className="text-sm font-semibold">Draft with NECTAR</div>
@@ -292,7 +292,7 @@ function EntryCard({ row, onChanged }: { row: Row; onChanged: () => void }) {
             {nectarDraft && (
               <div className="mt-3 rounded-md border-2 border-amber-500 bg-white px-3 py-2.5 shadow-sm">
                 <div className="mb-1.5 flex items-center gap-2">
-                  <PiMark className="h-3.5 w-3.5 text-amber-600" />
+                  <PiMark variant="gold" className="h-3.5 w-3.5" />
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
                     NECTAR draft — review before confirming
                   </span>

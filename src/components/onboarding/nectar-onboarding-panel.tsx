@@ -219,7 +219,7 @@ export function NectarOnboardingPanel({
                     className={cn(
                       "rounded-full border px-3 py-1 text-xs font-medium",
                       selected
-                        ? "border-[var(--hive-gold)] bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+                        ? "border-[var(--hive-gold)] bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
                         : "border-[var(--hive-border)] bg-[var(--hive-canvas)] text-[var(--hive-text-muted)] hover:bg-[var(--hive-muted-surface)]",
                     )}
                   >

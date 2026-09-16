@@ -179,7 +179,7 @@ function GuideCard({
                   onClick={() => onMarkDone(t)}
                   className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
                     t.status === "done"
-                      ? "border-[var(--hive-gold)] bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+                      ? "border-[var(--hive-gold)] bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
                       : "border-[var(--hive-border)] bg-[var(--hive-canvas)] hover:border-[var(--hive-gold)]"
                   }`}
                   aria-label="Mark done"

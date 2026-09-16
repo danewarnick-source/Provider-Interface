@@ -360,7 +360,7 @@ function ClientTrainingViewer() {
               <Button
                 onClick={() => completeMut.mutate()}
                 disabled={completeMut.isPending || anyChecking || signature.trim().length < 3 || !allAnswered || !contentRead}
-                className="bg-[var(--hive-gold)] text-[var(--hive-on-gold)]"
+                className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
               >
                 {completeMut.isPending || anyChecking
                   ? <Loader2 className="mr-1 h-4 w-4 animate-spin" />

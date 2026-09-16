@@ -81,7 +81,7 @@ function BillingLayout() {
               to={t.to}
               className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 active
-                  ? "bg-[var(--hive-gold)] text-[var(--hive-on-gold)] shadow-sm"
+                  ? "bg-[var(--hive-primary)] text-[var(--hive-primary-fg)] shadow-sm"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
