@@ -281,12 +281,12 @@ export function NotificationBell({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="relative z-20 flex h-9 w-9 pointer-events-auto items-center justify-center rounded-lg text-muted-foreground transition hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&_svg]:pointer-events-none"
+          className="hive-chrome-btn relative z-20 h-10 w-10 pointer-events-auto [&_svg]:pointer-events-none"
           aria-label={`Notifications${unreadCount > 0 ? ` — ${unreadCount} unread` : ""}`}
         >
-          <Bell className="h-5 w-5 text-[var(--hive-gold)]" />
+          <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--hive-gold)] text-[10px] font-bold text-[var(--hive-on-gold)]">
+            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--hive-gold)] px-1 text-[10px] font-bold leading-none text-[var(--hive-sidebar)] ring-2 ring-[var(--hive-sidebar)]">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}

@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { Building2, ChevronDown, GraduationCap, Lock, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PortalView } from "@/hooks/use-portal-view";
-import { PI_THEME } from "@/lib/pi-theme";
 
 export type PortalViewOption = {
   value: PortalView;
@@ -139,15 +138,11 @@ export function PortalViewSwitcher({
         aria-label="Portal View"
         data-testid="portal-view-menu"
         data-portal-view-menu=""
-        className="pointer-events-auto fixed z-[400] overflow-hidden rounded-md p-1 shadow-lg"
+        className="hive-chrome pointer-events-auto fixed z-[400] overflow-hidden rounded-md border border-[var(--hive-chrome-border)] p-1 shadow-xl"
         style={{
           top: pos.top,
           left: pos.left,
           width: pos.width,
-          background: PI_THEME.n1,
-          color: PI_THEME.cream,
-          border: `1px solid ${PI_THEME.c14}`,
-          boxShadow: PI_THEME.shadow2,
         }}
         onPointerDown={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
@@ -165,12 +160,10 @@ export function PortalViewSwitcher({
               data-testid={`portal-view-option-${opt.value}`}
               className={cn(
                 "flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-left text-sm outline-none",
-              )}
-              style={
                 selected
-                  ? { background: PI_THEME.goldSoft, color: PI_THEME.cream }
-                  : { color: PI_THEME.c70 }
-              }
+                  ? "bg-[var(--hive-chrome-hover)] text-[var(--hive-chrome-text)]"
+                  : "text-[var(--hive-chrome-text-muted)] hover:bg-[var(--hive-chrome-hover)] hover:text-[var(--hive-chrome-text)]",
+              )}
               onPointerDown={(e) => onOptionPointerDown(e, opt.value)}
               onClick={(e) => {
                 e.preventDefault();
@@ -199,14 +192,9 @@ export function PortalViewSwitcher({
         aria-expanded={open}
         data-testid="portal-view-trigger"
         className={cn(
-          "flex h-9 w-full items-center justify-between rounded-md px-3 py-2 text-sm shadow-sm outline-none",
+          "hive-chrome-btn h-9 w-full justify-between px-3 py-2 text-sm outline-none",
           triggerClassName,
         )}
-        style={{
-          background: PI_THEME.c08,
-          color: PI_THEME.cream,
-          border: `1px solid ${PI_THEME.c14}`,
-        }}
         onClick={() => setOpen((o) => !o)}
         onKeyDown={onTriggerKey}
       >

@@ -120,15 +120,13 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[var(--hive-text)] via-[#1a2a5a] to-[var(--hive-text)] px-4">
-      <div className="w-full max-w-md rounded-xl border border-[#fed7aa]/30 bg-white p-8 shadow-2xl">
+    <div className="hive-chrome flex min-h-screen items-center justify-center px-4">
+      <div className="w-full max-w-md rounded-xl border border-[var(--hive-border)] bg-[var(--hive-surface)] p-8 text-[var(--hive-text)] shadow-xl">
         <div className="mb-6 flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hive-text)] text-white">
-            <ShieldCheck className="h-6 w-6" />
-          </span>
+          <PiBrand tone="on-light" size="md" showText={false} />
           <div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">HIVE</div>
-            <h1 className="font-display text-lg font-bold text-[var(--hive-text)]">State Audit Portal</h1>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Provider Interface</div>
+            <h1 className="text-lg font-semibold text-[var(--hive-text)]">State Audit Portal</h1>
           </div>
         </div>
 
@@ -137,7 +135,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
             <div>
               This is a separate portal for state auditors. Access is provisioned by
-              HIVE — accounts cannot self-register. If you are an agency staff member,
+              Provider Interface — accounts cannot self-register. If you are an agency staff member,
               use your organization's regular sign-in.
             </div>
           </div>

@@ -12,6 +12,10 @@
 :root {
   --hive-sidebar: #0a1120;
   --hive-chrome-text: #f3efe6;
+  --hive-chrome-text-muted: rgba(243, 239, 230, 0.6);
+  --hive-chrome-border: rgba(243, 239, 230, 0.12);
+  --hive-chrome-hover: rgba(243, 239, 230, 0.1);
+  --hive-chrome-control: rgba(243, 239, 230, 0.06);
   --hive-canvas: #f4f6f8;
   --hive-bg: #f4f6f8;
   --hive-surface: #ffffff;
@@ -172,10 +176,54 @@
 }
 
 @layer utilities {
-  .bg-hive-hex {
-    background-color: var(--hive-canvas);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='92'%3E%3Cpolygon points='40,2 78,24 78,68 40,90 2,68 2,24' fill='none' stroke='%23C9A227' stroke-opacity='0.10' stroke-width='1'/%3E%3C/svg%3E");
-    background-size: 80px 92px;
+  /* Dark chrome (sidebar + top bar share this exact surface). */
+  .hive-chrome {
+    background-color: var(--hive-sidebar);
+    color: var(--hive-chrome-text);
+  }
+
+  /* Ghost control that lives on the dark chrome (menu, search, Nectar, bell). */
+  .hive-chrome-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--hive-chrome-border);
+    background-color: var(--hive-chrome-control);
+    color: var(--hive-chrome-text);
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+  .hive-chrome-btn:hover {
+    background-color: var(--hive-chrome-hover);
+    border-color: color-mix(in srgb, var(--hive-chrome-text) 22%, transparent);
+    color: var(--hive-chrome-text);
+  }
+  .hive-chrome-btn:focus-visible {
+    outline: 2px solid var(--hive-gold);
+    outline-offset: 2px;
+  }
+
+  /* Sheets whose header sits on the dark chrome: restyle the built-in close X to match. */
+  .hive-chrome-sheet > button[data-state] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--hive-chrome-border);
+    background-color: var(--hive-chrome-control);
+    color: var(--hive-chrome-text);
+    opacity: 1;
+    box-shadow: none;
+  }
+  .hive-chrome-sheet > button[data-state]:hover {
+    background-color: var(--hive-chrome-hover);
+  }
+  .hive-chrome-sheet > button[data-state]:focus-visible {
+    outline: 2px solid var(--hive-gold);
+    outline-offset: 2px;
   }
 
   .hive-gold-btn {
