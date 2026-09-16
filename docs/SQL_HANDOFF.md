@@ -1,5 +1,61 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
+## ACTION — Platform requirement_defs seed phase 2 (2026-09-16) — hold for Dane
+
+**Do not execute against Hive-Platform production from this PR.**
+Tony/Core pastes after Dane go. Clear the editor first. Additive INSERT/upsert
+only — never drop tables or columns. No production read switch.
+
+Seeds platform `requirement_defs` (`organization_id IS NULL`) for the locked
+DHHS91172 staff / client / company trackable set (132 keys). Titles and
+citations come from the existing catalog. Transport pack stays default-on:
+`driving_record_transport.gate_fact_key = does_not_transport`.
+
+Matches `supabase/migrations/20260916140000_seed_platform_requirement_defs.sql`.
+
+### Probe
+
+Clear the editor, paste:
+
+```sql
+SELECT count(*) AS platform_defs
+FROM public.requirement_defs
+WHERE organization_id IS NULL;
+```
+
+**What you'll see:** `0` until this ACTION runs. After apply: `132`.
+
+### Apply
+
+Clear the editor, paste the full file
+`supabase/migrations/20260916140000_seed_platform_requirement_defs.sql`.
+
+**What you'll see:** `INSERT 0 132` the first time; later pastes update in
+place (idempotent on `requirement_key`).
+
+### Verify
+
+Clear the editor, paste:
+
+```sql
+SELECT
+  count(*) AS platform_defs,
+  count(*) FILTER (WHERE layer = 'all_staff_clock') AS all_staff_clock,
+  count(*) FILTER (WHERE layer = 'staff_shelf') AS staff_shelf,
+  count(*) FILTER (WHERE layer = 'staff_exception') AS staff_exception,
+  count(*) FILTER (WHERE layer = 'client_shelf') AS client_shelf,
+  count(*) FILTER (WHERE layer = 'company_standing') AS company_standing,
+  string_agg(requirement_key, ',' ORDER BY requirement_key)
+    FILTER (WHERE gate_fact_key = 'does_not_transport') AS transport_opt_out_keys
+FROM public.requirement_defs
+WHERE organization_id IS NULL;
+```
+
+**What you'll see:** 132 platform rows, all five layers populated,
+`transport_opt_out_keys = driving_record_transport`.
+
+---
+
 ## ACTION — Compliance + training core tables phase 1 (2026-09-16) — hold for Dane
 
 **Do not Soft-apply / execute against Hive-Platform production from this PR.**

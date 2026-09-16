@@ -21,6 +21,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import type { Json } from "@/integrations/supabase/types";
+import { dualWriteNectarAttestation } from "./compliance-store-dual-write";
 
 export const EXTERNAL_SYSTEMS = [
   "UPI/USTEPS",
@@ -291,6 +292,14 @@ export const attestExternalCompletion = createServerFn({ method: "POST" })
       },
     });
     if (aErr) throw new Error(aErr.message);
+    await dualWriteNectarAttestation({
+      supabase,
+      organizationId: req.organization_id as string,
+      attestedBy: userId,
+      scope: "external_completion",
+      requirementTitle: req.title as string,
+      statement,
+    });
 
     // Roll renewal due date forward when supplied so the checklist tracks it.
     if (data.nextRenewalAt) {
