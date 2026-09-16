@@ -407,9 +407,6 @@ function serverFnResult(exportName: string): unknown {
     };
   }
   if (/getActiveDraftJobs/i.test(exportName)) return { jobs: [] };
-  if (/getOrgCeRoster/i.test(exportName)) {
-    return { organizationId: ORG_ID, goalHours: 12, rows: [], behindCount: 0 };
-  }
   if (/ensureCurrentSummaryPeriods/i.test(exportName)) return { ensured: 0 };
   if (/getInboxUnreadCount|getPendingUpgradeRequestCount/i.test(exportName)) {
     return { count: 0 };

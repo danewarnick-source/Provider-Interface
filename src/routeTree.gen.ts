@@ -196,7 +196,6 @@ import { Route as DashboardCoursesPersonRouteImport } from './routes/dashboard.c
 import { Route as DashboardCoursesOtherRouteImport } from './routes/dashboard.courses.other'
 import { Route as DashboardCoursesMindsmithRouteImport } from './routes/dashboard.courses.mindsmith'
 import { Route as DashboardCoursesCoreRouteImport } from './routes/dashboard.courses.core'
-import { Route as DashboardCoursesCeRouteImport } from './routes/dashboard.courses.ce'
 import { Route as DashboardCoursesCourseIdRouteImport } from './routes/dashboard.courses.$courseId'
 import { Route as DashboardClientsRhsBoardRouteImport } from './routes/dashboard.clients.rhs-board'
 import { Route as DashboardClientsPendingRouteImport } from './routes/dashboard.clients.pending'
@@ -211,7 +210,6 @@ import { Route as DashboardBillingForm520RouteImport } from './routes/dashboard.
 import { Route as DashboardBillingClientIdRouteImport } from './routes/dashboard.billing.$clientId'
 import { Route as DashboardBehaviorSupportClientIdRouteImport } from './routes/dashboard.behavior-support.$clientId'
 import { Route as DashboardAdminEmarAuditRouteImport } from './routes/dashboard.admin.emar-audit'
-import { Route as DashboardAdminCeHoursRouteImport } from './routes/dashboard.admin.ce-hours'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as ApiPublicRuntimeConfigRouteImport } from './routes/api/public/runtime-config'
 import { Route as ApiComplianceUrgentRouteImport } from './routes/api/compliance/urgent'
@@ -1244,11 +1242,6 @@ const DashboardCoursesCoreRoute = DashboardCoursesCoreRouteImport.update({
   path: '/courses/core',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardCoursesCeRoute = DashboardCoursesCeRouteImport.update({
-  id: '/courses/ce',
-  path: '/courses/ce',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardCoursesCourseIdRoute =
   DashboardCoursesCourseIdRouteImport.update({
     id: '/courses/$courseId',
@@ -1325,11 +1318,6 @@ const DashboardBehaviorSupportClientIdRoute =
 const DashboardAdminEmarAuditRoute = DashboardAdminEmarAuditRouteImport.update({
   id: '/admin/emar-audit',
   path: '/admin/emar-audit',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardAdminCeHoursRoute = DashboardAdminCeHoursRouteImport.update({
-  id: '/admin/ce-hours',
-  path: '/admin/ce-hours',
   getParentRoute: () => DashboardRoute,
 } as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
@@ -1628,7 +1616,6 @@ export interface FileRoutesByFullPath {
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
-  '/dashboard/admin/ce-hours': typeof DashboardAdminCeHoursRoute
   '/dashboard/admin/emar-audit': typeof DashboardAdminEmarAuditRoute
   '/dashboard/behavior-support/$clientId': typeof DashboardBehaviorSupportClientIdRoute
   '/dashboard/billing/$clientId': typeof DashboardBillingClientIdRoute
@@ -1643,7 +1630,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
   '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRouteWithChildren
-  '/dashboard/courses/ce': typeof DashboardCoursesCeRoute
   '/dashboard/courses/core': typeof DashboardCoursesCoreRoute
   '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
   '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
@@ -1855,7 +1841,6 @@ export interface FileRoutesByTo {
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
-  '/dashboard/admin/ce-hours': typeof DashboardAdminCeHoursRoute
   '/dashboard/admin/emar-audit': typeof DashboardAdminEmarAuditRoute
   '/dashboard/behavior-support/$clientId': typeof DashboardBehaviorSupportClientIdRoute
   '/dashboard/billing/$clientId': typeof DashboardBillingClientIdRoute
@@ -1870,7 +1855,6 @@ export interface FileRoutesByTo {
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
   '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRouteWithChildren
-  '/dashboard/courses/ce': typeof DashboardCoursesCeRoute
   '/dashboard/courses/core': typeof DashboardCoursesCoreRoute
   '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
   '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
@@ -2092,7 +2076,6 @@ export interface FileRoutesById {
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
-  '/dashboard/admin/ce-hours': typeof DashboardAdminCeHoursRoute
   '/dashboard/admin/emar-audit': typeof DashboardAdminEmarAuditRoute
   '/dashboard/behavior-support/$clientId': typeof DashboardBehaviorSupportClientIdRoute
   '/dashboard/billing/$clientId': typeof DashboardBillingClientIdRoute
@@ -2107,7 +2090,6 @@ export interface FileRoutesById {
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
   '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
   '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRouteWithChildren
-  '/dashboard/courses/ce': typeof DashboardCoursesCeRoute
   '/dashboard/courses/core': typeof DashboardCoursesCoreRoute
   '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
   '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
@@ -2330,7 +2312,6 @@ export interface FileRouteTypes {
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
-    | '/dashboard/admin/ce-hours'
     | '/dashboard/admin/emar-audit'
     | '/dashboard/behavior-support/$clientId'
     | '/dashboard/billing/$clientId'
@@ -2345,7 +2326,6 @@ export interface FileRouteTypes {
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
     | '/dashboard/courses/$courseId'
-    | '/dashboard/courses/ce'
     | '/dashboard/courses/core'
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
@@ -2557,7 +2537,6 @@ export interface FileRouteTypes {
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
-    | '/dashboard/admin/ce-hours'
     | '/dashboard/admin/emar-audit'
     | '/dashboard/behavior-support/$clientId'
     | '/dashboard/billing/$clientId'
@@ -2572,7 +2551,6 @@ export interface FileRouteTypes {
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
     | '/dashboard/courses/$courseId'
-    | '/dashboard/courses/ce'
     | '/dashboard/courses/core'
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
@@ -2793,7 +2771,6 @@ export interface FileRouteTypes {
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
-    | '/dashboard/admin/ce-hours'
     | '/dashboard/admin/emar-audit'
     | '/dashboard/behavior-support/$clientId'
     | '/dashboard/billing/$clientId'
@@ -2808,7 +2785,6 @@ export interface FileRouteTypes {
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
     | '/dashboard/courses/$courseId'
-    | '/dashboard/courses/ce'
     | '/dashboard/courses/core'
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
@@ -4280,13 +4256,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCoursesCoreRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/courses/ce': {
-      id: '/dashboard/courses/ce'
-      path: '/courses/ce'
-      fullPath: '/dashboard/courses/ce'
-      preLoaderRoute: typeof DashboardCoursesCeRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/courses/$courseId': {
       id: '/dashboard/courses/$courseId'
       path: '/courses/$courseId'
@@ -4383,13 +4352,6 @@ declare module '@tanstack/react-router' {
       path: '/admin/emar-audit'
       fullPath: '/dashboard/admin/emar-audit'
       preLoaderRoute: typeof DashboardAdminEmarAuditRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/admin/ce-hours': {
-      id: '/dashboard/admin/ce-hours'
-      path: '/admin/ce-hours'
-      fullPath: '/dashboard/admin/ce-hours'
-      preLoaderRoute: typeof DashboardAdminCeHoursRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/api/stripe/webhook': {
@@ -4999,13 +4961,11 @@ interface DashboardRouteChildren {
   DashboardTimeclockRoute: typeof DashboardTimeclockRoute
   DashboardTracksRoute: typeof DashboardTracksRouteWithChildren
   DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardAdminCeHoursRoute: typeof DashboardAdminCeHoursRoute
   DashboardAdminEmarAuditRoute: typeof DashboardAdminEmarAuditRoute
   DashboardBehaviorSupportClientIdRoute: typeof DashboardBehaviorSupportClientIdRoute
   DashboardClientIntakeClientIdRoute: typeof DashboardClientIntakeClientIdRoute
   DashboardClientTrainingClientIdRoute: typeof DashboardClientTrainingClientIdRoute
   DashboardCoursesCourseIdRoute: typeof DashboardCoursesCourseIdRouteWithChildren
-  DashboardCoursesCeRoute: typeof DashboardCoursesCeRoute
   DashboardCoursesCoreRoute: typeof DashboardCoursesCoreRoute
   DashboardCoursesMindsmithRoute: typeof DashboardCoursesMindsmithRoute
   DashboardCoursesOtherRoute: typeof DashboardCoursesOtherRoute
@@ -5103,13 +5063,11 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardTimeclockRoute: DashboardTimeclockRoute,
   DashboardTracksRoute: DashboardTracksRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardAdminCeHoursRoute: DashboardAdminCeHoursRoute,
   DashboardAdminEmarAuditRoute: DashboardAdminEmarAuditRoute,
   DashboardBehaviorSupportClientIdRoute: DashboardBehaviorSupportClientIdRoute,
   DashboardClientIntakeClientIdRoute: DashboardClientIntakeClientIdRoute,
   DashboardClientTrainingClientIdRoute: DashboardClientTrainingClientIdRoute,
   DashboardCoursesCourseIdRoute: DashboardCoursesCourseIdRouteWithChildren,
-  DashboardCoursesCeRoute: DashboardCoursesCeRoute,
   DashboardCoursesCoreRoute: DashboardCoursesCoreRoute,
   DashboardCoursesMindsmithRoute: DashboardCoursesMindsmithRoute,
   DashboardCoursesOtherRoute: DashboardCoursesOtherRoute,

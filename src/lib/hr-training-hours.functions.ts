@@ -7,7 +7,9 @@
  *  (a) signed `training_completions` whose mapped training topic carries a
  *      `default_hours` value (fallback 1.0 hr/topic when null), and
  *  (b) manual hour entries logged by an admin / team manager, stored as
- *      `ce_ledger` rows with source = 'manual_entry'.
+ *      `ce_ledger` rows with source = 'manual_entry'
+ *      (table name is historical; CE generation product was removed;
+ *      tables stay in place — no DROP).
  *
  * Evaluation is tenure-gated: before the staffer's 1-year anniversary the
  * status is `tracking_pre_tenure` (informational, NEVER a gap or audit
