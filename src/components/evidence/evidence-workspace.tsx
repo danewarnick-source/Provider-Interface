@@ -24,12 +24,12 @@ import {
   upsertEvidenceRequirement,
   type EvidenceBoard,
 } from "@/lib/evidence.functions";
+import { EVIDENCE_STEP_LABEL, EVIDENCE_STEPS, type EvidenceStep } from "@/lib/evidence/nav.ts";
 import {
-  EVIDENCE_STEP_LABEL,
-  EVIDENCE_STEPS,
-  type EvidenceStep,
-} from "@/lib/evidence/nav.ts";
-import { formatExpiresOn, latestFileForItem } from "@/lib/evidence/status.ts";
+  formatExpiresOn,
+  latestFileForItem,
+  type EvidenceCellStatus,
+} from "@/lib/evidence/status.ts";
 import {
   EVIDENCE_DISCLAIMER,
   type EvidenceSubject,
@@ -190,7 +190,9 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
     <div className="space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--hive-text)]">Evidence</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--hive-text)]">
+            Evidence
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Suggestions only · provider picks packs and adds custom rows.
           </p>
@@ -225,9 +227,15 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
         <EvidenceQuestionnaire
           subject={tab}
           onApply={(args) => {
-            const subjectIds = personId ? [personId] : tab === "company" ? [org.organization_id] : [];
+            const subjectIds = personId
+              ? [personId]
+              : tab === "company"
+                ? [org.organization_id]
+                : [];
             if (subjectIds.length === 0) {
-              toast.error("Pick a person on the grid first, or open this from Add employee / Add client.");
+              toast.error(
+                "Pick a person on the grid first, or open this from Add employee / Add client.",
+              );
               return;
             }
             applyM.mutate({
@@ -410,7 +418,11 @@ function GridPanel({
                   if (status === "all") return true;
                   return cellOf(person.id, col.requirementKey)?.status === status;
                 });
-                if (status !== "all" && visibleCols.length === 0 && (board?.columns ?? []).length > 0) {
+                if (
+                  status !== "all" &&
+                  visibleCols.length === 0 &&
+                  (board?.columns ?? []).length > 0
+                ) {
                   return null;
                 }
                 return (
@@ -425,9 +437,13 @@ function GridPanel({
                           {person.initials}
                         </span>
                         <span>
-                          <span className="block font-medium text-[var(--hive-text)]">{person.full_name}</span>
+                          <span className="block font-medium text-[var(--hive-text)]">
+                            {person.full_name}
+                          </span>
                           {person.subtitle ? (
-                            <span className="block text-xs text-muted-foreground">{person.subtitle}</span>
+                            <span className="block text-xs text-muted-foreground">
+                              {person.subtitle}
+                            </span>
                           ) : null}
                         </span>
                       </button>
@@ -478,7 +494,10 @@ function PackSettingsPanel({
   onAddCustom: () => void;
 }) {
   const packs = packsForSubject(tab);
-  const uniqueRows = new Map<string, { title: string; sow: string | null; count: number; itemIds: string[] }>();
+  const uniqueRows = new Map<
+    string,
+    { title: string; sow: string | null; count: number; itemIds: string[] }
+  >();
   for (const item of board?.items ?? []) {
     const cur = uniqueRows.get(item.requirement_key) ?? {
       title: item.title,
@@ -495,9 +514,12 @@ function PackSettingsPanel({
     <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Pack · {tab === "staff" ? "All-staff starter" : tab}</h2>
+          <h2 className="text-lg font-semibold">
+            Pack · {tab === "staff" ? "All-staff starter" : tab}
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Suggested from SOW citations. Provider can remove any row or add custom. Not a legal checklist.
+            Suggested from SOW citations. Provider can remove any row or add custom. Not a legal
+            checklist.
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={onClose}>
@@ -506,7 +528,10 @@ function PackSettingsPanel({
       </div>
       <ul className="mt-5 space-y-2">
         {[...uniqueRows.entries()].map(([key, row]) => (
-          <li key={key} className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-3">
+          <li
+            key={key}
+            className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-3"
+          >
             <div>
               <p className="text-sm font-medium">{row.title}</p>
               <p className="text-xs text-muted-foreground">
@@ -516,7 +541,12 @@ function PackSettingsPanel({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Assigned to {row.count}</span>
-              <Button type="button" variant="ghost" size="sm" onClick={() => onRemove(row.itemIds[0]!)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => onRemove(row.itemIds[0]!)}
+              >
                 Remove
               </Button>
             </div>
@@ -560,7 +590,9 @@ function NewRequirementPanel({
   const [kind, setKind] = useState<EvidenceType | null>(null);
   const [title, setTitle] = useState("");
   const [attest, setAttest] = useState("");
-  const [cadence, setCadence] = useState<"once" | "annual" | "every_2_years" | "keep_current">("annual");
+  const [cadence, setCadence] = useState<"once" | "annual" | "every_2_years" | "keep_current">(
+    "annual",
+  );
   const [sowCite, setSowCite] = useState("");
   const [ids, setIds] = useState<string[]>(defaultSubjectIds);
 
@@ -608,7 +640,9 @@ function NewRequirementPanel({
   return (
     <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-start justify-between">
-        <h2 className="text-lg font-semibold">{kind === "upload" ? "Request upload" : "Attest or sign"}</h2>
+        <h2 className="text-lg font-semibold">
+          {kind === "upload" ? "Request upload" : "Attest or sign"}
+        </h2>
         <Button type="button" variant="outline" size="sm" onClick={onCancel}>
           Close
         </Button>
@@ -656,7 +690,9 @@ function NewRequirementPanel({
                   <Checkbox
                     checked={ids.includes(p.id)}
                     onCheckedChange={(v) =>
-                      setIds((prev) => (v === true ? [...prev, p.id] : prev.filter((id) => id !== p.id)))
+                      setIds((prev) =>
+                        v === true ? [...prev, p.id] : prev.filter((id) => id !== p.id),
+                      )
                     }
                   />
                   {p.full_name}
@@ -721,9 +757,13 @@ function ReviewPanel({
 
   const openPreview = async () => {
     if (!file?.storage_path) return;
-    const { data, error } = await supabase.storage.from("evidence-files").createSignedUrl(file.storage_path, 300);
+    const { data, error } = await supabase.storage
+      .from("evidence-files")
+      .createSignedUrl(file.storage_path, 300);
     if (error || !data?.signedUrl) {
-      toast.error(error?.message ?? "Could not open file. Apply the Evidence SQL handoff for the bucket.");
+      toast.error(
+        error?.message ?? "Could not open file. Apply the Evidence SQL handoff for the bucket.",
+      );
       return;
     }
     setPreview(data.signedUrl);
@@ -746,7 +786,8 @@ function ReviewPanel({
         <p className="text-sm font-semibold">{person?.full_name ?? "Person"}</p>
         <p className="text-xs text-muted-foreground">{item.title}</p>
         <p className="mt-3 text-xs text-muted-foreground">
-          {item.evidence_type === "attestation" ? "Attestation" : "Upload"} · {cadenceLabel(item.cadence)}
+          {item.evidence_type === "attestation" ? "Attestation" : "Upload"} ·{" "}
+          {cadenceLabel(item.cadence)}
         </p>
         {item.expires_on ? (
           <p className="mt-3 rounded-full bg-emerald-50 px-3 py-1 text-xs text-emerald-800">
@@ -763,9 +804,11 @@ function ReviewPanel({
               onChange={async (e) => {
                 const picked = e.target.files?.[0];
                 if (!picked) return;
-                const safe = picked.name.replace(/[^\w.\-]+/g, "_");
+                const safe = picked.name.replace(/[^\w.-]+/g, "_");
                 const path = `${orgId}/${item.id}/${Date.now()}-${safe}`;
-                const up = await supabase.storage.from("evidence-files").upload(path, picked, { upsert: true });
+                const up = await supabase.storage
+                  .from("evidence-files")
+                  .upload(path, picked, { upsert: true });
                 if (up.error) {
                   toast.error(up.error.message);
                   return;
@@ -788,14 +831,21 @@ function ReviewPanel({
             <Button
               type="button"
               disabled={pending}
-              onClick={() => onAttest(item.attestation_text || `I attest that ${item.title} is complete.`)}
+              onClick={() =>
+                onAttest(item.attestation_text || `I attest that ${item.title} is complete.`)
+              }
             >
               Mark attested
             </Button>
           ) : null}
           <div className="grid gap-1.5">
             <Label htmlFor="ev-exp">Expiration</Label>
-            <Input id="ev-exp" type="date" value={expires} onChange={(e) => setExpires(e.target.value)} />
+            <Input
+              id="ev-exp"
+              type="date"
+              value={expires}
+              onChange={(e) => setExpires(e.target.value)}
+            />
           </div>
         </div>
       </aside>
@@ -805,7 +855,8 @@ function ReviewPanel({
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Preview</p>
             <h2 className="text-lg font-semibold">{item.title}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {file?.filename ?? "No file yet. Platform stores the file + expiration date. No automated you are compliant with SOW judgment."}
+              {file?.filename ??
+                "No file yet. Platform stores the file + expiration date. No automated you are compliant with SOW judgment."}
             </p>
           </div>
           <Button type="button" variant="outline" size="sm" onClick={onClose}>
@@ -813,7 +864,11 @@ function ReviewPanel({
           </Button>
         </div>
         {preview ? (
-          <iframe title="Evidence preview" src={preview} className="mt-4 h-[480px] w-full rounded-xl border" />
+          <iframe
+            title="Evidence preview"
+            src={preview}
+            className="mt-4 h-[480px] w-full rounded-xl border"
+          />
         ) : (
           <div className="mt-6 flex h-64 items-center justify-center rounded-xl bg-slate-50 text-sm text-muted-foreground">
             <FileText className="mr-2 h-4 w-4" />
@@ -867,18 +922,29 @@ function PersonPackEditor({
             Edit this person&apos;s pack. Click a row to review the file.
           </p>
         </div>
-        <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close person pack">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          aria-label="Close person pack"
+        >
           <X className="h-4 w-4" />
         </Button>
       </div>
       <ul className="mt-4 space-y-2">
         {rows.map((row) => (
-          <li key={row.id} className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2.5">
+          <li
+            key={row.id}
+            className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2.5"
+          >
             <label className="flex min-w-0 items-center gap-3">
               <Checkbox
                 checked={selected.includes(row.id)}
                 onCheckedChange={(v) =>
-                  setSelected((prev) => (v === true ? [...prev, row.id] : prev.filter((id) => id !== row.id)))
+                  setSelected((prev) =>
+                    v === true ? [...prev, row.id] : prev.filter((id) => id !== row.id),
+                  )
                 }
               />
               <button type="button" className="text-left" onClick={() => onReview(row.id)}>
@@ -890,13 +956,21 @@ function PersonPackEditor({
                 </span>
               </button>
             </label>
-            <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => onRemove(row.id)}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={pending}
+              onClick={() => onRemove(row.id)}
+            >
               Remove
             </Button>
           </li>
         ))}
         {rows.length === 0 ? (
-          <li className="text-sm text-muted-foreground">No rows yet. Run the hire questionnaire or add a requirement.</li>
+          <li className="text-sm text-muted-foreground">
+            No rows yet. Run the hire questionnaire or add a requirement.
+          </li>
         ) : null}
       </ul>
       <div className="mt-4 flex flex-wrap items-center gap-2">

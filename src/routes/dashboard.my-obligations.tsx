@@ -987,7 +987,10 @@ function MyObligationsPage() {
         <p className="mt-1 text-xs text-muted-foreground">
           Admin-owned packs stay off this list until someone clicks Send to staff.
         </p>
-        <Link to="/dashboard/my-evidence" className="mt-2 inline-block text-sm underline underline-offset-2">
+        <Link
+          to="/dashboard/my-evidence"
+          className="mt-2 inline-block text-sm underline underline-offset-2"
+        >
           Open Evidence
         </Link>
       </div>

@@ -1,12 +1,6 @@
 import { EVIDENCE_SUBJECTS, type EvidenceSubject } from "./types.ts";
 
-export const EVIDENCE_STEPS = [
-  "grid",
-  "pack",
-  "quiz",
-  "newtype",
-  "review",
-] as const;
+export const EVIDENCE_STEPS = ["grid", "pack", "quiz", "newtype", "review"] as const;
 export type EvidenceStep = (typeof EVIDENCE_STEPS)[number];
 
 export const EVIDENCE_STEP_LABEL: Record<EvidenceStep, string> = {

@@ -244,7 +244,8 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
     key: "mandt_behavior",
     title: "Mandt / behavior",
     subject: "staff",
-    description: "Behavior-intervention certification when the caseload may include aggression risk.",
+    description:
+      "Behavior-intervention certification when the caseload may include aggression risk.",
     requirementKeys: ["mandt_behavior"],
   },
   {
@@ -321,7 +322,8 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
     key: "company_starter",
     title: "Company starter",
     subject: "company",
-    description: "Insurance, Medicaid enrollment, and BAA. Shift notes, EVV, and summaries stay in their own workflows.",
+    description:
+      "Insurance, Medicaid enrollment, and BAA. Shift notes, EVV, and summaries stay in their own workflows.",
     requirementKeys: ["company_insurance", "company_medicaid_enrollment", "company_baa"],
   },
 ] as const;

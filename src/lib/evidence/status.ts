@@ -1,5 +1,7 @@
 import type { EvidenceCellStatus, EvidenceFileRow, EvidenceItemRow } from "./types.ts";
 
+export type { EvidenceCellStatus };
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const EXPIRING_SOON_DAYS = 30;
 

@@ -26,6 +26,7 @@ import {
   EVIDENCE_UNCHECK_WARNING,
   type EvidenceFileRow,
   type EvidenceItemRow,
+  type ServiceCodeFlag,
 } from "./evidence/types.ts";
 
 function item(partial: Partial<EvidenceItemRow>): EvidenceItemRow {
@@ -168,7 +169,7 @@ describe("Evidence curated catalog", () => {
   it("treats SOW-suggested rows as the opt-out warning set", () => {
     const answers = {
       ...defaultQuestionnaireAnswers("staff"),
-      serviceCodes: ["HHS"] as const,
+      serviceCodes: ["HHS"] as ServiceCodeFlag[],
     };
     assert.equal(isSowSuggestedKey("cpr_first_aid", answers), true);
     assert.equal(isSowSuggestedKey("host_home_cert", answers), true);
@@ -182,10 +183,7 @@ describe("Evidence curated catalog", () => {
 describe("Evidence cell status", () => {
   it("marks missing, expiring soon, and done without inventing a score", () => {
     assert.equal(cellStatus({ item: null, file: null, today: "2026-09-17" }), "missing");
-    assert.equal(
-      cellStatus({ item: item({}), file: null, today: "2026-09-17" }),
-      "missing",
-    );
+    assert.equal(cellStatus({ item: item({}), file: null, today: "2026-09-17" }), "missing");
     assert.equal(
       cellStatus({
         item: item({ expires_on: "2026-10-01" }),

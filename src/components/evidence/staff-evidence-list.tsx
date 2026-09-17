@@ -68,7 +68,8 @@ export function StaffEvidenceList() {
   return (
     <section className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        Only items your agency sent you. Admin-side packs stay off this phone list until Send to staff.
+        Only items your agency sent you. Admin-side packs stay off this phone list until Send to
+        staff.
       </p>
       {q.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
@@ -87,7 +88,8 @@ export function StaffEvidenceList() {
                   <div>
                     <p className="font-medium">{item.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {item.evidence_type === "attestation" ? "Attest" : "Upload"} · {cadenceLabel(item.cadence)}
+                      {item.evidence_type === "attestation" ? "Attest" : "Upload"} ·{" "}
+                      {cadenceLabel(item.cadence)}
                     </p>
                   </div>
                   <EvidenceStatusGlyph status={status} />
@@ -100,7 +102,8 @@ export function StaffEvidenceList() {
                     onClick={() =>
                       attestM.mutate({
                         itemId: item.id,
-                        attestationText: item.attestation_text || `I attest that ${item.title} is complete.`,
+                        attestationText:
+                          item.attestation_text || `I attest that ${item.title} is complete.`,
                       })
                     }
                   >
@@ -114,11 +117,13 @@ export function StaffEvidenceList() {
                       onChange={async (e) => {
                         const picked = e.target.files?.[0];
                         if (!picked) return;
-                        const safe = picked.name.replace(/[^\w.\-]+/g, "_");
+                        const safe = picked.name.replace(/[^\w.-]+/g, "_");
                         const path = `${org.organization_id}/${item.id}/${Date.now()}-${safe}`;
-                        const up = await supabase.storage.from("evidence-files").upload(path, picked, {
-                          upsert: true,
-                        });
+                        const up = await supabase.storage
+                          .from("evidence-files")
+                          .upload(path, picked, {
+                            upsert: true,
+                          });
                         if (up.error) {
                           toast.error(up.error.message);
                           return;

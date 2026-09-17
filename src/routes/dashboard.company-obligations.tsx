@@ -30,7 +30,11 @@ export const Route = createFileRoute("/dashboard/company-obligations")({
   beforeLoad: ({ search }) => {
     const tab = typeof search.tab === "string" ? search.tab : "";
     const mapped =
-      tab === "client" ? "client" : tab === "policy-library" || tab === "policies" ? "company" : "staff";
+      tab === "client"
+        ? "client"
+        : tab === "policy-library" || tab === "policies"
+          ? "company"
+          : "staff";
     throw redirect({
       to: "/dashboard/evidence",
       search: { tab: mapped },

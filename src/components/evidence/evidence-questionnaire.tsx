@@ -181,7 +181,9 @@ export function EvidenceQuestionnaire({
       {subject === "staff" ? (
         <>
           <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <p className="text-sm font-semibold text-[var(--hive-text)]">2. Do they transport people?</p>
+            <p className="text-sm font-semibold text-[var(--hive-text)]">
+              2. Do they transport people?
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Most staff do. Only turn off for rare office-only roles.
             </p>
@@ -252,12 +254,15 @@ export function EvidenceQuestionnaire({
                 className="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2.5"
               >
                 <label className="flex min-w-0 cursor-pointer items-start gap-3">
-                  <Checkbox checked={checked.has(row.key)} onCheckedChange={() => toggleKey(row.key)} />
+                  <Checkbox
+                    checked={checked.has(row.key)}
+                    onCheckedChange={() => toggleKey(row.key)}
+                  />
                   <span>
                     <span className="block text-sm font-medium">{row.title}</span>
                     <span className="block text-xs text-muted-foreground">
-                      {row.evidenceType === "upload" ? "Upload" : "Attest"} · {cadenceLabel(row.cadence)} ·{" "}
-                      {row.sowCite}
+                      {row.evidenceType === "upload" ? "Upload" : "Attest"} ·{" "}
+                      {cadenceLabel(row.cadence)} · {row.sowCite}
                     </span>
                   </span>
                 </label>
@@ -312,7 +317,11 @@ export function EvidenceQuestionnaire({
             </Button>
           </div>
         </div>
-        <Button type="button" disabled={!liability || checked.size === 0 || pending} onClick={apply}>
+        <Button
+          type="button"
+          disabled={!liability || checked.size === 0 || pending}
+          onClick={apply}
+        >
           {pending ? "Applying…" : "Apply packs"}
         </Button>
       </div>

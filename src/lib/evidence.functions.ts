@@ -8,11 +8,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import {
-  hostHomeDualLinkPeerKey,
-  packByKey,
-  requirementByKey,
-} from "./evidence/catalog.ts";
+import { hostHomeDualLinkPeerKey, packByKey, requirementByKey } from "./evidence/catalog.ts";
 import { addCadence, cellStatus, latestFileForItem, staffInitials } from "./evidence/status.ts";
 import {
   EVIDENCE_PUSH_BODY,
@@ -274,13 +270,15 @@ async function listStaffPeople(sb: AnySupabase, organizationId: string): Promise
   const roleByUser = new Map(
     (members ?? []).map((m: { user_id: string; role: string }) => [m.user_id, m.role]),
   );
-  return ((profiles ?? []) as Array<{
-    id: string;
-    full_name: string | null;
-    first_name: string | null;
-    last_name: string | null;
-    is_active: boolean | null;
-  }>)
+  return (
+    (profiles ?? []) as Array<{
+      id: string;
+      full_name: string | null;
+      first_name: string | null;
+      last_name: string | null;
+      is_active: boolean | null;
+    }>
+  )
     .filter((p) => p.is_active !== false)
     .map((p) => {
       const name =
@@ -297,20 +295,25 @@ async function listStaffPeople(sb: AnySupabase, organizationId: string): Promise
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
 }
 
-async function listClientPeople(sb: AnySupabase, organizationId: string): Promise<EvidencePerson[]> {
+async function listClientPeople(
+  sb: AnySupabase,
+  organizationId: string,
+): Promise<EvidencePerson[]> {
   const { data, error } = await sb
     .from("clients")
     .select("id, first_name, last_name, account_status, authorized_dspd_codes, job_code")
     .eq("organization_id", organizationId);
   if (error) throw new Error(error.message);
-  return ((data ?? []) as Array<{
-    id: string;
-    first_name: string | null;
-    last_name: string | null;
-    account_status: string | null;
-    authorized_dspd_codes: string[] | null;
-    job_code: string[] | null;
-  }>)
+  return (
+    (data ?? []) as Array<{
+      id: string;
+      first_name: string | null;
+      last_name: string | null;
+      account_status: string | null;
+      authorized_dspd_codes: string[] | null;
+      job_code: string[] | null;
+    }>
+  )
     .filter((c) => {
       const status = (c.account_status ?? "active").toLowerCase();
       return status !== "discharged" && status !== "inactive" && status !== "archived";
@@ -636,7 +639,10 @@ export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
     const { viaTables } = await loadAll(sb, data.organizationId);
     const key =
       data.requirementKey?.trim() ||
-      `custom:${data.title.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_")}`;
+      `custom:${data.title
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")}`;
     if (/^(w-?9|i-?9)$/i.test(key) || /^(w-?9|i-?9)$/i.test(data.title.trim())) {
       // Optional custom only — still allowed, but never a catalog built-in.
     }
@@ -797,8 +803,7 @@ export const recordEvidenceUpload = createServerFn({ method: "POST" })
       notes: data.notes ?? null,
     };
     await insertFileRow(sb, viaTables, data.organizationId, row);
-    const expires =
-      data.expiresOn ?? addCadence(todayStamp(), found.cadence);
+    const expires = data.expiresOn ?? addCadence(todayStamp(), found.cadence);
     await patchItem(sb, viaTables, data.organizationId, data.itemId, { expires_on: expires });
     if (found.dual_link_peer_id) {
       await patchItem(sb, viaTables, data.organizationId, found.dual_link_peer_id, {
@@ -866,13 +871,12 @@ export const listMySentEvidence = createServerFn({ method: "POST" })
   .inputValidator((i) => z.object({ organizationId: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    if (!supabase || !userId) return { items: [] as EvidenceItemRow[], files: [] as EvidenceFileRow[] };
+    if (!supabase || !userId)
+      return { items: [] as EvidenceItemRow[], files: [] as EvidenceFileRow[] };
     await requireOrgMembership(supabase, userId, data.organizationId, "employee");
     const sb = supabase as AnySupabase;
     const { store } = await loadAll(sb, data.organizationId);
-    const items = store.items.filter(
-      (i) => i.sent_to_staff && i.visible_to_staff_id === userId,
-    );
+    const items = store.items.filter((i) => i.sent_to_staff && i.visible_to_staff_id === userId);
     const files = store.files.filter((f) => items.some((i) => i.id === f.item_id));
     return { items, files };
   });
