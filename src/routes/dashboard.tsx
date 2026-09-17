@@ -53,7 +53,6 @@ import {
   HandCoins,
   Scale,
   FileText,
-  FolderArchive,
   Inbox,
   Search,
   Archive,
@@ -273,7 +272,7 @@ const STAFF_NAV: NavItem[] = [
   { to: "/dashboard/ask-nectar", label: "Nectar", icon: Sparkles, feature: "nectar" },
 ];
 
-// Thirteen primary admin items (ADMIN_PRIMARY_NAV_LABELS). Command Center
+// Twelve primary admin items (ADMIN_PRIMARY_NAV_LABELS). Command Center
 // redirects to Home. Compliance Desk stays mounted for EVV CSV only.
 const ADMIN_NAV: NavItem[] = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard, exact: true },
@@ -286,7 +285,6 @@ const ADMIN_NAV: NavItem[] = [
     icon: ClipboardCheck,
     feature: "pcsp",
   },
-  { to: "/dashboard/audit", label: "Audit", icon: FolderArchive },
   { to: "/dashboard/daily-logs", label: "Daily Logs", icon: ClipboardCheck },
   { to: "/dashboard/compliance", label: "Compliance", icon: FolderCheck, exact: true },
   { to: "/dashboard/summaries", label: "Summaries", icon: FileText },

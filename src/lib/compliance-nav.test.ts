@@ -46,8 +46,8 @@ describe("Compliance search aliases", () => {
 });
 
 describe("Compliance nav lock", () => {
-  it("keeps thirteen primary admin nav items including Audit and drops retired parallel labels", () => {
-    assert.equal(ADMIN_PRIMARY_NAV_LABELS.length, 13);
+  it("keeps twelve primary admin nav items and drops retired parallel labels", () => {
+    assert.equal(ADMIN_PRIMARY_NAV_LABELS.length, 12);
     const nav = readFileSync(new URL("../routes/dashboard.tsx", import.meta.url), "utf8");
     const start = nav.indexOf("const ADMIN_NAV: NavItem[] = [");
     const end = nav.indexOf("];", start);
@@ -55,7 +55,6 @@ describe("Compliance nav lock", () => {
     const block = nav.slice(start, end);
     const labels = [...block.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
     assert.deepEqual(labels, [...ADMIN_PRIMARY_NAV_LABELS]);
-    assert.match(nav, /to: "\/dashboard\/audit", label: "Audit"/);
     assert.match(nav, /to: "\/dashboard\/compliance", label: "Compliance"/);
     assert.match(nav, /item\.to === "\/dashboard\/compliance"/);
     assert.doesNotMatch(block, /state-audit/);
@@ -111,5 +110,35 @@ describe("Compliance nav lock", () => {
       "utf8",
     );
     assert.match(profile, /<TabsTrigger value="compliance">Compliance<\/TabsTrigger>/);
+  });
+});
+
+describe("Documentation hub Audit tab", () => {
+  it("keeps Documentation → Audit usable without a hub upgrade wall", () => {
+    const hub = readFileSync(
+      new URL("../routes/dashboard.hub.documentation.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(hub, /key: "audit"/);
+    assert.match(hub, /label: "Audit"/);
+    assert.doesNotMatch(hub, /feature: "state_audit"/);
+    assert.match(hub, /<AuditPage \/>/);
+    assert.match(hub, /<AuditZone \/>/);
+    assert.match(hub, /<InternalAuditPage \/>/);
+    assert.doesNotMatch(hub, /<details/);
+    const auditIdx = hub.indexOf('key: "audit"');
+    const evidenceIdx = hub.indexOf("Evidence pull", auditIdx);
+    const readinessIdx = hub.indexOf("Readiness check", auditIdx);
+    assert.ok(auditIdx >= 0 && evidenceIdx > auditIdx, "Evidence pull on Audit tab");
+    assert.ok(readinessIdx > evidenceIdx, "packets/zone render before Internal Audit lock");
+  });
+
+  it("lets Internal Audit embed on Documentation without Route.useSearch", () => {
+    const src = readFileSync(
+      new URL("../routes/dashboard.internal-audit.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.doesNotMatch(src, /Route\.useSearch\(\)/);
+    assert.match(src, /useSearch\(\{ strict: false \}\)/);
   });
 });

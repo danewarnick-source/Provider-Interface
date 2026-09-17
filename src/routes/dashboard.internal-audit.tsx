@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -126,7 +126,9 @@ const SEVERITY_BADGE: Record<Severity, { label: string; cls: string; Icon: typeo
 export function InternalAuditPage() {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id ?? "";
-  const search = Route.useSearch();
+  const search = parseInternalAuditSearch(
+    (useSearch({ strict: false }) ?? {}) as Record<string, unknown>,
+  );
   const { hasAddon } = useEntitlements();
   const auditEntitled = hasAddon("internal_audit");
   const { data: caseload } = useCaseload();

@@ -118,7 +118,6 @@ test.describe("Admin Home + obligations / audit-readiness", () => {
     await expect(
       page.locator("aside").getByRole("link", { name: /^Compliance desk$/i }),
     ).toHaveCount(0);
-    await expect(page.locator("aside").getByRole("link", { name: /^Audit$/i })).toBeVisible();
     await expect(page.locator("aside").getByRole("link", { name: /^State Audit$/i })).toHaveCount(
       0,
     );
