@@ -56,13 +56,14 @@ export function complianceRedirectSearchFromAgencyDocuments(
   return { tab: "agency" };
 }
 
-/** Admin primary sidebar — twelve items. State Audit and Reports stay as routes. */
+/** Admin primary sidebar — thirteen items. State Audit and Reports stay as routes. */
 export const ADMIN_PRIMARY_NAV_LABELS = [
   "Home",
   "Employees",
   "Clients",
   "Scheduler",
   "Documentation",
+  "Audit",
   "Daily Logs",
   "Compliance",
   "Summaries",

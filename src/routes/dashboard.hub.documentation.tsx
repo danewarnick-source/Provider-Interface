@@ -48,7 +48,6 @@ function DocumentationHub() {
         {
           key: "audit",
           label: "Audit",
-          feature: "state_audit",
           render: () => (
             <div className="space-y-6">
               <section>

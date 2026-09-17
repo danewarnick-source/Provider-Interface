@@ -46,8 +46,8 @@ describe("Compliance search aliases", () => {
 });
 
 describe("Compliance nav lock", () => {
-  it("keeps twelve primary admin nav items and drops retired parallel labels", () => {
-    assert.equal(ADMIN_PRIMARY_NAV_LABELS.length, 12);
+  it("keeps thirteen primary admin nav items including Audit and drops retired parallel labels", () => {
+    assert.equal(ADMIN_PRIMARY_NAV_LABELS.length, 13);
     const nav = readFileSync(new URL("../routes/dashboard.tsx", import.meta.url), "utf8");
     const start = nav.indexOf("const ADMIN_NAV: NavItem[] = [");
     const end = nav.indexOf("];", start);
@@ -55,6 +55,7 @@ describe("Compliance nav lock", () => {
     const block = nav.slice(start, end);
     const labels = [...block.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
     assert.deepEqual(labels, [...ADMIN_PRIMARY_NAV_LABELS]);
+    assert.match(nav, /to: "\/dashboard\/audit", label: "Audit"/);
     assert.match(nav, /to: "\/dashboard\/compliance", label: "Compliance"/);
     assert.match(nav, /item\.to === "\/dashboard\/compliance"/);
     assert.doesNotMatch(block, /state-audit/);
