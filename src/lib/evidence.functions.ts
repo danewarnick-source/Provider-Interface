@@ -11,6 +11,7 @@ import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { hostHomeDualLinkPeerKey, packByKey, requirementByKey } from "./evidence/catalog.ts";
 import { addCadence, cellStatus, latestFileForItem, staffInitials } from "./evidence/status.ts";
 import {
+  EVIDENCE_CADENCES,
   EVIDENCE_PUSH_BODY,
   EVIDENCE_PUSH_LINK,
   EVIDENCE_PUSH_TITLE,
@@ -32,7 +33,7 @@ const STORE_KEY = "evidence_v1";
 
 const SubjectEnum = z.enum(["staff", "client", "company"]);
 const TypeEnum = z.enum(["upload", "attestation"]);
-const CadenceEnum = z.enum(["once", "annual", "every_2_years", "keep_current"]);
+const CadenceEnum = z.enum(EVIDENCE_CADENCES);
 
 type StoreV1 = {
   items: EvidenceItemRow[];

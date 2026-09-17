@@ -4,6 +4,7 @@
  */
 
 import {
+  EVIDENCE_CADENCE_OPTIONS,
   SERVICE_CODE_FLAGS,
   type EvidencePackDef,
   type EvidenceRequirementDef,
@@ -432,10 +433,8 @@ export function isBuiltInTaxFormKey(key: string): boolean {
 }
 
 export function cadenceLabel(cadence: string): string {
-  if (cadence === "every_2_years") return "Renew every 2 years";
-  if (cadence === "annual") return "Annual";
-  if (cadence === "keep_current") return "Keep current";
-  return "Once";
+  const found = EVIDENCE_CADENCE_OPTIONS.find((row) => row.value === cadence);
+  return found?.label ?? "Once";
 }
 
 export function evidenceTypeLabel(type: string): string {

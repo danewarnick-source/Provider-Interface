@@ -136,22 +136,17 @@ export function EvidenceQuestionnaire({
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold tracking-tight text-[var(--hive-text)]">
-          {subject === "client" ? "Add client" : subject === "company" ? "Company" : "Add staff"}{" "}
-          setup questions
+          {subject === "client"
+            ? "Client pack"
+            : subject === "company"
+              ? "Company pack"
+              : "Staff pack"}
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Branching questions drive suggested packs. Nothing is forced on.
-        </p>
       </div>
 
       {subject !== "company" ? (
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-sm font-semibold text-[var(--hive-text)]">
-            1. Job / service codes this person works under
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Pick all that apply. Follow-ups appear from your answers.
-          </p>
+          <p className="text-sm font-semibold text-[var(--hive-text)]">Job / service codes</p>
           <div className="mt-4 space-y-2">
             {SERVICE_CODE_FLAGS.map((code) => (
               <label
@@ -182,10 +177,7 @@ export function EvidenceQuestionnaire({
         <>
           <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="text-sm font-semibold text-[var(--hive-text)]">
-              2. Do they transport people?
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Most staff do. Only turn off for rare office-only roles.
+              Do they transport people?
             </p>
             <div className="mt-4 space-y-2">
               <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
@@ -214,7 +206,7 @@ export function EvidenceQuestionnaire({
           </section>
 
           <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <p className="text-sm font-semibold text-[var(--hive-text)]">3. Caseload flags</p>
+            <p className="text-sm font-semibold text-[var(--hive-text)]">Caseload</p>
             <div className="mt-4 space-y-2">
               <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
                 <Checkbox
@@ -241,9 +233,6 @@ export function EvidenceQuestionnaire({
 
       <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <p className="text-sm font-semibold text-[var(--hive-text)]">Suggested rows</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Check or uncheck. Unchecking a SOW-suggested row asks you to confirm.
-        </p>
         <ul className="mt-4 space-y-2">
           {[...new Set([...suggestedKeys, ...checked])]
             .map((key) => requirementByKey(key))
@@ -270,7 +259,7 @@ export function EvidenceQuestionnaire({
             ))}
         </ul>
         {optOutKey ? (
-          <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+          <div className="mt-4 rounded-xl border border-border bg-muted/40 p-3 text-sm">
             <p>{EVIDENCE_UNCHECK_WARNING}</p>
             <div className="mt-3 flex gap-2">
               <Button type="button" size="sm" variant="outline" onClick={() => setOptOutKey(null)}>
@@ -284,7 +273,7 @@ export function EvidenceQuestionnaire({
         ) : null}
       </section>
 
-      <label className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm">
+      <label className="flex items-start gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm">
         <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
         <span>{EVIDENCE_LIABILITY_TEXT}</span>
       </label>

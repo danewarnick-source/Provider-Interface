@@ -9,8 +9,26 @@ export type EvidenceSubject = (typeof EVIDENCE_SUBJECTS)[number];
 export const EVIDENCE_TYPES = ["upload", "attestation"] as const;
 export type EvidenceType = (typeof EVIDENCE_TYPES)[number];
 
-export const EVIDENCE_CADENCES = ["once", "annual", "every_2_years", "keep_current"] as const;
+export const EVIDENCE_CADENCES = [
+  "once",
+  "monthly",
+  "quarterly",
+  "semi_annual",
+  "annual",
+  "every_2_years",
+  "keep_current",
+] as const;
 export type EvidenceCadence = (typeof EVIDENCE_CADENCES)[number];
+
+export const EVIDENCE_CADENCE_OPTIONS: { value: EvidenceCadence; label: string }[] = [
+  { value: "once", label: "Once" },
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "semi_annual", label: "Semi-annual (every 6 months)" },
+  { value: "annual", label: "Annual" },
+  { value: "every_2_years", label: "Every 2 years" },
+  { value: "keep_current", label: "Custom / Keep current" },
+];
 
 export const EVIDENCE_CELL_STATUSES = ["done", "expiring", "missing"] as const;
 export type EvidenceCellStatus = (typeof EVIDENCE_CELL_STATUSES)[number];

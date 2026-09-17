@@ -17,7 +17,10 @@ export function addCadence(fromIso: string, cadence: string): string | null {
   if (Number.isNaN(start.getTime())) return null;
   if (cadence === "once" || cadence === "keep_current") return null;
   const next = new Date(start);
-  if (cadence === "annual") next.setUTCFullYear(next.getUTCFullYear() + 1);
+  if (cadence === "monthly") next.setUTCMonth(next.getUTCMonth() + 1);
+  else if (cadence === "quarterly") next.setUTCMonth(next.getUTCMonth() + 3);
+  else if (cadence === "semi_annual") next.setUTCMonth(next.getUTCMonth() + 6);
+  else if (cadence === "annual") next.setUTCFullYear(next.getUTCFullYear() + 1);
   else if (cadence === "every_2_years") next.setUTCFullYear(next.getUTCFullYear() + 2);
   else return null;
   return next.toISOString().slice(0, 10);

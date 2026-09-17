@@ -1,8 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Link } from "@tanstack/react-router";
-import { FileText, PenLine, Plus, Search, Settings, Upload, X } from "lucide-react";
+import { Check, FileText, PenLine, Plus, Search, Settings, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,14 +23,16 @@ import {
   upsertEvidenceRequirement,
   type EvidenceBoard,
 } from "@/lib/evidence.functions";
-import { EVIDENCE_STEP_LABEL, EVIDENCE_STEPS, type EvidenceStep } from "@/lib/evidence/nav.ts";
+import { type EvidenceStep } from "@/lib/evidence/nav.ts";
 import {
   formatExpiresOn,
   latestFileForItem,
   type EvidenceCellStatus,
 } from "@/lib/evidence/status.ts";
 import {
-  EVIDENCE_DISCLAIMER,
+  EVIDENCE_CADENCE_OPTIONS,
+  type EvidenceCadence,
+  type EvidencePerson,
   type EvidenceSubject,
   type EvidenceType,
 } from "@/lib/evidence/types.ts";
@@ -101,7 +102,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
       title: string;
       evidenceType: EvidenceType;
       attestationText: string | null;
-      cadence: "once" | "annual" | "every_2_years" | "keep_current";
+      cadence: EvidenceCadence;
       sowCite: string | null;
     }) => upsertFn({ data: { organizationId: orgId!, subjectType: tab, ...args } }),
     onSuccess: () => {
@@ -186,42 +187,23 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
 
   const showQuiz = step === "quiz" || wizard;
 
+  const onGrid = !showQuiz && step === "grid";
+
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--hive-text)]">
-            Evidence
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Suggestions only · provider picks packs and adds custom rows.
-          </p>
-        </div>
-        <nav className="flex flex-wrap gap-2" aria-label="Evidence steps">
-          {EVIDENCE_STEPS.map((id, index) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onSearchChange({ tab, step: id, person: personId, item: itemId })}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium ring-1 ${
-                (showQuiz ? "quiz" : step) === id
-                  ? "bg-[var(--hive-text)] text-white ring-[var(--hive-text)]"
-                  : "bg-white text-muted-foreground ring-border hover:text-[var(--hive-text)]"
-              }`}
-            >
-              {index + 1} · {EVIDENCE_STEP_LABEL[id]}
-            </button>
-          ))}
-        </nav>
+        <h1 className="text-2xl font-semibold tracking-tight text-[var(--hive-text)]">Evidence</h1>
+        {!onGrid ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onSearchChange({ tab, step: "grid", person: personId, wizard: false })}
+          >
+            Back to Evidence
+          </Button>
+        ) : null}
       </header>
-
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-        {EVIDENCE_DISCLAIMER}{" "}
-        <Link to="/dashboard/compliance" className="underline underline-offset-2">
-          Legacy staff / client / agency files
-        </Link>
-        .
-      </div>
 
       {showQuiz ? (
         <EvidenceQuestionnaire
@@ -265,7 +247,8 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
       ) : step === "newtype" ? (
         <NewRequirementPanel
           tab={tab}
-          people={board?.people ?? []}
+          people={tab === "company" ? [] : (board?.people ?? [])}
+          peopleLoading={boardQ.isLoading}
           defaultSubjectIds={personId ? [personId] : tab === "company" ? [org.organization_id] : []}
           onCancel={() => onSearchChange({ tab, step: "grid", person: personId })}
           onSave={(payload) => upsertM.mutate(payload)}
@@ -398,7 +381,11 @@ function GridPanel({
           <div className="p-8 text-sm text-muted-foreground">Loading Evidence…</div>
         ) : !people.length ? (
           <div className="p-8 text-sm text-muted-foreground">
-            No people on this tab yet. Add staff or clients, then run the hire questionnaire.
+            {tab === "client"
+              ? "No clients yet."
+              : tab === "company"
+                ? "Company file is empty."
+                : "No staff yet."}
           </div>
         ) : (
           <table className="min-w-full text-sm">
@@ -471,12 +458,118 @@ function GridPanel({
         )}
       </div>
       <EvidenceStatusLegend />
-      {board && !board.viaTables ? (
-        <p className="text-xs text-muted-foreground">
-          Persistence is on the org JSON store until Evidence tables are applied from SQL handoff.
-        </p>
-      ) : null}
     </section>
+  );
+}
+
+function SubjectAssignPicker({
+  tab,
+  people,
+  loading,
+  selectedIds,
+  onChange,
+}: {
+  tab: EvidenceSubject;
+  people: EvidencePerson[];
+  loading: boolean;
+  selectedIds: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  const [query, setQuery] = useState("");
+  if (tab === "company") {
+    return (
+      <div className="grid gap-1.5">
+        <Label>Assign to</Label>
+        <p className="rounded-md border border-input bg-muted/40 px-3 py-2 text-sm">Company</p>
+      </div>
+    );
+  }
+
+  const noun = tab === "client" ? "client" : "staff";
+  const needle = query.trim().toLowerCase();
+  const selected = people.filter((p) => selectedIds.includes(p.id));
+  const filtered = people.filter((p) => {
+    if (needle && !p.full_name.toLowerCase().includes(needle)) return false;
+    return true;
+  });
+
+  const toggle = (id: string) => {
+    onChange(
+      selectedIds.includes(id) ? selectedIds.filter((row) => row !== id) : [...selectedIds, id],
+    );
+  };
+
+  return (
+    <div className="grid gap-2">
+      <Label htmlFor="ev-assign-search">
+        {tab === "client" ? "Assign to client" : "Assign to staff"}
+      </Label>
+      {selected.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5">
+          {selected.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => toggle(p.id)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-800"
+            >
+              {p.full_name}
+              <X className="h-3 w-3" />
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          id="ev-assign-search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={tab === "client" ? "Search clients" : "Search staff"}
+          className="h-9 pl-9"
+        />
+      </div>
+      <div className="max-h-48 overflow-y-auto rounded-xl border border-border">
+        {loading ? (
+          <p className="px-3 py-3 text-sm text-muted-foreground">Loading {noun}s…</p>
+        ) : filtered.length === 0 ? (
+          <p className="px-3 py-3 text-sm text-muted-foreground">
+            {people.length === 0 ? `No ${noun}s in this organization.` : `No matching ${noun}s.`}
+          </p>
+        ) : (
+          <ul>
+            {filtered.map((p) => {
+              const on = selectedIds.includes(p.id);
+              return (
+                <li key={p.id}>
+                  <button
+                    type="button"
+                    onClick={() => toggle(p.id)}
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm hover:bg-muted/60"
+                  >
+                    <span
+                      className={`inline-flex h-5 w-5 items-center justify-center rounded border ${
+                        on
+                          ? "border-[var(--hive-text)] bg-[var(--hive-text)] text-white"
+                          : "border-input bg-background"
+                      }`}
+                    >
+                      {on ? <Check className="h-3 w-3" /> : null}
+                    </span>
+                    <span>
+                      <span className="block font-medium">{p.full_name}</span>
+                      {p.subtitle ? (
+                        <span className="block text-xs text-muted-foreground">{p.subtitle}</span>
+                      ) : null}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -515,11 +608,10 @@ function PackSettingsPanel({
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">
-            Pack · {tab === "staff" ? "All-staff starter" : tab}
+            {tab === "staff" ? "Staff pack" : tab === "client" ? "Client pack" : "Company pack"}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Suggested from SOW citations. Provider can remove any row or add custom. Not a legal
-            checklist.
+            Requirements on this tab. Remove a row or add a custom one.
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={onClose}>
@@ -558,7 +650,7 @@ function PackSettingsPanel({
           Add requirement
         </Button>
         <p className="self-center text-xs text-muted-foreground">
-          Catalog packs: {packs.map((p) => p.title).join(", ")}.
+          {packs.map((p) => p.title).join(" · ")}
         </p>
       </div>
     </section>
@@ -568,6 +660,7 @@ function PackSettingsPanel({
 function NewRequirementPanel({
   tab,
   people,
+  peopleLoading,
   defaultSubjectIds,
   onCancel,
   onSave,
@@ -575,6 +668,7 @@ function NewRequirementPanel({
 }: {
   tab: EvidenceSubject;
   people: EvidenceBoard["people"];
+  peopleLoading: boolean;
   defaultSubjectIds: string[];
   onCancel: () => void;
   onSave: (payload: {
@@ -582,7 +676,7 @@ function NewRequirementPanel({
     title: string;
     evidenceType: EvidenceType;
     attestationText: string | null;
-    cadence: "once" | "annual" | "every_2_years" | "keep_current";
+    cadence: EvidenceCadence;
     sowCite: string | null;
   }) => void;
   pending: boolean;
@@ -590,11 +684,14 @@ function NewRequirementPanel({
   const [kind, setKind] = useState<EvidenceType | null>(null);
   const [title, setTitle] = useState("");
   const [attest, setAttest] = useState("");
-  const [cadence, setCadence] = useState<"once" | "annual" | "every_2_years" | "keep_current">(
-    "annual",
-  );
+  const [cadence, setCadence] = useState<EvidenceCadence>("annual");
   const [sowCite, setSowCite] = useState("");
   const [ids, setIds] = useState<string[]>(defaultSubjectIds);
+  const defaultKey = defaultSubjectIds.join(",");
+
+  useEffect(() => {
+    setIds(defaultKey ? defaultKey.split(",") : []);
+  }, [defaultKey]);
 
   if (!kind) {
     return (
@@ -629,10 +726,6 @@ function NewRequirementPanel({
             </p>
           </button>
         </div>
-        <p className="mt-4 text-xs text-muted-foreground">
-          Every custom row asks: title, evidence type, renew every, optional SOW cite. W-9 / I-9 are
-          custom-only — not built-ins. No DocuSign in this version.
-        </p>
       </section>
     );
   }
@@ -668,39 +761,27 @@ function NewRequirementPanel({
           <select
             id="ev-cadence"
             value={cadence}
-            onChange={(e) => setCadence(e.target.value as typeof cadence)}
+            onChange={(e) => setCadence(e.target.value as EvidenceCadence)}
             className="h-9 rounded-md border border-input bg-background px-2 text-sm"
           >
-            <option value="once">Once</option>
-            <option value="annual">Annual</option>
-            <option value="every_2_years">Every 2 years</option>
-            <option value="keep_current">Keep current</option>
+            {EVIDENCE_CADENCE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
           </select>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="ev-sow">SOW cite (optional)</Label>
           <Input id="ev-sow" value={sowCite} onChange={(e) => setSowCite(e.target.value)} />
         </div>
-        {tab !== "company" ? (
-          <div className="grid gap-2">
-            <Label>Assign to</Label>
-            <div className="max-h-40 space-y-1 overflow-y-auto rounded-xl border border-border p-2">
-              {people.map((p) => (
-                <label key={p.id} className="flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={ids.includes(p.id)}
-                    onCheckedChange={(v) =>
-                      setIds((prev) =>
-                        v === true ? [...prev, p.id] : prev.filter((id) => id !== p.id),
-                      )
-                    }
-                  />
-                  {p.full_name}
-                </label>
-              ))}
-            </div>
-          </div>
-        ) : null}
+        <SubjectAssignPicker
+          tab={tab}
+          people={people}
+          loading={peopleLoading}
+          selectedIds={ids}
+          onChange={setIds}
+        />
       </div>
       <div className="mt-4 flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={() => setKind(null)}>
@@ -854,10 +935,7 @@ function ReviewPanel({
           <div>
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Preview</p>
             <h2 className="text-lg font-semibold">{item.title}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {file?.filename ??
-                "No file yet. Platform stores the file + expiration date. No automated you are compliant with SOW judgment."}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{file?.filename ?? "No file yet."}</p>
           </div>
           <Button type="button" variant="outline" size="sm" onClick={onClose}>
             Close
@@ -918,9 +996,7 @@ function PersonPackEditor({
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">{person.full_name}</h2>
-          <p className="text-sm text-muted-foreground">
-            Edit this person&apos;s pack. Click a row to review the file.
-          </p>
+          <p className="text-sm text-muted-foreground">{person.subtitle ?? "Pack"}</p>
         </div>
         <Button
           type="button"

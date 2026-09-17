@@ -20,6 +20,7 @@ import {
 } from "./evidence/nav.ts";
 import { addCadence, cellStatus, staffInitials } from "./evidence/status.ts";
 import {
+  EVIDENCE_CADENCE_OPTIONS,
   EVIDENCE_DISCLAIMER,
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_PUSH_BODY,
@@ -209,6 +210,10 @@ describe("Evidence cell status", () => {
       "missing",
     );
     assert.equal(addCadence("2026-03-12", "every_2_years"), "2028-03-12");
+    assert.equal(addCadence("2026-03-12", "monthly"), "2026-04-12");
+    assert.equal(addCadence("2026-03-12", "quarterly"), "2026-06-12");
+    assert.equal(addCadence("2026-03-12", "semi_annual"), "2026-09-12");
+    assert.equal(addCadence("2026-03-12", "keep_current"), null);
     assert.equal(staffInitials("Dane Warnick"), "DW");
   });
 
@@ -287,6 +292,18 @@ describe("Evidence nav + product lock", () => {
       "utf8",
     );
     assert.match(staffPhone, /createFileRoute\("\/dashboard\/my-evidence"\)/);
+
+    const workspace = readFileSync(
+      new URL("./../components/evidence/evidence-workspace.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.doesNotMatch(workspace, /1 · Grid|EVIDENCE_DISCLAIMER|amber-50/);
+    assert.match(workspace, /SubjectAssignPicker/);
+    assert.equal(EVIDENCE_CADENCE_OPTIONS.length, 7);
+    assert.deepEqual(
+      EVIDENCE_CADENCE_OPTIONS.map((o) => o.value),
+      ["once", "monthly", "quarterly", "semi_annual", "annual", "every_2_years", "keep_current"],
+    );
   });
 
   it("does not revive requirement_defs dual-write or encoded applicability", () => {
