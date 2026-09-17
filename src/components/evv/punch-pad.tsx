@@ -7,10 +7,18 @@ import { useHasPassedLaunchpad } from "@/hooks/use-launchpad-pass";
 import { LAUNCHPAD_CLOCK_IN_BLOCKED_MESSAGE } from "@/lib/launchpad-gate";
 import { Button } from "@/components/ui/button";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,25 +33,24 @@ import {
   CheckCircle2,
   Clock,
   Wifi,
-  Mic,
-  MicOff,
-  Sparkles,
   Pencil,
-  ShieldCheck,
-  ExternalLink,
 } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { PiMark } from "@/components/pi-landing/pi-mark";
 import { toast } from "sonner";
-import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode, maskMemberId, padMemberId } from "@/lib/evv-codes";
+import {
+  EVV_SERVICE_CODES,
+  evvServiceLabel,
+  isEvvLockedCode,
+  maskMemberId,
+  padMemberId,
+} from "@/lib/evv-codes";
 import { clientAuthorizedCodes } from "@/lib/assignment-codes";
 import { roundToQuarterHourISO } from "@/lib/time-rounding";
 import { computeEntryUnits } from "@/lib/billing-units";
 import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
 import { EvvConsentGate } from "@/components/evv/consent-gate";
 import { evaluateShiftNote } from "@/lib/ai-coach.functions";
-import { NectarShiftNoteDraft } from "@/components/nectar/nectar-shift-note-draft";
-import { NectarCompletenessErrors } from "@/components/nectar/nectar-completeness-errors";
 import { NECTAR_DRAFT_MIN_WORDS, countNoteWords } from "@/lib/nectar-note-gate";
 import {
   type CompletenessItem,
@@ -51,39 +58,45 @@ import {
   localWordCountCheck,
 } from "@/lib/nectar-completeness";
 import { freezeOriginalTranscript } from "@/lib/original-transcript";
-import {
-  accumulateSpeechResults,
-  beginContinuousRecognition,
-  type ContinuousSpeechSession,
-} from "@/lib/continuous-speech";
-import { OriginalSpeechAudit } from "@/components/staff-mobile/original-speech-audit";
-import { answerProceduralQuestion, type ProceduralResult } from "@/lib/ai-coach.functions";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";
 import { useNectarInfusion } from "@/hooks/use-nectar-infusion";
 import {
-  BehaviorObservationsBlock,
   emptyBehaviorAnswers,
   validateBehaviorAnswers,
   type BehaviorAnswers,
 } from "@/components/evv/behavior-observations-block";
-import { BehaviorObservationsBoundary } from "@/components/evv/behavior-observations-boundary";
 import { useShiftBehaviorSetting } from "@/hooks/use-shift-behavior-setting";
 import { listClientTargetBehaviors } from "@/lib/client-target-behaviors.functions";
 import { getPendingTrackingForms } from "@/lib/forms.functions";
-import { PendingTrackingFormsDialog, type PendingForm } from "@/components/evv/pending-tracking-forms-dialog";
-import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";
-import { IncidentReportDialog } from "@/components/incidents/incident-report-dialog";
-import { AlertTriangle as AlertTriangleIcon } from "lucide-react";
+import {
+  PendingTrackingFormsDialog,
+  type PendingForm,
+} from "@/components/evv/pending-tracking-forms-dialog";
 import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
 import { useClientCareData } from "@/hooks/use-client-care-data";
-import { ShiftMedDueCheck, type PendingMedDose } from "@/components/medications/shift-med-due-check";
+import type { PendingMedDose } from "@/components/medications/shift-med-due-check";
 import { useComplianceGate } from "@/hooks/use-compliance-gate";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useServerFn } from "@tanstack/react-start";
-import { checkBillingEntry, checkStaffPrerequisite, raiseComplianceFlag } from "@/lib/nectar-compliance.functions";
-
-
-
+import {
+  checkBillingEntry,
+  checkStaffPrerequisite,
+  raiseComplianceFlag,
+} from "@/lib/nectar-compliance.functions";
+import { usePunchGps } from "@/components/evv/use-punch-gps";
+import {
+  GeofenceVarianceDialog,
+  type GeofenceVariance,
+} from "@/components/evv/geofence-variance-dialog";
+import { PunchPadProceduralAsk } from "@/components/evv/punch-pad-procedural-ask";
+import { PunchPadGoalsSection } from "@/components/evv/punch-pad-goals-section";
+import { PunchPadNoteSection } from "@/components/evv/punch-pad-note-section";
+import { PunchPadShiftSignals } from "@/components/evv/punch-pad-shift-signals";
+import {
+  PunchPadCompletenessPanel,
+  type PunchPadCompletenessFlag,
+} from "@/components/evv/punch-pad-completeness-panel";
+import { PunchPadSubmitFooter } from "@/components/evv/punch-pad-submit-footer";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -113,24 +126,13 @@ type ActiveShift = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TIMEZONES = [
-  { v: "America/Denver",      l: "Mountain (MST/MDT)" },
-  { v: "America/Los_Angeles", l: "Pacific" },
-  { v: "America/Phoenix",     l: "Arizona (no DST)" },
-  { v: "America/Chicago",     l: "Central" },
-  { v: "America/New_York",    l: "Eastern" },
-];
-
 import {
   evaluateGeofence,
   haversineFeet,
   isGpsFixConfident,
-  pickBetterGpsFix,
   resolveGeofenceRadiusFeet,
   MAX_GPS_ACCURACY_METERS,
-  type GpsFix,
 } from "@/lib/geo";
-import { gpsFixFromPosition, HIGH_ACCURACY_GPS_OPTIONS } from "@/lib/gps";
 import { selectedPill, unselectedPill } from "@/components/evv/toggle-styles";
 
 function fmtElapsed(ms: number): string {
@@ -176,7 +178,6 @@ export interface PunchPadProps {
   autoOpenCompliance?: boolean;
 }
 
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function PunchPad({
@@ -187,57 +188,16 @@ export function PunchPad({
   lockServiceCode = false,
   autoOpenCompliance = false,
 }: PunchPadProps) {
-
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();
   const { passed: hasPassedLaunchpad, blocked: launchpadBlocked } = useHasPassedLaunchpad();
 
-  // ── GPS state ───────────────────────────────────────────────────────────────
-  // High-accuracy watch only. A 4s low-accuracy fallback was accepting iPhone
-  // Safari coarse/Wi-Fi locations (~0.9 mi off) as a geofence decision.
-  const [livePos, setLivePos] = useState<GpsFix | null>(null);
-  const livePosRef = useRef<GpsFix | null>(null);
-  const [hardwareDenied, setHardwareDenied] = useState(false);
-  const [gpsAcquiring, setGpsAcquiring] = useState(true);
-  const [awaitingGps, setAwaitingGps] = useState(false);
-
-  const gpsConfident = isGpsFixConfident(livePos);
-
-  useEffect(() => {
-    if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
-      setHardwareDenied(true);
-      setGpsAcquiring(false);
-      return;
-    }
-    let cancelled = false;
-
-    const onPos = (p: GeolocationPosition) => {
-      if (cancelled) return;
-      setHardwareDenied(false);
-      const next = pickBetterGpsFix(livePosRef.current, gpsFixFromPosition(p));
-      livePosRef.current = next;
-      setLivePos(next);
-      setGpsAcquiring(false);
-    };
-    const onErr = (err: GeolocationPositionError) => {
-      if (cancelled) return;
-      if (err.code === err.PERMISSION_DENIED) {
-        setHardwareDenied(true);
-        setGpsAcquiring(false);
-      }
-    };
-
-    const watchId = navigator.geolocation.watchPosition(onPos, onErr, HIGH_ACCURACY_GPS_OPTIONS);
-
-    return () => {
-      cancelled = true;
-      navigator.geolocation.clearWatch(watchId);
-    };
-  }, []);
+  const { livePos, hardwareDenied, gpsAcquiring, awaitingGps, gpsConfident, waitForConfidentFix } =
+    usePunchGps();
 
   // ── Form state ──────────────────────────────────────────────────────────────
-  const [serviceCode, setServiceCode]           = useState(presetServiceCode ?? "");
+  const [serviceCode, setServiceCode] = useState(presetServiceCode ?? "");
 
   // Keep preset code in sync if the parent (route search) changes it.
   useEffect(() => {
@@ -245,26 +205,16 @@ export function PunchPad({
   }, [presetServiceCode]);
   const [selectedClientId, setSelectedClientId] = useState(lockedClient?.id ?? "");
   const [selectedFacility, setSelectedFacility] = useState(lockedClient?.facility ?? "");
-  const [timezone, setTimezone]                 = useState("America/Denver");
-  const [busy, setBusy]                         = useState(false);
-  const [now, setNow]                           = useState(0);
+  const [timezone] = useState("America/Denver");
+  const [busy, setBusy] = useState(false);
+  const [now, setNow] = useState(0);
 
   // ── Clock-in variance state ─────────────────────────────────────────────────
-  const [variance, setVariance] = useState<null | {
-    distanceFeet?: number;
-    limitFeet?: number;
-    pos: { lat: number; lng: number; acc: number } | null;
-    frameBlocked?: boolean;
-  }>(null);
+  const [variance, setVariance] = useState<GeofenceVariance | null>(null);
   const [varianceReason, setVarianceReason] = useState("");
 
   // ── Clock-out variance state ────────────────────────────────────────────────
-  const [outVariance, setOutVariance] = useState<null | {
-    distanceFeet?: number;
-    limitFeet?: number;
-    pos: { lat: number; lng: number; acc: number } | null;
-    frameBlocked?: boolean;
-  }>(null);
+  const [outVariance, setOutVariance] = useState<GeofenceVariance | null>(null);
   const [outVarianceReason, setOutVarianceReason] = useState("");
 
   // ── Stage 5: per-shift tracking-form front-guard state ──────────────────────
@@ -279,7 +229,6 @@ export function PunchPad({
     // Re-runs the check; if cleared, proceed automatically.
     recheck: () => Promise<void>;
   }>(null);
-
 
   // ── Clock-in success state ──────────────────────────────────────────────────
   const [clockInSuccess, setClockInSuccess] = useState<null | {
@@ -296,12 +245,12 @@ export function PunchPad({
   }>(null);
 
   // ── Clock-out compliance modal state ────────────────────────────────────────
-  const [showCompliance, setShowCompliance]     = useState(false);
-  const [checkedGoals, setCheckedGoals]         = useState<Record<string, boolean>>({});
-  const [baselineChecked, setBaselineChecked]   = useState(false);
-  const [narrative, setNarrative]               = useState("");
+  const [showCompliance, setShowCompliance] = useState(false);
+  const [checkedGoals, setCheckedGoals] = useState<Record<string, boolean>>({});
+  const [baselineChecked, setBaselineChecked] = useState(false);
+  const [narrative, setNarrative] = useState("");
   const [showNarrativeError, setShowNarrativeError] = useState(false);
-  const [longShiftAck, setLongShiftAck]         = useState(false);
+  const [longShiftAck, setLongShiftAck] = useState(false);
   const [triggersResolved, setTriggersResolved] = useState(true);
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
   const [incidentTriggerOpen, setIncidentTriggerOpen] = useState(false);
@@ -317,9 +266,8 @@ export function PunchPad({
   // approval, billing-units.ts reads corrected_clock_in/out instead of the
   // raw punches. Staff can see status on /dashboard/my-time-corrections.
   const [incidentFlag, setIncidentFlag] = useState(false);
-  const [scheduledMinutes, setScheduledMinutes] = useState<number | null>(null);
   const [correctionOpen, setCorrectionOpen] = useState(false);
-  const [correctionIn, setCorrectionIn] = useState<string>("");   // datetime-local
+  const [correctionIn, setCorrectionIn] = useState<string>(""); // datetime-local
   const [correctionOut, setCorrectionOut] = useState<string>(""); // datetime-local
   const [correctionReason, setCorrectionReason] = useState("");
 
@@ -327,15 +275,7 @@ export function PunchPad({
   const [aiBusy, setAiBusy] = useState(false);
   const [completenessErrors, setCompletenessErrors] = useState<CompletenessItem[]>([]);
 
-  // ── Voice dictation for the narrative textarea ──────────────────────────────
   const { enabled: nectarInfusionEnabled } = useNectarInfusion();
-  const [isRecording, setIsRecording]         = useState(false);
-  const [speechSupported, setSpeechSupported] = useState(false);
-  const recognitionSessionRef = useRef<ContinuousSpeechSession | null>(null);
-  const recordingWantedRef = useRef(false);
-  const dictationBaseRef = useRef("");
-  const dictationPriorFinalsRef = useRef("");
-  const dictationLiveFinalsRef = useRef("");
   const [originalTranscript, setOriginalTranscript] = useState("");
 
   // ── Staff attestation (Medicaid fraud statement) ────────────────────────────
@@ -346,16 +286,9 @@ export function PunchPad({
   const [nectarDraftApplied, setNectarDraftApplied] = useState<string | null>(null);
 
   // ── NECTAR Completeness Check (Infusion add-on) ────────────────────────────
-  type CFlag = {
-    key: string;
-    type: string;
-    severity: "soft" | "hard";
-    message: string;
-    fix?: { label: string; route?: string };
-  };
-  const [completenessRan, setCompletenessRan]   = useState(false);
+  const [completenessRan, setCompletenessRan] = useState(false);
   const [completenessBusy, setCompletenessBusy] = useState(false);
-  const [completenessFlags, setCompletenessFlags] = useState<CFlag[]>([]);
+  const [completenessFlags, setCompletenessFlags] = useState<PunchPadCompletenessFlag[]>([]);
   const [dismissals, setDismissals] = useState<Record<string, string>>({});
   const [dismissingKey, setDismissingKey] = useState<string | null>(null);
   const [dismissReasonDraft, setDismissReasonDraft] = useState("");
@@ -370,24 +303,6 @@ export function PunchPad({
   // ── Pre-submit medication check (reads real emar_logs, no shadow store) ───
   const [medDosesResolved, setMedDosesResolved] = useState(true);
   const [pendingMedDoses, setPendingMedDoses] = useState<PendingMedDose[]>([]);
-
-
-
-  // ── NECTAR Procedural Q&A (Infusion add-on) ────────────────────────────────
-  const [askOpen, setAskOpen]         = useState(false);
-  const [askQuestion, setAskQuestion] = useState("");
-  const [askBusy, setAskBusy]         = useState(false);
-  const [askResult, setAskResult]     = useState<ProceduralResult | null>(null);
-
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w = window as any;
-    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
-    setSpeechSupported(!!SR);
-  }, []);
-
 
   // ── Facilities list ─────────────────────────────────────────────────────────
   const facilities = useMemo(() => {
@@ -408,7 +323,7 @@ export function PunchPad({
         .from("evv_timesheets")
         .select(
           "id, client_id, clock_in_timestamp, service_type_code, " +
-          "utah_medicaid_member_id, shift_entry_type, clients(first_name,last_name)",
+            "utah_medicaid_member_id, shift_entry_type, clients(first_name,last_name)",
         )
         .eq("staff_id", user!.id)
         .is("clock_out_timestamp", null)
@@ -527,8 +442,9 @@ export function PunchPad({
           facility: c.physical_address,
           // Prefer client_billing_codes. Empty/missing 1056 rows fall back to
           // authorized_dspd_codes (then job_code) so SLH still appears.
-          authorizedCodes: billingAuthorizedCodes
-            ?? (clientAuthorizedCodes(c).length ? clientAuthorizedCodes(c) : undefined),
+          authorizedCodes:
+            billingAuthorizedCodes ??
+            (clientAuthorizedCodes(c).length ? clientAuthorizedCodes(c) : undefined),
           homeLat: c.home_latitude ?? null,
           homeLng: c.home_longitude ?? null,
           geofenceRadiusFeet: c.geofence_radius_feet ?? null,
@@ -585,30 +501,57 @@ export function PunchPad({
   // ── GPS status label ────────────────────────────────────────────────────────
   const gpsStatusLabel = (() => {
     if (hardwareDenied)
-      return { text: "⚠️ Location blocked — open device Settings and enable location for this site. Clock-in is held until GPS is available.", color: "amber" as const };
+      return {
+        text: "⚠️ Location blocked — open device Settings and enable location for this site. Clock-in is held until GPS is available.",
+        color: "amber" as const,
+      };
     if (gpsAcquiring || !livePos)
-      return { text: "📡 Acquiring high-accuracy GPS — wait for a live fix before clocking in.", color: "neutral" as const };
+      return {
+        text: "📡 Acquiring high-accuracy GPS — wait for a live fix before clocking in.",
+        color: "neutral" as const,
+      };
     if (!serviceCode)
       return { text: "📍 GPS confirmed. Select a service code above.", color: "neutral" as const };
     if (!isEvvLockedCode(serviceCode))
-      return { text: `🛈 ${serviceCode} — GPS logged passively, geofence not enforced for this code.`, color: "neutral" as const };
+      return {
+        text: `🛈 ${serviceCode} — GPS logged passively, geofence not enforced for this code.`,
+        color: "neutral" as const,
+      };
     if (livePos && !gpsConfident)
-      return { text: `📡 GPS is too coarse to confirm you are at the saved home pin (±${Math.round(livePos.acc)} m). Wait for a better fix — this is not an out-of-zone reading.`, color: "amber" as const };
+      return {
+        text: `📡 GPS is too coarse to confirm you are at the saved home pin (±${Math.round(livePos.acc)} m). Wait for a better fix — this is not an out-of-zone reading.`,
+        color: "amber" as const,
+      };
     if (geofenceDecision.kind === "no_home_pin")
-      return { text: "📍 GPS live. No home pin is saved on this client — an administrator should set it. Geofence is not enforced until a pin exists.", color: "amber" as const };
-    const matchedHere = livePos && gpsConfident ? matchApprovedLocation({ lat: livePos.lat, lng: livePos.lng }) : null;
+      return {
+        text: "📍 GPS live. No home pin is saved on this client — an administrator should set it. Geofence is not enforced until a pin exists.",
+        color: "amber" as const,
+      };
+    const matchedHere =
+      livePos && gpsConfident
+        ? matchApprovedLocation({ lat: livePos.lat, lng: livePos.lng })
+        : null;
     if (matchedHere)
-      return { text: `🟢 GPS confirmed — inside approved location "${matchedHere.label}". No variance required.`, color: "green" as const };
+      return {
+        text: `🟢 GPS confirmed — inside approved location "${matchedHere.label}". No variance required.`,
+        color: "green" as const,
+      };
     if (insideZone)
-      return { text: `🟢 GPS confirmed — you are within ${mapRadiusFeet} ft of the saved home pin.`, color: "green" as const };
-    return { text: `🔴 Outside the ${mapRadiusFeet} ft zone around the saved home pin — a written variance is required. This is not “GPS is off.”`, color: "red" as const };
+      return {
+        text: `🟢 GPS confirmed — you are within ${mapRadiusFeet} ft of the saved home pin.`,
+        color: "green" as const,
+      };
+    return {
+      text: `🔴 Outside the ${mapRadiusFeet} ft zone around the saved home pin — a written variance is required. This is not “GPS is off.”`,
+      color: "red" as const,
+    };
   })();
 
   const gpsStripClass = {
-    amber:   "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200",
+    amber: "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200",
     neutral: "border-border bg-muted/40 text-muted-foreground",
-    green:   "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200",
-    red:     "border-rose-500/40 bg-rose-500/10 text-rose-800 dark:text-rose-200",
+    green: "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200",
+    red: "border-rose-500/40 bg-rose-500/10 text-rose-800 dark:text-rose-200",
   }[gpsStatusLabel.color];
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -641,8 +584,6 @@ export function PunchPad({
   // WRITE SHIFT (clock-in DB write)
   // ────────────────────────────────────────────────────────────────────────────
 
-
-
   async function writeShift(args: {
     pos: { lat: number; lng: number; acc: number } | null;
     outsideReason?: string;
@@ -662,35 +603,35 @@ export function PunchPad({
         : null;
 
     const payload = {
-      organization_id:             org.organization_id,
-      staff_id:                    user.id,
-      client_id:                   clientForPunch.id,
-      utah_medicaid_provider_id:   providerIdFromOrg(org.organization_id),
-      utah_medicaid_member_id:     clientForPunch.memberId,
-      service_type_code:           serviceCode,
+      organization_id: org.organization_id,
+      staff_id: user.id,
+      client_id: clientForPunch.id,
+      utah_medicaid_provider_id: providerIdFromOrg(org.organization_id),
+      utah_medicaid_member_id: clientForPunch.memberId,
+      service_type_code: serviceCode,
       gps_in_coordinates: args.pos
         ? { latitude: args.pos.lat, longitude: args.pos.lng, accuracy_meters: args.pos.acc }
         : { latitude: null, longitude: null, accuracy_meters: null },
-      shift_entry_type:                 entryType,
-      status:                          "Active",
-      timezone_setting:                timezone,
-      outside_geofence_reason:         args.outsideReason ?? null,
-      gps_validated:                   !isOutOfBounds && !isGpsBypass,
-      is_out_of_bounds:                isOutOfBounds,
+      shift_entry_type: entryType,
+      status: "Active",
+      timezone_setting: timezone,
+      outside_geofence_reason: args.outsideReason ?? null,
+      gps_validated: !isOutOfBounds && !isGpsBypass,
+      is_out_of_bounds: isOutOfBounds,
       geofence_variance_justification: args.outsideReason ?? null,
       // Enroll out-of-bounds punches into the EVV Reconciliation queue so an
       // admin/manager can document a review decision (accept/correct/flag).
-      reconciliation_status:           isOutOfBounds ? "pending" : null,
-      raw_clock_in:                    nowIso,
-      rounded_clock_in:                roundToQuarterHourISO(nowIso),
-      matched_approved_location_id:    matched?.id ?? null,
+      reconciliation_status: isOutOfBounds ? "pending" : null,
+      raw_clock_in: nowIso,
+      rounded_clock_in: roundToQuarterHourISO(nowIso),
+      matched_approved_location_id: matched?.id ?? null,
       matched_approved_location_label: matched?.label ?? null,
       // GPS entirely unavailable at clock-in (denied/no fix), distinct from an
       // out-of-bounds geofence variance: staff proceeds with a reason and the
       // EVV record falls back to the client's on-file address for location
       // evidence (Utah UEVV accepts address OR GPS at begin/end of visit).
-      gps_in_bypassed:                 isGpsBypass,
-      gps_in_bypass_reason:            args.gpsBypassReason ?? null,
+      gps_in_bypassed: isGpsBypass,
+      gps_in_bypass_reason: args.gpsBypassReason ?? null,
     };
 
     // ── Staff-prerequisite gate: block clock-in if the staff lacks a required
@@ -726,14 +667,11 @@ export function PunchPad({
         );
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (gateResult && (gateResult as any).stopped) {
-          toast.message(
-            "Clock-in halted per your compliance decision. Flag logged for audit.",
-          );
+          toast.message("Clock-in halted per your compliance decision. Flag logged for audit.");
           return;
         }
         return;
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const detected = (await detectStaffPrereq({
           data: {
             organizationId: orgId,
@@ -785,7 +723,6 @@ export function PunchPad({
     }
 
     await runInsert();
-
   }
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -805,27 +742,18 @@ export function PunchPad({
     setBusy(true);
     try {
       if (hardwareDenied) {
-        toast.error("Location is blocked. Enable location for this site in device Settings, then retry. Clock-in is held until GPS is captured.");
+        toast.error(
+          "Location is blocked. Enable location for this site in device Settings, then retry. Clock-in is held until GPS is captured.",
+        );
         return;
       }
 
-      let pos = livePosRef.current;
-      if (!isGpsFixConfident(pos)) {
-        setAwaitingGps(true);
-        try {
-          const deadline = Date.now() + 15_000;
-          while (Date.now() < deadline) {
-            await new Promise((r) => setTimeout(r, 250));
-            if (isGpsFixConfident(livePosRef.current)) break;
-          }
-        } finally {
-          setAwaitingGps(false);
-        }
-        pos = livePosRef.current;
-      }
+      const pos = await waitForConfidentFix();
 
       if (!pos) {
-        toast.error("No GPS fix yet. Wait for high-accuracy GPS and retry — clock-in is held until a live location is captured.");
+        toast.error(
+          "No GPS fix yet. Wait for high-accuracy GPS and retry — clock-in is held until a live location is captured.",
+        );
         return;
       }
       if (!isGpsFixConfident(pos)) {
@@ -868,16 +796,24 @@ export function PunchPad({
           proceed: async () => {
             setPendingFormsDialog(null);
             setBusy(true);
-            try { await writeShift({ pos }); } finally { setBusy(false); }
+            try {
+              await writeShift({ pos });
+            } finally {
+              setBusy(false);
+            }
           },
           recheck: async () => {
             const again = await fetchPendingTrackingForms({ tier: "clockin" });
             if (!again.length) {
               setPendingFormsDialog(null);
               setBusy(true);
-              try { await writeShift({ pos }); } finally { setBusy(false); }
+              try {
+                await writeShift({ pos });
+              } finally {
+                setBusy(false);
+              }
             } else {
-              setPendingFormsDialog((p) => p ? { ...p, pending: again } : p);
+              setPendingFormsDialog((p) => (p ? { ...p, pending: again } : p));
             }
           },
         });
@@ -916,10 +852,14 @@ export function PunchPad({
             setPendingFormsDialog(null);
             setBusy(true);
             try {
-              await writeShift(isBypass ? { pos, gpsBypassReason: outside } : { pos, outsideReason: outside });
+              await writeShift(
+                isBypass ? { pos, gpsBypassReason: outside } : { pos, outsideReason: outside },
+              );
               setVariance(null);
               setVarianceReason("");
-            } finally { setBusy(false); }
+            } finally {
+              setBusy(false);
+            }
           },
           recheck: async () => {
             const again = await fetchPendingTrackingForms({ tier: "clockin" });
@@ -927,19 +867,27 @@ export function PunchPad({
               setPendingFormsDialog(null);
               setBusy(true);
               try {
-                await writeShift(isBypass ? { pos, gpsBypassReason: outside } : { pos, outsideReason: outside });
+                await writeShift(
+                  isBypass ? { pos, gpsBypassReason: outside } : { pos, outsideReason: outside },
+                );
                 setVariance(null);
                 setVarianceReason("");
-              } finally { setBusy(false); }
+              } finally {
+                setBusy(false);
+              }
             } else {
-              setPendingFormsDialog((p) => p ? { ...p, pending: again } : p);
+              setPendingFormsDialog((p) => (p ? { ...p, pending: again } : p));
             }
           },
         });
         return;
       }
 
-      await writeShift(isBypass ? { pos: variance.pos, gpsBypassReason: reason } : { pos: variance.pos, outsideReason: reason });
+      await writeShift(
+        isBypass
+          ? { pos: variance.pos, gpsBypassReason: reason }
+          : { pos: variance.pos, outsideReason: reason },
+      );
       setVariance(null);
       setVarianceReason("");
     } catch (e) {
@@ -957,29 +905,21 @@ export function PunchPad({
   // canonical shared reader (`useClientCareData`). Clock-out shows every
   // visible on-file goal (untagged included). No screen re-filters.
   const activeClientIdForGoals = active?.client_id ?? null;
-  const careData = useClientCareData(
-    activeClientIdForGoals,
-    active?.service_type_code ?? null,
-  );
+  const careData = useClientCareData(activeClientIdForGoals, active?.service_type_code ?? null);
 
   const activeClientGoals = useMemo<string[]>(() => {
     const rows = careData.data?.visibility.goalsForStaff ?? [];
     const fromCare = rows.map((g) => g.goal.trim()).filter((s) => s.length > 0);
     if (fromCare.length > 0) return fromCare;
-    return (lockedClient?.pcspGoals ?? [])
-      .map((g) => String(g).trim())
-      .filter((s) => s.length > 0);
+    return (lockedClient?.pcspGoals ?? []).map((g) => String(g).trim()).filter((s) => s.length > 0);
   }, [careData.data, lockedClient?.pcspGoals]);
-
-
-
 
   const wordCount = useMemo(() => countNoteWords(narrative), [narrative]);
 
-  const hasGoalSelected    = baselineChecked || Object.values(checkedGoals).some(Boolean);
-  const narrativeOk        = wordCount >= NECTAR_DRAFT_MIN_WORDS;
-  const behaviorError      = behaviorEnabled ? validateBehaviorAnswers(behaviorAnswers) : null;
-  const behaviorOk         = behaviorError === null;
+  const hasGoalSelected = baselineChecked || Object.values(checkedGoals).some(Boolean);
+  const narrativeOk = wordCount >= NECTAR_DRAFT_MIN_WORDS;
+  const behaviorError = behaviorEnabled ? validateBehaviorAnswers(behaviorAnswers) : null;
+  const behaviorOk = behaviorError === null;
   const liveDurationMs = active
     ? Math.max(0, now - new Date(active.clock_in_timestamp).getTime())
     : 0;
@@ -992,29 +932,36 @@ export function PunchPad({
   const effectiveInIso = correctionInIso ?? active?.clock_in_timestamp ?? null;
   const effectiveOutMs = correctionOutIso ? new Date(correctionOutIso).getTime() : now;
   const effectiveInMs = effectiveInIso ? new Date(effectiveInIso).getTime() : NaN;
-  const correctionOrderOk =
-    Number.isFinite(effectiveInMs) && effectiveOutMs > effectiveInMs;
+  const correctionOrderOk = Number.isFinite(effectiveInMs) && effectiveOutMs > effectiveInMs;
   const correctionWithinWindow =
     !!active &&
     Number.isFinite(effectiveInMs) &&
     effectiveOutMs - new Date(active.clock_in_timestamp).getTime() <= 36 * 60 * 60 * 1000 &&
     effectiveInMs >= new Date(active.clock_in_timestamp).getTime() - 24 * 60 * 60 * 1000;
   const correctionHasChange =
-    (!!correctionInIso && correctionInIso !== active?.clock_in_timestamp) ||
-    !!correctionOutIso;
+    (!!correctionInIso && correctionInIso !== active?.clock_in_timestamp) || !!correctionOutIso;
   const correctionReasonOk = correctionReason.trim().length >= 10;
   const correctionValid =
-    correctionOpen && correctionHasChange && correctionReasonOk && correctionOrderOk && correctionWithinWindow;
+    correctionOpen &&
+    correctionHasChange &&
+    correctionReasonOk &&
+    correctionOrderOk &&
+    correctionWithinWindow;
   // When staff opens a correction, the "these times are accurate" ack is
   // moot — the whole point is that they aren't.
   const longShiftOk = !isLongShift || longShiftAck || correctionOpen;
   const canSubmitCompliance =
-    hasGoalSelected && narrativeOk && behaviorOk &&
-    longShiftOk && triggersResolved && medDosesResolved &&
-    incidentAnswer !== null && !busy && attestationChecked &&
+    hasGoalSelected &&
+    narrativeOk &&
+    behaviorOk &&
+    longShiftOk &&
+    triggersResolved &&
+    medDosesResolved &&
+    incidentAnswer !== null &&
+    !busy &&
+    attestationChecked &&
     (!nectarUsed || nectarAssistChecked) &&
     (!correctionOpen || !correctionHasChange || correctionValid);
-
 
   function openCompliance() {
     if (!active) return;
@@ -1047,7 +994,6 @@ export function PunchPad({
     setCorrectionIn("");
     setCorrectionOut("");
     setCorrectionReason("");
-    stopRecording();
     setShowCompliance(true);
   }
 
@@ -1073,9 +1019,6 @@ export function PunchPad({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpenCompliance, active, activeMatchesThisPad]);
 
-
-
-
   // Format an ISO/Date as the value expected by <input type="datetime-local">
   // in the browser's local timezone: YYYY-MM-DDTHH:MM.
   function toLocalDatetimeInput(v: string | number | Date): string {
@@ -1094,8 +1037,6 @@ export function PunchPad({
     if (!correctionReason) setCorrectionReason("");
   }
 
-
-
   // Re-running the check is required after staff edit the note/goals
   useEffect(() => {
     if (completenessRan) {
@@ -1106,10 +1047,10 @@ export function PunchPad({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [narrative, checkedGoals, baselineChecked]);
 
-  async function runCompletenessCheck(): Promise<CFlag[]> {
+  async function runCompletenessCheck(): Promise<PunchPadCompletenessFlag[]> {
     if (!active) return [];
     setCompletenessBusy(true);
-    const flags: CFlag[] = [];
+    const flags: PunchPadCompletenessFlag[] = [];
     try {
       // Hard checks first (mirror existing field validation in the panel)
       if (!hasGoalSelected) {
@@ -1192,7 +1133,7 @@ export function PunchPad({
     }
   }
 
-  function jumpToFix(flag: CFlag) {
+  function jumpToFix(flag: PunchPadCompletenessFlag) {
     if (flag.fix?.route) {
       setShowCompliance(false);
       navigate({ to: flag.fix.route });
@@ -1212,87 +1153,6 @@ export function PunchPad({
     setDismissals((d) => ({ ...d, [key]: reason }));
     setDismissingKey(null);
     setDismissReasonDraft("");
-  }
-
-
-  function stopRecording() {
-    recordingWantedRef.current = false;
-    recognitionSessionRef.current?.stop();
-    recognitionSessionRef.current = null;
-    setIsRecording(false);
-  }
-
-  function startRecording() {
-    if (typeof window === "undefined") return;
-    stopRecording();
-    recordingWantedRef.current = true;
-    dictationBaseRef.current = narrative;
-    dictationPriorFinalsRef.current = "";
-    dictationLiveFinalsRef.current = "";
-    const session = beginContinuousRecognition({
-      interimResults: true,
-      shouldContinue: () => recordingWantedRef.current,
-      onResult: (e) => {
-        const { finals, display } = accumulateSpeechResults(
-          dictationPriorFinalsRef.current,
-          e.results,
-        );
-        dictationLiveFinalsRef.current = finals;
-        const base = dictationBaseRef.current.trim();
-        setNarrative(base && display ? `${base} ${display}` : display || base);
-        if (display.trim()) {
-          setOriginalTranscript((prev) => freezeOriginalTranscript(prev, display));
-          setShowNarrativeError(false);
-          setCompletenessErrors([]);
-        }
-      },
-      onSessionEnd: () => {
-        dictationPriorFinalsRef.current = dictationLiveFinalsRef.current;
-      },
-      onFatalStop: () => {
-        recordingWantedRef.current = false;
-        recognitionSessionRef.current = null;
-        setIsRecording(false);
-      },
-    });
-    if (!session) {
-      recordingWantedRef.current = false;
-      toast.error("Voice input isn't supported on this browser.");
-      return;
-    }
-    recognitionSessionRef.current = session;
-    setIsRecording(true);
-  }
-
-  async function handleAskNectar() {
-    const q = askQuestion.trim();
-    if (q.length < 4) {
-      toast.error("Type your question first.");
-      return;
-    }
-    const clientFirst =
-      lockedClient?.name?.split(" ")?.[0] ??
-      caseload.find((c) => c.id === (active?.client_id ?? selectedClientId))?.first_name ??
-      "the client";
-    const goals = lockedClient?.pcspGoals ?? [];
-    setAskBusy(true);
-    setAskResult(null);
-    try {
-      const res = await answerProceduralQuestion({
-        data: {
-          question: q,
-          clientFirstName: clientFirst,
-          serviceCode: serviceCode || null,
-          pcspGoals: goals,
-          notes: null,
-        },
-      });
-      setAskResult(res);
-    } catch (e) {
-      toast.error((e as Error).message || "NECTAR couldn't answer right now.");
-    } finally {
-      setAskBusy(false);
-    }
   }
 
   // ── Compliance gate (billing_conflict detector) at clock-out ────────────
@@ -1372,21 +1232,16 @@ export function PunchPad({
   async function preservePunchOnly(clockOutIso: string, fullUpdate: Record<string, unknown>) {
     if (!active) return;
     // Strip the billable-commit marker; keep everything staff already filled in.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { billed_units, ...preserved } = fullUpdate;
-    await supabase
-      .from("evv_timesheets")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update({
-        ...preserved,
-        clock_out_timestamp: clockOutIso,
-        raw_clock_out: clockOutIso,
-        rounded_clock_out: roundToQuarterHourISO(clockOutIso),
-      } as any)
-      .eq("id", active.id);
+    const { billed_units: _billedUnits, ...preserved } = fullUpdate;
+    const preservedUpdate = {
+      ...preserved,
+      clock_out_timestamp: clockOutIso,
+      raw_clock_out: clockOutIso,
+      rounded_clock_out: roundToQuarterHourISO(clockOutIso),
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    await supabase.from("evv_timesheets").update(preservedUpdate).eq("id", active.id);
     await qc.invalidateQueries({ queryKey: ["evv-active", user?.id] });
   }
-
 
   /** Gather all other service codes committed for this client on this date. */
   async function gatherDayCommittedCodes(
@@ -1454,7 +1309,6 @@ export function PunchPad({
       }
     }
 
-
     const selectedGoals = Object.entries(checkedGoals)
       .filter(([, v]) => v)
       .map(([k]) => k);
@@ -1462,18 +1316,18 @@ export function PunchPad({
 
     const clockOut = new Date().toISOString();
     const update: Record<string, unknown> = {
-      clock_out_timestamp:  clockOut,
-      gps_out_coordinates:  args.pos
+      clock_out_timestamp: clockOut,
+      gps_out_coordinates: args.pos
         ? { latitude: args.pos.lat, longitude: args.pos.lng, accuracy_meters: args.pos.acc }
         : { latitude: null, longitude: null, accuracy_meters: null },
-      status:               "Pending",
-      timezone_setting:     "America/Denver",
-      shift_note_text:      narrative.trim(),
-      goals_completed:      selectedGoals,
-      raw_clock_out:        clockOut,
-      rounded_clock_out:    roundToQuarterHourISO(clockOut),
+      status: "Pending",
+      timezone_setting: "America/Denver",
+      shift_note_text: narrative.trim(),
+      goals_completed: selectedGoals,
+      raw_clock_out: clockOut,
+      rounded_clock_out: roundToQuarterHourISO(clockOut),
       // Per-entry quarter-hour units (round-to-NEAREST); raw timestamps stay untouched.
-      billed_units:         computeEntryUnits(active.clock_in_timestamp, clockOut),
+      billed_units: computeEntryUnits(active.clock_in_timestamp, clockOut),
     };
     update.nectar_drafted = nectarUsed;
     update.nectar_review_service_code = active.service_type_code;
@@ -1487,27 +1341,25 @@ export function PunchPad({
 
     // Permanent legal record of the staff attestation — written for every
     // submitted shift, not just ones NECTAR reviewed.
-    const { error: attErr } = await supabase
-      .from("nectar_attestations")
-      .insert({
-        organization_id: org?.organization_id ?? null,
-        user_id: user.id,
-        user_display_name: user.email ?? null,
-        scope: "shift_note",
-        scope_ref_id: active.id,
-        scope_ref_type: "evv_timesheet",
-        statement:
-          "I attest that this shift note is accurate and truthful, that it reflects services I personally provided, and that I understand submitting false Medicaid documentation constitutes fraud. Warning: Falsification of Medicaid service records is a federal offense under 18 U.S.C. § 1347.",
-        context: {
-          client_id: active.client_id,
-          service_code: active.service_type_code,
-          nectar_review_status: args.aiStatus ?? "not_reviewed",
-        },
-        original_staff_input: frozenOriginal || null,
-        nectar_expanded_output: nectarUsed ? nectarDraftApplied : null,
-        input_confirmed_at: attestationTimestamp,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+    const { error: attErr } = await supabase.from("nectar_attestations").insert({
+      organization_id: org?.organization_id ?? null,
+      user_id: user.id,
+      user_display_name: user.email ?? null,
+      scope: "shift_note",
+      scope_ref_id: active.id,
+      scope_ref_type: "evv_timesheet",
+      statement:
+        "I attest that this shift note is accurate and truthful, that it reflects services I personally provided, and that I understand submitting false Medicaid documentation constitutes fraud. Warning: Falsification of Medicaid service records is a federal offense under 18 U.S.C. § 1347.",
+      context: {
+        client_id: active.client_id,
+        service_code: active.service_type_code,
+        nectar_review_status: args.aiStatus ?? "not_reviewed",
+      },
+      original_staff_input: frozenOriginal || null,
+      nectar_expanded_output: nectarUsed ? nectarDraftApplied : null,
+      input_confirmed_at: attestationTimestamp,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
     if (attErr) {
       toast.error(`Attestation log failed: ${attErr.message}`);
       return;
@@ -1525,9 +1377,9 @@ export function PunchPad({
       update.incident_flag = true;
     }
     if (args.aiStatus) {
-      update.ai_compliance_status    = args.aiStatus;
-      update.ai_compliance_feedback  = args.aiFeedback ?? null;
-      update.ai_coaching_iterations  = args.aiIterationCount ?? 0;
+      update.ai_compliance_status = args.aiStatus;
+      update.ai_compliance_feedback = args.aiFeedback ?? null;
+      update.ai_coaching_iterations = args.aiIterationCount ?? 0;
     }
 
     // Staff-requested time correction: never mutate raw punches. Write
@@ -1587,11 +1439,7 @@ export function PunchPad({
     };
 
     if (orgId) {
-      const otherCodes = await gatherDayCommittedCodes(
-        active.client_id,
-        serviceDateISO,
-        active.id,
-      );
+      const otherCodes = await gatherDayCommittedCodes(active.client_id, serviceDateISO, active.id);
       const allCodes = Array.from(
         new Set(
           [active.service_type_code, ...otherCodes]
@@ -1616,15 +1464,13 @@ export function PunchPad({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (gateResult && (gateResult as any).stopped) {
           await preservePunchOnly(clockOut, update);
-          toast.message(
-            "Punch preserved. Billable commit halted per your compliance decision.",
-          );
+          toast.message("Punch preserved. Billable commit halted per your compliance decision.");
           return;
         }
       } else {
         // Staff (no override): detect directly; if conflict, raise OPEN flags
         // for audit, preserve punch, and route to supervisor.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const detected = (await detectBillingConflict({
           data: {
             organizationId: orgId,
@@ -1634,7 +1480,14 @@ export function PunchPad({
             staffId: user.id,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any,
-        })) as { flags: Array<{ ruleId: string; requirementId: string; matchedCodes: string[]; source: { title: string; verbatim: string; citation: string | null } }> };
+        })) as {
+          flags: Array<{
+            ruleId: string;
+            requirementId: string;
+            matchedCodes: string[];
+            source: { title: string; verbatim: string; citation: string | null };
+          }>;
+        };
         if (detected?.flags?.length) {
           for (const c of detected.flags) {
             try {
@@ -1674,7 +1527,6 @@ export function PunchPad({
       await runFullCommit();
     }
 
-
     // Persist any unresolved / dismissed-with-reason completeness flags for the admin Task Center.
     if (org?.organization_id && completenessFlags.length > 0) {
       const rows = completenessFlags
@@ -1710,11 +1562,11 @@ export function PunchPad({
         target_behaviors: b.behaviorsObserved ? b.targetBehaviors : [],
         behavior_counts: b.behaviorsObserved ? b.counts : {},
         objective_description: b.behaviorsObserved ? b.objectiveDescription.trim() || null : null,
-        antecedent_context:    b.behaviorsObserved ? b.antecedentContext.trim() || null : null,
+        antecedent_context: b.behaviorsObserved ? b.antecedentContext.trim() || null : null,
         intervention_response: b.behaviorsObserved ? b.interventionResponse.trim() || null : null,
-        reportable_incident:   b.behaviorsObserved ? b.reportableIncident : false,
-        positives:             b.positives.trim() || null,
-        trend_vs_recent:       b.trendVsRecent || null,
+        reportable_incident: b.behaviorsObserved ? b.reportableIncident : false,
+        positives: b.positives.trim() || null,
+        trend_vs_recent: b.trendVsRecent || null,
       };
       const { error: behErr } = await supabase
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1729,13 +1581,6 @@ export function PunchPad({
 
     // Medication compliance is now recorded in the real MAR (`emar_logs`) via
     // the eMAR tab — no shadow attestation write here.
-
-
-
-
-
-
-
 
     const displayIn = args.correction?.correctedInIso ?? active.clock_in_timestamp;
     const displayOut = args.correction?.correctedOutIso ?? clockOut;
@@ -1797,17 +1642,20 @@ export function PunchPad({
       }
       return;
     }
-    const correctionPayload = correctionOpen && correctionHasChange
-      ? {
-          correctedInIso: correctionInIso,
-          correctedOutIso: correctionOutIso,
-          reason: correctionReason,
-        }
-      : undefined;
+    const correctionPayload =
+      correctionOpen && correctionHasChange
+        ? {
+            correctedInIso: correctionInIso,
+            correctedOutIso: correctionOutIso,
+            reason: correctionReason,
+          }
+        : undefined;
     // Hard gate: if staff toggled the clock-out incident flag (or a Nectar
     // trigger fired), require a SUBMITTED Incident Report on this shift.
     if (incidentFlag && incidentReportIds.length === 0) {
-      toast.error("You marked an incident — submit the Incident Report before submitting the timesheet.");
+      toast.error(
+        "You marked an incident — submit the Incident Report before submitting the timesheet.",
+      );
       setIncidentDialogOpen(true);
       return;
     }
@@ -1820,9 +1668,7 @@ export function PunchPad({
         flags = await runCompletenessCheck();
       }
       const hardOpen = flags.some((f) => f.severity === "hard");
-      const softOpen = flags.some(
-        (f) => f.severity === "soft" && !dismissals[f.key],
-      );
+      const softOpen = flags.some((f) => f.severity === "soft" && !dismissals[f.key]);
       if (hardOpen) {
         toast.error("Fix the required items flagged by NECTAR before submitting.");
         return;
@@ -1833,9 +1679,6 @@ export function PunchPad({
       }
     }
 
-
-
-
     // One completeness gate on Submit: local 30-word check, then NECTAR for
     // client / support / response. Fail stays on the form. No exception path.
     let aiVerdictFeedback = COMPLETENESS_PASS_FEEDBACK;
@@ -1844,7 +1687,8 @@ export function PunchPad({
       const selectedGoalsForAi = Object.entries(checkedGoals)
         .filter(([, v]) => v)
         .map(([k]) => k);
-      if (baselineChecked) selectedGoalsForAi.push("General baseline monitoring & safety oversight");
+      if (baselineChecked)
+        selectedGoalsForAi.push("General baseline monitoring & safety oversight");
 
       const clientFirst =
         lockedClient?.name?.split(" ")?.[0] ??
@@ -1871,7 +1715,8 @@ export function PunchPad({
         {
           key: "support_provided",
           passed: false,
-          message: errMsg || "NECTAR could not check this note. Fix nothing yet — tap Submit again.",
+          message:
+            errMsg || "NECTAR could not check this note. Fix nothing yet — tap Submit again.",
         },
       ]);
       return;
@@ -1888,40 +1733,36 @@ export function PunchPad({
 
       // Computed up front (no pos dependency) so the GPS-unavailable bypass
       // path below can offer the same radius context as the geofence dialog.
-      const refClient = lockedClient ?? (() => {
-        const c = caseload.find((x) => x.id === active.client_id);
-        if (!c) return null;
-        return {
-          homeLat: c.home_latitude ?? null,
-          homeLng: c.home_longitude ?? null,
-          geofenceRadiusFeet: c.geofence_radius_feet ?? null,
-        } as Pick<LockedClient, "homeLat" | "homeLng" | "geofenceRadiusFeet">;
-      })();
+      const refClient =
+        lockedClient ??
+        (() => {
+          const c = caseload.find((x) => x.id === active.client_id);
+          if (!c) return null;
+          return {
+            homeLat: c.home_latitude ?? null,
+            homeLng: c.home_longitude ?? null,
+            geofenceRadiusFeet: c.geofence_radius_feet ?? null,
+          } as Pick<LockedClient, "homeLat" | "homeLng" | "geofenceRadiusFeet">;
+        })();
 
-      const lat    = refClient?.homeLat;
-      const lng    = refClient?.homeLng;
+      const lat = refClient?.homeLat;
+      const lng = refClient?.homeLng;
       const radius = resolveGeofenceRadiusFeet(refClient?.geofenceRadiusFeet);
 
       // Sequence GPS acquisition: fail-closed until a high-accuracy fix.
-      let pos = livePosRef.current ?? livePos;
-      if (!isGpsFixConfident(pos)) {
+      let pos = livePos;
+      if (!gpsConfident) {
         if (hardwareDenied) {
-          toast.error("Location is blocked. Enable location for this site in device Settings, then retry. Clock-out is held until GPS is captured.");
+          toast.error(
+            "Location is blocked. Enable location for this site in device Settings, then retry. Clock-out is held until GPS is captured.",
+          );
           return;
         }
-        setAwaitingGps(true);
-        try {
-          const deadline = Date.now() + 15_000;
-          while (Date.now() < deadline) {
-            await new Promise((r) => setTimeout(r, 250));
-            if (isGpsFixConfident(livePosRef.current)) { pos = livePosRef.current; break; }
-          }
-        } finally {
-          setAwaitingGps(false);
-        }
-        pos = livePosRef.current ?? pos;
+        pos = await waitForConfidentFix();
         if (!pos) {
-          toast.error("No GPS fix yet. Wait for high-accuracy GPS and retry — clock-out is held until a live location is captured.");
+          toast.error(
+            "No GPS fix yet. Wait for high-accuracy GPS and retry — clock-out is held until a live location is captured.",
+          );
           return;
         }
         if (!isGpsFixConfident(pos)) {
@@ -1979,7 +1820,11 @@ export function PunchPad({
             proceed: async () => {
               setPendingFormsDialog(null);
               setBusy(true);
-              try { await finalize(); } finally { setBusy(false); }
+              try {
+                await finalize();
+              } finally {
+                setBusy(false);
+              }
             },
             recheck: async () => {
               const again = await fetchPendingTrackingForms({
@@ -1991,9 +1836,13 @@ export function PunchPad({
               if (!again.length) {
                 setPendingFormsDialog(null);
                 setBusy(true);
-                try { await finalize(); } finally { setBusy(false); }
+                try {
+                  await finalize();
+                } finally {
+                  setBusy(false);
+                }
               } else {
-                setPendingFormsDialog((p) => p ? { ...p, pending: again } : p);
+                setPendingFormsDialog((p) => (p ? { ...p, pending: again } : p));
               }
             },
           });
@@ -2039,14 +1888,20 @@ export function PunchPad({
           const pos = outVariance.pos;
           const outside = reason;
           const finalize = () =>
-            finalizeClockOut(isBypass ? { pos, gpsBypassReason: outside } : { pos, outsideReason: outside });
+            finalizeClockOut(
+              isBypass ? { pos, gpsBypassReason: outside } : { pos, outsideReason: outside },
+            );
           setPendingFormsDialog({
             mode: "clockout",
             pending: pendingOut,
             proceed: async () => {
               setPendingFormsDialog(null);
               setBusy(true);
-              try { await finalize(); } finally { setBusy(false); }
+              try {
+                await finalize();
+              } finally {
+                setBusy(false);
+              }
             },
             recheck: async () => {
               const again = await fetchPendingTrackingForms({
@@ -2058,9 +1913,13 @@ export function PunchPad({
               if (!again.length) {
                 setPendingFormsDialog(null);
                 setBusy(true);
-                try { await finalize(); } finally { setBusy(false); }
+                try {
+                  await finalize();
+                } finally {
+                  setBusy(false);
+                }
               } else {
-                setPendingFormsDialog((p) => p ? { ...p, pending: again } : p);
+                setPendingFormsDialog((p) => (p ? { ...p, pending: again } : p));
               }
             },
           });
@@ -2097,8 +1956,12 @@ export function PunchPad({
   const endIsEvv = isEvvLockedCode(active?.service_type_code ?? "");
   const startIsEvv = isEvvLockedCode(serviceCode);
   const padAriaLabel = isRunning
-    ? (endIsEvv ? "EVV Shift Punch Pad" : "Time Clock")
-    : (startIsEvv ? "EVV Shift Punch Pad" : "Time Clock");
+    ? endIsEvv
+      ? "EVV Shift Punch Pad"
+      : "Time Clock"
+    : startIsEvv
+      ? "EVV Shift Punch Pad"
+      : "Time Clock";
 
   return (
     <EvvConsentGate>
@@ -2119,17 +1982,26 @@ export function PunchPad({
           </div>
           <div className="flex items-center gap-2">
             {isEvvLockedCode(serviceCode) && gpsAcquiring && !hardwareDenied && (
-              <Badge variant="outline" className="gap-1 text-[10px] text-amber-600 border-amber-400">
+              <Badge
+                variant="outline"
+                className="gap-1 text-[10px] text-amber-600 border-amber-400"
+              >
                 <Wifi className="h-3 w-3 animate-pulse" /> Acquiring GPS
               </Badge>
             )}
             {isEvvLockedCode(serviceCode) && !gpsAcquiring && livePos && gpsConfident && (
-              <Badge variant="outline" className="gap-1 text-[10px] text-emerald-600 border-emerald-400">
+              <Badge
+                variant="outline"
+                className="gap-1 text-[10px] text-emerald-600 border-emerald-400"
+              >
                 <MapPin className="h-3 w-3" /> GPS Live
               </Badge>
             )}
             {isEvvLockedCode(serviceCode) && !hardwareDenied && livePos && !gpsConfident && (
-              <Badge variant="outline" className="gap-1 text-[10px] text-amber-600 border-amber-400">
+              <Badge
+                variant="outline"
+                className="gap-1 text-[10px] text-amber-600 border-amber-400"
+              >
                 <Wifi className="h-3 w-3" /> GPS coarse
               </Badge>
             )}
@@ -2151,7 +2023,9 @@ export function PunchPad({
               Verified Medicaid ID:{" "}
               <span className="font-mono">{maskMemberId(lockedClient.memberId) || "—"}</span>
               {typeof lockedClient.geofenceRadiusFeet === "number" && (
-                <> · Geofence:{" "}
+                <>
+                  {" "}
+                  · Geofence:{" "}
                   <span className="font-mono">{lockedClient.geofenceRadiusFeet} ft</span>
                 </>
               )}
@@ -2209,7 +2083,8 @@ export function PunchPad({
               </p>
               <ul className="mt-1 space-y-0.5 text-[12px] leading-snug text-[color:var(--navy-900)]/90">
                 <li>• A progress note (50-word minimum, objective)</li>
-                <li>• At least one PCSP goal checked
+                <li>
+                  • At least one PCSP goal checked
                   {clientForPunch.pcspGoals?.length
                     ? ` (${clientForPunch.pcspGoals.length} on file)`
                     : " (none on file — ask your supervisor)"}
@@ -2225,8 +2100,6 @@ export function PunchPad({
             </div>
           </NectarInfusionLock>
         )}
-
-
 
         {/* ── GPS status strip (clock-in only, no map) ── */}
         {!isRunning && (
@@ -2247,25 +2120,46 @@ export function PunchPad({
           {entryType === "General_Sidebar_Unscheduled" && (
             <>
               <div>
-                <label className="mb-1 block text-xs font-medium">🏢 Assign Facility / House Site</label>
-                <Select value={selectedFacility} onValueChange={setSelectedFacility} disabled={isRunning}>
-                  <SelectTrigger className="h-12"><SelectValue placeholder="Select a facility" /></SelectTrigger>
+                <label className="mb-1 block text-xs font-medium">
+                  🏢 Assign Facility / House Site
+                </label>
+                <Select
+                  value={selectedFacility}
+                  onValueChange={setSelectedFacility}
+                  disabled={isRunning}
+                >
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="Select a facility" />
+                  </SelectTrigger>
                   <SelectContent>
                     {facilities.length === 0 && (
-                      <SelectItem value="__none" disabled>No facilities on file</SelectItem>
+                      <SelectItem value="__none" disabled>
+                        No facilities on file
+                      </SelectItem>
                     )}
-                    {facilities.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                    {facilities.map((f) => (
+                      <SelectItem key={f} value={f}>
+                        {f}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium">👤 Assign Client Individual</label>
+                <label className="mb-1 block text-xs font-medium">
+                  👤 Assign Client Individual
+                </label>
                 <Select
                   value={selectedClientId}
-                  onValueChange={(v) => { setSelectedClientId(v); setServiceCode(""); }}
+                  onValueChange={(v) => {
+                    setSelectedClientId(v);
+                    setServiceCode("");
+                  }}
                   disabled={isRunning}
                 >
-                  <SelectTrigger className="h-12"><SelectValue placeholder="Select a client" /></SelectTrigger>
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="Select a client" />
+                  </SelectTrigger>
                   <SelectContent>
                     {caseload
                       .filter((c) => !selectedFacility || c.physical_address === selectedFacility)
@@ -2279,7 +2173,10 @@ export function PunchPad({
                 </Select>
                 {clientForPunch && (
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    Member ID: <span className="font-mono">{maskMemberId(clientForPunch.memberId) || "missing"}</span>
+                    Member ID:{" "}
+                    <span className="font-mono">
+                      {maskMemberId(clientForPunch.memberId) || "missing"}
+                    </span>
                   </p>
                 )}
               </div>
@@ -2295,14 +2192,22 @@ export function PunchPad({
                 disabled={isRunning || !clientForPunch || (lockServiceCode && !!presetServiceCode)}
               >
                 <SelectTrigger className="h-12">
-                  <SelectValue placeholder={clientForPunch ? "Select authorized code" : "Pick a client first"} />
+                  <SelectValue
+                    placeholder={clientForPunch ? "Select authorized code" : "Pick a client first"}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {codesForClient.length === 0 ? (
-                    <SelectItem value="__none" disabled>No codes authorized</SelectItem>
-                  ) : codesForClient.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
-                  ))}
+                    <SelectItem value="__none" disabled>
+                      No codes authorized
+                    </SelectItem>
+                  ) : (
+                    codesForClient.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>
+                        {c.label}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {lockServiceCode && presetServiceCode ? (
@@ -2337,9 +2242,14 @@ export function PunchPad({
               className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-rose-600 text-base font-bold uppercase tracking-wider text-white shadow-lg shadow-rose-600/30 transition hover:bg-rose-700 disabled:opacity-60"
               aria-label={endIsEvv ? "End EVV Shift" : "Clock Out"}
             >
-              {busy
-                ? <Loader2 className="h-5 w-5 animate-spin" />
-                : <><Square className="h-5 w-5 fill-current" /> {endIsEvv ? "END EVV SHIFT" : "CLOCK OUT"}</>}
+              {busy ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  <Square className="h-5 w-5 fill-current" />{" "}
+                  {endIsEvv ? "END EVV SHIFT" : "CLOCK OUT"}
+                </>
+              )}
             </button>
           </div>
         ) : (
@@ -2353,9 +2263,11 @@ export function PunchPad({
                 aria-label={startIsEvv ? "Start EVV Shift" : "Clock In"}
                 data-testid="clock-in-button"
               >
-                {busy
-                  ? <Loader2 className="h-10 w-10 animate-spin" />
-                  : <Play className="h-10 w-10 fill-current" />}
+                {busy ? (
+                  <Loader2 className="h-10 w-10 animate-spin" />
+                ) : (
+                  <Play className="h-10 w-10 fill-current" />
+                )}
               </button>
             </div>
             <p className="mt-3 text-center text-sm font-semibold uppercase tracking-wider">
@@ -2364,79 +2276,16 @@ export function PunchPad({
           </>
         )}
 
-
-        {/* ── NECTAR Procedural Q&A (embedded, plain-language) ── */}
-        <NectarInfusionLock
-          featureName="Ask NECTAR (procedural)"
-          benefit="Plain-language answers to 'am I allowed to…?' questions, grounded in this client's plan and your company policy."
-          className="mt-4"
-        >
-          <div className="rounded-lg border border-[color:var(--border-light)] bg-background/60 p-3">
-            <button
-              type="button"
-              onClick={() => setAskOpen((o) => !o)}
-              className="flex w-full items-center justify-between gap-2 text-left"
-              aria-expanded={askOpen}
-            >
-              <span className="flex items-center gap-2 text-xs font-semibold text-[color:var(--navy-900)]">
-                <PiMark variant="gold" className="h-3.5 w-3.5" />
-                Ask NECTAR — "am I allowed to…?"
-              </span>
-              <span className="text-[11px] text-muted-foreground">{askOpen ? "Hide" : "Open"}</span>
-            </button>
-
-            {askOpen && (
-              <div className="mt-3 space-y-2">
-                <Textarea
-                  rows={2}
-                  value={askQuestion}
-                  onChange={(e) => setAskQuestion(e.target.value)}
-                  placeholder='e.g. "Can I take Blake out of county?" or "What if he refuses a med?"'
-                  maxLength={500}
-                  className="text-sm"
-                />
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[11px] text-muted-foreground">
-                    Grounded in {lockedClient?.name?.split(" ")[0] ?? "this client"}&apos;s plan when available. You still take the action.
-                  </p>
-                  <Button
-                    size="sm"
-                    onClick={handleAskNectar}
-                    disabled={askBusy || askQuestion.trim().length < 4}
-                    className="bg-[color:var(--amber-500)] text-[color:var(--navy-900)] hover:bg-[color:var(--amber-600)]"
-                  >
-                    {askBusy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-1 h-3.5 w-3.5" />}
-                    Ask
-                  </Button>
-                </div>
-
-                {askResult && (
-                  <div
-                    className={`rounded-md border p-3 text-[13px] leading-snug ${
-                      askResult.escalate
-                        ? "border-rose-300 bg-rose-50 text-rose-900"
-                        : "border-[color:var(--amber-300)] bg-[color:var(--amber-50)] text-[color:var(--navy-900)]"
-                    }`}
-                  >
-                    <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide">
-                      {askResult.escalate ? (
-                        <><AlertTriangle className="h-3.5 w-3.5" /> Escalate now</>
-                      ) : (
-                        <><PiMark className="h-3.5 w-3.5" /> NECTAR · Confidence: {askResult.confidence}</>
-                      )}
-                    </p>
-                    <p className="mt-1">{askResult.answer}</p>
-                    <p className="mt-2 text-[11px] text-muted-foreground">
-                      Guidance only — confirm against your supervisor or company policy before acting.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </NectarInfusionLock>
-
-
+        <PunchPadProceduralAsk
+          clientFirstName={
+            lockedClient?.name?.split(" ")?.[0] ??
+            caseload.find((client) => client.id === (active?.client_id ?? selectedClientId))
+              ?.first_name ??
+            "this client"
+          }
+          serviceCode={serviceCode}
+          pcspGoals={lockedClient?.pcspGoals ?? []}
+        />
 
         {/* ════════════════════════════════════════════════════════════════════
             DIALOGS
@@ -2482,127 +2331,63 @@ export function PunchPad({
           }
         />
 
-        {/* Clock-in variance — text only, no map */}
-        <Dialog open={!!variance} onOpenChange={(o) => { if (!o) { setVariance(null); setVarianceReason(""); } }}>
-          <DialogContent className="max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                {variance?.frameBlocked ? "GPS unavailable" : "Outside the geofence"}
-              </DialogTitle>
-              <DialogDescription>
-                {variance?.frameBlocked
-                  ? "GPS could not be captured. Clock-in is held until a live location is available — enable location and retry."
-                  : "This check is against the home pin saved on the client record — not a sign that GPS is off. If you are standing at the house, ask an administrator to update that pin."}
-              </DialogDescription>
-            </DialogHeader>
-            {variance && typeof variance.distanceFeet === "number" && typeof variance.limitFeet === "number" && (
-              <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs">
-                Distance from the saved home pin:{" "}
-                <span className="font-mono font-semibold">{variance.distanceFeet.toLocaleString()} ft</span>
-                {" "}· Allowed:{" "}
-                <span className="font-mono font-semibold">{variance.limitFeet.toLocaleString()} ft</span>
-              </div>
-            )}
-            <div className="grid gap-2">
-              <Label htmlFor="variance-reason">
-                Why are you outside the geofence?
-              </Label>
-              <Textarea
-                id="variance-reason"
-                rows={4}
-                value={varianceReason}
-                onChange={(e) => setVarianceReason(e.target.value)}
-                placeholder="Write why you are clocking in away from the saved home pin."
-                maxLength={500}
-              />
-              <p className="text-[11px] text-muted-foreground">
-                {varianceReason.trim().length}/10 characters minimum
-              </p>
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setVariance(null); setVarianceReason(""); }}>
-                Cancel
-              </Button>
-              <Button onClick={submitVariance} disabled={busy || varianceReason.trim().length < 10}>
-                {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Confirm Clock In &amp; Start Shift
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Clock-out variance — text only, no map */}
-        <Dialog open={!!outVariance} onOpenChange={(o) => { if (!o) { setOutVariance(null); setOutVarianceReason(""); } }}>
-          <DialogContent className="max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                {outVariance?.frameBlocked ? "GPS unavailable" : "Outside the geofence"}
-              </DialogTitle>
-              <DialogDescription>
-                {outVariance?.frameBlocked
-                  ? "GPS could not be captured. Clock-out is held until a live location is available — enable location and retry."
-                  : "This check is against the home pin saved on the client record — not a sign that GPS is off. If you are standing at the house, ask an administrator to update that pin."}
-              </DialogDescription>
-            </DialogHeader>
-            {outVariance && !outVariance.frameBlocked && (
-              <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs">
-                {typeof outVariance.distanceFeet === "number" ? (
-                  <>
-                    Distance from the saved home pin:{" "}
-                    <span className="font-mono font-semibold">{outVariance.distanceFeet.toLocaleString()} ft</span>
-                    {" "}· Allowed:{" "}
-                    <span className="font-mono font-semibold">{(outVariance.limitFeet ?? 0).toLocaleString()} ft</span>
-                  </>
-                ) : (
-                  <>
-                    GPS accuracy too low to confirm location. A written variance is required. · Allowed:{" "}
-                    <span className="font-mono font-semibold">{(outVariance.limitFeet ?? 0).toLocaleString()} ft</span>
-                  </>
-                )}
-              </div>
-            )}
-            <div className="grid gap-2">
-              <Label htmlFor="out-variance-reason">
-                Why are you outside the geofence?
-              </Label>
-              <Textarea
-                id="out-variance-reason"
-                rows={4}
-                value={outVarianceReason}
-                onChange={(e) => setOutVarianceReason(e.target.value)}
-                placeholder="Write why you are clocking out away from the saved home pin."
-                maxLength={500}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setOutVariance(null); setOutVarianceReason(""); }}>
-                Cancel
-              </Button>
-              <Button onClick={submitOutVariance} disabled={busy || outVarianceReason.trim().length < 5}>
-                {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Submit &amp; Clock Out
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <GeofenceVarianceDialog
+          mode="clock-in"
+          variance={variance}
+          reason={varianceReason}
+          busy={busy}
+          onReasonChange={setVarianceReason}
+          onCancel={() => {
+            setVariance(null);
+            setVarianceReason("");
+          }}
+          onConfirm={() => void submitVariance()}
+        />
+        <GeofenceVarianceDialog
+          mode="clock-out"
+          variance={outVariance}
+          reason={outVarianceReason}
+          busy={busy}
+          onReasonChange={setOutVarianceReason}
+          onCancel={() => {
+            setOutVariance(null);
+            setOutVarianceReason("");
+          }}
+          onConfirm={() => void submitOutVariance()}
+        />
 
         {/* Clock-IN success confirmation */}
-        <Dialog open={!!clockInSuccess} onOpenChange={(o) => { if (!o) setClockInSuccess(null); }}>
+        <Dialog
+          open={!!clockInSuccess}
+          onOpenChange={(o) => {
+            if (!o) setClockInSuccess(null);
+          }}
+        >
           <DialogContent className="overflow-hidden p-0">
-            <div className={`px-6 py-5 ${clockInSuccess?.evvClean ? "bg-emerald-50 dark:bg-emerald-950" : "bg-amber-50 dark:bg-amber-950"}`}>
+            <div
+              className={`px-6 py-5 ${clockInSuccess?.evvClean ? "bg-emerald-50 dark:bg-emerald-950" : "bg-amber-50 dark:bg-amber-950"}`}
+            >
               <div className="flex items-center gap-3">
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${clockInSuccess?.evvClean ? "bg-emerald-500" : "bg-amber-500"}`}>
-                  {clockInSuccess?.evvClean
-                    ? <CheckCircle2 className="h-7 w-7 text-white" />
-                    : <AlertTriangle className="h-7 w-7 text-white" />}
+                <div
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${clockInSuccess?.evvClean ? "bg-emerald-500" : "bg-amber-500"}`}
+                >
+                  {clockInSuccess?.evvClean ? (
+                    <CheckCircle2 className="h-7 w-7 text-white" />
+                  ) : (
+                    <AlertTriangle className="h-7 w-7 text-white" />
+                  )}
                 </div>
                 <div>
-                  <p className={`text-base font-bold ${clockInSuccess?.evvClean ? "text-emerald-800 dark:text-emerald-200" : "text-amber-800 dark:text-amber-200"}`}>
-                    {clockInSuccess?.evvClean ? "✅ EVV Clock-In Confirmed" : "⚠️ Shift Started with Variance"}
+                  <p
+                    className={`text-base font-bold ${clockInSuccess?.evvClean ? "text-emerald-800 dark:text-emerald-200" : "text-amber-800 dark:text-amber-200"}`}
+                  >
+                    {clockInSuccess?.evvClean
+                      ? "✅ EVV Clock-In Confirmed"
+                      : "⚠️ Shift Started with Variance"}
                   </p>
-                  <p className={`text-xs ${clockInSuccess?.evvClean ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}>
+                  <p
+                    className={`text-xs ${clockInSuccess?.evvClean ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}
+                  >
                     {clockInSuccess?.evvClean
                       ? "GPS verified · Location confirmed · Timesheet saved in PI"
                       : "Variance logged · Pending admin review · Timesheet saved in PI"}
@@ -2619,9 +2404,11 @@ export function PunchPad({
               <div className="flex justify-end">
                 <Button
                   onClick={() => setClockInSuccess(null)}
-                  className={clockInSuccess?.evvClean
-                    ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                    : "bg-amber-600 hover:bg-amber-700 text-white"}
+                  className={
+                    clockInSuccess?.evvClean
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                      : "bg-amber-600 hover:bg-amber-700 text-white"
+                  }
                 >
                   Got it — Start Shift
                 </Button>
@@ -2631,54 +2418,72 @@ export function PunchPad({
         </Dialog>
 
         {/* Clock-OUT success confirmation */}
-        <Dialog open={!!success} onOpenChange={(o) => {
-          if (!o) {
-            setSuccess(null);
-            navigate({ to: "/dashboard" });
-          }
-        }}>
+        <Dialog
+          open={!!success}
+          onOpenChange={(o) => {
+            if (!o) {
+              setSuccess(null);
+              navigate({ to: "/dashboard" });
+            }
+          }}
+        >
           <DialogContent className="overflow-hidden p-0">
-            <div className={`px-6 py-5 ${success?.evvClean ? "bg-emerald-50 dark:bg-emerald-950" : "bg-amber-50 dark:bg-amber-950"}`}>
+            <div
+              className={`px-6 py-5 ${success?.evvClean ? "bg-emerald-50 dark:bg-emerald-950" : "bg-amber-50 dark:bg-amber-950"}`}
+            >
               <div className="flex items-center gap-3">
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${success?.evvClean ? "bg-emerald-500" : "bg-amber-500"}`}>
-                  {success?.evvClean
-                    ? <CheckCircle2 className="h-7 w-7 text-white" />
-                    : <AlertTriangle className="h-7 w-7 text-white" />}
+                <div
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${success?.evvClean ? "bg-emerald-500" : "bg-amber-500"}`}
+                >
+                  {success?.evvClean ? (
+                    <CheckCircle2 className="h-7 w-7 text-white" />
+                  ) : (
+                    <AlertTriangle className="h-7 w-7 text-white" />
+                  )}
                 </div>
                 <div>
-                  <p className={`text-base font-bold ${success?.evvClean ? "text-emerald-800 dark:text-emerald-200" : "text-amber-800 dark:text-amber-200"}`}>
+                  <p
+                    className={`text-base font-bold ${success?.evvClean ? "text-emerald-800 dark:text-emerald-200" : "text-amber-800 dark:text-amber-200"}`}
+                  >
                     {success?.correctionSubmitted
                       ? "Correction request submitted"
                       : success?.evvClean
-                      ? "Shift successfully closed"
-                      : "Shift closed with variance"}
+                        ? "Shift successfully closed"
+                        : "Shift closed with variance"}
                   </p>
-                  <p className={`text-xs ${success?.evvClean ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}>
+                  <p
+                    className={`text-xs ${success?.evvClean ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}
+                  >
                     {success?.correctionSubmitted
                       ? "Your supervisor will review the corrected times before this shift bills."
                       : success?.evvClean
-                      ? "GPS verified · Documentation complete · Submitted to EVV"
-                      : "Variance logged · Pending admin review · Submitted to EVV"}
+                        ? "GPS verified · Documentation complete · Submitted to EVV"
+                        : "Variance logged · Pending admin review · Submitted to EVV"}
                   </p>
                 </div>
               </div>
             </div>
             <div className="space-y-4 px-6 py-4">
               <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2">
-                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Duration</span>
-                <span className="font-mono text-lg font-bold tabular-nums">{success?.duration}</span>
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Total Duration
+                </span>
+                <span className="font-mono text-lg font-bold tabular-nums">
+                  {success?.duration}
+                </span>
               </div>
               {success?.awaitingApproval ? (
                 <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                  Awaiting supervisor approval. These hours use the time you submitted, not the original raw clock span.
+                  Awaiting supervisor approval. These hours use the time you submitted, not the
+                  original raw clock span.
                 </p>
               ) : null}
               <p className="text-sm text-muted-foreground">
                 {success?.correctionSubmitted
                   ? "The shift is held for supervisor review. You can track its status on My timesheets from the Caseload Nectar pay card. If approved, the corrected times replace the recorded times for billing; if denied, you'll see the reviewer's note there."
                   : success?.evvClean
-                  ? "Your timesheet has been submitted to Records review for administrative sign-off. No further action required."
-                  : "Your timesheet has been submitted with a variance flag. An administrator will review the out-of-bounds justification before final approval."}
+                    ? "Your timesheet has been submitted to Records review for administrative sign-off. No further action required."
+                    : "Your timesheet has been submitted with a variance flag. An administrator will review the out-of-bounds justification before final approval."}
               </p>
               <div className="flex justify-end">
                 <Button
@@ -2686,9 +2491,11 @@ export function PunchPad({
                     setSuccess(null);
                     navigate({ to: "/dashboard" });
                   }}
-                  className={success?.evvClean
-                    ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                    : "bg-amber-600 hover:bg-amber-700 text-white"}
+                  className={
+                    success?.evvClean
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                      : "bg-amber-600 hover:bg-amber-700 text-white"
+                  }
                 >
                   Back to My Caseload
                 </Button>
@@ -2698,398 +2505,148 @@ export function PunchPad({
         </Dialog>
 
         {/* Clock-Out Compliance Modal */}
-        <Dialog open={showCompliance} onOpenChange={(o) => { if (!busy) setShowCompliance(o); }}>
+        <Dialog
+          open={showCompliance}
+          onOpenChange={(o) => {
+            if (!busy) setShowCompliance(o);
+          }}
+        >
           <DialogContent
             className="flex max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-2xl flex-col gap-0 overflow-hidden p-0 sm:max-h-[90vh] sm:w-full"
             onPointerDownOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
             <DialogHeader className="shrink-0 border-b border-border bg-background/95 px-4 py-3 backdrop-blur sm:px-6 sm:py-4">
-              <DialogTitle className="pr-8 text-base sm:text-lg">Shift Verification &amp; Medicaid Compliance Form</DialogTitle>
+              <DialogTitle className="pr-8 text-base sm:text-lg">
+                Shift Verification &amp; Medicaid Compliance Form
+              </DialogTitle>
               <DialogDescription className="text-xs sm:text-sm">
                 Complete the goals tracker and progress note below to submit your timesheet.
               </DialogDescription>
               {/* Live elapsed — pinned at top */}
               <div className="mt-2 flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Live Duration</span>
-                <span className="font-mono text-base font-bold tabular-nums sm:text-lg">{elapsed}</span>
+                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                  Live Duration
+                </span>
+                <span className="font-mono text-base font-bold tabular-nums sm:text-lg">
+                  {elapsed}
+                </span>
               </div>
             </DialogHeader>
 
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 pb-6 sm:px-6">
               <div className="grid gap-4">
-                {/* PCSP goals */}
-                <div className="grid gap-2">
-                  <h3 className="text-sm font-semibold">Person-Centered Support Plan (PCSP) Objectives Tracker</h3>
-                  <div className="grid gap-1.5 rounded-md border border-border p-3">
-                    {activeClientGoals.length === 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        No PCSP goals on file for this individual.
-                        Goals come from the uploaded PCSP on the client profile.
-                        Use baseline monitoring below.
-                      </p>
-                    )}
-                    {activeClientGoals.map((goal, idx) => {
-                      const id = `goal-${idx}`;
-                      const sel = !!checkedGoals[goal];
-                      return (
-                        <label
-                          key={id}
-                          htmlFor={id}
-                          className={`flex cursor-pointer items-start gap-2 rounded-md border p-1.5 text-sm ${
-                            sel ? selectedPill : unselectedPill
-                          }`}
-                        >
-                          <input
-                            id={id}
-                            type="checkbox"
-                            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[color:var(--amber-600)]"
-                            checked={sel}
-                            onChange={(e) => setCheckedGoals((p) => ({ ...p, [goal]: e.target.checked }))}
-                          />
-                          <span className="break-words">{goal}</span>
-                        </label>
-                      );
-                    })}
-                    <div className="my-1 border-t border-dashed border-border" />
-                    <label
-                      htmlFor="goal-baseline"
-                      className={`flex cursor-pointer items-start gap-2 rounded-md border p-1.5 text-sm ${
-                        baselineChecked ? selectedPill : unselectedPill
-                      }`}
-                    >
-                      <input
-                        id="goal-baseline"
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[color:var(--amber-600)]"
-                        checked={baselineChecked}
-                        onChange={(e) => setBaselineChecked(e.target.checked)}
-                      />
-                      <span className="break-words italic text-muted-foreground">
-                        General baseline monitoring &amp; safety oversight
-                      </span>
-                    </label>
-                  </div>
-                  {!hasGoalSelected && (
-                    <p className="text-[11px] text-muted-foreground">
-                      Select at least one goal worked on this shift.
-                    </p>
-                  )}
-                </div>
-
-                {/* Narrative */}
-                <div className="grid gap-2">
-                  <Label htmlFor="evv-narrative">
-                    Mandatory Progress Note &amp; Narrative Log
-                  </Label>
-                  {activeClientGoals.length > 0 && (
-                    <div className="rounded-md border border-border bg-muted/40 px-2.5 py-1.5 text-[11px] text-foreground">
-                      <span className="font-semibold">PCSP goals to address:</span>{" "}
-                      {activeClientGoals.slice(0, 3).join("; ")}
-                      {activeClientGoals.length > 3 && ` (+${activeClientGoals.length - 3} more)`}
-                    </div>
-                  )}
-                  <OriginalSpeechAudit transcript={originalTranscript} />
-                  <Textarea
-                    id="evv-narrative"
-                    rows={7}
-                    value={narrative}
-                    onChange={(e) => {
-                      setNarrative(e.target.value);
-                      if (showNarrativeError) setShowNarrativeError(false);
-                      if (completenessErrors.length) setCompletenessErrors([]);
-                    }}
-                    placeholder="Describe client behaviors, choices, goal responses, and any incidents observed during this shift…"
-                    maxLength={5000}
-                    className="min-h-[160px] w-full resize-y"
-                  />
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className={`text-xs font-medium ${narrativeOk ? "text-emerald-600" : "text-muted-foreground"}`}>
-                      Word Count: {wordCount} / {NECTAR_DRAFT_MIN_WORDS} words minimum
-                    </div>
-                    {speechSupported && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => (isRecording ? stopRecording() : startRecording())}
-                        className={`h-8 border ${isRecording ? selectedPill : unselectedPill}`}
-                      >
-                        {isRecording ? <MicOff className="mr-2 h-3.5 w-3.5" /> : <Mic className="mr-2 h-3.5 w-3.5" />}
-                        {isRecording ? "Stop voice" : "Dictate note"}
-                      </Button>
-                    )}
-                  </div>
-                  {showNarrativeError && !narrativeOk && (
-                    <div className="rounded-md border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
-                      Your progress note must be at least {NECTAR_DRAFT_MIN_WORDS} words and describe how you supported the person.
-                    </div>
-                  )}
-                  <NectarShiftNoteDraft
-                    narrative={narrative}
-                    goals={[
-                      ...Object.entries(checkedGoals).filter(([, v]) => v).map(([k]) => k),
-                      ...(baselineChecked ? ["General baseline monitoring & safety oversight"] : []),
-                    ]}
-                    clientFirstName={
-                      lockedClient?.name?.split(" ")?.[0] ??
-                      caseload.find((c) => c.id === active?.client_id)?.first_name ??
-                      "the client"
-                    }
-                    onApplyDraft={(draft) => {
-                      setNarrative(draft);
-                      setNectarDraftApplied(draft);
-                      if (completenessErrors.length) setCompletenessErrors([]);
-                    }}
-                    onUsed={() => setNectarUsed(true)}
-                  />
-                  <NectarCompletenessErrors checks={completenessErrors} />
-                </div>
-
-                {/* Incident report: explicit Yes/No so staff cannot skip it. */}
-                {active && (
-                  <div className="grid gap-2 rounded-md border border-border bg-muted/40 px-3 py-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <AlertTriangleIcon className="h-4 w-4 text-amber-600" />
-                      <span className="text-sm font-medium">
-                        Did anything happen this shift that needs an incident report?
-                      </span>
-                      {incidentReportIds.length > 0 && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:text-emerald-200">
-                          <CheckCircle2 className="h-3 w-3" />
-                          Incident report filed
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={incidentReportIds.length > 0}
-                        onClick={() => {
-                          setIncidentAnswer("no");
-                          setIncidentFlag(false);
-                          setIncidentDialogOpen(false);
-                        }}
-                        className={`min-h-[44px] rounded-md border px-3 py-2 text-xs font-medium ${incidentAnswer === "no" ? selectedPill : unselectedPill}`}
-                      >
-                        No
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setIncidentAnswer("yes");
-                          setIncidentFlag(true);
-                          setIncidentDialogOpen(true);
-                        }}
-                        className={`min-h-[44px] rounded-md border px-3 py-2 text-xs font-medium ${incidentAnswer === "yes" || incidentReportIds.length > 0 ? selectedPill : unselectedPill}`}
-                      >
-                        {incidentReportIds.length > 0 ? "Add another report" : "Yes"}
-                      </Button>
-                    </div>
-                    {incidentAnswer === "yes" && incidentReportIds.length === 0 && (
-                      <p className="text-[11px] text-muted-foreground">
-                        Submit the incident report before you can submit the timesheet.
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* NECTAR trigger gate — on-device lexicon scan; blocks submit until resolved */}
-                {active && (
-                  <NoteTriggerPrompt
-                    text={narrative}
-                    clientId={active.client_id}
-                    date={new Date().toISOString().slice(0, 10)}
-                    onOpenForm={(kind) => {
-                      if (kind === "incident") {
-                        // Open the IR dialog inline; submission marks the trigger
-                        // resolved AND flips incident_flag on this timesheet row.
-                        setIncidentTriggerOpen(true);
-                        setIncidentDialogOpen(true);
-                        return;
-                      }
-                      // Appointment: still send staff to the workspace to log it.
-                      navigate({ to: `/dashboard/workspace/${active.client_id}` });
-                      toast.message("Opened client workspace — log the appointment, then return.");
-                    }}
-                    onAllResolved={setTriggersResolved}
-                  />
-                )}
-
-                <IncidentReportDialog
-                  open={incidentDialogOpen && !!active}
-                  onOpenChange={(o) => {
-                    setIncidentDialogOpen(o);
-                    if (!o) setIncidentTriggerOpen(false);
-                  }}
-                  clientId={active?.client_id}
-                  triggeredByNoteId={active?.id}
-                  triggeredByNoteType={incidentTriggerOpen ? "evv_timesheet" : null}
-                  onSubmitted={(id) => {
-                    setIncidentReportIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-                    setIncidentFlag(true);
-                    setIncidentAnswer("yes");
-                    // Force the NoteTriggerPrompt poll to refetch so the
-                    // incident gate clears the moment the IR is submitted.
-                    qc.invalidateQueries({
-                      queryKey: ["incident-submitted-for", active?.client_id, new Date().toISOString().slice(0, 10)],
-                    });
-                  }}
+                <PunchPadGoalsSection
+                  goals={activeClientGoals}
+                  checkedGoals={checkedGoals}
+                  baselineChecked={baselineChecked}
+                  hasGoalSelected={hasGoalSelected}
+                  onGoalChange={(goal, checked) =>
+                    setCheckedGoals((current) => ({
+                      ...current,
+                      [goal]: checked,
+                    }))
+                  }
+                  onBaselineChange={setBaselineChecked}
                 />
 
+                <PunchPadNoteSection
+                  goals={activeClientGoals}
+                  selectedGoals={[
+                    ...Object.entries(checkedGoals)
+                      .filter(([, selected]) => selected)
+                      .map(([goal]) => goal),
+                    ...(baselineChecked ? ["General baseline monitoring & safety oversight"] : []),
+                  ]}
+                  clientFirstName={
+                    lockedClient?.name?.split(" ")?.[0] ??
+                    caseload.find((client) => client.id === active?.client_id)?.first_name ??
+                    "the client"
+                  }
+                  narrative={narrative}
+                  originalTranscript={originalTranscript}
+                  wordCount={wordCount}
+                  narrativeOk={narrativeOk}
+                  showNarrativeError={showNarrativeError}
+                  completenessErrors={completenessErrors}
+                  onNarrativeChange={setNarrative}
+                  onOriginalTranscriptChange={setOriginalTranscript}
+                  onClearValidationErrors={() => {
+                    if (showNarrativeError) setShowNarrativeError(false);
+                    if (completenessErrors.length) setCompletenessErrors([]);
+                  }}
+                  onDraftApplied={setNectarDraftApplied}
+                  onNectarUsed={() => setNectarUsed(true)}
+                />
 
-                {/* Post-shift Behavior Observations (provider-toggled) */}
-                {behaviorEnabled && (
-                  <BehaviorObservationsBoundary answersSnapshot={behaviorAnswers}>
-                    <BehaviorObservationsBlock
-                      value={behaviorAnswers}
-                      onChange={setBehaviorAnswers}
-                      targetBehaviorOptions={targetBehaviorOptions}
-                      onOpenIncident={() => setIncidentDialogOpen(true)}
-                    />
-                  </BehaviorObservationsBoundary>
-                )}
-
-                {/* Pre-submit medication check — routes staff into the real MAR */}
-                {active && org?.organization_id && (
-                  <ShiftMedDueCheckSlot
-                    organizationId={org.organization_id}
+                {active && (
+                  <PunchPadShiftSignals
+                    shiftId={active.id}
                     clientId={active.client_id}
                     clientName={active.client_name ?? "this client"}
+                    organizationId={org?.organization_id}
                     clockInIso={active.clock_in_timestamp}
-                    emarHref={`/dashboard/workspace/${active.client_id}?tab=mar-emar`}
-                    onResolvedChange={setMedDosesResolved}
+                    narrative={narrative}
+                    incidentAnswer={incidentAnswer}
+                    incidentReportIds={incidentReportIds}
+                    incidentDialogOpen={incidentDialogOpen}
+                    incidentTriggerOpen={incidentTriggerOpen}
+                    behaviorEnabled={behaviorEnabled}
+                    behaviorAnswers={behaviorAnswers}
+                    targetBehaviorOptions={targetBehaviorOptions}
+                    onIncidentAnswer={(answer) => {
+                      setIncidentAnswer(answer);
+                      setIncidentFlag(answer === "yes");
+                    }}
+                    onIncidentDialogOpenChange={setIncidentDialogOpen}
+                    onIncidentTriggerOpenChange={setIncidentTriggerOpen}
+                    onIncidentSubmitted={(id) => {
+                      setIncidentReportIds((previous) =>
+                        previous.includes(id) ? previous : [...previous, id],
+                      );
+                      setIncidentFlag(true);
+                      setIncidentAnswer("yes");
+                      void qc.invalidateQueries({
+                        queryKey: [
+                          "incident-submitted-for",
+                          active.client_id,
+                          new Date().toISOString().slice(0, 10),
+                        ],
+                      });
+                    }}
+                    onAppointmentTriggered={() => {
+                      navigate({
+                        to: `/dashboard/workspace/${active.client_id}`,
+                      });
+                      toast.message("Opened client workspace — log the appointment, then return.");
+                    }}
+                    onTriggersResolved={setTriggersResolved}
+                    onBehaviorChange={setBehaviorAnswers}
+                    onMedResolvedChange={setMedDosesResolved}
                     onPendingDosesChange={setPendingMedDoses}
                   />
                 )}
 
-
-
-                {/* NECTAR Completeness Check */}
-                <NectarInfusionLock
-                  featureName="Pre-submit completeness check"
-                  benefit="NECTAR cross-checks your shift before submit — purchases mentioned vs spending log, approved reimbursements vs receipts, EVV consistency — so issues get fixed before they become audit flags."
-                >
-                  <div className="rounded-lg border-2 border-[color:var(--amber-400)]/50 bg-white/60 px-3 py-3 shadow-sm backdrop-blur sm:px-4">
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 text-sm font-bold text-[color:var(--navy-900)]">
-                        <ShieldCheck className="h-4 w-4 text-[color:var(--amber-600)]" />
-                        NECTAR Completeness Check
-                      </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => { void runCompletenessCheck(); }}
-                        disabled={completenessBusy}
-                        className="border-[color:var(--amber-600)]/60 text-[color:var(--amber-700)] hover:bg-[color:var(--amber-50)]"
-                      >
-                        {completenessBusy && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-                        {completenessRan ? "Re-check" : "Run check"}
-                      </Button>
-                    </div>
-
-                    {!completenessRan && !completenessBusy && (
-                      <p className="text-[11px] leading-relaxed text-muted-foreground">
-                        Run a quick check before submitting — catches missing receipts, unlogged purchases, and goal/note mismatches while you can still fix them.
-                      </p>
-                    )}
-
-                    {completenessRan && completenessFlags.length === 0 && (
-                      <div className="flex items-start gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-800 dark:text-emerald-200">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-                        <span>All clear — paperwork is consistent and complete.</span>
-                      </div>
-                    )}
-
-                    {completenessFlags.length > 0 && (
-                      <ul className="space-y-2">
-                        {completenessFlags.map((f) => {
-                          const dismissed = !!dismissals[f.key];
-                          const isHard = f.severity === "hard";
-                          return (
-                            <li
-                              key={f.key}
-                              className={`rounded-md border px-3 py-2 backdrop-blur ${
-                                dismissed
-                                  ? "border-muted bg-muted/40"
-                                  : isHard
-                                  ? "border-rose-500/50 bg-rose-500/10"
-                                  : "border-[color:var(--amber-500)]/50 bg-[color:var(--amber-50)]/70"
-                              }`}
-                            >
-                              <div className="flex items-start gap-2">
-                                <span
-                                  className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                                    isHard
-                                      ? "bg-rose-600 text-white"
-                                      : "bg-[color:var(--amber-600)] text-white"
-                                  }`}
-                                >
-                                  {isHard ? "!" : "?"}
-                                </span>
-                                <div className="min-w-0 flex-1">
-                                  <p className={`text-xs font-medium leading-snug ${dismissed ? "text-muted-foreground line-through" : "text-[color:var(--navy-900)]"}`}>
-                                    {f.message}
-                                  </p>
-                                  {dismissed && (
-                                    <p className="mt-1 text-[10px] italic text-muted-foreground">
-                                      Dismissed: {dismissals[f.key]} — admin will review.
-                                    </p>
-                                  )}
-                                  {!dismissed && dismissingKey === f.key && (
-                                    <div className="mt-2 space-y-1.5">
-                                      <Textarea
-                                        rows={2}
-                                        value={dismissReasonDraft}
-                                        onChange={(e) => setDismissReasonDraft(e.target.value)}
-                                        placeholder="Why are you submitting without addressing this?"
-                                        className="min-h-[60px] text-xs"
-                                      />
-                                      <div className="flex gap-1.5">
-                                        <Button type="button" size="sm" variant="outline" onClick={() => { setDismissingKey(null); setDismissReasonDraft(""); }} className="h-8 text-[11px]">Cancel</Button>
-                                        <Button type="button" size="sm" onClick={() => confirmDismiss(f.key)} className="h-8 text-[11px]">Save reason</Button>
-                                      </div>
-                                    </div>
-                                  )}
-                                  {!dismissed && dismissingKey !== f.key && (
-                                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                                      <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => jumpToFix(f)}
-                                        className="h-8 gap-1 text-[11px]"
-                                      >
-                                        {f.fix?.route ? <ExternalLink className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
-                                        {f.fix?.label ?? "Fix"}
-                                      </Button>
-                                      {!isHard && (
-                                        <Button
-                                          type="button"
-                                          size="sm"
-                                          variant="ghost"
-                                          onClick={() => { setDismissingKey(f.key); setDismissReasonDraft(""); }}
-                                          className="h-8 text-[11px] text-muted-foreground"
-                                        >
-                                          Dismiss with reason
-                                        </Button>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                  </div>
-                </NectarInfusionLock>
+                <PunchPadCompletenessPanel
+                  ran={completenessRan}
+                  busy={completenessBusy}
+                  flags={completenessFlags}
+                  dismissals={dismissals}
+                  dismissingKey={dismissingKey}
+                  dismissReason={dismissReasonDraft}
+                  onRun={() => void runCompletenessCheck()}
+                  onJumpToFix={jumpToFix}
+                  onStartDismiss={(key) => {
+                    setDismissingKey(key);
+                    setDismissReasonDraft("");
+                  }}
+                  onCancelDismiss={() => {
+                    setDismissingKey(null);
+                    setDismissReasonDraft("");
+                  }}
+                  onDismissReasonChange={setDismissReasonDraft}
+                  onConfirmDismiss={confirmDismiss}
+                />
 
                 {/* Long-shift acknowledgement / correction request — lives in
                     the scrollable area so a growing correction panel never
@@ -3100,7 +2657,10 @@ export function PunchPad({
                       <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                       <div className="space-y-2">
                         <p>
-                          This shift shows <span className="font-mono font-semibold">{elapsed}</span>. If you forgot to clock out or the times are wrong, request a time correction below instead of confirming these times.
+                          This shift shows{" "}
+                          <span className="font-mono font-semibold">{elapsed}</span>. If you forgot
+                          to clock out or the times are wrong, request a time correction below
+                          instead of confirming these times.
                         </p>
                         <div className="flex flex-wrap items-center gap-3">
                           <label
@@ -3154,7 +2714,9 @@ export function PunchPad({
                           Request a time correction
                         </p>
                         <p className="mt-0.5 text-[11px] text-muted-foreground">
-                          Enter what your clock-in and/or clock-out should have been. Your supervisor reviews the request and either approves the corrected times (they become the billable times) or denies it with a note.
+                          Enter what your clock-in and/or clock-out should have been. Your
+                          supervisor reviews the request and either approves the corrected times
+                          (they become the billable times) or denies it with a note.
                         </p>
                       </div>
                     </div>
@@ -3168,7 +2730,11 @@ export function PunchPad({
                           className="mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm"
                         />
                         <p className="mt-0.5 text-[10px] text-muted-foreground">
-                          Recorded: {new Date(active.clock_in_timestamp).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                          Recorded:{" "}
+                          {new Date(active.clock_in_timestamp).toLocaleString(undefined, {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          })}
                         </p>
                       </div>
                       <div>
@@ -3180,12 +2746,19 @@ export function PunchPad({
                           className="mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm"
                         />
                         <p className="mt-0.5 text-[10px] text-muted-foreground">
-                          Recorded: about to be set to now ({new Date(now).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}).
+                          Recorded: about to be set to now (
+                          {new Date(now).toLocaleString(undefined, {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          })}
+                          ).
                         </p>
                       </div>
                     </div>
                     <div className="mt-2">
-                      <Label className="text-[11px] font-medium">Reason (visible to your supervisor)</Label>
+                      <Label className="text-[11px] font-medium">
+                        Reason (visible to your supervisor)
+                      </Label>
                       <Textarea
                         rows={2}
                         value={correctionReason}
@@ -3225,7 +2798,8 @@ export function PunchPad({
                         onChange={(e) => setNectarAssistChecked(e.target.checked)}
                       />
                       <span className="leading-relaxed text-amber-900 dark:text-amber-100">
-                        I used NECTAR to help draft this note. I reviewed the draft and confirm it is accurate.
+                        I used NECTAR to help draft this note. I reviewed the draft and confirm it
+                        is accurate.
                       </span>
                     </label>
                   </div>
@@ -3247,15 +2821,16 @@ export function PunchPad({
                       }}
                     />
                     <span className="leading-relaxed text-amber-900 dark:text-amber-100">
-                      I attest that this shift note is accurate and truthful, that it reflects services I
-                      personally provided, and that I understand submitting false Medicaid documentation
-                      constitutes fraud.
+                      I attest that this shift note is accurate and truthful, that it reflects
+                      services I personally provided, and that I understand submitting false
+                      Medicaid documentation constitutes fraud.
                     </span>
                   </label>
                   <p className="mt-2 flex items-start gap-1.5 text-xs font-medium text-amber-800 dark:text-amber-200">
                     <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                    Warning: Falsification of Medicaid service records is a federal offense under 18 U.S.C. § 1347
-                    and may result in exclusion, civil penalties, and criminal prosecution.
+                    Warning: Falsification of Medicaid service records is a federal offense under 18
+                    U.S.C. § 1347 and may result in exclusion, civil penalties, and criminal
+                    prosecution.
                   </p>
                   {attestationChecked && attestationTimestamp && (
                     <p className="mt-2 text-[11px] text-muted-foreground">
@@ -3276,54 +2851,19 @@ export function PunchPad({
               </div>
             </div>
 
-
-            <div className="shrink-0 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:px-6 sm:py-4">
-              <div className="flex flex-col gap-2">
-
-                <div className="flex items-center justify-end text-[11px]">
-                  {hardwareDenied ? (
-                    <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-amber-800 dark:text-amber-200">
-                      ⚠️ Location blocked — check device permission
-                    </span>
-                  ) : awaitingGps ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-muted-foreground">
-                      <Loader2 className="h-3 w-3 animate-spin" /> Getting location…
-                    </span>
-                  ) : livePos && gpsConfident ? (
-                    <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-emerald-800 dark:text-emerald-200">
-                      📍 Location ready ✓
-                    </span>
-                  ) : livePos ? (
-                    <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-amber-800 dark:text-amber-200">
-                      📍 GPS too coarse — waiting
-                    </span>
-                  ) : (
-                    <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-muted-foreground">
-                      📍 Acquiring location…
-                    </span>
-                  )}
-                </div>
-                <div
-                  className="w-full"
-                  onMouseEnter={() => { if (!narrativeOk) setShowNarrativeError(true); }}
-                  onClick={() => { if (!narrativeOk) setShowNarrativeError(true); }}
-                >
-                  <Button
-                    type="button"
-                    onClick={() => submitCompliance()}
-                    disabled={!canSubmitCompliance || aiBusy}
-                    className={
-                      correctionOpen && correctionHasChange
-                        ? "w-full bg-amber-600 text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
-                        : "w-full bg-orange-500 text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
-                    }
-                  >
-                    {(busy || aiBusy) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {aiBusy ? "Checking note…" : awaitingGps ? "Getting location…" : "Submit Timeclock"}
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <PunchPadSubmitFooter
+              hardwareDenied={hardwareDenied}
+              awaitingGps={awaitingGps}
+              livePos={livePos}
+              gpsConfident={gpsConfident}
+              canSubmit={canSubmitCompliance}
+              busy={busy}
+              aiBusy={aiBusy}
+              narrativeOk={narrativeOk}
+              correctionRequested={correctionOpen && correctionHasChange}
+              onNarrativeError={() => setShowNarrativeError(true)}
+              onSubmit={() => void submitCompliance()}
+            />
           </DialogContent>
         </Dialog>
 
@@ -3334,38 +2874,3 @@ export function PunchPad({
     </EvvConsentGate>
   );
 }
-
-/**
- * Wraps ShiftMedDueCheck with a windowEnd captured ONCE per shift (keyed on
- * clockInIso). The parent re-renders every second to drive the live shift
- * timer; without this the React Query key would change every second and
- * refetch continuously.
- */
-function ShiftMedDueCheckSlot(props: {
-  organizationId: string;
-  clientId: string;
-  clientName: string;
-  clockInIso: string;
-  emarHref: string;
-  onResolvedChange: (resolved: boolean) => void;
-  onPendingDosesChange: (pending: PendingMedDose[]) => void;
-}) {
-  const windowEnd = useMemo(
-    () => new Date().toISOString(),
-    // Only recompute when the active shift itself changes.
-    [props.clockInIso],
-  );
-  return (
-    <ShiftMedDueCheck
-      organizationId={props.organizationId}
-      clientId={props.clientId}
-      clientName={props.clientName}
-      windowStart={props.clockInIso}
-      windowEnd={windowEnd}
-      emarHref={props.emarHref}
-      onResolvedChange={props.onResolvedChange}
-      onPendingDosesChange={props.onPendingDosesChange}
-    />
-  );
-}
-
