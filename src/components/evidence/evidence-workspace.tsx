@@ -85,6 +85,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
       requirementKeys: string[];
       suggestedKeys: string[];
       packKeys: string[];
+      typeOverrides?: Record<string, EvidenceType>;
     }) =>
       applyFn({
         data: { organizationId: orgId!, subjectType: tab, ...args },
@@ -225,6 +226,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
               requirementKeys: args.requirementKeys,
               suggestedKeys: args.suggestedKeys,
               packKeys: args.packKeys,
+              typeOverrides: args.typeOverrides,
             });
           }}
           onSaveTemplate={(args) =>

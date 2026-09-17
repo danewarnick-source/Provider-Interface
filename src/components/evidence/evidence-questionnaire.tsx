@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
   cadenceLabel,
+  chipsForRequirementKey,
   defaultQuestionnaireAnswers,
   packsForSubject,
   requirementByKey,
@@ -15,6 +16,7 @@ import {
   EVIDENCE_UNCHECK_WARNING,
   SERVICE_CODE_FLAGS,
   type EvidenceSubject,
+  type EvidenceType,
   type QuestionnaireAnswers,
   type ServiceCodeFlag,
 } from "@/lib/evidence/types.ts";
@@ -46,6 +48,7 @@ export function EvidenceQuestionnaire({
     packKeys: string[];
     suggestedKeys: string[];
     optedOutKeys: string[];
+    typeOverrides: Record<string, EvidenceType>;
   }) => void;
   onSaveTemplate: (args: {
     name: string;
@@ -66,6 +69,7 @@ export function EvidenceQuestionnaire({
   );
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const [optedOut, setOptedOut] = useState<Set<string>>(() => new Set());
+  const [typeByKey, setTypeByKey] = useState<Record<string, EvidenceType>>({});
   const [liability, setLiability] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [optOutKey, setOptOutKey] = useState<string | null>(null);
@@ -75,6 +79,14 @@ export function EvidenceQuestionnaire({
       const next = new Set(prev);
       for (const key of suggestedKeys) {
         if (!optedOut.has(key)) next.add(key);
+      }
+      return next;
+    });
+    setTypeByKey((prev) => {
+      const next = { ...prev };
+      for (const key of suggestedKeys) {
+        if (next[key]) continue;
+        next[key] = requirementByKey(key)?.evidenceType ?? "upload";
       }
       return next;
     });
@@ -121,6 +133,15 @@ export function EvidenceQuestionnaire({
     p.requirementKeys.every((k) => checked.has(k)),
   );
 
+  const typeOverrides = useMemo(() => {
+    const out: Record<string, EvidenceType> = {};
+    for (const key of checked) {
+      const chosen = typeByKey[key] ?? requirementByKey(key)?.evidenceType ?? "upload";
+      out[key] = chosen;
+    }
+    return out;
+  }, [checked, typeByKey]);
+
   const apply = () => {
     if (!liability) return;
     onApply({
@@ -129,11 +150,15 @@ export function EvidenceQuestionnaire({
       packKeys: selectedPacks.map((p) => p.key),
       suggestedKeys,
       optedOutKeys: suggestedKeys.filter((k) => !checked.has(k)),
+      typeOverrides,
     });
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      data-evidence-quiz=""
+      className="flex flex-col gap-6 pb-[max(7rem,calc(env(safe-area-inset-bottom)+5.5rem))]"
+    >
       <div>
         <h2 className="text-xl font-semibold tracking-tight text-[var(--hive-text)]">
           {subject === "client"
@@ -161,15 +186,6 @@ export function EvidenceQuestionnaire({
               </label>
             ))}
           </div>
-          {suggested.length > 0 ? (
-            <p className="mt-4 rounded-xl bg-sky-50 px-3 py-2 text-sm text-sky-950">
-              Suggested: {suggested.map((s) => s.pack.title).join(" + ")}.
-            </p>
-          ) : (
-            <p className="mt-4 text-sm text-muted-foreground">
-              No extra service pack yet. All-staff starter still applies for staff.
-            </p>
-          )}
         </section>
       ) : null}
 
@@ -189,7 +205,7 @@ export function EvidenceQuestionnaire({
                     setAnswers((a) => ({ ...a, transportsPeople: true }));
                   }}
                 />
-                Yes — suggest driving record / insurance proof
+                Yes — driving record / insurance proof
               </label>
               <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
                 <input
@@ -200,7 +216,7 @@ export function EvidenceQuestionnaire({
                     setAnswers((a) => ({ ...a, transportsPeople: false }));
                   }}
                 />
-                No — does not transport (opt out)
+                No — does not transport
               </label>
             </div>
           </section>
@@ -215,7 +231,7 @@ export function EvidenceQuestionnaire({
                     setAnswers((a) => ({ ...a, worksWithAbi: v === true }));
                   }}
                 />
-                Works with ABI / brain-injury caseload — suggest ABI training
+                Works with ABI / brain-injury caseload
               </label>
               <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
                 <Checkbox
@@ -224,7 +240,7 @@ export function EvidenceQuestionnaire({
                     setAnswers((a) => ({ ...a, maySupportAggressiveBehavior: v === true }));
                   }}
                 />
-                May support people with aggressive behavior — suggest Mandt / behavior cert
+                May support people with aggressive behavior
               </label>
             </div>
           </section>
@@ -237,26 +253,56 @@ export function EvidenceQuestionnaire({
           {[...new Set([...suggestedKeys, ...checked])]
             .map((key) => requirementByKey(key))
             .filter((row): row is NonNullable<typeof row> => !!row)
-            .map((row) => (
-              <li
-                key={row.key}
-                className="flex items-start justify-between gap-3 rounded-xl border border-border px-3 py-2.5"
-              >
-                <label className="flex min-w-0 cursor-pointer items-start gap-3">
-                  <Checkbox
-                    checked={checked.has(row.key)}
-                    onCheckedChange={() => toggleKey(row.key)}
-                  />
-                  <span>
-                    <span className="block text-sm font-medium">{row.title}</span>
-                    <span className="block text-xs text-muted-foreground">
-                      {row.evidenceType === "upload" ? "Upload" : "Attest"} ·{" "}
-                      {cadenceLabel(row.cadence)} · {row.sowCite}
+            .map((row) => {
+              const chips = chipsForRequirementKey(row.key, suggested);
+              const evidenceType = typeByKey[row.key] ?? row.evidenceType;
+              return (
+                <li key={row.key} className="rounded-xl border border-border px-3 py-2.5">
+                  <label className="flex min-w-0 cursor-pointer items-start gap-3">
+                    <Checkbox
+                      checked={checked.has(row.key)}
+                      onCheckedChange={() => toggleKey(row.key)}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-sm font-medium">{row.title}</span>
+                        {chips.map((chip) => (
+                          <span
+                            key={chip}
+                            className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700"
+                          >
+                            {chip}
+                          </span>
+                        ))}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        {cadenceLabel(row.cadence)}
+                        {row.sowCite ? ` · ${row.sowCite}` : ""}
+                      </span>
                     </span>
-                  </span>
-                </label>
-              </li>
-            ))}
+                  </label>
+                  <div className="mt-2 pl-8">
+                    <label className="sr-only" htmlFor={`ev-type-${row.key}`}>
+                      Evidence type for {row.title}
+                    </label>
+                    <select
+                      id={`ev-type-${row.key}`}
+                      value={evidenceType}
+                      onChange={(e) =>
+                        setTypeByKey((prev) => ({
+                          ...prev,
+                          [row.key]: e.target.value as EvidenceType,
+                        }))
+                      }
+                      className="h-9 w-full max-w-[11rem] rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="upload">Upload</option>
+                      <option value="attestation">Attestation</option>
+                    </select>
+                  </div>
+                </li>
+              );
+            })}
         </ul>
         {optOutKey ? (
           <div className="mt-4 rounded-xl border border-border bg-muted/40 p-3 text-sm">
@@ -273,46 +319,52 @@ export function EvidenceQuestionnaire({
         ) : null}
       </section>
 
-      <label className="flex items-start gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm">
-        <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
-        <span>{EVIDENCE_LIABILITY_TEXT}</span>
-      </label>
-
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="grid gap-1.5">
-          <Label htmlFor="evidence-template-name">Save template</Label>
-          <div className="flex gap-2">
-            <Input
-              id="evidence-template-name"
-              value={templateName}
-              onChange={(e) => setTemplateName(e.target.value)}
-              placeholder="e.g. HHS host starter"
-              className="w-56"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!templateName.trim() || checked.size === 0 || pending}
-              onClick={() =>
-                onSaveTemplate({
-                  name: templateName.trim(),
-                  answers,
-                  requirementKeys: [...checked],
-                  packKeys: selectedPacks.map((p) => p.key),
-                })
-              }
-            >
-              Save template
-            </Button>
+      <div
+        className="sticky bottom-0 z-20 -mx-4 space-y-3 border-t border-border bg-[var(--hive-canvas)] px-4 pt-3 md:-mx-8 md:px-8"
+        style={{
+          paddingBottom: "max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))",
+        }}
+      >
+        <label className="flex items-start gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm">
+          <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
+          <span>{EVIDENCE_LIABILITY_TEXT}</span>
+        </label>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="grid min-w-0 flex-1 gap-1.5">
+            <Label htmlFor="evidence-template-name">Save template</Label>
+            <div className="flex flex-wrap gap-2">
+              <Input
+                id="evidence-template-name"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                placeholder="Template name"
+                className="min-w-[10rem] flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!templateName.trim() || checked.size === 0 || pending}
+                onClick={() =>
+                  onSaveTemplate({
+                    name: templateName.trim(),
+                    answers,
+                    requirementKeys: [...checked],
+                    packKeys: selectedPacks.map((p) => p.key),
+                  })
+                }
+              >
+                Save template
+              </Button>
+            </div>
           </div>
+          <Button
+            type="button"
+            disabled={!liability || checked.size === 0 || pending}
+            onClick={apply}
+          >
+            {pending ? "Applying…" : "Apply packs"}
+          </Button>
         </div>
-        <Button
-          type="button"
-          disabled={!liability || checked.size === 0 || pending}
-          onClick={apply}
-        >
-          {pending ? "Applying…" : "Apply packs"}
-        </Button>
       </div>
     </div>
   );

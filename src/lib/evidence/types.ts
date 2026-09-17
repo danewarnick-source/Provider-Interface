@@ -72,6 +72,8 @@ export type QuestionnaireAnswers = {
 export type EvidencePackDef = {
   key: string;
   title: string;
+  /** Short chip on suggested rows — All-staff, Transport, HHS, ABI, … */
+  chip: string;
   subject: EvidenceSubject;
   description: string;
   requirementKeys: readonly string[];

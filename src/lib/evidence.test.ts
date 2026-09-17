@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   EVIDENCE_PACKS,
   EVIDENCE_REQUIREMENTS,
+  chipsForRequirementKey,
   defaultQuestionnaireAnswers,
   hostHomeDualLinkPeerKey,
   isBuiltInTaxFormKey,
@@ -82,6 +83,27 @@ describe("Evidence curated catalog", () => {
     assert.ok(EVIDENCE_PACKS.some((p) => p.key === "all_staff_starter"));
     assert.ok(EVIDENCE_PACKS.some((p) => p.key === "company_starter"));
     assert.ok(EVIDENCE_REQUIREMENTS.some((r) => r.dualLink === "host_home_cert"));
+    assert.equal(
+      EVIDENCE_PACKS.every((p) => p.chip.trim().length > 0),
+      true,
+    );
+  });
+
+  it("labels each suggested row with its pack chip", () => {
+    const staff = suggestPacks(defaultQuestionnaireAnswers("staff"));
+    assert.deepEqual(chipsForRequirementKey("cpr_first_aid", staff), ["All-staff"]);
+    assert.deepEqual(chipsForRequirementKey("driving_record", staff), ["Transport"]);
+    const hhs = suggestPacks({
+      ...defaultQuestionnaireAnswers("staff"),
+      serviceCodes: ["HHS"] as ServiceCodeFlag[],
+    });
+    assert.deepEqual(chipsForRequirementKey("host_home_cert", hhs), ["HHS"]);
+    const abi = suggestPacks({
+      ...defaultQuestionnaireAnswers("staff"),
+      transportsPeople: false,
+      worksWithAbi: true,
+    });
+    assert.deepEqual(chipsForRequirementKey("abi_training", abi), ["ABI"]);
   });
 
   it("suggests all-staff + transport by default for staff, and gates HHS/SEI/BC", () => {
@@ -299,6 +321,15 @@ describe("Evidence nav + product lock", () => {
     );
     assert.doesNotMatch(workspace, /1 · Grid|EVIDENCE_DISCLAIMER|amber-50/);
     assert.match(workspace, /SubjectAssignPicker/);
+
+    const quiz = readFileSync(
+      new URL("./../components/evidence/evidence-questionnaire.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(quiz, /data-evidence-quiz/);
+    assert.match(quiz, /chipsForRequirementKey/);
+    assert.match(quiz, /Attestation/);
+    assert.doesNotMatch(quiz, /amber-50|Not called compliance/);
     assert.equal(EVIDENCE_CADENCE_OPTIONS.length, 7);
     assert.deepEqual(
       EVIDENCE_CADENCE_OPTIONS.map((o) => o.value),

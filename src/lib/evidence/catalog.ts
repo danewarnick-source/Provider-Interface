@@ -230,6 +230,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "all_staff_starter",
     title: "All-staff starter",
+    chip: "All-staff",
     subject: "staff",
     description: "CPR / First Aid, background screening, and 30-day orientation.",
     requirementKeys: ["cpr_first_aid", "background_screening", "thirty_day_orientation"],
@@ -237,6 +238,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "transport",
     title: "Transport",
+    chip: "Transport",
     subject: "staff",
     description: "Driving record and insurance proof for staff who transport people.",
     requirementKeys: ["driving_record", "auto_insurance_proof"],
@@ -244,6 +246,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "mandt_behavior",
     title: "Mandt / behavior",
+    chip: "Mandt/behavior",
     subject: "staff",
     description:
       "Behavior-intervention certification when the caseload may include aggression risk.",
@@ -252,6 +255,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "abi",
     title: "ABI",
+    chip: "ABI",
     subject: "staff",
     description: "ABI training before working alone with an ABI caseload.",
     requirementKeys: ["abi_training"],
@@ -259,6 +263,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "hhs_staff",
     title: "HHS host-home file",
+    chip: "HHS",
     subject: "staff",
     description: "Host Home Certification — same document dual-linked to the HHS client.",
     requirementKeys: ["host_home_cert"],
@@ -266,6 +271,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "hhs_client",
     title: "HHS host-home file",
+    chip: "HHS",
     subject: "client",
     description: "Host Home Certification — same document dual-linked to the host staff.",
     requirementKeys: ["host_home_cert_client"],
@@ -273,6 +279,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "sei",
     title: "SEI",
+    chip: "SEI",
     subject: "staff",
     description: "ACRE / customized employment training for SEI staff.",
     requirementKeys: ["sei_acre"],
@@ -280,6 +287,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "bc1_staff",
     title: "BC1 staff creds",
+    chip: "BC1",
     subject: "staff",
     description: "BC1 credential on the staff file.",
     requirementKeys: ["bc1_staff_cred"],
@@ -287,6 +295,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "bc2_staff",
     title: "BC2 staff creds",
+    chip: "BC2",
     subject: "staff",
     description: "BC2 credential on the staff file.",
     requirementKeys: ["bc2_staff_cred"],
@@ -294,6 +303,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "bc3_staff",
     title: "BC3 staff creds",
+    chip: "BC3",
     subject: "staff",
     description: "BC3 credential on the staff file.",
     requirementKeys: ["bc3_staff_cred"],
@@ -301,6 +311,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "bc1_client",
     title: "BC1 client FBA / BSP",
+    chip: "BC1",
     subject: "client",
     description: "Functional behavior assessment and behavior support plan for BC1.",
     requirementKeys: ["bc1_fba_bsp"],
@@ -308,6 +319,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "bc2_client",
     title: "BC2 client FBA / BSP",
+    chip: "BC2",
     subject: "client",
     description: "Functional behavior assessment and behavior support plan for BC2.",
     requirementKeys: ["bc2_fba_bsp"],
@@ -315,6 +327,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "bc3_client",
     title: "BC3 client FBA / BSP",
+    chip: "BC3",
     subject: "client",
     description: "Functional behavior assessment and behavior support plan for BC3.",
     requirementKeys: ["bc3_fba_bsp"],
@@ -322,6 +335,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
   {
     key: "company_starter",
     title: "Company starter",
+    chip: "Company",
     subject: "company",
     description:
       "Insurance, Medicaid enrollment, and BAA. Shift notes, EVV, and summaries stay in their own workflows.",
@@ -416,6 +430,20 @@ export function suggestedRequirementKeys(answers: QuestionnaireAnswers): string[
     for (const key of row.pack.requirementKeys) keys.add(key);
   }
   return [...keys];
+}
+
+/** Pack chips for a requirement, preferring currently suggested packs. */
+export function chipsForRequirementKey(
+  key: string,
+  suggested: readonly SuggestedPack[] = [],
+): string[] {
+  const fromSuggested = suggested
+    .filter((row) => row.pack.requirementKeys.includes(key))
+    .map((row) => row.pack.chip);
+  if (fromSuggested.length > 0) return [...new Set(fromSuggested)];
+  return [
+    ...new Set(EVIDENCE_PACKS.filter((p) => p.requirementKeys.includes(key)).map((p) => p.chip)),
+  ];
 }
 
 export function isSowSuggestedKey(key: string, answers: QuestionnaireAnswers): boolean {

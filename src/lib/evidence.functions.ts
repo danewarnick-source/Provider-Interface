@@ -518,6 +518,7 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
         requirementKeys: z.array(z.string().min(1)).min(1),
         suggestedKeys: z.array(z.string()).optional(),
         packKeys: z.array(z.string()).optional(),
+        typeOverrides: z.record(z.string(), TypeEnum).optional(),
         dualLinkClientId: z.string().uuid().nullable().optional(),
         dualLinkStaffId: z.string().uuid().nullable().optional(),
       })
@@ -542,12 +543,22 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
             i.requirement_key === key,
         );
         if (exists) continue;
+        const overrideType = data.typeOverrides?.[key];
+        const def = requirementByKey(key);
+        const evidenceType = overrideType ?? def?.evidenceType ?? "upload";
         const row = buildItemFromKey({
           organizationId: data.organizationId,
           subjectType: data.subjectType,
           subjectId,
           requirementKey: key,
           suggested: suggested.has(key),
+          custom: {
+            evidenceType,
+            attestationText:
+              evidenceType === "attestation"
+                ? def?.attestationText || `I attest that ${def?.title ?? key} is complete.`
+                : null,
+          },
         });
         await insertItem(sb, viaTables, data.organizationId, row);
         created.push(row);
