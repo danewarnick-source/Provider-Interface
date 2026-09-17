@@ -58,6 +58,8 @@ describe("Compliance nav lock", () => {
     assert.match(nav, /to: "\/dashboard\/compliance", label: "Compliance"/);
     assert.match(nav, /item\.to === "\/dashboard\/compliance"/);
     assert.doesNotMatch(block, /state-audit/);
+    assert.doesNotMatch(block, /label: "Audit"/);
+    assert.doesNotMatch(block, /\/dashboard\/audit/);
     assert.doesNotMatch(block, /label: "Reports"/);
     assert.doesNotMatch(block, /command-center/);
     assert.doesNotMatch(block, /compliance-desk/);
