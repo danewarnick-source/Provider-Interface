@@ -55,8 +55,7 @@ describe("Compliance nav lock", () => {
     const block = nav.slice(start, end);
     const labels = [...block.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
     assert.deepEqual(labels, [...ADMIN_PRIMARY_NAV_LABELS]);
-    assert.match(nav, /to: "\/dashboard\/compliance", label: "Compliance"/);
-    assert.match(nav, /item\.to === "\/dashboard\/compliance"/);
+    assert.match(nav, /to: "\/dashboard\/evidence", label: "Evidence"/);
     assert.doesNotMatch(block, /state-audit/);
     assert.doesNotMatch(block, /label: "Audit"/);
     assert.doesNotMatch(block, /\/dashboard\/audit/);

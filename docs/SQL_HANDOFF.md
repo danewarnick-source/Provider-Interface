@@ -1,5 +1,38 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
+## ACTION — Evidence Phase 1 tables (2026-09-17)
+
+**Do not run until Dane approves the PR.** Additive only — never drop
+existing tables or columns. Does **not** seed W-9 / I-9. Does **not**
+write `requirement_defs` or revive the encoded SOW applicability engine.
+
+**What this is for:** Admin Evidence (people × requirements). Curated
+packs live in app code. These tables persist assigned rows, uploads /
+attestations, and saved templates. Until this runs, the app still
+persists on `organizations.feature_config.evidence_v1`.
+
+**To apply:** paste the full contents of
+`supabase/migrations/20260917220000_evidence_phase1.sql`
+into Lovable’s SQL editor (clear the editor first) and run it.
+
+**What you'll see:** `Success. No rows returned` (or already-exists notices).
+
+**Confirm (paste this next, after clearing the editor):**
+
+```sql
+SELECT string_agg(table_name, ' | ' ORDER BY table_name) AS tables_ok
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN ('evidence_items', 'evidence_files', 'evidence_templates');
+
+SELECT string_agg(id, ' | ' ORDER BY id) AS buckets_ok
+FROM storage.buckets
+WHERE id = 'evidence-files';
+```
+
+You want `evidence_files | evidence_items | evidence_templates` and
+`evidence-files`.
+
 ## ACTION — Drop Chores / Chore Chart tables (2026-09-18) — hold for Dane
 
 **Do not Soft-apply / execute against Hive-Platform production from this PR.**

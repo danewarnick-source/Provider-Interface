@@ -22,26 +22,18 @@ function parseLegacySearch(s: Record<string, unknown>): LegacySearch {
 
 /**
  * Legacy company-obligations / Obligations register.
- * Agency file is the company surface. Staff pack dues live on Staff file.
+ * Primary admin surface is now Evidence.
  */
 export const Route = createFileRoute("/dashboard/company-obligations")({
-  head: () => ({ meta: [{ title: "Agency file — Provider Interface" }] }),
+  head: () => ({ meta: [{ title: "Evidence — Provider Interface" }] }),
   validateSearch: parseLegacySearch,
   beforeLoad: ({ search }) => {
     const tab = typeof search.tab === "string" ? search.tab : "";
-    if (tab === "action-required" || tab === "onboarding" || tab === "credentials" || tab === "client") {
-      throw redirect({
-        to: "/dashboard/compliance",
-        search: { tab: "staff" },
-        replace: true,
-      });
-    }
+    const mapped =
+      tab === "client" ? "client" : tab === "policy-library" || tab === "policies" ? "company" : "staff";
     throw redirect({
-      to: "/dashboard/compliance",
-      search:
-        tab === "policy-library" || tab === "policies"
-          ? { tab: "company-policies" }
-          : { tab: "agency" },
+      to: "/dashboard/evidence",
+      search: { tab: mapped },
       replace: true,
     });
   },

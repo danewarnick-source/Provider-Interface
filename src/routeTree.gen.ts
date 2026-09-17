@@ -75,6 +75,7 @@ import { Route as DashboardMyObligationsRouteImport } from './routes/dashboard.m
 import { Route as DashboardMyHistoricalTimesheetsRouteImport } from './routes/dashboard.my-historical-timesheets'
 import { Route as DashboardMyHistoricalRecordsRouteImport } from './routes/dashboard.my-historical-records'
 import { Route as DashboardMyHistoricalDailyNotesRouteImport } from './routes/dashboard.my-historical-daily-notes'
+import { Route as DashboardMyEvidenceRouteImport } from './routes/dashboard.my-evidence'
 import { Route as DashboardMyClientTrainingsRouteImport } from './routes/dashboard.my-client-trainings'
 import { Route as DashboardInvitationsRouteImport } from './routes/dashboard.invitations'
 import { Route as DashboardInternalAuditRouteImport } from './routes/dashboard.internal-audit'
@@ -91,6 +92,7 @@ import { Route as DashboardFinancialRouteImport } from './routes/dashboard.finan
 import { Route as DashboardExternalComplianceRouteImport } from './routes/dashboard.external-compliance'
 import { Route as DashboardExternalCertificationsRouteImport } from './routes/dashboard.external-certifications'
 import { Route as DashboardEvvArchiveRouteImport } from './routes/dashboard.evv-archive'
+import { Route as DashboardEvidenceRouteImport } from './routes/dashboard.evidence'
 import { Route as DashboardEmarRouteImport } from './routes/dashboard.emar'
 import { Route as DashboardDeadlinesRouteImport } from './routes/dashboard.deadlines'
 import { Route as DashboardDayProgramRouteImport } from './routes/dashboard.day-program'
@@ -578,6 +580,11 @@ const DashboardMyHistoricalDailyNotesRoute =
     path: '/my-historical-daily-notes',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardMyEvidenceRoute = DashboardMyEvidenceRouteImport.update({
+  id: '/my-evidence',
+  path: '/my-evidence',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardMyClientTrainingsRoute =
   DashboardMyClientTrainingsRouteImport.update({
     id: '/my-client-trainings',
@@ -661,6 +668,11 @@ const DashboardExternalCertificationsRoute =
 const DashboardEvvArchiveRoute = DashboardEvvArchiveRouteImport.update({
   id: '/evv-archive',
   path: '/evv-archive',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardEvidenceRoute = DashboardEvidenceRouteImport.update({
+  id: '/evidence',
+  path: '/evidence',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardEmarRoute = DashboardEmarRouteImport.update({
@@ -1553,6 +1565,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/day-program': typeof DashboardDayProgramRoute
   '/dashboard/deadlines': typeof DashboardDeadlinesRoute
   '/dashboard/emar': typeof DashboardEmarRoute
+  '/dashboard/evidence': typeof DashboardEvidenceRoute
   '/dashboard/evv-archive': typeof DashboardEvvArchiveRoute
   '/dashboard/external-certifications': typeof DashboardExternalCertificationsRoute
   '/dashboard/external-compliance': typeof DashboardExternalComplianceRoute
@@ -1569,6 +1582,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/internal-audit': typeof DashboardInternalAuditRoute
   '/dashboard/invitations': typeof DashboardInvitationsRoute
   '/dashboard/my-client-trainings': typeof DashboardMyClientTrainingsRoute
+  '/dashboard/my-evidence': typeof DashboardMyEvidenceRoute
   '/dashboard/my-historical-daily-notes': typeof DashboardMyHistoricalDailyNotesRoute
   '/dashboard/my-historical-records': typeof DashboardMyHistoricalRecordsRoute
   '/dashboard/my-historical-timesheets': typeof DashboardMyHistoricalTimesheetsRoute
@@ -1782,6 +1796,7 @@ export interface FileRoutesByTo {
   '/dashboard/day-program': typeof DashboardDayProgramRoute
   '/dashboard/deadlines': typeof DashboardDeadlinesRoute
   '/dashboard/emar': typeof DashboardEmarRoute
+  '/dashboard/evidence': typeof DashboardEvidenceRoute
   '/dashboard/evv-archive': typeof DashboardEvvArchiveRoute
   '/dashboard/external-certifications': typeof DashboardExternalCertificationsRoute
   '/dashboard/external-compliance': typeof DashboardExternalComplianceRoute
@@ -1795,6 +1810,7 @@ export interface FileRoutesByTo {
   '/dashboard/internal-audit': typeof DashboardInternalAuditRoute
   '/dashboard/invitations': typeof DashboardInvitationsRoute
   '/dashboard/my-client-trainings': typeof DashboardMyClientTrainingsRoute
+  '/dashboard/my-evidence': typeof DashboardMyEvidenceRoute
   '/dashboard/my-historical-daily-notes': typeof DashboardMyHistoricalDailyNotesRoute
   '/dashboard/my-historical-records': typeof DashboardMyHistoricalRecordsRoute
   '/dashboard/my-historical-timesheets': typeof DashboardMyHistoricalTimesheetsRoute
@@ -2013,6 +2029,7 @@ export interface FileRoutesById {
   '/dashboard/day-program': typeof DashboardDayProgramRoute
   '/dashboard/deadlines': typeof DashboardDeadlinesRoute
   '/dashboard/emar': typeof DashboardEmarRoute
+  '/dashboard/evidence': typeof DashboardEvidenceRoute
   '/dashboard/evv-archive': typeof DashboardEvvArchiveRoute
   '/dashboard/external-certifications': typeof DashboardExternalCertificationsRoute
   '/dashboard/external-compliance': typeof DashboardExternalComplianceRoute
@@ -2029,6 +2046,7 @@ export interface FileRoutesById {
   '/dashboard/internal-audit': typeof DashboardInternalAuditRoute
   '/dashboard/invitations': typeof DashboardInvitationsRoute
   '/dashboard/my-client-trainings': typeof DashboardMyClientTrainingsRoute
+  '/dashboard/my-evidence': typeof DashboardMyEvidenceRoute
   '/dashboard/my-historical-daily-notes': typeof DashboardMyHistoricalDailyNotesRoute
   '/dashboard/my-historical-records': typeof DashboardMyHistoricalRecordsRoute
   '/dashboard/my-historical-timesheets': typeof DashboardMyHistoricalTimesheetsRoute
@@ -2249,6 +2267,7 @@ export interface FileRouteTypes {
     | '/dashboard/day-program'
     | '/dashboard/deadlines'
     | '/dashboard/emar'
+    | '/dashboard/evidence'
     | '/dashboard/evv-archive'
     | '/dashboard/external-certifications'
     | '/dashboard/external-compliance'
@@ -2265,6 +2284,7 @@ export interface FileRouteTypes {
     | '/dashboard/internal-audit'
     | '/dashboard/invitations'
     | '/dashboard/my-client-trainings'
+    | '/dashboard/my-evidence'
     | '/dashboard/my-historical-daily-notes'
     | '/dashboard/my-historical-records'
     | '/dashboard/my-historical-timesheets'
@@ -2478,6 +2498,7 @@ export interface FileRouteTypes {
     | '/dashboard/day-program'
     | '/dashboard/deadlines'
     | '/dashboard/emar'
+    | '/dashboard/evidence'
     | '/dashboard/evv-archive'
     | '/dashboard/external-certifications'
     | '/dashboard/external-compliance'
@@ -2491,6 +2512,7 @@ export interface FileRouteTypes {
     | '/dashboard/internal-audit'
     | '/dashboard/invitations'
     | '/dashboard/my-client-trainings'
+    | '/dashboard/my-evidence'
     | '/dashboard/my-historical-daily-notes'
     | '/dashboard/my-historical-records'
     | '/dashboard/my-historical-timesheets'
@@ -2708,6 +2730,7 @@ export interface FileRouteTypes {
     | '/dashboard/day-program'
     | '/dashboard/deadlines'
     | '/dashboard/emar'
+    | '/dashboard/evidence'
     | '/dashboard/evv-archive'
     | '/dashboard/external-certifications'
     | '/dashboard/external-compliance'
@@ -2724,6 +2747,7 @@ export interface FileRouteTypes {
     | '/dashboard/internal-audit'
     | '/dashboard/invitations'
     | '/dashboard/my-client-trainings'
+    | '/dashboard/my-evidence'
     | '/dashboard/my-historical-daily-notes'
     | '/dashboard/my-historical-records'
     | '/dashboard/my-historical-timesheets'
@@ -3409,6 +3433,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardMyHistoricalDailyNotesRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/my-evidence': {
+      id: '/dashboard/my-evidence'
+      path: '/my-evidence'
+      fullPath: '/dashboard/my-evidence'
+      preLoaderRoute: typeof DashboardMyEvidenceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/my-client-trainings': {
       id: '/dashboard/my-client-trainings'
       path: '/my-client-trainings'
@@ -3519,6 +3550,13 @@ declare module '@tanstack/react-router' {
       path: '/evv-archive'
       fullPath: '/dashboard/evv-archive'
       preLoaderRoute: typeof DashboardEvvArchiveRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/evidence': {
+      id: '/dashboard/evidence'
+      path: '/evidence'
+      fullPath: '/dashboard/evidence'
+      preLoaderRoute: typeof DashboardEvidenceRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/emar': {
@@ -4915,6 +4953,7 @@ interface DashboardRouteChildren {
   DashboardDayProgramRoute: typeof DashboardDayProgramRoute
   DashboardDeadlinesRoute: typeof DashboardDeadlinesRoute
   DashboardEmarRoute: typeof DashboardEmarRoute
+  DashboardEvidenceRoute: typeof DashboardEvidenceRoute
   DashboardEvvArchiveRoute: typeof DashboardEvvArchiveRoute
   DashboardExternalCertificationsRoute: typeof DashboardExternalCertificationsRoute
   DashboardExternalComplianceRoute: typeof DashboardExternalComplianceRoute
@@ -4931,6 +4970,7 @@ interface DashboardRouteChildren {
   DashboardInternalAuditRoute: typeof DashboardInternalAuditRoute
   DashboardInvitationsRoute: typeof DashboardInvitationsRoute
   DashboardMyClientTrainingsRoute: typeof DashboardMyClientTrainingsRoute
+  DashboardMyEvidenceRoute: typeof DashboardMyEvidenceRoute
   DashboardMyHistoricalDailyNotesRoute: typeof DashboardMyHistoricalDailyNotesRoute
   DashboardMyHistoricalRecordsRoute: typeof DashboardMyHistoricalRecordsRoute
   DashboardMyHistoricalTimesheetsRoute: typeof DashboardMyHistoricalTimesheetsRoute
@@ -5016,6 +5056,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardDayProgramRoute: DashboardDayProgramRoute,
   DashboardDeadlinesRoute: DashboardDeadlinesRoute,
   DashboardEmarRoute: DashboardEmarRoute,
+  DashboardEvidenceRoute: DashboardEvidenceRoute,
   DashboardEvvArchiveRoute: DashboardEvvArchiveRoute,
   DashboardExternalCertificationsRoute: DashboardExternalCertificationsRoute,
   DashboardExternalComplianceRoute: DashboardExternalComplianceRoute,
@@ -5033,6 +5074,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardInternalAuditRoute: DashboardInternalAuditRoute,
   DashboardInvitationsRoute: DashboardInvitationsRoute,
   DashboardMyClientTrainingsRoute: DashboardMyClientTrainingsRoute,
+  DashboardMyEvidenceRoute: DashboardMyEvidenceRoute,
   DashboardMyHistoricalDailyNotesRoute: DashboardMyHistoricalDailyNotesRoute,
   DashboardMyHistoricalRecordsRoute: DashboardMyHistoricalRecordsRoute,
   DashboardMyHistoricalTimesheetsRoute: DashboardMyHistoricalTimesheetsRoute,
