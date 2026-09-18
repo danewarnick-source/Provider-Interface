@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, FileText, PenLine, Plus, Search, Settings, Upload, X } from "lucide-react";
+import { Check, FileText, PenLine, Plus, Search, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,10 +25,13 @@ import {
 } from "@/lib/evidence.functions";
 import { type EvidenceStep } from "@/lib/evidence/nav.ts";
 import {
+  cellStatus,
   formatExpiresOn,
   latestFileForItem,
   type EvidenceCellStatus,
 } from "@/lib/evidence/status.ts";
+import { fetchEvidenceClientPeople } from "@/lib/evidence/fetch-clients.ts";
+import { skipGetStartedKey } from "@/lib/evidence/people.ts";
 import {
   EVIDENCE_CADENCE_OPTIONS,
   type EvidenceCadence,
@@ -68,11 +71,26 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
   const linkFn = useServerFn(linkHostHomeEvidence);
 
   const orgId = org?.organization_id;
+  const [skippedStart, setSkippedStart] = useState(false);
   const boardQ = useQuery({
     enabled: !!orgId,
     queryKey: ["evidence-board", orgId, tab],
     queryFn: () => loadFn({ data: { organizationId: orgId!, subject: tab } }),
   });
+  const clientsQ = useQuery({
+    enabled: !!orgId,
+    queryKey: ["evidence-clients", orgId],
+    queryFn: async (): Promise<EvidencePerson[]> => {
+      const listed = await fetchEvidenceClientPeople(orgId!);
+      if (listed.error) throw new Error(listed.error);
+      return listed.people;
+    },
+  });
+
+  useEffect(() => {
+    if (!orgId || typeof window === "undefined") return;
+    setSkippedStart(window.sessionStorage.getItem(skipGetStartedKey(orgId)) === "1");
+  }, [orgId]);
 
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: ["evidence-board", orgId] });
@@ -169,7 +187,18 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
   });
 
   const board = boardQ.data;
-  const person = board?.people.find((p) => p.id === personId) ?? null;
+  const clientPeople = clientsQ.data ?? [];
+  const people =
+    tab === "client"
+      ? clientPeople.length > 0 || clientsQ.isSuccess || clientsQ.isError
+        ? clientPeople
+        : (board?.people ?? [])
+      : (board?.people ?? []);
+  const person =
+    people.find((p) => p.id === personId) ??
+    board?.people.find((p) => p.id === personId) ??
+    board?.staffPicker.find((p) => p.id === personId) ??
+    null;
   const activeItem =
     board?.items.find((i) => i.id === itemId) ??
     (person ? board?.items.find((i) => i.subject_id === person.id) : undefined) ??
@@ -187,8 +216,35 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
   }
 
   const showQuiz = step === "quiz" || wizard;
-
   const onGrid = !showQuiz && step === "grid";
+  const peopleError =
+    tab === "client"
+      ? clientsQ.error instanceof Error
+        ? clientsQ.error.message
+        : (board?.peopleError ?? null)
+      : (board?.peopleError ?? null);
+  const orgItemCount = board?.orgItemCount ?? 0;
+  const showGetStarted =
+    onGrid && !!board && !boardQ.isLoading && orgItemCount === 0 && !skippedStart && !wizard;
+  const peopleLoading =
+    tab === "client" ? clientsQ.isLoading || boardQ.isLoading : boardQ.isLoading;
+
+  const skipGetStarted = () => {
+    if (orgId && typeof window !== "undefined") {
+      window.sessionStorage.setItem(skipGetStartedKey(orgId), "1");
+    }
+    setSkippedStart(true);
+    onSearchChange({ tab, step: "grid", wizard: false });
+  };
+
+  const openQuizFor = (nextTab: EvidenceSubject, nextPerson: string | null) => {
+    onSearchChange({
+      tab: nextTab,
+      step: "quiz",
+      person: nextPerson,
+      wizard: true,
+    });
+  };
 
   return (
     <div className="space-y-5">
@@ -206,38 +262,57 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
         ) : null}
       </header>
 
-      {showQuiz ? (
-        <EvidenceQuestionnaire
-          subject={tab}
-          onApply={(args) => {
-            const subjectIds = personId
-              ? [personId]
-              : tab === "company"
-                ? [org.organization_id]
-                : [];
-            if (subjectIds.length === 0) {
-              toast.error(
-                "Pick a person on the grid first, or open this from Add employee / Add client.",
-              );
-              return;
-            }
-            applyM.mutate({
-              subjectIds,
-              requirementKeys: args.requirementKeys,
-              suggestedKeys: args.suggestedKeys,
-              packKeys: args.packKeys,
-              typeOverrides: args.typeOverrides,
-            });
-          }}
-          onSaveTemplate={(args) =>
-            saveTplM.mutate({
-              name: args.name,
-              packKeys: args.packKeys,
-              requirementKeys: args.requirementKeys,
-            })
-          }
-          pending={applyM.isPending || saveTplM.isPending}
+      {showGetStarted ? (
+        <GetStartedPanel
+          tab={tab}
+          staff={board?.staffPicker ?? []}
+          clients={clientPeople}
+          clientsLoading={clientsQ.isLoading}
+          clientsError={clientsQ.error instanceof Error ? clientsQ.error.message : null}
+          companyId={org.organization_id}
+          onOpenQuiz={openQuizFor}
+          onSkip={skipGetStarted}
         />
+      ) : showQuiz ? (
+        <>
+          {person ? (
+            <p className="text-sm text-muted-foreground">
+              Adding evidence for{" "}
+              <span className="font-medium text-foreground">{person.full_name}</span>
+            </p>
+          ) : tab === "company" ? (
+            <p className="text-sm text-muted-foreground">Adding company evidence</p>
+          ) : null}
+          <EvidenceQuestionnaire
+            subject={tab}
+            onApply={(args) => {
+              const subjectIds = personId
+                ? [personId]
+                : tab === "company"
+                  ? [org.organization_id]
+                  : [];
+              if (subjectIds.length === 0) {
+                toast.error("Open Add on a person to apply a pack.");
+                return;
+              }
+              applyM.mutate({
+                subjectIds,
+                requirementKeys: args.requirementKeys,
+                suggestedKeys: args.suggestedKeys,
+                packKeys: args.packKeys,
+                typeOverrides: args.typeOverrides,
+              });
+            }}
+            onSaveTemplate={(args) =>
+              saveTplM.mutate({
+                name: args.name,
+                packKeys: args.packKeys,
+                requirementKeys: args.requirementKeys,
+              })
+            }
+            pending={applyM.isPending || saveTplM.isPending}
+          />
+        </>
       ) : step === "pack" ? (
         <PackSettingsPanel
           board={board}
@@ -249,8 +324,8 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
       ) : step === "newtype" ? (
         <NewRequirementPanel
           tab={tab}
-          people={tab === "company" ? [] : (board?.people ?? [])}
-          peopleLoading={boardQ.isLoading}
+          people={tab === "company" ? [] : people}
+          peopleLoading={peopleLoading}
           defaultSubjectIds={personId ? [personId] : tab === "company" ? [org.organization_id] : []}
           onCancel={() => onSearchChange({ tab, step: "grid", person: personId })}
           onSave={(payload) => upsertM.mutate(payload)}
@@ -272,20 +347,22 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
       ) : (
         <GridPanel
           board={board}
+          people={people}
+          peopleError={peopleError}
           tab={tab}
-          loading={boardQ.isLoading}
+          loading={peopleLoading}
+          orgItemCount={orgItemCount}
           onTabChange={(next) => onSearchChange({ tab: next, step: "grid" })}
           onOpenPerson={(id) => onSearchChange({ tab, step: "grid", person: id })}
           onOpenCell={(id, item) => onSearchChange({ tab, step: "review", person: id, item })}
-          onOpenPack={() => onSearchChange({ tab, step: "pack", person: personId })}
-          onOpenAdd={() => onSearchChange({ tab, step: "newtype", person: personId })}
-          onOpenQuiz={() => onSearchChange({ tab, step: "quiz", person: personId, wizard: true })}
+          onAddForPerson={(id) => openQuizFor(tab === "company" ? "company" : tab, id)}
         />
       )}
 
-      {step === "grid" && person ? (
+      {step === "grid" && !showGetStarted && person ? (
         <PersonPackEditor
           board={board}
+          person={person}
           personId={person.id}
           tab={tab}
           staffPicker={board?.staffPicker ?? []}
@@ -304,36 +381,61 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, wizard, onSearc
 
 function GridPanel({
   board,
+  people: roster,
+  peopleError,
   tab,
   loading,
+  orgItemCount,
   onTabChange,
   onOpenPerson,
   onOpenCell,
-  onOpenPack,
-  onOpenAdd,
-  onOpenQuiz,
+  onAddForPerson,
 }: {
   board: EvidenceBoard | undefined;
+  people: EvidencePerson[];
+  peopleError: string | null;
   tab: EvidenceSubject;
   loading: boolean;
+  orgItemCount: number;
   onTabChange: (tab: EvidenceSubject) => void;
   onOpenPerson: (id: string) => void;
   onOpenCell: (personId: string, itemId: string | null) => void;
-  onOpenPack: () => void;
-  onOpenAdd: () => void;
-  onOpenQuiz: () => void;
+  onAddForPerson: (id: string) => void;
 }) {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"all" | EvidenceCellStatus>("all");
+  const today = new Date().toISOString().slice(0, 10);
   const people = useMemo(() => {
-    const list = board?.people ?? [];
     const needle = q.trim().toLowerCase();
-    if (!needle) return list;
-    return list.filter((p) => p.full_name.toLowerCase().includes(needle));
-  }, [board?.people, q]);
+    if (!needle) return roster;
+    return roster.filter((p) => p.full_name.toLowerCase().includes(needle));
+  }, [roster, q]);
 
-  const cellOf = (subjectId: string, requirementKey: string) =>
-    board?.cells.find((c) => c.subjectId === subjectId && c.requirementKey === requirementKey);
+  const cellOf = (subjectId: string, requirementKey: string) => {
+    const fromBoard = board?.cells.find(
+      (c) => c.subjectId === subjectId && c.requirementKey === requirementKey,
+    );
+    if (fromBoard) return fromBoard;
+    const found = board?.items.find(
+      (i) => i.subject_id === subjectId && i.requirement_key === requirementKey,
+    );
+    if (!found) return undefined;
+    const file = latestFileForItem(board?.files ?? [], found.id);
+    return {
+      subjectId,
+      requirementKey,
+      itemId: found.id,
+      status: cellStatus({ item: found, file, today }),
+      expiresOn: found.expires_on,
+    };
+  };
+
+  const emptyCopy =
+    tab === "client"
+      ? "No clients yet."
+      : tab === "company"
+        ? "Company file is empty."
+        : "No staff yet.";
 
   return (
     <section className="space-y-4">
@@ -344,6 +446,20 @@ function GridPanel({
           <TabsTrigger value="company">Company</TabsTrigger>
         </TabsList>
       </Tabs>
+
+      {orgItemCount === 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            No evidence rows yet. Add a pack on a person to start tracking.
+          </p>
+          {tab === "company" && people[0] ? (
+            <Button type="button" size="sm" onClick={() => onAddForPerson(people[0]!.id)}>
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              Add
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[220px] flex-1">
@@ -365,29 +481,23 @@ function GridPanel({
           <option value="expiring">Expiring soon</option>
           <option value="missing">Missing</option>
         </select>
-        <Button type="button" variant="outline" size="sm" onClick={onOpenPack}>
-          <Settings className="mr-1.5 h-3.5 w-3.5" />
-          Settings
-        </Button>
-        <Button type="button" variant="outline" size="sm" onClick={onOpenQuiz}>
-          Hire questionnaire
-        </Button>
-        <Button type="button" size="sm" onClick={onOpenAdd}>
-          <Plus className="mr-1.5 h-3.5 w-3.5" />
-          Add
-        </Button>
       </div>
+
+      {peopleError ? (
+        <div
+          role="alert"
+          className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+        >
+          Could not load {tab === "client" ? "clients" : "people"}: {peopleError}
+        </div>
+      ) : null}
 
       <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
         {loading ? (
           <div className="p-8 text-sm text-muted-foreground">Loading Evidence…</div>
         ) : !people.length ? (
           <div className="p-8 text-sm text-muted-foreground">
-            {tab === "client"
-              ? "No clients yet."
-              : tab === "company"
-                ? "Company file is empty."
-                : "No staff yet."}
+            {peopleError ? `Could not load this list. ${peopleError}` : emptyCopy}
           </div>
         ) : (
           <table className="min-w-full text-sm">
@@ -399,6 +509,9 @@ function GridPanel({
                     {col.label}
                   </th>
                 ))}
+                <th className="px-3 py-3 text-right font-medium">
+                  <span className="sr-only">Add evidence</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -439,7 +552,7 @@ function GridPanel({
                     </td>
                     {(board?.columns ?? []).map((col) => {
                       const cell = cellOf(person.id, col.requirementKey);
-                      const cellStatus = cell?.status ?? "missing";
+                      const glyph = cell?.status ?? "missing";
                       return (
                         <td key={col.requirementKey} className="px-3 py-3 text-center">
                           <button
@@ -447,11 +560,22 @@ function GridPanel({
                             onClick={() => onOpenCell(person.id, cell?.itemId ?? null)}
                             className="inline-flex"
                           >
-                            <EvidenceStatusGlyph status={cellStatus} />
+                            <EvidenceStatusGlyph status={glyph} />
                           </button>
                         </td>
                       );
                     })}
+                    <td className="px-3 py-3 text-right">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onAddForPerson(person.id)}
+                      >
+                        <Plus className="mr-1.5 h-3.5 w-3.5" />
+                        Add
+                      </Button>
+                    </td>
                   </tr>
                 );
               })}
@@ -962,6 +1086,7 @@ function ReviewPanel({
 
 function PersonPackEditor({
   board,
+  person,
   personId,
   tab,
   staffPicker,
@@ -974,6 +1099,7 @@ function PersonPackEditor({
   pending,
 }: {
   board: EvidenceBoard | undefined;
+  person: EvidencePerson;
   personId: string;
   tab: EvidenceSubject;
   staffPicker: EvidenceBoard["staffPicker"];
@@ -985,13 +1111,10 @@ function PersonPackEditor({
   onLink: (itemId: string, peerSubjectId: string) => void;
   pending: boolean;
 }) {
-  const person = board?.people.find((p) => p.id === personId);
   const rows = (board?.items ?? []).filter((i) => i.subject_id === personId);
   const [selected, setSelected] = useState<string[]>([]);
   const [peerId, setPeerId] = useState("");
   const [sendStaff, setSendStaff] = useState(personId);
-
-  if (!person) return null;
 
   return (
     <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -1046,14 +1169,13 @@ function PersonPackEditor({
           </li>
         ))}
         {rows.length === 0 ? (
-          <li className="text-sm text-muted-foreground">
-            No rows yet. Run the hire questionnaire or add a requirement.
-          </li>
+          <li className="text-sm text-muted-foreground">No rows yet. Use Add to apply a pack.</li>
         ) : null}
       </ul>
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" onClick={onQuiz}>
-          Hire questionnaire
+          <Plus className="mr-1.5 h-3.5 w-3.5" />
+          Add
         </Button>
         {tab !== "staff" ? (
           <select
@@ -1096,6 +1218,103 @@ function PersonPackEditor({
             </Button>
           </div>
         ) : null}
+      </div>
+    </section>
+  );
+}
+
+function GetStartedPanel({
+  tab,
+  staff,
+  clients,
+  clientsLoading,
+  clientsError,
+  companyId,
+  onOpenQuiz,
+  onSkip,
+}: {
+  tab: EvidenceSubject;
+  staff: EvidencePerson[];
+  clients: EvidencePerson[];
+  clientsLoading: boolean;
+  clientsError: string | null;
+  companyId: string;
+  onOpenQuiz: (tab: EvidenceSubject, personId: string | null) => void;
+  onSkip: () => void;
+}) {
+  const [which, setWhich] = useState<EvidenceSubject>(tab === "company" ? "staff" : tab);
+  const list = which === "client" ? clients : which === "staff" ? staff : [];
+  const loading = which === "client" && clientsLoading;
+  const error = which === "client" ? clientsError : null;
+  const noun = which === "client" ? "client" : "staff";
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <h2 className="text-xl font-semibold text-[var(--hive-text)]">Get started with Evidence</h2>
+      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+        Add the first staff or client pack. Suggested rows stay suggestions until you apply them. If
+        your agency already tracks this elsewhere, skip and add a person from the grid later.
+      </p>
+
+      <Tabs value={which} onValueChange={(v) => setWhich(v as EvidenceSubject)} className="mt-6">
+        <TabsList className="h-auto">
+          <TabsTrigger value="staff">Staff</TabsTrigger>
+          <TabsTrigger value="client">Clients</TabsTrigger>
+          <TabsTrigger value="company">Company</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {which === "company" ? (
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border px-4 py-4">
+          <div>
+            <p className="text-sm font-medium">Company file</p>
+            <p className="text-xs text-muted-foreground">
+              Policies and agency-wide evidence. No person list.
+            </p>
+          </div>
+          <Button type="button" onClick={() => onOpenQuiz("company", companyId)}>
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
+            Add
+          </Button>
+        </div>
+      ) : loading ? (
+        <p className="mt-5 text-sm text-muted-foreground">Loading {noun}s…</p>
+      ) : error ? (
+        <p role="alert" className="mt-5 text-sm text-destructive">
+          Could not load {noun}s: {error}
+        </p>
+      ) : list.length === 0 ? (
+        <p className="mt-5 text-sm text-muted-foreground">
+          {which === "client" ? "No clients yet." : "No staff yet."}
+        </p>
+      ) : (
+        <ul className="mt-5 divide-y divide-border rounded-xl border border-border">
+          {list.map((person) => (
+            <li key={person.id} className="flex items-center justify-between gap-3 px-4 py-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+                  {person.initials}
+                </span>
+                <span>
+                  <span className="block text-sm font-medium">{person.full_name}</span>
+                  {person.subtitle ? (
+                    <span className="block text-xs text-muted-foreground">{person.subtitle}</span>
+                  ) : null}
+                </span>
+              </div>
+              <Button type="button" size="sm" onClick={() => onOpenQuiz(which, person.id)}>
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Add
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-6">
+        <Button type="button" variant="ghost" onClick={onSkip}>
+          Skip for now
+        </Button>
       </div>
     </section>
   );

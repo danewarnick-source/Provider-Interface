@@ -19,6 +19,12 @@ import {
   resolveEvidenceStep,
   resolveEvidenceTab,
 } from "./evidence/nav.ts";
+import {
+  isListedEvidenceClient,
+  loadEvidenceClientPeople,
+  mapClientRowsToPeople,
+  skipGetStartedKey,
+} from "./evidence/people.ts";
 import { addCadence, cellStatus, staffInitials } from "./evidence/status.ts";
 import {
   EVIDENCE_CADENCE_OPTIONS,
@@ -203,6 +209,75 @@ describe("Evidence curated catalog", () => {
   });
 });
 
+describe("Evidence people roster", () => {
+  it("lists discharged and inactive clients, hides only archived", () => {
+    assert.equal(isListedEvidenceClient("active"), true);
+    assert.equal(isListedEvidenceClient("discharged"), true);
+    assert.equal(isListedEvidenceClient("inactive"), true);
+    assert.equal(isListedEvidenceClient(null), true);
+    assert.equal(isListedEvidenceClient("archived"), false);
+    assert.equal(isListedEvidenceClient("Archived"), false);
+  });
+
+  it("maps client rows and surfaces query errors instead of an empty roster", async () => {
+    const people = mapClientRowsToPeople([
+      {
+        id: "c-2",
+        first_name: "Bea",
+        last_name: "Stone",
+        account_status: "active",
+        authorized_dspd_codes: ["HHS"],
+      },
+      {
+        id: "c-1",
+        first_name: "Ann",
+        last_name: "Lee",
+        account_status: "discharged",
+        job_code: ["SLN"],
+      },
+      {
+        id: "c-3",
+        first_name: "Gone",
+        last_name: "Client",
+        account_status: "archived",
+      },
+    ]);
+    assert.deepEqual(
+      people.map((p) => p.id),
+      ["c-1", "c-2"],
+    );
+    assert.equal(people[0]?.subtitle, "SLN");
+    assert.equal(people[1]?.subtitle, "HHS");
+
+    const failed = await loadEvidenceClientPeople(async () => ({
+      data: null,
+      error: { message: "permission denied for table clients" },
+    }));
+    assert.deepEqual(failed.people, []);
+    assert.match(failed.error ?? "", /permission denied/);
+
+    const slim = await loadEvidenceClientPeople(async (columns) => {
+      if (columns.includes("job_code")) {
+        return { data: null, error: { message: "column job_code does not exist" } };
+      }
+      return {
+        data: [
+          {
+            id: "c-9",
+            first_name: "Pat",
+            last_name: "Ng",
+            account_status: "active",
+          },
+        ],
+        error: null,
+      };
+    });
+    assert.equal(slim.error, null);
+    assert.equal(slim.people[0]?.full_name, "Pat Ng");
+    assert.equal(skipGetStartedKey("org-1"), "evidence-get-started-skip:org-1");
+  });
+});
+
 describe("Evidence cell status", () => {
   it("marks missing, expiring soon, and done without inventing a score", () => {
     assert.equal(cellStatus({ item: null, file: null, today: "2026-09-17" }), "missing");
@@ -320,7 +395,20 @@ describe("Evidence nav + product lock", () => {
       "utf8",
     );
     assert.doesNotMatch(workspace, /1 · Grid|EVIDENCE_DISCLAIMER|amber-50/);
+    assert.doesNotMatch(workspace, />Settings<|>Hire questionnaire/);
+    assert.match(workspace, /Get started with Evidence/);
+    assert.match(workspace, /Skip for now/);
+    assert.match(workspace, /onAddForPerson/);
+    assert.match(workspace, /fetchEvidenceClientPeople/);
+    assert.doesNotMatch(workspace, /\.from\(["']clients["']\)/);
     assert.match(workspace, /SubjectAssignPicker/);
+
+    const fetchClients = readFileSync(
+      new URL("./evidence/fetch-clients.ts", import.meta.url),
+      "utf8",
+    );
+    assert.match(fetchClients, /supabase as any/);
+    assert.match(fetchClients, /\.from\(["']clients["']\)/);
 
     const quiz = readFileSync(
       new URL("./../components/evidence/evidence-questionnaire.tsx", import.meta.url),
@@ -344,6 +432,8 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(fn, /duty-applicability/);
     assert.match(fn, /supabase as AnySupabase|supabase as any/);
     assert.match(fn, /feature_config/);
+    assert.match(fn, /peopleError/);
+    assert.match(fn, /loadEvidenceClientPeople/);
     assert.match(EVIDENCE_PUSH_BODY, /evidence item/);
     assert.doesNotMatch(EVIDENCE_PUSH_BODY, /client|medicaid|diagnosis/i);
 

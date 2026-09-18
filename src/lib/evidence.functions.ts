@@ -9,6 +9,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { hostHomeDualLinkPeerKey, packByKey, requirementByKey } from "./evidence/catalog.ts";
+import { loadEvidenceClientPeople } from "./evidence/people.ts";
 import { addCadence, cellStatus, latestFileForItem, staffInitials } from "./evidence/status.ts";
 import {
   EVIDENCE_CADENCES,
@@ -299,37 +300,14 @@ async function listStaffPeople(sb: AnySupabase, organizationId: string): Promise
 async function listClientPeople(
   sb: AnySupabase,
   organizationId: string,
-): Promise<EvidencePerson[]> {
-  const { data, error } = await sb
-    .from("clients")
-    .select("id, first_name, last_name, account_status, authorized_dspd_codes, job_code")
-    .eq("organization_id", organizationId);
-  if (error) throw new Error(error.message);
-  return (
-    (data ?? []) as Array<{
-      id: string;
-      first_name: string | null;
-      last_name: string | null;
-      account_status: string | null;
-      authorized_dspd_codes: string[] | null;
-      job_code: string[] | null;
-    }>
-  )
-    .filter((c) => {
-      const status = (c.account_status ?? "active").toLowerCase();
-      return status !== "discharged" && status !== "inactive" && status !== "archived";
-    })
-    .map((c) => {
-      const name = `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "Client";
-      const codes = c.authorized_dspd_codes ?? c.job_code ?? [];
-      return {
-        id: c.id,
-        full_name: name,
-        initials: staffInitials(name),
-        subtitle: codes.length ? codes.join(", ") : null,
-      };
-    })
-    .sort((a, b) => a.full_name.localeCompare(b.full_name));
+): Promise<{ people: EvidencePerson[]; error: string | null }> {
+  return loadEvidenceClientPeople((columns) =>
+    sb
+      .from("clients")
+      .select(columns)
+      .eq("organization_id", organizationId)
+      .order("last_name", { ascending: true }),
+  );
 }
 
 function companyPerson(organizationId: string, orgName: string): EvidencePerson {
@@ -410,6 +388,8 @@ export type EvidenceBoard = {
   files: EvidenceFileRow[];
   templates: EvidenceTemplateRow[];
   staffPicker: EvidencePerson[];
+  orgItemCount: number;
+  peopleError: string | null;
 };
 
 function boardFromStore(args: {
@@ -419,6 +399,7 @@ function boardFromStore(args: {
   store: StoreV1;
   staffPicker: EvidencePerson[];
   today: string;
+  peopleError?: string | null;
 }): EvidenceBoard {
   const items = args.store.items.filter((i) => i.subject_type === args.subject);
   const colMap = new Map<string, EvidenceGridColumn>();
@@ -458,6 +439,8 @@ function boardFromStore(args: {
     files: args.store.files.filter((f) => items.some((i) => i.id === f.item_id)),
     templates: args.store.templates.filter((t) => t.subject_type === args.subject),
     staffPicker: args.staffPicker,
+    orgItemCount: args.store.items.length,
+    peopleError: args.peopleError ?? null,
   };
 }
 
@@ -488,7 +471,12 @@ export const loadEvidenceBoard = createServerFn({ method: "POST" })
     const { store, viaTables } = await loadAll(sb, data.organizationId);
     const staff = await listStaffPeople(sb, data.organizationId);
     let people: EvidencePerson[] = staff;
-    if (data.subject === "client") people = await listClientPeople(sb, data.organizationId);
+    let peopleError: string | null = null;
+    if (data.subject === "client") {
+      const listed = await listClientPeople(sb, data.organizationId);
+      people = listed.people;
+      peopleError = listed.error;
+    }
     if (data.subject === "company") {
       const { data: org } = await sb
         .from("organizations")
@@ -504,6 +492,7 @@ export const loadEvidenceBoard = createServerFn({ method: "POST" })
       store,
       staffPicker: staff,
       today: todayStamp(),
+      peopleError,
     });
   });
 
