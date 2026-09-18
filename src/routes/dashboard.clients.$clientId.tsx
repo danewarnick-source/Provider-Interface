@@ -53,7 +53,6 @@ import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { displayMedicaidId } from "@/lib/medicaid-id";
 import { ClientBudgetPanel } from "@/components/clients/client-budget-panel";
 import { ClientMealPlannerMount } from "@/components/clients/client-meal-planner-mount";
-import { ChoreChartForClient } from "@/components/chores/chore-chart-mount";
 
 import { CaseloadEditor } from "@/components/clients/caseload-editor";
 import {
@@ -513,9 +512,6 @@ function ClientProfileHub() {
           <CareGroup label="Operational tools" hint="Day-to-day care coordination">
             <CareSection icon={UtensilsCrossed} accent="orange">
               <ClientMealPlannerMount clientId={clientId} />
-            </CareSection>
-            <CareSection icon={Sparkles} accent="teal">
-              <ChoreChartForClient clientId={clientId} />
             </CareSection>
           </CareGroup>
           <CustomFieldsForSection clientId={clientId} section="operations" />

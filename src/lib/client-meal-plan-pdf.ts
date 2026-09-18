@@ -3,7 +3,7 @@
 //   • renderMealPlanPdf       — landscape weekly menu grid + shopping list + preferences
 //   • renderPlanVsActualPdf   — portrait plan-vs-actual table for a chosen week
 // Both consume literal values only — never fabricates. Empty cells → "—".
-// Styling mirrors the client-budget / chore-chart PDFs (logo header, accent
+// Styling mirrors the client-budget PDF (logo header, accent
 // nib, muted footer, page numbers).
 
 import { PDFDocument, StandardFonts, rgb, PDFPage, PDFFont, PDFImage } from "pdf-lib";
