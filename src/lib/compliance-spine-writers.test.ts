@@ -102,9 +102,12 @@ describe("Compliance spine — parallel writers killed", () => {
 
   it("does not drop nectar or obligation tables", () => {
     const note = read("../../docs/SQL_HANDOFF.md");
-    assert.match(note, /Do not DROP tables\. Do not run Soft SQL for this change/);
-    const step10Note = note.slice(0, note.indexOf("## ACTION — Compliance revamp Step 9"));
-    assert.match(step10Note, /Step 10: stop-writes only/);
+    const step10Start = note.indexOf("## NOTE — Compliance revamp Step 10: stop-writes only");
+    const step9Start = note.indexOf("## ACTION — Compliance revamp Step 9");
+    assert.ok(step10Start >= 0, "step 10 note");
+    assert.ok(step9Start > step10Start, "step 9 follows step 10");
+    const step10Note = note.slice(step10Start, step9Start);
+    assert.match(step10Note, /Do not DROP tables\. Do not run Soft SQL for this change/);
     assert.doesNotMatch(step10Note, /DROP TABLE/);
     assert.doesNotMatch(step10Note, /20260911160000/);
     const step7 = read(
