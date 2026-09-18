@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
+  EVIDENCE_HELP_LINKS,
   EVIDENCE_PACKS,
   EVIDENCE_REQUIREMENTS,
   catalogSubjectsArePartitioned,
@@ -11,6 +12,7 @@ import {
   hostHomeDualLinkPeerKey,
   isBuiltInTaxFormKey,
   isSowSuggestedKey,
+  requirementByKey,
   suggestPacks,
   suggestedRequirementKeys,
 } from "./evidence/catalog.ts";
@@ -108,6 +110,45 @@ describe("Evidence curated catalog", () => {
       true,
     );
     assert.equal(catalogSubjectsArePartitioned(), true);
+  });
+
+  it("uses DSPD direct form/PDF hrefs when the forms page publishes them", () => {
+    const hrefs = (key: string) => (requirementByKey(key)?.links ?? []).map((l) => l.href);
+    assert.deepEqual(hrefs("medicaid_disclosure"), [
+      "https://dspd.utah.gov/wp-content/uploads/Employee-Medicaid-Disclosure.pdf",
+    ]);
+    assert.deepEqual(hrefs("host_home_cert"), [
+      "https://dspd.utah.gov/wp-content/uploads/Host-Home-Certification-Requirements.pdf",
+    ]);
+    assert.deepEqual(hrefs("host_home_cert_client"), [
+      "https://dspd.utah.gov/wp-content/uploads/Host-Home-Certification-Requirements.pdf",
+    ]);
+    assert.deepEqual(hrefs("oig_exclusion"), ["https://exclusions.oig.hhs.gov/"]);
+    assert.deepEqual(hrefs("background_screening"), [
+      "https://dlbc.utah.gov/background-screening/",
+    ]);
+    assert.deepEqual(hrefs("form_930"), [
+      "https://dspd.utah.gov/wp-content/uploads/Enhanced-Staffing-6-30-26.pdf",
+    ]);
+    assert.deepEqual(hrefs("sjp_milestone_packet"), [
+      "https://dspd.utah.gov/wp-content/uploads/CIE-Milestones-Payment-Request-Form-7-1-26.pdf",
+      "https://dspd.utah.gov/wp-content/uploads/CIE-Individualized-strengths-based-discovery-assessment-7-8-26.pdf",
+    ]);
+    assert.deepEqual(hrefs("sjr_retention_packet"), [
+      "https://dspd.utah.gov/wp-content/uploads/CIE-Milestones-Payment-Request-Form-7-1-26.pdf",
+    ]);
+    assert.deepEqual(hrefs("epr_staff_ready"), [
+      "https://dspd.utah.gov/wp-content/uploads/Request-for-Additional-Employment-Preparation-Services-EPR-6-16-26.pdf",
+    ]);
+    assert.equal(
+      EVIDENCE_HELP_LINKS.qualification.href,
+      "https://dspd.utah.gov/wp-content/uploads/General-Employee-Qualification.pdf",
+    );
+    assert.equal(hrefs("pps_foster_license")[0], "https://dspd.utah.gov/providers/forms/");
+    assert.ok(hrefs("customized_employment_usu").includes("https://jobs.utah.gov/usor/"));
+    assert.ok(
+      hrefs("customized_employment_usu").includes("https://dspd.utah.gov/providers/forms/"),
+    );
   });
 
   it("does not overlap staff / client / company rows except Host Home Cert dual-link", () => {

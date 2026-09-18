@@ -18,6 +18,12 @@ import {
   type SuggestedPack,
 } from "./types.ts";
 
+/**
+ * Helpful URLs for Evidence rows. Prefer the live DSPD form/PDF href from
+ * https://dspd.utah.gov/providers/forms/ (or the official tool page). Never invent
+ * wp-content/uploads URLs — only the hrefs published on those pages, plus the
+ * confirmed Employee / Host / Qualification PDFs Dane named.
+ */
 export const EVIDENCE_HELP_LINKS = {
   oig: { label: "Search the OIG exclusion list", href: "https://exclusions.oig.hhs.gov/" },
   dspd: { label: "DSPD provider resources", href: "https://dspd.utah.gov/" },
@@ -29,12 +35,52 @@ export const EVIDENCE_HELP_LINKS = {
   },
   coc: { label: "DHHS / DSPD provider info", href: "https://dspd.utah.gov/providers/" },
   host: {
-    label: "Host Home Certification (DSPD forms)",
-    href: "https://dspd.utah.gov/providers/forms/",
+    label: "Host Home Certification Requirements",
+    href: "https://dspd.utah.gov/wp-content/uploads/Host-Home-Certification-Requirements.pdf",
   },
   disclosure: {
-    label: "Employee Medicaid Disclosure (DSPD forms)",
-    href: "https://dspd.utah.gov/providers/forms/",
+    label: "Employee Medicaid Disclosure",
+    href: "https://dspd.utah.gov/wp-content/uploads/Employee-Medicaid-Disclosure.pdf",
+  },
+  qualification: {
+    label: "General Employee Qualification",
+    href: "https://dspd.utah.gov/wp-content/uploads/General-Employee-Qualification.pdf",
+  },
+  background: {
+    label: "DHHS Background Screening",
+    href: "https://dlbc.utah.gov/background-screening/",
+  },
+  form930: {
+    label: "Form 930 Enhanced Staffing",
+    href: "https://dspd.utah.gov/wp-content/uploads/Enhanced-Staffing-6-30-26.pdf",
+  },
+  cieMilestones: {
+    label: "CIE Milestones Payment Request Form",
+    href: "https://dspd.utah.gov/wp-content/uploads/CIE-Milestones-Payment-Request-Form-7-1-26.pdf",
+  },
+  cieDiscovery: {
+    label: "CIE individualized strengths-based discovery assessment",
+    href: "https://dspd.utah.gov/wp-content/uploads/CIE-Individualized-strengths-based-discovery-assessment-7-8-26.pdf",
+  },
+  cieVocational: {
+    label: "CIE Vocational Assessment",
+    href: "https://dspd.utah.gov/wp-content/uploads/DSPD-Vocational-Assessment-7-10-26.pdf",
+  },
+  eprAdditional: {
+    label: "Request for Additional Employment Preparation Services (EPR)",
+    href: "https://dspd.utah.gov/wp-content/uploads/Request-for-Additional-Employment-Preparation-Services-EPR-6-16-26.pdf",
+  },
+  caregiverTrainingEn: {
+    label: "New caregiver compensation training (English)",
+    href: "https://www.youtube.com/watch?v=VZ01I_9onww",
+  },
+  caregiverTrainingEs: {
+    label: "New caregiver compensation training (Spanish)",
+    href: "https://www.youtube.com/watch?v=iOC9Wn6_0aU",
+  },
+  caregiverAssessment: {
+    label: "Caregiver compensation knowledge check",
+    href: "https://docs.google.com/forms/d/e/1FAIpQLSfuxH9rseUYfadZxTYwIuGQnzeaioPfb666PySz0OwimrQmVw/viewform",
   },
   usor: { label: "Utah State Office of Rehabilitation", href: "https://jobs.utah.gov/usor/" },
 } as const satisfies Record<string, EvidenceHelpLink>;
@@ -74,6 +120,7 @@ export const EVIDENCE_REQUIREMENTS: readonly EvidenceRequirementDef[] = [
     sowCite: "SOW §1.9(2)",
     cadenceDisplay: "Annual · SOW §1.9(2)",
     why: "Utah requires a DHHS background check through the Office of Background Processing before—and while—someone works with people you serve. Store the clearance result on this file.",
+    links: [EVIDENCE_HELP_LINKS.background],
     subject: "staff",
     dualLink: null,
   }),
@@ -427,6 +474,7 @@ export const EVIDENCE_REQUIREMENTS: readonly EvidenceRequirementDef[] = [
     sowCite: "SOW §21.3.4",
     cadenceDisplay: "Before enhanced · SOW §21.3.4",
     why: "If this person receives enhanced staffing, Form 930 must be complete before that level of support begins. Skip this item if enhanced staffing does not apply.",
+    links: [EVIDENCE_HELP_LINKS.form930],
     subject: "client",
     dualLink: null,
   }),
@@ -598,6 +646,7 @@ export const EVIDENCE_REQUIREMENTS: readonly EvidenceRequirementDef[] = [
     sowCite: "SOW §1.7",
     cadenceDisplay: "Annual · SOW §1.7",
     why: "Document that the agency remains in good standing with Medicaid and that leadership is familiar with the manuals and rules under which you bill. Often a memo plus enrollment letters.",
+    links: [EVIDENCE_HELP_LINKS.medicaid],
     subject: "company",
     dualLink: null,
   }),
@@ -710,7 +759,7 @@ export const EVIDENCE_REQUIREMENTS: readonly EvidenceRequirementDef[] = [
     sowCite: "SOW SJP",
     cadenceDisplay: "At placement · SOW SJP",
     why: "Keep the Initial Job Placement milestone documentation (job start proof and required DSPD/CIE forms) on this staff file when they close a placement.",
-    links: [EVIDENCE_HELP_LINKS.forms],
+    links: [EVIDENCE_HELP_LINKS.cieMilestones, EVIDENCE_HELP_LINKS.cieDiscovery],
     subject: "staff",
     dualLink: null,
   }),
@@ -723,7 +772,7 @@ export const EVIDENCE_REQUIREMENTS: readonly EvidenceRequirementDef[] = [
     sowCite: "SOW SJR",
     cadenceDisplay: "At retention · SOW SJR",
     why: "Upload Job Retention milestone evidence when the required retention period is met. Use DSPD CIE milestone forms when those apply.",
-    links: [EVIDENCE_HELP_LINKS.forms],
+    links: [EVIDENCE_HELP_LINKS.cieMilestones],
     subject: "staff",
     dualLink: null,
   }),
@@ -736,7 +785,7 @@ export const EVIDENCE_REQUIREMENTS: readonly EvidenceRequirementDef[] = [
     sowCite: "SOW EPR",
     cadenceDisplay: "Before serving · SOW EPR",
     why: "Employment Preparation staff should have documented readiness (training plus any extra-hours request forms) before delivering EPR. Additional EPR hours use the DSPD request form.",
-    links: [EVIDENCE_HELP_LINKS.forms],
+    links: [EVIDENCE_HELP_LINKS.eprAdditional],
     subject: "staff",
     dualLink: null,
   }),
@@ -786,7 +835,11 @@ export const EVIDENCE_REQUIREMENTS: readonly EvidenceRequirementDef[] = [
     sowCite: "SOW §32.5",
     cadenceDisplay: "Before serving · SOW §32.5",
     why: "CMP and CMS caregivers complete DSPD’s New Caregiver Compensation training (passing score required) before paid family caregiver hours. Upload the completion record.",
-    links: [EVIDENCE_HELP_LINKS.forms, EVIDENCE_HELP_LINKS.dspd],
+    links: [
+      EVIDENCE_HELP_LINKS.caregiverTrainingEn,
+      EVIDENCE_HELP_LINKS.caregiverTrainingEs,
+      EVIDENCE_HELP_LINKS.caregiverAssessment,
+    ],
     subject: "staff",
     dualLink: null,
   }),
@@ -944,7 +997,7 @@ export const EVIDENCE_REQUIREMENTS: readonly EvidenceRequirementDef[] = [
     sowCite: "SOW §33",
     cadenceDisplay: "As updated · SOW §33",
     why: "Keep the current job-development plan for this person. Monthly UPI summaries are entered by admin elsewhere; this is the working plan on the person file.",
-    links: [EVIDENCE_HELP_LINKS.forms],
+    links: [EVIDENCE_HELP_LINKS.cieDiscovery, EVIDENCE_HELP_LINKS.cieVocational],
     subject: "client",
     dualLink: null,
   }),
