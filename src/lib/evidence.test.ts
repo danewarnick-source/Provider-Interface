@@ -146,7 +146,13 @@ describe("Evidence curated catalog", () => {
       EVIDENCE_HELP_LINKS.qualification.href,
       "https://dspd.utah.gov/wp-content/uploads/General-Employee-Qualification.pdf",
     );
-    assert.equal(hrefs("pps_foster_license")[0], "https://dspd.utah.gov/providers/forms/");
+    assert.deepEqual(hrefs("thirty_day_orientation"), [
+      "https://dspd.utah.gov/wp-content/uploads/General-Employee-Qualification.pdf",
+    ]);
+    assert.deepEqual(hrefs("pps_foster_license"), [
+      "https://dlbc.utah.gov/home/office-of-licensing/human-services/applications-and-renewals/",
+      "https://dlbc.utah.gov/home/office-of-licensing/human-services/rules-and-descriptions/",
+    ]);
     assert.ok(hrefs("customized_employment_usu").includes("https://jobs.utah.gov/usor/"));
     assert.ok(
       hrefs("customized_employment_usu").includes("https://dspd.utah.gov/providers/forms/"),
@@ -206,6 +212,7 @@ describe("Evidence curated catalog", () => {
     const keys = suggestedRequirementKeys(base);
     assert.ok(keys.includes("cpr_first_aid"));
     assert.ok(keys.includes("oig_exclusion"));
+    assert.ok(keys.includes("annual_12hr_training"));
     assert.ok(keys.includes("driving_record"));
     assert.equal(keys.includes("host_home_cert"), false);
     assert.equal(
@@ -301,12 +308,69 @@ describe("Evidence curated catalog", () => {
     };
     assert.equal(isSowSuggestedKey("cpr_first_aid", answers), true);
     assert.equal(isSowSuggestedKey("host_home_cert", answers), true);
+    assert.equal(isSowSuggestedKey("annual_12hr_training", answers), true);
     assert.equal(isSowSuggestedKey("custom_w9", answers), false);
     assert.equal(EVIDENCE_UNCHECK_TITLE, "Are you sure?");
     assert.match(EVIDENCE_UNCHECK_WARNING, /requirement in the SOW/);
     assert.match(EVIDENCE_LIABILITY_TEXT, /suggestions only/i);
     assert.match(EVIDENCE_LIABILITY_TEXT, /ultimately responsible/);
     assert.doesNotMatch(EVIDENCE_DISCLAIMER, /scoreboard percent|Hive Certify/i);
+  });
+
+  it("wires company OL standing, SEE job-coach, EPR supervisor, and annual 12-hour training", () => {
+    const companyKeys = suggestedRequirementKeys(defaultQuestionnaireAnswers("company"));
+    for (const key of [
+      "company_ol_day_treatment_license",
+      "company_ol_day_support_cert",
+      "company_ol_residential_support_license",
+      "company_ol_residential_support_cert",
+      "company_ol_child_placing_foster",
+      "company_designated_acre_holder",
+    ]) {
+      assert.ok(companyKeys.includes(key), key);
+      assert.equal(requirementByKey(key)?.subject, "company");
+    }
+    const companyPacks = suggestPacks(defaultQuestionnaireAnswers("company")).map(
+      (row) => row.pack.key,
+    );
+    assert.ok(companyPacks.includes("company_ol_day"));
+    assert.ok(companyPacks.includes("company_ol_residential"));
+    assert.ok(companyPacks.includes("company_ol_pps"));
+    assert.ok(companyPacks.includes("company_acre_standing"));
+    assert.equal(companyPacks.includes("company_optional"), false);
+
+    const staff = defaultQuestionnaireAnswers("staff");
+    const see = suggestedRequirementKeys({ ...staff, serviceCodes: ["SEE"] });
+    assert.ok(see.includes("see_workplace_supports_or_job_coach"));
+    assert.equal(see.includes("customized_employment_usu"), false);
+    const sjd = suggestedRequirementKeys({ ...staff, serviceCodes: ["SJD"] });
+    assert.ok(sjd.includes("customized_employment_usu"));
+    assert.equal(sjd.includes("see_workplace_supports_or_job_coach"), false);
+    const epr = suggestedRequirementKeys({ ...staff, serviceCodes: ["EPR"] });
+    assert.ok(epr.includes("epr_supervisor_acre_or_usu"));
+    assert.ok(epr.includes("epr_staff_ready"));
+
+    const dayWhy = requirementByKey("day_supports_staff")?.why ?? "";
+    assert.match(dayWhy, /company_ol_day_treatment_license/);
+    assert.match(dayWhy, /company_ol_day_support_cert/);
+    assert.doesNotMatch(dayWhy, /Site licenses live on the company file; this is the staff assignment record/);
+
+    const ppsWhy = requirementByKey("pps_foster_license")?.why ?? "";
+    assert.match(ppsWhy, /company_ol_child_placing_foster/);
+    assert.match(ppsWhy, /company file/);
+
+    const hrefs = (key: string) => (requirementByKey(key)?.links ?? []).map((link) => link.href);
+    assert.ok(
+      hrefs("company_ol_day_treatment_license").includes(
+        "https://dlbc.utah.gov/home/office-of-licensing/human-services/applications-and-renewals/",
+      ),
+    );
+    assert.ok(
+      hrefs("annual_12hr_training").includes("https://dspd.utah.gov/providers/trainings/"),
+    );
+    assert.ok(
+      hrefs("see_workplace_supports_or_job_coach").includes("https://jobs.utah.gov/usor/"),
+    );
   });
 });
 
