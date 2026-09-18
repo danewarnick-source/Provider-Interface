@@ -1,7 +1,7 @@
 import { isEmployeeOnActiveRoster } from "../employee-roster.ts";
 import { resolveHireDate } from "./due.ts";
 import { staffInitials } from "./status.ts";
-import type { EvidencePerson } from "./types.ts";
+import type { EvidenceItemRow, EvidencePerson, EvidenceSubject } from "./types.ts";
 
 export type EvidenceClientRow = {
   id: string;
@@ -102,6 +102,28 @@ export function companyEvidencePerson(organizationId: string, orgName: string): 
     subtitle: "Company file",
     hire_date: null,
   };
+}
+
+/** Same accordion roster for Employees, Clients, and Company — only the row list changes. */
+export function peopleForEvidenceTab(args: {
+  tab: EvidenceSubject;
+  employees: readonly EvidencePerson[];
+  clients: readonly EvidencePerson[];
+  company: EvidencePerson | null;
+}): EvidencePerson[] {
+  if (args.tab === "company") return args.company ? [args.company] : [];
+  if (args.tab === "client") return [...args.clients];
+  return [...args.employees];
+}
+
+/** Keep each scope on its own items — never a shared people×requirement grid. */
+export function itemsForEvidenceTab(
+  items: readonly EvidenceItemRow[],
+  tab: EvidenceSubject,
+  people: readonly EvidencePerson[],
+): EvidenceItemRow[] {
+  const ids = new Set(people.map((person) => person.id));
+  return items.filter((item) => item.subject_type === tab && ids.has(item.subject_id));
 }
 
 /** First and last name are both required to apply a pack. */

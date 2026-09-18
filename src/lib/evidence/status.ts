@@ -3,6 +3,24 @@ import type { EvidenceCellStatus, EvidenceFileRow, EvidenceItemRow } from "./typ
 
 export type { EvidenceCellStatus };
 
+/** Presentation chips for an Evidence item. Derived from existing due/file fields. */
+export const EVIDENCE_MATRIX_CHIP_KINDS = [
+  "complete",
+  "due",
+  "missing",
+  "review",
+  "add",
+  "open",
+  "na",
+] as const;
+export type EvidenceMatrixChipKind = (typeof EVIDENCE_MATRIX_CHIP_KINDS)[number];
+
+export type EvidenceMatrixChip = {
+  kind: EvidenceMatrixChipKind;
+  label: string;
+  itemId: string | null;
+};
+
 export function staffInitials(fullName: string): string {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
@@ -49,6 +67,62 @@ export function cellStatus(args: {
   const dueDay = parseIsoDate(due);
   if (dueDay && dueDay < today) return "missing";
   return "done";
+}
+
+export function daysBetweenIso(fromIso: string, toIso: string): number | null {
+  const from = parseIsoDate(fromIso);
+  const to = parseIsoDate(toIso);
+  if (!from || !to) return null;
+  const a = Date.parse(`${from}T12:00:00Z`);
+  const b = Date.parse(`${to}T12:00:00Z`);
+  if (Number.isNaN(a) || Number.isNaN(b)) return null;
+  return Math.round((b - a) / 86_400_000);
+}
+
+export function dueChipLabel(days: number): string {
+  if (days <= 0) return "Due today";
+  return `Due in ${days}d`;
+}
+
+/**
+ * Chip for one assigned evidence item (or N/A when the person has no row).
+ * Does not invent new due rules: N/A = not on this pack; Add = assigned, empty, no date;
+ * Review = sent to the employee and still empty; Due in Nd = upcoming first/attention date
+ * before anything is on file; Complete / Missing follow cellStatus().
+ */
+export function matrixChip(args: {
+  item: EvidenceItemRow | null;
+  file: EvidenceFileRow | null;
+  today: string;
+}): EvidenceMatrixChip {
+  const { item, file, today } = args;
+  if (!item) return { kind: "na", label: "N/A", itemId: null };
+
+  const onFile = itemHasCompletedEvidence(item, file);
+  const due = effectiveAttentionDate({
+    hasFile: onFile,
+    firstDueOn: item.first_due_on,
+    nextDueOn: item.next_due_on,
+    expiresOn: item.expires_on,
+  });
+  const dueDay = parseIsoDate(due);
+  const days = dueDay ? daysBetweenIso(today, dueDay) : null;
+
+  if (!onFile && item.sent_to_staff) {
+    return { kind: "review", label: "Review", itemId: item.id };
+  }
+  if (!onFile && days === null) {
+    return { kind: "add", label: "Add", itemId: item.id };
+  }
+  if (!onFile && days !== null && days >= 0) {
+    return { kind: "due", label: dueChipLabel(days), itemId: item.id };
+  }
+
+  const base = cellStatus({ item, file, today });
+  if (base === "done") {
+    return { kind: "complete", label: "Complete", itemId: item.id };
+  }
+  return { kind: "missing", label: "Missing", itemId: item.id };
 }
 
 export function statusLabel(status: EvidenceCellStatus): string {

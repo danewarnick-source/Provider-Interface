@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { FileText, Plus, Search } from "lucide-react";
+import { FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
 import { EvidenceDueFields } from "@/components/evidence/evidence-due-fields.tsx";
+import { EvidenceRoster } from "@/components/evidence/evidence-roster.tsx";
+import { EvidenceStatusChip } from "@/components/evidence/evidence-status-chip.tsx";
+import { EvidenceSubjectCards } from "@/components/evidence/evidence-subject-cards.tsx";
 import { parseServiceCodeFlags } from "@/lib/evidence/catalog.ts";
+import { denverYmd } from "@/lib/denver-date.ts";
 import {
   draftFromItem,
   dueSubtitleFromItem,
@@ -32,8 +34,12 @@ import {
 import { leaveEvidenceWizard, type EvidenceStep } from "@/lib/evidence/nav.ts";
 import { fetchEvidenceClientPeople } from "@/lib/evidence/fetch-clients.ts";
 import { fetchEvidenceEmployees } from "@/lib/evidence/fetch-employees.ts";
-import { companyEvidencePerson } from "@/lib/evidence/people.ts";
-import { formatExpiresOn, latestFileForItem } from "@/lib/evidence/status.ts";
+import {
+  companyEvidencePerson,
+  itemsForEvidenceTab,
+  peopleForEvidenceTab,
+} from "@/lib/evidence/people.ts";
+import { formatExpiresOn, latestFileForItem, matrixChip } from "@/lib/evidence/status.ts";
 import {
   EVIDENCE_SEND_MESSAGE_UNAVAILABLE,
   EVIDENCE_STORAGE_UNAVAILABLE,
@@ -265,12 +271,13 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
   const board = boardQ.data;
   const clientPeople = clientsQ.data ?? [];
   const employeePeople = employeesQ.data ?? [];
-  const people =
-    tab === "company" && companyPerson
-      ? [companyPerson]
-      : tab === "client"
-        ? clientPeople
-        : employeePeople;
+  const people = peopleForEvidenceTab({
+    tab,
+    employees: employeePeople,
+    clients: clientPeople,
+    company: companyPerson,
+  });
+  const rosterItems = itemsForEvidenceTab(board?.items ?? [], tab, people);
   const person =
     people.find((p) => p.id === personId) ??
     (companyPerson?.id === personId ? companyPerson : null) ??
@@ -324,20 +331,33 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
 
   const initialCodes = person?.subtitle ? parseServiceCodeFlags(person.subtitle.split(/,\s*/)) : [];
 
+  const companyLabel =
+    (org.display_acronym ?? "").trim() || companyPerson?.initials || "Company";
+
   return (
     <div className="space-y-5">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--hive-text)]">Evidence</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Employees, client, and company files. Add opens packs for that person only.
+          Records & renewals. Your people. Your selected records. One place.
         </p>
       </header>
+
+      <EvidenceSubjectCards
+        tab={tab}
+        employeeCount={employeePeople.length}
+        clientCount={clientPeople.length}
+        companyLabel={companyLabel}
+        companyHint="OL licenses · policies"
+        onSelect={(next) => onSearchChange({ tab: next, step: "grid", person: null, item: null })}
+      />
 
       {step === "review" ? (
         <ReviewPanel
           board={board}
           itemId={activeItem?.id ?? null}
           orgId={org.organization_id}
+          staffPicker={board?.staffPicker ?? []}
           onClose={() => onSearchChange({ tab, step: "grid", person: personId })}
           onUpload={(payload) => uploadM.mutate(payload)}
           onAttest={(args) => {
@@ -345,28 +365,38 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
             attestM.mutate({ itemId: activeItem.id, ...args });
           }}
           onSaveDue={(args) => dueM.mutate(args)}
-          pending={uploadM.isPending || attestM.isPending || dueM.isPending}
+          onSend={(draft) => setSendDraft(draft)}
+          onRemove={(id) => removeM.mutate(id)}
+          onLink={(item, peer) => linkM.mutate({ itemId: item, peerSubjectId: peer })}
+          pending={
+            uploadM.isPending ||
+            attestM.isPending ||
+            dueM.isPending ||
+            sendM.isPending ||
+            removeM.isPending ||
+            linkM.isPending
+          }
         />
       ) : (
         <RosterPanel
-          board={board}
+          items={rosterItems}
+          files={board?.files ?? []}
           people={people}
           peopleError={peopleError}
           tab={tab}
-          loading={peopleLoading}
+          loading={peopleLoading || boardQ.isLoading}
           selectedId={step === "grid" ? personId : undefined}
-          staffPicker={board?.staffPicker ?? []}
-          onTabChange={(next) =>
-            onSearchChange({ tab: next, step: "grid", person: null, item: null })
+          onTogglePerson={(id) =>
+            onSearchChange({
+              tab,
+              step: "grid",
+              person: personId === id ? null : id,
+              item: null,
+            })
           }
-          onOpenPerson={(id) => onSearchChange({ tab, step: "grid", person: id, item: null })}
-          onClosePerson={() => onSearchChange({ tab, step: "grid", person: null, item: null })}
           onAddForPerson={(id) => openPackFor(tab, id)}
           onReview={(id, item) => onSearchChange({ tab, step: "review", person: id, item })}
-          onRemove={(id) => removeM.mutate(id)}
           onSend={(draft) => setSendDraft(draft)}
-          onLink={(item, peer) => linkM.mutate({ itemId: item, peerSubjectId: peer })}
-          pending={removeM.isPending || sendM.isPending || linkM.isPending}
         />
       )}
 
@@ -421,39 +451,29 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
 }
 
 function RosterPanel({
-  board,
+  items,
+  files,
   people: roster,
   peopleError,
   tab,
   loading,
   selectedId,
-  staffPicker,
-  onTabChange,
-  onOpenPerson,
-  onClosePerson,
+  onTogglePerson,
   onAddForPerson,
   onReview,
-  onRemove,
   onSend,
-  onLink,
-  pending,
 }: {
-  board: EvidenceBoard | undefined;
+  items: EvidenceBoard["items"];
+  files: EvidenceBoard["files"];
   people: EvidencePerson[];
   peopleError: string | null;
   tab: EvidenceSubject;
   loading: boolean;
   selectedId?: string;
-  staffPicker: EvidenceBoard["staffPicker"];
-  onTabChange: (tab: EvidenceSubject) => void;
-  onOpenPerson: (id: string) => void;
-  onClosePerson: () => void;
+  onTogglePerson: (id: string) => void;
   onAddForPerson: (id: string) => void;
   onReview: (personId: string, itemId: string) => void;
-  onRemove: (itemId: string) => void;
   onSend: (draft: SendEvidenceDraft) => void;
-  onLink: (itemId: string, peerSubjectId: string) => void;
-  pending: boolean;
 }) {
   const [q, setQ] = useState("");
   const people = useMemo(() => {
@@ -464,109 +484,35 @@ function RosterPanel({
 
   const emptyCopy = tab === "client" ? "No clients yet." : "No employees yet.";
   const listLabel = tab === "client" ? "clients" : tab === "company" ? "company" : "employees";
+  const searchPlaceholder =
+    tab === "client" ? "Search clients…" : tab === "company" ? "Search company…" : "Search employees…";
 
   return (
-    <section className="space-y-4">
-      <Tabs value={tab} onValueChange={(v) => onTabChange(v as EvidenceSubject)}>
-        <TabsList className="h-auto">
-          <TabsTrigger value="staff">Employees</TabsTrigger>
-          <TabsTrigger value="client">Clients</TabsTrigger>
-          <TabsTrigger value="company">Company</TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search"
-          className="h-9 pl-9"
-        />
-      </div>
-
-      {peopleError ? (
-        <div
-          role="alert"
-          className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-        >
-          Could not load {listLabel}: {peopleError}
-        </div>
-      ) : null}
-
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-        {loading ? (
-          <div className="p-8 text-sm text-muted-foreground">Loading Evidence…</div>
-        ) : !people.length ? (
-          <div className="p-8 text-sm text-muted-foreground">
-            {peopleError ? `Could not load this list. ${peopleError}` : emptyCopy}
-          </div>
-        ) : (
-          <ul>
-            {people.map((person) => {
-              const rows = (board?.items ?? []).filter((item) => item.subject_id === person.id);
-              const count = rows.length;
-              const expanded = selectedId === person.id && count > 0;
-              return (
-                <li key={person.id} className="border-b border-border last:border-0">
-                  <div
-                    className={`flex items-center gap-3 px-4 py-3 ${expanded ? "bg-muted/40" : ""}`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (count === 0) return;
-                        if (selectedId === person.id) onClosePerson();
-                        else onOpenPerson(person.id);
-                      }}
-                      className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                    >
-                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
-                        {person.initials}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block font-medium text-[var(--hive-text)]">
-                          {person.full_name}
-                        </span>
-                        <span className="block text-xs text-muted-foreground">
-                          {person.subtitle ? `${person.subtitle} · ` : ""}
-                          {count > 0
-                            ? `${count} requirement${count === 1 ? "" : "s"}`
-                            : "no packs yet"}
-                        </span>
-                      </span>
-                    </button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      aria-label={`Add evidence for ${person.full_name}`}
-                      onClick={() => onAddForPerson(person.id)}
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      <span className="ml-1.5">Add</span>
-                    </Button>
-                  </div>
-                  {expanded ? (
-                    <PersonItemsInline
-                      person={person}
-                      rows={rows}
-                      tab={tab}
-                      staffPicker={staffPicker}
-                      pending={pending}
-                      onReview={(itemId) => onReview(person.id, itemId)}
-                      onRemove={onRemove}
-                      onSend={onSend}
-                      onLink={onLink}
-                    />
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
-    </section>
+    <EvidenceRoster
+      people={people}
+      items={items}
+      files={files}
+      today={denverYmd()}
+      search={q}
+      onSearchChange={setQ}
+      searchPlaceholder={searchPlaceholder}
+      peopleError={peopleError}
+      listLabel={listLabel}
+      emptyCopy={tab === "company" ? "Company file is ready when packs are added." : emptyCopy}
+      loading={loading}
+      selectedId={selectedId}
+      onTogglePerson={onTogglePerson}
+      onAddForPerson={onAddForPerson}
+      onReview={onReview}
+      onSend={(person, itemIds, titles) =>
+        onSend({
+          itemIds,
+          titles,
+          staffId: tab === "staff" ? person.id : "",
+          needsStaffPicker: tab !== "staff",
+        })
+      }
+    />
   );
 }
 
@@ -574,15 +520,20 @@ function ReviewPanel({
   board,
   itemId,
   orgId,
+  staffPicker,
   onClose,
   onUpload,
   onAttest,
   onSaveDue,
+  onSend,
+  onRemove,
+  onLink,
   pending,
 }: {
   board: EvidenceBoard | undefined;
   itemId: string | null;
   orgId: string;
+  staffPicker: EvidenceBoard["staffPicker"];
   onClose: () => void;
   onUpload: (payload: {
     itemId: string;
@@ -604,11 +555,18 @@ function ReviewPanel({
     documentDate?: string | null;
     hasFile?: boolean;
   }) => void;
+  onSend: (draft: SendEvidenceDraft) => void;
+  onRemove: (itemId: string) => void;
+  onLink: (itemId: string, peerSubjectId: string) => void;
   pending: boolean;
 }) {
   const item = board?.items.find((i) => i.id === itemId) ?? null;
   const file = item ? latestFileForItem(board?.files ?? [], item.id) : null;
   const person = board?.people.find((p) => p.id === item?.subject_id);
+  const chip = item
+    ? matrixChip({ item, file, today: denverYmd() })
+    : { kind: "na" as const, label: "N/A", itemId: null };
+  const [peerId, setPeerId] = useState("");
   const [due, setDue] = useState<EvidenceDueDraft | null>(item ? draftFromItem(item) : null);
   const [documentDate, setDocumentDate] = useState(item?.document_date ?? "");
   const [preview, setPreview] = useState<string | null>(null);
@@ -656,17 +614,21 @@ function ReviewPanel({
           {item.evidence_type === "attestation" ? "Attestation" : "Upload"} ·{" "}
           {dueSubtitleFromItem(item)}
         </p>
-        {file ? (
-          <p className="mt-3 rounded-full bg-emerald-50 px-3 py-1 text-xs text-emerald-800">
-            On file
-            {item.next_due_on ? ` · next due ${formatExpiresOn(item.next_due_on)}` : ""}
+        <div className="mt-3">
+          <EvidenceStatusChip
+            chip={chip}
+            ariaLabel={`${item.title}, ${chip.label}`}
+          />
+        </div>
+        {item.next_due_on || item.first_due_on ? (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {file && item.next_due_on
+              ? `Next due ${formatExpiresOn(item.next_due_on)}`
+              : item.first_due_on
+                ? `First due ${formatExpiresOn(item.first_due_on)}`
+                : null}
           </p>
-        ) : (
-          <p className="mt-3 rounded-full bg-rose-50 px-3 py-1 text-xs text-rose-800">
-            Needs attention
-            {item.first_due_on ? ` · first due ${formatExpiresOn(item.first_due_on)}` : ""}
-          </p>
-        )}
+        ) : null}
         <div className="mt-4 grid gap-2">
           <label className="block">
             <span className="sr-only">Replace file</span>
@@ -745,6 +707,51 @@ function ReviewPanel({
           >
             Save due dates
           </Button>
+          <Button
+            type="button"
+            disabled={pending}
+            onClick={() =>
+              onSend({
+                itemIds: [item.id],
+                titles: [item.title],
+                staffId: item.subject_type === "staff" ? item.subject_id : (staffPicker[0]?.id ?? ""),
+                needsStaffPicker: item.subject_type !== "staff",
+              })
+            }
+          >
+            Send to employee
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            disabled={pending}
+            onClick={() => onRemove(item.id)}
+          >
+            Remove
+          </Button>
+          {item.dual_link_key === "host_home_cert" && !item.dual_link_peer_id ? (
+            <div className="grid gap-2 pt-1">
+              <Input
+                value={peerId}
+                onChange={(e) => setPeerId(e.target.value)}
+                placeholder={
+                  item.subject_type === "staff"
+                    ? "Client id to dual-link"
+                    : "Employee id to dual-link"
+                }
+                className="h-9"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!peerId || pending}
+                onClick={() => onLink(item.id, peerId.trim())}
+              >
+                Dual-link Host Home Cert
+              </Button>
+            </div>
+          ) : null}
         </div>
       </aside>
       <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -772,112 +779,5 @@ function ReviewPanel({
         )}
       </div>
     </section>
-  );
-}
-
-function PersonItemsInline({
-  person,
-  rows,
-  tab,
-  staffPicker,
-  pending,
-  onReview,
-  onRemove,
-  onSend,
-  onLink,
-}: {
-  person: EvidencePerson;
-  rows: EvidenceBoard["items"];
-  tab: EvidenceSubject;
-  staffPicker: EvidenceBoard["staffPicker"];
-  pending: boolean;
-  onReview: (itemId: string) => void;
-  onRemove: (itemId: string) => void;
-  onSend: (draft: SendEvidenceDraft) => void;
-  onLink: (itemId: string, peerSubjectId: string) => void;
-}) {
-  const [peerId, setPeerId] = useState("");
-  const defaultStaff = tab === "staff" ? person.id : (staffPicker[0]?.id ?? "");
-
-  const openSend = (itemIds: string[]) => {
-    const titles = rows.filter((row) => itemIds.includes(row.id)).map((row) => row.title);
-    onSend({
-      itemIds,
-      titles,
-      staffId: defaultStaff,
-      needsStaffPicker: tab !== "staff",
-    });
-  };
-
-  return (
-    <div className="space-y-2 border-t border-border bg-slate-50/70 px-4 py-3">
-      {rows.map((row) => (
-        <div
-          key={row.id}
-          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card px-3 py-2.5"
-        >
-          <button
-            type="button"
-            className="min-w-0 flex-1 text-left"
-            onClick={() => onReview(row.id)}
-          >
-            <span className="block text-sm font-medium">{row.title}</span>
-            <span className="block text-xs text-muted-foreground">
-              {row.evidence_type === "attestation" ? "Attestation" : "Upload"} ·{" "}
-              {dueSubtitleFromItem(row)}
-              {row.sent_to_staff ? " · sent" : ""}
-              {row.send_message ? " · message attached" : ""}
-            </span>
-          </button>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" size="sm" disabled={pending} onClick={() => openSend([row.id])}>
-              Send to employee
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={pending}
-              onClick={() => onRemove(row.id)}
-            >
-              Remove
-            </Button>
-          </div>
-        </div>
-      ))}
-      {rows.length > 1 ? (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={pending}
-          onClick={() => openSend(rows.map((row) => row.id))}
-        >
-          Send all to employee
-        </Button>
-      ) : null}
-      {rows.some((r) => r.dual_link_key === "host_home_cert" && !r.dual_link_peer_id) ? (
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <Input
-            value={peerId}
-            onChange={(e) => setPeerId(e.target.value)}
-            placeholder={tab === "staff" ? "Client id to dual-link" : "Employee id to dual-link"}
-            className="h-9 w-56"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={!peerId || pending}
-            onClick={() => {
-              const host = rows.find((r) => r.dual_link_key === "host_home_cert");
-              if (host) onLink(host.id, peerId.trim());
-            }}
-          >
-            Dual-link Host Home Cert
-          </Button>
-        </div>
-      ) : null}
-    </div>
   );
 }
