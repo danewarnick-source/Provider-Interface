@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   EVIDENCE_PACKS,
   EVIDENCE_REQUIREMENTS,
+  catalogSubjectsArePartitioned,
   chipsForRequirementKey,
   defaultQuestionnaireAnswers,
   hostHomeDualLinkPeerKey,
@@ -23,7 +24,6 @@ import {
   isListedEvidenceClient,
   loadEvidenceClientPeople,
   mapClientRowsToPeople,
-  skipGetStartedKey,
 } from "./evidence/people.ts";
 import { addCadence, cellStatus, staffInitials } from "./evidence/status.ts";
 import {
@@ -79,20 +79,59 @@ function file(partial: Partial<EvidenceFileRow>): EvidenceFileRow {
 }
 
 describe("Evidence curated catalog", () => {
-  it("keeps a small curated set — not the mega sheet, no W-9/I-9 built-ins", () => {
-    assert.ok(EVIDENCE_REQUIREMENTS.length < 30);
-    assert.ok(EVIDENCE_PACKS.length < 20);
+  it("keeps a curated demo catalog — not the mega sheet, no W-9/I-9 built-ins", () => {
+    assert.ok(EVIDENCE_REQUIREMENTS.length < 60);
+    assert.ok(EVIDENCE_PACKS.length < 25);
     assert.equal(
       EVIDENCE_REQUIREMENTS.some((r) => isBuiltInTaxFormKey(r.key) || /w-?9|i-?9/i.test(r.title)),
       false,
     );
-    assert.ok(EVIDENCE_PACKS.some((p) => p.key === "all_staff_starter"));
-    assert.ok(EVIDENCE_PACKS.some((p) => p.key === "company_starter"));
+    assert.ok(EVIDENCE_PACKS.some((p) => p.key === "all_staff"));
+    assert.ok(EVIDENCE_PACKS.some((p) => p.key === "client_core"));
+    assert.ok(EVIDENCE_PACKS.some((p) => p.key === "company_governance"));
     assert.ok(EVIDENCE_REQUIREMENTS.some((r) => r.dualLink === "host_home_cert"));
+    assert.equal(
+      EVIDENCE_REQUIREMENTS.every(
+        (r) =>
+          (r.why.trim().length > 40 && r.cadenceDisplay.includes("·")) || r.key === "lease_housing",
+      ),
+      true,
+    );
     assert.equal(
       EVIDENCE_PACKS.every((p) => p.chip.trim().length > 0),
       true,
     );
+    assert.equal(catalogSubjectsArePartitioned(), true);
+  });
+
+  it("does not overlap staff / client / company rows except Host Home Cert dual-link", () => {
+    const staff = new Set(
+      EVIDENCE_REQUIREMENTS.filter((r) => r.subject === "staff").map((r) => r.key),
+    );
+    const client = new Set(
+      EVIDENCE_REQUIREMENTS.filter((r) => r.subject === "client").map((r) => r.key),
+    );
+    const company = new Set(
+      EVIDENCE_REQUIREMENTS.filter((r) => r.subject === "company").map((r) => r.key),
+    );
+    assert.equal(
+      [...staff].some((k) => client.has(k) || company.has(k)),
+      false,
+    );
+    assert.equal(
+      [...client].some((k) => company.has(k)),
+      false,
+    );
+    assert.equal(staff.has("client_photo") || staff.has("client_pcsp"), false);
+    assert.equal(
+      client.has("cpr_first_aid") ||
+        client.has("background_screening") ||
+        client.has("mandt_behavior"),
+      false,
+    );
+    assert.equal(company.has("cpr_first_aid") || company.has("bc1_staff_cred"), false);
+    assert.equal(hostHomeDualLinkPeerKey("host_home_cert"), "host_home_cert_client");
+    assert.equal(hostHomeDualLinkPeerKey("host_home_cert_client"), "host_home_cert");
   });
 
   it("labels each suggested row with its pack chip", () => {
@@ -103,7 +142,7 @@ describe("Evidence curated catalog", () => {
       ...defaultQuestionnaireAnswers("staff"),
       serviceCodes: ["HHS"] as ServiceCodeFlag[],
     });
-    assert.deepEqual(chipsForRequirementKey("host_home_cert", hhs), ["HHS"]);
+    assert.deepEqual(chipsForRequirementKey("host_home_cert", hhs), ["HHS host"]);
     const abi = suggestPacks({
       ...defaultQuestionnaireAnswers("staff"),
       transportsPeople: false,
@@ -116,13 +155,10 @@ describe("Evidence curated catalog", () => {
     const base = defaultQuestionnaireAnswers("staff");
     assert.equal(base.transportsPeople, true);
     const keys = suggestedRequirementKeys(base);
-    assert.deepEqual(keys.sort(), [
-      "auto_insurance_proof",
-      "background_screening",
-      "cpr_first_aid",
-      "driving_record",
-      "thirty_day_orientation",
-    ]);
+    assert.ok(keys.includes("cpr_first_aid"));
+    assert.ok(keys.includes("oig_exclusion"));
+    assert.ok(keys.includes("driving_record"));
+    assert.equal(keys.includes("host_home_cert"), false);
     assert.equal(
       suggestPacks(base).some((p) => p.pack.key === "hhs_staff"),
       false,
@@ -180,19 +216,27 @@ describe("Evidence curated catalog", () => {
     assert.ok(mandt.includes("mandt_behavior"));
   });
 
-  it("keeps client HHS dual-link and BC FBA packs conditional", () => {
+  it("keeps client core always on, and HHS / BC packs conditional", () => {
     const empty = suggestPacks(defaultQuestionnaireAnswers("client"));
-    assert.equal(empty.length, 0);
+    assert.deepEqual(
+      empty.map((p) => p.pack.key),
+      ["client_core"],
+    );
     const hhs = suggestPacks({
       ...defaultQuestionnaireAnswers("client"),
       serviceCodes: ["HHS"],
     });
     assert.deepEqual(
       hhs.map((p) => p.pack.key),
-      ["hhs_client"],
+      ["client_core", "hhs_client"],
     );
-    assert.equal(hostHomeDualLinkPeerKey("host_home_cert"), "host_home_cert_client");
-    assert.equal(hostHomeDualLinkPeerKey("host_home_cert_client"), "host_home_cert");
+    assert.ok(
+      suggestedRequirementKeys(
+        hhs[0]
+          ? { ...defaultQuestionnaireAnswers("client"), serviceCodes: ["HHS"] }
+          : defaultQuestionnaireAnswers("client"),
+      ).includes("host_home_cert_client"),
+    );
   });
 
   it("treats SOW-suggested rows as the opt-out warning set", () => {
@@ -204,7 +248,7 @@ describe("Evidence curated catalog", () => {
     assert.equal(isSowSuggestedKey("host_home_cert", answers), true);
     assert.equal(isSowSuggestedKey("custom_w9", answers), false);
     assert.match(EVIDENCE_UNCHECK_WARNING, /opting out/);
-    assert.match(EVIDENCE_LIABILITY_TEXT, /not comprehensive/);
+    assert.match(EVIDENCE_LIABILITY_TEXT, /Suggestions only/);
     assert.doesNotMatch(EVIDENCE_DISCLAIMER, /scoreboard percent|Hive Certify/i);
   });
 });
@@ -274,7 +318,6 @@ describe("Evidence people roster", () => {
     });
     assert.equal(slim.error, null);
     assert.equal(slim.people[0]?.full_name, "Pat Ng");
-    assert.equal(skipGetStartedKey("org-1"), "evidence-get-started-skip:org-1");
   });
 });
 
@@ -307,6 +350,7 @@ describe("Evidence cell status", () => {
       "missing",
     );
     assert.equal(addCadence("2026-03-12", "every_2_years"), "2028-03-12");
+    assert.equal(addCadence("2026-03-12", "every_5_years"), "2031-03-12");
     assert.equal(addCadence("2026-03-12", "monthly"), "2026-04-12");
     assert.equal(addCadence("2026-03-12", "quarterly"), "2026-06-12");
     assert.equal(addCadence("2026-03-12", "semi_annual"), "2026-09-12");
@@ -344,14 +388,15 @@ describe("Evidence nav + product lock", () => {
     assert.equal(resolveEvidenceTab("agency"), "company");
     assert.equal(resolveEvidenceTab("clients"), "client");
     assert.equal(resolveEvidenceStep("quiz"), "quiz");
+    assert.equal(resolveEvidenceStep("pack"), "quiz");
     assert.equal(resolveEvidenceStep("nope"), "grid");
     assert.deepEqual(parseEvidenceSearch({ tab: "client", wizard: "1" }), {
       tab: "client",
-      wizard: true,
+      step: "quiz",
     });
-    assert.deepEqual(evidenceSearchFor({ tab: "company", step: "pack" }), {
+    assert.deepEqual(evidenceSearchFor({ tab: "company", step: "quiz" }), {
       tab: "company",
-      step: "pack",
+      step: "quiz",
     });
   });
 
@@ -395,13 +440,14 @@ describe("Evidence nav + product lock", () => {
       "utf8",
     );
     assert.doesNotMatch(workspace, /1 · Grid|EVIDENCE_DISCLAIMER|amber-50/);
-    assert.doesNotMatch(workspace, />Settings<|>Hire questionnaire/);
-    assert.match(workspace, /Get started with Evidence/);
-    assert.match(workspace, /Skip for now/);
+    assert.doesNotMatch(
+      workspace,
+      />Settings<|>Hire questionnaire|Get started with Evidence|Skip for now|GetStartedPanel|skipGetStarted/,
+    );
     assert.match(workspace, /onAddForPerson/);
     assert.match(workspace, /fetchEvidenceClientPeople/);
     assert.doesNotMatch(workspace, /\.from\(["']clients["']\)/);
-    assert.match(workspace, /SubjectAssignPicker/);
+    assert.doesNotMatch(workspace, /SubjectAssignPicker|PackSettingsPanel|NewRequirementPanel/);
 
     const fetchClients = readFileSync(
       new URL("./evidence/fetch-clients.ts", import.meta.url),
@@ -415,13 +461,23 @@ describe("Evidence nav + product lock", () => {
       "utf8",
     );
     assert.match(quiz, /data-evidence-quiz/);
-    assert.match(quiz, /chipsForRequirementKey/);
+    assert.match(quiz, /See staff suggestions|See client suggestions/);
     assert.match(quiz, /Attestation/);
+    assert.match(quiz, /exclusions.oig.hhs.gov|row.why|row.links/);
     assert.doesNotMatch(quiz, /amber-50|Not called compliance/);
-    assert.equal(EVIDENCE_CADENCE_OPTIONS.length, 7);
+    assert.equal(EVIDENCE_CADENCE_OPTIONS.length, 8);
     assert.deepEqual(
       EVIDENCE_CADENCE_OPTIONS.map((o) => o.value),
-      ["once", "monthly", "quarterly", "semi_annual", "annual", "every_2_years", "keep_current"],
+      [
+        "once",
+        "monthly",
+        "quarterly",
+        "semi_annual",
+        "annual",
+        "every_2_years",
+        "every_5_years",
+        "keep_current",
+      ],
     );
   });
 

@@ -1,46 +1,33 @@
 import { useEffect, useMemo, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
-  cadenceLabel,
-  chipsForRequirementKey,
   defaultQuestionnaireAnswers,
-  packsForSubject,
+  isSowSuggestedKey,
+  quizCodesForSubject,
   requirementByKey,
   suggestPacks,
 } from "@/lib/evidence/catalog.ts";
 import {
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_UNCHECK_WARNING,
-  SERVICE_CODE_FLAGS,
+  type EvidenceRequirementDef,
   type EvidenceSubject,
   type EvidenceType,
   type QuestionnaireAnswers,
   type ServiceCodeFlag,
 } from "@/lib/evidence/types.ts";
 
-const CODE_LABEL: Record<ServiceCodeFlag, string> = {
-  HHS: "HHS — Host Home",
-  SLN: "SLN — Supported Living (hourly)",
-  SLH: "SLH — Supported Living (daily)",
-  SEI: "SEI — Supported Employment",
-  DSI: "DSI — Day Support",
-  RHS: "RHS — Residential Support",
-  BC1: "BC1 — Behavior Consultation 1",
-  BC2: "BC2 — Behavior Consultation 2",
-  BC3: "BC3 — Behavior Consultation 3",
-};
-
 export function EvidenceQuestionnaire({
   subject,
+  personName,
   initialCodes,
   onApply,
-  onSaveTemplate,
+  onClose,
   pending,
 }: {
   subject: EvidenceSubject;
+  personName: string;
   initialCodes?: ServiceCodeFlag[];
   onApply: (args: {
     answers: QuestionnaireAnswers;
@@ -50,14 +37,10 @@ export function EvidenceQuestionnaire({
     optedOutKeys: string[];
     typeOverrides: Record<string, EvidenceType>;
   }) => void;
-  onSaveTemplate: (args: {
-    name: string;
-    answers: QuestionnaireAnswers;
-    requirementKeys: string[];
-    packKeys: string[];
-  }) => void;
+  onClose: () => void;
   pending?: boolean;
 }) {
+  const [step, setStep] = useState<"quiz" | "rows">(subject === "company" ? "rows" : "quiz");
   const [answers, setAnswers] = useState<QuestionnaireAnswers>(() => ({
     ...defaultQuestionnaireAnswers(subject),
     serviceCodes: initialCodes ?? [],
@@ -71,7 +54,6 @@ export function EvidenceQuestionnaire({
   const [optedOut, setOptedOut] = useState<Set<string>>(() => new Set());
   const [typeByKey, setTypeByKey] = useState<Record<string, EvidenceType>>({});
   const [liability, setLiability] = useState(false);
-  const [templateName, setTemplateName] = useState("");
   const [optOutKey, setOptOutKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -79,6 +61,9 @@ export function EvidenceQuestionnaire({
       const next = new Set(prev);
       for (const key of suggestedKeys) {
         if (!optedOut.has(key)) next.add(key);
+      }
+      for (const key of [...next]) {
+        if (!suggestedKeys.includes(key) && !optedOut.has(key)) next.delete(key);
       }
       return next;
     });
@@ -105,8 +90,7 @@ export function EvidenceQuestionnaire({
   };
 
   const toggleKey = (key: string) => {
-    const isSuggested = suggestedKeys.includes(key);
-    if (checked.has(key) && isSuggested) {
+    if (checked.has(key) && isSowSuggestedKey(key, answers)) {
       setOptOutKey(key);
       return;
     }
@@ -129,242 +113,315 @@ export function EvidenceQuestionnaire({
     setOptOutKey(null);
   };
 
-  const selectedPacks = packsForSubject(subject).filter((p) =>
-    p.requirementKeys.every((k) => checked.has(k)),
-  );
-
   const typeOverrides = useMemo(() => {
     const out: Record<string, EvidenceType> = {};
     for (const key of checked) {
-      const chosen = typeByKey[key] ?? requirementByKey(key)?.evidenceType ?? "upload";
-      out[key] = chosen;
+      out[key] = typeByKey[key] ?? requirementByKey(key)?.evidenceType ?? "upload";
     }
     return out;
   }, [checked, typeByKey]);
 
+  const title =
+    subject === "company"
+      ? "Company packs"
+      : subject === "client"
+        ? `Client packs · ${personName}`
+        : `Staff packs · ${personName}`;
+
+  const grouped = suggested.map((row) => ({
+    pack: row.pack,
+    rows: row.pack.requirementKeys
+      .map((key) => requirementByKey(key))
+      .filter((def): def is EvidenceRequirementDef => !!def),
+  }));
+
   const apply = () => {
-    if (!liability) return;
+    if (!liability || checked.size === 0) return;
     onApply({
       answers,
       requirementKeys: [...checked],
-      packKeys: selectedPacks.map((p) => p.key),
+      packKeys: suggested
+        .filter((row) => row.pack.requirementKeys.some((k) => checked.has(k)))
+        .map((row) => row.pack.key),
       suggestedKeys,
       optedOutKeys: suggestedKeys.filter((k) => !checked.has(k)),
       typeOverrides,
     });
   };
 
+  const quizCodes = quizCodesForSubject(subject);
+
   return (
     <div
-      data-evidence-quiz=""
-      className="flex flex-col gap-6 pb-[max(7rem,calc(env(safe-area-inset-bottom)+5.5rem))]"
+      className="fixed inset-0 z-40 flex items-end justify-center bg-black/45 p-0 sm:items-center sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="evidence-pack-title"
     >
-      <div>
-        <h2 className="text-xl font-semibold tracking-tight text-[var(--hive-text)]">
-          {subject === "client"
-            ? "Client pack"
-            : subject === "company"
-              ? "Company pack"
-              : "Staff pack"}
-        </h2>
-      </div>
-
-      {subject !== "company" ? (
-        <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <p className="text-sm font-semibold text-[var(--hive-text)]">Job / service codes</p>
-          <div className="mt-4 space-y-2">
-            {SERVICE_CODE_FLAGS.map((code) => (
-              <label
-                key={code}
-                className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm"
-              >
-                <Checkbox
-                  checked={answers.serviceCodes.includes(code)}
-                  onCheckedChange={() => toggleCode(code)}
-                />
-                <span>{CODE_LABEL[code]}</span>
-              </label>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {subject === "staff" ? (
-        <>
-          <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <p className="text-sm font-semibold text-[var(--hive-text)]">
-              Do they transport people?
-            </p>
-            <div className="mt-4 space-y-2">
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
-                <input
-                  type="radio"
-                  name="transport"
-                  checked={answers.transportsPeople}
-                  onChange={() => {
-                    setAnswers((a) => ({ ...a, transportsPeople: true }));
-                  }}
-                />
-                Yes — driving record / insurance proof
-              </label>
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
-                <input
-                  type="radio"
-                  name="transport"
-                  checked={!answers.transportsPeople}
-                  onChange={() => {
-                    setAnswers((a) => ({ ...a, transportsPeople: false }));
-                  }}
-                />
-                No — does not transport
-              </label>
-            </div>
-          </section>
-
-          <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <p className="text-sm font-semibold text-[var(--hive-text)]">Caseload</p>
-            <div className="mt-4 space-y-2">
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
-                <Checkbox
-                  checked={answers.worksWithAbi}
-                  onCheckedChange={(v) => {
-                    setAnswers((a) => ({ ...a, worksWithAbi: v === true }));
-                  }}
-                />
-                Works with ABI / brain-injury caseload
-              </label>
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
-                <Checkbox
-                  checked={answers.maySupportAggressiveBehavior}
-                  onCheckedChange={(v) => {
-                    setAnswers((a) => ({ ...a, maySupportAggressiveBehavior: v === true }));
-                  }}
-                />
-                May support people with aggressive behavior
-              </label>
-            </div>
-          </section>
-        </>
-      ) : null}
-
-      <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <p className="text-sm font-semibold text-[var(--hive-text)]">Suggested rows</p>
-        <ul className="mt-4 space-y-2">
-          {[...new Set([...suggestedKeys, ...checked])]
-            .map((key) => requirementByKey(key))
-            .filter((row): row is NonNullable<typeof row> => !!row)
-            .map((row) => {
-              const chips = chipsForRequirementKey(row.key, suggested);
-              const evidenceType = typeByKey[row.key] ?? row.evidenceType;
-              return (
-                <li key={row.key} className="rounded-xl border border-border px-3 py-2.5">
-                  <label className="flex min-w-0 cursor-pointer items-start gap-3">
-                    <Checkbox
-                      checked={checked.has(row.key)}
-                      onCheckedChange={() => toggleKey(row.key)}
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-sm font-medium">{row.title}</span>
-                        {chips.map((chip) => (
-                          <span
-                            key={chip}
-                            className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700"
-                          >
-                            {chip}
-                          </span>
-                        ))}
-                      </span>
-                      <span className="mt-0.5 block text-xs text-muted-foreground">
-                        {cadenceLabel(row.cadence)}
-                        {row.sowCite ? ` · ${row.sowCite}` : ""}
-                      </span>
-                    </span>
-                  </label>
-                  <div className="mt-2 pl-8">
-                    <label className="sr-only" htmlFor={`ev-type-${row.key}`}>
-                      Evidence type for {row.title}
-                    </label>
-                    <select
-                      id={`ev-type-${row.key}`}
-                      value={evidenceType}
-                      onChange={(e) =>
-                        setTypeByKey((prev) => ({
-                          ...prev,
-                          [row.key]: e.target.value as EvidenceType,
-                        }))
-                      }
-                      className="h-9 w-full max-w-[11rem] rounded-md border border-input bg-background px-2 text-sm"
-                    >
-                      <option value="upload">Upload</option>
-                      <option value="attestation">Attestation</option>
-                    </select>
-                  </div>
-                </li>
-              );
-            })}
-        </ul>
-        {optOutKey ? (
-          <div className="mt-4 rounded-xl border border-border bg-muted/40 p-3 text-sm">
-            <p>{EVIDENCE_UNCHECK_WARNING}</p>
-            <div className="mt-3 flex gap-2">
-              <Button type="button" size="sm" variant="outline" onClick={() => setOptOutKey(null)}>
-                Keep suggested
-              </Button>
-              <Button type="button" size="sm" onClick={confirmOptOut}>
-                Uncheck anyway
-              </Button>
-            </div>
-          </div>
-        ) : null}
-      </section>
-
       <div
-        className="sticky bottom-0 z-20 -mx-4 space-y-3 border-t border-border bg-[var(--hive-canvas)] px-4 pt-3 md:-mx-8 md:px-8"
-        style={{
-          paddingBottom: "max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))",
-        }}
+        data-evidence-quiz=""
+        className="flex max-h-[100dvh] w-full max-w-[680px] flex-col overflow-hidden rounded-t-2xl bg-card shadow-lg sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl"
       >
-        <label className="flex items-start gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-sm">
-          <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
-          <span>{EVIDENCE_LIABILITY_TEXT}</span>
-        </label>
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="grid min-w-0 flex-1 gap-1.5">
-            <Label htmlFor="evidence-template-name">Save template</Label>
-            <div className="flex flex-wrap gap-2">
-              <Input
-                id="evidence-template-name"
-                value={templateName}
-                onChange={(e) => setTemplateName(e.target.value)}
-                placeholder="Template name"
-                className="min-w-[10rem] flex-1"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                disabled={!templateName.trim() || checked.size === 0 || pending}
-                onClick={() =>
-                  onSaveTemplate({
-                    name: templateName.trim(),
-                    answers,
-                    requirementKeys: [...checked],
-                    packKeys: selectedPacks.map((p) => p.key),
-                  })
-                }
-              >
-                Save template
-              </Button>
+        <header className="border-b border-border px-5 py-4">
+          <h2 id="evidence-pack-title" className="text-lg font-semibold text-[var(--hive-text)]">
+            {title}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {step === "quiz" && subject === "staff"
+              ? "Staff setup — different from Client and Company."
+              : step === "quiz" && subject === "client"
+                ? "Client setup — services on this person, not hire flags."
+                : "Each item has a short plain-English explanation. Links open in a new tab."}
+          </p>
+        </header>
+
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          {step === "quiz" && subject === "staff" ? (
+            <div className="space-y-4">
+              <p className="rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700">
+                Staff: hire / role questions, then personnel packs.
+              </p>
+              <section className="rounded-xl border border-border p-3">
+                <h3 className="text-sm font-semibold">Job / service codes</h3>
+                <div className="mt-3 grid gap-2">
+                  {quizCodes.map((code) => (
+                    <label
+                      key={code}
+                      className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm"
+                    >
+                      <Checkbox
+                        checked={answers.serviceCodes.includes(code)}
+                        onCheckedChange={() => toggleCode(code)}
+                      />
+                      {code}
+                    </label>
+                  ))}
+                </div>
+              </section>
+              <section className="rounded-xl border border-border p-3">
+                <h3 className="text-sm font-semibold">Transport</h3>
+                <div className="mt-3 grid gap-2">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm">
+                    <input
+                      type="radio"
+                      name="transport"
+                      checked={answers.transportsPeople}
+                      onChange={() => setAnswers((a) => ({ ...a, transportsPeople: true }))}
+                    />
+                    Yes
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm">
+                    <input
+                      type="radio"
+                      name="transport"
+                      checked={!answers.transportsPeople}
+                      onChange={() => setAnswers((a) => ({ ...a, transportsPeople: false }))}
+                    />
+                    Does not transport
+                  </label>
+                </div>
+              </section>
+              <section className="rounded-xl border border-border p-3">
+                <h3 className="text-sm font-semibold">Caseload flags</h3>
+                <div className="mt-3 grid gap-2">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm">
+                    <Checkbox
+                      checked={answers.worksWithAbi}
+                      onCheckedChange={(v) =>
+                        setAnswers((a) => ({ ...a, worksWithAbi: v === true }))
+                      }
+                    />
+                    ABI
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm">
+                    <Checkbox
+                      checked={answers.maySupportAggressiveBehavior}
+                      onCheckedChange={(v) =>
+                        setAnswers((a) => ({ ...a, maySupportAggressiveBehavior: v === true }))
+                      }
+                    />
+                    Mandt / aggressive behavior
+                  </label>
+                </div>
+              </section>
             </div>
-          </div>
+          ) : null}
+
+          {step === "quiz" && subject === "client" ? (
+            <div className="space-y-4">
+              <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+                Client: person-file packs. No CPR / background / Mandt.
+              </p>
+              <section className="rounded-xl border border-border p-3">
+                <h3 className="text-sm font-semibold">Services / codes for this client</h3>
+                <div className="mt-3 grid gap-2">
+                  {quizCodes.map((code) => (
+                    <label
+                      key={code}
+                      className="flex cursor-pointer items-center gap-3 rounded-lg border border-border px-3 py-2 text-sm"
+                    >
+                      <Checkbox
+                        checked={answers.serviceCodes.includes(code)}
+                        onCheckedChange={() => toggleCode(code)}
+                      />
+                      {code}
+                    </label>
+                  ))}
+                </div>
+              </section>
+            </div>
+          ) : null}
+
+          {step === "rows" ? (
+            <div className="space-y-4">
+              {subject === "company" ? (
+                <div className="space-y-3">
+                  <p className="rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-900">
+                    Company: agency policies and standing — not people. No hire questionnaire.
+                  </p>
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
+                    <Checkbox
+                      checked={answers.includeCompanyCustoms}
+                      onCheckedChange={(v) =>
+                        setAnswers((a) => ({ ...a, includeCompanyCustoms: v === true }))
+                      }
+                    />
+                    Include optional custom company slot
+                  </label>
+                </div>
+              ) : subject === "staff" ? (
+                <p className="rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700">
+                  Staff suggestions (personnel). Host Home Cert dual-links when HHS is selected.
+                </p>
+              ) : (
+                <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+                  Client suggestions (person file).
+                </p>
+              )}
+
+              {grouped.map(({ pack, rows }) => (
+                <section key={pack.key}>
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {pack.chip}
+                  </h3>
+                  <ul className="space-y-2">
+                    {rows.map((row) => {
+                      const evidenceType = typeByKey[row.key] ?? row.evidenceType;
+                      return (
+                        <li key={row.key} className="rounded-xl border border-border p-3">
+                          <label className="flex items-start gap-3">
+                            <Checkbox
+                              checked={checked.has(row.key)}
+                              onCheckedChange={() => toggleKey(row.key)}
+                            />
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-sm font-semibold">{row.title}</span>
+                              <span className="mt-0.5 block text-xs text-muted-foreground">
+                                {row.cadenceDisplay}
+                                {row.dualLink ? " · same file on Staff + Client" : ""}
+                              </span>
+                              <span className="mt-2 block text-sm leading-snug text-slate-700">
+                                {row.why}
+                              </span>
+                              {row.links.length > 0 ? (
+                                <span className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                                  {row.links.map((link) => (
+                                    <a
+                                      key={link.href + link.label}
+                                      href={link.href}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs font-semibold text-[var(--hive-accent,#2f6fed)] underline-offset-2 hover:underline"
+                                    >
+                                      {link.label}
+                                    </a>
+                                  ))}
+                                </span>
+                              ) : null}
+                              <label className="mt-2 block">
+                                <span className="sr-only">Evidence type for {row.title}</span>
+                                <select
+                                  value={evidenceType}
+                                  onChange={(e) =>
+                                    setTypeByKey((prev) => ({
+                                      ...prev,
+                                      [row.key]: e.target.value as EvidenceType,
+                                    }))
+                                  }
+                                  className="mt-1 h-8 rounded-md border border-input bg-background px-2 text-xs"
+                                >
+                                  <option value="upload">Upload</option>
+                                  <option value="attestation">Attestation</option>
+                                </select>
+                              </label>
+                            </span>
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              ))}
+
+              {optOutKey ? (
+                <div className="rounded-xl border border-border bg-muted/40 p-3 text-sm">
+                  <p>{EVIDENCE_UNCHECK_WARNING}</p>
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setOptOutKey(null)}
+                    >
+                      Keep suggested
+                    </Button>
+                    <Button type="button" size="sm" onClick={confirmOptOut}>
+                      Uncheck anyway
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+
+              <label className="flex items-start gap-3 rounded-xl border border-border bg-muted/30 px-3 py-3 text-sm">
+                <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
+                <span>{EVIDENCE_LIABILITY_TEXT}</span>
+              </label>
+            </div>
+          ) : null}
+        </div>
+
+        <footer
+          className="flex items-center gap-2 border-t border-border bg-muted/30 px-5 py-3"
+          style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+        >
           <Button
             type="button"
-            disabled={!liability || checked.size === 0 || pending}
-            onClick={apply}
+            variant="outline"
+            onClick={() => {
+              if (subject !== "company" && step === "rows") {
+                setStep("quiz");
+                return;
+              }
+              onClose();
+            }}
           >
-            {pending ? "Applying…" : "Apply packs"}
+            Back
           </Button>
-        </div>
+          <div className="flex-1" />
+          {step === "quiz" ? (
+            <Button type="button" onClick={() => setStep("rows")}>
+              {subject === "client" ? "See client suggestions" : "See staff suggestions"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              disabled={!liability || checked.size === 0 || pending}
+              onClick={apply}
+            >
+              {pending ? "Applying…" : "Apply packs"}
+            </Button>
+          )}
+        </footer>
       </div>
     </div>
   );

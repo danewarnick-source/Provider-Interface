@@ -22,10 +22,9 @@ function EvidencePage() {
   return (
     <EvidenceWorkspace
       tab={tab}
-      step={search.wizard ? "quiz" : step}
+      step={step}
       personId={search.person}
       itemId={search.item}
-      wizard={search.wizard}
       onSearchChange={(next) => {
         void navigate({
           search: evidenceSearchFor({
@@ -33,7 +32,6 @@ function EvidencePage() {
             step: next.step ?? step,
             person: next.person === undefined ? search.person : next.person,
             item: next.item === undefined ? search.item : next.item,
-            wizard: next.wizard,
           }),
         });
       }}

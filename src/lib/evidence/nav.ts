@@ -1,14 +1,16 @@
 import { EVIDENCE_SUBJECTS, type EvidenceSubject } from "./types.ts";
 
-export const EVIDENCE_STEPS = ["grid", "pack", "quiz", "newtype", "review"] as const;
+export const EVIDENCE_STEPS = ["grid", "quiz", "review"] as const;
 export type EvidenceStep = (typeof EVIDENCE_STEPS)[number];
 
-export const EVIDENCE_STEP_LABEL: Record<EvidenceStep, string> = {
-  grid: "Grid",
-  pack: "Pack settings",
-  quiz: "Hire questionnaire",
-  newtype: "Add requirement",
-  review: "Review file",
+export const EVIDENCE_STEP_ALIASES: Record<string, EvidenceStep> = {
+  grid: "grid",
+  roster: "grid",
+  quiz: "quiz",
+  pack: "quiz",
+  newtype: "quiz",
+  wizard: "quiz",
+  review: "review",
 };
 
 export type EvidenceSearch = {
@@ -16,7 +18,6 @@ export type EvidenceSearch = {
   step?: string;
   person?: string;
   item?: string;
-  wizard?: boolean;
 };
 
 const SUBJECT_ALIASES: Record<string, EvidenceSubject> = {
@@ -35,10 +36,9 @@ export function parseEvidenceSearch(s: Record<string, unknown>): EvidenceSearch 
   const wizard = s.wizard === "1" || s.wizard === 1 || s.wizard === true || s.wizard === "true";
   return {
     ...(tab ? { tab } : {}),
-    ...(step ? { step } : {}),
+    ...(step ? { step } : wizard ? { step: "quiz" } : {}),
     ...(person ? { person } : {}),
     ...(item ? { item } : {}),
-    ...(wizard ? { wizard: true } : {}),
   };
 }
 
@@ -49,7 +49,7 @@ export function resolveEvidenceTab(tab?: string): EvidenceSubject {
 
 export function resolveEvidenceStep(step?: string): EvidenceStep {
   const key = (step ?? "").trim().toLowerCase();
-  return (EVIDENCE_STEPS as readonly string[]).includes(key) ? (key as EvidenceStep) : "grid";
+  return EVIDENCE_STEP_ALIASES[key] ?? "grid";
 }
 
 export function evidenceSearchFor(args: {
@@ -57,14 +57,12 @@ export function evidenceSearchFor(args: {
   step?: EvidenceStep;
   person?: string | null;
   item?: string | null;
-  wizard?: boolean;
 }): EvidenceSearch {
   return {
     tab: args.tab ?? "staff",
     ...(args.step && args.step !== "grid" ? { step: args.step } : {}),
     ...(args.person ? { person: args.person } : {}),
     ...(args.item ? { item: args.item } : {}),
-    ...(args.wizard ? { wizard: true } : {}),
   };
 }
 

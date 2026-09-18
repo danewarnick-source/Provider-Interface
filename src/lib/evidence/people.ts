@@ -31,10 +31,6 @@ export function mapClientRowsToPeople(rows: readonly EvidenceClientRow[]): Evide
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
 }
 
-export function skipGetStartedKey(organizationId: string): string {
-  return `evidence-get-started-skip:${organizationId}`;
-}
-
 export type ClientPeopleQuery = (columns: string) => PromiseLike<{
   data: readonly EvidenceClientRow[] | null;
   error: { message: string } | null;

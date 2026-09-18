@@ -22,6 +22,7 @@ export function addCadence(fromIso: string, cadence: string): string | null {
   else if (cadence === "semi_annual") next.setUTCMonth(next.getUTCMonth() + 6);
   else if (cadence === "annual") next.setUTCFullYear(next.getUTCFullYear() + 1);
   else if (cadence === "every_2_years") next.setUTCFullYear(next.getUTCFullYear() + 2);
+  else if (cadence === "every_5_years") next.setUTCFullYear(next.getUTCFullYear() + 5);
   else return null;
   return next.toISOString().slice(0, 10);
 }

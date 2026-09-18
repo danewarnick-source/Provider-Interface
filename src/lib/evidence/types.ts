@@ -1,6 +1,6 @@
 /**
  * Evidence Phase 1 — suggestion-only people × requirements tracker.
- * Not a compliance engine. Packs are curated in code; providers opt in.
+ * Packs are curated in code from the product catalog. Providers opt in.
  */
 
 export const EVIDENCE_SUBJECTS = ["staff", "client", "company"] as const;
@@ -16,6 +16,7 @@ export const EVIDENCE_CADENCES = [
   "semi_annual",
   "annual",
   "every_2_years",
+  "every_5_years",
   "keep_current",
 ] as const;
 export type EvidenceCadence = (typeof EVIDENCE_CADENCES)[number];
@@ -27,6 +28,7 @@ export const EVIDENCE_CADENCE_OPTIONS: { value: EvidenceCadence; label: string }
   { value: "semi_annual", label: "Semi-annual (every 6 months)" },
   { value: "annual", label: "Annual" },
   { value: "every_2_years", label: "Every 2 years" },
+  { value: "every_5_years", label: "Every 5 years" },
   { value: "keep_current", label: "Custom / Keep current" },
 ];
 
@@ -40,13 +42,43 @@ export const SERVICE_CODE_FLAGS = [
   "SEI",
   "DSI",
   "RHS",
+  "PPS",
   "BC1",
   "BC2",
   "BC3",
 ] as const;
 export type ServiceCodeFlag = (typeof SERVICE_CODE_FLAGS)[number];
 
+export const STAFF_QUIZ_CODES: readonly ServiceCodeFlag[] = [
+  "HHS",
+  "SLN",
+  "SEI",
+  "DSI",
+  "RHS",
+  "PPS",
+  "BC1",
+  "BC2",
+  "BC3",
+];
+
+export const CLIENT_QUIZ_CODES: readonly ServiceCodeFlag[] = [
+  "HHS",
+  "PPS",
+  "RHS",
+  "SLN",
+  "SEI",
+  "DSI",
+  "BC1",
+  "BC2",
+  "BC3",
+];
+
 export type DualLinkKind = "host_home_cert";
+
+export type EvidenceHelpLink = {
+  label: string;
+  href: string;
+};
 
 export type EvidenceRequirementDef = {
   key: string;
@@ -56,6 +88,10 @@ export type EvidenceRequirementDef = {
   attestationText: string | null;
   cadence: EvidenceCadence;
   sowCite: string;
+  /** Demo-style "Annual · SOW §1.9(2)" line. */
+  cadenceDisplay: string;
+  why: string;
+  links: readonly EvidenceHelpLink[];
   subject: EvidenceSubject;
   dualLink: DualLinkKind | null;
 };
@@ -67,16 +103,17 @@ export type QuestionnaireAnswers = {
   transportsPeople: boolean;
   worksWithAbi: boolean;
   maySupportAggressiveBehavior: boolean;
+  includeCompanyCustoms: boolean;
 };
 
 export type EvidencePackDef = {
   key: string;
   title: string;
-  /** Short chip on suggested rows — All-staff, Transport, HHS, ABI, … */
   chip: string;
   subject: EvidenceSubject;
   description: string;
   requirementKeys: readonly string[];
+  when: (answers: QuestionnaireAnswers) => boolean;
 };
 
 export type SuggestedPack = {
@@ -151,7 +188,7 @@ export type EvidenceGridCell = {
 };
 
 export const EVIDENCE_LIABILITY_TEXT =
-  "I understand this pack is a suggestion based on common SOW topics. It is not comprehensive legal advice. My agency must verify requirements against our own contract / Scope of Work and add anything missing.";
+  "Suggestions only — verify against our own SOW / contract and add anything missing.";
 
 export const EVIDENCE_DISCLAIMER =
   "Not called compliance. Suggestions only — provider picks packs and adds custom rows. Platform tracks upload + expiration (done / expiring / missing). No Home percent scoreboard.";
