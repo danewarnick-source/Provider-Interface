@@ -165,14 +165,6 @@ export const Route = createFileRoute("/dashboard/compliance-desk")({
   ),
 });
 
-export function ComplianceDeskWrapped() {
-  return (
-    <RequirePermission perm="approve_timesheets">
-      <ComplianceDeskPage />
-    </RequirePermission>
-  );
-}
-
 type Coord = { latitude: number; longitude: number; accuracy_meters: number };
 type AuditEntry = {
   timestamp: string;
