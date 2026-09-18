@@ -21,9 +21,6 @@ export const EVIDENCE_CADENCES = [
 ] as const;
 export type EvidenceCadence = (typeof EVIDENCE_CADENCES)[number];
 
-/** Stored for older rows only. UI uses first-due / next-due chips — never “once” or “keep current”. */
-export const EVIDENCE_CADENCE_OPTIONS: { value: EvidenceCadence; label: string }[] = [];
-
 export const FIRST_DUE_RULES = [
   "before_first_shift",
   "hire_30",
@@ -35,7 +32,7 @@ export type FirstDueRule = (typeof FIRST_DUE_RULES)[number];
 
 export type RenewYears = 1 | 2 | null;
 
-export const EVIDENCE_CELL_STATUSES = ["done", "expiring", "missing"] as const;
+export const EVIDENCE_CELL_STATUSES = ["done", "missing"] as const;
 export type EvidenceCellStatus = (typeof EVIDENCE_CELL_STATUSES)[number];
 
 export const SERVICE_CODE_FLAGS = [
@@ -194,16 +191,6 @@ export type EvidenceFileRow = {
   notes: string | null;
 };
 
-export type EvidenceTemplateRow = {
-  id: string;
-  organization_id: string;
-  name: string;
-  subject_type: EvidenceSubject;
-  pack_keys: string[];
-  requirement_keys: string[];
-  created_at: string;
-};
-
 export type EvidencePerson = {
   id: string;
   full_name: string;
@@ -213,25 +200,8 @@ export type EvidencePerson = {
   hire_date?: string | null;
 };
 
-export type EvidenceGridColumn = {
-  requirementKey: string;
-  label: string;
-  sowCite: string | null;
-};
-
-export type EvidenceGridCell = {
-  subjectId: string;
-  requirementKey: string;
-  itemId: string | null;
-  status: EvidenceCellStatus;
-  expiresOn: string | null;
-};
-
 export const EVIDENCE_LIABILITY_TEXT =
   "These packs are suggestions only, based on common SOW topics. They are not a complete legal review and not a determination that this agency is in compliance. The provider remains ultimately responsible for knowing and meeting the obligations in its own contract, Scope of Work, and applicable Utah / DSPD rules. Verify every row against your SOW before you apply it, and add anything that is missing.";
-
-export const EVIDENCE_DISCLAIMER =
-  "Not called compliance. Suggestions only — provider picks packs and adds custom rows. Platform tracks upload and due dates (done / needs attention). No Home percent scoreboard.";
 
 export const EVIDENCE_UNCHECK_TITLE = "Are you sure?";
 export const EVIDENCE_UNCHECK_WARNING = "This was found to be a requirement in the SOW.";

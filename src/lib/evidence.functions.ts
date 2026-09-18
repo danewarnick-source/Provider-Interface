@@ -1,6 +1,6 @@
 /**
  * Evidence Phase 1 persistence.
- * Writes only evidence_items, evidence_files, and evidence_templates.
+ * Writes only evidence_items and evidence_files.
  * Does not read or write organizations.feature_config.
  * Does not write requirement_defs or company_obligations.
  */
@@ -8,7 +8,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { hostHomeDualLinkPeerKey, packByKey, requirementByKey } from "./evidence/catalog.ts";
+import { hostHomeDualLinkPeerKey, requirementByKey } from "./evidence/catalog.ts";
 import {
   companyEvidencePerson,
   loadEvidenceClientPeople,
@@ -23,23 +23,18 @@ import {
   parseIsoDate,
   type EvidenceDueDraft,
 } from "./evidence/due.ts";
-import { cellStatus, latestFileForItem } from "./evidence/status.ts";
+import { latestFileForItem } from "./evidence/status.ts";
 import {
-  EVIDENCE_CADENCES,
   EVIDENCE_PUSH_BODY,
   EVIDENCE_PUSH_LINK,
   EVIDENCE_PUSH_TITLE,
   EVIDENCE_SEND_MESSAGE_UNAVAILABLE,
   EVIDENCE_STORAGE_UNAVAILABLE,
   FIRST_DUE_RULES,
-  type EvidenceCellStatus,
   type EvidenceFileRow,
-  type EvidenceGridCell,
-  type EvidenceGridColumn,
   type EvidenceItemRow,
   type EvidencePerson,
   type EvidenceSubject,
-  type EvidenceTemplateRow,
   type EvidenceType,
   type FirstDueRule,
   type RenewYears,
@@ -50,16 +45,14 @@ type AnySupabase = any;
 
 const SubjectEnum = z.enum(["staff", "client", "company"]);
 const TypeEnum = z.enum(["upload", "attestation"]);
-const CadenceEnum = z.enum(EVIDENCE_CADENCES);
 
 type StoreV1 = {
   items: EvidenceItemRow[];
   files: EvidenceFileRow[];
-  templates: EvidenceTemplateRow[];
 };
 
 function emptyStore(): StoreV1 {
-  return { items: [], files: [], templates: [] };
+  return { items: [], files: [] };
 }
 
 function tableMissing(message: string | undefined): boolean {
@@ -244,26 +237,6 @@ async function loadAll(
     }
     throw new Error(mapEvidenceDbError(fileErr.message));
   }
-  const { data: templates, error: tplErr } = await sb
-    .from("evidence_templates")
-    .select("id, organization_id, name, subject_type, pack_keys, requirement_keys, created_at")
-    .eq("organization_id", organizationId)
-    .order("created_at", { ascending: false });
-  if (tplErr) {
-    if (tableMissing(tplErr.message)) {
-      return {
-        viaTables: true,
-        hasSendMessage,
-        hasDue,
-        store: {
-          items: items ?? [],
-          files: (files ?? []) as EvidenceFileRow[],
-          templates: [],
-        },
-      };
-    }
-    throw new Error(mapEvidenceDbError(tplErr.message));
-  }
   return {
     viaTables: true,
     hasSendMessage,
@@ -271,7 +244,6 @@ async function loadAll(
     store: {
       items: items ?? [],
       files: (files ?? []) as EvidenceFileRow[],
-      templates: (templates ?? []) as EvidenceTemplateRow[],
     },
   };
 }
@@ -548,13 +520,9 @@ export type EvidenceBoard = {
   viaTables: boolean;
   subject: EvidenceSubject;
   people: EvidencePerson[];
-  columns: EvidenceGridColumn[];
-  cells: EvidenceGridCell[];
   items: EvidenceItemRow[];
   files: EvidenceFileRow[];
-  templates: EvidenceTemplateRow[];
   staffPicker: EvidencePerson[];
-  orgItemCount: number;
   peopleError: string | null;
 };
 
@@ -564,48 +532,16 @@ function boardFromStore(args: {
   people: EvidencePerson[];
   store: StoreV1;
   staffPicker: EvidencePerson[];
-  today: string;
   peopleError?: string | null;
 }): EvidenceBoard {
   const items = args.store.items.filter((i) => i.subject_type === args.subject);
-  const colMap = new Map<string, EvidenceGridColumn>();
-  for (const row of items) {
-    if (!colMap.has(row.requirement_key)) {
-      colMap.set(row.requirement_key, {
-        requirementKey: row.requirement_key,
-        label: row.title,
-        sowCite: row.sow_cite,
-      });
-    }
-  }
-  const columns = [...colMap.values()];
-  const cells: EvidenceGridCell[] = [];
-  for (const person of args.people) {
-    for (const col of columns) {
-      const found = items.find(
-        (i) => i.subject_id === person.id && i.requirement_key === col.requirementKey,
-      );
-      const file = found ? latestFileForItem(args.store.files, found.id) : null;
-      cells.push({
-        subjectId: person.id,
-        requirementKey: col.requirementKey,
-        itemId: found?.id ?? null,
-        status: cellStatus({ item: found ?? null, file, today: args.today }),
-        expiresOn: found?.next_due_on ?? found?.first_due_on ?? found?.expires_on ?? null,
-      });
-    }
-  }
   return {
     viaTables: args.viaTables,
     subject: args.subject,
     people: args.people,
-    columns,
-    cells,
     items,
     files: args.store.files.filter((f) => items.some((i) => i.id === f.item_id)),
-    templates: args.store.templates.filter((t) => t.subject_type === args.subject),
     staffPicker: args.staffPicker,
-    orgItemCount: args.store.items.length,
     peopleError: args.peopleError ?? null,
   };
 }
@@ -629,7 +565,6 @@ export const loadEvidenceBoard = createServerFn({ method: "POST" })
         people: [],
         store: emptyStore(),
         staffPicker: [],
-        today: todayStamp(),
       });
     }
     await requireOrgMembership(supabase, userId, data.organizationId, "employee");
@@ -664,7 +599,6 @@ export const loadEvidenceBoard = createServerFn({ method: "POST" })
       people,
       store,
       staffPicker: staff,
-      today: todayStamp(),
       peopleError,
     });
   });
@@ -810,7 +744,6 @@ export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
         title: z.string().min(1),
         evidenceType: TypeEnum,
         attestationText: z.string().nullable().optional(),
-        cadence: CadenceEnum.optional(),
         sowCite: z.string().nullable().optional(),
         expiresOn: z.string().nullable().optional(),
         due: DueDraftSchema.optional(),
@@ -840,7 +773,6 @@ export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
           title: data.title,
           evidenceType: data.evidenceType,
           attestationText: data.attestationText ?? null,
-          cadence: data.cadence ?? cadenceFromDue(data.due?.renewYears ?? null),
           sowCite: data.sowCite ?? null,
           due: data.due,
           hireDate: data.hireDate ?? null,
@@ -875,43 +807,6 @@ export const removeEvidenceRequirement = createServerFn({ method: "POST" })
     const { viaTables } = await loadAll(sb, data.organizationId);
     await deleteItem(sb, viaTables, data.organizationId, data.itemId);
     return { ok: true as const };
-  });
-
-export const saveEvidenceTemplate = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i) =>
-    z
-      .object({
-        organizationId: z.string().uuid(),
-        name: z.string().min(1).max(80),
-        subjectType: SubjectEnum,
-        packKeys: z.array(z.string()),
-        requirementKeys: z.array(z.string()).min(1),
-      })
-      .parse(i),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    if (!supabase || !userId) return { ok: false as const, id: null as string | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
-    const sb = supabase as AnySupabase;
-    const { viaTables } = await loadAll(sb, data.organizationId);
-    const row: EvidenceTemplateRow = {
-      id: newId(),
-      organization_id: data.organizationId,
-      name: data.name.trim(),
-      subject_type: data.subjectType,
-      pack_keys: data.packKeys,
-      requirement_keys: data.requirementKeys,
-      created_at: nowIso(),
-    };
-    requireTables(viaTables);
-    const { error } = await sb.from("evidence_templates").insert({
-      ...row,
-      created_by: userId,
-    });
-    if (error) throw new Error(mapEvidenceDbError(error.message));
-    return { ok: true as const, id: row.id };
   });
 
 export const sendEvidenceToStaff = createServerFn({ method: "POST" })
@@ -1193,7 +1088,6 @@ export const createEvidenceChecklist = createServerFn({ method: "POST" })
         title: z.string().min(1).max(160),
         description: z.string().max(2000).optional(),
         questions: z.array(z.string().min(1).max(400)).min(1).max(40),
-        cadence: CadenceEnum.optional(),
         due: DueDraftSchema.optional(),
         hireDate: z.string().nullable().optional(),
       })
@@ -1220,7 +1114,6 @@ export const createEvidenceChecklist = createServerFn({ method: "POST" })
           title: data.title.trim(),
           evidenceType: "attestation",
           attestationText,
-          cadence: data.cadence ?? cadenceFromDue(data.due?.renewYears ?? null),
           sowCite: "Agency form",
           due: data.due,
           hireDate: data.hireDate ?? null,
@@ -1297,9 +1190,3 @@ export const updateEvidenceDue = createServerFn({ method: "POST" })
     });
     return { ok: true as const };
   });
-
-export function unusedPackGuard(packKey: string): boolean {
-  return !!packByKey(packKey);
-}
-
-export type { EvidenceCellStatus };

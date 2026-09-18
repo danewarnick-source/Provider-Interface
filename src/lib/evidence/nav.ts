@@ -1,4 +1,4 @@
-import { EVIDENCE_SUBJECTS, type EvidenceSubject } from "./types.ts";
+import type { EvidenceSubject } from "./types.ts";
 
 export const EVIDENCE_STEPS = ["grid", "quiz", "review"] as const;
 export type EvidenceStep = (typeof EVIDENCE_STEPS)[number];
@@ -71,8 +71,4 @@ export function evidenceSearchFor(args: {
 /** Leave Add / quiz / packs: list-only URL, no leftover person panel. */
 export function leaveEvidenceWizard(tab: EvidenceSubject): EvidenceSearch {
   return evidenceSearchFor({ tab, step: "grid", person: null, item: null });
-}
-
-export function isEvidenceSubject(value: string): value is EvidenceSubject {
-  return (EVIDENCE_SUBJECTS as readonly string[]).includes(value);
 }

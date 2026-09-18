@@ -38,9 +38,8 @@ import {
   LOCKED_DUE_DEFAULTS,
   needsHireDate,
 } from "./evidence/due.ts";
-import { addCadence, cellStatus, staffInitials } from "./evidence/status.ts";
+import { cellStatus, staffInitials } from "./evidence/status.ts";
 import {
-  EVIDENCE_DISCLAIMER,
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_PUSH_BODY,
   EVIDENCE_STORAGE_UNAVAILABLE,
@@ -326,7 +325,7 @@ describe("Evidence curated catalog", () => {
     assert.match(EVIDENCE_UNCHECK_WARNING, /requirement in the SOW/);
     assert.match(EVIDENCE_LIABILITY_TEXT, /suggestions only/i);
     assert.match(EVIDENCE_LIABILITY_TEXT, /ultimately responsible/);
-    assert.doesNotMatch(EVIDENCE_DISCLAIMER, /scoreboard percent|Hive Certify/i);
+    assert.doesNotMatch(EVIDENCE_LIABILITY_TEXT, /scoreboard percent|Hive Certify/i);
   });
 
   it("wires company OL standing, SEE job-coach, EPR supervisor, and annual 12-hour training", () => {
@@ -574,7 +573,7 @@ describe("Evidence people roster", () => {
 });
 
 describe("Evidence cell status", () => {
-  it("marks missing, expiring soon, and done without inventing a score", () => {
+  it("marks missing and done without inventing a score", () => {
     assert.equal(cellStatus({ item: null, file: null, today: "2026-09-17" }), "missing");
     assert.equal(cellStatus({ item: item({}), file: null, today: "2026-09-17" }), "missing");
     assert.equal(
@@ -601,12 +600,6 @@ describe("Evidence cell status", () => {
       }),
       "missing",
     );
-    assert.equal(addCadence("2026-03-12", "every_2_years"), "2028-03-12");
-    assert.equal(addCadence("2026-03-12", "every_5_years"), "2031-03-12");
-    assert.equal(addCadence("2026-03-12", "monthly"), "2026-04-12");
-    assert.equal(addCadence("2026-03-12", "quarterly"), "2026-06-12");
-    assert.equal(addCadence("2026-03-12", "semi_annual"), "2026-09-12");
-    assert.equal(addCadence("2026-03-12", "keep_current"), null);
     assert.equal(staffInitials("Dane Warnick"), "DW");
   });
 

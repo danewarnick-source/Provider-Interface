@@ -10,21 +10,6 @@ export function staffInitials(fullName: string): string {
   return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
 }
 
-export function addCadence(fromIso: string, cadence: string): string | null {
-  const start = new Date(`${fromIso.slice(0, 10)}T12:00:00Z`);
-  if (Number.isNaN(start.getTime())) return null;
-  if (cadence === "once" || cadence === "keep_current") return null;
-  const next = new Date(start);
-  if (cadence === "monthly") next.setUTCMonth(next.getUTCMonth() + 1);
-  else if (cadence === "quarterly") next.setUTCMonth(next.getUTCMonth() + 3);
-  else if (cadence === "semi_annual") next.setUTCMonth(next.getUTCMonth() + 6);
-  else if (cadence === "annual") next.setUTCFullYear(next.getUTCFullYear() + 1);
-  else if (cadence === "every_2_years") next.setUTCFullYear(next.getUTCFullYear() + 2);
-  else if (cadence === "every_5_years") next.setUTCFullYear(next.getUTCFullYear() + 5);
-  else return null;
-  return next.toISOString().slice(0, 10);
-}
-
 export function latestFileForItem(
   files: readonly EvidenceFileRow[],
   itemId: string,
@@ -38,7 +23,7 @@ export function latestFileForItem(
   });
 }
 
-export function itemHasCompletedEvidence(
+function itemHasCompletedEvidence(
   item: EvidenceItemRow,
   file: EvidenceFileRow | null,
 ): boolean {
@@ -67,9 +52,7 @@ export function cellStatus(args: {
 }
 
 export function statusLabel(status: EvidenceCellStatus): string {
-  if (status === "done") return "On file";
-  if (status === "expiring") return "Needs attention";
-  return "Needs attention";
+  return status === "done" ? "On file" : "Needs attention";
 }
 
 export function formatExpiresOn(iso: string | null): string | null {
