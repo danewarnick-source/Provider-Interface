@@ -51,10 +51,7 @@ export function EvidenceStatusLegend() {
         <EvidenceStatusDot status="done" /> Done
       </span>
       <span className="inline-flex items-center gap-1.5">
-        <EvidenceStatusDot status="expiring" /> Expiring soon
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <EvidenceStatusDot status="missing" /> Missing / needs attention
+        <EvidenceStatusDot status="missing" /> Needs attention
       </span>
     </div>
   );

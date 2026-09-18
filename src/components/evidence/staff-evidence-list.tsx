@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { cadenceLabel } from "@/lib/evidence/catalog.ts";
+import { dueSubtitleFromItem } from "@/lib/evidence/due.ts";
 import {
   listMySentEvidence,
   recordEvidenceAttestation,
@@ -27,8 +28,14 @@ export function StaffEvidenceList() {
     queryFn: () => listFn({ data: { organizationId: org!.organization_id } }),
   });
 
+  const [documentByItem, setDocumentByItem] = useState<Record<string, string>>({});
   const uploadM = useMutation({
-    mutationFn: (args: { itemId: string; storagePath: string; filename: string }) =>
+    mutationFn: (args: {
+      itemId: string;
+      storagePath: string;
+      filename: string;
+      documentDate?: string | null;
+    }) =>
       uploadFn({
         data: {
           organizationId: org!.organization_id,
@@ -43,8 +50,11 @@ export function StaffEvidenceList() {
     onError: (e: Error) => toast.error(e.message),
   });
   const attestM = useMutation({
-    mutationFn: (args: { itemId: string; attestationText: string }) =>
-      attestFn({ data: { organizationId: org!.organization_id, ...args } }),
+    mutationFn: (args: {
+      itemId: string;
+      attestationText: string;
+      documentDate?: string | null;
+    }) => attestFn({ data: { organizationId: org!.organization_id, ...args } }),
     onSuccess: () => {
       toast.success("Attested.");
       void qc.invalidateQueries({ queryKey: ["my-sent-evidence"] });
@@ -89,7 +99,7 @@ export function StaffEvidenceList() {
                     <p className="font-medium">{item.title}</p>
                     <p className="text-xs text-muted-foreground">
                       {item.evidence_type === "attestation" ? "Attest" : "Upload"} ·{" "}
-                      {cadenceLabel(item.cadence)}
+                      {dueSubtitleFromItem(item)}
                     </p>
                     {item.send_message?.trim() ? (
                       <div className="mt-3 rounded-xl border border-border bg-muted/40 px-3 py-2">
@@ -102,6 +112,20 @@ export function StaffEvidenceList() {
                   </div>
                   <EvidenceStatusGlyph status={status} />
                 </div>
+                {item.renew_years === 1 || item.renew_years === 2 ? (
+                  <label className="mt-3 block">
+                    <span className="mb-1 block text-xs text-muted-foreground">
+                      Document / certificate date
+                    </span>
+                    <Input
+                      type="date"
+                      value={documentByItem[item.id] ?? item.document_date ?? ""}
+                      onChange={(e) =>
+                        setDocumentByItem((prev) => ({ ...prev, [item.id]: e.target.value }))
+                      }
+                    />
+                  </label>
+                ) : null}
                 {item.evidence_type === "attestation" ? (
                   <Button
                     type="button"
@@ -112,6 +136,7 @@ export function StaffEvidenceList() {
                         itemId: item.id,
                         attestationText:
                           item.attestation_text || `I attest that ${item.title} is complete.`,
+                        documentDate: documentByItem[item.id] || item.document_date,
                       })
                     }
                   >
@@ -140,6 +165,7 @@ export function StaffEvidenceList() {
                           itemId: item.id,
                           storagePath: path,
                           filename: picked.name,
+                          documentDate: documentByItem[item.id] || item.document_date,
                         });
                       }}
                     />

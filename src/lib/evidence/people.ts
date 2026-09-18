@@ -1,4 +1,5 @@
 import { isEmployeeOnActiveRoster } from "../employee-roster.ts";
+import { resolveHireDate } from "./due.ts";
 import { staffInitials } from "./status.ts";
 import type { EvidencePerson } from "./types.ts";
 
@@ -66,6 +67,8 @@ export type EvidenceEmployeeRow = {
     last_name?: string | null;
     account_status: string | null;
     is_active: boolean | null;
+    hire_date?: string | null;
+    start_date?: string | null;
   } | null;
 };
 
@@ -84,6 +87,7 @@ export function mapEmployeeRowsToPeople(rows: readonly EvidenceEmployeeRow[]): E
         full_name: name,
         initials: staffInitials(name),
         subtitle: (m.job_title ?? m.role ?? "").trim() || null,
+        hire_date: resolveHireDate(p?.hire_date, p?.start_date),
       };
     })
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
@@ -96,6 +100,7 @@ export function companyEvidencePerson(organizationId: string, orgName: string): 
     full_name: name,
     initials: staffInitials(name),
     subtitle: "Company file",
+    hire_date: null,
   };
 }
 

@@ -1,5 +1,41 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
+## ACTION — Evidence due-date model (2026-09-18)
+
+**Do not run until Dane approves.** Additive only — adds
+`first_due_rule`, `first_due_on`, `document_date`, `next_due_on`, and
+`renew_years` on `evidence_items`. Does **not** drop columns.
+
+The app is graceful if these columns are missing: Apply / upload /
+attest still work and skip the new due fields.
+
+**Prerequisite:** Phase 1 `evidence_items` table already exists (or apply
+that SQL first).
+
+**To apply:** paste the full contents of
+`supabase/migrations/20260918070000_evidence_due_model.sql`
+into Lovable’s SQL editor (clear the editor first) and run it.
+
+**Confirm (paste this next, after clearing the editor):**
+
+```sql
+SELECT string_agg(column_name, ' | ' ORDER BY column_name) AS due_cols_ok
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'evidence_items'
+  AND column_name IN (
+    'document_date',
+    'first_due_on',
+    'first_due_rule',
+    'next_due_on',
+    'renew_years'
+  );
+```
+
+You want `document_date | first_due_on | first_due_rule | next_due_on | renew_years`.
+
+---
+
 ## ACTION — Evidence send_message (2026-09-18)
 
 **Do not run until Dane approves.** Additive only — adds

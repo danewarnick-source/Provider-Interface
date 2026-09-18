@@ -1,9 +1,7 @@
+import { effectiveAttentionDate, parseIsoDate } from "./due.ts";
 import type { EvidenceCellStatus, EvidenceFileRow, EvidenceItemRow } from "./types.ts";
 
 export type { EvidenceCellStatus };
-
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const EXPIRING_SOON_DAYS = 30;
 
 export function staffInitials(fullName: string): string {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -55,23 +53,23 @@ export function cellStatus(args: {
   today: string;
 }): EvidenceCellStatus {
   const { item, file, today } = args;
-  if (!item || !itemHasCompletedEvidence(item, file)) return "missing";
-  const expires = item.expires_on;
-  if (expires && expires < today) return "missing";
-  if (expires) {
-    const exp = new Date(`${expires}T12:00:00Z`).getTime();
-    const now = new Date(`${today}T12:00:00Z`).getTime();
-    if (!Number.isNaN(exp) && !Number.isNaN(now) && exp - now <= EXPIRING_SOON_DAYS * MS_PER_DAY) {
-      return "expiring";
-    }
-  }
+  const onFile = !!item && itemHasCompletedEvidence(item, file);
+  if (!item || !onFile) return "missing";
+  const due = effectiveAttentionDate({
+    hasFile: true,
+    firstDueOn: item.first_due_on,
+    nextDueOn: item.next_due_on,
+    expiresOn: item.expires_on,
+  });
+  const dueDay = parseIsoDate(due);
+  if (dueDay && dueDay < today) return "missing";
   return "done";
 }
 
 export function statusLabel(status: EvidenceCellStatus): string {
-  if (status === "done") return "Done";
-  if (status === "expiring") return "Expiring soon";
-  return "Missing / needs attention";
+  if (status === "done") return "On file";
+  if (status === "expiring") return "Needs attention";
+  return "Needs attention";
 }
 
 export function formatExpiresOn(iso: string | null): string | null {

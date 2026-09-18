@@ -4,12 +4,13 @@
  */
 
 import { evvServiceLabel } from "../evv-codes.ts";
+import { dueDefaultForRequirement, dueSubtitle, dueSubtitleFromItem } from "./due.ts";
 import {
   CLIENT_QUIZ_CODES,
-  EVIDENCE_CADENCE_OPTIONS,
   SERVICE_CODE_FLAGS,
   STAFF_QUIZ_CODES,
   type EvidenceHelpLink,
+  type EvidenceItemRow,
   type EvidencePackDef,
   type EvidenceRequirementDef,
   type EvidenceSubject,
@@ -98,13 +99,22 @@ export const EVIDENCE_HELP_LINKS = {
 } as const satisfies Record<string, EvidenceHelpLink>;
 
 function req(
-  partial: Omit<EvidenceRequirementDef, "shortLabel" | "links"> & {
+  partial: Omit<EvidenceRequirementDef, "shortLabel" | "links" | "dueDefault"> & {
     shortLabel?: string;
     links?: readonly EvidenceHelpLink[];
+    dueDefault?: EvidenceRequirementDef["dueDefault"];
   },
 ): EvidenceRequirementDef {
+  const dueDefault = dueDefaultForRequirement({
+    key: partial.key,
+    subject: partial.subject,
+    cadence: partial.cadence,
+    override: partial.dueDefault,
+  });
   return {
     ...partial,
+    dueDefault,
+    cadenceDisplay: dueSubtitle(dueDefault, partial.subject),
     shortLabel: partial.shortLabel ?? partial.title,
     links: partial.links ?? [],
   };
@@ -146,6 +156,19 @@ export const EVIDENCE_REQUIREMENTS: readonly EvidenceRequirementDef[] = [
     cadenceDisplay: "Once · SOW §1.8(4)",
     why: "New staff must complete orientation (rights, abuse reporting, agency policies, person-specific needs, and related topics) within 30 days. Upload completion proof or finish training in the platform. DSPD’s General Employee Qualification PDF lists baseline hire qualifications.",
     links: [EVIDENCE_HELP_LINKS.qualification],
+    subject: "staff",
+    dualLink: null,
+  }),
+  req({
+    key: "person_centered_thinking",
+    title: "Person-centered thinking",
+    evidenceType: "upload",
+    attestationText: null,
+    cadence: "once",
+    sowCite: "SOW §1.8",
+    cadenceDisplay: "First due within 90 days of hire · no renewal reminder",
+    why: "Staff complete person-centered thinking training so support stays about the person’s goals and choices. This is its own row, separate from CPR. Upload a certificate or completion record.",
+    links: [EVIDENCE_HELP_LINKS.training],
     subject: "staff",
     dualLink: null,
   }),
@@ -1148,6 +1171,7 @@ export const EVIDENCE_PACKS: readonly EvidencePackDef[] = [
       "cpr_first_aid",
       "background_screening",
       "thirty_day_orientation",
+      "person_centered_thinking",
       "medicaid_disclosure",
       "oig_exclusion",
       "code_of_conduct",
@@ -1686,9 +1710,10 @@ export function isBuiltInTaxFormKey(key: string): boolean {
   return /^(w-?9|i-?9)$/i.test(key.trim());
 }
 
-export function cadenceLabel(cadence: string): string {
-  const found = EVIDENCE_CADENCE_OPTIONS.find((row) => row.value === cadence);
-  return found?.label ?? "Once";
+export function cadenceLabel(itemOrCadence: string | Pick<EvidenceItemRow, "first_due_rule" | "renew_years" | "subject_type" | "next_due_on" | "first_due_on">): string {
+  if (typeof itemOrCadence !== "string") return dueSubtitleFromItem(itemOrCadence);
+  const renew = itemOrCadence === "annual" ? 1 : itemOrCadence === "every_2_years" ? 2 : null;
+  return dueSubtitle({ firstDueRule: "set_date", renewYears: renew }, "company");
 }
 
 export function evidenceTypeLabel(type: string): string {

@@ -30,10 +30,18 @@ export async function fetchEvidenceEmployees(
     return { people: [], error: null };
   }
 
-  const full = await sb
+  const withHire = await sb
     .from("profiles")
-    .select("id, full_name, first_name, last_name, account_status, is_active")
+    .select(
+      "id, full_name, first_name, last_name, account_status, is_active, hire_date, start_date",
+    )
     .in("id", ids);
+  const full = withHire.error
+    ? await sb
+        .from("profiles")
+        .select("id, full_name, first_name, last_name, account_status, is_active")
+        .in("id", ids)
+    : withHire;
   const slim = full.error
     ? await sb.from("profiles").select("id, full_name, account_status, is_active").in("id", ids)
     : full;
@@ -53,6 +61,8 @@ export async function fetchEvidenceEmployees(
         last_name?: string | null;
         account_status: string | null;
         is_active: boolean | null;
+        hire_date?: string | null;
+        start_date?: string | null;
       }>
     ).map((p) => [p.id, p]),
   );

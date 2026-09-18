@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { FileText, Plus, Search } from "lucide-react";
@@ -9,7 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
-import { cadenceLabel, parseServiceCodeFlags } from "@/lib/evidence/catalog.ts";
+import { EvidenceDueFields } from "@/components/evidence/evidence-due-fields.tsx";
+import { parseServiceCodeFlags } from "@/lib/evidence/catalog.ts";
+import {
+  draftFromItem,
+  dueSubtitleFromItem,
+  type EvidenceDueDraft,
+} from "@/lib/evidence/due.ts";
 import {
   applyEvidenceRequirements,
   createEvidenceChecklist,
@@ -19,6 +25,7 @@ import {
   recordEvidenceUpload,
   removeEvidenceRequirement,
   sendEvidenceToStaff,
+  updateEvidenceDue,
   upsertEvidenceRequirement,
   type EvidenceBoard,
 } from "@/lib/evidence.functions";
@@ -30,7 +37,6 @@ import { formatExpiresOn, latestFileForItem } from "@/lib/evidence/status.ts";
 import {
   EVIDENCE_SEND_MESSAGE_UNAVAILABLE,
   EVIDENCE_STORAGE_UNAVAILABLE,
-  type EvidenceCadence,
   type EvidencePerson,
   type EvidenceSubject,
   type EvidenceType,
@@ -63,6 +69,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
   const sendFn = useServerFn(sendEvidenceToStaff);
   const uploadFn = useServerFn(recordEvidenceUpload);
   const attestFn = useServerFn(recordEvidenceAttestation);
+  const dueFn = useServerFn(updateEvidenceDue);
   const linkFn = useServerFn(linkHostHomeEvidence);
 
   const orgId = org?.organization_id;
@@ -105,6 +112,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
       suggestedKeys: string[];
       packKeys: string[];
       typeOverrides?: Record<string, EvidenceType>;
+      dueOverrides?: Record<string, EvidenceDueDraft>;
     }) =>
       applyFn({
         data: { organizationId: orgId!, subjectType: tab, ...args },
@@ -121,10 +129,9 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
     mutationFn: (args: {
       title: string;
       evidenceType: EvidenceType;
-      cadence: EvidenceCadence;
       attestationText: string | null;
       sowCite?: string | null;
-      expiresOn: string | null;
+      due: EvidenceDueDraft;
     }) => {
       const subjectIds = personId ? [personId] : tab === "company" && orgId ? [orgId] : [];
       if (subjectIds.length === 0) throw new Error("Open Add on a person to apply a pack.");
@@ -136,9 +143,9 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
           title: args.title,
           evidenceType: args.evidenceType,
           attestationText: args.attestationText,
-          cadence: args.cadence,
           sowCite: args.sowCite ?? null,
-          expiresOn: args.expiresOn,
+          due: args.due,
+          hireDate: (employeesQ.data ?? []).find((p) => p.id === personId)?.hire_date ?? null,
         },
       });
     },
@@ -155,7 +162,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
       title: string;
       description: string;
       questions: string[];
-      cadence: EvidenceCadence;
+      due: EvidenceDueDraft;
     }) => {
       const subjectIds = personId ? [personId] : tab === "company" && orgId ? [orgId] : [];
       if (subjectIds.length === 0) throw new Error("Open Add on a person to create a form.");
@@ -167,7 +174,8 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
           title: args.title,
           description: args.description,
           questions: args.questions,
-          cadence: args.cadence,
+          due: args.due,
+          hireDate: (employeesQ.data ?? []).find((p) => p.id === personId)?.hire_date ?? null,
         },
       });
     },
@@ -208,6 +216,8 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
       storagePath: string;
       filename: string;
       expiresOn: string | null;
+      documentDate?: string | null;
+      nextDueOn?: string | null;
     }) => uploadFn({ data: { organizationId: orgId!, ...args } }),
     onSuccess: () => {
       toast.success("Upload recorded.");
@@ -216,10 +226,28 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
     onError: (e: Error) => toast.error(e.message),
   });
   const attestM = useMutation({
-    mutationFn: (args: { itemId: string; attestationText: string }) =>
-      attestFn({ data: { organizationId: orgId!, ...args } }),
+    mutationFn: (args: {
+      itemId: string;
+      attestationText: string;
+      documentDate?: string | null;
+      nextDueOn?: string | null;
+    }) => attestFn({ data: { organizationId: orgId!, ...args } }),
     onSuccess: () => {
       toast.success("Attestation recorded.");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const dueM = useMutation({
+    mutationFn: (args: {
+      itemId: string;
+      due: EvidenceDueDraft;
+      hireDate?: string | null;
+      documentDate?: string | null;
+      hasFile?: boolean;
+    }) => dueFn({ data: { organizationId: orgId!, ...args } }),
+    onSuccess: () => {
+      toast.success("Due dates saved.");
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -312,11 +340,12 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
           orgId={org.organization_id}
           onClose={() => onSearchChange({ tab, step: "grid", person: personId })}
           onUpload={(payload) => uploadM.mutate(payload)}
-          onAttest={(text) => {
+          onAttest={(args) => {
             if (!activeItem) return;
-            attestM.mutate({ itemId: activeItem.id, attestationText: text });
+            attestM.mutate({ itemId: activeItem.id, ...args });
           }}
-          pending={uploadM.isPending || attestM.isPending}
+          onSaveDue={(args) => dueM.mutate(args)}
+          pending={uploadM.isPending || attestM.isPending || dueM.isPending}
         />
       ) : (
         <RosterPanel
@@ -352,6 +381,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
                 ? "Client"
                 : "Employee")
           }
+          hireDate={person?.hire_date ?? null}
           initialCodes={initialCodes}
           onClose={closeWizard}
           onApply={(args) => {
@@ -370,6 +400,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
               suggestedKeys: args.suggestedKeys,
               packKeys: args.packKeys,
               typeOverrides: args.typeOverrides,
+              dueOverrides: args.dueOverrides,
             });
           }}
           onApplyCustom={(args) => customM.mutate(args)}
@@ -546,6 +577,7 @@ function ReviewPanel({
   onClose,
   onUpload,
   onAttest,
+  onSaveDue,
   pending,
 }: {
   board: EvidenceBoard | undefined;
@@ -557,15 +589,38 @@ function ReviewPanel({
     storagePath: string;
     filename: string;
     expiresOn: string | null;
+    documentDate?: string | null;
+    nextDueOn?: string | null;
   }) => void;
-  onAttest: (text: string) => void;
+  onAttest: (args: {
+    attestationText: string;
+    documentDate?: string | null;
+    nextDueOn?: string | null;
+  }) => void;
+  onSaveDue: (args: {
+    itemId: string;
+    due: EvidenceDueDraft;
+    hireDate?: string | null;
+    documentDate?: string | null;
+    hasFile?: boolean;
+  }) => void;
   pending: boolean;
 }) {
   const item = board?.items.find((i) => i.id === itemId) ?? null;
   const file = item ? latestFileForItem(board?.files ?? [], item.id) : null;
   const person = board?.people.find((p) => p.id === item?.subject_id);
-  const [expires, setExpires] = useState(item?.expires_on ?? "");
+  const [due, setDue] = useState<EvidenceDueDraft | null>(item ? draftFromItem(item) : null);
+  const [documentDate, setDocumentDate] = useState(item?.document_date ?? "");
   const [preview, setPreview] = useState<string | null>(null);
+  useEffect(() => {
+    if (!item) {
+      setDue(null);
+      setDocumentDate("");
+      return;
+    }
+    setDue(draftFromItem(item));
+    setDocumentDate(item.document_date ?? "");
+  }, [item?.id]);
 
   const openPreview = async () => {
     if (!file?.storage_path) return;
@@ -599,14 +654,18 @@ function ReviewPanel({
         <p className="text-xs text-muted-foreground">{item.title}</p>
         <p className="mt-3 text-xs text-muted-foreground">
           {item.evidence_type === "attestation" ? "Attestation" : "Upload"} ·{" "}
-          {cadenceLabel(item.cadence)}
+          {dueSubtitleFromItem(item)}
         </p>
-        {item.expires_on ? (
+        {file ? (
           <p className="mt-3 rounded-full bg-emerald-50 px-3 py-1 text-xs text-emerald-800">
-            Done · expires {formatExpiresOn(item.expires_on)}
+            On file
+            {item.next_due_on ? ` · next due ${formatExpiresOn(item.next_due_on)}` : ""}
           </p>
         ) : (
-          <p className="mt-3 rounded-full bg-rose-50 px-3 py-1 text-xs text-rose-800">Missing</p>
+          <p className="mt-3 rounded-full bg-rose-50 px-3 py-1 text-xs text-rose-800">
+            Needs attention
+            {item.first_due_on ? ` · first due ${formatExpiresOn(item.first_due_on)}` : ""}
+          </p>
         )}
         <div className="mt-4 grid gap-2">
           <label className="block">
@@ -629,7 +688,9 @@ function ReviewPanel({
                   itemId: item.id,
                   storagePath: path,
                   filename: picked.name,
-                  expiresOn: expires || null,
+                  expiresOn: due?.nextDueOn ?? item.next_due_on,
+                  documentDate: documentDate || null,
+                  nextDueOn: due?.nextDueOn ?? null,
                 });
               }}
             />
@@ -644,21 +705,46 @@ function ReviewPanel({
               type="button"
               disabled={pending}
               onClick={() =>
-                onAttest(item.attestation_text || `I attest that ${item.title} is complete.`)
+                onAttest({
+                  attestationText:
+                    item.attestation_text || `I attest that ${item.title} is complete.`,
+                  documentDate: documentDate || null,
+                  nextDueOn: due?.nextDueOn ?? null,
+                })
               }
             >
               Mark attested
             </Button>
           ) : null}
-          <div className="grid gap-1.5">
-            <Label htmlFor="ev-exp">Expiration</Label>
-            <Input
-              id="ev-exp"
-              type="date"
-              value={expires}
-              onChange={(e) => setExpires(e.target.value)}
+          {due ? (
+            <EvidenceDueFields
+              subject={item.subject_type}
+              hireDate={person?.hire_date}
+              value={due}
+              onChange={setDue}
+              showDocumentDate={due.nextDueMode === "years"}
+              documentDate={documentDate}
+              onDocumentDateChange={setDocumentDate}
             />
-          </div>
+          ) : null}
+          <Button
+            type="button"
+            variant="outline"
+            disabled={pending || !due}
+            onClick={() =>
+              due
+                ? onSaveDue({
+                    itemId: item.id,
+                    due,
+                    hireDate: person?.hire_date ?? null,
+                    documentDate: documentDate || null,
+                    hasFile: !!file,
+                  })
+                : undefined
+            }
+          >
+            Save due dates
+          </Button>
         </div>
       </aside>
       <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -738,7 +824,7 @@ function PersonItemsInline({
             <span className="block text-sm font-medium">{row.title}</span>
             <span className="block text-xs text-muted-foreground">
               {row.evidence_type === "attestation" ? "Attestation" : "Upload"} ·{" "}
-              {cadenceLabel(row.cadence)}
+              {dueSubtitleFromItem(row)}
               {row.sent_to_staff ? " · sent" : ""}
               {row.send_message ? " · message attached" : ""}
             </span>

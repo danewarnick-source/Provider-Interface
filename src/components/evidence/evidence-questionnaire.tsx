@@ -21,13 +21,13 @@ import {
   requirementByKey,
   suggestPacks,
 } from "@/lib/evidence/catalog.ts";
+import { EvidenceDueFields } from "@/components/evidence/evidence-due-fields.tsx";
+import { defaultDueDraft, dueSubtitle, type EvidenceDueDraft } from "@/lib/evidence/due.ts";
 import { isAttestFullName } from "@/lib/evidence/people.ts";
 import {
-  EVIDENCE_CADENCE_OPTIONS,
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_UNCHECK_TITLE,
   EVIDENCE_UNCHECK_WARNING,
-  type EvidenceCadence,
   type EvidenceRequirementDef,
   type EvidenceSubject,
   type EvidenceType,
@@ -38,6 +38,7 @@ import {
 export function EvidenceQuestionnaire({
   subject,
   personName,
+  hireDate,
   initialCodes,
   onApply,
   onApplyCustom,
@@ -47,6 +48,7 @@ export function EvidenceQuestionnaire({
 }: {
   subject: EvidenceSubject;
   personName: string;
+  hireDate?: string | null;
   initialCodes?: ServiceCodeFlag[];
   onApply: (args: {
     answers: QuestionnaireAnswers;
@@ -55,20 +57,20 @@ export function EvidenceQuestionnaire({
     suggestedKeys: string[];
     optedOutKeys: string[];
     typeOverrides: Record<string, EvidenceType>;
+    dueOverrides: Record<string, EvidenceDueDraft>;
   }) => void;
   onApplyCustom: (args: {
     title: string;
     evidenceType: EvidenceType;
-    cadence: EvidenceCadence;
     attestationText: string | null;
     blurb: string;
-    expiresOn: string | null;
+    due: EvidenceDueDraft;
   }) => void;
   onCreateForm: (args: {
     title: string;
     description: string;
     questions: string[];
-    cadence: EvidenceCadence;
+    due: EvidenceDueDraft;
   }) => void;
   onClose: () => void;
   pending?: boolean;
@@ -92,15 +94,15 @@ export function EvidenceQuestionnaire({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [optOutKey, setOptOutKey] = useState<string | null>(null);
+  const [dueByKey, setDueByKey] = useState<Record<string, EvidenceDueDraft>>({});
   const [customTitle, setCustomTitle] = useState("");
   const [customType, setCustomType] = useState<EvidenceType>("upload");
-  const [customCadence, setCustomCadence] = useState<EvidenceCadence>("once");
+  const [customDue, setCustomDue] = useState<EvidenceDueDraft>(() => defaultDueDraft(subject));
   const [customBlurb, setCustomBlurb] = useState("");
-  const [customExpires, setCustomExpires] = useState("");
   const [formTitle, setFormTitle] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [formQuestions, setFormQuestions] = useState<string[]>([""]);
-  const [formCadence, setFormCadence] = useState<EvidenceCadence>("once");
+  const [formDue, setFormDue] = useState<EvidenceDueDraft>(() => defaultDueDraft(subject));
 
   useEffect(() => {
     setChecked((prev) => {
@@ -121,7 +123,16 @@ export function EvidenceQuestionnaire({
       }
       return next;
     });
-  }, [suggestedKeys, optedOut]);
+    setDueByKey((prev) => {
+      const next = { ...prev };
+      for (const key of suggestedKeys) {
+        if (next[key]) continue;
+        const def = requirementByKey(key);
+        next[key] = defaultDueDraft(subject, def?.dueDefault);
+      }
+      return next;
+    });
+  }, [suggestedKeys, optedOut, subject]);
 
   const toggleCode = (code: ServiceCodeFlag) => {
     setAnswers((prev) => {
@@ -197,6 +208,7 @@ export function EvidenceQuestionnaire({
       suggestedKeys,
       optedOutKeys: suggestedKeys.filter((k) => !checked.has(k)),
       typeOverrides,
+      dueOverrides: Object.fromEntries([...checked].map((key) => [key, dueByKey[key] ?? defaultDueDraft(subject, requirementByKey(key)?.dueDefault)])),
     });
   };
 
@@ -371,12 +383,31 @@ export function EvidenceQuestionnaire({
                             <span className="min-w-0 flex-1">
                               <span className="block text-sm font-semibold">{row.title}</span>
                               <span className="mt-0.5 block text-xs text-muted-foreground">
-                                {row.cadenceDisplay}
+                                {dueSubtitle(
+                                  {
+                                    firstDueRule:
+                                      (dueByKey[row.key] ?? defaultDueDraft(subject, row.dueDefault))
+                                        .firstDueRule,
+                                    renewYears:
+                                      (dueByKey[row.key] ?? defaultDueDraft(subject, row.dueDefault))
+                                        .renewYears,
+                                  },
+                                  subject,
+                                )}
                                 {row.dualLink ? " · same file on Employees + Client" : ""}
                               </span>
                               <span className="mt-2 block text-sm leading-snug text-slate-700">
                                 {row.why}
                               </span>
+                              <EvidenceDueFields
+                                subject={subject}
+                                hireDate={hireDate}
+                                compact
+                                value={dueByKey[row.key] ?? defaultDueDraft(subject, row.dueDefault)}
+                                onChange={(next) =>
+                                  setDueByKey((prev) => ({ ...prev, [row.key]: next }))
+                                }
+                              />
                               {row.links.length > 0 ? (
                                 <span className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
                                   {row.links.map((link) => (
@@ -462,35 +493,24 @@ export function EvidenceQuestionnaire({
                   placeholder="Requirement title"
                 />
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="grid gap-1.5">
-                  <Label htmlFor="evidence-custom-type">Type</Label>
-                  <select
-                    id="evidence-custom-type"
-                    value={customType}
-                    onChange={(e) => setCustomType(e.target.value as EvidenceType)}
-                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  >
-                    <option value="upload">Upload</option>
-                    <option value="attestation">Attestation</option>
-                  </select>
-                </div>
-                <div className="grid gap-1.5">
-                  <Label htmlFor="evidence-custom-cadence">Cadence</Label>
-                  <select
-                    id="evidence-custom-cadence"
-                    value={customCadence}
-                    onChange={(e) => setCustomCadence(e.target.value as EvidenceCadence)}
-                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  >
-                    {EVIDENCE_CADENCE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="evidence-custom-type">Type</Label>
+                <select
+                  id="evidence-custom-type"
+                  value={customType}
+                  onChange={(e) => setCustomType(e.target.value as EvidenceType)}
+                  className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                >
+                  <option value="upload">Upload</option>
+                  <option value="attestation">Attestation</option>
+                </select>
               </div>
+              <EvidenceDueFields
+                subject={subject}
+                hireDate={hireDate}
+                value={customDue}
+                onChange={setCustomDue}
+              />
               <div className="grid gap-1.5">
                 <Label htmlFor="evidence-custom-blurb">Blurb (optional)</Label>
                 <Input
@@ -498,15 +518,6 @@ export function EvidenceQuestionnaire({
                   value={customBlurb}
                   onChange={(e) => setCustomBlurb(e.target.value)}
                   placeholder="What this row is for"
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label htmlFor="evidence-custom-expires">Expiration (optional)</Label>
-                <Input
-                  id="evidence-custom-expires"
-                  type="date"
-                  value={customExpires}
-                  onChange={(e) => setCustomExpires(e.target.value)}
                 />
               </div>
               <div className="space-y-3 rounded-xl border border-border bg-muted/30 px-3 py-3">
@@ -555,21 +566,12 @@ export function EvidenceQuestionnaire({
                   onChange={(e) => setFormDescription(e.target.value)}
                 />
               </div>
-              <div className="grid gap-1.5">
-                <Label htmlFor="evidence-form-cadence">Cadence</Label>
-                <select
-                  id="evidence-form-cadence"
-                  value={formCadence}
-                  onChange={(e) => setFormCadence(e.target.value as EvidenceCadence)}
-                  className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                >
-                  {EVIDENCE_CADENCE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <EvidenceDueFields
+                subject={subject}
+                hireDate={hireDate}
+                value={formDue}
+                onChange={setFormDue}
+              />
               <div className="space-y-2">
                 <Label>Checklist questions</Label>
                 {formQuestions.map((q, i) => (
@@ -641,13 +643,12 @@ export function EvidenceQuestionnaire({
                 onApplyCustom({
                   title: customTitle.trim(),
                   evidenceType: customType,
-                  cadence: customCadence,
                   attestationText:
                     customType === "attestation"
                       ? customBlurb.trim() || `I attest that ${customTitle.trim()} is complete.`
                       : null,
                   blurb: customBlurb.trim(),
-                  expiresOn: customExpires || null,
+                  due: customDue,
                 })
               }
             >
@@ -662,7 +663,7 @@ export function EvidenceQuestionnaire({
                   title: formTitle.trim(),
                   description: formDescription.trim(),
                   questions: formQs,
-                  cadence: formCadence,
+                  due: formDue,
                 })
               }
             >

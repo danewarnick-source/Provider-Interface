@@ -15,7 +15,15 @@ import {
   mapEmployeeRowsToPeople,
   type EvidenceEmployeeRow,
 } from "./evidence/people.ts";
-import { addCadence, cellStatus, latestFileForItem } from "./evidence/status.ts";
+import {
+  applyDueDraft,
+  cadenceFromDue,
+  defaultDueDraft,
+  dueDefaultForRequirement,
+  parseIsoDate,
+  type EvidenceDueDraft,
+} from "./evidence/due.ts";
+import { cellStatus, latestFileForItem } from "./evidence/status.ts";
 import {
   EVIDENCE_CADENCES,
   EVIDENCE_PUSH_BODY,
@@ -23,6 +31,7 @@ import {
   EVIDENCE_PUSH_TITLE,
   EVIDENCE_SEND_MESSAGE_UNAVAILABLE,
   EVIDENCE_STORAGE_UNAVAILABLE,
+  FIRST_DUE_RULES,
   type EvidenceCellStatus,
   type EvidenceFileRow,
   type EvidenceGridCell,
@@ -32,6 +41,8 @@ import {
   type EvidenceSubject,
   type EvidenceTemplateRow,
   type EvidenceType,
+  type FirstDueRule,
+  type RenewYears,
 } from "./evidence/types.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,17 +74,86 @@ function sendMessageColumnMissing(message: string | undefined): boolean {
   );
 }
 
-const ITEM_SELECT_WITH_MESSAGE =
-  "id, organization_id, subject_type, subject_id, requirement_key, title, evidence_type, attestation_text, cadence, sow_cite, suggested, sent_to_staff, visible_to_staff_id, dual_link_key, dual_link_peer_id, expires_on, send_message, created_at, updated_at";
+function dueColumnMissing(message: string | undefined): boolean {
+  return (
+    /first_due_rule|first_due_on|document_date|next_due_on|renew_years/i.test(message ?? "") &&
+    /column|schema cache|does not exist/i.test(message ?? "")
+  );
+}
 
 const ITEM_SELECT_BASE =
   "id, organization_id, subject_type, subject_id, requirement_key, title, evidence_type, attestation_text, cadence, sow_cite, suggested, sent_to_staff, visible_to_staff_id, dual_link_key, dual_link_peer_id, expires_on, created_at, updated_at";
 
+const ITEM_SELECT_WITH_MESSAGE = `${ITEM_SELECT_BASE.replace(", created_at, updated_at", "")}, send_message, created_at, updated_at`;
+
+const ITEM_SELECT_WITH_DUE = `${ITEM_SELECT_BASE.replace(", created_at, updated_at", "")}, send_message, first_due_rule, first_due_on, document_date, next_due_on, renew_years, created_at, updated_at`;
+
+const FirstDueEnum = z.enum(FIRST_DUE_RULES);
+const DueDraftSchema = z.object({
+  firstDueRule: FirstDueEnum,
+  firstDueOn: z.string().nullable(),
+  renewYears: z.union([z.literal(1), z.literal(2), z.null()]),
+  nextDueMode: z.enum(["years", "set_date", "none"]),
+  nextDueOn: z.string().nullable(),
+});
+
+function asFirstDueRule(value: unknown): FirstDueRule | null {
+  return FIRST_DUE_RULES.includes(value as FirstDueRule) ? (value as FirstDueRule) : null;
+}
+
+function asRenewYears(value: unknown): RenewYears {
+  return value === 1 || value === 2 ? value : null;
+}
+
 function normalizeItem(row: EvidenceItemRow | Record<string, unknown>): EvidenceItemRow {
-  const raw = row as EvidenceItemRow & { send_message?: unknown };
+  const raw = row as EvidenceItemRow & {
+    send_message?: unknown;
+    first_due_rule?: unknown;
+    first_due_on?: unknown;
+    document_date?: unknown;
+    next_due_on?: unknown;
+    renew_years?: unknown;
+  };
   return {
     ...(raw as EvidenceItemRow),
     send_message: typeof raw.send_message === "string" ? raw.send_message : null,
+    first_due_rule: asFirstDueRule(raw.first_due_rule),
+    first_due_on: parseIsoDate(typeof raw.first_due_on === "string" ? raw.first_due_on : null),
+    document_date: parseIsoDate(typeof raw.document_date === "string" ? raw.document_date : null),
+    next_due_on: parseIsoDate(typeof raw.next_due_on === "string" ? raw.next_due_on : null),
+    renew_years: asRenewYears(raw.renew_years),
+  };
+}
+
+function coreItemPayload(row: EvidenceItemRow): Record<string, unknown> {
+  return {
+    id: row.id,
+    organization_id: row.organization_id,
+    subject_type: row.subject_type,
+    subject_id: row.subject_id,
+    requirement_key: row.requirement_key,
+    title: row.title,
+    evidence_type: row.evidence_type,
+    attestation_text: row.attestation_text,
+    cadence: row.cadence,
+    sow_cite: row.sow_cite,
+    suggested: row.suggested,
+    sent_to_staff: row.sent_to_staff,
+    visible_to_staff_id: row.visible_to_staff_id,
+    dual_link_key: row.dual_link_key,
+    dual_link_peer_id: row.dual_link_peer_id,
+    expires_on: row.expires_on,
+    updated_at: row.updated_at,
+  };
+}
+
+function dueItemPayload(row: EvidenceItemRow): Record<string, unknown> {
+  return {
+    first_due_rule: row.first_due_rule,
+    first_due_on: row.first_due_on,
+    document_date: row.document_date,
+    next_due_on: row.next_due_on,
+    renew_years: row.renew_years,
   };
 }
 
@@ -107,32 +187,47 @@ function nowIso(): string {
 async function loadAll(
   sb: AnySupabase,
   organizationId: string,
-): Promise<{ store: StoreV1; viaTables: boolean; hasSendMessage: boolean }> {
+): Promise<{ store: StoreV1; viaTables: boolean; hasSendMessage: boolean; hasDue: boolean }> {
   let hasSendMessage = true;
+  let hasDue = true;
   let items: EvidenceItemRow[] | null = null;
   const first = await sb
     .from("evidence_items")
-    .select(ITEM_SELECT_WITH_MESSAGE)
+    .select(ITEM_SELECT_WITH_DUE)
     .eq("organization_id", organizationId);
   if (first.error) {
-    if (tableMissing(first.error.message) && !sendMessageColumnMissing(first.error.message)) {
-      return { store: emptyStore(), viaTables: false, hasSendMessage: false };
+    if (tableMissing(first.error.message) && !sendMessageColumnMissing(first.error.message) && !dueColumnMissing(first.error.message)) {
+      return { store: emptyStore(), viaTables: false, hasSendMessage: false, hasDue: false };
     }
-    if (sendMessageColumnMissing(first.error.message)) {
-      hasSendMessage = false;
-      const second = await sb
-        .from("evidence_items")
-        .select(ITEM_SELECT_BASE)
-        .eq("organization_id", organizationId);
-      if (second.error) {
-        if (tableMissing(second.error.message)) {
-          return { store: emptyStore(), viaTables: false, hasSendMessage: false };
+    hasDue = !dueColumnMissing(first.error.message);
+    hasSendMessage = !sendMessageColumnMissing(first.error.message);
+    const fallbackSelect = hasSendMessage ? ITEM_SELECT_WITH_MESSAGE : ITEM_SELECT_BASE;
+    const second = await sb
+      .from("evidence_items")
+      .select(fallbackSelect)
+      .eq("organization_id", organizationId);
+    if (second.error) {
+      if (tableMissing(second.error.message)) {
+        return { store: emptyStore(), viaTables: false, hasSendMessage: false, hasDue: false };
+      }
+      if (sendMessageColumnMissing(second.error.message)) {
+        hasSendMessage = false;
+        const third = await sb
+          .from("evidence_items")
+          .select(ITEM_SELECT_BASE)
+          .eq("organization_id", organizationId);
+        if (third.error) {
+          if (tableMissing(third.error.message)) {
+            return { store: emptyStore(), viaTables: false, hasSendMessage: false, hasDue: false };
+          }
+          throw new Error(mapEvidenceDbError(third.error.message));
         }
+        items = ((third.data ?? []) as EvidenceItemRow[]).map(normalizeItem);
+      } else {
         throw new Error(mapEvidenceDbError(second.error.message));
       }
-      items = ((second.data ?? []) as EvidenceItemRow[]).map(normalizeItem);
     } else {
-      throw new Error(mapEvidenceDbError(first.error.message));
+      items = ((second.data ?? []) as EvidenceItemRow[]).map(normalizeItem);
     }
   } else {
     items = ((first.data ?? []) as EvidenceItemRow[]).map(normalizeItem);
@@ -145,7 +240,7 @@ async function loadAll(
     .eq("organization_id", organizationId);
   if (fileErr) {
     if (tableMissing(fileErr.message)) {
-      return { store: emptyStore(), viaTables: false, hasSendMessage: false };
+      return { store: emptyStore(), viaTables: false, hasSendMessage: false, hasDue: false };
     }
     throw new Error(mapEvidenceDbError(fileErr.message));
   }
@@ -159,6 +254,7 @@ async function loadAll(
       return {
         viaTables: true,
         hasSendMessage,
+        hasDue,
         store: {
           items: items ?? [],
           files: (files ?? []) as EvidenceFileRow[],
@@ -171,6 +267,7 @@ async function loadAll(
   return {
     viaTables: true,
     hasSendMessage,
+    hasDue,
     store: {
       items: items ?? [],
       files: (files ?? []) as EvidenceFileRow[],
@@ -187,29 +284,18 @@ async function insertItem(
 ): Promise<void> {
   requireTables(viaTables);
   {
-    const { error } = await sb.from("evidence_items").upsert(
-      {
-        id: row.id,
-        organization_id: row.organization_id,
-        subject_type: row.subject_type,
-        subject_id: row.subject_id,
-        requirement_key: row.requirement_key,
-        title: row.title,
-        evidence_type: row.evidence_type,
-        attestation_text: row.attestation_text,
-        cadence: row.cadence,
-        sow_cite: row.sow_cite,
-        suggested: row.suggested,
-        sent_to_staff: row.sent_to_staff,
-        visible_to_staff_id: row.visible_to_staff_id,
-        dual_link_key: row.dual_link_key,
-        dual_link_peer_id: row.dual_link_peer_id,
-        expires_on: row.expires_on,
-        updated_at: row.updated_at,
-      },
-      { onConflict: "organization_id,subject_type,subject_id,requirement_key" },
-    );
-    if (error) throw new Error(mapEvidenceDbError(error.message));
+    const full = { ...coreItemPayload(row), ...dueItemPayload(row) };
+    const first = await sb.from("evidence_items").upsert(full, {
+      onConflict: "organization_id,subject_type,subject_id,requirement_key",
+    });
+    if (!first.error) return;
+    if (!dueColumnMissing(first.error.message)) {
+      throw new Error(mapEvidenceDbError(first.error.message));
+    }
+    const retry = await sb.from("evidence_items").upsert(coreItemPayload(row), {
+      onConflict: "organization_id,subject_type,subject_id,requirement_key",
+    });
+    if (retry.error) throw new Error(mapEvidenceDbError(retry.error.message));
   }
 }
 
@@ -221,15 +307,35 @@ async function patchItem(
   patch: Partial<EvidenceItemRow>,
 ): Promise<EvidenceItemRow | null> {
   requireTables(viaTables);
-  const { data, error } = await sb
+  const payload = { ...patch, updated_at: nowIso() };
+  const first = await sb
     .from("evidence_items")
-    .update({ ...patch, updated_at: nowIso() })
+    .update(payload)
     .eq("organization_id", organizationId)
     .eq("id", itemId)
     .select(ITEM_SELECT_BASE)
     .maybeSingle();
-  if (error) throw new Error(mapEvidenceDbError(error.message));
-  return data ? normalizeItem(data as EvidenceItemRow) : null;
+  if (!first.error) {
+    return first.data ? normalizeItem(first.data as EvidenceItemRow) : null;
+  }
+  if (!dueColumnMissing(first.error.message)) {
+    throw new Error(mapEvidenceDbError(first.error.message));
+  }
+  const slim = { ...payload } as Record<string, unknown>;
+  delete slim.first_due_rule;
+  delete slim.first_due_on;
+  delete slim.document_date;
+  delete slim.next_due_on;
+  delete slim.renew_years;
+  const retry = await sb
+    .from("evidence_items")
+    .update(slim)
+    .eq("organization_id", organizationId)
+    .eq("id", itemId)
+    .select(ITEM_SELECT_BASE)
+    .maybeSingle();
+  if (retry.error) throw new Error(mapEvidenceDbError(retry.error.message));
+  return retry.data ? normalizeItem(retry.data as EvidenceItemRow) : null;
 }
 
 async function deleteItem(
@@ -276,10 +382,18 @@ async function listStaffPeople(
     }>;
     const ids = rows.map((m) => m.user_id).filter((id) => typeof id === "string");
     if (ids.length === 0) return { people: [], error: null };
-    const full = await sb
+    const withHire = await sb
       .from("profiles")
-      .select("id, full_name, first_name, last_name, account_status, is_active")
+      .select(
+        "id, full_name, first_name, last_name, account_status, is_active, hire_date, start_date",
+      )
       .in("id", ids);
+    const full = withHire.error
+      ? await sb
+          .from("profiles")
+          .select("id, full_name, first_name, last_name, account_status, is_active")
+          .in("id", ids)
+      : withHire;
     const slim = full.error
       ? await sb.from("profiles").select("id, full_name, account_status, is_active").in("id", ids)
       : full;
@@ -298,6 +412,8 @@ async function listStaffPeople(
           last_name?: string | null;
           account_status: string | null;
           is_active: boolean | null;
+          hire_date?: string | null;
+          start_date?: string | null;
         }>
       ).map((p) => [p.id, p]),
     );
@@ -355,10 +471,30 @@ function buildItemFromKey(args: {
     attestationText?: string | null;
     cadence?: EvidenceItemRow["cadence"];
     sowCite?: string | null;
+    due?: EvidenceDueDraft;
+    hireDate?: string | null;
+    documentDate?: string | null;
   };
 }): EvidenceItemRow {
   const def = requirementByKey(args.requirementKey);
   const now = nowIso();
+  const due =
+    args.custom?.due ??
+    defaultDueDraft(
+      args.subjectType,
+      def?.dueDefault ??
+        dueDefaultForRequirement({
+          key: args.requirementKey,
+          subject: args.subjectType,
+          cadence: args.custom?.cadence ?? def?.cadence,
+        }),
+    );
+  const computed = applyDueDraft({
+    draft: due,
+    hireDate: args.custom?.hireDate ?? null,
+    documentDate: args.custom?.documentDate ?? null,
+    hasFile: false,
+  });
   return {
     id: newId(),
     organization_id: args.organizationId,
@@ -368,7 +504,7 @@ function buildItemFromKey(args: {
     title: args.custom?.title?.trim() || def?.title || args.requirementKey,
     evidence_type: args.custom?.evidenceType ?? def?.evidenceType ?? "upload",
     attestation_text: args.custom?.attestationText ?? def?.attestationText ?? null,
-    cadence: args.custom?.cadence ?? def?.cadence ?? "once",
+    cadence: args.custom?.cadence ?? cadenceFromDue(computed.renew_years),
     sow_cite: args.custom?.sowCite ?? def?.sowCite ?? null,
     suggested: args.suggested,
     sent_to_staff: false,
@@ -376,7 +512,12 @@ function buildItemFromKey(args: {
     send_message: null,
     dual_link_key: def?.dualLink ?? null,
     dual_link_peer_id: null,
-    expires_on: null,
+    expires_on: computed.expires_on,
+    first_due_rule: computed.first_due_rule,
+    first_due_on: computed.first_due_on,
+    document_date: computed.document_date,
+    next_due_on: computed.next_due_on,
+    renew_years: computed.renew_years,
     created_at: now,
     updated_at: now,
   };
@@ -450,7 +591,7 @@ function boardFromStore(args: {
         requirementKey: col.requirementKey,
         itemId: found?.id ?? null,
         status: cellStatus({ item: found ?? null, file, today: args.today }),
-        expiresOn: found?.expires_on ?? null,
+        expiresOn: found?.next_due_on ?? found?.first_due_on ?? found?.expires_on ?? null,
       });
     }
   }
@@ -540,6 +681,7 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
         suggestedKeys: z.array(z.string()).optional(),
         packKeys: z.array(z.string()).optional(),
         typeOverrides: z.record(z.string(), TypeEnum).optional(),
+        dueOverrides: z.record(z.string(), DueDraftSchema).optional(),
         dualLinkClientId: z.string().uuid().nullable().optional(),
         dualLinkStaffId: z.string().uuid().nullable().optional(),
       })
@@ -552,6 +694,10 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
     const sb = supabase as AnySupabase;
     const { store, viaTables } = await loadAll(sb, data.organizationId);
     requireTables(viaTables);
+    const staff =
+      data.subjectType === "staff"
+        ? (await listStaffPeople(sb, data.organizationId)).people
+        : [];
     const suggested = new Set(data.suggestedKeys ?? []);
     let count = 0;
     const created: EvidenceItemRow[] = [];
@@ -568,6 +714,8 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
         const overrideType = data.typeOverrides?.[key];
         const def = requirementByKey(key);
         const evidenceType = overrideType ?? def?.evidenceType ?? "upload";
+        const person = staff.find((p) => p.id === subjectId);
+        const hireDate = data.subjectType === "staff" ? (person?.hire_date ?? null) : null;
         const row = buildItemFromKey({
           organizationId: data.organizationId,
           subjectType: data.subjectType,
@@ -580,6 +728,8 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
               evidenceType === "attestation"
                 ? def?.attestationText || `I attest that ${def?.title ?? key} is complete.`
                 : null,
+            due: data.dueOverrides?.[key],
+            hireDate,
           },
         });
         await insertItem(sb, viaTables, data.organizationId, row);
@@ -660,9 +810,11 @@ export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
         title: z.string().min(1),
         evidenceType: TypeEnum,
         attestationText: z.string().nullable().optional(),
-        cadence: CadenceEnum,
+        cadence: CadenceEnum.optional(),
         sowCite: z.string().nullable().optional(),
         expiresOn: z.string().nullable().optional(),
+        due: DueDraftSchema.optional(),
+        hireDate: z.string().nullable().optional(),
       })
       .parse(i),
   )
@@ -688,11 +840,18 @@ export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
           title: data.title,
           evidenceType: data.evidenceType,
           attestationText: data.attestationText ?? null,
-          cadence: data.cadence,
+          cadence: data.cadence ?? cadenceFromDue(data.due?.renewYears ?? null),
           sowCite: data.sowCite ?? null,
+          due: data.due,
+          hireDate: data.hireDate ?? null,
         },
       });
-      if (data.expiresOn) row.expires_on = data.expiresOn;
+      if (data.expiresOn) {
+        row.expires_on = data.expiresOn;
+        row.next_due_on = data.expiresOn;
+        row.first_due_rule = "set_date";
+        row.first_due_on = data.expiresOn;
+      }
       await insertItem(sb, viaTables, data.organizationId, row);
     }
     return { ok: true as const, requirementKey: key };
@@ -829,6 +988,8 @@ export const recordEvidenceUpload = createServerFn({ method: "POST" })
         storagePath: z.string().min(1),
         filename: z.string().min(1),
         expiresOn: z.string().nullable().optional(),
+        documentDate: z.string().nullable().optional(),
+        nextDueOn: z.string().nullable().optional(),
         notes: z.string().nullable().optional(),
       })
       .parse(i),
@@ -857,12 +1018,30 @@ export const recordEvidenceUpload = createServerFn({ method: "POST" })
       notes: data.notes ?? null,
     };
     await insertFileRow(sb, viaTables, data.organizationId, row);
-    const expires = data.expiresOn ?? addCadence(todayStamp(), found.cadence);
-    await patchItem(sb, viaTables, data.organizationId, data.itemId, { expires_on: expires });
+    const documentDate = parseIsoDate(data.documentDate) ?? found.document_date;
+    const nextDue =
+      parseIsoDate(data.nextDueOn) ??
+      parseIsoDate(data.expiresOn) ??
+      applyDueDraft({
+        draft: {
+          firstDueRule: found.first_due_rule ?? "set_date",
+          firstDueOn: found.first_due_on,
+          renewYears: found.renew_years,
+          nextDueMode: found.renew_years ? "years" : found.next_due_on ? "set_date" : "none",
+          nextDueOn: found.next_due_on,
+        },
+        hireDate: null,
+        documentDate,
+        hasFile: true,
+      }).next_due_on;
+    const duePatch = {
+      document_date: documentDate,
+      next_due_on: nextDue,
+      expires_on: nextDue,
+    };
+    await patchItem(sb, viaTables, data.organizationId, data.itemId, duePatch);
     if (found.dual_link_peer_id) {
-      await patchItem(sb, viaTables, data.organizationId, found.dual_link_peer_id, {
-        expires_on: expires,
-      });
+      await patchItem(sb, viaTables, data.organizationId, found.dual_link_peer_id, duePatch);
       await insertFileRow(sb, viaTables, data.organizationId, {
         ...row,
         id: newId(),
@@ -880,6 +1059,8 @@ export const recordEvidenceAttestation = createServerFn({ method: "POST" })
         organizationId: z.string().uuid(),
         itemId: z.string().uuid(),
         attestationText: z.string().min(1),
+        documentDate: z.string().nullable().optional(),
+        nextDueOn: z.string().nullable().optional(),
       })
       .parse(i),
   )
@@ -905,17 +1086,34 @@ export const recordEvidenceAttestation = createServerFn({ method: "POST" })
       notes: null,
     };
     await insertFileRow(sb, viaTables, data.organizationId, row);
-    const expires = addCadence(todayStamp(), found.cadence);
-    await patchItem(sb, viaTables, data.organizationId, data.itemId, { expires_on: expires });
+    const documentDate = parseIsoDate(data.documentDate) ?? found.document_date ?? todayStamp();
+    const nextDue =
+      parseIsoDate(data.nextDueOn) ??
+      applyDueDraft({
+        draft: {
+          firstDueRule: found.first_due_rule ?? "set_date",
+          firstDueOn: found.first_due_on,
+          renewYears: found.renew_years,
+          nextDueMode: found.renew_years ? "years" : found.next_due_on ? "set_date" : "none",
+          nextDueOn: found.next_due_on,
+        },
+        hireDate: null,
+        documentDate,
+        hasFile: true,
+      }).next_due_on;
+    const duePatch = {
+      document_date: documentDate,
+      next_due_on: nextDue,
+      expires_on: nextDue,
+    };
+    await patchItem(sb, viaTables, data.organizationId, data.itemId, duePatch);
     if (found.dual_link_peer_id) {
       await insertFileRow(sb, viaTables, data.organizationId, {
         ...row,
         id: newId(),
         item_id: found.dual_link_peer_id,
       });
-      await patchItem(sb, viaTables, data.organizationId, found.dual_link_peer_id, {
-        expires_on: expires,
-      });
+      await patchItem(sb, viaTables, data.organizationId, found.dual_link_peer_id, duePatch);
     }
     return { ok: true as const };
   });
@@ -996,6 +1194,8 @@ export const createEvidenceChecklist = createServerFn({ method: "POST" })
         description: z.string().max(2000).optional(),
         questions: z.array(z.string().min(1).max(400)).min(1).max(40),
         cadence: CadenceEnum.optional(),
+        due: DueDraftSchema.optional(),
+        hireDate: z.string().nullable().optional(),
       })
       .parse(i),
   )
@@ -1020,8 +1220,10 @@ export const createEvidenceChecklist = createServerFn({ method: "POST" })
           title: data.title.trim(),
           evidenceType: "attestation",
           attestationText,
-          cadence: data.cadence ?? "once",
+          cadence: data.cadence ?? cadenceFromDue(data.due?.renewYears ?? null),
           sowCite: "Agency form",
+          due: data.due,
+          hireDate: data.hireDate ?? null,
         },
       });
       await insertItem(sb, viaTables, data.organizationId, row);
@@ -1054,6 +1256,46 @@ export const createEvidenceChecklist = createServerFn({ method: "POST" })
       /* Forms table is optional — evidence row is the source of truth. */
     }
     return { ok: true as const, requirementKey: key };
+  });
+
+export const updateEvidenceDue = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        organizationId: z.string().uuid(),
+        itemId: z.string().uuid(),
+        due: DueDraftSchema,
+        hireDate: z.string().nullable().optional(),
+        documentDate: z.string().nullable().optional(),
+        hasFile: z.boolean().optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: false as const };
+    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    const sb = supabase as AnySupabase;
+    const { store, viaTables } = await loadAll(sb, data.organizationId);
+    const found = store.items.find((i) => i.id === data.itemId);
+    if (!found) throw new Error("Evidence item not found");
+    const computed = applyDueDraft({
+      draft: data.due,
+      hireDate: data.hireDate ?? null,
+      documentDate: data.documentDate ?? found.document_date,
+      hasFile: data.hasFile ?? !!latestFileForItem(store.files, found.id),
+    });
+    await patchItem(sb, viaTables, data.organizationId, data.itemId, {
+      first_due_rule: computed.first_due_rule,
+      first_due_on: computed.first_due_on,
+      document_date: computed.document_date,
+      next_due_on: computed.next_due_on,
+      renew_years: computed.renew_years,
+      expires_on: computed.expires_on,
+      cadence: cadenceFromDue(computed.renew_years),
+    });
+    return { ok: true as const };
   });
 
 export function unusedPackGuard(packKey: string): boolean {

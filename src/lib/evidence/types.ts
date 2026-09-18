@@ -21,16 +21,19 @@ export const EVIDENCE_CADENCES = [
 ] as const;
 export type EvidenceCadence = (typeof EVIDENCE_CADENCES)[number];
 
-export const EVIDENCE_CADENCE_OPTIONS: { value: EvidenceCadence; label: string }[] = [
-  { value: "once", label: "Once" },
-  { value: "monthly", label: "Monthly" },
-  { value: "quarterly", label: "Quarterly" },
-  { value: "semi_annual", label: "Semi-annual (every 6 months)" },
-  { value: "annual", label: "Annual" },
-  { value: "every_2_years", label: "Every 2 years" },
-  { value: "every_5_years", label: "Every 5 years" },
-  { value: "keep_current", label: "Custom / Keep current" },
-];
+/** Stored for older rows only. UI uses first-due / next-due chips — never “once” or “keep current”. */
+export const EVIDENCE_CADENCE_OPTIONS: { value: EvidenceCadence; label: string }[] = [];
+
+export const FIRST_DUE_RULES = [
+  "before_first_shift",
+  "hire_30",
+  "hire_90",
+  "hire_180",
+  "set_date",
+] as const;
+export type FirstDueRule = (typeof FIRST_DUE_RULES)[number];
+
+export type RenewYears = 1 | 2 | null;
 
 export const EVIDENCE_CELL_STATUSES = ["done", "expiring", "missing"] as const;
 export type EvidenceCellStatus = (typeof EVIDENCE_CELL_STATUSES)[number];
@@ -112,8 +115,12 @@ export type EvidenceRequirementDef = {
   attestationText: string | null;
   cadence: EvidenceCadence;
   sowCite: string;
-  /** Demo-style "Annual · SOW §1.9(2)" line. */
+  /** Plain-English first-due / next-due line. Never “once” or “keep current”. */
   cadenceDisplay: string;
+  dueDefault: {
+    firstDueRule: FirstDueRule;
+    renewYears: RenewYears;
+  };
   why: string;
   links: readonly EvidenceHelpLink[];
   subject: EvidenceSubject;
@@ -162,6 +169,11 @@ export type EvidenceItemRow = {
   dual_link_key: DualLinkKind | null;
   dual_link_peer_id: string | null;
   expires_on: string | null;
+  first_due_rule: FirstDueRule | null;
+  first_due_on: string | null;
+  document_date: string | null;
+  next_due_on: string | null;
+  renew_years: RenewYears;
   /** Admin note attached when sending to an employee. Optional; column may be missing live. */
   send_message: string | null;
   created_at: string;
@@ -197,6 +209,8 @@ export type EvidencePerson = {
   full_name: string;
   initials: string;
   subtitle: string | null;
+  /** Employee hire/start date (YYYY-MM-DD). Null when missing or not a staff row. */
+  hire_date?: string | null;
 };
 
 export type EvidenceGridColumn = {
@@ -217,7 +231,7 @@ export const EVIDENCE_LIABILITY_TEXT =
   "These packs are suggestions only, based on common SOW topics. They are not a complete legal review and not a determination that this agency is in compliance. The provider remains ultimately responsible for knowing and meeting the obligations in its own contract, Scope of Work, and applicable Utah / DSPD rules. Verify every row against your SOW before you apply it, and add anything that is missing.";
 
 export const EVIDENCE_DISCLAIMER =
-  "Not called compliance. Suggestions only — provider picks packs and adds custom rows. Platform tracks upload + expiration (done / expiring / missing). No Home percent scoreboard.";
+  "Not called compliance. Suggestions only — provider picks packs and adds custom rows. Platform tracks upload and due dates (done / needs attention). No Home percent scoreboard.";
 
 export const EVIDENCE_UNCHECK_TITLE = "Are you sure?";
 export const EVIDENCE_UNCHECK_WARNING = "This was found to be a requirement in the SOW.";

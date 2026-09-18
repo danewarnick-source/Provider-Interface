@@ -31,9 +31,15 @@ import {
   mapClientRowsToPeople,
   mapEmployeeRowsToPeople,
 } from "./evidence/people.ts";
+import {
+  computeFirstDueOn,
+  computeNextDueOn,
+  dueSubtitle,
+  LOCKED_DUE_DEFAULTS,
+  needsHireDate,
+} from "./evidence/due.ts";
 import { addCadence, cellStatus, staffInitials } from "./evidence/status.ts";
 import {
-  EVIDENCE_CADENCE_OPTIONS,
   EVIDENCE_DISCLAIMER,
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_PUSH_BODY,
@@ -65,6 +71,11 @@ function item(partial: Partial<EvidenceItemRow>): EvidenceItemRow {
     dual_link_key: null,
     dual_link_peer_id: null,
     expires_on: null,
+    first_due_rule: "hire_90",
+    first_due_on: null,
+    document_date: null,
+    next_due_on: null,
+    renew_years: 2,
     created_at: "2026-09-17T00:00:00.000Z",
     updated_at: "2026-09-17T00:00:00.000Z",
     ...partial,
@@ -213,6 +224,7 @@ describe("Evidence curated catalog", () => {
     assert.ok(keys.includes("cpr_first_aid"));
     assert.ok(keys.includes("oig_exclusion"));
     assert.ok(keys.includes("annual_12hr_training"));
+    assert.ok(keys.includes("person_centered_thinking"));
     assert.ok(keys.includes("driving_record"));
     assert.equal(keys.includes("host_home_cert"), false);
     assert.equal(
@@ -372,6 +384,59 @@ describe("Evidence curated catalog", () => {
       hrefs("see_workplace_supports_or_job_coach").includes("https://jobs.utah.gov/usor/"),
     );
   });
+
+  it("locks first-due / next-due defaults and kills once/keep-current labels", () => {
+    assert.deepEqual(LOCKED_DUE_DEFAULTS.thirty_day_orientation, {
+      firstDueRule: "hire_30",
+      renewYears: null,
+    });
+    assert.deepEqual(LOCKED_DUE_DEFAULTS.cpr_first_aid, {
+      firstDueRule: "hire_90",
+      renewYears: 2,
+    });
+    assert.deepEqual(LOCKED_DUE_DEFAULTS.person_centered_thinking, {
+      firstDueRule: "hire_90",
+      renewYears: null,
+    });
+    assert.deepEqual(LOCKED_DUE_DEFAULTS.mandt_behavior, {
+      firstDueRule: "hire_180",
+      renewYears: 2,
+    });
+    assert.equal(requirementByKey("cpr_first_aid")?.dueDefault.renewYears, 2);
+    assert.equal(requirementByKey("thirty_day_orientation")?.dueDefault.firstDueRule, "hire_30");
+    assert.equal(requirementByKey("person_centered_thinking")?.subject, "staff");
+    assert.match(
+      dueSubtitle({ firstDueRule: "hire_90", renewYears: 2 }),
+      /First due within 90 days of hire · then every 2 years from the certificate date/,
+    );
+    assert.equal(computeFirstDueOn({ rule: "hire_30", hireDate: "2026-07-01" }), "2026-07-31");
+    assert.equal(computeFirstDueOn({ rule: "hire_90", hireDate: "2026-07-01" }), "2026-09-29");
+    assert.equal(computeFirstDueOn({ rule: "hire_180", hireDate: "2026-07-01" }), "2026-12-28");
+    assert.equal(computeFirstDueOn({ rule: "before_first_shift", hireDate: "2026-07-01" }), "2026-07-01");
+    assert.equal(computeFirstDueOn({ rule: "set_date", hireDate: "2026-07-01", setDate: "2026-08-15" }), "2026-08-15");
+    assert.equal(computeNextDueOn({ documentDate: "2026-03-12", renewYears: 2 }), "2028-03-12");
+    assert.equal(computeNextDueOn({ documentDate: "2026-03-12", renewYears: 1 }), "2027-03-12");
+    assert.equal(computeNextDueOn({ documentDate: "2026-03-12", renewYears: null }), null);
+    assert.equal(
+      needsHireDate({
+        subject: "staff",
+        rule: "hire_90",
+        hireDate: null,
+      }),
+      true,
+    );
+    assert.equal(
+      needsHireDate({
+        subject: "company",
+        rule: "hire_90",
+        hireDate: null,
+      }),
+      false,
+    );
+    for (const row of EVIDENCE_REQUIREMENTS) {
+      assert.doesNotMatch(row.cadenceDisplay, /\bonce\b|keep current/i);
+    }
+  });
 });
 
 describe("Evidence people roster", () => {
@@ -487,6 +552,21 @@ describe("Evidence people roster", () => {
     const company = companyEvidencePerson("org-1", "True North Supports LLC");
     assert.equal(company.id, "org-1");
     assert.equal(company.full_name, "True North Supports LLC");
+    const withHire = mapEmployeeRowsToPeople([
+      {
+        user_id: "e-9",
+        role: "dsp",
+        job_title: "DSP",
+        active: true,
+        profile: {
+          full_name: "Pat Hire",
+          account_status: "active",
+          is_active: true,
+          hire_date: "2026-07-01",
+        },
+      },
+    ]);
+    assert.equal(withHire[0]?.hire_date, "2026-07-01");
     assert.equal(isAttestFullName("Dane", "Warnick"), true);
     assert.equal(isAttestFullName("Dane", "  "), false);
     assert.equal(isAttestFullName("", "Warnick"), false);
@@ -499,11 +579,11 @@ describe("Evidence cell status", () => {
     assert.equal(cellStatus({ item: item({}), file: null, today: "2026-09-17" }), "missing");
     assert.equal(
       cellStatus({
-        item: item({ expires_on: "2026-10-01" }),
+        item: item({ next_due_on: "2026-10-01", expires_on: "2026-10-01" }),
         file: file({}),
         today: "2026-09-17",
       }),
-      "expiring",
+      "done",
     );
     assert.equal(
       cellStatus({
@@ -658,6 +738,7 @@ describe("Evidence nav + product lock", () => {
     assert.match(fetchEmployees, /supabase as any/);
     assert.match(fetchEmployees, /\.from\(["']organization_members["']\)/);
     assert.match(fetchEmployees, /mapEmployeeRowsToPeople/);
+    assert.match(fetchEmployees, /hire_date/);
 
     const quiz = readFileSync(
       new URL("./../components/evidence/evidence-questionnaire.tsx", import.meta.url),
@@ -686,20 +767,20 @@ describe("Evidence nav + product lock", () => {
     assert.ok(STAFF_QUIZ_CODES.includes("DSP"));
     assert.ok(STAFF_QUIZ_CODES.includes("SJD"));
     assert.ok(STAFF_QUIZ_CODES.includes("COM"));
-    assert.equal(EVIDENCE_CADENCE_OPTIONS.length, 8);
-    assert.deepEqual(
-      EVIDENCE_CADENCE_OPTIONS.map((o) => o.value),
-      [
-        "once",
-        "monthly",
-        "quarterly",
-        "semi_annual",
-        "annual",
-        "every_2_years",
-        "every_5_years",
-        "keep_current",
-      ],
+    assert.match(quiz, /EvidenceDueFields/);
+    assert.doesNotMatch(quiz, /evidence-custom-cadence|Keep current|>Once</);
+    const dueFields = readFileSync(
+      new URL("./../components/evidence/evidence-due-fields.tsx", import.meta.url),
+      "utf8",
     );
+    assert.match(dueFields, /First due/);
+    assert.match(dueFields, /Next due after on file/);
+    assert.match(dueFields, /Set a date/);
+    const dueLib = readFileSync(new URL("./evidence/due.ts", import.meta.url), "utf8");
+    assert.match(dueLib, /Document date \+ 2 years/);
+    assert.doesNotMatch(dueFields, /keep current|>Once</);
+    assert.match(workspace, /dueSubtitleFromItem|Save due dates/);
+    assert.doesNotMatch(workspace, />Once<|>Keep current</);
   });
 
   it("does not revive requirement_defs dual-write or encoded applicability", () => {
@@ -713,6 +794,14 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(fn, /readFeatureStore|writeFeatureStore|evidence_v1/);
     assert.match(fn, /send_message/);
     assert.match(fn, /hasSendMessage|sendMessageColumnMissing/);
+    assert.match(fn, /first_due_rule|dueColumnMissing/);
+    const dueSql = fileURLToPath(
+      new URL("../../supabase/migrations/20260918070000_evidence_due_model.sql", import.meta.url),
+    );
+    assert.equal(existsSync(dueSql), true, dueSql);
+    assert.match(readFileSync(dueSql, "utf8"), /ADD COLUMN IF NOT EXISTS first_due_rule/);
+    assert.match(readFileSync(dueSql, "utf8"), /ADD COLUMN IF NOT EXISTS document_date/);
+    assert.doesNotMatch(readFileSync(dueSql, "utf8"), /feature_config/);
     assert.match(EVIDENCE_STORAGE_UNAVAILABLE, /isn’t set up on this database yet/);
     const sendSql = fileURLToPath(
       new URL(
