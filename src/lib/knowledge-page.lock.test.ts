@@ -29,6 +29,9 @@ describe("Knowledge surface lock", () => {
     assert.doesNotMatch(page, /guarantee compliance/);
     assert.doesNotMatch(page, /power everything NECTAR shows/);
     assert.doesNotMatch(page, /[\u{1F300}-\u{1FAFF}]/u);
+    const uploadIdx = page.indexOf("<UploadCard");
+    const listIdx = page.indexOf("<DocumentList");
+    assert.ok(uploadIdx >= 0 && listIdx > uploadIdx, "upload sits above the document list");
   });
 
   it("retires External compliance and Authoritative Sources to Knowledge", () => {

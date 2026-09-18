@@ -102,14 +102,14 @@ export function KnowledgePage() {
       </header>
 
       {orgId ? (
-        <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
-          <DocumentList orgId={orgId} />
+        <div className="space-y-4">
           <div data-tour="authsources.upload">
             <UploadCard
               orgId={orgId}
               onUploaded={() => qc.invalidateQueries({ queryKey: ["auth-sources", orgId] })}
             />
           </div>
+          <DocumentList orgId={orgId} />
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
