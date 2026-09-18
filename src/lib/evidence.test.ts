@@ -38,7 +38,8 @@ import {
   LOCKED_DUE_DEFAULTS,
   needsHireDate,
 } from "./evidence/due.ts";
-import { cellStatus, staffInitials } from "./evidence/status.ts";
+import { columnDueHint, matrixColumns, personRowSubtitle } from "./evidence/matrix.ts";
+import { cellStatus, dueChipLabel, matrixChip, staffInitials } from "./evidence/status.ts";
 import {
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_PUSH_BODY,
@@ -603,6 +604,80 @@ describe("Evidence cell status", () => {
     assert.equal(staffInitials("Dane Warnick"), "DW");
   });
 
+  it("maps matrix chips from existing due and file fields", () => {
+    assert.deepEqual(matrixChip({ item: null, file: null, today: "2026-09-17" }), {
+      kind: "na",
+      label: "N/A",
+      itemId: null,
+    });
+    assert.deepEqual(matrixChip({ item: item({}), file: null, today: "2026-09-17" }), {
+      kind: "add",
+      label: "Add",
+      itemId: "item-1",
+    });
+    assert.deepEqual(
+      matrixChip({
+        item: item({ sent_to_staff: true }),
+        file: null,
+        today: "2026-09-17",
+      }),
+      { kind: "review", label: "Review", itemId: "item-1" },
+    );
+    assert.deepEqual(
+      matrixChip({
+        item: item({ first_due_on: "2026-10-03" }),
+        file: null,
+        today: "2026-09-17",
+      }),
+      { kind: "due", label: "Due in 16d", itemId: "item-1" },
+    );
+    assert.equal(dueChipLabel(0), "Due today");
+    assert.deepEqual(
+      matrixChip({
+        item: item({ first_due_on: "2026-09-01" }),
+        file: null,
+        today: "2026-09-17",
+      }),
+      { kind: "missing", label: "Missing", itemId: "item-1" },
+    );
+    assert.deepEqual(
+      matrixChip({
+        item: item({ next_due_on: "2027-03-12", expires_on: "2027-03-12" }),
+        file: file({}),
+        today: "2026-09-17",
+      }),
+      { kind: "complete", label: "Complete", itemId: "item-1" },
+    );
+    assert.deepEqual(
+      matrixChip({
+        item: item({ next_due_on: "2026-09-01", expires_on: "2026-09-01" }),
+        file: file({}),
+        today: "2026-09-17",
+      }),
+      { kind: "missing", label: "Missing", itemId: "item-1" },
+    );
+  });
+
+  it("builds columns from assigned keys and pack subtitles without fractions", () => {
+    const cols = matrixColumns([
+      item({ requirement_key: "cpr_first_aid", title: "CPR / First Aid" }),
+      item({ id: "item-2", requirement_key: "thirty_day_orientation", title: "30-day orientation" }),
+      item({ id: "item-3", requirement_key: "custom_policy", title: "Policy acknowledgment" }),
+    ]);
+    assert.deepEqual(
+      cols.map((c) => c.key),
+      ["cpr_first_aid", "thirty_day_orientation", "custom_policy"],
+    );
+    assert.equal(columnDueHint({ firstDueRule: "hire_90", renewYears: 2 }), "90-day · 2 yr");
+    assert.equal(columnDueHint({ firstDueRule: "before_first_shift", renewYears: null }), "On hire");
+    const subtitle = personRowSubtitle({
+      person: { id: "s1", full_name: "Ann Lee", initials: "AL", subtitle: "DSP" },
+      requirementKeys: ["cpr_first_aid", "thirty_day_orientation"],
+    });
+    assert.match(subtitle, /DSP/);
+    assert.doesNotMatch(subtitle, /\d+\s*\/\s*\d+/);
+  });
+
   it("requires attestation timestamp for attest rows", () => {
     const attest = item({ evidence_type: "attestation" });
     assert.equal(
@@ -697,6 +772,19 @@ describe("Evidence nav + product lock", () => {
       new URL("./../components/evidence/evidence-workspace.tsx", import.meta.url),
       "utf8",
     );
+    const cards = readFileSync(
+      new URL("./../components/evidence/evidence-subject-cards.tsx", import.meta.url),
+      "utf8",
+    );
+    const matrix = readFileSync(
+      new URL("./../components/evidence/evidence-matrix.tsx", import.meta.url),
+      "utf8",
+    );
+    const chips = readFileSync(
+      new URL("./../components/evidence/evidence-status-chip.tsx", import.meta.url),
+      "utf8",
+    );
+    const evidenceUi = `${workspace}\n${cards}\n${matrix}\n${chips}`;
     assert.doesNotMatch(workspace, /1 · Grid|EVIDENCE_DISCLAIMER|amber-50/);
     assert.doesNotMatch(
       workspace,
@@ -706,8 +794,15 @@ describe("Evidence nav + product lock", () => {
     assert.match(workspace, /fetchEvidenceClientPeople/);
     assert.match(workspace, /fetchEvidenceEmployees/);
     assert.match(workspace, /companyEvidencePerson/);
-    assert.match(workspace, />Employees</);
-    assert.doesNotMatch(workspace, />Staff</);
+    assert.match(cards, /title: "Employees"/);
+    assert.match(cards, /title: "Clients"/);
+    assert.match(cards, /title: "Company"/);
+    assert.match(cards, /\{card\.title\}/);
+    assert.match(workspace, /Records & renewals/);
+    assert.match(matrix, /Select a cell to add or review evidence/);
+    assert.match(chips, /EvidenceStatusChip/);
+    assert.match(chips, /complete|missing|review|"na"/);
+    assert.doesNotMatch(evidenceUi, />Staff</);
     assert.doesNotMatch(workspace, /Company file is empty/);
     assert.doesNotMatch(workspace, /No rows yet\. Use Add to apply a pack/);
     assert.doesNotMatch(workspace, /Send to staff/);
@@ -716,6 +811,10 @@ describe("Evidence nav + product lock", () => {
     assert.match(workspace, /person: null/);
     assert.doesNotMatch(workspace, /\.from\(["']clients["']\)/);
     assert.doesNotMatch(workspace, /SubjectAssignPicker|PackSettingsPanel|NewRequirementPanel/);
+    assert.doesNotMatch(evidenceUi, /Progress|progress-bar|compliance scoreboard|Hive Certify/i);
+    assert.doesNotMatch(evidenceUi, /\d+\s*\/\s*\d+\s*(complete|done|packs|requirements)/i);
+    assert.doesNotMatch(evidenceUi, /need attention|KPI|sparkline/i);
+    assert.doesNotMatch(evidenceUi, /\p{Extended_Pictographic}/u);
 
     const fetchClients = readFileSync(
       new URL("./evidence/fetch-clients.ts", import.meta.url),
