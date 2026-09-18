@@ -721,8 +721,8 @@ describe("Evidence cell status", () => {
         { kind: "missing", label: "Missing", itemId: "a" },
         { kind: "missing", label: "Missing", itemId: "b" },
         { kind: "due", label: "Due in 16d", itemId: "c" },
-      ]).map((c) => c.label),
-      ["2 to finish", "Due in 16d", "Overdue"],
+      ]).map((c) => ({ kind: c.kind, label: c.label })),
+      [{ kind: "open", label: "3 to finish" }],
     );
     assert.deepEqual(
       rowSummaryChips([
@@ -741,7 +741,8 @@ describe("Evidence cell status", () => {
       { kind: "missing", label: "Missing", itemId: "a" },
       { kind: "add", label: "Add", itemId: "b" },
     ])) {
-      assert.doesNotMatch(chip.label, /missing/i);
+      assert.doesNotMatch(chip.label, /missing|overdue/i);
+      assert.notEqual(chip.kind, "missing");
     }
   });
 
@@ -870,11 +871,16 @@ describe("Evidence nav + product lock", () => {
     assert.match(workspace, /Records & renewals/);
     assert.match(workspace, /<EvidenceRoster/);
     assert.equal(workspace.split("<EvidenceRoster").length - 1, 1);
-    assert.match(roster, /Open a row to add or review evidence/);
+    assert.doesNotMatch(roster, /Open a row to add or review evidence/);
     assert.match(roster, /aria-expanded/);
     assert.match(roster, /PersonAccordion|dueSubtitleFromItem/);
     assert.match(roster, /\+ Add records/);
     assert.doesNotMatch(roster, /Add packs/);
+    assert.doesNotMatch(roster, /Open a row|add or review evidence/i);
+    assert.doesNotMatch(
+      readFileSync(new URL("./evidence/matrix.ts", import.meta.url), "utf8"),
+      /label:\s*"Overdue"|N missing/,
+    );
     assert.doesNotMatch(cards, /fill="#c9a227"|-right-2\.5 -top-2\.5|opacity-10/);
     assert.doesNotMatch(roster, /<table|matrixColumns|shared column/i);
     assert.doesNotMatch(roster, /tab === |"staff"|"client"|"company"/);

@@ -46,19 +46,14 @@ export function EvidenceRoster({
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative min-w-[220px] max-w-md flex-1">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={searchPlaceholder}
-            className="h-9 bg-[var(--hive-canvas)] pl-9"
-          />
-        </div>
-        <p className="flex-1 text-[13px] text-[var(--hive-text-muted)]">
-          Open a row to add or review evidence.
-        </p>
+      <div className="relative min-w-[220px] max-w-md">
+        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={searchPlaceholder}
+          className="h-9 bg-[var(--hive-canvas)] pl-9"
+        />
       </div>
 
       {peopleError ? (
