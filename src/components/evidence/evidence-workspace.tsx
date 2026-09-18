@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { FileText, Plus, Search, X } from "lucide-react";
+import { FileText, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,12 +22,13 @@ import {
   upsertEvidenceRequirement,
   type EvidenceBoard,
 } from "@/lib/evidence.functions";
-import { type EvidenceStep } from "@/lib/evidence/nav.ts";
+import { leaveEvidenceWizard, type EvidenceStep } from "@/lib/evidence/nav.ts";
 import { fetchEvidenceClientPeople } from "@/lib/evidence/fetch-clients.ts";
 import { fetchEvidenceEmployees } from "@/lib/evidence/fetch-employees.ts";
 import { companyEvidencePerson } from "@/lib/evidence/people.ts";
 import { formatExpiresOn, latestFileForItem } from "@/lib/evidence/status.ts";
 import {
+  EVIDENCE_SEND_MESSAGE_UNAVAILABLE,
   EVIDENCE_STORAGE_UNAVAILABLE,
   type EvidenceCadence,
   type EvidencePerson,
@@ -36,6 +36,7 @@ import {
   type EvidenceType,
 } from "@/lib/evidence/types.ts";
 import { EvidenceQuestionnaire } from "./evidence-questionnaire";
+import { SendEvidenceDialog, type SendEvidenceDraft } from "./send-evidence-dialog";
 
 type Props = {
   tab: EvidenceSubject;
@@ -186,11 +187,17 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
     },
     onError: (e: Error) => toast.error(e.message),
   });
+  const [sendDraft, setSendDraft] = useState<SendEvidenceDraft | null>(null);
   const sendM = useMutation({
-    mutationFn: (args: { itemIds: string[]; staffId?: string }) =>
+    mutationFn: (args: { itemIds: string[]; staffId?: string; message?: string }) =>
       sendFn({ data: { organizationId: orgId!, ...args } }),
-    onSuccess: () => {
-      toast.success("Sent to staff phone. Notification has no client or clinical detail.");
+    onSuccess: (res) => {
+      setSendDraft(null);
+      if (res && "messageSkipped" in res && res.messageSkipped) {
+        toast.message(res.skipReason ?? EVIDENCE_SEND_MESSAGE_UNAVAILABLE);
+      } else {
+        toast.success("Sent to the employee.");
+      }
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -266,6 +273,16 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
     onSearchChange({ tab: nextTab, step: "quiz", person: nextPerson, item: null });
   };
 
+  const closeWizard = () => {
+    const next = leaveEvidenceWizard(tab);
+    onSearchChange({
+      tab: (next.tab as EvidenceSubject) ?? tab,
+      step: "grid",
+      person: null,
+      item: null,
+    });
+  };
+
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
   }
@@ -308,31 +325,21 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
           peopleError={peopleError}
           tab={tab}
           loading={peopleLoading}
-          selectedId={personId}
+          selectedId={step === "grid" ? personId : undefined}
+          staffPicker={board?.staffPicker ?? []}
           onTabChange={(next) =>
             onSearchChange({ tab: next, step: "grid", person: null, item: null })
           }
           onOpenPerson={(id) => onSearchChange({ tab, step: "grid", person: id, item: null })}
+          onClosePerson={() => onSearchChange({ tab, step: "grid", person: null, item: null })}
           onAddForPerson={(id) => openPackFor(tab, id)}
-        />
-      )}
-
-      {step === "grid" && person ? (
-        <PersonPackEditor
-          board={board}
-          person={person}
-          personId={person.id}
-          tab={tab}
-          staffPicker={board?.staffPicker ?? []}
-          onClose={() => onSearchChange({ tab, step: "grid", person: null })}
-          onQuiz={() => openPackFor(tab, person.id)}
-          onReview={(item) => onSearchChange({ tab, step: "review", person: person.id, item })}
+          onReview={(id, item) => onSearchChange({ tab, step: "review", person: id, item })}
           onRemove={(id) => removeM.mutate(id)}
-          onSend={(ids, staffId) => sendM.mutate({ itemIds: ids, staffId })}
+          onSend={(draft) => setSendDraft(draft)}
           onLink={(item, peer) => linkM.mutate({ itemId: item, peerSubjectId: peer })}
           pending={removeM.isPending || sendM.isPending || linkM.isPending}
         />
-      ) : null}
+      )}
 
       {showQuiz ? (
         <EvidenceQuestionnaire
@@ -346,7 +353,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
                 : "Employee")
           }
           initialCodes={initialCodes}
-          onClose={() => onSearchChange({ tab, step: "grid", person: personId })}
+          onClose={closeWizard}
           onApply={(args) => {
             const subjectIds = personId
               ? [personId]
@@ -370,6 +377,14 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
           pending={applyM.isPending || customM.isPending || formM.isPending}
         />
       ) : null}
+
+      <SendEvidenceDialog
+        draft={sendDraft}
+        staffPicker={board?.staffPicker ?? []}
+        pending={sendM.isPending}
+        onClose={() => setSendDraft(null)}
+        onSend={(args) => sendM.mutate(args)}
+      />
     </div>
   );
 }
@@ -381,9 +396,16 @@ function RosterPanel({
   tab,
   loading,
   selectedId,
+  staffPicker,
   onTabChange,
   onOpenPerson,
+  onClosePerson,
   onAddForPerson,
+  onReview,
+  onRemove,
+  onSend,
+  onLink,
+  pending,
 }: {
   board: EvidenceBoard | undefined;
   people: EvidencePerson[];
@@ -391,9 +413,16 @@ function RosterPanel({
   tab: EvidenceSubject;
   loading: boolean;
   selectedId?: string;
+  staffPicker: EvidenceBoard["staffPicker"];
   onTabChange: (tab: EvidenceSubject) => void;
   onOpenPerson: (id: string) => void;
+  onClosePerson: () => void;
   onAddForPerson: (id: string) => void;
+  onReview: (personId: string, itemId: string) => void;
+  onRemove: (itemId: string) => void;
+  onSend: (draft: SendEvidenceDraft) => void;
+  onLink: (itemId: string, peerSubjectId: string) => void;
+  pending: boolean;
 }) {
   const [q, setQ] = useState("");
   const people = useMemo(() => {
@@ -401,9 +430,6 @@ function RosterPanel({
     if (!needle) return roster;
     return roster.filter((p) => p.full_name.toLowerCase().includes(needle));
   }, [roster, q]);
-
-  const countFor = (id: string) =>
-    (board?.items ?? []).filter((item) => item.subject_id === id).length;
 
   const emptyCopy = tab === "client" ? "No clients yet." : "No employees yet.";
   const listLabel = tab === "client" ? "clients" : tab === "company" ? "company" : "employees";
@@ -447,44 +473,62 @@ function RosterPanel({
         ) : (
           <ul>
             {people.map((person) => {
-              const count = countFor(person.id);
+              const rows = (board?.items ?? []).filter((item) => item.subject_id === person.id);
+              const count = rows.length;
+              const expanded = selectedId === person.id && count > 0;
               return (
-                <li
-                  key={person.id}
-                  className={`flex items-center gap-3 border-b border-border px-4 py-3 last:border-0 ${
-                    selectedId === person.id ? "bg-muted/40" : ""
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => onOpenPerson(person.id)}
-                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                <li key={person.id} className="border-b border-border last:border-0">
+                  <div
+                    className={`flex items-center gap-3 px-4 py-3 ${expanded ? "bg-muted/40" : ""}`}
                   >
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
-                      {person.initials}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block font-medium text-[var(--hive-text)]">
-                        {person.full_name}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (count === 0) return;
+                        if (selectedId === person.id) onClosePerson();
+                        else onOpenPerson(person.id);
+                      }}
+                      className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                    >
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-700">
+                        {person.initials}
                       </span>
-                      <span className="block text-xs text-muted-foreground">
-                        {person.subtitle ? `${person.subtitle} · ` : ""}
-                        {count > 0
-                          ? `${count} requirement${count === 1 ? "" : "s"}`
-                          : "no packs yet"}
+                      <span className="min-w-0">
+                        <span className="block font-medium text-[var(--hive-text)]">
+                          {person.full_name}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                          {person.subtitle ? `${person.subtitle} · ` : ""}
+                          {count > 0
+                            ? `${count} requirement${count === 1 ? "" : "s"}`
+                            : "no packs yet"}
+                        </span>
                       </span>
-                    </span>
-                  </button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    aria-label={`Add evidence for ${person.full_name}`}
-                    onClick={() => onAddForPerson(person.id)}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    <span className="ml-1.5">Add</span>
-                  </Button>
+                    </button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      aria-label={`Add evidence for ${person.full_name}`}
+                      onClick={() => onAddForPerson(person.id)}
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      <span className="ml-1.5">Add</span>
+                    </Button>
+                  </div>
+                  {expanded ? (
+                    <PersonItemsInline
+                      person={person}
+                      rows={rows}
+                      tab={tab}
+                      staffPicker={staffPicker}
+                      pending={pending}
+                      onReview={(itemId) => onReview(person.id, itemId)}
+                      onRemove={onRemove}
+                      onSend={onSend}
+                      onLink={onLink}
+                    />
+                  ) : null}
                 </li>
               );
             })}
@@ -645,79 +689,64 @@ function ReviewPanel({
   );
 }
 
-function PersonPackEditor({
-  board,
+function PersonItemsInline({
   person,
-  personId,
+  rows,
   tab,
   staffPicker,
-  onClose,
-  onQuiz,
+  pending,
   onReview,
   onRemove,
   onSend,
   onLink,
-  pending,
 }: {
-  board: EvidenceBoard | undefined;
   person: EvidencePerson;
-  personId: string;
+  rows: EvidenceBoard["items"];
   tab: EvidenceSubject;
   staffPicker: EvidenceBoard["staffPicker"];
-  onClose: () => void;
-  onQuiz: () => void;
+  pending: boolean;
   onReview: (itemId: string) => void;
   onRemove: (itemId: string) => void;
-  onSend: (itemIds: string[], staffId?: string) => void;
+  onSend: (draft: SendEvidenceDraft) => void;
   onLink: (itemId: string, peerSubjectId: string) => void;
-  pending: boolean;
 }) {
-  const rows = (board?.items ?? []).filter((i) => i.subject_id === personId);
-  const [selected, setSelected] = useState<string[]>([]);
   const [peerId, setPeerId] = useState("");
-  const [sendStaff, setSendStaff] = useState(personId);
+  const defaultStaff = tab === "staff" ? person.id : (staffPicker[0]?.id ?? "");
+
+  const openSend = (itemIds: string[]) => {
+    const titles = rows.filter((row) => itemIds.includes(row.id)).map((row) => row.title);
+    onSend({
+      itemIds,
+      titles,
+      staffId: defaultStaff,
+      needsStaffPicker: tab !== "staff",
+    });
+  };
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">{person.full_name}</h2>
-          <p className="text-sm text-muted-foreground">{person.subtitle ?? "Pack"}</p>
-        </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          aria-label="Close person pack"
+    <div className="space-y-2 border-t border-border bg-slate-50/70 px-4 py-3">
+      {rows.map((row) => (
+        <div
+          key={row.id}
+          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card px-3 py-2.5"
         >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-      <ul className="mt-4 space-y-2">
-        {rows.map((row) => (
-          <li
-            key={row.id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2.5"
+          <button
+            type="button"
+            className="min-w-0 flex-1 text-left"
+            onClick={() => onReview(row.id)}
           >
-            <label className="flex min-w-0 items-center gap-3">
-              <Checkbox
-                checked={selected.includes(row.id)}
-                onCheckedChange={(v) =>
-                  setSelected((prev) =>
-                    v === true ? [...prev, row.id] : prev.filter((id) => id !== row.id),
-                  )
-                }
-              />
-              <button type="button" className="text-left" onClick={() => onReview(row.id)}>
-                <span className="block text-sm font-medium">{row.title}</span>
-                <span className="block text-xs text-muted-foreground">
-                  {row.evidence_type} · {cadenceLabel(row.cadence)} · {row.sow_cite ?? "Custom"}
-                  {row.sent_to_staff ? " · sent to staff" : ""}
-                  {row.dual_link_peer_id ? " · dual-linked" : ""}
-                </span>
-              </button>
-            </label>
+            <span className="block text-sm font-medium">{row.title}</span>
+            <span className="block text-xs text-muted-foreground">
+              {row.evidence_type === "attestation" ? "Attestation" : "Upload"} ·{" "}
+              {cadenceLabel(row.cadence)}
+              {row.sent_to_staff ? " · sent" : ""}
+              {row.send_message ? " · message attached" : ""}
+            </span>
+          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" size="sm" disabled={pending} onClick={() => openSend([row.id])}>
+              Send to employee
+            </Button>
             <Button
               type="button"
               variant="ghost"
@@ -727,59 +756,42 @@ function PersonPackEditor({
             >
               Remove
             </Button>
-          </li>
-        ))}
-        {rows.length === 0 ? (
-          <li className="text-sm text-muted-foreground">No rows yet. Use Add to apply a pack.</li>
-        ) : null}
-      </ul>
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <Button type="button" variant="outline" onClick={onQuiz}>
-          <Plus className="mr-1.5 h-3.5 w-3.5" />
-          Add
-        </Button>
-        {tab !== "staff" ? (
-          <select
-            value={sendStaff}
-            onChange={(e) => setSendStaff(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-          >
-            {staffPicker.map((s) => (
-              <option key={s.id} value={s.id}>
-                Send as {s.full_name}
-              </option>
-            ))}
-          </select>
-        ) : null}
+          </div>
+        </div>
+      ))}
+      {rows.length > 1 ? (
         <Button
           type="button"
-          disabled={selected.length === 0 || pending}
-          onClick={() => onSend(selected, tab === "staff" ? personId : sendStaff)}
+          variant="outline"
+          size="sm"
+          disabled={pending}
+          onClick={() => openSend(rows.map((row) => row.id))}
         >
-          Send to staff
+          Send all to employee
         </Button>
-        {rows.some((r) => r.dual_link_key === "host_home_cert" && !r.dual_link_peer_id) ? (
-          <div className="flex items-center gap-2">
-            <Input
-              value={peerId}
-              onChange={(e) => setPeerId(e.target.value)}
-              placeholder={tab === "staff" ? "Client id to dual-link" : "Employee id to dual-link"}
-              className="h-9 w-56"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!peerId || pending}
-              onClick={() => {
-                const host = rows.find((r) => r.dual_link_key === "host_home_cert");
-                if (host) onLink(host.id, peerId.trim());
-              }}
-            >
-              Dual-link Host Home Cert
-            </Button>
-          </div>
-        ) : null}
-      </div>
-    </section>
+      ) : null}
+      {rows.some((r) => r.dual_link_key === "host_home_cert" && !r.dual_link_peer_id) ? (
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <Input
+            value={peerId}
+            onChange={(e) => setPeerId(e.target.value)}
+            placeholder={tab === "staff" ? "Client id to dual-link" : "Employee id to dual-link"}
+            className="h-9 w-56"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!peerId || pending}
+            onClick={() => {
+              const host = rows.find((r) => r.dual_link_key === "host_home_cert");
+              if (host) onLink(host.id, peerId.trim());
+            }}
+          >
+            Dual-link Host Home Cert
+          </Button>
+        </div>
+      ) : null}
+    </div>
   );
 }

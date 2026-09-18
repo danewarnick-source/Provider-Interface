@@ -202,16 +202,40 @@ export function EvidenceQuestionnaire({
 
   const quizCodes = quizCodesForSubject(subject);
 
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (optOutKey) return;
+      onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose, optOutKey]);
+
+  const leaveWizard = () => {
+    if (step === "custom" || step === "form") {
+      setStep("rows");
+      return;
+    }
+    if (subject !== "company" && step === "rows") {
+      setStep("quiz");
+      return;
+    }
+    onClose();
+  };
+
   return (
     <div
       className="fixed inset-0 z-40 flex items-end justify-center bg-black/45 p-0 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="evidence-pack-title"
+      onClick={onClose}
     >
       <div
         data-evidence-quiz=""
         className="flex max-h-[100dvh] w-full max-w-[680px] flex-col overflow-hidden rounded-t-2xl bg-card shadow-lg sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl"
+        onClick={(event) => event.stopPropagation()}
       >
         <header className="border-b border-border px-5 py-4">
           <h2 id="evidence-pack-title" className="text-lg font-semibold text-[var(--hive-text)]">
@@ -601,21 +625,7 @@ export function EvidenceQuestionnaire({
           className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 px-5 py-3"
           style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
         >
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              if (step === "custom" || step === "form") {
-                setStep("rows");
-                return;
-              }
-              if (subject !== "company" && step === "rows") {
-                setStep("quiz");
-                return;
-              }
-              onClose();
-            }}
-          >
+          <Button type="button" variant="outline" onClick={leaveWizard}>
             Back
           </Button>
           <div className="flex-1" />

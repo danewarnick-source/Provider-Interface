@@ -91,6 +91,14 @@ export function StaffEvidenceList() {
                       {item.evidence_type === "attestation" ? "Attest" : "Upload"} ·{" "}
                       {cadenceLabel(item.cadence)}
                     </p>
+                    {item.send_message?.trim() ? (
+                      <div className="mt-3 rounded-xl border border-border bg-muted/40 px-3 py-2">
+                        <p className="text-xs font-semibold text-muted-foreground">
+                          Message from your agency
+                        </p>
+                        <p className="mt-1 whitespace-pre-wrap text-sm">{item.send_message}</p>
+                      </div>
+                    ) : null}
                   </div>
                   <EvidenceStatusGlyph status={status} />
                 </div>

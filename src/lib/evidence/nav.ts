@@ -68,6 +68,11 @@ export function evidenceSearchFor(args: {
   };
 }
 
+/** Leave Add / quiz / packs: list-only URL, no leftover person panel. */
+export function leaveEvidenceWizard(tab: EvidenceSubject): EvidenceSearch {
+  return evidenceSearchFor({ tab, step: "grid", person: null, item: null });
+}
+
 export function isEvidenceSubject(value: string): value is EvidenceSubject {
   return (EVIDENCE_SUBJECTS as readonly string[]).includes(value);
 }

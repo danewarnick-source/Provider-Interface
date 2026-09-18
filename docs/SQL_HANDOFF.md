@@ -1,5 +1,35 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
+## ACTION — Evidence send_message (2026-09-18)
+
+**Do not run until Dane approves.** Additive only — adds
+`evidence_items.send_message` so admin can attach a note when sending
+Evidence to an employee. Does **not** write `organizations.feature_config`.
+
+The app is graceful if this column is missing: Send still marks the row
+sent and skips the message with a friendly note.
+
+**Prerequisite:** Phase 1 `evidence_items` table already exists (or apply
+that SQL first).
+
+**To apply:** paste the full contents of
+`supabase/migrations/20260918053000_evidence_send_message.sql`
+into Lovable’s SQL editor (clear the editor first) and run it.
+
+**Confirm (paste this next, after clearing the editor):**
+
+```sql
+SELECT string_agg(column_name, ' | ' ORDER BY column_name) AS send_message_ok
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'evidence_items'
+  AND column_name = 'send_message';
+```
+
+You want `send_message`.
+
+---
+
 ## ACTION — Evidence Phase 1 tables (2026-09-17)
 
 **Do not run until Dane approves the PR.** Additive only — never drop

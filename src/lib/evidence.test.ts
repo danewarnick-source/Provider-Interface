@@ -18,6 +18,7 @@ import {
 } from "./evidence/catalog.ts";
 import {
   evidenceSearchFor,
+  leaveEvidenceWizard,
   parseEvidenceSearch,
   resolveEvidenceStep,
   resolveEvidenceTab,
@@ -60,6 +61,7 @@ function item(partial: Partial<EvidenceItemRow>): EvidenceItemRow {
     suggested: true,
     sent_to_staff: false,
     visible_to_staff_id: null,
+    send_message: null,
     dual_link_key: null,
     dual_link_peer_id: null,
     expires_on: null,
@@ -507,6 +509,10 @@ describe("Evidence nav + product lock", () => {
       tab: "company",
       step: "quiz",
     });
+    assert.deepEqual(leaveEvidenceWizard("company"), { tab: "company" });
+    assert.deepEqual(leaveEvidenceWizard("staff"), { tab: "staff" });
+    assert.equal("person" in leaveEvidenceWizard("client"), false);
+    assert.equal("step" in leaveEvidenceWizard("client"), false);
   });
 
   it("renames admin Obligations/Compliance nav to Evidence and keeps legacy file routes", () => {
@@ -543,6 +549,12 @@ describe("Evidence nav + product lock", () => {
       "utf8",
     );
     assert.match(staffPhone, /createFileRoute\("\/dashboard\/my-evidence"\)/);
+    const staffList = readFileSync(
+      new URL("./../components/evidence/staff-evidence-list.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(staffList, /send_message/);
+    assert.match(staffList, /Message from your agency/);
 
     const workspace = readFileSync(
       new URL("./../components/evidence/evidence-workspace.tsx", import.meta.url),
@@ -560,6 +572,11 @@ describe("Evidence nav + product lock", () => {
     assert.match(workspace, />Employees</);
     assert.doesNotMatch(workspace, />Staff</);
     assert.doesNotMatch(workspace, /Company file is empty/);
+    assert.doesNotMatch(workspace, /No rows yet\. Use Add to apply a pack/);
+    assert.doesNotMatch(workspace, /Send to staff/);
+    assert.match(workspace, /Send to employee/);
+    assert.match(workspace, /leaveEvidenceWizard/);
+    assert.match(workspace, /person: null/);
     assert.doesNotMatch(workspace, /\.from\(["']clients["']\)/);
     assert.doesNotMatch(workspace, /SubjectAssignPicker|PackSettingsPanel|NewRequirementPanel/);
 
@@ -592,6 +609,7 @@ describe("Evidence nav + product lock", () => {
     assert.match(quiz, /evidence-attest-first/);
     assert.match(quiz, /evidence-attest-last/);
     assert.match(quiz, /isAttestFullName/);
+    assert.match(quiz, /Escape/);
     assert.doesNotMatch(quiz, /Keep suggested|Uncheck anyway/);
     assert.doesNotMatch(quiz, /A checkbox alone is not enough/);
     assert.doesNotMatch(quiz, /Employee suggestions \(personnel\)/);
@@ -629,7 +647,18 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(fn, /\.select\(["']feature_config["']\)|feature_config:/);
     assert.match(fn, /EVIDENCE_STORAGE_UNAVAILABLE/);
     assert.doesNotMatch(fn, /readFeatureStore|writeFeatureStore|evidence_v1/);
+    assert.match(fn, /send_message/);
+    assert.match(fn, /hasSendMessage|sendMessageColumnMissing/);
     assert.match(EVIDENCE_STORAGE_UNAVAILABLE, /isn’t set up on this database yet/);
+    const sendSql = fileURLToPath(
+      new URL(
+        "../../supabase/migrations/20260918053000_evidence_send_message.sql",
+        import.meta.url,
+      ),
+    );
+    assert.equal(existsSync(sendSql), true, sendSql);
+    assert.match(readFileSync(sendSql, "utf8"), /ADD COLUMN IF NOT EXISTS send_message/);
+    assert.doesNotMatch(readFileSync(sendSql, "utf8"), /\.from\(["']organizations["']\)/);
     assert.match(fn, /peopleError/);
     assert.match(fn, /loadEvidenceClientPeople/);
     assert.match(EVIDENCE_PUSH_BODY, /evidence item/);

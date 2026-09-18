@@ -162,6 +162,8 @@ export type EvidenceItemRow = {
   dual_link_key: DualLinkKind | null;
   dual_link_peer_id: string | null;
   expires_on: string | null;
+  /** Admin note attached when sending to an employee. Optional; column may be missing live. */
+  send_message: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -221,6 +223,9 @@ export const EVIDENCE_UNCHECK_TITLE = "Are you sure?";
 export const EVIDENCE_UNCHECK_WARNING = "This was found to be a requirement in the SOW.";
 
 export const EVIDENCE_STORAGE_UNAVAILABLE = "Evidence storage isn’t set up on this database yet.";
+
+export const EVIDENCE_SEND_MESSAGE_UNAVAILABLE =
+  "Sent to the employee. The message could not be saved on this database yet.";
 
 export const EVIDENCE_PUSH_TITLE = "New evidence item";
 export const EVIDENCE_PUSH_BODY =

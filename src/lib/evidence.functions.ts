@@ -21,6 +21,7 @@ import {
   EVIDENCE_PUSH_BODY,
   EVIDENCE_PUSH_LINK,
   EVIDENCE_PUSH_TITLE,
+  EVIDENCE_SEND_MESSAGE_UNAVAILABLE,
   EVIDENCE_STORAGE_UNAVAILABLE,
   type EvidenceCellStatus,
   type EvidenceFileRow,
@@ -56,6 +57,26 @@ function tableMissing(message: string | undefined): boolean {
   );
 }
 
+function sendMessageColumnMissing(message: string | undefined): boolean {
+  return (
+    /send_message/i.test(message ?? "") && /column|schema cache|does not exist/i.test(message ?? "")
+  );
+}
+
+const ITEM_SELECT_WITH_MESSAGE =
+  "id, organization_id, subject_type, subject_id, requirement_key, title, evidence_type, attestation_text, cadence, sow_cite, suggested, sent_to_staff, visible_to_staff_id, dual_link_key, dual_link_peer_id, expires_on, send_message, created_at, updated_at";
+
+const ITEM_SELECT_BASE =
+  "id, organization_id, subject_type, subject_id, requirement_key, title, evidence_type, attestation_text, cadence, sow_cite, suggested, sent_to_staff, visible_to_staff_id, dual_link_key, dual_link_peer_id, expires_on, created_at, updated_at";
+
+function normalizeItem(row: EvidenceItemRow | Record<string, unknown>): EvidenceItemRow {
+  const raw = row as EvidenceItemRow & { send_message?: unknown };
+  return {
+    ...(raw as EvidenceItemRow),
+    send_message: typeof raw.send_message === "string" ? raw.send_message : null,
+  };
+}
+
 function mapEvidenceDbError(message: string | undefined): string {
   const text = message ?? "";
   if (/feature_config/i.test(text) || tableMissing(text)) {
@@ -86,16 +107,35 @@ function nowIso(): string {
 async function loadAll(
   sb: AnySupabase,
   organizationId: string,
-): Promise<{ store: StoreV1; viaTables: boolean }> {
-  const { data: items, error: itemErr } = await sb
+): Promise<{ store: StoreV1; viaTables: boolean; hasSendMessage: boolean }> {
+  let hasSendMessage = true;
+  let items: EvidenceItemRow[] | null = null;
+  const first = await sb
     .from("evidence_items")
-    .select(
-      "id, organization_id, subject_type, subject_id, requirement_key, title, evidence_type, attestation_text, cadence, sow_cite, suggested, sent_to_staff, visible_to_staff_id, dual_link_key, dual_link_peer_id, expires_on, created_at, updated_at",
-    )
+    .select(ITEM_SELECT_WITH_MESSAGE)
     .eq("organization_id", organizationId);
-  if (itemErr) {
-    if (tableMissing(itemErr.message)) return { store: emptyStore(), viaTables: false };
-    throw new Error(mapEvidenceDbError(itemErr.message));
+  if (first.error) {
+    if (tableMissing(first.error.message) && !sendMessageColumnMissing(first.error.message)) {
+      return { store: emptyStore(), viaTables: false, hasSendMessage: false };
+    }
+    if (sendMessageColumnMissing(first.error.message)) {
+      hasSendMessage = false;
+      const second = await sb
+        .from("evidence_items")
+        .select(ITEM_SELECT_BASE)
+        .eq("organization_id", organizationId);
+      if (second.error) {
+        if (tableMissing(second.error.message)) {
+          return { store: emptyStore(), viaTables: false, hasSendMessage: false };
+        }
+        throw new Error(mapEvidenceDbError(second.error.message));
+      }
+      items = ((second.data ?? []) as EvidenceItemRow[]).map(normalizeItem);
+    } else {
+      throw new Error(mapEvidenceDbError(first.error.message));
+    }
+  } else {
+    items = ((first.data ?? []) as EvidenceItemRow[]).map(normalizeItem);
   }
   const { data: files, error: fileErr } = await sb
     .from("evidence_files")
@@ -104,7 +144,9 @@ async function loadAll(
     )
     .eq("organization_id", organizationId);
   if (fileErr) {
-    if (tableMissing(fileErr.message)) return { store: emptyStore(), viaTables: false };
+    if (tableMissing(fileErr.message)) {
+      return { store: emptyStore(), viaTables: false, hasSendMessage: false };
+    }
     throw new Error(mapEvidenceDbError(fileErr.message));
   }
   const { data: templates, error: tplErr } = await sb
@@ -116,8 +158,9 @@ async function loadAll(
     if (tableMissing(tplErr.message)) {
       return {
         viaTables: true,
+        hasSendMessage,
         store: {
-          items: (items ?? []) as EvidenceItemRow[],
+          items: items ?? [],
           files: (files ?? []) as EvidenceFileRow[],
           templates: [],
         },
@@ -127,8 +170,9 @@ async function loadAll(
   }
   return {
     viaTables: true,
+    hasSendMessage,
     store: {
-      items: (items ?? []) as EvidenceItemRow[],
+      items: items ?? [],
       files: (files ?? []) as EvidenceFileRow[],
       templates: (templates ?? []) as EvidenceTemplateRow[],
     },
@@ -182,12 +226,10 @@ async function patchItem(
     .update({ ...patch, updated_at: nowIso() })
     .eq("organization_id", organizationId)
     .eq("id", itemId)
-    .select(
-      "id, organization_id, subject_type, subject_id, requirement_key, title, evidence_type, attestation_text, cadence, sow_cite, suggested, sent_to_staff, visible_to_staff_id, dual_link_key, dual_link_peer_id, expires_on, created_at, updated_at",
-    )
+    .select(ITEM_SELECT_BASE)
     .maybeSingle();
   if (error) throw new Error(mapEvidenceDbError(error.message));
-  return (data as EvidenceItemRow | null) ?? null;
+  return data ? normalizeItem(data as EvidenceItemRow) : null;
 }
 
 async function deleteItem(
@@ -331,6 +373,7 @@ function buildItemFromKey(args: {
     suggested: args.suggested,
     sent_to_staff: false,
     visible_to_staff_id: null,
+    send_message: null,
     dual_link_key: def?.dualLink ?? null,
     dual_link_peer_id: null,
     expires_on: null,
@@ -720,15 +763,19 @@ export const sendEvidenceToStaff = createServerFn({ method: "POST" })
         organizationId: z.string().uuid(),
         itemIds: z.array(z.string().uuid()).min(1),
         staffId: z.string().uuid().optional(),
+        message: z.string().max(1000).optional(),
       })
       .parse(i),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    if (!supabase || !userId) return { ok: false as const };
+    if (!supabase || !userId) return { ok: false as const, messageStored: false as const };
     await requireOrgMembership(supabase, userId, data.organizationId, "manager");
     const sb = supabase as AnySupabase;
-    const { store, viaTables } = await loadAll(sb, data.organizationId);
+    const { store, viaTables, hasSendMessage } = await loadAll(sb, data.organizationId);
+    const note = (data.message ?? "").trim();
+    const wantMessage = note.length > 0;
+    let messageStored = false;
     const notified = new Set<string>();
     for (const itemId of data.itemIds) {
       const found = store.items.find((i) => i.id === itemId);
@@ -737,16 +784,39 @@ export const sendEvidenceToStaff = createServerFn({ method: "POST" })
         data.staffId ??
         (found.subject_type === "staff" ? found.subject_id : found.visible_to_staff_id);
       if (!staffId) continue;
-      await patchItem(sb, viaTables, data.organizationId, itemId, {
+      const patch: Partial<EvidenceItemRow> = {
         sent_to_staff: true,
         visible_to_staff_id: staffId,
-      });
+      };
+      if (wantMessage && hasSendMessage) {
+        patch.send_message = note;
+        messageStored = true;
+      }
+      try {
+        await patchItem(sb, viaTables, data.organizationId, itemId, patch);
+      } catch (err) {
+        const text = err instanceof Error ? err.message : "";
+        if (wantMessage && sendMessageColumnMissing(text)) {
+          await patchItem(sb, viaTables, data.organizationId, itemId, {
+            sent_to_staff: true,
+            visible_to_staff_id: staffId,
+          });
+          messageStored = false;
+        } else {
+          throw err;
+        }
+      }
       if (!notified.has(staffId)) {
         await notifyStaffNoPhi(sb, data.organizationId, staffId);
         notified.add(staffId);
       }
     }
-    return { ok: true as const };
+    return {
+      ok: true as const,
+      messageStored,
+      messageSkipped: wantMessage && !messageStored,
+      skipReason: wantMessage && !messageStored ? EVIDENCE_SEND_MESSAGE_UNAVAILABLE : null,
+    };
   });
 
 export const recordEvidenceUpload = createServerFn({ method: "POST" })
