@@ -243,10 +243,6 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
       servicesOffered: ["HHS"],
     });
     assert.equal(canSkipAgencySetup(incomplete), false);
-    const panel = read("../components/onboarding/nectar-onboarding-panel.tsx");
-    assert.match(panel, /canSkipAgencySetup/);
-    assert.match(panel, /disabled=\{!canSkip\}/);
-    assert.doesNotMatch(panel, /Skip — take me to my dashboard/);
   });
 
   it("blocks create UI and server create while incomplete", () => {
@@ -295,9 +291,11 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
     assert.doesNotMatch(setupPage, /factsQuery/);
   });
 
-  it("keeps Home available for incomplete-setup guidance", () => {
+  it("does not mount the agency-setup wizard on Home", () => {
     const home = read("../components/admin-home/admin-home-dashboard.tsx");
-    assert.match(home, /NectarOnboardingPanel/);
+    assert.doesNotMatch(home, /NectarOnboardingPanel/);
+    assert.doesNotMatch(home, /nectar-onboarding-panel/);
+    assert.doesNotMatch(home, /agency-setup-panel/);
     assert.doesNotMatch(home, /RequirePermission/);
   });
 });

@@ -157,7 +157,7 @@ describe("Admin Home Step 3 — welcome banner", () => {
     const welcome = read("../components/admin-home/admin-home-welcome.tsx");
     assert.match(index, /welcomeFlag=\{!!search\.welcome\}/);
     assert.match(dash, /<AdminHomeWelcome welcomeFlag=\{welcomeFlag\} \/>/);
-    assert.match(dash, /NectarOnboardingPanel/);
+    assert.doesNotMatch(dash, /NectarOnboardingPanel/);
     assert.match(dash, /<Suspense fallback=\{null\}>/);
     const greetingIdx = dash.indexOf("Good {greetingWord");
     const bannerIdx = dash.indexOf("<AdminHomeWelcome");
@@ -181,12 +181,12 @@ describe("Admin Home Step 3 — welcome banner", () => {
     assert.match(hook, /documentedShiftCount: \(timesheetsRes\.count \?\? 0\) \+ \(logsRes\.count \?\? 0\)/);
   });
 
-  it("drops localStorage welcome dismissal so nectar and Home share welcome_dismissed_at", () => {
-    const panel = read("../components/onboarding/nectar-onboarding-panel.tsx");
+  it("drops localStorage welcome dismissal so Home uses welcome_dismissed_at", () => {
+    const welcome = read("../components/admin-home/admin-home-welcome.tsx");
     const hook = read("../hooks/use-onboarding-progress.tsx");
     const fn = read("./admin-home-welcome.functions.ts");
-    assert.doesNotMatch(panel, /hive_onboarding_\$\{orgId\}_dismissed|lsKey\(orgId, "dismissed"\)/);
-    assert.match(panel, /dismissAdminWelcome/);
+    assert.doesNotMatch(welcome, /hive_onboarding_\$\{orgId\}_dismissed|lsKey\(orgId, "dismissed"\)/);
+    assert.match(welcome, /dismissAdminWelcome/);
     assert.doesNotMatch(hook, /localStorage\.|onboardingLSKey\(/);
     assert.match(fn, /requireSupabaseAuth/);
     assert.match(fn, /requireOrgMembership/);

@@ -164,7 +164,7 @@ Import-graph + grep. None of these are route files.
   `quick-actions-card.tsx`  
   `recent-activity-card.tsx`  
   `team-leaderboard-card.tsx`  
-- **Keep:** `onboarding-pipeline-card.tsx` — imported by `nectar-onboarding-panel.tsx`.
+- **Keep:** `onboarding-pipeline-card.tsx` — staff onboarding pipeline, not the deleted Home agency-setup wizard.
 
 **Old scheduler UI kit** (live scheduler does not import these):
 
