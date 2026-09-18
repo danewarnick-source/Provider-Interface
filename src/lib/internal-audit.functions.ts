@@ -269,8 +269,8 @@ export const runInternalAudit = createServerFn({ method: "POST" })
             subjectKind: "staff",
             subjectId: c.user_id,
             subjectName: name,
-            fixHref: "/dashboard/external-compliance",
-            fixLabel: "Open external compliance",
+            fixHref: "/dashboard/certifications",
+            fixLabel: "Open certifications",
             asOf: todayIso(),
           });
         } else if (days <= 30) {
@@ -283,7 +283,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
             subjectKind: "staff",
             subjectId: c.user_id,
             subjectName: name,
-            fixHref: "/dashboard/external-compliance",
+            fixHref: "/dashboard/certifications",
             fixLabel: "Renew",
             asOf: todayIso(),
           });
@@ -578,7 +578,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
             detail: `"${r.title}" is confirmed but isn't mapped to any code/role/client/provider scope.`,
             sourceCitation: r.source_citation ?? null,
             subjectKind: "provider",
-            fixHref: "/dashboard/authoritative-sources",
+            fixHref: "/dashboard/hub/knowledge",
             fixLabel: "Map requirement",
             asOf: todayIso(),
           });
@@ -593,7 +593,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
           title: `${unknownUnconfirmed.length} unconfirmed engine proposal(s)`,
           detail: "NECTAR proposed mappings that an admin hasn't reviewed.",
           subjectKind: "provider",
-          fixHref: "/dashboard/authoritative-sources",
+          fixHref: "/dashboard/hub/knowledge",
           fixLabel: "Review",
           asOf: todayIso(),
         });
@@ -632,7 +632,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
                 }.`,
           sourceCitation: r.source_citation ?? null,
           subjectKind: "provider",
-          fixHref: "/dashboard/authoritative-sources",
+          fixHref: "/dashboard/hub/knowledge",
           fixLabel: "Update tracking",
           asOf: todayIso(),
         });
@@ -660,7 +660,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
             subjectKind: "staff",
             subjectId: s.user_id,
             subjectName: name,
-            fixHref: "/dashboard/external-compliance",
+            fixHref: "/dashboard/external-certifications",
             fixLabel: "Upload",
             asOf: todayIso(),
           });

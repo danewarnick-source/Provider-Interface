@@ -92,6 +92,7 @@ describe("Compliance nav lock", () => {
     assert.doesNotMatch(cc, /id="obligations"/);
     const ext = readFileSync(new URL("../routes/dashboard.external-compliance.tsx", import.meta.url), "utf8");
     assert.match(ext, /to: "\/dashboard\/hub\/knowledge"/);
+    assert.doesNotMatch(ext, /tab: "external"/);
   });
 
   it("keeps Company policies under Agency file", () => {

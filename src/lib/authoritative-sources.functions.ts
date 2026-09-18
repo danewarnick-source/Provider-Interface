@@ -918,8 +918,8 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
         (doc.mime_type as string | null)?.toLowerCase().includes("pdf") ||
         ((doc.file_name as string | null) ?? "").toLowerCase().endsWith(".pdf");
       const reason = looksLikePdf
-        ? "Couldn't read enough text from this PDF — it may be a scanned image. Try uploading a text-based PDF (export from Word/Pages, or run OCR first). You can still add requirements by hand from the Requirements tab."
-        : "No readable text was extracted from this file. You can still add requirements by hand from the Requirements tab.";
+        ? "Couldn't read enough text from this PDF — it may be a scanned image. Try uploading a text-based PDF (export from Word/Pages, or run OCR first). The file is still stored in Knowledge."
+        : "No readable text was extracted from this file. The file is still stored in Knowledge.";
       // Auto-file a PI Executive NECTAR ticket: this is the clearest
       // detectable platform-level problem (parsing pipeline can't see text).
       await reportPlatformEvent({
@@ -1348,7 +1348,7 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
         inserted: 0,
         reason: "no_requirements" as const,
         message:
-          "NECTAR read the document but didn't find clear requirement language (\"shall…\", \"must…\", required documents, etc.). If this source does contain obligations, add them by hand from the Requirements tab.",
+          "Nectar read the document. If the file is a scan with little selectable text, try a text-based PDF so search can use more of it.",
       };
     }
 
@@ -1531,8 +1531,8 @@ export const startRequirementsDraft = createServerFn({ method: "POST" })
         totalChunks: 0,
         reason: "no_text" as const,
         message: looksLikePdf
-          ? "Couldn't read enough text from this PDF — it may be a scanned image. Try uploading a text-based PDF (export from Word/Pages, or run OCR first). You can still add requirements by hand from the Requirements tab."
-          : "No readable text was extracted from this file. You can still add requirements by hand from the Requirements tab.",
+          ? "Couldn't read enough text from this PDF — it may be a scanned image. Try uploading a text-based PDF (export from Word/Pages, or run OCR first). The file is still stored in Knowledge."
+          : "No readable text was extracted from this file. The file is still stored in Knowledge.",
       };
     }
 
@@ -2148,7 +2148,7 @@ export const finalizeRequirementsDraft = createServerFn({ method: "POST" })
         chunkFailures,
         reason: "no_requirements" as const,
         message:
-          "NECTAR read the document but didn't find clear requirement language. You can add them by hand from the Requirements tab.",
+          "Nectar read the document. If the file is a scan with little selectable text, try a text-based PDF so search can use more of it.",
       };
     }
 
