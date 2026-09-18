@@ -286,7 +286,7 @@ const ADMIN_NAV: NavItem[] = [
     feature: "pcsp",
   },
   { to: "/dashboard/daily-logs", label: "Daily Logs", icon: ClipboardCheck },
-  { to: "/dashboard/compliance", label: "Compliance", icon: FolderCheck, exact: true },
+  { to: "/dashboard/evidence", label: "Evidence", icon: FolderCheck, exact: true },
   { to: "/dashboard/summaries", label: "Summaries", icon: FileText },
   {
     to: "/dashboard/hub/finances",
@@ -1096,9 +1096,11 @@ function SidebarBody({
   signOut,
   onNavigate,
   inboxUnread,
-  complianceActionCount,
-  complianceQueueLoading,
+  complianceActionCount: _complianceActionCount,
+  complianceQueueLoading: _complianceQueueLoading,
 }: SidebarBodyProps) {
+  void _complianceActionCount;
+  void _complianceQueueLoading;
   const [upgradeFeatureKey, setUpgradeFeatureKey] = useState<string | null>(null);
   // Domain sections in the Executive Command Center sidebar are collapsed by
   // default. The current route's domain auto-expands when the active domain
@@ -1370,16 +1372,6 @@ function SidebarBody({
                   className="h-4 w-4"
                 />
                 <span className="flex-1">{item.label}</span>
-                {item.to === "/dashboard/compliance" &&
-                  !complianceQueueLoading &&
-                  complianceActionCount > 0 && (
-                    <span
-                      aria-label={`${complianceActionCount} action required`}
-                      className="inline-flex min-w-[20px] items-center justify-center rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold leading-none text-destructive-foreground"
-                    >
-                      {complianceActionCount > 99 ? "99+" : complianceActionCount}
-                    </span>
-                  )}
                 {item.to === "/dashboard/inbox" && inboxUnread > 0 && (
                   <span
                     aria-label={`${inboxUnread} unread`}

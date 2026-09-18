@@ -173,7 +173,7 @@ describe("Client file surface lock", () => {
     assert.ok(!Object.values(CLIENT_FILE_CARD_TITLE).some((t) => /rights/i.test(t)));
 
     const nav = readFileSync(new URL("../routes/dashboard.tsx", import.meta.url), "utf8");
-    assert.match(nav, /to: "\/dashboard\/compliance", label: "Compliance"/);
+    assert.match(nav, /to: "\/dashboard\/evidence", label: "Evidence"/);
     assert.doesNotMatch(nav, /to: "\/dashboard\/client-file", label: "Client file"/);
 
     const route = readFileSync(new URL("../routes/dashboard.client-file.tsx", import.meta.url), "utf8");

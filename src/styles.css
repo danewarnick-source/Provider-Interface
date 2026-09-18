@@ -413,6 +413,10 @@
   [data-dashboard-scroller] {
     padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
   }
+  /* Hire questionnaire is long; extra pad so Apply packs clears Safari chrome. */
+  [data-dashboard-scroller]:has([data-evidence-quiz]) {
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /*

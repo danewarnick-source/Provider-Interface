@@ -1,5 +1,106 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
+## ACTION — Evidence due-date model (2026-09-18)
+
+**Do not run until Dane approves.** Additive only — adds
+`first_due_rule`, `first_due_on`, `document_date`, `next_due_on`, and
+`renew_years` on `evidence_items`. Does **not** drop columns.
+
+The app is graceful if these columns are missing: Apply / upload /
+attest still work and skip the new due fields.
+
+**Prerequisite:** Phase 1 `evidence_items` table already exists (or apply
+that SQL first).
+
+**To apply:** paste the full contents of
+`supabase/migrations/20260918070000_evidence_due_model.sql`
+into Lovable’s SQL editor (clear the editor first) and run it.
+
+**Confirm (paste this next, after clearing the editor):**
+
+```sql
+SELECT string_agg(column_name, ' | ' ORDER BY column_name) AS due_cols_ok
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'evidence_items'
+  AND column_name IN (
+    'document_date',
+    'first_due_on',
+    'first_due_rule',
+    'next_due_on',
+    'renew_years'
+  );
+```
+
+You want `document_date | first_due_on | first_due_rule | next_due_on | renew_years`.
+
+---
+
+## ACTION — Evidence send_message (2026-09-18)
+
+**Do not run until Dane approves.** Additive only — adds
+`evidence_items.send_message` so admin can attach a note when sending
+Evidence to an employee. Does **not** write `organizations.feature_config`.
+
+The app is graceful if this column is missing: Send still marks the row
+sent and skips the message with a friendly note.
+
+**Prerequisite:** Phase 1 `evidence_items` table already exists (or apply
+that SQL first).
+
+**To apply:** paste the full contents of
+`supabase/migrations/20260918053000_evidence_send_message.sql`
+into Lovable’s SQL editor (clear the editor first) and run it.
+
+**Confirm (paste this next, after clearing the editor):**
+
+```sql
+SELECT string_agg(column_name, ' | ' ORDER BY column_name) AS send_message_ok
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'evidence_items'
+  AND column_name = 'send_message';
+```
+
+You want `send_message`.
+
+---
+
+## ACTION — Evidence Phase 1 tables (2026-09-17)
+
+**Do not run until Dane approves the PR.** Additive only — never drop
+existing tables or columns. Does **not** seed W-9 / I-9. Does **not**
+write `requirement_defs` or revive the encoded SOW applicability engine.
+
+**What this is for:** Admin Evidence (people × requirements). Curated
+packs live in app code. Apply / upload / attest persist **only** on
+`evidence_items`, `evidence_files`, and `evidence_templates`. The app
+does **not** write `organizations.feature_config`. Until Dane pastes
+this SQL, Apply shows a friendly message that storage is not set up
+yet — it will not update a missing `feature_config` column.
+
+**To apply:** paste the full contents of
+`supabase/migrations/20260917220000_evidence_phase1.sql`
+into Lovable’s SQL editor (clear the editor first) and run it.
+
+**What you'll see:** `Success. No rows returned` (or already-exists notices).
+
+**Confirm (paste this next, after clearing the editor):**
+
+```sql
+SELECT string_agg(table_name, ' | ' ORDER BY table_name) AS tables_ok
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN ('evidence_items', 'evidence_files', 'evidence_templates');
+
+SELECT string_agg(id, ' | ' ORDER BY id) AS buckets_ok
+FROM storage.buckets
+WHERE id = 'evidence-files';
+```
+
+You want `evidence_files | evidence_items | evidence_templates` and
+`evidence-files`.
+
 ## ACTION — Drop Chores / Chore Chart tables (2026-09-18) — hold for Dane
 
 **Do not Soft-apply / execute against Hive-Platform production from this PR.**

@@ -362,6 +362,20 @@ export function AddEmployeeWizard({
               ))}
             </div>
             <DialogFooter className="gap-2 sm:justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  const id = created.length === 1 ? created[0]?.userId : "";
+                  onOpenChange(false);
+                  resetAll();
+                  window.location.href = id
+                    ? `/dashboard/evidence?tab=staff&wizard=1&person=${id}`
+                    : "/dashboard/evidence?tab=staff&wizard=1";
+                }}
+              >
+                Set up Evidence pack
+              </Button>
               <Button type="button" variant="ghost" onClick={() => finish(false)}>
                 Don&apos;t invite yet
               </Button>

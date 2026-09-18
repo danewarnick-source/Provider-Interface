@@ -309,7 +309,11 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
       return { id: data!.id as string, mode: input.intake_mode, name: `${input.first_name} ${input.last_name}`.trim() };
     },
     onSuccess: ({ id, mode, name }) => {
-      toast.success(mode === "intake" ? "Client created — starting intake." : "Draft client saved. Finish required fields when you're ready.");
+      toast.success(
+        mode === "intake"
+          ? "Client created — starting intake. You can set Evidence packs from Evidence after intake."
+          : "Draft client saved. Open Evidence to run the add-client questionnaire.",
+      );
       qc.invalidateQueries({ queryKey: ["clients"] });
       setAddOpen(false);
       if (mode === "intake") {

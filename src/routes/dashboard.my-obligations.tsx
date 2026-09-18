@@ -982,6 +982,18 @@ function MyObligationsPage() {
       </div>
 
       <AttentionStrip />
+      <div className="rounded-2xl border border-border bg-card px-4 py-3">
+        <p className="text-sm font-medium">Evidence sent to you</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Admin-owned packs stay off this list until someone clicks Send to staff.
+        </p>
+        <Link
+          to="/dashboard/my-evidence"
+          className="mt-2 inline-block text-sm underline underline-offset-2"
+        >
+          Open Evidence
+        </Link>
+      </div>
 
       <PacketNextActionCard
         nextAction={packetQ.data?.packet?.nextAction}
