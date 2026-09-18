@@ -3,7 +3,7 @@ import type { EvidenceCellStatus, EvidenceFileRow, EvidenceItemRow } from "./typ
 
 export type { EvidenceCellStatus };
 
-/** Presentation chips for the Admin Evidence matrix. Derived from existing due/file fields. */
+/** Presentation chips for an Evidence item. Derived from existing due/file fields. */
 export const EVIDENCE_MATRIX_CHIP_KINDS = [
   "complete",
   "due",
@@ -84,7 +84,7 @@ export function dueChipLabel(days: number): string {
 }
 
 /**
- * Matrix chip for one person × requirement cell.
+ * Chip for one assigned evidence item (or N/A when the person has no row).
  * Does not invent new due rules: N/A = not on this pack; Add = assigned, empty, no date;
  * Review = sent to the employee and still empty; Due in Nd = upcoming first/attention date
  * before anything is on file; Complete / Missing follow cellStatus().

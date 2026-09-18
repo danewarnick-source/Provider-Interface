@@ -27,9 +27,11 @@ import {
   companyEvidencePerson,
   isAttestFullName,
   isListedEvidenceClient,
+  itemsForEvidenceTab,
   loadEvidenceClientPeople,
   mapClientRowsToPeople,
   mapEmployeeRowsToPeople,
+  peopleForEvidenceTab,
 } from "./evidence/people.ts";
 import {
   computeFirstDueOn,
@@ -38,7 +40,7 @@ import {
   LOCKED_DUE_DEFAULTS,
   needsHireDate,
 } from "./evidence/due.ts";
-import { columnDueHint, matrixColumns, personRowSubtitle } from "./evidence/matrix.ts";
+import { personRowSubtitle, rowSummaryChips } from "./evidence/matrix.ts";
 import { cellStatus, dueChipLabel, matrixChip, staffInitials } from "./evidence/status.ts";
 import {
   EVIDENCE_LIABILITY_TEXT,
@@ -571,6 +573,55 @@ describe("Evidence people roster", () => {
     assert.equal(isAttestFullName("Dane", "  "), false);
     assert.equal(isAttestFullName("", "Warnick"), false);
   });
+
+  it("uses the same people helper for employees, clients, and company", () => {
+    const employees = [
+      { id: "e-1", full_name: "Ann Lee", initials: "AL", subtitle: "DSP" },
+    ];
+    const clients = [
+      { id: "c-1", full_name: "Bea Stone", initials: "BS", subtitle: "HHS" },
+    ];
+    const company = companyEvidencePerson("org-1", "True North Supports LLC");
+    assert.deepEqual(
+      peopleForEvidenceTab({ tab: "staff", employees, clients, company }).map((p) => p.id),
+      ["e-1"],
+    );
+    assert.deepEqual(
+      peopleForEvidenceTab({ tab: "client", employees, clients, company }).map((p) => p.id),
+      ["c-1"],
+    );
+    assert.deepEqual(
+      peopleForEvidenceTab({ tab: "company", employees, clients, company }).map((p) => p.id),
+      ["org-1"],
+    );
+    const mixed = [
+      item({ subject_type: "staff", subject_id: "e-1", requirement_key: "cpr_first_aid" }),
+      item({
+        id: "item-c",
+        subject_type: "client",
+        subject_id: "c-1",
+        requirement_key: "client_pcsp",
+      }),
+      item({
+        id: "item-co",
+        subject_type: "company",
+        subject_id: "org-1",
+        requirement_key: "ol_license",
+      }),
+    ];
+    assert.deepEqual(
+      itemsForEvidenceTab(mixed, "staff", employees).map((r) => r.id),
+      ["item-1"],
+    );
+    assert.deepEqual(
+      itemsForEvidenceTab(mixed, "client", clients).map((r) => r.id),
+      ["item-c"],
+    );
+    assert.deepEqual(
+      itemsForEvidenceTab(mixed, "company", [company]).map((r) => r.id),
+      ["item-co"],
+    );
+  });
 });
 
 describe("Evidence cell status", () => {
@@ -658,24 +709,26 @@ describe("Evidence cell status", () => {
     );
   });
 
-  it("builds columns from assigned keys and pack subtitles without fractions", () => {
-    const cols = matrixColumns([
-      item({ requirement_key: "cpr_first_aid", title: "CPR / First Aid" }),
-      item({ id: "item-2", requirement_key: "thirty_day_orientation", title: "30-day orientation" }),
-      item({ id: "item-3", requirement_key: "custom_policy", title: "Policy acknowledgment" }),
-    ]);
-    assert.deepEqual(
-      cols.map((c) => c.key),
-      ["cpr_first_aid", "thirty_day_orientation", "custom_policy"],
-    );
-    assert.equal(columnDueHint({ firstDueRule: "hire_90", renewYears: 2 }), "90-day · 2 yr");
-    assert.equal(columnDueHint({ firstDueRule: "before_first_shift", renewYears: null }), "On hire");
+  it("summarizes a person's own chips without shared columns or fractions", () => {
     const subtitle = personRowSubtitle({
       person: { id: "s1", full_name: "Ann Lee", initials: "AL", subtitle: "DSP" },
       requirementKeys: ["cpr_first_aid", "thirty_day_orientation"],
     });
     assert.match(subtitle, /DSP/);
     assert.doesNotMatch(subtitle, /\d+\s*\/\s*\d+/);
+    assert.deepEqual(
+      rowSummaryChips([
+        { kind: "missing", label: "Missing", itemId: "a" },
+        { kind: "missing", label: "Missing", itemId: "b" },
+        { kind: "due", label: "Due in 16d", itemId: "c" },
+      ]).map((c) => c.label),
+      ["2 missing", "Due in 16d"],
+    );
+    assert.deepEqual(
+      rowSummaryChips([{ kind: "complete", label: "Complete", itemId: "a" }]).map((c) => c.label),
+      ["Complete"],
+    );
+    assert.deepEqual(rowSummaryChips([]), []);
   });
 
   it("requires attestation timestamp for attest rows", () => {
@@ -776,15 +829,15 @@ describe("Evidence nav + product lock", () => {
       new URL("./../components/evidence/evidence-subject-cards.tsx", import.meta.url),
       "utf8",
     );
-    const matrix = readFileSync(
-      new URL("./../components/evidence/evidence-matrix.tsx", import.meta.url),
+    const roster = readFileSync(
+      new URL("./../components/evidence/evidence-roster.tsx", import.meta.url),
       "utf8",
     );
     const chips = readFileSync(
       new URL("./../components/evidence/evidence-status-chip.tsx", import.meta.url),
       "utf8",
     );
-    const evidenceUi = `${workspace}\n${cards}\n${matrix}\n${chips}`;
+    const evidenceUi = `${workspace}\n${cards}\n${roster}\n${chips}`;
     assert.doesNotMatch(workspace, /1 · Grid|EVIDENCE_DISCLAIMER|amber-50/);
     assert.doesNotMatch(
       workspace,
@@ -794,12 +847,29 @@ describe("Evidence nav + product lock", () => {
     assert.match(workspace, /fetchEvidenceClientPeople/);
     assert.match(workspace, /fetchEvidenceEmployees/);
     assert.match(workspace, /companyEvidencePerson/);
+    assert.match(workspace, /peopleForEvidenceTab/);
+    assert.match(workspace, /itemsForEvidenceTab/);
     assert.match(cards, /title: "Employees"/);
     assert.match(cards, /title: "Clients"/);
     assert.match(cards, /title: "Company"/);
     assert.match(cards, /\{card\.title\}/);
     assert.match(workspace, /Records & renewals/);
-    assert.match(matrix, /Select a cell to add or review evidence/);
+    assert.match(workspace, /<EvidenceRoster/);
+    assert.equal(workspace.split("<EvidenceRoster").length - 1, 1);
+    assert.match(roster, /Open a row to add or review evidence/);
+    assert.match(roster, /aria-expanded/);
+    assert.match(roster, /PersonAccordion|dueSubtitleFromItem/);
+    assert.doesNotMatch(roster, /<table|matrixColumns|shared column/i);
+    assert.doesNotMatch(roster, /tab === |"staff"|"client"|"company"/);
+    assert.doesNotMatch(workspace, /EvidenceMatrix|matrixColumns|evidence-matrix/);
+    assert.equal(
+      existsSync(
+        fileURLToPath(
+          new URL("./../components/evidence/evidence-matrix.tsx", import.meta.url),
+        ),
+      ),
+      false,
+    );
     assert.match(chips, /EvidenceStatusChip/);
     assert.match(chips, /complete|missing|review|"na"/);
     assert.doesNotMatch(evidenceUi, />Staff</);

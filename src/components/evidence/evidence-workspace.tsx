@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
 import { EvidenceDueFields } from "@/components/evidence/evidence-due-fields.tsx";
-import { EvidenceMatrix } from "@/components/evidence/evidence-matrix.tsx";
+import { EvidenceRoster } from "@/components/evidence/evidence-roster.tsx";
 import { EvidenceStatusChip } from "@/components/evidence/evidence-status-chip.tsx";
 import { EvidenceSubjectCards } from "@/components/evidence/evidence-subject-cards.tsx";
 import { parseServiceCodeFlags } from "@/lib/evidence/catalog.ts";
@@ -34,7 +34,11 @@ import {
 import { leaveEvidenceWizard, type EvidenceStep } from "@/lib/evidence/nav.ts";
 import { fetchEvidenceClientPeople } from "@/lib/evidence/fetch-clients.ts";
 import { fetchEvidenceEmployees } from "@/lib/evidence/fetch-employees.ts";
-import { companyEvidencePerson } from "@/lib/evidence/people.ts";
+import {
+  companyEvidencePerson,
+  itemsForEvidenceTab,
+  peopleForEvidenceTab,
+} from "@/lib/evidence/people.ts";
 import { formatExpiresOn, latestFileForItem, matrixChip } from "@/lib/evidence/status.ts";
 import {
   EVIDENCE_SEND_MESSAGE_UNAVAILABLE,
@@ -267,12 +271,13 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
   const board = boardQ.data;
   const clientPeople = clientsQ.data ?? [];
   const employeePeople = employeesQ.data ?? [];
-  const people =
-    tab === "company" && companyPerson
-      ? [companyPerson]
-      : tab === "client"
-        ? clientPeople
-        : employeePeople;
+  const people = peopleForEvidenceTab({
+    tab,
+    employees: employeePeople,
+    clients: clientPeople,
+    company: companyPerson,
+  });
+  const rosterItems = itemsForEvidenceTab(board?.items ?? [], tab, people);
   const person =
     people.find((p) => p.id === personId) ??
     (companyPerson?.id === personId ? companyPerson : null) ??
@@ -374,13 +379,21 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
         />
       ) : (
         <RosterPanel
-          board={board}
+          items={rosterItems}
+          files={board?.files ?? []}
           people={people}
           peopleError={peopleError}
           tab={tab}
-          loading={peopleLoading}
+          loading={peopleLoading || boardQ.isLoading}
           selectedId={step === "grid" ? personId : undefined}
-          onOpenPerson={(id) => onSearchChange({ tab, step: "grid", person: id, item: null })}
+          onTogglePerson={(id) =>
+            onSearchChange({
+              tab,
+              step: "grid",
+              person: personId === id ? null : id,
+              item: null,
+            })
+          }
           onAddForPerson={(id) => openPackFor(tab, id)}
           onReview={(id, item) => onSearchChange({ tab, step: "review", person: id, item })}
           onSend={(draft) => setSendDraft(draft)}
@@ -438,24 +451,26 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
 }
 
 function RosterPanel({
-  board,
+  items,
+  files,
   people: roster,
   peopleError,
   tab,
   loading,
   selectedId,
-  onOpenPerson,
+  onTogglePerson,
   onAddForPerson,
   onReview,
   onSend,
 }: {
-  board: EvidenceBoard | undefined;
+  items: EvidenceBoard["items"];
+  files: EvidenceBoard["files"];
   people: EvidencePerson[];
   peopleError: string | null;
   tab: EvidenceSubject;
   loading: boolean;
   selectedId?: string;
-  onOpenPerson: (id: string) => void;
+  onTogglePerson: (id: string) => void;
   onAddForPerson: (id: string) => void;
   onReview: (personId: string, itemId: string) => void;
   onSend: (draft: SendEvidenceDraft) => void;
@@ -473,10 +488,10 @@ function RosterPanel({
     tab === "client" ? "Search clients…" : tab === "company" ? "Search company…" : "Search employees…";
 
   return (
-    <EvidenceMatrix
+    <EvidenceRoster
       people={people}
-      items={board?.items ?? []}
-      files={board?.files ?? []}
+      items={items}
+      files={files}
       today={denverYmd()}
       search={q}
       onSearchChange={setQ}
@@ -486,10 +501,10 @@ function RosterPanel({
       emptyCopy={tab === "company" ? "Company file is ready when packs are added." : emptyCopy}
       loading={loading}
       selectedId={selectedId}
-      onSelectPerson={onOpenPerson}
+      onTogglePerson={onTogglePerson}
       onAddForPerson={onAddForPerson}
       onReview={onReview}
-      onSendAll={(person, itemIds, titles) =>
+      onSend={(person, itemIds, titles) =>
         onSend({
           itemIds,
           titles,

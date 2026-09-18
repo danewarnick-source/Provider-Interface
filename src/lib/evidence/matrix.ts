@@ -1,85 +1,11 @@
 /**
- * Admin Evidence matrix helpers — columns from assigned requirement keys,
- * row labels from existing pack chips. No invented catalog.
+ * Admin Evidence roster helpers — pack labels and per-person summaries.
+ * No shared requirement columns: people keep their own item lists.
  */
 
-import { chipsForRequirementKey, EVIDENCE_REQUIREMENTS, requirementByKey } from "./catalog.ts";
-import type { EvidenceDueDefault } from "./due.ts";
-import type { EvidenceItemRow, EvidencePerson, FirstDueRule, RenewYears } from "./types.ts";
-
-export type EvidenceMatrixColumn = {
-  key: string;
-  title: string;
-  subtitle: string;
-};
-
-const CATALOG_KEY_ORDER = EVIDENCE_REQUIREMENTS.map((row) => row.key);
-
-export function columnDueHint(args: {
-  firstDueRule?: FirstDueRule | null;
-  renewYears?: RenewYears;
-}): string {
-  const rule = args.firstDueRule;
-  const first =
-    rule === "hire_30"
-      ? "30-day"
-      : rule === "hire_90"
-        ? "90-day"
-        : rule === "hire_180"
-          ? "180-day"
-          : rule === "before_first_shift"
-            ? "On hire"
-            : "Set a date";
-  if (args.renewYears === 2) return `${first} · 2 yr`;
-  if (args.renewYears === 1) return `${first} · 1 yr`;
-  return first;
-}
-
-function dueFromItem(item: EvidenceItemRow): EvidenceDueDefault {
-  return {
-    firstDueRule:
-      item.first_due_rule ?? (item.subject_type === "staff" ? "before_first_shift" : "set_date"),
-    renewYears: item.renew_years === 1 || item.renew_years === 2 ? item.renew_years : null,
-  };
-}
-
-export function matrixColumnForKey(
-  key: string,
-  sample: EvidenceItemRow | undefined,
-): EvidenceMatrixColumn {
-  const def = requirementByKey(key);
-  const due = def?.dueDefault ?? (sample ? dueFromItem(sample) : null);
-  const hint = due ? columnDueHint(due) : "Set a date";
-  const packChips = chipsForRequirementKey(key);
-  const subtitle =
-    packChips.length === 1 && (hint === "On hire" || hint === "Set a date")
-      ? packChips[0]!
-      : hint;
-  return {
-    key,
-    title: def?.shortLabel ?? sample?.title ?? key,
-    subtitle,
-  };
-}
-
-/** Union of requirement keys on visible subjects, catalog order then leftover titles. */
-export function matrixColumns(items: readonly EvidenceItemRow[]): EvidenceMatrixColumn[] {
-  const sampleByKey = new Map<string, EvidenceItemRow>();
-  for (const item of items) {
-    if (!sampleByKey.has(item.requirement_key)) sampleByKey.set(item.requirement_key, item);
-  }
-  const remaining = new Set(sampleByKey.keys());
-  const ordered: EvidenceMatrixColumn[] = [];
-  for (const key of CATALOG_KEY_ORDER) {
-    if (!remaining.has(key)) continue;
-    ordered.push(matrixColumnForKey(key, sampleByKey.get(key)));
-    remaining.delete(key);
-  }
-  const leftovers = [...remaining]
-    .map((key) => matrixColumnForKey(key, sampleByKey.get(key)))
-    .sort((a, b) => a.title.localeCompare(b.title));
-  return [...ordered, ...leftovers];
-}
+import { chipsForRequirementKey } from "./catalog.ts";
+import type { EvidenceMatrixChip } from "./status.ts";
+import type { EvidenceItemRow, EvidencePerson } from "./types.ts";
 
 export function packChipsForKeys(keys: readonly string[]): string[] {
   const chips = new Set<string>();
@@ -94,13 +20,9 @@ export function personRowSubtitle(args: {
   requirementKeys: readonly string[];
 }): string {
   const chips = packChipsForKeys(args.requirementKeys);
-  const packLine =
-    chips.length === 0
-      ? "no packs yet"
-      : chips.length <= 3
-        ? chips.join(" · ")
-        : `${chips.length} selected packs`;
   const role = (args.person.subtitle ?? "").trim();
+  if (chips.length === 0) return role ? `${role} · no packs yet` : "no packs yet";
+  const packLine = chips.length <= 3 ? chips.join(" · ") : chips.slice(0, 3).join(" · ");
   if (role) return `${role} · ${packLine}`;
   return packLine;
 }
@@ -115,9 +37,44 @@ export function itemsBySubject(items: readonly EvidenceItemRow[]): Map<string, E
   return map;
 }
 
-export function itemForRequirement(
-  rows: readonly EvidenceItemRow[] | undefined,
-  requirementKey: string,
-): EvidenceItemRow | null {
-  return rows?.find((row) => row.requirement_key === requirementKey) ?? null;
+/** Closed-row summary chips — counts by status, never an n/m fraction. */
+export function rowSummaryChips(chips: readonly EvidenceMatrixChip[]): EvidenceMatrixChip[] {
+  const assigned = chips.filter((chip) => chip.kind !== "na");
+  if (assigned.length === 0) return [];
+
+  const missing = assigned.filter((chip) => chip.kind === "missing").length;
+  const due = assigned.filter((chip) => chip.kind === "due");
+  const review = assigned.filter((chip) => chip.kind === "review").length;
+  const add = assigned.filter((chip) => chip.kind === "add").length;
+  const complete = assigned.filter((chip) => chip.kind === "complete").length;
+  const summary: EvidenceMatrixChip[] = [];
+
+  if (missing > 0) {
+    summary.push({
+      kind: "missing",
+      label: missing === 1 ? "Missing" : `${missing} missing`,
+      itemId: null,
+    });
+  }
+  if (due.length > 0) {
+    summary.push({
+      kind: "due",
+      label: due.length === 1 ? due[0]!.label : "Due soon",
+      itemId: null,
+    });
+  }
+  if (review > 0) {
+    summary.push({
+      kind: "review",
+      label: review === 1 ? "Review" : `${review} review`,
+      itemId: null,
+    });
+  }
+  if (add > 0 && missing === 0 && due.length === 0) {
+    summary.push({ kind: "add", label: "Add", itemId: null });
+  }
+  if (summary.length === 0 && complete === assigned.length) {
+    summary.push({ kind: "complete", label: "Complete", itemId: null });
+  }
+  return summary;
 }
