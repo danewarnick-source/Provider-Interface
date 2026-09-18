@@ -1,14 +1,13 @@
 // Unified "client document report" registry.
 //
 // Every client-facing PDF report (Client Budget, Meal Plan Weekly Menu,
-// Meal Plan vs. Actual, Chore Chart) registers here so callers — the
-// manager UI buttons AND the NECTAR/assistant path — can generate or ship
-// any of them through one common surface.
+// Meal Plan vs. Actual, Employee Face Sheet) registers here so callers —
+// the manager UI buttons AND the NECTAR/assistant path — can generate or
+// ship any of them through one common surface.
 //
 // This is only a registry: PDF rendering + data fetching live in each
 // report module (`client-budget-report`, `meal-plan-menu-report`,
-// `meal-plan-vs-actual-report`, `chore-chart-report`). Nothing is
-// re-implemented here.
+// `meal-plan-vs-actual-report`). Nothing is re-implemented here.
 //
 // No fabrication anywhere in the chain: missing data renders "—" in the
 // PDF, never invented values.
@@ -38,13 +37,6 @@ import {
   type ShipResult as ShippedPlanVsActual,
 } from "./meal-plan-vs-actual-report";
 import {
-  generateChoreChartReport,
-  shipChoreChartReport,
-  type ChoreChartReportArgs,
-  type ChoreChartReportResult,
-  type ShippedChoreChartReport,
-} from "./chore-chart-report";
-import {
   generateEmployeeFaceSheet,
   shipEmployeeFaceSheet,
   type EmployeeFaceSheetArgs,
@@ -58,14 +50,12 @@ export type ReportType =
   | "client_budget"
   | "meal_plan_menu"
   | "meal_plan_vs_actual"
-  | "chore_chart"
   | "employee_face_sheet";
 
 export const REPORT_TYPES: ReadonlyArray<ReportType> = [
   "client_budget",
   "meal_plan_menu",
   "meal_plan_vs_actual",
-  "chore_chart",
   "employee_face_sheet",
 ];
 
@@ -73,7 +63,6 @@ export const REPORT_TYPES: ReadonlyArray<ReportType> = [
  *  only reads what it needs. */
 export type ReportParams = {
   clientId?: string;
-  spaceId?: string;
   /** Employee/staff id for employee-scoped reports (e.g. Employee Face Sheet). */
   staffId?: string;
   /** Organization scope for employee-scoped reports. */
@@ -100,18 +89,14 @@ export interface CommonReportOutput {
   periodLabel: string;
   organizationId: string;
   orgName: string;
-  /** Populated for client-scoped reports; empty for chore chart until ship. */
+  /** Populated for client-scoped reports. */
   clientId: string | null;
   clientName: string | null;
-  /** Chore-chart reports carry the space identity here. */
-  spaceId: string | null;
-  spaceName: string | null;
   /** Employee-scoped reports (Employee Face Sheet) carry the staff identity here. */
   staffId?: string | null;
   staffName?: string | null;
   /** Client IDs the report is / would be attached to on ship.
    *  - client_budget / meal_plan_menu / meal_plan_vs_actual: [clientId]
-   *  - chore_chart: linked space clients
    *  - employee_face_sheet: [] (ships to employee_documents, not client files) */
   attachClientIds: string[];
   /** Underlying generator payload, for callers that need the specifics. */
@@ -119,7 +104,6 @@ export interface CommonReportOutput {
     | BudgetReportResult
     | MealMenuReportResult
     | PlanVsActualResult
-    | ChoreChartReportResult
     | EmployeeFaceSheetResult;
 }
 
@@ -145,8 +129,8 @@ export interface CommonShipOutput extends CommonReportOutput {
 export interface ReportTypeMeta {
   key: ReportType;
   label: string;
-  scope: "client" | "space" | "staff";
-  requiredParams: Array<"clientId" | "spaceId" | "staffId" | "periodMonth" | "weekStart">;
+  scope: "client" | "staff";
+  requiredParams: Array<"clientId" | "staffId" | "periodMonth" | "weekStart">;
   optionalParams: Array<"weeksCount">;
   /** For client-scoped reports this matches `client_documents.document_type`.
    *  For employee-scoped reports it matches `employee_documents.kind`. */
@@ -183,16 +167,6 @@ export const REPORT_META: Record<ReportType, ReportTypeMeta> = {
     documentType: "meal_plan_plan_vs_actual",
     description:
       "Per-day per-slot planned meal vs. staff-recorded actual for audits.",
-  },
-  chore_chart: {
-    key: "chore_chart",
-    label: "Chore Chart",
-    scope: "space",
-    requiredParams: ["spaceId"],
-    optionalParams: [],
-    documentType: "chore_chart",
-    description:
-      "Living-space chore chart (client rotation + staff shift grid).",
   },
   employee_face_sheet: {
     key: "employee_face_sheet",
@@ -244,8 +218,6 @@ export async function generateClientReport(
         orgName: r.orgName,
         clientId: r.clientId,
         clientName: r.clientName,
-        spaceId: null,
-        spaceName: null,
         attachClientIds: [r.clientId],
         raw: r,
       };
@@ -266,8 +238,6 @@ export async function generateClientReport(
         orgName: r.orgName,
         clientId: r.clientId,
         clientName: r.clientName,
-        spaceId: null,
-        spaceName: null,
         attachClientIds: [r.clientId],
         raw: r,
       };
@@ -291,30 +261,7 @@ export async function generateClientReport(
         orgName: r.orgName,
         clientId: args.clientId,
         clientName: r.clientName,
-        spaceId: null,
-        spaceName: null,
         attachClientIds: [args.clientId],
-        raw: r,
-      };
-    }
-    case "chore_chart": {
-      const args: ChoreChartReportArgs = {
-        spaceId: requireField(params.spaceId, "spaceId"),
-        supabaseClient: params.supabaseClient,
-      };
-      const r = await generateChoreChartReport(args);
-      return {
-        reportType,
-        bytes: r.bytes,
-        filename: r.filename,
-        periodLabel: r.dateLabel,
-        organizationId: r.organizationId,
-        orgName: r.orgName,
-        clientId: null,
-        clientName: null,
-        spaceId: r.spaceId,
-        spaceName: r.spaceName,
-        attachClientIds: r.clientIds,
         raw: r,
       };
     }
@@ -334,8 +281,6 @@ export async function generateClientReport(
         orgName: r.orgName,
         clientId: null,
         clientName: null,
-        spaceId: null,
-        spaceName: null,
         staffId: r.staffId,
         staffName: r.staffName,
         attachClientIds: [],
@@ -368,8 +313,6 @@ export async function shipClientReport(
         orgName: r.orgName,
         clientId: r.clientId,
         clientName: r.clientName,
-        spaceId: null,
-        spaceName: null,
         attachClientIds: [r.clientId],
         raw: r,
         snapshots: [
@@ -393,8 +336,6 @@ export async function shipClientReport(
         orgName: r.orgName,
         clientId: r.clientId,
         clientName: r.clientName,
-        spaceId: null,
-        spaceName: null,
         attachClientIds: [r.clientId],
         raw: r,
         snapshots: [
@@ -421,35 +362,11 @@ export async function shipClientReport(
         orgName: r.orgName,
         clientId: args.clientId,
         clientName: r.clientName,
-        spaceId: null,
-        spaceName: null,
         attachClientIds: [args.clientId],
         raw: r,
         snapshots: [
           { clientId: args.clientId, documentId: r.documentId, storagePath: r.storagePath },
         ],
-      };
-    }
-    case "chore_chart": {
-      const args: ChoreChartReportArgs = {
-        spaceId: requireField(params.spaceId, "spaceId"),
-        supabaseClient: params.supabaseClient,
-      };
-      const r: ShippedChoreChartReport = await shipChoreChartReport(args);
-      return {
-        reportType,
-        bytes: r.bytes,
-        filename: r.filename,
-        periodLabel: r.dateLabel,
-        organizationId: r.organizationId,
-        orgName: r.orgName,
-        clientId: null,
-        clientName: null,
-        spaceId: r.spaceId,
-        spaceName: r.spaceName,
-        attachClientIds: r.clientIds,
-        raw: r,
-        snapshots: r.snapshots,
       };
     }
     case "employee_face_sheet": {
@@ -468,8 +385,6 @@ export async function shipClientReport(
         orgName: r.orgName,
         clientId: null,
         clientName: null,
-        spaceId: null,
-        spaceName: null,
         staffId: r.staffId,
         staffName: r.staffName,
         attachClientIds: [],

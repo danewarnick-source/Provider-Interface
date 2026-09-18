@@ -1,5 +1,82 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
+## ACTION — Drop Chores / Chore Chart tables (2026-09-18) — hold for Dane
+
+**Do not Soft-apply / execute against Hive-Platform production from this PR.**
+Tony/Core pastes after Dane go. **Clear the editor first.** This DROP is
+intentional: the Chores product is deleted from app code. Do not invent
+other drops.
+
+Tables (live Hive-Platform; row counts were non-blocking):
+
+`chore_completions`, `chore_client_rotation`, `chore_daily_items`,
+`chore_definitions`, `chore_space_clients`, `client_chore_support`,
+`chore_spaces`.
+
+Also drops those tables' RLS policies, indexes, triggers, and FKs among
+this set. CASCADE is used only so child FKs / attached policies drop with
+the table. Parents (`clients`, `teams`, `organizations`) are not dropped.
+
+Does **not** drop `client_meal_support`, historical `client_documents`
+rows with `document_type = 'chore_chart'`, or storage objects under
+`.../chore-charts/` (no dedicated chore bucket). Historical create-table
+migrations stay in `supabase/migrations/`.
+
+Matches `supabase/migrations/20260918120000_drop_chore_tables.sql`.
+
+### Probe (before)
+
+Clear the editor, paste:
+
+```sql
+SELECT string_agg(table_name, ' | ' ORDER BY table_name)
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN (
+    'chore_completions',
+    'chore_client_rotation',
+    'chore_daily_items',
+    'chore_definitions',
+    'chore_space_clients',
+    'client_chore_support',
+    'chore_spaces'
+  );
+```
+
+**What you'll see:** the seven names above, pipe-separated (whichever
+still exist). `NULL` means they are already gone — skip Apply.
+
+### Apply
+
+Clear the editor, paste the full file
+`supabase/migrations/20260918120000_drop_chore_tables.sql`.
+
+**What you'll see:** policy-drop notices (or none if already gone), then
+seven `DROP TABLE` (or already-absent notices). No other tables named.
+
+### Verify (after)
+
+Clear the editor, paste the same probe as above.
+
+**What you'll see:** `NULL` (zero matching public tables).
+
+Confirm parents still exist:
+
+```sql
+SELECT string_agg(table_name, ' | ' ORDER BY table_name)
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN ('clients', 'teams', 'organizations', 'client_meal_support');
+```
+
+**What you'll see:** `client_meal_support | clients | organizations | teams`
+(or those four names, order as aggregated).
+
+After apply: regenerate `src/integrations/supabase/types.ts` from the live
+schema (Lovable type sync) so the dropped tables leave generated types.
+
+---
+
 ## ACTION — Compliance + training core tables phase 1 (2026-09-16) — hold for Dane
 
 **Do not Soft-apply / execute against Hive-Platform production from this PR.**

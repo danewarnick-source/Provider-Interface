@@ -1,8 +1,8 @@
 // Per-client meal-support activation gate.
-// Mirror of ChoreSupportGate — same reason model, same UX. RHS/HHS clients
-// bypass this gate (handled by the mount wrapper that reads authorized codes).
-// DSI/SLH/SLN-only clients see this gate until a manager activates support
-// with a reason (pcsp_goal | intake_need | manual) and optional goal reference.
+// RHS/HHS clients bypass this gate (handled by the mount wrapper that
+// reads authorized codes). DSI/SLH/SLN-only clients see this gate until
+// a manager activates support with a reason (pcsp_goal | intake_need |
+// manual) and optional goal reference.
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

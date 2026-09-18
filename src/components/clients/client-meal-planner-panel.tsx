@@ -1606,7 +1606,7 @@ function ActualsAssigneeCard({
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Meal Plan output card — Preview / Download / Print / Ship to file
-// (weekly menu PDF). Manager-only. Matches budget/chore-chart pattern.
+// (weekly menu PDF). Manager-only. Matches budget pattern.
 // ═══════════════════════════════════════════════════════════════════════════
 function MealPlanOutputCard({
   clientId,

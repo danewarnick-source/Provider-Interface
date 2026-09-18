@@ -22,7 +22,6 @@ import {
   Info,
   Brain,
   Utensils,
-  Sparkles,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,8 +40,6 @@ import { ClientPhoto } from "@/components/client-photo";
 import { FaceSheetButton } from "@/components/clients/face-sheet-button";
 import { useClientFeature, clientFeatureVisible } from "@/lib/client-features";
 import { ClientMealPlannerMount } from "@/components/clients/client-meal-planner-mount";
-import { ChoreDailyChecklist } from "@/components/chores/chore-daily-checklist";
-import { ChoreChartForClient } from "@/components/chores/chore-chart-mount";
 
 function ActiveShiftReimbursementSlot({ clientId }: { clientId: string }) {
   const { data: active } = useActiveShift();
@@ -215,36 +212,6 @@ function ClientWorkspace() {
   });
   const showBehaviorTab = hasBehaviorCode && !!bsTab?.show;
 
-  // Chore-chart space IDs for this client: any chore_space linked directly
-  // (chore_space_clients) plus any chart attached to the client's home team.
-  const { data: choreSpaceIds } = useQuery({
-    queryKey: ["workspace-chore-spaces", client?.id ?? null],
-    enabled: !!client?.id,
-    queryFn: async () => {
-      const ids = new Set<string>();
-      const { data: links } = await supabase
-        .from("chore_space_clients")
-        .select("space_id")
-        .eq("client_id", client!.id);
-      (links ?? []).forEach((l) => ids.add(l.space_id));
-      const { data: c } = await supabase
-        .from("clients")
-        .select("team_id")
-        .eq("id", client!.id)
-        .maybeSingle();
-      const teamId = (c as { team_id: string | null } | null)?.team_id ?? null;
-      if (teamId) {
-        const { data: teamSpaces } = await supabase
-          .from("chore_spaces")
-          .select("id")
-          .eq("team_id", teamId);
-        (teamSpaces ?? []).forEach((s) => ids.add(s.id));
-      }
-      return Array.from(ids);
-    },
-  });
-  const hasChores = (choreSpaceIds?.length ?? 0) > 0;
-
   if (isLoading || !client) {
     return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
   }
@@ -343,7 +310,6 @@ function ClientWorkspace() {
               { v: "emar", label: "MAR", Icon: Pill, show: emarEnabled },
               { v: "forms", label: "Forms", Icon: FileText, show: true },
               { v: "meals", label: "Meals", Icon: Utensils, show: true },
-              { v: "chores", label: "Chores", Icon: Sparkles, show: hasChores },
               { v: "behavior-data", label: "Behavior Data", Icon: Brain, show: showBehaviorTab },
             ].filter((t) => t.show);
             const gridCls =
@@ -421,13 +387,6 @@ function ClientWorkspace() {
           <TabsContent value="meals" className="mt-5">
             <ClientMealPlannerMount clientId={client.id} readOnly />
           </TabsContent>
-
-          {hasChores && (
-            <TabsContent value="chores" className="mt-5 space-y-5">
-              <ChoreDailyChecklist spaceIds={choreSpaceIds ?? []} />
-              <ChoreChartForClient clientId={client.id} readOnly />
-            </TabsContent>
-          )}
 
           {showBehaviorTab && bsTab?.organizationId && (
             <TabsContent value="behavior-data" className="mt-5">
