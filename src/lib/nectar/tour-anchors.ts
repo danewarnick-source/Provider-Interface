@@ -15,8 +15,8 @@ export type TourAnchor = {
 export const TOUR_ANCHORS: TourAnchor[] = [
   // Sidebar navigation (admin)
   { id: "nav.audit", label: "Audit tab", route: "/dashboard/audit", description: "Open the Audit zone where audit folders and checklists live.", surface: "admin" },
-  { id: "nav.authoritative-sources", label: "Authoritative Sources", route: "/dashboard/authoritative-sources", description: "Upload your SOW, contracts and DSPD/DHS requirement documents.", surface: "admin" },
-  { id: "nav.nectar-docs", label: "NECTAR Docs", route: "/dashboard/nectar-docs", description: "Central document repository — parsed extracted fields and version history.", surface: "admin" },
+  { id: "nav.authoritative-sources", label: "Knowledge", route: "/dashboard/hub/knowledge", description: "Upload the Scope of Work, policies, or any agency documents for Nectar search.", surface: "admin" },
+  { id: "nav.nectar-docs", label: "NECTAR Docs", route: "/dashboard/nectar-docs", description: "Client and staff document repository — parsed extracted fields and version history.", surface: "admin" },
   { id: "nav.records-desk", label: "Records review", route: "/dashboard/compliance-desk", description: "Review submitted timesheets, daily logs, EVV punches and incidents.", surface: "admin" },
   { id: "nav.billing", label: "Billing", route: "/dashboard/billing", description: "Billing forms, 520 generation, and exports.", surface: "admin" },
   { id: "nav.scheduling", label: "Scheduling", route: "/dashboard/scheduling", description: "Publish and edit staff shifts on the calendar.", surface: "admin" },
@@ -37,7 +37,7 @@ export const TOUR_ANCHORS: TourAnchor[] = [
 
   // Page-level CTAs (admin)
   { id: "audit.body", label: "Audit zone body", route: "/dashboard/audit", description: "Where audit folders, items needed and items provided are shown.", surface: "admin" },
-  { id: "authsources.upload", label: "Upload an authoritative source", route: "/dashboard/authoritative-sources", description: "Upload a State SOW, provider contract or requirement document.", surface: "admin" },
+  { id: "authsources.upload", label: "Upload a knowledge document", route: "/dashboard/hub/knowledge", description: "Upload a Scope of Work, policy, or any agency document for Nectar search.", surface: "admin" },
   { id: "nectardocs.body", label: "NECTAR Docs body", route: "/dashboard/nectar-docs", description: "Review parsed fields and version history.", surface: "admin" },
 
   // Staff navigation — ids match data-tour={`nav.${slug}`} on the staff sidebar

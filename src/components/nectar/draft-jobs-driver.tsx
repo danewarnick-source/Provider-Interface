@@ -320,7 +320,7 @@ export function DraftJobsProvider({ children }: { children: React.ReactNode }) {
           const inserted = finalize.inserted ?? 0;
           if (inserted > 0) {
             toast.success(
-              `NECTAR drafted ${inserted} requirement${inserted === 1 ? "" : "s"} from “${job.documentTitle}”. Review them in the Requirements tab.`,
+              `Nectar finished reading “${job.documentTitle}”. It's in the Knowledge library.`,
             );
           } else if (finalize.message) {
             toast.warning(finalize.message, { duration: 9000 });

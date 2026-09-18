@@ -228,7 +228,7 @@ export const computeSowAlerts = createServerFn({ method: "POST" })
         subject: "Agency",
         subjectKind: "agency",
         dueAt,
-        href: `/dashboard/authoritative-sources`,
+        href: `/dashboard/hub/knowledge`,
       });
     }
 

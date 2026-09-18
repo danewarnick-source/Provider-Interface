@@ -1,15 +1,14 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 /**
- * Retired standalone External compliance URL.
- * Knowledge base → External compliance is the product surface.
+ * Retired External compliance URL.
+ * That surface is gone; bookmarks land on Knowledge.
  */
 export const Route = createFileRoute("/dashboard/external-compliance")({
-  head: () => ({ meta: [{ title: "External compliance — Provider Interface" }] }),
+  head: () => ({ meta: [{ title: "Knowledge — Provider Interface" }] }),
   beforeLoad: () => {
     throw redirect({
       to: "/dashboard/hub/knowledge",
-      search: { tab: "external" },
       replace: true,
     });
   },

@@ -14,7 +14,7 @@ export function DraftJobsHeaderPill() {
   const etaLabel = formatEta(minEtaMs);
   return (
     <Link
-      to="/dashboard/authoritative-sources"
+      to="/dashboard/hub/knowledge"
       className="hive-chrome-btn h-10 px-3 text-xs font-semibold"
       title="NECTAR is drafting requirements from your authoritative sources"
     >

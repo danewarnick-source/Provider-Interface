@@ -414,7 +414,7 @@ ABSOLUTE RULES — never violate:
    - Step B — Raw source text: from FACTS.authoritative_sources[*].excerpts, list EVERY excerpt that matches the topic (do not pick just one).
    - Also include needs_attention / drafted requirements under Step B.
    - Never collapse multiple distinct provisions into one sentence — if the SOW lists four trainings, return four bullets, each with its own citation.
-   - When Step B has any content, set deepLink to /dashboard/authoritative-sources.
+   - When Step B has any content, set deepLink to /dashboard/hub/knowledge.
    - You answer factual lookups, but do NOT issue compliance verdicts. If asked for a verdict, state the facts and recommend an admin make the call.
 
 ANSWER FORMATTING — strict markdown, no exceptions:

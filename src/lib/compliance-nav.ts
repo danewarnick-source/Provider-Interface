@@ -86,5 +86,5 @@ export const RETIRED_COMPLIANCE_REDIRECTS: RetiredComplianceRedirect[] = [
   { from: "/dashboard/company-obligations", to: "/dashboard/evidence" },
   { from: "/dashboard/deadlines", to: "/dashboard/compliance", search: { tab: "staff" } },
   { from: "/dashboard/command-center", to: "/dashboard" },
-  { from: "/dashboard/external-compliance", to: "/dashboard/hub/knowledge", search: { tab: "external" } },
+  { from: "/dashboard/external-compliance", to: "/dashboard/hub/knowledge" },
 ];

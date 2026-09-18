@@ -243,7 +243,7 @@ export const hiveExecApproveRequirement = createServerFn({ method: "POST" })
       urgency: "normal",
       title: "Requirement ready for your final confirmation",
       body: `NECTAR drafted "${(req.title as string).slice(0, 120)}" from one of your authoritative sources, and PI Executive has verified the extraction. Your confirmation is the final step before it becomes active.`,
-      link_to: "/dashboard/authoritative-sources",
+      link_to: "/dashboard/hub/knowledge",
       related_id: req.id,
       related_type: "nectar_requirement",
     });
