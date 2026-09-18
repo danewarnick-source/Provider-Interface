@@ -53,7 +53,7 @@ export function EvidenceMatrix({
   return (
     <section className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative min-w-0 flex-1">
+        <div className="relative min-w-[220px] max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
@@ -62,9 +62,20 @@ export function EvidenceMatrix({
             className="h-9 bg-[var(--hive-canvas)] pl-9"
           />
         </div>
-        <p className="text-[13px] text-[var(--hive-text-muted)]">
+        <p className="flex-1 text-[13px] text-[var(--hive-text-muted)]">
           Select a cell to add or review evidence.
         </p>
+        <Button
+          type="button"
+          size="sm"
+          disabled={!selectedId && people.length !== 1}
+          onClick={() => {
+            const id = selectedId ?? people[0]?.id;
+            if (id) onAddForPerson(id);
+          }}
+        >
+          Add packs
+        </Button>
       </div>
 
       {peopleError ? (
@@ -210,7 +221,7 @@ function MatrixRow({
               </span>
             </span>
           </button>
-          <div className="flex shrink-0 flex-col gap-1">
+          {rows.length === 0 ? (
             <Button
               type="button"
               variant="outline"
@@ -220,24 +231,23 @@ function MatrixRow({
             >
               Add packs
             </Button>
-            {rows.length > 0 ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                aria-label={`Send all evidence for ${person.full_name}`}
-                onClick={() =>
-                  onSendAll(
-                    person,
-                    rows.map((row) => row.id),
-                    rows.map((row) => row.title),
-                  )
-                }
-              >
-                Send
-              </Button>
-            ) : null}
-          </div>
+          ) : rows.length > 1 ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              aria-label={`Send all evidence for ${person.full_name}`}
+              onClick={() =>
+                onSendAll(
+                  person,
+                  rows.map((row) => row.id),
+                  rows.map((row) => row.title),
+                )
+              }
+            >
+              Send
+            </Button>
+          ) : null}
         </div>
       </td>
       {columns.map((col) => {
