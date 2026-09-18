@@ -1,3 +1,4 @@
+import { isEmployeeOnActiveRoster } from "../employee-roster.ts";
 import { staffInitials } from "./status.ts";
 import type { EvidencePerson } from "./types.ts";
 
@@ -51,4 +52,54 @@ export async function loadEvidenceClientPeople(
     return { people: [], error: slim.error.message || full.error.message };
   }
   return { people: mapClientRowsToPeople(slim.data ?? []), error: null };
+}
+
+export type EvidenceEmployeeRow = {
+  user_id: string;
+  role: string | null;
+  job_title: string | null;
+  active: boolean;
+  profile: {
+    id?: string;
+    full_name: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
+    account_status: string | null;
+    is_active: boolean | null;
+  } | null;
+};
+
+/** Same active roster rule as the Employees page. */
+export function mapEmployeeRowsToPeople(rows: readonly EvidenceEmployeeRow[]): EvidencePerson[] {
+  return rows
+    .filter((m) => isEmployeeOnActiveRoster(m))
+    .map((m) => {
+      const p = m.profile;
+      const name =
+        (p?.full_name ?? "").trim() ||
+        `${p?.first_name ?? ""} ${p?.last_name ?? ""}`.trim() ||
+        "Employee";
+      return {
+        id: m.user_id,
+        full_name: name,
+        initials: staffInitials(name),
+        subtitle: (m.job_title ?? m.role ?? "").trim() || null,
+      };
+    })
+    .sort((a, b) => a.full_name.localeCompare(b.full_name));
+}
+
+export function companyEvidencePerson(organizationId: string, orgName: string): EvidencePerson {
+  const name = orgName.trim() || "Company";
+  return {
+    id: organizationId,
+    full_name: name,
+    initials: staffInitials(name),
+    subtitle: "Company file",
+  };
+}
+
+/** First and last name are both required to apply a pack. */
+export function isAttestFullName(firstName: string, lastName: string): boolean {
+  return firstName.trim().length >= 1 && lastName.trim().length >= 1;
 }

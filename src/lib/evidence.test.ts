@@ -21,9 +21,12 @@ import {
   resolveEvidenceTab,
 } from "./evidence/nav.ts";
 import {
+  companyEvidencePerson,
+  isAttestFullName,
   isListedEvidenceClient,
   loadEvidenceClientPeople,
   mapClientRowsToPeople,
+  mapEmployeeRowsToPeople,
 } from "./evidence/people.ts";
 import { addCadence, cellStatus, staffInitials } from "./evidence/status.ts";
 import {
@@ -31,6 +34,7 @@ import {
   EVIDENCE_DISCLAIMER,
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_PUSH_BODY,
+  EVIDENCE_UNCHECK_TITLE,
   EVIDENCE_UNCHECK_WARNING,
   type EvidenceFileRow,
   type EvidenceItemRow,
@@ -247,8 +251,10 @@ describe("Evidence curated catalog", () => {
     assert.equal(isSowSuggestedKey("cpr_first_aid", answers), true);
     assert.equal(isSowSuggestedKey("host_home_cert", answers), true);
     assert.equal(isSowSuggestedKey("custom_w9", answers), false);
-    assert.match(EVIDENCE_UNCHECK_WARNING, /opting out/);
-    assert.match(EVIDENCE_LIABILITY_TEXT, /Suggestions only/);
+    assert.equal(EVIDENCE_UNCHECK_TITLE, "Are you sure?");
+    assert.match(EVIDENCE_UNCHECK_WARNING, /requirement in the SOW/);
+    assert.match(EVIDENCE_LIABILITY_TEXT, /suggestions only/i);
+    assert.match(EVIDENCE_LIABILITY_TEXT, /ultimately responsible/);
     assert.doesNotMatch(EVIDENCE_DISCLAIMER, /scoreboard percent|Hive Certify/i);
   });
 });
@@ -319,6 +325,57 @@ describe("Evidence people roster", () => {
     assert.equal(slim.error, null);
     assert.equal(slim.people[0]?.full_name, "Pat Ng");
   });
+
+  it("maps the Employees-page active roster and always names the company row", () => {
+    const people = mapEmployeeRowsToPeople([
+      {
+        user_id: "e-2",
+        role: "dsp",
+        job_title: "DSP",
+        active: true,
+        profile: { full_name: "Bea Stone", account_status: "active", is_active: true },
+      },
+      {
+        user_id: "e-1",
+        role: "admin",
+        job_title: "Owner",
+        active: true,
+        profile: { full_name: "Ann Lee", account_status: "active", is_active: true },
+      },
+      {
+        user_id: "e-3",
+        role: "dsp",
+        job_title: "DSP",
+        active: false,
+        profile: { full_name: "Off Roster", account_status: "active", is_active: true },
+      },
+      {
+        user_id: "e-4",
+        role: "dsp",
+        job_title: "DSP",
+        active: true,
+        profile: { full_name: "Archived Emp", account_status: "archived", is_active: true },
+      },
+      {
+        user_id: "e-5",
+        role: "dsp",
+        job_title: "DSP",
+        active: true,
+        profile: { full_name: "Inactive Emp", account_status: "active", is_active: false },
+      },
+    ]);
+    assert.deepEqual(
+      people.map((p) => p.id),
+      ["e-1", "e-2"],
+    );
+    assert.equal(people[0]?.subtitle, "Owner");
+    const company = companyEvidencePerson("org-1", "True North Supports LLC");
+    assert.equal(company.id, "org-1");
+    assert.equal(company.full_name, "True North Supports LLC");
+    assert.equal(isAttestFullName("Dane", "Warnick"), true);
+    assert.equal(isAttestFullName("Dane", "  "), false);
+    assert.equal(isAttestFullName("", "Warnick"), false);
+  });
 });
 
 describe("Evidence cell status", () => {
@@ -387,6 +444,9 @@ describe("Evidence nav + product lock", () => {
   it("resolves Staff / Client / Company and step aliases", () => {
     assert.equal(resolveEvidenceTab("agency"), "company");
     assert.equal(resolveEvidenceTab("clients"), "client");
+    assert.equal(resolveEvidenceTab("employees"), "staff");
+    assert.equal(resolveEvidenceTab("employee"), "staff");
+    assert.equal(resolveEvidenceTab("staff"), "staff");
     assert.equal(resolveEvidenceStep("quiz"), "quiz");
     assert.equal(resolveEvidenceStep("pack"), "quiz");
     assert.equal(resolveEvidenceStep("nope"), "grid");
@@ -446,6 +506,11 @@ describe("Evidence nav + product lock", () => {
     );
     assert.match(workspace, /onAddForPerson/);
     assert.match(workspace, /fetchEvidenceClientPeople/);
+    assert.match(workspace, /fetchEvidenceEmployees/);
+    assert.match(workspace, /companyEvidencePerson/);
+    assert.match(workspace, />Employees</);
+    assert.doesNotMatch(workspace, />Staff</);
+    assert.doesNotMatch(workspace, /Company file is empty/);
     assert.doesNotMatch(workspace, /\.from\(["']clients["']\)/);
     assert.doesNotMatch(workspace, /SubjectAssignPicker|PackSettingsPanel|NewRequirementPanel/);
 
@@ -456,14 +521,27 @@ describe("Evidence nav + product lock", () => {
     assert.match(fetchClients, /supabase as any/);
     assert.match(fetchClients, /\.from\(["']clients["']\)/);
 
+    const fetchEmployees = readFileSync(
+      new URL("./evidence/fetch-employees.ts", import.meta.url),
+      "utf8",
+    );
+    assert.match(fetchEmployees, /supabase as any/);
+    assert.match(fetchEmployees, /\.from\(["']organization_members["']\)/);
+    assert.match(fetchEmployees, /mapEmployeeRowsToPeople/);
+
     const quiz = readFileSync(
       new URL("./../components/evidence/evidence-questionnaire.tsx", import.meta.url),
       "utf8",
     );
     assert.match(quiz, /data-evidence-quiz/);
-    assert.match(quiz, /See staff suggestions|See client suggestions/);
+    assert.match(quiz, /See employee suggestions|See client suggestions/);
     assert.match(quiz, /Attestation/);
     assert.match(quiz, /exclusions.oig.hhs.gov|row.why|row.links/);
+    assert.match(quiz, /AlertDialog/);
+    assert.match(quiz, /evidence-attest-first/);
+    assert.match(quiz, /evidence-attest-last/);
+    assert.match(quiz, /isAttestFullName/);
+    assert.doesNotMatch(quiz, /Keep suggested|Uncheck anyway/);
     assert.doesNotMatch(quiz, /amber-50|Not called compliance/);
     assert.equal(EVIDENCE_CADENCE_OPTIONS.length, 8);
     assert.deepEqual(

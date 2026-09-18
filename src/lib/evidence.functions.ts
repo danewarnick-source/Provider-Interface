@@ -9,8 +9,13 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { hostHomeDualLinkPeerKey, packByKey, requirementByKey } from "./evidence/catalog.ts";
-import { loadEvidenceClientPeople } from "./evidence/people.ts";
-import { addCadence, cellStatus, latestFileForItem, staffInitials } from "./evidence/status.ts";
+import {
+  companyEvidencePerson,
+  loadEvidenceClientPeople,
+  mapEmployeeRowsToPeople,
+  type EvidenceEmployeeRow,
+} from "./evidence/people.ts";
+import { addCadence, cellStatus, latestFileForItem } from "./evidence/status.ts";
 import {
   EVIDENCE_CADENCES,
   EVIDENCE_PUSH_BODY,
@@ -253,48 +258,63 @@ async function insertFileRow(
   await writeFeatureStore(sb, organizationId, store);
 }
 
-async function listStaffPeople(sb: AnySupabase, organizationId: string): Promise<EvidencePerson[]> {
-  const { data: members, error } = await sb
-    .from("organization_members")
-    .select("user_id, role, active")
-    .eq("organization_id", organizationId)
-    .eq("active", true);
-  if (error) throw new Error(error.message);
-  const ids = (members ?? [])
-    .map((m: { user_id: string }) => m.user_id)
-    .filter((id: string) => typeof id === "string");
-  if (ids.length === 0) return [];
-  const { data: profiles, error: pErr } = await sb
-    .from("profiles")
-    .select("id, full_name, first_name, last_name, is_active")
-    .in("id", ids);
-  if (pErr) throw new Error(pErr.message);
-  const roleByUser = new Map(
-    (members ?? []).map((m: { user_id: string; role: string }) => [m.user_id, m.role]),
-  );
-  return (
-    (profiles ?? []) as Array<{
-      id: string;
-      full_name: string | null;
-      first_name: string | null;
-      last_name: string | null;
-      is_active: boolean | null;
-    }>
-  )
-    .filter((p) => p.is_active !== false)
-    .map((p) => {
-      const name =
-        (p.full_name ?? "").trim() ||
-        `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() ||
-        "Staff";
+async function listStaffPeople(
+  sb: AnySupabase,
+  organizationId: string,
+): Promise<{ people: EvidencePerson[]; error: string | null }> {
+  try {
+    const { data: members, error } = await sb
+      .from("organization_members")
+      .select("user_id, role, job_title, active")
+      .eq("organization_id", organizationId);
+    if (error) return { people: [], error: error.message };
+    const rows = (members ?? []) as Array<{
+      user_id: string;
+      role: string | null;
+      job_title: string | null;
+      active: boolean | null;
+    }>;
+    const ids = rows.map((m) => m.user_id).filter((id) => typeof id === "string");
+    if (ids.length === 0) return { people: [], error: null };
+    const full = await sb
+      .from("profiles")
+      .select("id, full_name, first_name, last_name, account_status, is_active")
+      .in("id", ids);
+    const slim = full.error
+      ? await sb.from("profiles").select("id, full_name, account_status, is_active").in("id", ids)
+      : full;
+    if (slim.error) {
       return {
-        id: p.id,
-        full_name: name,
-        initials: staffInitials(name),
-        subtitle: (roleByUser.get(p.id) as string | undefined) ?? null,
+        people: [],
+        error: slim.error.message || full.error?.message || "Could not load employees.",
       };
-    })
-    .sort((a, b) => a.full_name.localeCompare(b.full_name));
+    }
+    const profMap = new Map(
+      (
+        (slim.data ?? []) as Array<{
+          id: string;
+          full_name: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          account_status: string | null;
+          is_active: boolean | null;
+        }>
+      ).map((p) => [p.id, p]),
+    );
+    const joined: EvidenceEmployeeRow[] = rows.map((m) => ({
+      user_id: m.user_id,
+      role: m.role,
+      job_title: m.job_title,
+      active: m.active !== false,
+      profile: profMap.get(m.user_id) ?? null,
+    }));
+    return { people: mapEmployeeRowsToPeople(joined), error: null };
+  } catch (e) {
+    return {
+      people: [],
+      error: e instanceof Error ? e.message : "Could not load employees.",
+    };
+  }
 }
 
 async function listClientPeople(
@@ -310,13 +330,17 @@ async function listClientPeople(
   );
 }
 
-function companyPerson(organizationId: string, orgName: string): EvidencePerson {
-  return {
-    id: organizationId,
-    full_name: orgName || "Company",
-    initials: staffInitials(orgName || "Company"),
-    subtitle: "Company file",
-  };
+function companyNameFromOrgRow(
+  org: {
+    name?: string | null;
+    legal_name?: string | null;
+    dba_name?: string | null;
+  } | null,
+): string {
+  const dba = (org?.dba_name ?? "").trim();
+  const legal = (org?.legal_name ?? "").trim();
+  const name = (org?.name ?? "").trim();
+  return dba || legal || name || "Company";
 }
 
 function buildItemFromKey(args: {
@@ -469,21 +493,28 @@ export const loadEvidenceBoard = createServerFn({ method: "POST" })
     await requireOrgMembership(supabase, userId, data.organizationId, "employee");
     const sb = supabase as AnySupabase;
     const { store, viaTables } = await loadAll(sb, data.organizationId);
-    const staff = await listStaffPeople(sb, data.organizationId);
+    const staffListed = await listStaffPeople(sb, data.organizationId);
+    const staff = staffListed.people;
     let people: EvidencePerson[] = staff;
-    let peopleError: string | null = null;
+    let peopleError: string | null = data.subject === "staff" ? staffListed.error : null;
     if (data.subject === "client") {
       const listed = await listClientPeople(sb, data.organizationId);
       people = listed.people;
       peopleError = listed.error;
     }
     if (data.subject === "company") {
-      const { data: org } = await sb
-        .from("organizations")
-        .select("name")
-        .eq("id", data.organizationId)
-        .maybeSingle();
-      people = [companyPerson(data.organizationId, (org?.name as string | null) ?? "Company")];
+      try {
+        const { data: org } = await sb
+          .from("organizations")
+          .select("name, legal_name, dba_name")
+          .eq("id", data.organizationId)
+          .maybeSingle();
+        people = [companyEvidencePerson(data.organizationId, companyNameFromOrgRow(org ?? null))];
+        peopleError = null;
+      } catch {
+        people = [companyEvidencePerson(data.organizationId, "Company")];
+        peopleError = null;
+      }
     }
     return boardFromStore({
       viaTables,

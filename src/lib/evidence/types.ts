@@ -188,13 +188,13 @@ export type EvidenceGridCell = {
 };
 
 export const EVIDENCE_LIABILITY_TEXT =
-  "Suggestions only — verify against our own SOW / contract and add anything missing.";
+  "These packs are suggestions only, based on common SOW topics. They are not a complete legal review and not a determination that this agency is in compliance. The provider remains ultimately responsible for knowing and meeting the obligations in its own contract, Scope of Work, and applicable Utah / DSPD rules. Verify every row against your SOW before you apply it, and add anything that is missing.";
 
 export const EVIDENCE_DISCLAIMER =
   "Not called compliance. Suggestions only — provider picks packs and adds custom rows. Platform tracks upload + expiration (done / expiring / missing). No Home percent scoreboard.";
 
-export const EVIDENCE_UNCHECK_WARNING =
-  "This row was suggested from a common SOW topic. Unchecking it means you are opting out of that suggestion. Confirm your own contract still does not require it.";
+export const EVIDENCE_UNCHECK_TITLE = "Are you sure?";
+export const EVIDENCE_UNCHECK_WARNING = "This was found to be a requirement in the SOW.";
 
 export const EVIDENCE_PUSH_TITLE = "New evidence item";
 export const EVIDENCE_PUSH_BODY =

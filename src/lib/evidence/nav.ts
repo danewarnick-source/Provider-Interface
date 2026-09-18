@@ -22,6 +22,8 @@ export type EvidenceSearch = {
 
 const SUBJECT_ALIASES: Record<string, EvidenceSubject> = {
   staff: "staff",
+  employee: "staff",
+  employees: "staff",
   client: "client",
   clients: "client",
   company: "company",

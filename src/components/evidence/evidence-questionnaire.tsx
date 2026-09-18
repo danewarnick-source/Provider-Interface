@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   defaultQuestionnaireAnswers,
   isSowSuggestedKey,
@@ -8,8 +20,10 @@ import {
   requirementByKey,
   suggestPacks,
 } from "@/lib/evidence/catalog.ts";
+import { isAttestFullName } from "@/lib/evidence/people.ts";
 import {
   EVIDENCE_LIABILITY_TEXT,
+  EVIDENCE_UNCHECK_TITLE,
   EVIDENCE_UNCHECK_WARNING,
   type EvidenceRequirementDef,
   type EvidenceSubject,
@@ -54,6 +68,8 @@ export function EvidenceQuestionnaire({
   const [optedOut, setOptedOut] = useState<Set<string>>(() => new Set());
   const [typeByKey, setTypeByKey] = useState<Record<string, EvidenceType>>({});
   const [liability, setLiability] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [optOutKey, setOptOutKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -126,7 +142,9 @@ export function EvidenceQuestionnaire({
       ? "Company packs"
       : subject === "client"
         ? `Client packs · ${personName}`
-        : `Staff packs · ${personName}`;
+        : `Employee packs · ${personName}`;
+  const canApply =
+    liability && isAttestFullName(firstName, lastName) && checked.size > 0 && !pending;
 
   const grouped = suggested.map((row) => ({
     pack: row.pack,
@@ -136,7 +154,7 @@ export function EvidenceQuestionnaire({
   }));
 
   const apply = () => {
-    if (!liability || checked.size === 0) return;
+    if (!canApply) return;
     onApply({
       answers,
       requirementKeys: [...checked],
@@ -168,7 +186,7 @@ export function EvidenceQuestionnaire({
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {step === "quiz" && subject === "staff"
-              ? "Staff setup — different from Client and Company."
+              ? "Employee setup — different from Client and Company."
               : step === "quiz" && subject === "client"
                 ? "Client setup — services on this person, not hire flags."
                 : "Each item has a short plain-English explanation. Links open in a new tab."}
@@ -179,7 +197,7 @@ export function EvidenceQuestionnaire({
           {step === "quiz" && subject === "staff" ? (
             <div className="space-y-4">
               <p className="rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700">
-                Staff: hire / role questions, then personnel packs.
+                Employee: hire / role questions, then personnel packs.
               </p>
               <section className="rounded-xl border border-border p-3">
                 <h3 className="text-sm font-semibold">Job / service codes</h3>
@@ -291,7 +309,7 @@ export function EvidenceQuestionnaire({
                 </div>
               ) : subject === "staff" ? (
                 <p className="rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700">
-                  Staff suggestions (personnel). Host Home Cert dual-links when HHS is selected.
+                  Employee suggestions (personnel). Host Home Cert dual-links when HHS is selected.
                 </p>
               ) : (
                 <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
@@ -318,7 +336,7 @@ export function EvidenceQuestionnaire({
                               <span className="block text-sm font-semibold">{row.title}</span>
                               <span className="mt-0.5 block text-xs text-muted-foreground">
                                 {row.cadenceDisplay}
-                                {row.dualLink ? " · same file on Staff + Client" : ""}
+                                {row.dualLink ? " · same file on Employees + Client" : ""}
                               </span>
                               <span className="mt-2 block text-sm leading-snug text-slate-700">
                                 {row.why}
@@ -363,29 +381,38 @@ export function EvidenceQuestionnaire({
                 </section>
               ))}
 
-              {optOutKey ? (
-                <div className="rounded-xl border border-border bg-muted/40 p-3 text-sm">
-                  <p>{EVIDENCE_UNCHECK_WARNING}</p>
-                  <div className="mt-3 flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setOptOutKey(null)}
-                    >
-                      Keep suggested
-                    </Button>
-                    <Button type="button" size="sm" onClick={confirmOptOut}>
-                      Uncheck anyway
-                    </Button>
+              <div className="space-y-3 rounded-xl border border-border bg-muted/30 px-3 py-3">
+                <label className="flex items-start gap-3 text-sm">
+                  <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
+                  <span>{EVIDENCE_LIABILITY_TEXT}</span>
+                </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="evidence-attest-first">First name</Label>
+                    <Input
+                      id="evidence-attest-first"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      autoComplete="given-name"
+                      placeholder="First"
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="evidence-attest-last">Last name</Label>
+                    <Input
+                      id="evidence-attest-last"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      autoComplete="family-name"
+                      placeholder="Last"
+                    />
                   </div>
                 </div>
-              ) : null}
-
-              <label className="flex items-start gap-3 rounded-xl border border-border bg-muted/30 px-3 py-3 text-sm">
-                <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
-                <span>{EVIDENCE_LIABILITY_TEXT}</span>
-              </label>
+                <p className="text-xs text-muted-foreground">
+                  Type your first and last name to confirm you accept this responsibility. A
+                  checkbox alone is not enough.
+                </p>
+              </div>
             </div>
           ) : null}
         </div>
@@ -410,19 +437,33 @@ export function EvidenceQuestionnaire({
           <div className="flex-1" />
           {step === "quiz" ? (
             <Button type="button" onClick={() => setStep("rows")}>
-              {subject === "client" ? "See client suggestions" : "See staff suggestions"}
+              {subject === "client" ? "See client suggestions" : "See employee suggestions"}
             </Button>
           ) : (
-            <Button
-              type="button"
-              disabled={!liability || checked.size === 0 || pending}
-              onClick={apply}
-            >
+            <Button type="button" disabled={!canApply} onClick={apply}>
               {pending ? "Applying…" : "Apply packs"}
             </Button>
           )}
         </footer>
       </div>
+
+      <AlertDialog
+        open={!!optOutKey}
+        onOpenChange={(open) => {
+          if (!open) setOptOutKey(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{EVIDENCE_UNCHECK_TITLE}</AlertDialogTitle>
+            <AlertDialogDescription>{EVIDENCE_UNCHECK_WARNING}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmOptOut}>Uncheck</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

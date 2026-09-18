@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentOrg } from "@/hooks/use-org";
+import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
 import { cadenceLabel, parseServiceCodeFlags } from "@/lib/evidence/catalog.ts";
 import {
   applyEvidenceRequirements,
@@ -23,6 +23,8 @@ import {
 } from "@/lib/evidence.functions";
 import { type EvidenceStep } from "@/lib/evidence/nav.ts";
 import { fetchEvidenceClientPeople } from "@/lib/evidence/fetch-clients.ts";
+import { fetchEvidenceEmployees } from "@/lib/evidence/fetch-employees.ts";
+import { companyEvidencePerson } from "@/lib/evidence/people.ts";
 import { formatExpiresOn, latestFileForItem } from "@/lib/evidence/status.ts";
 import {
   type EvidencePerson,
@@ -46,6 +48,7 @@ type Props = {
 
 export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange }: Props) {
   const { data: org, isLoading } = useCurrentOrg();
+  const { displayName } = useOrgDisplayName();
   const qc = useQueryClient();
   const loadFn = useServerFn(loadEvidenceBoard);
   const applyFn = useServerFn(applyEvidenceRequirements);
@@ -70,6 +73,18 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
       return listed.people;
     },
   });
+  const employeesQ = useQuery({
+    enabled: !!orgId,
+    queryKey: ["evidence-employees", orgId],
+    queryFn: async (): Promise<EvidencePerson[]> => {
+      const listed = await fetchEvidenceEmployees(orgId!);
+      if (listed.error) throw new Error(listed.error);
+      return listed.people;
+    },
+  });
+  const companyPerson = orgId
+    ? companyEvidencePerson(orgId, displayName || org?.organization_name || "Company")
+    : null;
 
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: ["evidence-board", orgId] });
@@ -145,14 +160,18 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
 
   const board = boardQ.data;
   const clientPeople = clientsQ.data ?? [];
+  const employeePeople = employeesQ.data ?? [];
   const people =
-    tab === "client"
-      ? clientPeople.length > 0 || clientsQ.isSuccess || clientsQ.isError
+    tab === "company" && companyPerson
+      ? [companyPerson]
+      : tab === "client"
         ? clientPeople
-        : (board?.people ?? [])
-      : (board?.people ?? []);
+        : employeePeople;
   const person =
     people.find((p) => p.id === personId) ??
+    (companyPerson?.id === personId ? companyPerson : null) ??
+    employeePeople.find((p) => p.id === personId) ??
+    clientPeople.find((p) => p.id === personId) ??
     board?.people.find((p) => p.id === personId) ??
     board?.staffPicker.find((p) => p.id === personId) ??
     null;
@@ -164,10 +183,14 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
     tab === "client"
       ? clientsQ.error instanceof Error
         ? clientsQ.error.message
-        : (board?.peopleError ?? null)
-      : (board?.peopleError ?? null);
+        : null
+      : tab === "staff"
+        ? employeesQ.error instanceof Error
+          ? employeesQ.error.message
+          : null
+        : null;
   const peopleLoading =
-    tab === "client" ? clientsQ.isLoading || boardQ.isLoading : boardQ.isLoading;
+    tab === "client" ? clientsQ.isLoading : tab === "staff" ? employeesQ.isLoading : false;
   const showQuiz = step === "quiz";
 
   const openPackFor = (nextTab: EvidenceSubject, nextPerson: string) => {
@@ -192,7 +215,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--hive-text)]">Evidence</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Staff, client, and company files. Add opens packs for that person only.
+          Employees, client, and company files. Add opens packs for that person only.
         </p>
       </header>
 
@@ -247,7 +270,11 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
           subject={tab}
           personName={
             person?.full_name ??
-            (tab === "company" ? "Company" : tab === "client" ? "Client" : "Staff")
+            (tab === "company"
+              ? (companyPerson?.full_name ?? "Company")
+              : tab === "client"
+                ? "Client"
+                : "Employee")
           }
           initialCodes={initialCodes}
           onClose={() => onSearchChange({ tab, step: "grid", person: personId })}
@@ -307,18 +334,14 @@ function RosterPanel({
   const countFor = (id: string) =>
     (board?.items ?? []).filter((item) => item.subject_id === id).length;
 
-  const emptyCopy =
-    tab === "client"
-      ? "No clients yet."
-      : tab === "company"
-        ? "Company file is empty."
-        : "No staff yet.";
+  const emptyCopy = tab === "client" ? "No clients yet." : "No employees yet.";
+  const listLabel = tab === "client" ? "clients" : tab === "company" ? "company" : "employees";
 
   return (
     <section className="space-y-4">
       <Tabs value={tab} onValueChange={(v) => onTabChange(v as EvidenceSubject)}>
         <TabsList className="h-auto">
-          <TabsTrigger value="staff">Staff</TabsTrigger>
+          <TabsTrigger value="staff">Employees</TabsTrigger>
           <TabsTrigger value="client">Clients</TabsTrigger>
           <TabsTrigger value="company">Company</TabsTrigger>
         </TabsList>
@@ -339,7 +362,7 @@ function RosterPanel({
           role="alert"
           className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
         >
-          Could not load {tab === "client" ? "clients" : "people"}: {peopleError}
+          Could not load {listLabel}: {peopleError}
         </div>
       ) : null}
 
@@ -669,7 +692,7 @@ function PersonPackEditor({
             <Input
               value={peerId}
               onChange={(e) => setPeerId(e.target.value)}
-              placeholder={tab === "staff" ? "Client id to dual-link" : "Staff id to dual-link"}
+              placeholder={tab === "staff" ? "Client id to dual-link" : "Employee id to dual-link"}
               className="h-9 w-56"
             />
             <Button
