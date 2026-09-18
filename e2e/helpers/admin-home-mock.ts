@@ -10,13 +10,6 @@
  */
 import type { Page, Route } from "@playwright/test";
 import { ALL_PERMISSIONS } from "../../src/lib/rbac";
-import {
-  LOCKED_PACK_KEYS,
-  LOCKED_PACK_LABEL,
-  packCellStatus,
-  packColumnForObligation,
-  staffInitials,
-} from "../../src/lib/obligation-packs";
 
 export const TNS_ORG_ID = "7fabcf5d-f826-487f-8730-8b0c3f1969bb";
 export const ADMIN_USER_ID = "e2e00000-0000-4000-a000-000000000001";
@@ -845,12 +838,6 @@ function decodeDevServerFnExport(urlStr: string): string | null {
 function serverFnName(url: string, postText: string): string | null {
   const fromId = decodeDevServerFnExport(url);
   const names = [
-    "listObligationPackMatrix",
-    "createObligationPack",
-    "assignObligationPack",
-    "addPackItem",
-    "attachExistingToPack",
-    "deleteCustomPack",
     "listCompanyObligations",
     "listAgencyDocuments",
     "listAgencyPolicies",
@@ -972,111 +959,6 @@ function orgFeaturesPayload() {
   };
 }
 
-function buildPackMatrix(fx: ReturnType<typeof fixtures>, persona: MockPersona, packKey: string) {
-  const directory = [
-    {
-      id: persona === "admin" ? ADMIN_USER_ID : DSP_USER_ID,
-      full_name: persona === "admin" ? "Dana Admin" : "Alex DSP",
-    },
-    { id: STAFF_USER_ID, full_name: "Jordan Lee" },
-  ];
-  const staff = directory.map((p) => ({
-    id: p.id,
-    full_name: p.full_name,
-    initials: staffInitials(p.full_name),
-    role: p.id === ADMIN_USER_ID ? "admin" : "employee",
-  }));
-  const colMap = new Map<
-    string,
-    { label: string; required: boolean; evidenceType: string; obligationIds: string[] }
-  >();
-  for (const ob of fx.obligations) {
-    if (ob.active === false) continue;
-    const ref = packColumnForObligation({
-      id: String(ob.id),
-      title: String(ob.title),
-      scope: String(ob.scope ?? "org"),
-      source: String(ob.source ?? "sow"),
-    });
-    if (!ref || ref.packKey !== packKey) continue;
-    const existing = colMap.get(ref.columnKey);
-    if (existing) existing.obligationIds.push(String(ob.id));
-    else {
-      colMap.set(ref.columnKey, {
-        label: ref.label,
-        required: ref.required,
-        evidenceType: String(ob.evidence_type ?? "upload"),
-        obligationIds: [String(ob.id)],
-      });
-    }
-  }
-  const columns = [];
-  const cells = [];
-  for (const [columnKey, col] of colMap) {
-    let assignedCount = 0;
-    let completeCount = 0;
-    let redCount = 0;
-    for (const person of staff) {
-      const inst = fx.instances.filter(
-        (i) =>
-          col.obligationIds.includes(String(i.obligation_id)) && i.assignee_staff_id === person.id,
-      );
-      const assigned = inst.length > 0;
-      const open = inst.filter((i) => i.status === "pending" || i.status === "overdue");
-      const completed = inst.filter((i) => i.status === "completed" || i.status === "waived");
-      const complete = assigned && open.length === 0 && completed.length > 0;
-      const status = packCellStatus({ assigned, complete, required: col.required });
-      if (assigned) assignedCount += 1;
-      if (complete) completeCount += 1;
-      if (status === "incomplete") redCount += 1;
-      cells.push({
-        columnKey,
-        staffId: person.id,
-        obligationId: col.obligationIds[0] ?? null,
-        instanceId: inst[0]?.id ?? null,
-        assigned,
-        complete,
-        required: col.required,
-        status,
-      });
-    }
-    columns.push({
-      columnKey,
-      obligationIds: col.obligationIds,
-      label: col.label,
-      required: col.required,
-      evidenceType: col.evidenceType,
-      completeCount,
-      assignedCount,
-      redCount,
-    });
-  }
-  return {
-    packs: LOCKED_PACK_KEYS.map((k) => ({
-      packKey: k,
-      name: LOCKED_PACK_LABEL[k],
-      locked: true,
-      assign: { roles: [], jobCodes: [], groupIds: [], userIds: [] },
-    })),
-    staff,
-    columns,
-    cells,
-    jobCodes: [{ key: "dsp", label: "DSP" }],
-    existingItems: fx.obligations
-      .filter((o) => o.active !== false)
-      .map((o) => ({
-        id: String(o.id),
-        title: String(o.title),
-        packKey:
-          packColumnForObligation({
-            id: String(o.id),
-            title: String(o.title),
-            scope: String(o.scope ?? "org"),
-          })?.packKey ?? null,
-      })),
-  };
-}
-
 function deadlineItems(fx: ReturnType<typeof fixtures>) {
   return [
     {
@@ -1148,15 +1030,6 @@ function serverFnResult(
     return { error: "Nectar is not configured in this test environment." };
   }
   switch (name) {
-    case "listObligationPackMatrix":
-      return buildPackMatrix(fx, persona, String(body.packKey ?? "onboarding"));
-    case "createObligationPack":
-      return { packKey: "custom-e2e", name: String(body.name ?? "Custom") };
-    case "assignObligationPack":
-    case "addPackItem":
-    case "attachExistingToPack":
-    case "deleteCustomPack":
-      return { ok: true, obligationId: OB_CONDUCT_ID };
     case "listCompanyObligations":
       return fx.obligations;
     case "listAgencyDocuments": {

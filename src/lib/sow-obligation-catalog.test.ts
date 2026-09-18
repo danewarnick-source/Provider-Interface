@@ -142,10 +142,8 @@ describe("SOW catalog pack identity", () => {
       new URL("./company-obligations.functions.ts", import.meta.url),
       "utf8",
     );
-    const packSrc = readFileSync(new URL("./obligation-packs.functions.ts", import.meta.url), "utf8");
     const policySrc = readFileSync(new URL("./agency-policies.functions.ts", import.meta.url), "utf8");
     assert.match(createSrc, /ORPHAN_OBLIGATION_CREATE_GONE/);
-    assert.match(packSrc, /ORPHAN_OBLIGATION_CREATE_GONE/);
     assert.match(policySrc, /catalogTitleIsReserved\(policy\.title\)/);
   });
 

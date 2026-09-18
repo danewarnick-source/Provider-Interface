@@ -109,7 +109,6 @@ import {
   type RequirementTracking,
 } from "@/lib/requirement-tracking";
 import { RequirementTrackingEditor } from "@/components/nectar/requirement-tracking-editor";
-import { RequirementDrillDownSheet } from "@/components/nectar/requirement-drilldown-sheet";
 import {
   classifyPendingRequirements,
   providerConfirmRequirement,
@@ -2697,7 +2696,6 @@ function RequirementRow({
   const [detailOpen, setDetailOpen] = useState(false);
   const [trackingOpen, setTrackingOpen] = useState(false);
   const [attestOpen, setAttestOpen] = useState(false);
-  const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [verifTypeOpen, setVerifTypeOpen] = useState(false);
   const [pendingVerifType, setPendingVerifType] = useState<"internal" | "external">("internal");
 
@@ -2718,34 +2716,6 @@ function RequirementRow({
   const renewalDueAt = (md["renewal_due_at"] as string | null | undefined) ?? null;
   const trackingMd = (md["tracking"] ?? {}) as Partial<RequirementTracking>;
   const trackingState = computeRequirementDueState(md);
-
-  // Per-person completion, read from whatever the drill-down sheet already
-  // cached for this requirement — never fetched fresh from this row.
-  const drillDownCache = qc.getQueryData<{
-    kind?: "per_staff" | "per_client" | "per_event" | "org_wide";
-    staff?: Array<{ user_id: string }>;
-    clients?: Array<{ id: string }>;
-    evidenceByStaff?: Record<string, unknown[]>;
-    evidenceByClient?: Record<string, unknown[]>;
-  }>(["requirement-drilldown", orgId, req.id]);
-  const personProgress = (() => {
-    if (!drillDownCache) return null;
-    if (drillDownCache.kind === "per_staff" && drillDownCache.staff) {
-      const total = drillDownCache.staff.length;
-      const complete = drillDownCache.staff.filter(
-        (s) => (drillDownCache.evidenceByStaff?.[s.user_id]?.length ?? 0) > 0,
-      ).length;
-      return { total, complete };
-    }
-    if (drillDownCache.kind === "per_client" && drillDownCache.clients) {
-      const total = drillDownCache.clients.length;
-      const complete = drillDownCache.clients.filter(
-        (c) => (drillDownCache.evidenceByClient?.[c.id]?.length ?? 0) > 0,
-      ).length;
-      return { total, complete };
-    }
-    return null;
-  })();
 
   return (
     <li
@@ -2996,59 +2966,23 @@ function RequirementRow({
             </Badge>
           )}
         </div>
-        {!isRemoved && (
+        {!isRemoved && isConfirmed && !isNotApplicable && (
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            {isConfirmed && !isNotApplicable && (
-              <>
-                {req.applies_to === "company" ? (
-                  req.verified_at ? (
-                    <span className="text-[11px] text-muted-foreground">
-                      Last recorded: {new Date(req.verified_at).toLocaleDateString()}
-                    </span>
-                  ) : (
-                    <span className="text-[11px] text-amber-700 dark:text-amber-300">
-                      Not yet recorded
-                    </span>
-                  )
-                ) : personProgress ? (
-                  <div className="flex min-w-0 flex-1 items-center gap-2">
-                    <div className="h-1.5 w-full max-w-[160px] overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={`h-full rounded-full ${
-                          personProgress.total > 0 && personProgress.complete === personProgress.total
-                            ? "bg-emerald-500"
-                            : personProgress.complete > 0
-                              ? "bg-amber-500"
-                              : "bg-red-500"
-                        }`}
-                        style={{
-                          width: `${
-                            personProgress.total > 0
-                              ? (personProgress.complete / personProgress.total) * 100
-                              : 0
-                          }%`,
-                        }}
-                      />
-                    </div>
-                    <span className="shrink-0 text-[11px] text-muted-foreground">
-                      {personProgress.complete}/{personProgress.total} complete
-                    </span>
-                  </div>
-                ) : applicStats ? (
-                  <span className="text-[11px] text-muted-foreground">
-                    {applicStats.confirmed} confirmed · {applicStats.pending} pending
-                  </span>
-                ) : null}
-              </>
-            )}
-            <button
-              type="button"
-              onClick={() => setDrillDownOpen(true)}
-              className="rounded-sm text-[11px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-              title="View per-person compliance status"
-            >
-              View status →
-            </button>
+            {req.applies_to === "company" ? (
+              req.verified_at ? (
+                <span className="text-[11px] text-muted-foreground">
+                  Last recorded: {new Date(req.verified_at).toLocaleDateString()}
+                </span>
+              ) : (
+                <span className="text-[11px] text-amber-700 dark:text-amber-300">
+                  Not yet recorded
+                </span>
+              )
+            ) : applicStats ? (
+              <span className="text-[11px] text-muted-foreground">
+                {applicStats.confirmed} confirmed · {applicStats.pending} pending
+              </span>
+            ) : null}
           </div>
         )}
         {req.description && (
@@ -3300,13 +3234,6 @@ function RequirementRow({
         requirementTitle={req.title}
         orgId={orgId}
         current={trackingMd}
-      />
-      <RequirementDrillDownSheet
-        open={drillDownOpen}
-        onOpenChange={setDrillDownOpen}
-        orgId={orgId}
-        requirementId={req.id}
-        requirementTitle={req.title}
       />
     </li>
   );

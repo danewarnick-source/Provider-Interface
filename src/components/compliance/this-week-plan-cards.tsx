@@ -39,9 +39,6 @@ import {
 } from "@/lib/obligations/this-week.functions";
 import "./decision-card.css";
 
-/** PlanCard shim — keep 30 days while callers move to DecisionCard. */
-export { DecisionCard as PlanCard } from "@/components/compliance/decision-card";
-
 type PlanDialogKind = "license" | "standing" | "overdue";
 
 const HOME_CARD_CAP = 3;
