@@ -13,12 +13,14 @@ import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
 import { cadenceLabel, parseServiceCodeFlags } from "@/lib/evidence/catalog.ts";
 import {
   applyEvidenceRequirements,
+  createEvidenceChecklist,
   linkHostHomeEvidence,
   loadEvidenceBoard,
   recordEvidenceAttestation,
   recordEvidenceUpload,
   removeEvidenceRequirement,
   sendEvidenceToStaff,
+  upsertEvidenceRequirement,
   type EvidenceBoard,
 } from "@/lib/evidence.functions";
 import { type EvidenceStep } from "@/lib/evidence/nav.ts";
@@ -27,6 +29,8 @@ import { fetchEvidenceEmployees } from "@/lib/evidence/fetch-employees.ts";
 import { companyEvidencePerson } from "@/lib/evidence/people.ts";
 import { formatExpiresOn, latestFileForItem } from "@/lib/evidence/status.ts";
 import {
+  EVIDENCE_STORAGE_UNAVAILABLE,
+  type EvidenceCadence,
   type EvidencePerson,
   type EvidenceSubject,
   type EvidenceType,
@@ -52,6 +56,8 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
   const qc = useQueryClient();
   const loadFn = useServerFn(loadEvidenceBoard);
   const applyFn = useServerFn(applyEvidenceRequirements);
+  const customFn = useServerFn(upsertEvidenceRequirement);
+  const formFn = useServerFn(createEvidenceChecklist);
   const removeFn = useServerFn(removeEvidenceRequirement);
   const sendFn = useServerFn(sendEvidenceToStaff);
   const uploadFn = useServerFn(recordEvidenceUpload);
@@ -107,7 +113,70 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
       invalidate();
       onSearchChange({ tab, step: "grid", person: personId });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(/feature_config/i.test(e.message) ? EVIDENCE_STORAGE_UNAVAILABLE : e.message),
+  });
+  const customM = useMutation({
+    mutationFn: (args: {
+      title: string;
+      evidenceType: EvidenceType;
+      cadence: EvidenceCadence;
+      attestationText: string | null;
+      sowCite?: string | null;
+      expiresOn: string | null;
+    }) => {
+      const subjectIds = personId ? [personId] : tab === "company" && orgId ? [orgId] : [];
+      if (subjectIds.length === 0) throw new Error("Open Add on a person to apply a pack.");
+      return customFn({
+        data: {
+          organizationId: orgId!,
+          subjectType: tab,
+          subjectIds,
+          title: args.title,
+          evidenceType: args.evidenceType,
+          attestationText: args.attestationText,
+          cadence: args.cadence,
+          sowCite: args.sowCite ?? null,
+          expiresOn: args.expiresOn,
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success("Custom evidence added.");
+      invalidate();
+      onSearchChange({ tab, step: "grid", person: personId });
+    },
+    onError: (e: Error) =>
+      toast.error(/feature_config/i.test(e.message) ? EVIDENCE_STORAGE_UNAVAILABLE : e.message),
+  });
+  const formM = useMutation({
+    mutationFn: (args: {
+      title: string;
+      description: string;
+      questions: string[];
+      cadence: EvidenceCadence;
+    }) => {
+      const subjectIds = personId ? [personId] : tab === "company" && orgId ? [orgId] : [];
+      if (subjectIds.length === 0) throw new Error("Open Add on a person to create a form.");
+      return formFn({
+        data: {
+          organizationId: orgId!,
+          subjectType: tab,
+          subjectIds,
+          title: args.title,
+          description: args.description,
+          questions: args.questions,
+          cadence: args.cadence,
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success("Form created and added to this file.");
+      invalidate();
+      onSearchChange({ tab, step: "grid", person: personId });
+    },
+    onError: (e: Error) =>
+      toast.error(/feature_config/i.test(e.message) ? EVIDENCE_STORAGE_UNAVAILABLE : e.message),
   });
   const removeM = useMutation({
     mutationFn: (id: string) => removeFn({ data: { organizationId: orgId!, itemId: id } }),
@@ -296,7 +365,9 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
               typeOverrides: args.typeOverrides,
             });
           }}
-          pending={applyM.isPending}
+          onApplyCustom={(args) => customM.mutate(args)}
+          onCreateForm={(args) => formM.mutate(args)}
+          pending={applyM.isPending || customM.isPending || formM.isPending}
         />
       ) : null}
     </div>

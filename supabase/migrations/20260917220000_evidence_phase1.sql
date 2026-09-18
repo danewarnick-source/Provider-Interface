@@ -3,8 +3,9 @@
 -- pastes it into Lovable's SQL editor (clear the editor first).
 -- See docs/SQL_HANDOFF.md.
 --
--- App code works without this file: assignments also persist on
--- organizations.feature_config.evidence_v1 until this SQL is applied.
+-- Required for Apply / upload / attest. The app does not fall back to
+-- organizations.feature_config. Until this SQL is applied, the UI shows
+-- a friendly “storage isn’t set up” message and does not write that column.
 
 -- ── Assigned requirement rows ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.evidence_items (

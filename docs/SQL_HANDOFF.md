@@ -7,9 +7,11 @@ existing tables or columns. Does **not** seed W-9 / I-9. Does **not**
 write `requirement_defs` or revive the encoded SOW applicability engine.
 
 **What this is for:** Admin Evidence (people × requirements). Curated
-packs live in app code. These tables persist assigned rows, uploads /
-attestations, and saved templates. Until this runs, the app still
-persists on `organizations.feature_config.evidence_v1`.
+packs live in app code. Apply / upload / attest persist **only** on
+`evidence_items`, `evidence_files`, and `evidence_templates`. The app
+does **not** write `organizations.feature_config`. Until Dane pastes
+this SQL, Apply shows a friendly message that storage is not set up
+yet — it will not update a missing `feature_config` column.
 
 **To apply:** paste the full contents of
 `supabase/migrations/20260917220000_evidence_phase1.sql`

@@ -43,31 +43,55 @@ export const SERVICE_CODE_FLAGS = [
   "DSI",
   "RHS",
   "PPS",
+  "SJD",
+  "SEE",
+  "SED",
+  "SEC",
+  "SJP",
+  "SJR",
+  "EPR",
+  "DSG",
+  "DSP",
   "BC1",
   "BC2",
   "BC3",
+  "PM1",
+  "PM2",
+  "PN1",
+  "PN2",
+  "PBA",
+  "CMP",
+  "CMS",
+  "ELS",
+  "TFB",
+  "HSQ",
+  "RP2",
+  "RP3",
+  "RP4",
+  "RP5",
+  "RPS",
+  "MTP",
+  "PAC",
+  "COM",
 ] as const;
 export type ServiceCodeFlag = (typeof SERVICE_CODE_FLAGS)[number];
 
-export const STAFF_QUIZ_CODES: readonly ServiceCodeFlag[] = [
-  "HHS",
-  "SLN",
-  "SEI",
-  "DSI",
-  "RHS",
-  "PPS",
-  "BC1",
-  "BC2",
-  "BC3",
-];
+/** Employees quiz — every SOW tab with discrete file evidence (not notes/EVV/summaries). */
+export const STAFF_QUIZ_CODES: readonly ServiceCodeFlag[] = SERVICE_CODE_FLAGS;
 
 export const CLIENT_QUIZ_CODES: readonly ServiceCodeFlag[] = [
   "HHS",
   "PPS",
   "RHS",
   "SLN",
+  "SLH",
   "SEI",
+  "SJD",
+  "SEE",
+  "SED",
   "DSI",
+  "DSG",
+  "DSP",
   "BC1",
   "BC2",
   "BC3",
@@ -195,6 +219,8 @@ export const EVIDENCE_DISCLAIMER =
 
 export const EVIDENCE_UNCHECK_TITLE = "Are you sure?";
 export const EVIDENCE_UNCHECK_WARNING = "This was found to be a requirement in the SOW.";
+
+export const EVIDENCE_STORAGE_UNAVAILABLE = "Evidence storage isn’t set up on this database yet.";
 
 export const EVIDENCE_PUSH_TITLE = "New evidence item";
 export const EVIDENCE_PUSH_BODY =

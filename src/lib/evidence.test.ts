@@ -34,6 +34,8 @@ import {
   EVIDENCE_DISCLAIMER,
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_PUSH_BODY,
+  EVIDENCE_STORAGE_UNAVAILABLE,
+  STAFF_QUIZ_CODES,
   EVIDENCE_UNCHECK_TITLE,
   EVIDENCE_UNCHECK_WARNING,
   type EvidenceFileRow,
@@ -84,8 +86,8 @@ function file(partial: Partial<EvidenceFileRow>): EvidenceFileRow {
 
 describe("Evidence curated catalog", () => {
   it("keeps a curated demo catalog — not the mega sheet, no W-9/I-9 built-ins", () => {
-    assert.ok(EVIDENCE_REQUIREMENTS.length < 60);
-    assert.ok(EVIDENCE_PACKS.length < 25);
+    assert.ok(EVIDENCE_REQUIREMENTS.length < 120);
+    assert.ok(EVIDENCE_PACKS.length < 80);
     assert.equal(
       EVIDENCE_REQUIREMENTS.some((r) => isBuiltInTaxFormKey(r.key) || /w-?9|i-?9/i.test(r.title)),
       false,
@@ -181,6 +183,12 @@ describe("Evidence curated catalog", () => {
 
     const sei = suggestPacks({ ...base, serviceCodes: ["SEI"] });
     assert.ok(sei.some((p) => p.pack.key === "sei"));
+    const slh = suggestPacks({ ...base, serviceCodes: ["SLH"] });
+    assert.ok(slh.some((p) => p.pack.key === "slh_staff"));
+    const dsg = suggestPacks({ ...base, serviceCodes: ["DSG"] });
+    assert.ok(dsg.some((p) => p.pack.key === "day_supports_staff"));
+    const dsp = suggestPacks({ ...base, serviceCodes: ["DSP"] });
+    assert.ok(dsp.some((p) => p.pack.key === "day_supports_staff"));
     assert.equal(
       sei.some((p) => p.pack.key === "hhs_staff"),
       false,
@@ -535,6 +543,8 @@ describe("Evidence nav + product lock", () => {
     );
     assert.match(quiz, /data-evidence-quiz/);
     assert.match(quiz, /See employee suggestions|See client suggestions/);
+    assert.match(quiz, /Add custom evidence/);
+    assert.match(quiz, /Create a form/);
     assert.match(quiz, /Attestation/);
     assert.match(quiz, /exclusions.oig.hhs.gov|row.why|row.links/);
     assert.match(quiz, /AlertDialog/);
@@ -542,7 +552,17 @@ describe("Evidence nav + product lock", () => {
     assert.match(quiz, /evidence-attest-last/);
     assert.match(quiz, /isAttestFullName/);
     assert.doesNotMatch(quiz, /Keep suggested|Uncheck anyway/);
+    assert.doesNotMatch(quiz, /A checkbox alone is not enough/);
+    assert.doesNotMatch(quiz, /Employee suggestions \(personnel\)/);
+    assert.doesNotMatch(quiz, /Each item has a short plain-English explanation/);
+    assert.doesNotMatch(quiz, /Client: person-file packs/);
+    assert.doesNotMatch(quiz, /Client setup — services on this person/);
     assert.doesNotMatch(quiz, /amber-50|Not called compliance/);
+    assert.ok(STAFF_QUIZ_CODES.includes("SLH"));
+    assert.ok(STAFF_QUIZ_CODES.includes("DSG"));
+    assert.ok(STAFF_QUIZ_CODES.includes("DSP"));
+    assert.ok(STAFF_QUIZ_CODES.includes("SJD"));
+    assert.ok(STAFF_QUIZ_CODES.includes("COM"));
     assert.equal(EVIDENCE_CADENCE_OPTIONS.length, 8);
     assert.deepEqual(
       EVIDENCE_CADENCE_OPTIONS.map((o) => o.value),
@@ -565,7 +585,10 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(fn, /\.from\(["']requirement_applicability["']\)/);
     assert.doesNotMatch(fn, /duty-applicability/);
     assert.match(fn, /supabase as AnySupabase|supabase as any/);
-    assert.match(fn, /feature_config/);
+    assert.doesNotMatch(fn, /\.select\(["']feature_config["']\)|feature_config:/);
+    assert.match(fn, /EVIDENCE_STORAGE_UNAVAILABLE/);
+    assert.doesNotMatch(fn, /readFeatureStore|writeFeatureStore|evidence_v1/);
+    assert.match(EVIDENCE_STORAGE_UNAVAILABLE, /isn’t set up on this database yet/);
     assert.match(fn, /peopleError/);
     assert.match(fn, /loadEvidenceClientPeople/);
     assert.match(EVIDENCE_PUSH_BODY, /evidence item/);

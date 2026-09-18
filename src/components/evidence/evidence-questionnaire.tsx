@@ -16,15 +16,18 @@ import { Label } from "@/components/ui/label";
 import {
   defaultQuestionnaireAnswers,
   isSowSuggestedKey,
+  quizCodeLabel,
   quizCodesForSubject,
   requirementByKey,
   suggestPacks,
 } from "@/lib/evidence/catalog.ts";
 import { isAttestFullName } from "@/lib/evidence/people.ts";
 import {
+  EVIDENCE_CADENCE_OPTIONS,
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_UNCHECK_TITLE,
   EVIDENCE_UNCHECK_WARNING,
+  type EvidenceCadence,
   type EvidenceRequirementDef,
   type EvidenceSubject,
   type EvidenceType,
@@ -37,6 +40,8 @@ export function EvidenceQuestionnaire({
   personName,
   initialCodes,
   onApply,
+  onApplyCustom,
+  onCreateForm,
   onClose,
   pending,
 }: {
@@ -51,10 +56,26 @@ export function EvidenceQuestionnaire({
     optedOutKeys: string[];
     typeOverrides: Record<string, EvidenceType>;
   }) => void;
+  onApplyCustom: (args: {
+    title: string;
+    evidenceType: EvidenceType;
+    cadence: EvidenceCadence;
+    attestationText: string | null;
+    blurb: string;
+    expiresOn: string | null;
+  }) => void;
+  onCreateForm: (args: {
+    title: string;
+    description: string;
+    questions: string[];
+    cadence: EvidenceCadence;
+  }) => void;
   onClose: () => void;
   pending?: boolean;
 }) {
-  const [step, setStep] = useState<"quiz" | "rows">(subject === "company" ? "rows" : "quiz");
+  const [step, setStep] = useState<"quiz" | "rows" | "custom" | "form">(
+    subject === "company" ? "rows" : "quiz",
+  );
   const [answers, setAnswers] = useState<QuestionnaireAnswers>(() => ({
     ...defaultQuestionnaireAnswers(subject),
     serviceCodes: initialCodes ?? [],
@@ -71,6 +92,15 @@ export function EvidenceQuestionnaire({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [optOutKey, setOptOutKey] = useState<string | null>(null);
+  const [customTitle, setCustomTitle] = useState("");
+  const [customType, setCustomType] = useState<EvidenceType>("upload");
+  const [customCadence, setCustomCadence] = useState<EvidenceCadence>("once");
+  const [customBlurb, setCustomBlurb] = useState("");
+  const [customExpires, setCustomExpires] = useState("");
+  const [formTitle, setFormTitle] = useState("");
+  const [formDescription, setFormDescription] = useState("");
+  const [formQuestions, setFormQuestions] = useState<string[]>([""]);
+  const [formCadence, setFormCadence] = useState<EvidenceCadence>("once");
 
   useEffect(() => {
     setChecked((prev) => {
@@ -143,8 +173,11 @@ export function EvidenceQuestionnaire({
       : subject === "client"
         ? `Client packs · ${personName}`
         : `Employee packs · ${personName}`;
-  const canApply =
-    liability && isAttestFullName(firstName, lastName) && checked.size > 0 && !pending;
+  const named = liability && isAttestFullName(firstName, lastName);
+  const canApply = named && checked.size > 0 && !pending;
+  const canSaveCustom = named && customTitle.trim().length > 0 && !pending;
+  const formQs = formQuestions.map((q) => q.trim()).filter(Boolean);
+  const canCreateForm = named && formTitle.trim().length > 0 && formQs.length > 0 && !pending;
 
   const grouped = suggested.map((row) => ({
     pack: row.pack,
@@ -184,21 +217,16 @@ export function EvidenceQuestionnaire({
           <h2 id="evidence-pack-title" className="text-lg font-semibold text-[var(--hive-text)]">
             {title}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {step === "quiz" && subject === "staff"
-              ? "Employee setup — different from Client and Company."
-              : step === "quiz" && subject === "client"
-                ? "Client setup — services on this person, not hire flags."
-                : "Each item has a short plain-English explanation. Links open in a new tab."}
-          </p>
+          {step === "custom" ? (
+            <p className="mt-1 text-sm text-muted-foreground">Add custom evidence</p>
+          ) : step === "form" ? (
+            <p className="mt-1 text-sm text-muted-foreground">Create a form</p>
+          ) : null}
         </header>
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {step === "quiz" && subject === "staff" ? (
             <div className="space-y-4">
-              <p className="rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700">
-                Employee: hire / role questions, then personnel packs.
-              </p>
               <section className="rounded-xl border border-border p-3">
                 <h3 className="text-sm font-semibold">Job / service codes</h3>
                 <div className="mt-3 grid gap-2">
@@ -211,7 +239,7 @@ export function EvidenceQuestionnaire({
                         checked={answers.serviceCodes.includes(code)}
                         onCheckedChange={() => toggleCode(code)}
                       />
-                      {code}
+                      {quizCodeLabel(code)}
                     </label>
                   ))}
                 </div>
@@ -267,11 +295,8 @@ export function EvidenceQuestionnaire({
 
           {step === "quiz" && subject === "client" ? (
             <div className="space-y-4">
-              <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
-                Client: person-file packs. No CPR / background / Mandt.
-              </p>
               <section className="rounded-xl border border-border p-3">
-                <h3 className="text-sm font-semibold">Services / codes for this client</h3>
+                <h3 className="text-sm font-semibold">Services / codes</h3>
                 <div className="mt-3 grid gap-2">
                   {quizCodes.map((code) => (
                     <label
@@ -282,7 +307,7 @@ export function EvidenceQuestionnaire({
                         checked={answers.serviceCodes.includes(code)}
                         onCheckedChange={() => toggleCode(code)}
                       />
-                      {code}
+                      {quizCodeLabel(code)}
                     </label>
                   ))}
                 </div>
@@ -293,29 +318,16 @@ export function EvidenceQuestionnaire({
           {step === "rows" ? (
             <div className="space-y-4">
               {subject === "company" ? (
-                <div className="space-y-3">
-                  <p className="rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-900">
-                    Company: agency policies and standing — not people. No hire questionnaire.
-                  </p>
-                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
-                    <Checkbox
-                      checked={answers.includeCompanyCustoms}
-                      onCheckedChange={(v) =>
-                        setAnswers((a) => ({ ...a, includeCompanyCustoms: v === true }))
-                      }
-                    />
-                    Include optional custom company slot
-                  </label>
-                </div>
-              ) : subject === "staff" ? (
-                <p className="rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-700">
-                  Employee suggestions (personnel). Host Home Cert dual-links when HHS is selected.
-                </p>
-              ) : (
-                <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
-                  Client suggestions (person file).
-                </p>
-              )}
+                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border px-3 py-2.5 text-sm">
+                  <Checkbox
+                    checked={answers.includeCompanyCustoms}
+                    onCheckedChange={(v) =>
+                      setAnswers((a) => ({ ...a, includeCompanyCustoms: v === true }))
+                    }
+                  />
+                  Include optional custom company slot
+                </label>
+              ) : null}
 
               {grouped.map(({ pack, rows }) => (
                 <section key={pack.key}>
@@ -409,22 +421,194 @@ export function EvidenceQuestionnaire({
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Type your first and last name to confirm you accept this responsibility. A
-                  checkbox alone is not enough.
+                  Type your first and last name to confirm you accept this responsibility.
                 </p>
+              </div>
+            </div>
+          ) : null}
+
+          {step === "custom" ? (
+            <div className="space-y-4">
+              <div className="grid gap-1.5">
+                <Label htmlFor="evidence-custom-title">Title</Label>
+                <Input
+                  id="evidence-custom-title"
+                  value={customTitle}
+                  onChange={(e) => setCustomTitle(e.target.value)}
+                  placeholder="Requirement title"
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="evidence-custom-type">Type</Label>
+                  <select
+                    id="evidence-custom-type"
+                    value={customType}
+                    onChange={(e) => setCustomType(e.target.value as EvidenceType)}
+                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                  >
+                    <option value="upload">Upload</option>
+                    <option value="attestation">Attestation</option>
+                  </select>
+                </div>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="evidence-custom-cadence">Cadence</Label>
+                  <select
+                    id="evidence-custom-cadence"
+                    value={customCadence}
+                    onChange={(e) => setCustomCadence(e.target.value as EvidenceCadence)}
+                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                  >
+                    {EVIDENCE_CADENCE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="evidence-custom-blurb">Blurb (optional)</Label>
+                <Input
+                  id="evidence-custom-blurb"
+                  value={customBlurb}
+                  onChange={(e) => setCustomBlurb(e.target.value)}
+                  placeholder="What this row is for"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="evidence-custom-expires">Expiration (optional)</Label>
+                <Input
+                  id="evidence-custom-expires"
+                  type="date"
+                  value={customExpires}
+                  onChange={(e) => setCustomExpires(e.target.value)}
+                />
+              </div>
+              <div className="space-y-3 rounded-xl border border-border bg-muted/30 px-3 py-3">
+                <label className="flex items-start gap-3 text-sm">
+                  <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
+                  <span>{EVIDENCE_LIABILITY_TEXT}</span>
+                </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="evidence-custom-first">First name</Label>
+                    <Input
+                      id="evidence-custom-first"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="evidence-custom-last">Last name</Label>
+                    <Input
+                      id="evidence-custom-last"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {step === "form" ? (
+            <div className="space-y-4">
+              <div className="grid gap-1.5">
+                <Label htmlFor="evidence-form-title">Form title</Label>
+                <Input
+                  id="evidence-form-title"
+                  value={formTitle}
+                  onChange={(e) => setFormTitle(e.target.value)}
+                  placeholder="Checklist name"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="evidence-form-desc">Description (optional)</Label>
+                <Input
+                  id="evidence-form-desc"
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="evidence-form-cadence">Cadence</Label>
+                <select
+                  id="evidence-form-cadence"
+                  value={formCadence}
+                  onChange={(e) => setFormCadence(e.target.value as EvidenceCadence)}
+                  className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                >
+                  {EVIDENCE_CADENCE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Checklist questions</Label>
+                {formQuestions.map((q, i) => (
+                  <Input
+                    key={`fq-${i}`}
+                    value={q}
+                    onChange={(e) =>
+                      setFormQuestions((prev) =>
+                        prev.map((row, idx) => (idx === i ? e.target.value : row)),
+                      )
+                    }
+                    placeholder={`Question ${i + 1}`}
+                  />
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFormQuestions((prev) => [...prev, ""])}
+                >
+                  Add question
+                </Button>
+              </div>
+              <div className="space-y-3 rounded-xl border border-border bg-muted/30 px-3 py-3">
+                <label className="flex items-start gap-3 text-sm">
+                  <Checkbox checked={liability} onCheckedChange={(v) => setLiability(v === true)} />
+                  <span>{EVIDENCE_LIABILITY_TEXT}</span>
+                </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="evidence-form-first">First name</Label>
+                    <Input
+                      id="evidence-form-first"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="evidence-form-last">Last name</Label>
+                    <Input
+                      id="evidence-form-last"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           ) : null}
         </div>
 
         <footer
-          className="flex items-center gap-2 border-t border-border bg-muted/30 px-5 py-3"
+          className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 px-5 py-3"
           style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
         >
           <Button
             type="button"
             variant="outline"
             onClick={() => {
+              if (step === "custom" || step === "form") {
+                setStep("rows");
+                return;
+              }
               if (subject !== "company" && step === "rows") {
                 setStep("quiz");
                 return;
@@ -439,10 +623,53 @@ export function EvidenceQuestionnaire({
             <Button type="button" onClick={() => setStep("rows")}>
               {subject === "client" ? "See client suggestions" : "See employee suggestions"}
             </Button>
-          ) : (
-            <Button type="button" disabled={!canApply} onClick={apply}>
-              {pending ? "Applying…" : "Apply packs"}
+          ) : step === "custom" ? (
+            <Button
+              type="button"
+              disabled={!canSaveCustom}
+              onClick={() =>
+                onApplyCustom({
+                  title: customTitle.trim(),
+                  evidenceType: customType,
+                  cadence: customCadence,
+                  attestationText:
+                    customType === "attestation"
+                      ? customBlurb.trim() || `I attest that ${customTitle.trim()} is complete.`
+                      : null,
+                  blurb: customBlurb.trim(),
+                  expiresOn: customExpires || null,
+                })
+              }
+            >
+              {pending ? "Saving…" : "Save custom evidence"}
             </Button>
+          ) : step === "form" ? (
+            <Button
+              type="button"
+              disabled={!canCreateForm}
+              onClick={() =>
+                onCreateForm({
+                  title: formTitle.trim(),
+                  description: formDescription.trim(),
+                  questions: formQs,
+                  cadence: formCadence,
+                })
+              }
+            >
+              {pending ? "Creating…" : "Create form"}
+            </Button>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <Button type="button" variant="outline" onClick={() => setStep("custom")}>
+                Add custom evidence
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setStep("form")}>
+                Create a form
+              </Button>
+              <Button type="button" disabled={!canApply} onClick={apply}>
+                {pending ? "Applying…" : "Apply packs"}
+              </Button>
+            </div>
           )}
         </footer>
       </div>

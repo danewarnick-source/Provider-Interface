@@ -1,7 +1,7 @@
 /**
  * Evidence Phase 1 persistence.
- * Prefers additive evidence_* tables. Falls back to
- * organizations.feature_config.evidence_v1 when those tables are not live.
+ * Writes only evidence_items, evidence_files, and evidence_templates.
+ * Does not read or write organizations.feature_config.
  * Does not write requirement_defs or company_obligations.
  */
 import { createServerFn } from "@tanstack/react-start";
@@ -21,6 +21,7 @@ import {
   EVIDENCE_PUSH_BODY,
   EVIDENCE_PUSH_LINK,
   EVIDENCE_PUSH_TITLE,
+  EVIDENCE_STORAGE_UNAVAILABLE,
   type EvidenceCellStatus,
   type EvidenceFileRow,
   type EvidenceGridCell,
@@ -34,8 +35,6 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
-
-const STORE_KEY = "evidence_v1";
 
 const SubjectEnum = z.enum(["staff", "client", "company"]);
 const TypeEnum = z.enum(["upload", "attestation"]);
@@ -57,6 +56,18 @@ function tableMissing(message: string | undefined): boolean {
   );
 }
 
+function mapEvidenceDbError(message: string | undefined): string {
+  const text = message ?? "";
+  if (/feature_config/i.test(text) || tableMissing(text)) {
+    return EVIDENCE_STORAGE_UNAVAILABLE;
+  }
+  return text || EVIDENCE_STORAGE_UNAVAILABLE;
+}
+
+function requireTables(viaTables: boolean): void {
+  if (!viaTables) throw new Error(EVIDENCE_STORAGE_UNAVAILABLE);
+}
+
 function newId(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -72,43 +83,6 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-async function readFeatureStore(sb: AnySupabase, organizationId: string): Promise<StoreV1> {
-  const { data, error } = await sb
-    .from("organizations")
-    .select("feature_config")
-    .eq("id", organizationId)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  const fc = (data?.feature_config ?? {}) as Record<string, unknown>;
-  const raw = fc[STORE_KEY];
-  if (!raw || typeof raw !== "object") return emptyStore();
-  const store = raw as Partial<StoreV1>;
-  return {
-    items: Array.isArray(store.items) ? store.items : [],
-    files: Array.isArray(store.files) ? store.files : [],
-    templates: Array.isArray(store.templates) ? store.templates : [],
-  };
-}
-
-async function writeFeatureStore(
-  sb: AnySupabase,
-  organizationId: string,
-  store: StoreV1,
-): Promise<void> {
-  const { data, error } = await sb
-    .from("organizations")
-    .select("feature_config")
-    .eq("id", organizationId)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  const existing = ((data?.feature_config ?? {}) as Record<string, unknown>) ?? {};
-  const { error: upErr } = await sb
-    .from("organizations")
-    .update({ feature_config: { ...existing, [STORE_KEY]: store } })
-    .eq("id", organizationId);
-  if (upErr) throw new Error(upErr.message);
-}
-
 async function loadAll(
   sb: AnySupabase,
   organizationId: string,
@@ -120,8 +94,8 @@ async function loadAll(
     )
     .eq("organization_id", organizationId);
   if (itemErr) {
-    if (!tableMissing(itemErr.message)) throw new Error(itemErr.message);
-    return { store: await readFeatureStore(sb, organizationId), viaTables: false };
+    if (tableMissing(itemErr.message)) return { store: emptyStore(), viaTables: false };
+    throw new Error(mapEvidenceDbError(itemErr.message));
   }
   const { data: files, error: fileErr } = await sb
     .from("evidence_files")
@@ -130,15 +104,27 @@ async function loadAll(
     )
     .eq("organization_id", organizationId);
   if (fileErr) {
-    if (!tableMissing(fileErr.message)) throw new Error(fileErr.message);
-    return { store: await readFeatureStore(sb, organizationId), viaTables: false };
+    if (tableMissing(fileErr.message)) return { store: emptyStore(), viaTables: false };
+    throw new Error(mapEvidenceDbError(fileErr.message));
   }
   const { data: templates, error: tplErr } = await sb
     .from("evidence_templates")
     .select("id, organization_id, name, subject_type, pack_keys, requirement_keys, created_at")
     .eq("organization_id", organizationId)
     .order("created_at", { ascending: false });
-  if (tplErr && !tableMissing(tplErr.message)) throw new Error(tplErr.message);
+  if (tplErr) {
+    if (tableMissing(tplErr.message)) {
+      return {
+        viaTables: true,
+        store: {
+          items: (items ?? []) as EvidenceItemRow[],
+          files: (files ?? []) as EvidenceFileRow[],
+          templates: [],
+        },
+      };
+    }
+    throw new Error(mapEvidenceDbError(tplErr.message));
+  }
   return {
     viaTables: true,
     store: {
@@ -155,7 +141,8 @@ async function insertItem(
   organizationId: string,
   row: EvidenceItemRow,
 ): Promise<void> {
-  if (viaTables) {
+  requireTables(viaTables);
+  {
     const { error } = await sb.from("evidence_items").upsert(
       {
         id: row.id,
@@ -178,19 +165,8 @@ async function insertItem(
       },
       { onConflict: "organization_id,subject_type,subject_id,requirement_key" },
     );
-    if (error) throw new Error(error.message);
-    return;
+    if (error) throw new Error(mapEvidenceDbError(error.message));
   }
-  const store = await readFeatureStore(sb, organizationId);
-  const idx = store.items.findIndex(
-    (i) =>
-      i.subject_type === row.subject_type &&
-      i.subject_id === row.subject_id &&
-      i.requirement_key === row.requirement_key,
-  );
-  if (idx >= 0) store.items[idx] = { ...store.items[idx], ...row, id: store.items[idx]!.id };
-  else store.items.push(row);
-  await writeFeatureStore(sb, organizationId, store);
 }
 
 async function patchItem(
@@ -200,25 +176,18 @@ async function patchItem(
   itemId: string,
   patch: Partial<EvidenceItemRow>,
 ): Promise<EvidenceItemRow | null> {
-  if (viaTables) {
-    const { data, error } = await sb
-      .from("evidence_items")
-      .update({ ...patch, updated_at: nowIso() })
-      .eq("organization_id", organizationId)
-      .eq("id", itemId)
-      .select(
-        "id, organization_id, subject_type, subject_id, requirement_key, title, evidence_type, attestation_text, cadence, sow_cite, suggested, sent_to_staff, visible_to_staff_id, dual_link_key, dual_link_peer_id, expires_on, created_at, updated_at",
-      )
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    return (data as EvidenceItemRow | null) ?? null;
-  }
-  const store = await readFeatureStore(sb, organizationId);
-  const idx = store.items.findIndex((i) => i.id === itemId);
-  if (idx < 0) return null;
-  store.items[idx] = { ...store.items[idx]!, ...patch, updated_at: nowIso() };
-  await writeFeatureStore(sb, organizationId, store);
-  return store.items[idx]!;
+  requireTables(viaTables);
+  const { data, error } = await sb
+    .from("evidence_items")
+    .update({ ...patch, updated_at: nowIso() })
+    .eq("organization_id", organizationId)
+    .eq("id", itemId)
+    .select(
+      "id, organization_id, subject_type, subject_id, requirement_key, title, evidence_type, attestation_text, cadence, sow_cite, suggested, sent_to_staff, visible_to_staff_id, dual_link_key, dual_link_peer_id, expires_on, created_at, updated_at",
+    )
+    .maybeSingle();
+  if (error) throw new Error(mapEvidenceDbError(error.message));
+  return (data as EvidenceItemRow | null) ?? null;
 }
 
 async function deleteItem(
@@ -227,19 +196,13 @@ async function deleteItem(
   organizationId: string,
   itemId: string,
 ): Promise<void> {
-  if (viaTables) {
-    const { error } = await sb
-      .from("evidence_items")
-      .delete()
-      .eq("organization_id", organizationId)
-      .eq("id", itemId);
-    if (error) throw new Error(error.message);
-    return;
-  }
-  const store = await readFeatureStore(sb, organizationId);
-  store.files = store.files.filter((f) => f.item_id !== itemId);
-  store.items = store.items.filter((i) => i.id !== itemId);
-  await writeFeatureStore(sb, organizationId, store);
+  requireTables(viaTables);
+  const { error } = await sb
+    .from("evidence_items")
+    .delete()
+    .eq("organization_id", organizationId)
+    .eq("id", itemId);
+  if (error) throw new Error(mapEvidenceDbError(error.message));
 }
 
 async function insertFileRow(
@@ -248,14 +211,9 @@ async function insertFileRow(
   organizationId: string,
   row: EvidenceFileRow,
 ): Promise<void> {
-  if (viaTables) {
-    const { error } = await sb.from("evidence_files").insert(row);
-    if (error) throw new Error(error.message);
-    return;
-  }
-  const store = await readFeatureStore(sb, organizationId);
-  store.files.push(row);
-  await writeFeatureStore(sb, organizationId, store);
+  requireTables(viaTables);
+  const { error } = await sb.from("evidence_files").insert(row);
+  if (error) throw new Error(mapEvidenceDbError(error.message));
 }
 
 async function listStaffPeople(
@@ -550,6 +508,7 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
     await requireOrgMembership(supabase, userId, data.organizationId, "manager");
     const sb = supabase as AnySupabase;
     const { store, viaTables } = await loadAll(sb, data.organizationId);
+    requireTables(viaTables);
     const suggested = new Set(data.suggestedKeys ?? []);
     let count = 0;
     const created: EvidenceItemRow[] = [];
@@ -660,6 +619,7 @@ export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
         attestationText: z.string().nullable().optional(),
         cadence: CadenceEnum,
         sowCite: z.string().nullable().optional(),
+        expiresOn: z.string().nullable().optional(),
       })
       .parse(i),
   )
@@ -669,12 +629,8 @@ export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
     await requireOrgMembership(supabase, userId, data.organizationId, "manager");
     const sb = supabase as AnySupabase;
     const { viaTables } = await loadAll(sb, data.organizationId);
-    const key =
-      data.requirementKey?.trim() ||
-      `custom:${data.title
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")}`;
+    requireTables(viaTables);
+    const key = data.requirementKey?.trim() || `custom:${newId()}`;
     if (/^(w-?9|i-?9)$/i.test(key) || /^(w-?9|i-?9)$/i.test(data.title.trim())) {
       // Optional custom only — still allowed, but never a catalog built-in.
     }
@@ -693,6 +649,7 @@ export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
           sowCite: data.sowCite ?? null,
         },
       });
+      if (data.expiresOn) row.expires_on = data.expiresOn;
       await insertItem(sb, viaTables, data.organizationId, row);
     }
     return { ok: true as const, requirementKey: key };
@@ -746,17 +703,12 @@ export const saveEvidenceTemplate = createServerFn({ method: "POST" })
       requirement_keys: data.requirementKeys,
       created_at: nowIso(),
     };
-    if (viaTables) {
-      const { error } = await sb.from("evidence_templates").insert({
-        ...row,
-        created_by: userId,
-      });
-      if (error) throw new Error(error.message);
-    } else {
-      const store = await readFeatureStore(sb, data.organizationId);
-      store.templates.unshift(row);
-      await writeFeatureStore(sb, data.organizationId, store);
-    }
+    requireTables(viaTables);
+    const { error } = await sb.from("evidence_templates").insert({
+      ...row,
+      created_by: userId,
+    });
+    if (error) throw new Error(mapEvidenceDbError(error.message));
     return { ok: true as const, id: row.id };
   });
 
@@ -960,6 +912,78 @@ export const linkHostHomeEvidence = createServerFn({ method: "POST" })
       dual_link_key: "host_home_cert",
     });
     return { ok: true as const, peerId: peer.id };
+  });
+
+export const createEvidenceChecklist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        organizationId: z.string().uuid(),
+        subjectType: SubjectEnum,
+        subjectIds: z.array(z.string().uuid()).min(1),
+        title: z.string().min(1).max(160),
+        description: z.string().max(2000).optional(),
+        questions: z.array(z.string().min(1).max(400)).min(1).max(40),
+        cadence: CadenceEnum.optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: false as const, requirementKey: null as string | null };
+    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    const sb = supabase as AnySupabase;
+    const { viaTables } = await loadAll(sb, data.organizationId);
+    requireTables(viaTables);
+    const key = `form:${newId()}`;
+    const prompts = data.questions.map((q) => q.trim()).filter(Boolean);
+    const attestationText = prompts.map((q, i) => `${i + 1}. ${q}`).join("\n");
+    for (const subjectId of data.subjectIds) {
+      const row = buildItemFromKey({
+        organizationId: data.organizationId,
+        subjectType: data.subjectType,
+        subjectId,
+        requirementKey: key,
+        suggested: false,
+        custom: {
+          title: data.title.trim(),
+          evidenceType: "attestation",
+          attestationText,
+          cadence: data.cadence ?? "once",
+          sowCite: "Agency form",
+        },
+      });
+      await insertItem(sb, viaTables, data.organizationId, row);
+    }
+    try {
+      const fields = prompts.map((label, i) => ({
+        id: `q${i + 1}`,
+        type: "yes_no",
+        label,
+        required: true,
+      }));
+      const assignedUsers = data.subjectType === "staff" ? data.subjectIds : [];
+      const assignedClients = data.subjectType === "client" ? data.subjectIds : [];
+      await sb.from("forms").insert({
+        organization_id: data.organizationId,
+        name: data.title.trim(),
+        description: data.description?.trim() || null,
+        category: "evidence",
+        fields,
+        frequency: "as_needed",
+        schedule: {},
+        assigned_groups: [],
+        assigned_users: assignedUsers,
+        all_clients: data.subjectType !== "client",
+        assigned_clients: assignedClients,
+        settings: { source: "evidence", requirement_key: key },
+        created_by: userId,
+      });
+    } catch {
+      /* Forms table is optional — evidence row is the source of truth. */
+    }
+    return { ok: true as const, requirementKey: key };
   });
 
 export function unusedPackGuard(packKey: string): boolean {
