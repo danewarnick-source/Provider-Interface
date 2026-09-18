@@ -10,6 +10,7 @@ export const EVIDENCE_MATRIX_CHIP_KINDS = [
   "missing",
   "review",
   "add",
+  "open",
   "na",
 ] as const;
 export type EvidenceMatrixChipKind = (typeof EVIDENCE_MATRIX_CHIP_KINDS)[number];

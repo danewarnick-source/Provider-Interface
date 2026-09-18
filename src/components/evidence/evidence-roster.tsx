@@ -59,17 +59,6 @@ export function EvidenceRoster({
         <p className="flex-1 text-[13px] text-[var(--hive-text-muted)]">
           Open a row to add or review evidence.
         </p>
-        <Button
-          type="button"
-          size="sm"
-          disabled={!selectedId && people.length !== 1}
-          onClick={() => {
-            const id = selectedId ?? people[0]?.id;
-            if (id) onAddForPerson(id);
-          }}
-        >
-          Add packs
-        </Button>
       </div>
 
       {peopleError ? (
@@ -183,22 +172,11 @@ function PersonAccordion({
             }`}
           />
         </button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          aria-label={`Add packs for ${person.full_name}`}
-          onClick={() => onAddForPerson(person.id)}
-        >
-          Add packs
-        </Button>
       </div>
       {expanded ? (
         <div className="space-y-2 border-t border-[var(--hive-border)] bg-[var(--hive-canvas)] px-4 py-3">
           {rows.length === 0 ? (
-            <p className="text-sm text-[var(--hive-text-muted)]">
-              No selected records yet. Use Add packs for this person.
-            </p>
+            <p className="text-sm text-[var(--hive-text-muted)]">No selected records yet.</p>
           ) : (
             rows.map((row) => {
               const chip = matrixChip({
@@ -257,6 +235,13 @@ function PersonAccordion({
               Send all to employee
             </Button>
           ) : null}
+          <button
+            type="button"
+            className="text-[12px] font-medium text-[var(--hive-text-muted)] hover:text-[var(--hive-text)]"
+            onClick={() => onAddForPerson(person.id)}
+          >
+            + Add records
+          </button>
         </div>
       ) : null}
     </li>

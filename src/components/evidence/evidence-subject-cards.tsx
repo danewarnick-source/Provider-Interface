@@ -92,7 +92,7 @@ export function EvidenceSubjectCards({
             aria-pressed={active}
             onClick={() => onSelect(card.subject)}
             className={cn(
-              "relative overflow-hidden rounded-[14px] border bg-[var(--hive-surface)] px-4 py-3.5 text-left shadow-[0_1px_2px_rgba(36,48,64,0.04)]",
+              "rounded-[14px] border bg-[var(--hive-surface)] px-4 py-3.5 text-left shadow-[0_1px_2px_rgba(36,48,64,0.04)]",
               active
                 ? "border-[var(--hive-gold)] shadow-[0_0_0_1px_var(--hive-gold)]"
                 : "border-[var(--hive-border)]",
@@ -120,15 +120,6 @@ export function EvidenceSubjectCards({
                 <p className="mt-1 text-xs text-[var(--hive-text-muted)]">{hint}</p>
               </div>
             </div>
-            {card.tone === "emp" ? (
-              <svg
-                aria-hidden
-                className="pointer-events-none absolute -right-2.5 -top-2.5 h-[70px] w-[70px] opacity-10"
-                viewBox="0 0 80 80"
-              >
-                <circle cx="40" cy="40" r="30" fill="#c9a227" />
-              </svg>
-            ) : null}
           </button>
         );
       })}

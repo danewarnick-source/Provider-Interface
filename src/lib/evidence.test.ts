@@ -722,13 +722,27 @@ describe("Evidence cell status", () => {
         { kind: "missing", label: "Missing", itemId: "b" },
         { kind: "due", label: "Due in 16d", itemId: "c" },
       ]).map((c) => c.label),
-      ["2 missing", "Due in 16d"],
+      ["2 to finish", "Due in 16d", "Overdue"],
+    );
+    assert.deepEqual(
+      rowSummaryChips([
+        { kind: "add", label: "Add", itemId: "a" },
+        { kind: "add", label: "Add", itemId: "b" },
+        { kind: "review", label: "Review", itemId: "c" },
+      ]).map((c) => ({ kind: c.kind, label: c.label })),
+      [{ kind: "open", label: "3 to finish" }],
     );
     assert.deepEqual(
       rowSummaryChips([{ kind: "complete", label: "Complete", itemId: "a" }]).map((c) => c.label),
       ["Complete"],
     );
     assert.deepEqual(rowSummaryChips([]), []);
+    for (const chip of rowSummaryChips([
+      { kind: "missing", label: "Missing", itemId: "a" },
+      { kind: "add", label: "Add", itemId: "b" },
+    ])) {
+      assert.doesNotMatch(chip.label, /missing/i);
+    }
   });
 
   it("requires attestation timestamp for attest rows", () => {
@@ -859,6 +873,9 @@ describe("Evidence nav + product lock", () => {
     assert.match(roster, /Open a row to add or review evidence/);
     assert.match(roster, /aria-expanded/);
     assert.match(roster, /PersonAccordion|dueSubtitleFromItem/);
+    assert.match(roster, /\+ Add records/);
+    assert.doesNotMatch(roster, /Add packs/);
+    assert.doesNotMatch(cards, /fill="#c9a227"|-right-2\.5 -top-2\.5|opacity-10/);
     assert.doesNotMatch(roster, /<table|matrixColumns|shared column/i);
     assert.doesNotMatch(roster, /tab === |"staff"|"client"|"company"/);
     assert.doesNotMatch(workspace, /EvidenceMatrix|matrixColumns|evidence-matrix/);
