@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { APP_VIEWPORT_BOOT_SCRIPT, installAppViewportSync } from "@/lib/app-viewport";
 import {
   Outlet,
   createRootRouteWithContext,
@@ -267,6 +268,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: `window.__HIVE_RUNTIME__=${runtime}` }} />
+        <script dangerouslySetInnerHTML={{ __html: APP_VIEWPORT_BOOT_SCRIPT }} />
       </head>
       <body>
         {children}
@@ -278,6 +280,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // Keep --app-vh / --app-vt aligned with the visible viewport (iOS Safari
+  // URL bar + toolbar). Must be a layout effect so the first paint after
+  // hydrate already has the measured height.
+  useLayoutEffect(() => installAppViewportSync(), []);
 
   // Global safety net: failed dynamic imports / preloads that escape the
   // router error boundary still surface here. Same one-time, loop-guarded
