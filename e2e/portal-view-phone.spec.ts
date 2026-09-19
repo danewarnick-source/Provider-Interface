@@ -25,7 +25,7 @@ test.use({
 
 async function openPortalViewMenu(page: Page) {
   await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
-  await expect(page.getByText("Loading workspace…")).toHaveCount(0, { timeout: 40_000 });
+  await expect(page.locator("[data-app-shell]")).toBeVisible({ timeout: 40_000 });
   await expect(page.getByRole("button", { name: "Open menu" })).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: "Open menu" }).tap();
   // Desktop aside stays in the DOM (hidden md:flex). Use the open Sheet.
@@ -222,22 +222,26 @@ test.describe("Phone shells can scroll from the first row to the last", () => {
 
   async function openAdmin(page: Page, path: string) {
     await page.goto(path, { waitUntil: "domcontentloaded" });
-    await expect(page.getByText("Loading workspace…")).toHaveCount(0, { timeout: 40_000 });
+    await expect(page.locator("[data-app-shell]")).toBeVisible({ timeout: 40_000 });
     await expect(page.getByRole("button", { name: "Open menu" })).toBeVisible({ timeout: 20_000 });
     await expect(page.locator("[data-dashboard-scroller]")).toBeVisible();
   }
 
-  test("admin Home / Evidence / Employees keep first and last rows in the scrollport", async ({
+  test("admin Home / Evidence / Daily Logs keep first and last rows in the scrollport", async ({
     page,
   }) => {
     const routes = [
-      { path: "/dashboard", shot: "admin_phone_home_scroll" },
-      { path: "/dashboard/evidence", shot: "admin_phone_evidence_scroll" },
-      { path: "/dashboard/employees", shot: "admin_phone_employees_scroll" },
+      { path: "/dashboard", shot: "admin_phone_home" },
+      { path: "/dashboard/evidence", shot: "admin_phone_evidence" },
+      { path: "/dashboard/daily-logs", shot: "admin_phone_dailylogs" },
     ] as const;
 
     for (const route of routes) {
       await openAdmin(page, route.path);
+      await page.locator("[data-dashboard-scroller]").evaluate((el) => {
+        el.scrollTop = 0;
+      });
+      await shot(page, `${route.shot}_top`);
       const report = await measurePhoneScroll(page, {
         scroller: "[data-dashboard-scroller]",
         header: "header.hive-chrome",
@@ -254,7 +258,7 @@ test.describe("Phone shells can scroll from the first row to the last", () => {
         (report.innerH ?? 0) + 1,
       );
       expect(report.appVh, `${route.path} missing --app-vh`).toMatch(/px$/);
-      await shot(page, route.shot);
+      await shot(page, `${route.shot}_bottom`);
     }
   });
 
@@ -268,6 +272,10 @@ test.describe("Phone shells can scroll from the first row to the last", () => {
     );
     await expect(page.locator("[data-staff-phone-scroller]")).toBeVisible({ timeout: 15_000 });
     await expect(page.locator("[data-staff-top-bar]")).toBeVisible();
+    await page.locator("[data-staff-phone-scroller]").evaluate((el) => {
+      el.scrollTop = 0;
+    });
+    await shot(page, "staff_phone_home_top");
 
     const report = await measurePhoneScroll(page, {
       scroller: "[data-staff-phone-scroller]",
@@ -277,7 +285,7 @@ test.describe("Phone shells can scroll from the first row to the last", () => {
     expect(report.ok, report.reason ?? "").toBeTruthy();
     expect(report.topClear, `staff first row under title bar ${JSON.stringify(report)}`).toBe(true);
     expect(report.bottomClear, `staff last row under tabs ${JSON.stringify(report)}`).toBe(true);
-    await shot(page, "staff_phone_home_scroll_ends");
+    await shot(page, "staff_phone_home_bottom");
   });
 });
 
