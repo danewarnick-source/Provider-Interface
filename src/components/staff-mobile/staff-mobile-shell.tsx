@@ -10,10 +10,10 @@ import { resetStaffPhoneScroll, staffMainBottomPadCss } from "@/lib/staff-phone-
 
 /**
  * Mobile-only chrome for the staff portal. The shell is a fixed-viewport
- * `position: relative; overflow: hidden` container that acts as the
- * positioning context for every overlay (bottom sheets, confirm dialogs,
- * paperwork pop-ups). All overlays mount into this subtree via portal so
- * they stay bounded by the screen.
+ * `data-app-shell="fixed"` container (`--app-vh` / `--app-vt`, never the large viewport)
+ * that acts as the positioning context for every overlay (bottom sheets,
+ * confirm dialogs, paperwork pop-ups). All overlays mount into this subtree
+ * via portal so they stay bounded by the visible screen.
  */
 export function StaffMobileShell({
   title,
@@ -47,7 +47,8 @@ function ShellInner({ title, children }: { title: string; children: ReactNode })
   return (
     <div
       ref={ref}
-      className="md:hidden fixed left-0 top-0 z-30 flex h-[100dvh] w-[100dvw] max-w-[100dvw] flex-col overflow-hidden bg-background"
+      data-app-shell="fixed"
+      className="z-30 flex flex-col overflow-hidden bg-background md:hidden"
     >
       <StaffTopBar title={title} framed />
       {/*

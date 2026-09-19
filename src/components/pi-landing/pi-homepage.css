@@ -40,6 +40,7 @@ html.pi-html-landing:has(.pi-home) body {
   position: relative;
   overflow-x: clip;
   min-height: 100vh;
+  min-height: 100svh;
 }
 
 .pi-landing-root.pi-home,
@@ -708,6 +709,7 @@ html.pi-html-landing:has(.pi-home) body {
 .pi-home-foot {
   border-top: 1px solid var(--line);
   padding: 36px 0 28px;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
   color: var(--ink3);
   background: transparent;
 }

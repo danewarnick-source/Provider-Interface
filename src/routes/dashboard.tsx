@@ -751,7 +751,7 @@ function DashboardLayout() {
   return (
     <GuidedTourProvider>
       <DraftJobsProvider>
-        <div className="flex h-screen h-[100dvh] flex-col overflow-hidden">
+        <div data-app-shell className="flex flex-col overflow-hidden">
           <ImpersonationBanner />
           {isCognitoAuth() && (orgError || awsDbFailed) && (
             <div
@@ -785,7 +785,7 @@ function DashboardLayout() {
 
             <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
               <header
-                className="hive-chrome flex min-h-16 shrink-0 items-center justify-between gap-2 border-b border-[var(--hive-chrome-border)] px-4 md:px-6"
+                className="hive-chrome relative z-20 flex min-h-16 shrink-0 items-center justify-between gap-2 border-b border-[var(--hive-chrome-border)] px-4 md:px-6"
                 style={{
                   paddingTop: "env(safe-area-inset-top)",
                   paddingLeft: "max(1rem, env(safe-area-inset-left))",
@@ -1036,8 +1036,9 @@ function CompanyClientsBridge({
 
 /**
  * Admin / desktop nested scroller. Staff phones use StaffMobileShell instead.
- * Resets to top on route change. iOS safe-area is applied via styles.css
- * on [data-dashboard-scroller].
+ * Resets to top on route change. Visible-viewport height lives on
+ * [data-app-shell]; iOS safe-area + Safari-chrome pad live on
+ * [data-dashboard-scroller] in styles.css.
  */
 function DashboardMain({ className, children }: { className: string; children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

@@ -404,14 +404,42 @@
 .pt-safe { padding-top: env(safe-area-inset-top); }
 
 /*
+ * In-app shells must fill the *visible* viewport, never 100vh. iOS Safari's
+ * 100vh includes the area behind the URL bar and the bottom toolbar, so a
+ * h-screen + overflow-hidden frame clips the last rows and lets the first
+ * rows slide under the chrome. --app-vh is synced from visualViewport;
+ * 100svh is the fallback before JS / on browsers without dvh.
+ */
+[data-app-shell] {
+  height: 100svh;
+  height: var(--app-vh, 100svh);
+  max-width: 100%;
+  overflow: hidden;
+}
+[data-app-shell="fixed"] {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--app-vt, 0px);
+  width: 100%;
+  max-width: 100%;
+}
+html:has([data-app-shell]),
+html:has([data-app-shell]) body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/*
  * Admin / desktop nested <main> (data-dashboard-scroller). Staff phones
  * reserve tab + clock chrome in StaffMobileShell via staffMainBottomPadCss.
  * On phones this clears Safari's bottom chrome + the home indicator so the
- * last list card is reachable.
+ * last list card is reachable. 2.75rem ~= compact Safari toolbar as a
+ * comfort pad even if visualViewport is a few pixels off.
  */
 @media (max-width: 767px) {
   [data-dashboard-scroller] {
-    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(2.75rem + env(safe-area-inset-bottom, 0px));
   }
   /* Hire questionnaire is long; extra pad so Apply packs clears Safari chrome. */
   [data-dashboard-scroller]:has([data-evidence-quiz]) {
