@@ -29,8 +29,21 @@ import {
   STAFF_LIST,
   TEAMS,
 } from "../fixtures/tns-roster";
+import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
+import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
+import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
 
 export type MockPersona = "admin" | "dsp" | "manager";
+
+/** Every required operating fact answered — mirrors a launched TNS. */
+const MOCK_SETUP_FACTS: AgencySetupFacts = {
+  operates_ol_site: true,
+  uses_volunteers: false,
+  has_governing_board: true,
+  servicesOffered: ["HHS", "SLN", "SLH", "SEI", "DSI"],
+  approxClientCount: 12,
+  serviceArea: "Salt Lake, Davis",
+};
 
 export type MockOptions = {
   persona?: MockPersona;
@@ -810,6 +823,15 @@ function serverFnPayload(url: string, body: string): unknown {
     };
   }
   if (/checkHiveExecutive/i.test(fn)) return { isExecutive: false };
+  if (/getAgencySetupStatus/i.test(fn)) {
+    // Mocked TNS has finished agency setup, so the Employees/Clients create gate stays open.
+    return {
+      ...computeAgencySetupStatus(MOCK_SETUP_FACTS),
+      organizationId: ORG_ID,
+      facts: MOCK_SETUP_FACTS,
+    };
+  }
+  if (/loadEmployeeScope|loadOrgScopeSnapshot/i.test(fn)) return emptyOrgScopeSnapshot();
   if (/getMyEntitlements/i.test(fn)) {
     return {
       organization_id: ORG_ID,

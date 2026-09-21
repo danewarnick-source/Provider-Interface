@@ -229,13 +229,18 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await page.locator("#hire_date").fill("2026-07-01");
     await page.getByRole("button", { name: /Create employee/i }).click();
 
-    await expect(page.getByRole("heading", { name: /How should they sign in/i })).toBeVisible({
+    // Step 2 ("access"): the file already exists; invites are opt-in per hire.
+    await expect(page.getByRole("heading", { name: /Send invites\?/i })).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByRole("button", { name: /Send invite email/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Don't invite yet/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Show temporary password/i })).toBeVisible();
+    // Nobody is pre-checked: the send button is disabled at "Send 0 invites".
+    await expect(page.getByRole("button", { name: /^Send 0 invites$/i })).toBeDisabled();
+    await page.getByRole("checkbox", { name: /Sep Tester/i }).check();
+    await expect(page.getByRole("button", { name: /^Send 1 invite$/i })).toBeEnabled();
 
-    await page.getByRole("button", { name: /Send invite email/i }).click();
+    await page.getByRole("button", { name: /^Send 1 invite$/i }).click();
     const toast = page.locator("[data-sonner-toast]").filter({
       hasText: /Invite emailed|couldn't be sent|Invitation created|Unauthorized/i,
     });
