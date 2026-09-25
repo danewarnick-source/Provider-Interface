@@ -18562,7 +18562,6 @@ export type Database = {
         Args: { _notes: string; _proposal_id: string }
         Returns: undefined
       }
-      restore_my_admin_role: { Args: never; Returns: undefined }
       seed_standard_service_codes: {
         Args: { _org: string }
         Returns: undefined
