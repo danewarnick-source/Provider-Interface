@@ -57,7 +57,7 @@ If the agency hasn't answered its six setup questions (do you run an OL site, us
 | Deactivate / delete someone | yes | no (button hidden) | no (button hidden) | no |
 | Save the Roster → Settings toggles | yes | **looks like yes, actually no** (bug F-1) | **same** | no |
 | Edit a Host card | yes | no | no | no |
-| Use Employee Loans | yes | **tab shows, but nothing loads** (bug F-10) | yes | no |
+| Use Employee Loans | yes | yes (double-check live with Q7) | yes | no |
 
 ---
 
@@ -382,7 +382,7 @@ Employee Loan Ledger
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Bug F-10:** Program Managers can see this tab (it only checks "can view staff records") but the database bouncer for all four loan tables only lets `admin` and `manager` through — `program_manager` was added to HIVE later and never added to that rule. So a PM sees an empty ledger and every save fails. Fix is a one-line SQL change (Q7 at the end shows the current rule) **or** hide the tab for PMs.
+**F-10 (withdrawn):** An earlier version of this doc said Program Managers were blocked from loans. That was wrong. The database rule for all four loan tables (`is_org_admin_or_manager`) lets Owners, Program Managers and Supervisors in. That rule was updated in migration `20260825020000`. Run Q7 at the end to confirm the live database has the same rule. If `program_manager` is missing there, the migration never reached the live database.
 
 ### Starting a loan (2.4.2)
 
@@ -445,7 +445,7 @@ Matches what the tree describes. **EXACTLY WHAT WE WANT** for the lock logic; al
 | **F-7** | Employee page → Back | Goes to the previous tab, not the list | Uses browser history; tab clicks add history | "Make both back buttons navigate to `/dashboard/hub/employees` directly." |
 | **F-8** | Employee page → Activity → All | Every shift appears twice | Shifts and Timesheets read the same records | "In `ActivityFeed`, only create a Timesheet item when the EVV row is in a payroll status (approved/submitted), or merge Shift and Timesheet into one line." |
 | **F-9** | Employee page → Save profile | If one of four saves fails, the earlier ones already went through | Four sequential writes, no rollback | Acceptable for now. Long-term: one server function does all four. |
-| **F-10** | Employee Loans | Program Managers see the tab, but nothing loads and saves fail | Database rule lists admin + manager only | SQL handoff: "Add `program_manager` to `is_org_admin_or_manager`" — **but check every other table that uses this rule first (Q7)**. Or hide the tab for PMs. |
+| **F-10** (withdrawn) | Employee Loans | Not a bug: Program Managers are allowed by the current database rule | Earlier doc misread an older migration | Nothing, unless Q7 shows the live rule is missing `program_manager`. |
 | **F-11** | Loan editor header | "DRAFT — pending legal review" on signed loans | Hard-coded text | "Replace the static subtitle with the loan's actual `status`." |
 | **F-12** | Send for e-signature | One signer only; extra parties don't get links | Design: one token per send | Product decision. Multi-party = one link per party + "all signed" state. |
 | **F-13** | Test harness (not the app) | The roster browser tests failed on `main` | Two new server functions weren't mocked; wizard wording changed | **Fixed in this PR.** |
@@ -510,7 +510,7 @@ from user_permission_overrides where organization_id = ':org';
 select role, count(*) as granted, string_agg(permission, ',' order by permission)
 from role_permissions where organization_id = ':org' and granted group by role;
 
--- Q7. Does the loans bouncer include program_manager? (F-10) — read the function body
+-- Q7. Does the loans bouncer include program_manager? (confirms F-10 is withdrawn) — read the function body
 select pg_get_functiondef('public.is_org_admin_or_manager(uuid,uuid)'::regprocedure);
 
 -- Q8. Loans by status, how many signed, how many waiting on a signature
@@ -679,7 +679,7 @@ These are what a regular Staff member can do on their phone. Staff has all of th
 | 2.3.1.2 / 2.3.1.3 | Client file / Agency file | YET TO BREAK DOWN |
 | 2.3.2 | HR Settings | NEEDS ATTENTION (F-2, F-3) — not empty, just un-run |
 | 2.3.3–2.3.5 | Rollup, 0 open, 0 done | EXACTLY WHAT WE WANT |
-| 2.4 | Loans tab | EXACTLY WHAT WE WANT (renders) · NEEDS ATTENTION (F-10 for PMs) |
+| 2.4 | Loans tab | EXACTLY WHAT WE WANT (renders; PM access confirmed in migrations) |
 | 2.4.2.x / "2.1.2.3.x" | New loan form fields | EXACTLY WHAT WE WANT (fields) · UNTESTED (save) |
 | Download PDF | | UNTESTED |
 | Send for e-signature | | UNTESTED · NEEDS ATTENTION (F-12) |

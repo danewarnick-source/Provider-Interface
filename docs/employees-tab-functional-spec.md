@@ -73,7 +73,7 @@ Baseline from `DEFAULT_MATRIX` (live `role_permissions` may override per org; §
 | Deactivate / Delete (`deactivate_staff` in UI; server fn accepts admin/PM/manager) | yes | UI: no | UI: no | no |
 | Save Staff Fields settings (RLS `organizations` UPDATE = `has_org_role(...,'admin')`) | yes | **no (silent)** | **no (silent)** | no |
 | Edit host cue cards (`manage_referrals`) | yes | no | no | no |
-| Read/write employee loans (RLS `is_org_admin_or_manager`) | yes | **no** — PM is not in that helper | yes | no |
+| Read/write employee loans (RLS `is_org_admin_or_manager`) | yes | yes (helper includes `program_manager` since `20260825020000`; confirm live with Q7) | yes | no |
 
 ---
 
@@ -548,7 +548,7 @@ HR Settings (/dashboard/hr-admin/settings)
 
 ### 6.A Functional spec
 
-**Purpose.** Admin-only record and e-signature of loan/advance agreements between the org and a staffer. Tables (migration `20260702041149`): `employee_loans` (agreement + status), `employee_loan_entries` (ledger lines), `employee_loan_signatures` (signed record: name, image, IP, method, time), `employee_loan_signature_tokens` (one-time signing links). RLS on all four: `is_org_admin_or_manager` — **Program Manager is not in that helper**, so a PM sees the tab (permission gate is `view_staff_records`) but every query fails/returns nothing (F-10).
+**Purpose.** Admin-only record and e-signature of loan/advance agreements between the org and a staffer. Tables (migration `20260702041149`): `employee_loans` (agreement + status), `employee_loan_entries` (ledger lines), `employee_loan_signatures` (signed record: name, image, IP, method, time), `employee_loan_signature_tokens` (one-time signing links). RLS on all four: `is_org_admin_or_manager`, which is `role IN ('admin','program_manager','manager')` as of migration `20260825020000`, so Owners, Program Managers and Supervisors can read/write. The tab gate is `view_staff_records` (F-10, withdrawn; confirm live with Q7).
 
 **Panel (2.4.1–2.4.3).**
 
@@ -628,7 +628,7 @@ Editor (replaces the ledger in place):
 | 2.4.3.5.1.1.3 | Send for e-signature | **UNTESTED** / **NEEDS ATTENTION** | F-12 single signer; disabled-without-email has no hint |
 | 2.4.3.5.1 / .2 | Open by status | **EXACTLY WHAT WE WANT** | lock logic traced |
 | header copy | "DRAFT — pending legal review" | **NEEDS ATTENTION** | F-11 static |
-| RLS | Program Manager access | **NEEDS ATTENTION** | F-10 |
+| RLS | Program Manager access | **EXACTLY WHAT WE WANT** (per migrations) / **UNTESTED** (live) | F-10 withdrawn; confirm with Q7 |
 | 2.4.3.5.1.1.5 | Delete | **UNTESTED** | browser confirm; also allowed on signed |
 
 ---
@@ -646,7 +646,7 @@ Editor (replaces the ledger in place):
 | **F-7** | Profile → Back to list / ← Employees | After changing tabs, Back returns to the previous tab instead of the list. | Both buttons call `router.history.back()`; tab changes push history. | Navigate explicitly to `/dashboard/hub/employees` (keep `history.back()` only when the referrer is the roster). |
 | **F-8** | Profile → Activity → All | Every EVV row with a status appears twice (Shift + Timesheet). | `ActivityFeed` pushes one item of each kind per `evv_timesheets` row. | Show Timesheet items only when the row is in a payroll status (e.g. approved/submitted), or merge into one line. |
 | **F-9** | Profile → Save profile | Four writers run sequentially; if the 3rd fails the first two are already committed and the toast reads as a failure. | `saveMut` is not transactional. | Acceptable for now; document. Long-term: one server fn. |
-| **F-10** | Employee Loans | Program Manager sees the tab but RLS blocks every read/write (`is_org_admin_or_manager` = admin, manager only). | Helper predates `program_manager` (added 2026-08-25). | SQL handoff: extend `is_org_admin_or_manager` to include `program_manager` (affects every table using it — review first), or gate the tab on role rank ≥ manager. |
+| **F-10** (withdrawn) | Employee Loans | Originally reported as "Program Manager blocked by RLS". That is incorrect: migration `20260825020000_replace_is_super_admin_with_hive_executive.sql` defines `is_org_admin_or_manager` as `role IN ('admin','program_manager','manager')`. | n/a | None, unless Q7 shows the live function body is missing `program_manager` (that would mean the migration never reached the live DB). |
 | **F-11** | Loan editor header | "DRAFT — pending legal review" prints on signed/active loans. | Static string. | Render `values.status` instead. |
 | **F-12** | Send for e-signature | Only one signer per send; added Signature parties are PDF text only. | Token model is one signer per token; dialog collects one name/email. | Product decision: multi-party = one token per party + "all signed" state. Tester's request noted. |
 | **F-13** | e2e harness (not product) | `e2e/clients-staff-roster.spec.ts` failed 5/8 on `main` before this work because `mock-hive.ts` did not mock `getAgencySetupStatus` / `loadEmployeeScope` (both added after the harness) and the wizard step-2 copy had changed. | Harness drift. | Fixed in this PR (mocks + copy). Two remaining failures are in the **Clients** chart (Files tab, empty state) — outside this tab. |
@@ -710,7 +710,7 @@ from user_permission_overrides where organization_id = ':org';
 select role, count(*) as granted, string_agg(permission, ',' order by permission)
 from role_permissions where organization_id = ':org' and granted group by role;
 
--- Q7. Loans RLS helper includes program_manager? (F-10)
+-- Q7. Loans RLS helper includes program_manager? (confirms F-10 is withdrawn)
 select pg_get_functiondef('public.is_org_admin_or_manager(uuid,uuid)'::regprocedure);
 
 -- Q8. Employee loans + signature tokens for the org (2.4)
