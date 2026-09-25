@@ -7,6 +7,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { isLikelyBadCoord } from "@/lib/geo";
 import { syncHomePinFromAddress } from "@/lib/home-pin";
+import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = any;
@@ -24,14 +25,14 @@ async function requireAdminForClient(
   if (!client) throw new Error("Client not found");
   const { data: membership } = await sb
     .from("organization_members")
-    .select("role")
+    .select("access_level")
     .eq("organization_id", client.organization_id)
     .eq("user_id", userId)
     .eq("active", true)
     .maybeSingle();
   if (!membership) throw new Error("Forbidden");
-  const role = String((membership as { role: string }).role ?? "").toLowerCase();
-  if (!["admin", "program_manager", "manager", "owner"].includes(role)) {
+  const level = (membership as { access_level: string | null }).access_level;
+  if (!isAdminLevel(level)) {
     throw new Error("Forbidden");
   }
   return { organizationId: client.organization_id as string };
@@ -150,14 +151,14 @@ export const backfillOrgHomePinsFromAddresses = createServerFn({ method: "POST" 
     const sb = context.supabase as Sb;
     const { data: membership } = await sb
       .from("organization_members")
-      .select("role")
+      .select("access_level")
       .eq("organization_id", data.organizationId)
       .eq("user_id", context.userId)
       .eq("active", true)
       .maybeSingle();
     if (!membership) throw new Error("Forbidden");
-    const role = String((membership as { role: string }).role ?? "").toLowerCase();
-    if (!["admin", "program_manager", "manager", "owner"].includes(role)) {
+    const level = (membership as { access_level: string | null }).access_level;
+    if (!isAdminLevel(level)) {
       throw new Error("Forbidden");
     }
 

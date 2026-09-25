@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -28,9 +28,9 @@ import {
 export const Route = createFileRoute("/dashboard/financial/nectar")({
   head: () => ({ meta: [{ title: "NECTAR Financial — Provider Interface" }] }),
   component: () => (
-    <RequireRole roles={["admin", "program_manager", "manager"]}>
+    <RequireLevel min="admin">
       <NectarFinancialPage />
-    </RequireRole>
+    </RequireLevel>
   ),
 });
 

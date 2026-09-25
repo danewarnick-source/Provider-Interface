@@ -247,9 +247,9 @@ describe("Admin employee profile lock", () => {
     );
     assert.match(identity, /Employee ID/);
     assert.match(identity, /Job title/);
-    assert.match(identity, /Base role/);
+    assert.match(identity, /Access level/);
     assert.doesNotMatch(identity, /Department/);
-    assert.match(panel, /Admin scope/);
+    assert.match(panel, /AccessSection/);
     assert.match(panel, /Edit profile/);
     assert.match(panel, /Save profile/);
   });

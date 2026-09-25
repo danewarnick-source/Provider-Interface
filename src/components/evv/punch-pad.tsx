@@ -78,7 +78,7 @@ import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { ShiftMedDueCheck, type PendingMedDose } from "@/components/medications/shift-med-due-check";
 import { useComplianceGate } from "@/hooks/use-compliance-gate";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { useServerFn } from "@tanstack/react-start";
 import { checkBillingEntry, checkStaffPrerequisite, raiseComplianceFlag } from "@/lib/nectar-compliance.functions";
 
@@ -132,6 +132,7 @@ import {
 } from "@/lib/geo";
 import { gpsFixFromPosition, HIGH_ACCURACY_GPS_OPTIONS } from "@/lib/gps";
 import { selectedPill, unselectedPill } from "@/components/evv/toggle-styles";
+import { isAdminLevel } from "@/lib/access/levels";
 
 function fmtElapsed(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -1299,9 +1300,9 @@ export function PunchPad({
   // Growth-adaptive: one useComplianceGate call, its own buildInput/buildSubject,
   // plus a restrict-vs-override branch. Engine (dialog, rules, flags, history,
   // freeze trigger, raise/resolve fns) and detector registry are UNTOUCHED.
-  const { role } = usePermissions();
+  const { level: role } = useAccess();
   const canOverrideCompliance =
-    role === "admin" || role === "program_manager" || role === "manager";
+    isAdminLevel(role);
   const detectBillingConflict = useServerFn(checkBillingEntry);
   const detectStaffPrereq = useServerFn(checkStaffPrerequisite);
   const raiseComplianceFlagFn = useServerFn(raiseComplianceFlag);

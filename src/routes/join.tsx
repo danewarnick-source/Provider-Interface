@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 import { toast } from "sonner";
 import { AuthShell } from "./login";
-import { ROLE_LABEL, type Role } from "@/lib/rbac";
+import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import {
   extractInviteToken,
   humanizeInviteError,
@@ -22,7 +22,7 @@ import {
   JOIN_USERNAME_HINT,
   JOIN_USERNAME_INVALID,
   joinConfirmLiveMessage,
-  joinHomeForRole,
+  joinHomeForLevel,
   joinPasswordLiveMessage,
   joinSetsAuthPassword,
   joinUsernameLiveMessage,
@@ -144,7 +144,7 @@ function JoinPage() {
       if (rpcErr) throw new Error(humanizeInviteError(rpcErr.message));
 
       toast.success(`You're in — welcome to ${prepared.org_name}.`);
-      window.location.replace(joinHomeForRole(prepared.role));
+      window.location.replace(joinHomeForLevel(prepared.level, prepared.home));
     } catch (err) {
       toast.error(humanizeInviteError(err));
     } finally {
@@ -185,7 +185,8 @@ function JoinPage() {
     );
   }
 
-  const roleLabel = ROLE_LABEL[preview.role as Role] ?? preview.role;
+  const levelLabel = LEVEL_LABEL[preview.level as AccessLevel] ?? "Staff";
+  const roleLabel = preview.preset_name ? `${levelLabel} · ${preview.preset_name}` : levelLabel;
   const setsNewPassword = joinSetsAuthPassword(preview.account_exists, {
     mustChangePassword: preview.must_change_password,
   });

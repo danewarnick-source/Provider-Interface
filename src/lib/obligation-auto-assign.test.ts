@@ -45,7 +45,7 @@ describe("hire auto-assign", () => {
     assert.doesNotMatch(hireHook, /assignmentNeedsMandt/);
     assert.doesNotMatch(hireHook, /ensureOpenStaffObligationInternal\(/);
     const roleWriter = readFileSync(
-      fileURLToPath(new URL("./team-access.functions.ts", import.meta.url)),
+      fileURLToPath(new URL("./access/access.functions.ts", import.meta.url)),
       "utf8",
     );
     assert.match(roleWriter, /reevaluateStaffDutiesInternal/);

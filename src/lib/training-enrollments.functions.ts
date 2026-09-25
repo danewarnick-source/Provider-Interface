@@ -105,7 +105,7 @@ async function notifyOrgAdminsInternal(
     .select("user_id")
     .eq("organization_id", organizationId)
     .eq("active", true)
-    .in("role", ["admin"]);
+    .eq("access_level", "owner");
   if (error) throw new Error(error.message);
   const rows = ((admins ?? []) as Array<{ user_id: string }>).map((a) => ({
     organization_id: organizationId,
@@ -126,7 +126,7 @@ async function notifyOrgAdminsInternal(
 }
 
 async function assertOrgAdmin(sb: AnySupabase, orgId: string, userId: string): Promise<void> {
-  await requireOrgMembership(sb, userId, orgId, "admin");
+  await requireOrgMembership(sb, userId, orgId, "owner");
 }
 
 export async function markTrainingLinkSentInternal(

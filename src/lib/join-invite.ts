@@ -94,12 +94,9 @@ export function humanizeInviteError(raw: unknown): string {
   return inviteFailureMessage("unknown");
 }
 
-export function joinHomeForRole(role: string | null | undefined): string {
-  if (role === "admin" || role === "manager" || role === "program_manager") {
-    return "/dashboard";
-  }
-  if (role === "committee_member") return "/dashboard/hrc";
-  return "/employee";
+export function joinHomeForLevel(level: string | null | undefined, presetHome?: string | null): string {
+  if (presetHome) return presetHome;
+  return level === "owner" || level === "admin" ? "/dashboard" : "/employee";
 }
 
 /** Staff join: length only. GoTrue default is 6 with no required character classes. */

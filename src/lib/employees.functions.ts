@@ -8,8 +8,11 @@ import {
 } from "@/lib/staff-assignment-hooks.functions";
 import { resolveAccountUsername } from "@/lib/account-username";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
+import { requireCategory, requireLevel } from "@/lib/access/require";
+import type { AccessLevel } from "@/lib/access/levels";
+import { logChange } from "@/lib/access/change-log.server";
 
-const RoleEnum = z.enum(["admin", "program_manager", "manager", "employee", "committee_member"]);
+const LevelEnum = z.enum(["owner", "admin", "staff"]);
 
 export const CreateEmployeeInput = z.object({
   organizationId: z.string().uuid(),
@@ -18,7 +21,9 @@ export const CreateEmployeeInput = z.object({
   email: z.string().trim().email().max(255),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
   temporaryPassword: z.string().min(8).max(128),
-  role: RoleEnum,
+  accessLevel: LevelEnum,
+  /** Null → the level's default preset (member trigger). */
+  accessPresetId: z.string().uuid().nullable().optional(),
   department: z.string().trim().max(120).optional().or(z.literal("")),
   hireDate: z.string().optional().or(z.literal("")),
   startDate: z.string().optional().or(z.literal("")),
@@ -37,17 +42,12 @@ export const CreateEmployeeInput = z.object({
 export type HireEmployeeInput = z.infer<typeof CreateEmployeeInput>;
 
 async function assertOrgManager(actorId: string, orgId: string) {
-  const { data, error } = await supabaseAdmin
-    .from("organization_members")
-    .select("role,active")
-    .eq("user_id", actorId)
-    .eq("organization_id", orgId)
-    .eq("active", true)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data || !["admin", "program_manager", "manager"].includes(data.role)) {
-    throw new Error("Forbidden: insufficient permissions for this organization");
-  }
+  await requireCategory(supabaseAdmin, actorId, orgId, "staff_hiring", "edit");
+}
+
+/** Hiring or re-levelling someone above Staff takes an Owner. */
+async function assertCanGrantLevel(actorId: string, orgId: string, level: AccessLevel) {
+  if (level !== "staff") await requireLevel(supabaseAdmin, actorId, orgId, "owner");
 }
 
 /** Shared hire path for Add employee and roster upload. Never sends email. */
@@ -180,7 +180,9 @@ export async function hireEmployeeInternal(
       {
         organization_id: data.organizationId,
         user_id: newUserId,
-        role: data.role,
+        access_level: data.accessLevel,
+        access_preset_id: data.accessLevel === "owner" ? null : (data.accessPresetId ?? null),
+        access_scope: null,
         job_title: data.department || null,
         active: true,
         ...(data.managerId !== undefined ? { manager_id: data.managerId } : {}),
@@ -189,17 +191,13 @@ export async function hireEmployeeInternal(
     );
     if (memErr) throw new Error(memErr.message);
 
-    await supabaseAdmin.from("role_change_audit_log").insert({
-      organization_id: data.organizationId,
-      changed_by_user_id: actorUserId,
-      changed_by_name:
-        createdVia === "smart_import" ? "Admin (smart import)" : "Admin (staff creation)",
-      target_user_id: newUserId,
-      target_user_name: `${data.firstName} ${data.lastName}`.trim(),
-      previous_role: "none",
-      new_role: data.role,
-      change_method: createdVia === "smart_import" ? "smartImportEmployee" : "createEmployee",
-    });
+    await logChange(
+      data.organizationId,
+      actorUserId,
+      "member_created",
+      { userId: newUserId, name: `${data.firstName} ${data.lastName}`.trim() },
+      { access_level: data.accessLevel, created_via: createdVia },
+    );
 
     if (data.trackIds.length) {
       const rows = data.trackIds.map((tid) => ({
@@ -234,6 +232,7 @@ export const createEmployeeManually = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     if (!context.userId) return { userId: "", email: "" };
     await assertOrgManager(context.userId, data.organizationId);
+    await assertCanGrantLevel(context.userId, data.organizationId, data.accessLevel);
     const hired = await hireEmployeeInternal(data, context.userId, "manual_admin");
     return { userId: hired.userId, email: hired.email };
   });
@@ -244,7 +243,7 @@ const RosterApplyInput = z.object({
   lastName: z.string().trim().min(1).max(80),
   email: z.string().trim().email().max(255),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
-  role: RoleEnum,
+  accessLevel: LevelEnum,
   department: z.string().trim().max(120).optional().or(z.literal("")),
   hireDate: z.string().optional().or(z.literal("")),
   username: z.string().trim().max(254).optional().or(z.literal("")),
@@ -291,11 +290,20 @@ async function updateExistingRosterMember(
   if (profErr) throw new Error(profErr.message);
 
   if (inOrg) {
+    const { data: current } = await supabaseAdmin
+      .from("organization_members")
+      .select("access_level")
+      .eq("organization_id", data.organizationId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    const levelChanged = current?.access_level !== data.accessLevel;
     const { error: memErr } = await supabaseAdmin
       .from("organization_members")
       .update({
-        role: data.role,
         job_title: data.department || null,
+        ...(levelChanged
+          ? { access_level: data.accessLevel, access_preset_id: null, access_scope: null, access_overrides: {} }
+          : {}),
       })
       .eq("organization_id", data.organizationId)
       .eq("user_id", userId);
@@ -312,7 +320,9 @@ async function updateExistingRosterMember(
     {
       organization_id: data.organizationId,
       user_id: userId,
-      role: data.role,
+      access_level: data.accessLevel,
+      access_preset_id: null,
+      access_scope: null,
       job_title: data.department || null,
       active: true,
     },
@@ -339,6 +349,7 @@ export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
     };
     if (!context.userId) return empty;
     await assertOrgManager(context.userId, data.organizationId);
+    await assertCanGrantLevel(context.userId, data.organizationId, data.accessLevel);
 
     const email = data.email.trim().toLowerCase();
     const { data: existingProf } = await supabaseAdmin
@@ -384,7 +395,7 @@ export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
           email,
           phone: data.phone ?? "",
           temporaryPassword: password,
-          role: data.role,
+          accessLevel: data.accessLevel,
           department: data.department ?? "",
           hireDate: data.hireDate ?? "",
           startDate: data.hireDate ?? "",
@@ -475,7 +486,7 @@ export interface StaffHireDateRow {
   userId: string;
   name: string;
   email: string | null;
-  role: string;
+  accessLevel: AccessLevel;
   department: string | null;
   hireDate: string | null;
 }
@@ -489,7 +500,7 @@ export const listStaffHireDates = createServerFn({ method: "GET" })
 
     const { data: members, error } = await supabaseAdmin
       .from("organization_members")
-      .select("user_id, role, job_title")
+      .select("user_id, access_level, job_title")
       .eq("organization_id", data.organizationId)
       .eq("active", true);
     if (error) throw new Error(error.message);
@@ -520,7 +531,7 @@ export const listStaffHireDates = createServerFn({ method: "GET" })
           userId: m.user_id,
           name,
           email: (p?.email as string | null) ?? null,
-          role: m.role as string,
+          accessLevel: (m.access_level ?? "staff") as AccessLevel,
           department: (p?.department as string | null) ?? (m.job_title as string | null) ?? null,
           hireDate: ((p?.start_date ?? p?.hire_date) as string | null) ?? null,
         };

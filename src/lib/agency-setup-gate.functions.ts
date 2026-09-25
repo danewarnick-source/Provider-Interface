@@ -46,7 +46,7 @@ export const getAgencySetupStatus = createServerFn({ method: "GET" })
         facts: EMPTY_AGENCY_SETUP_FACTS,
       };
     }
-    await requireOrgMembership(supabase, context.userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, context.userId, data.organizationId, "staff");
     const facts = await loadAgencySetupFacts(supabase, data.organizationId);
     const status = await loadAgencySetupStatus(supabase, data.organizationId);
     return { ...status, organizationId: data.organizationId, facts };
@@ -59,7 +59,7 @@ export const persistAgencySetupFacts = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = context.supabase as any;
     if (!supabase || !context.userId) throw new Error("Not authenticated");
-    await requireOrgMembership(supabase, context.userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, context.userId, data.organizationId, "admin");
     const { organizationId, ...answers } = data;
     return persistAgencySetupFactsInternal(supabase, organizationId, context.userId, answers);
   });

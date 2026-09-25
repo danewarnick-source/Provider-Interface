@@ -6,6 +6,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { Award, ExternalLink, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
+import { isAdminLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/certifications")({
   validateSearch: (s: Record<string, unknown>): { focus?: string } =>
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/dashboard/certifications")({
 function CertificationsPage() {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
-  const isManager = org?.role === "admin" || org?.role === "manager";
+  const isManager = isAdminLevel(org?.access.level);
 
   const { data: certs, isLoading } = useQuery({
     enabled: !!user,

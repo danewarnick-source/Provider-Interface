@@ -19,7 +19,7 @@ export type StaffIdentityProfile = {
 
 export type StaffIdentityMember = {
   id: string;
-  role: string;
+  access_level: string;
   job_title?: string | null;
   user_id?: string | null;
   active?: boolean;
@@ -31,7 +31,6 @@ export type StaffIdentityDraft = {
   last_name: string;
   email: string;
   phone: string;
-  role: string;
   hire_date: string;
   employee_id: string;
   job_title: string;
@@ -83,7 +82,6 @@ export function identityDraftFrom(
     last_name: names.last,
     email: profile?.email ?? "",
     phone: profile?.phone ?? "",
-    role: member.role,
     hire_date: profile?.hire_date ?? profile?.start_date ?? "",
     employee_id: profile?.employee_id ?? "",
     job_title: member.job_title ?? "",
@@ -136,7 +134,7 @@ export async function loadStaffProfileIdentity(
 
   const { data: m, error: mErr } = await supabase
     .from("organization_members")
-    .select("id, role, job_title, active, user_id, created_at")
+    .select("id, access_level, job_title, active, user_id, created_at")
     .eq("organization_id", organizationId)
     .eq("user_id", staffId)
     .maybeSingle();

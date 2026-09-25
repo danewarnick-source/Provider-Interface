@@ -12,6 +12,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { isAdminLevel } from "@/lib/access/levels";
 
 const orgStaff = z.object({
   organization_id: z.string().uuid(),
@@ -192,13 +193,12 @@ export const updateStaffPii = createServerFn({ method: "POST" })
     if (userId === data.staff_id) {
       const { data: mem } = await sb
         .from("organization_members")
-        .select("role")
+        .select("access_level")
         .eq("organization_id", data.organization_id)
         .eq("user_id", userId)
         .eq("active", true)
         .maybeSingle();
-      const role = (mem as { role?: string } | null)?.role;
-      if (role !== "admin" && role !== "manager") {
+      if (!isAdminLevel((mem as { access_level?: string } | null)?.access_level)) {
         throw new Error("Forbidden: staff may not edit own PII");
       }
     }

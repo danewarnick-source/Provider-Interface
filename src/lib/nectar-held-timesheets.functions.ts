@@ -19,22 +19,21 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { computeEntryUnits } from "./billing-units";
+import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function ensureOverrideRole(supabase: any, userId: string, orgId: string) {
   const { data, error } = await supabase
     .from("organization_members")
-    .select("role")
+    .select("access_level")
     .eq("organization_id", orgId)
     .eq("user_id", userId)
     .eq("active", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  const role = data?.role;
-  if (role !== "admin" && role !== "program_manager" && role !== "manager") {
-    throw new Error("Forbidden — admin, program manager, or supervisor required to resolve held timesheets");
+  if (!isAdminLevel(data?.access_level)) {
+    throw new Error("Forbidden — an Owner or Admin is required to resolve held timesheets");
   }
-  return role as "admin" | "program_manager" | "manager";
 }
 
 export type HeldTimesheetFlag = {

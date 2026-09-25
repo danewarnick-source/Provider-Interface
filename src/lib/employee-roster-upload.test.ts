@@ -8,8 +8,7 @@ import {
   normalizeEmployeeRosterHeader,
   normalizeHireDate,
   parseEmployeeRosterCsv,
-  parseEmployeeRosterRole,
-  toInviteRole,
+  parseEmployeeRosterLevel,
   classifyRosterRowAction,
   validateEmployeeRosterRows,
 } from "./employee-roster-upload.ts";
@@ -21,7 +20,7 @@ describe("employee roster template", () => {
     assert.match(csv, /last_name/);
     assert.match(csv, /email/);
     assert.match(csv, /phone/);
-    assert.match(csv, /role/);
+    assert.match(csv, /access_level/);
     assert.match(csv, /title/);
     assert.match(csv, /hire_date/);
     assert.match(csv, /username/);
@@ -41,12 +40,12 @@ describe("employee roster template", () => {
     assert.equal(isClientOnlyRosterHeader("medicaid_id"), true);
     assert.equal(isClientOnlyRosterHeader("PCSP goals"), true);
     assert.equal(isClientOnlyRosterHeader("billing_code"), true);
-    assert.equal(parseEmployeeRosterRole("Supervisor"), "manager");
-    assert.equal(parseEmployeeRosterRole(""), "employee");
-    assert.equal(parseEmployeeRosterRole("wizard"), null);
-    assert.equal(toInviteRole("admin"), "admin");
-    assert.equal(toInviteRole("program_manager"), "manager");
-    assert.equal(toInviteRole("committee_member"), "employee");
+    assert.equal(normalizeEmployeeRosterHeader("Role"), "access_level");
+    assert.equal(parseEmployeeRosterLevel("Supervisor"), "admin");
+    assert.equal(parseEmployeeRosterLevel(""), "staff");
+    assert.equal(parseEmployeeRosterLevel("wizard"), null);
+    assert.equal(parseEmployeeRosterLevel("owner"), "owner");
+    assert.equal(parseEmployeeRosterLevel("committee_member"), "staff");
     assert.equal(normalizeHireDate("7/1/2026"), "2026-07-01");
   });
 
@@ -58,7 +57,7 @@ describe("employee roster template", () => {
     assert.equal(rows.length, 1);
     assert.equal(rows[0].username, "jane@agency.org");
     assert.equal(rows[0].username_provided, false);
-    assert.equal(rows[0].role, "employee");
+    assert.equal(rows[0].access_level, "employee");
     const ok = validateEmployeeRosterRows(rows);
     assert.equal(ok.size, 0);
 
@@ -71,7 +70,7 @@ describe("employee roster template", () => {
     assert.ok(fields.includes("first_name"));
     assert.ok(fields.includes("email"));
     assert.ok(fields.includes("phone"));
-    assert.ok(fields.includes("role"));
+    assert.ok(fields.includes("access_level"));
   });
 
   it("keeps the upload wizard on the invite rail and off Smart Import", () => {

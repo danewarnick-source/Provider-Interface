@@ -197,7 +197,7 @@ export const getAgencyHealthSnapshot = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return emptySnapshot();
 
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = supabase as any;
     const orgId = data.organizationId;

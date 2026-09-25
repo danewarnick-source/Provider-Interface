@@ -106,7 +106,7 @@ export const ingestDocument = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
 
     // 1. Upload to storage
@@ -431,7 +431,7 @@ export const reviewExtractedField = createServerFn({ method: "POST" })
       .eq("id", data.fieldId)
       .maybeSingle();
     if (!fieldRow?.organization_id) throw new Error("Extracted field not found");
-    await requireOrgMembership(supabase, userId, fieldRow.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, fieldRow.organization_id as string, "admin");
     const update: Record<string, unknown> = {
       status: data.action === "confirm" ? "confirmed" : data.action === "override" ? "overridden" : "rejected",
       reviewed_by: userId,
@@ -463,7 +463,7 @@ export const deleteDocument = createServerFn({ method: "POST" })
       .eq("id", data.documentId)
       .maybeSingle();
     if (!doc?.organization_id) throw new Error("Document not found");
-    await requireOrgMembership(supabase, userId, doc.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, doc.organization_id as string, "admin");
     if (doc?.storage_path) {
       await supabase.storage.from(doc.storage_bucket as string).remove([doc.storage_path as string]);
     }

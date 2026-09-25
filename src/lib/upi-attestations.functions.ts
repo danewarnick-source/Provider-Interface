@@ -56,7 +56,7 @@ export const listUpiAttestations = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return [] as UpiAttestationRow[];
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: rows, error } = await (supabase as any)
       .from("upi_attestations")
@@ -80,7 +80,7 @@ export const recordUpiAttestation = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: true };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const { data: prof } = await supabase.from("profiles").select("full_name").eq("id", userId).maybeSingle();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = supabase as any;

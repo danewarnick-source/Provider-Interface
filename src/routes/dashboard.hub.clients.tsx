@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { HubShell, type HubTab } from "@/components/admin-hubs/hub-shell";
 import { RequirePermission } from "@/components/rbac-guard";
-import { RequireRole } from "@/components/rbac-guard";
-import { usePermissions } from "@/hooks/use-permissions";
+import { RequireLevel } from "@/components/rbac-guard";
+import { useAccess } from "@/hooks/use-access";
 import { ClientsPage } from "./dashboard.clients";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { TeamsPage } from "./dashboard.teams";
@@ -17,7 +17,7 @@ const search = z.object({
 
 
 function ClientsHub() {
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const tabs: HubTab[] = [
     { key: "directory", label: "Directory", render: () => <ClientsPage /> },
   ];
@@ -60,9 +60,9 @@ function ClientsHub() {
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               Client Loan Ledger
             </h3>
-            <RequireRole roles={["admin"]}>
+            <RequireLevel min="owner">
               <ClientLoansPage />
-            </RequireRole>
+            </RequireLevel>
           </section>
         </div>
       ),

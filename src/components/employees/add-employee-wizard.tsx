@@ -17,13 +17,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { LevelPresetFields, type LevelPresetValue } from "@/components/access/level-preset-fields";
 import {
   normalizeConfig,
   WORKER_TYPE_OPTIONS,
   type StaffIntakeFieldsConfig,
 } from "@/components/hr/staff-fields-panel";
 
-type Role = "admin" | "manager" | "employee";
 
 type HireDraft = {
   id: string;
@@ -31,7 +31,7 @@ type HireDraft = {
   lastName: string;
   email: string;
   phone: string;
-  role: Role;
+  access: LevelPresetValue;
   hireDate: string;
   staffType: string[];
   department: string;
@@ -46,7 +46,7 @@ type CreatedEmployee = {
   name: string;
   email: string;
   password: string;
-  role: Role;
+  access: LevelPresetValue;
 };
 
 function newDraftId(): string {
@@ -63,7 +63,7 @@ function emptyDraft(): HireDraft {
     lastName: "",
     email: "",
     phone: "",
-    role: "employee",
+    access: { level: "staff", presetId: null },
     hireDate: "",
     staffType: [],
     department: "",
@@ -146,7 +146,8 @@ export function AddEmployeeWizard({
               email: row.email.trim(),
               phone: row.phone.trim(),
               temporaryPassword: password,
-              role: row.role,
+              accessLevel: row.access.level,
+              accessPresetId: row.access.presetId,
               hireDate: row.hireDate,
               startDate: row.hireDate,
               trackIds: [],
@@ -165,7 +166,7 @@ export function AddEmployeeWizard({
             name: `${row.firstName.trim()} ${row.lastName.trim()}`.trim(),
             email: row.email.trim(),
             password,
-            role: row.role,
+            access: row.access,
           });
         } catch (e) {
           const who = `${row.firstName.trim()} ${row.lastName.trim()}`.trim() || row.email.trim();
@@ -204,7 +205,13 @@ export function AddEmployeeWizard({
           let raw: unknown;
           try {
             raw = await createInviteFn({
-              data: { organization_id: organizationId, email, role: row.role, site_origin },
+              data: {
+                organization_id: organizationId,
+                email,
+                access_level: row.access.level,
+                access_preset_id: row.access.presetId,
+                site_origin,
+              },
             });
           } catch (e) {
             const msg = e instanceof Error ? e.message : "";
@@ -295,6 +302,7 @@ export function AddEmployeeWizard({
             >
               {drafts.map((draft, index) => (
                 <HireDraftFields
+                  organizationId={organizationId}
                   key={draft.id}
                   draft={draft}
                   index={index}
@@ -448,6 +456,7 @@ function AccessCard({
 }
 
 function HireDraftFields({
+  organizationId,
   draft,
   index,
   showHeader,
@@ -457,6 +466,7 @@ function HireDraftFields({
   onChange,
   onRemove,
 }: {
+  organizationId: string | null;
   draft: HireDraft;
   index: number;
   showHeader: boolean;
@@ -535,17 +545,12 @@ function HireDraftFields({
         />
         <p className="text-xs text-muted-foreground">All training deadlines are calculated from this date.</p>
       </div>
-      <div className="grid gap-2">
-        <Label htmlFor={fieldId("role", index)}>Role</Label>
-        <Select value={draft.role} onValueChange={(v) => onChange({ role: v as Role })}>
-          <SelectTrigger id={fieldId("role", index)}><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="employee">Employee</SelectItem>
-            <SelectItem value="manager">Manager</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <LevelPresetFields
+        orgId={organizationId ?? undefined}
+        value={draft.access}
+        onChange={(access) => onChange({ access })}
+        idPrefix={fieldId("access", index)}
+      />
 
       <OptionalIntakeFields
         config={staffIntakeConfig}

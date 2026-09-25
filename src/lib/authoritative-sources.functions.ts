@@ -22,6 +22,7 @@ import {
 } from "./authoritative-sources.server";
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import { classifyServiceCodes } from "./nectar-code-classifier";
+import { isAgencyAdmin } from "@/lib/access/levels";
 
 // =============================================================
 // Foundation B — Authoritative sources, derived requirements,
@@ -68,7 +69,7 @@ export const ingestWebSource = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { documentId: "", capturedAt: "", sourceUrl: "", textLength: 0 };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
 
     const parsedUrl = new URL(data.url);
@@ -230,7 +231,7 @@ export const markAsAuthoritativeSource = createServerFn({ method: "POST" })
       .eq("id", data.documentId)
       .maybeSingle();
     if (!docRow?.organization_id) throw new Error("Document not found");
-    await requireOrgMembership(supabase, userId, docRow.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, docRow.organization_id as string, "admin");
     const update: {
       is_authoritative_source: boolean;
       authoritative_kind: string | null;
@@ -276,7 +277,7 @@ export const updatePolicyConfig = createServerFn({ method: "POST" })
       .eq("id", data.documentId)
       .maybeSingle();
     if (!docRow?.organization_id) throw new Error("Document not found");
-    await requireOrgMembership(supabase, userId, docRow.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, docRow.organization_id as string, "admin");
     if ((docRow.authoritative_kind as string) !== "provider_policy") {
       throw new Error("Policy config only applies to provider_policy documents.");
     }
@@ -329,7 +330,7 @@ export const setSourceIgnoreState = createServerFn({ method: "POST" })
       .eq("id", data.documentId)
       .single();
     if (dErr || !doc) throw new Error(dErr?.message ?? "Source not found");
-    await requireOrgMembership(supabase, userId, doc.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, doc.organization_id as string, "admin");
 
     let duplicateOfTitle: string | null = null;
     if (data.action === "duplicate") {
@@ -593,7 +594,7 @@ export const upsertRequirement = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { id: "" };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const payload = {
       organization_id: data.organizationId,
       source_document_id: data.sourceDocumentId ?? null,
@@ -640,7 +641,7 @@ export const deleteRequirement = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
     if (!reqRow?.organization_id) throw new Error("Requirement not found");
-    await requireOrgMembership(supabase, userId, reqRow.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, reqRow.organization_id as string, "admin");
     const { error } = await supabase
       .from("nectar_requirements")
       .delete()
@@ -676,7 +677,7 @@ export const setRequirementReviewStatus = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .single();
     if (gErr || !req) throw new Error(gErr?.message ?? "Requirement not found");
-    await requireOrgMembership(supabase, userId, req.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, req.organization_id as string, "admin");
 
 
     const nowIso = new Date().toISOString();
@@ -772,7 +773,7 @@ export const setRequirementVerificationType = createServerFn({ method: "POST" })
       .eq("id", data.requirementId)
       .single();
     if (gErr || !req) throw new Error(gErr?.message ?? "Requirement not found");
-    await requireOrgMembership(supabase, userId, req.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, req.organization_id as string, "admin");
 
     const { error } = await supabase
       .from("nectar_requirements")
@@ -806,7 +807,7 @@ export const verifyRequirement = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .single();
     if (getErr || !req) throw new Error(getErr?.message ?? "Requirement not found");
-    await requireOrgMembership(supabase, userId, req.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, req.organization_id as string, "admin");
 
 
     const { error } = await supabase
@@ -863,7 +864,7 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
       .eq("id", data.documentId)
       .single();
     if (dErr || !doc) throw new Error(dErr?.message ?? "Document not found");
-    await requireOrgMembership(supabase, userId, doc.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, doc.organization_id as string, "admin");
     if (!doc.is_authoritative_source)
       throw new Error("Document is not marked as an authoritative source.");
 
@@ -872,15 +873,14 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
     // throw a cryptic permission error.
     const { data: membership } = await supabase
       .from("organization_members")
-      .select("role, active")
+      .select("access_level, access_scope, active")
       .eq("organization_id", doc.organization_id)
       .eq("user_id", context.userId)
       .eq("active", true)
       .maybeSingle();
-    const allowedRoles = new Set(["admin", "program_manager", "manager"]);
-    if (!membership || !allowedRoles.has(membership.role as string)) {
+    if (!membership || !isAgencyAdmin(membership.access_level, membership.access_scope)) {
       throw new Error(
-        "Drafting requirements is an Admin View action. Switch to this company's Admin View with an Admin, Manager, or Super Admin role to draft from authoritative sources.",
+        "Drafting requirements needs an Owner, or an Admin whose access covers the whole agency.",
       );
     }
 
@@ -1424,7 +1424,7 @@ async function loadDraftJobDoc(
     supabase,
     userId,
     job.organization_id as string,
-    "manager",
+    "admin",
   );
   return job;
 }
@@ -1456,7 +1456,7 @@ export const startRequirementsDraft = createServerFn({ method: "POST" })
       supabase,
       userId,
       doc.organization_id as string,
-      "manager",
+      "admin",
     );
 
     if (!doc.is_authoritative_source)
@@ -1746,7 +1746,7 @@ export const getActiveDraftJobs = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { jobs: [] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const { data: rows, error } = await supabase
       .from("nectar_draft_jobs")
       .select(
@@ -2192,7 +2192,7 @@ export const recordAttestation = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { id: "", attestedAt: "" };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const { data: profile } = await supabase
       .from("profiles")
       .select("full_name, email")

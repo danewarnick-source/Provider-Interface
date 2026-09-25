@@ -84,6 +84,7 @@ import { useAgencySetup } from "@/hooks/use-agency-setup";
 import { shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
 import { PersonAvatar } from "@/components/person/person-avatar";
 import type { Position } from "@/lib/employee-positions";
+import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/employees/")({
   validateSearch: (s: Record<string, unknown>): { upload?: boolean } => ({
@@ -138,7 +139,7 @@ export function EmployeesPage() {
       if (!org) throw new Error("No organization selected.");
       const { data } = await supabase
         .from("organization_members")
-        .select("id, role, job_title, active, user_id, created_at")
+        .select("id, access_level, access_presets(name), job_title, active, user_id, created_at")
         .eq("organization_id", org.organization_id);
       const ids = (data ?? []).map((m) => m.user_id);
       const profilesQuery = supabase
@@ -156,6 +157,7 @@ export function EmployeesPage() {
       const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
       return (data ?? []).map((m) => ({
         ...m,
+        accessLabel: m.access_presets?.name ?? LEVEL_LABEL[m.access_level as AccessLevel] ?? "—",
         profile: profMap.get(m.user_id) ?? null,
         lastSignInAt: lastLoginByUser.get(m.user_id) ?? null,
         lastSignInKnown: lastLoginByUser.has(m.user_id),
@@ -364,7 +366,7 @@ export function EmployeesPage() {
                   <div className="flex items-center gap-2 truncate">
                     <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />{" "}
                     <span className="truncate">{i.email}</span>{" "}
-                    <span className="shrink-0 text-xs text-muted-foreground">· {i.role}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">· {LEVEL_LABEL[i.access_level as AccessLevel] ?? "—"}</span>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
                     <Button
@@ -495,7 +497,7 @@ export function EmployeesPage() {
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="rounded-full bg-secondary px-2 py-0.5 text-xs uppercase">
-                        {m.role}
+                        {m.accessLabel}
                       </span>
                       {codes.length ? (
                         codes.map((code) => (
@@ -551,7 +553,7 @@ export function EmployeesPage() {
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold">Name</th>
                     <th className="px-4 py-3 text-left font-semibold">Login</th>
-                    <th className="px-4 py-3 text-left font-semibold">Role</th>
+                    <th className="px-4 py-3 text-left font-semibold">Access</th>
                     <th className="px-4 py-3 text-left font-semibold">Status</th>
                     <th className="px-4 py-3 text-left font-semibold">Start date</th>
                     <th className="px-4 py-3 text-left font-semibold">Last Login</th>
@@ -630,7 +632,7 @@ export function EmployeesPage() {
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           <span className="hive-role-pill rounded-full px-2 py-0.5 text-xs uppercase">
-                            {m.role}
+                            {m.accessLabel}
                           </span>
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
@@ -664,7 +666,7 @@ export function EmployeesPage() {
                                 setCaseloadFor({
                                   id: m.user_id,
                                   name,
-                                  role: m.job_title || m.role,
+                                  role: m.job_title || m.accessLabel,
                                 });
                               }}
                             >

@@ -31,6 +31,7 @@ import {
   type BudgetPdfLogo,
 } from "@/lib/client-budget-pdf";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { isAdminLevel } from "@/lib/access/levels";
 
 
 type Section = "income" | "expense" | "other";
@@ -77,7 +78,7 @@ function fmt$(n: number): string {
 export function ClientBudgetPanel({ clientId }: { clientId: string }) {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
-  const canEdit = org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+  const canEdit = isAdminLevel(org?.access.level);
   const qc = useQueryClient();
 
   const [monthInput, setMonthInput] = useState<string>(currentMonthValue());

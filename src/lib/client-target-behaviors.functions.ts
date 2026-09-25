@@ -25,7 +25,7 @@ export const listClientTargetBehaviors = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return [];
-    await requireOrgMembership(supabase, userId, data.organization_id, "employee");
+    await requireOrgMembership(supabase, userId, data.organization_id, "staff");
     const { data: rows, error } = await (supabase as any)
       .from("client_target_behaviors")
       .select("*")
@@ -52,7 +52,7 @@ export const upsertClientTargetBehavior = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
+    await requireOrgMembership(supabase, userId, data.organization_id, "owner");
     const { id, ...payload } = data;
     if (id) {
       const { data: row, error } = await (supabase as any)
@@ -85,7 +85,7 @@ export const deleteClientTargetBehavior = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
+    await requireOrgMembership(supabase, userId, data.organization_id, "owner");
     const { error } = await (supabase as any)
       .from("client_target_behaviors")
       .delete()

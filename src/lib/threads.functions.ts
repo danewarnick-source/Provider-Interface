@@ -120,7 +120,7 @@ export const listMyThreads = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { rows: [] as ThreadListItem[], softReady: false };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const threadsRes = await supabase
       .from("threads")
       .select(
@@ -184,7 +184,7 @@ export const listThreadMessages = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { rows: [] as ThreadMessageRow[], softReady: false };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const { data: rows, error } = await supabase
       .from("thread_messages")
       .select("id, thread_id, author_id, kind, body, created_at")
@@ -226,7 +226,7 @@ export const askStaffOnTimesheet = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { ok: false, softReady: false, threadId: null as string | null };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: sheet, error: sheetErr } = await supabase
       .from("evv_timesheets")
@@ -330,7 +330,7 @@ export const replyOnThread = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false, softReady: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const body = sanitizeThreadBody(data.body);
     const { data: thread, error: tErr } = await supabase
       .from("threads")
@@ -405,7 +405,7 @@ export const createTeamThread = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { ok: false, softReady: false, threadId: null as string | null };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const subject = teamThreadSubject(data.subject);
     const threadIns = await supabase
       .from("threads")
@@ -451,7 +451,7 @@ export const adviseMoveToClientThread = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return advisoryMoveToClientThread({ kind: "shift", hasClientId: false });
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const { data: thread, error } = await supabase
       .from("threads")
       .select("kind, client_id")

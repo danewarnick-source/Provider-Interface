@@ -15,9 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { usePortalView } from "@/hooks/use-portal-view";
-import { ROLE_LABEL, type Role } from "@/lib/rbac";
 import { toast } from "sonner";
 import { PiBrand } from "@/components/brand/pi-brand";
 import {
@@ -25,21 +24,20 @@ import {
   resolvePortalSwitcherPath,
 } from "@/lib/portal-view-landing";
 import { resetStaffPhoneScroll } from "@/lib/staff-phone-chrome";
+import { isAdminLevel, LEVEL_LABEL } from "@/lib/access/levels";
 
 export function StaffTopBar({ title, framed = false }: { title: string; framed?: boolean }) {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const { view, setView } = usePortalView();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  const role: Role = org?.role ?? "employee";
+  const role = org?.access.level ?? "staff";
   const isAdminCapable =
     can("edit_staff_records") ||
-    role === "admin" ||
-    role === "program_manager" ||
-    role === "manager";
+    isAdminLevel(role);
 
   const signOut = async () => {
     await completeClientSignOut(() => supabase.auth.signOut());
@@ -91,7 +89,7 @@ export function StaffTopBar({ title, framed = false }: { title: string; framed?:
             <SheetHeader className="text-left">
               <SheetTitle className="text-white">{displayName}</SheetTitle>
               <SheetDescription className="text-white/80">
-                {(org?.organization_name ?? "Workspace") + " · " + ROLE_LABEL[role]}
+                {(org?.organization_name ?? "Workspace") + " · " + LEVEL_LABEL[role]}
               </SheetDescription>
             </SheetHeader>
 

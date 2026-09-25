@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +38,7 @@ type ExtCert = {
 function ExternalCertsPage() {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const canApprove = can("approve_external_certs");
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);

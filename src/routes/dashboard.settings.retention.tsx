@@ -14,6 +14,7 @@ import {
   sweepArchiveEligible,
   purgeAgedReferrals,
 } from "@/lib/retention.functions";
+import { isAdminLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/settings/retention")({
   component: RetentionSettingsPage,
@@ -33,7 +34,7 @@ function RetentionSettingsPage() {
   const [busy, setBusy] = useState(false);
 
   const canEdit =
-    org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+    isAdminLevel(org?.access.level);
 
   useEffect(() => {
     if (!org) return;

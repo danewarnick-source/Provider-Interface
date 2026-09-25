@@ -2,14 +2,14 @@
 //
 // Moves the 5 raw reads (client_billing_codes, evv_timesheets, hhs_daily_records_v,
 // contractor_monthly_pay, provider_ledger_entries) behind a server boundary that
-// FIRST enforces `view_financial_tns_gross` via has_permission(). The reads use
+// FIRST enforces `view_financial_tns_gross` via requirePermission(). The reads use
 // the USER-SCOPED supabase client from requireSupabaseAuth — RLS still applies
 // as the user (defense in depth). No supabaseAdmin, no RLS changes.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { requirePermission } from "@/lib/require-permission";
+import { requirePermission } from "@/lib/access/require";
 
 const PERM = "view_financial_tns_gross";
 

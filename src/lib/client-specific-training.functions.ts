@@ -4,12 +4,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { CLIENT_FORM_LABEL, clientFormKindForTitle } from "@/lib/client-form-obligations";
+import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
 
 function adminGuard(role: string | undefined) {
-  if (!role || !["admin", "program_manager", "manager"].includes(role)) {
+  if (!role || !isAdminLevel(role)) {
     throw new Error("Forbidden: admin access required.");
   }
 }
@@ -17,13 +18,13 @@ function adminGuard(role: string | undefined) {
 async function getMembership(supabase: AnySupabase, userId: string) {
   const { data, error } = await supabase
     .from("organization_members")
-    .select("organization_id, role")
+    .select("organization_id, access_level")
     .eq("user_id", userId)
     .eq("active", true)
     .limit(1)
     .maybeSingle();
   if (error || !data) throw new Error("No active organization membership.");
-  return data as { organization_id: string; role: string };
+  return data as { organization_id: string; access_level: string };
 }
 
 async function assertClientInOrg(supabase: AnySupabase, clientId: string, orgId: string) {
@@ -454,7 +455,7 @@ export const extractPcspGoalsForTraining = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { ok: false as const, reason: "Not authenticated." };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
 
     // 1) Find the most recent PCSP document for this client.
@@ -531,7 +532,7 @@ export const getClientSpecificTraining = createServerFn({ method: "GET" })
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
     const { data: row, error } = await supabase
       .from("client_specific_trainings")
@@ -556,7 +557,7 @@ export const draftClientSpecificTrainingWithNectar = createServerFn({ method: "P
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
 
     const content = await assembleVerbatim(supabase, m.organization_id, data.clientId);
@@ -611,7 +612,7 @@ export const draftClientSpecificTrainingBlank = createServerFn({ method: "POST" 
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
 
     const content: CSTContent = { sections: [
@@ -672,7 +673,7 @@ export const attachClientSpecificTrainingDocument = createServerFn({ method: "PO
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { ok: false, documentId: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
 
     const { data: doc, error: dErr } = await supabase
@@ -739,7 +740,7 @@ export const updateClientSpecificTraining = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     const { data: row, error } = await supabase
       .from("client_specific_trainings")
       .select("organization_id, status")
@@ -775,7 +776,7 @@ export const publishClientSpecificTraining = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     const { data: row, error } = await supabase
       .from("client_specific_trainings")
       .select("organization_id")
@@ -808,7 +809,7 @@ export const saveReviewQuestions = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { ok: false };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     const { data: row, error } = await supabase
       .from("client_specific_trainings")
       .select("organization_id, status")
@@ -941,7 +942,7 @@ export const getSupportStrategiesTraining = createServerFn({ method: "GET" })
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
     const { data: row, error } = await supabase
       .from("client_specific_trainings")
@@ -963,7 +964,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
 
     let content: CSTContent;
@@ -1031,7 +1032,7 @@ export const attachSupportStrategyDocument = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { ok: false, documentId: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
 
     const { data: doc, error: dErr } = await supabase
@@ -1106,7 +1107,7 @@ async function assertStaffMayViewClient(
   role: string,
   clientId: string,
 ): Promise<void> {
-  if (["admin", "program_manager", "manager"].includes(role)) return;
+  if (isAdminLevel(role)) return;
   // Direct assignment first (cheap).
   const { data: direct } = await supabase
     .from("staff_assignments")
@@ -1196,7 +1197,7 @@ export const getStaffClientSpecificTraining = createServerFn({ method: "GET" })
     if (!supabase || !userId) return { training: null, completion: null, hash: null, pinnedToCurrent: false };
     const m = await getMembership(supabase, userId);
     // HARD scope check — admin/manager bypass; staff must be assigned.
-    await assertStaffMayViewClient(supabase, m.organization_id, userId, m.role, data.clientId);
+    await assertStaffMayViewClient(supabase, m.organization_id, userId, m.access_level, data.clientId);
 
     const trainingType = data.trainingType ?? "person_specific";
 
@@ -1264,7 +1265,7 @@ export const completeClientSpecificTraining = createServerFn({ method: "POST" })
     }
     const m = await getMembership(supabase, userId);
     // Re-verify assignment scope at write time.
-    await assertStaffMayViewClient(supabase, m.organization_id, userId, m.role, data.clientId);
+    await assertStaffMayViewClient(supabase, m.organization_id, userId, m.access_level, data.clientId);
 
     const trainingType = data.trainingType ?? "person_specific";
 
@@ -1474,7 +1475,7 @@ export const getMyClientTrainingStatuses = createServerFn({ method: "GET" })
     const m = await getMembership(supabase, userId);
 
     let clientIds: string[] = [];
-    if (["admin", "program_manager", "manager"].includes(m.role)) {
+    if (isAdminLevel(m.access_level)) {
       // Admins: show all clients that have at least one training row.
       const { data: rows } = await supabase
         .from("client_specific_trainings")

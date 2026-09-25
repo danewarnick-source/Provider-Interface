@@ -132,7 +132,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         .maybeSingle(),
       supabase
         .from("organization_members")
-        .select("organization_id, role")
+        .select("organization_id")
         .eq("user_id", session.user.id)
         .eq("active", true)
         .limit(5),

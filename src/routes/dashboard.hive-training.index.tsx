@@ -33,6 +33,7 @@ import { InternalTrainingsPanel } from "@/components/training/internal-trainings
 import { FeatureLocked } from "@/components/feature-locked";
 import { useFeatureEnabled } from "@/hooks/use-feature-enabled";
 import { FeatureLockedRoute } from "@/components/upgrade-gate";
+import { isAdminLevel } from "@/lib/access/levels";
 
 const searchSchema = z.object({
   checkout: z.enum(["success", "cancelled"]).optional(),
@@ -100,7 +101,7 @@ function HiveTrainingHub() {
     );
   }
 
-  const realIsAdmin = ["admin", "program_manager", "manager"].includes(org.role);
+  const realIsAdmin = isAdminLevel(org.access.level);
   const isAdmin = realIsAdmin && view !== "staff" && view !== "staff_mobile";
 
   const setTab = (next: "classes" | "internal") => {

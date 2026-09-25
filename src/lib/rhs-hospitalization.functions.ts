@@ -46,7 +46,7 @@ export const setRhsHospitalizationDay = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organization_id, "employee");
+    await requireOrgMembership(supabase, userId, data.organization_id, "staff");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = supabase as any;
     const { error } = await sb.from("rhs_hospitalization_days").upsert(
@@ -69,7 +69,7 @@ export const deleteRhsHospitalizationDay = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organization_id, "employee");
+    await requireOrgMembership(supabase, userId, data.organization_id, "staff");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = supabase as any;
     const { error } = await sb.from("rhs_hospitalization_days").delete().eq("id", data.id).eq("organization_id", data.organization_id);

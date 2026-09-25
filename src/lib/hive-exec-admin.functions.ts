@@ -12,7 +12,7 @@ export interface MemberRow {
   user_id: string;
   email: string | null;
   full_name: string | null;
-  role: string;
+  access_level: string;
   is_company_executive: boolean;
   active: boolean;
 }
@@ -40,8 +40,8 @@ export interface AuditEntry {
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ALLOWED_ROLES = ["employee", "manager", "program_manager", "admin"] as const;
-type AllowedRole = (typeof ALLOWED_ROLES)[number];
+const ALLOWED_LEVELS = ["staff", "admin", "owner"] as const;
+type AllowedLevel = (typeof ALLOWED_LEVELS)[number];
 
 // ───── Helpers ───────────────────────────────────────────────────────────────
 
@@ -157,7 +157,7 @@ export const createCompany = createServerFn({ method: "POST" })
     const { error: memberErr } = await supabaseAdmin
       .from("organization_members")
       .upsert(
-        { organization_id: org.id, user_id: adminUserId, role: "admin", active: true, is_company_executive: true },
+        { organization_id: org.id, user_id: adminUserId, access_level: "owner", active: true, is_company_executive: true },
         { onConflict: "organization_id,user_id" },
       );
     if (memberErr) throw new Error(`Member create failed: ${memberErr.message}`);
@@ -193,7 +193,7 @@ export const listAllMembers = createServerFn({ method: "GET" })
 
     const { data: members, error } = await supabaseAdmin
       .from("organization_members")
-      .select("id, organization_id, user_id, role, active, is_company_executive")
+      .select("id, organization_id, user_id, access_level, active, is_company_executive")
       .order("organization_id");
     if (error) throw error;
 
@@ -221,17 +221,24 @@ export const listAllMembers = createServerFn({ method: "GET" })
       user_id: m.user_id,
       email: profileById.get(m.user_id)?.email ?? null,
       full_name: profileById.get(m.user_id)?.full_name ?? null,
-      role: m.role,
+      access_level: m.access_level,
       is_company_executive: m.is_company_executive,
       active: m.active,
     }));
   });
 
-// ───── Member role / status update ───────────────────────────────────────────
+// ───── Member access level / status update ───────────────────────────────────────────
 
 function validateMemberUpdate(input: unknown): {
   membershipId: string;
-  patch: { role?: AllowedRole; active?: boolean; is_company_executive?: boolean };
+  patch: {
+    access_level?: AllowedLevel;
+    access_preset_id?: null;
+    access_scope?: null;
+    access_overrides?: Record<string, never>;
+    active?: boolean;
+    is_company_executive?: boolean;
+  };
 } {
   const i = (input ?? {}) as Record<string, unknown>;
   const membershipId = typeof i.membershipId === "string" ? i.membershipId : "";
@@ -239,10 +246,14 @@ function validateMemberUpdate(input: unknown): {
   const patch = (i.patch ?? {}) as Record<string, unknown>;
   const out: ReturnType<typeof validateMemberUpdate>["patch"] = {};
   if (
-    typeof patch.role === "string" &&
-    (ALLOWED_ROLES as readonly string[]).includes(patch.role)
+    typeof patch.access_level === "string" &&
+    (ALLOWED_LEVELS as readonly string[]).includes(patch.access_level)
   ) {
-    out.role = patch.role as AllowedRole;
+    // A level change resets preset/scope/overrides; the DB trigger re-applies defaults.
+    out.access_level = patch.access_level as AllowedLevel;
+    out.access_preset_id = null;
+    out.access_scope = null;
+    out.access_overrides = {};
   }
   if (typeof patch.active === "boolean") out.active = patch.active;
   if (typeof patch.is_company_executive === "boolean")
@@ -261,7 +272,7 @@ export const updateMember = createServerFn({ method: "POST" })
 
     const { data: existing, error: readErr } = await supabaseAdmin
       .from("organization_members")
-      .select("organization_id, user_id, role")
+      .select("organization_id, user_id")
       .eq("id", data.membershipId)
       .maybeSingle();
     if (readErr) throw readErr;

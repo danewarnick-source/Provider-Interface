@@ -7,12 +7,13 @@ import type { FormField, FormSettings, Schedule, Frequency } from "./forms-utils
 import { periodKeyFor } from "./forms-utils";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
+import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
 
 function adminGuard(role: string | undefined) {
-  if (!role || !["admin", "program_manager", "manager"].includes(role)) {
+  if (!role || !isAdminLevel(role)) {
     throw new Error("Forbidden: admin access required.");
   }
 }
@@ -20,13 +21,13 @@ function adminGuard(role: string | undefined) {
 async function getMembership(supabase: AnySupabase, userId: string) {
   const { data, error } = await supabase
     .from("organization_members")
-    .select("organization_id, role, manager_id")
+    .select("organization_id, access_level, manager_id")
     .eq("user_id", userId)
     .eq("active", true)
     .limit(1)
     .maybeSingle();
   if (error || !data) throw new Error("No active organization membership.");
-  return data as { organization_id: string; role: string; manager_id: string | null };
+  return data as { organization_id: string; access_level: string; manager_id: string | null };
 }
 
 // ─── ADMIN: list forms ─────────────────────────────────────────────────────
@@ -36,7 +37,7 @@ export const listForms = createServerFn({ method: "GET" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { forms: [] };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     const { data, error } = await supabase
       .from("forms")
       .select("*")
@@ -58,7 +59,7 @@ export const getForm = createServerFn({ method: "GET" })
     if (error || !form) throw new Error("Form not found.");
     if (form.organization_id !== m.organization_id) throw new Error("Forbidden.");
     // Staff can only fetch via getStaffForm; this is admin-scoped.
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     return { form };
   });
 
@@ -85,7 +86,7 @@ export const saveForm = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { form: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     const payload = {
       organization_id: m.organization_id,
       name: data.name,
@@ -249,7 +250,7 @@ export const archiveForm = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     const { error } = await supabase.from("forms").update({ status: "archived" })
       .eq("id", data.formId).eq("organization_id", m.organization_id);
     if (error) throw new Error(error.message);
@@ -344,7 +345,7 @@ export const seedIntakeForms = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { seeded: 0, skipped: true };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
 
     // Idempotency gate: any existing intake form (any status) blocks seeding.
     const { count, error: countErr } = await supabase
@@ -393,7 +394,7 @@ export const getFormDeleteImpact = createServerFn({ method: "GET" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return null;
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
 
     const { data: form, error: fe } = await supabase
       .from("forms").select("id, name, category, organization_id")
@@ -457,7 +458,7 @@ export const deleteForm = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false, deleted: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
 
     const { data: form, error: fe } = await supabase
       .from("forms").select("id, name, organization_id")
@@ -517,7 +518,7 @@ export const publishForm = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false, delivered: 0 };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
 
     const { data: form, error: fe } = await supabase
       .from("forms").select("*").eq("id", data.formId)
@@ -733,7 +734,7 @@ export const submitIntakeForm = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { submission: null };
     const m = await getMembership(supabase, userId);
     // Role gate: admin/manager/super_admin only.
-    adminGuard(m.role);
+    adminGuard(m.access_level);
 
     const { data: form, error: fe } = await supabase
       .from("forms")
@@ -812,7 +813,7 @@ export const submitStaffMandateForm = createServerFn({ method: "POST" })
     let targetStaffId = data.targetStaffId ?? userId;
     if (targetStaffId !== userId) {
       // On-behalf submission requires admin/manager/super_admin.
-      adminGuard(m.role);
+      adminGuard(m.access_level);
       // Verify target is a member of the same org.
       const { data: tm } = await supabase
         .from("organization_members")
@@ -872,7 +873,7 @@ export const getUnmetStaffMandates = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { unmet: [] };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
 
     const unmet: Array<{ form_id: string; name: string; mandate_scope: string; enforcement: "warn" | "block" }> = [];
 
@@ -1063,14 +1064,14 @@ export const recordStaffMandateOverride = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { wrote: false, reason: "no_auth", notificationId: null as string | null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
 
     const isBlockOverride = data.overrideKind === "block_override";
     if (isBlockOverride) {
-      // Stricter gate: only admin/super_admin (not manager) may override
+      // Stricter gate: only an Owner (not an Admin) may override
       // a hard-block mandate, and a typed reason is required.
-      if (!["admin"].includes(m.role)) {
-        throw new Error("Only admins or owners may override a blocking staff mandate.");
+      if (m.access_level !== "owner") {
+        throw new Error("Only an Owner may override a blocking staff mandate.");
       }
       if (!data.overrideReason || !data.overrideReason.trim()) {
         throw new Error("A typed reason is required to override a blocking mandate.");
@@ -1182,7 +1183,7 @@ export const listSubmissions = createServerFn({ method: "GET" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { submissions: [], profiles: [] };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     const { data: subs, error } = await supabase
       .from("form_submissions").select("*")
       .eq("form_id", data.formId)
@@ -1205,9 +1206,9 @@ export const getAssignDirectory = createServerFn({ method: "GET" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { members: [], profiles: [], staffTypes: [], clients: [] };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     const { data: members } = await supabase
-      .from("organization_members").select("user_id, role, job_title")
+      .from("organization_members").select("user_id, access_level, job_title")
       .eq("organization_id", m.organization_id).eq("active", true);
     const uids = (members ?? []).map((m: { user_id: string }) => m.user_id);
     let profiles: Array<{ id: string; full_name: string | null; email: string | null; staff_type_keys: string[] }> = [];
@@ -1275,7 +1276,7 @@ export const listIntakeFormsForClient = createServerFn({ method: "GET" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { forms: [], submissions: [] };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
 
     const { data: forms, error } = await supabase
       .from("forms")
@@ -1326,7 +1327,7 @@ export const listClientTrackingForms = createServerFn({ method: "GET" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { forms: [], submissions: [], submitterNames: {} as Record<string, string> };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
 
     const { data: forms, error } = await supabase
       .from("forms")
@@ -1515,7 +1516,7 @@ export const nectarDraftForm = createServerFn({ method: "POST" })
     const { userId, supabase } = context as { userId: string; supabase: AnySupabase };
     if (!supabase || !userId) return { draft: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     assertBedrockConfigured();
     const system = `You are NECTAR, drafting a CUSTOM FORM for a HIPAA-conscious DSPD agency. Output STRICT JSON only — no markdown.
 Schema:
@@ -1587,7 +1588,7 @@ export const nectarDraftFormFromPdf = createServerFn({ method: "POST" })
     const { userId, supabase } = context as { userId: string; supabase: AnySupabase };
     if (!supabase || !userId) return { draft: null, lowConfidence: false, confidenceNotes: "" };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     assertBedrockConfigured();
 
     const system = `You are NECTAR. You are given a PDF of an EXISTING paper/digital form used by a DSPD agency. Extract the form's STRUCTURE (sections, questions, input types) and re-express it as a PI custom form. Output STRICT JSON only — no markdown.
@@ -1698,7 +1699,7 @@ export const nectarDraftNotification = createServerFn({ method: "POST" })
     const { userId, supabase } = context as { userId: string; supabase: AnySupabase };
     if (!supabase || !userId) return { draft: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     assertBedrockConfigured();
     const required = (data.fields as FormField[]).filter((f) => f.required).map((f) => f.label);
     const system = `You are NECTAR, drafting a friendly, plain-language in-app notification telling agency staff that a new form has been assigned to them. Output STRICT JSON: { "title": "...", "body": "..." }. The body is 3–6 short sentences. Cover: what the form is for, how often + when it's due (use the provided cadence and schedule), where to find it ("in your Forms list"), and step-by-step what's needed (mention required questions if listed). No markdown. Title ≤80 chars. Body ≤900 chars.`;
@@ -1742,7 +1743,7 @@ export const nectarProposeRouting = createServerFn({ method: "POST" })
     const { userId, supabase } = context as { userId: string; supabase: AnySupabase };
     if (!supabase || !userId) return { proposal: null };
     const m = await getMembership(supabase, userId);
-    adminGuard(m.role);
+    adminGuard(m.access_level);
     assertBedrockConfigured();
 
     const allowed = [

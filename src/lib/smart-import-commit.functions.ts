@@ -226,7 +226,7 @@ export const recommitSmartImportJob = createServerFn({ method: "POST" })
     if (error || !job) throw new Error("Job not found");
     const orgId = (job.source === "white_glove" ? job.target_org_id : job.org_id) as string;
     if (!orgId) throw new Error("Job has no organization to commit into.");
-    await requireOrgMembership(sb, context.userId, orgId, "admin");
+    await requireOrgMembership(sb, context.userId, orgId, "owner");
     return runJobCommit(sb, context.userId, data.jobId);
   });
 
@@ -254,7 +254,7 @@ export const commitSingleSubject = createServerFn({ method: "POST" })
       .single();
     const orgId = (job?.source === "white_glove" ? job.target_org_id : job?.org_id) as string;
     if (!orgId) throw new Error("Job has no organization to commit into.");
-    await requireOrgMembership(sb, context.userId, orgId, "admin");
+    await requireOrgMembership(sb, context.userId, orgId, "owner");
     return runJobCommit(sb, context.userId, subj.import_job_id, { subjectId: data.subjectId });
   });
 
@@ -286,13 +286,12 @@ export async function runJobCommit(
     if (!job.provider_signoff_at) {
       throw new Error("Provider sign-off required before commit.");
     }
-    const { data: isAdmin } = await sb.rpc("has_org_role", {
+    const { data: isOwner } = await sb.rpc("access_is_owner", {
       _org: job.target_org_id,
       _user: userId,
-      _role: "admin",
     });
-    if (!isAdmin) {
-      throw new Error("Only the receiving company's admin can commit a white-glove migration.");
+    if (!isOwner) {
+      throw new Error("Only the receiving company's Owner can commit a white-glove migration.");
     }
   }
 
@@ -1121,11 +1120,10 @@ function extractedFieldValue(
   return String(hit?.value ?? "").trim();
 }
 
-function importedStaffRole(raw: string): "admin" | "manager" | "employee" {
+/** Imports never create Owners; an Owner promotes people afterward. */
+function importedAccessLevel(raw: string): "admin" | "staff" {
   const n = raw.trim().toLowerCase().replace(/\s+/g, "_");
-  if (n === "admin" || n === "company_admin") return "admin";
-  if (n === "manager" || n === "program_manager") return "manager";
-  return "employee";
+  return ["admin", "company_admin", "manager", "program_manager"].includes(n) ? "admin" : "staff";
 }
 
 async function commitEmployee(
@@ -1185,7 +1183,7 @@ async function commitEmployee(
         email,
         phone: extractedFieldValue(fields, "phone"),
         temporaryPassword: generateTempPassword(),
-        role: importedStaffRole(
+        accessLevel: importedAccessLevel(
           extractedFieldValue(fields, "position") || extractedFieldValue(fields, "role"),
         ),
         hireDate: extractedFieldValue(fields, "hire_date"),

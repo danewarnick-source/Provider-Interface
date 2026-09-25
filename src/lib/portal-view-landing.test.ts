@@ -201,8 +201,9 @@ describe("hive-exec Open company / Admin View control", () => {
   it("/admin persists Admin View for an Owner instead of bouncing to staff", () => {
     const owner = resolveRoleEntryLanding({
       hasSession: true,
-      role: "admin",
-      allowed: ["admin", "program_manager", "manager", "super_admin"],
+      level: "owner",
+      home: "/dashboard",
+      allowed: ["owner", "admin"],
       persistView: "admin",
     });
     assert.equal(owner.path, "/dashboard");
@@ -210,8 +211,9 @@ describe("hive-exec Open company / Admin View control", () => {
 
     const dsp = resolveRoleEntryLanding({
       hasSession: true,
-      role: "employee",
-      allowed: ["admin", "program_manager", "manager", "super_admin"],
+      level: "staff",
+      home: "/employee",
+      allowed: ["owner", "admin"],
       persistView: "admin",
     });
     assert.equal(dsp.path, "/employee");

@@ -75,10 +75,10 @@ export const providerSignoff = createServerFn({ method: "POST" })
     if (job.source !== "white_glove" || !job.target_org_id) {
       throw new Error("Sign-off only applies to white-glove migrations.");
     }
-    const { data: isAdmin } = await sb.rpc("has_org_role", {
-      _org: job.target_org_id, _user: context.userId, _role: "admin",
+    const { data: isOwner } = await sb.rpc("access_is_owner", {
+      _org: job.target_org_id, _user: context.userId,
     });
-    if (!isAdmin) throw new Error("Only the receiving company's admin can sign off.");
+    if (!isOwner) throw new Error("Only the receiving company's Owner can sign off.");
 
     const { error: upErr } = await sb.from("import_jobs").update({
       provider_signoff_at: new Date().toISOString(),

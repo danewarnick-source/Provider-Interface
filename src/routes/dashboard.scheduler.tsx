@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { getMissingAbiStaffIds, getMissingThirtyDayStaffIds } from "@/lib/sow-perimeters.functions";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import {
   useSchedulerData, startOfWeek, startOfDay, startOfMonth,
   type SchedClient, type SchedStaff, type SchedShift,
@@ -118,7 +118,7 @@ function dayStr(d: Date) {
 function SchedulerPage() {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
-  const { can, isLoading: permLoading } = usePermissions();
+  const { can, isLoading: permLoading } = useAccess();
   const canManageSchedule = can("create_shifts");
   const [tab, setTab] = useState<Tab>("schedule");
   const [view, setView] = useState<ViewMode>("day");
@@ -266,7 +266,7 @@ function SchedulerBody({
 }) {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const canManageSchedule = can("create_shifts");
   const [addOpen, setAddOpen] = useState(false);
   const [addPrefill, setAddPrefill] = useState<{ clientId?: string; code?: string; day?: Date } | null>(null);
@@ -985,7 +985,7 @@ function AddShiftDialog({
   const toggleWeekday = (n: number) =>
     setWeekdays((prev) => prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n].sort());
 
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const canManageSchedule = can("create_shifts");
 
   const saveMut = useMutation({
@@ -1320,7 +1320,7 @@ function ShiftDetailPanel({
     ? sched.staff.filter((s) => s.name.toLowerCase().includes(search.toLowerCase())).slice(0, 8)
     : [];
 
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const canManageSchedule = can("create_shifts");
 
   const clientHasAbi = !!client?.has_abi;

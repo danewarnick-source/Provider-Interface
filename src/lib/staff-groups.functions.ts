@@ -4,6 +4,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -37,7 +38,7 @@ export const listStaffGroups = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as Array<StaffGroupRow & { member_count: number }>;
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const { data: groups, error } = await supabase
       .from("staff_groups")
@@ -72,7 +73,7 @@ export const getStaffGroupWithMembers = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { group: null, members: [] as StaffGroupMemberRow[] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const { data: group, error: gErr } = await supabase
       .from("staff_groups")
@@ -125,7 +126,7 @@ export const createStaffGroup = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { group: null as StaffGroupRow | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: inserted, error } = await supabase
       .from("staff_groups")
@@ -154,7 +155,7 @@ export const updateStaffGroup = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { group: null as StaffGroupRow | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: existing, error: exErr } = await supabase
       .from("staff_groups")
@@ -222,7 +223,7 @@ export const ensureAllStaffGroup = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { id: null as string | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const id = await ensureAllStaffGroupInternal(supabase, data.organizationId);
     return { id };
   });
@@ -257,7 +258,7 @@ export const deleteStaffGroup = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: existing, error: exErr } = await supabase
       .from("staff_groups")
@@ -290,7 +291,7 @@ export const addGroupMember = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { error } = await supabase
       .from("staff_group_members")
@@ -313,7 +314,7 @@ export const removeGroupMember = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: existing, error: exErr } = await supabase
       .from("staff_groups")
@@ -348,7 +349,7 @@ export const syncGroupFromTeam = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { added: 0 };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: teamProfiles, error: pErr } = await supabase
       .from("profiles")
@@ -414,7 +415,7 @@ export async function resolveGroupMembersInternal(
 
   const [{ data: dirRows, error: dErr }, { data: roleRows, error: rErr }] = await Promise.all([
     supabase.from("org_member_directory").select("id, full_name").in("id", staffIds),
-    supabase.from("organization_members").select("user_id, role")
+    supabase.from("organization_members").select("user_id, access_level")
       .eq("organization_id", organizationId).eq("active", true).in("user_id", staffIds),
   ]);
   if (dErr) throw new Error(dErr.message);
@@ -426,16 +427,16 @@ export async function resolveGroupMembersInternal(
       .map((r) => [r.id as string, r.full_name ?? "Unknown"] as [string, string]),
   );
   const roleById = new Map<string, string>(
-    ((roleRows ?? []) as unknown as Array<{ user_id: string; role: string }>)
-      .map((r) => [r.user_id, r.role] as [string, string]),
+    ((roleRows ?? []) as unknown as Array<{ user_id: string; access_level: string }>)
+      .map((r) => [r.user_id, r.access_level] as [string, string]),
   );
 
   const out: ResolvedStaffMember[] = [];
   for (const staffId of staffIds) {
     const role = roleById.get(staffId);
     if (!role) continue; // not an active org member — drop
-    if (assigneeRole === "managers_only" && !["manager", "program_manager", "admin"].includes(role)) continue;
-    if (assigneeRole === "admin_only" && !["admin"].includes(role)) continue;
+    if (assigneeRole === "managers_only" && !isAdminLevel(role)) continue;
+    if (assigneeRole === "admin_only" && role !== "owner") continue;
     out.push({ staff_id: staffId, staff_name: nameById.get(staffId) ?? "Unknown", staff_role: role });
   }
   return out;
@@ -452,6 +453,6 @@ export const resolveGroupMembers = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as ResolvedStaffMember[];
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     return resolveGroupMembersInternal(supabase, data.organizationId, data.groupIds, data.assigneeRole);
   });

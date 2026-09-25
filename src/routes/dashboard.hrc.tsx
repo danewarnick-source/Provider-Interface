@@ -1,10 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { supabase } from "@/integrations/supabase/client";
-import { setMemberGrants } from "@/lib/team-access.functions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +11,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Scale, CalendarDays, ClipboardList, Users, UserPlus, ShieldAlert, CheckCircle2, Circle } from "lucide-react";
+import { Scale, CalendarDays, ClipboardList, Users, ShieldAlert, CheckCircle2, Circle } from "lucide-react";
 import { toast } from "sonner";
-import type { Role } from "@/lib/rbac";
 import {
   RESTRICTION_ELEMENTS,
   computeRestrictionCompletion,
   type RestrictionRecord,
 } from "@/lib/hrc-restrictions";
+import { useAccess } from "@/hooks/use-access";
 
 export const Route = createFileRoute("/dashboard/hrc")({
   head: () => ({ meta: [{ title: "Human Rights Committee (HRC) — Provider Interface" }] }),
@@ -37,9 +35,8 @@ function ScaffoldNotice() {
 
 export function HrcPage() {
   const { data: org } = useCurrentOrg();
-  const role = (org?.role ?? "employee") as Role;
-  const canManage = role === "admin" || role === "program_manager" || role === "manager";
-  const isCommittee = role === "committee_member";
+  const { canCategory, isOwner, isCommitteeOnly: isCommittee } = useAccess();
+  const canManage = canCategory("hrc", "edit");
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -60,7 +57,7 @@ export function HrcPage() {
             {isCommittee && (
               <p className="mt-2 text-xs text-amber-800">
                 You are signed in as a Committee Member. You can only view this page —
-                nothing else in the app is accessible to your role.
+                nothing else in the app is accessible with your preset.
               </p>
             )}
           </div>
@@ -132,38 +129,16 @@ export function HrcPage() {
                 <Users className="h-4 w-4 text-amber-700" /> Committee members
               </CardTitle>
               <CardDescription>
-                Roster of HRC members for this organization.
+                Everyone on the HRC Committee preset.
               </CardDescription>
             </div>
-            <ScaffoldNotice />
           </div>
         </CardHeader>
         <CardContent>
-          <RosterStub canManage={canManage} orgId={org?.organization_id ?? null} />
+          <CommitteeRoster canEditAccess={isOwner} orgId={org?.organization_id ?? null} />
         </CardContent>
       </Card>
 
-      {canManage && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <UserPlus className="h-4 w-4 text-amber-700" /> Grant / revoke Committee Member role
-                </CardTitle>
-                <CardDescription>
-                  Promote an existing user in this organization to Committee Member,
-                  or revoke the role. Committee Members can only see this page.
-                </CardDescription>
-              </div>
-              <ScaffoldNotice />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <RoleGranterStub orgId={org?.organization_id ?? null} />
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
@@ -779,18 +754,26 @@ function ReviewsStub({ canManage, orgId }: { canManage: boolean; orgId: string |
   );
 }
 
-function RosterStub({ canManage, orgId }: { canManage: boolean; orgId: string | null }) {
+function CommitteeRoster({ canEditAccess, orgId }: { canEditAccess: boolean; orgId: string | null }) {
   const { data, isLoading } = useQuery({
     enabled: !!orgId,
     queryKey: ["hrc-roster", orgId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("hrc_committee_members")
-        .select("id, user_id, title, active")
+      const { data: members, error } = await supabase
+        .from("organization_members")
+        .select("user_id, access_presets!inner(seed_key)")
         .eq("organization_id", orgId!)
-        .order("created_at", { ascending: true });
+        .eq("active", true)
+        .eq("access_presets.seed_key", "hrc_committee");
       if (error) throw error;
-      return data ?? [];
+      const ids = (members ?? []).map((m) => m.user_id);
+      if (!ids.length) return [];
+      const { data: people, error: pErr } = await supabase
+        .from("org_member_directory")
+        .select("id, full_name, email")
+        .in("id", ids);
+      if (pErr) throw pErr;
+      return (people ?? []).sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""));
     },
   });
 
@@ -800,120 +783,27 @@ function RosterStub({ canManage, orgId }: { canManage: boolean; orgId: string | 
         <div className="text-sm text-muted-foreground">Loading…</div>
       ) : !data?.length ? (
         <div className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
-          No committee members on the roster yet.
-          {canManage && " Use the grant/revoke section below to add some."}
+          No one is on the HRC Committee preset yet.
         </div>
       ) : (
         <ul className="divide-y divide-border rounded-md border border-border">
           {data.map((m) => (
             <li key={m.id} className="flex items-center justify-between px-3 py-2 text-sm">
-              <span className="truncate font-mono text-xs">{m.user_id}</span>
-              <span className="text-xs text-muted-foreground">{m.title ?? "Member"}</span>
+              <span className="truncate">{m.full_name ?? m.email ?? "Member"}</span>
+              <span className="text-xs text-muted-foreground">{m.email}</span>
             </li>
           ))}
         </ul>
       )}
-    </div>
-  );
-}
-
-function RoleGranterStub({ orgId }: { orgId: string | null }) {
-  const qc = useQueryClient();
-  const [search, setSearch] = useState("");
-  const [selectedUser, setSelectedUser] = useState<string>("");
-  const [action, setAction] = useState<"grant" | "revoke">("grant");
-
-  const { data: members } = useQuery({
-    enabled: !!orgId,
-    queryKey: ["org-members-for-hrc", orgId, search],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("organization_members")
-        .select("id, user_id, role, profiles(full_name, email)")
-        .eq("organization_id", orgId!)
-        .eq("active", true)
-        .limit(50);
-      if (error) throw error;
-      const q = search.trim().toLowerCase();
-      return (data ?? []).filter((m) => {
-        if (!q) return true;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const p = (m as any).profiles as { full_name?: string; email?: string } | null;
-        return (
-          p?.full_name?.toLowerCase().includes(q) ||
-          p?.email?.toLowerCase().includes(q)
-        );
-      });
-    },
-  });
-
-  const setGrantsFn = useServerFn(setMemberGrants);
-  const apply = useMutation({
-    mutationFn: async () => {
-      if (!selectedUser || !orgId) throw new Error("Pick a user first");
-      const member = (members ?? []).find((m) => m.user_id === selectedUser);
-      if (!member) throw new Error("Selected user not found");
-      const newRole = action === "grant" ? "committee_member" : "employee";
-      await setGrantsFn({
-        data: {
-          organization_id: orgId,
-          membership_id: member.id,
-          target_user_id: selectedUser,
-          explicit_role: newRole,
-        },
-      });
-    },
-    onSuccess: () => {
-      toast.success(
-        action === "grant"
-          ? "User promoted to Committee Member"
-          : "Committee Member role revoked (now Employee)"
-      );
-      qc.invalidateQueries({ queryKey: ["org-members-for-hrc", orgId] });
-    },
-    onError: (e: Error) =>
-      toast.error(
-        e.message.includes("Unauthorized")
-          ? "Only organization admins can manage committee member roles."
-          : e.message,
-      ),
-  });
-
-  return (
-    <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
-      <Input
-        placeholder="Search organization members…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <Select value={selectedUser} onValueChange={setSelectedUser}>
-        <SelectTrigger className="w-full sm:w-auto min-w-[220px]">
-          <SelectValue placeholder="Select a user" />
-        </SelectTrigger>
-        <SelectContent>
-          {(members ?? []).map((m) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const p = (m as any).profiles as { full_name?: string; email?: string } | null;
-            return (
-              <SelectItem key={m.user_id} value={m.user_id}>
-                {p?.full_name ?? p?.email ?? m.user_id} · {m.role}
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
-      <Select value={action} onValueChange={(v) => setAction(v as "grant" | "revoke")}>
-        <SelectTrigger className="w-full sm:w-[140px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="grant">Grant</SelectItem>
-          <SelectItem value="revoke">Revoke</SelectItem>
-        </SelectContent>
-      </Select>
-      <Button onClick={() => apply.mutate()} disabled={!selectedUser || apply.isPending}>
-        Apply
-      </Button>
+      {canEditAccess && (
+        <p className="text-xs text-muted-foreground">
+          To add or remove someone, set their preset to HRC Committee in{" "}
+          <Link to="/dashboard/settings/team-access" className="underline">
+            Settings → Access &amp; presets
+          </Link>
+          .
+        </p>
+      )}
     </div>
   );
 }

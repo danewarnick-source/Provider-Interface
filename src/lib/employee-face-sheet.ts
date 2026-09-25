@@ -96,7 +96,7 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
   //    users from tripping object-mode queries with multiple memberships.
   const { data: member, error: mErr } = await sb
     .from("organization_members")
-    .select("id, role, active, organization_id")
+    .select("id, role:access_level, active, organization_id")
     .eq("user_id", staffId)
     .eq("organization_id", organizationId)
     .limit(1)

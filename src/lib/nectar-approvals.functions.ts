@@ -305,7 +305,7 @@ export const listProviderPendingConfirmations = createServerFn({ method: "GET" }
     // RLS will scope reads; require org member explicitly for clarity.
     const { data: member } = await context.supabase
       .from("organization_members")
-      .select("role, active")
+      .select("active")
       .eq("organization_id", data.organizationId)
       .eq("user_id", context.userId)
       .eq("active", true)
@@ -345,7 +345,7 @@ export const classifyPendingRequirements = createServerFn({ method: "GET" })
       return { bucketA: [], bucketB: [], bucketC: [] };
     const { data: member } = await context.supabase
       .from("organization_members")
-      .select("role, active")
+      .select("active")
       .eq("organization_id", data.organizationId)
       .eq("user_id", context.userId)
       .eq("active", true)

@@ -31,7 +31,7 @@ export const saveDailyRecord = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const followupTypes = data.incidentRequired ? ["incident_report"] : [];
     const { error, data: row } = await supabase
       .from("daily_logs")
@@ -124,7 +124,7 @@ export const saveEmarLog = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
 
     // Map HHS status enum → unified emar_logs status enum.
@@ -201,7 +201,7 @@ export const setAttendance = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     if (data.presenceStatus === "Away" && data.awayCategory === "Hospitalization" && !data.awayNotes?.trim()) {
       throw new Error("Elaborate on the hospitalization (reason, hospital name, expected duration) before saving.");
     }
@@ -262,7 +262,7 @@ export const savePrnForm = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const { error, data: row } = await supabase
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("submitted_forms" as never)
@@ -307,7 +307,7 @@ export const saveIncidentReport = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const { error, data: row } = await supabase
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("hhs_incident_reports" as never)
@@ -414,7 +414,7 @@ export const markIncidentFiled = createServerFn({ method: "POST" })
       supabase,
       userId,
       (incident as { organization_id: string }).organization_id,
-      "employee",
+      "staff",
     );
     const { error } = await supabase
       .from("hhs_incident_reports" as never)

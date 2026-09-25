@@ -22,7 +22,7 @@ interface Props {
 export function NectarTaskCenter({ trigger, open, onOpenChange, initialGoal, surface = "admin" }: Props) {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id ?? "";
-  const role = org?.role ?? "employee";
+  const role = org?.access.level ?? "staff";
   const list = useServerFn(listNectarGuides);
   const plan = useServerFn(planNectarGuide);
   const upd = useServerFn(updateGuideTask);

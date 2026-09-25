@@ -14,7 +14,7 @@ export async function fetchEvidenceEmployees(
 ): Promise<{ people: EvidencePerson[]; error: string | null }> {
   const members = await sb
     .from("organization_members")
-    .select("user_id, role, job_title, active")
+    .select("user_id, role:access_level, job_title, active")
     .eq("organization_id", organizationId);
   if (members.error) {
     return { people: [], error: members.error.message };

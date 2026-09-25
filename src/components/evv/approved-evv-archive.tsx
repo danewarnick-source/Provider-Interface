@@ -17,6 +17,7 @@ import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
 import { downloadCsv } from "@/lib/utah-evv-export";
 import { HistoricalTimesheetBadge } from "@/components/smart-import/timesheets/historical-timesheet-badge";
 import { toast } from "sonner";
+import { isAdminLevel } from "@/lib/access/levels";
 
 const searchSchema = z.object({
   staff: z.array(z.string()).optional(),
@@ -103,7 +104,7 @@ export function EvvArchivePage() {
   const navigate = useNavigate();
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
-  const isAdmin = org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+  const isAdmin = isAdminLevel(org?.access.level);
 
   // Filter state — local only. We sync to URL when embedded as a standalone route,
   // but since this component is also rendered inside the Documentation hub

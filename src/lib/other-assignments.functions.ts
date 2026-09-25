@@ -79,7 +79,7 @@ export const listStaffOtherAssignments = createServerFn({ method: "POST" })
       context.supabase,
       context.userId,
       data.organization_id,
-      "manager",
+      "admin",
     );
     const { data: rows, error } = await context.supabase
       .from("staff_other_assignments")
@@ -103,7 +103,7 @@ export const listOrgOtherAssignments = createServerFn({ method: "POST" })
       context.supabase,
       context.userId,
       data.organization_id,
-      "manager",
+      "admin",
     );
     const { data: rows, error } = await context.supabase
       .from("staff_other_assignments")
@@ -157,7 +157,7 @@ export const assignOtherItem = createServerFn({ method: "POST" })
       context.supabase,
       context.userId,
       data.organization_id,
-      "manager",
+      "admin",
     );
     if (context.userId === data.staff_id) {
       throw new Error("Cannot self-assign");
@@ -202,7 +202,7 @@ export const proposeOtherAssignment = createServerFn({ method: "POST" })
       context.supabase,
       context.userId,
       data.organization_id,
-      "manager",
+      "admin",
     );
     const { data: row, error } = await context.supabase
       .from("staff_other_assignments")
@@ -245,7 +245,7 @@ export const confirmProposedAssignment = createServerFn({ method: "POST" })
       context.supabase,
       context.userId,
       data.organization_id,
-      "manager",
+      "admin",
     );
     const now = new Date().toISOString();
     const { error } = await context.supabase
@@ -278,7 +278,7 @@ export const rejectProposedAssignment = createServerFn({ method: "POST" })
       context.supabase,
       context.userId,
       data.organization_id,
-      "manager",
+      "admin",
     );
     const { error } = await context.supabase
       .from("staff_other_assignments")
@@ -307,7 +307,7 @@ export const deleteOtherAssignment = createServerFn({ method: "POST" })
       context.supabase,
       context.userId,
       data.organization_id,
-      "manager",
+      "admin",
     );
     const { error } = await context.supabase
       .from("staff_other_assignments")
@@ -390,7 +390,7 @@ export const adminCompleteAssignment = createServerFn({ method: "POST" })
       context.supabase,
       context.userId,
       data.organization_id,
-      "manager",
+      "admin",
     );
     const { error } = await context.supabase
       .from("staff_other_assignments")

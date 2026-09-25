@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -69,7 +69,7 @@ function CoursePlayer() {
   const { courseId } = Route.useParams();
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const qc = useQueryClient();
   const router = useRouter();
   const [activeId, setActiveId] = useState<string | null>(null);

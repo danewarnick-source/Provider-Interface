@@ -15,7 +15,7 @@ export const EMPLOYEE_ROSTER_HEADERS = [
   "last_name",
   "email",
   "phone",
-  "role",
+  "access_level",
   "title",
   "hire_date",
   "username",
@@ -23,10 +23,7 @@ export const EMPLOYEE_ROSTER_HEADERS = [
 
 export type EmployeeRosterHeader = (typeof EMPLOYEE_ROSTER_HEADERS)[number];
 
-export type EmployeeRosterRole = "admin" | "program_manager" | "manager" | "employee" | "committee_member";
-
-/** createInvitation / resendInvitation only accept these three. */
-export type EmployeeInviteRole = "admin" | "manager" | "employee";
+export type EmployeeRosterLevel = "owner" | "admin" | "staff";
 
 export type EmployeeRosterDraft = {
   id: string;
@@ -34,7 +31,7 @@ export type EmployeeRosterDraft = {
   last_name: string;
   email: string;
   phone: string;
-  role: string;
+  access_level: string;
   title: string;
   hire_date: string;
   username: string;
@@ -59,7 +56,9 @@ const HEADER_ALIASES: Record<string, EmployeeRosterHeader> = {
   phone: "phone",
   phone_number: "phone",
   mobile: "phone",
-  role: "role",
+  access_level: "access_level",
+  level: "access_level",
+  role: "access_level",
   title: "title",
   job_title: "title",
   hire_date: "hire_date",
@@ -82,17 +81,18 @@ const CLIENT_ONLY_HEADERS = [
   "client_record",
 ];
 
-const ROLE_ALIASES: Record<string, EmployeeRosterRole> = {
-  employee: "employee",
-  staff: "employee",
-  dsp: "employee",
-  manager: "manager",
-  supervisor: "manager",
+/** Old templates used a "role" column; those values still land on a level. */
+const LEVEL_ALIASES: Record<string, EmployeeRosterLevel> = {
+  staff: "staff",
+  employee: "staff",
+  dsp: "staff",
+  committee: "staff",
+  committee_member: "staff",
   admin: "admin",
-  owner: "admin",
-  program_manager: "program_manager",
-  committee_member: "committee_member",
-  committee: "committee_member",
+  manager: "admin",
+  supervisor: "admin",
+  program_manager: "admin",
+  owner: "owner",
 };
 
 const EXAMPLE_ROW: Record<EmployeeRosterHeader, string> = {
@@ -100,7 +100,7 @@ const EXAMPLE_ROW: Record<EmployeeRosterHeader, string> = {
   last_name: "Doe",
   email: "jane.doe@example.com",
   phone: "555-123-4567",
-  role: "employee",
+  access_level: "staff",
   title: "Direct Support",
   hire_date: "2026-07-01",
   username: "jane.doe@example.com",
@@ -119,17 +119,10 @@ export function isClientOnlyRosterHeader(raw: string): boolean {
   return CLIENT_ONLY_HEADERS.some((h) => slug === h || slug.startsWith(`${h}_`));
 }
 
-export function parseEmployeeRosterRole(raw: string): EmployeeRosterRole | null {
+export function parseEmployeeRosterLevel(raw: string): EmployeeRosterLevel | null {
   const key = slugHeader(raw);
-  if (!key) return "employee";
-  return ROLE_ALIASES[key] ?? null;
-}
-
-export function toInviteRole(raw: string): EmployeeInviteRole {
-  const parsed = parseEmployeeRosterRole(raw);
-  if (parsed === "admin") return "admin";
-  if (parsed === "manager" || parsed === "program_manager") return "manager";
-  return "employee";
+  if (!key) return "staff";
+  return LEVEL_ALIASES[key] ?? null;
 }
 
 export function normalizeRosterEmailSet(emails: Iterable<string>): Set<string> {
@@ -185,7 +178,7 @@ export function emptyEmployeeRosterDraft(): EmployeeRosterDraft {
     last_name: "",
     email: "",
     phone: "",
-    role: "employee",
+    access_level: "staff",
     title: "",
     hire_date: "",
     username: "",
@@ -222,7 +215,7 @@ export function mapRawRosterRow(
     mapped[key] = String(raw[header] ?? "").trim();
   }
   const email = normalizeSignupEmail(mapped.email ?? "");
-  const rawRole = (mapped.role ?? "").trim();
+  const rawLevel = (mapped.access_level ?? "").trim();
   const usernameRaw = (mapped.username ?? "").trim();
   return {
     id: newRowId(),
@@ -230,7 +223,7 @@ export function mapRawRosterRow(
     last_name: mapped.last_name ?? "",
     email,
     phone: mapped.phone ?? "",
-    role: rawRole || "employee",
+    access_level: rawLevel || "staff",
     title: mapped.title ?? "",
     hire_date: normalizeHireDate(mapped.hire_date ?? ""),
     username: usernameRaw || email,
@@ -271,7 +264,9 @@ export function validateEmployeeRosterRows(rows: EmployeeRosterDraft[]): Map<str
     if (!row.last_name.trim()) list.push({ field: "last_name", message: "Last name is required." });
     if (!isValidSignupEmail(row.email)) list.push({ field: "email", message: "Enter a valid email." });
     if (!row.phone.trim()) list.push({ field: "phone", message: "Phone is required." });
-    if (!parseEmployeeRosterRole(row.role)) list.push({ field: "role", message: "Use employee, manager, or admin." });
+    if (!parseEmployeeRosterLevel(row.access_level)) {
+      list.push({ field: "access_level", message: "Use staff, admin, or owner." });
+    }
     if (row.hire_date && !/^\d{4}-\d{2}-\d{2}$/.test(row.hire_date)) {
       list.push({ field: "hire_date", message: "Use YYYY-MM-DD." });
     }

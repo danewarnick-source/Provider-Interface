@@ -156,7 +156,7 @@ export const proposeStaffTypesAndMapping = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { proposed_types: 0, mapped: 0 };
-    await requireOrgMembership(supabase, userId, data.organization_id, "manager");
+    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
 
     // 1) Load org's authoritative sources (text)
     const { data: sources, error: sErr } = await supabase
@@ -304,7 +304,7 @@ export const listStaffTypeProposal = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId)
       return { staff_types: [], requirements: [], any_unconfirmed: false, proposed_at: null };
-    await requireOrgMembership(supabase, userId, data.organization_id, "employee");
+    await requireOrgMembership(supabase, userId, data.organization_id, "staff");
 
     const { data: types } = await supabase
       .from("staff_types")
@@ -396,7 +396,7 @@ export const upsertStaffType = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organization_id, "manager");
+    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
     if (data.id) {
       const { error } = await supabase
         .from("staff_types")
@@ -435,7 +435,7 @@ export const deleteStaffType = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organization_id, "manager");
+    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
     const { error } = await supabase
       .from("staff_types")
       .delete()
@@ -460,7 +460,7 @@ export const updateRequirementApplicability = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organization_id, "manager");
+    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
     const { data: r, error: rErr } = await supabase
       .from("nectar_requirements")
       .select("id, metadata")
@@ -494,7 +494,7 @@ export const confirmAllApplicability = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organization_id, "manager");
+    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
     const now = new Date().toISOString();
     await supabase
       .from("staff_types")
@@ -540,7 +540,7 @@ export const setStaffTypeKeys = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organization_id, "manager");
+    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
       .from("profiles")

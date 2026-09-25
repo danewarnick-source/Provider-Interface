@@ -28,14 +28,14 @@ export const updatePaymentMethodFn = createServerFn({ method: "POST" })
     // Authorize: caller must be an active owner (admin) of this org.
     const { data: membership, error: mErr } = await context.supabase
       .from("organization_members")
-      .select("role")
+      .select("access_level")
       .eq("organization_id", data.organization_id)
       .eq("user_id", context.userId)
       .eq("active", true)
       .maybeSingle();
     if (mErr) throw new Error(mErr.message);
-    if (!membership || membership.role !== "admin") {
-      throw new Error("Forbidden — admin role required to update payment method");
+    if (!membership || membership.access_level !== "owner") {
+      throw new Error("Forbidden — only an Owner can update the payment method");
     }
 
     // expires_at = last day of the expiry month (YYYY-MM-DD)

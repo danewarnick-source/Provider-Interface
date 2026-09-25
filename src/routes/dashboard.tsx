@@ -10,7 +10,7 @@ import {
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { usePortalView } from "@/hooks/use-portal-view";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { ROLE_LABEL, type Role } from "@/lib/rbac";
+import { isAdminLevel, LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
+import { isCommitteeOnly } from "@/lib/access/member";
 import {
   LayoutDashboard,
   GraduationCap,
@@ -238,7 +239,7 @@ export const Route = createFileRoute("/dashboard")({
   errorComponent: DashboardShellError,
 });
 
-import type { Permission } from "@/lib/rbac";
+import type { Permission } from "@/lib/access/permission-keys";
 type NavItem = {
   to: string;
   label: string;
@@ -312,7 +313,8 @@ type PV = "staff" | "admin" | "staff_mobile" | "hive_exec" | "state_preview";
 
 type SidebarBodyProps = {
   user: ReturnType<typeof useAuth>["user"];
-  role: Role;
+  role: AccessLevel;
+  accessLabel: string;
   isAdminCapable: boolean;
   isExecutive: boolean;
   isHiveExecView: boolean;
@@ -342,7 +344,7 @@ function DashboardLayout() {
     isError: orgError,
     error: orgQueryError,
   } = useCurrentOrg();
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const {
     view,
     hasStoredView,
@@ -451,16 +453,14 @@ function DashboardLayout() {
     };
   }, [session?.user?.id, pathname, navigate]);
 
-  const role: Role = org?.role ?? "employee";
-  const isCommitteeMember = role === "committee_member";
+  const role = org?.access.level ?? "staff";
+  const isCommitteeMember = isCommitteeOnly(org?.access);
   const isAdminCapable =
     !isCommitteeMember &&
     (can("view_staff_records") ||
-      role === "admin" ||
-      role === "program_manager" ||
-      role === "manager");
+      isAdminLevel(role));
 
-  // Fail-closed gate: a committee_member can ONLY access /dashboard/hrc.
+  // Fail-closed gate: committee-only staff can ONLY access /dashboard/hrc.
   // Redirect away from anything else immediately.
   useEffect(() => {
     if (!loading && session && isCommitteeMember && !pathname.startsWith("/dashboard/hrc")) {
@@ -524,7 +524,7 @@ function DashboardLayout() {
         : STAFF_NAV;
   const { isEnabled: isFeatureOn } = useOrgFeatures();
   const nav: NavItem[] = baseNav
-    .filter((n) => !n.perm || can(n.perm) || role === "admin")
+    .filter((n) => !n.perm || can(n.perm))
     // Master-Controller gating: keep item visible; mark isLocked when feature is OFF.
     // Training stays visible without hive_training — Internal trainings replaced Policies.
     .map((n) => ({ ...n, isLocked: n.feature ? !isFeatureOn(n.feature) : false }));
@@ -725,9 +725,11 @@ function DashboardLayout() {
     "Dashboard";
   const inboxUnread = unreadQ.data?.count ?? 0;
 
+  const accessLabel = org?.access.presetName ?? LEVEL_LABEL[role];
   const sidebarProps: Omit<SidebarBodyProps, "onNavigate"> = {
     user,
     role,
+    accessLabel,
     isAdminCapable,
     isExecutive,
     isHiveExecView,
@@ -845,7 +847,7 @@ function DashboardLayout() {
                         <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                           <span>{org?.organization_name ?? "Workspace"}</span>
                           {org?.is_demo && <DemoBadge />}
-                          <span>· {ROLE_LABEL[role]}</span>
+                          <span>· {accessLabel}</span>
                         </span>
                       )}
                     </p>
@@ -1059,6 +1061,7 @@ function DashboardMain({ className, children }: { className: string; children: R
 function SidebarBody({
   user,
   role,
+  accessLabel,
   isAdminCapable,
   isExecutive,
   isHiveExecView,
@@ -1449,7 +1452,7 @@ function SidebarBody({
                 <OrgSwitcher />
                 <div className="mt-1.5 flex justify-end">
                   <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-[10px] uppercase tracking-wider">
-                    {ROLE_LABEL[role]}
+                    {accessLabel}
                   </span>
                 </div>
               </>

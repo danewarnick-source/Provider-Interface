@@ -21,15 +21,15 @@ async function ensureOrgAdmin(
 ): Promise<void> {
   const { data, error } = await supabase
     .from("organization_members")
-    .select("role, active")
+    .select("access_level, active")
     .eq("user_id", userId)
     .eq("organization_id", organizationId)
     .eq("active", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  const role = (data as { role?: string } | null)?.role ?? null;
-  if (role !== "admin") {
-    throw new Error("Only org admins may update the billing contact number.");
+  const level = (data as { access_level?: string } | null)?.access_level ?? null;
+  if (level !== "owner") {
+    throw new Error("Only an Owner may update the billing contact number.");
   }
 }
 

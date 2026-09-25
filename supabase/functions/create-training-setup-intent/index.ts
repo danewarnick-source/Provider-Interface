@@ -37,12 +37,12 @@ Deno.serve(async (req) => {
 
   const { data: memberships } = await admin
     .from("organization_members")
-    .select("organization_id, role")
+    .select("organization_id, access_level")
     .eq("user_id", user.id)
     .eq("active", true)
     .limit(1);
   const orgRow = memberships?.[0];
-  if (!orgRow || !["admin", "manager", "super_admin"].includes(orgRow.role)) {
+  if (!orgRow || !["owner", "admin"].includes(orgRow.access_level)) {
     return json({ error: "forbidden" }, 403);
   }
 

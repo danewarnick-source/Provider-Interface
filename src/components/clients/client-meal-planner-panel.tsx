@@ -70,6 +70,7 @@ import {
   rangeLabelOf,
   rangeTagOf,
 } from "@/lib/meal-plan-vs-actual-report";
+import { isAdminLevel } from "@/lib/access/levels";
 
 
 
@@ -177,9 +178,9 @@ export function ClientMealPlannerPanel({
   const orgId = org?.organization_id;
   const canEdit =
     !forcedReadOnly &&
-    (org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager");
+    (isAdminLevel(org?.access.level));
   // Staff (any org member) may record daily actuals even in read-only-plan mode.
-  const canRecordActuals = !!org?.role;
+  const canRecordActuals = !!org?.access.level;
   const qc = useQueryClient();
 
   const [weekStart, setWeekStart] = useState<Date>(mondayOf(new Date()));

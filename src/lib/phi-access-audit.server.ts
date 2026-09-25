@@ -66,7 +66,7 @@ export async function logPhiAccess(opts: {
   try {
     const { data: membership } = await opts.supabaseUserClient
       .from("organization_members")
-      .select("role")
+      .select("access_level")
       .eq("organization_id", opts.organizationId)
       .eq("user_id", opts.userId)
       .eq("active", true)
@@ -74,7 +74,7 @@ export async function logPhiAccess(opts: {
 
     const breakGlass = await isBreakGlass(opts.supabaseUserClient, opts.userId);
     const role =
-      (membership as { role?: string } | null)?.role ?? (breakGlass ? "super_admin" : null);
+      (membership as { access_level?: string } | null)?.access_level ?? (breakGlass ? "super_admin" : null);
     const { ip, userAgent } = resolveRequestMeta({
       ip: opts.ip,
       userAgent: opts.userAgent,

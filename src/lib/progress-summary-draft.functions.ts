@@ -59,7 +59,7 @@ export const draftProgressSummary = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { status: "no_source" as const, draft: null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     // 1. Load the summary row.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

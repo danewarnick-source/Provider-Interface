@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { HubShell, type HubTab } from "@/components/admin-hubs/hub-shell";
 import { RequirePermission } from "@/components/rbac-guard";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { EmployeesPage } from "./dashboard.employees.index";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { HrAdminPage, EmployeeLoansPage } from "./dashboard.hr-admin";
@@ -16,7 +16,7 @@ const search = z.object({
 });
 
 function EmployeesHub() {
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const tabs: HubTab[] = [
     { key: "roster", label: "Roster", render: () => <EmployeesPage /> },
   ];

@@ -111,7 +111,7 @@ export const listExternalRequirements = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { items: [] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const { data: reqs, error } = await supabase
       .from("nectar_requirements")
@@ -215,7 +215,7 @@ export const setRequirementClassification = createServerFn({ method: "POST" })
       .eq("id", data.requirementId)
       .single();
     if (rErr || !req) throw new Error(rErr?.message ?? "Requirement not found");
-    await requireOrgMembership(supabase, userId, req.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, req.organization_id as string, "admin");
     const md = ((req.metadata as Record<string, unknown> | null) ?? {});
     const nextMd: Record<string, unknown> = {
       ...md,
@@ -254,7 +254,7 @@ export const attestExternalCompletion = createServerFn({ method: "POST" })
       .eq("id", data.requirementId)
       .single();
     if (rErr || !req) throw new Error(rErr?.message ?? "Requirement not found");
-    await requireOrgMembership(supabase, userId, req.organization_id as string, "employee");
+    await requireOrgMembership(supabase, userId, req.organization_id as string, "staff");
 
     const md = ((req.metadata as Record<string, unknown> | null) ?? {});
     const system = (md["external_system"] as string | null) ?? "external system";
@@ -314,7 +314,7 @@ export const autoClassifyRequirements = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { classified: 0, external: 0 };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const { data: rows, error } = await supabase
       .from("nectar_requirements")
       .select("id, title, description, source_citation, metadata")

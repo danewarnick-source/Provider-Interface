@@ -23,7 +23,7 @@ import { RequirePermission } from "@/components/rbac-guard";
 import { EmployeeFaceSheetButton } from "@/components/employees/employee-face-sheet-button";
 import { StaffProfilePanel } from "@/components/employees/staff-profile-panel";
 import { StaffObligationsFilesTab } from "@/components/employees/staff-obligations-files-tab";
-import { ALL_PERMISSIONS, type Permission } from "@/lib/rbac";
+import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import {
   loadStaffProfileIdentity,
   staffProfileDisplayName,
@@ -48,8 +48,8 @@ export const Route = createFileRoute("/dashboard/employees/$staffId")({
       fallbackTo: "/dashboard/employees",
     });
   },
-  validateSearch: (s: Record<string, unknown>): { tab?: SearchTab; override_perm?: Permission } => {
-    const out: { tab?: SearchTab; override_perm?: Permission } = {};
+  validateSearch: (s: Record<string, unknown>): { tab?: SearchTab } => {
+    const out: { tab?: SearchTab } = {};
     if (
       typeof s.tab === "string" &&
       (s.tab === "record" ||
@@ -59,12 +59,6 @@ export const Route = createFileRoute("/dashboard/employees/$staffId")({
         (PROFILE_TABS as readonly string[]).includes(s.tab))
     ) {
       out.tab = s.tab as SearchTab;
-    }
-    if (
-      typeof s.override_perm === "string" &&
-      (ALL_PERMISSIONS as readonly string[]).includes(s.override_perm)
-    ) {
-      out.override_perm = s.override_perm as Permission;
     }
     return out;
   },
@@ -77,7 +71,7 @@ export const Route = createFileRoute("/dashboard/employees/$staffId")({
 
 function StaffProfilePage() {
   const { staffId } = Route.useParams();
-  const { tab, override_perm } = Route.useSearch();
+  const { tab } = Route.useSearch();
   const { data: org } = useCurrentOrg();
   const router = useRouter();
   const qc = useQueryClient();
@@ -150,9 +144,9 @@ function StaffProfilePage() {
               <Badge
                 variant="outline"
                 className="border-primary/30 bg-primary/5 uppercase tracking-wide text-primary"
-                title="Provider Interface role"
+                title="Access level"
               >
-                {m.role}
+                {LEVEL_LABEL[m.access_level as AccessLevel] ?? m.access_level}
               </Badge>
               <Badge
                 variant="outline"
@@ -209,7 +203,6 @@ function StaffProfilePage() {
             profile={p}
             member={m}
             name={name}
-            highlightPermission={override_perm}
             onSaved={invalidateProfile}
           />
         </TabsContent>

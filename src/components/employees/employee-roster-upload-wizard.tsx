@@ -11,16 +11,15 @@ import { interpretInviteSendResult } from "@/lib/invite-send-result";
 import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { generateTempPassword } from "@/lib/temp-password";
 import {
-  type EmployeeInviteRole,
+  type EmployeeRosterLevel,
   type EmployeeRosterDraft,
   type EmployeeRosterHeader,
   type EmployeeRosterUploadMode,
   classifyRosterRowAction,
   parseEmployeeRosterCsv,
   parseEmployeeRosterRecords,
-  parseEmployeeRosterRole,
+  parseEmployeeRosterLevel,
   rosterRowHasFieldIssue,
-  toInviteRole,
   triggerEmployeeRosterTemplateDownload,
   validateEmployeeRosterRows,
 } from "@/lib/employee-roster-upload";
@@ -37,7 +36,7 @@ type CreatedRow = {
   name: string;
   email: string;
   password: string;
-  role: EmployeeInviteRole;
+  accessLevel: EmployeeRosterLevel;
   action: "created" | "updated";
 };
 
@@ -157,7 +156,7 @@ export function EmployeeRosterUploadWizard({
               lastName: row.last_name.trim(),
               email: row.email.trim(),
               phone: row.phone.trim(),
-              role: parseEmployeeRosterRole(row.role) ?? "employee",
+              accessLevel: parseEmployeeRosterLevel(row.access_level) ?? "staff",
               hireDate: row.hire_date,
               department: row.title.trim(),
               username: row.username.trim(),
@@ -176,7 +175,7 @@ export function EmployeeRosterUploadWizard({
             name: `${row.first_name.trim()} ${row.last_name.trim()}`.trim(),
             email: row.email.trim(),
             password,
-            role: toInviteRole(row.role),
+            accessLevel: parseEmployeeRosterLevel(row.access_level) ?? "staff",
             action: res.action,
           });
         } catch (e) {
@@ -211,7 +210,7 @@ export function EmployeeRosterUploadWizard({
           let raw: unknown;
           try {
             raw = await createInviteFn({
-              data: { organization_id: organizationId, email, role: row.role, site_origin },
+              data: { organization_id: organizationId, email, access_level: row.accessLevel, site_origin },
             });
           } catch (e) {
             const msg = e instanceof Error ? e.message : "";
@@ -526,7 +525,7 @@ function applyLabel(createCount: number, updateCount: number): string {
 }
 
 const previewFields: EmployeeRosterHeader[] = [
-  "first_name", "last_name", "email", "phone", "role", "title", "hire_date", "username",
+  "first_name", "last_name", "email", "phone", "access_level", "title", "hire_date", "username",
 ];
 
 function labelFor(field: EmployeeRosterHeader): string {
@@ -535,7 +534,7 @@ function labelFor(field: EmployeeRosterHeader): string {
     case "last_name": return "Last name";
     case "email": return "Email";
     case "phone": return "Phone";
-    case "role": return "Role";
+    case "access_level": return "Access level";
     case "title": return "Title";
     case "hire_date": return "Hire date";
     case "username": return "Username";

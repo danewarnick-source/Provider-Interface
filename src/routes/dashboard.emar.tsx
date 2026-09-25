@@ -18,10 +18,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Pill, CheckCircle2, AlertTriangle, AlertCircle, Eraser, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { EmarLegalBanner } from "@/components/workspace/emar-chart";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { logMedicationPass } from "@/lib/emar-pass.functions";
 import { type EmarStatus, normalizeEmarStatus } from "@/lib/emar-status";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { isAdminLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/emar")({
   head: () => ({ meta: [{ title: "Today's Pass — Provider Interface eMAR" }] }),
@@ -66,8 +67,8 @@ function EmarPage() {
   const { data: org } = useCurrentOrg();
   const { user } = useAuth();
   const { data: activeShift } = useActiveShift();
-  const { role } = usePermissions();
-  const isAdminLike = role === "admin" || role === "program_manager" || role === "manager";
+  const { level: role } = useAccess();
+  const isAdminLike = isAdminLevel(role);
   const qc = useQueryClient();
   const [selected, setSelected] = useState<DueRow | null>(null);
   const recordAccessFn = useServerFn(recordPhiAccess);

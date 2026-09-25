@@ -18,7 +18,6 @@ import {
   type MembershipPick,
 } from "@/lib/current-org";
 import { readSupabaseAdminEnv } from "@/lib/supabase-public-env";
-import type { Role } from "@/lib/rbac";
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 
@@ -109,12 +108,12 @@ export const getBillingLockFn = createServerFn({ method: "POST" })
 
     const { data: memberships } = await context.supabase
       .from("organization_members")
-      .select("organization_id, role, organizations(name, is_demo, display_acronym)")
+      .select("organization_id, access_level, organizations(name, is_demo, display_acronym)")
       .eq("user_id", context.userId)
       .eq("active", true);
     const ms = (memberships ?? []) as Array<{
       organization_id: string;
-      role: string;
+      access_level: string | null;
       organizations?: {
         name?: string | null;
         is_demo?: boolean | null;
@@ -126,7 +125,7 @@ export const getBillingLockFn = createServerFn({ method: "POST" })
     const picks: MembershipPick[] = ms.map((m) => ({
       organization_id: m.organization_id,
       is_demo: m.organizations?.is_demo === true,
-      role: m.role as Role,
+      access: { level: m.access_level ?? "staff" },
       display_acronym: m.organizations?.display_acronym ?? null,
       organization_name: m.organizations?.name ?? null,
     }));
@@ -219,7 +218,7 @@ export const getBillingLockFn = createServerFn({ method: "POST" })
     const orgId = chosen?.organization_id ?? picks[0]?.organization_id ?? "";
     if (!orgId) return empty;
     const membership = ms.find((m) => m.organization_id === orgId) ?? ms[0];
-    const isAdmin = membership?.role === "admin";
+    const isAdmin = membership?.access_level === "owner";
 
     let org = await readLockOrg(context.supabase, orgId);
     let sub = await readLockSub(context.supabase, orgId);

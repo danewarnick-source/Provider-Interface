@@ -7,7 +7,6 @@ import {
   isRbacSeedTriggerError,
   isSignupEmailNotConfirmedError,
   messageForSignupWorkspaceReason,
-  seedSignupOrgRolePermissions,
   signupHasSession,
   workspaceNameFromSignup,
 } from "./signup-workspace.ts";
@@ -47,28 +46,10 @@ describe("signup workspace / session", () => {
     assert.doesNotMatch(workspaceNameFromSignup({ agencyName: "Test agency 1" }), /True North/i);
   });
 
-  it("seeds role_permissions via RPC and does not throw on failure", async () => {
-    const calls: Array<{ fn: string; org: string }> = [];
-    const ok = await seedSignupOrgRolePermissions(async (fn, args) => {
-      calls.push({ fn, org: args._org });
-      return { error: null };
-    }, "org-1");
-    assert.equal(ok, true);
-    assert.deepEqual(calls, [{ fn: "seed_org_role_permissions", org: "org-1" }]);
-
-    const failed = await seedSignupOrgRolePermissions(async () => {
-      return { error: { message: "function does not exist" } };
-    }, "org-2");
-    assert.equal(failed, false);
-
-    const empty = await seedSignupOrgRolePermissions(async () => ({ error: null }), "  ");
-    assert.equal(empty, false);
-  });
-
-  it("signup workspace provision calls the role_permissions seed", () => {
+  it("signup workspace provision no longer calls the legacy role_permissions seed", () => {
     const src = readFileSync(new URL("./signup-workspace.functions.ts", import.meta.url), "utf8");
-    assert.match(src, /seedSignupOrgRolePermissions/);
-    assert.match(src, /seed_org_role_permissions/);
+    assert.doesNotMatch(src, /seed_org_role_permissions/);
+    assert.match(src, /access_level:\s*"owner"/);
   });
 
   it("defaults the owner profile username to the signup email", () => {

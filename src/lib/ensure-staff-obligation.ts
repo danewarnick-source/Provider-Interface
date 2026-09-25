@@ -165,7 +165,7 @@ export async function loadStaffForEnsure(
   const [{ data: mem }, { data: prof }] = await Promise.all([
     supabase
       .from("organization_members")
-      .select("role")
+      .select("role:access_level")
       .eq("organization_id", organizationId)
       .eq("user_id", staffId)
       .eq("active", true)
@@ -176,6 +176,6 @@ export async function loadStaffForEnsure(
   return {
     id: staffId,
     full_name: (prof.full_name as string | null) ?? "Staff",
-    role: String(mem.role ?? "employee"),
+    role: String(mem.role ?? "staff"),
   };
 }

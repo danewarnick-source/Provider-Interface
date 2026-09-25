@@ -198,7 +198,7 @@ export const askNectarReport = createServerFn({ method: "POST" })
 
     // Verify manager+ membership on the PASSED org (not first-membership).
     const { requireOrgMembership } = await import("@/integrations/supabase/require-org");
-    await requireOrgMembership(supabase, userId, orgId, "manager");
+    await requireOrgMembership(supabase, userId, orgId, "admin");
 
 
     const plan = await planFromPrompt(data.prompt);

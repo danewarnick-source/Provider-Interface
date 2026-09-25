@@ -30,7 +30,7 @@ function BehaviorSupportClientPage() {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
   const router = useRouter();
-  const orgRole = org?.role;
+  const orgRole = org?.access.level;
   const orgId = org?.organization_id;
 
   const { data, isLoading } = useQuery({
@@ -61,7 +61,7 @@ function BehaviorSupportClientPage() {
     );
   }
 
-  const isAdmin = orgRole === "admin";
+  const isAdmin = orgRole === "owner";
   const isBehaviorist = !isAdmin && data.bsc.assigned_behaviorist_user_id === user?.id;
 
   // Staff should not reach this surface — send them to the client workspace

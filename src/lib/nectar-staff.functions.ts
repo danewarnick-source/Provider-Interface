@@ -254,7 +254,7 @@ export const askNectarStaff = createServerFn({ method: "POST" })
       context.supabase as unknown as Parameters<typeof requireOrgMembership>[0],
       userId,
       orgId,
-      "employee",
+      "staff",
     );
 
     if (questionWantsPayOrHours(data.question)) {
@@ -264,13 +264,13 @@ export const askNectarStaff = createServerFn({ method: "POST" })
     // Load the caller's role/job_title within this org for prompt context.
     const memQ = await supabase
       .from("organization_members")
-      .select("role, job_title")
+      .select("role:access_level, job_title")
       .eq("organization_id", orgId)
       .eq("user_id", userId)
       .eq("active", true)
       .maybeSingle();
     const mem = (memQ.data as { role: string; job_title: string | null } | null) ?? {
-      role: "employee",
+      role: "staff",
       job_title: null,
     };
 

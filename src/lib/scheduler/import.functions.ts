@@ -43,7 +43,7 @@ export const nectarImportSchedule = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { drafts: [] };
-    await requireOrgMembership(supabase, userId, data.organization_id, "employee");
+    await requireOrgMembership(supabase, userId, data.organization_id, "staff");
     assertBedrockConfigured();
 
     const approxBytes = Math.floor((data.file_b64.length * 3) / 4);

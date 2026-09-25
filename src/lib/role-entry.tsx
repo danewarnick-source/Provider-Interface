@@ -2,32 +2,23 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { type Role } from "@/lib/rbac";
-import {
-  COMPANY_ADMIN_ROLES,
-  persistPortalView,
-  resolveRoleEntryLanding,
-  type PortalView,
-} from "@/lib/portal-view-landing";
+import { levelHome, type AccessLevel } from "@/lib/access/levels";
+import { persistPortalView, resolveRoleEntryLanding, type PortalView } from "@/lib/portal-view-landing";
 
-/** Generic role-entry redirector: validates the user's role, then sends them into /dashboard. */
-function makeRoleEntry(allowed: Role[], persistView: PortalView | null) {
+/** Bookmark-entry redirector: checks the user's access level, then sends them into /dashboard. */
+function makeRoleEntry(allowed: AccessLevel[], persistView: PortalView | null) {
   return function RoleEntry() {
     const { session, loading } = useAuth();
     const { data: org, isLoading } = useCurrentOrg();
     const navigate = useNavigate();
+    const level = org?.access.level ?? "staff";
+    const home = levelHome(level, org?.access.presetHome);
     useEffect(() => {
       if (loading || isLoading) return;
-      const role = (org?.role ?? "employee") as Role;
-      const landing = resolveRoleEntryLanding({
-        hasSession: !!session,
-        role,
-        allowed,
-        persistView,
-      });
+      const landing = resolveRoleEntryLanding({ hasSession: !!session, level, home, allowed, persistView });
       if (landing.persistView) persistPortalView(landing.persistView);
       navigate({ to: landing.path as "/dashboard", replace: true });
-    }, [loading, isLoading, session, org?.role, navigate]);
+    }, [loading, isLoading, session, level, home, navigate]);
     return (
       <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">
         Opening {persistView === "admin" ? "Admin View" : "dashboard"}…
@@ -36,12 +27,9 @@ function makeRoleEntry(allowed: Role[], persistView: PortalView | null) {
   };
 }
 
-export const AdminEntry = makeRoleEntry([...COMPANY_ADMIN_ROLES], "admin");
-export const ManagerEntry = makeRoleEntry(["manager", "program_manager", "admin"], "admin");
-export const EmployeeEntry = makeRoleEntry(
-  ["employee", "manager", "program_manager", "admin"],
-  "staff",
-);
+export const AdminEntry = makeRoleEntry(["owner", "admin"], "admin");
+export const ManagerEntry = makeRoleEntry(["owner", "admin"], "admin");
+export const EmployeeEntry = makeRoleEntry(["owner", "admin", "staff"], "staff");
 
 // Re-export createFileRoute for the route files to use.
 export { createFileRoute };

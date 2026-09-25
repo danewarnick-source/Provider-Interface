@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
 import { useCurrentOrg } from "./use-org";
 import { usePortalView } from "./use-portal-view";
+import { isAdminLevel } from "@/lib/access/levels";
 
 export type CaseloadClient = {
   id: string;
@@ -32,8 +33,8 @@ export function useCaseload() {
   const { user } = useAuth();
   const { data: org, isLoading: orgLoading } = useCurrentOrg();
   const { view } = usePortalView();
-  const role = org?.role;
-  const isManagerial = role === "admin" || role === "program_manager" || role === "manager";
+  const role = org?.access.level;
+  const isManagerial = isAdminLevel(role);
   const shouldForceStaffCaseload = false;
   const canSeeWholeOrgCaseload = isManagerial && view === "admin" && !shouldForceStaffCaseload;
 

@@ -14,9 +14,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { requirePermission } from "@/lib/require-permission";
+import { requireLevel, requirePermission } from "@/lib/access/require";
 import { resolveOrgSender } from "@/lib/email.functions";
-import { ROLE_LABEL, type Role } from "@/lib/rbac";
+import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { inviteJoinUrl } from "@/lib/join-invite";
 import { stripFakeDisplayLabel } from "@/lib/managed-from";
@@ -24,16 +24,19 @@ import { canSendImportInvite } from "@/lib/import-invite";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
 
 const ORG_ID = z.string().uuid();
-const INVITE_ROLE = z.enum(["admin", "manager", "employee"]);
+const INVITE_LEVEL = z.enum(["owner", "admin", "staff"]);
 const SITE_ORIGIN = z.string().trim().min(1).max(500);
 
 type InvitationRow = {
   id: string;
   token: string;
   email: string;
-  role: Role;
+  access_level: AccessLevel;
+  access_preset_id: string | null;
   expires_at: string;
 };
+
+const INVITE_SELECT = "id, token, email, access_level, access_preset_id, expires_at";
 
 type InviteTargetResult = {
   email: string;
@@ -83,10 +86,29 @@ function inviteSendPayload(args: {
   };
 }
 
-function inviteRoleFromMember(role: string | undefined): Role {
-  if (role === "admin") return "admin";
-  if (role === "manager" || role === "program_manager") return "manager";
-  return "employee";
+/**
+ * invite_staff lets someone invite Staff; inviting an Owner or Admin takes an Owner.
+ * A chosen preset must belong to the org and match the level. No preset → the
+ * member trigger applies the level's default preset on accept.
+ */
+async function assertCanInviteAt(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  userId: string,
+  organizationId: string,
+  level: AccessLevel,
+  presetId: string | null | undefined,
+): Promise<void> {
+  if (level !== "staff") await requireLevel(supabase, userId, organizationId, "owner");
+  if (level === "owner" || !presetId) return;
+  const { data: preset } = await supabase
+    .from("access_presets")
+    .select("access_level")
+    .eq("id", presetId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (!preset) throw new Error("That preset doesn't exist in this agency");
+  if (preset.access_level !== level) throw new Error("That preset is for a different access level");
 }
 
 function escapeHtml(s: string): string {
@@ -103,11 +125,11 @@ async function sendInvitationEmail(args: {
   supabase: any;
   organizationId: string;
   email: string;
-  role: Role;
+  level: AccessLevel;
   token: string;
   siteOrigin: string;
 }): Promise<{ ok: boolean; error?: string }> {
-  const { supabase, organizationId, email, role, token, siteOrigin } = args;
+  const { supabase, organizationId, email, level, token, siteOrigin } = args;
   try {
     const sender = await resolveOrgSender(supabase, organizationId);
     const { data: org } = await supabase
@@ -119,14 +141,14 @@ async function sendInvitationEmail(args: {
       stripFakeDisplayLabel(String(org?.name || "").trim()) || "your organization";
     const origin = resolveAuthOrigin(siteOrigin);
     const link = inviteJoinUrl(origin, token);
-    const roleLabel = ROLE_LABEL[role] ?? role;
+    const levelLabel = LEVEL_LABEL[level] ?? "Staff";
 
     const subject = `You're invited to join ${orgName} on Provider Interface`;
     const html = `
       <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#243040">
         <p>Hello,</p>
-        <p><strong>${escapeHtml(orgName)}</strong> has invited you to join their team on Provider Interface as a
-          <strong>${escapeHtml(roleLabel)}</strong>.</p>
+        <p><strong>${escapeHtml(orgName)}</strong> has invited you to join their team on Provider Interface as
+          <strong>${escapeHtml(levelLabel)}</strong>.</p>
         <p style="margin:28px 0">
           <a href="${link}"
              style="display:inline-block;background:#c9a227;color:#243040;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:600">
@@ -164,14 +186,16 @@ export const createInvitation = createServerFn({ method: "POST" })
   .inputValidator((d: {
     organization_id: string;
     email: string;
-    role: "admin" | "manager" | "employee";
+    access_level: AccessLevel;
+    access_preset_id?: string | null;
     site_origin: string;
   }) =>
     z
       .object({
         organization_id: ORG_ID,
         email: z.string().trim().toLowerCase().email().max(255),
-        role: INVITE_ROLE,
+        access_level: INVITE_LEVEL,
+        access_preset_id: z.string().uuid().nullish(),
         site_origin: SITE_ORIGIN,
       })
       .parse(d),
@@ -186,6 +210,7 @@ export const createInvitation = createServerFn({ method: "POST" })
       data.organization_id,
       "invite_staff",
     );
+    await assertCanInviteAt(supabase, userId, data.organization_id, data.access_level, data.access_preset_id);
     await assertAgencySetupCompleteForOrg(supabase, data.organization_id);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -205,10 +230,11 @@ export const createInvitation = createServerFn({ method: "POST" })
       .insert({
         organization_id: data.organization_id,
         email: data.email,
-        role: data.role,
+        access_level: data.access_level,
+        access_preset_id: data.access_level === "owner" ? null : (data.access_preset_id ?? null),
         invited_by: userId,
       })
-      .select("id, token, email, role, expires_at")
+      .select(INVITE_SELECT)
       .single();
     if (error) throw new Error(error.message);
 
@@ -216,7 +242,7 @@ export const createInvitation = createServerFn({ method: "POST" })
       supabase,
       organizationId: data.organization_id,
       email: data.email,
-      role: data.role,
+      level: data.access_level,
       token: (invite as InvitationRow).token,
       siteOrigin: data.site_origin,
     });
@@ -257,7 +283,7 @@ export const resendInvitation = createServerFn({ method: "POST" })
       .update({ expires_at: expires, status: "pending" })
       .eq("id", data.invitation_id)
       .eq("organization_id", data.organization_id)
-      .select("id, token, email, role, expires_at")
+      .select(INVITE_SELECT)
       .single();
     if (error) throw new Error(error.message);
     if (!invite) throw new Error("Invitation not found");
@@ -267,7 +293,7 @@ export const resendInvitation = createServerFn({ method: "POST" })
       supabase,
       organizationId: data.organization_id,
       email: row.email,
-      role: row.role,
+      level: row.access_level,
       token: row.token,
       siteOrigin: data.site_origin,
     });
@@ -320,16 +346,18 @@ async function upsertPendingInviteAndSend(args: {
   organizationId: string;
   userId: string;
   email: string;
-  role: Role;
+  level: AccessLevel;
+  presetId: string | null;
   siteOrigin: string;
 }): Promise<{ invitation: InvitationRow; email_sent: boolean; email_error: string | null }> {
-  const { supabase, organizationId, userId, email, role, siteOrigin } = args;
+  const { supabase, organizationId, userId, email, level, presetId, siteOrigin } = args;
+  const access = { access_level: level, access_preset_id: level === "owner" ? null : presetId };
   await assertAgencySetupCompleteForOrg(supabase, organizationId);
   const expires = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
 
   const { data: pending, error: pendingErr } = await supabase
     .from("invitations")
-    .select("id, token, email, role, expires_at")
+    .select(INVITE_SELECT)
     .eq("organization_id", organizationId)
     .eq("email", email)
     .eq("status", "pending")
@@ -340,10 +368,10 @@ async function upsertPendingInviteAndSend(args: {
   if (invite) {
     const { data: refreshed, error: refreshErr } = await supabase
       .from("invitations")
-      .update({ expires_at: expires, role })
+      .update({ expires_at: expires, ...access })
       .eq("id", invite.id)
       .eq("organization_id", organizationId)
-      .select("id, token, email, role, expires_at")
+      .select(INVITE_SELECT)
       .single();
     if (refreshErr) throw new Error(refreshErr.message);
     invite = refreshed as InvitationRow;
@@ -353,10 +381,10 @@ async function upsertPendingInviteAndSend(args: {
       .insert({
         organization_id: organizationId,
         email,
-        role,
+        ...access,
         invited_by: userId,
       })
-      .select("id, token, email, role, expires_at")
+      .select(INVITE_SELECT)
       .single();
     if (createErr) throw new Error(createErr.message);
     invite = created as InvitationRow;
@@ -366,7 +394,7 @@ async function upsertPendingInviteAndSend(args: {
     supabase,
     organizationId,
     email,
-    role,
+    level,
     token: invite.token,
     siteOrigin,
   });
@@ -391,7 +419,7 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
         site_origin: SITE_ORIGIN,
         user_ids: z.array(z.string().uuid()).max(200).default([]),
         emails: z.array(z.string().trim().toLowerCase().email().max(255)).max(200).default([]),
-        role: INVITE_ROLE.optional(),
+        access_level: INVITE_LEVEL.optional(),
         resend_accepted: z.boolean().optional().default(false),
         force: z.boolean().optional().default(false),
       })
@@ -417,18 +445,29 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = supabase as any;
-    const targets = new Map<string, { userId: string | null; email: string; role: Role; mustChange: boolean | null }>();
+    if (data.access_level) {
+      await assertCanInviteAt(sb, userId, data.organization_id, data.access_level, null);
+    }
+    type Target = {
+      userId: string | null;
+      email: string;
+      level: AccessLevel;
+      presetId: string | null;
+      mustChange: boolean | null;
+    };
+    const targets = new Map<string, Target>();
 
     if (data.user_ids.length) {
       const { data: members, error: memErr } = await sb
         .from("organization_members")
-        .select("user_id, role")
+        .select("user_id, access_level, access_preset_id")
         .eq("organization_id", data.organization_id)
         .in("user_id", data.user_ids);
       if (memErr) throw new Error(memErr.message);
-      const ids = (members ?? []).map((m: { user_id: string }) => m.user_id);
-      const roleByUser = new Map(
-        (members ?? []).map((m: { user_id: string; role: string }) => [m.user_id, m.role as Role]),
+      type MemberAccessPick = { user_id: string; access_level: AccessLevel; access_preset_id: string | null };
+      const ids = (members ?? []).map((m: MemberAccessPick) => m.user_id);
+      const accessByUser = new Map<string, MemberAccessPick>(
+        (members ?? []).map((m: MemberAccessPick) => [m.user_id, m]),
       );
       if (ids.length) {
         const { data: profs, error: pErr } = await sb
@@ -442,7 +481,8 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
           targets.set(email, {
             userId: p.id,
             email,
-            role: (data.role ?? inviteRoleFromMember(roleByUser.get(p.id))) as Role,
+            level: data.access_level ?? accessByUser.get(p.id)?.access_level ?? "staff",
+            presetId: data.access_level ? null : (accessByUser.get(p.id)?.access_preset_id ?? null),
             mustChange: p.must_change_password ?? null,
           });
         }
@@ -455,7 +495,8 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
       targets.set(email, {
         userId: null,
         email,
-        role: data.role ?? "employee",
+        level: data.access_level ?? "staff",
+        presetId: null,
         mustChange: true,
       });
     }
@@ -516,7 +557,8 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
           organizationId: data.organization_id,
           userId,
           email: t.email,
-          role: t.role,
+          level: t.level,
+          presetId: t.presetId,
           siteOrigin: data.site_origin,
         });
         if (out.email_sent) {

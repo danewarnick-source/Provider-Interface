@@ -8,7 +8,7 @@
  * Gating:
  *   - read  → view_referrals OR manage_referrals
  *   - write → manage_referrals
- * Staff blocked. Super-admin bypassed by has_permission().
+ * Enforced by requirePermission() (access categories).
  *
  * NOT included here: the match weights tuner UI (v2). Defaults are stored
  * in match_weights and surfaced read-only.
@@ -19,7 +19,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   requirePermission,
   requireAnyPermission,
-} from "@/lib/require-permission";
+} from "@/lib/access/require";
 
 const orgOnly = z.object({ organization_id: z.string().uuid() });
 

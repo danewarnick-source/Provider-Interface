@@ -3,13 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 
 export const Route = createFileRoute("/dashboard/team")({
   component: () => (
-    <RequireRole roles={["admin", "program_manager", "manager"]}>
+    <RequireLevel min="admin">
       <TeamPage />
-    </RequireRole>
+    </RequireLevel>
   ),
 });
 

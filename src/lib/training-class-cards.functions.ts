@@ -41,7 +41,7 @@ async function matchStaffByEmail(
 ): Promise<{ id: string; full_name: string | null; role: string } | null> {
   const { data: mems, error: memErr } = await sb
     .from("organization_members")
-    .select("user_id, role")
+    .select("user_id, role:access_level")
     .eq("organization_id", organizationId)
     .eq("active", true);
   if (memErr) throw new Error(memErr.message);
@@ -59,7 +59,7 @@ async function matchStaffByEmail(
   if (!hit) return null;
   const role =
     ((mems ?? []) as Array<{ user_id: string; role: string }>).find((m) => m.user_id === hit.id)?.role ??
-    "employee";
+    "staff";
   return { id: hit.id, full_name: hit.full_name, role };
 }
 
@@ -148,7 +148,7 @@ export const createTrainingClassCardUploadUrl = createServerFn({ method: "POST" 
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { objectPath: null as string | null, upload: null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     await assertAdmin(supabase, data.organizationId, userId);
 
     const safeName = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -184,7 +184,7 @@ export const attachTrainingClassCard = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false, closed: 0 };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     await assertAdmin(supabase, data.organizationId, userId);
 
     const admin = supabaseAdmin as AnySupabase;
@@ -233,7 +233,7 @@ export const attachTrainingClassCard = createServerFn({ method: "POST" })
         staff = {
           id: row.staff_user_id ?? "",
           full_name: row.staff_name,
-          role: "employee",
+          role: "staff",
         };
       }
       if (!staff.id) continue;

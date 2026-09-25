@@ -20,7 +20,6 @@ import {
 } from "@/lib/current-org";
 import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_LIST_PRICE_UNIT, PI_SIGNUP_PRICE_LINE } from "@/lib/pi-landing";
 import { quotePiListSubscription } from "@/lib/pi-signup-pricing";
-import type { Role } from "@/lib/rbac";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 
 export const Route = createFileRoute("/billing-locked")({
@@ -96,12 +95,12 @@ function BillingLockedPage() {
 
       const { data: memberships } = await supabase
         .from("organization_members")
-        .select("organization_id, role, organizations(name, is_demo, display_acronym)")
+        .select("organization_id, access_level, organizations(name, is_demo, display_acronym)")
         .eq("user_id", session.user.id)
         .eq("active", true);
       const ms = (memberships ?? []) as Array<{
         organization_id: string;
-        role: string;
+        access_level: string | null;
         organizations: { name: string | null; is_demo?: boolean | null; display_acronym?: string | null } | null;
       }>;
       if (ms.length === 0) {
@@ -111,7 +110,7 @@ function BillingLockedPage() {
       const picks: MembershipPick[] = ms.map((row) => ({
         organization_id: row.organization_id,
         is_demo: row.organizations?.is_demo === true,
-        role: row.role as Role,
+        access: { level: row.access_level ?? "staff" },
         display_acronym: row.organizations?.display_acronym ?? null,
         organization_name: row.organizations?.name ?? null,
       }));
@@ -164,7 +163,7 @@ function BillingLockedPage() {
       setState({
         loading: false,
         authed: true,
-        isAdmin: m.role === "admin",
+        isAdmin: m.access_level === "owner",
         agencyName: m.organizations?.name ?? status.orgName ?? "your agency",
         orgId: m.organization_id,
         testMode: status.testMode,

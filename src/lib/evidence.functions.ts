@@ -343,7 +343,7 @@ async function listStaffPeople(
   try {
     const { data: members, error } = await sb
       .from("organization_members")
-      .select("user_id, role, job_title, active")
+      .select("user_id, role:access_level, job_title, active")
       .eq("organization_id", organizationId);
     if (error) return { people: [], error: error.message };
     const rows = (members ?? []) as Array<{
@@ -567,7 +567,7 @@ export const loadEvidenceBoard = createServerFn({ method: "POST" })
         staffPicker: [],
       });
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const sb = supabase as AnySupabase;
     const { store, viaTables } = await loadAll(sb, data.organizationId);
     const staffListed = await listStaffPeople(sb, data.organizationId);
@@ -624,7 +624,7 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const, count: 0 };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const sb = supabase as AnySupabase;
     const { store, viaTables } = await loadAll(sb, data.organizationId);
     requireTables(viaTables);
@@ -754,7 +754,7 @@ export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const sb = supabase as AnySupabase;
     const { viaTables } = await loadAll(sb, data.organizationId);
     requireTables(viaTables);
@@ -802,7 +802,7 @@ export const removeEvidenceRequirement = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const sb = supabase as AnySupabase;
     const { viaTables } = await loadAll(sb, data.organizationId);
     await deleteItem(sb, viaTables, data.organizationId, data.itemId);
@@ -824,7 +824,7 @@ export const sendEvidenceToStaff = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const, messageStored: false as const };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const sb = supabase as AnySupabase;
     const { store, viaTables, hasSendMessage } = await loadAll(sb, data.organizationId);
     const note = (data.message ?? "").trim();
@@ -892,7 +892,7 @@ export const recordEvidenceUpload = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const sb = supabase as AnySupabase;
     const { store, viaTables } = await loadAll(sb, data.organizationId);
     const found = store.items.find((i) => i.id === data.itemId);
@@ -962,7 +962,7 @@ export const recordEvidenceAttestation = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const sb = supabase as AnySupabase;
     const { store, viaTables } = await loadAll(sb, data.organizationId);
     const found = store.items.find((i) => i.id === data.itemId);
@@ -1020,7 +1020,7 @@ export const listMySentEvidence = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId)
       return { items: [] as EvidenceItemRow[], files: [] as EvidenceFileRow[] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const sb = supabase as AnySupabase;
     const { store } = await loadAll(sb, data.organizationId);
     const items = store.items.filter((i) => i.sent_to_staff && i.visible_to_staff_id === userId);
@@ -1042,7 +1042,7 @@ export const linkHostHomeEvidence = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const sb = supabase as AnySupabase;
     const { store, viaTables } = await loadAll(sb, data.organizationId);
     const found = store.items.find((i) => i.id === data.itemId);
@@ -1096,7 +1096,7 @@ export const createEvidenceChecklist = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const, requirementKey: null as string | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const sb = supabase as AnySupabase;
     const { viaTables } = await loadAll(sb, data.organizationId);
     requireTables(viaTables);
@@ -1168,7 +1168,7 @@ export const updateEvidenceDue = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const sb = supabase as AnySupabase;
     const { store, viaTables } = await loadAll(sb, data.organizationId);
     const found = store.items.find((i) => i.id === data.itemId);

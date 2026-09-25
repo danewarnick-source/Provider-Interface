@@ -191,6 +191,6 @@ describe("Admin Home Step 3 — welcome banner", () => {
     assert.match(fn, /requireSupabaseAuth/);
     assert.match(fn, /requireOrgMembership/);
     assert.match(fn, /welcome_dismissed_at/);
-    assert.match(fn, /"admin"/);
+    assert.match(fn, /"owner"/);
   });
 });

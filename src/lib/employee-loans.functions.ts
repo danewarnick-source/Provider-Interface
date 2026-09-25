@@ -63,7 +63,7 @@ const loanInput = z.object({
 export type EmployeeLoanInput = z.infer<typeof loanInput>;
 
 async function assertAdmin(supabase: any, userId: string, organization_id: string) {
-  await requireOrgMembership(supabase, userId, organization_id, "manager");
+  await requireOrgMembership(supabase, userId, organization_id, "admin");
 }
 
 export const listEmployeeLoans = createServerFn({ method: "GET" })

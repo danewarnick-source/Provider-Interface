@@ -11,7 +11,7 @@ import {
   isValidJoinPassword,
   isValidJoinUsername,
   joinConfirmLiveMessage,
-  joinHomeForRole,
+  joinHomeForLevel,
   joinPasswordLiveMessage,
   joinSetsAuthPassword,
   joinUsernameLiveMessage,
@@ -87,12 +87,14 @@ describe("humanizeInviteError", () => {
   });
 });
 
-describe("joinHomeForRole", () => {
+describe("joinHomeForLevel", () => {
   it("sends staff to the employee home and admins to Admin Home", () => {
-    assert.equal(joinHomeForRole("employee"), "/employee");
-    assert.equal(joinHomeForRole("admin"), "/dashboard");
-    assert.equal(joinHomeForRole("manager"), "/dashboard");
-    assert.equal(joinHomeForRole("program_manager"), "/dashboard");
+    assert.equal(joinHomeForLevel("staff"), "/employee");
+    assert.equal(joinHomeForLevel("admin"), "/dashboard");
+    assert.equal(joinHomeForLevel("owner"), "/dashboard");
+  });
+  it("prefers the preset's home page", () => {
+    assert.equal(joinHomeForLevel("staff", "/dashboard/hrc"), "/dashboard/hrc");
   });
 });
 
