@@ -12,6 +12,17 @@
 
 ---
 
+## Build status (2026-09-25)
+
+| Step | Migration file | Live? |
+|---|---|---|
+| A1 schema: `access_level` enum, `access_presets`, member access columns, `access_assignments` (renamed from `scope_assignments`), `access_change_log` (renamed from `permission_audit_log`, old role-change rows copied in), helpers, one-Owner trigger, backfill | `20260925100000_access_levels_a1_schema.sql` | Applied |
+| A2 RLS: helpers and role-word policies re-pointed at `access_level` / categories | `20260925100100_access_levels_a2_rls.sql` | Applied |
+| A3 default preset for new Staff/Admin members; invitations `access_level` backfill; `accept_invitation` maps old role-only invites | `20260925100200_access_levels_a3_default_preset.sql` | Applied |
+| A4 demo-requirements wipe checks Owner instead of `role` | `20260925100300_access_levels_a4_demo_wipe_owner_check.sql` | Applied |
+| App code switched to levels, presets and categories (PR #389) | — | Ships with the PR |
+| **B** drop `role` columns, `app_role`, `has_org_role`, `has_permission`, the role-permission seed, compat views, and 4 legacy tables; `access_level`/`access_scope` NOT NULL | `20260926000000_access_levels_b_drop_legacy_roles.sql` | **Not applied.** Apply after PR #389 is deployed. Dry-run on live succeeded (rolled back). Then regenerate `types.ts`. |
+
 ## 1. The short answer
 
 This is a **large but very doable** change. It touches almost every part of HIVE, because "who are you and what can you see" is checked everywhere. The good news:
