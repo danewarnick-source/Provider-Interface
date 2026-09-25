@@ -207,14 +207,6 @@ export function EmployeesPage() {
     },
   });
 
-  const { data: courses } = useQuery({
-    queryKey: ["courses-mini"],
-    queryFn: async () => {
-      const { data } = await supabase.from("courses").select("id, title").eq("is_published", true);
-      return data ?? [];
-    },
-  });
-
   const resendInviteMutation = useMutation({
     mutationFn: async (invitationId: string) => {
       if (!org) throw new Error("No organization selected.");

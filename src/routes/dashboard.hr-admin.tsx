@@ -8,7 +8,7 @@ export const Route = createFileRoute("/dashboard/hr-admin")({
   beforeLoad: () => {
     throw redirect({
       to: "/dashboard/hub/employees",
-      search: { tab: "roster" },
+      search: {},
       replace: true,
     });
   },

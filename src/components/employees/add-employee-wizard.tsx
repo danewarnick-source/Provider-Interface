@@ -149,7 +149,6 @@ export function AddEmployeeWizard({
               role: row.role,
               hireDate: row.hireDate,
               startDate: row.hireDate,
-              trackIds: [],
               requiresDeescalation: false,
               requiresAbi: false,
               staffType: row.staffType,
