@@ -43,7 +43,7 @@ The one part that is genuinely hard, and needs care because it protects client m
 | `user_permission_overrides` table | Per-person switch overrides | **replace** with per-person category overrides |
 | `permission_audit_log`, `role_change_audit_log` | Audit trails | keep; record the new fields going forward |
 | `staff_groups`, `staff_group_members`, `profiles.scope_group_id`, `is_lead` | Lead groups for compliance scope | fold into the new scope, or keep only for compliance targeting |
-| `restore_my_admin_role()` | Old self-promotion function, already disabled | **delete** |
+| `restore_my_admin_role()` | Old self-promotion function, already disabled | **deleted 2026-09-25** |
 
 Literal role words written directly inside SQL in the migrations: `'admin'` ~240 times, `'super_admin'` ~130, `'manager'` ~70, `'employee'` ~40, `'program_manager'` 7, `'committee_member'` 6. Each needs to be found in the **live** policies (Phase 0 lists them) and pointed at the new helpers.
 
@@ -101,19 +101,36 @@ Anyone who has per-person overrides today keeps them. They're translated into ca
 
 **Minimal design: 1 new table. Everything else reuses what the live database already has** (checked 2026-09-25).
 
-| Change | Type | Purpose |
+**Naming rule:** everything that belongs to the new access system starts with `access_`, and every table and column gets a database comment saying what it's for (it shows in the Supabase table editor). Reused tables are **renamed**, so no old name is left doing a new job.
+
+| Name | New / reused | What it's for |
 |---|---|---|
-| `access_presets` (org, name, access_level, scope_mode, home_page, categories `jsonb`) | **new table (the only one)** | The agency's named presets. `categories` holds all 18 settings in one field, e.g. `{"billing":"view","scheduling":"edit"}`. `home_page` is optional (the HRC Committee preset lands on the HRC page). |
-| `organization_members.access_level` | new column + small enum (`owner`, `admin`, `staff`) | The 3 levels |
-| `organization_members.custom_role_id` → rename to `preset_id`, add FK to `access_presets` | **reuse** | The column already exists, unused (0 rows set, no FK). |
-| `organization_members.scope_mode` | new column | Whole agency / Assigned / Only themselves. Filled from the preset, changeable per person. |
-| `organization_members.category_overrides` `jsonb` | new column | Per-person exceptions in the same shape as the preset's `categories`. Replaces `user_permission_overrides` (0 rows live). |
-| `scope_assignments` (user, `scope_type`, `scope_ref_id`) | **reuse**, widen `scope_type` to add `home` and `staff` (keeps `client`) | Assigned homes, staff and clients, all in one existing table (0 rows live). One row per manager + person, so any client or staffer can be assigned to any number of managers, and each sees everything their own preset allows. |
-| `teams.manager_id` | **reuse** | Copied into `scope_assignments` as `home` rows on day one. |
+| `access_presets` (org, name, access_level, access_scope, home_page, categories `jsonb`) | **new (the only new table)** | The agency's named presets. `categories` holds all 18 settings in one field, e.g. `{"billing":"view","scheduling":"edit"}`. `home_page` is optional (the HRC Committee preset lands on the HRC page). |
+| `access_assignments` (user, kind `home`/`staff`/`client`, ref id) | **renamed** from `scope_assignments` (0 rows) | Who each manager is assigned to. One row per manager + person, so any client or staffer can have any number of managers. |
+| `access_change_log` | **renamed** from `permission_audit_log`; the 3 rows of `role_change_audit_log` are copied in | One audit trail for every access change (level, preset, category, scope). |
+| `organization_members.access_level` | new column + enum `access_level` (`owner`, `admin`, `staff`) | The 3 levels |
+| `organization_members.access_preset_id` | **renamed** from `custom_role_id` (unused: 0 rows set, not referenced in code) | Which preset this person uses |
+| `organization_members.access_scope` | new column | Whole agency / Assigned / Only themselves. Filled from the preset, changeable per person. |
+| `organization_members.access_overrides` `jsonb` | new column | Per-person exceptions, same shape as the preset's `categories` |
+| `teams.manager_id` | reused as-is | Copied into `access_assignments` as `home` rows on day one |
 | Rule: at least one active Owner per agency | trigger on `organization_members` | Nobody can lock the agency out |
 | Rule: Admins can't grant beyond themselves or edit Owners | in the server function that saves access | Stops privilege creep |
 
-**Deleted in Phase 5:** `role_permissions`, `user_permission_overrides`, the `app_role` type, `organization_members.role`. Net result: **+1 table, −2 tables**.
+**Deletion schedule.** Each item is deleted in the same step that removes the last code using it, so nothing breaks in between. Row counts are from the live database on 2026-09-25.
+
+| Delete | Rows | When | Why then |
+|---|---|---|---|
+| `restore_my_admin_role()` function | — | **Done 2026-09-25** | Disabled and called by nothing |
+| `role_change_audit_log` | 3 (copied first) | Step 1 | Merged into `access_change_log`; 3 code spots switch to the new name |
+| old `scope_assignments` values (`all`, `service_code`, `staff_group`) | 0 | Step 1 | Replaced by `home` / `staff` / `client` when the table is renamed |
+| `user_permission_overrides` | 0 | Step 3 | Its screens and hooks are replaced by the new Access section |
+| `hrc_committee_members` | 0 | Step 3 | HRC membership becomes the "HRC Committee" preset |
+| `role_permissions` | 12,962 | Step 5 | The old 83-switch matrix; still read by today's app until Step 3 ships |
+| `organization_members.role`, `invitations.role`, `app_role` type, `has_org_role()`, `has_permission()` | — | Step 5 | Last, so any missed check fails loudly instead of quietly |
+
+**Not touched (they belong to other features):** `staff_groups` / `staff_group_members` (compliance lead groups, 9 groups in use), `hive_executives` (HIVE staff), `custom_field_*` (custom profile fields).
+
+Net result: **+1 table, −4 tables** (`role_change_audit_log`, `user_permission_overrides`, `hrc_committee_members`, `role_permissions`).
 
 **New helper functions** (all `SECURITY DEFINER`, org-scoped like today's):
 
@@ -200,10 +217,10 @@ select (select count(*) from clients where team_id is null) as clients_without_h
 
 ### Phase 1 — Add the new pieces next to the old ones
 
-- Migration: create the `access_level` enum and the `access_presets` table, add the new `organization_members` columns (rename `custom_role_id` → `preset_id`), widen `scope_assignments.scope_type`, and add the helper functions and the at-least-one-Owner trigger (§4).
-- Backfill `access_level` and `preset_id` from `role` using the mapping in §3. Create the default presets per agency from today's `role_permissions`, so each agency's customizations carry over.
+- Migration: create the `access_level` enum and the `access_presets` table, add the new `organization_members` columns (rename `custom_role_id` → `access_preset_id`), rename `scope_assignments` → `access_assignments` and `permission_audit_log` → `access_change_log` (copy in and drop `role_change_audit_log`), add table/column comments, and add the helper functions and the at-least-one-Owner trigger (§4).
+- Backfill `access_level` and `access_preset_id` from `role` using the mapping in §3. Create the default presets per agency from today's `role_permissions`, so each agency's customizations carry over.
 - ~~Translate `user_permission_overrides`~~: not needed, the live table is empty (Phase 0).
-- Copy each home's `teams.manager_id` into `scope_assignments` as `home` rows.
+- Copy each home's `teams.manager_id` into `access_assignments` as `home` rows.
 - Server functions that change roles (hire, invite accept, role change, roster upload) write **both** `role` and `access_level` for now.
 - **Nothing visible changes.**
 
@@ -260,7 +277,7 @@ The text lives in one catalog in code (`src/lib/access-categories.ts`: key, labe
 
 ### Phase 5 — Delete the old terminology
 
-- **Database:** drop `organization_members.role`, `invitations.role`, `role_permissions`, `user_permission_overrides` (after a grace period), `restore_my_admin_role()`, `has_org_role()`, and the `app_role` type. Postgres can't remove individual enum values, so the whole type goes once nothing uses it. Optionally rename `is_org_admin_or_manager` → `is_org_admin` at the same time.
+- **Database:** drop `organization_members.role`, `invitations.role`, `role_permissions`, `has_org_role()`, `has_permission()`, and the `app_role` type (`user_permission_overrides` and `hrc_committee_members` already went in Step 3; see the deletion schedule in §4). Postgres can't remove individual enum values, so the whole type goes once nothing uses it. Optionally rename `is_org_admin_or_manager` → `is_org_admin` at the same time.
 - **Code:** delete `ROLE_RANK`, `PROVIDER_ROLES`, `DEFAULT_MATRIX`, `PERMISSION_SECTION_MAP`, `profile-permission-groups.ts`, `staff-permission-toggles.ts`, `permissions-can.ts`, `isAdminLevelRole`, `isAdminScopeRole`, the old Roles/Permissions/Team-access pages, and the hard-coded "Employee / Manager / Admin / Supervisor / Program Manager / Committee Member" labels. Those names now live only as **preset names the agency typed in**.
 - Remove the 4 dead switches (`manage_roles`, `manage_organization` legacy; `view_platform_metrics`, `manage_all_orgs` are HIVE-staff only via `hive_executives`).
 - Regenerate `types.ts`. Update `CLAUDE.md` (RLS helper names, role vocabulary), the Employees docs, and e2e mocks.
