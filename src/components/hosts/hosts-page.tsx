@@ -62,15 +62,20 @@ function useOrgStaffOptions(orgId: string | undefined) {
         .select("id, first_name, last_name, full_name, is_active")
         .in("id", ids);
       if (pErr) throw pErr;
-      return ((profs ?? []) as Array<{
-        id: string; first_name: string | null; last_name: string | null;
-        full_name: string | null; is_active: boolean | null;
-      }>)
+      return (
+        (profs ?? []) as Array<{
+          id: string;
+          first_name: string | null;
+          last_name: string | null;
+          full_name: string | null;
+          is_active: boolean | null;
+        }>
+      )
         .filter((p) => p.is_active !== false)
         .map((p) => ({
           id: p.id,
           name:
-            (p.full_name?.trim()) ||
+            p.full_name?.trim() ||
             [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
             "Staff",
         }))
@@ -123,10 +128,9 @@ export function HostsPage() {
         <div>
           <h2 className="text-lg font-semibold tracking-tight">Placements</h2>
           <p className="text-sm text-muted-foreground">
-            Host homes for clients who need a placement. Onboarding, ready, and
-            placed. Each card shows what the host can accept and the latest
-            inspection. A host who joins the agency is managed on Employees; the
-            staff link stays on the card. A Host Home Questionnaire still
+            Host homes for clients who need a placement. Onboarding, ready, and placed. Each card
+            shows what the host can accept and the latest inspection. A host who joins the agency is
+            managed on Employees; the staff link stays on the card. A Host Home Questionnaire still
             creates a card.
           </p>
         </div>
@@ -137,10 +141,7 @@ export function HostsPage() {
         {(HHP_STATUSES as readonly HhpStatus[]).map((s) => {
           const rows = grouped[s];
           return (
-            <section
-              key={s}
-              className="min-w-0 rounded-md border border-border bg-card p-3"
-            >
+            <section key={s} className="min-w-0 rounded-md border border-border bg-card p-3">
               <header className="mb-2 flex items-center justify-between">
                 <h3 className="text-sm font-semibold">{HHP_STATUS_LABEL[s]}</h3>
                 <Badge variant="secondary">{rows.length}</Badge>
@@ -154,9 +155,7 @@ export function HostsPage() {
               ) : (
                 <ul className="space-y-2">
                   {rows.map((c) => {
-                    const loc = [c.location_city, c.location_county]
-                      .filter(Boolean)
-                      .join(", ");
+                    const loc = [c.location_city, c.location_county].filter(Boolean).join(", ");
                     return (
                       <li key={c.id}>
                         <button
@@ -186,9 +185,7 @@ export function HostsPage() {
                             </div>
                           )}
                           <div className="mt-2 flex flex-wrap gap-1">
-                            {orgId && (
-                              <HostCertBadge orgId={orgId} hostCardId={c.id} />
-                            )}
+                            {orgId && <HostCertBadge orgId={orgId} hostCardId={c.id} />}
                             {c.linked_staff_user_id && (
                               <Badge className="gap-1 bg-primary/15 text-primary text-[10px] hover:bg-primary/20">
                                 <UserCheck className="h-3 w-3" /> Linked employee
@@ -260,10 +257,23 @@ function NewHostDialog({ organizationId }: { organizationId: string }) {
   const [commit, setCommit] = useState("");
 
   const reset = () => {
-    setName(""); setPhone(""); setEmail(""); setCity(""); setCounty("");
-    setAddress(""); setPets(""); setWheelchair(false); setSign(false);
-    setCrim(false); setExperience(""); setBehavior(""); setComm("");
-    setMedical(""); setLevels(""); setSchedule(""); setCommit("");
+    setName("");
+    setPhone("");
+    setEmail("");
+    setCity("");
+    setCounty("");
+    setAddress("");
+    setPets("");
+    setWheelchair(false);
+    setSign(false);
+    setCrim(false);
+    setExperience("");
+    setBehavior("");
+    setComm("");
+    setMedical("");
+    setLevels("");
+    setSchedule("");
+    setCommit("");
   };
 
   const create = useMutation({
@@ -301,7 +311,13 @@ function NewHostDialog({ organizationId }: { organizationId: string }) {
   });
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) reset();
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="sm" className="gap-1">
           <Plus className="h-4 w-4" /> New host
@@ -316,25 +332,128 @@ function NewHostDialog({ organizationId }: { organizationId: string }) {
             <Label htmlFor="h-name">Name *</Label>
             <Input id="h-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
-          <div><Label htmlFor="h-phone">Phone</Label><Input id="h-phone" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
-          <div><Label htmlFor="h-email">Email</Label><Input id="h-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-          <div className="md:col-span-2"><Label htmlFor="h-addr">Address</Label><Input id="h-addr" value={address} onChange={(e) => setAddress(e.target.value)} /></div>
-          <div><Label htmlFor="h-city">City</Label><Input id="h-city" value={city} onChange={(e) => setCity(e.target.value)} /></div>
-          <div><Label htmlFor="h-county">County</Label><Input id="h-county" value={county} onChange={(e) => setCounty(e.target.value)} /></div>
-          <div className="md:col-span-2"><Label htmlFor="h-pets">Pets</Label><Input id="h-pets" value={pets} onChange={(e) => setPets(e.target.value)} placeholder="2 dogs, 1 cat" /></div>
-          <div className="flex items-center gap-2"><Checkbox id="h-wheel" checked={wheelchair} onCheckedChange={(v) => setWheelchair(!!v)} /><Label htmlFor="h-wheel" className="cursor-pointer">Wheelchair accessible</Label></div>
-          <div className="flex items-center gap-2"><Checkbox id="h-sign" checked={sign} onCheckedChange={(v) => setSign(!!v)} /><Label htmlFor="h-sign" className="cursor-pointer">Sign language</Label></div>
-          <div className="flex items-center gap-2 md:col-span-2"><Checkbox id="h-crim" checked={crim} onCheckedChange={(v) => setCrim(!!v)} /><Label htmlFor="h-crim" className="cursor-pointer">Criminal history flag</Label></div>
-          <div className="md:col-span-2"><Label htmlFor="h-exp">Experience summary</Label><Textarea id="h-exp" rows={2} value={experience} onChange={(e) => setExperience(e.target.value)} /></div>
-          <div className="md:col-span-2"><Label htmlFor="h-beh">Behavioral comfort</Label><Textarea id="h-beh" rows={2} value={behavior} onChange={(e) => setBehavior(e.target.value)} placeholder="e.g. behaviors ok but not high aggression" /></div>
-          <div className="md:col-span-2"><Label htmlFor="h-comm">Communication abilities</Label><Textarea id="h-comm" rows={2} value={comm} onChange={(e) => setComm(e.target.value)} /></div>
-          <div><Label htmlFor="h-med">Medical comfort (comma)</Label><Input id="h-med" value={medical} onChange={(e) => setMedical(e.target.value)} placeholder="meds, seizures, aging" /></div>
-          <div><Label htmlFor="h-lv">Independence levels (comma)</Label><Input id="h-lv" value={levels} onChange={(e) => setLevels(e.target.value)} placeholder="T1, T2, T3" /></div>
-          <div className="md:col-span-2"><Label htmlFor="h-sched">Schedule availability</Label><Textarea id="h-sched" rows={2} value={schedule} onChange={(e) => setSchedule(e.target.value)} /></div>
-          <div className="md:col-span-2"><Label htmlFor="h-cmt">Commitment length</Label><Input id="h-cmt" value={commit} onChange={(e) => setCommit(e.target.value)} placeholder="e.g. 12 months" /></div>
+          <div>
+            <Label htmlFor="h-phone">Phone</Label>
+            <Input id="h-phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="h-email">Email</Label>
+            <Input
+              id="h-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="h-addr">Address</Label>
+            <Input id="h-addr" value={address} onChange={(e) => setAddress(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="h-city">City</Label>
+            <Input id="h-city" value={city} onChange={(e) => setCity(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="h-county">County</Label>
+            <Input id="h-county" value={county} onChange={(e) => setCounty(e.target.value)} />
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="h-pets">Pets</Label>
+            <Input
+              id="h-pets"
+              value={pets}
+              onChange={(e) => setPets(e.target.value)}
+              placeholder="2 dogs, 1 cat"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="h-wheel"
+              checked={wheelchair}
+              onCheckedChange={(v) => setWheelchair(!!v)}
+            />
+            <Label htmlFor="h-wheel" className="cursor-pointer">
+              Wheelchair accessible
+            </Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox id="h-sign" checked={sign} onCheckedChange={(v) => setSign(!!v)} />
+            <Label htmlFor="h-sign" className="cursor-pointer">
+              Sign language
+            </Label>
+          </div>
+          <div className="flex items-center gap-2 md:col-span-2">
+            <Checkbox id="h-crim" checked={crim} onCheckedChange={(v) => setCrim(!!v)} />
+            <Label htmlFor="h-crim" className="cursor-pointer">
+              Criminal history flag
+            </Label>
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="h-exp">Experience summary</Label>
+            <Textarea
+              id="h-exp"
+              rows={2}
+              value={experience}
+              onChange={(e) => setExperience(e.target.value)}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="h-beh">Behavioral comfort</Label>
+            <Textarea
+              id="h-beh"
+              rows={2}
+              value={behavior}
+              onChange={(e) => setBehavior(e.target.value)}
+              placeholder="e.g. behaviors ok but not high aggression"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="h-comm">Communication abilities</Label>
+            <Textarea id="h-comm" rows={2} value={comm} onChange={(e) => setComm(e.target.value)} />
+          </div>
+          <div>
+            <Label htmlFor="h-med">Medical comfort (comma)</Label>
+            <Input
+              id="h-med"
+              value={medical}
+              onChange={(e) => setMedical(e.target.value)}
+              placeholder="meds, seizures, aging"
+            />
+          </div>
+          <div>
+            <Label htmlFor="h-lv">Independence levels (comma)</Label>
+            <Input
+              id="h-lv"
+              value={levels}
+              onChange={(e) => setLevels(e.target.value)}
+              placeholder="T1, T2, T3"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="h-sched">Schedule availability</Label>
+            <Textarea
+              id="h-sched"
+              rows={2}
+              value={schedule}
+              onChange={(e) => setSchedule(e.target.value)}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="h-cmt">Commitment length</Label>
+            <Input
+              id="h-cmt"
+              value={commit}
+              onChange={(e) => setCommit(e.target.value)}
+              placeholder="e.g. 12 months"
+            />
+          </div>
         </div>
         <DialogFooter>
-          <Button size="sm" disabled={!name.trim() || create.isPending} onClick={() => create.mutate()}>
+          <Button
+            size="sm"
+            disabled={!name.trim() || create.isPending}
+            onClick={() => create.mutate()}
+          >
             {create.isPending ? "Creating…" : "Create host"}
           </Button>
         </DialogFooter>
@@ -365,8 +484,7 @@ function HostDetailDialog({
   const q = useQuery({
     enabled: !!cardId && open,
     queryKey: ["hhp-cue-card", cardId],
-    queryFn: () =>
-      getFn({ data: { organization_id: organizationId, id: cardId! } }),
+    queryFn: () => getFn({ data: { organization_id: organizationId, id: cardId! } }),
   });
 
   const [notes, setNotes] = useState("");
@@ -427,11 +545,7 @@ function HostDetailDialog({
                 value={c.schedule_availability}
                 className="md:col-span-2"
               />
-              <KV
-                label="Experience"
-                value={c.experience_summary}
-                className="md:col-span-2"
-              />
+              <KV label="Experience" value={c.experience_summary} className="md:col-span-2" />
               <KV
                 label="Behavioral comfort"
                 value={c.behavioral_comfort}
@@ -442,10 +556,7 @@ function HostDetailDialog({
                 value={c.communication_abilities}
                 className="md:col-span-2"
               />
-              <KV
-                label="Medical comfort"
-                value={c.medical_comfort?.join(", ") || "—"}
-              />
+              <KV label="Medical comfort" value={c.medical_comfort?.join(", ") || "—"} />
               <KV
                 label="Independence levels"
                 value={c.independence_levels_accepted?.join(", ") || "—"}
@@ -471,7 +582,9 @@ function HostDetailDialog({
                   onValueChange={(v) => setStatus(v as HhpStatus)}
                   disabled={!canManage}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {HHP_STATUSES.map((s) => (
                       <SelectItem key={s} value={s}>
@@ -498,8 +611,8 @@ function HostDetailDialog({
                   <UserCheck className="h-3.5 w-3.5" /> Linked employee
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Connect this host to their employee record after they join the
-                  agency. Until then they do not clock or appear in scheduling.
+                  Connect this host to their employee record after they join the agency. Until then
+                  they do not clock or appear in scheduling.
                 </p>
                 <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
                   <Select
@@ -513,7 +626,9 @@ function HostDetailDialog({
                     <SelectContent>
                       <SelectItem value="none">Not a staff member</SelectItem>
                       {(staffQ.data ?? []).map((s) => (
-                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -570,9 +685,7 @@ function KV({
 }) {
   return (
     <div className={className}>
-      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
-        {label}
-      </div>
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="text-sm">{value || "—"}</div>
     </div>
   );

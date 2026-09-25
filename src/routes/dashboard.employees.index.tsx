@@ -318,619 +318,625 @@ export function EmployeesPage() {
 
   return (
     <AgencySetupCreateGate>
-    <div className="space-y-6">
-      <OnboardingReturnBar />
-      <OnboardingGuidanceBanner step={2} />
+      <div className="space-y-6">
+        <OnboardingReturnBar />
+        <OnboardingGuidanceBanner step={2} />
 
-      <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-        <div>
-          <h2 className="text-base font-semibold">Team members</h2>
-          <p className="text-sm text-muted-foreground">
-            {activeCount} active
-            {inactiveCount > 0 && ` · ${inactiveCount} inactive`}
-            {(invites?.length ?? 0) > 0 &&
-              ` · ${invites!.length} pending invite${invites!.length === 1 ? "" : "s"}`}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <EmployeeRosterUploadButton onClick={() => setUploadOpen(true)} disabled={!org || createBlocked} />
-          <AddEmployeeButton onClick={() => setAddOpen(true)} disabled={!org || createBlocked} />
-          <Button variant="outline" onClick={() => setStaffFieldsOpen(true)}>
-            <Settings className="mr-2 h-4 w-4" /> Settings
-          </Button>
-        </div>
-      </div>
-
-      {!!invites?.length && (
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-          <h3 className="text-sm font-semibold">Pending invitations</h3>
-          <p className="text-xs text-muted-foreground">
-            Pending people join <strong>this</strong> organization via the link (not new-agency
-            signup). Resend keeps the same join email. For a new hire, use Add employee.
-          </p>
-          <ul className="mt-3 divide-y divide-border">
-            {invites.map((i) => {
-              const link = inviteJoinUrl(resolveAuthOrigin(), i.token);
-              return (
-                <li key={i.id} className="flex items-center justify-between gap-3 py-3 text-sm">
-                  <div className="flex items-center gap-2 truncate">
-                    <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />{" "}
-                    <span className="truncate">{i.email}</span>{" "}
-                    <span className="shrink-0 text-xs text-muted-foreground">· {i.role}</span>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={resendInviteMutation.isPending}
-                      onClick={() => resendInviteMutation.mutate(i.id)}
-                    >
-                      <RefreshCcw className="mr-1 h-3.5 w-3.5" /> Resend
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(link);
-                        toast.success("Invite link copied");
-                      }}
-                    >
-                      <Copy className="mr-1 h-3.5 w-3.5" /> Copy link
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      disabled={revokeInviteMutation.isPending}
-                      onClick={() => {
-                        if (confirm(`Uninvite ${i.email}? This link will stop working.`)) {
-                          revokeInviteMutation.mutate(i.id);
-                        }
-                      }}
-                    >
-                      <Ban className="mr-1 h-3.5 w-3.5" /> Uninvite
-                    </Button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-
-      <div className="inline-flex rounded-md border border-border bg-muted/40 p-0.5 text-xs">
-        {(["active", "inactive"] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setRosterTab(t)}
-            className={
-              "rounded px-3 py-1 font-medium capitalize transition-colors " +
-              (rosterTab === t
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground")
-            }
-          >
-            {t === "active" ? "Active" : "Inactive"}
-            {t === "inactive" && inactiveCount > 0 && (
-              <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px] tabular-nums">
-                {inactiveCount}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-        {membersLoading ? (
-          <div className="flex items-center justify-center gap-2 p-12 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading employees…
+        <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+          <div>
+            <h2 className="text-base font-semibold">Team members</h2>
+            <p className="text-sm text-muted-foreground">
+              {activeCount} active
+              {inactiveCount > 0 && ` · ${inactiveCount} inactive`}
+              {(invites?.length ?? 0) > 0 &&
+                ` · ${invites!.length} pending invite${invites!.length === 1 ? "" : "s"}`}
+            </p>
           </div>
-        ) : !visibleMembers.length ? (
-          <div className="flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
-            <p>{rosterTab === "inactive" ? "No deactivated employees." : "No active employees."}</p>
+          <div className="flex flex-wrap gap-2">
+            <EmployeeRosterUploadButton
+              onClick={() => setUploadOpen(true)}
+              disabled={!org || createBlocked}
+            />
+            <AddEmployeeButton onClick={() => setAddOpen(true)} disabled={!org || createBlocked} />
+            <Button variant="outline" onClick={() => setStaffFieldsOpen(true)}>
+              <Settings className="mr-2 h-4 w-4" /> Settings
+            </Button>
           </div>
-        ) : (
-          <>
-            {/* Mobile card list — the table overflows on small screens, so below
-            md we render the same roster as stacked cards instead. */}
-            <div className="block divide-y divide-border md:hidden">
-              {visibleMembers.map((m) => {
-                const name = m.profile?.full_name ?? "—";
-                const onActiveRoster = isEmployeeOnActiveRoster(m);
-                const codes = serviceCodesByStaff.get(m.user_id) ?? [];
-                const openProfile = () => {
-                  void navigate({
-                    to: "/dashboard/employees/$staffId",
-                    params: { staffId: m.user_id },
-                  });
-                };
+        </div>
+
+        {!!invites?.length && (
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+            <h3 className="text-sm font-semibold">Pending invitations</h3>
+            <p className="text-xs text-muted-foreground">
+              Pending people join <strong>this</strong> organization via the link (not new-agency
+              signup). Resend keeps the same join email. For a new hire, use Add employee.
+            </p>
+            <ul className="mt-3 divide-y divide-border">
+              {invites.map((i) => {
+                const link = inviteJoinUrl(resolveAuthOrigin(), i.token);
                 return (
-                  <div
-                    key={m.id}
-                    className="flex cursor-pointer flex-col gap-2 p-4 active:bg-muted/50"
-                    onClick={openProfile}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <PersonAvatar
-                          bucket="staff-photos"
-                          path={
-                            (m.profile as { photo_path?: string | null } | undefined)?.photo_path ??
-                            null
-                          }
-                          name={name === "—" ? null : name}
-                          className="h-9 w-9 text-xs"
-                        />
-                        <Link
-                          to="/dashboard/employees/$staffId"
-                          params={{ staffId: m.user_id }}
-                          className="truncate font-bold hover:underline"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {name}
-                        </Link>
-                      </div>
-                      <span
-                        className={
-                          "shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium " +
-                          (onActiveRoster
-                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                            : "bg-muted text-muted-foreground")
-                        }
+                  <li key={i.id} className="flex items-center justify-between gap-3 py-3 text-sm">
+                    <div className="flex items-center gap-2 truncate">
+                      <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />{" "}
+                      <span className="truncate">{i.email}</span>{" "}
+                      <span className="shrink-0 text-xs text-muted-foreground">· {i.role}</span>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={resendInviteMutation.isPending}
+                        onClick={() => resendInviteMutation.mutate(i.id)}
                       >
-                        {onActiveRoster ? "Active" : "Deactivated"}
-                      </span>
+                        <RefreshCcw className="mr-1 h-3.5 w-3.5" /> Resend
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(link);
+                          toast.success("Invite link copied");
+                        }}
+                      >
+                        <Copy className="mr-1 h-3.5 w-3.5" /> Copy link
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        disabled={revokeInviteMutation.isPending}
+                        onClick={() => {
+                          if (confirm(`Uninvite ${i.email}? This link will stop working.`)) {
+                            revokeInviteMutation.mutate(i.id);
+                          }
+                        }}
+                      >
+                        <Ban className="mr-1 h-3.5 w-3.5" /> Uninvite
+                      </Button>
                     </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="rounded-full bg-secondary px-2 py-0.5 text-xs uppercase">
-                        {m.role}
-                      </span>
-                      {codes.length ? (
-                        codes.map((code) => (
-                          <Badge key={code} variant="outline" className="font-mono text-[10px]">
-                            {code}
-                          </Badge>
-                        ))
-                      ) : (
-                        <span className="text-xs text-muted-foreground">No service codes</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Last login {formatLastLogin(m.lastSignInAt, m.lastSignInKnown)}
-                    </p>
-                    <div
-                      className="flex items-center justify-end gap-2 pt-1"
-                      data-no-row-nav
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {rosterTab === "inactive" && m.user_id !== user?.id && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-xs"
-                            disabled={reactivateMutation.isPending}
-                            onClick={() => reactivateMutation.mutate({ userId: m.user_id, name })}
-                          >
-                            Reactivate
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-xs text-destructive hover:text-destructive"
-                            onClick={() => {
-                              setConfirmDeleteName("");
-                              setDeleteTarget({ userId: m.user_id, name });
-                            }}
-                          >
-                            <Trash2 className="mr-1 h-3 w-3" /> Delete
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
+          </div>
+        )}
 
-            <div className="hidden max-h-[calc(100vh-16rem)] overflow-auto md:block">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur supports-[backdrop-filter]:bg-muted/60 text-xs uppercase tracking-wider text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-semibold">Name</th>
-                    <th className="px-4 py-3 text-left font-semibold">Login</th>
-                    <th className="px-4 py-3 text-left font-semibold">Role</th>
-                    <th className="px-4 py-3 text-left font-semibold">Status</th>
-                    <th className="px-4 py-3 text-left font-semibold">Start date</th>
-                    <th className="px-4 py-3 text-left font-semibold">Last Login</th>
-                    <th className="px-4 py-3 text-right font-semibold w-[140px]">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleMembers.map((m) => {
-                    const name = m.profile?.full_name ?? "—";
-                    const onActiveRoster = isEmployeeOnActiveRoster(m);
-                    const login = m.profile?.username ?? m.profile?.email ?? "—";
-                    const needsReset = m.profile?.must_change_password;
-                    const position = (m.profile?.position ?? "") as Position | "";
-                    const startDate = (m.profile?.start_date ?? m.profile?.hire_date ?? null) as
-                      | string
-                      | null;
-                    // Roster avatar now uses <PersonAvatar>, which handles the
-                    // initials fallback itself when photo_path is null.
-                    const openProfile = () => {
-                      void navigate({
-                        to: "/dashboard/employees/$staffId",
-                        params: { staffId: m.user_id },
-                      });
-                    };
-                    return (
-                      <tr
-                        key={m.id}
-                        className="cursor-pointer h-12 border-b border-border/50 hover:bg-muted/50 transition-colors"
-                        onClick={openProfile}
-                      >
-                        <td className="px-4 py-2 font-medium whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <PersonAvatar
-                              bucket="staff-photos"
-                              path={
-                                (m.profile as { photo_path?: string | null } | undefined)
-                                  ?.photo_path ?? null
-                              }
-                              name={name === "—" ? null : name}
-                              className="h-9 w-9 text-xs"
-                            />
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2 truncate">
-                                <Link
-                                  to="/dashboard/employees/$staffId"
-                                  params={{ staffId: m.user_id }}
-                                  className="truncate hover:underline"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {name}
-                                </Link>
-                                {needsReset && (
-                                  <span className="hive-role-pill rounded-full px-2 py-0.5 text-[10px] uppercase whitespace-nowrap">
-                                    Pending first login
-                                  </span>
-                                )}
-                              </div>
-                              {position && (
-                                <div className="text-xs text-muted-foreground truncate">
-                                  {position}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-muted-foreground whitespace-nowrap max-w-[220px]">
+        <div className="inline-flex rounded-md border border-border bg-muted/40 p-0.5 text-xs">
+          {(["active", "inactive"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setRosterTab(t)}
+              className={
+                "rounded px-3 py-1 font-medium capitalize transition-colors " +
+                (rosterTab === t
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground")
+              }
+            >
+              {t === "active" ? "Active" : "Inactive"}
+              {t === "inactive" && inactiveCount > 0 && (
+                <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px] tabular-nums">
+                  {inactiveCount}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          {membersLoading ? (
+            <div className="flex items-center justify-center gap-2 p-12 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading employees…
+            </div>
+          ) : !visibleMembers.length ? (
+            <div className="flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
+              <p>
+                {rosterTab === "inactive" ? "No deactivated employees." : "No active employees."}
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Mobile card list — the table overflows on small screens, so below
+            md we render the same roster as stacked cards instead. */}
+              <div className="block divide-y divide-border md:hidden">
+                {visibleMembers.map((m) => {
+                  const name = m.profile?.full_name ?? "—";
+                  const onActiveRoster = isEmployeeOnActiveRoster(m);
+                  const codes = serviceCodesByStaff.get(m.user_id) ?? [];
+                  const openProfile = () => {
+                    void navigate({
+                      to: "/dashboard/employees/$staffId",
+                      params: { staffId: m.user_id },
+                    });
+                  };
+                  return (
+                    <div
+                      key={m.id}
+                      className="flex cursor-pointer flex-col gap-2 p-4 active:bg-muted/50"
+                      onClick={openProfile}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <PersonAvatar
+                            bucket="staff-photos"
+                            path={
+                              (m.profile as { photo_path?: string | null } | undefined)
+                                ?.photo_path ?? null
+                            }
+                            name={name === "—" ? null : name}
+                            className="h-9 w-9 text-xs"
+                          />
                           <Link
                             to="/dashboard/employees/$staffId"
                             params={{ staffId: m.user_id }}
-                            className="block truncate hover:underline"
-                            title={login}
+                            className="truncate font-bold hover:underline"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {login}
+                            {name}
                           </Link>
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
-                          <span className="hive-role-pill rounded-full px-2 py-0.5 text-xs uppercase">
-                            {m.role}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
-                          <span
-                            className={
-                              "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium " +
-                              (onActiveRoster
-                                ? "hive-status-active"
-                                : "bg-muted text-muted-foreground")
-                            }
-                          >
-                            {onActiveRoster ? "Active" : "Deactivated"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap">
-                          {formatRosterDate(startDate)}
-                        </td>
-                        <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap">
-                          {formatLastLogin(m.lastSignInAt, m.lastSignInKnown)}
-                        </td>
-                        <td
-                          className="px-4 py-2 text-right whitespace-nowrap w-[160px]"
-                          onClick={(e) => e.stopPropagation()}
+                        </div>
+                        <span
+                          className={
+                            "shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium " +
+                            (onActiveRoster
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                              : "bg-muted text-muted-foreground")
+                          }
                         >
-                          <div className="inline-flex items-center gap-1">
+                          {onActiveRoster ? "Active" : "Deactivated"}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs uppercase">
+                          {m.role}
+                        </span>
+                        {codes.length ? (
+                          codes.map((code) => (
+                            <Badge key={code} variant="outline" className="font-mono text-[10px]">
+                              {code}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No service codes</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Last login {formatLastLogin(m.lastSignInAt, m.lastSignInKnown)}
+                      </p>
+                      <div
+                        className="flex items-center justify-end gap-2 pt-1"
+                        data-no-row-nav
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {rosterTab === "inactive" && m.user_id !== user?.id && (
+                          <>
                             <Button
-                              variant="outline"
                               size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setCaseloadFor({
-                                  id: m.user_id,
-                                  name,
-                                  role: m.job_title || m.role,
-                                });
+                              variant="outline"
+                              className="h-8 text-xs"
+                              disabled={reactivateMutation.isPending}
+                              onClick={() => reactivateMutation.mutate({ userId: m.user_id, name })}
+                            >
+                              Reactivate
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 text-xs text-destructive hover:text-destructive"
+                              onClick={() => {
+                                setConfirmDeleteName("");
+                                setDeleteTarget({ userId: m.user_id, name });
                               }}
                             >
-                              <UsersIcon className="mr-1 h-3.5 w-3.5" /> Caseload
+                              <Trash2 className="mr-1 h-3 w-3" /> Delete
                             </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-8 p-0"
-                                  aria-label="More actions"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onSelect={() => setResetUser({ id: m.user_id, name })}
-                                >
-                                  <KeyRound className="mr-2 h-3.5 w-3.5" /> Reset password
-                                </DropdownMenuItem>
-                                {m.user_id !== user?.id && rosterTab === "active" && (
-                                  <DropdownMenuItem
-                                    onSelect={() =>
-                                      deactivateMutation.mutate({ userId: m.user_id, name })
-                                    }
-                                    className="text-destructive focus:text-destructive"
-                                  >
-                                    <UserX className="mr-2 h-3.5 w-3.5" /> Deactivate
-                                  </DropdownMenuItem>
-                                )}
-                                {m.user_id !== user?.id && rosterTab === "inactive" && (
-                                  <DropdownMenuItem
-                                    onSelect={() =>
-                                      reactivateMutation.mutate({ userId: m.user_id, name })
-                                    }
-                                  >
-                                    <UserCheck className="mr-2 h-3.5 w-3.5" /> Reactivate
-                                  </DropdownMenuItem>
-                                )}
-                                {m.user_id !== user?.id && (
-                                  <DropdownMenuItem
-                                    onSelect={() => {
-                                      setConfirmDeleteName("");
-                                      setDeleteTarget({ userId: m.user_id, name });
-                                    }}
-                                    className="text-destructive focus:text-destructive"
-                                  >
-                                    <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
-                                  </DropdownMenuItem>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </div>
-
-      <AddEmployeeWizard
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        organizationId={org?.organization_id ?? null}
-        onOpenSettings={() => setStaffFieldsOpen(true)}
-      />
-      <EmployeeRosterUploadWizard
-        open={uploadOpen}
-        onOpenChange={setUploadOpen}
-        organizationId={org?.organization_id ?? null}
-      />
-
-      <Dialog
-        open={!!deleteTarget}
-        onOpenChange={(o) => {
-          if (!o) {
-            setDeleteTarget(null);
-            setConfirmDeleteName("");
-          }
-        }}
-      >
-        <DialogContent className="border-destructive/60">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-5 w-5" /> Delete {deleteTarget?.name}?
-            </DialogTitle>
-            <DialogDescription>
-              This permanently removes {deleteTarget?.name} from this organization. Type their full
-              name to confirm. This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-2">
-            <Label htmlFor="confirm-employee-delete" className="text-sm">
-              Type <span className="font-mono font-semibold">{deleteTarget?.name}</span> to confirm
-            </Label>
-            <Input
-              id="confirm-employee-delete"
-              value={confirmDeleteName}
-              onChange={(e) => setConfirmDeleteName(e.target.value)}
-              placeholder={deleteTarget?.name}
-              autoComplete="off"
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setDeleteTarget(null);
-                setConfirmDeleteName("");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={
-                !deleteTarget ||
-                confirmDeleteName.trim().toLowerCase() !==
-                  (deleteTarget.name ?? "").trim().toLowerCase() ||
-                deleteEmployeeMutation.isPending
-              }
-              onClick={() => {
-                if (!deleteTarget) return;
-                deleteEmployeeMutation.mutate({
-                  userId: deleteTarget.userId,
-                  name: deleteTarget.name,
-                  confirmName: confirmDeleteName,
-                });
-              }}
-            >
-              {deleteEmployeeMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting…
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete permanently
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Reset password */}
-      <Dialog open={!!resetUser} onOpenChange={(o) => !o && setResetUser(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reset password for {resetUser?.name}</DialogTitle>
-            <DialogDescription>
-              A new temporary password will be set. The employee must change it on next sign-in.
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const fd = new FormData(e.currentTarget);
-              resetPwMutation.mutate({
-                userId: resetUser!.id,
-                newPassword: String(fd.get("newpw")),
-              });
-            }}
-            className="grid gap-4"
-          >
-            <div className="grid gap-2">
-              <Label htmlFor="newpw">New temporary password</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="newpw"
-                  name="newpw"
-                  defaultValue={tempPassword}
-                  key={"r-" + tempPassword}
-                  required
-                  minLength={8}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setTempPassword(generateTempPassword())}
-                >
-                  Regenerate
-                </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+
+              <div className="hidden max-h-[calc(100vh-16rem)] overflow-auto md:block">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur supports-[backdrop-filter]:bg-muted/60 text-xs uppercase tracking-wider text-muted-foreground">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold">Name</th>
+                      <th className="px-4 py-3 text-left font-semibold">Login</th>
+                      <th className="px-4 py-3 text-left font-semibold">Role</th>
+                      <th className="px-4 py-3 text-left font-semibold">Status</th>
+                      <th className="px-4 py-3 text-left font-semibold">Start date</th>
+                      <th className="px-4 py-3 text-left font-semibold">Last Login</th>
+                      <th className="px-4 py-3 text-right font-semibold w-[140px]">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visibleMembers.map((m) => {
+                      const name = m.profile?.full_name ?? "—";
+                      const onActiveRoster = isEmployeeOnActiveRoster(m);
+                      const login = m.profile?.username ?? m.profile?.email ?? "—";
+                      const needsReset = m.profile?.must_change_password;
+                      const position = (m.profile?.position ?? "") as Position | "";
+                      const startDate = (m.profile?.start_date ?? m.profile?.hire_date ?? null) as
+                        | string
+                        | null;
+                      // Roster avatar now uses <PersonAvatar>, which handles the
+                      // initials fallback itself when photo_path is null.
+                      const openProfile = () => {
+                        void navigate({
+                          to: "/dashboard/employees/$staffId",
+                          params: { staffId: m.user_id },
+                        });
+                      };
+                      return (
+                        <tr
+                          key={m.id}
+                          className="cursor-pointer h-12 border-b border-border/50 hover:bg-muted/50 transition-colors"
+                          onClick={openProfile}
+                        >
+                          <td className="px-4 py-2 font-medium whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <PersonAvatar
+                                bucket="staff-photos"
+                                path={
+                                  (m.profile as { photo_path?: string | null } | undefined)
+                                    ?.photo_path ?? null
+                                }
+                                name={name === "—" ? null : name}
+                                className="h-9 w-9 text-xs"
+                              />
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2 truncate">
+                                  <Link
+                                    to="/dashboard/employees/$staffId"
+                                    params={{ staffId: m.user_id }}
+                                    className="truncate hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {name}
+                                  </Link>
+                                  {needsReset && (
+                                    <span className="hive-role-pill rounded-full px-2 py-0.5 text-[10px] uppercase whitespace-nowrap">
+                                      Pending first login
+                                    </span>
+                                  )}
+                                </div>
+                                {position && (
+                                  <div className="text-xs text-muted-foreground truncate">
+                                    {position}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2 text-muted-foreground whitespace-nowrap max-w-[220px]">
+                            <Link
+                              to="/dashboard/employees/$staffId"
+                              params={{ staffId: m.user_id }}
+                              className="block truncate hover:underline"
+                              title={login}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {login}
+                            </Link>
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            <span className="hive-role-pill rounded-full px-2 py-0.5 text-xs uppercase">
+                              {m.role}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            <span
+                              className={
+                                "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium " +
+                                (onActiveRoster
+                                  ? "hive-status-active"
+                                  : "bg-muted text-muted-foreground")
+                              }
+                            >
+                              {onActiveRoster ? "Active" : "Deactivated"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap">
+                            {formatRosterDate(startDate)}
+                          </td>
+                          <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap">
+                            {formatLastLogin(m.lastSignInAt, m.lastSignInKnown)}
+                          </td>
+                          <td
+                            className="px-4 py-2 text-right whitespace-nowrap w-[160px]"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="inline-flex items-center gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCaseloadFor({
+                                    id: m.user_id,
+                                    name,
+                                    role: m.job_title || m.role,
+                                  });
+                                }}
+                              >
+                                <UsersIcon className="mr-1 h-3.5 w-3.5" /> Caseload
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    aria-label="More actions"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onSelect={() => setResetUser({ id: m.user_id, name })}
+                                  >
+                                    <KeyRound className="mr-2 h-3.5 w-3.5" /> Reset password
+                                  </DropdownMenuItem>
+                                  {m.user_id !== user?.id && rosterTab === "active" && (
+                                    <DropdownMenuItem
+                                      onSelect={() =>
+                                        deactivateMutation.mutate({ userId: m.user_id, name })
+                                      }
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <UserX className="mr-2 h-3.5 w-3.5" /> Deactivate
+                                    </DropdownMenuItem>
+                                  )}
+                                  {m.user_id !== user?.id && rosterTab === "inactive" && (
+                                    <DropdownMenuItem
+                                      onSelect={() =>
+                                        reactivateMutation.mutate({ userId: m.user_id, name })
+                                      }
+                                    >
+                                      <UserCheck className="mr-2 h-3.5 w-3.5" /> Reactivate
+                                    </DropdownMenuItem>
+                                  )}
+                                  {m.user_id !== user?.id && (
+                                    <DropdownMenuItem
+                                      onSelect={() => {
+                                        setConfirmDeleteName("");
+                                        setDeleteTarget({ userId: m.user_id, name });
+                                      }}
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
+
+        <AddEmployeeWizard
+          open={addOpen}
+          onOpenChange={setAddOpen}
+          organizationId={org?.organization_id ?? null}
+          onOpenSettings={() => setStaffFieldsOpen(true)}
+        />
+        <EmployeeRosterUploadWizard
+          open={uploadOpen}
+          onOpenChange={setUploadOpen}
+          organizationId={org?.organization_id ?? null}
+        />
+
+        <Dialog
+          open={!!deleteTarget}
+          onOpenChange={(o) => {
+            if (!o) {
+              setDeleteTarget(null);
+              setConfirmDeleteName("");
+            }
+          }}
+        >
+          <DialogContent className="border-destructive/60">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-5 w-5" /> Delete {deleteTarget?.name}?
+              </DialogTitle>
+              <DialogDescription>
+                This permanently removes {deleteTarget?.name} from this organization. Type their
+                full name to confirm. This cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-2">
+              <Label htmlFor="confirm-employee-delete" className="text-sm">
+                Type <span className="font-mono font-semibold">{deleteTarget?.name}</span> to
+                confirm
+              </Label>
+              <Input
+                id="confirm-employee-delete"
+                value={confirmDeleteName}
+                onChange={(e) => setConfirmDeleteName(e.target.value)}
+                placeholder={deleteTarget?.name}
+                autoComplete="off"
+              />
             </div>
             <DialogFooter>
-              <Button type="submit" disabled={resetPwMutation.isPending}>
-                Reset password
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setConfirmDeleteName("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={
+                  !deleteTarget ||
+                  confirmDeleteName.trim().toLowerCase() !==
+                    (deleteTarget.name ?? "").trim().toLowerCase() ||
+                  deleteEmployeeMutation.isPending
+                }
+                onClick={() => {
+                  if (!deleteTarget) return;
+                  deleteEmployeeMutation.mutate({
+                    userId: deleteTarget.userId,
+                    name: deleteTarget.name,
+                    confirmName: confirmDeleteName,
+                  });
+                }}
+              >
+                {deleteEmployeeMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting…
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete permanently
+                  </>
+                )}
               </Button>
             </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
 
-      {/* Credentials reveal */}
-      <Dialog open={!!credentialsShown} onOpenChange={(o) => !o && setCredentialsShown(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Share these credentials</DialogTitle>
-            <DialogDescription>
-              This password is shown only once. Copy it and share securely.
-            </DialogDescription>
-          </DialogHeader>
-          {credentialsShown && (
-            <div className="grid gap-3 text-sm">
-              <div>
-                <div className="text-xs text-muted-foreground">Login</div>
-                <code className="block rounded bg-secondary p-2">
-                  {credentialsShown.identifier}
-                </code>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Temporary password</div>
+        {/* Reset password */}
+        <Dialog open={!!resetUser} onOpenChange={(o) => !o && setResetUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reset password for {resetUser?.name}</DialogTitle>
+              <DialogDescription>
+                A new temporary password will be set. The employee must change it on next sign-in.
+              </DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                resetPwMutation.mutate({
+                  userId: resetUser!.id,
+                  newPassword: String(fd.get("newpw")),
+                });
+              }}
+              className="grid gap-4"
+            >
+              <div className="grid gap-2">
+                <Label htmlFor="newpw">New temporary password</Label>
                 <div className="flex gap-2">
-                  <code className="flex-1 rounded bg-secondary p-2">
-                    {credentialsShown.password}
-                  </code>
+                  <Input
+                    id="newpw"
+                    name="newpw"
+                    defaultValue={tempPassword}
+                    key={"r-" + tempPassword}
+                    required
+                    minLength={8}
+                  />
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => {
-                      navigator.clipboard.writeText(credentialsShown.password);
-                      toast.success("Copied");
-                    }}
+                    onClick={() => setTempPassword(generateTempPassword())}
                   >
-                    <Copy className="h-3.5 w-3.5" />
+                    Regenerate
                   </Button>
                 </div>
               </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button
-              onClick={() => {
-                const newStaffId = credentialsShown?.newStaffId;
-                setCredentialsShown(null);
-                if (newStaffId) {
-                  void navigate({
-                    to: "/dashboard/employees/$staffId",
-                    params: { staffId: newStaffId },
-                    search: { tab: "record" },
-                  });
-                }
-              }}
-            >
-              Done
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <DialogFooter>
+                <Button type="submit" disabled={resetPwMutation.isPending}>
+                  Reset password
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
-      <CaseloadDrawer
-        member={caseloadFor}
-        organizationId={org?.organization_id ?? null}
-        onClose={() => setCaseloadFor(null)}
-      />
+        {/* Credentials reveal */}
+        <Dialog open={!!credentialsShown} onOpenChange={(o) => !o && setCredentialsShown(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Share these credentials</DialogTitle>
+              <DialogDescription>
+                This password is shown only once. Copy it and share securely.
+              </DialogDescription>
+            </DialogHeader>
+            {credentialsShown && (
+              <div className="grid gap-3 text-sm">
+                <div>
+                  <div className="text-xs text-muted-foreground">Login</div>
+                  <code className="block rounded bg-secondary p-2">
+                    {credentialsShown.identifier}
+                  </code>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Temporary password</div>
+                  <div className="flex gap-2">
+                    <code className="flex-1 rounded bg-secondary p-2">
+                      {credentialsShown.password}
+                    </code>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(credentialsShown.password);
+                        toast.success("Copied");
+                      }}
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  const newStaffId = credentialsShown?.newStaffId;
+                  setCredentialsShown(null);
+                  if (newStaffId) {
+                    void navigate({
+                      to: "/dashboard/employees/$staffId",
+                      params: { staffId: newStaffId },
+                      search: { tab: "record" },
+                    });
+                  }
+                }}
+              >
+                Done
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {org && (
-        <StaffFieldsPanel
-          open={staffFieldsOpen}
-          onOpenChange={(v) => {
-            setStaffFieldsOpen(v);
-            if (!v)
-              qc.invalidateQueries({ queryKey: ["staff-intake-fields", org.organization_id] });
-          }}
-          organizationId={org.organization_id}
+        <CaseloadDrawer
+          member={caseloadFor}
+          organizationId={org?.organization_id ?? null}
+          onClose={() => setCaseloadFor(null)}
         />
-      )}
-    </div>
+
+        {org && (
+          <StaffFieldsPanel
+            open={staffFieldsOpen}
+            onOpenChange={(v) => {
+              setStaffFieldsOpen(v);
+              if (!v)
+                qc.invalidateQueries({ queryKey: ["staff-intake-fields", org.organization_id] });
+            }}
+            organizationId={org.organization_id}
+          />
+        )}
+      </div>
     </AgencySetupCreateGate>
   );
 }
