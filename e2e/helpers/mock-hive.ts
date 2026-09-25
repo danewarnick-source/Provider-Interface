@@ -913,7 +913,7 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/listTeamAccess/i.test(fn)) return sampleTeamAccess();
   if (/listAccessTargets/i.test(fn)) return sampleAccessTargets();
   if (/getMemberAccess/i.test(fn)) return sampleMemberAccess(fnBlob);
-  if (/setMemberAccess/i.test(fn)) {
+  if (/setMemberAccess/i.test(fn) || /access_scope/.test(fnBlob)) {
     rememberMemberAccess(fnBlob);
     return { ok: true };
   }
@@ -1095,7 +1095,65 @@ function sampleAccessTargets() {
 }
 
 function userIdFromBlob(blob: string): string {
-  return blob.match(/"user_id"\s*:\s*"([^"]+)"/)?.[1] ?? STAFF.jake.id;
+  const plain = blob.match(/"user_id"\s*:\s*"([^"]+)"/)?.[1];
+  if (plain) return plain;
+  // Seroval keeps keys and string values in separate arrays.
+  const decoded = decodeURIComponent(blob);
+  const packed = decoded.match(
+    /"organization_id","user_id","access_level"[\s\S]*?"v":\[(?:\{"t":1,"s":"([^"]+)"\},)\{"t":1,"s":"([^"]+)"\}/,
+  );
+  if (packed?.[2]) return packed[2];
+  return STAFF.jake.id;
+}
+
+/** Read a setMemberAccess body, whether it is plain JSON or seroval. */
+function parseAccessWrite(blob: string): {
+  userId: string;
+  level: SavedMemberAccess["access_level"];
+  scope: SavedMemberAccess["access_scope"];
+  preset: string | null;
+  assignments: SavedMemberAccess["assignments"];
+} {
+  const decoded = decodeURIComponent(blob);
+  const levelPlain = decoded.match(/"access_level"\s*:\s*"(owner|admin|staff)"/)?.[1];
+  const scopePlain = decoded.match(/"access_scope"\s*:\s*"(agency|assigned|self)"/)?.[1];
+  if (levelPlain && scopePlain) {
+    const assignments: SavedMemberAccess["assignments"] = [];
+    const re =
+      /"kind"\s*:\s*"(home|staff|client)"\s*,\s*"target_id"\s*:\s*"([0-9a-f-]{36})"/gi;
+    for (const match of decoded.matchAll(re)) {
+      assignments.push({
+        kind: match[1] as SavedMemberAccess["assignments"][number]["kind"],
+        target_id: match[2],
+      });
+    }
+    return {
+      userId: userIdFromBlob(decoded),
+      level: levelPlain as SavedMemberAccess["access_level"],
+      scope: scopePlain as SavedMemberAccess["access_scope"],
+      preset: decoded.match(/"access_preset_id"\s*:\s*"([^"]+)"/)?.[1] ?? null,
+      assignments,
+    };
+  }
+  const packed = decoded.match(
+    /"organization_id","user_id","access_level","access_preset_id","access_scope"[\s\S]*?"v":\[\{"t":1,"s":"([^"]+)"\},\{"t":1,"s":"([^"]+)"\},\{"t":1,"s":"(owner|admin|staff)"\},\{"t":1,"s":"([^"]*)"\},\{"t":1,"s":"(agency|assigned|self)"\}/,
+  );
+  const assignments: SavedMemberAccess["assignments"] = [];
+  const assignRe =
+    /"k":\["kind","target_id"\],"v":\[\{"t":1,"s":"(home|staff|client)"\},\{"t":1,"s":"([0-9a-f-]{36})"\}/g;
+  for (const match of decoded.matchAll(assignRe)) {
+    assignments.push({
+      kind: match[1] as SavedMemberAccess["assignments"][number]["kind"],
+      target_id: match[2],
+    });
+  }
+  return {
+    userId: packed?.[2] ?? STAFF.jake.id,
+    level: (packed?.[3] ?? "admin") as SavedMemberAccess["access_level"],
+    preset: packed?.[4] ? packed[4] : null,
+    scope: (packed?.[5] ?? "agency") as SavedMemberAccess["access_scope"],
+    assignments,
+  };
 }
 
 function sampleMemberAccess(blob: string): SavedMemberAccess {
@@ -1113,28 +1171,15 @@ function sampleMemberAccess(blob: string): SavedMemberAccess {
 }
 
 function rememberMemberAccess(blob: string) {
-  const userId = userIdFromBlob(blob);
-  const level = (blob.match(/"access_level"\s*:\s*"(owner|admin|staff)"/)?.[1] ??
-    "admin") as SavedMemberAccess["access_level"];
-  const scope = (blob.match(/"access_scope"\s*:\s*"(agency|assigned|self)"/)?.[1] ??
-    "agency") as SavedMemberAccess["access_scope"];
-  const preset = blob.match(/"access_preset_id"\s*:\s*"([^"]+)"/)?.[1] ?? null;
-  const assignments: SavedMemberAccess["assignments"] = [];
-  const re =
-    /"kind"\s*:\s*"(home|staff|client)"\s*,\s*"target_id"\s*:\s*"([0-9a-f-]{36})"/gi;
-  for (const match of blob.matchAll(re)) {
-    assignments.push({
-      kind: match[1] as SavedMemberAccess["assignments"][number]["kind"],
-      target_id: match[2],
-    });
-  }
-  savedMemberAccess.set(userId, {
+  const parsed = parseAccessWrite(blob);
+  const owner = parsed.level === "owner";
+  savedMemberAccess.set(parsed.userId, {
     membership_id: "00000000-0000-4000-a000-000000000941",
-    access_level: level,
-    access_scope: level === "owner" ? "agency" : scope,
-    access_preset_id: level === "owner" ? null : preset,
+    access_level: parsed.level,
+    access_scope: owner ? "agency" : parsed.scope,
+    access_preset_id: owner ? null : parsed.preset,
     access_overrides: {},
-    assignments: level === "owner" || scope !== "assigned" ? [] : assignments,
+    assignments: owner || parsed.scope !== "assigned" ? [] : parsed.assignments,
   });
 }
 
@@ -1209,7 +1254,11 @@ export async function installHiveMocks(page: Page, opts: MockOptions = {}): Prom
   await page.addInitScript(
     ({ storageKey, sessionJson, orgId, persona, noAssignments, clientsError }) => {
       try {
+        // The running app's storage key is sb-<project-ref>-auth-token.
+        // .env points at dhrrukdcigiiqksibdfb; older mocks used mmknqtdrefbzwfdtykza.
         window.localStorage.setItem(storageKey, sessionJson);
+        window.localStorage.setItem("sb-dhrrukdcigiiqksibdfb-auth-token", sessionJson);
+        window.localStorage.setItem("sb-mmknqtdrefbzwfdtykza-auth-token", sessionJson);
         window.localStorage.setItem("hive.activeOrgId", orgId);
         window.localStorage.setItem("portal-view", persona === "dsp" ? "staff" : "admin");
         window.localStorage.setItem("hive.e2e.persona", persona);
