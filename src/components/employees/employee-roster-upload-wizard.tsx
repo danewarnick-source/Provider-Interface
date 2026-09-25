@@ -257,7 +257,7 @@ export function EmployeeRosterUploadWizard({
         {step === "entry" && (
           <>
             <DialogHeader>
-              <DialogTitle>Add several at once</DialogTitle>
+              <DialogTitle>Import team members</DialogTitle>
               <DialogDescription>
                 Add basic info for several team members now. Each person lands on the roster as
                 Needs setup, and you&apos;ll answer their job questions next.
@@ -539,7 +539,7 @@ export function EmployeeRosterUploadButton({
 }) {
   return (
     <Button variant="outline" onClick={onClick} disabled={disabled}>
-      <FileSpreadsheet className="mr-2 h-4 w-4" /> Add several at once
+      <FileSpreadsheet className="mr-2 h-4 w-4" /> Import team members
     </Button>
   );
 }

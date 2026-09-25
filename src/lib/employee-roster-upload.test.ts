@@ -112,12 +112,13 @@ describe("employee roster template", () => {
     assert.ok(fields.includes("hire_date"));
   });
 
-  it("keeps Add several at once off update modes and off automatic invites", () => {
+  it("keeps Import team members off update modes and off automatic invites", () => {
     const src = readFileSync(
       new URL("../components/employees/employee-roster-upload-wizard.tsx", import.meta.url),
       "utf8",
     );
-    assert.match(src, /Add several at once/);
+    assert.match(src, /Import team members/);
+    assert.doesNotMatch(src, /Add several at once/);
     assert.match(src, /Needs setup/);
     assert.match(src, /Already on the roster/);
     assert.match(src, /No invites/);

@@ -402,10 +402,7 @@ export function EmployeesPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <EmployeeRosterUploadButton
-              onClick={() => setUploadOpen(true)}
-              disabled={!org || createBlocked}
-            />
+            <AddEmployeeButton onClick={() => setAddOpen(true)} disabled={!org || createBlocked} />
             {needsSetupPeople.length > 0 && (
               <Button
                 variant="outline"
@@ -415,7 +412,10 @@ export function EmployeesPage() {
                 Finish setup ({needsSetupPeople.length})
               </Button>
             )}
-            <AddEmployeeButton onClick={() => setAddOpen(true)} disabled={!org || createBlocked} />
+            <EmployeeRosterUploadButton
+              onClick={() => setUploadOpen(true)}
+              disabled={!org || createBlocked}
+            />
           </div>
         </div>
 

@@ -100,6 +100,10 @@ describe("Employees list source lock", () => {
     assert.match(src, /deleteEntity/);
     assert.match(src, /Inactive/);
     assert.match(src, /EmployeeRosterUploadWizard/);
+    assert.ok(
+      src.indexOf("<AddEmployeeButton") < src.indexOf("<EmployeeRosterUploadButton"),
+      "Add team member stays the primary action and sits before Import team members",
+    );
     assert.match(src, /FinishEmployeeSetupWizard/);
     assert.match(src, /Needs setup/);
     assert.match(src, /Finish setup/);
