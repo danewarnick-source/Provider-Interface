@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Database } from "@/integrations/supabase/types";
 import { onStaffHiredInternal } from "@/lib/staff-assignment-hooks.functions";
 import { resolveAccountUsername } from "@/lib/account-username";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
@@ -10,6 +11,8 @@ import { requireCategory, requireLevel } from "@/lib/access/require";
 import type { AccessLevel } from "@/lib/access/levels";
 import { resolvePresetId } from "@/lib/access/preset-resolve";
 import { logChange } from "@/lib/access/change-log.server";
+
+type MemberInsert = Database["public"]["Tables"]["organization_members"]["Insert"];
 
 const LevelEnum = z.enum(["owner", "admin", "staff"]);
 
@@ -209,11 +212,11 @@ export async function hireEmployeeInternal(
         user_id: newUserId,
         access_level: data.accessLevel,
         access_preset_id: presetId,
-        access_scope: null,
         job_title: jobTitle,
         active: true,
         ...(data.managerId !== undefined ? { manager_id: data.managerId } : {}),
-      },
+        // access_normalize_member() fills access_scope before the NOT NULL check.
+      } satisfies Omit<MemberInsert, "access_scope"> as MemberInsert,
       { onConflict: "organization_id,user_id" },
     );
     if (memErr) throw new Error(memErr.message);
@@ -464,7 +467,6 @@ export const finishEmployeeSetup = createServerFn({ method: "POST" })
       .update({
         access_level: data.accessLevel,
         access_preset_id: presetId,
-        access_scope: null,
         job_title: data.jobTitle?.trim() || null,
         active: true,
       })
