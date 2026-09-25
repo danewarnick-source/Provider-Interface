@@ -426,11 +426,18 @@ test.describe("Add several at once and Finish setup", () => {
     await expect(page.getByText(/Enter a valid email/i)).toBeVisible();
     await expect(page.getByText(/Will add as Needs setup/i)).toBeVisible();
     await expect(page.getByText(/"Owner" is not an access level/i)).toBeVisible();
+    await expect(
+      page.getByText(/Use Team member, Supervisor, Program Manager, Committee Member/i),
+    ).toBeVisible();
     await shot(page, "add_several_preview_desktop");
-    await page.getByLabel("Access level").nth(1).click();
-    await expect(page.getByRole("option", { name: "Team member" })).toBeVisible();
-    await expect(page.getByRole("option", { name: "Supervisor" })).toBeVisible();
-    await expect(page.getByRole("option", { name: "Owner" })).toHaveCount(0);
+    await page.setViewportSize({ width: 1280, height: 1100 });
+    const invalidAccess = page.getByLabel("Access level").first();
+    await invalidAccess.scrollIntoViewIfNeeded();
+    await invalidAccess.click();
+    for (const name of ["Team member", "Supervisor", "Program Manager", "Committee Member"]) {
+      await expect(page.getByRole("option", { name, exact: true })).toBeVisible();
+    }
+    await expect(page.getByRole("option", { name: "Owner", exact: true })).toHaveCount(0);
     await shot(page, "add_several_access_level_desktop");
     await page.keyboard.press("Escape");
 
