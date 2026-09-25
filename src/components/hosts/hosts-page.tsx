@@ -121,11 +121,13 @@ export function HostsPage() {
     <div className="space-y-4">
       <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Host Home Providers</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Placements</h2>
           <p className="text-sm text-muted-foreground">
-            HHP cue cards — host-side matching input. Hosts are not staff and
-            never appear in scheduling or EVV. Submitting a Host Home
-            Questionnaire auto-creates a card.
+            Host homes for clients who need a placement. Onboarding, ready, and
+            placed. Each card shows what the host can accept and the latest
+            inspection. A host who joins the agency is managed on Employees; the
+            staff link stays on the card. A Host Home Questionnaire still
+            creates a card.
           </p>
         </div>
         {orgId && canManage && <NewHostDialog organizationId={orgId} />}
@@ -184,12 +186,12 @@ export function HostsPage() {
                             </div>
                           )}
                           <div className="mt-2 flex flex-wrap gap-1">
-                            {canManage && orgId && (
+                            {orgId && (
                               <HostCertBadge orgId={orgId} hostCardId={c.id} />
                             )}
                             {c.linked_staff_user_id && (
                               <Badge className="gap-1 bg-primary/15 text-primary text-[10px] hover:bg-primary/20">
-                                <UserCheck className="h-3 w-3" /> Also DSP
+                                <UserCheck className="h-3 w-3" /> Linked employee
                               </Badge>
                             )}
                             {c.wheelchair_accessible && (
@@ -493,11 +495,11 @@ function HostDetailDialog({
 
               <div className="rounded-md border border-border bg-muted/30 p-3">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <UserCheck className="h-3.5 w-3.5" /> Also a staff member?
+                  <UserCheck className="h-3.5 w-3.5" /> Linked employee
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Link this host to a DSP on your roster so they can be assigned
-                  shifts, appear in caseload pickers, and complete client trainings.
+                  Connect this host to their employee record after they join the
+                  agency. Until then they do not clock or appear in scheduling.
                 </p>
                 <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
                   <Select

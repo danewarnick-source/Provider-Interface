@@ -10,9 +10,13 @@ import { TeamsPage } from "./dashboard.teams";
 import { PbaLedgerPage } from "./dashboard.pba-ledger";
 import { ClientLoansPage } from "./dashboard.client-loans";
 import { ReferralsPage } from "@/components/referrals/referrals-page";
+import { HostsPage } from "@/components/hosts/hosts-page";
 
 const search = z.object({
-  tab: z.enum(["directory", "referrals", "teams", "funds"]).optional(),
+  tab: z
+    .enum(["directory", "referrals", "placements", "hosts", "teams", "funds"])
+    .optional()
+    .transform((v) => (v === "hosts" ? "placements" : v)),
 });
 
 
@@ -28,6 +32,15 @@ function ClientsHub() {
       render: () => (
         <RequirePermission perm="view_referrals">
           <ReferralsPage />
+        </RequirePermission>
+      ),
+    });
+    tabs.push({
+      key: "placements",
+      label: "Placements",
+      render: () => (
+        <RequirePermission perm="view_referrals">
+          <HostsPage />
         </RequirePermission>
       ),
     });
