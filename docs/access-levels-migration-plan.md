@@ -163,6 +163,18 @@ select (select count(*) from clients where team_id is null) as clients_without_h
        (select count(*) from profiles where team_id is null) as profiles_without_home;
 ```
 
+**Phase 0 results (run 2026-09-25 on the live database):**
+
+| Check | Result | What it means for the build |
+|---|---|---|
+| People per role | Only `admin` (Owner) and `employee` (Staff) are in use. TNS has 2 Owners and 4 Staff; the other 18 agencies are test workspaces with 1 Owner each (two are both named "Thrive Living"). Nobody is a Supervisor, Program Manager or Committee Member. | The move is simple: every current person becomes Owner or Staff. No manager exists yet, so nobody can be wrongly mapped. The Program Manager / Supervisor presets are still created, as templates. |
+| Role values | Match the migrations (6 values). | No surprises. |
+| Helper functions | `is_org_admin_or_manager` includes `program_manager`, `manager` and `admin`. `can_view_staff_pii` allows only the person themself, Owners, HIVE staff, and the home's manager (`teams.manager_id`). | F-10 is confirmed withdrawn on the live database. Today, managers other than a home's named manager can't see staff SSN, date of birth, address or pay rates; the new model keeps that locked behind Payroll / Staff roster plus scope. `teams.manager_id` gets copied into Assigned homes. |
+| Policies using helpers | 763 policies total: 312 use `is_org_admin_or_manager`, 59 `has_org_role`, 7 `has_permission`, 4 the HRC helper. | Re-pointing those four helpers in Phase 2 switches ~380 policies at once. |
+| Policies with role words written in | 65 policies across 47 tables. | Hand-edit list for Phase 2. About 10 of those tables (`organization_members`, `invitations`, `role_permissions`, `user_permission_overrides`, audit logs, `scope_assignments`) are the role system itself and get replaced anyway. |
+| Per-person overrides | 0. | Skip the override-translation step entirely. |
+| Homes set | 0 of 4 clients and 0 of 24 active members have a home (`team_id`). | "Assigned homes" won't show anyone until homes are assigned on the Homes & Teams board (that screen already exists). Assigned staff and Assigned clients work without it. Assign homes before turning on home-based scope for a real manager. |
+
 **Decided (2026-09-25):**
 
 - No Guest level. HRC committee members are **Staff** with an "HRC Committee" preset.
@@ -174,7 +186,8 @@ select (select count(*) from clients where team_id is null) as clients_without_h
 
 - Migration: create `access_level`, the preset/override/scope tables, the helper functions, and the at-least-one-Owner trigger.
 - Backfill `access_level` and `preset_id` from `role` using the mapping in §3. Create the default presets per agency from today's `role_permissions`, so each agency's customizations carry over.
-- Translate `user_permission_overrides` into `member_category_overrides`.
+- ~~Translate `user_permission_overrides`~~: not needed, the live table is empty (Phase 0).
+- Copy each home's `teams.manager_id` into `member_scope_homes`.
 - Server functions that change roles (hire, invite accept, role change, roster upload) write **both** `role` and `access_level` for now.
 - **Nothing visible changes.**
 
@@ -255,4 +268,4 @@ The text lives in one catalog in code (`src/lib/access-categories.ts`: key, labe
 
 ## 7. Correction to the Employees docs
 
-The Employees tab docs listed **F-10: Program Managers can't use Employee Loans because `is_org_admin_or_manager` excludes them.** That's wrong for the current code. Migration `20260825020000_replace_is_super_admin_with_hive_executive.sql` redefines the helper as `role IN ('admin','program_manager','manager')`, so Program Managers **are** allowed. It could only still happen if the live database never received that migration; Phase 0 query D (or Q7 in the Employees doc) confirms it. The Employees docs have been updated.
+The Employees tab docs listed **F-10: Program Managers can't use Employee Loans because `is_org_admin_or_manager` excludes them.** That's wrong for the current code. Migration `20260825020000_replace_is_super_admin_with_hive_executive.sql` redefines the helper as `role IN ('admin','program_manager','manager')`, so Program Managers **are** allowed. It could only still happen if the live database never received that migration; Phase 0 check 3 (run 2026-09-25) confirmed the live helper includes `program_manager`. The Employees docs have been updated.
