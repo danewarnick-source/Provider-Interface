@@ -6011,6 +6011,229 @@ export type Database = {
           },
         ]
       }
+      escalation_rules: {
+        Row: {
+          archived_at: string | null
+          climbs_to: string
+          id: string
+          message_template: string
+          state_code: string
+          trigger: string
+          urgency: string
+        }
+        Insert: {
+          archived_at?: string | null
+          climbs_to: string
+          id?: string
+          message_template: string
+          state_code?: string
+          trigger: string
+          urgency: string
+        }
+        Update: {
+          archived_at?: string | null
+          climbs_to?: string
+          id?: string
+          message_template?: string
+          state_code?: string
+          trigger?: string
+          urgency?: string
+        }
+        Relationships: []
+      }
+      evidence_files: {
+        Row: {
+          attestation_text_snapshot: string | null
+          attested_at: string | null
+          attested_by: string | null
+          created_at: string
+          filename: string | null
+          id: string
+          item_id: string
+          notes: string | null
+          organization_id: string
+          storage_path: string | null
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          attestation_text_snapshot?: string | null
+          attested_at?: string | null
+          attested_by?: string | null
+          created_at?: string
+          filename?: string | null
+          id?: string
+          item_id: string
+          notes?: string | null
+          organization_id: string
+          storage_path?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          attestation_text_snapshot?: string | null
+          attested_at?: string | null
+          attested_by?: string | null
+          created_at?: string
+          filename?: string | null
+          id?: string
+          item_id?: string
+          notes?: string | null
+          organization_id?: string
+          storage_path?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_files_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_files_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evidence_items: {
+        Row: {
+          attestation_text: string | null
+          cadence: string
+          created_at: string
+          created_by: string | null
+          document_date: string | null
+          dual_link_key: string | null
+          dual_link_peer_id: string | null
+          evidence_type: string
+          expires_on: string | null
+          first_due_on: string | null
+          first_due_rule: string | null
+          id: string
+          next_due_on: string | null
+          organization_id: string
+          renew_years: number | null
+          requirement_key: string
+          send_message: string | null
+          sent_to_staff: boolean
+          sow_cite: string | null
+          subject_id: string
+          subject_type: string
+          suggested: boolean
+          title: string
+          updated_at: string
+          visible_to_staff_id: string | null
+        }
+        Insert: {
+          attestation_text?: string | null
+          cadence?: string
+          created_at?: string
+          created_by?: string | null
+          document_date?: string | null
+          dual_link_key?: string | null
+          dual_link_peer_id?: string | null
+          evidence_type: string
+          expires_on?: string | null
+          first_due_on?: string | null
+          first_due_rule?: string | null
+          id?: string
+          next_due_on?: string | null
+          organization_id: string
+          renew_years?: number | null
+          requirement_key: string
+          send_message?: string | null
+          sent_to_staff?: boolean
+          sow_cite?: string | null
+          subject_id: string
+          subject_type: string
+          suggested?: boolean
+          title: string
+          updated_at?: string
+          visible_to_staff_id?: string | null
+        }
+        Update: {
+          attestation_text?: string | null
+          cadence?: string
+          created_at?: string
+          created_by?: string | null
+          document_date?: string | null
+          dual_link_key?: string | null
+          dual_link_peer_id?: string | null
+          evidence_type?: string
+          expires_on?: string | null
+          first_due_on?: string | null
+          first_due_rule?: string | null
+          id?: string
+          next_due_on?: string | null
+          organization_id?: string
+          renew_years?: number | null
+          requirement_key?: string
+          send_message?: string | null
+          sent_to_staff?: boolean
+          sow_cite?: string | null
+          subject_id?: string
+          subject_type?: string
+          suggested?: boolean
+          title?: string
+          updated_at?: string
+          visible_to_staff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evidence_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          organization_id: string
+          pack_keys: string[]
+          requirement_keys: string[]
+          subject_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          pack_keys?: string[]
+          requirement_keys?: string[]
+          subject_type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          pack_keys?: string[]
+          requirement_keys?: string[]
+          subject_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evv_export_batches: {
         Row: {
           archived_at: string | null
