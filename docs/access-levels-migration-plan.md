@@ -133,7 +133,7 @@ Each phase ships on its own and leaves the app working. Commits stay small (Lova
 
 ### Phase 0 — Look before touching (SQL handoff only, no changes)
 
-Run in the Lovable SQL editor (Clear before each paste). Each query returns one row, so nothing gets cut off:
+The paste-ready version (7 queries, one row each, with what to expect) is at the top of `docs/SQL_HANDOFF.md` under "CHECK — Access levels Phase 0". The sketch below shows the intent:
 
 ```sql
 -- A. How many people hold each role today, per agency
