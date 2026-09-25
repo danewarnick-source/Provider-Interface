@@ -4,7 +4,6 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
 import { RequirePermission } from "@/components/rbac-guard";
 import { OtherAssignmentsRollup } from "@/components/training/other-assignments-rollup";
-import { EmployeeLoansPanel } from "@/components/employee-loans/EmployeeLoansPanel";
 
 export const Route = createFileRoute("/dashboard/hr-admin")({
   head: () => ({ meta: [{ title: "HR Admin — Provider Interface" }] }),
@@ -26,7 +25,7 @@ export function HrAdminPage() {
         <div>
           <h1 className="text-xl font-semibold">HR Admin</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Other trainings and HR settings.             File status for every staffer lives on{" "}
+            Other trainings and HR settings. File status for every staffer lives on{" "}
             <Link to="/dashboard/compliance" search={{ tab: "staff" }} className="font-medium text-[var(--hive-ink)] underline">
               Staff file
             </Link>
@@ -48,11 +47,4 @@ export function HrAdminPage() {
       <OtherAssignmentsRollup organizationId={orgId} />
     </div>
   );
-}
-
-export function EmployeeLoansPage() {
-  const { data: org } = useCurrentOrg();
-  const orgId = org?.organization_id;
-  if (!orgId) return null;
-  return <EmployeeLoansPanel organizationId={orgId} lenderName={org?.organization_name ?? "Employer"} />;
 }

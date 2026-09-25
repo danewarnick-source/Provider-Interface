@@ -129,7 +129,6 @@ import { Route as DashboardEmployeesIndexRouteImport } from './routes/dashboard.
 import { Route as DashboardCoursesIndexRouteImport } from './routes/dashboard.courses.index'
 import { Route as DashboardClientsIndexRouteImport } from './routes/dashboard.clients.index'
 import { Route as DashboardBillingIndexRouteImport } from './routes/dashboard.billing.index'
-import { Route as SignEmployeeLoanTokenRouteImport } from './routes/sign.employee-loan.$token'
 import { Route as E2eHhsHubClientIdRouteImport } from './routes/e2e.hhs-hub.$clientId'
 import { Route as DashboardWorkspaceClientIdRouteImport } from './routes/dashboard.workspace.$clientId'
 import { Route as DashboardTrainingCatalogRouteImport } from './routes/dashboard.training.catalog'
@@ -862,11 +861,6 @@ const DashboardBillingIndexRoute = DashboardBillingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardBillingRoute,
-} as any)
-const SignEmployeeLoanTokenRoute = SignEmployeeLoanTokenRouteImport.update({
-  id: '/sign/employee-loan/$token',
-  path: '/sign/employee-loan/$token',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const E2eHhsHubClientIdRoute = E2eHhsHubClientIdRouteImport.update({
   id: '/e2e/hhs-hub/$clientId',
@@ -1712,7 +1706,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
   '/dashboard/workspace/$clientId': typeof DashboardWorkspaceClientIdRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
-  '/sign/employee-loan/$token': typeof SignEmployeeLoanTokenRoute
   '/dashboard/billing/': typeof DashboardBillingIndexRoute
   '/dashboard/clients/': typeof DashboardClientsIndexRoute
   '/dashboard/courses/': typeof DashboardCoursesIndexRoute
@@ -1939,7 +1932,6 @@ export interface FileRoutesByTo {
   '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
   '/dashboard/workspace/$clientId': typeof DashboardWorkspaceClientIdRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
-  '/sign/employee-loan/$token': typeof SignEmployeeLoanTokenRoute
   '/dashboard/billing': typeof DashboardBillingIndexRoute
   '/dashboard/clients': typeof DashboardClientsIndexRoute
   '/dashboard/courses': typeof DashboardCoursesIndexRoute
@@ -2176,7 +2168,6 @@ export interface FileRoutesById {
   '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
   '/dashboard/workspace/$clientId': typeof DashboardWorkspaceClientIdRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
-  '/sign/employee-loan/$token': typeof SignEmployeeLoanTokenRoute
   '/dashboard/billing/': typeof DashboardBillingIndexRoute
   '/dashboard/clients/': typeof DashboardClientsIndexRoute
   '/dashboard/courses/': typeof DashboardCoursesIndexRoute
@@ -2414,7 +2405,6 @@ export interface FileRouteTypes {
     | '/dashboard/training/catalog'
     | '/dashboard/workspace/$clientId'
     | '/e2e/hhs-hub/$clientId'
-    | '/sign/employee-loan/$token'
     | '/dashboard/billing/'
     | '/dashboard/clients/'
     | '/dashboard/courses/'
@@ -2641,7 +2631,6 @@ export interface FileRouteTypes {
     | '/dashboard/training/catalog'
     | '/dashboard/workspace/$clientId'
     | '/e2e/hhs-hub/$clientId'
-    | '/sign/employee-loan/$token'
     | '/dashboard/billing'
     | '/dashboard/clients'
     | '/dashboard/courses'
@@ -2877,7 +2866,6 @@ export interface FileRouteTypes {
     | '/dashboard/training/catalog'
     | '/dashboard/workspace/$clientId'
     | '/e2e/hhs-hub/$clientId'
-    | '/sign/employee-loan/$token'
     | '/dashboard/billing/'
     | '/dashboard/clients/'
     | '/dashboard/courses/'
@@ -2959,7 +2947,6 @@ export interface RootRouteChildren {
   ApiPublicRuntimeConfigRoute: typeof ApiPublicRuntimeConfigRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
   E2eHhsHubClientIdRoute: typeof E2eHhsHubClientIdRoute
-  SignEmployeeLoanTokenRoute: typeof SignEmployeeLoanTokenRoute
   ApiPublicHooksBillingDailyCheckRoute: typeof ApiPublicHooksBillingDailyCheckRoute
   ApiPublicHooksGmailIngestRoute: typeof ApiPublicHooksGmailIngestRoute
   ApiPublicHooksNectarDraftTickRoute: typeof ApiPublicHooksNectarDraftTickRoute
@@ -3810,13 +3797,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/billing/'
       preLoaderRoute: typeof DashboardBillingIndexRouteImport
       parentRoute: typeof DashboardBillingRoute
-    }
-    '/sign/employee-loan/$token': {
-      id: '/sign/employee-loan/$token'
-      path: '/sign/employee-loan/$token'
-      fullPath: '/sign/employee-loan/$token'
-      preLoaderRoute: typeof SignEmployeeLoanTokenRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/e2e/hhs-hub/$clientId': {
       id: '/e2e/hhs-hub/$clientId'
@@ -5222,7 +5202,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRuntimeConfigRoute: ApiPublicRuntimeConfigRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
   E2eHhsHubClientIdRoute: E2eHhsHubClientIdRoute,
-  SignEmployeeLoanTokenRoute: SignEmployeeLoanTokenRoute,
   ApiPublicHooksBillingDailyCheckRoute: ApiPublicHooksBillingDailyCheckRoute,
   ApiPublicHooksGmailIngestRoute: ApiPublicHooksGmailIngestRoute,
   ApiPublicHooksNectarDraftTickRoute: ApiPublicHooksNectarDraftTickRoute,
