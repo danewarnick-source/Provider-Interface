@@ -10252,7 +10252,7 @@ export type Database = {
         Row: {
           accepted_at: string | null
           accepted_by: string | null
-          access_level: Database["public"]["Enums"]["access_level"] | null
+          access_level: Database["public"]["Enums"]["access_level"]
           access_preset_id: string | null
           created_at: string
           email: string
@@ -10266,7 +10266,7 @@ export type Database = {
         Insert: {
           accepted_at?: string | null
           accepted_by?: string | null
-          access_level?: Database["public"]["Enums"]["access_level"] | null
+          access_level?: Database["public"]["Enums"]["access_level"]
           access_preset_id?: string | null
           created_at?: string
           email: string
@@ -10280,7 +10280,7 @@ export type Database = {
         Update: {
           accepted_at?: string | null
           accepted_by?: string | null
-          access_level?: Database["public"]["Enums"]["access_level"] | null
+          access_level?: Database["public"]["Enums"]["access_level"]
           access_preset_id?: string | null
           created_at?: string
           email?: string
@@ -12944,10 +12944,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          access_level?: Database["public"]["Enums"]["access_level"] | null
+          access_level?: Database["public"]["Enums"]["access_level"]
           access_overrides?: Json
           access_preset_id?: string | null
-          access_scope?: string | null
+          access_scope: string
           active?: boolean
           created_at?: string
           id?: string
@@ -12958,10 +12958,10 @@ export type Database = {
           user_id: string
         }
         Update: {
-          access_level?: Database["public"]["Enums"]["access_level"] | null
+          access_level?: Database["public"]["Enums"]["access_level"]
           access_overrides?: Json
           access_preset_id?: string | null
-          access_scope?: string | null
+          access_scope?: string
           active?: boolean
           created_at?: string
           id?: string

@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Database } from "@/integrations/supabase/types";
 import { passwordResetRedirectUrl } from "@/lib/auth-redirect";
+
+type MemberInsert = Database["public"]["Tables"]["organization_members"]["Insert"];
 
 // ───── Types ─────────────────────────────────────────────────────────────────
 
@@ -157,7 +160,14 @@ export const createCompany = createServerFn({ method: "POST" })
     const { error: memberErr } = await supabaseAdmin
       .from("organization_members")
       .upsert(
-        { organization_id: org.id, user_id: adminUserId, access_level: "owner", active: true, is_company_executive: true },
+        {
+          organization_id: org.id,
+          user_id: adminUserId,
+          access_level: "owner",
+          active: true,
+          is_company_executive: true,
+          // access_normalize_member() fills access_scope before the NOT NULL check.
+        } satisfies Omit<MemberInsert, "access_scope"> as MemberInsert,
         { onConflict: "organization_id,user_id" },
       );
     if (memberErr) throw new Error(`Member create failed: ${memberErr.message}`);
