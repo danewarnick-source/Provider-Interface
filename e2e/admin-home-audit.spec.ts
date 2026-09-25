@@ -389,7 +389,7 @@ test.describe("Admin Home welcome — incomplete setup", () => {
     await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
     const banner = page.getByTestId("admin-home-welcome");
     await expect(banner).toBeVisible({ timeout: 25_000 });
-    await expect(banner.getByRole("link", { name: /Add employee/i })).toBeVisible();
+    await expect(banner.getByRole("link", { name: /Add team member/i })).toBeVisible();
     await expect(banner.getByRole("link", { name: /Add client/i })).toBeVisible();
     await expect(banner.getByRole("link", { name: /Documentation/i })).toBeVisible();
     await expect(banner.getByTestId("welcome-chip-Invite staff")).toBeVisible();

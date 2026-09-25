@@ -247,7 +247,7 @@ export function triggerEmployeeRosterTemplateDownload(): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "employee-roster-template.csv";
+  a.download = "team-member-roster-template.csv";
   a.click();
   URL.revokeObjectURL(url);
 }

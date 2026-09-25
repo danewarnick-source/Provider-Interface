@@ -229,8 +229,8 @@ export function EmployeeRosterUploadWizard({
             <DialogHeader>
               <DialogTitle>Add several at once</DialogTitle>
               <DialogDescription>
-                Add your team&apos;s basic info now. Each person lands on the roster as Needs setup,
-                and you&apos;ll answer their job questions next.
+                Add basic info for several team members now. Each person lands on the roster as
+                Needs setup, and you&apos;ll answer their job questions next.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-3">

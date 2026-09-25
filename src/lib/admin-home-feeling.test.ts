@@ -29,7 +29,7 @@ describe("feeling-hero B (parked for Step 3)", () => {
     assert.deepEqual(
       ADMIN_HOME_CARDS.map((c) => ({ title: c.title, to: c.to, cta: c.cta })),
       [
-        { title: "Staff ready", to: "/dashboard/hub/employees", cta: "Add employee" },
+        { title: "Staff ready", to: "/dashboard/hub/employees", cta: "Add team member" },
         { title: "Clients covered", to: "/dashboard/hub/clients", cta: "Add client" },
         { title: "Notes done", to: "/dashboard/hub/documentation", cta: "Documentation" },
       ],
@@ -68,7 +68,7 @@ describe("feeling-hero B (parked for Step 3)", () => {
   it("puts the π + PI brand lockup in the sidebar and never a NECTAR wordmark there", () => {
     const shell = read("../routes/dashboard.tsx");
     const markSlot = shell.slice(
-      shell.indexOf("<PiBrand to=\"/dashboard\""),
+      shell.indexOf('<PiBrand to="/dashboard"'),
       shell.indexOf("{(isAdminCapable || isExecutive) &&"),
     );
     assert.match(markSlot, /PiBrand/);
@@ -82,7 +82,10 @@ describe("feeling-hero B (parked for Step 3)", () => {
     assert.match(shell, /whitespace-normal break-words/);
     assert.match(shell, /title=\{/);
     assert.doesNotMatch(
-      shell.slice(shell.indexOf("data-testid=\"shell-org-subtitle\""), shell.indexOf("data-testid=\"shell-org-subtitle\"") + 800),
+      shell.slice(
+        shell.indexOf('data-testid="shell-org-subtitle"'),
+        shell.indexOf('data-testid="shell-org-subtitle"') + 800,
+      ),
       /className="truncate text-xs"/,
     );
   });
@@ -178,14 +181,20 @@ describe("Admin Home Step 3 — welcome banner", () => {
     assert.match(hook, /evv_timesheets/);
     assert.match(hook, /attested_accurate\.eq\.true,attested_at\.not\.is\.null/);
     assert.match(hook, /daily_logs/);
-    assert.match(hook, /documentedShiftCount: \(timesheetsRes\.count \?\? 0\) \+ \(logsRes\.count \?\? 0\)/);
+    assert.match(
+      hook,
+      /documentedShiftCount: \(timesheetsRes\.count \?\? 0\) \+ \(logsRes\.count \?\? 0\)/,
+    );
   });
 
   it("drops localStorage welcome dismissal so Home uses welcome_dismissed_at", () => {
     const welcome = read("../components/admin-home/admin-home-welcome.tsx");
     const hook = read("../hooks/use-onboarding-progress.tsx");
     const fn = read("./admin-home-welcome.functions.ts");
-    assert.doesNotMatch(welcome, /hive_onboarding_\$\{orgId\}_dismissed|lsKey\(orgId, "dismissed"\)/);
+    assert.doesNotMatch(
+      welcome,
+      /hive_onboarding_\$\{orgId\}_dismissed|lsKey\(orgId, "dismissed"\)/,
+    );
     assert.match(welcome, /dismissAdminWelcome/);
     assert.doesNotMatch(hook, /localStorage\.|onboardingLSKey\(/);
     assert.match(fn, /requireSupabaseAuth/);

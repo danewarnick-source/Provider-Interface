@@ -47,7 +47,7 @@ function SettingsPage() {
       // Fetch EVV-specific org fields directly (not part of useCurrentOrg)
       void supabase
         .from("organizations")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         .select("dhhs_provider_id, evv_vendor_name, incident_ai_review_enabled, go_live_date, created_at" as any)
         .eq("id", org.organization_id)
         .maybeSingle()
@@ -90,7 +90,7 @@ function SettingsPage() {
     setBusy(true);
     const { error } = await supabase
       .from("organizations")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       .update({
         name: orgName,
         legal_name: legalName.trim() || null,
@@ -252,7 +252,7 @@ function SettingsPage() {
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><SlidersHorizontal className="h-5 w-5" /></div>
               <div>
                 <h2 className="text-base font-semibold">Permission matrix</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Turn features on or off for each company role. Per-person exceptions stay on the employee record.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Turn features on or off for each company role. Per-person exceptions stay on the team member record.</p>
               </div>
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />

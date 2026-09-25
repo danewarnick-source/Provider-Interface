@@ -245,7 +245,7 @@ describe("Admin employee profile lock", () => {
       new URL("../components/employees/staff-profile-panel.tsx", import.meta.url),
       "utf8",
     );
-    assert.match(identity, /Employee ID/);
+    assert.match(identity, /Team member ID/);
     assert.match(identity, /Job title/);
     assert.match(identity, /Base role/);
     assert.doesNotMatch(identity, /Department/);

@@ -134,7 +134,7 @@ function StaffProfilePage() {
                 : router.navigate({ to: "/dashboard/hub/employees" })
             }
           >
-            <ArrowLeft className="mr-1 h-4 w-4" /> Employees
+            <ArrowLeft className="mr-1 h-4 w-4" /> Team Members
           </Button>
           <PersonAvatar
             bucket="staff-photos"
@@ -152,7 +152,7 @@ function StaffProfilePage() {
                 className="border-primary/30 bg-primary/5 uppercase tracking-wide text-primary"
                 title="Provider Interface role"
               >
-                {m.role}
+                {m.role === "employee" ? "Team member" : m.role}
               </Badge>
               <Badge
                 variant="outline"
@@ -168,7 +168,7 @@ function StaffProfilePage() {
               <EmployeeFaceSheetButton staffId={staffId} organizationId={orgId} variant="pill" />
               {(p?.hire_date || p?.start_date) && (
                 <span className="text-muted-foreground">
-                  · Hired {p?.hire_date ?? p?.start_date}
+                  · Hire date {p?.hire_date ?? p?.start_date}
                 </span>
               )}
             </div>

@@ -65,12 +65,10 @@ import {
   Loader2,
   MoreHorizontal,
   Ban,
-  Settings,
   RefreshCcw,
   Trash2,
   AlertTriangle,
 } from "lucide-react";
-import { StaffFieldsPanel } from "@/components/hr/staff-fields-panel";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -126,8 +124,6 @@ export function EmployeesPage() {
   const [caseloadFor, setCaseloadFor] = useState<{ id: string; name: string; role: string } | null>(
     null,
   );
-  const [staffFieldsOpen, setStaffFieldsOpen] = useState(false);
-
   const resetPwFn = useServerFn(adminResetEmployeePassword);
   const resendInviteFn = useServerFn(resendInvitation);
   const revokeInviteFn = useServerFn(revokeInvitation);
@@ -341,7 +337,7 @@ export function EmployeesPage() {
     onSuccess: (_d, vars) => {
       toast.success("Password reset");
       setCredentialsShown({
-        identifier: resetUser?.name ?? "Employee",
+        identifier: resetUser?.name ?? "Team member",
         password: vars.newPassword,
       });
       setResetUser(null);
@@ -357,7 +353,7 @@ export function EmployeesPage() {
 
         <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
           <div>
-            <h2 className="text-base font-semibold">Team members</h2>
+            <h2 className="text-base font-semibold">Team Members</h2>
             <p className="text-sm text-muted-foreground">
               {activeCount} active
               {inactiveCount > 0 && ` · ${inactiveCount} inactive`}
@@ -380,9 +376,6 @@ export function EmployeesPage() {
               </Button>
             )}
             <AddEmployeeButton onClick={() => setAddOpen(true)} disabled={!org || createBlocked} />
-            <Button variant="outline" onClick={() => setStaffFieldsOpen(true)}>
-              <Settings className="mr-2 h-4 w-4" /> Settings
-            </Button>
           </div>
         </div>
 
@@ -391,7 +384,7 @@ export function EmployeesPage() {
             <h3 className="text-sm font-semibold">Pending invitations</h3>
             <p className="text-xs text-muted-foreground">
               Pending people join <strong>this</strong> organization via the link (not new-agency
-              signup). Resend keeps the same join email. For a new hire, use Add employee.
+              signup). Resend keeps the same join email. For a new team member, use Add team member.
             </p>
             <ul className="mt-3 divide-y divide-border">
               {invites.map((i) => {
@@ -472,12 +465,14 @@ export function EmployeesPage() {
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           {membersLoading ? (
             <div className="flex items-center justify-center gap-2 p-12 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading employees…
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading team members…
             </div>
           ) : !visibleMembers.length ? (
             <div className="flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
               <p>
-                {rosterTab === "inactive" ? "No deactivated employees." : "No active employees."}
+                {rosterTab === "inactive"
+                  ? "No deactivated team members."
+                  : "No active team members."}
               </p>
             </div>
           ) : (
@@ -535,7 +530,7 @@ export function EmployeesPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs uppercase">
-                          {m.role}
+                          {m.role === "employee" ? "Team member" : m.role}
                         </span>
                         {codes.length ? (
                           codes.map((code) => (
@@ -673,7 +668,7 @@ export function EmployeesPage() {
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap">
                             <span className="hive-role-pill rounded-full px-2 py-0.5 text-xs uppercase">
-                              {m.role}
+                              {m.role === "employee" ? "Team member" : m.role}
                             </span>
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap">
@@ -707,7 +702,9 @@ export function EmployeesPage() {
                                   setCaseloadFor({
                                     id: m.user_id,
                                     name,
-                                    role: m.job_title || m.role,
+                                    role:
+                                      m.job_title ||
+                                      (m.role === "employee" ? "Team member" : m.role),
                                   });
                                 }}
                               >
@@ -778,7 +775,6 @@ export function EmployeesPage() {
           open={addOpen}
           onOpenChange={setAddOpen}
           organizationId={org?.organization_id ?? null}
-          onOpenSettings={() => setStaffFieldsOpen(true)}
         />
         <EmployeeRosterUploadWizard
           open={uploadOpen}
@@ -790,7 +786,6 @@ export function EmployeesPage() {
           onOpenChange={setFinishOpen}
           organizationId={org?.organization_id ?? null}
           people={needsSetupPeople}
-          onOpenSettings={() => setStaffFieldsOpen(true)}
         />
 
         <Dialog
@@ -872,7 +867,8 @@ export function EmployeesPage() {
             <DialogHeader>
               <DialogTitle>Reset password for {resetUser?.name}</DialogTitle>
               <DialogDescription>
-                A new temporary password will be set. The employee must change it on next sign-in.
+                A new temporary password will be set. The team member must change it on next
+                sign-in.
               </DialogDescription>
             </DialogHeader>
             <form
@@ -977,18 +973,6 @@ export function EmployeesPage() {
           organizationId={org?.organization_id ?? null}
           onClose={() => setCaseloadFor(null)}
         />
-
-        {org && (
-          <StaffFieldsPanel
-            open={staffFieldsOpen}
-            onOpenChange={(v) => {
-              setStaffFieldsOpen(v);
-              if (!v)
-                qc.invalidateQueries({ queryKey: ["staff-intake-fields", org.organization_id] });
-            }}
-            organizationId={org.organization_id}
-          />
-        )}
       </div>
     </AgencySetupCreateGate>
   );
@@ -1124,7 +1108,7 @@ function CaseloadDrawer({
       }
     },
     onSuccess: () => {
-      toast.success(`Caseload updated successfully for ${member?.name ?? "employee"}`);
+      toast.success(`Caseload updated successfully for ${member?.name ?? "team member"}`);
       qc.invalidateQueries({ queryKey: ["caseload-for-staff"] });
       qc.invalidateQueries({ queryKey: ["assignments"] });
       qc.invalidateQueries({ queryKey: ["caseload"] });

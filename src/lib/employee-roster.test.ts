@@ -75,7 +75,9 @@ describe("Add employee wizard source lock", () => {
     assert.doesNotMatch(src, /name=["']end_date["']/);
     assert.match(src, /requiresDeescalation: false/);
     assert.match(src, /requiresAbi: false/);
-    assert.match(src, /Add another employee/);
+    assert.match(src, /Add another team member/);
+    assert.doesNotMatch(src, /Configure staff fields/);
+    assert.doesNotMatch(src, /Open settings/);
     assert.match(src, /createInvitation/);
     assert.match(src, /interpretInviteSendResult/);
     assert.match(src, /invite yet/);
@@ -101,6 +103,8 @@ describe("Employees list source lock", () => {
     assert.match(src, /FinishEmployeeSetupWizard/);
     assert.match(src, /Needs setup/);
     assert.match(src, /Finish setup/);
+    assert.match(src, /Team Members/);
+    assert.doesNotMatch(src, /StaffFieldsPanel/);
     assert.match(src, /upload/);
     assert.match(src, /Last Login/);
     assert.match(src, /org_member_last_sign_ins/);

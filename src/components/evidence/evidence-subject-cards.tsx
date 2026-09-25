@@ -8,7 +8,7 @@ type CardDef = {
 };
 
 const CARDS: readonly CardDef[] = [
-  { subject: "staff", title: "Employees", tone: "emp" },
+  { subject: "staff", title: "Team Members", tone: "emp" },
   { subject: "client", title: "Clients", tone: "cli" },
   { subject: "company", title: "Company", tone: "com" },
 ];
@@ -83,7 +83,7 @@ export function EvidenceSubjectCards({
           card.subject === "company"
             ? companyHint
             : card.subject === "staff"
-              ? "Selected records for employees"
+              ? "Selected records for team members"
               : "Selected records for clients";
         return (
           <button

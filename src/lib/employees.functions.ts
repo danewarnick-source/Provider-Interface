@@ -384,7 +384,7 @@ export const finishEmployeeSetup = createServerFn({ method: "POST" })
       .eq("organization_id", data.organizationId)
       .maybeSingle();
     if (memLookupErr) throw new Error(memLookupErr.message);
-    if (!mem) throw new Error("Employee not found in this organization");
+    if (!mem) throw new Error("Team member not found in this organization");
 
     const email = data.email.trim().toLowerCase();
     const { data: emailOwner } = await supabaseAdmin
@@ -495,7 +495,7 @@ export const adminResetEmployeePassword = createServerFn({ method: "POST" })
       .eq("user_id", data.userId)
       .eq("organization_id", data.organizationId)
       .maybeSingle();
-    if (!mem) throw new Error("Employee not found in this organization");
+    if (!mem) throw new Error("Team member not found in this organization");
 
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
       password: data.newPassword,

@@ -55,7 +55,7 @@ export function SendEvidenceDialog({
     >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Send to employee</DialogTitle>
+          <DialogTitle>Send to team member</DialogTitle>
           <DialogDescription>
             {draft && draft.titles.length === 1
               ? `Send “${draft.titles[0]}” to their phone Evidence list.`
@@ -66,14 +66,14 @@ export function SendEvidenceDialog({
         <div className="grid gap-3">
           {draft?.needsStaffPicker ? (
             <div className="grid gap-1.5">
-              <Label htmlFor="evidence-send-employee">Employee</Label>
+              <Label htmlFor="evidence-send-employee">Team member</Label>
               <select
                 id="evidence-send-employee"
                 value={staffId || draft.staffId}
                 onChange={(e) => setStaffId(e.target.value)}
                 className="h-9 rounded-md border border-input bg-background px-2 text-sm"
               >
-                <option value="">Choose an employee</option>
+                <option value="">Choose a team member</option>
                 {staffPicker.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.full_name}
@@ -106,7 +106,7 @@ export function SendEvidenceDialog({
               setMessage("");
             }}
           >
-            {pending ? "Sending…" : "Send to employee"}
+            {pending ? "Sending…" : "Send to team member"}
           </Button>
         </DialogFooter>
       </DialogContent>

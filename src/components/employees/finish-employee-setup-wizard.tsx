@@ -65,13 +65,11 @@ export function FinishEmployeeSetupWizard({
   onOpenChange,
   organizationId,
   people,
-  onOpenSettings,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   organizationId: string | null;
   people: NeedsSetupPerson[];
-  onOpenSettings: () => void;
 }) {
   const qc = useQueryClient();
   const finishFn = useServerFn(finishEmployeeSetup);
@@ -262,7 +260,7 @@ export function FinishEmployeeSetupWizard({
                   ? `${draft.firstName} ${draft.lastName}`.trim()
                   : person.email}{" "}
                 · {index + 1} of {queue.length}. Basics are filled in. These are the same questions
-                as Add employee. Skip for now leaves them on Needs setup.
+                as Add team member. Skip for now leaves them on Needs setup.
               </DialogDescription>
             </DialogHeader>
             <form
@@ -286,7 +284,6 @@ export function FinishEmployeeSetupWizard({
                 showHeader={false}
                 canRemove={false}
                 staffIntakeConfig={staffIntakeConfig}
-                onOpenSettings={onOpenSettings}
                 onChange={(patch) => setDraft((prev) => (prev ? { ...prev, ...patch } : prev))}
                 onRemove={() => {}}
               />

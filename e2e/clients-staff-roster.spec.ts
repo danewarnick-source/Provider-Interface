@@ -131,7 +131,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByRole("link", { name: /Import CSV/i })).toHaveCount(0);
     await expect(rosterName(page, "Jake Probert")).toBeVisible();
     await page.getByRole("button", { name: /^Inactive$/i }).click();
-    await expect(page.getByText(/No deactivated employees/i).first()).toBeVisible();
+    await expect(page.getByText(/No deactivated team members/i).first()).toBeVisible();
     await expect(rosterName(page, "Jake Probert")).toHaveCount(0);
     await page.getByRole("button", { name: /^Active$/i }).click();
     await expect(rosterName(page, "Jake Probert")).toBeVisible();
@@ -147,7 +147,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(
       page
         .locator("table")
-        .getByText(/^employee$/i)
+        .getByText(/^team member$/i)
         .first(),
     ).toBeVisible();
     await expect(page.locator("table").getByText(/^Last Login$/i)).toBeVisible();
@@ -166,6 +166,11 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.locator("table").getByRole("link", { name: /Staff file/i })).toHaveCount(0);
     await expect(page.locator("table").getByRole("link", { name: /^View$/i })).toHaveCount(0);
     await expect(page.locator("table").getByText("Aug 27, 2026").first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Settings$/i })).toHaveCount(0);
+    await shot(page, "team_members_roster_desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await shot(page, "team_members_roster_mobile");
+    await page.setViewportSize({ width: 1280, height: 720 });
 
     await rosterName(page, "Jake Probert").click();
     await page.waitForURL(new RegExp(`/dashboard/employees/${STAFF.jake.id}`));
@@ -195,6 +200,8 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     ).toBeVisible();
     await assertPageNotBlank(page, "staff profile");
 
+    await expect(page.getByText(/Team member ID/i).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /Team Member Face Sheet/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Edit profile/i })).toBeVisible();
     await expect(
       page
@@ -203,22 +210,31 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     ).toBeVisible({
       timeout: 10_000,
     });
+    await shot(page, "team_member_face_sheet_desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await shot(page, "team_member_face_sheet_mobile");
+    await page.setViewportSize({ width: 1280, height: 720 });
     await shot(page, "employees_list_and_profile");
   });
 
-  test("5. Add employee wizard — full file first, then invite or temp password", async ({
+  test("5. Add team member wizard — full file first, then invite or temp password", async ({
     page,
   }) => {
     await gotoAdmin(page, "/dashboard/employees");
-    await expect(page.getByRole("button", { name: /^Add employee$/i })).toBeVisible({
+    await expect(page.getByRole("button", { name: /^Add team member$/i })).toBeVisible({
       timeout: 20_000,
     });
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /Add manually/i })).toHaveCount(0);
 
-    await page.getByRole("button", { name: /^Add employee$/i }).click();
-    await expect(page.getByRole("heading", { name: /Add employee/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Add another employee/i })).toBeVisible();
+    await page.getByRole("button", { name: /^Add team member$/i }).click();
+    await expect(page.getByRole("heading", { name: /Add team member/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Add another team member/i })).toBeVisible();
+    await expect(page.getByLabel(/Hire date/i)).toBeVisible();
+    await shot(page, "add_team_member_wizard_desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await shot(page, "add_team_member_wizard_mobile");
+    await page.setViewportSize({ width: 1280, height: 720 });
     await expect(page.getByLabel(/End date/i)).toHaveCount(0);
     await expect(page.getByText(/Assigned training tracks/i)).toHaveCount(0);
     await expect(page.getByText(/Behavior-related training/i)).toHaveCount(0);
@@ -227,15 +243,14 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await page.locator("#email").fill("sep1.tester@example.test");
     await page.locator("#phone").fill("555-010-0199");
     await page.locator("#hire_date").fill("2026-07-01");
-    await page.getByRole("button", { name: /Create employee/i }).click();
+    await page.getByRole("button", { name: /Create team member/i }).click();
 
-    await expect(page.getByRole("heading", { name: /How should they sign in/i })).toBeVisible({
+    await expect(page.getByRole("heading", { name: /Send invites\?/i })).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByRole("button", { name: /Send invite email/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Show temporary password/i })).toBeVisible();
-
-    await page.getByRole("button", { name: /Send invite email/i }).click();
+    await page.getByRole("checkbox").check();
+    await page.getByRole("button", { name: /Send 1 invite/i }).click();
     const toast = page.locator("[data-sonner-toast]").filter({
       hasText: /Invite emailed|couldn't be sent|Invitation created|Unauthorized/i,
     });
@@ -244,10 +259,10 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await shot(page, "add_employee_wizard_access");
 
     await gotoAdmin(page, "/dashboard/invitations");
-    await expect(page.getByRole("heading", { name: /Employee invitations/i })).toBeVisible({
+    await expect(page.getByRole("heading", { name: /Team member invitations/i })).toBeVisible({
       timeout: 20_000,
     });
-    await expect(page.getByRole("link", { name: /^Add employee$/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Add team member$/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
     await assertPageNotBlank(page, "invitations");
   });
@@ -392,14 +407,16 @@ test.describe("Add several at once and Finish setup", () => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await shot(page, "add_several_dialog_desktop");
 
-    await page.locator("#roster-paste").fill(
-      [
-        "name,email,phone,hire_date,job_title",
-        "Sam Rivera,sam.rivera@example.test,555-0100,2026-07-01,Direct Support",
-        "Pat,not-an-email,,,",
-        "Jake Probert,jake.probert@example.test,555-0101,2026-01-15,DSP",
-      ].join("\n"),
-    );
+    await page
+      .locator("#roster-paste")
+      .fill(
+        [
+          "name,email,phone,hire_date,job_title",
+          "Sam Rivera,sam.rivera@example.test,555-0100,2026-07-01,Direct Support",
+          "Pat,not-an-email,,,",
+          "Jake Probert,jake.probert@example.test,555-0101,2026-01-15,DSP",
+        ].join("\n"),
+      );
     await page.getByRole("button", { name: /Review pasted rows/i }).click();
     await expect(page.getByText(/Already on the roster — skipped/i)).toBeVisible();
     await expect(page.getByText(/Enter a valid email/i)).toBeVisible();
@@ -415,7 +432,7 @@ test.describe("Add several at once and Finish setup", () => {
 
     await page.getByRole("button", { name: /Finish setup \(1\)/i }).click();
     await expect(page.getByTestId("finish-setup-dialog")).toBeVisible();
-    await expect(page.getByText(/same questions as Add employee/i)).toBeVisible();
+    await expect(page.getByText(/same questions as Add team member/i)).toBeVisible();
     await expect(page.getByText("Direct Support Professional")).toBeVisible();
     await expect(page.getByLabel("Job title")).toHaveValue("DSP");
     await shot(page, "finish_setup_step_desktop");
@@ -437,7 +454,7 @@ test.describe("RBAC — DSP / employee cannot open employee admin", () => {
     await expect(page.getByRole("heading", { name: /Access denied/i })).toBeVisible();
     await expect(page.getByText(/View staff records/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /^Add employee$/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Add team member$/i })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: /Team members/i })).toHaveCount(0);
     await shot(page, "dsp_rbac_employees_gated");
   });

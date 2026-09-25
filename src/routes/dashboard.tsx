@@ -273,7 +273,12 @@ const STAFF_NAV: NavItem[] = [
 // redirects to Home. Compliance Desk stays mounted for EVV CSV only.
 const ADMIN_NAV: NavItem[] = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard, exact: true },
-  { to: "/dashboard/hub/employees", label: "Employees", icon: Users, feature: "staff_onboarding" },
+  {
+    to: "/dashboard/hub/employees",
+    label: "Team Members",
+    icon: Users,
+    feature: "staff_onboarding",
+  },
   { to: "/dashboard/hub/clients", label: "Clients", icon: Contact2, feature: "client_intake" },
   { to: "/dashboard/scheduler", label: "Scheduler", icon: CalendarDays, feature: "evv_timesheets" },
   {
@@ -858,7 +863,9 @@ function DashboardLayout() {
                       nav={allNav.map((n) => ({ to: n.to, label: n.label }))}
                       isAdminCapable={isAdminCapable && effectiveView === "admin"}
                       variant="desktop"
-                      askRoute={effectiveView === "staff" ? "/dashboard/ask-nectar" : "/dashboard/help"}
+                      askRoute={
+                        effectiveView === "staff" ? "/dashboard/ask-nectar" : "/dashboard/help"
+                      }
                     />
                   )}
                 </div>
@@ -890,9 +897,7 @@ function DashboardLayout() {
                     <span className="hidden md:inline">Nectar</span>
                   </button>
                   {isAdminCapable && effectiveView === "admin" && <DraftJobsHeaderPill />}
-                  {isAdminCapable && effectiveView === "admin" && (
-                    <NotificationBell />
-                  )}
+                  {isAdminCapable && effectiveView === "admin" && <NotificationBell />}
                   <button
                     type="button"
                     onClick={() => void signOut()}
@@ -911,7 +916,9 @@ function DashboardLayout() {
                     nav={allNav.map((n) => ({ to: n.to, label: n.label }))}
                     isAdminCapable={isAdminCapable && effectiveView === "admin"}
                     variant="mobile"
-                    askRoute={effectiveView === "staff" ? "/dashboard/ask-nectar" : "/dashboard/help"}
+                    askRoute={
+                      effectiveView === "staff" ? "/dashboard/ask-nectar" : "/dashboard/help"
+                    }
                   />
                 </div>
               )}
@@ -1046,11 +1053,7 @@ function DashboardMain({ className, children }: { className: string; children: R
     resetStaffPhoneScroll(mainRef.current);
   }, [pathname]);
   return (
-    <main
-      ref={mainRef}
-      data-dashboard-scroller=""
-      className={className}
-    >
+    <main ref={mainRef} data-dashboard-scroller="" className={className}>
       {children}
     </main>
   );
@@ -1346,9 +1349,7 @@ function SidebarBody({
                       : "text-[var(--hive-chrome-text)]/75 hover:bg-[color-mix(in_srgb,white_10%,transparent)] hover:text-[var(--hive-chrome-text)]"
                 }`}
               >
-                <Icon
-                  className="h-4 w-4"
-                />
+                <Icon className="h-4 w-4" />
                 <span className="flex-1">{item.label}</span>
                 {item.to === "/dashboard/inbox" && inboxUnread > 0 && (
                   <span
@@ -1370,7 +1371,9 @@ function SidebarBody({
                 <PiBrand tone="chrome" size="sm" showText={false} markClassName="h-6 w-6" />
               </span>
               <div className="min-w-0">
-                <span className="text-sm font-bold tracking-wide text-[var(--hive-chrome-text)]">Nectar</span>
+                <span className="text-sm font-bold tracking-wide text-[var(--hive-chrome-text)]">
+                  Nectar
+                </span>
                 <p className="text-[11px] leading-relaxed text-[var(--hive-chrome-text)]/55">
                   The brain. Tabs below feed it the data the rest of Provider Interface reads from.
                 </p>
