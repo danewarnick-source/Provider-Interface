@@ -99,21 +99,21 @@ Anyone who has per-person overrides today keeps them. They're translated into ca
 
 ## 4. New database pieces
 
-| New thing | Purpose |
-|---|---|
-| `access_level` enum + `organization_members.access_level` | The 3 levels |
-| `organization_members.preset_id` | Which preset this person uses |
-| `access_presets` (org, name, access_level, scope_mode, home_page, is_default) | The agency's named presets. `home_page` is optional and sets where the preset lands after login. |
-| `access_preset_categories` (preset, category, level Off/View/Edit) | What each preset allows |
-| `member_category_overrides` (org, user, category, level) | Per-person exceptions; replaces `user_permission_overrides` |
-| `member_scope` (org, user, scope_mode) | Whole agency / Assigned / Only themselves (the preset gives the default) |
-| `member_scope_homes` (org, user, team_id) | Assigned homes (`teams` = homes) |
-| `member_scope_staff` (org, user, staff_user_id) | Assigned staff and admins, picked by name |
-| `member_scope_clients` (org, user, client_id) | Assigned clients, picked by name |
+**Minimal design: 1 new table. Everything else reuses what the live database already has** (checked 2026-09-25).
 
-The three assignment tables are many-to-many: one row per manager + person, unique on the pair. The same client or staff member can be assigned to any number of managers, and each of those managers sees everything their preset allows for that person. A client who lives in one home but is also assigned to a second home's manager is visible to both.
-| Rule: at least one active Owner per agency | Database trigger, so nobody can lock the agency out |
-| Rule: Admins can't grant beyond themselves or edit Owners | Enforced in the server function that saves access |
+| Change | Type | Purpose |
+|---|---|---|
+| `access_presets` (org, name, access_level, scope_mode, home_page, categories `jsonb`) | **new table (the only one)** | The agency's named presets. `categories` holds all 18 settings in one field, e.g. `{"billing":"view","scheduling":"edit"}`. `home_page` is optional (the HRC Committee preset lands on the HRC page). |
+| `organization_members.access_level` | new column + small enum (`owner`, `admin`, `staff`) | The 3 levels |
+| `organization_members.custom_role_id` → rename to `preset_id`, add FK to `access_presets` | **reuse** | The column already exists, unused (0 rows set, no FK). |
+| `organization_members.scope_mode` | new column | Whole agency / Assigned / Only themselves. Filled from the preset, changeable per person. |
+| `organization_members.category_overrides` `jsonb` | new column | Per-person exceptions in the same shape as the preset's `categories`. Replaces `user_permission_overrides` (0 rows live). |
+| `scope_assignments` (user, `scope_type`, `scope_ref_id`) | **reuse**, widen `scope_type` to add `home` and `staff` (keeps `client`) | Assigned homes, staff and clients, all in one existing table (0 rows live). One row per manager + person, so any client or staffer can be assigned to any number of managers, and each sees everything their own preset allows. |
+| `teams.manager_id` | **reuse** | Copied into `scope_assignments` as `home` rows on day one. |
+| Rule: at least one active Owner per agency | trigger on `organization_members` | Nobody can lock the agency out |
+| Rule: Admins can't grant beyond themselves or edit Owners | in the server function that saves access | Stops privilege creep |
+
+**Deleted in Phase 5:** `role_permissions`, `user_permission_overrides`, the `app_role` type, `organization_members.role`. Net result: **+1 table, −2 tables**.
 
 **New helper functions** (all `SECURITY DEFINER`, org-scoped like today's):
 
@@ -122,6 +122,22 @@ The three assignment tables are many-to-many: one row per manager + person, uniq
 - `has_category(user, org, category, 'view' | 'edit')`, which checks override → preset → level ceiling
 - `can_see_client(user, client_id)`, which applies whole agency / assigned homes (client's `team_id`) / assigned clients / own caseload
 - `can_see_staff(user, staff_user_id)`, which applies whole agency / assigned homes (staff's `team_id` or scheduled there) / assigned staff / self
+
+**Code layout (small files, one job each):**
+
+```
+supabase/migrations/            one migration per step, named for what it does
+src/lib/access/
+  levels.ts                     AccessLevel, ScopeMode types + level ceilings
+  categories.ts                 the 18 categories + their Off/View/Edit explanations
+  can.ts                        pure check: override → preset → level ceiling (unit tested)
+  scope.ts                      pure helpers for whole agency / assigned / self
+  access.functions.ts           server functions: read my access, save a person's access, save a preset
+src/components/access/
+  category-row.tsx              one category with the explanation drop-down
+  access-section.tsx            Level ▾, Preset ▾, overrides, scope pickers (profile)
+  presets-page.tsx              Settings → Access & presets
+```
 
 **The one-line trick for Phase 2:** re-point the body of `is_org_admin_or_manager()` at `access_level IN ('owner','admin')`, and `has_org_role(…,'admin')` at `access_level = 'owner'`. With the mapping above, that is **behavior-neutral**: the same people pass the same checks. Hundreds of policies are switched over without editing any of them.
 
@@ -184,10 +200,10 @@ select (select count(*) from clients where team_id is null) as clients_without_h
 
 ### Phase 1 — Add the new pieces next to the old ones
 
-- Migration: create `access_level`, the preset/override/scope tables, the helper functions, and the at-least-one-Owner trigger.
+- Migration: create the `access_level` enum and the `access_presets` table, add the new `organization_members` columns (rename `custom_role_id` → `preset_id`), widen `scope_assignments.scope_type`, and add the helper functions and the at-least-one-Owner trigger (§4).
 - Backfill `access_level` and `preset_id` from `role` using the mapping in §3. Create the default presets per agency from today's `role_permissions`, so each agency's customizations carry over.
 - ~~Translate `user_permission_overrides`~~: not needed, the live table is empty (Phase 0).
-- Copy each home's `teams.manager_id` into `member_scope_homes`.
+- Copy each home's `teams.manager_id` into `scope_assignments` as `home` rows.
 - Server functions that change roles (hire, invite accept, role change, roster upload) write **both** `role` and `access_level` for now.
 - **Nothing visible changes.**
 
