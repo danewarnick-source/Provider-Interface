@@ -219,7 +219,8 @@ async function installSignupMocks(
       return fulfillJson(route, {
         organization_id: ORG_ID,
         user_id: USER_ID,
-        role: "admin",
+        access_level: "owner",
+        access_scope: "agency",
         active: true,
       });
     }

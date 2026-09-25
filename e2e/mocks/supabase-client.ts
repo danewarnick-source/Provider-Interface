@@ -3,7 +3,6 @@
  * Selects return fixtures. Inserts/updates/deletes are rejected so tests
  * cannot write True North production timesheets.
  */
-import { ALL_PERMISSIONS, DEFAULT_MATRIX, PROVIDER_ROLES, type Permission, type ProviderRole } from "../../src/lib/rbac";
 import {
   ALL_TIMESHEETS,
   APPROVED_LOCATIONS,
@@ -28,6 +27,7 @@ import {
   STAFF,
   STAFF_LIST,
 } from "../fixtures/tns-roster";
+import { withAccessLevel } from "../helpers/access-level";
 
 function readFlag(key: string): string | null {
   if (typeof window === "undefined") return null;
@@ -172,22 +172,6 @@ function assignmentRows(): Record<string, unknown>[] {
   return rows;
 }
 
-function tnsRolePermissionRows(): Record<string, unknown>[] {
-  const rows: Record<string, unknown>[] = [];
-  for (const role of PROVIDER_ROLES) {
-    const granted = new Set<Permission>(DEFAULT_MATRIX[role as ProviderRole] ?? []);
-    for (const permission of ALL_PERMISSIONS) {
-      rows.push({
-        organization_id: TNS_ORG_ID,
-        role,
-        permission,
-        enabled: granted.has(permission),
-      });
-    }
-  }
-  return rows;
-}
-
 type Filter = { op: string; col: string; val?: unknown; extra?: unknown };
 
 function valOf(row: Record<string, unknown>, col: string): unknown {
@@ -237,9 +221,9 @@ function tableRows(table: string): Record<string, unknown>[] {
     case "teams":
       return TEAMS as unknown as Record<string, unknown>[];
     case "organization_members":
-      return hhs
-        ? tnsMemberRows()
-        : [MEMBERSHIP as unknown as Record<string, unknown>];
+      return (hhs ? tnsMemberRows() : [MEMBERSHIP as unknown as Record<string, unknown>]).map(
+        withAccessLevel,
+      );
     case "organizations":
       return hhs
         ? [tnsOrg()]
@@ -250,16 +234,6 @@ function tableRows(table: string): Record<string, unknown>[] {
         : (DIRECTORY as unknown as Record<string, unknown>[]);
     case "profiles":
       return hhs ? tnsProfileRows() : [PROFILE as unknown as Record<string, unknown>];
-    case "role_permissions":
-      if (hhs) return tnsRolePermissionRows();
-      return ALL_PERMISSIONS.map((permission) => ({
-        organization_id: ORG_ID,
-        role: "admin",
-        permission,
-        enabled: true,
-      }));
-    case "user_permission_overrides":
-      return [];
     case "evv_export_records":
       return EXPORT_RECORDS as unknown as Record<string, unknown>[];
     case "evv_export_batches":

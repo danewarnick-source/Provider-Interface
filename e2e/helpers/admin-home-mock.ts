@@ -9,7 +9,7 @@
  * file is mock-only — do not flip flags or run experimental writes there.
  */
 import type { Page, Route } from "@playwright/test";
-import { ALL_PERMISSIONS } from "../../src/lib/rbac";
+import { withAccessLevel } from "./access-level";
 
 export const TNS_ORG_ID = "7fabcf5d-f826-487f-8730-8b0c3f1969bb";
 export const ADMIN_USER_ID = "e2e00000-0000-4000-a000-000000000001";
@@ -578,21 +578,6 @@ function tableRows(
     organization_id: TNS_ORG_ID,
   }));
 
-  const rolePermissions =
-    persona === "admin"
-      ? ALL_PERMISSIONS.map((permission) => ({
-          organization_id: TNS_ORG_ID,
-          role: "admin",
-          permission,
-          enabled: true,
-        }))
-      : ALL_PERMISSIONS.map((permission) => ({
-          organization_id: TNS_ORG_ID,
-          role: "employee",
-          permission,
-          enabled: permission === "complete_obligations" || permission === "view_own_timesheets",
-        }));
-
   const clients = [
     {
       id: CLIENT_ID,
@@ -705,7 +690,7 @@ function tableRows(
   ];
 
   return {
-    organization_members: members,
+    organization_members: members.map(withAccessLevel),
     organizations: [
       {
         id: TNS_ORG_ID,
@@ -719,8 +704,6 @@ function tableRows(
     ],
     profiles,
     org_member_directory: directory,
-    role_permissions: rolePermissions,
-    user_permission_overrides: [],
     auditor_accounts: [],
     org_subscriptions: [
       {

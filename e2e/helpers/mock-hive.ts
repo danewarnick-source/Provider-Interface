@@ -9,13 +9,6 @@
 import { expect, type Page, type Route } from "@playwright/test";
 import { toCrossJSONAsync } from "seroval";
 import {
-  ALL_PERMISSIONS,
-  DEFAULT_MATRIX,
-  PROVIDER_ROLES,
-  type Permission,
-  type ProviderRole,
-} from "../../src/lib/rbac";
-import {
   ADMIN_EMAIL,
   ADMIN_NAME,
   ADMIN_USER_ID,
@@ -32,6 +25,7 @@ import {
 import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
 import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
 import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
+import { withAccessLevel } from "./access-level";
 
 export type MockPersona = "admin" | "dsp" | "manager";
 
@@ -324,22 +318,6 @@ function billingCodeRows(): Row[] {
   return out;
 }
 
-function rolePermissionRows(): Row[] {
-  const rows: Row[] = [];
-  for (const role of PROVIDER_ROLES) {
-    const granted = new Set<Permission>(DEFAULT_MATRIX[role as ProviderRole] ?? []);
-    for (const permission of ALL_PERMISSIONS) {
-      rows.push({
-        organization_id: ORG_ID,
-        role,
-        permission,
-        enabled: granted.has(permission),
-      });
-    }
-  }
-  return rows;
-}
-
 function expandDailyLog(row: (typeof DAILY_LOGS)[number]): Row {
   const staff = STAFF_LIST.find((s) => s.id === row.user_id);
   const client = CLIENT_LIST.find((c) => c.id === row.client_id);
@@ -404,7 +382,7 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
 
   switch (table) {
     case "organization_members":
-      return staff.map((s) => memberRow(s, true));
+      return staff.map((s) => withAccessLevel(memberRow(s, true)));
     case "profiles":
       return staff.map(profileRow);
     case "org_member_directory":
@@ -436,7 +414,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "training_tracks":
     case "courses":
     case "course_assignments":
-    case "user_permission_overrides":
     case "import_subjects":
     case "auditor_accounts":
     case "staff_types":
@@ -446,8 +423,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
       return [];
     case "daily_logs":
       return opts.emptyLogs ? [] : DAILY_LOGS.map((row) => expandDailyLog(row));
-    case "role_permissions":
-      return rolePermissionRows();
     case "invitations":
       return [{ ...PENDING_INVITE }];
     case "teams":
