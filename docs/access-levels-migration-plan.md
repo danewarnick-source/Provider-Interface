@@ -193,7 +193,27 @@ select (select count(*) from clients where team_id is null) as clients_without_h
   - a new **Access** section on the employee profile: Level ▾, Preset ▾, overrides, and scope pickers for homes, staff and clients
   - hire wizard, roster upload, invitations and join use Level + Preset
   - roster and badges show the preset name
+  - **every permission explains itself** (see "Permission explanations" below)
 - Signup seeds default presets.
+
+**Permission explanations (required).** Wherever a category can be set (the Access & presets page and the employee profile's Access section), each row has:
+
+- A chevron that expands the row to show **what it covers** plus what the person **can** and **can't** do at Off, View and Edit. The currently selected setting is highlighted. Wording comes from sheet 7 of the spreadsheet ("What each setting means").
+- The Off / View / Edit picker itself shows the same one-line explanation under each option, so nobody has to guess before choosing.
+- For Staff-level presets, a line saying the access applies inside the phone app. For Agency settings, the text "Owners only — can't be given to anyone else" instead of a picker.
+- A footer on every expanded row: "Applies only to people in this person's scope: <their scope>."
+
+```
+Billing                                   [ View ▾ ]   ⌄
+  Covers: billing, claims, authorizations (1056), service codes.
+  ○ Off   Can't see billing, claims, authorizations or service codes.
+  ● View  Can see billing, claims, authorizations and service codes.
+          Can't change or submit anything.
+  ○ Edit  Can manage billing and claims, authorizations and service codes.
+  Applies only to people in this person's scope: Maple House.
+```
+
+The text lives in one catalog in code (`src/lib/access-categories.ts`: key, label, covers, off/view/edit text). The UI, the preset seeds and the tests all read from it, so the explanation can never drift from what the check actually does. A unit test fails if a category is missing any of its explanations.
 - **Check:** unit tests for `can()` and the old→new translation; e2e with one persona per level.
 
 ### Phase 4 — Enforce scope in the database (the careful one)
