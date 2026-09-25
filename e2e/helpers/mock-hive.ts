@@ -41,6 +41,8 @@ export type MockOptions = {
   logsError?: boolean;
   /** Skip staff_assignments so the HHS hub bounce path can be asserted. */
   noAssignments?: boolean;
+  /** Mark one roster profile custom_attributes.needs_setup so Finish setup can render. */
+  needsSetupUserId?: string;
 };
 
 type Row = Record<string, unknown>;
@@ -108,7 +110,7 @@ function orgRow() {
   };
 }
 
-function profileRow(staff: (typeof STAFF_LIST)[number]): Row {
+function profileRow(staff: (typeof STAFF_LIST)[number], opts: MockOptions): Row {
   const [first, ...rest] = staff.name.split(" ");
   return {
     id: staff.id,
@@ -145,6 +147,8 @@ function profileRow(staff: (typeof STAFF_LIST)[number]): Row {
     requires_abi: true,
     is_active: true,
     bc_role: null,
+    custom_attributes: opts.needsSetupUserId === staff.id ? { needs_setup: true } : {},
+    phone: opts.needsSetupUserId === staff.id ? "555-0142" : null,
   };
 }
 
@@ -393,7 +397,7 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "organization_members":
       return staff.map((s) => memberRow(s, true));
     case "profiles":
-      return staff.map(profileRow);
+      return staff.map((s) => profileRow(s, opts));
     case "org_member_directory":
       return staff.map((s) => ({
         id: s.id,
@@ -773,6 +777,21 @@ function inferServerFn(url: string, body: string): string {
 
 function serverFnPayload(url: string, body: string): unknown {
   const fn = inferServerFn(url, body);
+  if (/applyEmployeeRosterRow/i.test(fn)) {
+    return {
+      userId: "00000000-0000-4000-a000-000000000498",
+      email: "sam.rivera@example.test",
+      action: "created",
+      reason: null,
+    };
+  }
+  if (/finishEmployeeSetup/i.test(fn)) {
+    return {
+      userId: "00000000-0000-4000-a000-000000000201",
+      email: "jake.probert@example.test",
+      name: "Jake Probert",
+    };
+  }
   if (/createEmployeeManually/i.test(fn)) {
     return { userId: "00000000-0000-4000-a000-000000000499", email: "sep1.tester@example.test" };
   }

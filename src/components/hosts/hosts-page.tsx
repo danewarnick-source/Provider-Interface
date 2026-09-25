@@ -130,8 +130,8 @@ export function HostsPage() {
           <p className="text-sm text-muted-foreground">
             Host homes for clients who need a placement. Onboarding, ready, and placed. Each card
             shows what the host can accept and the latest inspection. A host who joins the agency is
-            managed on Employees; the staff link stays on the card. A Host Home Questionnaire still
-            creates a card.
+            managed on Team Members; the staff link stays on the card. A Host Home Questionnaire
+            still creates a card.
           </p>
         </div>
         {orgId && canManage && <NewHostDialog organizationId={orgId} />}
@@ -188,7 +188,7 @@ export function HostsPage() {
                             {orgId && <HostCertBadge orgId={orgId} hostCardId={c.id} />}
                             {c.linked_staff_user_id && (
                               <Badge className="gap-1 bg-primary/15 text-primary text-[10px] hover:bg-primary/20">
-                                <UserCheck className="h-3 w-3" /> Linked employee
+                                <UserCheck className="h-3 w-3" /> Linked team member
                               </Badge>
                             )}
                             {c.wheelchair_accessible && (
@@ -608,11 +608,11 @@ function HostDetailDialog({
 
               <div className="rounded-md border border-border bg-muted/30 p-3">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <UserCheck className="h-3.5 w-3.5" /> Linked employee
+                  <UserCheck className="h-3.5 w-3.5" /> Linked team member
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Connect this host to their employee record after they join the agency. Until then
-                  they do not clock or appear in scheduling.
+                  Connect this host to their team member record after they join the agency. Until
+                  then they do not clock or appear in scheduling.
                 </p>
                 <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
                   <Select

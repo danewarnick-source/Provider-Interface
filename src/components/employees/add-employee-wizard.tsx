@@ -36,9 +36,11 @@ import {
   type StaffIntakeFieldsConfig,
 } from "@/components/hr/staff-fields-panel";
 
-type Role = "admin" | "manager" | "employee";
+type Role = "admin" | "program_manager" | "manager" | "employee" | "committee_member";
 
-type HireDraft = {
+export type HireRoleChoice = { value: Role; label: string };
+
+export type HireDraft = {
   id: string;
   firstName: string;
   lastName: string;
@@ -94,12 +96,10 @@ export function AddEmployeeWizard({
   open,
   onOpenChange,
   organizationId,
-  onOpenSettings,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   organizationId: string | null;
-  onOpenSettings: () => void;
 }) {
   const qc = useQueryClient();
   const createManual = useServerFn(createEmployeeManually);
@@ -185,7 +185,7 @@ export function AddEmployeeWizard({
         }
       }
       if (!made.length) {
-        throw new Error(errors.join(" ") || "Could not create employees.");
+        throw new Error(errors.join(" ") || "Could not add team members.");
       }
       return { made, errors };
     },
@@ -194,7 +194,9 @@ export function AddEmployeeWizard({
         toast.warning(`Created ${made.length}. ${errors.join(" ")}`);
       } else {
         toast.success(
-          made.length === 1 ? "Employee file created" : `${made.length} employee files created`,
+          made.length === 1
+            ? "Team member file created"
+            : `${made.length} team member files created`,
         );
       }
       setCreated(made);
@@ -282,7 +284,7 @@ export function AddEmployeeWizard({
         !d.hireDate,
     );
     if (missing) {
-      toast.error("Each employee needs a first name, last name, email, phone, and hire date.");
+      toast.error("Each team member needs a first name, last name, email, phone, and hire date.");
       return;
     }
     createMutation.mutate(drafts);
@@ -300,9 +302,9 @@ export function AddEmployeeWizard({
         {step === "details" ? (
           <>
             <DialogHeader>
-              <DialogTitle>Add employee</DialogTitle>
+              <DialogTitle>Add team member</DialogTitle>
               <DialogDescription>
-                Creates the full staff record first. You can send a join email or copy a temporary
+                Adds the team member file first. You can send a join email or copy a temporary
                 password after.
               </DialogDescription>
             </DialogHeader>
@@ -321,7 +323,6 @@ export function AddEmployeeWizard({
                   showHeader={drafts.length > 1}
                   canRemove={drafts.length > 1}
                   staffIntakeConfig={staffIntakeConfig}
-                  onOpenSettings={onOpenSettings}
                   onChange={(patch) => patchDraft(draft.id, patch)}
                   onRemove={() => setDrafts((prev) => prev.filter((d) => d.id !== draft.id))}
                 />
@@ -331,7 +332,7 @@ export function AddEmployeeWizard({
                 variant="outline"
                 onClick={() => setDrafts((prev) => [...prev, emptyDraft()])}
               >
-                <Plus className="mr-2 h-4 w-4" /> Add another employee
+                <Plus className="mr-2 h-4 w-4" /> Add another team member
               </Button>
               <DialogFooter>
                 <Button
@@ -342,8 +343,8 @@ export function AddEmployeeWizard({
                   {createMutation.isPending
                     ? "Creating…"
                     : drafts.length === 1
-                      ? "Create employee"
-                      : `Create ${drafts.length} employees`}
+                      ? "Create team member"
+                      : `Create ${drafts.length} team members`}
                 </Button>
               </DialogFooter>
             </form>
@@ -468,31 +469,36 @@ function AccessCard({
   );
 }
 
-function HireDraftFields({
+export function HireDraftFields({
   draft,
   index,
   showHeader,
   canRemove,
   staffIntakeConfig,
-  onOpenSettings,
   onChange,
   onRemove,
+  roleChoices,
 }: {
   draft: HireDraft;
   index: number;
   showHeader: boolean;
   canRemove: boolean;
   staffIntakeConfig: StaffIntakeFieldsConfig | undefined;
-  onOpenSettings: () => void;
   onChange: (patch: Partial<HireDraft>) => void;
   onRemove: () => void;
+  roleChoices?: HireRoleChoice[];
 }) {
+  const roles = roleChoices ?? [
+    { value: "employee" as const, label: "Team member" },
+    { value: "manager" as const, label: "Manager" },
+    { value: "admin" as const, label: "Admin" },
+  ];
   return (
     <div className={showHeader ? "grid gap-4 rounded-md border border-border p-3" : "grid gap-4"}>
       {showHeader && (
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Employee {index + 1}
+            Team member {index + 1}
           </p>
           {canRemove && (
             <Button
@@ -571,9 +577,11 @@ function HireDraftFields({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="employee">Employee</SelectItem>
-            <SelectItem value="manager">Manager</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
+            {roles.map((choice) => (
+              <SelectItem key={choice.value} value={choice.value}>
+                {choice.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -590,7 +598,6 @@ function HireDraftFields({
         onWorkerTypeChange={(workerType) => onChange({ workerType })}
         customFieldValues={draft.customFieldValues}
         onCustomFieldValuesChange={(customFieldValues) => onChange({ customFieldValues })}
-        onOpenSettings={onOpenSettings}
         idSuffix={index === 0 ? "" : `-${index}`}
       />
     </div>
@@ -610,7 +617,7 @@ export function AddEmployeeButton({
       onClick={onClick}
       disabled={disabled}
     >
-      <ShieldPlus className="mr-2 h-4 w-4" /> Add employee
+      <ShieldPlus className="mr-2 h-4 w-4" /> Add team member
     </Button>
   );
 }
@@ -627,7 +634,6 @@ function OptionalIntakeFields({
   onWorkerTypeChange,
   customFieldValues,
   onCustomFieldValuesChange,
-  onOpenSettings,
   idSuffix = "",
 }: {
   config: StaffIntakeFieldsConfig | undefined;
@@ -641,7 +647,6 @@ function OptionalIntakeFields({
   onWorkerTypeChange: (v: string) => void;
   customFieldValues: Record<string, unknown>;
   onCustomFieldValuesChange: (v: Record<string, unknown>) => void;
-  onOpenSettings: () => void;
   idSuffix?: string;
 }) {
   if (!config) return null;
@@ -661,16 +666,7 @@ function OptionalIntakeFields({
   if (!hasAnyOptionalField) {
     return (
       <div className="grid gap-2">
-        <p className="text-sm text-muted-foreground">
-          No optional fields configured.{" "}
-          <button
-            type="button"
-            className="underline underline-offset-2 hover:text-foreground"
-            onClick={onOpenSettings}
-          >
-            Configure staff fields
-          </button>
-        </p>
+        <p className="text-sm text-muted-foreground">No optional fields configured.</p>
       </div>
     );
   }
@@ -684,24 +680,15 @@ function OptionalIntakeFields({
       {!config.staff_type.enabled && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
           <span>
-            Staff type is not enabled — training requirements won't auto-activate until set on this
-            staff member's profile. Enable in staff field settings.
+            Team member type is not enabled — training requirements won&apos;t auto-activate until
+            set on this team member&apos;s profile.
           </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-7 shrink-0 text-xs"
-            onClick={onOpenSettings}
-          >
-            Open settings
-          </Button>
         </div>
       )}
 
       {config.staff_type.enabled && (
         <div className="grid gap-2">
-          <Label>Staff type · drives training requirements</Label>
+          <Label>Team member type · drives training requirements</Label>
           <div className="grid max-h-40 gap-1 overflow-y-auto rounded-md border border-border p-2 text-sm">
             {(config.staff_type.options ?? []).map((opt) => (
               <label key={opt} className="flex items-center gap-2">
@@ -740,7 +727,7 @@ function OptionalIntakeFields({
 
       {config.employee_id.enabled && (
         <div className="grid gap-2">
-          <Label htmlFor={`employee_id${idSuffix}`}>Employee ID (optional)</Label>
+          <Label htmlFor={`employee_id${idSuffix}`}>Team member ID (optional)</Label>
           <Input
             id={`employee_id${idSuffix}`}
             value={employeeId}

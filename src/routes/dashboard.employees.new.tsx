@@ -3,7 +3,7 @@ import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-crea
 import { EmployeesPage } from "./dashboard.employees.index";
 
 export const Route = createFileRoute("/dashboard/employees/new")({
-  head: () => ({ meta: [{ title: "Add employee — Provider Interface" }] }),
+  head: () => ({ meta: [{ title: "Add team member — Provider Interface" }] }),
   component: AddEmployeeRoute,
 });
 

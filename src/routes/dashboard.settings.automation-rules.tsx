@@ -10,13 +10,20 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Tabs, TabsList, TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { ArrowLeft, Plus, Pencil, Wand2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -37,8 +44,16 @@ type AppliesTo = "employee" | "client";
 type TriggerType = "service_code" | "role" | "keyword" | "data_present";
 type ActionType = "enable_feature" | "create_draft" | "seed_record" | "activate_requirements";
 type TargetModule =
-  | "time_clock" | "daily_logs" | "med_mgmt" | "incident_reporting" | "behavior_plan"
-  | "compliance_track" | "training" | "eligibility" | "driver_credential" | "requirements";
+  | "time_clock"
+  | "daily_logs"
+  | "med_mgmt"
+  | "incident_reporting"
+  | "behavior_plan"
+  | "compliance_track"
+  | "training"
+  | "eligibility"
+  | "driver_credential"
+  | "requirements";
 
 type Rule = {
   id: string;
@@ -81,7 +96,10 @@ const TRIGGER_LABELS: Record<TriggerType, string> = {
   data_present: "Data present",
 };
 
-type Draft = Omit<Rule, "id" | "org_id" | "created_at" | "is_active"> & { id?: string; is_active?: boolean };
+type Draft = Omit<Rule, "id" | "org_id" | "created_at" | "is_active"> & {
+  id?: string;
+  is_active?: boolean;
+};
 
 const emptyClient: Draft = {
   applies_to: "client",
@@ -182,12 +200,15 @@ function AutomationRulesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <Link to="/dashboard/settings" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <Link
+          to="/dashboard/settings"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> Back to Settings
         </Link>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setEditing({ ...emptyEmployee })}>
-            <Plus className="mr-2 h-4 w-4" /> Add employee rule
+            <Plus className="mr-2 h-4 w-4" /> Add team member rule
           </Button>
           <Button onClick={() => setEditing({ ...emptyClient })}>
             <Plus className="mr-2 h-4 w-4" /> Add client rule
@@ -203,8 +224,8 @@ function AutomationRulesPage() {
           <div>
             <h1 className="text-lg font-semibold">Automation Rules</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              These tell NECTAR what to set up when it imports. You stay in control — nothing is created
-              without your review, and nothing here ever blocks scheduling or access.
+              These tell NECTAR what to set up when it imports. You stay in control — nothing is
+              created without your review, and nothing here ever blocks scheduling or access.
             </p>
           </div>
         </div>
@@ -213,7 +234,7 @@ function AutomationRulesPage() {
       <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="employee">Employee</TabsTrigger>
+          <TabsTrigger value="employee">Team member</TabsTrigger>
           <TabsTrigger value="client">Client</TabsTrigger>
         </TabsList>
       </Tabs>
@@ -234,28 +255,40 @@ function AutomationRulesPage() {
             </thead>
             <tbody>
               {isLoading && (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                  <Loader2 className="mx-auto h-5 w-5 animate-spin" />
-                </td></tr>
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                    <Loader2 className="mx-auto h-5 w-5 animate-spin" />
+                  </td>
+                </tr>
               )}
               {!isLoading && filtered.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">No rules yet for this view.</td></tr>
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                    No rules yet for this view.
+                  </td>
+                </tr>
               )}
               {filtered.map((r) => (
                 <tr key={r.id} className="border-t border-border">
                   <td className="px-4 py-3">
-                    <Badge variant={r.applies_to === "employee" ? "outline" : "secondary"}>{r.applies_to}</Badge>
+                    <Badge variant={r.applies_to === "employee" ? "outline" : "secondary"}>
+                      {r.applies_to === "employee" ? "Team member" : "Client"}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col">
-                      <span className="text-xs text-muted-foreground">{TRIGGER_LABELS[r.trigger_type]}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {TRIGGER_LABELS[r.trigger_type]}
+                      </span>
                       <span className="font-medium">{r.trigger_value}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">{ACTION_LABELS[r.action_type]}</td>
                   <td className="px-4 py-3">{MODULE_LABELS[r.target_module] ?? r.target_module}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={r.default_state === "active" ? "default" : "secondary"}>{r.default_state}</Badge>
+                    <Badge variant={r.default_state === "active" ? "default" : "secondary"}>
+                      {r.default_state}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3">
                     <Switch
@@ -264,16 +297,22 @@ function AutomationRulesPage() {
                     />
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing({
-                      id: r.id,
-                      applies_to: r.applies_to,
-                      trigger_type: r.trigger_type,
-                      trigger_value: r.trigger_value,
-                      action_type: r.action_type,
-                      target_module: r.target_module,
-                      default_state: r.default_state,
-                      notes: r.notes ?? "",
-                    })}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setEditing({
+                          id: r.id,
+                          applies_to: r.applies_to,
+                          trigger_type: r.trigger_type,
+                          trigger_value: r.trigger_value,
+                          action_type: r.action_type,
+                          target_module: r.target_module,
+                          default_state: r.default_state,
+                          notes: r.notes ?? "",
+                        })
+                      }
+                    >
                       <Pencil className="h-4 w-4" />
                     </Button>
                   </td>
@@ -289,17 +328,23 @@ function AutomationRulesPage() {
           <DialogHeader>
             <DialogTitle>{editing?.id ? "Edit rule" : "Add rule"}</DialogTitle>
             <DialogDescription>
-              When NECTAR sees the trigger in an imported document, it will take this action on the target module.
+              When NECTAR sees the trigger in an imported document, it will take this action on the
+              target module.
             </DialogDescription>
           </DialogHeader>
           {editing && (
             <div className="grid gap-4 py-2">
               <div className="grid gap-2">
                 <Label>Applies to</Label>
-                <Select value={editing.applies_to} onValueChange={(v) => setEditing({ ...editing, applies_to: v as AppliesTo })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={editing.applies_to}
+                  onValueChange={(v) => setEditing({ ...editing, applies_to: v as AppliesTo })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="employee">Team member</SelectItem>
                     <SelectItem value="client">Client</SelectItem>
                   </SelectContent>
                 </Select>
@@ -307,8 +352,15 @@ function AutomationRulesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-2">
                   <Label>Trigger type</Label>
-                  <Select value={editing.trigger_type} onValueChange={(v) => setEditing({ ...editing, trigger_type: v as TriggerType })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select
+                    value={editing.trigger_type}
+                    onValueChange={(v) =>
+                      setEditing({ ...editing, trigger_type: v as TriggerType })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="service_code">Service code</SelectItem>
                       <SelectItem value="role">Role</SelectItem>
@@ -319,14 +371,23 @@ function AutomationRulesPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label>Trigger value</Label>
-                  <Input value={editing.trigger_value} onChange={(e) => setEditing({ ...editing, trigger_value: e.target.value })} placeholder="e.g. DSI, certification, any" />
+                  <Input
+                    value={editing.trigger_value}
+                    onChange={(e) => setEditing({ ...editing, trigger_value: e.target.value })}
+                    placeholder="e.g. DSI, certification, any"
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-2">
                   <Label>Action</Label>
-                  <Select value={editing.action_type} onValueChange={(v) => setEditing({ ...editing, action_type: v as ActionType })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select
+                    value={editing.action_type}
+                    onValueChange={(v) => setEditing({ ...editing, action_type: v as ActionType })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="enable_feature">Enable feature</SelectItem>
                       <SelectItem value="create_draft">Create draft</SelectItem>
@@ -337,11 +398,20 @@ function AutomationRulesPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label>Target module</Label>
-                  <Select value={editing.target_module} onValueChange={(v) => setEditing({ ...editing, target_module: v as TargetModule })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select
+                    value={editing.target_module}
+                    onValueChange={(v) =>
+                      setEditing({ ...editing, target_module: v as TargetModule })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       {Object.entries(MODULE_LABELS).map(([k, label]) => (
-                        <SelectItem key={k} value={k}>{label}</SelectItem>
+                        <SelectItem key={k} value={k}>
+                          {label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -349,8 +419,15 @@ function AutomationRulesPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Default state</Label>
-                <Select value={editing.default_state} onValueChange={(v) => setEditing({ ...editing, default_state: v as Rule["default_state"] })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={editing.default_state}
+                  onValueChange={(v) =>
+                    setEditing({ ...editing, default_state: v as Rule["default_state"] })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="draft">Draft</SelectItem>
@@ -359,12 +436,17 @@ function AutomationRulesPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Notes (optional)</Label>
-                <Input value={editing.notes ?? ""} onChange={(e) => setEditing({ ...editing, notes: e.target.value })} />
+                <Input
+                  value={editing.notes ?? ""}
+                  onChange={(e) => setEditing({ ...editing, notes: e.target.value })}
+                />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setEditing(null)}>
+              Cancel
+            </Button>
             <Button
               onClick={() => editing && saveRule.mutate(editing)}
               disabled={saveRule.isPending || !editing?.trigger_value.trim()}

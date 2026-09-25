@@ -9,10 +9,29 @@ import { RequirePermission } from "@/components/rbac-guard";
 import { setMemberGrants } from "@/lib/team-access.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { PROVIDER_ROLES, ROLE_LABEL, isHiveInternalRole, type ProviderRole, type Role } from "@/lib/rbac";
+import {
+  PROVIDER_ROLES,
+  ROLE_LABEL,
+  isHiveInternalRole,
+  type ProviderRole,
+  type Role,
+} from "@/lib/rbac";
 import { ShieldCheck, Search } from "lucide-react";
 import { toast } from "sonner";
 
@@ -55,17 +74,32 @@ function RolesPage() {
           .from("org_member_directory")
           .select("id, full_name, email")
           .in("id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
-        supabase.from("hive_executives").select("user_id, active").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
+        supabase
+          .from("hive_executives")
+          .select("user_id, active")
+          .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
       ]);
       const map = new Map((profs ?? []).map((p) => [p.id, p]));
       const hiveSet = new Set((hiveExecs ?? []).filter((h) => h.active).map((h) => h.user_id));
-      return (data ?? []).map((m) => ({ ...m, profile: map.get(m.user_id), isHiveExec: hiveSet.has(m.user_id) }));
+      return (data ?? []).map((m) => ({
+        ...m,
+        profile: map.get(m.user_id),
+        isHiveExec: hiveSet.has(m.user_id),
+      }));
     },
   });
 
   const setGrantsFn = useServerFn(setMemberGrants);
   const updateRole = useMutation({
-    mutationFn: async ({ memberId, userId, role }: { memberId: string; userId: string; role: ProviderRole }) => {
+    mutationFn: async ({
+      memberId,
+      userId,
+      role,
+    }: {
+      memberId: string;
+      userId: string;
+      role: ProviderRole;
+    }) => {
       await setGrantsFn({
         data: {
           organization_id: org!.organization_id,
@@ -125,7 +159,9 @@ function RolesPage() {
         <div className="mt-6 grid gap-3 sm:grid-cols-5">
           {PROVIDER_ROLES.map((r) => (
             <div key={r} className="rounded-xl border border-border bg-background p-4">
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">{ROLE_LABEL[r]}</div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                {ROLE_LABEL[r]}
+              </div>
               <div className="mt-1 text-2xl font-semibold">{counts[r] ?? 0}</div>
             </div>
           ))}
@@ -157,10 +193,18 @@ function RolesPage() {
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Loading…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  Loading…
+                </TableCell>
+              </TableRow>
             )}
             {!isLoading && filtered.length === 0 && (
-              <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No members found.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  No members found.
+                </TableCell>
+              </TableRow>
             )}
             {filtered.map((m) => {
               const isSelf = m.user_id === user?.id;
@@ -170,16 +214,17 @@ function RolesPage() {
               const label =
                 m.isHiveExec && isHiveInternalRole(role)
                   ? ROLE_LABEL.super_admin
-                  : ROLE_LABEL[role] ?? role;
-              const badgeClass =
-                isHiveInternalRole(role)
-                  ? "bg-purple-500/15 text-purple-700 dark:text-purple-300"
-                  : ROLE_BADGE[role as ProviderRole] ?? "bg-secondary text-secondary-foreground";
+                  : (ROLE_LABEL[role] ?? role);
+              const badgeClass = isHiveInternalRole(role)
+                ? "bg-purple-500/15 text-purple-700 dark:text-purple-300"
+                : (ROLE_BADGE[role as ProviderRole] ?? "bg-secondary text-secondary-foreground");
               return (
                 <TableRow key={m.id}>
                   <TableCell>
                     <div className="font-medium">{m.profile?.full_name ?? "—"}</div>
-                    {m.job_title && <div className="text-xs text-muted-foreground">{m.job_title}</div>}
+                    {m.job_title && (
+                      <div className="text-xs text-muted-foreground">{m.job_title}</div>
+                    )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">{m.profile?.email ?? "—"}</TableCell>
                   <TableCell>
@@ -192,24 +237,32 @@ function RolesPage() {
                     {lockedInternal ? (
                       <span className="text-xs text-muted-foreground">Managed by PI</span>
                     ) : (
-                    <Select
-                      value={isHiveInternalRole(role) ? "admin" : role}
-                      disabled={disabled}
-                      onValueChange={(val) => {
-                        const next = val as ProviderRole;
-                        if (next === role) return;
-                        if (confirm(`Change ${m.profile?.full_name ?? "this user"}'s role to ${ROLE_LABEL[next]}?`)) {
-                          updateRole.mutate({ memberId: m.id, userId: m.user_id, role: next });
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="w-full sm:w-auto"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {PROVIDER_ROLES.map((r) => (
-                          <SelectItem key={r} value={r}>{ROLE_LABEL[r]}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <Select
+                        value={isHiveInternalRole(role) ? "admin" : role}
+                        disabled={disabled}
+                        onValueChange={(val) => {
+                          const next = val as ProviderRole;
+                          if (next === role) return;
+                          if (
+                            confirm(
+                              `Change ${m.profile?.full_name ?? "this user"}'s role to ${ROLE_LABEL[next]}?`,
+                            )
+                          ) {
+                            updateRole.mutate({ memberId: m.id, userId: m.user_id, role: next });
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full sm:w-auto">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PROVIDER_ROLES.map((r) => (
+                            <SelectItem key={r} value={r}>
+                              {ROLE_LABEL[r]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     )}
                   </TableCell>
                 </TableRow>
@@ -222,14 +275,29 @@ function RolesPage() {
       <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-[var(--shadow-card)]">
         <h3 className="mb-2 text-sm font-semibold text-foreground">Role guide</h3>
         <ul className="space-y-1">
-          <li><strong className="text-foreground">Owner</strong> — Full access including billing, org settings, and permissions.</li>
-          <li><strong className="text-foreground">Program Manager</strong> — Scheduling, timesheets, compliance, and client records within assigned scope. No billing management or org settings.</li>
-          <li><strong className="text-foreground">Supervisor</strong> — Team operations, training, and day-to-day documentation.</li>
-          <li><strong className="text-foreground">Staff</strong> — Own caseload, logs, trainings, and assigned obligations.</li>
-          <li><strong className="text-foreground">Committee Member</strong> — Human Rights Committee only.</li>
+          <li>
+            <strong className="text-foreground">Owner</strong> — Full access including billing, org
+            settings, and permissions.
+          </li>
+          <li>
+            <strong className="text-foreground">Program Manager</strong> — Scheduling, timesheets,
+            compliance, and client records within assigned scope. No billing management or org
+            settings.
+          </li>
+          <li>
+            <strong className="text-foreground">Supervisor</strong> — Team operations, training, and
+            day-to-day documentation.
+          </li>
+          <li>
+            <strong className="text-foreground">Team member</strong> — Own caseload, logs,
+            trainings, and assigned obligations.
+          </li>
+          <li>
+            <strong className="text-foreground">Committee Member</strong> — Human Rights Committee
+            only.
+          </li>
         </ul>
       </div>
-
     </div>
   );
 }

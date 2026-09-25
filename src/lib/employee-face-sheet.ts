@@ -108,7 +108,7 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
     .limit(1)
     .maybeSingle();
   if (mErr) throw new Error(mErr.message);
-  if (!member) throw new Error("Employee not found in your organization");
+  if (!member) throw new Error("Team member not found in your organization");
   const orgId = (member as { organization_id: string }).organization_id;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -487,11 +487,11 @@ export async function generateEmployeeFaceSheet(
     [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
     (p.username && String(p.username).trim()) ||
     (p.email && String(p.email).trim()) ||
-    "Employee";
+    "Team member";
   const orgName = (d.org?.dba_name ?? d.org?.name ?? "").trim() || "Organization";
 
   const pdf = await PDFDocument.create();
-  pdf.setTitle(`Employee Face Sheet - ${name}`);
+  pdf.setTitle(`Team Member Face Sheet - ${name}`);
   pdf.setCreator("Provider Interface");
   const helv = await pdf.embedFont(StandardFonts.Helvetica);
   const helvB = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -643,7 +643,7 @@ export async function generateEmployeeFaceSheet(
   yL = sectionHeader(page, "Identity & contact", M, yL, colW, helvB);
   yL = drawKV(page, "Email", field(p.email), M, yL, colW, helv, helvB);
   yL = drawKV(page, "Phone", field(p.phone), M, yL, colW, helv, helvB);
-  yL = drawKV(page, "Employee ID", field(p.employee_id), M, yL, colW, helv, helvB);
+  yL = drawKV(page, "Team member ID", field(p.employee_id), M, yL, colW, helv, helvB);
   {
     const nm = field(p.emergency_contact_name);
     const rel = field(p.emergency_contact_relationship);
@@ -862,7 +862,7 @@ export async function generateEmployeeFaceSheet(
       thickness: 0.5,
       color: BORDER,
     });
-    pg.drawText(`Employee Face Sheet  ·  ${name}  ·  ${orgName}`, {
+    pg.drawText(`Team Member Face Sheet  ·  ${name}  ·  ${orgName}`, {
       x: M,
       y: footerY + 4,
       size: 7.5,
@@ -887,7 +887,7 @@ export async function generateEmployeeFaceSheet(
     .replace(/(^-|-$)/g, "");
   return {
     bytes,
-    filename: `employee-face-sheet-${safeName || "employee"}.pdf`,
+    filename: `team-member-face-sheet-${safeName || "team-member"}.pdf`,
     staffId: args.staffId,
     staffName: name,
     organizationId: d.orgId,
@@ -916,7 +916,7 @@ export async function shipEmployeeFaceSheet(
     .upload(storagePath, blob, { upsert: false, contentType: "application/pdf" });
   if (upErr) throw upErr;
 
-  const displayName = `Employee Face Sheet — ${report.periodLabel}.pdf`;
+  const displayName = `Team Member Face Sheet — ${report.periodLabel}.pdf`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: insertedRows, error: insErr } = await (sb as any)
     .from("employee_documents")

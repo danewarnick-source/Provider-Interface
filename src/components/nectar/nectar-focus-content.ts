@@ -85,7 +85,7 @@ export const NECTAR_FOCUS_CONTENT: Record<string, FocusContent> = {
     steps: [
       "Sort by soonest expiry first.",
       "For each row, queue the renewal training or upload the new certificate.",
-      "Confirm in the staff profile that the new expiry date saved correctly.",
+      "Confirm in the team member profile that the new expiry date saved correctly.",
     ],
   },
   "incidents-pending-review": {

@@ -79,7 +79,7 @@ export function StaffProfileIdentity({
             <Field label="Phone" value={profile?.phone} />
             <Field label="Base role" value={roleLabel} />
             <Field label="Hire date" value={hireDate} />
-            <Field label="Employee ID" value={profile?.employee_id} />
+            <Field label="Team member ID" value={profile?.employee_id} />
             <Field label="Job title" value={member.job_title} />
           </div>
         ) : (
@@ -163,7 +163,7 @@ export function StaffProfileIdentity({
             </div>
             <div className="space-y-1">
               <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Employee ID
+                Team member ID
               </Label>
               <Input
                 value={draft.employee_id}

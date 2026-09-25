@@ -16,7 +16,7 @@ function EmployeesHub() {
 }
 
 export const Route = createFileRoute("/dashboard/hub/employees")({
-  head: () => ({ meta: [{ title: "Employees — Provider Interface" }] }),
+  head: () => ({ meta: [{ title: "Team Members — Provider Interface" }] }),
   validateSearch: (s) => search.parse(s),
   beforeLoad: ({ search: s }) => {
     if (s.tab === "hosts") {

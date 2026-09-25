@@ -213,7 +213,7 @@ export function BehaviorSupportConfigCard({
             onValueChange={(v) => setAssigneeId(v === "__none" ? null : v)}
           >
             <SelectTrigger className="min-h-[44px]">
-              <SelectValue placeholder="Select an employee with a BC role…" />
+              <SelectValue placeholder="Select a team member with a BC role…" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__none">— Unassigned —</SelectItem>

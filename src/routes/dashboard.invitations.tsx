@@ -6,7 +6,14 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { RequirePermission } from "@/components/rbac-guard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Mail, UserPlus, Copy, RefreshCcw, Ban, Send } from "lucide-react";
 import { ROLE_LABEL, type Role } from "@/lib/rbac";
 import { resendInvitation, revokeInvitation } from "@/lib/invitations.functions";
@@ -90,9 +97,10 @@ function InvitationsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
         <div>
-          <h2 className="text-base font-semibold">Employee invitations</h2>
+          <h2 className="text-base font-semibold">Team member invitations</h2>
           <p className="text-sm text-muted-foreground">
-            Resend or copy join links for pending invites. New hires start from Employees → Add employee (full file first, then invite or temp password).
+            Resend or copy join links for pending invites. New people start from Team Members → Add
+            team member (full file first, then invite or temp password).
           </p>
           <div className="mt-3 flex gap-2 text-xs">
             <Badge variant="secondary">{counts.pending ?? 0} pending</Badge>
@@ -102,7 +110,7 @@ function InvitationsPage() {
         </div>
         <Button asChild className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]">
           <Link to="/dashboard/hub/employees">
-            <UserPlus className="mr-2 h-4 w-4" /> Add employee
+            <UserPlus className="mr-2 h-4 w-4" /> Add team member
           </Link>
         </Button>
       </div>
@@ -110,9 +118,11 @@ function InvitationsPage() {
       <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
         <Send className="mt-0.5 h-4 w-4 shrink-0" />
         <div>
-          <strong className="text-foreground">Email delivery:</strong> Invitations are emailed automatically when created or resent.
-          The link opens <code>/join</code> — they set a password and join this organization (not a new company).
-          If a message doesn't arrive, copy the invite link below and send it manually — it expires in 14 days and is locked to the invitee's email.
+          <strong className="text-foreground">Email delivery:</strong> Invitations are emailed
+          automatically when created or resent. The link opens <code>/join</code> — they set a
+          password and join this organization (not a new company). If a message doesn't arrive, copy
+          the invite link below and send it manually — it expires in 14 days and is locked to the
+          invitee's email.
         </div>
       </div>
 
@@ -130,50 +140,65 @@ function InvitationsPage() {
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Loading…</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  Loading…
+                </TableCell>
+              </TableRow>
             )}
             {!isLoading && (invites?.length ?? 0) === 0 && (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No invitations yet.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                  No invitations yet.
+                </TableCell>
+              </TableRow>
             )}
             {invites?.map((inv) => {
               const expired = new Date(inv.expires_at) < new Date();
-              const link = typeof window !== "undefined"
-                ? inviteJoinUrl(resolveAuthOrigin(), inv.token)
-                : "";
+              const link =
+                typeof window !== "undefined" ? inviteJoinUrl(resolveAuthOrigin(), inv.token) : "";
               return (
                 <TableRow key={inv.id}>
                   <TableCell className="font-medium flex items-center gap-2">
                     <Mail className="h-3.5 w-3.5 text-muted-foreground" /> {inv.email}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{ROLE_LABEL[(inv.role as Role)] ?? inv.role}</Badge>
+                    <Badge variant="secondary">{ROLE_LABEL[inv.role as Role] ?? inv.role}</Badge>
                   </TableCell>
                   <TableCell>
-                    {inv.status === "pending" && (expired ? (
-                      <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border-0">Expired</Badge>
-                    ) : (
-                      <Badge className="bg-primary/15 text-primary border-0">Pending</Badge>
-                    ))}
+                    {inv.status === "pending" &&
+                      (expired ? (
+                        <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border-0">
+                          Expired
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-primary/15 text-primary border-0">Pending</Badge>
+                      ))}
                     {inv.status === "accepted" && (
-                      <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-0">Accepted</Badge>
+                      <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-0">
+                        Accepted
+                      </Badge>
                     )}
-                    {inv.status === "revoked" && (
-                      <Badge variant="secondary">Revoked</Badge>
-                    )}
+                    {inv.status === "revoked" && <Badge variant="secondary">Revoked</Badge>}
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
                     {new Date(inv.expires_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
                     {inv.status === "pending" ? (
-                      <code className="block truncate rounded bg-secondary px-2 py-1 text-xs">{link}</code>
-                    ) : <span className="text-xs text-muted-foreground">—</span>}
+                      <code className="block truncate rounded bg-secondary px-2 py-1 text-xs">
+                        {link}
+                      </code>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     {inv.status === "pending" && (
                       <div className="inline-flex gap-1">
                         <Button
-                          variant="ghost" size="sm"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             navigator.clipboard.writeText(link);
                             toast.success("Link copied");
@@ -182,7 +207,8 @@ function InvitationsPage() {
                           <Copy className="h-3.5 w-3.5" />
                         </Button>
                         <Button
-                          variant="ghost" size="sm"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => resendInvite.mutate(inv.id)}
                           disabled={resendInvite.isPending}
                           title="Resend invitation email"
@@ -190,9 +216,11 @@ function InvitationsPage() {
                           <RefreshCcw className="h-3.5 w-3.5" />
                         </Button>
                         <Button
-                          variant="ghost" size="sm"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
-                            if (confirm(`Revoke invitation for ${inv.email}?`)) revokeInvite.mutate(inv.id);
+                            if (confirm(`Revoke invitation for ${inv.email}?`))
+                              revokeInvite.mutate(inv.id);
                           }}
                         >
                           <Ban className="h-3.5 w-3.5 text-destructive" />

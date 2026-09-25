@@ -154,10 +154,10 @@ export const attachBaselineCertificate = createServerFn({ method: "POST" })
       }
       // Name check
       if (nameMatch === "unreadable") {
-        reasons.push("Could not read the staff member's name on the certificate.");
+        reasons.push("Could not read the team member's name on the certificate.");
       } else if (nameMatch === "mismatch") {
         reasons.push(
-          `Name on certificate ("${nectarName}") does not match staff profile ("${profileName ?? "—"}").`,
+          `Name on certificate ("${nectarName}") does not match team member profile ("${profileName ?? "—"}").`,
         );
       }
       // Required dates

@@ -8,6 +8,7 @@ import {
   formatRosterDate,
   isEmployeeOnActiveRoster,
   lastLoginByUserId,
+  profileNeedsSetup,
   uniqueHireEmails,
 } from "./employee-roster.ts";
 
@@ -41,6 +42,17 @@ describe("isEmployeeOnActiveRoster", () => {
   });
 });
 
+describe("profileNeedsSetup", () => {
+  it("reads the existing custom_attributes flag and ignores anything else", () => {
+    assert.equal(profileNeedsSetup({ needs_setup: true }), true);
+    assert.equal(profileNeedsSetup({ needs_setup: false }), false);
+    assert.equal(profileNeedsSetup({}), false);
+    assert.equal(profileNeedsSetup(null), false);
+    assert.equal(profileNeedsSetup("yes"), false);
+    assert.equal(profileNeedsSetup([]), false);
+  });
+});
+
 describe("uniqueHireEmails", () => {
   it("returns the first duplicate, ignoring case and blanks", () => {
     assert.equal(uniqueHireEmails(["a@agency.org", "b@agency.org"]), null);
@@ -63,7 +75,9 @@ describe("Add employee wizard source lock", () => {
     assert.doesNotMatch(src, /name=["']end_date["']/);
     assert.match(src, /requiresDeescalation: false/);
     assert.match(src, /requiresAbi: false/);
-    assert.match(src, /Add another employee/);
+    assert.match(src, /Add another team member/);
+    assert.doesNotMatch(src, /Configure staff fields/);
+    assert.doesNotMatch(src, /Open settings/);
     assert.match(src, /createInvitation/);
     assert.match(src, /interpretInviteSendResult/);
     assert.match(src, /invite yet/);
@@ -86,6 +100,11 @@ describe("Employees list source lock", () => {
     assert.match(src, /deleteEntity/);
     assert.match(src, /Inactive/);
     assert.match(src, /EmployeeRosterUploadWizard/);
+    assert.match(src, /FinishEmployeeSetupWizard/);
+    assert.match(src, /Needs setup/);
+    assert.match(src, /Finish setup/);
+    assert.match(src, /Team Members/);
+    assert.doesNotMatch(src, /StaffFieldsPanel/);
     assert.match(src, /upload/);
     assert.match(src, /Last Login/);
     assert.match(src, /org_member_last_sign_ins/);
@@ -130,5 +149,32 @@ describe("lastLoginByUserId", () => {
     assert.equal(map.size, 2);
     assert.equal(lastLoginByUserId(null).size, 0);
     assert.equal(lastLoginByUserId("nope").size, 0);
+  });
+});
+
+describe("Finish setup reuses Add employee", () => {
+  it("walks Needs-setup people through the hire fields and an optional invite", () => {
+    const src = readFileSync(
+      new URL("../components/employees/finish-employee-setup-wizard.tsx", import.meta.url),
+      "utf8",
+    );
+    const hire = readFileSync(new URL("./employees.functions.ts", import.meta.url), "utf8");
+    assert.match(src, /HireDraftFields/);
+    assert.match(src, /finishEmployeeSetup/);
+    assert.match(src, /Skip for now/);
+    assert.match(src, /createInvitation/);
+    assert.match(src, /interpretInviteSendResult/);
+    assert.match(src, /Send invite/);
+    assert.match(src, /Set up Evidence pack/);
+    assert.doesNotMatch(src, /Behavior-related training/);
+    assert.doesNotMatch(src, /inviteStaffMembers\(/);
+    assert.doesNotMatch(src, /[\u{1F300}-\u{1FAFF}]/u);
+    assert.match(hire, /needs_setup/);
+    assert.match(hire, /deferHirePack/);
+    assert.match(hire, /finishEmployeeSetup/);
+    assert.match(hire, /onStaffHiredInternal/);
+    assert.match(hire, /requires_deescalation: false/);
+    assert.doesNotMatch(hire, /add_and_update/);
+    assert.doesNotMatch(hire, /update_only/);
   });
 });

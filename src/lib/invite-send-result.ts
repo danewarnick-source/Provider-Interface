@@ -88,13 +88,16 @@ export function interpretInviteSendResult(res: unknown): InterpretedInviteSend {
   const invitationEmailValue = invitationEmail(row.invitation);
   const firstEmail =
     invitationEmailValue ??
-    (typeof results[0]?.email === "string" && results[0].email.trim() ? results[0].email.trim() : null);
+    (typeof results[0]?.email === "string" && results[0].email.trim()
+      ? results[0].email.trim()
+      : null);
 
   const sentFromCount = typeof row.sent === "number" && Number.isFinite(row.sent) ? row.sent : null;
   const emailSentFlag = row.email_sent === true;
   const sent = sentFromCount ?? (emailSentFlag ? 1 : 0);
   const skipped = typeof row.skipped === "number" && Number.isFinite(row.skipped) ? row.skipped : 0;
-  const errorsFromCount = typeof row.errors === "number" && Number.isFinite(row.errors) ? row.errors : null;
+  const errorsFromCount =
+    typeof row.errors === "number" && Number.isFinite(row.errors) ? row.errors : null;
 
   const emailError =
     typeof row.email_error === "string" && row.email_error.trim()
@@ -103,8 +106,7 @@ export function interpretInviteSendResult(res: unknown): InterpretedInviteSend {
 
   const createdUnsent = results.some((r) => r.status === "created_unsent");
   const errors =
-    errorsFromCount ??
-    (emailSentFlag || sent > 0 ? 0 : createdUnsent || emailError ? 1 : 0);
+    errorsFromCount ?? (emailSentFlag || sent > 0 ? 0 : createdUnsent || emailError ? 1 : 0);
 
   const email_sent = emailSentFlag || sent > 0;
   const hasInviteShape =
@@ -119,7 +121,11 @@ export function interpretInviteSendResult(res: unknown): InterpretedInviteSend {
 
   let message: string;
   if (email_sent) {
-    message = firstEmail ? `Invite emailed to ${firstEmail}.` : sent === 1 ? "Invite emailed." : `Invited ${sent} employees.`;
+    message = firstEmail
+      ? `Invite emailed to ${firstEmail}.`
+      : sent === 1
+        ? "Invite emailed."
+        : `Invited ${sent} team members.`;
   } else if (createdUnsent || emailError) {
     message = `Invitation created, but the email couldn't be sent (${emailError ?? "unknown error"}). Share the join link from Pending invitations.`;
   } else {
