@@ -2,55 +2,46 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import * as XLSX from "xlsx";
-import { Copy, Download, FileSpreadsheet, KeyRound, Mail, Upload } from "lucide-react";
+import { Download, FileSpreadsheet, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { applyEmployeeRosterRow } from "@/lib/employees.functions";
-import { createInvitation, resendInvitation } from "@/lib/invitations.functions";
-import { interpretInviteSendResult } from "@/lib/invite-send-result";
-import { resolveAuthOrigin } from "@/lib/auth-redirect";
-import { generateTempPassword } from "@/lib/temp-password";
 import {
-  type EmployeeInviteRole,
   type EmployeeRosterDraft,
   type EmployeeRosterHeader,
-  type EmployeeRosterUploadMode,
+  applyRosterName,
   classifyRosterRowAction,
   parseEmployeeRosterCsv,
+  parseEmployeeRosterPaste,
   parseEmployeeRosterRecords,
-  parseEmployeeRosterRole,
   rosterRowHasFieldIssue,
-  toInviteRole,
   triggerEmployeeRosterTemplateDownload,
   validateEmployeeRosterRows,
 } from "@/lib/employee-roster-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 
-type CreatedRow = {
-  draftId: string;
-  userId: string;
-  name: string;
-  email: string;
-  password: string;
-  role: EmployeeInviteRole;
-  action: "created" | "updated";
-};
+const PREVIEW_FIELDS: EmployeeRosterHeader[] = ["name", "email", "phone", "hire_date", "job_title"];
 
-const MODE_OPTIONS: Array<{ id: EmployeeRosterUploadMode; title: string; hint: string }> = [
-  { id: "add_new", title: "Add new only", hint: "Skip emails already on this roster." },
-  { id: "add_and_update", title: "Add new and update existing", hint: "Match on email. New rows are created; existing rows are updated." },
-  { id: "update_only", title: "Update existing only", hint: "Only change people already on this roster. New emails are skipped." },
-];
-
-async function parseRosterFile(file: File): Promise<{ rows: EmployeeRosterDraft[]; ignoredColumns: string[] }> {
+async function parseRosterFile(
+  file: File,
+): Promise<{ rows: EmployeeRosterDraft[]; ignoredColumns: string[] }> {
   const name = file.name.toLowerCase();
   if (name.endsWith(".csv") || file.type === "text/csv") {
-    return parseEmployeeRosterCsv(await file.text());
+    const text = await file.text();
+    const first = text.split(/\r?\n/).find((line) => line.trim()) ?? "";
+    if (!/email/i.test(first)) return parseEmployeeRosterPaste(text);
+    return parseEmployeeRosterCsv(text);
   }
   const buf = await file.arrayBuffer();
   const wb = XLSX.read(buf, { type: "array" });
@@ -66,6 +57,21 @@ async function parseRosterFile(file: File): Promise<{ rows: EmployeeRosterDraft[
   return parseEmployeeRosterRecords(records, headers);
 }
 
+function labelFor(field: EmployeeRosterHeader): string {
+  switch (field) {
+    case "name":
+      return "Name";
+    case "email":
+      return "Email";
+    case "phone":
+      return "Phone";
+    case "hire_date":
+      return "Hire date";
+    case "job_title":
+      return "Job title";
+  }
+}
+
 export function EmployeeRosterUploadWizard({
   open,
   onOpenChange,
@@ -77,16 +83,12 @@ export function EmployeeRosterUploadWizard({
 }) {
   const qc = useQueryClient();
   const applyRow = useServerFn(applyEmployeeRosterRow);
-  const createInviteFn = useServerFn(createInvitation);
-  const resendInviteFn = useServerFn(resendInvitation);
 
-  const [step, setStep] = useState<"upload" | "preview" | "access">("upload");
-  const [mode, setMode] = useState<EmployeeRosterUploadMode>("add_new");
+  const [step, setStep] = useState<"entry" | "preview" | "done">("entry");
+  const [paste, setPaste] = useState("");
   const [rows, setRows] = useState<EmployeeRosterDraft[]>([]);
   const [ignoredColumns, setIgnoredColumns] = useState<string[]>([]);
-  const [created, setCreated] = useState<CreatedRow[]>([]);
-  const [inviteIds, setInviteIds] = useState<Set<string>>(() => new Set());
-  const [shownPasswords, setShownPasswords] = useState<Set<string>>(() => new Set());
+  const [addedCount, setAddedCount] = useState(0);
 
   const { data: existingEmails = [] } = useQuery({
     enabled: !!organizationId && open,
@@ -98,57 +100,68 @@ export function EmployeeRosterUploadWizard({
         .select("user_id")
         .eq("organization_id", organizationId);
       const ids = (members ?? []).map((m) => m.user_id);
-      const { data: profs } = await supabase.from("profiles")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .select("id, email" as any)
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, email")
         .in("id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return ((profs ?? []) as any[])
-        .map((p) => String(p.email ?? "").trim().toLowerCase())
+      return (profs ?? [])
+        .map((p) =>
+          String(p.email ?? "")
+            .trim()
+            .toLowerCase(),
+        )
         .filter(Boolean);
     },
   });
 
   const actions = useMemo(() => {
     const map = new Map<string, ReturnType<typeof classifyRosterRowAction>>();
-    for (const row of rows) {
-      map.set(row.id, classifyRosterRowAction(row.email, existingEmails, mode));
-    }
+    for (const row of rows) map.set(row.id, classifyRosterRowAction(row.email, existingEmails));
     return map;
-  }, [rows, existingEmails, mode]);
+  }, [rows, existingEmails]);
 
-  const actionable = rows.filter((row) => actions.get(row.id) !== "skip");
-  const issues = validateEmployeeRosterRows(actionable);
+  const toCreate = rows.filter((row) => actions.get(row.id) === "create");
+  const issues = validateEmployeeRosterRows(toCreate);
   const hasErrors = issues.size > 0;
-  const createCount = actionable.filter((row) => actions.get(row.id) === "create").length;
-  const updateCount = actionable.filter((row) => actions.get(row.id) === "update").length;
-  const skipCount = rows.length - actionable.length;
+  const skipCount = rows.length - toCreate.length;
 
   const resetAll = () => {
-    setStep("upload");
-    setMode("add_new");
+    setStep("entry");
+    setPaste("");
     setRows([]);
     setIgnoredColumns([]);
-    setCreated([]);
-    setInviteIds(new Set());
-    setShownPasswords(new Set());
+    setAddedCount(0);
   };
 
   const patchRow = (id: string, patch: Partial<EmployeeRosterDraft>) => {
-    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+    setRows((prev) =>
+      prev.map((row) => {
+        if (row.id !== id) return row;
+        if (patch.name !== undefined) return applyRosterName(row, patch.name);
+        return { ...row, ...patch };
+      }),
+    );
+  };
+
+  const showPreview = (parsed: { rows: EmployeeRosterDraft[]; ignoredColumns: string[] }) => {
+    if (!parsed.rows.length) {
+      toast.error("No people found. Use a name, email, phone, hire date, and job title.");
+      return;
+    }
+    setRows(parsed.rows);
+    setIgnoredColumns(parsed.ignoredColumns);
+    setStep("preview");
   };
 
   const createMutation = useMutation({
     mutationFn: async () => {
       if (!organizationId) throw new Error("No organization selected.");
-      if (hasErrors) throw new Error("Fix the highlighted rows before applying the file.");
-      if (!actionable.length) throw new Error("No rows to apply in this mode.");
-      const made: CreatedRow[] = [];
+      if (hasErrors) throw new Error("Fix the highlighted rows before adding anyone.");
+      if (!toCreate.length) throw new Error("Everyone in this list is already on the roster.");
+      let added = 0;
       const skipped: string[] = [];
       const errors: string[] = [];
-      for (const row of actionable) {
-        const planned = actions.get(row.id) ?? "create";
-        const password = planned === "create" ? generateTempPassword() : "";
+      for (const row of toCreate) {
         try {
           const res = await applyRow({
             data: {
@@ -157,125 +170,43 @@ export function EmployeeRosterUploadWizard({
               lastName: row.last_name.trim(),
               email: row.email.trim(),
               phone: row.phone.trim(),
-              role: parseEmployeeRosterRole(row.role) ?? "employee",
               hireDate: row.hire_date,
-              department: row.title.trim(),
-              username: row.username.trim(),
-              usernameProvided: row.username_provided,
-              mode,
-              temporaryPassword: password,
+              jobTitle: row.job_title.trim(),
             },
           });
           if (res.action === "skipped") {
             skipped.push(`${row.email}: ${res.reason ?? "Skipped."}`);
             continue;
           }
-          made.push({
-            draftId: row.id,
-            userId: res.userId || "",
-            name: `${row.first_name.trim()} ${row.last_name.trim()}`.trim(),
-            email: row.email.trim(),
-            password,
-            role: toInviteRole(row.role),
-            action: res.action,
-          });
+          added += 1;
         } catch (e) {
-          const who = `${row.first_name} ${row.last_name}`.trim() || row.email;
-          errors.push(`${who}: ${e instanceof Error ? e.message : "Could not apply."}`);
+          const who = row.name.trim() || row.email;
+          errors.push(`${who}: ${e instanceof Error ? e.message : "Could not add."}`);
         }
       }
-      if (!made.length) throw new Error(errors.join(" ") || skipped.join(" ") || "No staff rows applied.");
-      return { made, skipped, errors };
+      if (!added) throw new Error(errors.join(" ") || skipped.join(" ") || "No one was added.");
+      return { added, skipped, errors };
     },
-    onSuccess: ({ made, skipped, errors }) => {
+    onSuccess: ({ added, skipped, errors }) => {
       const extra = [...skipped, ...errors];
-      if (extra.length) toast.warning(`Applied ${made.length}. ${extra.join(" ")}`);
-      else toast.success(made.length === 1 ? "Staff row applied" : `${made.length} staff rows applied`);
-      setCreated(made);
-      setInviteIds(new Set());
-      setStep("access");
+      if (extra.length) toast.warning(`Added ${added}. ${extra.join(" ")}`);
+      else toast.success(added === 1 ? "Added 1 person" : `Added ${added} people`);
+      setAddedCount(added);
+      setStep("done");
       qc.invalidateQueries({ queryKey: ["members"] });
       qc.invalidateQueries({ queryKey: ["employee-roster-emails"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const inviteMutation = useMutation({
-    mutationFn: async (targets: CreatedRow[]) => {
-      if (!organizationId) throw new Error("No organization selected.");
-      const site_origin = resolveAuthOrigin();
-      const results: string[] = [];
-      for (const row of targets) {
-        const email = row.email.trim().toLowerCase();
-        try {
-          let raw: unknown;
-          try {
-            raw = await createInviteFn({
-              data: { organization_id: organizationId, email, role: row.role, site_origin },
-            });
-          } catch (e) {
-            const msg = e instanceof Error ? e.message : "";
-            if (!/pending invitation already exists/i.test(msg)) throw e;
-            const { data: pending, error } = await supabase
-              .from("invitations")
-              .select("id")
-              .eq("organization_id", organizationId)
-              .eq("email", email)
-              .eq("status", "pending")
-              .maybeSingle();
-            if (error) throw new Error(error.message);
-            if (!pending?.id) throw e;
-            raw = await resendInviteFn({
-              data: { organization_id: organizationId, invitation_id: pending.id, site_origin },
-            });
-          }
-          const out = interpretInviteSendResult(raw);
-          if (out.rpc_failure) throw new Error(out.message);
-          results.push(
-            out.email_sent
-              ? `Invite emailed to ${out.email ?? email}.`
-              : out.email_error
-                ? `Invitation created for ${email}, but the email couldn't be sent (${out.email_error}).`
-                : `${email}: ${out.message}`,
-          );
-        } catch (e) {
-          results.push(`${email}: ${e instanceof Error ? e.message : "Invite failed."}`);
-        }
-      }
-      return results;
-    },
-    onSuccess: (results) => {
-      const failed = results.some((r) => !/^Invite emailed/.test(r));
-      if (failed) toast.warning(results.join(" · "));
-      else toast.success(results.join(" · "));
-      qc.invalidateQueries({ queryKey: ["invites"] });
-      qc.invalidateQueries({ queryKey: ["invitations"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const finish = () => {
-    onOpenChange(false);
-    resetAll();
-  };
-
   const onFile = async (file: File | undefined) => {
     if (!file) return;
     try {
-      const parsed = await parseRosterFile(file);
-      if (!parsed.rows.length) {
-        toast.error("No staff rows found. Use the template columns.");
-        return;
-      }
-      setRows(parsed.rows);
-      setIgnoredColumns(parsed.ignoredColumns);
-      setStep("preview");
+      showPreview(await parseRosterFile(file));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not read that file.");
     }
   };
-
-  const selected = created.filter((r) => inviteIds.has(r.draftId));
 
   return (
     <Dialog
@@ -285,18 +216,53 @@ export function EmployeeRosterUploadWizard({
         onOpenChange(next);
       }}
     >
-      <DialogContent className={step === "preview" ? "max-w-4xl max-h-[90vh] overflow-y-auto" : "max-w-lg max-h-[90vh] overflow-y-auto"}>
-        {step === "upload" && (
+      <DialogContent
+        data-testid={step === "preview" ? "add-several-preview" : "add-several-dialog"}
+        className={
+          step === "preview"
+            ? "max-w-3xl max-h-[90vh] overflow-y-auto"
+            : "max-w-lg max-h-[90vh] overflow-y-auto"
+        }
+      >
+        {step === "entry" && (
           <>
             <DialogHeader>
-              <DialogTitle>Upload roster</DialogTitle>
+              <DialogTitle>Add several at once</DialogTitle>
               <DialogDescription>
-                Download the template, choose how to treat existing emails, then upload a CSV or Excel file. Client fields are ignored.
+                Add your team&apos;s basic info now. Each person lands on the roster as Needs setup,
+                and you&apos;ll answer their job questions next.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-3">
-              <ModePicker mode={mode} onChange={setMode} />
-              <Button type="button" variant="outline" onClick={() => triggerEmployeeRosterTemplateDownload()}>
+              <div className="grid gap-2">
+                <Label htmlFor="roster-paste">Paste rows</Label>
+                <Textarea
+                  id="roster-paste"
+                  value={paste}
+                  onChange={(e) => setPaste(e.target.value)}
+                  placeholder={
+                    "Jane Doe, jane.doe@example.com, 555-123-4567, 2026-07-01, Direct Support"
+                  }
+                  className="min-h-28 font-mono text-xs"
+                />
+                <p className="text-xs text-muted-foreground">
+                  One person per line: name, email, phone, hire date, job title. A header row is
+                  fine. No invites are sent.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!paste.trim()}
+                onClick={() => showPreview(parseEmployeeRosterPaste(paste))}
+              >
+                Review pasted rows
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => triggerEmployeeRosterTemplateDownload()}
+              >
                 <Download className="mr-2 h-4 w-4" /> Download template
               </Button>
               <label className="grid cursor-pointer gap-2 rounded-md border border-dashed border-border p-6 text-center text-sm">
@@ -320,159 +286,105 @@ export function EmployeeRosterUploadWizard({
         {step === "preview" && (
           <>
             <DialogHeader>
-              <DialogTitle>Review staff rows</DialogTitle>
+              <DialogTitle>Review before adding</DialogTitle>
               <DialogDescription>
-                Fix highlighted cells, then apply. Invites are not sent until the next step.
+                Fix anything highlighted. People already on the roster are skipped. No invites are
+                sent, and nothing here updates an existing person.
               </DialogDescription>
             </DialogHeader>
-            <ModePicker mode={mode} onChange={setMode} />
             <p className="text-xs text-muted-foreground">
-              {createCount} new
-              {updateCount > 0 && ` · ${updateCount} update`}
-              {skipCount > 0 && ` · ${skipCount} skip`}
+              {toCreate.length} to add
+              {skipCount > 0 && ` · ${skipCount} already on the roster`}
             </p>
             {ignoredColumns.length > 0 && (
               <p className="text-xs text-muted-foreground">
                 Ignored columns: {ignoredColumns.join(", ")}.
               </p>
             )}
-            <div className="overflow-x-auto rounded-md border border-border">
-              <table className="w-full min-w-[800px] text-sm">
-                <thead className="bg-muted/60 text-xs uppercase tracking-wider text-muted-foreground">
-                  <tr>
-                    <th className="px-2 py-2 text-left font-semibold">Action</th>
-                    {previewFields.map((h) => (
-                      <th key={h} className="px-2 py-2 text-left font-semibold">{labelFor(h)}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => (
-                    <tr key={row.id} className="border-t border-border/60">
-                      <td className="px-2 py-1 text-xs font-medium capitalize text-muted-foreground">
-                        {actions.get(row.id) ?? "create"}
-                      </td>
-                      {previewFields.map((field) => (
-                        <td key={field} className="px-2 py-1">
+            <div className="grid gap-3">
+              {rows.map((row) => {
+                const action = actions.get(row.id) ?? "create";
+                const rowIssues = action === "create" ? (issues.get(row.id) ?? []) : [];
+                return (
+                  <div key={row.id} className="grid gap-2 rounded-md border border-border p-3">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      {action === "skip"
+                        ? "Already on the roster — skipped"
+                        : rowIssues.length
+                          ? "Needs a fix"
+                          : "Will add as Needs setup"}
+                    </p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {PREVIEW_FIELDS.map((field) => (
+                        <div key={field} className="grid gap-1">
+                          <Label className="text-xs">{labelFor(field)}</Label>
                           <Input
                             value={row[field]}
-                            onChange={(e) => patchRow(row.id, field === "username"
-                              ? { username: e.target.value, username_provided: true }
-                              : { [field]: e.target.value })}
+                            onChange={(e) => patchRow(row.id, { [field]: e.target.value })}
                             className={
-                              "h-8 text-xs " +
-                              (rosterRowHasFieldIssue(issues, row.id, field) ? "border-destructive" : "")
+                              "h-8 text-sm " +
+                              (rosterRowHasFieldIssue(issues, row.id, field) && action === "create"
+                                ? "border-destructive"
+                                : "")
                             }
                           />
-                        </td>
+                        </div>
                       ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                    </div>
+                    {rowIssues.length > 0 && (
+                      <ul className="list-disc pl-5 text-xs text-destructive">
+                        {rowIssues.map((issue) => (
+                          <li key={`${row.id}-${issue.field}-${issue.message}`}>{issue.message}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            {hasErrors && (
-              <ul className="list-disc pl-5 text-xs text-destructive">
-                {[...issues.values()].flat().slice(0, 8).map((issue, i) => (
-                  <li key={`${issue.field}-${i}`}>{issue.message}</li>
-                ))}
-              </ul>
-            )}
             <DialogFooter className="gap-2 sm:justify-between">
-              <Button type="button" variant="ghost" onClick={() => { setRows([]); setStep("upload"); }}>
+              <Button type="button" variant="ghost" onClick={() => setStep("entry")}>
                 Back
               </Button>
               <Button
                 type="button"
-                disabled={!organizationId || !actionable.length || hasErrors || createMutation.isPending}
+                disabled={
+                  !organizationId || !toCreate.length || hasErrors || createMutation.isPending
+                }
                 className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
                 onClick={() => createMutation.mutate()}
               >
                 {createMutation.isPending
-                  ? "Applying…"
-                  : applyLabel(createCount, updateCount)}
+                  ? "Adding…"
+                  : toCreate.length === 1
+                    ? "Add 1 person"
+                    : `Add ${toCreate.length} people`}
               </Button>
             </DialogFooter>
           </>
         )}
 
-        {step === "access" && (
+        {step === "done" && (
           <>
             <DialogHeader>
-              <DialogTitle>Send invites?</DialogTitle>
+              <DialogTitle>Added to the roster</DialogTitle>
               <DialogDescription>
-                Check who should get a join email. Nothing is sent unless you choose it.
+                {addedCount === 1
+                  ? "1 person is on the roster as Needs setup."
+                  : `${addedCount} people are on the roster as Needs setup.`}{" "}
+                Finish setup from the roster to answer their job questions. No invites were sent.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-2">
-              {created.map((row) => (
-                <div key={row.draftId} className="grid gap-2 rounded-md border border-border p-3">
-                  <label className="flex items-center gap-2 text-sm">
-                    <Checkbox
-                      checked={inviteIds.has(row.draftId)}
-                      onCheckedChange={(v) => {
-                        setInviteIds((prev) => {
-                          const next = new Set(prev);
-                          if (v === true) next.add(row.draftId);
-                          else next.delete(row.draftId);
-                          return next;
-                        });
-                      }}
-                    />
-                    <span className="font-medium">{row.name}</span>
-                    <code className="truncate text-xs text-muted-foreground">{row.email}</code>
-                    <span className="text-xs text-muted-foreground">{row.action === "updated" ? "updated" : "new"}</span>
-                  </label>
-                  {row.password ? (
-                    <>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setShownPasswords((prev) => {
-                              const next = new Set(prev);
-                              next.add(row.draftId);
-                              return next;
-                            })
-                          }
-                        >
-                          <KeyRound className="mr-1 h-3.5 w-3.5" /> Show temporary password
-                        </Button>
-                      </div>
-                      {shownPasswords.has(row.draftId) && (
-                        <div className="flex gap-2">
-                          <code className="flex-1 rounded bg-secondary p-2 text-sm">{row.password}</code>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => {
-                              void navigator.clipboard.writeText(row.password);
-                              toast.success("Copied");
-                            }}
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      )}
-                    </>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-            <DialogFooter className="gap-2 sm:justify-between">
-              <Button type="button" variant="ghost" onClick={finish}>
-                Don&apos;t invite yet
-              </Button>
+            <DialogFooter>
               <Button
                 type="button"
-                disabled={!selected.length || inviteMutation.isPending || !organizationId}
                 className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
-                onClick={() => inviteMutation.mutate(selected)}
+                onClick={() => {
+                  onOpenChange(false);
+                  resetAll();
+                }}
               >
-                <Mail className="mr-2 h-4 w-4" />
-                {inviteMutation.isPending ? "Sending…" : `Send ${selected.length} invite${selected.length === 1 ? "" : "s"}`}
+                Done
               </Button>
             </DialogFooter>
           </>
@@ -482,62 +394,16 @@ export function EmployeeRosterUploadWizard({
   );
 }
 
-export function EmployeeRosterUploadButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
-  return (
-    <Button variant="outline" onClick={onClick} disabled={disabled}>
-      <FileSpreadsheet className="mr-2 h-4 w-4" /> Upload roster
-    </Button>
-  );
-}
-
-function ModePicker({
-  mode,
-  onChange,
+export function EmployeeRosterUploadButton({
+  onClick,
+  disabled,
 }: {
-  mode: EmployeeRosterUploadMode;
-  onChange: (mode: EmployeeRosterUploadMode) => void;
+  onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
-    <fieldset className="grid gap-2">
-      <legend className="text-sm font-medium">If an email is already on this roster</legend>
-      {MODE_OPTIONS.map((opt) => (
-        <label key={opt.id} className="flex items-start gap-2 rounded-md border border-border p-3 text-sm">
-          <input
-            type="radio"
-            name="roster-upload-mode"
-            className="mt-1"
-            checked={mode === opt.id}
-            onChange={() => onChange(opt.id)}
-          />
-          <span>
-            <span className="font-medium">{opt.title}</span>
-            <span className="block text-xs text-muted-foreground">{opt.hint}</span>
-          </span>
-        </label>
-      ))}
-    </fieldset>
+    <Button variant="outline" onClick={onClick} disabled={disabled}>
+      <FileSpreadsheet className="mr-2 h-4 w-4" /> Add several at once
+    </Button>
   );
-}
-
-function applyLabel(createCount: number, updateCount: number): string {
-  if (createCount && updateCount) return `Apply ${createCount} new, ${updateCount} update`;
-  if (updateCount && !createCount) return `Update ${updateCount} staff`;
-  return `Create ${createCount} staff`;
-}
-
-const previewFields: EmployeeRosterHeader[] = [
-  "first_name", "last_name", "email", "phone", "role", "title", "hire_date", "username",
-];
-
-function labelFor(field: EmployeeRosterHeader): string {
-  switch (field) {
-    case "first_name": return "First name";
-    case "last_name": return "Last name";
-    case "email": return "Email";
-    case "phone": return "Phone";
-    case "role": return "Role";
-    case "title": return "Title";
-    case "hire_date": return "Hire date";
-    case "username": return "Username";
-  }
 }

@@ -38,7 +38,7 @@ import {
 
 type Role = "admin" | "manager" | "employee";
 
-type HireDraft = {
+export type HireDraft = {
   id: string;
   firstName: string;
   lastName: string;
@@ -468,7 +468,7 @@ function AccessCard({
   );
 }
 
-function HireDraftFields({
+export function HireDraftFields({
   draft,
   index,
   showHeader,

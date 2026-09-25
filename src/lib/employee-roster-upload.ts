@@ -1,52 +1,56 @@
 /**
- * Employees-only Excel/CSV roster upload.
- * Fixed columns. Never maps guardian / meds / PCSP / billing / client fields.
+ * Add several employees at once.
+ * Basics only: name, email, phone, hire date, job title.
+ * Never maps guardian / meds / PCSP / billing / client fields.
+ * Existing roster emails are skipped. There is no update mode.
  */
 import Papa from "papaparse";
 import { isValidSignupEmail, normalizeSignupEmail } from "./signup-email.ts";
-import {
-  isValidUsername,
-  resolveAccountUsername,
-} from "./account-username.ts";
-import { uniqueHireEmails } from "./employee-roster.ts";
 
 export const EMPLOYEE_ROSTER_HEADERS = [
-  "first_name",
-  "last_name",
+  "name",
   "email",
   "phone",
-  "role",
-  "title",
   "hire_date",
-  "username",
+  "job_title",
 ] as const;
 
 export type EmployeeRosterHeader = (typeof EMPLOYEE_ROSTER_HEADERS)[number];
 
-export type EmployeeRosterRole = "admin" | "program_manager" | "manager" | "employee" | "committee_member";
+export type EmployeeRosterRole =
+  | "admin"
+  | "program_manager"
+  | "manager"
+  | "employee"
+  | "committee_member";
 
 /** createInvitation / resendInvitation only accept these three. */
 export type EmployeeInviteRole = "admin" | "manager" | "employee";
 
 export type EmployeeRosterDraft = {
   id: string;
+  name: string;
   first_name: string;
   last_name: string;
   email: string;
   phone: string;
-  role: string;
-  title: string;
   hire_date: string;
-  username: string;
-  username_provided: boolean;
+  job_title: string;
 };
 
-export type EmployeeRosterUploadMode = "add_new" | "add_and_update" | "update_only";
-export type EmployeeRosterRowAction = "create" | "update" | "skip";
+export type EmployeeRosterRowAction = "create" | "skip";
 
-export type EmployeeRosterIssue = { field: EmployeeRosterHeader | "row"; message: string };
+export type EmployeeRosterIssueField = EmployeeRosterHeader | "row";
 
-const HEADER_ALIASES: Record<string, EmployeeRosterHeader> = {
+export type EmployeeRosterIssue = { field: EmployeeRosterIssueField; message: string };
+
+type MappedKey = EmployeeRosterHeader | "first_name" | "last_name";
+
+const HEADER_ALIASES: Record<string, MappedKey> = {
+  name: "name",
+  full_name: "name",
+  employee_name: "name",
+  staff_name: "name",
   first_name: "first_name",
   firstname: "first_name",
   first: "first_name",
@@ -59,14 +63,12 @@ const HEADER_ALIASES: Record<string, EmployeeRosterHeader> = {
   phone: "phone",
   phone_number: "phone",
   mobile: "phone",
-  role: "role",
-  title: "title",
-  job_title: "title",
   hire_date: "hire_date",
   start_date: "hire_date",
-  username: "username",
-  user_name: "username",
-  login: "username",
+  job_title: "job_title",
+  jobtitle: "job_title",
+  title: "job_title",
+  position: "job_title",
 };
 
 const CLIENT_ONLY_HEADERS = [
@@ -96,22 +98,29 @@ const ROLE_ALIASES: Record<string, EmployeeRosterRole> = {
 };
 
 const EXAMPLE_ROW: Record<EmployeeRosterHeader, string> = {
-  first_name: "Jane",
-  last_name: "Doe",
+  name: "Jane Doe",
   email: "jane.doe@example.com",
   phone: "555-123-4567",
-  role: "employee",
-  title: "Direct Support",
   hire_date: "2026-07-01",
-  username: "jane.doe@example.com",
+  job_title: "Direct Support",
 };
 
 function slugHeader(raw: string): string {
-  return raw.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
+}
+
+function mapRosterColumn(raw: string): MappedKey | null {
+  return HEADER_ALIASES[slugHeader(raw)] ?? null;
 }
 
 export function normalizeEmployeeRosterHeader(raw: string): EmployeeRosterHeader | null {
-  return HEADER_ALIASES[slugHeader(raw)] ?? null;
+  const key = mapRosterColumn(raw);
+  if (key === "first_name" || key === "last_name") return null;
+  return key;
 }
 
 export function isClientOnlyRosterHeader(raw: string): boolean {
@@ -132,6 +141,14 @@ export function toInviteRole(raw: string): EmployeeInviteRole {
   return "employee";
 }
 
+export function splitPersonName(raw: string): { first_name: string; last_name: string } {
+  const t = raw.trim().replace(/\s+/g, " ");
+  if (!t) return { first_name: "", last_name: "" };
+  const idx = t.lastIndexOf(" ");
+  if (idx <= 0) return { first_name: t, last_name: "" };
+  return { first_name: t.slice(0, idx), last_name: t.slice(idx + 1) };
+}
+
 export function normalizeRosterEmailSet(emails: Iterable<string>): Set<string> {
   const out = new Set<string>();
   for (const raw of emails) {
@@ -141,16 +158,13 @@ export function normalizeRosterEmailSet(emails: Iterable<string>): Set<string> {
   return out;
 }
 
-/** Connecteam-style: match existing roster rows on email. */
+/** Existing roster emails are skipped. There is no update mode. */
 export function classifyRosterRowAction(
   email: string,
   existingEmails: Iterable<string>,
-  mode: EmployeeRosterUploadMode,
 ): EmployeeRosterRowAction {
   const exists = normalizeRosterEmailSet(existingEmails).has(normalizeSignupEmail(email));
-  if (mode === "add_new") return exists ? "skip" : "create";
-  if (mode === "update_only") return exists ? "update" : "skip";
-  return exists ? "update" : "create";
+  return exists ? "skip" : "create";
 }
 
 export function normalizeHireDate(raw: string): string {
@@ -181,15 +195,43 @@ function newRowId(): string {
 export function emptyEmployeeRosterDraft(): EmployeeRosterDraft {
   return {
     id: newRowId(),
+    name: "",
     first_name: "",
     last_name: "",
     email: "",
     phone: "",
-    role: "employee",
-    title: "",
     hire_date: "",
-    username: "",
-    username_provided: false,
+    job_title: "",
+  };
+}
+
+function draftFromParts(parts: {
+  name?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  hire_date?: string;
+  job_title?: string;
+}): EmployeeRosterDraft {
+  const explicitFirst = (parts.first_name ?? "").trim();
+  const explicitLast = (parts.last_name ?? "").trim();
+  const combined = [explicitFirst, explicitLast].filter(Boolean).join(" ");
+  const name = (parts.name ?? "").trim() || combined;
+  const split =
+    explicitFirst || explicitLast
+      ? { first_name: explicitFirst, last_name: explicitLast }
+      : splitPersonName(name);
+  const email = normalizeSignupEmail(parts.email ?? "");
+  return {
+    id: newRowId(),
+    name: name || [split.first_name, split.last_name].filter(Boolean).join(" "),
+    first_name: split.first_name,
+    last_name: split.last_name,
+    email,
+    phone: (parts.phone ?? "").trim(),
+    hire_date: normalizeHireDate(parts.hire_date ?? ""),
+    job_title: (parts.job_title ?? "").trim(),
   };
 }
 
@@ -214,28 +256,24 @@ export function mapRawRosterRow(
   raw: Record<string, string>,
   headers: string[],
 ): EmployeeRosterDraft {
-  const mapped: Record<string, string> = {};
+  const mapped: Partial<Record<MappedKey, string>> = {};
   for (const header of headers) {
     if (isClientOnlyRosterHeader(header)) continue;
-    const key = normalizeEmployeeRosterHeader(header);
+    const key = mapRosterColumn(header);
     if (!key) continue;
-    mapped[key] = String(raw[header] ?? "").trim();
+    const value = String(raw[header] ?? "").trim();
+    if (!value) continue;
+    mapped[key] = mapped[key] ? `${mapped[key]} ${value}`.trim() : value;
   }
-  const email = normalizeSignupEmail(mapped.email ?? "");
-  const rawRole = (mapped.role ?? "").trim();
-  const usernameRaw = (mapped.username ?? "").trim();
-  return {
-    id: newRowId(),
-    first_name: mapped.first_name ?? "",
-    last_name: mapped.last_name ?? "",
-    email,
-    phone: mapped.phone ?? "",
-    role: rawRole || "employee",
-    title: mapped.title ?? "",
-    hire_date: normalizeHireDate(mapped.hire_date ?? ""),
-    username: usernameRaw || email,
-    username_provided: Boolean(usernameRaw),
-  };
+  return draftFromParts(mapped);
+}
+
+function ignoredHeaders(headers: string[]): string[] {
+  return headers.filter((h) => {
+    if (!h.trim()) return false;
+    if (isClientOnlyRosterHeader(h)) return true;
+    return !mapRosterColumn(h);
+  });
 }
 
 export function parseEmployeeRosterCsv(text: string): {
@@ -244,44 +282,94 @@ export function parseEmployeeRosterCsv(text: string): {
 } {
   const res = Papa.parse<Record<string, string>>(text, { header: true, skipEmptyLines: true });
   const headers = res.meta.fields ?? [];
-  const ignoredColumns = headers.filter((h) => isClientOnlyRosterHeader(h) || !normalizeEmployeeRosterHeader(h));
   const rows = (res.data ?? [])
     .map((raw) => mapRawRosterRow(raw, headers))
-    .filter((row) => row.first_name || row.last_name || row.email);
-  return { rows, ignoredColumns };
+    .filter((row) => row.name || row.first_name || row.last_name || row.email);
+  return { rows, ignoredColumns: ignoredHeaders(headers) };
 }
 
 export function parseEmployeeRosterRecords(
   records: Record<string, string>[],
   headers: string[],
 ): { rows: EmployeeRosterDraft[]; ignoredColumns: string[] } {
-  const ignoredColumns = headers.filter((h) => isClientOnlyRosterHeader(h) || !normalizeEmployeeRosterHeader(h));
   const rows = records
     .map((raw) => mapRawRosterRow(raw, headers))
-    .filter((row) => row.first_name || row.last_name || row.email);
-  return { rows, ignoredColumns };
+    .filter((row) => row.name || row.first_name || row.last_name || row.email);
+  return { rows, ignoredColumns: ignoredHeaders(headers) };
 }
 
-export function validateEmployeeRosterRows(rows: EmployeeRosterDraft[]): Map<string, EmployeeRosterIssue[]> {
+function splitPasteLine(line: string): string[] {
+  if (line.includes("\t")) return line.split("\t").map((c) => c.trim());
+  const parsed = Papa.parse<string[]>(line, { header: false, skipEmptyLines: true });
+  const row = parsed.data?.[0];
+  if (Array.isArray(row)) return row.map((c) => String(c ?? "").trim());
+  return [line.trim()];
+}
+
+function lineLooksLikeHeader(line: string): boolean {
+  return splitPasteLine(line).some((cell) => mapRosterColumn(cell) === "email");
+}
+
+/** Header row if it contains Email; otherwise name, email, phone, hire date, job title. */
+export function parseEmployeeRosterPaste(text: string): {
+  rows: EmployeeRosterDraft[];
+  ignoredColumns: string[];
+} {
+  const trimmed = text.trim();
+  if (!trimmed) return { rows: [], ignoredColumns: [] };
+  const lines = trimmed.split(/\r?\n/).filter((line) => line.trim());
+  const first = lines[0] ?? "";
+  if (lineLooksLikeHeader(first)) return parseEmployeeRosterCsv(trimmed);
+  const rows = lines
+    .map((line) => {
+      const [name, email, phone, hireDate, jobTitle] = splitPasteLine(line);
+      return draftFromParts({
+        name,
+        email,
+        phone,
+        hire_date: hireDate,
+        job_title: jobTitle,
+      });
+    })
+    .filter((row) => row.name || row.email || row.phone || row.hire_date || row.job_title);
+  return { rows, ignoredColumns: [] };
+}
+
+function duplicateEmails(rows: EmployeeRosterDraft[]): Set<string> {
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    const email = normalizeSignupEmail(row.email);
+    if (!email || !isValidSignupEmail(email)) continue;
+    counts.set(email, (counts.get(email) ?? 0) + 1);
+  }
+  const dups = new Set<string>();
+  for (const [email, count] of counts) {
+    if (count > 1) dups.add(email);
+  }
+  return dups;
+}
+
+export function validateEmployeeRosterRows(
+  rows: EmployeeRosterDraft[],
+): Map<string, EmployeeRosterIssue[]> {
   const issues = new Map<string, EmployeeRosterIssue[]>();
-  const dup = uniqueHireEmails(rows.map((r) => r.email));
+  const dups = duplicateEmails(rows);
   for (const row of rows) {
     const list: EmployeeRosterIssue[] = [];
-    if (!row.first_name.trim()) list.push({ field: "first_name", message: "First name is required." });
-    if (!row.last_name.trim()) list.push({ field: "last_name", message: "Last name is required." });
-    if (!isValidSignupEmail(row.email)) list.push({ field: "email", message: "Enter a valid email." });
+    if (!row.first_name.trim() && !row.last_name.trim()) {
+      list.push({ field: "name", message: "Name is required." });
+    } else if (!row.first_name.trim() || !row.last_name.trim()) {
+      list.push({ field: "name", message: "Enter a first and last name." });
+    }
+    if (!row.email.trim()) list.push({ field: "email", message: "Email is required." });
+    else if (!isValidSignupEmail(row.email))
+      list.push({ field: "email", message: "Enter a valid email." });
     if (!row.phone.trim()) list.push({ field: "phone", message: "Phone is required." });
-    if (!parseEmployeeRosterRole(row.role)) list.push({ field: "role", message: "Use employee, manager, or admin." });
-    if (row.hire_date && !/^\d{4}-\d{2}-\d{2}$/.test(row.hire_date)) {
+    if (!row.hire_date.trim()) list.push({ field: "hire_date", message: "Hire date is required." });
+    else if (!/^\d{4}-\d{2}-\d{2}$/.test(row.hire_date)) {
       list.push({ field: "hire_date", message: "Use YYYY-MM-DD." });
     }
-    const username = resolveAccountUsername({ username: row.username, email: row.email });
-    if (row.username.trim() && !isValidUsername(row.username)) {
-      list.push({ field: "username", message: "Use the email, or a 3–32 character handle." });
-    } else if (username && !isValidUsername(username) && row.email) {
-      list.push({ field: "username", message: "Use the email, or a 3–32 character handle." });
-    }
-    if (dup && normalizeSignupEmail(row.email) === dup) {
+    if (dups.has(normalizeSignupEmail(row.email))) {
       list.push({ field: "email", message: "This email is listed more than once." });
     }
     if (list.length) issues.set(row.id, list);
@@ -292,7 +380,17 @@ export function validateEmployeeRosterRows(rows: EmployeeRosterDraft[]): Map<str
 export function rosterRowHasFieldIssue(
   issues: Map<string, EmployeeRosterIssue[]>,
   rowId: string,
-  field: EmployeeRosterHeader,
+  field: EmployeeRosterIssueField,
 ): boolean {
   return (issues.get(rowId) ?? []).some((i) => i.field === field);
+}
+
+export function applyRosterName(row: EmployeeRosterDraft, name: string): EmployeeRosterDraft {
+  const split = splitPersonName(name);
+  return {
+    ...row,
+    name,
+    first_name: split.first_name,
+    last_name: split.last_name,
+  };
 }

@@ -2,12 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import {
-  onStaffHiredInternal,
-  reevaluateStaffDutiesInternal,
-} from "@/lib/staff-assignment-hooks.functions";
+import { onStaffHiredInternal } from "@/lib/staff-assignment-hooks.functions";
 import { resolveAccountUsername } from "@/lib/account-username";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
+import { generateTempPassword } from "@/lib/temp-password";
 
 const RoleEnum = z.enum(["admin", "program_manager", "manager", "employee", "committee_member"]);
 
@@ -35,6 +33,40 @@ export const CreateEmployeeInput = z.object({
 
 export type HireEmployeeInput = z.infer<typeof CreateEmployeeInput>;
 
+export type HireEmployeeOptions = {
+  /** Bulk add: person is on the roster but job questions are not answered yet. */
+  needsSetup?: boolean;
+  /** Skip Evidence-pack assignment until Finish setup, when job answers exist. */
+  deferHirePack?: boolean;
+  /** Spreadsheet job title. Omit to keep the Add employee department → job title path. */
+  jobTitle?: string | null;
+};
+
+async function customAttributesFromIntake(
+  organizationId: string,
+  customFieldValues: Record<string, unknown> | undefined,
+): Promise<Record<string, unknown>> {
+  const customFieldEntries = Object.entries(customFieldValues ?? {}).filter(
+    ([, v]) => v !== undefined && v !== "",
+  );
+  const customAttributes: Record<string, unknown> = {};
+  if (!customFieldEntries.length) return customAttributes;
+  const { data: orgRow } = await supabaseAdmin
+    .from("organizations")
+    .select("feature_config")
+    .eq("id", organizationId)
+    .maybeSingle();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const customFieldDefs = ((orgRow as any)?.feature_config?.staff_intake_fields?.custom_fields ??
+    []) as Array<{ id: string; name: string }>;
+  const nameById = new Map(customFieldDefs.map((f) => [f.id, f.name]));
+  for (const [fieldId, value] of customFieldEntries) {
+    const name = nameById.get(fieldId);
+    if (name && name !== "needs_setup") customAttributes[name] = value;
+  }
+  return customAttributes;
+}
+
 async function assertOrgManager(actorId: string, orgId: string) {
   const { data, error } = await supabaseAdmin
     .from("organization_members")
@@ -54,6 +86,7 @@ export async function hireEmployeeInternal(
   data: HireEmployeeInput,
   actorUserId: string,
   createdVia: "manual_admin" | "smart_import" = "manual_admin",
+  options: HireEmployeeOptions = {},
 ): Promise<{ userId: string; email: string; created: boolean }> {
   await assertAgencySetupCompleteForOrg(supabaseAdmin, data.organizationId);
 
@@ -110,25 +143,11 @@ export async function hireEmployeeInternal(
   }
 
   try {
-    const customFieldEntries = Object.entries(data.customFieldValues ?? {}).filter(
-      ([, v]) => v !== undefined && v !== "",
+    const customAttributes = await customAttributesFromIntake(
+      data.organizationId,
+      data.customFieldValues,
     );
-    const customAttributes: Record<string, unknown> = {};
-    if (customFieldEntries.length) {
-      const { data: orgRow } = await supabaseAdmin
-        .from("organizations")
-        .select("feature_config")
-        .eq("id", data.organizationId)
-        .maybeSingle();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const customFieldDefs = ((orgRow as any)?.feature_config?.staff_intake_fields
-        ?.custom_fields ?? []) as Array<{ id: string; name: string }>;
-      const nameById = new Map(customFieldDefs.map((f) => [f.id, f.name]));
-      for (const [fieldId, value] of customFieldEntries) {
-        const name = nameById.get(fieldId);
-        if (name) customAttributes[name] = value;
-      }
-    }
+    if (options.needsSetup) customAttributes.needs_setup = true;
 
     const profileRow: Record<string, unknown> = {
       id: newUserId,
@@ -175,12 +194,14 @@ export async function hireEmployeeInternal(
       .eq("user_id", newUserId)
       .neq("organization_id", data.organizationId);
 
+    const jobTitle =
+      options.jobTitle !== undefined ? options.jobTitle?.trim() || null : data.department || null;
     const { error: memErr } = await supabaseAdmin.from("organization_members").upsert(
       {
         organization_id: data.organizationId,
         user_id: newUserId,
         role: data.role,
-        job_title: data.department || null,
+        job_title: jobTitle,
         active: true,
         ...(data.managerId !== undefined ? { manager_id: data.managerId } : {}),
       },
@@ -200,10 +221,12 @@ export async function hireEmployeeInternal(
       change_method: createdVia === "smart_import" ? "smartImportEmployee" : "createEmployee",
     });
 
-    try {
-      await onStaffHiredInternal(supabaseAdmin, data.organizationId, newUserId);
-    } catch (hireErr) {
-      console.warn("[obligations] hire auto-assign failed:", hireErr);
+    if (!options.deferHirePack) {
+      try {
+        await onStaffHiredInternal(supabaseAdmin, data.organizationId, newUserId);
+      } catch (hireErr) {
+        console.warn("[obligations] hire auto-assign failed:", hireErr);
+      }
     }
 
     return { userId: newUserId, email: effectiveEmail, created };
@@ -230,111 +253,39 @@ const RosterApplyInput = z.object({
   firstName: z.string().trim().min(1).max(80),
   lastName: z.string().trim().min(1).max(80),
   email: z.string().trim().email().max(255),
-  phone: z.string().trim().max(30).optional().or(z.literal("")),
-  role: RoleEnum,
-  department: z.string().trim().max(120).optional().or(z.literal("")),
-  hireDate: z.string().optional().or(z.literal("")),
-  username: z.string().trim().max(254).optional().or(z.literal("")),
-  usernameProvided: z.boolean().optional().default(false),
-  mode: z.enum(["add_new", "add_and_update", "update_only"]),
-  temporaryPassword: z.string().min(8).max(128).optional().or(z.literal("")),
+  phone: z.string().trim().min(1).max(30),
+  hireDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
 });
 
 export type RosterApplyResult = {
   userId: string;
   email: string;
-  action: "created" | "updated" | "skipped";
+  action: "created" | "skipped";
   reason: string | null;
 };
 
-async function updateExistingRosterMember(
-  data: z.infer<typeof RosterApplyInput>,
-  userId: string,
-  inOrg: boolean,
-): Promise<void> {
-  const email = data.email.trim().toLowerCase();
-  const profilePatch: Record<string, unknown> = {
-    first_name: data.firstName,
-    last_name: data.lastName,
-    full_name: `${data.firstName} ${data.lastName}`.trim(),
-  };
-  if (data.phone?.trim()) profilePatch.phone = data.phone.trim();
-  if (data.department?.trim()) profilePatch.department = data.department.trim();
-  if (data.hireDate) {
-    profilePatch.hire_date = data.hireDate;
-    profilePatch.start_date = data.hireDate;
-  }
-  if (data.usernameProvided && data.username?.trim()) {
-    profilePatch.username = resolveAccountUsername({
-      username: data.username,
-      email,
-    });
-  }
-  const { error: profErr } = await supabaseAdmin
-    .from("profiles")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .update(profilePatch as any)
-    .eq("id", userId);
-  if (profErr) throw new Error(profErr.message);
-
-  if (inOrg) {
-    const { error: memErr } = await supabaseAdmin
-      .from("organization_members")
-      .update({
-        role: data.role,
-        job_title: data.department || null,
-      })
-      .eq("organization_id", data.organizationId)
-      .eq("user_id", userId);
-    if (memErr) throw new Error(memErr.message);
-    try {
-      await reevaluateStaffDutiesInternal(supabaseAdmin, data.organizationId, userId);
-    } catch (e) {
-      console.warn("[obligations] roster role reevaluate failed:", e);
-    }
-    return;
-  }
-
-  const { error: memErr } = await supabaseAdmin.from("organization_members").upsert(
-    {
-      organization_id: data.organizationId,
-      user_id: userId,
-      role: data.role,
-      job_title: data.department || null,
-      active: true,
-    },
-    { onConflict: "organization_id,user_id" },
-  );
-  if (memErr) throw new Error(memErr.message);
-  try {
-    await reevaluateStaffDutiesInternal(supabaseAdmin, data.organizationId, userId);
-  } catch (e) {
-    console.warn("[obligations] roster membership reevaluate failed:", e);
-  }
-}
-
-/** Template upload: create / update / skip. Never sends email or hire-pack on update. */
+/** Add basics only. Existing emails are skipped. Never updates, never emails. */
 export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => RosterApplyInput.parse(d))
   .handler(async ({ data, context }): Promise<RosterApplyResult> => {
+    const email = data.email.trim().toLowerCase();
     const empty: RosterApplyResult = {
       userId: "",
-      email: data.email.trim().toLowerCase(),
+      email,
       action: "skipped",
       reason: "Not signed in.",
     };
     if (!context.userId) return empty;
     await assertOrgManager(context.userId, data.organizationId);
 
-    const email = data.email.trim().toLowerCase();
     const { data: existingProf } = await supabaseAdmin
       .from("profiles")
       .select("id")
       .ilike("email", email)
       .maybeSingle();
 
-    let inOrg = false;
     if (existingProf?.id) {
       const { data: mem } = await supabaseAdmin
         .from("organization_members")
@@ -342,26 +293,14 @@ export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
         .eq("user_id", existingProf.id)
         .eq("organization_id", data.organizationId)
         .maybeSingle();
-      inOrg = !!mem;
+      return {
+        userId: existingProf.id,
+        email,
+        action: "skipped",
+        reason: mem ? "Already on the roster." : "An account with this email already exists.",
+      };
     }
 
-    if (existingProf?.id) {
-      if (data.mode === "add_new") {
-        return { userId: existingProf.id, email, action: "skipped", reason: "Already on file." };
-      }
-      if (data.mode === "update_only" && !inOrg) {
-        return { userId: existingProf.id, email, action: "skipped", reason: "Not on this roster." };
-      }
-      await updateExistingRosterMember(data, existingProf.id, inOrg);
-      return { userId: existingProf.id, email, action: "updated", reason: null };
-    }
-
-    if (data.mode === "update_only") {
-      return { userId: "", email, action: "skipped", reason: "Not on this roster." };
-    }
-
-    const password = data.temporaryPassword?.trim();
-    if (!password) throw new Error("A temporary password is required to create a new employee.");
     try {
       const hired = await hireEmployeeInternal(
         {
@@ -369,13 +308,12 @@ export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
           firstName: data.firstName,
           lastName: data.lastName,
           email,
-          phone: data.phone ?? "",
-          temporaryPassword: password,
-          role: data.role,
-          department: data.department ?? "",
-          hireDate: data.hireDate ?? "",
-          startDate: data.hireDate ?? "",
-          username: data.username ?? "",
+          phone: data.phone,
+          temporaryPassword: generateTempPassword(),
+          role: "employee",
+          department: "",
+          hireDate: data.hireDate,
+          startDate: data.hireDate,
           requiresDeescalation: false,
           requiresAbi: false,
           staffType: [],
@@ -383,37 +321,158 @@ export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
         },
         context.userId,
         "manual_admin",
+        {
+          needsSetup: true,
+          deferHirePack: true,
+          jobTitle: data.jobTitle ?? "",
+        },
       );
       return {
         userId: hired.userId,
         email: hired.email,
-        action: hired.created ? "created" : "updated",
+        action: "created",
         reason: null,
       };
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
       if (/already exists/i.test(msg)) {
-        if (data.mode === "add_new") {
-          return { userId: "", email, action: "skipped", reason: "Already on file." };
-        }
-        const { data: again } = await supabaseAdmin
-          .from("profiles")
-          .select("id")
-          .ilike("email", email)
-          .maybeSingle();
-        if (again?.id) {
-          const { data: mem } = await supabaseAdmin
-            .from("organization_members")
-            .select("id")
-            .eq("user_id", again.id)
-            .eq("organization_id", data.organizationId)
-            .maybeSingle();
-          await updateExistingRosterMember(data, again.id, !!mem);
-          return { userId: again.id, email, action: "updated", reason: null };
-        }
+        return { userId: "", email, action: "skipped", reason: "Already on the roster." };
       }
       throw e;
     }
+  });
+
+const FinishSetupInput = z.object({
+  organizationId: z.string().uuid(),
+  userId: z.string().uuid(),
+  firstName: z.string().trim().min(1).max(80),
+  lastName: z.string().trim().min(1).max(80),
+  email: z.string().trim().email().max(255),
+  phone: z.string().trim().min(1).max(30),
+  role: z.enum(["admin", "manager", "employee"]),
+  department: z.string().trim().max(120).optional().or(z.literal("")),
+  hireDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
+  staffType: z.array(z.string()).optional().default([]),
+  employeeId: z.string().trim().max(80).optional().or(z.literal("")),
+  workerType: z.string().trim().max(80).optional().or(z.literal("")),
+  customFieldValues: z.record(z.string(), z.unknown()).optional().default({}),
+});
+
+export type FinishEmployeeSetupResult = {
+  userId: string;
+  email: string;
+  name: string;
+};
+
+/**
+ * Same profile writes as Add employee, for someone already created as Needs setup.
+ * Clears the flag and runs the hire pack once job answers exist. Never sends email.
+ */
+export const finishEmployeeSetup = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => FinishSetupInput.parse(d))
+  .handler(async ({ data, context }): Promise<FinishEmployeeSetupResult> => {
+    if (!context.userId) throw new Error("Not signed in.");
+    await assertOrgManager(context.userId, data.organizationId);
+    await assertAgencySetupCompleteForOrg(supabaseAdmin, data.organizationId);
+
+    const { data: mem, error: memLookupErr } = await supabaseAdmin
+      .from("organization_members")
+      .select("id, role")
+      .eq("user_id", data.userId)
+      .eq("organization_id", data.organizationId)
+      .maybeSingle();
+    if (memLookupErr) throw new Error(memLookupErr.message);
+    if (!mem) throw new Error("Employee not found in this organization");
+
+    const email = data.email.trim().toLowerCase();
+    const { data: emailOwner } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .ilike("email", email)
+      .maybeSingle();
+    if (emailOwner?.id && emailOwner.id !== data.userId) {
+      throw new Error("An account with this email already exists.");
+    }
+
+    const { data: current } = await supabaseAdmin
+      .from("profiles")
+      .select("email")
+      .eq("id", data.userId)
+      .maybeSingle();
+    if ((current?.email ?? "").trim().toLowerCase() !== email) {
+      const { error: authErr } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+        email,
+        email_confirm: true,
+      });
+      if (authErr) throw new Error(authErr.message);
+    }
+
+    const customAttributes = await customAttributesFromIntake(
+      data.organizationId,
+      data.customFieldValues,
+    );
+    const startDate = data.hireDate;
+    const profilePatch: Record<string, unknown> = {
+      email,
+      full_name: `${data.firstName} ${data.lastName}`.trim(),
+      first_name: data.firstName,
+      last_name: data.lastName,
+      phone: data.phone.trim(),
+      department: data.department || null,
+      employee_id: data.employeeId || null,
+      staff_type_keys: data.staffType,
+      hire_date: startDate,
+      start_date: startDate,
+      requires_deescalation: false,
+      requires_abi: false,
+      custom_attributes: customAttributes,
+    };
+    if (data.workerType) profilePatch.worker_type = data.workerType;
+
+    const { error: profErr } = await supabaseAdmin
+      .from("profiles")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update(profilePatch as any)
+      .eq("id", data.userId);
+    if (profErr) throw new Error(profErr.message);
+
+    const { error: memErr } = await supabaseAdmin
+      .from("organization_members")
+      .update({
+        role: data.role,
+        job_title: data.jobTitle?.trim() || null,
+        active: true,
+      })
+      .eq("organization_id", data.organizationId)
+      .eq("user_id", data.userId);
+    if (memErr) throw new Error(memErr.message);
+
+    if (mem.role !== data.role) {
+      await supabaseAdmin.from("role_change_audit_log").insert({
+        organization_id: data.organizationId,
+        changed_by_user_id: context.userId,
+        changed_by_name: "Admin (finish setup)",
+        target_user_id: data.userId,
+        target_user_name: `${data.firstName} ${data.lastName}`.trim(),
+        previous_role: mem.role,
+        new_role: data.role,
+        change_method: "finishEmployeeSetup",
+      });
+    }
+
+    try {
+      await onStaffHiredInternal(supabaseAdmin, data.organizationId, data.userId);
+    } catch (hireErr) {
+      console.warn("[obligations] finish-setup auto-assign failed:", hireErr);
+    }
+
+    return {
+      userId: data.userId,
+      email,
+      name: `${data.firstName} ${data.lastName}`.trim(),
+    };
   });
 
 const ResetInput = z.object({

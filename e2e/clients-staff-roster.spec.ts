@@ -126,7 +126,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     });
     await expect(page.getByRole("button", { name: /^Active$/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /^Inactive$/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Upload roster/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Add several at once/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /Smart Import/i })).toHaveCount(0);
     await expect(page.getByRole("link", { name: /Import CSV/i })).toHaveCount(0);
     await expect(rosterName(page, "Jake Probert")).toBeVisible();
@@ -358,6 +358,71 @@ test.describe("Employees flatten and Clients placements", () => {
     await gotoAdmin(page, "/dashboard/hub/clients?tab=hosts");
     await expect(page).toHaveURL(/tab=placements/);
     await expect(page.getByRole("heading", { name: /^Placements$/i })).toBeVisible();
+  });
+});
+
+test.describe("Add several at once and Finish setup", () => {
+  test.beforeEach(async ({ page }) => {
+    await installHiveMocks(page, { persona: "admin", needsSetupUserId: STAFF.jake.id });
+  });
+
+  test("roster chip, add dialog, preview, and finish step", async ({ page }) => {
+    await gotoAdmin(page, "/dashboard/hub/employees");
+    await expect(page.getByRole("heading", { name: /Team members/i })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole("button", { name: /Finish setup \(1\)/i })).toBeVisible();
+    const desktopChip = page.locator("table").getByTestId("needs-setup-chip");
+    await desktopChip.scrollIntoViewIfNeeded();
+    await expect(desktopChip).toBeVisible();
+    await shot(page, "needs_setup_roster_desktop");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByRole("button", { name: /Finish setup \(1\)/i })).toBeVisible();
+    const mobileChip = page.locator(".md\\:hidden").getByTestId("needs-setup-chip");
+    await mobileChip.scrollIntoViewIfNeeded();
+    await shot(page, "needs_setup_roster_mobile");
+
+    await page.getByRole("button", { name: /Add several at once/i }).scrollIntoViewIfNeeded();
+    await page.getByRole("button", { name: /Add several at once/i }).click();
+    await expect(page.getByRole("heading", { name: /Add several at once/i })).toBeVisible();
+    await expect(page.getByText(/lands on the roster as Needs setup/i)).toBeVisible();
+    await shot(page, "add_several_dialog_mobile");
+
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await shot(page, "add_several_dialog_desktop");
+
+    await page.locator("#roster-paste").fill(
+      [
+        "name,email,phone,hire_date,job_title",
+        "Sam Rivera,sam.rivera@example.test,555-0100,2026-07-01,Direct Support",
+        "Pat,not-an-email,,,",
+        "Jake Probert,jake.probert@example.test,555-0101,2026-01-15,DSP",
+      ].join("\n"),
+    );
+    await page.getByRole("button", { name: /Review pasted rows/i }).click();
+    await expect(page.getByText(/Already on the roster — skipped/i)).toBeVisible();
+    await expect(page.getByText(/Enter a valid email/i)).toBeVisible();
+    await expect(page.getByText(/Will add as Needs setup/i)).toBeVisible();
+    await shot(page, "add_several_preview_desktop");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await shot(page, "add_several_preview_mobile");
+
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.getByRole("button", { name: /^Back$/i }).click();
+    await page.keyboard.press("Escape");
+
+    await page.getByRole("button", { name: /Finish setup \(1\)/i }).click();
+    await expect(page.getByTestId("finish-setup-dialog")).toBeVisible();
+    await expect(page.getByText(/same questions as Add employee/i)).toBeVisible();
+    await expect(page.getByText("Direct Support Professional")).toBeVisible();
+    await expect(page.getByLabel("Job title")).toHaveValue("DSP");
+    await shot(page, "finish_setup_step_desktop");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByText("Direct Support Professional")).toBeVisible();
+    await shot(page, "finish_setup_step_mobile");
   });
 });
 

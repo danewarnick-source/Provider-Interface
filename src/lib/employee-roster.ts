@@ -47,6 +47,18 @@ export function countEmployeesOnRosterTab(
   return filterEmployeesByRosterTab(members, tab).length;
 }
 
+/** Bulk-added people stay on the roster until an admin finishes their job questions. */
+export function profileNeedsSetup(customAttributes: unknown): boolean {
+  if (
+    !customAttributes ||
+    typeof customAttributes !== "object" ||
+    Array.isArray(customAttributes)
+  ) {
+    return false;
+  }
+  return (customAttributes as Record<string, unknown>).needs_setup === true;
+}
+
 export function uniqueHireEmails(emails: readonly string[]): string | null {
   const seen = new Set<string>();
   for (const raw of emails) {

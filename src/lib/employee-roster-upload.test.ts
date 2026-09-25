@@ -3,28 +3,34 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
   buildEmployeeRosterTemplateCsv,
+  classifyRosterRowAction,
   isClientOnlyRosterHeader,
   mapRawRosterRow,
   normalizeEmployeeRosterHeader,
   normalizeHireDate,
   parseEmployeeRosterCsv,
+  parseEmployeeRosterPaste,
   parseEmployeeRosterRole,
   toInviteRole,
-  classifyRosterRowAction,
   validateEmployeeRosterRows,
 } from "./employee-roster-upload.ts";
 
 describe("employee roster template", () => {
-  it("uses the fixed Dane columns and never client-record fields", () => {
+  it("uses basics only, with one filled sample row, and never client-record fields", () => {
     const csv = buildEmployeeRosterTemplateCsv();
-    assert.match(csv, /first_name/);
-    assert.match(csv, /last_name/);
+    assert.match(csv, /name/);
     assert.match(csv, /email/);
     assert.match(csv, /phone/);
-    assert.match(csv, /role/);
-    assert.match(csv, /title/);
     assert.match(csv, /hire_date/);
-    assert.match(csv, /username/);
+    assert.match(csv, /job_title/);
+    assert.match(csv, /Jane Doe/);
+    assert.match(csv, /jane\.doe@example\.com/);
+    assert.match(csv, /555-123-4567/);
+    assert.match(csv, /2026-07-01/);
+    assert.match(csv, /Direct Support/);
+    assert.doesNotMatch(csv, /first_name/);
+    assert.doesNotMatch(csv, /role/);
+    assert.doesNotMatch(csv, /username/);
     assert.doesNotMatch(csv, /guardian/i);
     assert.doesNotMatch(csv, /pcsp/i);
     assert.doesNotMatch(csv, /medicaid/i);
@@ -34,9 +40,9 @@ describe("employee roster template", () => {
   });
 
   it("maps human headers and ignores client-only columns", () => {
-    assert.equal(normalizeEmployeeRosterHeader("First Name"), "first_name");
+    assert.equal(normalizeEmployeeRosterHeader("Full name"), "name");
     assert.equal(normalizeEmployeeRosterHeader("Hire date"), "hire_date");
-    assert.equal(normalizeEmployeeRosterHeader("Job Title"), "title");
+    assert.equal(normalizeEmployeeRosterHeader("Job Title"), "job_title");
     assert.equal(isClientOnlyRosterHeader("guardian_name"), true);
     assert.equal(isClientOnlyRosterHeader("medicaid_id"), true);
     assert.equal(isClientOnlyRosterHeader("PCSP goals"), true);
@@ -50,38 +56,51 @@ describe("employee roster template", () => {
     assert.equal(normalizeHireDate("7/1/2026"), "2026-07-01");
   });
 
-  it("defaults username to email and flags missing required fields", () => {
+  it("splits a full name and flags missing basics", () => {
     const { rows, ignoredColumns } = parseEmployeeRosterCsv(
-      "First Name,Last Name,Email,Phone,Role,guardian_name,medicaid_id\nJane,Doe,jane@agency.org,555-0100,employee,Mom,12345\n",
+      "name,email,phone,hire_date,job_title,guardian_name,role\nJane Doe,jane@agency.org,555-0100,2026-07-01,Direct Support,Mom,employee\n",
     );
-    assert.deepEqual(ignoredColumns.sort(), ["guardian_name", "medicaid_id"]);
+    assert.deepEqual(ignoredColumns.sort(), ["guardian_name", "role"]);
     assert.equal(rows.length, 1);
-    assert.equal(rows[0].username, "jane@agency.org");
-    assert.equal(rows[0].username_provided, false);
-    assert.equal(rows[0].role, "employee");
-    const ok = validateEmployeeRosterRows(rows);
-    assert.equal(ok.size, 0);
+    assert.equal(rows[0].first_name, "Jane");
+    assert.equal(rows[0].last_name, "Doe");
+    assert.equal(rows[0].job_title, "Direct Support");
+    assert.equal(validateEmployeeRosterRows(rows).size, 0);
 
-    const mapped = mapRawRosterRow(
-      { "first name": "", last_name: "Doe", email: "bad", phone: "", role: "wizard" },
-      ["first name", "last_name", "email", "phone", "role"],
+    const pasted = parseEmployeeRosterPaste(
+      "Sam Rivera, sam@agency.org, 555-0101, 7/1/2026, DSP\n",
     );
-    const issues = validateEmployeeRosterRows([mapped]);
-    const fields = (issues.get(mapped.id) ?? []).map((i) => i.field);
-    assert.ok(fields.includes("first_name"));
+    assert.equal(pasted.rows[0].first_name, "Sam");
+    assert.equal(pasted.rows[0].last_name, "Rivera");
+    assert.equal(pasted.rows[0].hire_date, "2026-07-01");
+
+    const mapped = mapRawRosterRow({ name: "Pat", email: "bad", phone: "", hire_date: "" }, [
+      "name",
+      "email",
+      "phone",
+      "hire_date",
+    ]);
+    const fields = (validateEmployeeRosterRows([mapped]).get(mapped.id) ?? []).map((i) => i.field);
+    assert.ok(fields.includes("name"));
     assert.ok(fields.includes("email"));
     assert.ok(fields.includes("phone"));
-    assert.ok(fields.includes("role"));
+    assert.ok(fields.includes("hire_date"));
   });
 
-  it("keeps the upload wizard on the invite rail and off Smart Import", () => {
-    const src = readFileSync(new URL("../components/employees/employee-roster-upload-wizard.tsx", import.meta.url), "utf8");
-    assert.match(src, /createInvitation/);
-    assert.match(src, /interpretInviteSendResult/);
-    assert.match(src, /invite yet/);
-    assert.match(src, /add_new/);
-    assert.match(src, /add_and_update/);
-    assert.match(src, /update_only/);
+  it("keeps Add several at once off update modes and off automatic invites", () => {
+    const src = readFileSync(
+      new URL("../components/employees/employee-roster-upload-wizard.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(src, /Add several at once/);
+    assert.match(src, /Needs setup/);
+    assert.match(src, /Already on the roster/);
+    assert.match(src, /No invites/);
+    assert.doesNotMatch(src, /add_new/);
+    assert.doesNotMatch(src, /add_and_update/);
+    assert.doesNotMatch(src, /update_only/);
+    assert.doesNotMatch(src, /createInvitation/);
+    assert.doesNotMatch(src, /invite yet/);
     assert.doesNotMatch(src, /inviteStaffMembers\(/);
     assert.doesNotMatch(src, /smart-import/);
     assert.doesNotMatch(src, /guardian/i);
@@ -89,21 +108,28 @@ describe("employee roster template", () => {
     assert.doesNotMatch(src, /Hive Platform/);
   });
 
-  it("classifies Connecteam-style add / update / skip by email", () => {
+  it("skips emails already on the roster and never updates", () => {
     const existing = ["jake@agency.org"];
-    assert.equal(classifyRosterRowAction("new@agency.org", existing, "add_new"), "create");
-    assert.equal(classifyRosterRowAction("Jake@agency.org", existing, "add_new"), "skip");
-    assert.equal(classifyRosterRowAction("Jake@agency.org", existing, "add_and_update"), "update");
-    assert.equal(classifyRosterRowAction("new@agency.org", existing, "add_and_update"), "create");
-    assert.equal(classifyRosterRowAction("Jake@agency.org", existing, "update_only"), "update");
-    assert.equal(classifyRosterRowAction("new@agency.org", existing, "update_only"), "skip");
+    assert.equal(classifyRosterRowAction("new@agency.org", existing), "create");
+    assert.equal(classifyRosterRowAction("Jake@agency.org", existing), "skip");
   });
 
   it("flags duplicate emails in the file", () => {
     const { rows } = parseEmployeeRosterCsv(
-      "first_name,last_name,email,phone\nA,One,a@agency.org,555-1\nB,Two,A@agency.org,555-2\n",
+      "name,email,phone,hire_date\nA One,a@agency.org,555-1,2026-07-01\nB Two,A@agency.org,555-2,2026-07-01\n",
     );
     const issues = validateEmployeeRosterRows(rows);
     assert.equal(issues.size, 2);
+    const messages = [...issues.values()].flat().map((i) => i.message);
+    assert.ok(messages.some((m) => /more than once/i.test(m)));
+  });
+
+  it("accepts separate first and last name columns", () => {
+    const { rows } = parseEmployeeRosterCsv(
+      "first_name,last_name,email,phone,hire_date,job_title\nJane,Doe,jane@agency.org,555-0100,2026-07-01,DSP\n",
+    );
+    assert.equal(rows[0].first_name, "Jane");
+    assert.equal(rows[0].last_name, "Doe");
+    assert.equal(validateEmployeeRosterRows(rows).size, 0);
   });
 });
