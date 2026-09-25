@@ -1925,45 +1925,6 @@ export type Database = {
         }
         Relationships: []
       }
-      certification_types: {
-        Row: {
-          code: string
-          created_at: string
-          description: string | null
-          id: string
-          is_global: boolean
-          name: string
-          organization_id: string | null
-          requires_upload: boolean
-          track_id: string | null
-          validity_months: number | null
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_global?: boolean
-          name: string
-          organization_id?: string | null
-          requires_upload?: boolean
-          track_id?: string | null
-          validity_months?: number | null
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_global?: boolean
-          name?: string
-          organization_id?: string | null
-          requires_upload?: boolean
-          track_id?: string | null
-          validity_months?: number | null
-        }
-        Relationships: []
-      }
       certifications: {
         Row: {
           certification_type_code: string | null
@@ -14207,7 +14168,6 @@ export type Database = {
           name: string | null
           notes: string | null
           organization_id: string
-          rotation_group_id: string | null
           service_code_id: string | null
           staff_id: string | null
           start_time_local: string
@@ -14228,7 +14188,6 @@ export type Database = {
           name?: string | null
           notes?: string | null
           organization_id: string
-          rotation_group_id?: string | null
           service_code_id?: string | null
           staff_id?: string | null
           start_time_local: string
@@ -14249,7 +14208,6 @@ export type Database = {
           name?: string | null
           notes?: string | null
           organization_id?: string
-          rotation_group_id?: string | null
           service_code_id?: string | null
           staff_id?: string | null
           start_time_local?: string
@@ -18111,7 +18069,6 @@ export type Database = {
         Args: { _org: string }
         Returns: undefined
       }
-      seed_system_rbac_roles: { Args: { _org: string }; Returns: undefined }
       set_company_executive: {
         Args: { _grant: boolean; _membership_id: string }
         Returns: undefined
@@ -18185,15 +18142,8 @@ export type Database = {
         | "completed"
         | "expired"
       hive_training_auto_renew_scope: "all" | "full_program" | "selected"
-      hive_training_auto_renew_status:
-        | "succeeded"
-        | "card_failed"
-        | "no_eligible"
-        | "partial"
-        | "error"
       hive_training_catalog_kind: "full_program" | "ala_carte"
       hive_training_order_model: "bulk_seats" | "individual"
-      hive_training_order_status: "pending" | "paid" | "refunded" | "failed"
       hive_training_seat_status: "available" | "assigned" | "consumed"
       home_position: "manager" | "supervisor" | "staff"
       invitation_status: "pending" | "accepted" | "revoked"
@@ -18219,13 +18169,6 @@ export type Database = {
         | "waiting_customer"
         | "resolved"
         | "closed"
-      track_type:
-        | "onboarding_30"
-        | "certification_90"
-        | "behavioral"
-        | "abi_specialty"
-        | "annual"
-        | "custom"
       training_progress_status: "not_started" | "in_progress" | "completed"
       training_topic_kind: "core" | "person"
     }
@@ -18391,16 +18334,8 @@ export const Constants = {
         "expired",
       ],
       hive_training_auto_renew_scope: ["all", "full_program", "selected"],
-      hive_training_auto_renew_status: [
-        "succeeded",
-        "card_failed",
-        "no_eligible",
-        "partial",
-        "error",
-      ],
       hive_training_catalog_kind: ["full_program", "ala_carte"],
       hive_training_order_model: ["bulk_seats", "individual"],
-      hive_training_order_status: ["pending", "paid", "refunded", "failed"],
       hive_training_seat_status: ["available", "assigned", "consumed"],
       home_position: ["manager", "supervisor", "staff"],
       invitation_status: ["pending", "accepted", "revoked"],
@@ -18427,14 +18362,6 @@ export const Constants = {
         "waiting_customer",
         "resolved",
         "closed",
-      ],
-      track_type: [
-        "onboarding_30",
-        "certification_90",
-        "behavioral",
-        "abi_specialty",
-        "annual",
-        "custom",
       ],
       training_progress_status: ["not_started", "in_progress", "completed"],
       training_topic_kind: ["core", "person"],
