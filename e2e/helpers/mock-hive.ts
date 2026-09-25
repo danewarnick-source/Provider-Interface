@@ -874,6 +874,21 @@ function serverFnPayload(url: string, body: string): unknown {
     };
   }
   if (/listAgencyPolicies|listPolicyJobCodeOptions/i.test(fn)) return [];
+  if (/getAgencySetupStatus/i.test(fn)) {
+    return {
+      complete: true,
+      answeredCount: 6,
+      requiredCount: 6,
+      unanswered: [],
+      answeredKeys: [],
+      progressLabel: "6 of 6",
+      message: null,
+      createGateExempt: true,
+      createAllowed: true,
+      organizationId: ORG_ID,
+      facts: {},
+    };
+  }
   if (/getStaffPii|getStaffTrainingRiskFlags/i.test(fn)) return null;
   if (/recordPhiAccess|dismissUiPref|requestPermission/i.test(fn)) return { ok: true };
   if (/saveDailyRecord/i.test(fn)) {

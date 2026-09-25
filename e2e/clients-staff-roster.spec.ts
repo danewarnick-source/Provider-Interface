@@ -304,6 +304,68 @@ test.describe("Clients + Staff roster — mocked admin", () => {
   });
 });
 
+test.describe("Employees flatten and Clients placements", () => {
+  test.beforeEach(async ({ page }) => {
+    await installHiveMocks(page, { persona: "admin" });
+  });
+
+  test("Employees hub is the roster with no tab bar; old tabs redirect", async ({ page }) => {
+    await gotoAdmin(page, "/dashboard/hub/employees");
+    await expect(page.getByRole("heading", { name: /Team members/i })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole("navigation", { name: "Tabs" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /^Hosts$/i })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /HR Admin/i })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /Employee Loans/i })).toHaveCount(0);
+    await expect(rosterName(page, "Jake Probert")).toBeVisible();
+    await shot(page, "employees_roster_desktop");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByRole("heading", { name: /Team members/i })).toBeVisible();
+    await shot(page, "employees_roster_mobile");
+    await page.setViewportSize({ width: 1280, height: 720 });
+
+    await gotoAdmin(page, "/dashboard/hub/employees?tab=loans");
+    await expect(page).toHaveURL(/\/dashboard\/hub\/employees\/?$/);
+    await expect(page.getByRole("heading", { name: /Team members/i })).toBeVisible();
+
+    await gotoAdmin(page, "/dashboard/hub/employees?tab=hr-admin");
+    await expect(page).toHaveURL(/\/dashboard\/hub\/employees\/?$/);
+
+    await gotoAdmin(page, "/dashboard/hub/employees?tab=hosts");
+    await expect(page).toHaveURL(/\/dashboard\/hub\/clients\?tab=placements/);
+    await expect(page.getByRole("heading", { name: /^Placements$/i })).toBeVisible({
+      timeout: 20_000,
+    });
+  });
+
+  test("Clients Placements is the host pipeline; old hosts tab redirects", async ({ page }) => {
+    await gotoAdmin(page, "/dashboard/hub/clients?tab=placements");
+    await expect(
+      page.getByRole("navigation", { name: "Tabs" }).getByText("Placements"),
+    ).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole("heading", { name: /^Placements$/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Onboarding$/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Ready$/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Placed$/i })).toBeVisible();
+    await expect(page.getByText(/No hosts in this state/i).first()).toBeVisible();
+    await shot(page, "clients_placements_desktop");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByRole("heading", { name: /^Placements$/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Onboarding$/i })).toBeVisible();
+    await shot(page, "clients_placements_mobile");
+
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await gotoAdmin(page, "/dashboard/hub/clients?tab=hosts");
+    await expect(page).toHaveURL(/tab=placements/);
+    await expect(page.getByRole("heading", { name: /^Placements$/i })).toBeVisible();
+  });
+});
+
 test.describe("RBAC — DSP / employee cannot open employee admin", () => {
   test.beforeEach(async ({ page }) => {
     await installHiveMocks(page, { persona: "dsp" });

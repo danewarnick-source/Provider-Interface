@@ -28,7 +28,6 @@ export const CreateEmployeeInput = z.object({
   hireDate: z.string().optional().or(z.literal("")),
   startDate: z.string().optional().or(z.literal("")),
   endDate: z.string().optional().or(z.literal("")),
-  trackIds: z.array(z.string().uuid()).max(50).default([]),
   requiresDeescalation: z.boolean().default(true),
   requiresAbi: z.boolean().default(true),
   staffType: z.array(z.string()).optional().default([]),
@@ -198,18 +197,6 @@ export async function hireEmployeeInternal(
       { userId: newUserId, name: `${data.firstName} ${data.lastName}`.trim() },
       { access_level: data.accessLevel, created_via: createdVia },
     );
-
-    if (data.trackIds.length) {
-      const rows = data.trackIds.map((tid) => ({
-        track_id: tid,
-        user_id: newUserId,
-        organization_id: data.organizationId,
-        assigned_by: actorUserId,
-        status: "not_started" as const,
-      }));
-      const { error: trackErr } = await supabaseAdmin.from("track_assignments").insert(rows);
-      if (trackErr) console.warn("track assignment failed", trackErr.message);
-    }
 
     try {
       await onStaffHiredInternal(supabaseAdmin, data.organizationId, newUserId);
@@ -400,7 +387,6 @@ export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
           hireDate: data.hireDate ?? "",
           startDate: data.hireDate ?? "",
           username: data.username ?? "",
-          trackIds: [],
           requiresDeescalation: false,
           requiresAbi: false,
           staffType: [],

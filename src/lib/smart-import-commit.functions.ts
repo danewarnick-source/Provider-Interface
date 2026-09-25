@@ -1195,7 +1195,6 @@ async function commitEmployee(
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
-        trackIds: [],
         requiresDeescalation: true,
         requiresAbi: true,
         customFieldValues: {},

@@ -13,8 +13,21 @@ import { uniqueHireEmails } from "@/lib/employee-roster";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { LevelPresetFields, type LevelPresetValue } from "@/components/access/level-preset-fields";
@@ -150,7 +163,6 @@ export function AddEmployeeWizard({
               accessPresetId: row.access.presetId,
               hireDate: row.hireDate,
               startDate: row.hireDate,
-              trackIds: [],
               requiresDeescalation: false,
               requiresAbi: false,
               staffType: row.staffType,
@@ -182,7 +194,9 @@ export function AddEmployeeWizard({
       if (errors.length) {
         toast.warning(`Created ${made.length}. ${errors.join(" ")}`);
       } else {
-        toast.success(made.length === 1 ? "Employee file created" : `${made.length} employee files created`);
+        toast.success(
+          made.length === 1 ? "Employee file created" : `${made.length} employee files created`,
+        );
       }
       setCreated(made);
       setInviteIds(new Set());
@@ -266,8 +280,13 @@ export function AddEmployeeWizard({
       toast.error("No organization selected.");
       return;
     }
-    const missing = drafts.find((d) =>
-      !d.firstName.trim() || !d.lastName.trim() || !d.email.trim() || !d.phone.trim() || !d.hireDate,
+    const missing = drafts.find(
+      (d) =>
+        !d.firstName.trim() ||
+        !d.lastName.trim() ||
+        !d.email.trim() ||
+        !d.phone.trim() ||
+        !d.hireDate,
     );
     if (missing) {
       toast.error("Each employee needs a first name, last name, email, phone, and hire date.");
@@ -290,7 +309,8 @@ export function AddEmployeeWizard({
             <DialogHeader>
               <DialogTitle>Add employee</DialogTitle>
               <DialogDescription>
-                Creates the full staff record first. You can send a join email or copy a temporary password after.
+                Creates the full staff record first. You can send a join email or copy a temporary
+                password after.
               </DialogDescription>
             </DialogHeader>
             <form
@@ -391,7 +411,9 @@ export function AddEmployeeWizard({
                 type="button"
                 disabled={!inviteIds.size || inviteMutation.isPending || !organizationId}
                 className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
-                onClick={() => inviteMutation.mutate(created.filter((row) => inviteIds.has(row.draftId)))}
+                onClick={() =>
+                  inviteMutation.mutate(created.filter((row) => inviteIds.has(row.draftId)))
+                }
               >
                 <Mail className="mr-2 h-4 w-4" />
                 {inviteMutation.isPending
@@ -422,10 +444,7 @@ function AccessCard({
   return (
     <div className="grid gap-3 rounded-md border border-border p-3">
       <label className="flex items-center gap-2 text-sm">
-        <Checkbox
-          checked={checked}
-          onCheckedChange={(v) => onCheckedChange(v === true)}
-        />
+        <Checkbox checked={checked} onCheckedChange={(v) => onCheckedChange(v === true)} />
         <span className="font-medium">{row.name}</span>
         <code className="truncate text-xs text-muted-foreground">{row.email}</code>
       </label>
@@ -448,7 +467,9 @@ function AccessCard({
               <Copy className="h-3.5 w-3.5" />
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">They will be asked to change this on first sign-in.</p>
+          <p className="text-xs text-muted-foreground">
+            They will be asked to change this on first sign-in.
+          </p>
         </div>
       )}
     </div>
@@ -484,7 +505,13 @@ function HireDraftFields({
             Employee {index + 1}
           </p>
           {canRemove && (
-            <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" onClick={onRemove}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={onRemove}
+            >
               <Trash2 className="mr-1 h-3.5 w-3.5" /> Remove
             </Button>
           )}
@@ -543,7 +570,9 @@ function HireDraftFields({
           onChange={(e) => onChange({ hireDate: e.target.value })}
           required
         />
-        <p className="text-xs text-muted-foreground">All training deadlines are calculated from this date.</p>
+        <p className="text-xs text-muted-foreground">
+          All training deadlines are calculated from this date.
+        </p>
       </div>
       <LevelPresetFields
         orgId={organizationId ?? undefined}
@@ -571,9 +600,19 @@ function HireDraftFields({
   );
 }
 
-export function AddEmployeeButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
+export function AddEmployeeButton({
+  onClick,
+  disabled,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+}) {
   return (
-    <Button className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]" onClick={onClick} disabled={disabled}>
+    <Button
+      className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]"
+      onClick={onClick}
+      disabled={disabled}
+    >
       <ShieldPlus className="mr-2 h-4 w-4" /> Add employee
     </Button>
   );
@@ -581,11 +620,16 @@ export function AddEmployeeButton({ onClick, disabled }: { onClick: () => void; 
 
 function OptionalIntakeFields({
   config,
-  staffType, onStaffTypeChange,
-  department, onDepartmentChange,
-  employeeId, onEmployeeIdChange,
-  workerType, onWorkerTypeChange,
-  customFieldValues, onCustomFieldValuesChange,
+  staffType,
+  onStaffTypeChange,
+  department,
+  onDepartmentChange,
+  employeeId,
+  onEmployeeIdChange,
+  workerType,
+  onWorkerTypeChange,
+  customFieldValues,
+  onCustomFieldValuesChange,
   onOpenSettings,
   idSuffix = "",
 }: {
@@ -622,7 +666,11 @@ function OptionalIntakeFields({
       <div className="grid gap-2">
         <p className="text-sm text-muted-foreground">
           No optional fields configured.{" "}
-          <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={onOpenSettings}>
+          <button
+            type="button"
+            className="underline underline-offset-2 hover:text-foreground"
+            onClick={onOpenSettings}
+          >
             Configure staff fields
           </button>
         </p>
@@ -639,10 +687,16 @@ function OptionalIntakeFields({
       {!config.staff_type.enabled && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
           <span>
-            Staff type is not enabled — training requirements won't auto-activate until set on this staff
-            member's profile. Enable in staff field settings.
+            Staff type is not enabled — training requirements won't auto-activate until set on this
+            staff member's profile. Enable in staff field settings.
           </span>
-          <Button type="button" variant="outline" size="sm" className="h-7 shrink-0 text-xs" onClick={onOpenSettings}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 shrink-0 text-xs"
+            onClick={onOpenSettings}
+          >
             Open settings
           </Button>
         </div>
@@ -673,10 +727,14 @@ function OptionalIntakeFields({
         <div className="grid gap-2">
           <Label>Department</Label>
           <Select value={department} onValueChange={onDepartmentChange}>
-            <SelectTrigger><SelectValue placeholder="Select a department" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a department" />
+            </SelectTrigger>
             <SelectContent>
               {(config.department.options ?? []).map((opt) => (
-                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                <SelectItem key={opt} value={opt}>
+                  {opt}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -698,10 +756,14 @@ function OptionalIntakeFields({
         <div className="grid gap-2">
           <Label>Worker type</Label>
           <Select value={workerType} onValueChange={onWorkerTypeChange}>
-            <SelectTrigger><SelectValue placeholder="Select worker type" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="Select worker type" />
+            </SelectTrigger>
             <SelectContent>
               {WORKER_TYPE_OPTIONS.map((opt) => (
-                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                <SelectItem key={opt} value={opt}>
+                  {opt}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -712,7 +774,9 @@ function OptionalIntakeFields({
         <div key={field.id} className="grid gap-2">
           <Label htmlFor={`cf-${field.id}${idSuffix}`} className="flex items-center gap-2">
             {field.name}
-            <Badge variant="outline" className="text-[10px]">Custom</Badge>
+            <Badge variant="outline" className="text-[10px]">
+              Custom
+            </Badge>
           </Label>
           {field.type === "text" && (
             <Input
@@ -742,7 +806,9 @@ function OptionalIntakeFields({
               value={(customFieldValues[field.id] as string) ?? ""}
               onValueChange={(v) => setCustomFieldValue(field.id, v)}
             >
-              <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Select…" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="yes">Yes</SelectItem>
                 <SelectItem value="no">No</SelectItem>
@@ -754,10 +820,14 @@ function OptionalIntakeFields({
               value={(customFieldValues[field.id] as string) ?? ""}
               onValueChange={(v) => setCustomFieldValue(field.id, v)}
             >
-              <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Select…" />
+              </SelectTrigger>
               <SelectContent>
                 {field.options.map((opt) => (
-                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  <SelectItem key={opt} value={opt}>
+                    {opt}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
