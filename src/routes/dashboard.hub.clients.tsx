@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 import { HubShell, type HubTab } from "@/components/admin-hubs/hub-shell";
 import { RequirePermission } from "@/components/rbac-guard";
@@ -13,18 +13,12 @@ import { ReferralsPage } from "@/components/referrals/referrals-page";
 import { HostsPage } from "@/components/hosts/hosts-page";
 
 const search = z.object({
-  tab: z
-    .enum(["directory", "referrals", "placements", "hosts", "teams", "funds"])
-    .optional()
-    .transform((v) => (v === "hosts" ? "placements" : v)),
+  tab: z.enum(["directory", "referrals", "placements", "hosts", "teams", "funds"]).optional(),
 });
-
 
 function ClientsHub() {
   const { can } = usePermissions();
-  const tabs: HubTab[] = [
-    { key: "directory", label: "Directory", render: () => <ClientsPage /> },
-  ];
+  const tabs: HubTab[] = [{ key: "directory", label: "Directory", render: () => <ClientsPage /> }];
   if (can("view_referrals") || can("manage_referrals")) {
     tabs.push({
       key: "referrals",
@@ -46,7 +40,6 @@ function ClientsHub() {
     });
   }
   tabs.push(
-
     {
       key: "teams",
       label: "Teams & homes",
@@ -91,5 +84,14 @@ function ClientsHub() {
 export const Route = createFileRoute("/dashboard/hub/clients")({
   head: () => ({ meta: [{ title: "Clients — Provider Interface" }] }),
   validateSearch: (s) => search.parse(s),
+  beforeLoad: ({ search: s }) => {
+    if (s.tab === "hosts") {
+      throw redirect({
+        to: "/dashboard/hub/clients",
+        search: { tab: "placements" },
+        replace: true,
+      });
+    }
+  },
   component: ClientsHub,
 });
