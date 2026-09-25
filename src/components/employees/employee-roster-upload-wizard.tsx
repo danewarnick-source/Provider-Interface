@@ -7,20 +7,32 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { applyEmployeeRosterRow } from "@/lib/employees.functions";
 import {
+  type BulkAccessRole,
   type EmployeeRosterDraft,
   type EmployeeRosterHeader,
   applyRosterName,
+  bulkAccessChoices,
+  bulkAccessLabel,
   classifyRosterRowAction,
+  parseBulkAccessLevel,
   parseEmployeeRosterCsv,
   parseEmployeeRosterPaste,
   parseEmployeeRosterRecords,
   rosterRowHasFieldIssue,
   triggerEmployeeRosterTemplateDownload,
+  triggerEmployeeRosterTemplateXlsxDownload,
   validateEmployeeRosterRows,
 } from "@/lib/employee-roster-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -32,6 +44,7 @@ import {
 } from "@/components/ui/dialog";
 
 const PREVIEW_FIELDS: EmployeeRosterHeader[] = ["name", "email", "phone", "hire_date", "job_title"];
+const ACCESS_CHOICES = bulkAccessChoices();
 
 async function parseRosterFile(
   file: File,
@@ -172,6 +185,7 @@ export function EmployeeRosterUploadWizard({
               phone: row.phone.trim(),
               hireDate: row.hire_date,
               jobTitle: row.job_title.trim(),
+              role: row.role,
             },
           });
           if (res.action === "skipped") {
@@ -241,13 +255,13 @@ export function EmployeeRosterUploadWizard({
                   value={paste}
                   onChange={(e) => setPaste(e.target.value)}
                   placeholder={
-                    "Jane Doe, jane.doe@example.com, 555-123-4567, 2026-07-01, Direct Support"
+                    "Jane Doe, jane.doe@example.com, 555-123-4567, 2026-07-01, Direct Support, Team member"
                   }
                   className="min-h-28 font-mono text-xs"
                 />
                 <p className="text-xs text-muted-foreground">
-                  One person per line: name, email, phone, hire date, job title. A header row is
-                  fine. No invites are sent.
+                  One person per line: name, email, phone, hire date, job title, access level. Leave
+                  access level blank for Team member. A header row is fine. No invites are sent.
                 </p>
               </div>
               <Button
@@ -258,13 +272,26 @@ export function EmployeeRosterUploadWizard({
               >
                 Review pasted rows
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => triggerEmployeeRosterTemplateDownload()}
-              >
-                <Download className="mr-2 h-4 w-4" /> Download template
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    void triggerEmployeeRosterTemplateXlsxDownload().catch(() => {
+                      toast.error("Could not build the Excel template.");
+                    });
+                  }}
+                >
+                  <Download className="mr-2 h-4 w-4" /> Download Excel template
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => triggerEmployeeRosterTemplateDownload()}
+                >
+                  <Download className="mr-2 h-4 w-4" /> Download CSV template
+                </Button>
+              </div>
               <label className="grid cursor-pointer gap-2 rounded-md border border-dashed border-border p-6 text-center text-sm">
                 <Upload className="mx-auto h-5 w-5 text-muted-foreground" />
                 <span>Drop a CSV or Excel file, or click to choose</span>
@@ -330,6 +357,16 @@ export function EmployeeRosterUploadWizard({
                           />
                         </div>
                       ))}
+                      <AccessLevelField
+                        row={row}
+                        invalid={
+                          action === "create" &&
+                          rosterRowHasFieldIssue(issues, row.id, "access_level")
+                        }
+                        onChange={(role) =>
+                          patchRow(row.id, { role, access_level: bulkAccessLabel(role) })
+                        }
+                      />
                     </div>
                     {rowIssues.length > 0 && (
                       <ul className="list-disc pl-5 text-xs text-destructive">
@@ -391,6 +428,45 @@ export function EmployeeRosterUploadWizard({
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function AccessLevelField({
+  row,
+  invalid,
+  onChange,
+}: {
+  row: EmployeeRosterDraft;
+  invalid: boolean;
+  onChange: (role: BulkAccessRole) => void;
+}) {
+  const parsed = parseBulkAccessLevel(row.access_level);
+  return (
+    <div className="grid gap-1">
+      <Label className="text-xs" htmlFor={`access-level-${row.id}`}>
+        Access level
+      </Label>
+      <Select
+        value={invalid || parsed.invalid ? undefined : row.role}
+        onValueChange={(value) => onChange(value as BulkAccessRole)}
+      >
+        <SelectTrigger
+          id={`access-level-${row.id}`}
+          className={"h-8 text-sm " + (invalid ? "border-destructive" : "")}
+        >
+          <SelectValue
+            placeholder={invalid ? row.access_level || "Choose access level" : "Team member"}
+          />
+        </SelectTrigger>
+        <SelectContent>
+          {ACCESS_CHOICES.map((choice) => (
+            <SelectItem key={choice.value} value={choice.value}>
+              {choice.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
 

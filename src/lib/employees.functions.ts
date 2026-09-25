@@ -6,6 +6,7 @@ import { onStaffHiredInternal } from "@/lib/staff-assignment-hooks.functions";
 import { resolveAccountUsername } from "@/lib/account-username";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
 import { generateTempPassword } from "@/lib/temp-password";
+import { BULK_ACCESS_ROLES } from "@/lib/employee-roster-upload";
 
 const RoleEnum = z.enum(["admin", "program_manager", "manager", "employee", "committee_member"]);
 
@@ -256,6 +257,7 @@ const RosterApplyInput = z.object({
   phone: z.string().trim().min(1).max(30),
   hireDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
+  role: z.enum(BULK_ACCESS_ROLES).optional().default("employee"),
 });
 
 export type RosterApplyResult = {
@@ -310,7 +312,7 @@ export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
           email,
           phone: data.phone,
           temporaryPassword: generateTempPassword(),
-          role: "employee",
+          role: data.role,
           department: "",
           hireDate: data.hireDate,
           startDate: data.hireDate,
@@ -349,7 +351,7 @@ const FinishSetupInput = z.object({
   lastName: z.string().trim().min(1).max(80),
   email: z.string().trim().email().max(255),
   phone: z.string().trim().min(1).max(30),
-  role: z.enum(["admin", "manager", "employee"]),
+  role: z.enum(["admin", "program_manager", "manager", "employee", "committee_member"]),
   department: z.string().trim().max(120).optional().or(z.literal("")),
   hireDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   jobTitle: z.string().trim().max(120).optional().or(z.literal("")),

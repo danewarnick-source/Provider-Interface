@@ -414,17 +414,25 @@ test.describe("Add several at once and Finish setup", () => {
       .locator("#roster-paste")
       .fill(
         [
-          "name,email,phone,hire_date,job_title",
-          "Sam Rivera,sam.rivera@example.test,555-0100,2026-07-01,Direct Support",
+          "name,email,phone,hire_date,job_title,access_level",
+          "Alex Kim,alex.kim@example.test,555-0199,2026-08-01,Coach,Owner",
+          "Sam Rivera,sam.rivera@example.test,555-0100,2026-07-01,Direct Support,Team member",
           "Pat,not-an-email,,,",
-          "Jake Probert,jake.probert@example.test,555-0101,2026-01-15,DSP",
+          "Jake Probert,jake.probert@example.test,555-0101,2026-01-15,DSP,",
         ].join("\n"),
       );
     await page.getByRole("button", { name: /Review pasted rows/i }).click();
     await expect(page.getByText(/Already on the roster — skipped/i)).toBeVisible();
     await expect(page.getByText(/Enter a valid email/i)).toBeVisible();
     await expect(page.getByText(/Will add as Needs setup/i)).toBeVisible();
+    await expect(page.getByText(/"Owner" is not an access level/i)).toBeVisible();
     await shot(page, "add_several_preview_desktop");
+    await page.getByLabel("Access level").nth(1).click();
+    await expect(page.getByRole("option", { name: "Team member" })).toBeVisible();
+    await expect(page.getByRole("option", { name: "Supervisor" })).toBeVisible();
+    await expect(page.getByRole("option", { name: "Owner" })).toHaveCount(0);
+    await shot(page, "add_several_access_level_desktop");
+    await page.keyboard.press("Escape");
 
     await page.setViewportSize({ width: 390, height: 844 });
     await shot(page, "add_several_preview_mobile");

@@ -177,11 +177,13 @@ export function EmployeesPage() {
         const hireRaw = profile?.start_date ?? profile?.hire_date ?? "";
         const hireDate = /^\d{4}-\d{2}-\d{2}/.test(hireRaw) ? hireRaw.slice(0, 10) : "";
         const role =
-          m.role === "admin"
-            ? "admin"
-            : m.role === "manager" || m.role === "program_manager"
-              ? "manager"
-              : "employee";
+          m.role === "admin" ||
+          m.role === "manager" ||
+          m.role === "program_manager" ||
+          m.role === "employee" ||
+          m.role === "committee_member"
+            ? m.role
+            : "employee";
         return {
           userId: m.user_id,
           firstName: profile?.first_name?.trim() || split.first_name,

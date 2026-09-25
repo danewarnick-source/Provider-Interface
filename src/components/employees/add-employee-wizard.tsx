@@ -36,7 +36,9 @@ import {
   type StaffIntakeFieldsConfig,
 } from "@/components/hr/staff-fields-panel";
 
-type Role = "admin" | "manager" | "employee";
+type Role = "admin" | "program_manager" | "manager" | "employee" | "committee_member";
+
+export type HireRoleChoice = { value: Role; label: string };
 
 export type HireDraft = {
   id: string;
@@ -475,6 +477,7 @@ export function HireDraftFields({
   staffIntakeConfig,
   onChange,
   onRemove,
+  roleChoices,
 }: {
   draft: HireDraft;
   index: number;
@@ -483,7 +486,13 @@ export function HireDraftFields({
   staffIntakeConfig: StaffIntakeFieldsConfig | undefined;
   onChange: (patch: Partial<HireDraft>) => void;
   onRemove: () => void;
+  roleChoices?: HireRoleChoice[];
 }) {
+  const roles = roleChoices ?? [
+    { value: "employee" as const, label: "Team member" },
+    { value: "manager" as const, label: "Manager" },
+    { value: "admin" as const, label: "Admin" },
+  ];
   return (
     <div className={showHeader ? "grid gap-4 rounded-md border border-border p-3" : "grid gap-4"}>
       {showHeader && (
@@ -568,9 +577,11 @@ export function HireDraftFields({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="employee">Team member</SelectItem>
-            <SelectItem value="manager">Manager</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
+            {roles.map((choice) => (
+              <SelectItem key={choice.value} value={choice.value}>
+                {choice.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

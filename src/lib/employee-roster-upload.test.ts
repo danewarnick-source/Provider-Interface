@@ -3,11 +3,13 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
   buildEmployeeRosterTemplateCsv,
+  buildEmployeeRosterTemplateXlsx,
   classifyRosterRowAction,
   isClientOnlyRosterHeader,
   mapRawRosterRow,
   normalizeEmployeeRosterHeader,
   normalizeHireDate,
+  parseBulkAccessLevel,
   parseEmployeeRosterCsv,
   parseEmployeeRosterPaste,
   parseEmployeeRosterRole,
@@ -23,13 +25,15 @@ describe("employee roster template", () => {
     assert.match(csv, /phone/);
     assert.match(csv, /hire_date/);
     assert.match(csv, /job_title/);
+    assert.match(csv, /access_level/);
     assert.match(csv, /Jane Doe/);
     assert.match(csv, /jane\.doe@example\.com/);
     assert.match(csv, /555-123-4567/);
     assert.match(csv, /2026-07-01/);
     assert.match(csv, /Direct Support/);
+    assert.match(csv, /Team member/);
     assert.doesNotMatch(csv, /first_name/);
-    assert.doesNotMatch(csv, /role/);
+    assert.doesNotMatch(csv, /Owner/);
     assert.doesNotMatch(csv, /username/);
     assert.doesNotMatch(csv, /guardian/i);
     assert.doesNotMatch(csv, /pcsp/i);
@@ -43,6 +47,7 @@ describe("employee roster template", () => {
     assert.equal(normalizeEmployeeRosterHeader("Full name"), "name");
     assert.equal(normalizeEmployeeRosterHeader("Hire date"), "hire_date");
     assert.equal(normalizeEmployeeRosterHeader("Job Title"), "job_title");
+    assert.equal(normalizeEmployeeRosterHeader("Access level"), "access_level");
     assert.equal(isClientOnlyRosterHeader("guardian_name"), true);
     assert.equal(isClientOnlyRosterHeader("medicaid_id"), true);
     assert.equal(isClientOnlyRosterHeader("PCSP goals"), true);
@@ -50,6 +55,15 @@ describe("employee roster template", () => {
     assert.equal(parseEmployeeRosterRole("Supervisor"), "manager");
     assert.equal(parseEmployeeRosterRole(""), "employee");
     assert.equal(parseEmployeeRosterRole("wizard"), null);
+    assert.equal(parseBulkAccessLevel("staff").role, "employee");
+    assert.equal(parseBulkAccessLevel("STAFF").invalid, false);
+    assert.equal(parseBulkAccessLevel("employee").role, "employee");
+    assert.equal(parseBulkAccessLevel("Team member").role, "employee");
+    assert.equal(parseBulkAccessLevel("").invalid, false);
+    assert.equal(parseBulkAccessLevel("Owner").invalid, true);
+    assert.equal(parseBulkAccessLevel("Admin").invalid, true);
+    assert.equal(parseBulkAccessLevel("Program Manager").role, "program_manager");
+    assert.equal(parseBulkAccessLevel("Committee Member").role, "committee_member");
     assert.equal(toInviteRole("admin"), "admin");
     assert.equal(toInviteRole("program_manager"), "manager");
     assert.equal(toInviteRole("committee_member"), "employee");
@@ -58,13 +72,14 @@ describe("employee roster template", () => {
 
   it("splits a full name and flags missing basics", () => {
     const { rows, ignoredColumns } = parseEmployeeRosterCsv(
-      "name,email,phone,hire_date,job_title,guardian_name,role\nJane Doe,jane@agency.org,555-0100,2026-07-01,Direct Support,Mom,employee\n",
+      "name,email,phone,hire_date,job_title,guardian_name,access_level\nJane Doe,jane@agency.org,555-0100,2026-07-01,Direct Support,Mom,staff\n",
     );
-    assert.deepEqual(ignoredColumns.sort(), ["guardian_name", "role"]);
+    assert.deepEqual(ignoredColumns.sort(), ["guardian_name"]);
     assert.equal(rows.length, 1);
     assert.equal(rows[0].first_name, "Jane");
     assert.equal(rows[0].last_name, "Doe");
     assert.equal(rows[0].job_title, "Direct Support");
+    assert.equal(rows[0].role, "employee");
     assert.equal(validateEmployeeRosterRows(rows).size, 0);
 
     const pasted = parseEmployeeRosterPaste(
@@ -130,6 +145,44 @@ describe("employee roster template", () => {
     );
     assert.equal(rows[0].first_name, "Jane");
     assert.equal(rows[0].last_name, "Doe");
+    assert.equal(rows[0].role, "employee");
     assert.equal(validateEmployeeRosterRows(rows).size, 0);
+  });
+
+  it("flags an access level outside the bulk list and defaults a blank to Team member", () => {
+    const { rows } = parseEmployeeRosterCsv(
+      [
+        "name,email,phone,hire_date,job_title,access_level",
+        "A One,a@agency.org,555-0100,2026-07-01,DSP,",
+        "B Two,b@agency.org,555-0101,2026-07-01,DSP,Owner",
+        "C Three,c@agency.org,555-0102,2026-07-01,,Supervisor",
+      ].join("\n"),
+    );
+    assert.equal(rows[0].role, "employee");
+    assert.equal(rows[0].job_title, "DSP");
+    assert.equal(validateEmployeeRosterRows([rows[0]]).size, 0);
+    assert.equal(rows[2].role, "manager");
+    assert.equal(rows[2].job_title, "");
+    const issues = validateEmployeeRosterRows(rows);
+    const owner = issues.get(rows[1].id) ?? [];
+    assert.equal(owner.length, 1);
+    assert.equal(owner[0].field, "access_level");
+    assert.match(owner[0].message, /Owner/);
+    assert.match(owner[0].message, /Team member/);
+  });
+
+  it("puts a list dropdown on the Excel access level column", async () => {
+    const bytes = await buildEmployeeRosterTemplateXlsx();
+    const { default: JSZip } = await import("jszip");
+    const zip = await JSZip.loadAsync(bytes);
+    const sheetPath = Object.keys(zip.files).find((name) =>
+      /xl\/worksheets\/sheet\d+\.xml$/.test(name),
+    );
+    assert.ok(sheetPath);
+    const xml = await zip.file(sheetPath)!.async("string");
+    assert.match(xml, /dataValidation type="list"/);
+    assert.match(xml, /Team member,Supervisor,Program Manager,Committee Member/);
+    assert.doesNotMatch(xml, />Owner</);
+    assert.match(xml, /Jane Doe/);
   });
 });

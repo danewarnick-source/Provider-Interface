@@ -1,10 +1,12 @@
 /**
  * Add several employees at once.
- * Basics only: name, email, phone, hire date, job title.
+ * Basics: name, email, phone, hire date, optional job title, access level.
  * Never maps guardian / meds / PCSP / billing / client fields.
  * Existing roster emails are skipped. There is no update mode.
  */
 import Papa from "papaparse";
+import * as XLSX from "xlsx";
+import { ROLE_LABEL } from "./rbac.ts";
 import { isValidSignupEmail, normalizeSignupEmail } from "./signup-email.ts";
 
 export const EMPLOYEE_ROSTER_HEADERS = [
@@ -13,6 +15,7 @@ export const EMPLOYEE_ROSTER_HEADERS = [
   "phone",
   "hire_date",
   "job_title",
+  "access_level",
 ] as const;
 
 export type EmployeeRosterHeader = (typeof EMPLOYEE_ROSTER_HEADERS)[number];
@@ -27,6 +30,27 @@ export type EmployeeRosterRole =
 /** createInvitation / resendInvitation only accept these three. */
 export type EmployeeInviteRole = "admin" | "manager" | "employee";
 
+/**
+ * Roles a bulk upload may assign. Owner (`admin` in ROLE_LABEL) and Platform
+ * Admin are excluded. Labels come from ROLE_LABEL.
+ */
+export const BULK_ACCESS_ROLES = [
+  "employee",
+  "manager",
+  "program_manager",
+  "committee_member",
+] as const;
+
+export type BulkAccessRole = (typeof BULK_ACCESS_ROLES)[number];
+
+export function bulkAccessLabel(role: BulkAccessRole): string {
+  return ROLE_LABEL[role];
+}
+
+export function bulkAccessChoices(): { value: BulkAccessRole; label: string }[] {
+  return BULK_ACCESS_ROLES.map((value) => ({ value, label: bulkAccessLabel(value) }));
+}
+
 export type EmployeeRosterDraft = {
   id: string;
   name: string;
@@ -36,6 +60,9 @@ export type EmployeeRosterDraft = {
   phone: string;
   hire_date: string;
   job_title: string;
+  /** Raw cell text. Blank means Team member. */
+  access_level: string;
+  role: BulkAccessRole;
 };
 
 export type EmployeeRosterRowAction = "create" | "skip";
@@ -69,6 +96,9 @@ const HEADER_ALIASES: Record<string, MappedKey> = {
   jobtitle: "job_title",
   title: "job_title",
   position: "job_title",
+  access_level: "access_level",
+  access: "access_level",
+  role: "access_level",
 };
 
 const CLIENT_ONLY_HEADERS = [
@@ -84,25 +114,19 @@ const CLIENT_ONLY_HEADERS = [
   "client_record",
 ];
 
-const ROLE_ALIASES: Record<string, EmployeeRosterRole> = {
-  employee: "employee",
-  staff: "employee",
-  dsp: "employee",
-  manager: "manager",
-  supervisor: "manager",
-  admin: "admin",
-  owner: "admin",
-  program_manager: "program_manager",
-  committee_member: "committee_member",
-  committee: "committee_member",
-};
-
 const EXAMPLE_ROW: Record<EmployeeRosterHeader, string> = {
   name: "Jane Doe",
   email: "jane.doe@example.com",
   phone: "555-123-4567",
   hire_date: "2026-07-01",
   job_title: "Direct Support",
+  access_level: "Team member",
+};
+
+/** Extra spellings that are not the current label or stored value. */
+const BULK_ACCESS_EXTRA: Record<string, BulkAccessRole> = {
+  staff: "employee",
+  employee: "employee",
 };
 
 function slugHeader(raw: string): string {
@@ -128,17 +152,46 @@ export function isClientOnlyRosterHeader(raw: string): boolean {
   return CLIENT_ONLY_HEADERS.some((h) => slug === h || slug.startsWith(`${h}_`));
 }
 
-export function parseEmployeeRosterRole(raw: string): EmployeeRosterRole | null {
+export type ParsedBulkAccess = { role: BulkAccessRole; invalid: boolean };
+
+/** Blank becomes Team member. Owner, Admin, and unknown text are invalid. */
+export function parseBulkAccessLevel(raw: string): ParsedBulkAccess {
   const key = slugHeader(raw);
-  if (!key) return "employee";
-  return ROLE_ALIASES[key] ?? null;
+  if (!key) return { role: "employee", invalid: false };
+  const extra = BULK_ACCESS_EXTRA[key];
+  if (extra) return { role: extra, invalid: false };
+  for (const role of BULK_ACCESS_ROLES) {
+    if (key === role || key === slugHeader(ROLE_LABEL[role])) {
+      return { role, invalid: false };
+    }
+  }
+  return { role: "employee", invalid: true };
+}
+
+export function parseEmployeeRosterRole(raw: string): EmployeeRosterRole | null {
+  const parsed = parseBulkAccessLevel(raw);
+  if (!slugHeader(raw)) return "employee";
+  if (parsed.invalid) return null;
+  return parsed.role;
 }
 
 export function toInviteRole(raw: string): EmployeeInviteRole {
-  const parsed = parseEmployeeRosterRole(raw);
-  if (parsed === "admin") return "admin";
-  if (parsed === "manager" || parsed === "program_manager") return "manager";
+  const key = slugHeader(raw);
+  if (key === "admin" || key === "owner") return "admin";
+  if (key === "manager" || key === "supervisor" || key === "program_manager") {
+    return "manager";
+  }
+  const parsed = parseBulkAccessLevel(raw);
+  if (!parsed.invalid && (parsed.role === "manager" || parsed.role === "program_manager")) {
+    return "manager";
+  }
   return "employee";
+}
+
+export function bulkAccessErrorMessage(raw: string): string {
+  const allowed = BULK_ACCESS_ROLES.map((role) => bulkAccessLabel(role)).join(", ");
+  const entered = raw.trim();
+  return entered ? `"${entered}" is not an access level. Use ${allowed}.` : `Use ${allowed}.`;
 }
 
 export function splitPersonName(raw: string): { first_name: string; last_name: string } {
@@ -202,6 +255,8 @@ export function emptyEmployeeRosterDraft(): EmployeeRosterDraft {
     phone: "",
     hire_date: "",
     job_title: "",
+    access_level: "",
+    role: "employee",
   };
 }
 
@@ -213,6 +268,7 @@ function draftFromParts(parts: {
   phone?: string;
   hire_date?: string;
   job_title?: string;
+  access_level?: string;
 }): EmployeeRosterDraft {
   const explicitFirst = (parts.first_name ?? "").trim();
   const explicitLast = (parts.last_name ?? "").trim();
@@ -223,6 +279,8 @@ function draftFromParts(parts: {
       ? { first_name: explicitFirst, last_name: explicitLast }
       : splitPersonName(name);
   const email = normalizeSignupEmail(parts.email ?? "");
+  const accessRaw = (parts.access_level ?? "").trim();
+  const access = parseBulkAccessLevel(accessRaw);
   return {
     id: newRowId(),
     name: name || [split.first_name, split.last_name].filter(Boolean).join(" "),
@@ -232,6 +290,8 @@ function draftFromParts(parts: {
     phone: (parts.phone ?? "").trim(),
     hire_date: normalizeHireDate(parts.hire_date ?? ""),
     job_title: (parts.job_title ?? "").trim(),
+    access_level: accessRaw,
+    role: access.role,
   };
 }
 
@@ -248,6 +308,58 @@ export function triggerEmployeeRosterTemplateDownload(): void {
   const a = document.createElement("a");
   a.href = url;
   a.download = "team-member-roster-template.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function accessLevelColumnLetter(): string {
+  const index = EMPLOYEE_ROSTER_HEADERS.indexOf("access_level");
+  return String.fromCharCode("A".charCodeAt(0) + index);
+}
+
+/** Excel template with a real list dropdown on Access level. CSV has no dropdown. */
+export async function buildEmployeeRosterTemplateXlsx(): Promise<Uint8Array> {
+  const ws = XLSX.utils.json_to_sheet([EXAMPLE_ROW], {
+    header: [...EMPLOYEE_ROSTER_HEADERS],
+  });
+  ws["!cols"] = EMPLOYEE_ROSTER_HEADERS.map((header) => ({
+    wch: Math.max(header.length, String(EXAMPLE_ROW[header]).length, 18),
+  }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Team members");
+  const out = XLSX.write(wb, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
+  const { default: JSZip } = await import("jszip");
+  const zip = await JSZip.loadAsync(out);
+  const sheetPath = Object.keys(zip.files).find((name) =>
+    /xl\/worksheets\/sheet\d+\.xml$/.test(name),
+  );
+  if (!sheetPath) throw new Error("Excel template is missing a worksheet.");
+  const file = zip.file(sheetPath);
+  if (!file) throw new Error("Excel template is missing a worksheet.");
+  const xml = await file.async("string");
+  const labels = BULK_ACCESS_ROLES.map((role) => bulkAccessLabel(role)).join(",");
+  const col = accessLevelColumnLetter();
+  const validation =
+    `<dataValidations count="1">` +
+    `<dataValidation type="list" allowBlank="1" showErrorMessage="1" ` +
+    `errorTitle="Access level" error="Choose an access level from the list." ` +
+    `sqref="${col}2:${col}500">` +
+    `<formula1>"${labels}"</formula1>` +
+    `</dataValidation></dataValidations>`;
+  if (!xml.includes("</worksheet>")) throw new Error("Excel template worksheet is incomplete.");
+  zip.file(sheetPath, xml.replace("</worksheet>", `${validation}</worksheet>`));
+  return zip.generateAsync({ type: "uint8array" });
+}
+
+export async function triggerEmployeeRosterTemplateXlsxDownload(): Promise<void> {
+  const bytes = await buildEmployeeRosterTemplateXlsx();
+  const blob = new Blob([bytes], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "team-member-roster-template.xlsx";
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -284,7 +396,7 @@ export function parseEmployeeRosterCsv(text: string): {
   const headers = res.meta.fields ?? [];
   const rows = (res.data ?? [])
     .map((raw) => mapRawRosterRow(raw, headers))
-    .filter((row) => row.name || row.first_name || row.last_name || row.email);
+    .filter((row) => row.name || row.first_name || row.last_name || row.email || row.access_level);
   return { rows, ignoredColumns: ignoredHeaders(headers) };
 }
 
@@ -294,7 +406,7 @@ export function parseEmployeeRosterRecords(
 ): { rows: EmployeeRosterDraft[]; ignoredColumns: string[] } {
   const rows = records
     .map((raw) => mapRawRosterRow(raw, headers))
-    .filter((row) => row.name || row.first_name || row.last_name || row.email);
+    .filter((row) => row.name || row.first_name || row.last_name || row.email || row.access_level);
   return { rows, ignoredColumns: ignoredHeaders(headers) };
 }
 
@@ -310,7 +422,7 @@ function lineLooksLikeHeader(line: string): boolean {
   return splitPasteLine(line).some((cell) => mapRosterColumn(cell) === "email");
 }
 
-/** Header row if it contains Email; otherwise name, email, phone, hire date, job title. */
+/** Header row if it contains Email; otherwise name, email, phone, hire date, job title, access level. */
 export function parseEmployeeRosterPaste(text: string): {
   rows: EmployeeRosterDraft[];
   ignoredColumns: string[];
@@ -322,16 +434,20 @@ export function parseEmployeeRosterPaste(text: string): {
   if (lineLooksLikeHeader(first)) return parseEmployeeRosterCsv(trimmed);
   const rows = lines
     .map((line) => {
-      const [name, email, phone, hireDate, jobTitle] = splitPasteLine(line);
+      const [name, email, phone, hireDate, jobTitle, accessLevel] = splitPasteLine(line);
       return draftFromParts({
         name,
         email,
         phone,
         hire_date: hireDate,
         job_title: jobTitle,
+        access_level: accessLevel,
       });
     })
-    .filter((row) => row.name || row.email || row.phone || row.hire_date || row.job_title);
+    .filter(
+      (row) =>
+        row.name || row.email || row.phone || row.hire_date || row.job_title || row.access_level,
+    );
   return { rows, ignoredColumns: [] };
 }
 
@@ -371,6 +487,9 @@ export function validateEmployeeRosterRows(
     }
     if (dups.has(normalizeSignupEmail(row.email))) {
       list.push({ field: "email", message: "This email is listed more than once." });
+    }
+    if (parseBulkAccessLevel(row.access_level).invalid) {
+      list.push({ field: "access_level", message: bulkAccessErrorMessage(row.access_level) });
     }
     if (list.length) issues.set(row.id, list);
   }

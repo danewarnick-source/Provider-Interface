@@ -19,7 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { HireDraftFields, type HireDraft } from "@/components/employees/add-employee-wizard";
+import {
+  HireDraftFields,
+  type HireDraft,
+  type HireRoleChoice,
+} from "@/components/employees/add-employee-wizard";
+import { bulkAccessChoices, toInviteRole } from "@/lib/employee-roster-upload";
 import { normalizeConfig, type StaffIntakeFieldsConfig } from "@/components/hr/staff-fields-panel";
 
 export type NeedsSetupPerson = {
@@ -42,6 +47,11 @@ type FinishedPerson = {
   email: string;
   role: HireDraft["role"];
 };
+
+const FINISH_SETUP_ROLES: HireRoleChoice[] = [
+  ...bulkAccessChoices(),
+  { value: "admin", label: "Admin" },
+];
 
 function personToDraft(person: NeedsSetupPerson): HireDraft {
   return {
@@ -179,7 +189,12 @@ export function FinishEmployeeSetupWizard({
       let raw: unknown;
       try {
         raw = await createInviteFn({
-          data: { organization_id: organizationId, email, role: target.role, site_origin },
+          data: {
+            organization_id: organizationId,
+            email,
+            role: toInviteRole(target.role),
+            site_origin,
+          },
         });
       } catch (e) {
         const msg = e instanceof Error ? e.message : "";
@@ -284,6 +299,7 @@ export function FinishEmployeeSetupWizard({
                 showHeader={false}
                 canRemove={false}
                 staffIntakeConfig={staffIntakeConfig}
+                roleChoices={FINISH_SETUP_ROLES}
                 onChange={(patch) => setDraft((prev) => (prev ? { ...prev, ...patch } : prev))}
                 onRemove={() => {}}
               />
