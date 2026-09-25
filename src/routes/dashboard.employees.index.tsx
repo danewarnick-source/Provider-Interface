@@ -85,18 +85,34 @@ import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-crea
 import { useAgencySetup } from "@/hooks/use-agency-setup";
 import { shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
 import { PersonAvatar } from "@/components/person/person-avatar";
-import type { Position } from "@/lib/employee-positions";
 
-function memberAccessLabel(m: {
-  access_level: string | null;
-  access_presets?: { name: string } | { name: string }[] | null;
-}): string {
-  const preset = Array.isArray(m.access_presets) ? m.access_presets[0] : m.access_presets;
-  if (preset?.name) return preset.name;
-  if (m.access_level === "owner" || m.access_level === "admin" || m.access_level === "staff") {
-    return LEVEL_LABEL[m.access_level];
-  }
+function rosterAccessLabel(level: string | null | undefined): string {
+  if (level === "owner" || level === "admin" || level === "staff") return LEVEL_LABEL[level];
   return LEVEL_LABEL.staff;
+}
+
+/** Job titles that are really old role names. The Access column carries Owner / Admin / Team member. */
+const LEGACY_ROSTER_ROLES = new Set([
+  "platform admin",
+  "company admin",
+  "supervisor",
+  "committee member",
+  "program manager",
+  "owner",
+  "admin",
+  "team member",
+  "staff",
+  "employee",
+  "manager",
+]);
+
+function rosterJobLine(
+  jobTitle: string | null | undefined,
+  position: string | null | undefined,
+): string | null {
+  const raw = (jobTitle || position || "").trim();
+  if (!raw || LEGACY_ROSTER_ROLES.has(raw.toLowerCase())) return null;
+  return raw;
 }
 
 function asAccessLevel(raw: string | null | undefined): AccessLevel {
@@ -171,11 +187,20 @@ export function EmployeesPage() {
         "org_member_last_sign_ins" as never,
         { _org: org.organization_id } as never,
       );
-      const [{ data: profs }, lastLoginRes] = await Promise.all([profilesQuery, lastLoginQuery]);
+      const execQuery = supabase.from("hive_executives").select("user_id").eq("active", true);
+      const [{ data: profs }, lastLoginRes, execRes] = await Promise.all([
+        profilesQuery,
+        lastLoginQuery,
+        execQuery,
+      ]);
       const lastLoginByUser = lastLoginByUserId(lastLoginRes.error ? null : lastLoginRes.data);
       const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
+      const hiveExecIds = new Set(
+        (execRes.error ? [] : (execRes.data ?? [])).map((row) => row.user_id),
+      );
       return (data ?? []).map((m) => ({
         ...m,
+        hiveExecutive: hiveExecIds.has(m.user_id),
         profile: profMap.get(m.user_id) ?? null,
         lastSignInAt: lastLoginByUser.get(m.user_id) ?? null,
         lastSignInKnown: lastLoginByUser.has(m.user_id),
@@ -547,7 +572,7 @@ export function EmployeesPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs uppercase">
-                          {memberAccessLabel(m)}
+                          {rosterAccessLabel(m.access_level)}
                         </span>
                         {codes.length ? (
                           codes.map((code) => (
@@ -616,7 +641,7 @@ export function EmployeesPage() {
                       const onActiveRoster = isEmployeeOnActiveRoster(m);
                       const login = m.profile?.username ?? m.profile?.email ?? "—";
                       const needsReset = m.profile?.must_change_password;
-                      const position = (m.profile?.position ?? "") as Position | "";
+                      const jobLine = rosterJobLine(m.job_title, m.profile?.position);
                       const startDate = (m.profile?.start_date ?? m.profile?.hire_date ?? null) as
                         | string
                         | null;
@@ -664,11 +689,16 @@ export function EmployeesPage() {
                                     <NeedsSetupChip />
                                   )}
                                 </div>
-                                {position && (
+                                {m.hiveExecutive ? (
                                   <div className="text-xs text-muted-foreground truncate">
-                                    {position}
+                                    Platform admin
                                   </div>
-                                )}
+                                ) : null}
+                                {jobLine ? (
+                                  <div className="text-xs text-muted-foreground truncate">
+                                    {jobLine}
+                                  </div>
+                                ) : null}
                               </div>
                             </div>
                           </td>
@@ -685,7 +715,7 @@ export function EmployeesPage() {
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap">
                             <span className="hive-role-pill rounded-full px-2 py-0.5 text-xs uppercase">
-                              {memberAccessLabel(m)}
+                              {rosterAccessLabel(m.access_level)}
                             </span>
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap">
@@ -719,7 +749,9 @@ export function EmployeesPage() {
                                   setCaseloadFor({
                                     id: m.user_id,
                                     name,
-                                    role: m.job_title || memberAccessLabel(m),
+                                    role:
+                                      rosterJobLine(m.job_title, m.profile?.position) ||
+                                      rosterAccessLabel(m.access_level),
                                   });
                                 }}
                               >

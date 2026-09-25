@@ -17,11 +17,11 @@ const ARTIFACT_DIR = fs.existsSync("/opt/cursor/artifacts")
   ? "/opt/cursor/artifacts"
   : path.join(process.cwd(), "test-results", "clients-staff-roster");
 
-async function shot(page: Page, name: string) {
+async function shot(page: Page, name: string, fullPage = false) {
   fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
   await page.screenshot({
     path: path.join(ARTIFACT_DIR, `${name}.png`),
-    fullPage: false,
+    fullPage,
   });
 }
 
@@ -478,7 +478,12 @@ test.describe("Access levels screenshots", () => {
     await page.getByRole("tab", { name: "Presets" }).click();
     await expect(page.getByText("Program Manager").first()).toBeVisible();
     await expect(page.getByText("DSP").first()).toBeVisible();
-    await shot(page, "access-presets");
+    const rosterCategory = page.getByText("Team roster & profiles").first();
+    await rosterCategory.scrollIntoViewIfNeeded();
+    await expect(rosterCategory).toBeVisible();
+    await expect(page.getByText("Hire & deactivate team members").first()).toBeVisible();
+    await expect(page.getByText(/Staff roster|Hire & deactivate staff|Staff compliance/i)).toHaveCount(0);
+    await shot(page, "access-presets", true);
 
     await gotoAdmin(page, "/dashboard/hub/employees");
     await page.getByRole("button", { name: /Add several at once/i }).click();
@@ -499,6 +504,10 @@ test.describe("Access levels screenshots", () => {
     await expect(page.getByRole("heading", { name: "Access", exact: true })).toBeVisible({
       timeout: 20_000,
     });
+    await expect(page.getByText("Leads group / Scope")).toHaveCount(0);
+    await expect(page.getByText(/Scope columns are not live/i)).toHaveCount(0);
+    await expect(page.getByTestId("profile-access-level")).toHaveText("Admin");
+    await expect(page.getByTestId("profile-access-badge")).toHaveText("Admin");
     await page.getByRole("button", { name: /Edit access/i }).click();
     await page.getByText("Whole agency", { exact: true }).click();
     await page.getByRole("option", { name: /Assigned homes, team members, and clients/i }).click();
@@ -508,7 +517,9 @@ test.describe("Access levels screenshots", () => {
     await expect(page.getByText("Access saved")).toBeVisible();
     await expect(page.getByText(/Assigned homes, team members, and clients/i)).toBeVisible();
     await expect(page.getByText("1 assigned").first()).toBeVisible();
-    await shot(page, "profile-admin-scope-save");
+    await expect(page.getByTestId("profile-access-level")).toHaveText("Admin");
+    await expect(page.getByTestId("profile-access-badge")).toHaveText("Admin");
+    await shot(page, "profile-admin-scope-save", true);
   });
 });
 

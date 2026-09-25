@@ -2,7 +2,7 @@
 // Owners edit; Admins with staff-roster access see it read-only.
 
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckboxMultiSelect } from "@/components/ui/checkbox-multi-select";
 import { useAccess } from "@/hooks/use-access";
-import { getMemberAccess, setMemberAccess, type AccessPreset } from "@/lib/access/access.functions";
+import { setMemberAccess, type AccessPreset } from "@/lib/access/access.functions";
 import { effectiveCategories } from "@/lib/access/can";
 import type { CategoryId, CategoryValue } from "@/lib/access/categories";
 import {
@@ -25,7 +25,7 @@ import {
 } from "@/lib/access/levels";
 import { safeErrorMessage } from "@/lib/safe-error-message";
 import { CategoryList } from "./category-list";
-import { accessKeys, useAccessTargets, usePresets } from "./queries";
+import { accessKeys, useAccessTargets, useMemberAccess, usePresets } from "./queries";
 
 interface Draft {
   level: AccessLevel;
@@ -49,13 +49,9 @@ function presetCats(presets: AccessPreset[] | undefined, id: string | null, leve
 export function AccessSection({ orgId, staffId }: { orgId: string; staffId: string }) {
   const { isOwner } = useAccess();
   const qc = useQueryClient();
-  const getFn = useServerFn(getMemberAccess);
   const saveFn = useServerFn(setMemberAccess);
   const presetsQ = usePresets(orgId);
-  const memberQ = useQuery({
-    queryKey: accessKeys.member(orgId, staffId),
-    queryFn: () => getFn({ data: { organization_id: orgId, user_id: staffId } }),
-  });
+  const memberQ = useMemberAccess(orgId, staffId);
   const [editing, setEditing] = useState(false);
   const targetsQ = useAccessTargets(orgId, editing);
 
@@ -207,7 +203,7 @@ export function AccessSection({ orgId, staffId }: { orgId: string; staffId: stri
           <div>
             <h3 className="text-sm font-semibold">Assigned to</h3>
             <p className="text-xs text-muted-foreground">
-              A home covers its clients and staff. People can be assigned to several managers; each sees the
+              A home covers its clients and team members. People can be assigned to several managers; each sees the
               full record within their own settings.
             </p>
           </div>

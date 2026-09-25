@@ -76,7 +76,7 @@ function InviteForm({ orgId }: { orgId: string }) {
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">
         <p className="text-xs text-muted-foreground">
-          Prefer Employees → Add employee for a complete staff file. This sends a join link only.
+          Prefer Team Members → Add team member for a complete file. This sends a join link only.
         </p>
         <Button type="submit" disabled={invite.isPending || !email}>
           Send invitation

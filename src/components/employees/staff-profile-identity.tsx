@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useMemberAccess } from "@/components/access/queries";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import {
   staffNameParts,
@@ -42,7 +43,10 @@ export function StaffProfileIdentity({
 }) {
   const names = staffNameParts(profile);
   const hireDate = profile?.hire_date ?? profile?.start_date ?? "";
-  const levelLabel = LEVEL_LABEL[member.access_level as AccessLevel] ?? member.access_level;
+  const accessQ = useMemberAccess(orgId, staffId);
+  const level = (accessQ.data?.access_level ?? member.access_level) as AccessLevel;
+  const levelLabel =
+    level === "owner" || level === "admin" || level === "staff" ? LEVEL_LABEL[level] : "Team member";
   const patch = (partial: Partial<StaffIdentityDraft>) => onDraftChange({ ...draft, ...partial });
 
   return (
@@ -62,7 +66,10 @@ export function StaffProfileIdentity({
             <Field label="Email" value={profile?.email} />
             <Field label="Username" value={profile?.username} />
             <Field label="Phone" value={profile?.phone} />
-            <Field label="Access level" value={levelLabel} />
+            <Field
+              label="Access level"
+              value={<span data-testid="profile-access-level">{levelLabel}</span>}
+            />
             <Field label="Hire date" value={hireDate} />
             <Field label="Team member ID" value={profile?.employee_id} />
             <Field label="Job title" value={member.job_title} />

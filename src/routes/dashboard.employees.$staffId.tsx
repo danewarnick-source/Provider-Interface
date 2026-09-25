@@ -23,6 +23,7 @@ import { RequirePermission } from "@/components/rbac-guard";
 import { EmployeeFaceSheetButton } from "@/components/employees/employee-face-sheet-button";
 import { StaffProfilePanel } from "@/components/employees/staff-profile-panel";
 import { StaffObligationsFilesTab } from "@/components/employees/staff-obligations-files-tab";
+import { useMemberAccess } from "@/components/access/queries";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import {
   loadStaffProfileIdentity,
@@ -88,6 +89,7 @@ function StaffProfilePage() {
       return loadStaffProfileIdentity(supabase, { organizationId: orgId, staffId });
     },
   });
+  const accessQ = useMemberAccess(orgId, staffId);
 
   if (!orgId || memberQ.isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Loading team member profile…</div>;
@@ -97,7 +99,7 @@ function StaffProfilePage() {
       <Card className="border-rose-200 bg-rose-50/30">
         <CardContent className="p-6 text-sm text-rose-700">
           <ShieldAlert className="mr-2 inline h-4 w-4" />
-          Staffer not found in your organization.
+          Team member not found in your organization.
         </CardContent>
       </Card>
     );
@@ -106,6 +108,11 @@ function StaffProfilePage() {
   const m = memberQ.data!.member;
   const p = memberQ.data!.profile;
   const name = staffProfileDisplayName(p);
+  const accessLevel = (accessQ.data?.access_level ?? m.access_level) as AccessLevel;
+  const accessLevelLabel =
+    accessLevel === "owner" || accessLevel === "admin" || accessLevel === "staff"
+      ? LEVEL_LABEL[accessLevel]
+      : "Team member";
 
   const invalidateProfile = () => {
     qc.invalidateQueries({ queryKey: staffProfileIdentityQueryKey(orgId, staffId) });
@@ -145,8 +152,9 @@ function StaffProfilePage() {
                 variant="outline"
                 className="border-primary/30 bg-primary/5 uppercase tracking-wide text-primary"
                 title="Access level"
+                data-testid="profile-access-badge"
               >
-                {LEVEL_LABEL[(m.access_level as AccessLevel) ?? "staff"] ?? "Team member"}
+                {accessLevelLabel}
               </Badge>
               <Badge
                 variant="outline"
@@ -191,7 +199,7 @@ function StaffProfilePage() {
       >
         <TabsList className="flex h-auto w-full min-w-0 max-w-full flex-wrap justify-start overflow-x-auto">
           <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="personnel">Staff file</TabsTrigger>
+          <TabsTrigger value="personnel">Team member file</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
 

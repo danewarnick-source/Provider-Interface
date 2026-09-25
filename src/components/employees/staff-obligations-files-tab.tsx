@@ -339,9 +339,9 @@ export function StaffObligationsFilesTab({
 
   const uploadMut = useMutation({
     mutationFn: async () => {
-      if (!targetInstance) throw new Error("Choose a staff file item.");
+      if (!targetInstance) throw new Error("Choose a team member file item.");
       if (attestationBlocked) {
-        throw new Error("This item requires the staff member to attest themselves.");
+        throw new Error("This item requires the team member to attest themselves.");
       }
       if (!uploadFile) throw new Error("Choose a file to upload.");
       const safeName = uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -375,12 +375,12 @@ export function StaffObligationsFilesTab({
   });
 
   if (listQ.isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading staff file…</p>;
+    return <p className="text-sm text-muted-foreground">Loading team member file…</p>;
   }
   if (listQ.error) {
     return (
       <p className="text-sm text-rose-700">
-        {listQ.error instanceof Error ? listQ.error.message : "Could not load this staff file."}
+        {listQ.error instanceof Error ? listQ.error.message : "Could not load this team member file."}
       </p>
     );
   }
@@ -413,7 +413,7 @@ export function StaffObligationsFilesTab({
       </div>
 
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nothing on this staff file yet.</p>
+        <p className="text-sm text-muted-foreground">Nothing on this team member file yet.</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
@@ -423,7 +423,7 @@ export function StaffObligationsFilesTab({
                   <Checkbox
                     checked={rows.length > 0 && selected.size === rows.length}
                     onCheckedChange={(v) => toggleAll(!!v)}
-                    aria-label="Select all staff file items"
+                    aria-label="Select all team member file items"
                   />
                 </th>
                 <th className="px-3 py-2 text-left">Item</th>
@@ -509,13 +509,13 @@ export function StaffObligationsFilesTab({
           <DialogHeader>
             <DialogTitle>Upload evidence</DialogTitle>
             <DialogDescription>
-              File attaches to the open cycle of this staff file item. Accepted certificates stay on
+              File attaches to the open cycle of this team member file item. Accepted certificates stay on
               file when a renewal is uploaded.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label>Staff file item</Label>
+              <Label>Team member file item</Label>
               <Select
                 value={uploadInstanceId ?? ""}
                 onValueChange={(v) => setUploadInstanceId(v || null)}
@@ -538,7 +538,7 @@ export function StaffObligationsFilesTab({
               </p>
             ) : attestationBlocked ? (
               <p className="text-sm text-amber-900">
-                This item requires the staff member to attest themselves. Evidence cannot be filed
+                This item requires the team member to attest themselves. Evidence cannot be filed
                 here.
               </p>
             ) : (
@@ -598,7 +598,7 @@ export function StaffObligationsFilesTab({
               <img src={viewUrl} alt="" className="max-h-[70vh] w-full object-contain" />
             ) : (
               <iframe
-                title="Staff file evidence"
+                title="Team member file evidence"
                 src={viewUrl}
                 className="h-[70vh] w-full border-0"
               />

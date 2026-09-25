@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listAccessPresets, listAccessTargets } from "@/lib/access/access.functions";
+import { getMemberAccess, listAccessPresets, listAccessTargets } from "@/lib/access/access.functions";
 
 export const accessKeys = {
   presets: (orgId: string) => ["access-presets", orgId] as const,
@@ -16,6 +16,16 @@ export function usePresets(orgId: string | undefined) {
     enabled: !!orgId,
     queryKey: accessKeys.presets(orgId ?? ""),
     queryFn: () => fn({ data: { organization_id: orgId! } }),
+  });
+}
+
+/** Same query the Access card uses, so profile labels stay in sync after a save. */
+export function useMemberAccess(orgId: string | undefined, userId: string | undefined) {
+  const fn = useServerFn(getMemberAccess);
+  return useQuery({
+    enabled: !!orgId && !!userId,
+    queryKey: accessKeys.member(orgId ?? "", userId ?? ""),
+    queryFn: () => fn({ data: { organization_id: orgId!, user_id: userId! } }),
   });
 }
 

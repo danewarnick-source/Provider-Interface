@@ -42,31 +42,31 @@ export type CategoryMap = Partial<Record<CategoryId, CategoryValue>>;
 export const CATEGORIES: AccessCategory[] = [
   {
     id: "staff_roster",
-    label: "Staff roster & profiles",
-    covers: "The staff list and each person's profile.",
+    label: "Team roster & profiles",
+    covers: "The team member list and each person's profile.",
     explain: {
-      off: "Can't see the staff list or open anyone's profile.",
-      view: "Can see the staff list and open profiles (contact info, hire date, job title, home). Can't change anything.",
+      off: "Can't see the team member list or open anyone's profile.",
+      view: "Can see the team member list and open profiles (contact info, hire date, job title, home). Can't change anything.",
       edit: "Everything in View, plus edit names, phone, email, hire date, job title and home. Can't hire, deactivate, or change anyone's access.",
     },
   },
   {
     id: "staff_hiring",
-    label: "Hire & deactivate staff",
+    label: "Hire & deactivate team members",
     covers: "Bringing people on and taking them off.",
     explain: {
       off: "Can't add, invite, or deactivate anyone.",
-      view: "Can see pending invites and deactivated staff. Can't add, invite, reset passwords, or deactivate.",
-      edit: "Can add employees, upload a roster, send and resend invites, reset passwords, deactivate and reactivate. Can't choose anyone's access level or preset (Owners only).",
+      view: "Can see pending invites and deactivated team members. Can't add, invite, reset passwords, or deactivate.",
+      edit: "Can add team members, upload a roster, send and resend invites, reset passwords, deactivate and reactivate. Can't choose anyone's access level or preset (Owners only).",
     },
   },
   {
     id: "staff_compliance",
-    label: "Staff compliance file & training",
-    covers: "Staff file items, evidence, certifications, training.",
+    label: "Team member file & training",
+    covers: "Team member file items, evidence, certifications, training.",
     explain: {
-      off: "Can't see anyone's staff file, certifications or training.",
-      view: "Can see staff file items, uploaded evidence, certification status, training progress and team compliance reports. Can't upload, approve, or assign.",
+      off: "Can't see anyone's team member file, certifications or training.",
+      view: "Can see team member file items, uploaded evidence, certification status, training progress and team compliance reports. Can't upload, approve, or assign.",
       edit: "Can upload and file documents, approve certifications and evidence, assign training, create and edit courses, and manage obligations.",
     },
   },
@@ -214,7 +214,7 @@ export const CATEGORIES: AccessCategory[] = [
   {
     id: "phone_app",
     label: "Phone app basics",
-    covers: "The staff phone app for their own work.",
+    covers: "The phone app for their own work.",
     onOff: true,
     explain: {
       off: "Can't use the phone app's work features.",

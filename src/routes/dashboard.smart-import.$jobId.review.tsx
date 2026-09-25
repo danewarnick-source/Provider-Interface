@@ -259,7 +259,7 @@ function ReviewPage() {
     return <div className="text-sm text-destructive">Failed to load job.</div>;
   if (job.data.job.mode === "employee") {
     return (
-      <p className="text-sm text-muted-foreground">Staff roster upload moved to Team Members.</p>
+      <p className="text-sm text-muted-foreground">Roster upload moved to Team Members.</p>
     );
   }
 
