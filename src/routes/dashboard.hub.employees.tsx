@@ -1,11 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 import { HubShell, type HubTab } from "@/components/admin-hubs/hub-shell";
-import { RequirePermission } from "@/components/rbac-guard";
 import { usePermissions } from "@/hooks/use-permissions";
 import { EmployeesPage } from "./dashboard.employees.index";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
-import { HrAdminPage } from "./dashboard.hr-admin";
 import { HostsPage } from "@/components/hosts/hosts-page";
 
 const search = z.object({
@@ -26,15 +24,6 @@ function EmployeesHub() {
       render: () => <HostsPage />,
     });
   }
-  tabs.push({
-    key: "hr-admin",
-    label: "HR Admin",
-    render: () => (
-      <RequirePermission perm="view_staff_records">
-        <HrAdminPage />
-      </RequirePermission>
-    ),
-  });
   return (
     <AgencySetupCreateGate>
       <HubShell title="Employees" basePath="/dashboard/hub/employees" tabs={tabs} />
@@ -46,17 +35,10 @@ export const Route = createFileRoute("/dashboard/hub/employees")({
   head: () => ({ meta: [{ title: "Employees — Provider Interface" }] }),
   validateSearch: (s) => search.parse(s),
   beforeLoad: ({ search: s }) => {
-    if (s.tab === "loans") {
+    if (s.tab === "loans" || s.tab === "hr-admin" || s.tab === "compliance") {
       throw redirect({
         to: "/dashboard/hub/employees",
         search: { tab: "roster" },
-        replace: true,
-      });
-    }
-    if (s.tab === "compliance") {
-      throw redirect({
-        to: "/dashboard/hub/employees",
-        search: { tab: "hr-admin" },
         replace: true,
       });
     }

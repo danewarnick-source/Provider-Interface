@@ -372,7 +372,9 @@ describe("Org-wide Staff file lock", () => {
     );
     assert.doesNotMatch(hrAdmin, /HrComplianceMatrix/);
     assert.doesNotMatch(hrAdmin, /getHrAdminRollup/);
-    assert.match(hrAdmin, /to="\/dashboard\/compliance"/);
+    assert.doesNotMatch(hrAdmin, /OtherAssignmentsRollup/);
+    assert.match(hrAdmin, /redirect/);
+    assert.match(hrAdmin, /\/dashboard\/hub\/employees/);
     const matrixFns = readFileSync(new URL("./hr-staff.functions.ts", import.meta.url), "utf8");
     assert.doesNotMatch(matrixFns, /getHrComplianceMatrix/);
     assert.doesNotMatch(matrixFns, /getHrAdminRollup/);

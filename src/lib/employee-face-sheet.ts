@@ -7,8 +7,7 @@
  *
  * Pulled together on demand from the same tables the profile UI reads:
  *   - profiles (identity, contact, position, hire date, emergency contact)
- *   - organization_members (PI role + active status)
- *   - staff_types + profiles.staff_type_keys (org title tier)
+ *   - organization_members (PI role, job title, active status)
  *   - teams (team assignment)
  *   - certifications + external_certifications + baseline training
  *     completions (certs & trainings with expirations)
@@ -96,7 +95,7 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
   //    users from tripping object-mode queries with multiple memberships.
   const { data: member, error: mErr } = await sb
     .from("organization_members")
-    .select("id, role, active, organization_id")
+    .select("id, role, active, organization_id, job_title")
     .eq("user_id", staffId)
     .eq("organization_id", organizationId)
     .limit(1)
@@ -109,7 +108,7 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
   const { data: profile, error: pErr } = await (sb as any)
     .from("profiles")
     .select(
-      "id, full_name, first_name, last_name, email, username, phone, employee_id, position, positions, department, hire_date, account_status, worker_type, team_id, photo_path, staff_type_keys, emergency_contact_name, emergency_contact_relationship, emergency_contact_phone",
+      "id, full_name, first_name, last_name, email, username, phone, employee_id, position, positions, department, hire_date, account_status, worker_type, team_id, photo_path, emergency_contact_name, emergency_contact_relationship, emergency_contact_phone",
     )
     .eq("id", staffId)
     .limit(1)
@@ -138,19 +137,9 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
     team = (data as { team_name: string | null } | null) ?? null;
   }
 
-  // 4) Staff-type labels for org title tier.
-  const { data: typesCatalog } = await sb
-    .from("staff_types")
-    .select("key, label")
-    .eq("organization_id", orgId);
-  const typeByKey = new Map(
-    ((typesCatalog ?? []) as Array<{ key: string; label: string }>).map((t) => [t.key, t.label]),
-  );
-  const typeKeys =
-    ((profile as { staff_type_keys: string[] | null } | null)?.staff_type_keys ?? []) as string[];
-  const staffTypeLabels = typeKeys.map((k) => typeByKey.get(k) ?? k);
+  const jobTitle = String((member as { job_title?: string | null }).job_title ?? "").trim();
 
-  // 5) Certifications from all three sources.
+  // 4) Certifications from all three sources.
   const certs: CertRow[] = [];
   const { data: hiveCerts } = await sb
     .from("certifications")
@@ -262,7 +251,7 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
       org_phone: string | null;
     } | null,
     team,
-    staffTypeLabels,
+    jobTitle,
     certs,
     deadlines,
     hrDocs: ((hrDocs ?? []) as HrDocRow[]),
@@ -542,11 +531,7 @@ export async function generateEmployeeFaceSheet(
     font: helvB, size: 22, color: INK, maxWidth: idW, maxLines: 2,
   });
   iy -= 4;
-  const orgTitle = d.staffTypeLabels.length
-    ? (d.staffTypeLabels.length <= 3
-        ? d.staffTypeLabels.join(" / ")
-        : `${d.staffTypeLabels[0]} and ${d.staffTypeLabels.length - 1} more`)
-    : EMPTY;
+  const orgTitle = d.jobTitle || EMPTY;
   iy = drawText(page, orgTitle, M, iy, {
     font: helv, size: 10.5, color: INK, maxWidth: idW, maxLines: 1,
   });
@@ -587,9 +572,7 @@ export async function generateEmployeeFaceSheet(
     ? (p.positions as string[]).join(", ")
     : field(p.position);
   yR = drawKV(page, "Position / role", positions, rightXCol, yR, colW, helv, helvB);
-  yR = drawKV(page, "Staff types",
-    d.staffTypeLabels.length ? d.staffTypeLabels.join(", ") : EMPTY,
-    rightXCol, yR, colW, helv, helvB);
+  yR = drawKV(page, "Job title", field(d.jobTitle), rightXCol, yR, colW, helv, helvB);
   yR = drawKV(page, "Team", field(d.team?.team_name), rightXCol, yR, colW, helv, helvB);
   yR = drawKV(page, "Department", field(p.department), rightXCol, yR, colW, helv, helvB);
   yR = drawKV(page, "Worker type", field(p.worker_type), rightXCol, yR, colW, helv, helvB);

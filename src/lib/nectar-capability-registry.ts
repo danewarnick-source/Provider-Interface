@@ -82,12 +82,12 @@ export const CAPABILITY_REGISTRY: ReadonlyArray<CapabilityAction> = [
     handler: "propose_staff_checklist_from_document",
   },
 
-  // ---------- LIVE (HR Admin tab) ----------
+  // ---------- LIVE (Staff file) ----------
   {
     action_key: "per_staff_tracking",
     label: "Open per-staff tracking for items in this checklist",
     helper:
-      "Track each staff member's status against these items in the HR Admin roll-up. Completion still requires a one-click human confirm.",
+      "Track each staff member's status against these items on Staff file. Completion still requires a one-click human confirm.",
     applies_to_types: ["staff_checklist"],
     is_live: true,
     handler: "noop",
@@ -96,7 +96,7 @@ export const CAPABILITY_REGISTRY: ReadonlyArray<CapabilityAction> = [
     action_key: "renewal_alerts",
     label: "Set renewal reminders for dates found in this document",
     helper:
-      "Surface upcoming expirations in the HR Admin roll-up. NECTAR pre-fills dates; you confirm them.",
+      "Surface upcoming expirations on Staff file. NECTAR pre-fills dates; you confirm them.",
     applies_to_types: [
       "insurance_certificate",
       "training_certificate",
