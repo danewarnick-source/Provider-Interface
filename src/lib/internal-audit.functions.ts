@@ -143,7 +143,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
           .eq("organization_id", orgId),
         supabase
           .from("organization_members")
-          .select("user_id, role, job_title")
+          .select("user_id, role:access_level, job_title")
           .eq("organization_id", orgId)
           .eq("active", true),
         supabase
@@ -756,7 +756,7 @@ export const listAuditableStaff = createServerFn({ method: "GET" })
     await assertAddonForOrg(supabase, userId, "internal_audit", data.organizationId);
     const { data: members, error } = await supabase
       .from("organization_members")
-      .select("user_id, role, job_title, active")
+      .select("user_id, role:access_level, job_title, active")
       .eq("organization_id", data.organizationId)
       .eq("active", true);
     if (error) throw error;

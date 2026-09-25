@@ -19,6 +19,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Utensils, ShieldCheck, PowerOff } from "lucide-react";
 import { toast } from "sonner";
+import { isAdminLevel } from "@/lib/access/levels";
 
 export type MealSupportRow = {
   id: string;
@@ -63,7 +64,7 @@ export function MealSupportGate({
   const { session } = useAuth();
   const qc = useQueryClient();
   const supportQ = useMealSupport(clientId);
-  const canEdit = org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+  const canEdit = isAdminLevel(org?.access.level);
 
   const [reason, setReason] = useState<MealSupportRow["reason"]>("intake_need");
   const [goalNote, setGoalNote] = useState("");

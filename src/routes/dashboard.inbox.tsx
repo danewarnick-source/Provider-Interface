@@ -7,7 +7,7 @@ import { Mail, Paperclip, Download, ArrowLeft, AlertCircle, Info, ShieldCheck, M
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 import {
   listInboxMessages,
   openInboxMessage,
@@ -21,9 +21,9 @@ import { ApprovalDialog } from "@/components/billing/ApprovalDialog";
 export const Route = createFileRoute("/dashboard/inbox")({
   head: () => ({ meta: [{ title: "Inbox — Provider Interface" }] }),
   component: () => (
-    <RequireRole roles={["admin", "program_manager", "manager"]}>
+    <RequireLevel min="admin">
       <InboxPage />
-    </RequireRole>
+    </RequireLevel>
   ),
 });
 

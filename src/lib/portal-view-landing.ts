@@ -44,7 +44,6 @@ export function preventSheetDismissForPortalViewMenu(event: {
 }
 
 export const COMPANY_PORTAL_VIEWS = ["admin", "staff", "staff_mobile"] as const;
-export const COMPANY_ADMIN_ROLES = ["admin", "super_admin", "program_manager", "manager"] as const;
 
 export function isCompanyPortalView(
   v: string | null | undefined,
@@ -52,10 +51,9 @@ export function isCompanyPortalView(
   return v === "admin" || v === "staff" || v === "staff_mobile";
 }
 
-export function isCompanyAdminRole(role: string | null | undefined): boolean {
-  return (
-    role === "admin" || role === "super_admin" || role === "program_manager" || role === "manager"
-  );
+/** Owner or Admin access level — anyone who works in the web dashboard. */
+export function isCompanyAdminLevel(level: string | null | undefined): boolean {
+  return level === "owner" || level === "admin";
 }
 
 export function readStoredPortalView(): PortalView | null {
@@ -158,29 +156,20 @@ export function resolvePortalSwitcherPath(
   return COMPANY_PORTAL_HOME;
 }
 
-export const ROLE_ENTRY_HOME: Record<string, string> = {
-  super_admin: "/dashboard/hive-exec",
-  admin: "/dashboard",
-  program_manager: "/dashboard",
-  manager: "/dashboard",
-  employee: "/employee",
-  committee_member: "/dashboard/hrc",
-};
-
 /**
  * `/admin` (and the other role-entry bookmarks) must persist the matching
  * Portal View. Otherwise an Owner who last used Staff View hits /admin,
  * sees "Redirecting…", and lands back on the staff dashboard.
+ * `home` is the member's own landing page (preset home, else level home).
  */
 export function resolveRoleEntryLanding(input: {
   hasSession: boolean;
-  role: string;
+  level: string;
+  home: string;
   allowed: readonly string[];
   persistView: PortalView | null;
 }): { path: string; persistView: PortalView | null } {
   if (!input.hasSession) return { path: "/login", persistView: null };
-  if (!input.allowed.includes(input.role)) {
-    return { path: ROLE_ENTRY_HOME[input.role] ?? "/dashboard", persistView: null };
-  }
+  if (!input.allowed.includes(input.level)) return { path: input.home, persistView: null };
   return { path: "/dashboard", persistView: input.persistView };
 }

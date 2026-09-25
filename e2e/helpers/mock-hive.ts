@@ -9,13 +9,6 @@
 import { expect, type Page, type Route } from "@playwright/test";
 import { toCrossJSONAsync } from "seroval";
 import {
-  ALL_PERMISSIONS,
-  DEFAULT_MATRIX,
-  PROVIDER_ROLES,
-  type Permission,
-  type ProviderRole,
-} from "../../src/lib/rbac";
-import {
   ADMIN_EMAIL,
   ADMIN_NAME,
   ADMIN_USER_ID,
@@ -29,8 +22,22 @@ import {
   STAFF_LIST,
   TEAMS,
 } from "../fixtures/tns-roster";
+import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
+import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
+import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
+import { withAccessLevel } from "./access-level";
 
 export type MockPersona = "admin" | "dsp" | "manager";
+
+/** Every required operating fact answered — mirrors a launched TNS. */
+const MOCK_SETUP_FACTS: AgencySetupFacts = {
+  operates_ol_site: true,
+  uses_volunteers: false,
+  has_governing_board: true,
+  servicesOffered: ["HHS", "SLN", "SLH", "SEI", "DSI"],
+  approxClientCount: 12,
+  serviceArea: "Salt Lake, Davis",
+};
 
 export type MockOptions = {
   persona?: MockPersona;
@@ -315,22 +322,6 @@ function billingCodeRows(): Row[] {
   return out;
 }
 
-function rolePermissionRows(): Row[] {
-  const rows: Row[] = [];
-  for (const role of PROVIDER_ROLES) {
-    const granted = new Set<Permission>(DEFAULT_MATRIX[role as ProviderRole] ?? []);
-    for (const permission of ALL_PERMISSIONS) {
-      rows.push({
-        organization_id: ORG_ID,
-        role,
-        permission,
-        enabled: granted.has(permission),
-      });
-    }
-  }
-  return rows;
-}
-
 function expandDailyLog(row: (typeof DAILY_LOGS)[number]): Row {
   const staff = STAFF_LIST.find((s) => s.id === row.user_id);
   const client = CLIENT_LIST.find((c) => c.id === row.client_id);
@@ -395,7 +386,7 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
 
   switch (table) {
     case "organization_members":
-      return staff.map((s) => memberRow(s, true));
+      return staff.map((s) => withAccessLevel(memberRow(s, true)));
     case "profiles":
       return staff.map((s) => profileRow(s, opts));
     case "org_member_directory":
@@ -427,7 +418,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "training_tracks":
     case "courses":
     case "course_assignments":
-    case "user_permission_overrides":
     case "import_subjects":
     case "auditor_accounts":
     case "staff_types":
@@ -437,8 +427,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
       return [];
     case "daily_logs":
       return opts.emptyLogs ? [] : DAILY_LOGS.map((row) => expandDailyLog(row));
-    case "role_permissions":
-      return rolePermissionRows();
     case "invitations":
       return [{ ...PENDING_INVITE }];
     case "teams":
@@ -777,6 +765,7 @@ function inferServerFn(url: string, body: string): string {
 
 function serverFnPayload(url: string, body: string): unknown {
   const fn = inferServerFn(url, body);
+  const fnBlob = `${fn}\n${url}\n${body}`;
   if (/applyEmployeeRosterRow/i.test(fn)) {
     return {
       userId: "00000000-0000-4000-a000-000000000498",
@@ -829,6 +818,15 @@ function serverFnPayload(url: string, body: string): unknown {
     };
   }
   if (/checkHiveExecutive/i.test(fn)) return { isExecutive: false };
+  if (/getAgencySetupStatus/i.test(fn)) {
+    // Mocked TNS has finished agency setup, so the Employees/Clients create gate stays open.
+    return {
+      ...computeAgencySetupStatus(MOCK_SETUP_FACTS),
+      organizationId: ORG_ID,
+      facts: MOCK_SETUP_FACTS,
+    };
+  }
+  if (/loadEmployeeScope|loadOrgScopeSnapshot/i.test(fn)) return emptyOrgScopeSnapshot();
   if (/getMyEntitlements/i.test(fn)) {
     return {
       organization_id: ORG_ID,
@@ -911,6 +909,15 @@ function serverFnPayload(url: string, body: string): unknown {
       facts: {},
     };
   }
+  if (/listAccessPresets/i.test(fn)) return sampleAccessPresets();
+  if (/listTeamAccess/i.test(fn)) return sampleTeamAccess();
+  if (/listAccessTargets/i.test(fn)) return sampleAccessTargets();
+  if (/getMemberAccess/i.test(fn)) return sampleMemberAccess(fnBlob);
+  if (/setMemberAccess/i.test(fn) || /access_scope/.test(fnBlob)) {
+    rememberMemberAccess(fnBlob);
+    return { ok: true };
+  }
+  if (/listAccessChangeLog/i.test(fn)) return { rows: [], total: 0 };
   if (/getStaffPii|getStaffTrainingRiskFlags/i.test(fn)) return null;
   if (/recordPhiAccess|dismissUiPref|requestPermission/i.test(fn)) return { ok: true };
   if (/saveDailyRecord/i.test(fn)) {
@@ -993,6 +1000,189 @@ function serverFnPayload(url: string, body: string): unknown {
   return [];
 }
 
+const PRESET_PROGRAM_MANAGER = "00000000-0000-4000-a000-000000000911";
+const PRESET_DSP = "00000000-0000-4000-a000-000000000912";
+const PRESET_BILLING = "00000000-0000-4000-a000-000000000913";
+const PRESET_HOME = "00000000-0000-4000-a000-000000000914";
+const PRESET_HR = "00000000-0000-4000-a000-000000000915";
+const PRESET_LEAD = "00000000-0000-4000-a000-000000000916";
+const PRESET_HRC = "00000000-0000-4000-a000-000000000917";
+
+type SavedMemberAccess = {
+  membership_id: string;
+  access_level: "owner" | "admin" | "staff";
+  access_scope: "agency" | "assigned" | "self";
+  access_preset_id: string | null;
+  access_overrides: Record<string, string>;
+  assignments: Array<{ kind: "home" | "staff" | "client"; target_id: string }>;
+};
+
+const savedMemberAccess = new Map<string, SavedMemberAccess>();
+
+function sampleAccessPresets() {
+  const row = (
+    id: string,
+    name: string,
+    access_level: "admin" | "staff",
+    access_scope: "agency" | "assigned" | "self",
+    seed_key: string,
+    home_page: string,
+  ) => ({
+    id,
+    name,
+    access_level,
+    access_scope,
+    home_page,
+    categories: access_level === "staff" ? { phone_app: "edit" } : { staff_roster: "edit", clients: "edit" },
+    seed_key,
+    member_count: 1,
+  });
+  return [
+    row(PRESET_BILLING, "Billing", "admin", "agency", "billing", "/dashboard"),
+    row(PRESET_DSP, "DSP", "staff", "self", "dsp", "/employee"),
+    row(PRESET_HOME, "Group Home Manager", "admin", "assigned", "home_manager", "/dashboard"),
+    row(PRESET_HR, "HR / Office", "admin", "agency", "hr_office", "/dashboard"),
+    row(PRESET_HRC, "HRC Committee", "staff", "assigned", "hrc_committee", "/dashboard/hrc"),
+    row(PRESET_LEAD, "Lead DSP", "staff", "assigned", "lead_dsp", "/employee"),
+    row(PRESET_PROGRAM_MANAGER, "Program Manager", "admin", "agency", "program_manager", "/dashboard"),
+  ];
+}
+
+function sampleTeamAccess() {
+  return [
+    {
+      membership_id: "00000000-0000-4000-a000-000000000921",
+      user_id: "00000000-0000-4000-a000-000000000931",
+      email: "alex.kim@example.test",
+      full_name: "Alex Kim",
+      access_level: "owner",
+      access_scope: "agency",
+      preset_name: null,
+      company_executive: true,
+      hive_executive: false,
+    },
+    {
+      membership_id: "00000000-0000-4000-a000-000000000922",
+      user_id: "00000000-0000-4000-a000-000000000932",
+      email: "sam.rivera@example.test",
+      full_name: "Sam Rivera",
+      access_level: "admin",
+      access_scope: "agency",
+      preset_name: "Program Manager",
+      company_executive: false,
+      hive_executive: false,
+    },
+    {
+      membership_id: "00000000-0000-4000-a000-000000000923",
+      user_id: STAFF.jake.id,
+      email: "pat.lee@example.test",
+      full_name: "Pat Lee",
+      access_level: "staff",
+      access_scope: "self",
+      preset_name: "DSP",
+      company_executive: false,
+      hive_executive: false,
+    },
+  ];
+}
+
+function sampleAccessTargets() {
+  return {
+    home: TEAMS.map((t) => ({ id: t.id, label: t.team_name })),
+    staff: [{ id: STAFF.jake.id, label: "Pat Lee" }],
+    client: [{ id: CLIENTS.tommy.id, label: "Sample Client" }],
+  };
+}
+
+function userIdFromBlob(blob: string): string {
+  const plain = blob.match(/"user_id"\s*:\s*"([^"]+)"/)?.[1];
+  if (plain) return plain;
+  // Seroval keeps keys and string values in separate arrays.
+  const decoded = decodeURIComponent(blob);
+  const packed = decoded.match(
+    /"organization_id","user_id","access_level"[\s\S]*?"v":\[(?:\{"t":1,"s":"([^"]+)"\},)\{"t":1,"s":"([^"]+)"\}/,
+  );
+  if (packed?.[2]) return packed[2];
+  return STAFF.jake.id;
+}
+
+/** Read a setMemberAccess body, whether it is plain JSON or seroval. */
+function parseAccessWrite(blob: string): {
+  userId: string;
+  level: SavedMemberAccess["access_level"];
+  scope: SavedMemberAccess["access_scope"];
+  preset: string | null;
+  assignments: SavedMemberAccess["assignments"];
+} {
+  const decoded = decodeURIComponent(blob);
+  const levelPlain = decoded.match(/"access_level"\s*:\s*"(owner|admin|staff)"/)?.[1];
+  const scopePlain = decoded.match(/"access_scope"\s*:\s*"(agency|assigned|self)"/)?.[1];
+  if (levelPlain && scopePlain) {
+    const assignments: SavedMemberAccess["assignments"] = [];
+    const re =
+      /"kind"\s*:\s*"(home|staff|client)"\s*,\s*"target_id"\s*:\s*"([0-9a-f-]{36})"/gi;
+    for (const match of decoded.matchAll(re)) {
+      assignments.push({
+        kind: match[1] as SavedMemberAccess["assignments"][number]["kind"],
+        target_id: match[2],
+      });
+    }
+    return {
+      userId: userIdFromBlob(decoded),
+      level: levelPlain as SavedMemberAccess["access_level"],
+      scope: scopePlain as SavedMemberAccess["access_scope"],
+      preset: decoded.match(/"access_preset_id"\s*:\s*"([^"]+)"/)?.[1] ?? null,
+      assignments,
+    };
+  }
+  const packed = decoded.match(
+    /"organization_id","user_id","access_level","access_preset_id","access_scope"[\s\S]*?"v":\[\{"t":1,"s":"([^"]+)"\},\{"t":1,"s":"([^"]+)"\},\{"t":1,"s":"(owner|admin|staff)"\},\{"t":1,"s":"([^"]*)"\},\{"t":1,"s":"(agency|assigned|self)"\}/,
+  );
+  const assignments: SavedMemberAccess["assignments"] = [];
+  const assignRe =
+    /"k":\["kind","target_id"\],"v":\[\{"t":1,"s":"(home|staff|client)"\},\{"t":1,"s":"([0-9a-f-]{36})"\}/g;
+  for (const match of decoded.matchAll(assignRe)) {
+    assignments.push({
+      kind: match[1] as SavedMemberAccess["assignments"][number]["kind"],
+      target_id: match[2],
+    });
+  }
+  return {
+    userId: packed?.[2] ?? STAFF.jake.id,
+    level: (packed?.[3] ?? "admin") as SavedMemberAccess["access_level"],
+    preset: packed?.[4] ? packed[4] : null,
+    scope: (packed?.[5] ?? "agency") as SavedMemberAccess["access_scope"],
+    assignments,
+  };
+}
+
+function sampleMemberAccess(blob: string): SavedMemberAccess {
+  const userId = userIdFromBlob(blob);
+  return (
+    savedMemberAccess.get(userId) ?? {
+      membership_id: "00000000-0000-4000-a000-000000000941",
+      access_level: "admin",
+      access_scope: "agency",
+      access_preset_id: PRESET_PROGRAM_MANAGER,
+      access_overrides: {},
+      assignments: [],
+    }
+  );
+}
+
+function rememberMemberAccess(blob: string) {
+  const parsed = parseAccessWrite(blob);
+  const owner = parsed.level === "owner";
+  savedMemberAccess.set(parsed.userId, {
+    membership_id: "00000000-0000-4000-a000-000000000941",
+    access_level: parsed.level,
+    access_scope: owner ? "agency" : parsed.scope,
+    access_preset_id: owner ? null : parsed.preset,
+    access_overrides: {},
+    assignments: owner || parsed.scope !== "assigned" ? [] : parsed.assignments,
+  });
+}
+
 async function handleServerFn(route: Route) {
   const req = route.request();
   if (req.method() === "OPTIONS") {
@@ -1064,7 +1254,11 @@ export async function installHiveMocks(page: Page, opts: MockOptions = {}): Prom
   await page.addInitScript(
     ({ storageKey, sessionJson, orgId, persona, noAssignments, clientsError }) => {
       try {
+        // The running app's storage key is sb-<project-ref>-auth-token.
+        // .env points at dhrrukdcigiiqksibdfb; older mocks used mmknqtdrefbzwfdtykza.
         window.localStorage.setItem(storageKey, sessionJson);
+        window.localStorage.setItem("sb-dhrrukdcigiiqksibdfb-auth-token", sessionJson);
+        window.localStorage.setItem("sb-mmknqtdrefbzwfdtykza-auth-token", sessionJson);
         window.localStorage.setItem("hive.activeOrgId", orgId);
         window.localStorage.setItem("portal-view", persona === "dsp" ? "staff" : "admin");
         window.localStorage.setItem("hive.e2e.persona", persona);

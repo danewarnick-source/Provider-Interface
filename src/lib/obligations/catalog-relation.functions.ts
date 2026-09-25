@@ -148,7 +148,7 @@ export const listCatalogRelations = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { rows: [] as AgencySourceRow[], softReady: false };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     return loadAgencySourceRows(supabase, data.organizationId);
   });
 
@@ -167,7 +167,7 @@ export const proposeCatalogRelations = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { proposed: 0, skipped: 0, persisted: false, softReady: false };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const loaded = await loadAgencySourceRows(supabase, data.organizationId);
     const wanted = data.requirementIds
       ? new Set(data.requirementIds)
@@ -225,7 +225,7 @@ export const setCatalogRelationStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false, softReady: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const { error } = await supabase
       .from("nectar_requirements")
       .update({ catalog_relation_status: data.status })

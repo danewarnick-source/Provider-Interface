@@ -59,7 +59,7 @@ describe("staffProfileIdentityQueryKey", () => {
 describe("loadStaffProfileIdentity", () => {
   it("filters member and profile by the passed route staffId, never a session user", async () => {
     const sb = mockSupabase({
-      member: { id: "mem-jeff", role: "employee", user_id: JEFF, job_title: "DSP" },
+      member: { id: "mem-jeff", access_level: "staff", user_id: JEFF, job_title: "DSP" },
       profile: { id: JEFF, full_name: "Jeff", first_name: "Jeff", last_name: "Smith" },
     });
     const bundle = await loadStaffProfileIdentity(sb, { organizationId: ORG, staffId: JEFF });
@@ -82,7 +82,7 @@ describe("loadStaffProfileIdentity", () => {
 
   it("refuses a member row that is not the route staffId (session leak)", async () => {
     const sb = mockSupabase({
-      member: { id: "mem-dane", role: "admin", user_id: DANE, job_title: "Owner" },
+      member: { id: "mem-dane", access_level: "owner", user_id: DANE, job_title: "Owner" },
       profile: { id: DANE, full_name: "Dane Warnick" },
     });
     const bundle = await loadStaffProfileIdentity(sb, { organizationId: ORG, staffId: JEFF });
@@ -91,7 +91,7 @@ describe("loadStaffProfileIdentity", () => {
 
   it("drops a profile row whose id is not the route staffId", async () => {
     const sb = mockSupabase({
-      member: { id: "mem-jeff", role: "employee", user_id: JEFF, job_title: "DSP" },
+      member: { id: "mem-jeff", access_level: "staff", user_id: JEFF, job_title: "DSP" },
       profile: { id: DANE, full_name: "Dane Warnick", first_name: "Dane", last_name: "Warnick" },
     });
     const bundle = await loadStaffProfileIdentity(sb, { organizationId: ORG, staffId: JEFF });
@@ -101,7 +101,7 @@ describe("loadStaffProfileIdentity", () => {
   });
 
   it("throws when staffId is missing so the loader cannot query the session user", async () => {
-    const sb = mockSupabase({ member: { id: "x", role: "admin", user_id: DANE } });
+    const sb = mockSupabase({ member: { id: "x", access_level: "owner", user_id: DANE } });
     await assert.rejects(
       () => loadStaffProfileIdentity(sb, { organizationId: ORG, staffId: "  " }),
       /staffId is required/,
@@ -112,9 +112,9 @@ describe("loadStaffProfileIdentity", () => {
 
 describe("route staff identity guards", () => {
   it("accepts only the route staff member and profile", () => {
-    assert.equal(memberBelongsToRouteStaff({ id: "m", role: "admin", user_id: DANE }, JEFF), false);
+    assert.equal(memberBelongsToRouteStaff({ id: "m", access_level: "owner", user_id: DANE }, JEFF), false);
     assert.equal(
-      memberBelongsToRouteStaff({ id: "m", role: "employee", user_id: JEFF }, JEFF),
+      memberBelongsToRouteStaff({ id: "m", access_level: "staff", user_id: JEFF }, JEFF),
       true,
     );
     assert.equal(
@@ -162,11 +162,10 @@ describe("route staff identity guards", () => {
         hire_date: null,
         start_date: null,
       },
-      { id: "mem-jeff", role: "employee", user_id: JEFF, job_title: "DSP" },
+      { id: "mem-jeff", access_level: "staff", user_id: JEFF, job_title: "DSP" },
     );
     assert.equal(draft.first_name, "Jeff");
-    assert.equal(draft.role, "employee");
-    assert.notEqual(draft.role, "admin");
+    assert.equal(draft.job_title, "DSP");
   });
 });
 

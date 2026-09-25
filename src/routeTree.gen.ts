@@ -58,7 +58,6 @@ import { Route as DashboardSchedulingRouteImport } from './routes/dashboard.sche
 import { Route as DashboardSchedulerRouteImport } from './routes/dashboard.scheduler'
 import { Route as DashboardSchedulePreviewRouteImport } from './routes/dashboard.schedule-preview'
 import { Route as DashboardScheduleRouteImport } from './routes/dashboard.schedule'
-import { Route as DashboardRolesRouteImport } from './routes/dashboard.roles'
 import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
 import { Route as DashboardReimbursementsRouteImport } from './routes/dashboard.reimbursements'
 import { Route as DashboardRecordsDeskRouteImport } from './routes/dashboard.records-desk'
@@ -66,7 +65,6 @@ import { Route as DashboardProgramsAdminRouteImport } from './routes/dashboard.p
 import { Route as DashboardProgramsRouteImport } from './routes/dashboard.programs'
 import { Route as DashboardPoliciesRouteImport } from './routes/dashboard.policies'
 import { Route as DashboardPersonnelFileRouteImport } from './routes/dashboard.personnel-file'
-import { Route as DashboardPermissionsRouteImport } from './routes/dashboard.permissions'
 import { Route as DashboardPbaLedgerRouteImport } from './routes/dashboard.pba-ledger'
 import { Route as DashboardNectarDocsRouteImport } from './routes/dashboard.nectar-docs'
 import { Route as DashboardNectarCompanyProfileRouteImport } from './routes/dashboard.nectar-company-profile'
@@ -140,7 +138,6 @@ import { Route as DashboardSettingsTeamAccessRouteImport } from './routes/dashbo
 import { Route as DashboardSettingsSubscriptionRouteImport } from './routes/dashboard.settings.subscription'
 import { Route as DashboardSettingsServiceCodesRouteImport } from './routes/dashboard.settings.service-codes'
 import { Route as DashboardSettingsServiceCatalogRouteImport } from './routes/dashboard.settings.service-catalog'
-import { Route as DashboardSettingsRoleAuditRouteImport } from './routes/dashboard.settings.role-audit'
 import { Route as DashboardSettingsRetentionRouteImport } from './routes/dashboard.settings.retention'
 import { Route as DashboardSettingsPhiAccessAuditRouteImport } from './routes/dashboard.settings.phi-access-audit'
 import { Route as DashboardSettingsLicensingRouteImport } from './routes/dashboard.settings.licensing'
@@ -489,11 +486,6 @@ const DashboardScheduleRoute = DashboardScheduleRouteImport.update({
   path: '/schedule',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardRolesRoute = DashboardRolesRouteImport.update({
-  id: '/roles',
-  path: '/roles',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardReportsRoute = DashboardReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -527,11 +519,6 @@ const DashboardPoliciesRoute = DashboardPoliciesRouteImport.update({
 const DashboardPersonnelFileRoute = DashboardPersonnelFileRouteImport.update({
   id: '/personnel-file',
   path: '/personnel-file',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardPermissionsRoute = DashboardPermissionsRouteImport.update({
-  id: '/permissions',
-  path: '/permissions',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardPbaLedgerRoute = DashboardPbaLedgerRouteImport.update({
@@ -923,12 +910,6 @@ const DashboardSettingsServiceCatalogRoute =
   DashboardSettingsServiceCatalogRouteImport.update({
     id: '/service-catalog',
     path: '/service-catalog',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsRoleAuditRoute =
-  DashboardSettingsRoleAuditRouteImport.update({
-    id: '/role-audit',
-    path: '/role-audit',
     getParentRoute: () => DashboardSettingsRoute,
   } as any)
 const DashboardSettingsRetentionRoute =
@@ -1585,7 +1566,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/nectar-company-profile': typeof DashboardNectarCompanyProfileRoute
   '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
   '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
-  '/dashboard/permissions': typeof DashboardPermissionsRoute
   '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
   '/dashboard/policies': typeof DashboardPoliciesRoute
   '/dashboard/programs': typeof DashboardProgramsRouteWithChildren
@@ -1593,7 +1573,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
-  '/dashboard/roles': typeof DashboardRolesRoute
   '/dashboard/schedule': typeof DashboardScheduleRoute
   '/dashboard/schedule-preview': typeof DashboardSchedulePreviewRoute
   '/dashboard/scheduler': typeof DashboardSchedulerRoute
@@ -1694,7 +1673,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
   '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
   '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
-  '/dashboard/settings/role-audit': typeof DashboardSettingsRoleAuditRoute
   '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
   '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
   '/dashboard/settings/subscription': typeof DashboardSettingsSubscriptionRoute
@@ -1812,7 +1790,6 @@ export interface FileRoutesByTo {
   '/dashboard/nectar-company-profile': typeof DashboardNectarCompanyProfileRoute
   '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
   '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
-  '/dashboard/permissions': typeof DashboardPermissionsRoute
   '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
   '/dashboard/policies': typeof DashboardPoliciesRoute
   '/dashboard/programs': typeof DashboardProgramsRouteWithChildren
@@ -1820,7 +1797,6 @@ export interface FileRoutesByTo {
   '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
-  '/dashboard/roles': typeof DashboardRolesRoute
   '/dashboard/schedule': typeof DashboardScheduleRoute
   '/dashboard/schedule-preview': typeof DashboardSchedulePreviewRoute
   '/dashboard/scheduler': typeof DashboardSchedulerRoute
@@ -1920,7 +1896,6 @@ export interface FileRoutesByTo {
   '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
   '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
   '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
-  '/dashboard/settings/role-audit': typeof DashboardSettingsRoleAuditRoute
   '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
   '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
   '/dashboard/settings/subscription': typeof DashboardSettingsSubscriptionRoute
@@ -2047,7 +2022,6 @@ export interface FileRoutesById {
   '/dashboard/nectar-company-profile': typeof DashboardNectarCompanyProfileRoute
   '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
   '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
-  '/dashboard/permissions': typeof DashboardPermissionsRoute
   '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
   '/dashboard/policies': typeof DashboardPoliciesRoute
   '/dashboard/programs': typeof DashboardProgramsRouteWithChildren
@@ -2055,7 +2029,6 @@ export interface FileRoutesById {
   '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
   '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
   '/dashboard/reports': typeof DashboardReportsRoute
-  '/dashboard/roles': typeof DashboardRolesRoute
   '/dashboard/schedule': typeof DashboardScheduleRoute
   '/dashboard/schedule-preview': typeof DashboardSchedulePreviewRoute
   '/dashboard/scheduler': typeof DashboardSchedulerRoute
@@ -2156,7 +2129,6 @@ export interface FileRoutesById {
   '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
   '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
   '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
-  '/dashboard/settings/role-audit': typeof DashboardSettingsRoleAuditRoute
   '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
   '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
   '/dashboard/settings/subscription': typeof DashboardSettingsSubscriptionRoute
@@ -2284,7 +2256,6 @@ export interface FileRouteTypes {
     | '/dashboard/nectar-company-profile'
     | '/dashboard/nectar-docs'
     | '/dashboard/pba-ledger'
-    | '/dashboard/permissions'
     | '/dashboard/personnel-file'
     | '/dashboard/policies'
     | '/dashboard/programs'
@@ -2292,7 +2263,6 @@ export interface FileRouteTypes {
     | '/dashboard/records-desk'
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
-    | '/dashboard/roles'
     | '/dashboard/schedule'
     | '/dashboard/schedule-preview'
     | '/dashboard/scheduler'
@@ -2393,7 +2363,6 @@ export interface FileRouteTypes {
     | '/dashboard/settings/licensing'
     | '/dashboard/settings/phi-access-audit'
     | '/dashboard/settings/retention'
-    | '/dashboard/settings/role-audit'
     | '/dashboard/settings/service-catalog'
     | '/dashboard/settings/service-codes'
     | '/dashboard/settings/subscription'
@@ -2511,7 +2480,6 @@ export interface FileRouteTypes {
     | '/dashboard/nectar-company-profile'
     | '/dashboard/nectar-docs'
     | '/dashboard/pba-ledger'
-    | '/dashboard/permissions'
     | '/dashboard/personnel-file'
     | '/dashboard/policies'
     | '/dashboard/programs'
@@ -2519,7 +2487,6 @@ export interface FileRouteTypes {
     | '/dashboard/records-desk'
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
-    | '/dashboard/roles'
     | '/dashboard/schedule'
     | '/dashboard/schedule-preview'
     | '/dashboard/scheduler'
@@ -2619,7 +2586,6 @@ export interface FileRouteTypes {
     | '/dashboard/settings/licensing'
     | '/dashboard/settings/phi-access-audit'
     | '/dashboard/settings/retention'
-    | '/dashboard/settings/role-audit'
     | '/dashboard/settings/service-catalog'
     | '/dashboard/settings/service-codes'
     | '/dashboard/settings/subscription'
@@ -2745,7 +2711,6 @@ export interface FileRouteTypes {
     | '/dashboard/nectar-company-profile'
     | '/dashboard/nectar-docs'
     | '/dashboard/pba-ledger'
-    | '/dashboard/permissions'
     | '/dashboard/personnel-file'
     | '/dashboard/policies'
     | '/dashboard/programs'
@@ -2753,7 +2718,6 @@ export interface FileRouteTypes {
     | '/dashboard/records-desk'
     | '/dashboard/reimbursements'
     | '/dashboard/reports'
-    | '/dashboard/roles'
     | '/dashboard/schedule'
     | '/dashboard/schedule-preview'
     | '/dashboard/scheduler'
@@ -2854,7 +2818,6 @@ export interface FileRouteTypes {
     | '/dashboard/settings/licensing'
     | '/dashboard/settings/phi-access-audit'
     | '/dashboard/settings/retention'
-    | '/dashboard/settings/role-audit'
     | '/dashboard/settings/service-catalog'
     | '/dashboard/settings/service-codes'
     | '/dashboard/settings/subscription'
@@ -3301,13 +3264,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardScheduleRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/roles': {
-      id: '/dashboard/roles'
-      path: '/roles'
-      fullPath: '/dashboard/roles'
-      preLoaderRoute: typeof DashboardRolesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/reports': {
       id: '/dashboard/reports'
       path: '/reports'
@@ -3355,13 +3311,6 @@ declare module '@tanstack/react-router' {
       path: '/personnel-file'
       fullPath: '/dashboard/personnel-file'
       preLoaderRoute: typeof DashboardPersonnelFileRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/permissions': {
-      id: '/dashboard/permissions'
-      path: '/permissions'
-      fullPath: '/dashboard/permissions'
-      preLoaderRoute: typeof DashboardPermissionsRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/pba-ledger': {
@@ -3873,13 +3822,6 @@ declare module '@tanstack/react-router' {
       path: '/service-catalog'
       fullPath: '/dashboard/settings/service-catalog'
       preLoaderRoute: typeof DashboardSettingsServiceCatalogRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/role-audit': {
-      id: '/dashboard/settings/role-audit'
-      path: '/role-audit'
-      fullPath: '/dashboard/settings/role-audit'
-      preLoaderRoute: typeof DashboardSettingsRoleAuditRouteImport
       parentRoute: typeof DashboardSettingsRoute
     }
     '/dashboard/settings/retention': {
@@ -4842,7 +4784,6 @@ interface DashboardSettingsRouteChildren {
   DashboardSettingsLicensingRoute: typeof DashboardSettingsLicensingRoute
   DashboardSettingsPhiAccessAuditRoute: typeof DashboardSettingsPhiAccessAuditRoute
   DashboardSettingsRetentionRoute: typeof DashboardSettingsRetentionRoute
-  DashboardSettingsRoleAuditRoute: typeof DashboardSettingsRoleAuditRoute
   DashboardSettingsServiceCatalogRoute: typeof DashboardSettingsServiceCatalogRoute
   DashboardSettingsServiceCodesRoute: typeof DashboardSettingsServiceCodesRoute
   DashboardSettingsSubscriptionRoute: typeof DashboardSettingsSubscriptionRoute
@@ -4859,7 +4800,6 @@ const DashboardSettingsRouteChildren: DashboardSettingsRouteChildren = {
   DashboardSettingsLicensingRoute: DashboardSettingsLicensingRoute,
   DashboardSettingsPhiAccessAuditRoute: DashboardSettingsPhiAccessAuditRoute,
   DashboardSettingsRetentionRoute: DashboardSettingsRetentionRoute,
-  DashboardSettingsRoleAuditRoute: DashboardSettingsRoleAuditRoute,
   DashboardSettingsServiceCatalogRoute: DashboardSettingsServiceCatalogRoute,
   DashboardSettingsServiceCodesRoute: DashboardSettingsServiceCodesRoute,
   DashboardSettingsSubscriptionRoute: DashboardSettingsSubscriptionRoute,
@@ -4959,7 +4899,6 @@ interface DashboardRouteChildren {
   DashboardNectarCompanyProfileRoute: typeof DashboardNectarCompanyProfileRoute
   DashboardNectarDocsRoute: typeof DashboardNectarDocsRoute
   DashboardPbaLedgerRoute: typeof DashboardPbaLedgerRoute
-  DashboardPermissionsRoute: typeof DashboardPermissionsRoute
   DashboardPersonnelFileRoute: typeof DashboardPersonnelFileRoute
   DashboardPoliciesRoute: typeof DashboardPoliciesRoute
   DashboardProgramsRoute: typeof DashboardProgramsRouteWithChildren
@@ -4967,7 +4906,6 @@ interface DashboardRouteChildren {
   DashboardRecordsDeskRoute: typeof DashboardRecordsDeskRoute
   DashboardReimbursementsRoute: typeof DashboardReimbursementsRoute
   DashboardReportsRoute: typeof DashboardReportsRoute
-  DashboardRolesRoute: typeof DashboardRolesRoute
   DashboardScheduleRoute: typeof DashboardScheduleRoute
   DashboardSchedulePreviewRoute: typeof DashboardSchedulePreviewRoute
   DashboardSchedulerRoute: typeof DashboardSchedulerRoute
@@ -5063,7 +5001,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardNectarCompanyProfileRoute: DashboardNectarCompanyProfileRoute,
   DashboardNectarDocsRoute: DashboardNectarDocsRoute,
   DashboardPbaLedgerRoute: DashboardPbaLedgerRoute,
-  DashboardPermissionsRoute: DashboardPermissionsRoute,
   DashboardPersonnelFileRoute: DashboardPersonnelFileRoute,
   DashboardPoliciesRoute: DashboardPoliciesRoute,
   DashboardProgramsRoute: DashboardProgramsRouteWithChildren,
@@ -5071,7 +5008,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardRecordsDeskRoute: DashboardRecordsDeskRoute,
   DashboardReimbursementsRoute: DashboardReimbursementsRoute,
   DashboardReportsRoute: DashboardReportsRoute,
-  DashboardRolesRoute: DashboardRolesRoute,
   DashboardScheduleRoute: DashboardScheduleRoute,
   DashboardSchedulePreviewRoute: DashboardSchedulePreviewRoute,
   DashboardSchedulerRoute: DashboardSchedulerRoute,

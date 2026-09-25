@@ -11,7 +11,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { requirePermission } from "@/lib/require-permission";
+import { requirePermission } from "@/lib/access/require";
 
 const orgOnly = z.object({ organization_id: z.string().uuid() });
 

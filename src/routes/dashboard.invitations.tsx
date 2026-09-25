@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Mail, UserPlus, Copy, RefreshCcw, Ban, Send } from "lucide-react";
-import { ROLE_LABEL, type Role } from "@/lib/rbac";
+import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import { resendInvitation, revokeInvitation } from "@/lib/invitations.functions";
 import { inviteJoinUrl } from "@/lib/join-invite";
 import { resolveAuthOrigin } from "@/lib/auth-redirect";
@@ -131,7 +131,7 @@ function InvitationsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
+              <TableHead>Access</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Expires</TableHead>
               <TableHead className="w-[260px]">Invite link</TableHead>
@@ -163,7 +163,9 @@ function InvitationsPage() {
                     <Mail className="h-3.5 w-3.5 text-muted-foreground" /> {inv.email}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{ROLE_LABEL[inv.role as Role] ?? inv.role}</Badge>
+                    <Badge variant="secondary">
+                      {LEVEL_LABEL[(inv.access_level ?? "staff") as AccessLevel] ?? "Team member"}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     {inv.status === "pending" &&

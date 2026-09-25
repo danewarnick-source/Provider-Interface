@@ -17,7 +17,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { requirePermission } from "@/lib/require-permission";
+import { requirePermission } from "@/lib/access/require";
 
 const orgOnly = z.object({ organization_id: z.string().uuid() });
 
@@ -37,7 +37,7 @@ export const getGmailConnection = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { connection: null };
-    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
+    await requireOrgMembership(supabase, userId, data.organization_id, "owner");
     const { data: row } = await supabase
       .from("gmail_connections")
       .select(
@@ -56,7 +56,7 @@ export const getGmailOAuthStartUrl = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { url: "" };
-    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
+    await requireOrgMembership(supabase, userId, data.organization_id, "owner");
     const { signOAuthState, buildAuthorizeUrl } = await import("@/lib/gmail-oauth.server");
     const state = signOAuthState({ org: data.organization_id, uid: userId });
     const redirectUri = callbackUrlFromRequest();
@@ -71,7 +71,7 @@ export const disconnectGmail = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
+    await requireOrgMembership(supabase, userId, data.organization_id, "owner");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: conn } = await supabaseAdmin
@@ -119,7 +119,7 @@ export const listGmailRules = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { rules: [] };
-    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
+    await requireOrgMembership(supabase, userId, data.organization_id, "owner");
     const { data: rows } = await supabase
       .from("gmail_ingestion_rules")
       .select("*")
@@ -143,7 +143,7 @@ export const upsertGmailRule = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const, id: "" };
-    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
+    await requireOrgMembership(supabase, userId, data.organization_id, "owner");
     const payload = {
       organization_id: data.organization_id,
       rule_name: data.rule_name,
@@ -177,7 +177,7 @@ export const deleteGmailRule = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
+    await requireOrgMembership(supabase, userId, data.organization_id, "owner");
     const { error } = await supabase
       .from("gmail_ingestion_rules")
       .delete()
@@ -195,7 +195,7 @@ export const listGmailAudit = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { audit: [] };
-    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
+    await requireOrgMembership(supabase, userId, data.organization_id, "owner");
     const { data: rows } = await supabase
       .from("gmail_ingestion_audit")
       .select("id, action, actor_kind, gmail_message_id, referral_id, detail, created_at")

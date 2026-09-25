@@ -7,6 +7,7 @@ import { ArrowLeft, CalendarDays, Loader2, Save } from "lucide-react";
 
 import { RequirePermission } from "@/components/rbac-guard";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { LEVEL_LABEL } from "@/lib/access/levels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -178,7 +179,7 @@ function HireDatesPage() {
                     <div className="text-xs text-muted-foreground">{r.email ?? "—"}</div>
                   </td>
                   <td className="hidden px-4 py-3 capitalize text-muted-foreground md:table-cell">
-                    {r.role.replace(/_/g, " ")}
+                    {LEVEL_LABEL[r.accessLevel]}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">

@@ -88,7 +88,7 @@ export const planNectarGuide = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
     const { requireOrgMembership } = await import("@/integrations/supabase/require-org");
-    await requireOrgMembership(supabase, userId, data.orgId, "employee");
+    await requireOrgMembership(supabase, userId, data.orgId, "staff");
 
     const isStaff = data.surface === "staff";
     const who = isStaff
@@ -220,7 +220,7 @@ export const listNectarGuides = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return [];
     const { requireOrgMembership } = await import("@/integrations/supabase/require-org");
-    await requireOrgMembership(supabase, userId, data.orgId, "employee");
+    await requireOrgMembership(supabase, userId, data.orgId, "staff");
     const { data: guides, error } = await supabase
       .from("nectar_guides")
       .select("id, goal, summary, status, surface, created_at")

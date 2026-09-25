@@ -57,7 +57,7 @@ export const getBilledRevenueByYear = createServerFn({ method: "POST" })
     const organizationId = data.organizationId;
 
     // ─── Server-side admin gate (Company Admin only) on the PASSED org ───
-    await requireOrgMembership(supabase, userId, organizationId, "admin");
+    await requireOrgMembership(supabase, userId, organizationId, "owner");
 
     // ─── NECTAR Infusion entitlement gate (on the PASSED org) ─────────────
     let nectarEntitled = true;
@@ -204,7 +204,7 @@ export const listBilledManualEntries = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { entries: [] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, userId, data.organizationId, "owner");
     const { data: rows, error } = await supabase
       .from("provider_ledger_entries")
       .select("id, period_month, amount, label, note, is_estimate, updated_at")
@@ -232,7 +232,7 @@ export const upsertBilledManualEntry = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { entry: null };
     const organization_id = data.organizationId;
-    await requireOrgMembership(supabase, userId, organization_id, "admin");
+    await requireOrgMembership(supabase, userId, organization_id, "owner");
 
     const { data: existing, error: findErr } = await supabase
       .from("provider_ledger_entries")
@@ -293,7 +293,7 @@ export const deleteBilledManualEntry = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const };
-    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, userId, data.organizationId, "owner");
     const { error } = await supabase
       .from("provider_ledger_entries")
       .delete()

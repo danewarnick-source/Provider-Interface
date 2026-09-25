@@ -1,15 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isAdminLevel } from "@/lib/access/levels";
 
 async function assertAdmin(supabase: any, userId: string, orgId: string) {
   const { data } = await supabase
     .from("organization_members")
-    .select("role, active")
+    .select("access_level, active")
     .eq("organization_id", orgId)
     .eq("user_id", userId)
     .maybeSingle();
-  if (!data?.active || !["admin", "program_manager", "manager"].includes(data.role)) {
+  if (!data?.active || !isAdminLevel(data.access_level)) {
     throw new Error("Only admins or managers can manage auditor shares.");
   }
 }
@@ -234,11 +235,11 @@ export const getAuditorShareView = createServerFn({ method: "POST" })
     if (!isRecipient) {
       const { data: m } = await supabase
         .from("organization_members")
-        .select("role, active")
+        .select("access_level, active")
         .eq("organization_id", share.organization_id)
         .eq("user_id", userId)
         .maybeSingle();
-      isAdmin = !!m?.active && ["admin", "program_manager", "manager"].includes(m.role);
+      isAdmin = !!m?.active && isAdminLevel(m.access_level);
     }
     if (!isRecipient && !isAdmin) {
       await supabase.from("auditor_share_access_log").insert({

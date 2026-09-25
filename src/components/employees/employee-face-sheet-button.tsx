@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { generateEmployeeFaceSheetFn } from "@/lib/employee-face-sheet.functions";
-import { staffPermissionMutationErrorMessage } from "@/lib/staff-permission-toggles";
+import { safeErrorMessage } from "@/lib/safe-error-message";
 
 /**
  * Employee Face Sheet trigger — parallel to the client's `FaceSheetButton`.
@@ -82,7 +82,7 @@ export function EmployeeFaceSheetButton({
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
       }
     } catch (e) {
-      toast.error(staffPermissionMutationErrorMessage(e, "Could not build face sheet"));
+      toast.error(safeErrorMessage(e, "Could not build face sheet"));
     } finally {
       setBusy(null);
     }

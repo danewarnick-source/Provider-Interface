@@ -20,7 +20,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   requireAnyPermission,
-} from "@/lib/require-permission";
+} from "@/lib/access/require";
 import type { Json } from "@/integrations/supabase/types";
 
 const orgOnly = z.object({ organization_id: z.string().uuid() });

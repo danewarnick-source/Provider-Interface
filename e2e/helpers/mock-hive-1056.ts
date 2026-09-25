@@ -9,13 +9,6 @@
 import { expect, type Page, type Route } from "@playwright/test";
 import { toCrossJSONAsync } from "seroval";
 import {
-  ALL_PERMISSIONS,
-  DEFAULT_MATRIX,
-  PROVIDER_ROLES,
-  type Permission,
-  type ProviderRole,
-} from "../../src/lib/rbac";
-import {
   ADMIN_EMAIL,
   ADMIN_NAME,
   ADMIN_USER_ID,
@@ -32,6 +25,7 @@ import {
   DAILY_CODES,
   WORKSHEET_CODES,
 } from "../fixtures/tns-1056";
+import { withAccessLevel } from "./access-level";
 
 export type MockPersona = "admin" | "dsp";
 
@@ -250,22 +244,6 @@ function billingCodeRows(): Row[] {
   return out;
 }
 
-function rolePermissionRows(): Row[] {
-  const rows: Row[] = [];
-  for (const role of PROVIDER_ROLES) {
-    const granted = new Set<Permission>(DEFAULT_MATRIX[role as ProviderRole] ?? []);
-    for (const permission of ALL_PERMISSIONS) {
-      rows.push({
-        organization_id: ORG_ID,
-        role,
-        permission,
-        enabled: granted.has(permission),
-      });
-    }
-  }
-  return rows;
-}
-
 function parseFilters(url: URL): Array<{ col: string; op: string; val: string }> {
   const out: Array<{ col: string; op: string; val: string }> = [];
   for (const [key, raw] of url.searchParams.entries()) {
@@ -307,7 +285,7 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
 
   switch (table) {
     case "organization_members":
-      return staff.map((s) => memberRow(s, true));
+      return staff.map((s) => withAccessLevel(memberRow(s, true)));
     case "profiles":
       return staff.map(profileRow);
     case "org_member_directory":
@@ -336,7 +314,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "training_tracks":
     case "courses":
     case "course_assignments":
-    case "user_permission_overrides":
     case "import_subjects":
     case "auditor_accounts":
     case "staff_types":
@@ -344,8 +321,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "home_staff_designations":
     case "client_staffing_ratios":
       return [];
-    case "role_permissions":
-      return rolePermissionRows();
     case "invitations":
       return [{ ...PENDING_INVITE }];
     case "teams":

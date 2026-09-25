@@ -8,7 +8,7 @@ import { AdminExamExportButton } from "@/components/compliance/admin-exam-export
 import { PacketNextActionCard, PacketScopeNote } from "@/components/compliance/packet-next-action";
 import { listPendingCertReviews, type CertReviewRow } from "@/lib/company-obligations.functions";
 import { inHiveCourseIdForTitle } from "@/lib/in-hive-training";
-import { ROLE_RANK } from "@/lib/rbac";
+import { isAdminLevel } from "@/lib/access/levels";
 
 export function StaffFilePanel() {
   const { data: org, isLoading } = useCurrentOrg();
@@ -32,7 +32,7 @@ export function StaffFilePanel() {
     );
   }
 
-  const canAccess = ROLE_RANK[org.role] >= ROLE_RANK.manager;
+  const canAccess = isAdminLevel(org.access.level);
   if (!canAccess) {
     return (
       <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">

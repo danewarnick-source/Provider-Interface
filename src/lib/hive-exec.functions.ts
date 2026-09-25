@@ -904,7 +904,7 @@ export const updateAccountContact = createServerFn({ method: "POST" })
       .maybeSingle();
     const isExec = !!execRow;
     if (!isExec) {
-      await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+      await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     }
 
     const updates: Record<string, unknown> = {};
@@ -948,7 +948,7 @@ export const getAccountContact = createServerFn({ method: "POST" })
     const { data: execRow } = await supabase
       .from("hive_executives").select("id").eq("user_id", userId).eq("active", true).maybeSingle();
     if (!execRow) {
-      await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+      await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     }
     const { data: org, error } = await supabase
       .from("organizations")

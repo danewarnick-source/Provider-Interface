@@ -52,6 +52,7 @@ import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestation
 import { formatPeriodMonthYear } from "@/lib/progress-summaries";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { onClientDutyFactsChanged } from "@/lib/staff-assignment-hooks.functions";
+import { isAdminLevel } from "@/lib/access/levels";
 
 type ClientRow = Record<string, unknown>;
 type DocRow = { id: string; document_type: string | null; file_name: string | null; storage_path: string | null; uploaded_at: string | null };
@@ -183,7 +184,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
     .map((r) => r.service_start_date)
     .filter((d): d is string => !!d)
     .sort()[0] ?? null;
-  const isOrgAdmin = org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+  const isOrgAdmin = isAdminLevel(org?.access.level);
 
   if (clientQ.isLoading || !client) {
     return <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">Loading…</CardContent></Card>;

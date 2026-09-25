@@ -162,7 +162,7 @@ export const searchTimesheetsByVector = createServerFn({ method: "POST" })
           requires_semantic: false,
         } as RouterResult,
       };
-    await requireOrgMembership(context.supabase, context.userId, data.organizationId, "employee");
+    await requireOrgMembership(context.supabase, context.userId, data.organizationId, "staff");
     const route = await routeQueryWithLLM(data.query);
 
     let vecLiteral: string | null = null;
@@ -202,7 +202,7 @@ export const backfillTimesheetEmbeddings = createServerFn({ method: "POST" })
   .inputValidator(validateBackfill)
   .handler(async ({ data, context }) => {
     if (!context.supabase || !context.userId) return { embedded: 0, remaining: 0 };
-    await requireOrgMembership(context.supabase, context.userId, data.organizationId, "admin");
+    await requireOrgMembership(context.supabase, context.userId, data.organizationId, "owner");
     const { data: rows, error } = await context.supabase
       .from("evv_timesheets")
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

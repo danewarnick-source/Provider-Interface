@@ -86,7 +86,7 @@ export const listMyPendingPolicies = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { pending: [], gating: [] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const policies = await loadAckRequiredPolicies(supabase, data.organizationId);
     if (policies.length === 0) return { pending: [], gating: [] };
@@ -157,7 +157,7 @@ export const listPolicySignatureStatus = createServerFn({ method: "POST" })
       .eq("id", data.documentId)
       .maybeSingle();
     if (dErr || !doc) throw new Error(dErr?.message ?? "Document not found");
-    await requireOrgMembership(supabase, userId, doc.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, doc.organization_id as string, "admin");
     if ((doc.authoritative_kind as string) !== "provider_policy") {
       throw new Error("Signature status only applies to provider_policy documents.");
     }
@@ -232,7 +232,7 @@ export const supersedePolicyVersion = createServerFn({ method: "POST" })
       .eq("id", data.oldDocumentId)
       .maybeSingle();
     if (oErr || !oldDoc) throw new Error(oErr?.message ?? "Prior version not found");
-    await requireOrgMembership(supabase, userId, oldDoc.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, oldDoc.organization_id as string, "admin");
     if ((oldDoc.authoritative_kind as string) !== "provider_policy") {
       throw new Error("Version supersede only applies to provider_policy documents.");
     }
@@ -297,7 +297,7 @@ export const listPolicyAcknowledgmentsForStaff = createServerFn({ method: "POST"
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { policies: [] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const policies = await loadAckRequiredPolicies(supabase, data.organizationId);
     const inScope: PolicyDocRow[] = [];

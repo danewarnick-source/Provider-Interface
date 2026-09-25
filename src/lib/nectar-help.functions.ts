@@ -22,7 +22,7 @@ const UUID_RE = /^[0-9a-f-]{36}$/i;
 function validate(input: unknown): AskInput {
   const i = (input ?? {}) as Record<string, unknown>;
   const question = typeof i.question === "string" ? i.question.trim() : "";
-  const role = typeof i.role === "string" ? i.role : "employee";
+  const role = typeof i.role === "string" ? i.role : "staff";
   const organizationId = typeof i.organizationId === "string" ? i.organizationId : "";
   if (question.length < 2 || question.length > 1000) {
     throw new Error("Question must be 2–1000 characters.");
@@ -343,7 +343,7 @@ async function gatherFacts(
   const facts: OrgFacts = {
     organization_id: orgId,
     role,
-    scope: role === "employee" || role === "host_family" ? "self" : "organization",
+    scope: role === "owner" || role === "admin" ? "organization" : "self",
     generated_at: new Date().toISOString(),
     totals: {
       clients_active: null,
@@ -557,7 +557,7 @@ export const askNectarHelp = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId)
       return { answer: "", deepLink: null, isDataRequest: false, followUps: [] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const facts = await gatherFacts(
       supabase as unknown as SupabaseLike,
       userId,
@@ -682,7 +682,7 @@ export const escalateHelpToHive = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ticketId: "", status: "" };
     const orgId = data.organizationId;
-    await requireOrgMembership(supabase, userId, orgId, "employee");
+    await requireOrgMembership(supabase, userId, orgId, "staff");
 
     const subject = data.question.length > 120 ? data.question.slice(0, 117) + "…" : data.question;
 

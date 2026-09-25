@@ -20,7 +20,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { requirePermission } from "@/lib/require-permission";
+import { requirePermission } from "@/lib/access/require";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import {
   DEFAULT_MANAGED_FROM_NAME,
@@ -101,7 +101,7 @@ export const getOrgEmailSettings = createServerFn({ method: "POST" })
       supabase as unknown as SupabaseClient,
       userId,
       data.organization_id,
-      "employee",
+      "staff",
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: row, error } = await (supabase as any)

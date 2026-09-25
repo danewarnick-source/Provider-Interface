@@ -10,7 +10,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import {
   setRefillStatus, logShiftChangeCount, logMedicationTransfer,
 } from "@/lib/emar-pass.functions";
+import { isAdminLevel } from "@/lib/access/levels";
 
 type Med = {
   id: string;
@@ -372,8 +373,8 @@ function TransfersCard({ meds, clientId }: { meds: Med[]; clientId: string }) {
 // ── Public entry ──────────────────────────────────────────────────────────────
 export function EmarOpsPanel({ clientId }: { clientId: string }) {
   const { data: org } = useCurrentOrg();
-  const { role } = usePermissions();
-  const isAdmin = role === "admin" || role === "program_manager" || role === "manager";
+  const { level: role } = useAccess();
+  const isAdmin = isAdminLevel(role);
   const { data: meds = [], isLoading } = useQuery({
     enabled: !!org && !!clientId,
     queryKey: ["mar-meds-ops", clientId, org?.organization_id],

@@ -1,9 +1,9 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 import { TrendingUp, Grid3x3, Home, HardHat, TableProperties, BarChart3, PieChart, LineChart, Users2, Sparkles } from "lucide-react";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { useOrgDisplayName } from "@/hooks/use-org";
-import type { Permission } from "@/lib/rbac";
+import type { Permission } from "@/lib/access/permission-keys";
 
 function FinancialError({ error }: { error: Error; reset: () => void }) {
   return (
@@ -26,9 +26,9 @@ function FinancialError({ error }: { error: Error; reset: () => void }) {
 export const Route = createFileRoute("/dashboard/financial")({
   head: () => ({ meta: [{ title: "Financial — Provider Interface" }] }),
   component: () => (
-    <RequireRole roles={["admin", "program_manager", "manager"]}>
+    <RequireLevel min="admin">
       <FinancialLayout />
-    </RequireRole>
+    </RequireLevel>
   ),
   errorComponent: FinancialError,
 });
@@ -56,7 +56,7 @@ function buildTabs(grossLabel: string): Tab[] {
 
 function FinancialLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const { prefixLabel } = useOrgDisplayName();
   const visibleTabs = buildTabs(prefixLabel("Gross")).filter((t) => !t.perm || can(t.perm));
 

@@ -33,12 +33,13 @@ export const TRANSPORT_DUTY_KEYS = ["driving_record_transport"] as const;
 export const BEHAVIOR_DUTY_KEYS = ["behavior_intervention_cert"] as const;
 export const CLIENT_SCOPED_DUTY_KEYS = ["client_specific_training", "support_strategies"] as const;
 
-const OFFICE_ROLES = new Set(["admin", "program_manager", "committee_member", "super_admin"]);
+const OFFICE_ROLES = new Set(["owner", "admin"]);
 
 export type StaffDutyFootprint = "office" | "direct_support" | "unresolved";
 
 export type StaffDutyFacts = {
   staffId: string;
+  /** The member's access level (owner / admin / staff). */
   role: string | null;
   assignmentsKnown: boolean;
   assignedClientIds: string[];

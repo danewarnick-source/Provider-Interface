@@ -22,7 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import {
   DEFAULT_MATCH_WEIGHTS,
   getProviderInterestOutline,
@@ -43,7 +43,7 @@ export function ProviderInterestOutlineButton({
 }: {
   organizationId: string;
 }) {
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const canEdit = can("manage_referrals");
   const canView = canEdit || can("view_referrals");
   const [open, setOpen] = useState(false);

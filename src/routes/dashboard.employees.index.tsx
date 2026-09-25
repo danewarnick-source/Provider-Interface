@@ -26,6 +26,7 @@ import {
   type EmployeeRosterTab,
 } from "@/lib/employee-roster";
 import { splitPersonName } from "@/lib/employee-roster-upload";
+import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import { AddEmployeeButton, AddEmployeeWizard } from "@/components/employees/add-employee-wizard";
 import {
   EmployeeRosterUploadButton,
@@ -84,7 +85,40 @@ import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-crea
 import { useAgencySetup } from "@/hooks/use-agency-setup";
 import { shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
 import { PersonAvatar } from "@/components/person/person-avatar";
-import type { Position } from "@/lib/employee-positions";
+
+function rosterAccessLabel(level: string | null | undefined): string {
+  if (level === "owner" || level === "admin" || level === "staff") return LEVEL_LABEL[level];
+  return LEVEL_LABEL.staff;
+}
+
+/** Job titles that are really old role names. The Access column carries Owner / Admin / Team member. */
+const LEGACY_ROSTER_ROLES = new Set([
+  "platform admin",
+  "company admin",
+  "supervisor",
+  "committee member",
+  "program manager",
+  "owner",
+  "admin",
+  "team member",
+  "staff",
+  "employee",
+  "manager",
+]);
+
+function rosterJobLine(
+  jobTitle: string | null | undefined,
+  position: string | null | undefined,
+): string | null {
+  const raw = (jobTitle || position || "").trim();
+  if (!raw || LEGACY_ROSTER_ROLES.has(raw.toLowerCase())) return null;
+  return raw;
+}
+
+function asAccessLevel(raw: string | null | undefined): AccessLevel {
+  if (raw === "owner" || raw === "admin" || raw === "staff") return raw;
+  return "staff";
+}
 
 export const Route = createFileRoute("/dashboard/employees/")({
   validateSearch: (s: Record<string, unknown>): { upload?: boolean } => ({
@@ -138,7 +172,9 @@ export function EmployeesPage() {
       if (!org) throw new Error("No organization selected.");
       const { data } = await supabase
         .from("organization_members")
-        .select("id, role, job_title, active, user_id, created_at")
+        .select(
+          "id, access_level, access_preset_id, access_presets(name), job_title, active, user_id, created_at",
+        )
         .eq("organization_id", org.organization_id);
       const ids = (data ?? []).map((m) => m.user_id);
       const profilesQuery = supabase
@@ -151,11 +187,20 @@ export function EmployeesPage() {
         "org_member_last_sign_ins" as never,
         { _org: org.organization_id } as never,
       );
-      const [{ data: profs }, lastLoginRes] = await Promise.all([profilesQuery, lastLoginQuery]);
+      const execQuery = supabase.from("hive_executives").select("user_id").eq("active", true);
+      const [{ data: profs }, lastLoginRes, execRes] = await Promise.all([
+        profilesQuery,
+        lastLoginQuery,
+        execQuery,
+      ]);
       const lastLoginByUser = lastLoginByUserId(lastLoginRes.error ? null : lastLoginRes.data);
       const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
+      const hiveExecIds = new Set(
+        (execRes.error ? [] : (execRes.data ?? [])).map((row) => row.user_id),
+      );
       return (data ?? []).map((m) => ({
         ...m,
+        hiveExecutive: hiveExecIds.has(m.user_id),
         profile: profMap.get(m.user_id) ?? null,
         lastSignInAt: lastLoginByUser.get(m.user_id) ?? null,
         lastSignInKnown: lastLoginByUser.has(m.user_id),
@@ -176,14 +221,6 @@ export function EmployeesPage() {
         const split = splitPersonName(profile?.full_name ?? "");
         const hireRaw = profile?.start_date ?? profile?.hire_date ?? "";
         const hireDate = /^\d{4}-\d{2}-\d{2}/.test(hireRaw) ? hireRaw.slice(0, 10) : "";
-        const role =
-          m.role === "admin" ||
-          m.role === "manager" ||
-          m.role === "program_manager" ||
-          m.role === "employee" ||
-          m.role === "committee_member"
-            ? m.role
-            : "employee";
         return {
           userId: m.user_id,
           firstName: profile?.first_name?.trim() || split.first_name,
@@ -191,7 +228,8 @@ export function EmployeesPage() {
           email: profile?.email ?? "",
           phone: profile?.phone ?? "",
           hireDate,
-          role,
+          accessLevel: asAccessLevel(m.access_level),
+          accessPresetId: m.access_preset_id,
           jobTitle: m.job_title ?? "",
           department: profile?.department ?? "",
           employeeId: profile?.employee_id ?? "",
@@ -396,7 +434,9 @@ export function EmployeesPage() {
                     <div className="flex items-center gap-2 truncate">
                       <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />{" "}
                       <span className="truncate">{i.email}</span>{" "}
-                      <span className="shrink-0 text-xs text-muted-foreground">· {i.role}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        · {LEVEL_LABEL[asAccessLevel(i.access_level)]}
+                      </span>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <Button
@@ -532,7 +572,7 @@ export function EmployeesPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs uppercase">
-                          {m.role === "employee" ? "Team member" : m.role}
+                          {rosterAccessLabel(m.access_level)}
                         </span>
                         {codes.length ? (
                           codes.map((code) => (
@@ -588,7 +628,7 @@ export function EmployeesPage() {
                     <tr>
                       <th className="px-4 py-3 text-left font-semibold">Name</th>
                       <th className="px-4 py-3 text-left font-semibold">Login</th>
-                      <th className="px-4 py-3 text-left font-semibold">Role</th>
+                      <th className="px-4 py-3 text-left font-semibold">Access</th>
                       <th className="px-4 py-3 text-left font-semibold">Status</th>
                       <th className="px-4 py-3 text-left font-semibold">Start date</th>
                       <th className="px-4 py-3 text-left font-semibold">Last Login</th>
@@ -601,7 +641,7 @@ export function EmployeesPage() {
                       const onActiveRoster = isEmployeeOnActiveRoster(m);
                       const login = m.profile?.username ?? m.profile?.email ?? "—";
                       const needsReset = m.profile?.must_change_password;
-                      const position = (m.profile?.position ?? "") as Position | "";
+                      const jobLine = rosterJobLine(m.job_title, m.profile?.position);
                       const startDate = (m.profile?.start_date ?? m.profile?.hire_date ?? null) as
                         | string
                         | null;
@@ -649,11 +689,16 @@ export function EmployeesPage() {
                                     <NeedsSetupChip />
                                   )}
                                 </div>
-                                {position && (
+                                {m.hiveExecutive ? (
                                   <div className="text-xs text-muted-foreground truncate">
-                                    {position}
+                                    Platform admin
                                   </div>
-                                )}
+                                ) : null}
+                                {jobLine ? (
+                                  <div className="text-xs text-muted-foreground truncate">
+                                    {jobLine}
+                                  </div>
+                                ) : null}
                               </div>
                             </div>
                           </td>
@@ -670,7 +715,7 @@ export function EmployeesPage() {
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap">
                             <span className="hive-role-pill rounded-full px-2 py-0.5 text-xs uppercase">
-                              {m.role === "employee" ? "Team member" : m.role}
+                              {rosterAccessLabel(m.access_level)}
                             </span>
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap">
@@ -705,8 +750,8 @@ export function EmployeesPage() {
                                     id: m.user_id,
                                     name,
                                     role:
-                                      m.job_title ||
-                                      (m.role === "employee" ? "Team member" : m.role),
+                                      rosterJobLine(m.job_title, m.profile?.position) ||
+                                      rosterAccessLabel(m.access_level),
                                   });
                                 }}
                               >
@@ -1091,7 +1136,7 @@ function CaseloadDrawer({
           staff_id: member.id,
           client_id,
         }));
-        const { error } = await supabase.from("staff_assignments" as never).insert(rows);
+        const { error } = await supabase.from("staff_assignments" as never).insert(rows as never);
         if (error) throw error;
         for (const clientId of toAdd) {
           try {

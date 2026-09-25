@@ -350,7 +350,7 @@ export const commitClientFromPdf = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const c = data.client;
 
     // Locate existing client

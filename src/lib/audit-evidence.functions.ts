@@ -680,7 +680,7 @@ export const getAuditEvidenceSnapshot = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return EMPTY_AUDIT_EVIDENCE;
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     try {
       return await getAuditEvidenceSnapshotInternal(supabase, data.organizationId);
     } catch (e) {

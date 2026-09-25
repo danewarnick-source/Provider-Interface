@@ -2,7 +2,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { useCompliancePacket } from "@/hooks/use-compliance-packet";
 import { OrgClientFileMatrix } from "@/components/client-file/org-client-file-matrix";
 import { PacketNextActionCard } from "@/components/compliance/packet-next-action";
-import { ROLE_RANK } from "@/lib/rbac";
+import { isAdminLevel } from "@/lib/access/levels";
 
 export function ClientFilePanel() {
   const { data: org, isLoading } = useCurrentOrg();
@@ -19,7 +19,7 @@ export function ClientFilePanel() {
     );
   }
 
-  const canAccess = ROLE_RANK[org.role] >= ROLE_RANK.manager;
+  const canAccess = isAdminLevel(org.access.level);
   if (!canAccess) {
     return (
       <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">

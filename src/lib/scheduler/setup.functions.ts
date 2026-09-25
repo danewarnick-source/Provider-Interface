@@ -449,7 +449,7 @@ export const nectarDraftShifts = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { drafts: [] };
-    await requireOrgMembership(supabase, userId, data.organization_id, "employee");
+    await requireOrgMembership(supabase, userId, data.organization_id, "staff");
     assertBedrockConfigured();
 
     const [staffRes, clientsRes, authsRes] = await Promise.all([

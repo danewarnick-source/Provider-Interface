@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 import { toast } from "sonner";
 import { AuthShell } from "./login";
-import { roleInvitePhrase, type Role } from "@/lib/rbac";
+import { levelInvitePhrase } from "@/lib/access/levels";
 import {
   extractInviteToken,
   humanizeInviteError,
@@ -22,7 +22,7 @@ import {
   JOIN_USERNAME_HINT,
   JOIN_USERNAME_INVALID,
   joinConfirmLiveMessage,
-  joinHomeForRole,
+  joinHomeForLevel,
   joinPasswordLiveMessage,
   joinSetsAuthPassword,
   joinUsernameLiveMessage,
@@ -147,7 +147,7 @@ function JoinPage() {
       if (rpcErr) throw new Error(humanizeInviteError(rpcErr.message));
 
       toast.success(`You're in — welcome to ${prepared.org_name}.`);
-      window.location.replace(joinHomeForRole(prepared.role));
+      window.location.replace(joinHomeForLevel(prepared.level, prepared.home));
     } catch (err) {
       toast.error(humanizeInviteError(err));
     } finally {
@@ -188,7 +188,7 @@ function JoinPage() {
     );
   }
 
-  const rolePhrase = roleInvitePhrase(preview.role as Role);
+  const rolePhrase = levelInvitePhrase(preview.level);
   const setsNewPassword = joinSetsAuthPassword(preview.account_exists, {
     mustChangePassword: preview.must_change_password,
   });

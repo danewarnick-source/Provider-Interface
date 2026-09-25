@@ -5,11 +5,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { isAdminLevel, isOwner } from "@/lib/access/levels";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Landmark, ArrowRight, ShieldCheck, Wand2, ListChecks, BookOpenCheck, CreditCard, Mail, Inbox, UserCircle2, Building2, Receipt, BadgeCheck, UserCog, SlidersHorizontal, ScrollText, ClipboardList, FlaskConical } from "lucide-react";
+import { Landmark, ArrowRight, ShieldCheck, Wand2, ListChecks, BookOpenCheck, CreditCard, Mail, Inbox, UserCircle2, Building2, Receipt, BadgeCheck, ScrollText, ClipboardList, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { OrgBrandingCard } from "@/components/settings/org-branding-card";
 import { ShiftBehaviorToggleCard } from "@/components/evv/shift-behavior-toggle-card";
@@ -47,7 +48,7 @@ function SettingsPage() {
       // Fetch EVV-specific org fields directly (not part of useCurrentOrg)
       void supabase
         .from("organizations")
-         
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .select("dhhs_provider_id, evv_vendor_name, incident_ai_review_enabled, go_live_date, created_at" as any)
         .eq("id", org.organization_id)
         .maybeSingle()
@@ -90,7 +91,7 @@ function SettingsPage() {
     setBusy(true);
     const { error } = await supabase
       .from("organizations")
-       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update({
         name: orgName,
         legal_name: legalName.trim() || null,
@@ -108,8 +109,8 @@ function SettingsPage() {
     refetch();
   };
 
-  const isAdmin = org?.role === "admin";
-  const canBillingContact = org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+  const isAdmin = isOwner(org?.access.level);
+  const canBillingContact = isAdminLevel(org?.access.level);
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
@@ -197,17 +198,17 @@ function SettingsPage() {
 
       <OrgBrandingCard />
 
-      <ShiftBehaviorToggleCard isAdmin={org?.role === "admin"} />
+      <ShiftBehaviorToggleCard isAdmin={isOwner(org?.access.level)} />
 
 
-      {(org?.role === "admin") && (
+      {isOwner(org?.access.level) && (
         <Link to="/dashboard/settings/team-access" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ShieldCheck className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-base font-semibold">Team access</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Invite teammates by email and grant any combination of Staff, Admin, Company Executive, and (for PI staff) PI Executive roles per login.</p>
+                <h2 className="text-base font-semibold">Access &amp; presets</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Set each person to Owner, Admin, or Team member, edit presets (what each area allows), assign homes, team members, and clients, and review the change history.</p>
               </div>
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
@@ -215,7 +216,7 @@ function SettingsPage() {
         </Link>
       )}
 
-      {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
+      {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/phi-access-audit" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
@@ -230,37 +231,7 @@ function SettingsPage() {
         </Link>
       )}
 
-      {(org?.role === "admin") && (
-        <Link to="/dashboard/roles" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
-            <div className="flex items-start gap-4">
-              <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><UserCog className="h-5 w-5" /></div>
-              <div>
-                <h2 className="text-base font-semibold">Member roles</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Assign Owner, Program Manager, Supervisor, Staff, or Committee Member to each person in this company.</p>
-              </div>
-            </div>
-            <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
-          </div>
-        </Link>
-      )}
-
-      {(org?.role === "admin") && (
-        <Link to="/dashboard/permissions" className="group lg:col-span-2">
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
-            <div className="flex items-start gap-4">
-              <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><SlidersHorizontal className="h-5 w-5" /></div>
-              <div>
-                <h2 className="text-base font-semibold">Permission matrix</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Turn features on or off for each company role. Per-person exceptions stay on the team member record.</p>
-              </div>
-            </div>
-            <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
-          </div>
-        </Link>
-      )}
-
-      {org?.role === "admin" && (
+      {isOwner(org?.access.level) && (
         <Link to="/dashboard/settings/bank-mapping" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
@@ -275,7 +246,7 @@ function SettingsPage() {
         </Link>
       )}
 
-      {org?.role === "admin" && (
+      {isOwner(org?.access.level) && (
         <Link to="/dashboard/settings/automation-rules" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
@@ -290,7 +261,7 @@ function SettingsPage() {
         </Link>
       )}
 
-      {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
+      {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/service-codes" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
@@ -306,7 +277,7 @@ function SettingsPage() {
       )}
 
 
-      {(org?.role === "admin") && (
+      {isOwner(org?.access.level) && (
         <Link to="/dashboard/billing/subscription" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
@@ -321,7 +292,7 @@ function SettingsPage() {
         </Link>
       )}
 
-      {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
+      {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/email" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
@@ -336,7 +307,7 @@ function SettingsPage() {
         </Link>
       )}
 
-      {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
+      {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/retention" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
@@ -351,7 +322,7 @@ function SettingsPage() {
         </Link>
       )}
 
-      {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
+      {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/compliance-setup" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
@@ -366,7 +337,7 @@ function SettingsPage() {
         </Link>
       )}
 
-      {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
+      {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/draft-rules" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
@@ -381,7 +352,7 @@ function SettingsPage() {
         </Link>
       )}
 
-      {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
+      {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/licensing" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">
@@ -396,7 +367,7 @@ function SettingsPage() {
         </Link>
       )}
 
-      {(org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager") && (
+      {isAdminLevel(org?.access.level) && (
         <Link to="/dashboard/settings/gmail" className="group lg:col-span-2">
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition hover:border-primary/40 hover:bg-[var(--hive-hover)]">
             <div className="flex items-start gap-4">

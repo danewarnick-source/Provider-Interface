@@ -221,7 +221,7 @@ export const onStaffHired = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     await onStaffHiredInternal(supabase, data.organizationId, data.staffId);
     return { ok: true };
   });
@@ -241,7 +241,7 @@ export const onStaffAssignmentCreated = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     await onStaffAssignmentCreatedInternal(
       supabase,
       data.organizationId,
@@ -265,7 +265,7 @@ export const onStaffAssignmentRemoved = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     await onStaffAssignmentRemovedInternal(supabase, data.organizationId, data.staffId);
     return { ok: true };
   });
@@ -284,7 +284,7 @@ export const setStaffSupervisor = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     await onSupervisorChangedInternal(supabase, data.organizationId, data.staffId, data.managerId);
     return { ok: true };
   });
@@ -302,7 +302,7 @@ export const onClientDutyFactsChanged = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     await reevaluateStaffAssignedToClientInternal(supabase, data.organizationId, data.clientId);
     return { ok: true };
   });

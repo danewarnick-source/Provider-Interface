@@ -1,5 +1,5 @@
+import { levelInvitePhrase } from "./access/levels.ts";
 import { PROVIDER_INTERFACE_ORIGIN } from "./auth-redirect.ts";
-import { roleInvitePhrase } from "./rbac.ts";
 
 /** @2x of the 30px header mark. Footer uses the same file at 22px. */
 export const INVITE_EMAIL_LOGO_URL = `${PROVIDER_INTERFACE_ORIGIN}/email/pi-mark.png`;
@@ -102,7 +102,7 @@ function stepRow(n: string, title: string, detail: string, when: string, gold: b
 
 export type InvitationEmail = { subject: string; html: string; text: string };
 
-/** Centered-card invite. Role value stays stored; the sentence uses roleInvitePhrase. */
+/** Centered-card invite. Access level stays stored; the sentence uses levelInvitePhrase. */
 export function buildInvitationEmail(args: {
   orgName: string;
   role: string;
@@ -111,7 +111,7 @@ export function buildInvitationEmail(args: {
 }): InvitationEmail {
   const orgName = cleanLabel(args.orgName, "your organization");
   const inviterName = cleanLabel(args.inviterName, "A teammate");
-  const phrase = roleInvitePhrase(args.role);
+  const phrase = levelInvitePhrase(args.role);
   const link = args.link.trim();
   const subject = `${inviterName} invited you to join ${orgName}`;
   const initials = inviteEmailInitials(inviterName);

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Home, Plus, UserCheck } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -100,7 +100,7 @@ function statusVariant(s: HhpStatus): "secondary" | "default" | "outline" {
 export function HostsPage() {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const canManage = can("manage_referrals");
 
   const listFn = useServerFn(listHhpCueCards);

@@ -15,7 +15,7 @@ import { checkHiveExecutive } from "@/lib/hive-exec.functions";
 import { completePasswordSignIn, GENERIC_LOGIN_ERROR } from "@/lib/login-auth";
 import { trainingOnlyHomeForMeFn } from "@/lib/training-only-access.functions";
 import {
-  isCompanyAdminRole,
+  isCompanyAdminLevel,
   persistPortalView,
   readStoredPortalView,
   resolvePostLoginLanding,
@@ -26,7 +26,6 @@ import {
   resolveCurrentMembership,
   type MembershipPick,
 } from "@/lib/current-org";
-import type { Role } from "@/lib/rbac";
 import { toast } from "sonner";
 import { isCognitoAuth } from "@/lib/aws/env";
 import { shouldSkipLoginAutoRedirect } from "@/lib/cognito-login-gate";
@@ -51,7 +50,7 @@ export const Route = createFileRoute("/login")({
 function persistPreferredOrgFromRows(
   rows: Array<{
     organization_id?: string;
-    role?: string;
+    access_level?: string | null;
     organizations?: {
       name?: string | null;
       is_demo?: boolean | null;
@@ -64,7 +63,7 @@ function persistPreferredOrgFromRows(
     .map((m) => ({
       organization_id: m.organization_id as string,
       is_demo: m.organizations?.is_demo === true,
-      role: (m.role ?? "employee") as Role,
+      access: { level: m.access_level ?? "staff" },
       display_acronym: m.organizations?.display_acronym ?? null,
       organization_name: m.organizations?.name ?? null,
     }));
@@ -148,14 +147,14 @@ function LoginPage() {
           if (!storedView || storedView === "hive_exec" || storedView === "state_preview") {
             const { data: memberships, error } = await supabase
               .from("organization_members")
-              .select("role, organization_id, organizations(name, is_demo, display_acronym)")
+              .select("access_level, organization_id, organizations(name, is_demo, display_acronym)")
               .eq("user_id", session.user.id)
               .eq("active", true);
             if (error) {
               // Fail toward the company dashboard so an owner-exec is not trapped.
               isCompanyAdmin = true;
             } else {
-              isCompanyAdmin = (memberships ?? []).some((m) => isCompanyAdminRole(m.role));
+              isCompanyAdmin = (memberships ?? []).some((m) => isCompanyAdminLevel(m.access_level));
               persistPreferredOrgFromRows(memberships ?? []);
             }
           }
@@ -174,7 +173,7 @@ function LoginPage() {
         try {
           const { data: memberships } = await supabase
             .from("organization_members")
-            .select("id, organization_id, role, organizations(name, is_demo, display_acronym)")
+            .select("id, organization_id, access_level, organizations(name, is_demo, display_acronym)")
             .eq("user_id", session.user.id)
             .eq("active", true);
           persistPreferredOrgFromRows(memberships ?? []);

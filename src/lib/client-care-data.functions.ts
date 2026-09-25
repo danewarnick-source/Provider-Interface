@@ -360,7 +360,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
     if (!organizationIdForAccess) {
       throw new Error("Client not found or not accessible");
     }
-    await requireOrgMembership(supabase, userId, organizationIdForAccess, "employee");
+    await requireOrgMembership(supabase, userId, organizationIdForAccess, "staff");
     void logPhiAccess({
       supabaseUserClient: supabase,
       userId,

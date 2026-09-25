@@ -83,7 +83,7 @@ export async function loadOrgPersonnelFileIndex(
 
   const { data: members, error: mErr } = await supabase
     .from("organization_members")
-    .select("user_id, role, job_title, active")
+    .select("user_id, role:access_level, job_title, active")
     .eq("organization_id", organizationId);
   if (mErr) throw new Error(mErr.message);
 
@@ -297,7 +297,7 @@ export const listOrgPersonnelFileMatrix = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as PersonnelFileMatrixRow[];
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const index = await loadOrgPersonnelFileIndex(supabase, data.organizationId);
     return index.staff;
   });
@@ -315,7 +315,7 @@ export const listOrgPersonnelFilePack = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as PersonnelFilePackItem[];
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const index = await loadOrgPersonnelFileIndex(
       supabase,
       data.organizationId,

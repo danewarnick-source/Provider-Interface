@@ -38,11 +38,11 @@ const MEM_ADMIN = "dddddddd-dddd-dddd-dddd-dddddddddddd";
 const MEM_SUPER = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee";
 
 const members: OrgMemberRow[] = [
-  { id: MEM_STAFF, user_id: STAFF, role: "employee", manager_id: MEM_MGR, active: true },
-  { id: MEM_MGR, user_id: MANAGER, role: "manager", manager_id: MEM_MOM, active: true },
-  { id: MEM_MOM, user_id: MOM, role: "program_manager", manager_id: MEM_ADMIN, active: true },
-  { id: MEM_ADMIN, user_id: ADMIN, role: "admin", manager_id: MEM_SUPER, active: true },
-  { id: MEM_SUPER, user_id: SUPER, role: "super_admin", manager_id: null, active: true },
+  { id: MEM_STAFF, user_id: STAFF, access_level: "staff", manager_id: MEM_MGR, active: true },
+  { id: MEM_MGR, user_id: MANAGER, access_level: "admin", manager_id: MEM_MOM, active: true },
+  { id: MEM_MOM, user_id: MOM, access_level: "admin", manager_id: MEM_ADMIN, active: true },
+  { id: MEM_ADMIN, user_id: ADMIN, access_level: "owner", manager_id: MEM_SUPER, active: true },
+  { id: MEM_SUPER, user_id: SUPER, access_level: "owner", is_company_executive: true, manager_id: null, active: true },
 ];
 
 const now = new Date("2026-09-11T12:00:00.000Z");
@@ -88,8 +88,8 @@ describe("resolveRecipient", () => {
 
   it("manager_of_manager falls back to admin_level when the walk is null", () => {
     const leaf: OrgMemberRow[] = [
-      { id: MEM_STAFF, user_id: STAFF, role: "employee", manager_id: null, active: true },
-      { id: MEM_SUPER, user_id: SUPER, role: "super_admin", manager_id: null, active: true },
+      { id: MEM_STAFF, user_id: STAFF, access_level: "staff", manager_id: null, active: true },
+      { id: MEM_SUPER, user_id: SUPER, access_level: "owner", is_company_executive: true, manager_id: null, active: true },
     ];
     const id = resolveRecipient({ climbs_to: "manager_of_manager" }, personSubject(), leaf);
     assert.equal(id, SUPER);
@@ -104,7 +104,7 @@ describe("resolveRecipient", () => {
   });
 
   it("admin_level falls back to rank ≥ 4 when no super_admin", () => {
-    const noSuper = members.filter((m) => m.role !== "super_admin");
+    const noSuper = members.filter((m) => !m.is_company_executive);
     const id = resolveRecipient({ climbs_to: "admin_level" }, orgSubject(), noSuper);
     assert.equal(id, ADMIN);
   });
@@ -225,7 +225,7 @@ describe("evaluator fixtures (TNS)", () => {
     input.staffDutyFactsById = {
       [STAFF]: {
         staffId: STAFF,
-        role: "admin",
+        role: "owner",
         assignmentsKnown: true,
         assignedClientIds: [],
         assignedServiceCodes: [],
@@ -293,9 +293,9 @@ describe("evaluator fixtures (TNS)", () => {
     // TNS live shape: one super_admin; staff manager has no manager_of_manager
     // so overdue climbs to admin_level (this user).
     const tnsMembers: OrgMemberRow[] = [
-      { id: MEM_STAFF, user_id: STAFF, role: "employee", manager_id: MEM_MGR, active: true },
-      { id: MEM_MGR, user_id: MANAGER, role: "manager", manager_id: null, active: true },
-      { id: MEM_SUPER, user_id: SUPER, role: "super_admin", manager_id: null, active: true },
+      { id: MEM_STAFF, user_id: STAFF, access_level: "staff", manager_id: MEM_MGR, active: true },
+      { id: MEM_MGR, user_id: MANAGER, access_level: "admin", manager_id: null, active: true },
+      { id: MEM_SUPER, user_id: SUPER, access_level: "owner", is_company_executive: true, manager_id: null, active: true },
     ];
     const hits = evaluateEscalations({ ...baseInput(), members: tnsMembers });
     const week = assembleThisWeekFromHits(SUPER, hits);

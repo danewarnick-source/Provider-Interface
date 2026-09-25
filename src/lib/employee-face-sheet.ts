@@ -102,7 +102,7 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
   //    users from tripping object-mode queries with multiple memberships.
   const { data: member, error: mErr } = await sb
     .from("organization_members")
-    .select("id, role, active, organization_id, job_title")
+    .select("id, access_level, active, organization_id, job_title")
     .eq("user_id", staffId)
     .eq("organization_id", organizationId)
     .limit(1)
@@ -621,7 +621,13 @@ export async function generateEmployeeFaceSheet(
     maxLines: 1,
   });
   iy -= 2;
-  const roleLine = `${String(d.member.role ?? "").toUpperCase()}  ·  ${d.member.active ? "Active" : "Deactivated"}`;
+  const accessLabel =
+    d.member.access_level === "owner"
+      ? "OWNER"
+      : d.member.access_level === "admin"
+        ? "ADMIN"
+        : "TEAM MEMBER";
+  const roleLine = `${accessLabel}  ·  ${d.member.active ? "Active" : "Deactivated"}`;
   iy = drawText(page, roleLine, M, iy, {
     font: helvB,
     size: 7.8,

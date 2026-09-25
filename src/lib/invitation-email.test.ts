@@ -5,22 +5,25 @@ import {
   buildInvitationEmail,
   inviteEmailInitials,
 } from "./invitation-email.ts";
-import { ROLE_LABEL, roleInvitePhrase } from "./rbac.ts";
+import { LEVEL_LABEL, levelInvitePhrase } from "./access/levels.ts";
 
 const LINK = "https://providerinterface.com/join?invite=abc";
 
 describe("role invite wording", () => {
-  it("labels the stored employee role as Team member", () => {
-    assert.equal(ROLE_LABEL.employee, "Team member");
+  it("labels the stored staff access level as Team member", () => {
+    assert.equal(LEVEL_LABEL.staff, "Team member");
+    assert.equal(LEVEL_LABEL.admin, "Admin");
+    assert.equal(LEVEL_LABEL.owner, "Owner");
   });
 
   it("uses a lowercase team-member phrase in the invite sentence", () => {
-    assert.equal(roleInvitePhrase("employee"), "a team member");
-    assert.equal(roleInvitePhrase("admin"), "an Owner");
-    assert.equal(roleInvitePhrase("manager"), "a Supervisor");
+    assert.equal(levelInvitePhrase("staff"), "a team member");
+    assert.equal(levelInvitePhrase("employee"), "a team member");
+    assert.equal(levelInvitePhrase("admin"), "an admin");
+    assert.equal(levelInvitePhrase("owner"), "an owner");
     const email = buildInvitationEmail({
       orgName: "True North Supports",
-      role: "employee",
+      role: "staff",
       link: LINK,
       inviterName: "Jake Probert",
     });
@@ -81,14 +84,14 @@ describe("centered card invite email", () => {
     assert.equal(inviteEmailInitials("Jake Probert"), "JP");
   });
 
-  it("keeps an Owner phrase when that role is invited", () => {
+  it("keeps an owner phrase when that access level is invited", () => {
     const owner = buildInvitationEmail({
       orgName: "True North Supports",
-      role: "admin",
+      role: "owner",
       link: LINK,
       inviterName: "Dana",
     });
-    assert.match(owner.html, /as an Owner/);
+    assert.match(owner.html, /as an owner/);
     assert.equal(owner.subject, "Dana invited you to join True North Supports");
   });
 

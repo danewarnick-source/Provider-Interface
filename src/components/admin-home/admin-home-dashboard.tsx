@@ -20,7 +20,7 @@ import {
   type ReviewDayMeta,
 } from "@/lib/obligations/review-pack";
 import { PACK_VERSION } from "@/lib/sow-obligation-catalog-pack";
-import { isAdminLevelRole } from "@/lib/obligations/escalation";
+import { isAdminLevel } from "@/lib/access/levels";
 import "@/components/compliance/decision-card.css";
 import "./admin-home-decisions.css";
 
@@ -115,7 +115,7 @@ function AdminHomeDashboardInner({ welcomeFlag = false }: { welcomeFlag?: boolea
   const [tab, setTab] = useState<HomeTab>("this-week");
 
   const canManage = org
-    ? isAdminLevelRole(org.role) || org.role === "manager" || org.role === "program_manager"
+    ? isAdminLevel(org.access.level)
     : false;
 
   const listChanged = useServerFn(listPackWhatChanged);

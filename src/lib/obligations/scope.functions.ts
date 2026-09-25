@@ -24,7 +24,7 @@ export const loadEmployeeScope = createServerFn({ method: "POST" })
         leadsByGroupId: {},
       };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     return loadOrgScopeSnapshot(supabase, data.organizationId);
   });
 
@@ -43,7 +43,7 @@ export const setEmployeeScope = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: boolean; reason?: string }> => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false, reason: "no_session" };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: target, error: tErr } = await supabase
       .from("organization_members")

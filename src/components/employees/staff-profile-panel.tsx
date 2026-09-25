@@ -1,30 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import {
-  usePermissions,
-  useOrgPermissions,
-  useEffectivePermissions,
-} from "@/hooks/use-permissions";
-import { setMemberGrants } from "@/lib/team-access.functions";
+import { useAccess } from "@/hooks/use-access";
 import { onStaffHired } from "@/lib/staff-assignment-hooks.functions";
-import { saveStaffPermissionToggles, setScopeAssignments } from "@/lib/permissions.functions";
-import {
-  existingOverridesFromEffective,
-  fillRoleGrantedMap,
-  staffPermissionMutationErrorMessage,
-  staffPermissionSaveToggles,
-} from "@/lib/staff-permission-toggles";
-import { ALL_PERMISSIONS, type Permission, type ProviderRole, type Role } from "@/lib/rbac";
-import {
-  adminScopeIsLockedWholeOrg,
-  isAdminScopeRole,
-  parseAdminScope,
-  type ParsedAdminScope,
-} from "@/lib/admin-scope";
+import { safeErrorMessage } from "@/lib/safe-error-message";
 import { StaffProfileIdentity } from "@/components/employees/staff-profile-identity";
 import {
   identityDraftFrom,
@@ -36,19 +18,7 @@ import {
   type StaffIdentityMember,
   type StaffIdentityProfile,
 } from "@/lib/staff-profile-identity";
-import { AdminScopeFields } from "@/components/employees/admin-scope-fields";
-import { EmployeeScopeFields } from "@/components/employees/employee-scope-fields";
-import { StaffProfilePermissions } from "@/components/employees/staff-profile-permissions";
-import { loadEmployeeScope, setEmployeeScope } from "@/lib/obligations/scope.functions";
-import { employeeScopeFromSnapshot, type EmployeeScopeDraft } from "@/lib/obligations/scope";
-
-const EMPTY_SCOPE: ParsedAdminScope = {
-  mode: "all",
-  clientIds: [],
-  staffIds: [],
-  serviceCodes: [],
-  legacyStaffGroupIds: [],
-};
+import { AccessSection } from "@/components/access/access-section";
 
 export function StaffProfilePanel({
   orgId,
@@ -56,7 +26,6 @@ export function StaffProfilePanel({
   profile,
   member,
   name,
-  highlightPermission,
   onSaved,
 }: {
   orgId: string;
@@ -64,21 +33,15 @@ export function StaffProfilePanel({
   profile: StaffIdentityProfile | null;
   member: StaffIdentityMember;
   name: string;
-  highlightPermission?: Permission;
   onSaved: () => void;
 }) {
   const qc = useQueryClient();
-  const { can } = usePermissions();
-  const canEditIdentity = can("edit_staff_records");
-  const canManagePerms = can("manage_permissions");
-  const canEdit = canEditIdentity || canManagePerms;
+  const { canCategory } = useAccess();
+  const canEditIdentity = canCategory("staff_roster", "edit");
+  const canSeeAccess = canCategory("staff_roster", "view");
+  const canEdit = canEditIdentity;
 
-  const setGrantsFn = useServerFn(setMemberGrants);
   const hireHookFn = useServerFn(onStaffHired);
-  const savePermsFn = useServerFn(saveStaffPermissionToggles);
-  const setScopeFn = useServerFn(setScopeAssignments);
-  const loadEmployeeScopeFn = useServerFn(loadEmployeeScope);
-  const setEmployeeScopeFn = useServerFn(setEmployeeScope);
 
   const identityQ = useQuery({
     enabled: !!orgId && !!staffId,
@@ -101,125 +64,26 @@ export function StaffProfilePanel({
         ? member
         : member;
 
-  const { data: effective, isLoading: permsLoading } = useEffectivePermissions(staffId);
-  const { data: matrix } = useOrgPermissions();
-
-  const scopeQ = useQuery({
-    enabled: !!orgId && isAdminScopeRole(routeMember.role),
-    queryKey: ["staff-admin-scope", orgId, staffId],
-    queryFn: async (): Promise<ParsedAdminScope> => {
-      const { data } = await supabase
-        .from("scope_assignments")
-        .select("scope_type, scope_ref_id")
-        .eq("organization_id", orgId)
-        .eq("user_id", staffId);
-      return parseAdminScope(data ?? []);
-    },
-  });
-
-  const employeeScopeQ = useQuery({
-    enabled: !!orgId,
-    queryKey: ["employee-compliance-scope", orgId],
-    queryFn: () => loadEmployeeScopeFn({ data: { organizationId: orgId } }),
-  });
-  const EMPTY_EMPLOYEE_SCOPE: EmployeeScopeDraft = { scopeGroupId: null, leadGroupId: null };
-  const employeeScopeSaved = useMemo(
-    () =>
-      employeeScopeFromSnapshot(
-        staffId,
-        employeeScopeQ.data ?? {
-          available: false,
-          groups: [],
-          members: [],
-          scopeByStaffId: {},
-          leadsByGroupId: {},
-        },
-      ),
-    [staffId, employeeScopeQ.data],
-  );
-
   const [editing, setEditing] = useState(false);
   const [identity, setIdentity] = useState<StaffIdentityDraft>(() =>
     identityDraftFrom(routeProfile, routeMember),
   );
-  const [permDraft, setPermDraft] = useState<Record<string, boolean>>({});
-  const [scopeDraft, setScopeDraft] = useState<ParsedAdminScope>(EMPTY_SCOPE);
-  const [employeeScopeDraft, setEmployeeScopeDraft] =
-    useState<EmployeeScopeDraft>(EMPTY_EMPLOYEE_SCOPE);
-
-  const roleForDefaults = (editing ? identity.role : routeMember.role) as Role;
-  const roleGranted = useMemo(
-    () => fillRoleGrantedMap(roleForDefaults, matrixRows(matrix, roleForDefaults)),
-    [matrix, roleForDefaults],
-  );
-
   useEffect(() => {
     if (editing) return;
     setIdentity(identityDraftFrom(routeProfile, routeMember));
   }, [editing, routeProfile, routeMember, staffId]);
 
-  useEffect(() => {
-    if (!effective || editing) return;
-    const next: Record<string, boolean> = {};
-    for (const perm of ALL_PERMISSIONS) {
-      next[perm] = !!effective.resolved[perm]?.granted;
-    }
-    setPermDraft(next);
-  }, [effective, editing]);
-
-  useEffect(() => {
-    if (editing) return;
-    if (scopeQ.data) setScopeDraft(scopeQ.data);
-    else if (adminScopeIsLockedWholeOrg(routeMember.role)) setScopeDraft(EMPTY_SCOPE);
-  }, [editing, scopeQ.data, routeMember.role]);
-
-  useEffect(() => {
-    if (editing) return;
-    setEmployeeScopeDraft(employeeScopeSaved);
-  }, [editing, employeeScopeSaved]);
-
   const startEdit = () => {
     setIdentity(identityDraftFrom(routeProfile, routeMember));
-    if (effective) {
-      const next: Record<string, boolean> = {};
-      for (const perm of ALL_PERMISSIONS) {
-        next[perm] = !!effective.resolved[perm]?.granted;
-      }
-      setPermDraft(next);
-    }
-    setScopeDraft(scopeQ.data ?? EMPTY_SCOPE);
-    setEmployeeScopeDraft(employeeScopeSaved);
     setEditing(true);
   };
 
   const cancel = () => {
     setIdentity(identityDraftFrom(routeProfile, routeMember));
-    if (effective) {
-      const next: Record<string, boolean> = {};
-      for (const perm of ALL_PERMISSIONS) {
-        next[perm] = !!effective.resolved[perm]?.granted;
-      }
-      setPermDraft(next);
-    }
-    setScopeDraft(scopeQ.data ?? EMPTY_SCOPE);
-    setEmployeeScopeDraft(employeeScopeSaved);
     setEditing(false);
   };
 
-  const onIdentityChange = (next: StaffIdentityDraft) => {
-    if (next.role !== identity.role) {
-      const granted = fillRoleGrantedMap(next.role as Role, matrixRows(matrix, next.role as Role));
-      const reset: Record<string, boolean> = {};
-      for (const perm of ALL_PERMISSIONS) {
-        reset[perm] = !!granted.get(perm);
-      }
-      setPermDraft(reset);
-      if (adminScopeIsLockedWholeOrg(next.role)) {
-        setScopeDraft(EMPTY_SCOPE);
-      }
-    }
-    setIdentity(next);
-  };
+  const onIdentityChange = (next: StaffIdentityDraft) => setIdentity(next);
 
   const saveMut = useMutation({
     mutationFn: async () => {
@@ -256,103 +120,17 @@ export function StaffProfilePanel({
             console.warn("[obligations] hire auto-assign failed:", e);
           }
         }
-        if (identity.role !== routeMember.role) {
-          await setGrantsFn({
-            data: {
-              organization_id: orgId,
-              membership_id: routeMember.id,
-              target_user_id: staffId,
-              explicit_role: identity.role as ProviderRole,
-            },
-          });
-        }
-      }
-
-      if (canManagePerms) {
-        if (!effective) throw new Error("Permissions are still loading");
-        const toggles = staffPermissionSaveToggles({
-          draft: permDraft,
-          roleGranted,
-          existingGranted: existingOverridesFromEffective(effective.resolved),
-        });
-        if (toggles.length) {
-          await savePermsFn({
-            data: { organizationId: orgId, targetUserId: staffId, toggles },
-          });
-        }
-
-        const scopeRole = identity.role;
-        const savedScope = scopeQ.data ?? EMPTY_SCOPE;
-        if (isAdminScopeRole(scopeRole) && !adminScopeIsLockedWholeOrg(scopeRole)) {
-          if (
-            scopeDraft.mode === "selected" &&
-            !scopeDraft.clientIds.length &&
-            !scopeDraft.staffIds.length
-          ) {
-            throw new Error("Select at least one client or staff member for Admin scope.");
-          }
-          if (scopeDraft.mode === "service_code" && !scopeDraft.serviceCodes.length) {
-            throw new Error("Select at least one service code for Admin scope.");
-          }
-          if (!adminScopeDraftEquals(scopeDraft, savedScope)) {
-            await setScopeFn({
-              data: {
-                organizationId: orgId,
-                targetUserId: staffId,
-                mode: scopeDraft.mode,
-                clientIds: scopeDraft.clientIds,
-                staffIds: scopeDraft.staffIds,
-                serviceCodes: scopeDraft.serviceCodes,
-              },
-            });
-          }
-        } else if (adminScopeIsLockedWholeOrg(scopeRole) && savedScope.mode !== "all") {
-          await setScopeFn({
-            data: {
-              organizationId: orgId,
-              targetUserId: staffId,
-              mode: "all",
-              clientIds: [],
-              staffIds: [],
-              serviceCodes: [],
-            },
-          });
-        }
-      }
-
-      if (
-        employeeScopeQ.data?.available &&
-        (employeeScopeDraft.scopeGroupId !== employeeScopeSaved.scopeGroupId ||
-          employeeScopeDraft.leadGroupId !== employeeScopeSaved.leadGroupId)
-      ) {
-        const result = await setEmployeeScopeFn({
-          data: {
-            organizationId: orgId,
-            staffId,
-            scopeGroupId: employeeScopeDraft.scopeGroupId,
-            leadGroupId: employeeScopeDraft.leadGroupId,
-          },
-        });
-        if (!result.ok && result.reason === "not_live") {
-          throw new Error("Scope columns are not live yet. Core Soft applies them after merge.");
-        }
-        if (!result.ok) throw new Error("Could not save scope.");
       }
     },
     onSuccess: () => {
       toast.success("Saved");
       setEditing(false);
       qc.invalidateQueries({ queryKey: staffProfileIdentityQueryKey(orgId, staffId) });
-      qc.invalidateQueries({ queryKey: ["effective-permissions", orgId, staffId] });
-      qc.invalidateQueries({ queryKey: ["staff-admin-scope", orgId, staffId] });
-      qc.invalidateQueries({ queryKey: ["scope-assignments", orgId] });
       qc.invalidateQueries({ queryKey: ["employee-compliance-scope", orgId] });
       onSaved();
     },
     onError: (e) => toast.error(profileSaveErrorMessage(e)),
   });
-
-  const showScope = isAdminScopeRole(editing ? identity.role : routeMember.role);
 
   return (
     <div className="space-y-6">
@@ -396,95 +174,20 @@ export function StaffProfilePanel({
         />
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
-        <h2 className="mb-3 text-sm font-semibold">Leads group / Scope</h2>
-        {employeeScopeQ.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading scope…</p>
-        ) : (
-          <EmployeeScopeFields
-            groups={employeeScopeQ.data?.groups ?? []}
-            available={!!employeeScopeQ.data?.available}
-            editing={editing && canEdit}
-            draft={editing ? employeeScopeDraft : employeeScopeSaved}
-            onChange={setEmployeeScopeDraft}
-          />
-        )}
-      </section>
-
-      {canManagePerms ? (
+      {canSeeAccess ? (
         <section
-          id="staff-profile-permissions"
-          className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+          id="access"
+          className="scroll-mt-20 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
         >
-          <div>
-            <h2 className="text-sm font-semibold">Permissions</h2>
-            <p className="text-sm text-muted-foreground">
-              Changing base role resets toggles to that role&apos;s defaults. Save stores overrides
-              only.
-            </p>
-          </div>
-
-          {showScope ? (
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold">Admin scope</h3>
-              <AdminScopeFields
-                orgId={orgId}
-                role={editing ? identity.role : routeMember.role}
-                editing={editing}
-                draft={
-                  adminScopeIsLockedWholeOrg(editing ? identity.role : routeMember.role)
-                    ? EMPTY_SCOPE
-                    : scopeDraft
-                }
-                onChange={setScopeDraft}
-              />
-            </div>
-          ) : null}
-
-          {permsLoading ? (
-            <p className="text-sm text-muted-foreground">Loading permissions…</p>
-          ) : (
-            <StaffProfilePermissions
-              editing={editing}
-              draft={permDraft}
-              roleGranted={roleGranted}
-              highlightPermission={highlightPermission}
-              onToggle={(perm, granted) => setPermDraft((d) => ({ ...d, [perm]: granted }))}
-            />
-          )}
+          <AccessSection orgId={orgId} staffId={staffId} />
         </section>
       ) : null}
     </div>
   );
 }
 
-function matrixRows(
-  matrix: Record<string, Record<string, boolean>> | undefined,
-  role: string,
-): Array<{ permission: string; enabled: boolean }> {
-  const row = matrix?.[role];
-  if (!row) return [];
-  return Object.entries(row).map(([permission, enabled]) => ({ permission, enabled }));
-}
-
-function sameIdList(a: string[], b: string[]): boolean {
-  if (a.length !== b.length) return false;
-  const left = [...a].sort();
-  const right = [...b].sort();
-  return left.every((id, i) => id === right[i]);
-}
-
-function adminScopeDraftEquals(a: ParsedAdminScope, b: ParsedAdminScope): boolean {
-  return (
-    a.mode === b.mode &&
-    sameIdList(a.clientIds, b.clientIds) &&
-    sameIdList(a.staffIds, b.staffIds) &&
-    sameIdList(a.serviceCodes, b.serviceCodes)
-  );
-}
-
 function profileSaveErrorMessage(error: unknown): string {
   const raw = error instanceof Error ? error.message : "";
-  if (raw.includes("Unauthorized")) return "Only organization admins can change user roles.";
-  return staffPermissionMutationErrorMessage(error, "Could not save");
+  if (raw.includes("Unauthorized")) return "You don't have access to change this profile.";
+  return safeErrorMessage(error, "Could not save");
 }

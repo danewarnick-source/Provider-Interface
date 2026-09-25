@@ -6,7 +6,6 @@
  * so createServerFn client middleware can unwrap them.
  */
 import type { Page, Request, Route } from "@playwright/test";
-import { ALL_PERMISSIONS } from "../../src/lib/rbac";
 
 export const ORG_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1";
 export const USER_ID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1";
@@ -321,6 +320,8 @@ function restRows(world: BillingWorld, table: string): unknown[] {
         organization_id: ORG_ID,
         user_id: USER_ID,
         role: "admin",
+        access_level: "owner",
+        access_scope: "agency",
         job_title: "Admin",
         active: true,
         organizations: {
@@ -395,9 +396,6 @@ function restRows(world: BillingWorld, table: string): unknown[] {
   }
   if (table === "org_member_directory") {
     return [{ id: USER_ID, full_name: "E2E Admin", email: "e2e.billing@example.com", username: "e2e" }];
-  }
-  if (table === "role_permissions") {
-    return ALL_PERMISSIONS.map((perm) => ({ role: "admin", permission: perm }));
   }
   if (table === "profiles") {
     return [

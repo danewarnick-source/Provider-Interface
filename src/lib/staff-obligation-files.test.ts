@@ -209,12 +209,13 @@ describe("dueLabel", () => {
 });
 
 describe("Admin employee profile lock", () => {
-  it("keeps Profile / Staff file / Activity and drops junk surfaces", () => {
+  it("keeps Profile / Team member file / Activity and drops junk surfaces", () => {
     const src = readFileSync(
       new URL("../routes/dashboard.employees.$staffId.tsx", import.meta.url),
       "utf8",
     );
-    assert.match(src, /Staff file/);
+    assert.match(src, /Team member file/);
+    assert.doesNotMatch(src, />Staff file</);
     assert.match(src, /s\.tab === "staff"/);
     assert.doesNotMatch(src, /Personnel file/);
     assert.match(src, /value="profile"/);
@@ -247,9 +248,9 @@ describe("Admin employee profile lock", () => {
     );
     assert.match(identity, /Team member ID/);
     assert.match(identity, /Job title/);
-    assert.match(identity, /Base role/);
+    assert.match(identity, /Access level/);
     assert.doesNotMatch(identity, /Department/);
-    assert.match(panel, /Admin scope/);
+    assert.match(panel, /AccessSection/);
     assert.match(panel, /Edit profile/);
     assert.match(panel, /Save profile/);
   });

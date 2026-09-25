@@ -1,10 +1,10 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 import { Receipt, Users, FileSpreadsheet, Upload, Sparkles, CreditCard } from "lucide-react";
 import { NectarBillingReadinessBar } from "@/components/billing/nectar-billing-readiness-bar";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
-import { usePermissions } from "@/hooks/use-permissions";
-import type { Permission } from "@/lib/rbac";
+import { useAccess } from "@/hooks/use-access";
+import type { Permission } from "@/lib/access/permission-keys";
 import { parseCheckoutReturnSearch } from "@/lib/billing-access";
 
 
@@ -33,9 +33,9 @@ export const Route = createFileRoute("/dashboard/billing")({
     ...parseCheckoutReturnSearch(s),
   }),
   component: () => (
-    <RequireRole roles={["admin", "program_manager", "manager"]}>
+    <RequireLevel min="admin">
       <BillingLayout />
-    </RequireRole>
+    </RequireLevel>
   ),
   errorComponent: BillingError,
 });
@@ -50,7 +50,7 @@ const TABS: Array<{ to: string; label: string; icon: typeof Users; exact?: boole
 
 function BillingLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const visibleTabs = TABS.filter((t) => !t.perm || can(t.perm));
 
   return (

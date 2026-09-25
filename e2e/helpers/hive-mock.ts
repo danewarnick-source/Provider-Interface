@@ -9,7 +9,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Page, Request } from "@playwright/test";
-import { ALL_PERMISSIONS, DEFAULT_MATRIX } from "../../src/lib/rbac";
+import { withAccessLevel } from "./access-level";
 
 export const ORG_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1";
 export const ADMIN_ID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1";
@@ -242,17 +242,6 @@ function assigns() {
   ];
 }
 
-function permissionsFor(role: HiveRole) {
-  const granted = role === "admin" ? ALL_PERMISSIONS : DEFAULT_MATRIX.employee;
-  const grantedSet = new Set(granted);
-  return ALL_PERMISSIONS.map((permission) => ({
-    organization_id: ORG_ID,
-    role: role === "admin" ? "admin" : "employee",
-    permission,
-    enabled: grantedSet.has(permission),
-  }));
-}
-
 function parseEq(search: URLSearchParams, key: string): string | null {
   const raw = search.get(key);
   if (!raw) return null;
@@ -307,11 +296,9 @@ function filterRows(table: string, rows: Record<string, unknown>[], search: URLS
 function tableRows(table: string, role: HiveRole): Record<string, unknown>[] {
   switch (table) {
     case "organization_members":
-      return members().map((m) =>
-        role === "employee" && m.user_id === STAFF.riley
-          ? { ...m, role: "employee" }
-          : m,
-      );
+      return members()
+        .map((m) => (role === "employee" && m.user_id === STAFF.riley ? { ...m, role: "employee" } : m))
+        .map(withAccessLevel);
     case "organizations":
       return [{ id: ORG_ID, ...ORG }];
     case "profiles":
@@ -329,10 +316,6 @@ function tableRows(table: string, role: HiveRole): Record<string, unknown>[] {
     case "time_off_requests":
       return [];
     case "shift_swap_requests":
-      return [];
-    case "role_permissions":
-      return permissionsFor(role);
-    case "user_permission_overrides":
       return [];
     case "auditor_accounts":
       return [];

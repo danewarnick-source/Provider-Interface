@@ -23,7 +23,8 @@ const TokenInput = z.object({
 type InviteRow = {
   id: string;
   email: string;
-  role: string;
+  access_level: string | null;
+  access_presets: { name: string; home_page: string | null } | null;
   status: string;
   expires_at: string;
   organization_id: string;
@@ -32,7 +33,8 @@ type InviteRow = {
 export type InvitePreviewOk = {
   ok: true;
   email: string;
-  role: string;
+  level: string;
+  preset_name: string | null;
   org_name: string;
   expires_at: string;
   needs_name: boolean;
@@ -58,13 +60,13 @@ type LoadedInvite = { ok: true; invite: InviteRow; orgName: string };
 async function loadInvite(token: string): Promise<LoadedInvite | InvitePreviewErr> {
   const { data: invite, error } = await supabaseAdmin
     .from("invitations")
-    .select("id, email, role, status, expires_at, organization_id")
+    .select("id, email, access_level, access_presets(name, home_page), status, expires_at, organization_id")
     .eq("token", token)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!invite) return fail("not_found");
 
-  const row = invite as InviteRow;
+  const row = invite as unknown as InviteRow;
   if (row.status === "accepted") return fail("used");
   if (row.status === "revoked") return fail("revoked");
   if (row.status !== "pending") return fail("used");
@@ -107,7 +109,8 @@ export const previewInvitation = createServerFn({ method: "POST" })
     return {
       ok: true,
       email: invite.email,
-      role: invite.role,
+      level: invite.access_level ?? "staff",
+      preset_name: invite.access_presets?.name ?? null,
       org_name: orgName,
       expires_at: invite.expires_at,
       needs_name: !String(profile?.full_name || "").trim(),
@@ -247,7 +250,8 @@ export const prepareInviteAccount = createServerFn({ method: "POST" })
     return {
       ok: true as const,
       email,
-      role: invite.role,
+      level: invite.access_level ?? "staff",
+      home: invite.access_presets?.home_page ?? null,
       org_name: orgName,
     };
   });

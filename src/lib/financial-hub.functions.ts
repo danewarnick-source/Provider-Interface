@@ -20,7 +20,7 @@ export const getBillingSnapshot = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { totalClients: 0, activeCodes: 0, blockers: 0, expiringSoon: 0 };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, userId, data.organizationId, "owner");
 
     const now = new Date();
     const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);

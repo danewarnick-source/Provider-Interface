@@ -75,7 +75,7 @@ async function matchStaffByEmail(
 ): Promise<{ id: string; full_name: string | null; role: string } | null> {
   const { data: mems, error: memErr } = await sb
     .from("organization_members")
-    .select("user_id, role")
+    .select("user_id, role:access_level")
     .eq("organization_id", organizationId)
     .eq("active", true);
   if (memErr) throw new Error(memErr.message);
@@ -92,7 +92,7 @@ async function matchStaffByEmail(
   );
   if (!hit) return null;
   const role = ((mems ?? []) as Array<{ user_id: string; role: string }>).find((m) => m.user_id === hit.id)
-    ?.role ?? "employee";
+    ?.role ?? "staff";
   return { id: hit.id, full_name: hit.full_name, role };
 }
 
@@ -163,7 +163,7 @@ export async function fulfillTrainingClass(input: FulfillTrainingClassInput): Pr
   for (const row of rows) {
     let staffId = row.staff_user_id;
     let staff = staffId
-      ? { id: staffId, full_name: row.staff_name, role: "employee" }
+      ? { id: staffId, full_name: row.staff_name, role: "staff" }
       : await matchStaffByEmail(sb, input.organizationId, row.staff_email);
     if (staff && !staffId) {
       await sb

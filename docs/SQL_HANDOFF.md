@@ -1,5 +1,93 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
+## CHECK — Access levels Phase 0: read-only look before the build (2026-09-25)
+
+**Safe to run any time.** Every query below only reads; nothing changes.
+Run them one at a time, and **Clear the editor before each paste**. Send
+back the result of each one (a screenshot is fine). This tells us whether
+the live database matches the plan in `docs/access-levels-migration-plan.md`.
+
+**1. How many people hold each role today**
+
+```sql
+SELECT string_agg(o.name || ' — ' || t.role || ': ' || t.n, ' | ' ORDER BY o.name, t.role) AS people_per_role
+FROM (SELECT organization_id, role::text AS role, count(*) AS n
+      FROM organization_members WHERE active GROUP BY 1, 2) t
+JOIN organizations o ON o.id = t.organization_id;
+```
+
+**2. Role values that exist in the live database**
+
+```sql
+SELECT string_agg(enumlabel, ', ' ORDER BY enumsortorder) AS app_role_values
+FROM pg_enum WHERE enumtypid = 'public.app_role'::regtype;
+```
+
+You'd expect: `admin, manager, employee, super_admin, committee_member, program_manager` (order may differ).
+
+**3. What the role helper functions check (one row per function)**
+
+```sql
+SELECT p.proname AS helper,
+       pg_get_functiondef(p.oid) ILIKE '%program_manager%' AS mentions_program_manager,
+       pg_get_functiondef(p.oid) ILIKE '%''manager''%' AS mentions_manager,
+       pg_get_functiondef(p.oid) ILIKE '%''admin''%' AS mentions_admin,
+       pg_get_functiondef(p.oid) ILIKE '%committee_member%' AS mentions_committee,
+       pg_get_functiondef(p.oid) ILIKE '%hive_executive%' AS mentions_hive_exec
+FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'public'
+  AND p.proname IN ('is_org_admin_or_manager','has_org_role','is_hrc_committee_member',
+                    'can_access_client_phi','can_view_staff_pii','has_permission')
+ORDER BY 1;
+```
+
+You'd expect `is_org_admin_or_manager` to be **true** for program_manager, manager and admin. Any missing function row is worth knowing too.
+
+**4. How many security rules use each helper**
+
+```sql
+SELECT count(*) FILTER (WHERE x ~* 'is_org_admin_or_manager') AS uses_admin_or_manager,
+       count(*) FILTER (WHERE x ~* 'has_org_role')            AS uses_has_org_role,
+       count(*) FILTER (WHERE x ~* 'has_permission')          AS uses_has_permission,
+       count(*) FILTER (WHERE x ~* 'is_hrc_committee_member') AS uses_hrc_helper,
+       count(*)                                               AS total_policies
+FROM (SELECT coalesce(qual,'') || ' ' || coalesce(with_check,'') AS x
+      FROM pg_policies WHERE schemaname = 'public') p;
+```
+
+**5. Security rules that write a role word directly (these need hand edits later)**
+
+```sql
+SELECT count(*) AS policies,
+       string_agg(DISTINCT tablename, ', ' ORDER BY tablename) AS tables
+FROM pg_policies
+WHERE schemaname = 'public'
+  AND (coalesce(qual,'') || coalesce(with_check,'')) ~* '''(admin|manager|employee|program_manager|committee_member|super_admin)''';
+```
+
+**6. Per-person permission overrides that will need translating**
+
+```sql
+SELECT count(*) AS overrides,
+       count(DISTINCT user_id) AS people,
+       string_agg(DISTINCT permission, ', ' ORDER BY permission) AS permissions_used
+FROM user_permission_overrides;
+```
+
+**7. Do clients and staff have a home set? (scope by home depends on it)**
+
+```sql
+SELECT (SELECT count(*) FROM clients)                                   AS clients_total,
+       (SELECT count(*) FROM clients WHERE team_id IS NULL)             AS clients_without_home,
+       (SELECT count(*) FROM organization_members WHERE active)         AS active_members,
+       (SELECT count(*) FROM organization_members m JOIN profiles p ON p.id = m.user_id
+         WHERE m.active AND p.team_id IS NULL)                          AS members_without_home;
+```
+
+If any query errors (for example "relation does not exist"), send the error text; that's useful information too.
+
+---
+
 ## ACTION — Evidence due-date model (2026-09-18)
 
 **Do not run until Dane approves.** Additive only — adds

@@ -3,7 +3,6 @@
 // notifications.type = "escalation". Do not add a second overdue/escalation
 // fan-out.
 
-import { ROLE_RANK, type Role } from "../rbac.ts";
 import {
   loadOrgScopeSnapshot,
   pickScopeAdminRecipient,
@@ -95,9 +94,10 @@ export const SEED_ESCALATION_RULES: EscalationRule[] = [
 export type OrgMemberRow = {
   id: string;
   user_id: string;
-  role: string;
+  access_level: string;
   manager_id: string | null;
   active?: boolean;
+  is_company_executive?: boolean;
 };
 
 export type EscalationSubject = {
@@ -283,13 +283,19 @@ export function consequenceForTrigger(
   }
 }
 
-function memberRole(role: string): Role {
-  if (role in ROLE_RANK) return role as Role;
-  return "employee";
+/** "Admin-level" escalation recipients are the agency's Owners. */
+export function isOwnerLevel(level: string | null | undefined): boolean {
+  return level === "owner";
 }
 
-export function isAdminLevelRole(role: string): boolean {
-  return ROLE_RANK[memberRole(role)] >= 4;
+/** Company-executive Owners first when `execFirst`, otherwise last; ties by user id. */
+function byExecThenId(execFirst: boolean) {
+  return (a: OrgMemberRow, b: OrgMemberRow): number => {
+    const ae = a.is_company_executive ? 1 : 0;
+    const be = b.is_company_executive ? 1 : 0;
+    if (ae !== be) return execFirst ? be - ae : ae - be;
+    return a.user_id.localeCompare(b.user_id);
+  };
 }
 
 function activeMembers(members: OrgMemberRow[]): OrgMemberRow[] {
@@ -315,28 +321,16 @@ function managerUserId(members: OrgMemberRow[], staffUserId: string | null): str
 }
 
 export function pickAdminLevelRecipient(members: OrgMemberRow[]): string | null {
-  const pool = activeMembers(members).filter((m) => isAdminLevelRole(m.role));
+  const pool = activeMembers(members).filter((m) => isOwnerLevel(m.access_level));
   if (!pool.length) return null;
-  const supers = pool
-    .filter((m) => m.role === "super_admin")
-    .sort((a, b) => a.user_id.localeCompare(b.user_id));
-  if (supers[0]) return supers[0].user_id;
-  return [...pool].sort((a, b) => {
-    const rank = ROLE_RANK[memberRole(b.role)] - ROLE_RANK[memberRole(a.role)];
-    if (rank !== 0) return rank;
-    return a.user_id.localeCompare(b.user_id);
-  })[0]!.user_id;
+  return [...pool].sort(byExecThenId(true))[0]!.user_id;
 }
 
-/** Lowest admin-level (admin before super_admin) — org-item manager fallback. */
+/** Lowest admin-level (a non-executive Owner first) — org-item manager fallback. */
 export function pickLowestAdminLevel(members: OrgMemberRow[]): string | null {
-  const pool = activeMembers(members).filter((m) => isAdminLevelRole(m.role));
+  const pool = activeMembers(members).filter((m) => isOwnerLevel(m.access_level));
   if (!pool.length) return null;
-  return [...pool].sort((a, b) => {
-    const rank = ROLE_RANK[memberRole(a.role)] - ROLE_RANK[memberRole(b.role)];
-    if (rank !== 0) return rank;
-    return a.user_id.localeCompare(b.user_id);
-  })[0]!.user_id;
+  return [...pool].sort(byExecThenId(false))[0]!.user_id;
 }
 
 function resolveAdminLevel(
@@ -804,7 +798,7 @@ export async function loadEvaluateInput(
 
   const { data: members, error: mErr } = await supabase
     .from("organization_members")
-    .select("id, user_id, role, manager_id, active")
+    .select("id, user_id, access_level, manager_id, active, is_company_executive")
     .eq("organization_id", organizationId)
     .eq("active", true);
   if (mErr) throw new Error(mErr.message);

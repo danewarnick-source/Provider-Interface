@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
   // Resolve caller's org (first active membership; admin flows only have one context).
   const { data: memberships } = await admin
     .from("organization_members")
-    .select("organization_id, role")
+    .select("organization_id, access_level")
     .eq("user_id", user.id)
     .eq("active", true)
     .limit(1);
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     // Individual: assignee must be self OR an org-member of the caller's org (if caller is admin).
     assigneeUserId = body.assignee_user_id || user.id;
     if (assigneeUserId !== user.id) {
-      if (!orgRow || !["admin", "manager", "super_admin"].includes(orgRow.role)) {
+      if (!orgRow || !["owner", "admin"].includes(orgRow.access_level)) {
         return json({ error: "forbidden_assignee" }, 403);
       }
     }

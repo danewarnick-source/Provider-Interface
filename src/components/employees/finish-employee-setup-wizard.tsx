@@ -22,9 +22,8 @@ import {
 import {
   HireDraftFields,
   type HireDraft,
-  type HireRoleChoice,
 } from "@/components/employees/add-employee-wizard";
-import { bulkAccessChoices, toInviteRole } from "@/lib/employee-roster-upload";
+import type { AccessLevel } from "@/lib/access/levels";
 import { normalizeConfig, type StaffIntakeFieldsConfig } from "@/components/hr/staff-fields-panel";
 
 export type NeedsSetupPerson = {
@@ -34,7 +33,8 @@ export type NeedsSetupPerson = {
   email: string;
   phone: string;
   hireDate: string;
-  role: HireDraft["role"];
+  accessLevel: AccessLevel;
+  accessPresetId: string | null;
   jobTitle: string;
   department: string;
   employeeId: string;
@@ -45,13 +45,9 @@ type FinishedPerson = {
   userId: string;
   name: string;
   email: string;
-  role: HireDraft["role"];
+  accessLevel: AccessLevel;
+  accessPresetId: string | null;
 };
-
-const FINISH_SETUP_ROLES: HireRoleChoice[] = [
-  ...bulkAccessChoices(),
-  { value: "admin", label: "Admin" },
-];
 
 function personToDraft(person: NeedsSetupPerson): HireDraft {
   return {
@@ -60,7 +56,7 @@ function personToDraft(person: NeedsSetupPerson): HireDraft {
     lastName: person.lastName,
     email: person.email,
     phone: person.phone,
-    role: person.role,
+    access: { level: person.accessLevel, presetId: person.accessPresetId },
     hireDate: person.hireDate,
     staffType: [],
     department: person.department,
@@ -156,7 +152,8 @@ export function FinishEmployeeSetupWizard({
           lastName: row.lastName.trim(),
           email: row.email.trim(),
           phone: row.phone.trim(),
-          role: row.role,
+          accessLevel: row.access.level,
+          accessPresetId: row.access.presetId,
           department: row.department,
           hireDate: row.hireDate,
           jobTitle,
@@ -173,7 +170,8 @@ export function FinishEmployeeSetupWizard({
         userId: res.userId,
         name: res.name,
         email: res.email,
-        role: row.role,
+        accessLevel: row.access.level,
+        accessPresetId: row.access.presetId,
       });
       setPhase("invite");
       qc.invalidateQueries({ queryKey: ["members"] });
@@ -192,7 +190,8 @@ export function FinishEmployeeSetupWizard({
           data: {
             organization_id: organizationId,
             email,
-            role: toInviteRole(target.role),
+            access_level: target.accessLevel,
+            access_preset_id: target.accessPresetId,
             site_origin,
           },
         });
@@ -299,7 +298,7 @@ export function FinishEmployeeSetupWizard({
                 showHeader={false}
                 canRemove={false}
                 staffIntakeConfig={staffIntakeConfig}
-                roleChoices={FINISH_SETUP_ROLES}
+                organizationId={organizationId}
                 onChange={(patch) => setDraft((prev) => (prev ? { ...prev, ...patch } : prev))}
                 onRemove={() => {}}
               />

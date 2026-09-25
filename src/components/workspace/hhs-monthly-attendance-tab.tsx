@@ -12,6 +12,7 @@ import {
   getHhsMonthData, getMonthCertification, certifyHhsMonth,
   type AttendanceRow, type BlockedDay,
 } from "@/lib/hhs-certifications.functions";
+import { isAdminLevel } from "@/lib/access/levels";
 
 const fmt = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -32,7 +33,7 @@ export function HhsMonthlyAttendanceTab({
   clientName: string;
 }) {
   const { data: org } = useCurrentOrg();
-  const canCertify = org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+  const canCertify = isAdminLevel(org?.access.level);
   const qc = useQueryClient();
 
   const [anchor, setAnchor] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d; });

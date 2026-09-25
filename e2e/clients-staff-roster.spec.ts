@@ -17,11 +17,11 @@ const ARTIFACT_DIR = fs.existsSync("/opt/cursor/artifacts")
   ? "/opt/cursor/artifacts"
   : path.join(process.cwd(), "test-results", "clients-staff-roster");
 
-async function shot(page: Page, name: string) {
+async function shot(page: Page, name: string, fullPage = false) {
   fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
   await page.screenshot({
     path: path.join(ARTIFACT_DIR, `${name}.png`),
-    fullPage: false,
+    fullPage,
   });
 }
 
@@ -425,19 +425,19 @@ test.describe("Add several at once and Finish setup", () => {
     await expect(page.getByText(/Already on the roster — skipped/i)).toBeVisible();
     await expect(page.getByText(/Enter a valid email/i)).toBeVisible();
     await expect(page.getByText(/Will add as Needs setup/i)).toBeVisible();
-    await expect(page.getByText(/"Owner" is not an access level/i)).toBeVisible();
-    await expect(
-      page.getByText(/Use Team member, Supervisor, Program Manager, Committee Member/i),
-    ).toBeVisible();
+    await expect(page.getByText(/Owner can't be assigned from a spreadsheet/i)).toBeVisible();
+    await expect(page.getByText(/Team member/i).first()).toBeVisible();
     await shot(page, "add_several_preview_desktop");
     await page.setViewportSize({ width: 1280, height: 1100 });
     const invalidAccess = page.getByLabel("Access level").first();
     await invalidAccess.scrollIntoViewIfNeeded();
     await invalidAccess.click();
-    for (const name of ["Team member", "Supervisor", "Program Manager", "Committee Member"]) {
+    for (const name of ["Admin", "Team member"]) {
       await expect(page.getByRole("option", { name, exact: true })).toBeVisible();
     }
     await expect(page.getByRole("option", { name: "Owner", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("option", { name: "Supervisor", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("option", { name: "Committee Member", exact: true })).toHaveCount(0);
     await shot(page, "add_several_access_level_desktop");
     await page.keyboard.press("Escape");
 
@@ -458,6 +458,68 @@ test.describe("Add several at once and Finish setup", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(page.getByText("Direct Support Professional")).toBeVisible();
     await shot(page, "finish_setup_step_mobile");
+  });
+});
+
+test.describe("Access levels screenshots", () => {
+  test.beforeEach(async ({ page }) => {
+    await installHiveMocks(page, { persona: "admin" });
+  });
+
+  test("access presets, bulk access dropdown, and profile scope save", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoAdmin(page, "/dashboard/settings/team-access");
+    await expect(page.getByRole("heading", { name: /Access & presets/i })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByText(/Team member/i).first()).toBeVisible();
+    await expect(page.getByText("Pat Lee")).toBeVisible();
+    await expect(page.getByText(/Owner, Admin, or Team member/i)).toBeVisible();
+    await page.getByRole("tab", { name: "Presets" }).click();
+    await expect(page.getByText("Program Manager").first()).toBeVisible();
+    await expect(page.getByText("DSP").first()).toBeVisible();
+    const rosterCategory = page.getByText("Team roster & profiles").first();
+    await rosterCategory.scrollIntoViewIfNeeded();
+    await expect(rosterCategory).toBeVisible();
+    await expect(page.getByText("Hire & deactivate team members").first()).toBeVisible();
+    await expect(page.getByText(/Staff roster|Hire & deactivate staff|Staff compliance/i)).toHaveCount(0);
+    await shot(page, "access-presets", true);
+
+    await gotoAdmin(page, "/dashboard/hub/employees");
+    await page.getByRole("button", { name: /Add several at once/i }).click();
+    await page.locator("#roster-paste").fill(
+      "Sam Rivera, sam.rivera@example.test, 555-0100, 2026-07-01, Direct Support, Team member\n",
+    );
+    await page.getByRole("button", { name: /Review pasted rows/i }).click();
+    await expect(page.getByTestId("bulk-access-level")).toBeVisible();
+    await page.getByTestId("bulk-access-level").click();
+    await expect(page.getByRole("option", { name: "Admin", exact: true })).toBeVisible();
+    await expect(page.getByRole("option", { name: "Team member", exact: true })).toBeVisible();
+    await expect(page.getByRole("option", { name: "Owner", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("option", { name: "Supervisor", exact: true })).toHaveCount(0);
+    await shot(page, "bulk-upload-access-level");
+    await page.keyboard.press("Escape");
+
+    await gotoAdmin(page, `/dashboard/employees/${STAFF.jake.id}`);
+    await expect(page.getByRole("heading", { name: "Access", exact: true })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByText("Leads group / Scope")).toHaveCount(0);
+    await expect(page.getByText(/Scope columns are not live/i)).toHaveCount(0);
+    await expect(page.getByTestId("profile-access-level")).toHaveText("Admin");
+    await expect(page.getByTestId("profile-access-badge")).toHaveText("Admin");
+    await page.getByRole("button", { name: /Edit access/i }).click();
+    await page.getByText("Whole agency", { exact: true }).click();
+    await page.getByRole("option", { name: /Assigned homes, team members, and clients/i }).click();
+    await page.getByText("Pick homes").click();
+    await page.getByText("Maple House", { exact: true }).click();
+    await page.getByRole("button", { name: /Save access/i }).click();
+    await expect(page.getByText("Access saved")).toBeVisible();
+    await expect(page.getByText(/Assigned homes, team members, and clients/i)).toBeVisible();
+    await expect(page.getByText("1 assigned").first()).toBeVisible();
+    await expect(page.getByTestId("profile-access-level")).toHaveText("Admin");
+    await expect(page.getByTestId("profile-access-badge")).toHaveText("Admin");
+    await shot(page, "profile-admin-scope-save", true);
   });
 });
 

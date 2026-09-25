@@ -12,13 +12,12 @@ import {
   listAuditLog,
   type MemberRow,
 } from "@/lib/hive-exec-admin.functions";
+import { ACCESS_LEVELS, LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/hive-exec/permissions")({
   head: () => ({ meta: [{ title: "Permissions & Roles — Provider Interface Executive" }] }),
   component: PermissionsPage,
 });
-
-const ROLE_OPTIONS = ["employee", "manager", "program_manager", "admin"] as const;
 
 function PermissionsPage() {
   return (
@@ -168,7 +167,7 @@ function MembersSection() {
   const [orgFilter, setOrgFilter] = useState("all");
 
   const upd = useMutation({
-    mutationFn: (vars: { membershipId: string; patch: Partial<Pick<MemberRow, "role" | "active" | "is_company_executive">> }) =>
+    mutationFn: (vars: { membershipId: string; patch: Partial<Pick<MemberRow, "active" | "is_company_executive"> & { access_level: AccessLevel }> }) =>
       updFn({ data: vars }),
     onSuccess: () => {
       toast.success("Membership updated.");
@@ -236,7 +235,7 @@ function MembersSection() {
             <tr>
               <th className="px-3 py-2">User</th>
               <th className="px-3 py-2">Company</th>
-              <th className="px-3 py-2">Role</th>
+              <th className="px-3 py-2">Access level</th>
               <th className="px-3 py-2">Co. Exec</th>
               <th className="px-3 py-2">Status</th>
               <th className="px-3 py-2"></th>
@@ -256,14 +255,14 @@ function MembersSection() {
                 <td className="px-3 py-2 text-muted-foreground">{m.organization_name}</td>
                 <td className="px-3 py-2">
                   <select
-                    value={m.role}
+                    value={m.access_level}
                     onChange={(e) =>
-                      upd.mutate({ membershipId: m.membership_id, patch: { role: e.target.value as typeof ROLE_OPTIONS[number] } })
+                      upd.mutate({ membershipId: m.membership_id, patch: { access_level: e.target.value as AccessLevel } })
                     }
                     className="rounded-md border border-border bg-background px-2 py-1 text-xs"
                   >
-                    {ROLE_OPTIONS.map((r) => (
-                      <option key={r} value={r}>{r}</option>
+                    {ACCESS_LEVELS.map((l) => (
+                      <option key={l} value={l}>{LEVEL_LABEL[l]}</option>
                     ))}
                   </select>
                 </td>

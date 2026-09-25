@@ -141,7 +141,8 @@ test.describe("invite join vs new-agency signup", () => {
               body: JSON.stringify({
                 ok: true,
                 email: "tester@example.com",
-                role: "employee",
+                level: "staff",
+                preset_name: "DSP",
                 org_name: "True North Supports",
                 expires_at: new Date(Date.now() + 86400_000).toISOString(),
                 needs_name: true,

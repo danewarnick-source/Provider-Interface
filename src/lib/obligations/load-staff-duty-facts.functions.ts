@@ -31,12 +31,12 @@ export async function loadStaffDutyFactsInternal(
     out.set(staffId, { staffId, ...UNKNOWN_STAFF_DUTY_FACTS });
   }
 
-  let members: Array<{ user_id: string; role: string | null; manager_id?: string | null }> = [];
+  let members: Array<{ user_id: string; access_level: string | null; manager_id?: string | null }> = [];
   let managerIdKnown = true;
   {
     const full = await supabase
       .from("organization_members")
-      .select("user_id, role, manager_id")
+      .select("user_id, access_level, manager_id")
       .eq("organization_id", organizationId)
       .eq("active", true)
       .in("user_id", ids);
@@ -44,18 +44,18 @@ export async function loadStaffDutyFactsInternal(
       managerIdKnown = false;
       const retry = await supabase
         .from("organization_members")
-        .select("user_id, role")
+        .select("user_id, access_level")
         .eq("organization_id", organizationId)
         .eq("active", true)
         .in("user_id", ids);
       if (retry.error) throw new Error(retry.error.message);
-      members = (retry.data ?? []) as Array<{ user_id: string; role: string | null }>;
+      members = (retry.data ?? []) as Array<{ user_id: string; access_level: string | null }>;
     } else if (full.error) {
       throw new Error(full.error.message);
     } else {
       members = (full.data ?? []) as Array<{
         user_id: string;
-        role: string | null;
+        access_level: string | null;
         manager_id: string | null;
       }>;
     }
@@ -203,7 +203,7 @@ export async function loadStaffDutyFactsInternal(
 
     out.set(staffId, {
       staffId,
-      role: mem?.role ?? null,
+      role: mem?.access_level ?? null,
       assignmentsKnown: assignmentsKnown.value,
       assignedClientIds: clientIds,
       assignedServiceCodes: codes,

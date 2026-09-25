@@ -51,7 +51,7 @@ async function requireManager(
   userId: string,
   organizationId: string,
 ): Promise<void> {
-  await requireOrgMembership(supabase, userId, organizationId, "manager");
+  await requireOrgMembership(supabase, userId, organizationId, "admin");
 }
 
 export const getThisWeekForUser = createServerFn({ method: "POST" })
@@ -67,7 +67,7 @@ export const getThisWeekForUser = createServerFn({ method: "POST" })
         automation: emptyAutomationHeartbeat(),
       };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     return getThisWeek(supabase, data.organizationId, userId);
   });
 
@@ -163,7 +163,7 @@ export const listSoloLapsesForStaff = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<SoloLapse[]> => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [];
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     return loadSoloLapsesForStaffInternal(supabase, data.organizationId, data.staffId, {
       hasAbi: data.hasAbi,
       hasBehaviorPlan: data.hasBehaviorPlan,
@@ -316,7 +316,7 @@ export const listOverridesForStaff = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [];
     if (data.staffId === userId) {
-      await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+      await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     } else {
       await requireManager(supabase, userId, data.organizationId);
     }

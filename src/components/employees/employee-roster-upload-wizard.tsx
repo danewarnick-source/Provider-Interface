@@ -6,14 +6,17 @@ import { Download, FileSpreadsheet, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { applyEmployeeRosterRow } from "@/lib/employees.functions";
+import { usePresets } from "@/components/access/queries";
 import {
-  type BulkAccessRole,
+  type BulkAccessLevel,
+  type BulkPresetOption,
   type EmployeeRosterDraft,
   type EmployeeRosterHeader,
+  BULK_LEVEL_LABEL,
   applyRosterName,
-  bulkAccessChoices,
-  bulkAccessLabel,
+  canonicalBulkPresets,
   classifyRosterRowAction,
+  defaultPresetName,
   parseBulkAccessLevel,
   parseEmployeeRosterCsv,
   parseEmployeeRosterPaste,
@@ -44,7 +47,6 @@ import {
 } from "@/components/ui/dialog";
 
 const PREVIEW_FIELDS: EmployeeRosterHeader[] = ["name", "email", "phone", "hire_date", "job_title"];
-const ACCESS_CHOICES = bulkAccessChoices();
 
 async function parseRosterFile(
   file: File,
@@ -82,6 +84,8 @@ function labelFor(field: EmployeeRosterHeader): string {
       return "Hire date";
     case "job_title":
       return "Job title";
+    case "access_level":
+      return "Access level";
   }
 }
 
@@ -96,6 +100,17 @@ export function EmployeeRosterUploadWizard({
 }) {
   const qc = useQueryClient();
   const applyRow = useServerFn(applyEmployeeRosterRow);
+  const presetsQ = usePresets(organizationId ?? undefined);
+  const presetOptions: BulkPresetOption[] = useMemo(() => {
+    const live = (presetsQ.data ?? [])
+      .filter((p) => p.access_level === "admin" || p.access_level === "staff")
+      .map((p) => ({
+        name: p.name,
+        level: p.access_level as BulkAccessLevel,
+        seed: p.seed_key,
+      }));
+    return live.length ? live : canonicalBulkPresets();
+  }, [presetsQ.data]);
 
   const [step, setStep] = useState<"entry" | "preview" | "done">("entry");
   const [paste, setPaste] = useState("");
@@ -134,7 +149,7 @@ export function EmployeeRosterUploadWizard({
   }, [rows, existingEmails]);
 
   const toCreate = rows.filter((row) => actions.get(row.id) === "create");
-  const issues = validateEmployeeRosterRows(toCreate);
+  const issues = validateEmployeeRosterRows(toCreate, presetOptions);
   const hasErrors = issues.size > 0;
   const skipCount = rows.length - toCreate.length;
 
@@ -185,7 +200,8 @@ export function EmployeeRosterUploadWizard({
               phone: row.phone.trim(),
               hireDate: row.hire_date,
               jobTitle: row.job_title.trim(),
-              role: row.role,
+              accessLevel: row.level,
+              presetName: row.presetName,
             },
           });
           if (res.action === "skipped") {
@@ -357,15 +373,14 @@ export function EmployeeRosterUploadWizard({
                           />
                         </div>
                       ))}
-                      <AccessLevelField
+                      <AccessLevelFields
                         row={row}
+                        presets={presetOptions}
                         invalid={
                           action === "create" &&
                           rosterRowHasFieldIssue(issues, row.id, "access_level")
                         }
-                        onChange={(role) =>
-                          patchRow(row.id, { role, access_level: bulkAccessLabel(role) })
-                        }
+                        onChange={(patch) => patchRow(row.id, patch)}
                       />
                     </div>
                     {rowIssues.length > 0 && (
@@ -431,42 +446,87 @@ export function EmployeeRosterUploadWizard({
   );
 }
 
-function AccessLevelField({
+function AccessLevelFields({
   row,
+  presets,
   invalid,
   onChange,
 }: {
   row: EmployeeRosterDraft;
+  presets: BulkPresetOption[];
   invalid: boolean;
-  onChange: (role: BulkAccessRole) => void;
+  onChange: (patch: Partial<EmployeeRosterDraft>) => void;
 }) {
-  const parsed = parseBulkAccessLevel(row.access_level);
+  const parsed = parseBulkAccessLevel(row.access_level, presets);
+  const broken = invalid || parsed.invalid;
+  const level = broken ? undefined : row.level;
+  const forLevel = presets.filter((p) => p.level === (level ?? row.level));
   return (
-    <div className="grid gap-1">
-      <Label className="text-xs" htmlFor={`access-level-${row.id}`}>
-        Access level
-      </Label>
-      <Select
-        value={invalid || parsed.invalid ? undefined : row.role}
-        onValueChange={(value) => onChange(value as BulkAccessRole)}
-      >
-        <SelectTrigger
-          id={`access-level-${row.id}`}
-          className={"h-8 text-sm " + (invalid ? "border-destructive" : "")}
+    <>
+      <div className="grid gap-1">
+        <Label className="text-xs" htmlFor={`access-level-${row.id}`}>
+          Access level
+        </Label>
+        <Select
+          value={level}
+          onValueChange={(value) => {
+            const next = value as BulkAccessLevel;
+            const presetName = defaultPresetName(next, presets);
+            onChange({
+              level: next,
+              presetName,
+              access_level: BULK_LEVEL_LABEL[next],
+            });
+          }}
         >
-          <SelectValue
-            placeholder={invalid ? row.access_level || "Choose access level" : "Team member"}
-          />
-        </SelectTrigger>
-        <SelectContent>
-          {ACCESS_CHOICES.map((choice) => (
-            <SelectItem key={choice.value} value={choice.value}>
-              {choice.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+          <SelectTrigger
+            id={`access-level-${row.id}`}
+            data-testid="bulk-access-level"
+            className={"h-8 text-sm " + (broken ? "border-destructive" : "")}
+          >
+            <SelectValue
+              placeholder={broken ? row.access_level || "Choose access level" : "Team member"}
+            />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="staff">Team member</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid gap-1">
+        <Label className="text-xs" htmlFor={`access-preset-${row.id}`}>
+          Preset
+        </Label>
+        <Select
+          value={broken ? undefined : row.presetName}
+          onValueChange={(presetName) => {
+            const preset = presets.find((p) => p.name === presetName);
+            if (!preset) return;
+            onChange({
+              level: preset.level,
+              presetName: preset.name,
+              access_level: preset.name,
+            });
+          }}
+        >
+          <SelectTrigger
+            id={`access-preset-${row.id}`}
+            data-testid="bulk-access-preset"
+            className={"h-8 text-sm " + (broken ? "border-destructive" : "")}
+          >
+            <SelectValue placeholder={broken ? "Choose a preset" : "DSP"} />
+          </SelectTrigger>
+          <SelectContent>
+            {forLevel.map((preset) => (
+              <SelectItem key={preset.name} value={preset.name}>
+                {preset.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </>
   );
 }
 

@@ -71,7 +71,7 @@ async function loadStaffFacts(
 ): Promise<Array<{ id: string; full_name: string | null; role: string; facts: StaffAudienceFacts }>> {
   const { data: mems, error: memErr } = await supabase
     .from("organization_members")
-    .select("user_id, role")
+    .select("user_id, role:access_level")
     .eq("organization_id", organizationId)
     .eq("active", true);
   if (memErr) throw new Error(memErr.message);
@@ -114,7 +114,7 @@ async function loadStaffFacts(
   }>).map((p) => ({
     id: p.id,
     full_name: p.full_name,
-    role: roleById.get(p.id) ?? "employee",
+    role: roleById.get(p.id) ?? "staff",
     facts: {
       staffTypeKeys: p.staff_type_keys ?? [],
       position: p.position,
@@ -253,7 +253,7 @@ export const listAgencyPolicies = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<AgencyPolicyView[]> => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [];
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: rows, error } = await supabase
       .from("agency_policies")
@@ -291,7 +291,7 @@ export const listPolicyJobCodeOptions = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<JobCodeOption[]> => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [];
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const { data: types } = await supabase
       .from("staff_types")
@@ -323,7 +323,7 @@ export const createAgencyPolicyUploadUrl = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { objectPath: null as string | null, upload: null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     await assertAdmin(supabase, data.organizationId, userId);
 
     const fileErr = isAllowedPolicyFile({
@@ -355,7 +355,7 @@ export const createAgencyPolicy = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { policy: null as AgencyPolicyRow | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     await assertAdmin(supabase, data.organizationId, userId);
 
     if (data.audienceKind === "job_code" && !data.audienceJobCode?.trim()) {
@@ -427,7 +427,7 @@ export const getAgencyPolicyForInstance = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { policy: null as AgencyPolicyRow | null, signedUrl: null as string | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const { data: inst, error: iErr } = await supabase
       .from("company_obligation_instances")

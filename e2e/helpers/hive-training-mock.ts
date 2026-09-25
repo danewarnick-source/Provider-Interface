@@ -7,6 +7,7 @@
  * product feature.
  */
 import type { Page, Request, Route } from "@playwright/test";
+import { withAccessLevel } from "./access-level";
 
 export const IDS = {
   org: "11111111-1111-4111-8111-111111111111",
@@ -486,8 +487,9 @@ function restRows(world: HiveE2EWorld, table: string, url: string): unknown[] {
       },
     ];
     const userEq = paramEq(url, "user_id");
-    if (userEq) return allMembers.filter((m) => m.user_id === userEq);
-    return allMembers;
+    const rows = allMembers.map(withAccessLevel);
+    if (userEq) return rows.filter((m) => m.user_id === userEq);
+    return rows;
   }
 
   if (table === "organizations") {
@@ -513,12 +515,6 @@ function restRows(world: HiveE2EWorld, table: string, url: string): unknown[] {
       email: `${m.id}@hive.test`,
       username: m.label.toLowerCase().replace(/\s+/g, "."),
     }));
-  }
-
-  if (table === "role_permissions") {
-    return [
-      { organization_id: IDS.org, role: "admin", permission: "view_staff_records", enabled: true },
-    ];
   }
 
   if (table === "clients") {

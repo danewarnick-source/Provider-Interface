@@ -6,9 +6,12 @@ import { onStaffHiredInternal } from "@/lib/staff-assignment-hooks.functions";
 import { resolveAccountUsername } from "@/lib/account-username";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
 import { generateTempPassword } from "@/lib/temp-password";
-import { BULK_ACCESS_ROLES } from "@/lib/employee-roster-upload";
+import { requireCategory, requireLevel } from "@/lib/access/require";
+import type { AccessLevel } from "@/lib/access/levels";
+import { resolvePresetId } from "@/lib/access/preset-resolve";
+import { logChange } from "@/lib/access/change-log.server";
 
-const RoleEnum = z.enum(["admin", "program_manager", "manager", "employee", "committee_member"]);
+const LevelEnum = z.enum(["owner", "admin", "staff"]);
 
 export const CreateEmployeeInput = z.object({
   organizationId: z.string().uuid(),
@@ -17,7 +20,9 @@ export const CreateEmployeeInput = z.object({
   email: z.string().trim().email().max(255),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
   temporaryPassword: z.string().min(8).max(128),
-  role: RoleEnum,
+  accessLevel: LevelEnum,
+  /** Null for Owner. Blank for Admin / Team member uses that level's default preset. */
+  accessPresetId: z.string().uuid().nullable().optional(),
   department: z.string().trim().max(120).optional().or(z.literal("")),
   hireDate: z.string().optional().or(z.literal("")),
   startDate: z.string().optional().or(z.literal("")),
@@ -69,17 +74,12 @@ async function customAttributesFromIntake(
 }
 
 async function assertOrgManager(actorId: string, orgId: string) {
-  const { data, error } = await supabaseAdmin
-    .from("organization_members")
-    .select("role,active")
-    .eq("user_id", actorId)
-    .eq("organization_id", orgId)
-    .eq("active", true)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data || !["admin", "program_manager", "manager"].includes(data.role)) {
-    throw new Error("Forbidden: insufficient permissions for this organization");
-  }
+  await requireCategory(supabaseAdmin, actorId, orgId, "staff_hiring", "edit");
+}
+
+/** Hiring or re-leveling someone above Team member takes an Owner. */
+async function assertCanGrantLevel(actorId: string, orgId: string, level: AccessLevel) {
+  if (level !== "staff") await requireLevel(supabaseAdmin, actorId, orgId, "owner");
 }
 
 /** Shared hire path for Add employee and roster upload. Never sends email. */
@@ -197,11 +197,19 @@ export async function hireEmployeeInternal(
 
     const jobTitle =
       options.jobTitle !== undefined ? options.jobTitle?.trim() || null : data.department || null;
+    const presetId =
+      data.accessLevel === "owner"
+        ? null
+        : await resolvePresetId(data.organizationId, data.accessLevel, {
+            id: data.accessPresetId,
+          });
     const { error: memErr } = await supabaseAdmin.from("organization_members").upsert(
       {
         organization_id: data.organizationId,
         user_id: newUserId,
-        role: data.role,
+        access_level: data.accessLevel,
+        access_preset_id: presetId,
+        access_scope: null,
         job_title: jobTitle,
         active: true,
         ...(data.managerId !== undefined ? { manager_id: data.managerId } : {}),
@@ -210,17 +218,13 @@ export async function hireEmployeeInternal(
     );
     if (memErr) throw new Error(memErr.message);
 
-    await supabaseAdmin.from("role_change_audit_log").insert({
-      organization_id: data.organizationId,
-      changed_by_user_id: actorUserId,
-      changed_by_name:
-        createdVia === "smart_import" ? "Admin (smart import)" : "Admin (staff creation)",
-      target_user_id: newUserId,
-      target_user_name: `${data.firstName} ${data.lastName}`.trim(),
-      previous_role: "none",
-      new_role: data.role,
-      change_method: createdVia === "smart_import" ? "smartImportEmployee" : "createEmployee",
-    });
+    await logChange(
+      data.organizationId,
+      actorUserId,
+      "member_created",
+      { userId: newUserId, name: `${data.firstName} ${data.lastName}`.trim() },
+      { access_level: data.accessLevel, access_preset_id: presetId, created_via: createdVia },
+    );
 
     if (!options.deferHirePack) {
       try {
@@ -245,6 +249,7 @@ export const createEmployeeManually = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     if (!context.userId) return { userId: "", email: "" };
     await assertOrgManager(context.userId, data.organizationId);
+    await assertCanGrantLevel(context.userId, data.organizationId, data.accessLevel);
     const hired = await hireEmployeeInternal(data, context.userId, "manual_admin");
     return { userId: hired.userId, email: hired.email };
   });
@@ -257,7 +262,8 @@ const RosterApplyInput = z.object({
   phone: z.string().trim().min(1).max(30),
   hireDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
-  role: z.enum(BULK_ACCESS_ROLES).optional().default("employee"),
+  accessLevel: z.enum(["admin", "staff"]).default("staff"),
+  presetName: z.string().trim().max(80).optional().or(z.literal("")),
 });
 
 export type RosterApplyResult = {
@@ -281,6 +287,10 @@ export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
     };
     if (!context.userId) return empty;
     await assertOrgManager(context.userId, data.organizationId);
+    await assertCanGrantLevel(context.userId, data.organizationId, data.accessLevel);
+    const presetId = await resolvePresetId(data.organizationId, data.accessLevel, {
+      name: data.presetName,
+    });
 
     const { data: existingProf } = await supabaseAdmin
       .from("profiles")
@@ -312,7 +322,8 @@ export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
           email,
           phone: data.phone,
           temporaryPassword: generateTempPassword(),
-          role: data.role,
+          accessLevel: data.accessLevel,
+          accessPresetId: presetId,
           department: "",
           hireDate: data.hireDate,
           startDate: data.hireDate,
@@ -351,7 +362,8 @@ const FinishSetupInput = z.object({
   lastName: z.string().trim().min(1).max(80),
   email: z.string().trim().email().max(255),
   phone: z.string().trim().min(1).max(30),
-  role: z.enum(["admin", "program_manager", "manager", "employee", "committee_member"]),
+  accessLevel: LevelEnum,
+  accessPresetId: z.string().uuid().nullable().optional(),
   department: z.string().trim().max(120).optional().or(z.literal("")),
   hireDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
@@ -377,11 +389,12 @@ export const finishEmployeeSetup = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<FinishEmployeeSetupResult> => {
     if (!context.userId) throw new Error("Not signed in.");
     await assertOrgManager(context.userId, data.organizationId);
+    await assertCanGrantLevel(context.userId, data.organizationId, data.accessLevel);
     await assertAgencySetupCompleteForOrg(supabaseAdmin, data.organizationId);
 
     const { data: mem, error: memLookupErr } = await supabaseAdmin
       .from("organization_members")
-      .select("id, role")
+      .select("id, access_level, access_preset_id")
       .eq("user_id", data.userId)
       .eq("organization_id", data.organizationId)
       .maybeSingle();
@@ -440,10 +453,18 @@ export const finishEmployeeSetup = createServerFn({ method: "POST" })
       .eq("id", data.userId);
     if (profErr) throw new Error(profErr.message);
 
+    const presetId =
+      data.accessLevel === "owner"
+        ? null
+        : await resolvePresetId(data.organizationId, data.accessLevel, {
+            id: data.accessPresetId,
+          });
     const { error: memErr } = await supabaseAdmin
       .from("organization_members")
       .update({
-        role: data.role,
+        access_level: data.accessLevel,
+        access_preset_id: presetId,
+        access_scope: null,
         job_title: data.jobTitle?.trim() || null,
         active: true,
       })
@@ -451,17 +472,18 @@ export const finishEmployeeSetup = createServerFn({ method: "POST" })
       .eq("user_id", data.userId);
     if (memErr) throw new Error(memErr.message);
 
-    if (mem.role !== data.role) {
-      await supabaseAdmin.from("role_change_audit_log").insert({
-        organization_id: data.organizationId,
-        changed_by_user_id: context.userId,
-        changed_by_name: "Admin (finish setup)",
-        target_user_id: data.userId,
-        target_user_name: `${data.firstName} ${data.lastName}`.trim(),
-        previous_role: mem.role,
-        new_role: data.role,
-        change_method: "finishEmployeeSetup",
-      });
+    if (mem.access_level !== data.accessLevel || mem.access_preset_id !== presetId) {
+      await logChange(
+        data.organizationId,
+        context.userId,
+        "member_access",
+        { userId: data.userId, name: `${data.firstName} ${data.lastName}`.trim() },
+        {
+          before: { access_level: mem.access_level, access_preset_id: mem.access_preset_id },
+          after: { access_level: data.accessLevel, access_preset_id: presetId },
+          change_method: "finishEmployeeSetup",
+        },
+      );
     }
 
     try {
@@ -522,7 +544,7 @@ export interface StaffHireDateRow {
   userId: string;
   name: string;
   email: string | null;
-  role: string;
+  accessLevel: AccessLevel;
   department: string | null;
   hireDate: string | null;
 }
@@ -536,7 +558,7 @@ export const listStaffHireDates = createServerFn({ method: "GET" })
 
     const { data: members, error } = await supabaseAdmin
       .from("organization_members")
-      .select("user_id, role, job_title")
+      .select("user_id, access_level, job_title")
       .eq("organization_id", data.organizationId)
       .eq("active", true);
     if (error) throw new Error(error.message);
@@ -567,7 +589,7 @@ export const listStaffHireDates = createServerFn({ method: "GET" })
           userId: m.user_id,
           name,
           email: (p?.email as string | null) ?? null,
-          role: m.role as string,
+          accessLevel: (m.access_level ?? "staff") as AccessLevel,
           department: (p?.department as string | null) ?? (m.job_title as string | null) ?? null,
           hireDate: ((p?.start_date ?? p?.hire_date) as string | null) ?? null,
         };

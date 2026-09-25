@@ -243,8 +243,8 @@ function AssignmentsPage() {
   // Role of the current user in this org. Block-overrides are admin/owner
   // only (owner/admin). Managers can still proceed past WARN mandates
   // (their existing capability), but a hard BLOCK has no override for them.
-  const myRole = org?.role as string | undefined;
-  const canOverrideBlock = myRole === "admin";
+  const myRole = org?.access.level;
+  const canOverrideBlock = myRole === "owner";
 
   type UnmetItem = { name: string; form_id: string; enforcement: "warn" | "block" };
   const [pendingWarning, setPendingWarning] = useState<{

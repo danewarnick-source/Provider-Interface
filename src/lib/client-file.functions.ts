@@ -363,7 +363,7 @@ export const listOrgClientFileMatrix = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as ClientFileMatrixRow[];
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const index = await loadOrgClientFileIndex(supabase, data.organizationId);
     return index.clients;
   });
@@ -376,7 +376,7 @@ export const listClientFileCards = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as ClientFileCard[];
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const index = await loadOrgClientFileIndex(supabase, data.organizationId, [data.clientId]);
     return index.cardsByClient.get(data.clientId) ?? [];
   });
@@ -394,7 +394,7 @@ export const listOrgClientFilePack = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as ClientFilePackItem[];
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const index = await loadOrgClientFileIndex(supabase, data.organizationId, data.clientIds);
     const allowed = new Set(data.clientIds);
     return index.pack.filter((p) => allowed.has(p.client_id));

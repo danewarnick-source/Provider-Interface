@@ -10,6 +10,7 @@ import { interpretInviteSendResult } from "@/lib/invite-send-result";
 import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { generateTempPassword } from "@/lib/temp-password";
 import { uniqueHireEmails } from "@/lib/employee-roster";
+import { LevelPresetFields, type LevelPresetValue } from "@/components/access/level-preset-fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,17 +37,13 @@ import {
   type StaffIntakeFieldsConfig,
 } from "@/components/hr/staff-fields-panel";
 
-type Role = "admin" | "program_manager" | "manager" | "employee" | "committee_member";
-
-export type HireRoleChoice = { value: Role; label: string };
-
 export type HireDraft = {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  role: Role;
+  access: LevelPresetValue;
   hireDate: string;
   staffType: string[];
   department: string;
@@ -61,7 +58,7 @@ type CreatedEmployee = {
   name: string;
   email: string;
   password: string;
-  role: Role;
+  access: LevelPresetValue;
 };
 
 function newDraftId(): string {
@@ -78,7 +75,7 @@ function emptyDraft(): HireDraft {
     lastName: "",
     email: "",
     phone: "",
-    role: "employee",
+    access: { level: "staff", presetId: null },
     hireDate: "",
     staffType: [],
     department: "",
@@ -159,7 +156,8 @@ export function AddEmployeeWizard({
               email: row.email.trim(),
               phone: row.phone.trim(),
               temporaryPassword: password,
-              role: row.role,
+              accessLevel: row.access.level,
+              accessPresetId: row.access.presetId,
               hireDate: row.hireDate,
               startDate: row.hireDate,
               requiresDeescalation: false,
@@ -177,7 +175,7 @@ export function AddEmployeeWizard({
             name: `${row.firstName.trim()} ${row.lastName.trim()}`.trim(),
             email: row.email.trim(),
             password,
-            role: row.role,
+            access: row.access,
           });
         } catch (e) {
           const who = `${row.firstName.trim()} ${row.lastName.trim()}`.trim() || row.email.trim();
@@ -220,7 +218,13 @@ export function AddEmployeeWizard({
           let raw: unknown;
           try {
             raw = await createInviteFn({
-              data: { organization_id: organizationId, email, role: row.role, site_origin },
+              data: {
+                organization_id: organizationId,
+                email,
+                access_level: row.access.level,
+                access_preset_id: row.access.presetId,
+                site_origin,
+              },
             });
           } catch (e) {
             const msg = e instanceof Error ? e.message : "";
@@ -323,6 +327,7 @@ export function AddEmployeeWizard({
                   showHeader={drafts.length > 1}
                   canRemove={drafts.length > 1}
                   staffIntakeConfig={staffIntakeConfig}
+                  organizationId={organizationId}
                   onChange={(patch) => patchDraft(draft.id, patch)}
                   onRemove={() => setDrafts((prev) => prev.filter((d) => d.id !== draft.id))}
                 />
@@ -475,24 +480,19 @@ export function HireDraftFields({
   showHeader,
   canRemove,
   staffIntakeConfig,
+  organizationId,
   onChange,
   onRemove,
-  roleChoices,
 }: {
   draft: HireDraft;
   index: number;
   showHeader: boolean;
   canRemove: boolean;
   staffIntakeConfig: StaffIntakeFieldsConfig | undefined;
+  organizationId: string | null;
   onChange: (patch: Partial<HireDraft>) => void;
   onRemove: () => void;
-  roleChoices?: HireRoleChoice[];
 }) {
-  const roles = roleChoices ?? [
-    { value: "employee" as const, label: "Team member" },
-    { value: "manager" as const, label: "Manager" },
-    { value: "admin" as const, label: "Admin" },
-  ];
   return (
     <div className={showHeader ? "grid gap-4 rounded-md border border-border p-3" : "grid gap-4"}>
       {showHeader && (
@@ -570,21 +570,12 @@ export function HireDraftFields({
           All training deadlines are calculated from this date.
         </p>
       </div>
-      <div className="grid gap-2">
-        <Label htmlFor={fieldId("role", index)}>Role</Label>
-        <Select value={draft.role} onValueChange={(v) => onChange({ role: v as Role })}>
-          <SelectTrigger id={fieldId("role", index)}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {roles.map((choice) => (
-              <SelectItem key={choice.value} value={choice.value}>
-                {choice.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <LevelPresetFields
+        orgId={organizationId ?? undefined}
+        value={draft.access}
+        onChange={(access) => onChange({ access })}
+        idPrefix={fieldId("access", index)}
+      />
 
       <OptionalIntakeFields
         config={staffIntakeConfig}

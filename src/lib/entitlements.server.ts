@@ -22,7 +22,7 @@ export async function assertAddonForOrg(
   addon: AddonId,
   organizationId: string,
 ): Promise<void> {
-  await requireOrgMembership(supabase, userId, organizationId, "employee");
+  await requireOrgMembership(supabase, userId, organizationId, "staff");
 
   const { data: sub } = await supabase
     .from("org_subscriptions")

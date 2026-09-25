@@ -132,7 +132,7 @@ export const detectAndOfferActions = createServerFn({ method: "POST" })
       supabase,
       userId,
       doc.organization_id,
-      "employee",
+      "staff",
     );
 
     // Reuse a cached detection if present and confident enough.

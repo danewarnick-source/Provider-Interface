@@ -9,7 +9,7 @@ import {
 import { unansweredDutyQuietSummary } from "./duty-applicability.ts";
 import {
   evaluateEscalations,
-  isAdminLevelRole,
+  isOwnerLevel,
   loadEvaluateInput,
   pickAdminLevelRecipient,
   type EscalationHit,
@@ -315,13 +315,13 @@ export async function getThisWeek(
 
   const { data: membership, error: memErr } = await supabase
     .from("organization_members")
-    .select("id, user_id, role, manager_id, active")
+    .select("id, user_id, access_level, manager_id, active")
     .eq("organization_id", orgId)
     .eq("user_id", userId)
     .maybeSingle();
   if (memErr) throw new Error(memErr.message);
 
-  const adminLevel = membership ? isAdminLevelRole(membership.role) : false;
+  const adminLevel = isOwnerLevel(membership?.access_level);
 
   const input = await loadEvaluateInput(supabase, orgId, now);
   const hits = evaluateEscalations(input);

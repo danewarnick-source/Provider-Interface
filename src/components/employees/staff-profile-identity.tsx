@@ -1,14 +1,8 @@
 import type { ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ROLE_LABEL, type ProviderRole } from "@/lib/rbac";
+import { useMemberAccess } from "@/components/access/queries";
+import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import {
   staffNameParts,
   type StaffIdentityDraft,
@@ -27,14 +21,6 @@ function Field({ label, value }: { label: string; value: ReactNode }) {
     </div>
   );
 }
-
-const ROLE_OPTIONS: ProviderRole[] = [
-  "employee",
-  "manager",
-  "program_manager",
-  "admin",
-  "committee_member",
-];
 
 export function StaffProfileIdentity({
   orgId,
@@ -57,7 +43,10 @@ export function StaffProfileIdentity({
 }) {
   const names = staffNameParts(profile);
   const hireDate = profile?.hire_date ?? profile?.start_date ?? "";
-  const roleLabel = ROLE_LABEL[member.role as ProviderRole] ?? member.role;
+  const accessQ = useMemberAccess(orgId, staffId);
+  const level = (accessQ.data?.access_level ?? member.access_level) as AccessLevel;
+  const levelLabel =
+    level === "owner" || level === "admin" || level === "staff" ? LEVEL_LABEL[level] : "Team member";
   const patch = (partial: Partial<StaffIdentityDraft>) => onDraftChange({ ...draft, ...partial });
 
   return (
@@ -77,7 +66,10 @@ export function StaffProfileIdentity({
             <Field label="Email" value={profile?.email} />
             <Field label="Username" value={profile?.username} />
             <Field label="Phone" value={profile?.phone} />
-            <Field label="Base role" value={roleLabel} />
+            <Field
+              label="Access level"
+              value={<span data-testid="profile-access-level">{levelLabel}</span>}
+            />
             <Field label="Hire date" value={hireDate} />
             <Field label="Team member ID" value={profile?.employee_id} />
             <Field label="Job title" value={member.job_title} />
@@ -132,23 +124,6 @@ export function StaffProfileIdentity({
                 placeholder="(801) 555-0100"
                 className="text-sm"
               />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Base role
-              </Label>
-              <Select value={draft.role} onValueChange={(v) => patch({ role: v })}>
-                <SelectTrigger className="text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLE_OPTIONS.map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {ROLE_LABEL[role]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
             <div className="space-y-1">
               <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">

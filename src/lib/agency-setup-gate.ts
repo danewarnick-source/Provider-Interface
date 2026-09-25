@@ -24,6 +24,7 @@ import {
   isRequiredSetupFactAnswered,
   type AgencySetupFacts,
 } from "./agency-setup-completion.ts";
+import { isAdminLevel } from "./access/levels.ts";
 
 export {
   AGENCY_SETUP_COMPLETION_SPEC,
@@ -224,7 +225,7 @@ export function canModifyAgencySetup(input: {
 }): boolean {
   if (!canViewAgencySetup(input)) return false;
   const role = input.actor?.role ?? "";
-  return role === "admin" || role === "program_manager" || role === "manager";
+  return isAdminLevel(role);
 }
 
 export function isolateOrgRecords<T extends { organizationId: string }>(

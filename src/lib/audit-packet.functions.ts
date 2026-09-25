@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
+import { isAdminLevel } from "@/lib/access/levels";
 
 type ExtractedItem = {
   sub_folder: "staff" | "client" | "admin" | "other";
@@ -93,11 +94,11 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
     // Verify caller is admin/manager for this org
     const { data: membership } = await supabase
       .from("organization_members")
-      .select("role, active")
+      .select("access_level, active")
       .eq("organization_id", data.organization_id)
       .eq("user_id", userId)
       .maybeSingle();
-    if (!membership?.active || !["admin", "program_manager", "manager"].includes(membership.role)) {
+    if (!membership?.active || !isAdminLevel(membership.access_level)) {
       throw new Error("Only admins or managers can produce an audit packet.");
     }
 

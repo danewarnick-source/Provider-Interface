@@ -6,7 +6,6 @@
  */
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import { ROLE_LABEL } from "./rbac.ts";
 import { isValidSignupEmail, normalizeSignupEmail } from "./signup-email.ts";
 
 export const EMPLOYEE_ROSTER_HEADERS = [
@@ -20,35 +19,38 @@ export const EMPLOYEE_ROSTER_HEADERS = [
 
 export type EmployeeRosterHeader = (typeof EMPLOYEE_ROSTER_HEADERS)[number];
 
-export type EmployeeRosterRole =
-  | "admin"
-  | "program_manager"
-  | "manager"
-  | "employee"
-  | "committee_member";
+/** Bulk upload never assigns Owner. */
+export type BulkAccessLevel = "admin" | "staff";
 
-/** createInvitation / resendInvitation only accept these three. */
-export type EmployeeInviteRole = "admin" | "manager" | "employee";
+export const BULK_LEVEL_LABEL: Record<BulkAccessLevel, string> = {
+  admin: "Admin",
+  staff: "Team member",
+};
 
-/**
- * Roles a bulk upload may assign. Owner (`admin` in ROLE_LABEL) and Platform
- * Admin are excluded. Labels come from ROLE_LABEL.
- */
-export const BULK_ACCESS_ROLES = [
-  "employee",
-  "manager",
-  "program_manager",
-  "committee_member",
-] as const;
+/** Built-in preset names. Live validation uses the agency's access_presets. */
+export const CANONICAL_BULK_PRESETS: Array<{
+  name: string;
+  level: BulkAccessLevel;
+  seed: string;
+}> = [
+  { name: "Billing", level: "admin", seed: "billing" },
+  { name: "DSP", level: "staff", seed: "dsp" },
+  { name: "Group Home Manager", level: "admin", seed: "home_manager" },
+  { name: "HR / Office", level: "admin", seed: "hr_office" },
+  { name: "HRC Committee", level: "staff", seed: "hrc_committee" },
+  { name: "Lead DSP", level: "staff", seed: "lead_dsp" },
+  { name: "Program Manager", level: "admin", seed: "program_manager" },
+];
 
-export type BulkAccessRole = (typeof BULK_ACCESS_ROLES)[number];
+export type BulkPresetOption = { name: string; level: BulkAccessLevel; seed?: string | null };
 
-export function bulkAccessLabel(role: BulkAccessRole): string {
-  return ROLE_LABEL[role];
+export function canonicalBulkPresets(): BulkPresetOption[] {
+  return CANONICAL_BULK_PRESETS.map(({ name, level, seed }) => ({ name, level, seed }));
 }
 
-export function bulkAccessChoices(): { value: BulkAccessRole; label: string }[] {
-  return BULK_ACCESS_ROLES.map((value) => ({ value, label: bulkAccessLabel(value) }));
+/** Excel list: Admin, Team member, and each built-in preset name. No Owner. */
+export function bulkAccessExcelList(): string {
+  return ["Admin", "Team member", ...CANONICAL_BULK_PRESETS.map((p) => p.name)].join(",");
 }
 
 export type EmployeeRosterDraft = {
@@ -60,9 +62,10 @@ export type EmployeeRosterDraft = {
   phone: string;
   hire_date: string;
   job_title: string;
-  /** Raw cell text. Blank means Team member. */
+  /** Raw cell text. Blank means Team member + DSP. */
   access_level: string;
-  role: BulkAccessRole;
+  level: BulkAccessLevel;
+  presetName: string;
 };
 
 export type EmployeeRosterRowAction = "create" | "skip";
@@ -123,11 +126,13 @@ const EXAMPLE_ROW: Record<EmployeeRosterHeader, string> = {
   access_level: "Team member",
 };
 
-/** Extra spellings that are not the current label or stored value. */
-const BULK_ACCESS_EXTRA: Record<string, BulkAccessRole> = {
-  staff: "employee",
-  employee: "employee",
-};
+const LEGACY_ROLE_WORDS = new Set([
+  "supervisor",
+  "manager",
+  "committee",
+  "committee_member",
+  "owner",
+]);
 
 function slugHeader(raw: string): string {
   return raw
@@ -152,46 +157,69 @@ export function isClientOnlyRosterHeader(raw: string): boolean {
   return CLIENT_ONLY_HEADERS.some((h) => slug === h || slug.startsWith(`${h}_`));
 }
 
-export type ParsedBulkAccess = { role: BulkAccessRole; invalid: boolean };
+export type ParsedBulkAccess = {
+  level: BulkAccessLevel;
+  presetName: string;
+  invalid: boolean;
+};
 
-/** Blank becomes Team member. Owner, Admin, and unknown text are invalid. */
-export function parseBulkAccessLevel(raw: string): ParsedBulkAccess {
+export function defaultPresetName(
+  level: BulkAccessLevel,
+  presets: BulkPresetOption[] = canonicalBulkPresets(),
+): string {
+  const seed = level === "staff" ? "dsp" : "program_manager";
+  const fallbackName = level === "staff" ? "DSP" : "Program Manager";
+  return (
+    presets.find((p) => p.seed === seed && p.level === level)?.name ??
+    presets.find((p) => slugHeader(p.name) === seed && p.level === level)?.name ??
+    presets.find((p) => p.level === level)?.name ??
+    fallbackName
+  );
+}
+
+function matchPreset(key: string, presets: BulkPresetOption[]): BulkPresetOption | undefined {
+  return presets.find((p) => slugHeader(p.name) === key);
+}
+
+/**
+ * Blank → Team member + DSP. "Admin" / "Team member" use that level's default
+ * preset. A preset name uses that preset's level. Owner and old role labels
+ * (Supervisor, Committee Member) are row errors.
+ */
+export function parseBulkAccessLevel(
+  raw: string,
+  presets: BulkPresetOption[] = canonicalBulkPresets(),
+): ParsedBulkAccess {
   const key = slugHeader(raw);
-  if (!key) return { role: "employee", invalid: false };
-  const extra = BULK_ACCESS_EXTRA[key];
-  if (extra) return { role: extra, invalid: false };
-  for (const role of BULK_ACCESS_ROLES) {
-    if (key === role || key === slugHeader(ROLE_LABEL[role])) {
-      return { role, invalid: false };
-    }
+  const teamMember: ParsedBulkAccess = {
+    level: "staff",
+    presetName: defaultPresetName("staff", presets),
+    invalid: false,
+  };
+  if (!key) return teamMember;
+  if (key === "admin") {
+    return { level: "admin", presetName: defaultPresetName("admin", presets), invalid: false };
   }
-  return { role: "employee", invalid: true };
+  if (key === "team_member" || key === "staff" || key === "employee") return teamMember;
+  const preset = matchPreset(key, presets);
+  if (preset) return { level: preset.level, presetName: preset.name, invalid: false };
+  if (LEGACY_ROLE_WORDS.has(key) || key === "program_manager") {
+    return { level: "staff", presetName: "", invalid: true };
+  }
+  return { level: "staff", presetName: "", invalid: true };
 }
 
-export function parseEmployeeRosterRole(raw: string): EmployeeRosterRole | null {
-  const parsed = parseBulkAccessLevel(raw);
-  if (!slugHeader(raw)) return "employee";
-  if (parsed.invalid) return null;
-  return parsed.role;
-}
-
-export function toInviteRole(raw: string): EmployeeInviteRole {
-  const key = slugHeader(raw);
-  if (key === "admin" || key === "owner") return "admin";
-  if (key === "manager" || key === "supervisor" || key === "program_manager") {
-    return "manager";
-  }
-  const parsed = parseBulkAccessLevel(raw);
-  if (!parsed.invalid && (parsed.role === "manager" || parsed.role === "program_manager")) {
-    return "manager";
-  }
-  return "employee";
-}
-
-export function bulkAccessErrorMessage(raw: string): string {
-  const allowed = BULK_ACCESS_ROLES.map((role) => bulkAccessLabel(role)).join(", ");
+export function bulkAccessErrorMessage(
+  raw: string,
+  presets: BulkPresetOption[] = canonicalBulkPresets(),
+): string {
+  const names = ["Admin", "Team member", ...presets.map((p) => p.name)];
+  const allowed = names.join(", ");
   const entered = raw.trim();
-  return entered ? `"${entered}" is not an access level. Use ${allowed}.` : `Use ${allowed}.`;
+  if (slugHeader(entered) === "owner") {
+    return `Owner can't be assigned from a spreadsheet. Use ${allowed}.`;
+  }
+  return entered ? `"${entered}" is not an access level or preset. Use ${allowed}.` : `Use ${allowed}.`;
 }
 
 export function splitPersonName(raw: string): { first_name: string; last_name: string } {
@@ -256,7 +284,8 @@ export function emptyEmployeeRosterDraft(): EmployeeRosterDraft {
     hire_date: "",
     job_title: "",
     access_level: "",
-    role: "employee",
+    level: "staff",
+    presetName: "DSP",
   };
 }
 
@@ -291,7 +320,8 @@ function draftFromParts(parts: {
     hire_date: normalizeHireDate(parts.hire_date ?? ""),
     job_title: (parts.job_title ?? "").trim(),
     access_level: accessRaw,
-    role: access.role,
+    level: access.level,
+    presetName: access.invalid ? "" : access.presetName,
   };
 }
 
@@ -337,7 +367,7 @@ export async function buildEmployeeRosterTemplateXlsx(): Promise<Uint8Array> {
   const file = zip.file(sheetPath);
   if (!file) throw new Error("Excel template is missing a worksheet.");
   const xml = await file.async("string");
-  const labels = BULK_ACCESS_ROLES.map((role) => bulkAccessLabel(role)).join(",");
+  const labels = bulkAccessExcelList();
   const col = accessLevelColumnLetter();
   const validation =
     `<dataValidations count="1">` +
@@ -353,7 +383,7 @@ export async function buildEmployeeRosterTemplateXlsx(): Promise<Uint8Array> {
 
 export async function triggerEmployeeRosterTemplateXlsxDownload(): Promise<void> {
   const bytes = await buildEmployeeRosterTemplateXlsx();
-  const blob = new Blob([bytes], {
+  const blob = new Blob([bytes.buffer as ArrayBuffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
   const url = URL.createObjectURL(blob);
@@ -467,6 +497,7 @@ function duplicateEmails(rows: EmployeeRosterDraft[]): Set<string> {
 
 export function validateEmployeeRosterRows(
   rows: EmployeeRosterDraft[],
+  presets: BulkPresetOption[] = canonicalBulkPresets(),
 ): Map<string, EmployeeRosterIssue[]> {
   const issues = new Map<string, EmployeeRosterIssue[]>();
   const dups = duplicateEmails(rows);
@@ -488,8 +519,11 @@ export function validateEmployeeRosterRows(
     if (dups.has(normalizeSignupEmail(row.email))) {
       list.push({ field: "email", message: "This email is listed more than once." });
     }
-    if (parseBulkAccessLevel(row.access_level).invalid) {
-      list.push({ field: "access_level", message: bulkAccessErrorMessage(row.access_level) });
+    if (parseBulkAccessLevel(row.access_level, presets).invalid) {
+      list.push({
+        field: "access_level",
+        message: bulkAccessErrorMessage(row.access_level, presets),
+      });
     }
     if (list.length) issues.set(row.id, list);
   }

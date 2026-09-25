@@ -10,6 +10,7 @@ import { NectarBadge, NectarMark, NectarButton } from "@/components/nectar/necta
 import { NectarTaskCenter } from "@/components/nectar/nectar-task-center";
 import { NectarAnswer } from "@/components/nectar/nectar-answer";
 import { FeatureGate } from "@/components/upgrade-gate";
+import { isAdminLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/help")({
   head: () => ({ meta: [{ title: "Need help? — NECTAR" }] }),
@@ -56,8 +57,8 @@ function loadRecent(): string[] {
 
 function HelpPage() {
   const { data: org } = useCurrentOrg();
-  const role = org?.role ?? "employee";
-  const isAdmin = role === "admin" || role === "program_manager" || role === "manager";
+  const role = org?.access.level ?? "staff";
+  const isAdmin = isAdminLevel(role);
   const starters = isAdmin ? STARTERS_ADMIN : STARTERS_STAFF;
   const navigate = useNavigate();
 

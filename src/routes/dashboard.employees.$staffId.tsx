@@ -23,7 +23,8 @@ import { RequirePermission } from "@/components/rbac-guard";
 import { EmployeeFaceSheetButton } from "@/components/employees/employee-face-sheet-button";
 import { StaffProfilePanel } from "@/components/employees/staff-profile-panel";
 import { StaffObligationsFilesTab } from "@/components/employees/staff-obligations-files-tab";
-import { ALL_PERMISSIONS, type Permission } from "@/lib/rbac";
+import { useMemberAccess } from "@/components/access/queries";
+import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import {
   loadStaffProfileIdentity,
   staffProfileDisplayName,
@@ -48,8 +49,8 @@ export const Route = createFileRoute("/dashboard/employees/$staffId")({
       fallbackTo: "/dashboard/employees",
     });
   },
-  validateSearch: (s: Record<string, unknown>): { tab?: SearchTab; override_perm?: Permission } => {
-    const out: { tab?: SearchTab; override_perm?: Permission } = {};
+  validateSearch: (s: Record<string, unknown>): { tab?: SearchTab } => {
+    const out: { tab?: SearchTab } = {};
     if (
       typeof s.tab === "string" &&
       (s.tab === "record" ||
@@ -59,12 +60,6 @@ export const Route = createFileRoute("/dashboard/employees/$staffId")({
         (PROFILE_TABS as readonly string[]).includes(s.tab))
     ) {
       out.tab = s.tab as SearchTab;
-    }
-    if (
-      typeof s.override_perm === "string" &&
-      (ALL_PERMISSIONS as readonly string[]).includes(s.override_perm)
-    ) {
-      out.override_perm = s.override_perm as Permission;
     }
     return out;
   },
@@ -77,7 +72,7 @@ export const Route = createFileRoute("/dashboard/employees/$staffId")({
 
 function StaffProfilePage() {
   const { staffId } = Route.useParams();
-  const { tab, override_perm } = Route.useSearch();
+  const { tab } = Route.useSearch();
   const { data: org } = useCurrentOrg();
   const router = useRouter();
   const qc = useQueryClient();
@@ -94,6 +89,7 @@ function StaffProfilePage() {
       return loadStaffProfileIdentity(supabase, { organizationId: orgId, staffId });
     },
   });
+  const accessQ = useMemberAccess(orgId, staffId);
 
   if (!orgId || memberQ.isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Loading team member profile…</div>;
@@ -103,7 +99,7 @@ function StaffProfilePage() {
       <Card className="border-rose-200 bg-rose-50/30">
         <CardContent className="p-6 text-sm text-rose-700">
           <ShieldAlert className="mr-2 inline h-4 w-4" />
-          Staffer not found in your organization.
+          Team member not found in your organization.
         </CardContent>
       </Card>
     );
@@ -112,6 +108,11 @@ function StaffProfilePage() {
   const m = memberQ.data!.member;
   const p = memberQ.data!.profile;
   const name = staffProfileDisplayName(p);
+  const accessLevel = (accessQ.data?.access_level ?? m.access_level) as AccessLevel;
+  const accessLevelLabel =
+    accessLevel === "owner" || accessLevel === "admin" || accessLevel === "staff"
+      ? LEVEL_LABEL[accessLevel]
+      : "Team member";
 
   const invalidateProfile = () => {
     qc.invalidateQueries({ queryKey: staffProfileIdentityQueryKey(orgId, staffId) });
@@ -150,9 +151,10 @@ function StaffProfilePage() {
               <Badge
                 variant="outline"
                 className="border-primary/30 bg-primary/5 uppercase tracking-wide text-primary"
-                title="Provider Interface role"
+                title="Access level"
+                data-testid="profile-access-badge"
               >
-                {m.role === "employee" ? "Team member" : m.role}
+                {accessLevelLabel}
               </Badge>
               <Badge
                 variant="outline"
@@ -197,7 +199,7 @@ function StaffProfilePage() {
       >
         <TabsList className="flex h-auto w-full min-w-0 max-w-full flex-wrap justify-start overflow-x-auto">
           <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="personnel">Staff file</TabsTrigger>
+          <TabsTrigger value="personnel">Team member file</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
 
@@ -209,7 +211,6 @@ function StaffProfilePage() {
             profile={p}
             member={m}
             name={name}
-            highlightPermission={override_perm}
             onSaved={invalidateProfile}
           />
         </TabsContent>

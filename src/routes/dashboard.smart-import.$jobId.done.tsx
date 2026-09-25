@@ -242,7 +242,7 @@ function DonePage() {
     return <div className="text-sm text-destructive">Failed to load readout.</div>;
   if (q.data.job.mode === "employee") {
     return (
-      <p className="text-sm text-muted-foreground">Staff roster upload moved to Team Members.</p>
+      <p className="text-sm text-muted-foreground">Roster upload moved to Team Members.</p>
     );
   }
 

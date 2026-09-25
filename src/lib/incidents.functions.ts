@@ -19,6 +19,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { createIncidentInstances, resolveComplianceRequirement } from "@/lib/compliance-resolution";
 import { logPhiAccess } from "@/lib/phi-access-audit.server";
+import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -30,19 +31,19 @@ async function getMembership(
 ) {
   const { data, error } = await supabase
     .from("organization_members")
-    .select("organization_id, role, active")
+    .select("organization_id, access_level, active")
     .eq("user_id", userId)
     .eq("organization_id", organizationId)
     .eq("active", true)
     .limit(1)
     .maybeSingle();
   if (error || !data) throw new Error("Not an active member of this organization.");
-  return data as { organization_id: string; role: string; active: boolean };
+  return data as { organization_id: string; access_level: string; active: boolean };
 }
 
 
 function isManager(role: string | undefined) {
-  return !!role && ["admin", "program_manager", "manager"].includes(role);
+  return !!role && isAdminLevel(role);
 }
 
 const createInput = z.object({
@@ -95,7 +96,7 @@ export const createIncident = createServerFn({ method: "POST" })
       throw new Error("Prevention strategies are required for abuse/neglect/exploitation incidents.");
     }
     // Confirm caregiver may file for this client.
-    if (!isManager(m.role)) {
+    if (!isManager(m.access_level)) {
       const { data: sa } = await supabase
         .from("staff_assignments")
         .select("client_id")
@@ -290,7 +291,7 @@ export const incidentTrends = createServerFn({ method: "GET" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { monthly: [], perClient: [] };
     const m = await getMembership(supabase, userId, data.organization_id);
-    if (!isManager(m.role)) throw new Error("Admin or manager access required.");
+    if (!isManager(m.access_level)) throw new Error("Admin or manager access required.");
 
     const now = new Date();
     const sixMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5, 1));
@@ -321,7 +322,7 @@ async function requireManager(
   organizationId: string,
 ) {
   const m = await getMembership(supabase, userId, organizationId);
-  if (!isManager(m.role)) throw new Error("Admin or manager access required.");
+  if (!isManager(m.access_level)) throw new Error("Admin or manager access required.");
   return m;
 }
 
