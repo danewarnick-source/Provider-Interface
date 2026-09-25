@@ -121,7 +121,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
 
   test("4. Employees list loads; staff profile shows role at a glance", async ({ page }) => {
     await gotoAdmin(page, "/dashboard/employees");
-    await expect(page.getByRole("heading", { name: /Team members/i })).toBeVisible({
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible({
       timeout: 20_000,
     });
     await expect(page.getByRole("button", { name: /^Active$/i })).toBeVisible();
@@ -321,7 +321,7 @@ test.describe("Employees flatten and Clients placements", () => {
 
   test("Employees hub is the roster with no tab bar; old tabs redirect", async ({ page }) => {
     await gotoAdmin(page, "/dashboard/hub/employees");
-    await expect(page.getByRole("heading", { name: /Team members/i })).toBeVisible({
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible({
       timeout: 20_000,
     });
     await expect(page.getByRole("navigation", { name: "Tabs" })).toHaveCount(0);
@@ -332,13 +332,13 @@ test.describe("Employees flatten and Clients placements", () => {
     await shot(page, "employees_roster_desktop");
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await expect(page.getByRole("heading", { name: /Team members/i })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible();
     await shot(page, "employees_roster_mobile");
     await page.setViewportSize({ width: 1280, height: 720 });
 
     await gotoAdmin(page, "/dashboard/hub/employees?tab=loans");
     await expect(page).toHaveURL(/\/dashboard\/hub\/employees\/?$/);
-    await expect(page.getByRole("heading", { name: /Team members/i })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible();
 
     await gotoAdmin(page, "/dashboard/hub/employees?tab=hr-admin");
     await expect(page).toHaveURL(/\/dashboard\/hub\/employees\/?$/);
@@ -383,7 +383,7 @@ test.describe("Add several at once and Finish setup", () => {
 
   test("roster chip, add dialog, preview, and finish step", async ({ page }) => {
     await gotoAdmin(page, "/dashboard/hub/employees");
-    await expect(page.getByRole("heading", { name: /Team members/i })).toBeVisible({
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible({
       timeout: 20_000,
     });
     await expect(page.getByRole("button", { name: /Finish setup \(1\)/i })).toBeVisible();
@@ -455,7 +455,7 @@ test.describe("RBAC — DSP / employee cannot open employee admin", () => {
     await expect(page.getByText(/View staff records/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^Add team member$/i })).toHaveCount(0);
-    await expect(page.getByRole("heading", { name: /Team members/i })).toHaveCount(0);
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toHaveCount(0);
     await shot(page, "dsp_rbac_employees_gated");
   });
 });
