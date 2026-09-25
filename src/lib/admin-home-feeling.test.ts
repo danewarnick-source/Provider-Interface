@@ -169,7 +169,7 @@ describe("Admin Home Step 3 — welcome banner", () => {
     assert.match(welcome, /Skip — take me to my dashboard/);
     assert.match(welcome, /Go to my dashboard/);
     assert.match(welcome, /You&apos;re set up\. This banner will close itself\./);
-    assert.match(welcome, /Invite staff/);
+    assert.match(welcome, /Invite team members/);
     assert.match(welcome, /Add a client/);
     assert.match(welcome, /Document a shift/);
     assert.match(welcome, /dismissAdminWelcome/);

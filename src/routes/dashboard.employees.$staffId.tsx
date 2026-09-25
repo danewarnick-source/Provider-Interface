@@ -96,7 +96,7 @@ function StaffProfilePage() {
   });
 
   if (!orgId || memberQ.isLoading) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading staff profile…</div>;
+    return <div className="p-6 text-sm text-muted-foreground">Loading team member profile…</div>;
   }
   if (memberQ.data === null) {
     return (

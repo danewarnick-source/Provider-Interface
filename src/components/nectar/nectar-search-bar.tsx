@@ -143,7 +143,7 @@ export function NectarSearchBar({
           kind: "staff",
           id: `staff:${s.id}`,
           label: s.name,
-          sublabel: s.subtitle ? `Staff · ${s.subtitle}` : "Staff",
+          sublabel: s.subtitle ? `Team member · ${s.subtitle}` : "Team member",
           onSelect: () => {
             setOpen(false);
             setQuery("");
@@ -166,7 +166,9 @@ export function NectarSearchBar({
   }, [debounced, nav, isAdminCapable, entitiesQ.data]);
 
   // Reset active when results change.
-  useEffect(() => { setActive(0); }, [debounced, results.length]);
+  useEffect(() => {
+    setActive(0);
+  }, [debounced, results.length]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {
@@ -188,19 +190,23 @@ export function NectarSearchBar({
   };
 
   const isDesktop = variant === "desktop";
-  const wrapCls = isDesktop
-    ? "relative hidden md:block w-full max-w-[440px]"
-    : "relative w-full";
+  const wrapCls = isDesktop ? "relative hidden md:block w-full max-w-[440px]" : "relative w-full";
 
   return (
     <div ref={wrapRef} className={wrapCls}>
       <div className="relative">
-        <PiMark variant="gold" className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2" />
+        <PiMark
+          variant="gold"
+          className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2"
+        />
         <input
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setOpen(true);
+          }}
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
           placeholder={isDesktop ? "Ask Nectar or search… (⌘K)" : "Ask Nectar or search…"}
@@ -253,16 +259,18 @@ function SectionGroup({
   active: number;
   setActive: (n: number) => void;
 }) {
-  const groups: Array<{ key: ResultKind; title: string; items: Array<{ r: Result; idx: number }> }> = [];
+  const groups: Array<{
+    key: ResultKind;
+    title: string;
+    items: Array<{ r: Result; idx: number }>;
+  }> = [];
   const push = (key: ResultKind, title: string) => {
-    const items = results
-      .map((r, idx) => ({ r, idx }))
-      .filter((x) => x.r.kind === key);
+    const items = results.map((r, idx) => ({ r, idx })).filter((x) => x.r.kind === key);
     if (items.length) groups.push({ key, title, items });
   };
   push("page", "Pages");
   push("client", "Clients");
-  push("staff", "Staff");
+  push("staff", "Team members");
   push("ask", "");
 
   return (
@@ -284,7 +292,9 @@ function SectionGroup({
                     onMouseEnter={() => setActive(idx)}
                     onClick={r.onSelect}
                     className={`flex w-full min-h-[40px] items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm ${
-                      isActive ? "bg-[color-mix(in_srgb,var(--hive-gold)_14%,var(--hive-canvas))] text-[var(--hive-text)]" : "text-[var(--hive-text)] hover:bg-[var(--hive-canvas)]"
+                      isActive
+                        ? "bg-[color-mix(in_srgb,var(--hive-gold)_14%,var(--hive-canvas))] text-[var(--hive-text)]"
+                        : "text-[var(--hive-text)] hover:bg-[var(--hive-canvas)]"
                     }`}
                     role="option"
                     aria-selected={isActive}
@@ -296,7 +306,9 @@ function SectionGroup({
                         {r.sublabel}
                       </span>
                     )}
-                    {r.kind === "ask" && <ArrowRight className="h-3.5 w-3.5 text-[var(--hive-gold)]" />}
+                    {r.kind === "ask" && (
+                      <ArrowRight className="h-3.5 w-3.5 text-[var(--hive-gold)]" />
+                    )}
                   </button>
                 </li>
               );

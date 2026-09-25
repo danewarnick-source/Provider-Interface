@@ -1,4 +1,10 @@
-export type Role = "super_admin" | "admin" | "program_manager" | "manager" | "employee" | "committee_member";
+export type Role =
+  | "super_admin"
+  | "admin"
+  | "program_manager"
+  | "manager"
+  | "employee"
+  | "committee_member";
 export type ProviderRole = Exclude<Role, "super_admin">;
 
 export const ROLE_LABEL: Record<Role, string> = {
@@ -6,9 +12,17 @@ export const ROLE_LABEL: Record<Role, string> = {
   admin: "Owner",
   program_manager: "Program Manager",
   manager: "Supervisor",
-  employee: "Staff",
+  employee: "Team member",
   committee_member: "Committee Member",
 };
+
+/** Mid-sentence invite wording. Stored role stays `employee`; the phrase is "a team member". */
+export function roleInvitePhrase(role: string): string {
+  if (role === "employee") return "a team member";
+  const label = role in ROLE_LABEL ? ROLE_LABEL[role as Role] : role;
+  const article = /^[aeiou]/i.test(label) ? "an" : "a";
+  return `${article} ${label}`;
+}
 
 export const ROLE_HOME: Record<Role, string> = {
   super_admin: "/dashboard/hive-exec",
@@ -39,7 +53,7 @@ export const PROVIDER_ROLES: ProviderRole[] = [
 
 /** Section labels for the UI — used to group permissions in the matrix. */
 export const PERMISSION_SECTIONS: Record<string, string> = {
-  people: "Staff & People",
+  people: "Team members",
   clients: "Clients",
   scheduling: "Scheduling",
   timesheets: "Timesheets & EVV",
@@ -162,14 +176,14 @@ export type Permission = keyof typeof PERMISSION_SECTION_MAP;
 
 export const PERMISSION_LABEL: Record<Permission, string> = {
   // People
-  invite_staff: "Invite staff",
-  view_staff_records: "View staff records",
-  edit_staff_records: "Edit staff records",
-  manage_staff_roles: "Manage staff roles",
-  deactivate_staff: "Deactivate staff",
-  view_staff_documents: "View staff documents",
-  upload_staff_documents: "Upload staff documents",
-  approve_staff_documents: "Approve staff documents",
+  invite_staff: "Invite team members",
+  view_staff_records: "View team member records",
+  edit_staff_records: "Edit team member records",
+  manage_staff_roles: "Manage team member roles",
+  deactivate_staff: "Deactivate team members",
+  view_staff_documents: "View team member documents",
+  upload_staff_documents: "Upload team member documents",
+  approve_staff_documents: "Approve team member documents",
   // Clients
   view_clients: "View clients",
   edit_client_records: "Edit client records",
@@ -207,7 +221,7 @@ export const PERMISSION_LABEL: Record<Permission, string> = {
   // Compliance
   view_compliance_dashboard: "View compliance dashboard",
   complete_obligations: "Complete obligations",
-  file_staff_documents: "File staff documents",
+  file_staff_documents: "File team member documents",
   manage_obligations: "Manage obligations",
   view_audit_trail: "View audit trail",
   // Incidents
@@ -265,57 +279,118 @@ export const DEFAULT_MATRIX: Record<ProviderRole, Permission[]> = {
   admin: [...ALL_PERMISSIONS], // owner starts with everything on
 
   program_manager: [
-    "invite_staff", "view_staff_records", "edit_staff_records",
-    "view_staff_documents", "upload_staff_documents", "approve_staff_documents",
-    "view_clients", "edit_client_records", "manage_client_intake", "view_client_medical",
-    "view_client_documents", "manage_client_documents", "manage_client_goals",
-    "view_schedule", "create_shifts", "edit_shifts", "delete_shifts",
-    "approve_shift_swaps", "manage_recurring_shifts",
-    "view_own_timesheets", "view_team_timesheets", "view_all_timesheets", "approve_timesheets",
-    "edit_timesheets", "export_evv",
-    "submit_shift_notes", "edit_shift_notes", "approve_shift_notes", "view_daily_logs",
-    "submit_daily_logs", "approve_daily_logs", "submit_forms", "view_form_submissions",
+    "invite_staff",
+    "view_staff_records",
+    "edit_staff_records",
+    "view_staff_documents",
+    "upload_staff_documents",
+    "approve_staff_documents",
+    "view_clients",
+    "edit_client_records",
+    "manage_client_intake",
+    "view_client_medical",
+    "view_client_documents",
+    "manage_client_documents",
+    "manage_client_goals",
+    "view_schedule",
+    "create_shifts",
+    "edit_shifts",
+    "delete_shifts",
+    "approve_shift_swaps",
+    "manage_recurring_shifts",
+    "view_own_timesheets",
+    "view_team_timesheets",
+    "view_all_timesheets",
+    "approve_timesheets",
+    "edit_timesheets",
+    "export_evv",
+    "submit_shift_notes",
+    "edit_shift_notes",
+    "approve_shift_notes",
+    "view_daily_logs",
+    "submit_daily_logs",
+    "approve_daily_logs",
+    "submit_forms",
+    "view_form_submissions",
     "approve_form_submissions",
-    "view_compliance_dashboard", "complete_obligations", "file_staff_documents",
+    "view_compliance_dashboard",
+    "complete_obligations",
+    "file_staff_documents",
     "manage_obligations",
-    "report_incidents", "view_incidents", "manage_incidents",
-    "view_emar", "submit_emar",
-    "view_hrc", "manage_hrc",
-    "view_billing", "view_payroll", "view_analytics", "export_reports",
+    "report_incidents",
+    "view_incidents",
+    "manage_incidents",
+    "view_emar",
+    "submit_emar",
+    "view_hrc",
+    "manage_hrc",
+    "view_billing",
+    "view_payroll",
+    "view_analytics",
+    "export_reports",
   ],
 
   manager: [
     // New granular set — operational access, not financial or org settings
-    "invite_staff", "view_staff_records", "view_staff_documents", "upload_staff_documents",
-    "view_clients", "edit_client_records", "view_client_medical", "view_client_documents",
-    "manage_client_documents", "manage_client_goals",
-    "view_schedule", "create_shifts", "edit_shifts", "approve_shift_swaps",
-    "view_own_timesheets", "view_team_timesheets", "approve_timesheets",
-    "submit_shift_notes", "edit_shift_notes", "view_daily_logs", "submit_daily_logs",
-    "submit_forms", "view_form_submissions",
-    "view_compliance_dashboard", "complete_obligations", "file_staff_documents",
-    "report_incidents", "view_incidents",
-    "view_emar", "submit_emar",
+    "invite_staff",
+    "view_staff_records",
+    "view_staff_documents",
+    "upload_staff_documents",
+    "view_clients",
+    "edit_client_records",
+    "view_client_medical",
+    "view_client_documents",
+    "manage_client_documents",
+    "manage_client_goals",
+    "view_schedule",
+    "create_shifts",
+    "edit_shifts",
+    "approve_shift_swaps",
+    "view_own_timesheets",
+    "view_team_timesheets",
+    "approve_timesheets",
+    "submit_shift_notes",
+    "edit_shift_notes",
+    "view_daily_logs",
+    "submit_daily_logs",
+    "submit_forms",
+    "view_form_submissions",
+    "view_compliance_dashboard",
+    "complete_obligations",
+    "file_staff_documents",
+    "report_incidents",
+    "view_incidents",
+    "view_emar",
+    "submit_emar",
     "view_hrc",
     "view_analytics",
     // Legacy set — preserves existing manager behavior
-    "assign_training", "view_team_reports", "approve_external_certs",
-    "upload_external_certs", "view_own_training", "view_certifications",
+    "assign_training",
+    "view_team_reports",
+    "approve_external_certs",
+    "upload_external_certs",
+    "view_own_training",
+    "view_certifications",
     "manage_incidents",
   ],
 
   employee: [
     // New granular set
-    "view_own_timesheets", "submit_shift_notes", "submit_daily_logs",
-    "submit_forms", "complete_obligations",
-    "report_incidents", "view_emar", "submit_emar",
+    "view_own_timesheets",
+    "submit_shift_notes",
+    "submit_daily_logs",
+    "submit_forms",
+    "complete_obligations",
+    "report_incidents",
+    "view_emar",
+    "submit_emar",
     // Legacy set
-    "view_own_training", "view_certifications", "upload_external_certs",
+    "view_own_training",
+    "view_certifications",
+    "upload_external_certs",
   ],
 
-  committee_member: [
-    "view_hrc", "manage_hrc",
-  ],
+  committee_member: ["view_hrc", "manage_hrc"],
 };
 
 export function defaultCan(role: Role | undefined | null, perm: Permission): boolean {

@@ -478,7 +478,7 @@ function useCompleteSetup({
       if (!isPartial && committedRows.length > 0) {
         setPartial([]);
         toast.success(
-          `${mode === "client" ? "Client" : "Staff"} setup complete — ${committedRows.length === 1 ? "added to directory" : `${committedRows.length} added`}.`,
+          `${mode === "client" ? "Client" : "Team member"} setup complete — ${committedRows.length === 1 ? "added to directory" : `${committedRows.length} added`}.`,
         );
         if (committedRows.length === 1 && mode === "client" && committedRows[0].record_id) {
           navigate({

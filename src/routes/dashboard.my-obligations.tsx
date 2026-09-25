@@ -1025,7 +1025,7 @@ function MyObligationsPage() {
               }),
             ),
           )}
-          staffLabel={user.email ? `${user.email} · Staff` : "Staff"}
+          staffLabel={user.email ? `${user.email} · Team member` : "Team member"}
           emptyLabel="Nothing needs you on this list."
           onAction={(task) => {
             const inst = open.find((row) => row.id === task.instanceId);

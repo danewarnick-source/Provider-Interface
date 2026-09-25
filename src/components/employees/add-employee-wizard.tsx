@@ -669,15 +669,15 @@ function OptionalIntakeFields({
       {!config.staff_type.enabled && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
           <span>
-            Staff type is not enabled — training requirements won&apos;t auto-activate until set on
-            this team member&apos;s profile.
+            Team member type is not enabled — training requirements won&apos;t auto-activate until
+            set on this team member&apos;s profile.
           </span>
         </div>
       )}
 
       {config.staff_type.enabled && (
         <div className="grid gap-2">
-          <Label>Staff type · drives training requirements</Label>
+          <Label>Team member type · drives training requirements</Label>
           <div className="grid max-h-40 gap-1 overflow-y-auto rounded-md border border-border p-2 text-sm">
             {(config.staff_type.options ?? []).map((opt) => (
               <label key={opt} className="flex items-center gap-2">

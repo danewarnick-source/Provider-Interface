@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 import { toast } from "sonner";
 import { AuthShell } from "./login";
-import { ROLE_LABEL, type Role } from "@/lib/rbac";
+import { roleInvitePhrase, type Role } from "@/lib/rbac";
 import {
   extractInviteToken,
   humanizeInviteError,
@@ -36,7 +36,10 @@ import {
 
 export const Route = createFileRoute("/join")({
   head: () => ({
-    meta: [{ title: "Join your provider — Provider Interface" }, { name: "robots", content: "noindex,nofollow" }],
+    meta: [
+      { title: "Join your provider — Provider Interface" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
   }),
   validateSearch: (s: Record<string, unknown>): { invite?: string; token?: string } => {
     const invite = typeof s.invite === "string" && s.invite.trim() ? s.invite : undefined;
@@ -185,7 +188,7 @@ function JoinPage() {
     );
   }
 
-  const roleLabel = ROLE_LABEL[preview.role as Role] ?? preview.role;
+  const rolePhrase = roleInvitePhrase(preview.role as Role);
   const setsNewPassword = joinSetsAuthPassword(preview.account_exists, {
     mustChangePassword: preview.must_change_password,
   });
@@ -210,8 +213,8 @@ function JoinPage() {
       title={`Join ${preview.org_name}`}
       subtitle={
         setsNewPassword
-          ? `You've been invited as ${roleLabel}. Set how you'll sign in — this is not a new company.`
-          : `You've been invited as ${roleLabel}. Use the password you already sign in with — this is not a new company.`
+          ? `You've been invited as ${rolePhrase}. Set how you'll sign in — this is not a new company.`
+          : `You've been invited as ${rolePhrase}. Use the password you already sign in with — this is not a new company.`
       }
     >
       <form onSubmit={onSubmit} className="grid gap-4" data-testid="join-form">
@@ -266,7 +269,11 @@ function JoinPage() {
               className={fieldClass}
               aria-describedby="join-username-hint join-username-live"
             />
-            <p id="join-username-hint" className="text-xs text-[#0a0f1c]/55" data-testid="join-username-hint">
+            <p
+              id="join-username-hint"
+              className="text-xs text-[#0a0f1c]/55"
+              data-testid="join-username-hint"
+            >
               {JOIN_USERNAME_HINT}
             </p>
             {suggestedUsername && suggestedUsername !== username.trim().toLowerCase() && (
@@ -301,16 +308,28 @@ function JoinPage() {
             aria-describedby="join-password-hint join-password-live"
           />
           {setsNewPassword ? (
-            <p id="join-password-hint" className="text-xs text-[#0a0f1c]/55" data-testid="join-password-hint">
+            <p
+              id="join-password-hint"
+              className="text-xs text-[#0a0f1c]/55"
+              data-testid="join-password-hint"
+            >
               {JOIN_PASSWORD_HINT}
             </p>
           ) : (
-            <p id="join-password-hint" className="text-xs text-[#0a0f1c]/55" data-testid="join-password-hint">
+            <p
+              id="join-password-hint"
+              className="text-xs text-[#0a0f1c]/55"
+              data-testid="join-password-hint"
+            >
               This does not change your password. Use the same one you use on the sign-in page.
             </p>
           )}
           {setsNewPassword && (
-            <ul className="grid gap-1" data-testid="join-password-rules" aria-label="Password requirements">
+            <ul
+              className="grid gap-1"
+              data-testid="join-password-rules"
+              aria-label="Password requirements"
+            >
               <JoinRule ok={isValidJoinPassword(password)} idle={password.length === 0}>
                 At least 8 characters
               </JoinRule>
@@ -378,15 +397,7 @@ function LiveLine({
   );
 }
 
-function JoinRule({
-  ok,
-  idle,
-  children,
-}: {
-  ok: boolean;
-  idle: boolean;
-  children: ReactNode;
-}) {
+function JoinRule({ ok, idle, children }: { ok: boolean; idle: boolean; children: ReactNode }) {
   const color = idle ? "#3a4553" : ok ? "#1e3a30" : "#8a3228";
   return (
     <li className="flex items-center gap-2 text-xs" style={{ color }}>

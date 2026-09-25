@@ -392,7 +392,7 @@ test.describe("Admin Home welcome — incomplete setup", () => {
     await expect(banner.getByRole("link", { name: /Add team member/i })).toBeVisible();
     await expect(banner.getByRole("link", { name: /Add client/i })).toBeVisible();
     await expect(banner.getByRole("link", { name: /Documentation/i })).toBeVisible();
-    await expect(banner.getByTestId("welcome-chip-Invite staff")).toBeVisible();
+    await expect(banner.getByTestId("welcome-chip-Invite team members")).toBeVisible();
     await expect(banner.getByTestId("welcome-chip-Add a client")).toBeVisible();
     await expect(banner.getByTestId("welcome-chip-Document a shift")).toBeVisible();
     await expect(page.getByText(/Good (morning|afternoon|evening), Dana/i)).toBeVisible();

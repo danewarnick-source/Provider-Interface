@@ -195,8 +195,9 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByRole("tab", { name: /Staff file/i })).toBeVisible();
     await expect(page.getByRole("tab", { name: /^Activity$/i })).toBeVisible();
     await expect(page.getByRole("tab", { name: /^Permissions$/i })).toHaveCount(0);
+    await expect(page.getByTestId("staff-profile-identity")).toContainText("Team member");
     await expect(
-      page.getByText(/admin|employee|manager|Owner|Staff|Supervisor/i).first(),
+      page.getByText(/admin|employee|manager|Owner|Team member|Supervisor/i).first(),
     ).toBeVisible();
     await assertPageNotBlank(page, "staff profile");
 
@@ -205,7 +206,9 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByRole("button", { name: /Edit profile/i })).toBeVisible();
     await expect(
       page
-        .getByText(/people & files|Staff phone permissions|Invite staff|View staff records/i)
+        .getByText(
+          /people & files|Staff phone permissions|Invite team members|View team member records/i,
+        )
         .first(),
     ).toBeVisible({
       timeout: 10_000,
@@ -452,7 +455,7 @@ test.describe("RBAC — DSP / employee cannot open employee admin", () => {
     await gotoAdmin(page, "/dashboard/employees");
     await expect(page).toHaveURL(/\/unauthorized/, { timeout: 20_000 });
     await expect(page.getByRole("heading", { name: /Access denied/i })).toBeVisible();
-    await expect(page.getByText(/View staff records/i)).toBeVisible();
+    await expect(page.getByText(/View team member records/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^Add team member$/i })).toHaveCount(0);
     await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toHaveCount(0);

@@ -194,6 +194,8 @@ export const Route = createFileRoute("/dashboard")({
               .eq("active", true)
               .maybeSingle();
             if (!execRow) {
+              // training_only_seats is not in the generated Database types.
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const { data: seats } = await (supabase as any)
                 .from("training_only_seats")
                 .select("id")
