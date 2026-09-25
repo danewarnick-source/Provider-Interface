@@ -47,16 +47,18 @@ describe("inviteTokenFromSearchStr", () => {
 });
 
 describe("inviteJoinUrl", () => {
-  it("builds /join?invite= and strips a trailing slash on origin", () => {
+  it("always opens providerinterface.com, including hivecertify and Lovable callers", () => {
     assert.equal(
       inviteJoinUrl("https://app.example.com/", "tok+en"),
-      "https://app.example.com/join?invite=tok%2Ben",
+      "https://providerinterface.com/join?invite=tok%2Ben",
     );
-  });
-  it("rewrites a Lovable origin to hivecertify.com", () => {
+    assert.equal(
+      inviteJoinUrl("https://hivecertify.com", "tok"),
+      "https://providerinterface.com/join?invite=tok",
+    );
     assert.equal(
       inviteJoinUrl("https://agency-peace-of-mind.lovable.app", "tok"),
-      "https://hivecertify.com/join?invite=tok",
+      "https://providerinterface.com/join?invite=tok",
     );
   });
 });

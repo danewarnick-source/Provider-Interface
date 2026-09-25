@@ -18,7 +18,6 @@ import { requirePermission } from "@/lib/require-permission";
 import { resolveOrgSender } from "@/lib/email.functions";
 import type { Role } from "@/lib/rbac";
 import { buildInvitationEmail } from "@/lib/invitation-email";
-import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { inviteJoinUrl } from "@/lib/join-invite";
 import { stripFakeDisplayLabel } from "@/lib/managed-from";
 import { canSendImportInvite } from "@/lib/import-invite";
@@ -90,6 +89,30 @@ function inviteRoleFromMember(role: string | undefined): Role {
   return "employee";
 }
 
+async function loadInviterName(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  userId: string,
+): Promise<string> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("full_name, first_name, last_name")
+    .eq("id", userId)
+    .maybeSingle();
+  const row = (data ?? {}) as {
+    full_name?: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
+  };
+  const full = String(row.full_name ?? "").trim();
+  if (full) return full;
+  const joined = [row.first_name, row.last_name]
+    .map((part) => String(part ?? "").trim())
+    .filter(Boolean)
+    .join(" ");
+  return joined || "A teammate";
+}
+
 async function sendInvitationEmail(args: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any;
@@ -98,8 +121,9 @@ async function sendInvitationEmail(args: {
   role: Role;
   token: string;
   siteOrigin: string;
+  inviterUserId: string;
 }): Promise<{ ok: boolean; error?: string }> {
-  const { supabase, organizationId, email, role, token, siteOrigin } = args;
+  const { supabase, organizationId, email, role, token, siteOrigin, inviterUserId } = args;
   try {
     const sender = await resolveOrgSender(supabase, organizationId);
     const { data: org } = await supabase
@@ -108,9 +132,9 @@ async function sendInvitationEmail(args: {
       .eq("id", organizationId)
       .maybeSingle();
     const orgName = stripFakeDisplayLabel(String(org?.name || "").trim()) || "your organization";
-    const origin = resolveAuthOrigin(siteOrigin);
-    const link = inviteJoinUrl(origin, token);
-    const { subject, html } = buildInvitationEmail({ orgName, role, link });
+    const inviterName = await loadInviterName(supabase, inviterUserId);
+    const link = inviteJoinUrl(siteOrigin, token);
+    const { subject, html, text } = buildInvitationEmail({ orgName, role, link, inviterName });
 
     const { data: invokeData, error: invokeErr } = await supabase.functions.invoke("send-email", {
       body: {
@@ -118,6 +142,7 @@ async function sendInvitationEmail(args: {
         to: email,
         subject,
         html,
+        text,
         reply_to: sender.reply_to,
       },
     });
@@ -191,6 +216,7 @@ export const createInvitation = createServerFn({ method: "POST" })
       role: data.role,
       token: (invite as InvitationRow).token,
       siteOrigin: data.site_origin,
+      inviterUserId: userId,
     });
 
     return {
@@ -241,6 +267,7 @@ export const resendInvitation = createServerFn({ method: "POST" })
       role: row.role,
       token: row.token,
       siteOrigin: data.site_origin,
+      inviterUserId: userId,
     });
 
     return {
@@ -340,6 +367,7 @@ async function upsertPendingInviteAndSend(args: {
     role,
     token: invite.token,
     siteOrigin,
+    inviterUserId: userId,
   });
   return {
     invitation: invite,
