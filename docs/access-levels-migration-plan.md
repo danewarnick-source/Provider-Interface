@@ -2,7 +2,7 @@
 
 **Goal:** replace today's five company roles and 83 permission switches with the model in `docs/downloads/hive-access-levels-and-permissions.xlsx`:
 
-- **4 access levels:** Owner, Admin, Staff, Guest
+- **3 access levels:** Owner, Admin, Staff (HRC committee members are Staff with an "HRC Committee" preset)
 - **18 categories**, each set to Off / View / Edit
 - **Presets** that each agency names itself ("Supervisor", "Manager", "Lead"…)
 - **Scope:** Whole agency, Assigned homes, Assigned staff, Assigned clients, or Only themselves
@@ -35,7 +35,7 @@ The one part that is genuinely hard, and needs care because it protects client m
 | `has_org_role(org, user, role)` | "has exactly this role"; mostly used as "is Owner" | ~270 references across 33 files |
 | `is_org_member(org, user)` | "belongs to this agency at all" | ~380 references; **unchanged by this plan** |
 | `is_super_admin()` | Old platform-admin check; now just calls `is_hive_executive()` | ~350 references; not a company role, **out of scope**, but the `super_admin` enum value can finally be deleted |
-| `is_hrc_committee_member()` | Reads `hrc_committee_members` table **or** `role = 'committee_member'` | becomes: table only, or Guest level |
+| `is_hrc_committee_member()` | Reads `hrc_committee_members` table **or** `role = 'committee_member'` | becomes: table only, or preset = "HRC Committee" |
 | `can_access_client_phi(client)` | Managers see all clients; staff see clients on their caseload | this becomes the heart of scope |
 | `can_view_staff_pii()` | Who can see staff personal info | needs scope added |
 | `has_permission(user, org, perm)` | Reads the 83-switch tables | only used by the **Hosts / referrals** rules in the database |
@@ -59,7 +59,7 @@ Literal role words written directly inside SQL in the migrations: `'admin'` ~240
 | Employee profile | The 83-switch Permissions section, role dropdown, Leads group/Scope section | Replace with: Access level ▾, Preset ▾, 18 category overrides, scope pickers |
 | Add employee / Upload roster / Invitations / Join | Role dropdowns (the "Employee / Manager / Admin" mismatch, bug F-6) | Level + preset pickers |
 | Roster, badges, top bars | Show raw role words (`EMPLOYEE`, `MANAGER`) | Show the preset name (or job title) plus a small level badge |
-| Where people land after login (`ROLE_HOME`) | Staff → phone app, HRC → HRC page | Level-based: Staff → phone app; Guest → their read-only page; Owner/Admin → dashboard |
+| Where people land after login (`ROLE_HOME`) | Staff → phone app, HRC → HRC page | Owner/Admin → dashboard; Staff → phone app, unless their preset sets a different home page (the "HRC Committee" preset lands on the HRC page) |
 | Compliance escalation (`isAdminLevelRole`) and admin scope (`isAdminScopeRole`) | Decide who gets escalations / scoped views | Level + scope |
 | New-agency signup | Seeds `role_permissions` for a new agency | Seeds the default **presets** instead |
 | Generated DB types (`src/integrations/supabase/types.ts`) | Mirrors the enum and tables | Regenerate |
@@ -76,7 +76,7 @@ Today the database value **`admin` means Owner**. In the new model, **Admin mean
 
 **So: don't rename `app_role`. Build a new field next to it and then delete the old one.**
 
-- Add `organization_members.access_level` with the values `owner`, `admin`, `staff`, `guest`.
+- Add `organization_members.access_level` with the values `owner`, `admin`, `staff`.
 - Move every check over to it.
 - Finally **drop** the old `role` column and `app_role` type.
 
@@ -90,7 +90,7 @@ If anything was missed, it breaks loudly (an error) instead of quietly letting a
 | `program_manager` | `admin` | "Program Manager", scope = Whole agency |
 | `manager` (shown as Supervisor) | `admin` | "Supervisor", scope = Whole agency *(the agency can narrow it to homes later)* |
 | `employee` (shown as Staff) | `staff` | "DSP", scope = Only themselves + caseload |
-| `committee_member` | `guest` | "HRC Committee", scope = Assigned clients |
+| `committee_member` | `staff` | "HRC Committee" (home page = HRC page), scope = Assigned clients |
 | `super_admin` | — | leftover; platform access is already `hive_executives` |
 
 Anyone who has per-person overrides today keeps them. They're translated into category overrides using sheet 5 of the spreadsheet (old key → category), keeping the *highest* level any old key gave them in that category.
@@ -101,15 +101,17 @@ Anyone who has per-person overrides today keeps them. They're translated into ca
 
 | New thing | Purpose |
 |---|---|
-| `access_level` enum + `organization_members.access_level` | The 4 levels |
+| `access_level` enum + `organization_members.access_level` | The 3 levels |
 | `organization_members.preset_id` | Which preset this person uses |
-| `access_presets` (org, name, access_level, scope_mode, is_default) | The agency's named presets |
+| `access_presets` (org, name, access_level, scope_mode, home_page, is_default) | The agency's named presets. `home_page` is optional and sets where the preset lands after login. |
 | `access_preset_categories` (preset, category, level Off/View/Edit) | What each preset allows |
 | `member_category_overrides` (org, user, category, level) | Per-person exceptions; replaces `user_permission_overrides` |
 | `member_scope` (org, user, scope_mode) | Whole agency / Assigned / Only themselves (the preset gives the default) |
 | `member_scope_homes` (org, user, team_id) | Assigned homes (`teams` = homes) |
 | `member_scope_staff` (org, user, staff_user_id) | Assigned staff and admins, picked by name |
 | `member_scope_clients` (org, user, client_id) | Assigned clients, picked by name |
+
+The three assignment tables are many-to-many: one row per manager + person, unique on the pair. The same client or staff member can be assigned to any number of managers, and each of those managers sees everything their preset allows for that person. A client who lives in one home but is also assigned to a second home's manager is visible to both.
 | Rule: at least one active Owner per agency | Database trigger, so nobody can lock the agency out |
 | Rule: Admins can't grant beyond themselves or edit Owners | Enforced in the server function that saves access |
 
@@ -161,7 +163,12 @@ select (select count(*) from clients where team_id is null) as clients_without_h
        (select count(*) from profiles where team_id is null) as profiles_without_home;
 ```
 
-**Decide before Phase 1:** Is Guest its own level (recommended) or Staff + HRC preset? Should a client served in two homes be visible to both managers for all categories, or only for the codes delivered there (spreadsheet sheet 4)?
+**Decided (2026-09-25):**
+
+- No Guest level. HRC committee members are **Staff** with an "HRC Committee" preset.
+- Clients and staff can each be assigned to **multiple managers**. Every assigned manager sees the full record, within what their preset allows. Access is not limited to the service codes delivered in that manager's home.
+
+**Still open:** the final category/preset settings, which will come from the edited spreadsheet.
 
 ### Phase 1 — Add the new pieces next to the old ones
 
