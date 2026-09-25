@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
   hasValidObligationEvidence,
@@ -372,10 +372,9 @@ describe("Org-wide Staff file lock", () => {
     );
     assert.doesNotMatch(hrAdmin, /HrComplianceMatrix/);
     assert.doesNotMatch(hrAdmin, /getHrAdminRollup/);
-    assert.match(hrAdmin, /to="\/dashboard\/compliance"/);
-    const matrixFns = readFileSync(new URL("./hr-staff.functions.ts", import.meta.url), "utf8");
-    assert.doesNotMatch(matrixFns, /getHrComplianceMatrix/);
-    assert.doesNotMatch(matrixFns, /getHrAdminRollup/);
-    assert.doesNotMatch(matrixFns, /getStaffChecklist/);
+    assert.doesNotMatch(hrAdmin, /OtherAssignmentsRollup/);
+    assert.match(hrAdmin, /redirect/);
+    assert.match(hrAdmin, /\/dashboard\/hub\/employees/);
+    assert.equal(existsSync(new URL("./hr-staff.functions.ts", import.meta.url)), false);
   });
 });

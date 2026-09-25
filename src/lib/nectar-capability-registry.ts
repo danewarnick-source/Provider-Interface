@@ -49,10 +49,7 @@ export type CapabilityAction = {
   /** Must be true ONLY when the backing flow actually works today. */
   is_live: boolean;
   /** Identifier the offer dialog dispatches against a server fn. */
-  handler:
-    | "add_to_authoritative_sources"
-    | "propose_staff_checklist_from_document"
-    | "noop";
+  handler: "add_to_authoritative_sources" | "propose_staff_checklist_from_document" | "noop";
 };
 
 // All applicable types (used for actions that work against anything).
@@ -63,8 +60,7 @@ export const CAPABILITY_REGISTRY: ReadonlyArray<CapabilityAction> = [
   {
     action_key: "add_to_authoritative_sources",
     label: "Add this to your authoritative sources",
-    helper:
-      "Keeps it in the source-of-truth set the rest of PI reads from. You confirm the label.",
+    helper: "Keeps it in the source-of-truth set the rest of PI reads from. You confirm the label.",
     applies_to_types: ALL_TYPES,
     is_live: true,
     handler: "add_to_authoritative_sources",
@@ -82,12 +78,12 @@ export const CAPABILITY_REGISTRY: ReadonlyArray<CapabilityAction> = [
     handler: "propose_staff_checklist_from_document",
   },
 
-  // ---------- LIVE (HR Admin tab) ----------
+  // ---------- LIVE (Staff file) ----------
   {
     action_key: "per_staff_tracking",
     label: "Open per-staff tracking for items in this checklist",
     helper:
-      "Track each staff member's status against these items in the HR Admin roll-up. Completion still requires a one-click human confirm.",
+      "Track each staff member's status against these items on Staff file. Completion still requires a one-click human confirm.",
     applies_to_types: ["staff_checklist"],
     is_live: true,
     handler: "noop",
@@ -95,13 +91,8 @@ export const CAPABILITY_REGISTRY: ReadonlyArray<CapabilityAction> = [
   {
     action_key: "renewal_alerts",
     label: "Set renewal reminders for dates found in this document",
-    helper:
-      "Surface upcoming expirations in the HR Admin roll-up. NECTAR pre-fills dates; you confirm them.",
-    applies_to_types: [
-      "insurance_certificate",
-      "training_certificate",
-      "staff_checklist",
-    ],
+    helper: "Surface upcoming expirations on Staff file. NECTAR pre-fills dates; you confirm them.",
+    applies_to_types: ["insurance_certificate", "training_certificate", "staff_checklist"],
     is_live: true,
     handler: "noop",
   },
@@ -127,10 +118,6 @@ export const CAPABILITY_REGISTRY: ReadonlyArray<CapabilityAction> = [
 ];
 
 /** Pure filter — drives the offer menu. Never returns dormant actions. */
-export function liveActionsForType(
-  type: DetectedDocType,
-): ReadonlyArray<CapabilityAction> {
-  return CAPABILITY_REGISTRY.filter(
-    (a) => a.is_live && a.applies_to_types.includes(type),
-  );
+export function liveActionsForType(type: DetectedDocType): ReadonlyArray<CapabilityAction> {
+  return CAPABILITY_REGISTRY.filter((a) => a.is_live && a.applies_to_types.includes(type));
 }
