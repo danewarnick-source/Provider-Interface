@@ -628,7 +628,7 @@ Editor (replaces the ledger in place):
 | 2.4.3.5.1.1.3 | Send for e-signature | **UNTESTED** / **NEEDS ATTENTION** | F-12 single signer; disabled-without-email has no hint |
 | 2.4.3.5.1 / .2 | Open by status | **EXACTLY WHAT WE WANT** | lock logic traced |
 | header copy | "DRAFT — pending legal review" | **NEEDS ATTENTION** | F-11 static |
-| RLS | Program Manager access | **EXACTLY WHAT WE WANT** (per migrations) / **UNTESTED** (live) | F-10 withdrawn; confirm with Q7 |
+| RLS | Program Manager access | **EXACTLY WHAT WE WANT** | F-10 withdrawn; live helper confirmed 2026-09-25 |
 | 2.4.3.5.1.1.5 | Delete | **UNTESTED** | browser confirm; also allowed on signed |
 
 ---

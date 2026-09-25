@@ -57,7 +57,7 @@ If the agency hasn't answered its six setup questions (do you run an OL site, us
 | Deactivate / delete someone | yes | no (button hidden) | no (button hidden) | no |
 | Save the Roster → Settings toggles | yes | **looks like yes, actually no** (bug F-1) | **same** | no |
 | Edit a Host card | yes | no | no | no |
-| Use Employee Loans | yes | yes (double-check live with Q7) | yes | no |
+| Use Employee Loans | yes | yes | yes | no |
 
 ---
 
@@ -382,7 +382,7 @@ Employee Loan Ledger
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**F-10 (withdrawn):** An earlier version of this doc said Program Managers were blocked from loans. That was wrong. The database rule for all four loan tables (`is_org_admin_or_manager`) lets Owners, Program Managers and Supervisors in. That rule was updated in migration `20260825020000`. Run Q7 at the end to confirm the live database has the same rule. If `program_manager` is missing there, the migration never reached the live database.
+**F-10 (withdrawn):** An earlier version of this doc said Program Managers were blocked from loans. That was wrong. The database rule for all four loan tables (`is_org_admin_or_manager`) lets Owners, Program Managers and Supervisors in. That rule was updated in migration `20260825020000`, and a check on the live database (2026-09-25) confirmed it includes `program_manager`.
 
 ### Starting a loan (2.4.2)
 
