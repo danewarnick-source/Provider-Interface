@@ -232,7 +232,7 @@ export const LIVE_PATH_SETUP_QUESTIONS: LivePathSetupQuestion[] = [
     path: "code_of_conduct",
     dutyKeys: ["dhhs_code_of_conduct_signed"],
     question: "Which staff are assigned to SLN, SLH, HHS, or PPS?",
-    help: "Code of Conduct follows those assignment codes, not a staff type.",
+    help: "Code of Conduct follows those assignment codes, not a team member type.",
     source: "staff_assignment",
     factKey: "residential_assignment",
     ownerAnswers: false,

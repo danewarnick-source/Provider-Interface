@@ -208,7 +208,12 @@ export function EvidenceQuestionnaire({
       suggestedKeys,
       optedOutKeys: suggestedKeys.filter((k) => !checked.has(k)),
       typeOverrides,
-      dueOverrides: Object.fromEntries([...checked].map((key) => [key, dueByKey[key] ?? defaultDueDraft(subject, requirementByKey(key)?.dueDefault)])),
+      dueOverrides: Object.fromEntries(
+        [...checked].map((key) => [
+          key,
+          dueByKey[key] ?? defaultDueDraft(subject, requirementByKey(key)?.dueDefault),
+        ]),
+      ),
     });
   };
 
@@ -385,16 +390,16 @@ export function EvidenceQuestionnaire({
                               <span className="mt-0.5 block text-xs text-muted-foreground">
                                 {dueSubtitle(
                                   {
-                                    firstDueRule:
-                                      (dueByKey[row.key] ?? defaultDueDraft(subject, row.dueDefault))
-                                        .firstDueRule,
-                                    renewYears:
-                                      (dueByKey[row.key] ?? defaultDueDraft(subject, row.dueDefault))
-                                        .renewYears,
+                                    firstDueRule: (
+                                      dueByKey[row.key] ?? defaultDueDraft(subject, row.dueDefault)
+                                    ).firstDueRule,
+                                    renewYears: (
+                                      dueByKey[row.key] ?? defaultDueDraft(subject, row.dueDefault)
+                                    ).renewYears,
                                   },
                                   subject,
                                 )}
-                                {row.dualLink ? " · same file on Employees + Client" : ""}
+                                {row.dualLink ? " · same file on Team Members + Client" : ""}
                               </span>
                               <span className="mt-2 block text-sm leading-snug text-slate-700">
                                 {row.why}
@@ -403,7 +408,9 @@ export function EvidenceQuestionnaire({
                                 subject={subject}
                                 hireDate={hireDate}
                                 compact
-                                value={dueByKey[row.key] ?? defaultDueDraft(subject, row.dueDefault)}
+                                value={
+                                  dueByKey[row.key] ?? defaultDueDraft(subject, row.dueDefault)
+                                }
                                 onChange={(next) =>
                                   setDueByKey((prev) => ({ ...prev, [row.key]: next }))
                                 }
@@ -633,7 +640,7 @@ export function EvidenceQuestionnaire({
           <div className="flex-1" />
           {step === "quiz" ? (
             <Button type="button" onClick={() => setStep("rows")}>
-              {subject === "client" ? "See client suggestions" : "See employee suggestions"}
+              {subject === "client" ? "See client suggestions" : "See team member suggestions"}
             </Button>
           ) : step === "custom" ? (
             <Button

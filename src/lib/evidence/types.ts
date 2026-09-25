@@ -209,7 +209,7 @@ export const EVIDENCE_UNCHECK_WARNING = "This was found to be a requirement in t
 export const EVIDENCE_STORAGE_UNAVAILABLE = "Evidence storage isn’t set up on this database yet.";
 
 export const EVIDENCE_SEND_MESSAGE_UNAVAILABLE =
-  "Sent to the employee. The message could not be saved on this database yet.";
+  "Sent to the team member. The message could not be saved on this database yet.";
 
 export const EVIDENCE_PUSH_TITLE = "New evidence item";
 export const EVIDENCE_PUSH_BODY =

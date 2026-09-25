@@ -121,17 +121,17 @@ test.describe("Clients + Staff roster — mocked admin", () => {
 
   test("4. Employees list loads; staff profile shows role at a glance", async ({ page }) => {
     await gotoAdmin(page, "/dashboard/employees");
-    await expect(page.getByRole("heading", { name: /Team members/i })).toBeVisible({
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible({
       timeout: 20_000,
     });
     await expect(page.getByRole("button", { name: /^Active$/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /^Inactive$/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Upload roster/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Add several at once/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /Smart Import/i })).toHaveCount(0);
     await expect(page.getByRole("link", { name: /Import CSV/i })).toHaveCount(0);
     await expect(rosterName(page, "Jake Probert")).toBeVisible();
     await page.getByRole("button", { name: /^Inactive$/i }).click();
-    await expect(page.getByText(/No deactivated employees/i).first()).toBeVisible();
+    await expect(page.getByText(/No deactivated team members/i).first()).toBeVisible();
     await expect(rosterName(page, "Jake Probert")).toHaveCount(0);
     await page.getByRole("button", { name: /^Active$/i }).click();
     await expect(rosterName(page, "Jake Probert")).toBeVisible();
@@ -147,7 +147,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(
       page
         .locator("table")
-        .getByText(/^employee$/i)
+        .getByText(/^team member$/i)
         .first(),
     ).toBeVisible();
     await expect(page.locator("table").getByText(/^Last Login$/i)).toBeVisible();
@@ -166,6 +166,11 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.locator("table").getByRole("link", { name: /Staff file/i })).toHaveCount(0);
     await expect(page.locator("table").getByRole("link", { name: /^View$/i })).toHaveCount(0);
     await expect(page.locator("table").getByText("Aug 27, 2026").first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Settings$/i })).toHaveCount(0);
+    await shot(page, "team_members_roster_desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await shot(page, "team_members_roster_mobile");
+    await page.setViewportSize({ width: 1280, height: 720 });
 
     await rosterName(page, "Jake Probert").click();
     await page.waitForURL(new RegExp(`/dashboard/employees/${STAFF.jake.id}`));
@@ -190,35 +195,49 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByRole("tab", { name: /Staff file/i })).toBeVisible();
     await expect(page.getByRole("tab", { name: /^Activity$/i })).toBeVisible();
     await expect(page.getByRole("tab", { name: /^Permissions$/i })).toHaveCount(0);
+    await expect(page.getByTestId("staff-profile-identity")).toContainText("Team member");
     await expect(
-      page.getByText(/admin|employee|manager|Owner|Staff|Supervisor/i).first(),
+      page.getByText(/admin|employee|manager|Owner|Team member|Supervisor/i).first(),
     ).toBeVisible();
     await assertPageNotBlank(page, "staff profile");
 
+    await expect(page.getByText(/Team member ID/i).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /Team Member Face Sheet/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Edit profile/i })).toBeVisible();
     await expect(
       page
-        .getByText(/people & files|Staff phone permissions|Invite staff|View staff records/i)
+        .getByText(
+          /people & files|Staff phone permissions|Invite team members|View team member records/i,
+        )
         .first(),
     ).toBeVisible({
       timeout: 10_000,
     });
+    await shot(page, "team_member_face_sheet_desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await shot(page, "team_member_face_sheet_mobile");
+    await page.setViewportSize({ width: 1280, height: 720 });
     await shot(page, "employees_list_and_profile");
   });
 
-  test("5. Add employee wizard — full file first, then invite or temp password", async ({
+  test("5. Add team member wizard — full file first, then invite or temp password", async ({
     page,
   }) => {
     await gotoAdmin(page, "/dashboard/employees");
-    await expect(page.getByRole("button", { name: /^Add employee$/i })).toBeVisible({
+    await expect(page.getByRole("button", { name: /^Add team member$/i })).toBeVisible({
       timeout: 20_000,
     });
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /Add manually/i })).toHaveCount(0);
 
-    await page.getByRole("button", { name: /^Add employee$/i }).click();
-    await expect(page.getByRole("heading", { name: /Add employee/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Add another employee/i })).toBeVisible();
+    await page.getByRole("button", { name: /^Add team member$/i }).click();
+    await expect(page.getByRole("heading", { name: /Add team member/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Add another team member/i })).toBeVisible();
+    await expect(page.getByLabel(/Hire date/i)).toBeVisible();
+    await shot(page, "add_team_member_wizard_desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await shot(page, "add_team_member_wizard_mobile");
+    await page.setViewportSize({ width: 1280, height: 720 });
     await expect(page.getByLabel(/End date/i)).toHaveCount(0);
     await expect(page.getByText(/Assigned training tracks/i)).toHaveCount(0);
     await expect(page.getByText(/Behavior-related training/i)).toHaveCount(0);
@@ -227,20 +246,14 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await page.locator("#email").fill("sep1.tester@example.test");
     await page.locator("#phone").fill("555-010-0199");
     await page.locator("#hire_date").fill("2026-07-01");
-    await page.getByRole("button", { name: /Create employee/i }).click();
+    await page.getByRole("button", { name: /Create team member/i }).click();
 
-    // Step 2 ("access"): the file already exists; invites are opt-in per hire.
     await expect(page.getByRole("heading", { name: /Send invites\?/i })).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByRole("button", { name: /Don't invite yet/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Show temporary password/i })).toBeVisible();
-    // Nobody is pre-checked: the send button is disabled at "Send 0 invites".
-    await expect(page.getByRole("button", { name: /^Send 0 invites$/i })).toBeDisabled();
-    await page.getByRole("checkbox", { name: /Sep Tester/i }).check();
-    await expect(page.getByRole("button", { name: /^Send 1 invite$/i })).toBeEnabled();
-
-    await page.getByRole("button", { name: /^Send 1 invite$/i }).click();
+    await page.getByRole("checkbox").check();
+    await page.getByRole("button", { name: /Send 1 invite/i }).click();
     const toast = page.locator("[data-sonner-toast]").filter({
       hasText: /Invite emailed|couldn't be sent|Invitation created|Unauthorized/i,
     });
@@ -249,10 +262,10 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await shot(page, "add_employee_wizard_access");
 
     await gotoAdmin(page, "/dashboard/invitations");
-    await expect(page.getByRole("heading", { name: /Employee invitations/i })).toBeVisible({
+    await expect(page.getByRole("heading", { name: /Team member invitations/i })).toBeVisible({
       timeout: 20_000,
     });
-    await expect(page.getByRole("link", { name: /^Add employee$/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Add team member$/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
     await assertPageNotBlank(page, "invitations");
   });
@@ -304,6 +317,201 @@ test.describe("Clients + Staff roster — mocked admin", () => {
   });
 });
 
+test.describe("Employees flatten and Clients placements", () => {
+  test.beforeEach(async ({ page }) => {
+    await installHiveMocks(page, { persona: "admin" });
+  });
+
+  test("Employees hub is the roster with no tab bar; old tabs redirect", async ({ page }) => {
+    await gotoAdmin(page, "/dashboard/hub/employees");
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole("navigation", { name: "Tabs" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /^Hosts$/i })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /HR Admin/i })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /Employee Loans/i })).toHaveCount(0);
+    await expect(rosterName(page, "Jake Probert")).toBeVisible();
+    await shot(page, "employees_roster_desktop");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible();
+    await shot(page, "employees_roster_mobile");
+    await page.setViewportSize({ width: 1280, height: 720 });
+
+    await gotoAdmin(page, "/dashboard/hub/employees?tab=loans");
+    await expect(page).toHaveURL(/\/dashboard\/hub\/employees\/?$/);
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible();
+
+    await gotoAdmin(page, "/dashboard/hub/employees?tab=hr-admin");
+    await expect(page).toHaveURL(/\/dashboard\/hub\/employees\/?$/);
+
+    await gotoAdmin(page, "/dashboard/hub/employees?tab=hosts");
+    await expect(page).toHaveURL(/\/dashboard\/hub\/clients\?tab=placements/);
+    await expect(page.getByRole("heading", { name: /^Placements$/i })).toBeVisible({
+      timeout: 20_000,
+    });
+  });
+
+  test("Clients Placements is the host pipeline; old hosts tab redirects", async ({ page }) => {
+    await gotoAdmin(page, "/dashboard/hub/clients?tab=placements");
+    await expect(
+      page.getByRole("navigation", { name: "Tabs" }).getByText("Placements"),
+    ).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole("heading", { name: /^Placements$/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Onboarding$/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Ready$/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Placed$/i })).toBeVisible();
+    await expect(page.getByText(/No hosts in this state/i).first()).toBeVisible();
+    await shot(page, "clients_placements_desktop");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByRole("heading", { name: /^Placements$/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Onboarding$/i })).toBeVisible();
+    await shot(page, "clients_placements_mobile");
+
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await gotoAdmin(page, "/dashboard/hub/clients?tab=hosts");
+    await expect(page).toHaveURL(/tab=placements/);
+    await expect(page.getByRole("heading", { name: /^Placements$/i })).toBeVisible();
+  });
+});
+
+test.describe("Add several at once and Finish setup", () => {
+  test.beforeEach(async ({ page }) => {
+    await installHiveMocks(page, { persona: "admin", needsSetupUserId: STAFF.jake.id });
+  });
+
+  test("roster chip, add dialog, preview, and finish step", async ({ page }) => {
+    await gotoAdmin(page, "/dashboard/hub/employees");
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole("button", { name: /Finish setup \(1\)/i })).toBeVisible();
+    const desktopChip = page.locator("table").getByTestId("needs-setup-chip");
+    await desktopChip.scrollIntoViewIfNeeded();
+    await expect(desktopChip).toBeVisible();
+    await shot(page, "needs_setup_roster_desktop");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByRole("button", { name: /Finish setup \(1\)/i })).toBeVisible();
+    const mobileChip = page.locator(".md\\:hidden").getByTestId("needs-setup-chip");
+    await mobileChip.scrollIntoViewIfNeeded();
+    await shot(page, "needs_setup_roster_mobile");
+
+    await page.getByRole("button", { name: /Add several at once/i }).scrollIntoViewIfNeeded();
+    await page.getByRole("button", { name: /Add several at once/i }).click();
+    await expect(page.getByRole("heading", { name: /Add several at once/i })).toBeVisible();
+    await expect(page.getByText(/lands on the roster as Needs setup/i)).toBeVisible();
+    await shot(page, "add_several_dialog_mobile");
+
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await shot(page, "add_several_dialog_desktop");
+
+    await page
+      .locator("#roster-paste")
+      .fill(
+        [
+          "name,email,phone,hire_date,job_title,access_level",
+          "Alex Kim,alex.kim@example.test,555-0199,2026-08-01,Coach,Owner",
+          "Sam Rivera,sam.rivera@example.test,555-0100,2026-07-01,Direct Support,Team member",
+          "Pat,not-an-email,,,",
+          "Jake Probert,jake.probert@example.test,555-0101,2026-01-15,DSP,",
+        ].join("\n"),
+      );
+    await page.getByRole("button", { name: /Review pasted rows/i }).click();
+    await expect(page.getByText(/Already on the roster — skipped/i)).toBeVisible();
+    await expect(page.getByText(/Enter a valid email/i)).toBeVisible();
+    await expect(page.getByText(/Will add as Needs setup/i)).toBeVisible();
+    await expect(page.getByText(/Owner can't be assigned from a spreadsheet/i)).toBeVisible();
+    await expect(page.getByText(/Team member/i).first()).toBeVisible();
+    await shot(page, "add_several_preview_desktop");
+    await page.setViewportSize({ width: 1280, height: 1100 });
+    const invalidAccess = page.getByLabel("Access level").first();
+    await invalidAccess.scrollIntoViewIfNeeded();
+    await invalidAccess.click();
+    for (const name of ["Admin", "Team member"]) {
+      await expect(page.getByRole("option", { name, exact: true })).toBeVisible();
+    }
+    await expect(page.getByRole("option", { name: "Owner", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("option", { name: "Supervisor", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("option", { name: "Committee Member", exact: true })).toHaveCount(0);
+    await shot(page, "add_several_access_level_desktop");
+    await page.keyboard.press("Escape");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await shot(page, "add_several_preview_mobile");
+
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.getByRole("button", { name: /^Back$/i }).click();
+    await page.keyboard.press("Escape");
+
+    await page.getByRole("button", { name: /Finish setup \(1\)/i }).click();
+    await expect(page.getByTestId("finish-setup-dialog")).toBeVisible();
+    await expect(page.getByText(/same questions as Add team member/i)).toBeVisible();
+    await expect(page.getByText("Direct Support Professional")).toBeVisible();
+    await expect(page.getByLabel("Job title")).toHaveValue("DSP");
+    await shot(page, "finish_setup_step_desktop");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByText("Direct Support Professional")).toBeVisible();
+    await shot(page, "finish_setup_step_mobile");
+  });
+});
+
+test.describe("Access levels screenshots", () => {
+  test.beforeEach(async ({ page }) => {
+    await installHiveMocks(page, { persona: "admin" });
+  });
+
+  test("access presets, bulk access dropdown, and profile scope save", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoAdmin(page, "/dashboard/settings/team-access");
+    await expect(page.getByRole("heading", { name: /Access & presets/i })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByText(/Team member/i).first()).toBeVisible();
+    await expect(page.getByText("Pat Lee")).toBeVisible();
+    await expect(page.getByText(/Owner, Admin, or Team member/i)).toBeVisible();
+    await page.getByRole("tab", { name: "Presets" }).click();
+    await expect(page.getByText("Program Manager").first()).toBeVisible();
+    await expect(page.getByText("DSP").first()).toBeVisible();
+    await shot(page, "access-presets");
+
+    await gotoAdmin(page, "/dashboard/hub/employees");
+    await page.getByRole("button", { name: /Add several at once/i }).click();
+    await page.locator("#roster-paste").fill(
+      "Sam Rivera, sam.rivera@example.test, 555-0100, 2026-07-01, Direct Support, Team member\n",
+    );
+    await page.getByRole("button", { name: /Review pasted rows/i }).click();
+    await expect(page.getByTestId("bulk-access-level")).toBeVisible();
+    await page.getByTestId("bulk-access-level").click();
+    await expect(page.getByRole("option", { name: "Admin", exact: true })).toBeVisible();
+    await expect(page.getByRole("option", { name: "Team member", exact: true })).toBeVisible();
+    await expect(page.getByRole("option", { name: "Owner", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("option", { name: "Supervisor", exact: true })).toHaveCount(0);
+    await shot(page, "bulk-upload-access-level");
+    await page.keyboard.press("Escape");
+
+    await gotoAdmin(page, `/dashboard/employees/${STAFF.jake.id}`);
+    await expect(page.getByRole("heading", { name: "Access", exact: true })).toBeVisible({
+      timeout: 20_000,
+    });
+    await page.getByRole("button", { name: /Edit access/i }).click();
+    await page.getByText("Whole agency", { exact: true }).click();
+    await page.getByRole("option", { name: /Assigned homes, team members, and clients/i }).click();
+    await page.getByText("Pick homes").click();
+    await page.getByText("Maple House", { exact: true }).click();
+    await page.getByRole("button", { name: /Save access/i }).click();
+    await expect(page.getByText("Access saved")).toBeVisible();
+    await expect(page.getByText(/Assigned homes, team members, and clients/i)).toBeVisible();
+    await expect(page.getByText("1 assigned").first()).toBeVisible();
+    await shot(page, "profile-admin-scope-save");
+  });
+});
+
 test.describe("RBAC — DSP / employee cannot open employee admin", () => {
   test.beforeEach(async ({ page }) => {
     await installHiveMocks(page, { persona: "dsp" });
@@ -313,10 +521,10 @@ test.describe("RBAC — DSP / employee cannot open employee admin", () => {
     await gotoAdmin(page, "/dashboard/employees");
     await expect(page).toHaveURL(/\/unauthorized/, { timeout: 20_000 });
     await expect(page.getByRole("heading", { name: /Access denied/i })).toBeVisible();
-    await expect(page.getByText(/View staff records/i)).toBeVisible();
+    await expect(page.getByText(/View team member records/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /^Add employee$/i })).toHaveCount(0);
-    await expect(page.getByRole("heading", { name: /Team members/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Add team member$/i })).toHaveCount(0);
+    await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toHaveCount(0);
     await shot(page, "dsp_rbac_employees_gated");
   });
 });

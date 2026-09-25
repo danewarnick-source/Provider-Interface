@@ -26,7 +26,8 @@ export function parseComplianceSearch(s: Record<string, unknown>): ComplianceSea
 export function resolveComplianceFileTab(tab?: string): ComplianceFileTab {
   const key = (tab ?? "").trim().toLowerCase();
   if (CLIENT_ALIASES.has(key)) return "client";
-  if (AGENCY_ALIASES.has(key) || POLICY_ALIASES.has(key) || CONTRACT_ALIASES.has(key)) return "agency";
+  if (AGENCY_ALIASES.has(key) || POLICY_ALIASES.has(key) || CONTRACT_ALIASES.has(key))
+    return "agency";
   return "staff";
 }
 
@@ -47,9 +48,7 @@ export function complianceSearchForAgencySubTab(sub: AgencyFileSubTab): Complian
   return { tab: "agency" };
 }
 
-export function complianceRedirectSearchFromAgencyDocuments(
-  tab?: string,
-): ComplianceSearch {
+export function complianceRedirectSearchFromAgencyDocuments(tab?: string): ComplianceSearch {
   const sub = resolveAgencyFileSubTab(tab);
   if (sub === "company-policies") return { tab: "company-policies" };
   if (sub === "contract-index") return { tab: "contract-index" };
@@ -59,7 +58,7 @@ export function complianceRedirectSearchFromAgencyDocuments(
 /** Admin primary sidebar — twelve items. State Audit and Reports stay as routes. */
 export const ADMIN_PRIMARY_NAV_LABELS = [
   "Home",
-  "Employees",
+  "Team Members",
   "Clients",
   "Scheduler",
   "Documentation",

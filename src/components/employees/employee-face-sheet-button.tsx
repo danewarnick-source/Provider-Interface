@@ -89,7 +89,7 @@ export function EmployeeFaceSheetButton({
   }
 
   const isBusy = busy !== null;
-  const label = isBusy ? "Working…" : "Face Sheet";
+  const label = isBusy ? "Working…" : "Team Member Face Sheet";
 
   return (
     <DropdownMenu>
@@ -98,7 +98,7 @@ export function EmployeeFaceSheetButton({
           <button
             type="button"
             disabled={isBusy}
-            title="Employee Face Sheet — preview, download, print, or ship to HR docs"
+            title="Team Member Face Sheet — preview, download, print, or ship to HR docs"
             className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition hover:border-primary/40 hover:text-foreground disabled:opacity-60"
           >
             <FileText className="h-3 w-3" />
@@ -108,7 +108,7 @@ export function EmployeeFaceSheetButton({
         ) : (
           <Button type="button" variant="outline" size="sm" disabled={isBusy} className="shrink-0">
             <FileText className="mr-1.5 h-3.5 w-3.5" />
-            {isBusy ? "Working…" : "Employee Face Sheet"}
+            {label}
             <ChevronDown className="ml-1 h-3.5 w-3.5" />
           </Button>
         )}

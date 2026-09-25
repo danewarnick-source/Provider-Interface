@@ -128,6 +128,7 @@ export const SETUP_CREATE_APIS = [
   "createEmployeeManually",
   "hireEmployeeInternal",
   "applyEmployeeRosterRow",
+  "finishEmployeeSetup",
   "createInvitation",
   "clients.insert",
   "smartImportCommitClient",

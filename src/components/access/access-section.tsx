@@ -35,7 +35,11 @@ interface Draft {
   assigned: Record<AssignmentKind, string[]>;
 }
 
-const KIND_LABEL: Record<AssignmentKind, string> = { home: "Homes", staff: "Staff", client: "Clients" };
+const KIND_LABEL: Record<AssignmentKind, string> = {
+  home: "Homes",
+  staff: "Team members",
+  client: "Clients",
+};
 const KINDS: AssignmentKind[] = ["home", "staff", "client"];
 
 function presetCats(presets: AccessPreset[] | undefined, id: string | null, level: AccessLevel) {

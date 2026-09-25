@@ -208,7 +208,7 @@ function SettingsPage() {
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><ShieldCheck className="h-5 w-5" /></div>
               <div>
                 <h2 className="text-base font-semibold">Access &amp; presets</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Set each person to Owner, Admin or Staff, edit presets (what each area allows), assign homes, staff and clients, and review the change history.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Set each person to Owner, Admin, or Team member, edit presets (what each area allows), assign homes, team members, and clients, and review the change history.</p>
               </div>
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />

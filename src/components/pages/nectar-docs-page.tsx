@@ -48,7 +48,6 @@ import {
 import { DocumentEffectiveDatingDialog } from "@/components/documents/document-effective-dating-dialog";
 import { OutdatedDocumentsSection } from "@/components/documents/outdated-documents-section";
 
-
 const DOC_TYPES = [
   { value: "all", label: "All types" },
   { value: "pcsp", label: "PCSP" },
@@ -70,7 +69,7 @@ const DOC_TYPES = [
 const OWNER_KINDS = [
   { value: "all", label: "All owners" },
   { value: "client", label: "Client" },
-  { value: "staff", label: "Staff" },
+  { value: "staff", label: "Team member" },
   { value: "company", label: "Company" },
   { value: "state", label: "State / SOW" },
   { value: "other", label: "Other" },
@@ -134,7 +133,9 @@ export function NectarDocsPage() {
 
   const stats = useMemo(() => {
     const parsed = docs.filter((d) => d.parse_status === "parsed").length;
-    const pending = docs.filter((d) => d.parse_status === "parsing" || d.parse_status === "pending").length;
+    const pending = docs.filter(
+      (d) => d.parse_status === "parsing" || d.parse_status === "pending",
+    ).length;
     return { total: docs.length, parsed, pending };
   }, [docs]);
 
@@ -145,11 +146,15 @@ export function NectarDocsPage() {
 
       <header className="space-y-1">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
-          <Database className="h-3.5 w-3.5" /> NECTAR · Client &amp; Staff Documents
+          <Database className="h-3.5 w-3.5" /> NECTAR · Client &amp; team member documents
         </div>
         <h1 className="text-2xl font-semibold">Company Docs</h1>
         <p className="text-sm text-muted-foreground">
-          Aggregated view of every client and staff document in the workspace. Files uploaded on a <span className="font-medium text-foreground">client</span> or <span className="font-medium text-foreground">staff profile</span> appear here automatically — no duplicate upload. Agency-wide documents (Scope of Work, policies) live in <span className="font-medium">Knowledge</span>.
+          Aggregated view of every client and team member document in the workspace. Files uploaded
+          on a <span className="font-medium text-foreground">client</span> or{" "}
+          <span className="font-medium text-foreground">team member profile</span> appear here
+          automatically — no duplicate upload. Agency-wide documents (Scope of Work, policies) live
+          in <span className="font-medium">Knowledge</span>.
         </p>
       </header>
 
@@ -158,7 +163,8 @@ export function NectarDocsPage() {
         message={
           <>
             Drop a PCSP, 1056 budget, certification, or any client/staff document. NECTAR extracts
-            structured fields (rate, units, dates, clauses) with source locators. An admin always confirms or overrides — the platform proposes, you decide.
+            structured fields (rate, units, dates, clauses) with source locators. An admin always
+            confirms or overrides — the platform proposes, you decide.
           </>
         }
         highlight={stats.pending ? `${stats.pending} parsing` : undefined}
@@ -166,7 +172,9 @@ export function NectarDocsPage() {
 
       <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-card/40 p-3 backdrop-blur-md md:flex-row md:items-end md:gap-4">
         <div className="flex-1 space-y-1">
-          <Label htmlFor="nectar-search" className="text-xs">Search by title</Label>
+          <Label htmlFor="nectar-search" className="text-xs">
+            Search by title
+          </Label>
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -181,25 +189,39 @@ export function NectarDocsPage() {
         <div className="space-y-1">
           <Label className="text-xs">Document type</Label>
           <Select value={docType} onValueChange={setDocType}>
-            <SelectTrigger className="w-full md:w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full md:w-44">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
-              {DOC_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+              {DOC_TYPES.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1">
           <Label className="text-xs">Owner</Label>
           <Select value={ownerKind} onValueChange={setOwnerKind}>
-            <SelectTrigger className="w-full md:w-36"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full md:w-36">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
-              {OWNER_KINDS.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+              {OWNER_KINDS.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1">
           <Label className="text-xs">Client</Label>
           <Select value={clientFilter} onValueChange={setClientFilter}>
-            <SelectTrigger className="w-full md:w-48"><SelectValue placeholder="All clients" /></SelectTrigger>
+            <SelectTrigger className="w-full md:w-48">
+              <SelectValue placeholder="All clients" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All clients</SelectItem>
               {(caseload ?? []).map((c) => (
@@ -224,11 +246,15 @@ export function NectarDocsPage() {
         <NectarDocumentActionsDialog
           documentId={offerDocId}
           open={!!offerDocId}
-          onOpenChange={(v) => { if (!v) setOfferDocId(null); }}
+          onOpenChange={(v) => {
+            if (!v) setOfferDocId(null);
+          }}
         />
         <DocumentEffectiveDatingDialog
           open={!!dating}
-          onOpenChange={(v) => { if (!v) setDating(null); }}
+          onOpenChange={(v) => {
+            if (!v) setDating(null);
+          }}
           organizationId={orgId}
           kind="nectar"
           documentId={dating?.id ?? null}
@@ -239,8 +265,6 @@ export function NectarDocsPage() {
         />
       </div>
 
-
-
       <div className="grid gap-3">
         {isLoading && (
           <div className="flex items-center justify-center gap-2 rounded-xl border border-border/60 bg-card/40 p-6 text-sm text-muted-foreground">
@@ -249,7 +273,8 @@ export function NectarDocsPage() {
         )}
         {!isLoading && docs.length === 0 && (
           <div className="rounded-xl border border-dashed border-border/60 bg-card/30 p-8 text-center text-sm text-muted-foreground">
-            No documents yet. Upload a PCSP, contract, or certification when you have files to store.
+            No documents yet. Upload a PCSP, contract, or certification when you have files to
+            store.
           </div>
         )}
         {docs.map((d) => (
@@ -263,13 +288,26 @@ export function NectarDocsPage() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="truncate font-medium">{d.title}</span>
-                  <Badge variant="outline" className="text-[10px] uppercase tracking-wide">{d.document_type.replace(/_/g, " ")}</Badge>
-                  <Badge variant="secondary" className="text-[10px]">{d.owner_kind}</Badge>
-                  {d.fiscal_year && <Badge variant="outline" className="text-[10px]">{d.fiscal_year}</Badge>}
-                  {d.version > 1 && <Badge variant="outline" className="text-[10px]">v{d.version}</Badge>}
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                    {d.document_type.replace(/_/g, " ")}
+                  </Badge>
+                  <Badge variant="secondary" className="text-[10px]">
+                    {d.owner_kind}
+                  </Badge>
+                  {d.fiscal_year && (
+                    <Badge variant="outline" className="text-[10px]">
+                      {d.fiscal_year}
+                    </Badge>
+                  )}
+                  {d.version > 1 && (
+                    <Badge variant="outline" className="text-[10px]">
+                      v{d.version}
+                    </Badge>
+                  )}
                 </div>
                 <div className="mt-0.5 truncate text-xs text-muted-foreground">
-                  {d.file_name} · uploaded {new Date(d.created_at).toLocaleDateString()}{d.uploaded_by_name ? ` by ${d.uploaded_by_name}` : ""}
+                  {d.file_name} · uploaded {new Date(d.created_at).toLocaleDateString()}
+                  {d.uploaded_by_name ? ` by ${d.uploaded_by_name}` : ""}
                 </div>
               </div>
             </div>
@@ -283,7 +321,6 @@ export function NectarDocsPage() {
         kind="nectar"
         title="Outdated Company Docs"
       />
-
 
       {selectedId && (
         <DocumentDetailDialog
@@ -359,18 +396,18 @@ function UploadButton({
       });
     },
     onSuccess: (res) => {
-      toast.success(
-        `Uploaded — NECTAR extracted ${res?.extracted?.length ?? 0} field(s)`,
-      );
+      toast.success(`Uploaded — NECTAR extracted ${res?.extracted?.length ?? 0} field(s)`);
       const chosenType = docType;
-      setTitle(""); setFile(null); setFiscalYear(""); setMedicaidId("");
+      setTitle("");
+      setFile(null);
+      setFiscalYear("");
+      setMedicaidId("");
       onOpenChange(false);
       const docId = (res as { document?: { id?: string } }).document?.id;
       onUploaded(docId, chosenType);
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -386,20 +423,32 @@ function UploadButton({
         <div className="space-y-3">
           <div className="space-y-1">
             <Label>File (PDF, text, CSV)</Label>
-            <Input type="file" accept=".pdf,.txt,.csv,.md,.json,.html,.htm" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            <Input
+              type="file"
+              accept=".pdf,.txt,.csv,.md,.json,.html,.htm"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
           </div>
           <div className="space-y-1">
             <Label>Title</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="PCSP FY26 — Jane Doe" />
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="PCSP FY26 — Jane Doe"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>Document type</Label>
               <Select value={docType} onValueChange={setDocType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {DOC_TYPES.filter((t) => t.value !== "all").map((t) => (
-                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -407,32 +456,50 @@ function UploadButton({
             <div className="space-y-1">
               <Label>Owner</Label>
               <Select value={ownerKind} onValueChange={setOwnerKind}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {OWNER_KINDS.filter((t) => t.value !== "all").map((t) => (
-                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
               <Label>Fiscal year</Label>
-              <Input value={fiscalYear} onChange={(e) => setFiscalYear(e.target.value)} placeholder="FY26" />
+              <Input
+                value={fiscalYear}
+                onChange={(e) => setFiscalYear(e.target.value)}
+                placeholder="FY26"
+              />
             </div>
             <div className="space-y-1">
               <Label>Medicaid ID</Label>
-              <Input value={medicaidId} onChange={(e) => setMedicaidId(e.target.value)} placeholder="optional" />
+              <Input
+                value={medicaidId}
+                onChange={(e) => setMedicaidId(e.target.value)}
+                placeholder="optional"
+              />
             </div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           <Button
             disabled={!file || mut.isPending}
             onClick={() => mut.mutate()}
             className="bg-amber-500 text-amber-950 hover:bg-amber-400"
           >
-            {mut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {mut.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="mr-2 h-4 w-4" />
+            )}
             Upload & parse
           </Button>
         </DialogFooter>
@@ -473,8 +540,11 @@ function DocumentDetailDialog({
   });
 
   const review = useMutation({
-    mutationFn: (args: { fieldId: string; action: "confirm" | "override" | "reject"; overrideValue?: { value_text?: string } }) =>
-      reviewFn({ data: args }),
+    mutationFn: (args: {
+      fieldId: string;
+      action: "confirm" | "override" | "reject";
+      overrideValue?: { value_text?: string };
+    }) => reviewFn({ data: args }),
     onSuccess: () => {
       refetch();
       onChanged();
@@ -484,13 +554,33 @@ function DocumentDetailDialog({
 
   const del = useMutation({
     mutationFn: () => deleteFn({ data: { documentId } }),
-    onSuccess: () => { toast.success("Document deleted"); qc.invalidateQueries({ queryKey: ["nectar-docs"] }); onClose(); },
+    onSuccess: () => {
+      toast.success("Document deleted");
+      qc.invalidateQueries({ queryKey: ["nectar-docs"] });
+      onClose();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const doc = data?.document as Record<string, unknown> | undefined;
-  const fields = (data?.fields ?? []) as Array<{ id: string; field_key: string; field_group: string | null; value_text: string | null; value_number: number | null; value_date: string | null; source_locator: string | null; confidence: number | null; status: string }>;
-  const versions = (data?.versions ?? []) as Array<{ id: string; version: number; is_current: boolean; created_at: string; uploaded_by_name: string | null }>;
+  const fields = (data?.fields ?? []) as Array<{
+    id: string;
+    field_key: string;
+    field_group: string | null;
+    value_text: string | null;
+    value_number: number | null;
+    value_date: string | null;
+    source_locator: string | null;
+    confidence: number | null;
+    status: string;
+  }>;
+  const versions = (data?.versions ?? []) as Array<{
+    id: string;
+    version: number;
+    is_current: boolean;
+    created_at: string;
+    uploaded_by_name: string | null;
+  }>;
 
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
@@ -498,22 +588,38 @@ function DocumentDetailDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary/70" />
-            {doc?.title as string ?? "Document"}
+            {(doc?.title as string) ?? "Document"}
           </DialogTitle>
         </DialogHeader>
         {isLoading || !doc ? (
-          <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin" /></div>
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
         ) : (
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <Badge variant="outline">{(doc.document_type as string).replace(/_/g, " ")}</Badge>
               <Badge variant="secondary">{doc.owner_kind as string}</Badge>
-              {doc.fiscal_year ? <Badge variant="outline">{doc.fiscal_year as string}</Badge> : null}
+              {doc.fiscal_year ? (
+                <Badge variant="outline">{doc.fiscal_year as string}</Badge>
+              ) : null}
               <Badge variant="outline">v{doc.version as number}</Badge>
               {data?.signedUrl && (
-                <a href={data.signedUrl} target="_blank" rel="noreferrer" className="text-primary underline">Open file</a>
+                <a
+                  href={data.signedUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline"
+                >
+                  Open file
+                </a>
               )}
-              <Button size="sm" variant="ghost" className="ml-auto text-destructive" onClick={() => del.mutate()}>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="ml-auto text-destructive"
+                onClick={() => del.mutate()}
+              >
                 <X className="mr-1 h-3 w-3" /> Delete
               </Button>
             </div>
@@ -530,21 +636,37 @@ function DocumentDetailDialog({
               ) : (
                 <div className="space-y-2">
                   {fields.map((f) => (
-                    <div key={f.id} className="rounded-md border border-border/50 bg-background/40 p-2 text-sm">
+                    <div
+                      key={f.id}
+                      className="rounded-md border border-border/50 bg-background/40 p-2 text-sm"
+                    >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="font-medium">{f.field_key}</span>
-                            {f.field_group && <Badge variant="outline" className="text-[10px]">{f.field_group}</Badge>}
+                            {f.field_group && (
+                              <Badge variant="outline" className="text-[10px]">
+                                {f.field_group}
+                              </Badge>
+                            )}
                             <FieldStatusBadge status={f.status} />
                           </div>
                           <div className="mt-0.5 text-xs">
-                            <span className="font-mono">{f.value_text ?? (f.value_number != null ? String(f.value_number) : f.value_date ?? "—")}</span>
+                            <span className="font-mono">
+                              {f.value_text ??
+                                (f.value_number != null
+                                  ? String(f.value_number)
+                                  : (f.value_date ?? "—"))}
+                            </span>
                             {f.source_locator && (
-                              <span className="ml-2 text-muted-foreground">· source: {f.source_locator}</span>
+                              <span className="ml-2 text-muted-foreground">
+                                · source: {f.source_locator}
+                              </span>
                             )}
                             {f.confidence != null && (
-                              <span className="ml-2 text-muted-foreground">· {Math.round(f.confidence * 100)}% conf.</span>
+                              <span className="ml-2 text-muted-foreground">
+                                · {Math.round(f.confidence * 100)}% conf.
+                              </span>
                             )}
                           </div>
                         </div>
@@ -563,7 +685,12 @@ function DocumentDetailDialog({
                               className="h-7"
                               onClick={() => {
                                 const v = prompt("Override value:", f.value_text ?? "");
-                                if (v != null) review.mutate({ fieldId: f.id, action: "override", overrideValue: { value_text: v } });
+                                if (v != null)
+                                  review.mutate({
+                                    fieldId: f.id,
+                                    action: "override",
+                                    overrideValue: { value_text: v },
+                                  });
                               }}
                             >
                               Override
@@ -583,9 +710,25 @@ function DocumentDetailDialog({
               </h3>
               <div className="space-y-1 text-xs">
                 {versions.map((v) => (
-                  <div key={v.id} className="flex items-center justify-between rounded-md border border-border/40 bg-background/40 px-2 py-1">
-                    <span>v{v.version} {v.is_current && <Badge className="ml-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" variant="outline">current</Badge>}</span>
-                    <span className="text-muted-foreground">{new Date(v.created_at).toLocaleString()} {v.uploaded_by_name ? `· ${v.uploaded_by_name}` : ""}</span>
+                  <div
+                    key={v.id}
+                    className="flex items-center justify-between rounded-md border border-border/40 bg-background/40 px-2 py-1"
+                  >
+                    <span>
+                      v{v.version}{" "}
+                      {v.is_current && (
+                        <Badge
+                          className="ml-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                          variant="outline"
+                        >
+                          current
+                        </Badge>
+                      )}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {new Date(v.created_at).toLocaleString()}{" "}
+                      {v.uploaded_by_name ? `· ${v.uploaded_by_name}` : ""}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -598,8 +741,18 @@ function DocumentDetailDialog({
 }
 
 function FieldStatusBadge({ status }: { status: string }) {
-  if (status === "confirmed") return <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">confirmed</Badge>;
-  if (status === "overridden") return <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/15 dark:text-amber-300">overridden</Badge>;
+  if (status === "confirmed")
+    return (
+      <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300">
+        confirmed
+      </Badge>
+    );
+  if (status === "overridden")
+    return (
+      <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/15 dark:text-amber-300">
+        overridden
+      </Badge>
+    );
   if (status === "rejected") return <Badge variant="destructive">rejected</Badge>;
   return <Badge variant="outline">proposed</Badge>;
 }

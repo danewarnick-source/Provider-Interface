@@ -78,7 +78,7 @@ describe("resolveMemberAccess", () => {
     assert.equal(a.presetHome, null);
   });
 
-  it("falls back to Staff / self for unknown values", () => {
+  it("falls back to team member / self for unknown values", () => {
     const a = resolveMemberAccess({
       access_level: "manager",
       access_scope: null,

@@ -189,7 +189,11 @@ async function loadAll(
     .select(ITEM_SELECT_WITH_DUE)
     .eq("organization_id", organizationId);
   if (first.error) {
-    if (tableMissing(first.error.message) && !sendMessageColumnMissing(first.error.message) && !dueColumnMissing(first.error.message)) {
+    if (
+      tableMissing(first.error.message) &&
+      !sendMessageColumnMissing(first.error.message) &&
+      !dueColumnMissing(first.error.message)
+    ) {
       return { store: emptyStore(), viaTables: false, hasSendMessage: false, hasDue: false };
     }
     hasDue = !dueColumnMissing(first.error.message);
@@ -372,7 +376,7 @@ async function listStaffPeople(
     if (slim.error) {
       return {
         people: [],
-        error: slim.error.message || full.error?.message || "Could not load employees.",
+        error: slim.error.message || full.error?.message || "Could not load team members.",
       };
     }
     const profMap = new Map(
@@ -400,7 +404,7 @@ async function listStaffPeople(
   } catch (e) {
     return {
       people: [],
-      error: e instanceof Error ? e.message : "Could not load employees.",
+      error: e instanceof Error ? e.message : "Could not load team members.",
     };
   }
 }
@@ -629,9 +633,7 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
     const { store, viaTables } = await loadAll(sb, data.organizationId);
     requireTables(viaTables);
     const staff =
-      data.subjectType === "staff"
-        ? (await listStaffPeople(sb, data.organizationId)).people
-        : [];
+      data.subjectType === "staff" ? (await listStaffPeople(sb, data.organizationId)).people : [];
     const suggested = new Set(data.suggestedKeys ?? []);
     let count = 0;
     const created: EvidenceItemRow[] = [];

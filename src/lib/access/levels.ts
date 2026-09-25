@@ -8,8 +8,16 @@ export const ACCESS_SCOPES: AccessScope[] = ["agency", "assigned", "self"];
 export const LEVEL_LABEL: Record<AccessLevel, string> = {
   owner: "Owner",
   admin: "Admin",
-  staff: "Staff",
+  staff: "Team member",
 };
+
+/** Mid-sentence invite wording. Stored level stays `staff`; the phrase is "a team member". */
+export function levelInvitePhrase(level: string): string {
+  if (level === "staff" || level === "employee") return "a team member";
+  const label = level === "owner" ? "owner" : level === "admin" ? "admin" : level;
+  const article = /^[aeiou]/i.test(label) ? "an" : "a";
+  return `${article} ${label}`;
+}
 
 export const LEVEL_SUMMARY: Record<AccessLevel, string> = {
   owner: "Everything, including agency settings and who can do what. Can't be limited.",
@@ -19,7 +27,7 @@ export const LEVEL_SUMMARY: Record<AccessLevel, string> = {
 
 export const SCOPE_LABEL: Record<AccessScope, string> = {
   agency: "Whole agency",
-  assigned: "Assigned homes, staff & clients",
+  assigned: "Assigned homes, team members, and clients",
   self: "Only themselves",
 };
 

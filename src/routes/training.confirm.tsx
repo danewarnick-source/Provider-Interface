@@ -58,9 +58,7 @@ function TrainingConfirmPage() {
       <main className="wrap pi-home-commerce">
         <section className="mx-auto max-w-2xl">
           <p className="pi-home-kicker">Training</p>
-          <h1>
-            {order?.paymentStatus === "paid" ? "Seats are paid" : "Confirming payment"}
-          </h1>
+          <h1>{order?.paymentStatus === "paid" ? "Seats are paid" : "Confirming payment"}</h1>
           <p className="pi-home-lede">
             This is not an office. You are not an admin. The office places class seats and sends
             30-day access from Provider Interface Executive.
@@ -97,13 +95,13 @@ function TrainingConfirmPage() {
                 </ul>
                 {hasClass ? (
                   <p className="mt-4 text-sm text-[#0b1220]/70">
-                    CPR and Mandt are class seats. The office will place each person on a class
-                    and email the details.
+                    CPR and Mandt are class seats. The office will place each person on a class and
+                    email the details.
                   </p>
                 ) : null}
                 {hasThirty ? (
                   <p className="mt-3 text-sm text-[#0b1220]/70">
-                    The 30-day course uses a training-only login — not Employees, Clients, or the
+                    The 30-day course uses a training-only login — not Team Members, Clients, or the
                     Scheduler. The office sends that access.
                   </p>
                 ) : null}

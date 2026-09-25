@@ -100,11 +100,7 @@ export interface CommonReportOutput {
    *  - employee_face_sheet: [] (ships to employee_documents, not client files) */
   attachClientIds: string[];
   /** Underlying generator payload, for callers that need the specifics. */
-  raw:
-    | BudgetReportResult
-    | MealMenuReportResult
-    | PlanVsActualResult
-    | EmployeeFaceSheetResult;
+  raw: BudgetReportResult | MealMenuReportResult | PlanVsActualResult | EmployeeFaceSheetResult;
 }
 
 export interface CommonShipOutput extends CommonReportOutput {
@@ -155,8 +151,7 @@ export const REPORT_META: Record<ReportType, ReportTypeMeta> = {
     requiredParams: ["clientId", "weekStart"],
     optionalParams: [],
     documentType: "meal_plan_menu",
-    description:
-      "Weekly meal plan grid with shopping list, nutrition, and preferences.",
+    description: "Weekly meal plan grid with shopping list, nutrition, and preferences.",
   },
   meal_plan_vs_actual: {
     key: "meal_plan_vs_actual",
@@ -165,18 +160,17 @@ export const REPORT_META: Record<ReportType, ReportTypeMeta> = {
     requiredParams: ["clientId", "weekStart"],
     optionalParams: ["weeksCount"],
     documentType: "meal_plan_plan_vs_actual",
-    description:
-      "Per-day per-slot planned meal vs. staff-recorded actual for audits.",
+    description: "Per-day per-slot planned meal vs. staff-recorded actual for audits.",
   },
   employee_face_sheet: {
     key: "employee_face_sheet",
-    label: "Employee Face Sheet",
+    label: "Team Member Face Sheet",
     scope: "staff",
     requiredParams: ["staffId"],
     optionalParams: [],
     documentType: "face_sheet",
     description:
-      "One-page aggregated employee record: identity, contact, employment, certifications & trainings, deadlines, and HR docs on file.",
+      "One-page aggregated team member record: identity, contact, employment, certifications & trainings, deadlines, and HR docs on file.",
   },
 };
 
@@ -245,9 +239,7 @@ export async function generateClientReport(
     case "meal_plan_vs_actual": {
       const args: PlanVsActualArgs = {
         clientId: requireField(params.clientId, "clientId"),
-        weekStart: mondayOf(
-          coerceWeekStart(requireField(params.weekStart, "weekStart")),
-        ),
+        weekStart: mondayOf(coerceWeekStart(requireField(params.weekStart, "weekStart"))),
         weeksCount: params.weeksCount,
         supabaseClient: params.supabaseClient,
       };
@@ -315,9 +307,7 @@ export async function shipClientReport(
         clientName: r.clientName,
         attachClientIds: [r.clientId],
         raw: r,
-        snapshots: [
-          { clientId: r.clientId, documentId: r.documentId, storagePath: r.storagePath },
-        ],
+        snapshots: [{ clientId: r.clientId, documentId: r.documentId, storagePath: r.storagePath }],
       };
     }
     case "meal_plan_menu": {
@@ -338,17 +328,13 @@ export async function shipClientReport(
         clientName: r.clientName,
         attachClientIds: [r.clientId],
         raw: r,
-        snapshots: [
-          { clientId: r.clientId, documentId: r.documentId, storagePath: r.storagePath },
-        ],
+        snapshots: [{ clientId: r.clientId, documentId: r.documentId, storagePath: r.storagePath }],
       };
     }
     case "meal_plan_vs_actual": {
       const args: PlanVsActualArgs = {
         clientId: requireField(params.clientId, "clientId"),
-        weekStart: mondayOf(
-          coerceWeekStart(requireField(params.weekStart, "weekStart")),
-        ),
+        weekStart: mondayOf(coerceWeekStart(requireField(params.weekStart, "weekStart"))),
         weeksCount: params.weeksCount,
         supabaseClient: params.supabaseClient,
       };

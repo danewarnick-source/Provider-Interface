@@ -17,6 +17,8 @@
  */
 
 export const CANONICAL_SITE_ORIGIN = "https://hivecertify.com";
+/** Public site for links people click in email. Not the auth-redirect host. */
+export const PROVIDER_INTERFACE_ORIGIN = "https://providerinterface.com";
 export const RESET_PASSWORD_PATH = "/reset-password";
 export const VERCEL_PREVIEW_ORIGIN = "https://agency-peace-of-mind.vercel.app";
 
@@ -30,6 +32,11 @@ function readEnv(name: string): string | undefined {
     /* browser / edge without process */
   }
   return undefined;
+}
+
+export function isHivecertifyHost(hostname: string): boolean {
+  const host = String(hostname || "").toLowerCase();
+  return host === "hivecertify.com" || host.endsWith(".hivecertify.com");
 }
 
 export function isLovableAuthHost(hostname: string): boolean {
@@ -113,6 +120,35 @@ export function authRedirectUrl(path: string, candidate?: string | null): string
 
 export function passwordResetRedirectUrl(candidate?: string | null): string {
   return authRedirectUrl(RESET_PASSWORD_PATH, candidate);
+}
+
+/**
+ * Origin printed in email links. hivecertify.com stays valid for in-app auth
+ * redirects, and is rewritten here so a person reading mail never sees it.
+ */
+export function emailLinkOrigin(candidate?: string | null): string {
+  const resolved = resolveAuthOrigin(candidate);
+  try {
+    if (isHivecertifyHost(new URL(resolved).hostname)) return PROVIDER_INTERFACE_ORIGIN;
+  } catch {
+    return PROVIDER_INTERFACE_ORIGIN;
+  }
+  return resolved;
+}
+
+/** Full redirect URL embedded in an auth email. Lovable and hivecertify.com become providerinterface.com. */
+export function rewriteEmailRedirectUrl(url: string, fallbackPath: string = "/"): string {
+  const path = fallbackPath.startsWith("/") ? fallbackPath : `/${fallbackPath}`;
+  const fallback = `${PROVIDER_INTERFACE_ORIGIN}${path}`;
+  try {
+    const parsed = new URL(url);
+    if (isLovableAuthHost(parsed.hostname) || isHivecertifyHost(parsed.hostname)) {
+      return `${PROVIDER_INTERFACE_ORIGIN}${parsed.pathname}${parsed.search}${parsed.hash}`;
+    }
+    return `${parsed.origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return fallback;
+  }
 }
 
 /**

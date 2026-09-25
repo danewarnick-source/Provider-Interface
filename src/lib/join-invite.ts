@@ -1,4 +1,4 @@
-import { resolveAuthOrigin } from "./auth-redirect.ts";
+import { PROVIDER_INTERFACE_ORIGIN } from "./auth-redirect.ts";
 import { defaultUsernameFromEmail } from "./account-username.ts";
 
 /** Shown on every failed join so testers are not dumped into new-agency signup. */
@@ -20,9 +20,12 @@ export function inviteTokenFromSearchStr(searchStr: string | null | undefined): 
   return extractInviteToken({ invite: sp.get("invite"), token: sp.get("token") });
 }
 
-export function inviteJoinUrl(origin: string, token: string): string {
-  const base = resolveAuthOrigin(origin);
-  return `${base}/join?invite=${encodeURIComponent(token)}`;
+/**
+ * Team-member join links always open providerinterface.com.
+ * The caller's origin (hivecertify.com, Lovable, localhost, a preview) is not the link in the email.
+ */
+export function inviteJoinUrl(_origin: string, token: string): string {
+  return `${PROVIDER_INTERFACE_ORIGIN}/join?invite=${encodeURIComponent(token)}`;
 }
 
 export type InviteFailureReason =
@@ -124,9 +127,7 @@ export const JOIN_PASSWORD_TOO_SHORT = "Password must be at least 8 characters."
  * Auth may still reject a leaked / HIBP-listed password if that project flag is on.
  */
 export function isValidJoinPassword(password: string): boolean {
-  return (
-    password.length >= JOIN_PASSWORD_MIN_LENGTH && password.length <= JOIN_PASSWORD_MAX_LENGTH
-  );
+  return password.length >= JOIN_PASSWORD_MIN_LENGTH && password.length <= JOIN_PASSWORD_MAX_LENGTH;
 }
 
 /** Live copy for a new password. Empty string means "not typed yet". */

@@ -2607,10 +2607,10 @@ async function runObligationNectarValidation(
       reasons.push(`Missing ${group.label} (expected one of: ${(group.any_of ?? []).join(", ")}).`);
   }
   if (nameMatch === "unreadable") {
-    reasons.push("Could not read the staff member's name on the document.");
+    reasons.push("Could not read the team member's name on the document.");
   } else if (nameMatch === "mismatch") {
     reasons.push(
-      `Name on document ("${ocr.name_on_certificate ?? "—"}") does not match staff profile ("${profileName ?? "—"}").`,
+      `Name on document ("${ocr.name_on_certificate ?? "—"}") does not match team member profile ("${profileName ?? "—"}").`,
     );
   }
 

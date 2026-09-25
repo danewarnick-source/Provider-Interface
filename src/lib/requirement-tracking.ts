@@ -39,7 +39,7 @@ export const FREQUENCY_OPTIONS: Array<{
   hint: string;
 }> = [
   { value: "one_time", label: "One-time", hint: "Set once, never recurs." },
-  { value: "per_employee", label: "Per employee", hint: "Done once for each staff member." },
+  { value: "per_employee", label: "Per team member", hint: "Done once for each team member." },
   { value: "per_shift", label: "Per shift", hint: "Done each shift." },
   { value: "per_code", label: "Per billing code", hint: "Done once per service code." },
   { value: "per_day", label: "Daily", hint: "Recheck every day." },
@@ -47,7 +47,11 @@ export const FREQUENCY_OPTIONS: Array<{
   { value: "per_month", label: "Monthly", hint: "Recheck every 30 days." },
   { value: "per_quarter", label: "Quarterly", hint: "Recheck every 90 days." },
   { value: "per_year", label: "Yearly", hint: "Recheck every 365 days." },
-  { value: "per_billing_rate_unit", label: "Per billing-rate unit", hint: "Tied to a billing unit event." },
+  {
+    value: "per_billing_rate_unit",
+    label: "Per billing-rate unit",
+    hint: "Tied to a billing unit event.",
+  },
   { value: "ongoing", label: "Ongoing", hint: "Continuously maintained; spot-check periodically." },
 ];
 

@@ -48,7 +48,7 @@ export async function fetchEvidenceEmployees(
   if (slim.error) {
     return {
       people: [],
-      error: slim.error.message || full.error?.message || "Could not load employees.",
+      error: slim.error.message || full.error?.message || "Could not load team members.",
     };
   }
 

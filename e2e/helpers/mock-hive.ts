@@ -48,6 +48,8 @@ export type MockOptions = {
   logsError?: boolean;
   /** Skip staff_assignments so the HHS hub bounce path can be asserted. */
   noAssignments?: boolean;
+  /** Mark one roster profile custom_attributes.needs_setup so Finish setup can render. */
+  needsSetupUserId?: string;
 };
 
 type Row = Record<string, unknown>;
@@ -115,7 +117,7 @@ function orgRow() {
   };
 }
 
-function profileRow(staff: (typeof STAFF_LIST)[number]): Row {
+function profileRow(staff: (typeof STAFF_LIST)[number], opts: MockOptions): Row {
   const [first, ...rest] = staff.name.split(" ");
   return {
     id: staff.id,
@@ -152,6 +154,8 @@ function profileRow(staff: (typeof STAFF_LIST)[number]): Row {
     requires_abi: true,
     is_active: true,
     bc_role: null,
+    custom_attributes: opts.needsSetupUserId === staff.id ? { needs_setup: true } : {},
+    phone: opts.needsSetupUserId === staff.id ? "555-0142" : null,
   };
 }
 
@@ -384,7 +388,7 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "organization_members":
       return staff.map((s) => withAccessLevel(memberRow(s, true)));
     case "profiles":
-      return staff.map(profileRow);
+      return staff.map((s) => profileRow(s, opts));
     case "org_member_directory":
       return staff.map((s) => ({
         id: s.id,
@@ -761,6 +765,22 @@ function inferServerFn(url: string, body: string): string {
 
 function serverFnPayload(url: string, body: string): unknown {
   const fn = inferServerFn(url, body);
+  const fnBlob = `${fn}\n${url}\n${body}`;
+  if (/applyEmployeeRosterRow/i.test(fn)) {
+    return {
+      userId: "00000000-0000-4000-a000-000000000498",
+      email: "sam.rivera@example.test",
+      action: "created",
+      reason: null,
+    };
+  }
+  if (/finishEmployeeSetup/i.test(fn)) {
+    return {
+      userId: "00000000-0000-4000-a000-000000000201",
+      email: "jake.probert@example.test",
+      name: "Jake Probert",
+    };
+  }
   if (/createEmployeeManually/i.test(fn)) {
     return { userId: "00000000-0000-4000-a000-000000000499", email: "sep1.tester@example.test" };
   }
@@ -874,6 +894,30 @@ function serverFnPayload(url: string, body: string): unknown {
     };
   }
   if (/listAgencyPolicies|listPolicyJobCodeOptions/i.test(fn)) return [];
+  if (/getAgencySetupStatus/i.test(fn)) {
+    return {
+      complete: true,
+      answeredCount: 6,
+      requiredCount: 6,
+      unanswered: [],
+      answeredKeys: [],
+      progressLabel: "6 of 6",
+      message: null,
+      createGateExempt: true,
+      createAllowed: true,
+      organizationId: ORG_ID,
+      facts: {},
+    };
+  }
+  if (/listAccessPresets/i.test(fn)) return sampleAccessPresets();
+  if (/listTeamAccess/i.test(fn)) return sampleTeamAccess();
+  if (/listAccessTargets/i.test(fn)) return sampleAccessTargets();
+  if (/getMemberAccess/i.test(fn)) return sampleMemberAccess(fnBlob);
+  if (/setMemberAccess/i.test(fn)) {
+    rememberMemberAccess(fnBlob);
+    return { ok: true };
+  }
+  if (/listAccessChangeLog/i.test(fn)) return { rows: [], total: 0 };
   if (/getStaffPii|getStaffTrainingRiskFlags/i.test(fn)) return null;
   if (/recordPhiAccess|dismissUiPref|requestPermission/i.test(fn)) return { ok: true };
   if (/saveDailyRecord/i.test(fn)) {
@@ -954,6 +998,144 @@ function serverFnPayload(url: string, body: string): unknown {
     return { ok: true };
   }
   return [];
+}
+
+const PRESET_PROGRAM_MANAGER = "00000000-0000-4000-a000-000000000911";
+const PRESET_DSP = "00000000-0000-4000-a000-000000000912";
+const PRESET_BILLING = "00000000-0000-4000-a000-000000000913";
+const PRESET_HOME = "00000000-0000-4000-a000-000000000914";
+const PRESET_HR = "00000000-0000-4000-a000-000000000915";
+const PRESET_LEAD = "00000000-0000-4000-a000-000000000916";
+const PRESET_HRC = "00000000-0000-4000-a000-000000000917";
+
+type SavedMemberAccess = {
+  membership_id: string;
+  access_level: "owner" | "admin" | "staff";
+  access_scope: "agency" | "assigned" | "self";
+  access_preset_id: string | null;
+  access_overrides: Record<string, string>;
+  assignments: Array<{ kind: "home" | "staff" | "client"; target_id: string }>;
+};
+
+const savedMemberAccess = new Map<string, SavedMemberAccess>();
+
+function sampleAccessPresets() {
+  const row = (
+    id: string,
+    name: string,
+    access_level: "admin" | "staff",
+    access_scope: "agency" | "assigned" | "self",
+    seed_key: string,
+    home_page: string,
+  ) => ({
+    id,
+    name,
+    access_level,
+    access_scope,
+    home_page,
+    categories: access_level === "staff" ? { phone_app: "edit" } : { staff_roster: "edit", clients: "edit" },
+    seed_key,
+    member_count: 1,
+  });
+  return [
+    row(PRESET_BILLING, "Billing", "admin", "agency", "billing", "/dashboard"),
+    row(PRESET_DSP, "DSP", "staff", "self", "dsp", "/employee"),
+    row(PRESET_HOME, "Group Home Manager", "admin", "assigned", "home_manager", "/dashboard"),
+    row(PRESET_HR, "HR / Office", "admin", "agency", "hr_office", "/dashboard"),
+    row(PRESET_HRC, "HRC Committee", "staff", "assigned", "hrc_committee", "/dashboard/hrc"),
+    row(PRESET_LEAD, "Lead DSP", "staff", "assigned", "lead_dsp", "/employee"),
+    row(PRESET_PROGRAM_MANAGER, "Program Manager", "admin", "agency", "program_manager", "/dashboard"),
+  ];
+}
+
+function sampleTeamAccess() {
+  return [
+    {
+      membership_id: "00000000-0000-4000-a000-000000000921",
+      user_id: "00000000-0000-4000-a000-000000000931",
+      email: "alex.kim@example.test",
+      full_name: "Alex Kim",
+      access_level: "owner",
+      access_scope: "agency",
+      preset_name: null,
+      company_executive: true,
+      hive_executive: false,
+    },
+    {
+      membership_id: "00000000-0000-4000-a000-000000000922",
+      user_id: "00000000-0000-4000-a000-000000000932",
+      email: "sam.rivera@example.test",
+      full_name: "Sam Rivera",
+      access_level: "admin",
+      access_scope: "agency",
+      preset_name: "Program Manager",
+      company_executive: false,
+      hive_executive: false,
+    },
+    {
+      membership_id: "00000000-0000-4000-a000-000000000923",
+      user_id: STAFF.jake.id,
+      email: "pat.lee@example.test",
+      full_name: "Pat Lee",
+      access_level: "staff",
+      access_scope: "self",
+      preset_name: "DSP",
+      company_executive: false,
+      hive_executive: false,
+    },
+  ];
+}
+
+function sampleAccessTargets() {
+  return {
+    home: TEAMS.map((t) => ({ id: t.id, label: t.team_name })),
+    staff: [{ id: STAFF.jake.id, label: "Pat Lee" }],
+    client: [{ id: CLIENTS.tommy.id, label: "Sample Client" }],
+  };
+}
+
+function userIdFromBlob(blob: string): string {
+  return blob.match(/"user_id"\s*:\s*"([^"]+)"/)?.[1] ?? STAFF.jake.id;
+}
+
+function sampleMemberAccess(blob: string): SavedMemberAccess {
+  const userId = userIdFromBlob(blob);
+  return (
+    savedMemberAccess.get(userId) ?? {
+      membership_id: "00000000-0000-4000-a000-000000000941",
+      access_level: "admin",
+      access_scope: "agency",
+      access_preset_id: PRESET_PROGRAM_MANAGER,
+      access_overrides: {},
+      assignments: [],
+    }
+  );
+}
+
+function rememberMemberAccess(blob: string) {
+  const userId = userIdFromBlob(blob);
+  const level = (blob.match(/"access_level"\s*:\s*"(owner|admin|staff)"/)?.[1] ??
+    "admin") as SavedMemberAccess["access_level"];
+  const scope = (blob.match(/"access_scope"\s*:\s*"(agency|assigned|self)"/)?.[1] ??
+    "agency") as SavedMemberAccess["access_scope"];
+  const preset = blob.match(/"access_preset_id"\s*:\s*"([^"]+)"/)?.[1] ?? null;
+  const assignments: SavedMemberAccess["assignments"] = [];
+  const re =
+    /"kind"\s*:\s*"(home|staff|client)"\s*,\s*"target_id"\s*:\s*"([0-9a-f-]{36})"/gi;
+  for (const match of blob.matchAll(re)) {
+    assignments.push({
+      kind: match[1] as SavedMemberAccess["assignments"][number]["kind"],
+      target_id: match[2],
+    });
+  }
+  savedMemberAccess.set(userId, {
+    membership_id: "00000000-0000-4000-a000-000000000941",
+    access_level: level,
+    access_scope: level === "owner" ? "agency" : scope,
+    access_preset_id: level === "owner" ? null : preset,
+    access_overrides: {},
+    assignments: level === "owner" || scope !== "assigned" ? [] : assignments,
+  });
 }
 
 async function handleServerFn(route: Route) {

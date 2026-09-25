@@ -7,8 +7,7 @@
  *
  * Pulled together on demand from the same tables the profile UI reads:
  *   - profiles (identity, contact, position, hire date, emergency contact)
- *   - organization_members (PI role + active status)
- *   - staff_types + profiles.staff_type_keys (org title tier)
+ *   - organization_members (PI role, job title, active status)
  *   - teams (team assignment)
  *   - certifications + external_certifications + baseline training
  *     completions (certs & trainings with expirations)
@@ -22,7 +21,14 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase as defaultSupabase } from "@/integrations/supabase/client";
-import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont, type PDFImage } from "pdf-lib";
+import {
+  PDFDocument,
+  StandardFonts,
+  rgb,
+  type PDFPage,
+  type PDFFont,
+  type PDFImage,
+} from "pdf-lib";
 
 const EMPTY = "—";
 const BUCKET = "employee-docs";
@@ -96,20 +102,20 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
   //    users from tripping object-mode queries with multiple memberships.
   const { data: member, error: mErr } = await sb
     .from("organization_members")
-    .select("id, role:access_level, active, organization_id")
+    .select("id, access_level, active, organization_id, job_title")
     .eq("user_id", staffId)
     .eq("organization_id", organizationId)
     .limit(1)
     .maybeSingle();
   if (mErr) throw new Error(mErr.message);
-  if (!member) throw new Error("Employee not found in your organization");
+  if (!member) throw new Error("Team member not found in your organization");
   const orgId = (member as { organization_id: string }).organization_id;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile, error: pErr } = await (sb as any)
     .from("profiles")
     .select(
-      "id, full_name, first_name, last_name, email, username, phone, employee_id, position, positions, department, hire_date, account_status, worker_type, team_id, photo_path, staff_type_keys, emergency_contact_name, emergency_contact_relationship, emergency_contact_phone",
+      "id, full_name, first_name, last_name, email, username, phone, employee_id, position, positions, department, hire_date, account_status, worker_type, team_id, photo_path, emergency_contact_name, emergency_contact_relationship, emergency_contact_phone",
     )
     .eq("id", staffId)
     .limit(1)
@@ -134,23 +140,18 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
   const teamId = (profile as { team_id: string | null } | null)?.team_id ?? null;
   let team: { team_name: string | null } | null = null;
   if (teamId) {
-    const { data } = await sb.from("teams").select("team_name").eq("id", teamId).limit(1).maybeSingle();
+    const { data } = await sb
+      .from("teams")
+      .select("team_name")
+      .eq("id", teamId)
+      .limit(1)
+      .maybeSingle();
     team = (data as { team_name: string | null } | null) ?? null;
   }
 
-  // 4) Staff-type labels for org title tier.
-  const { data: typesCatalog } = await sb
-    .from("staff_types")
-    .select("key, label")
-    .eq("organization_id", orgId);
-  const typeByKey = new Map(
-    ((typesCatalog ?? []) as Array<{ key: string; label: string }>).map((t) => [t.key, t.label]),
-  );
-  const typeKeys =
-    ((profile as { staff_type_keys: string[] | null } | null)?.staff_type_keys ?? []) as string[];
-  const staffTypeLabels = typeKeys.map((k) => typeByKey.get(k) ?? k);
+  const jobTitle = String((member as { job_title?: string | null }).job_title ?? "").trim();
 
-  // 5) Certifications from all three sources.
+  // 4) Certifications from all three sources.
   const certs: CertRow[] = [];
   const { data: hiveCerts } = await sb
     .from("certifications")
@@ -182,11 +183,13 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
     status: string | null;
   }>) {
     certs.push({
-      label:
-        [r.cert_name ?? r.cert_type ?? "External certification", r.issuer ? `— ${r.issuer}` : ""]
-          .filter(Boolean)
-          .join(" ")
-          .trim(),
+      label: [
+        r.cert_name ?? r.cert_type ?? "External certification",
+        r.issuer ? `— ${r.issuer}` : "",
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .trim(),
       source: `External cert${r.status ? ` · ${r.status}` : ""}`,
       issued: r.issued_date,
       expires: r.expires_at,
@@ -255,17 +258,21 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
     profile: (profile ?? {}) as any,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     member: member as any,
-    org: (org ?? null) as { name: string | null; legal_name: string | null; dba_name: string | null } | null,
+    org: (org ?? null) as {
+      name: string | null;
+      legal_name: string | null;
+      dba_name: string | null;
+    } | null,
     branding: (branding ?? null) as {
       logo_path: string | null;
       org_address: string | null;
       org_phone: string | null;
     } | null,
     team,
-    staffTypeLabels,
+    jobTitle,
     certs,
     deadlines,
-    hrDocs: ((hrDocs ?? []) as HrDocRow[]),
+    hrDocs: (hrDocs ?? []) as HrDocRow[],
     photoBytes,
     logoBytes,
   };
@@ -344,15 +351,22 @@ function drawText(
 ): number {
   const { font, size, color = INK, maxWidth, maxLines, align = "left" } = opts;
   const lines = maxWidth
-    ? (maxLines ? wrapClamp(text, font, size, maxWidth, maxLines) : wrap(text, font, size, maxWidth))
+    ? maxLines
+      ? wrapClamp(text, font, size, maxWidth, maxLines)
+      : wrap(text, font, size, maxWidth)
     : [text];
   const lineHeight = size * LH;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const dx = align === "right" && maxWidth
-      ? x + maxWidth - font.widthOfTextAtSize(line, size)
-      : x;
-    page.drawText(line, { x: dx, y: y - (i + 1) * lineHeight + lineHeight * 0.25, font, size, color });
+    const dx =
+      align === "right" && maxWidth ? x + maxWidth - font.widthOfTextAtSize(line, size) : x;
+    page.drawText(line, {
+      x: dx,
+      y: y - (i + 1) * lineHeight + lineHeight * 0.25,
+      font,
+      size,
+      color,
+    });
   }
   return y - lines.length * lineHeight;
 }
@@ -369,11 +383,18 @@ function drawKV(
 ): number {
   // Label (small, uppercase-ish muted)
   page.drawText(label.toUpperCase(), {
-    x, y: y - 8, size: 6.8, font: helvB, color: MUTED,
+    x,
+    y: y - 8,
+    size: 6.8,
+    font: helvB,
+    color: MUTED,
   });
   const yVal = y - 8 - 12;
   const end = drawText(page, value, x, yVal + 9.5 * LH * 0.75, {
-    font: helv, size: 9.5, color: INK, maxWidth: colW,
+    font: helv,
+    size: 9.5,
+    color: INK,
+    maxWidth: colW,
   });
   return end - 8;
 }
@@ -391,15 +412,25 @@ function drawKV2(
   helvB: PDFFont,
 ): number {
   page.drawText(label.toUpperCase(), {
-    x, y: y - 8, size: 6.8, font: helvB, color: MUTED,
+    x,
+    y: y - 8,
+    size: 6.8,
+    font: helvB,
+    color: MUTED,
   });
   let cursor = y - 8 - 12 + 9.5 * LH * 0.75;
   cursor = drawText(page, line1, x, cursor, {
-    font: helv, size: 9.5, color: INK, maxWidth: colW,
+    font: helv,
+    size: 9.5,
+    color: INK,
+    maxWidth: colW,
   });
   if (line2) {
     cursor = drawText(page, line2, x, cursor, {
-      font: helv, size: 9, color: MUTED, maxWidth: colW,
+      font: helv,
+      size: 9,
+      color: MUTED,
+      maxWidth: colW,
     });
   }
   return cursor - 8;
@@ -417,7 +448,11 @@ function sectionHeader(
   page.drawRectangle({ x, y: y - barH, width: w, height: barH, color: rgb(0.945, 0.96, 0.975) });
   page.drawRectangle({ x, y: y - barH, width: 2.5, height: barH, color: ACCENT });
   page.drawText(title.toUpperCase(), {
-    x: x + 10, y: y - barH + 5.5, size: 7.8, font: helvB, color: ACCENT,
+    x: x + 10,
+    y: y - barH + 5.5,
+    size: 7.8,
+    font: helvB,
+    color: ACCENT,
   });
   return y - barH - 6;
 }
@@ -452,11 +487,11 @@ export async function generateEmployeeFaceSheet(
     [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
     (p.username && String(p.username).trim()) ||
     (p.email && String(p.email).trim()) ||
-    "Employee";
+    "Team member";
   const orgName = (d.org?.dba_name ?? d.org?.name ?? "").trim() || "Organization";
 
   const pdf = await PDFDocument.create();
-  pdf.setTitle(`Employee Face Sheet - ${name}`);
+  pdf.setTitle(`Team Member Face Sheet - ${name}`);
   pdf.setCreator("Provider Interface");
   const helv = await pdf.embedFont(StandardFonts.Helvetica);
   const helvB = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -481,7 +516,11 @@ export async function generateEmployeeFaceSheet(
     leftBottom = headerTop - h;
   } else {
     const end = drawText(page, orgName, M, headerTop, {
-      font: helvB, size: 18, color: INK, maxWidth: 320, maxLines: 1,
+      font: helvB,
+      size: 18,
+      color: INK,
+      maxWidth: 320,
+      maxLines: 1,
     });
     leftBottom = end;
   }
@@ -490,15 +529,30 @@ export async function generateEmployeeFaceSheet(
   const rightX = PAGE_W - M - rightColW;
   let ry = headerTop;
   ry = drawText(page, orgName, rightX, ry, {
-    font: helvB, size: 9.5, color: INK, maxWidth: rightColW, maxLines: 1, align: "right",
+    font: helvB,
+    size: 9.5,
+    color: INK,
+    maxWidth: rightColW,
+    maxLines: 1,
+    align: "right",
   });
   ry -= 2;
   ry = drawText(page, field(d.branding?.org_address), rightX, ry, {
-    font: helv, size: 8.5, color: MUTED, maxWidth: rightColW, maxLines: 2, align: "right",
+    font: helv,
+    size: 8.5,
+    color: MUTED,
+    maxWidth: rightColW,
+    maxLines: 2,
+    align: "right",
   });
   ry -= 1;
   ry = drawText(page, field(d.branding?.org_phone), rightX, ry, {
-    font: helv, size: 8.5, color: MUTED, maxWidth: rightColW, maxLines: 1, align: "right",
+    font: helv,
+    size: 8.5,
+    color: MUTED,
+    maxWidth: rightColW,
+    maxLines: 1,
+    align: "right",
   });
 
   let y = Math.min(leftBottom, ry) - 14;
@@ -511,8 +565,12 @@ export async function generateEmployeeFaceSheet(
   const identityTop = y;
   const photoY = identityTop - photoBoxSize;
   page.drawRectangle({
-    x: photoX, y: photoY, width: photoBoxSize, height: photoBoxSize,
-    borderColor: BORDER, borderWidth: 0.75,
+    x: photoX,
+    y: photoY,
+    width: photoBoxSize,
+    height: photoBoxSize,
+    borderColor: BORDER,
+    borderWidth: 0.75,
   });
   if (photoImg) {
     const box = photoBoxSize - 4;
@@ -524,36 +582,58 @@ export async function generateEmployeeFaceSheet(
     page.drawImage(photoImg, {
       x: photoX + (photoBoxSize - w) / 2,
       y: photoY + (photoBoxSize - h) / 2,
-      width: w, height: h,
+      width: w,
+      height: h,
     });
   } else {
     drawText(page, "No photo on file", photoX, photoY + photoBoxSize / 2 + 4, {
-      font: helv, size: 8.5, color: MUTED, maxWidth: photoBoxSize, align: "left",
+      font: helv,
+      size: 8.5,
+      color: MUTED,
+      maxWidth: photoBoxSize,
+      align: "left",
     });
   }
 
   const idW = photoX - M - 20;
   let iy = identityTop;
   iy = drawText(page, "EMPLOYEE FACE SHEET", M, iy, {
-    font: helvB, size: 8, color: ACCENT, maxWidth: idW,
+    font: helvB,
+    size: 8,
+    color: ACCENT,
+    maxWidth: idW,
   });
   iy -= 4;
   iy = drawText(page, name, M, iy, {
-    font: helvB, size: 22, color: INK, maxWidth: idW, maxLines: 2,
+    font: helvB,
+    size: 22,
+    color: INK,
+    maxWidth: idW,
+    maxLines: 2,
   });
   iy -= 4;
-  const orgTitle = d.staffTypeLabels.length
-    ? (d.staffTypeLabels.length <= 3
-        ? d.staffTypeLabels.join(" / ")
-        : `${d.staffTypeLabels[0]} and ${d.staffTypeLabels.length - 1} more`)
-    : EMPTY;
+  const orgTitle = d.jobTitle || EMPTY;
   iy = drawText(page, orgTitle, M, iy, {
-    font: helv, size: 10.5, color: INK, maxWidth: idW, maxLines: 1,
+    font: helv,
+    size: 10.5,
+    color: INK,
+    maxWidth: idW,
+    maxLines: 1,
   });
   iy -= 2;
-  const roleLine = `${String(d.member.role ?? "").toUpperCase()}  ·  ${d.member.active ? "Active" : "Deactivated"}`;
+  const accessLabel =
+    d.member.access_level === "owner"
+      ? "OWNER"
+      : d.member.access_level === "admin"
+        ? "ADMIN"
+        : "TEAM MEMBER";
+  const roleLine = `${accessLabel}  ·  ${d.member.active ? "Active" : "Deactivated"}`;
   iy = drawText(page, roleLine, M, iy, {
-    font: helvB, size: 7.8, color: ACCENT, maxWidth: idW, maxLines: 1,
+    font: helvB,
+    size: 7.8,
+    color: ACCENT,
+    maxWidth: idW,
+    maxLines: 1,
   });
 
   y = Math.min(iy, photoY) - 14;
@@ -569,31 +649,37 @@ export async function generateEmployeeFaceSheet(
   yL = sectionHeader(page, "Identity & contact", M, yL, colW, helvB);
   yL = drawKV(page, "Email", field(p.email), M, yL, colW, helv, helvB);
   yL = drawKV(page, "Phone", field(p.phone), M, yL, colW, helv, helvB);
-  yL = drawKV(page, "Employee ID", field(p.employee_id), M, yL, colW, helv, helvB);
+  yL = drawKV(page, "Team member ID", field(p.employee_id), M, yL, colW, helv, helvB);
   {
     const nm = field(p.emergency_contact_name);
     const rel = field(p.emergency_contact_relationship);
     const ph = field(p.emergency_contact_phone);
-    const line1 = nm === EMPTY && rel === EMPTY
-      ? EMPTY
-      : (rel !== EMPTY ? `${nm} (${rel})` : nm);
+    const line1 = nm === EMPTY && rel === EMPTY ? EMPTY : rel !== EMPTY ? `${nm} (${rel})` : nm;
     const line2 = ph !== EMPTY ? `Phone: ${ph}` : null;
     yL = drawKV2(page, "Emergency contact", line1, line2, M, yL, colW, helv, helvB);
   }
 
   let yR = y;
   yR = sectionHeader(page, "Employment", rightXCol, yR, colW, helvB);
-  const positions = Array.isArray(p.positions) && p.positions.length
-    ? (p.positions as string[]).join(", ")
-    : field(p.position);
+  const positions =
+    Array.isArray(p.positions) && p.positions.length
+      ? (p.positions as string[]).join(", ")
+      : field(p.position);
   yR = drawKV(page, "Position / role", positions, rightXCol, yR, colW, helv, helvB);
-  yR = drawKV(page, "Staff types",
-    d.staffTypeLabels.length ? d.staffTypeLabels.join(", ") : EMPTY,
-    rightXCol, yR, colW, helv, helvB);
+  yR = drawKV(page, "Job title", field(d.jobTitle), rightXCol, yR, colW, helv, helvB);
   yR = drawKV(page, "Team", field(d.team?.team_name), rightXCol, yR, colW, helv, helvB);
   yR = drawKV(page, "Department", field(p.department), rightXCol, yR, colW, helv, helvB);
   yR = drawKV(page, "Worker type", field(p.worker_type), rightXCol, yR, colW, helv, helvB);
-  yR = drawKV(page, "Hire date", fmtDate(p.hire_date as string | null), rightXCol, yR, colW, helv, helvB);
+  yR = drawKV(
+    page,
+    "Hire date",
+    fmtDate(p.hire_date as string | null),
+    rightXCol,
+    yR,
+    colW,
+    helv,
+    helvB,
+  );
 
   y = Math.min(yL, yR) - 4;
   hr(page, y);
@@ -608,7 +694,9 @@ export async function generateEmployeeFaceSheet(
   }
 
   let rowIndex = 0;
-  function resetRows(): void { rowIndex = 0; }
+  function resetRows(): void {
+    rowIndex = 0;
+  }
 
   function drawRow(
     cells: string[],
@@ -632,11 +720,19 @@ export async function generateEmployeeFaceSheet(
 
     if (header) {
       page.drawRectangle({
-        x: M, y: y - rowH, width: PAGE_W - M * 2, height: rowH, color: rgb(0.95, 0.955, 0.965),
+        x: M,
+        y: y - rowH,
+        width: PAGE_W - M * 2,
+        height: rowH,
+        color: rgb(0.95, 0.955, 0.965),
       });
     } else if (rowIndex % 2 === 1) {
       page.drawRectangle({
-        x: M, y: y - rowH, width: PAGE_W - M * 2, height: rowH, color: ZEBRA,
+        x: M,
+        y: y - rowH,
+        width: PAGE_W - M * 2,
+        height: rowH,
+        color: ZEBRA,
       });
     }
 
@@ -646,21 +742,24 @@ export async function generateEmployeeFaceSheet(
       const align = aligns[i];
       for (let li = 0; li < lines.length; li++) {
         const line = lines[li];
-        const dx = align === "right"
-          ? x + widths[i] - padX - font.widthOfTextAtSize(line, size)
-          : x + padX;
+        const dx =
+          align === "right" ? x + widths[i] - padX - font.widthOfTextAtSize(line, size) : x + padX;
         page.drawText(line, {
           x: dx,
           y: y - padY - (li + 1) * size * LH + size * LH * 0.25,
-          font, size, color,
+          font,
+          size,
+          color,
         });
       }
       x += widths[i];
     }
     y -= rowH;
     page.drawLine({
-      start: { x: M, y }, end: { x: PAGE_W - M, y },
-      thickness: 0.25, color: BORDER,
+      start: { x: M, y },
+      end: { x: PAGE_W - M, y },
+      thickness: 0.25,
+      color: BORDER,
     });
     if (!header) rowIndex++;
   }
@@ -702,7 +801,9 @@ export async function generateEmployeeFaceSheet(
     if (d.deadlines.length === 0) {
       ensureSpace(18);
       drawText(page, "No credentials expiring in the next 90 days.", M + 8, y, {
-        font: helv, size: 9, color: MUTED,
+        font: helv,
+        size: 9,
+        color: MUTED,
       });
       y -= 18;
     } else {
@@ -728,7 +829,9 @@ export async function generateEmployeeFaceSheet(
     if (d.hrDocs.length === 0) {
       ensureSpace(18);
       drawText(page, "No HR documents on file.", M + 8, y, {
-        font: helv, size: 9, color: MUTED,
+        font: helv,
+        size: 9,
+        color: MUTED,
       });
       y -= 18;
     } else {
@@ -750,31 +853,47 @@ export async function generateEmployeeFaceSheet(
   // ── Footer on every page ─────────────────────────────────────────────
   const pages = pdf.getPages();
   const genStr = generatedAt.toLocaleString("en-US", {
-    year: "numeric", month: "short", day: "numeric",
-    hour: "numeric", minute: "2-digit",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
   for (let i = 0; i < pages.length; i++) {
     const pg = pages[i];
     const footerY = 34;
     pg.drawLine({
-      start: { x: M, y: footerY + 14 }, end: { x: PAGE_W - M, y: footerY + 14 },
-      thickness: 0.5, color: BORDER,
+      start: { x: M, y: footerY + 14 },
+      end: { x: PAGE_W - M, y: footerY + 14 },
+      thickness: 0.5,
+      color: BORDER,
     });
-    pg.drawText(`Employee Face Sheet  ·  ${name}  ·  ${orgName}`, {
-      x: M, y: footerY + 4, size: 7.5, font: helvB, color: INK,
+    pg.drawText(`Team Member Face Sheet  ·  ${name}  ·  ${orgName}`, {
+      x: M,
+      y: footerY + 4,
+      size: 7.5,
+      font: helvB,
+      color: INK,
     });
     const meta = `Generated ${genStr}   ·   Page ${i + 1} of ${pages.length}`;
     const metaW = helv.widthOfTextAtSize(meta, 7.5);
     pg.drawText(meta, {
-      x: PAGE_W - M - metaW, y: footerY + 4, size: 7.5, font: helv, color: MUTED,
+      x: PAGE_W - M - metaW,
+      y: footerY + 4,
+      size: 7.5,
+      font: helv,
+      color: MUTED,
     });
   }
 
   const bytes = await pdf.save();
-  const safeName = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const safeName = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
   return {
     bytes,
-    filename: `employee-face-sheet-${safeName || "employee"}.pdf`,
+    filename: `team-member-face-sheet-${safeName || "team-member"}.pdf`,
     staffId: args.staffId,
     staffName: name,
     organizationId: d.orgId,
@@ -803,26 +922,29 @@ export async function shipEmployeeFaceSheet(
     .upload(storagePath, blob, { upsert: false, contentType: "application/pdf" });
   if (upErr) throw upErr;
 
-  const displayName = `Employee Face Sheet — ${report.periodLabel}.pdf`;
+  const displayName = `Team Member Face Sheet — ${report.periodLabel}.pdf`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: insertedRows, error: insErr } = await (sb as any)
     .from("employee_documents")
-    .insert([{
-      organization_id: report.organizationId,
-      staff_id: report.staffId,
-      kind: "face_sheet",
-      title: displayName,
-      file_path: storagePath,
-      file_name: displayName,
-      mime_type: "application/pdf",
-      size_bytes: report.bytes.byteLength,
-      uploaded_by: uid,
-    }])
+    .insert([
+      {
+        organization_id: report.organizationId,
+        staff_id: report.staffId,
+        kind: "face_sheet",
+        title: displayName,
+        file_path: storagePath,
+        file_name: displayName,
+        mime_type: "application/pdf",
+        size_bytes: report.bytes.byteLength,
+        uploaded_by: uid,
+      },
+    ])
     .select("id")
     .limit(1);
   if (insErr) throw new Error(insErr.message);
   const inserted = Array.isArray(insertedRows) ? insertedRows[0] : null;
-  if (!inserted) throw new Error("Face sheet saved, but the HR document record could not be confirmed.");
+  if (!inserted)
+    throw new Error("Face sheet saved, but the HR document record could not be confirmed.");
 
   return {
     ...report,

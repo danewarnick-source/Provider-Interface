@@ -367,7 +367,10 @@ describe("Evidence curated catalog", () => {
     const dayWhy = requirementByKey("day_supports_staff")?.why ?? "";
     assert.match(dayWhy, /company_ol_day_treatment_license/);
     assert.match(dayWhy, /company_ol_day_support_cert/);
-    assert.doesNotMatch(dayWhy, /Site licenses live on the company file; this is the staff assignment record/);
+    assert.doesNotMatch(
+      dayWhy,
+      /Site licenses live on the company file; this is the staff assignment record/,
+    );
 
     const ppsWhy = requirementByKey("pps_foster_license")?.why ?? "";
     assert.match(ppsWhy, /company_ol_child_placing_foster/);
@@ -379,12 +382,8 @@ describe("Evidence curated catalog", () => {
         "https://dlbc.utah.gov/home/office-of-licensing/human-services/applications-and-renewals/",
       ),
     );
-    assert.ok(
-      hrefs("annual_12hr_training").includes("https://dspd.utah.gov/providers/trainings/"),
-    );
-    assert.ok(
-      hrefs("see_workplace_supports_or_job_coach").includes("https://jobs.utah.gov/usor/"),
-    );
+    assert.ok(hrefs("annual_12hr_training").includes("https://dspd.utah.gov/providers/trainings/"));
+    assert.ok(hrefs("see_workplace_supports_or_job_coach").includes("https://jobs.utah.gov/usor/"));
   });
 
   it("locks first-due / next-due defaults and kills once/keep-current labels", () => {
@@ -414,8 +413,14 @@ describe("Evidence curated catalog", () => {
     assert.equal(computeFirstDueOn({ rule: "hire_30", hireDate: "2026-07-01" }), "2026-07-31");
     assert.equal(computeFirstDueOn({ rule: "hire_90", hireDate: "2026-07-01" }), "2026-09-29");
     assert.equal(computeFirstDueOn({ rule: "hire_180", hireDate: "2026-07-01" }), "2026-12-28");
-    assert.equal(computeFirstDueOn({ rule: "before_first_shift", hireDate: "2026-07-01" }), "2026-07-01");
-    assert.equal(computeFirstDueOn({ rule: "set_date", hireDate: "2026-07-01", setDate: "2026-08-15" }), "2026-08-15");
+    assert.equal(
+      computeFirstDueOn({ rule: "before_first_shift", hireDate: "2026-07-01" }),
+      "2026-07-01",
+    );
+    assert.equal(
+      computeFirstDueOn({ rule: "set_date", hireDate: "2026-07-01", setDate: "2026-08-15" }),
+      "2026-08-15",
+    );
     assert.equal(computeNextDueOn({ documentDate: "2026-03-12", renewYears: 2 }), "2028-03-12");
     assert.equal(computeNextDueOn({ documentDate: "2026-03-12", renewYears: 1 }), "2027-03-12");
     assert.equal(computeNextDueOn({ documentDate: "2026-03-12", renewYears: null }), null);
@@ -575,12 +580,8 @@ describe("Evidence people roster", () => {
   });
 
   it("uses the same people helper for employees, clients, and company", () => {
-    const employees = [
-      { id: "e-1", full_name: "Ann Lee", initials: "AL", subtitle: "DSP" },
-    ];
-    const clients = [
-      { id: "c-1", full_name: "Bea Stone", initials: "BS", subtitle: "HHS" },
-    ];
+    const employees = [{ id: "e-1", full_name: "Ann Lee", initials: "AL", subtitle: "DSP" }];
+    const clients = [{ id: "c-1", full_name: "Bea Stone", initials: "BS", subtitle: "HHS" }];
     const company = companyEvidencePerson("org-1", "True North Supports LLC");
     assert.deepEqual(
       peopleForEvidenceTab({ tab: "staff", employees, clients, company }).map((p) => p.id),
@@ -864,7 +865,7 @@ describe("Evidence nav + product lock", () => {
     assert.match(workspace, /companyEvidencePerson/);
     assert.match(workspace, /peopleForEvidenceTab/);
     assert.match(workspace, /itemsForEvidenceTab/);
-    assert.match(cards, /title: "Employees"/);
+    assert.match(cards, /title: "Team Members"/);
     assert.match(cards, /title: "Clients"/);
     assert.match(cards, /title: "Company"/);
     assert.match(cards, /\{card\.title\}/);
@@ -887,9 +888,7 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(workspace, /EvidenceMatrix|matrixColumns|evidence-matrix/);
     assert.equal(
       existsSync(
-        fileURLToPath(
-          new URL("./../components/evidence/evidence-matrix.tsx", import.meta.url),
-        ),
+        fileURLToPath(new URL("./../components/evidence/evidence-matrix.tsx", import.meta.url)),
       ),
       false,
     );
@@ -899,7 +898,7 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(workspace, /Company file is empty/);
     assert.doesNotMatch(workspace, /No rows yet\. Use Add to apply a pack/);
     assert.doesNotMatch(workspace, /Send to staff/);
-    assert.match(workspace, /Send to employee/);
+    assert.match(workspace, /Send to team member/);
     assert.match(workspace, /leaveEvidenceWizard/);
     assert.match(workspace, /person: null/);
     assert.doesNotMatch(workspace, /\.from\(["']clients["']\)/);
@@ -930,7 +929,7 @@ describe("Evidence nav + product lock", () => {
       "utf8",
     );
     assert.match(quiz, /data-evidence-quiz/);
-    assert.match(quiz, /See employee suggestions|See client suggestions/);
+    assert.match(quiz, /See team member suggestions|See client suggestions/);
     assert.match(quiz, /Add custom evidence/);
     assert.match(quiz, /Create a form/);
     assert.match(quiz, /Attestation/);

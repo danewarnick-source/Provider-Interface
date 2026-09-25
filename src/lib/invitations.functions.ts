@@ -16,8 +16,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireLevel, requirePermission } from "@/lib/access/require";
 import { resolveOrgSender } from "@/lib/email.functions";
-import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
-import { resolveAuthOrigin } from "@/lib/auth-redirect";
+import { type AccessLevel } from "@/lib/access/levels";
+import { resolvePresetId } from "@/lib/access/preset-resolve";
+import { buildInvitationEmail } from "@/lib/invitation-email";
 import { inviteJoinUrl } from "@/lib/join-invite";
 import { stripFakeDisplayLabel } from "@/lib/managed-from";
 import { canSendImportInvite } from "@/lib/import-invite";
@@ -87,10 +88,19 @@ function inviteSendPayload(args: {
 }
 
 /**
- * invite_staff lets someone invite Staff; inviting an Owner or Admin takes an Owner.
+ * invite_staff lets someone invite a team member; inviting an Owner or Admin takes an Owner.
  * A chosen preset must belong to the org and match the level. No preset → the
- * member trigger applies the level's default preset on accept.
+ * level's default (Admin → Program Manager, Team member → DSP).
  */
+async function presetIdForInvite(
+  organizationId: string,
+  level: AccessLevel,
+  presetId: string | null | undefined,
+): Promise<string | null> {
+  if (level === "owner") return null;
+  return resolvePresetId(organizationId, level, { id: presetId });
+}
+
 async function assertCanInviteAt(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
@@ -111,13 +121,28 @@ async function assertCanInviteAt(
   if (preset.access_level !== level) throw new Error("That preset is for a different access level");
 }
 
-function escapeHtml(s: string): string {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+async function loadInviterName(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  userId: string,
+): Promise<string> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("full_name, first_name, last_name")
+    .eq("id", userId)
+    .maybeSingle();
+  const row = (data ?? {}) as {
+    full_name?: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
+  };
+  const full = String(row.full_name ?? "").trim();
+  if (full) return full;
+  const joined = [row.first_name, row.last_name]
+    .map((part) => String(part ?? "").trim())
+    .filter(Boolean)
+    .join(" ");
+  return joined || "A teammate";
 }
 
 async function sendInvitationEmail(args: {
@@ -128,8 +153,9 @@ async function sendInvitationEmail(args: {
   level: AccessLevel;
   token: string;
   siteOrigin: string;
+  inviterUserId: string;
 }): Promise<{ ok: boolean; error?: string }> {
-  const { supabase, organizationId, email, level, token, siteOrigin } = args;
+  const { supabase, organizationId, email, level, token, siteOrigin, inviterUserId } = args;
   try {
     const sender = await resolveOrgSender(supabase, organizationId);
     const { data: org } = await supabase
@@ -139,28 +165,14 @@ async function sendInvitationEmail(args: {
       .maybeSingle();
     const orgName =
       stripFakeDisplayLabel(String(org?.name || "").trim()) || "your organization";
-    const origin = resolveAuthOrigin(siteOrigin);
-    const link = inviteJoinUrl(origin, token);
-    const levelLabel = LEVEL_LABEL[level] ?? "Staff";
-
-    const subject = `You're invited to join ${orgName} on Provider Interface`;
-    const html = `
-      <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#243040">
-        <p>Hello,</p>
-        <p><strong>${escapeHtml(orgName)}</strong> has invited you to join their team on Provider Interface as
-          <strong>${escapeHtml(levelLabel)}</strong>.</p>
-        <p style="margin:28px 0">
-          <a href="${link}"
-             style="display:inline-block;background:#c9a227;color:#243040;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:600">
-            Accept invitation
-          </a>
-        </p>
-        <p style="color:#666;font-size:12px">If the button doesn't work, copy and paste this link into your browser:<br/>
-          <span style="word-break:break-all">${link}</span>
-        </p>
-        <p style="color:#666;font-size:12px;margin-top:24px">This invitation link expires in 14 days.</p>
-      </div>
-    `;
+    const inviterName = await loadInviterName(supabase, inviterUserId);
+    const link = inviteJoinUrl(siteOrigin, token);
+    const { subject, html, text } = buildInvitationEmail({
+      orgName,
+      role: level,
+      link,
+      inviterName,
+    });
 
     const { data: invokeData, error: invokeErr } = await supabase.functions.invoke("send-email", {
       body: {
@@ -168,6 +180,7 @@ async function sendInvitationEmail(args: {
         to: email,
         subject,
         html,
+        text,
         reply_to: sender.reply_to,
       },
     });
@@ -212,6 +225,11 @@ export const createInvitation = createServerFn({ method: "POST" })
     );
     await assertCanInviteAt(supabase, userId, data.organization_id, data.access_level, data.access_preset_id);
     await assertAgencySetupCompleteForOrg(supabase, data.organization_id);
+    const presetId = await presetIdForInvite(
+      data.organization_id,
+      data.access_level,
+      data.access_preset_id,
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existing, error: existErr } = await (supabase as any)
@@ -231,7 +249,7 @@ export const createInvitation = createServerFn({ method: "POST" })
         organization_id: data.organization_id,
         email: data.email,
         access_level: data.access_level,
-        access_preset_id: data.access_level === "owner" ? null : (data.access_preset_id ?? null),
+        access_preset_id: presetId,
         invited_by: userId,
       })
       .select(INVITE_SELECT)
@@ -245,6 +263,7 @@ export const createInvitation = createServerFn({ method: "POST" })
       level: data.access_level,
       token: (invite as InvitationRow).token,
       siteOrigin: data.site_origin,
+      inviterUserId: userId,
     });
 
     return {
@@ -296,6 +315,7 @@ export const resendInvitation = createServerFn({ method: "POST" })
       level: row.access_level,
       token: row.token,
       siteOrigin: data.site_origin,
+      inviterUserId: userId,
     });
 
     return {
@@ -350,8 +370,9 @@ async function upsertPendingInviteAndSend(args: {
   presetId: string | null;
   siteOrigin: string;
 }): Promise<{ invitation: InvitationRow; email_sent: boolean; email_error: string | null }> {
-  const { supabase, organizationId, userId, email, level, presetId, siteOrigin } = args;
-  const access = { access_level: level, access_preset_id: level === "owner" ? null : presetId };
+  const { supabase, organizationId, userId, email, level, siteOrigin } = args;
+  const presetId = await presetIdForInvite(organizationId, level, args.presetId);
+  const access = { access_level: level, access_preset_id: presetId };
   await assertAgencySetupCompleteForOrg(supabase, organizationId);
   const expires = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -397,6 +418,7 @@ async function upsertPendingInviteAndSend(args: {
     level,
     token: invite.token,
     siteOrigin,
+    inviterUserId: userId,
   });
   return {
     invitation: invite,

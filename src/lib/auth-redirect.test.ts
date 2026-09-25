@@ -9,8 +9,11 @@ import {
   isLovableAuthHost,
   isSafeAuthOrigin,
   normalizeOrigin,
+  emailLinkOrigin,
   passwordResetRedirectUrl,
+  PROVIDER_INTERFACE_ORIGIN,
   resolveAuthOrigin,
+  rewriteEmailRedirectUrl,
   sanitizeAuthRedirectUrl,
 } from "./auth-redirect.ts";
 
@@ -28,8 +31,14 @@ describe("isLovableAuthHost", () => {
 
 describe("normalizeOrigin / isSafeAuthOrigin", () => {
   it("strips paths and rejects Lovable hosts", () => {
-    assert.equal(normalizeOrigin("https://hivecertify.com/reset-password"), "https://hivecertify.com");
-    assert.equal(normalizeOrigin("agency-peace-of-mind.vercel.app"), "https://agency-peace-of-mind.vercel.app");
+    assert.equal(
+      normalizeOrigin("https://hivecertify.com/reset-password"),
+      "https://hivecertify.com",
+    );
+    assert.equal(
+      normalizeOrigin("agency-peace-of-mind.vercel.app"),
+      "https://agency-peace-of-mind.vercel.app",
+    );
     assert.equal(isSafeAuthOrigin("https://hivecertify.com"), true);
     assert.equal(isSafeAuthOrigin("https://agency-peace-of-mind.vercel.app"), true);
     assert.equal(isSafeAuthOrigin("https://agency-peace-of-mind.lovable.app"), false);
@@ -98,6 +107,26 @@ describe("sanitizeAuthRedirectUrl", () => {
   });
 });
 
+describe("email links use providerinterface.com", () => {
+  it("rewrites hivecertify.com and leaves other hosts", () => {
+    assert.equal(emailLinkOrigin("https://hivecertify.com"), PROVIDER_INTERFACE_ORIGIN);
+    assert.equal(emailLinkOrigin("https://app.hivecertify.com"), PROVIDER_INTERFACE_ORIGIN);
+    assert.equal(emailLinkOrigin(VERCEL_PREVIEW_ORIGIN), VERCEL_PREVIEW_ORIGIN);
+    assert.equal(
+      rewriteEmailRedirectUrl("https://hivecertify.com/reset-password?x=1", "/reset-password"),
+      "https://providerinterface.com/reset-password?x=1",
+    );
+    assert.equal(
+      rewriteEmailRedirectUrl("https://preview.lovable.app/login", "/login"),
+      "https://providerinterface.com/login",
+    );
+    assert.equal(
+      rewriteEmailRedirectUrl("not a url", "/reset-password"),
+      "https://providerinterface.com/reset-password",
+    );
+  });
+});
+
 describe("auth email call sites do not hardcode Lovable", () => {
   it("forgot-password uses passwordResetRedirectUrl", () => {
     const src = readFileSync(new URL("../routes/forgot-password.tsx", import.meta.url), "utf8");
@@ -109,7 +138,10 @@ describe("auth email call sites do not hardcode Lovable", () => {
   it("signup / auditor / hive-exec invite use the shared helper", () => {
     const signup = readFileSync(new URL("../routes/signup.tsx", import.meta.url), "utf8");
     const auditor = readFileSync(new URL("../routes/auditor.tsx", import.meta.url), "utf8");
-    const hiveExec = readFileSync(new URL("./hive-exec-admin.functions.ts", import.meta.url), "utf8");
+    const hiveExec = readFileSync(
+      new URL("./hive-exec-admin.functions.ts", import.meta.url),
+      "utf8",
+    );
     assert.match(signup, /authRedirectUrl\("\/signup"\)/);
     assert.match(auditor, /authRedirectUrl\("\/auditor"\)/);
     assert.match(hiveExec, /passwordResetRedirectUrl/);
@@ -122,6 +154,7 @@ describe("auth email call sites do not hardcode Lovable", () => {
       "utf8",
     );
     assert.match(src, /sanitizeRedirectTo/);
+    assert.match(src, /providerinterface\.com/);
     assert.match(src, /hivecertify\.com/);
     assert.match(src, /lovable\.app/);
     assert.match(src, /redirect_to: sanitizeRedirectTo/);

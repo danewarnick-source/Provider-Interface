@@ -13,11 +13,7 @@ import { EvidenceStatusChip } from "@/components/evidence/evidence-status-chip.t
 import { EvidenceSubjectCards } from "@/components/evidence/evidence-subject-cards.tsx";
 import { parseServiceCodeFlags } from "@/lib/evidence/catalog.ts";
 import { denverYmd } from "@/lib/denver-date.ts";
-import {
-  draftFromItem,
-  dueSubtitleFromItem,
-  type EvidenceDueDraft,
-} from "@/lib/evidence/due.ts";
+import { draftFromItem, dueSubtitleFromItem, type EvidenceDueDraft } from "@/lib/evidence/due.ts";
 import {
   applyEvidenceRequirements,
   createEvidenceChecklist,
@@ -210,7 +206,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
       if (res && "messageSkipped" in res && res.messageSkipped) {
         toast.message(res.skipReason ?? EVIDENCE_SEND_MESSAGE_UNAVAILABLE);
       } else {
-        toast.success("Sent to the employee.");
+        toast.success("Sent to the team member.");
       }
       invalidate();
     },
@@ -331,8 +327,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
 
   const initialCodes = person?.subtitle ? parseServiceCodeFlags(person.subtitle.split(/,\s*/)) : [];
 
-  const companyLabel =
-    (org.display_acronym ?? "").trim() || companyPerson?.initials || "Company";
+  const companyLabel = (org.display_acronym ?? "").trim() || companyPerson?.initials || "Company";
 
   return (
     <div className="space-y-5">
@@ -409,7 +404,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
               ? (companyPerson?.full_name ?? "Company")
               : tab === "client"
                 ? "Client"
-                : "Employee")
+                : "Team member")
           }
           hireDate={person?.hire_date ?? null}
           initialCodes={initialCodes}
@@ -482,10 +477,14 @@ function RosterPanel({
     return roster.filter((p) => p.full_name.toLowerCase().includes(needle));
   }, [roster, q]);
 
-  const emptyCopy = tab === "client" ? "No clients yet." : "No employees yet.";
-  const listLabel = tab === "client" ? "clients" : tab === "company" ? "company" : "employees";
+  const emptyCopy = tab === "client" ? "No clients yet." : "No team members yet.";
+  const listLabel = tab === "client" ? "clients" : tab === "company" ? "company" : "team members";
   const searchPlaceholder =
-    tab === "client" ? "Search clients…" : tab === "company" ? "Search company…" : "Search employees…";
+    tab === "client"
+      ? "Search clients…"
+      : tab === "company"
+        ? "Search company…"
+        : "Search team members…";
 
   return (
     <EvidenceRoster
@@ -615,10 +614,7 @@ function ReviewPanel({
           {dueSubtitleFromItem(item)}
         </p>
         <div className="mt-3">
-          <EvidenceStatusChip
-            chip={chip}
-            ariaLabel={`${item.title}, ${chip.label}`}
-          />
+          <EvidenceStatusChip chip={chip} ariaLabel={`${item.title}, ${chip.label}`} />
         </div>
         {item.next_due_on || item.first_due_on ? (
           <p className="mt-2 text-xs text-muted-foreground">
@@ -714,12 +710,13 @@ function ReviewPanel({
               onSend({
                 itemIds: [item.id],
                 titles: [item.title],
-                staffId: item.subject_type === "staff" ? item.subject_id : (staffPicker[0]?.id ?? ""),
+                staffId:
+                  item.subject_type === "staff" ? item.subject_id : (staffPicker[0]?.id ?? ""),
                 needsStaffPicker: item.subject_type !== "staff",
               })
             }
           >
-            Send to employee
+            Send to team member
           </Button>
           <Button
             type="button"
@@ -737,7 +734,7 @@ function ReviewPanel({
                 placeholder={
                   item.subject_type === "staff"
                     ? "Client id to dual-link"
-                    : "Employee id to dual-link"
+                    : "Team member id to dual-link"
                 }
                 className="h-9"
               />

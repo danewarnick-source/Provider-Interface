@@ -214,7 +214,7 @@ export const setMemberAccess = createServerFn({ method: "POST" })
         .eq("id", data.access_preset_id ?? "")
         .eq("organization_id", orgId)
         .maybeSingle();
-      if (!preset) throw new Error("Pick a preset for Admin and Staff access");
+      if (!preset) throw new Error("Pick a preset for Admin and Team member access");
       if (preset.access_level !== data.access_level) throw new Error("That preset is for a different access level");
       presetCats = preset.categories;
     }

@@ -12,14 +12,28 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import {
-  Upload, X, Loader2, ArrowRight, ArrowLeft, Download,
-  CheckCircle2, AlertTriangle, Archive, FileSpreadsheet,
+  Upload,
+  X,
+  Loader2,
+  ArrowRight,
+  ArrowLeft,
+  Download,
+  CheckCircle2,
+  AlertTriangle,
+  Archive,
+  FileSpreadsheet,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { useCurrentOrg } from "@/hooks/use-org";
@@ -55,8 +69,8 @@ type ReviewRow = {
   serviceCode: string;
   staffCandidates: Person[];
   clientCandidates: Person[];
-  staffId: string | null;   // resolved (chosen) staff
-  clientId: string | null;  // resolved (chosen) client
+  staffId: string | null; // resolved (chosen) staff
+  clientId: string | null; // resolved (chosen) client
   clockInIso: string | null;
   clockOutIso: string | null;
   status: MatchStatus;
@@ -68,7 +82,6 @@ type ReviewRow = {
   duplicateOfId: string | null;
   duplicateReason: string | null;
 };
-
 
 const ALLOWED_EXT = [".csv", ".xlsx", ".xls"];
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -150,7 +163,11 @@ function findCandidates(pool: Person[], raw: string): Person[] {
 }
 
 // ─── date/time parsing ─────────────────────────────────────────────────────
-function tryParseDateTime(dateStr: string, timeStr: string | null, singleField: boolean): Date | null {
+function tryParseDateTime(
+  dateStr: string,
+  timeStr: string | null,
+  singleField: boolean,
+): Date | null {
   const combined = singleField || !timeStr ? dateStr : `${dateStr} ${timeStr}`;
   if (!combined) return null;
   // ISO first
@@ -158,10 +175,10 @@ function tryParseDateTime(dateStr: string, timeStr: string | null, singleField: 
   if (!isNaN(iso.getTime()) && /\d{4}/.test(combined)) return iso;
   // US M/D/YYYY [h:mm[:ss] am/pm]
   const m = combined.match(
-    /^\s*(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm|AM|PM)?)?\s*$/,
+    /^\s*(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm|AM|PM)?)?\s*$/,
   );
   if (m) {
-    let [, mm, dd, yy, hh = "0", mi = "0", ss = "0", ap] = m;
+    const [, mm, dd, yy, hh = "0", mi = "0", ss = "0", ap] = m;
     const year = yy.length === 2 ? 2000 + Number(yy) : Number(yy);
     let hour = Number(hh);
     if (ap && /pm/i.test(ap) && hour < 12) hour += 12;
@@ -175,8 +192,6 @@ function tryParseDateTime(dateStr: string, timeStr: string | null, singleField: 
 
 // (Column-mapping guesswork removed — the wizard now accepts only the
 // fixed six-column template shipped with the app.)
-
-
 
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -193,7 +208,6 @@ export function TimesheetsImportWizard() {
   const commitRows = useServerFn(importHistoricalTimesheets);
   const checkDupes = useServerFn(checkImportDuplicates);
   const [dupeChecking, setDupeChecking] = useState(false);
-
 
   // Load staff + clients for this org (cached)
   const peopleQ = useQuery({
@@ -236,14 +250,18 @@ export function TimesheetsImportWizard() {
       const staff: Person[] = profileRows.map((p) => ({
         id: p.id,
         label:
-          (p.full_name?.trim()) ||
+          p.full_name?.trim() ||
           [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
           "Staff",
         norms: personNorms(p.first_name ?? "", p.last_name ?? "", p.full_name),
       }));
-      const clients: Person[] = ((clientsRes.data ?? []) as Array<{
-        id: string; first_name: string; last_name: string;
-      }>).map((c) => ({
+      const clients: Person[] = (
+        (clientsRes.data ?? []) as Array<{
+          id: string;
+          first_name: string;
+          last_name: string;
+        }>
+      ).map((c) => ({
         id: c.id,
         label: `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "Client",
         norms: personNorms(c.first_name ?? "", c.last_name ?? ""),
@@ -252,162 +270,180 @@ export function TimesheetsImportWizard() {
     },
   });
 
-
   // Build review rows directly from the fixed template columns. Called
   // once peopleQ.data resolves after a successful upload.
-  const buildFromParsed = useCallback((p: ParsedFile) => {
-    if (!peopleQ.data) return;
-    const { staff, clients } = peopleQ.data;
+  const buildFromParsed = useCallback(
+    (p: ParsedFile) => {
+      if (!peopleQ.data) return;
+      const { staff, clients } = peopleQ.data;
 
-    const result: ReviewRow[] = p.rows.map((raw, idx) => {
-      const staffLabel = raw["Staff Name"] ?? "";
-      const clientLabel = raw["Client Name"] ?? "";
-      const clockInStr = raw["Clock In"] ?? "";
-      const clockOutStr = raw["Clock Out"] ?? "";
-      const serviceCode = (raw["Service Code"] ?? "").toUpperCase();
-      const notes = raw["Notes"] ?? "";
+      const result: ReviewRow[] = p.rows.map((raw, idx) => {
+        const staffLabel = raw["Staff Name"] ?? "";
+        const clientLabel = raw["Client Name"] ?? "";
+        const clockInStr = raw["Clock In"] ?? "";
+        const clockOutStr = raw["Clock Out"] ?? "";
+        const serviceCode = (raw["Service Code"] ?? "").toUpperCase();
+        const notes = raw["Notes"] ?? "";
 
-      const staffCandidates = findCandidates(staff, staffLabel);
-      const clientCandidates = findCandidates(clients, clientLabel);
+        const staffCandidates = findCandidates(staff, staffLabel);
+        const clientCandidates = findCandidates(clients, clientLabel);
 
-      const inDate = tryParseDateTime(clockInStr, null, true);
-      const outDate = tryParseDateTime(clockOutStr, null, true);
+        const inDate = tryParseDateTime(clockInStr, null, true);
+        const outDate = tryParseDateTime(clockOutStr, null, true);
 
-      let status: MatchStatus;
-      let reason: string | null = null;
-      let staffId: string | null = null;
-      let clientId: string | null = null;
+        let status: MatchStatus;
+        let reason: string | null = null;
+        let staffId: string | null = null;
+        let clientId: string | null = null;
 
-      if (!staffLabel || !clientLabel || !clockInStr || !clockOutStr) {
-        status = "invalid";
-        reason = "missing required cells";
-      } else if (!inDate || !outDate) {
-        status = "invalid";
-        reason = "unreadable date or time";
-      } else if (outDate.getTime() <= inDate.getTime()) {
-        status = "invalid";
-        reason = "clock-out is not after clock-in";
-      } else if (staffCandidates.length === 0 || clientCandidates.length === 0) {
-        status = "no_match";
-        reason =
-          staffCandidates.length === 0 && clientCandidates.length === 0
-            ? "no staff or client match"
-            : staffCandidates.length === 0
-              ? "no staff match"
-              : "no client match";
-      } else if (staffCandidates.length > 1 || clientCandidates.length > 1) {
-        status = "ambiguous";
-        reason = "multiple possible matches";
-        if (staffCandidates.length === 1) staffId = staffCandidates[0].id;
-        if (clientCandidates.length === 1) clientId = clientCandidates[0].id;
-      } else {
-        status = "matched";
-        staffId = staffCandidates[0].id;
-        clientId = clientCandidates[0].id;
+        if (!staffLabel || !clientLabel || !clockInStr || !clockOutStr) {
+          status = "invalid";
+          reason = "missing required cells";
+        } else if (!inDate || !outDate) {
+          status = "invalid";
+          reason = "unreadable date or time";
+        } else if (outDate.getTime() <= inDate.getTime()) {
+          status = "invalid";
+          reason = "clock-out is not after clock-in";
+        } else if (staffCandidates.length === 0 || clientCandidates.length === 0) {
+          status = "no_match";
+          reason =
+            staffCandidates.length === 0 && clientCandidates.length === 0
+              ? "no staff or client match"
+              : staffCandidates.length === 0
+                ? "no staff match"
+                : "no client match";
+        } else if (staffCandidates.length > 1 || clientCandidates.length > 1) {
+          status = "ambiguous";
+          reason = "multiple possible matches";
+          if (staffCandidates.length === 1) staffId = staffCandidates[0].id;
+          if (clientCandidates.length === 1) clientId = clientCandidates[0].id;
+        } else {
+          status = "matched";
+          staffId = staffCandidates[0].id;
+          clientId = clientCandidates[0].id;
+        }
+
+        return {
+          idx,
+          raw,
+          staffLabel,
+          clientLabel,
+          dateStr: inDate ? inDate.toLocaleDateString() : clockInStr,
+          clockInStr,
+          clockOutStr,
+          notes,
+          serviceCode,
+          staffCandidates,
+          clientCandidates,
+          staffId,
+          clientId,
+          clockInIso: inDate ? inDate.toISOString() : null,
+          clockOutIso: outDate ? outDate.toISOString() : null,
+          status,
+          reason,
+          skipped: false,
+          duplicateOfId: null,
+          duplicateReason: null,
+        };
+      });
+      setRows(result);
+      setStep(2);
+
+      // Duplicate check for every fully-resolved row (staff + client + times).
+      // Runs async against evv_timesheets; hits are flagged and auto-skipped
+      // so an overlapping date range doesn't get imported twice.
+      const resolved = result.filter(
+        (r) => r.staffId && r.clientId && r.clockInIso && r.clockOutIso,
+      );
+      if (resolved.length > 0 && org?.organization_id) {
+        setDupeChecking(true);
+        checkDupes({
+          data: {
+            mode: "timesheets" as const,
+            organization_id: org.organization_id,
+            rows: resolved.map((r) => ({
+              index: r.idx,
+              staff_id: r.staffId!,
+              client_id: r.clientId!,
+              clock_in_iso: r.clockInIso!,
+              clock_out_iso: r.clockOutIso!,
+            })),
+          },
+        })
+          .then(
+            (res: {
+              duplicates: Array<{ index: number; existing_id: string; reason: string }>;
+            }) => {
+              if (!res.duplicates?.length) return;
+              setRows((rs) =>
+                rs.map((r) => {
+                  const hit = res.duplicates.find((d) => d.index === r.idx);
+                  if (!hit) return r;
+                  return {
+                    ...r,
+                    skipped: true,
+                    duplicateOfId: hit.existing_id,
+                    duplicateReason: hit.reason,
+                  };
+                }),
+              );
+              toast.info(
+                `${res.duplicates.length} row${res.duplicates.length === 1 ? "" : "s"} look like duplicates of existing entries — auto-skipped. Un-skip individually if you disagree.`,
+              );
+            },
+          )
+          .catch((e: unknown) => {
+            console.warn("Duplicate check failed:", e);
+          })
+          .finally(() => setDupeChecking(false));
       }
-
-      return {
-        idx,
-        raw,
-        staffLabel, clientLabel,
-        dateStr: inDate ? inDate.toLocaleDateString() : clockInStr,
-        clockInStr, clockOutStr, notes, serviceCode,
-        staffCandidates, clientCandidates,
-        staffId, clientId,
-        clockInIso: inDate ? inDate.toISOString() : null,
-        clockOutIso: outDate ? outDate.toISOString() : null,
-        status, reason,
-        skipped: false,
-        duplicateOfId: null,
-        duplicateReason: null,
-      };
-    });
-    setRows(result);
-    setStep(2);
-
-    // Duplicate check for every fully-resolved row (staff + client + times).
-    // Runs async against evv_timesheets; hits are flagged and auto-skipped
-    // so an overlapping date range doesn't get imported twice.
-    const resolved = result.filter(
-      (r) => r.staffId && r.clientId && r.clockInIso && r.clockOutIso,
-    );
-    if (resolved.length > 0 && org?.organization_id) {
-      setDupeChecking(true);
-      checkDupes({
-        data: {
-          mode: "timesheets" as const,
-          organization_id: org.organization_id,
-          rows: resolved.map((r) => ({
-            index: r.idx,
-            staff_id: r.staffId!,
-            client_id: r.clientId!,
-            clock_in_iso: r.clockInIso!,
-            clock_out_iso: r.clockOutIso!,
-          })),
-        },
-      })
-        .then((res: { duplicates: Array<{ index: number; existing_id: string; reason: string }> }) => {
-          if (!res.duplicates?.length) return;
-          setRows((rs) =>
-            rs.map((r) => {
-              const hit = res.duplicates.find((d) => d.index === r.idx);
-              if (!hit) return r;
-              return {
-                ...r,
-                skipped: true,
-                duplicateOfId: hit.existing_id,
-                duplicateReason: hit.reason,
-              };
-            }),
-          );
-          toast.info(`${res.duplicates.length} row${res.duplicates.length === 1 ? "" : "s"} look like duplicates of existing entries — auto-skipped. Un-skip individually if you disagree.`);
-        })
-        .catch((e: unknown) => {
-          console.warn("Duplicate check failed:", e);
-        })
-        .finally(() => setDupeChecking(false));
-    }
-  }, [peopleQ.data, org?.organization_id, checkDupes]);
+    },
+    [peopleQ.data, org?.organization_id, checkDupes],
+  );
 
   // ── Step 1 handler ──
-  const onPickFile = useCallback(async (f: File) => {
-    const okExt = ALLOWED_EXT.some((e) => f.name.toLowerCase().endsWith(e));
-    if (!okExt) {
-      toast.error("Historical timesheet import only accepts CSV or Excel (.csv, .xlsx, .xls).");
-      return;
-    }
-    if (f.size > MAX_BYTES) {
-      toast.error(`${f.name} is larger than 25 MB.`);
-      return;
-    }
-    if (!peopleQ.data) {
-      if (peopleQ.isError) {
-        toast.error(`Couldn't load staff and clients: ${(peopleQ.error as Error)?.message ?? "unknown error"}`);
-      } else {
-        toast.error("Still loading staff and clients — try again in a moment.");
-      }
-      return;
-    }
-    try {
-      const p = await parseFile(f);
-      if (p.headers.length === 0 || p.rows.length === 0) {
-        toast.error("That file didn't contain any readable rows.");
+  const onPickFile = useCallback(
+    async (f: File) => {
+      const okExt = ALLOWED_EXT.some((e) => f.name.toLowerCase().endsWith(e));
+      if (!okExt) {
+        toast.error("Historical timesheet import only accepts CSV or Excel (.csv, .xlsx, .xls).");
         return;
       }
-      const check = validateTemplateHeaders(p.headers);
-      if (!check.ok) {
-        toast.error(check.message);
+      if (f.size > MAX_BYTES) {
+        toast.error(`${f.name} is larger than 25 MB.`);
         return;
       }
-      setFile(f);
-      setParsed(p);
-      buildFromParsed(p);
-    } catch (e) {
-      toast.error(`Couldn't read ${f.name}: ${(e as Error).message}`);
-    }
-  }, [peopleQ.data, buildFromParsed]);
-
-
+      if (!peopleQ.data) {
+        if (peopleQ.isError) {
+          toast.error(
+            `Couldn't load staff and clients: ${(peopleQ.error as Error)?.message ?? "unknown error"}`,
+          );
+        } else {
+          toast.error("Still loading staff and clients — try again in a moment.");
+        }
+        return;
+      }
+      try {
+        const p = await parseFile(f);
+        if (p.headers.length === 0 || p.rows.length === 0) {
+          toast.error("That file didn't contain any readable rows.");
+          return;
+        }
+        const check = validateTemplateHeaders(p.headers);
+        if (!check.ok) {
+          toast.error(check.message);
+          return;
+        }
+        setFile(f);
+        setParsed(p);
+        buildFromParsed(p);
+      } catch (e) {
+        toast.error(`Couldn't read ${f.name}: ${(e as Error).message}`);
+      }
+    },
+    [peopleQ.data, buildFromParsed],
+  );
 
   // Actions on review rows
   const updateRow = (idx: number, patch: Partial<ReviewRow>) => {
@@ -448,7 +484,8 @@ export function TimesheetsImportWizard() {
     updateRow(idx, patch);
   };
   const skipRow = (idx: number) => updateRow(idx, { skipped: true });
-  const unskipRow = (idx: number) => updateRow(idx, { skipped: false, duplicateOfId: null, duplicateReason: null });
+  const unskipRow = (idx: number) =>
+    updateRow(idx, { skipped: false, duplicateOfId: null, duplicateReason: null });
 
   // Bulk-fix: resolve every row sharing the same raw staff/client label at
   // once. Example: "J. Smith" appears on 47 rows, none match a real staff
@@ -464,16 +501,20 @@ export function TimesheetsImportWizard() {
         touched++;
         const nextStaff = kind === "staff" ? id : r.staffId;
         const nextClient = kind === "client" ? id : r.clientId;
-        const nowMatched = nextStaff && nextClient && r.clockInIso && r.clockOutIso && !r.duplicateOfId;
+        const nowMatched =
+          nextStaff && nextClient && r.clockInIso && r.clockOutIso && !r.duplicateOfId;
         return {
           ...r,
           staffId: nextStaff,
           clientId: nextClient,
-          status: nowMatched ? "matched" as const : r.status,
+          status: nowMatched ? ("matched" as const) : r.status,
           reason: nowMatched ? null : r.reason,
         };
       });
-      if (touched > 0) toast.success(`Applied to ${touched} row${touched === 1 ? "" : "s"} sharing "${rawLabel}".`);
+      if (touched > 0)
+        toast.success(
+          `Applied to ${touched} row${touched === 1 ? "" : "s"} sharing "${rawLabel}".`,
+        );
       return out;
     });
   }, []);
@@ -485,19 +526,37 @@ export function TimesheetsImportWizard() {
     const clientMap = new Map<string, number>();
     for (const r of rows) {
       if (r.skipped) continue;
-      if (!r.staffId && r.staffLabel) staffMap.set(r.staffLabel, (staffMap.get(r.staffLabel) ?? 0) + 1);
-      if (!r.clientId && r.clientLabel) clientMap.set(r.clientLabel, (clientMap.get(r.clientLabel) ?? 0) + 1);
+      if (!r.staffId && r.staffLabel)
+        staffMap.set(r.staffLabel, (staffMap.get(r.staffLabel) ?? 0) + 1);
+      if (!r.clientId && r.clientLabel)
+        clientMap.set(r.clientLabel, (clientMap.get(r.clientLabel) ?? 0) + 1);
     }
-    const staffIssues = Array.from(staffMap.entries()).filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]);
-    const clientIssues = Array.from(clientMap.entries()).filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]);
+    const staffIssues = Array.from(staffMap.entries())
+      .filter(([, n]) => n >= 2)
+      .sort((a, b) => b[1] - a[1]);
+    const clientIssues = Array.from(clientMap.entries())
+      .filter(([, n]) => n >= 2)
+      .sort((a, b) => b[1] - a[1]);
     return { staffIssues, clientIssues };
   }, [rows]);
 
   const readyRows = useMemo(
-    () => rows.filter((r) => !r.skipped && r.status === "matched" && r.staffId && r.clientId && r.clockInIso && r.clockOutIso),
+    () =>
+      rows.filter(
+        (r) =>
+          !r.skipped &&
+          r.status === "matched" &&
+          r.staffId &&
+          r.clientId &&
+          r.clockInIso &&
+          r.clockOutIso,
+      ),
     [rows],
   );
-  const ambiguousRows = useMemo(() => rows.filter((r) => !r.skipped && r.status === "ambiguous"), [rows]);
+  const ambiguousRows = useMemo(
+    () => rows.filter((r) => !r.skipped && r.status === "ambiguous"),
+    [rows],
+  );
   const unmatchedRows = useMemo(
     () => rows.filter((r) => !r.skipped && (r.status === "no_match" || r.status === "invalid")),
     [rows],
@@ -560,7 +619,9 @@ export function TimesheetsImportWizard() {
     onSuccess: (res) => {
       setCommitted({ inserted: res.inserted, staffCount: res.staffCount ?? 0 });
       setStep(3);
-      toast.success(`Submitted ${res.inserted} historical timesheet${res.inserted === 1 ? "" : "s"} to staff for confirmation.`);
+      toast.success(
+        `Submitted ${res.inserted} historical timesheet${res.inserted === 1 ? "" : "s"} to staff for confirmation.`,
+      );
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -572,12 +633,15 @@ export function TimesheetsImportWizard() {
         <div className="flex items-start gap-2">
           <Archive className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
           <div>
-            <div className="font-semibold text-amber-800">Historical timesheets — imported from another platform</div>
+            <div className="font-semibold text-amber-800">
+              Historical timesheets — imported from another platform
+            </div>
             <p className="mt-1 text-muted-foreground">
-              Fill in the six-column template below, upload it, review each row, and submit. Nothing moves forward
-              without a deliberate action. Rows are permanently marked as historical imports so nobody mistakes them
-              for live clock punches, and staff never see anything until you (the admin) explicitly submit it to
-              them. This flow never creates new staff or clients — every row must match someone who already exists.
+              Fill in the six-column template below, upload it, review each row, and submit. Nothing
+              moves forward without a deliberate action. Rows are permanently marked as historical
+              imports so nobody mistakes them for live clock punches, and staff never see anything
+              until you (the admin) explicitly submit it to them. This flow never creates new staff
+              or clients — every row must match someone who already exists.
             </p>
           </div>
         </div>
@@ -586,9 +650,7 @@ export function TimesheetsImportWizard() {
       {/* Stepper */}
       <Stepper step={step} />
 
-      {step === 1 && (
-        <UploadStep onPick={onPickFile} />
-      )}
+      {step === 1 && <UploadStep onPick={onPickFile} />}
 
       {step === 2 && peopleQ.data && (
         <ReviewStep
@@ -607,7 +669,12 @@ export function TimesheetsImportWizard() {
           onSkip={skipRow}
           onUnskip={unskipRow}
           onDownloadSkipped={downloadSkipped}
-          onBack={() => { setStep(1); setParsed(null); setFile(null); setRows([]); }}
+          onBack={() => {
+            setStep(1);
+            setParsed(null);
+            setFile(null);
+            setRows([]);
+          }}
           onCommit={() => commit.mutate()}
           committing={commit.isPending}
         />
@@ -618,7 +685,11 @@ export function TimesheetsImportWizard() {
           inserted={committed.inserted}
           staffCount={committed.staffCount}
           onAnother={() => {
-            setStep(1); setFile(null); setParsed(null); setRows([]); setCommitted(null);
+            setStep(1);
+            setFile(null);
+            setParsed(null);
+            setRows([]);
+            setCommitted(null);
           }}
           onArchive={() => navigate({ to: "/dashboard/evv-archive" })}
         />
@@ -626,7 +697,6 @@ export function TimesheetsImportWizard() {
     </div>
   );
 }
-
 
 // ─── Stepper ───────────────────────────────────────────────────────────────
 function Stepper({ step }: { step: 1 | 2 | 3 }) {
@@ -641,14 +711,18 @@ function Stepper({ step }: { step: 1 | 2 | 3 }) {
         <li key={it.n} className="flex items-center gap-2">
           <span
             className={`grid h-6 w-6 place-items-center rounded-full text-xs font-medium ${
-              step === it.n ? "bg-primary text-primary-foreground"
-                : step > it.n ? "bg-primary/20 text-primary"
+              step === it.n
+                ? "bg-primary text-primary-foreground"
+                : step > it.n
+                  ? "bg-primary/20 text-primary"
                   : "bg-muted text-muted-foreground"
             }`}
           >
             {step > it.n ? <CheckCircle2 className="h-3.5 w-3.5" /> : it.n}
           </span>
-          <span className={step === it.n ? "font-medium" : "text-muted-foreground"}>{it.label}</span>
+          <span className={step === it.n ? "font-medium" : "text-muted-foreground"}>
+            {it.label}
+          </span>
           {i < items.length - 1 && <ArrowRight className="h-3 w-3 text-muted-foreground" />}
         </li>
       ))}
@@ -674,12 +748,16 @@ function UploadStep({ onPick }: { onPick: (f: File) => void }) {
         <div className="flex items-start gap-2">
           <FileSpreadsheet className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <div className="flex-1">
-            <div className="text-sm font-semibold">Step 1 — download the template, then fill it in</div>
+            <div className="text-sm font-semibold">
+              Step 1 — download the template, then fill it in
+            </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              The importer only accepts files matching this exact template. Six columns, in this order:{" "}
-              <span className="font-medium text-foreground">{TEMPLATE_HEADERS.join(", ")}</span>. Clock in and clock
-              out should each be a single cell holding both the date and the time (e.g. <code>2026-05-14 08:00</code>
-              {" "}or <code>5/14/2026 8:00 AM</code>). Notes is optional; every other column is required per row.
+              The importer only accepts files matching this exact template. Six columns, in this
+              order:{" "}
+              <span className="font-medium text-foreground">{TEMPLATE_HEADERS.join(", ")}</span>.
+              Clock in and clock out should each be a single cell holding both the date and the time
+              (e.g. <code>2026-05-14 08:00</code> or <code>5/14/2026 8:00 AM</code>). Notes is
+              optional; every other column is required per row.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={onDownloadCsv}>
@@ -694,10 +772,14 @@ function UploadStep({ onPick }: { onPick: (f: File) => void }) {
       </div>
 
       <div
-        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
         onDragLeave={() => setDragging(false)}
         onDrop={(e) => {
-          e.preventDefault(); setDragging(false);
+          e.preventDefault();
+          setDragging(false);
           const f = e.dataTransfer.files?.[0];
           if (f) onPick(f);
         }}
@@ -708,8 +790,8 @@ function UploadStep({ onPick }: { onPick: (f: File) => void }) {
         <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
         <p className="mt-3 font-medium">Drop the filled-in template here</p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Accepts .csv, .xlsx, or .xls up to 25 MB. Files that don't match the template's six columns will be
-          rejected before any rows are imported.
+          Accepts .csv, .xlsx, or .xls up to 25 MB. Files that don't match the template's six
+          columns will be rejected before any rows are imported.
         </p>
         <div className="mt-4">
           <input
@@ -717,10 +799,15 @@ function UploadStep({ onPick }: { onPick: (f: File) => void }) {
             type="file"
             accept=".csv,.xlsx,.xls"
             className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) onPick(f); }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onPick(f);
+            }}
           />
           <label htmlFor="ts-import-file">
-            <Button variant="outline" asChild><span>Choose file</span></Button>
+            <Button variant="outline" asChild>
+              <span>Choose file</span>
+            </Button>
           </label>
         </div>
       </div>
@@ -728,12 +815,25 @@ function UploadStep({ onPick }: { onPick: (f: File) => void }) {
   );
 }
 
-
 function ReviewStep({
-  rows, ready, ambiguous, unmatched, skipped, people,
-  repeatedIssues, dupeChecking,
-  onChooseStaff, onChooseClient, onLink, onBulkResolve, onSkip, onUnskip,
-  onDownloadSkipped, onBack, onCommit, committing,
+  rows,
+  ready,
+  ambiguous,
+  unmatched,
+  skipped,
+  people,
+  repeatedIssues,
+  dupeChecking,
+  onChooseStaff,
+  onChooseClient,
+  onLink,
+  onBulkResolve,
+  onSkip,
+  onUnskip,
+  onDownloadSkipped,
+  onBack,
+  onCommit,
+  committing,
 }: {
   rows: ReviewRow[];
   ready: ReviewRow[];
@@ -765,9 +865,20 @@ function ReviewStep({
           <span className="text-destructive font-medium">{unmatched.length} not matched</span> ·{" "}
           <span className="text-muted-foreground">{skipped.length} skipped</span>
           {duplicateCount > 0 && (
-            <> · <span className="text-orange-700 font-medium">{duplicateCount} likely duplicate{duplicateCount === 1 ? "" : "s"}</span></>
+            <>
+              {" "}
+              ·{" "}
+              <span className="text-orange-700 font-medium">
+                {duplicateCount} likely duplicate{duplicateCount === 1 ? "" : "s"}
+              </span>
+            </>
           )}
-          {dupeChecking && <> · <Loader2 className="inline h-3 w-3 animate-spin" /> checking duplicates…</>}
+          {dupeChecking && (
+            <>
+              {" "}
+              · <Loader2 className="inline h-3 w-3 animate-spin" /> checking duplicates…
+            </>
+          )}
         </div>
         <Button variant="outline" size="sm" onClick={onDownloadSkipped}>
           <Download className="mr-1.5 h-3.5 w-3.5" /> Download skipped rows
@@ -781,9 +892,11 @@ function ReviewStep({
           <TabsTrigger value="ready">Ready ({ready.length})</TabsTrigger>
           <TabsTrigger value="ambiguous">Needs a choice ({ambiguous.length})</TabsTrigger>
           <TabsTrigger value="unmatched">Not matched ({unmatched.length})</TabsTrigger>
-          <TabsTrigger value="skipped">Skipped ({skipped.length}{duplicateCount > 0 ? `, incl. ${duplicateCount} dup` : ""})</TabsTrigger>
+          <TabsTrigger value="skipped">
+            Skipped ({skipped.length}
+            {duplicateCount > 0 ? `, incl. ${duplicateCount} dup` : ""})
+          </TabsTrigger>
         </TabsList>
-
 
         <TabsContent value="ready" className="mt-3">
           <ReadyTable rows={ready} onSkip={onSkip} />
@@ -792,7 +905,13 @@ function ReviewStep({
         <TabsContent value="ambiguous" className="mt-3 space-y-2">
           {ambiguous.length === 0 && <EmptyMsg text="Nothing needs a choice." />}
           {ambiguous.map((r) => (
-            <AmbiguousRow key={r.idx} row={r} onChooseStaff={onChooseStaff} onChooseClient={onChooseClient} onSkip={onSkip} />
+            <AmbiguousRow
+              key={r.idx}
+              row={r}
+              onChooseStaff={onChooseStaff}
+              onChooseClient={onChooseClient}
+              onSkip={onSkip}
+            />
           ))}
         </TabsContent>
 
@@ -806,31 +925,41 @@ function ReviewStep({
         <TabsContent value="skipped" className="mt-3 space-y-2">
           {skipped.length === 0 && <EmptyMsg text="No skipped rows." />}
           {skipped.map((r) => (
-            <div key={r.idx} className="flex items-center justify-between rounded-md border border-border bg-muted/30 p-2 text-xs">
+            <div
+              key={r.idx}
+              className="flex items-center justify-between rounded-md border border-border bg-muted/30 p-2 text-xs"
+            >
               <div className="min-w-0">
                 <div className="truncate">
                   <span className="font-medium">{r.staffLabel || "(no staff)"}</span> ·{" "}
                   <span>{r.clientLabel || "(no client)"}</span> ·{" "}
-                  <span className="text-muted-foreground">{r.dateStr} {r.clockInStr}→{r.clockOutStr}</span>
+                  <span className="text-muted-foreground">
+                    {r.dateStr} {r.clockInStr}→{r.clockOutStr}
+                  </span>
                 </div>
                 {r.reason && <div className="text-muted-foreground">Reason: {r.reason}</div>}
               </div>
-              <Button variant="ghost" size="sm" onClick={() => onUnskip(r.idx)}>Un-skip</Button>
+              <Button variant="ghost" size="sm" onClick={() => onUnskip(r.idx)}>
+                Un-skip
+              </Button>
             </div>
           ))}
         </TabsContent>
       </Tabs>
 
       <div className="flex flex-col items-stretch gap-2 md:flex-row md:items-center md:justify-between">
-        <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Back to upload</Button>
+        <Button variant="ghost" onClick={onBack}>
+          <ArrowLeft className="mr-1.5 h-4 w-4" /> Back to upload
+        </Button>
         <div className="flex flex-col items-end gap-1">
           <Button onClick={onCommit} disabled={committing || ready.length === 0}>
             {committing && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
             Submit {ready.length} entr{ready.length === 1 ? "y" : "ies"} to staff for confirmation
           </Button>
           <p className="text-[11px] text-muted-foreground max-w-md text-right">
-            This is Stage 3 of the import. Nothing has been written to the database yet. Clicking submit releases these
-            entries into each staff member's own confirmation queue — staff never see them before this click.
+            This is Stage 3 of the import. Nothing has been written to the database yet. Clicking
+            submit releases these entries into each staff member's own confirmation queue — staff
+            never see them before this click.
           </p>
         </div>
       </div>
@@ -839,11 +968,18 @@ function ReviewStep({
 }
 
 function EmptyMsg({ text }: { text: string }) {
-  return <div className="rounded-md border border-dashed border-border p-6 text-center text-xs text-muted-foreground">{text}</div>;
+  return (
+    <div className="rounded-md border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+      {text}
+    </div>
+  );
 }
 
 function ReadyTable({ rows, onSkip }: { rows: ReviewRow[]; onSkip: (idx: number) => void }) {
-  if (rows.length === 0) return <EmptyMsg text="No ready rows yet. Resolve ambiguous or unmatched rows to move them here." />;
+  if (rows.length === 0)
+    return (
+      <EmptyMsg text="No ready rows yet. Resolve ambiguous or unmatched rows to move them here." />
+    );
   return (
     <div className="overflow-x-auto rounded-2xl border border-border bg-card">
       <table className="w-full text-xs">
@@ -861,18 +997,36 @@ function ReadyTable({ rows, onSkip }: { rows: ReviewRow[]; onSkip: (idx: number)
         <tbody>
           {rows.map((r) => (
             <tr key={r.idx} className="border-t border-border/60">
-              <td className="px-3 py-1.5">{r.staffCandidates.find((s) => s.id === r.staffId)?.label ?? r.staffLabel}</td>
-              <td className="px-3 py-1.5">{r.clientCandidates.find((c) => c.id === r.clientId)?.label ?? r.clientLabel}</td>
-              <td className="px-3 py-1.5">{r.clockInIso ? new Date(r.clockInIso).toLocaleDateString() : r.dateStr}</td>
               <td className="px-3 py-1.5">
-                {r.clockInIso ? new Date(r.clockInIso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : r.clockInStr}
+                {r.staffCandidates.find((s) => s.id === r.staffId)?.label ?? r.staffLabel}
+              </td>
+              <td className="px-3 py-1.5">
+                {r.clientCandidates.find((c) => c.id === r.clientId)?.label ?? r.clientLabel}
+              </td>
+              <td className="px-3 py-1.5">
+                {r.clockInIso ? new Date(r.clockInIso).toLocaleDateString() : r.dateStr}
+              </td>
+              <td className="px-3 py-1.5">
+                {r.clockInIso
+                  ? new Date(r.clockInIso).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : r.clockInStr}
                 {" → "}
-                {r.clockOutIso ? new Date(r.clockOutIso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : r.clockOutStr}
+                {r.clockOutIso
+                  ? new Date(r.clockOutIso).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : r.clockOutStr}
               </td>
               <td className="px-3 py-1.5 font-mono">{r.serviceCode || "HISTORICAL"}</td>
               <td className="px-3 py-1.5 max-w-[16rem] truncate">{r.notes}</td>
               <td className="px-3 py-1.5">
-                <Button variant="ghost" size="sm" onClick={() => onSkip(r.idx)}><X className="h-3.5 w-3.5" /></Button>
+                <Button variant="ghost" size="sm" onClick={() => onSkip(r.idx)}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
               </td>
             </tr>
           ))}
@@ -883,7 +1037,10 @@ function ReadyTable({ rows, onSkip }: { rows: ReviewRow[]; onSkip: (idx: number)
 }
 
 function AmbiguousRow({
-  row, onChooseStaff, onChooseClient, onSkip,
+  row,
+  onChooseStaff,
+  onChooseClient,
+  onSkip,
 }: {
   row: ReviewRow;
   onChooseStaff: (idx: number, id: string) => void;
@@ -894,22 +1051,37 @@ function AmbiguousRow({
     <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs">
       <div className="mb-2 flex items-start justify-between gap-2">
         <div>
-          <Badge variant="outline" className="border-amber-500/40 text-amber-700">Ambiguous</Badge>
+          <Badge variant="outline" className="border-amber-500/40 text-amber-700">
+            Ambiguous
+          </Badge>
           <span className="ml-2 text-muted-foreground">
             {row.dateStr} · {row.clockInStr} → {row.clockOutStr}
-            {row.notes && <> · <span className="italic">{row.notes.slice(0, 60)}</span></>}
+            {row.notes && (
+              <>
+                {" "}
+                · <span className="italic">{row.notes.slice(0, 60)}</span>
+              </>
+            )}
           </span>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => onSkip(row.idx)}>Skip</Button>
+        <Button variant="ghost" size="sm" onClick={() => onSkip(row.idx)}>
+          Skip
+        </Button>
       </div>
       <div className="grid gap-2 md:grid-cols-2">
         <div>
           <div className="mb-1 text-muted-foreground">Staff — "{row.staffLabel}"</div>
           {row.staffCandidates.length > 1 ? (
             <Select value={row.staffId ?? ""} onValueChange={(v) => onChooseStaff(row.idx, v)}>
-              <SelectTrigger className="h-8"><SelectValue placeholder="Pick one" /></SelectTrigger>
+              <SelectTrigger className="h-8">
+                <SelectValue placeholder="Pick one" />
+              </SelectTrigger>
               <SelectContent>
-                {row.staffCandidates.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
+                {row.staffCandidates.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           ) : (
@@ -920,9 +1092,15 @@ function AmbiguousRow({
           <div className="mb-1 text-muted-foreground">Client — "{row.clientLabel}"</div>
           {row.clientCandidates.length > 1 ? (
             <Select value={row.clientId ?? ""} onValueChange={(v) => onChooseClient(row.idx, v)}>
-              <SelectTrigger className="h-8"><SelectValue placeholder="Pick one" /></SelectTrigger>
+              <SelectTrigger className="h-8">
+                <SelectValue placeholder="Pick one" />
+              </SelectTrigger>
               <SelectContent>
-                {row.clientCandidates.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
+                {row.clientCandidates.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           ) : (
@@ -935,7 +1113,10 @@ function AmbiguousRow({
 }
 
 function UnmatchedRow({
-  row, people, onLink, onSkip,
+  row,
+  people,
+  onLink,
+  onSkip,
 }: {
   row: ReviewRow;
   people: { staff: Person[]; clients: Person[] };
@@ -948,10 +1129,14 @@ function UnmatchedRow({
     ? people.staff.filter((p) => p.label.toLowerCase().includes(staffQ.toLowerCase())).slice(0, 8)
     : [];
   const clientMatches = clientQ.trim()
-    ? people.clients.filter((p) => p.label.toLowerCase().includes(clientQ.toLowerCase())).slice(0, 8)
+    ? people.clients
+        .filter((p) => p.label.toLowerCase().includes(clientQ.toLowerCase()))
+        .slice(0, 8)
     : [];
   const staffLabel = row.staffId ? people.staff.find((p) => p.id === row.staffId)?.label : null;
-  const clientLabel = row.clientId ? people.clients.find((p) => p.id === row.clientId)?.label : null;
+  const clientLabel = row.clientId
+    ? people.clients.find((p) => p.id === row.clientId)?.label
+    : null;
 
   return (
     <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs">
@@ -965,11 +1150,15 @@ function UnmatchedRow({
             {row.reason} · {row.dateStr} {row.clockInStr}→{row.clockOutStr}
           </span>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => onSkip(row.idx)}>Skip</Button>
+        <Button variant="ghost" size="sm" onClick={() => onSkip(row.idx)}>
+          Skip
+        </Button>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         <div>
-          <div className="mb-1 text-muted-foreground">Staff — "{row.staffLabel || "(missing)"}"</div>
+          <div className="mb-1 text-muted-foreground">
+            Staff — "{row.staffLabel || "(missing)"}"
+          </div>
           {staffLabel ? (
             <div className="text-emerald-700">✓ Linked to {staffLabel}</div>
           ) : (
@@ -984,7 +1173,10 @@ function UnmatchedRow({
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => { onLink(row.idx, "staff", m.id); setStaffQ(""); }}
+                  onClick={() => {
+                    onLink(row.idx, "staff", m.id);
+                    setStaffQ("");
+                  }}
                   className="mt-1 block w-full rounded border border-border bg-background px-2 py-1 text-left hover:bg-muted"
                 >
                   {m.label}
@@ -994,7 +1186,9 @@ function UnmatchedRow({
           )}
         </div>
         <div>
-          <div className="mb-1 text-muted-foreground">Client — "{row.clientLabel || "(missing)"}"</div>
+          <div className="mb-1 text-muted-foreground">
+            Client — "{row.clientLabel || "(missing)"}"
+          </div>
           {clientLabel ? (
             <div className="text-emerald-700">✓ Linked to {clientLabel}</div>
           ) : (
@@ -1009,7 +1203,10 @@ function UnmatchedRow({
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => { onLink(row.idx, "client", m.id); setClientQ(""); }}
+                  onClick={() => {
+                    onLink(row.idx, "client", m.id);
+                    setClientQ("");
+                  }}
                   className="mt-1 block w-full rounded border border-border bg-background px-2 py-1 text-left hover:bg-muted"
                 >
                   {m.label}
@@ -1020,7 +1217,9 @@ function UnmatchedRow({
         </div>
       </div>
       <div className="mt-2 text-[11px] text-muted-foreground">
-        This flow never creates new staff or clients. If the person truly doesn't exist yet, skip the row, add them through Client Smart Import or the Employees roster, then re-import the leftover rows.
+        This flow never creates new staff or clients. If the person truly doesn't exist yet, skip
+        the row, add them through Client Smart Import or the Team Members roster, then re-import the
+        leftover rows.
       </div>
     </div>
   );
@@ -1028,7 +1227,10 @@ function UnmatchedRow({
 
 // ─── Step 4 ────────────────────────────────────────────────────────────────
 function DoneStep({
-  inserted, staffCount, onAnother, onArchive,
+  inserted,
+  staffCount,
+  onAnother,
+  onArchive,
 }: {
   inserted: number;
   staffCount: number;
@@ -1039,17 +1241,22 @@ function DoneStep({
     <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-6 text-center">
       <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-600" />
       <div className="mt-2 font-semibold">
-        Submitted {inserted} historical entr{inserted === 1 ? "y" : "ies"} to{" "}
-        {staffCount} staff member{staffCount === 1 ? "" : "s"} for confirmation
+        Submitted {inserted} historical entr{inserted === 1 ? "y" : "ies"} to {staffCount} staff
+        member{staffCount === 1 ? "" : "s"} for confirmation
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        Each staff member will see only their own entries on their "Historical Timesheets to Confirm" page. They can add
-        a missing shift note, flag anything that looks wrong, and must confirm before an entry is finalized. Every entry
-        stays permanently marked as a historical import — it will never be confused with a live clock punch.
+        Each staff member will see only their own entries on their "Historical Timesheets to
+        Confirm" page. They can add a missing shift note, flag anything that looks wrong, and must
+        confirm before an entry is finalized. Every entry stays permanently marked as a historical
+        import — it will never be confused with a live clock punch.
       </p>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
-        <Button variant="outline" onClick={onAnother}>Import another spreadsheet</Button>
-        <Button variant="outline" onClick={onArchive}>View EVV archive</Button>
+        <Button variant="outline" onClick={onAnother}>
+          Import another spreadsheet
+        </Button>
+        <Button variant="outline" onClick={onArchive}>
+          View EVV archive
+        </Button>
       </div>
     </div>
   );
@@ -1060,7 +1267,9 @@ function DoneStep({
 // admin can pick the right person once here and every row sharing that
 // label is updated. Prevents doing the identical fix N times.
 function BulkFixPanel({
-  repeatedIssues, people, onBulkResolve,
+  repeatedIssues,
+  people,
+  onBulkResolve,
 }: {
   repeatedIssues: { staffIssues: Array<[string, number]>; clientIssues: Array<[string, number]> };
   people: { staff: Person[]; clients: Person[] };
@@ -1071,11 +1280,12 @@ function BulkFixPanel({
   return (
     <div className="rounded-2xl border border-amber-400/50 bg-amber-500/5 p-4">
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-800">
-        <AlertTriangle className="h-4 w-4" /> Repeated issues — fix once, apply to every matching row
+        <AlertTriangle className="h-4 w-4" /> Repeated issues — fix once, apply to every matching
+        row
       </div>
       <p className="mb-3 text-xs text-muted-foreground">
-        These raw values appear on multiple rows and aren't resolved yet. Pick the correct person once and every
-        row sharing that value will update.
+        These raw values appear on multiple rows and aren't resolved yet. Pick the correct person
+        once and every row sharing that value will update.
       </p>
       <div className="grid gap-3 md:grid-cols-2">
         {staffIssues.length > 0 && (
@@ -1083,16 +1293,23 @@ function BulkFixPanel({
             <div className="mb-1 text-xs font-medium">Unresolved staff labels</div>
             <div className="space-y-1.5">
               {staffIssues.slice(0, 20).map(([label, n]) => (
-                <div key={label} className="flex items-center gap-2 rounded-md border border-border/60 bg-card p-2 text-xs">
+                <div
+                  key={label}
+                  className="flex items-center gap-2 rounded-md border border-border/60 bg-card p-2 text-xs"
+                >
                   <div className="min-w-0 flex-1 truncate">
                     <span className="font-medium">"{label}"</span>{" "}
                     <span className="text-muted-foreground">· {n} rows</span>
                   </div>
                   <Select onValueChange={(id) => id && onBulkResolve("staff", label, id)}>
-                    <SelectTrigger className="h-7 w-48 text-xs"><SelectValue placeholder="Pick staff member" /></SelectTrigger>
+                    <SelectTrigger className="h-7 w-48 text-xs">
+                      <SelectValue placeholder="Pick staff member" />
+                    </SelectTrigger>
                     <SelectContent>
                       {people.staff.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -1106,16 +1323,23 @@ function BulkFixPanel({
             <div className="mb-1 text-xs font-medium">Unresolved client labels</div>
             <div className="space-y-1.5">
               {clientIssues.slice(0, 20).map(([label, n]) => (
-                <div key={label} className="flex items-center gap-2 rounded-md border border-border/60 bg-card p-2 text-xs">
+                <div
+                  key={label}
+                  className="flex items-center gap-2 rounded-md border border-border/60 bg-card p-2 text-xs"
+                >
                   <div className="min-w-0 flex-1 truncate">
                     <span className="font-medium">"{label}"</span>{" "}
                     <span className="text-muted-foreground">· {n} rows</span>
                   </div>
                   <Select onValueChange={(id) => id && onBulkResolve("client", label, id)}>
-                    <SelectTrigger className="h-7 w-48 text-xs"><SelectValue placeholder="Pick client" /></SelectTrigger>
+                    <SelectTrigger className="h-7 w-48 text-xs">
+                      <SelectValue placeholder="Pick client" />
+                    </SelectTrigger>
                     <SelectContent>
                       {people.clients.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

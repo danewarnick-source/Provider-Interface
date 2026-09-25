@@ -38,8 +38,8 @@ function AccessPage() {
           <h2 className="text-base font-semibold">Access &amp; presets</h2>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Everyone is an Owner, Admin or Staff. Admins and Staff get a preset — a named set of Off / View / Edit
-          settings — and can be limited to the homes, staff and clients they&apos;re assigned.
+          Everyone is an Owner, Admin, or Team member. Admins and Team members get a preset — a named set of Off / View / Edit
+          settings — and can be limited to the homes, team members, and clients they&apos;re assigned.
         </p>
       </div>
 

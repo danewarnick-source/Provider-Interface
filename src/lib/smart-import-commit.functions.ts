@@ -467,7 +467,7 @@ export async function runJobCommit(
             jobId,
             orgId,
             subj.id,
-            "Employee imported without a login (missing email)",
+            "Team member imported without a login (missing email)",
             "admin_override",
             userId,
             "imported_no_email",
@@ -1160,7 +1160,7 @@ async function commitEmployee(
       jobId,
       orgId,
       subj.id,
-      "Employee imported without email (no login created, no invite sent)",
+      "Team member imported without email (no login created, no invite sent)",
       "admin_override",
       userId,
       "imported_no_email",
@@ -1195,7 +1195,6 @@ async function commitEmployee(
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
-        trackIds: [],
         requiresDeescalation: true,
         requiresAbi: true,
         customFieldValues: {},
@@ -1209,7 +1208,7 @@ async function commitEmployee(
       orgId,
       subj.id,
       hired.created
-        ? "Created employee login + roster record (invite not sent during import)"
+        ? "Created team member login + roster record (invite not sent during import)"
         : "Linked existing account and updated roster record (invite not sent during import)",
       "admin_override",
       userId,
@@ -1238,7 +1237,7 @@ async function commitEmployee(
     jobId,
     orgId,
     subj.id,
-    `Updated existing employee (${Object.keys(mapped).length} fields)`,
+    `Updated existing team member (${Object.keys(mapped).length} fields)`,
     "admin_override",
     userId,
     "update_employee",
