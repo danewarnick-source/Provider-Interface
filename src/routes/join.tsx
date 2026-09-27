@@ -20,6 +20,7 @@ import {
   isValidJoinPassword,
   isValidJoinUsername,
   JOIN_PASSWORD_HINT,
+  JOIN_PASSWORD_MIN_LENGTH,
   JOIN_PASSWORD_TOO_SHORT,
   JOIN_USERNAME_HINT,
   JOIN_USERNAME_INVALID,
@@ -308,7 +309,7 @@ function JoinPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={setsNewPassword ? 8 : undefined}
+            minLength={setsNewPassword ? JOIN_PASSWORD_MIN_LENGTH : undefined}
             autoComplete={setsNewPassword ? "new-password" : "current-password"}
             className={fieldClass}
             aria-describedby="join-password-hint join-password-live"
@@ -337,7 +338,7 @@ function JoinPage() {
               aria-label="Password requirements"
             >
               <JoinRule ok={isValidJoinPassword(password)} idle={password.length === 0}>
-                At least 8 characters
+                At least {JOIN_PASSWORD_MIN_LENGTH} characters
               </JoinRule>
             </ul>
           )}

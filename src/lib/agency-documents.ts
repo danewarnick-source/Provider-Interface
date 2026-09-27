@@ -4,6 +4,7 @@
  * One card per duty; renew uses the same card. Company policies stay off this pack.
  */
 
+import { neutralizeCsvFormula } from "./csv-safe.ts";
 import {
   obligationFileStatusLabel,
   statusForObligationInstance,
@@ -377,7 +378,8 @@ export function tallyAgencyDocCards(cards: AgencyDocCard[]): AgencyDocCounts {
 }
 
 function csvCell(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
+  const safe = neutralizeCsvFormula(value);
+  return `"${safe.replace(/"/g, '""')}"`;
 }
 
 export function missingAgencyDocCsv(cards: AgencyDocCard[]): string {

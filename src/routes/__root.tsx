@@ -218,11 +218,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "font-src 'self' fonts.googleapis.com fonts.gstatic.com",
           "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
           "script-src 'self' 'unsafe-inline'",
-          "img-src 'self' data: https:",
-          // Nominatim geocode + Supabase + Vercel analytics/ingest. Do NOT put
+          "img-src 'self' data: blob: https://*.supabase.co https://*.tile.openstreetmap.org https://*.s3.amazonaws.com https://*.s3.us-east-1.amazonaws.com",
+          // Nominatim geocode + Supabase + Vercel. Bedrock stays server-side, so
+          // the browser does not get a blanket amazonaws connect. Do NOT put
           // frame-ancestors here — browsers ignore it on <meta http-equiv> and
           // log a console warning; set that directive via HTTP headers only.
-          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://vercel.live https://nominatim.openstreetmap.org https://*.amazonaws.com https://cognito-idp.us-east-1.amazonaws.com",
+          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://vercel.live https://nominatim.openstreetmap.org https://cognito-idp.us-east-1.amazonaws.com https://*.s3.amazonaws.com https://*.s3.us-east-1.amazonaws.com",
           "object-src 'none'",
           "base-uri 'self'",
           "form-action 'self'",

@@ -99,7 +99,7 @@ function ResetPassword() {
     const password = String(fd.get("password"));
     const confirm = String(fd.get("confirm"));
     if (password !== confirm) return toast.error("Passwords don't match");
-    if (password.length < 8) return toast.error("Password must be at least 8 characters");
+    if (password.length < 12) return toast.error("Password must be at least 12 characters");
     setBusy(true);
     const { data: u, error } = await supabase.auth.updateUser({ password });
     if (!error && u.user) {
@@ -139,8 +139,8 @@ function ResetPassword() {
   return (
     <AuthShell title="Set a new password" subtitle="Choose a strong password you don't use elsewhere.">
       <form onSubmit={onSubmit} className="grid gap-4">
-        <div className="grid gap-2"><Label htmlFor="password">New password</Label><PasswordInput id="password" name="password" minLength={8} required /></div>
-        <div className="grid gap-2"><Label htmlFor="confirm">Confirm password</Label><PasswordInput id="confirm" name="confirm" minLength={8} required /></div>
+        <div className="grid gap-2"><Label htmlFor="password">New password</Label><PasswordInput id="password" name="password" minLength={12} required /></div>
+        <div className="grid gap-2"><Label htmlFor="confirm">Confirm password</Label><PasswordInput id="confirm" name="confirm" minLength={12} required /></div>
         <Button type="submit" disabled={busy} className="bg-[var(--hive-sidebar)] text-[var(--hive-chrome-text)] hover:bg-[var(--hive-ink)]">
           {busy ? "Saving…" : "Update password"}
         </Button>

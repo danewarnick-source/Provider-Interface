@@ -13,6 +13,7 @@ import {
   type CandidateFlagLike,
   type ShiftInsertRow,
 } from "./shift-commit";
+import { coerceScheduledShiftStatus } from "./shift-status";
 
 const ShiftRowZ = z
   .object({
@@ -63,7 +64,16 @@ export const insertScheduledShiftsGated = createServerFn({ method: "POST" })
       return { status: "inserted", inserted: 0, flagsRaised: 0, blocked: false, insertedIds: [] };
     }
     try {
-      const gate = await gateScheduledShiftInsert(supabase, data.rows as ShiftInsertRow[], {
+      // Column default status is 'pending', which fails scheduled_shifts_status_check.
+      // Always write an allowlisted status. DB default should be fixed separately.
+      const rows = (data.rows as ShiftInsertRow[]).map((row) => ({
+        ...row,
+        status: coerceScheduledShiftStatus(
+          typeof row.status === "string" ? row.status : null,
+          row.staff_id,
+        ),
+      }));
+      const gate = await gateScheduledShiftInsert(supabase, rows, {
         mode: "strict_acknowledgements",
         userId,
         acknowledgements: data.acknowledgements ?? [],
@@ -75,7 +85,7 @@ export const insertScheduledShiftsGated = createServerFn({ method: "POST" })
       const insertRes = await supabase
         .from("scheduled_shifts")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .insert(data.rows as any)
+        .insert(rows as any)
         .select("id");
       if (insertRes.error) throw insertRes.error;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

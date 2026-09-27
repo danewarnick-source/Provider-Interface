@@ -1,3 +1,4 @@
+import { neutralizeCsvFormula } from "./csv-safe.ts";
 import { toDisplayNameCase } from "./person-name.ts";
 import { isCorrectionRequestedNote } from "./cert-review.ts";
 
@@ -161,7 +162,8 @@ export function tallyObligationFileStatus(
 }
 
 export function csvCell(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
+  const safe = neutralizeCsvFormula(value);
+  return `"${safe.replace(/"/g, '""')}"`;
 }
 
 export function escapeHtml(value: string): string {
