@@ -64,6 +64,20 @@ export async function logPhiAccess(opts: {
   userAgent?: string | null;
 }): Promise<void> {
   try {
+    if (opts.clientId) {
+      const { data: allowed, error: phiErr } = await opts.supabaseUserClient.rpc(
+        "can_access_client_phi",
+        { _client_id: opts.clientId },
+      );
+      if (phiErr || allowed !== true) return;
+      const { data: client, error: clientErr } = await opts.supabaseUserClient
+        .from("clients")
+        .select("organization_id")
+        .eq("id", opts.clientId)
+        .maybeSingle();
+      if (clientErr || !client || client.organization_id !== opts.organizationId) return;
+    }
+
     const { data: membership } = await opts.supabaseUserClient
       .from("organization_members")
       .select("access_level")
@@ -74,7 +88,8 @@ export async function logPhiAccess(opts: {
 
     const breakGlass = await isBreakGlass(opts.supabaseUserClient, opts.userId);
     const role =
-      (membership as { access_level?: string } | null)?.access_level ?? (breakGlass ? "super_admin" : null);
+      (membership as { access_level?: string } | null)?.access_level ??
+      (breakGlass ? "super_admin" : null);
     const { ip, userAgent } = resolveRequestMeta({
       ip: opts.ip,
       userAgent: opts.userAgent,

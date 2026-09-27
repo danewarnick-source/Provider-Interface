@@ -22,6 +22,7 @@
  * weekday + same start time-of-day + starts_at >= clicked occurrence.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { coerceScheduledShiftStatus } from "@/lib/scheduling/shift-status";
 
 export type ShiftDraft = {
   id?: string;
@@ -34,7 +35,7 @@ export type ShiftDraft = {
   starts_at: string; // ISO
   ends_at: string;   // ISO
   notes: string | null;
-  status: string;    // e.g. "pending"
+  status: string;
   published: boolean;
   created_by: string;
   // Recurrence (optional — defaults match a one-off shift)
@@ -95,7 +96,7 @@ function buildPayload(draft: ShiftDraft): Record<string, unknown> {
     starts_at: draft.starts_at,
     ends_at: draft.ends_at,
     notes: draft.notes?.trim() || null,
-    status: draft.status,
+    status: coerceScheduledShiftStatus(draft.status, draft.staff_id),
     published: draft.published,
     created_by: draft.created_by,
     is_recurring: !!draft.is_recurring,

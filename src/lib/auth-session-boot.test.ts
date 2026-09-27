@@ -257,6 +257,9 @@ describe("this branch matches live CloudFront JS (image 1b8fbd50 / PR 190)", () 
 
     const root = readFileSync(new URL("../routes/__root.tsx", import.meta.url), "utf8");
     assert.match(root, /connect-src 'self' https:\/\/\*\.supabase\.co wss:\/\/\*\.supabase\.co/);
+    assert.doesNotMatch(root, /unsafe-eval/);
+    assert.doesNotMatch(root, /https:\/\/\*\.amazonaws\.com/);
+    assert.doesNotMatch(root, /img-src 'self' data: https:/);
 
     const aws = readFileSync(new URL("../../docs/AWS_DEPLOY.md", import.meta.url), "utf8");
     assert.doesNotMatch(aws, /Content-Security-Policy/);

@@ -5,6 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { isTrainingOnlySku, trainingOnlyIncludesThirtyDay } from "@/lib/training-only";
 import {
@@ -43,7 +44,8 @@ export const thirtyDayCourseAccessFn = createServerFn({ method: "POST" })
       charged: false,
       organizationName: "Provider agency",
     };
-    if (!userId) return empty;
+    if (!userId || !context.supabase) return empty;
+    await requireOrgMembership(context.supabase, userId, data.organizationId, "staff");
     const admin = supabaseAdmin as AnySupabase;
 
     const full = await admin

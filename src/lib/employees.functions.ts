@@ -22,7 +22,7 @@ export const CreateEmployeeInput = z.object({
   lastName: z.string().trim().min(1).max(80),
   email: z.string().trim().email().max(255),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
-  temporaryPassword: z.string().min(8).max(128),
+  temporaryPassword: z.string().min(12).max(128),
   accessLevel: LevelEnum,
   /** Null for Owner. Blank for Admin / Team member uses that level's default preset. */
   accessPresetId: z.string().uuid().nullable().optional(),
@@ -508,7 +508,7 @@ export const finishEmployeeSetup = createServerFn({ method: "POST" })
 const ResetInput = z.object({
   organizationId: z.string().uuid(),
   userId: z.string().uuid(),
-  newPassword: z.string().min(8).max(128),
+  newPassword: z.string().min(12).max(128),
 });
 
 export const adminResetEmployeePassword = createServerFn({ method: "POST" })

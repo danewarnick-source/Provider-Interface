@@ -10,6 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
+import { neutralizeCsvFields } from "@/lib/csv-safe";
 import { toast } from "sonner";
 import {
   Upload,
@@ -575,7 +576,7 @@ export function TimesheetsImportWizard() {
       const row: Record<string, string> = {};
       for (const h of parsed.headers) row[h] = r.raw[h] ?? "";
       row.skip_reason = r.skipped ? (r.reason ?? "skipped by user") : (r.reason ?? "unresolved");
-      return row;
+      return neutralizeCsvFields(row);
     });
     const csv = Papa.unparse({ fields: headers, data: csvRows });
     const blob = new Blob([csv], { type: "text/csv" });

@@ -6,6 +6,7 @@
  * Progress uses existing training_topic_progress / training_completions.
  */
 
+import { neutralizeCsvFormula } from "./csv-safe.ts";
 import {
   ANNUAL_CE_COURSE_FULFILLS_OBLIGATION,
   ANNUAL_CE_COURSE_ID,
@@ -562,7 +563,7 @@ export function formatExamExportCsv(args: {
 }
 
 function csvCell(value: string): string {
-  const s = value.replace(/\r?\n/g, " ").replace(/"/g, '""');
+  const s = neutralizeCsvFormula(value.replace(/\r?\n/g, " ")).replace(/"/g, '""');
   return `"${s}"`;
 }
 

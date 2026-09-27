@@ -102,12 +102,12 @@ export function joinHomeForLevel(level: string | null | undefined, presetHome?: 
   return level === "owner" || level === "admin" ? "/dashboard" : "/employee";
 }
 
-/** Staff join: length only. GoTrue default is 6 with no required character classes. */
-export const JOIN_PASSWORD_MIN_LENGTH = 8;
+/** Team-member join: length only. Supabase project minimum is 12. */
+export const JOIN_PASSWORD_MIN_LENGTH = 12;
 export const JOIN_PASSWORD_MAX_LENGTH = 200;
 
 export const JOIN_PASSWORD_HINT =
-  "At least 8 characters. Letters and numbers are fine — no special character required.";
+  "At least 12 characters. Letters and numbers are fine — no special character required.";
 
 export {
   USERNAME_HINT as JOIN_USERNAME_HINT,
@@ -119,11 +119,11 @@ export {
   usernameLiveMessage as joinUsernameLiveMessage,
 } from "./account-username.ts";
 
-export const JOIN_PASSWORD_TOO_SHORT = "Password must be at least 8 characters.";
+export const JOIN_PASSWORD_TOO_SHORT = "Password must be at least 12 characters.";
 
 /**
- * New-invite password rule: 8–200 characters. No digit / symbol / case classes.
- * Matches reset-password and is slightly above GoTrue's default min (6).
+ * New-invite password rule: 12–200 characters. No digit / symbol / case classes.
+ * Matches signup, reset-password, and the Supabase project minimum.
  * Auth may still reject a leaked / HIBP-listed password if that project flag is on.
  */
 export function isValidJoinPassword(password: string): boolean {

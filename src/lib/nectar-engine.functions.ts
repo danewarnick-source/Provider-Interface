@@ -192,22 +192,7 @@ PROVIDER ENTITIES:
 - Jurisdictions: ${facts.jurisdictions.join(", ")}`;
 
   const { callBedrockChatCompletions, BedrockError } = await import("@/lib/ai-bedrock.server");
-  const { acquireBedrockSlot, recordBedrockTokens, RateLimitError } = await import(
-    "@/lib/nectar-rate-limit.server"
-  );
   const { TransientAIError } = await import("@/lib/authoritative-sources.server");
-
-  // Gate every call through the shared 8-rpm Bedrock slot bucket. If the bucket
-  // is saturated beyond its wait window, surface as transient so the caller
-  // retries with backoff instead of failing outright.
-  try {
-    await acquireBedrockSlot();
-  } catch (e) {
-    if (e instanceof RateLimitError) {
-      throw new TransientAIError(e.message, Math.max(5_000, e.waitMs || 30_000));
-    }
-    throw e;
-  }
 
   let json;
   try {
@@ -233,19 +218,6 @@ PROVIDER ENTITIES:
     }
     throw e;
   }
-
-  // Best-effort daily-token bookkeeping so pre-fill counts against the same
-  // daily cap as drafting.
-  const usage = ((json as unknown as { usage?: unknown })?.usage ?? {}) as {
-    total_tokens?: number;
-    input_tokens?: number;
-    output_tokens?: number;
-  };
-  const totalTokens =
-    typeof usage.total_tokens === "number"
-      ? usage.total_tokens
-      : Number(usage.input_tokens ?? 0) + Number(usage.output_tokens ?? 0);
-  if (totalTokens > 0) void recordBedrockTokens(totalTokens);
 
   const raw: unknown = (() => {
     try {

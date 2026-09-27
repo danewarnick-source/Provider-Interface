@@ -39,6 +39,34 @@ type InvitationRow = {
 
 const INVITE_SELECT = "id, token, email, access_level, access_preset_id, expires_at";
 
+/** Per inviter. Reuses nectar_check_rate (service role). 0 daily cap = requests only. */
+const INVITE_MAX_PER_MIN = 20;
+
+async function assertInviteRate(userId: string): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabaseAdmin as any).rpc("nectar_check_rate", {
+    p_key: `invite:${userId}`,
+    p_max_per_min: INVITE_MAX_PER_MIN,
+    p_daily_token_cap: 0,
+  });
+  if (error) {
+    console.error("[invite-rate] nectar_check_rate failed:", error.message);
+    throw new Error("Invites are temporarily unavailable. Try again in a moment.");
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  const waitMs = Number(row?.wait_ms ?? 0);
+  if (waitMs > 0 || row?.day_full) {
+    try {
+      const { setResponseStatus } = await import("@tanstack/react-start/server");
+      setResponseStatus(429);
+    } catch {
+      /* The thrown error still stops the invite when no response object is bound. */
+    }
+    throw new Error("Too many invites. Try again in a minute.");
+  }
+}
+
 type InviteTargetResult = {
   email: string;
   user_id: string | null;
@@ -235,6 +263,7 @@ export const createInvitation = createServerFn({ method: "POST" })
       data.access_preset_id,
     );
     await assertAgencySetupCompleteForOrg(supabase, data.organization_id);
+    await assertInviteRate(userId);
     const presetId = await presetIdForInvite(
       data.organization_id,
       data.access_level,
@@ -303,6 +332,7 @@ export const resendInvitation = createServerFn({ method: "POST" })
       data.organization_id,
       "invite_staff",
     );
+    await assertInviteRate(userId);
 
     const expires = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -479,6 +509,7 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
       if (data.access_level) {
         await assertCanInviteAt(sb, userId, data.organization_id, data.access_level, null);
       }
+      await assertInviteRate(userId);
       type Target = {
         userId: string | null;
         email: string;

@@ -2,20 +2,20 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { isAdminLevel } from "@/lib/access/levels";
+import { isAgencyAdmin } from "@/lib/access/levels";
 
 const Kind = z.enum(["employee", "client"]);
 
 async function assertManager(actorId: string, orgId: string) {
   const { data } = await supabaseAdmin
     .from("organization_members")
-    .select("access_level,active")
+    .select("access_level, access_scope, active")
     .eq("user_id", actorId)
     .eq("organization_id", orgId)
     .eq("active", true)
     .maybeSingle();
-  if (!data || !isAdminLevel(data.access_level)) {
-    throw new Error("Forbidden: only managers or admins may archive or delete profiles");
+  if (!data || !isAgencyAdmin(data.access_level, data.access_scope)) {
+    throw new Error("Forbidden: only an agency-wide admin may archive or delete profiles");
   }
 }
 

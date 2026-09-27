@@ -7,6 +7,7 @@ import {
   isCorrectionRequestedEvidence,
   dueLabel,
   liveObligationTitle,
+  csvCell,
   missingPersonnelCsv,
   obligationFileStatus,
   obligationFileStatusLabel,
@@ -377,5 +378,15 @@ describe("Org-wide Staff file lock", () => {
     assert.match(hrAdmin, /redirect/);
     assert.match(hrAdmin, /\/dashboard\/hub\/employees/);
     assert.equal(existsSync(new URL("./hr-staff.functions.ts", import.meta.url)), false);
+  });
+
+  it("prefixes a quote on formula-looking CSV cells", () => {
+    assert.equal(csvCell("=cmd|'/c calc'!A0"), "\"'=cmd|'/c calc'!A0\"");
+    assert.equal(csvCell("+1+1"), '"\'+1+1"');
+    assert.equal(csvCell("-2"), '"\'-2"');
+    assert.equal(csvCell("@sum"), '"\'@sum"');
+    assert.equal(csvCell("\t=1"), '"\'\t=1"');
+    assert.equal(csvCell("\r=1"), '"\'\r=1"');
+    assert.equal(csvCell("Jane Doe"), '"Jane Doe"');
   });
 });

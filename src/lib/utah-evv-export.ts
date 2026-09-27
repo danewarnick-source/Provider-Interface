@@ -1,3 +1,5 @@
+import { neutralizeCsvFormula } from "./csv-safe.ts";
+
 // Utah DHHS 30-column EVV CSV builder + types.
 // The format mirrors what dashboard.compliance-desk.tsx already emits — the
 // only changes are: real Member ID (pad-to-10), Provider ID + Vendor from
@@ -63,7 +65,7 @@ function sanitizeUevvText(s: string): string {
 }
 
 function csvEscape(s: string) {
-  const v = sanitizeUevvText(s ?? "");
+  const v = neutralizeCsvFormula(sanitizeUevvText(s ?? ""));
   if (v.includes(",") || v.includes('"') || v.includes("\n")) return `"${v.replace(/"/g, '""')}"`;
   return v;
 }

@@ -39,52 +39,6 @@ export const listOpenShifts = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
-export const postOpenShift = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    organizationId: string;
-    clientId: string;
-    serviceCode: string;
-    startsAtIso: string;
-    endsAtIso: string;
-    locationId?: string | null;
-    notes?: string;
-  }) => z.object({
-    organizationId: z.string().uuid(),
-    clientId: z.string().uuid(),
-    serviceCode: z.string().min(1),
-    startsAtIso: z.string(),
-    endsAtIso: z.string(),
-    locationId: z.string().uuid().nullable().optional(),
-    notes: z.string().optional(),
-  }).parse(d))
-  .handler(async ({ data, context }) => {
-    if (!context.supabase || !context.userId) return null;
-    const insertRow = {
-      organization_id: data.organizationId,
-      staff_id: null,
-      client_id: data.clientId,
-      service_code: data.serviceCode.toUpperCase(),
-      job_code: data.serviceCode.toUpperCase(),
-      starts_at: data.startsAtIso,
-      ends_at: data.endsAtIso,
-      location_id: data.locationId ?? null,
-      notes: data.notes ?? null,
-      status: "open",
-      published: true,
-      shift_type: "hourly",
-      created_from: "manual",
-    };
-    const { gateScheduledShiftInsert } = await import("@/lib/scheduling/shift-commit");
-    await gateScheduledShiftInsert(context.supabase, [insertRow as never], { mode: "bulk_auto", userId: context.userId });
-    const { data: row, error } = await context.supabase
-      .from("scheduled_shifts")
-      .insert(insertRow)
-      .select("*").single();
-    if (error) throw error;
-    return row;
-  });
-
 export const claimOpenShift = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { shiftId: string }) =>

@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { neutralizeCsvFormula } from "@/lib/csv-safe";
 import { RequirePermission } from "@/components/rbac-guard";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -1394,8 +1395,10 @@ function fmtTimeAmPm(iso: string) {
   return `${h}:${pad2(m)} ${ampm}`;
 }
 function csvEscape(s: string) {
-  const v = s ?? "";
-  if (v.includes(",") || v.includes('"') || v.includes("\n")) return `"${v.replace(/"/g, '""')}"`;
+  const v = neutralizeCsvFormula(s ?? "");
+  if (v.includes(",") || v.includes('"') || v.includes("\n") || v.includes("\r")) {
+    return `"${v.replace(/"/g, '""')}"`;
+  }
   return v;
 }
 

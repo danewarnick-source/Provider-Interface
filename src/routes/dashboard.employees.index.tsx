@@ -938,7 +938,7 @@ export function EmployeesPage() {
                     defaultValue={tempPassword}
                     key={"r-" + tempPassword}
                     required
-                    minLength={8}
+                    minLength={12}
                   />
                   <Button
                     type="button"

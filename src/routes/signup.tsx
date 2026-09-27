@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
 import { AUTH_CAPTCHA_REQUIRED, captchaTokenOption } from "@/lib/auth-captcha";
 import { authRedirectUrl } from "@/lib/auth-redirect";
-import { checkEmailExists, checkPasswordPwnedRange } from "@/lib/signup-checks.functions";
+import { checkPasswordPwnedRange } from "@/lib/signup-checks.functions";
 import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
 import { setBillingSmsPhoneAtSignup } from "@/lib/billing-sms.functions";
 import {
@@ -74,7 +74,6 @@ import {
   SIGNUP_EMAIL_IN_USE_MESSAGE,
   humanizeSignupAccountError,
   isAlreadyUsedEmailError,
-  isMissingLegalAttestationsError,
 } from "@/lib/signup-account-error";
 import {
   humanizeCheckoutStartError,
@@ -285,7 +284,6 @@ function SignupPage() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(initialForm);
   const [authCallbackError, setAuthCallbackError] = useState<string | null>(null);
-  const checkEmail = useServerFn(checkEmailExists);
   const checkPwnedRange = useServerFn(checkPasswordPwnedRange);
   const ensureWorkspace = useServerFn(ensureSignupWorkspace);
   const setSmsPhoneFn = useServerFn(setBillingSmsPhoneAtSignup);
@@ -356,7 +354,6 @@ function SignupPage() {
               <Step1Account
                 form={form}
                 update={update}
-                checkEmail={checkEmail}
                 checkPwnedRange={checkPwnedRange}
                 onNext={() => setStep(1)}
                 authCallbackError={authCallbackError}
@@ -395,17 +392,17 @@ function SignupPage() {
 
 /* ──────────────────────────── STEP 1 ──────────────────────────── */
 
+const SIGNUP_PASSWORD_MIN = 12;
+
 function Step1Account({
   form,
   update,
-  checkEmail,
   checkPwnedRange,
   onNext,
   authCallbackError,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
-  checkEmail: (input: { data: { email: string } }) => Promise<{ exists: boolean }>;
   checkPwnedRange: (input: { data: { sha1Prefix: string } }) => Promise<{ range: string }>;
   onNext: () => void;
   authCallbackError?: string | null;
@@ -414,7 +411,6 @@ function Step1Account({
   const [accountErr, setAccountErr] = useState<string | null>(null);
   const [confirmEmailMsg, setConfirmEmailMsg] = useState<string | null>(authCallbackError ?? null);
   const [passwordWeakErr, setPasswordWeakErr] = useState<string | null>(null);
-  const [checking, setChecking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -426,13 +422,13 @@ function Step1Account({
     if (authCallbackError) setConfirmEmailMsg(authCallbackError);
   }, [authCallbackError]);
 
-  const lenOk = form.password.length >= 8;
+  const lenOk = form.password.length >= SIGNUP_PASSWORD_MIN;
   const matchOk = form.password.length > 0 && form.password === form.confirm;
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
 
   const verifyPasswordPwned = useCallback(async (password: string): Promise<boolean> => {
     const gen = ++weakCheckGen.current;
-    if (password.length < 8) {
+    if (password.length < SIGNUP_PASSWORD_MIN) {
       setPasswordWeakErr(null);
       return false;
     }
@@ -451,7 +447,7 @@ function Step1Account({
   }, [checkPwnedRange]);
 
   useEffect(() => {
-    if (form.password.length < 8) {
+    if (form.password.length < SIGNUP_PASSWORD_MIN) {
       setPasswordWeakErr(null);
       return;
     }
@@ -461,59 +457,19 @@ function Step1Account({
     return () => window.clearTimeout(t);
   }, [form.password, verifyPasswordPwned]);
 
-  const verifyEmail = async () => {
-    if (!emailValid) return;
-    setChecking(true);
-    setEmailErr(null);
-    try {
-      const r = await checkEmail({ data: { email: form.email } });
-      if (r.exists) {
-        setEmailErr(SIGNUP_EMAIL_IN_USE_MESSAGE);
-      }
-    } catch {
-      // soft-fail; we'll re-check on submit
-    } finally {
-      setChecking(false);
-    }
-  };
-
   const submit = async () => {
     setEmailErr(null);
     setAccountErr(null);
     if (!form.acceptedTos) return toast.error("Agree to the Terms to continue.");
     if (!form.acceptedBaa) return toast.error("Agree to the Business Associate Agreement to continue.");
     if (!emailValid) return setEmailErr("Please enter a valid email address.");
-    if (!lenOk) return toast.error("Password must be at least 8 characters.");
+    if (!lenOk) return toast.error(`Password must be at least ${SIGNUP_PASSWORD_MIN} characters.`);
     if (!matchOk) return toast.error("Passwords don't match.");
     if (await verifyPasswordPwned(form.password)) return;
     if (authCaptchaBlocked()) return toast.error(AUTH_CAPTCHA_REQUIRED);
     const captchaToken = readAuthCaptchaToken();
     setBusy(true);
     try {
-      let exists = false;
-      try {
-        const r = await checkEmail({ data: { email: form.email } });
-        exists = r.exists;
-      } catch (e) {
-        if (isAlreadyUsedEmailError(e)) {
-          setEmailErr(SIGNUP_EMAIL_IN_USE_MESSAGE);
-          setBusy(false);
-          return;
-        }
-        if (isMissingLegalAttestationsError(e)) {
-          const sentence = humanizeSignupAccountError(e);
-          setAccountErr(sentence);
-          toast.error(sentence);
-          setBusy(false);
-          return;
-        }
-        /* empty / unknown server-fn payload — unique-email still runs on signUp */
-      }
-      if (exists) {
-        setEmailErr(SIGNUP_EMAIL_IN_USE_MESSAGE);
-        setBusy(false);
-        return;
-      }
       // Before signUp on either auth path. supabase.auth is supabase-js, or
       // the Cognito adapter in src/lib/aws/auth-adapter.ts when that flag is on.
       // A hit shows the same confirm-email state and does not create a user.
@@ -692,13 +648,11 @@ function Step1Account({
               setEmailErr(null);
               update("email", e.target.value);
             }}
-            onBlur={verifyEmail}
             className="flex h-12 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40"
             style={inputStyle}
             placeholder="you+agency@gmail.com"
             data-testid="signup-email"
           />
-          {checking && <span className="text-xs text-[var(--hive-text-muted)]">Checking…</span>}
         </Field>
 
         <Field label="Password">
@@ -740,7 +694,7 @@ function Step1Account({
         </Field>
 
         <ul className="-mt-1 grid gap-1 text-xs">
-          <PwRule ok={lenOk}>At least 8 characters</PwRule>
+          <PwRule ok={lenOk}>At least {SIGNUP_PASSWORD_MIN} characters</PwRule>
         </ul>
 
         <Field label="Confirm password" error={!matchOk && form.confirm ? "Passwords don't match." : null}>
@@ -829,7 +783,7 @@ function Step1Account({
         loading={busy}
         nextDisabled={
           confirmEmailMsg
-            ? !emailValid || form.password.length < 8
+            ? !emailValid || form.password.length < SIGNUP_PASSWORD_MIN
             : !form.acceptedTos ||
               !form.acceptedBaa ||
               !emailValid ||

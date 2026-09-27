@@ -111,8 +111,8 @@ describe("signup Create account env wiring", () => {
     assert.match(resolver, /readSupabasePublicEnv/);
     assert.match(helper, /import\.meta\.env\.VITE_SUPABASE_URL/);
     assert.match(helper, /import\.meta\.env\.VITE_SUPABASE_ANON_KEY/);
-    assert.match(checks, /readSupabaseAdminEnv/);
-    assert.match(checks, /exists: false/);
+    assert.doesNotMatch(checks, /checkEmailExists/);
+    assert.doesNotMatch(checks, /auth\/v1\/admin\/users/);
   });
 
   it("does not throw Missing SUPABASE_URL from the public env helper", () => {

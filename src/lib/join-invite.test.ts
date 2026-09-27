@@ -101,10 +101,11 @@ describe("joinHomeForLevel", () => {
 });
 
 describe("join field rules", () => {
-  it("requires 8+ characters and no digit / symbol class", () => {
+  it("requires 12+ characters and no digit / symbol class", () => {
     assert.equal(isValidJoinPassword("short1"), false);
-    assert.equal(isValidJoinPassword("longenough"), true);
-    assert.equal(isValidJoinPassword("goodpass1"), true);
+    assert.equal(isValidJoinPassword("longenough"), false);
+    assert.equal(isValidJoinPassword("longenough12"), true);
+    assert.equal(isValidJoinPassword("goodpassword1"), true);
   });
   it("never overwrites an existing account's password unless first-login is pending", () => {
     assert.equal(joinSetsAuthPassword(true), false);
@@ -136,10 +137,11 @@ describe("join field rules", () => {
   it("live-validates new-password length and confirm match", () => {
     assert.equal(joinPasswordLiveMessage(""), null);
     assert.equal(joinPasswordLiveMessage("short1")?.ok, false);
-    assert.equal(joinPasswordLiveMessage("longenough")?.ok, true);
-    assert.equal(joinConfirmLiveMessage("longenough", ""), null);
-    assert.equal(joinConfirmLiveMessage("longenough", "different")?.ok, false);
-    assert.equal(joinConfirmLiveMessage("longenough", "longenough")?.ok, true);
+    assert.equal(joinPasswordLiveMessage("longenough")?.ok, false);
+    assert.equal(joinPasswordLiveMessage("longenough12")?.ok, true);
+    assert.equal(joinConfirmLiveMessage("longenough12", ""), null);
+    assert.equal(joinConfirmLiveMessage("longenough12", "different")?.ok, false);
+    assert.equal(joinConfirmLiveMessage("longenough12", "longenough12")?.ok, true);
   });
 });
 

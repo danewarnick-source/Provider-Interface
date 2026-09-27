@@ -8,6 +8,7 @@ import { useNectarAlerts, DEFAULT_NECTAR_ALERT_SETTINGS, type NectarAlert, type 
 import { askNectarReport, type NectarReportResult } from "@/lib/nectar-reports.functions";
 import { listSavedReports, saveReport, deleteSavedReport, togglePinReport, upsertReportSchedule, unscheduleReport, type SavedReport } from "@/lib/saved-reports.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { neutralizeCsvFormula } from "@/lib/csv-safe";
 import { NectarBadge, NectarMark, NectarButton } from "@/components/nectar/nectar-brand";
 
 
@@ -439,7 +440,7 @@ function fmt(v: string | number | null | undefined): string {
 }
 function csvCell(v: string | number | null | undefined): string {
   if (v === null || v === undefined) return "";
-  const s = String(v);
+  const s = neutralizeCsvFormula(String(v));
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
