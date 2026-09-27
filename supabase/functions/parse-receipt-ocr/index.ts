@@ -4,10 +4,10 @@
 // Returns { merchant_name, total_amount, transaction_date }
 //
 // SECURITY:
-// - verify_jwt = true in supabase/config.toml: unauthenticated callers are rejected before this code runs.
-// - We do NOT accept a caller-supplied URL. Previously this function fetched an arbitrary `imageUrl`,
-//   which was a Server-Side Request Forgery (SSRF) hole (e.g. http://169.254.169.254 cloud metadata).
-//   Instead, callers pass a storage bucket+path and we download via the service-role client.
+// - verify_jwt = true rejects unsigned tokens. getUser() then rejects the anon key.
+// - Storage is downloaded with the caller's JWT, so storage RLS applies.
+//   This function does not use the service role.
+// - We do NOT accept a caller-supplied URL. Callers pass a storage bucket+path.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -37,12 +37,21 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Defense-in-depth: verify_jwt=true already enforces this, but require the
-    // authorization header explicitly so any misconfiguration fails closed.
     const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
     if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
       return json({ error: "Unauthorized" }, 401);
     }
+
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!SUPABASE_URL || !ANON_KEY) return json({ error: "Not configured" }, 500);
+
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+      auth: { persistSession: false },
+    });
+    const { data: userRes } = await userClient.auth.getUser();
+    if (!userRes?.user?.id) return json({ error: "Unauthorized" }, 401);
 
     const body = await req.json().catch(() => ({}));
     const { bucket, path, imageBase64, mime } = body ?? {};
@@ -51,7 +60,8 @@ Deno.serve(async (req) => {
 
     if (typeof imageBase64 === "string" && imageBase64.length > 0) {
       // Inline base64 — no network fetch, no SSRF risk.
-      const safeMime = typeof mime === "string" && /^image\/[a-zA-Z0-9.+-]+$/.test(mime) ? mime : "image/jpeg";
+      const safeMime =
+        typeof mime === "string" && /^image\/[a-zA-Z0-9.+-]+$/.test(mime) ? mime : "image/jpeg";
       dataUrl = `data:${safeMime};base64,${imageBase64}`;
     } else if (typeof bucket === "string" && typeof path === "string") {
       if (!ALLOWED_BUCKETS.has(bucket)) {
@@ -68,12 +78,7 @@ Deno.serve(async (req) => {
         return json({ error: "Invalid path" }, 400);
       }
 
-      const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-      const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-      if (!SUPABASE_URL || !SERVICE_ROLE) throw new Error("Storage not configured");
-
-      const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
-      const { data: blob, error: dlErr } = await admin.storage.from(bucket).download(path);
+      const { data: blob, error: dlErr } = await userClient.storage.from(bucket).download(path);
       if (dlErr || !blob) {
         return json({ error: `Failed to read receipt: ${dlErr?.message ?? "not found"}` }, 400);
       }
@@ -81,7 +86,7 @@ Deno.serve(async (req) => {
       if (ab.byteLength > MAX_IMAGE_BYTES) {
         return json({ error: "Image too large" }, 413);
       }
-      const ct = (blob.type && /^image\//.test(blob.type)) ? blob.type : "image/jpeg";
+      const ct = blob.type && /^image\//.test(blob.type) ? blob.type : "image/jpeg";
       const buf = new Uint8Array(ab);
       let bin = "";
       for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
@@ -92,40 +97,43 @@ Deno.serve(async (req) => {
 
     const { gatewayFetch } = await import("../_shared/bedrock-fetch.ts");
     const aiRes = await gatewayFetch({
-        messages: [
-          {
-            role: "system",
-            content:
-              "You read retail/medical receipts and extract structured data. Always return the function call exactly once with normalized fields.",
-          },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: "Extract merchant_name, total_amount (final paid total, numeric), and transaction_date (YYYY-MM-DD) from this receipt." },
-              { type: "image_url", image_url: { url: dataUrl } },
-            ],
-          },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "return_receipt",
-              description: "Return parsed receipt fields.",
-              parameters: {
-                type: "object",
-                properties: {
-                  merchant_name: { type: "string" },
-                  total_amount: { type: "number" },
-                  transaction_date: { type: "string", description: "YYYY-MM-DD" },
-                },
-                required: ["merchant_name", "total_amount", "transaction_date"],
-                additionalProperties: false,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You read retail/medical receipts and extract structured data. Always return the function call exactly once with normalized fields.",
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Extract merchant_name, total_amount (final paid total, numeric), and transaction_date (YYYY-MM-DD) from this receipt.",
+            },
+            { type: "image_url", image_url: { url: dataUrl } },
+          ],
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "return_receipt",
+            description: "Return parsed receipt fields.",
+            parameters: {
+              type: "object",
+              properties: {
+                merchant_name: { type: "string" },
+                total_amount: { type: "number" },
+                transaction_date: { type: "string", description: "YYYY-MM-DD" },
               },
+              required: ["merchant_name", "total_amount", "transaction_date"],
+              additionalProperties: false,
             },
           },
-        ],
-        tool_choice: { type: "function", function: { name: "return_receipt" } },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "return_receipt" } },
     });
 
     if (!aiRes.ok) {

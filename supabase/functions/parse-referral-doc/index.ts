@@ -1,16 +1,17 @@
 // Referral document → structured pre-fill via NECTAR (AWS Bedrock).
-// Reuses the shared gatewayFetch shim used by parse-receipt-ocr.
 //
 // SECURITY:
-// - verify_jwt = true (see supabase/config.toml) — anon callers rejected before code runs.
+// - verify_jwt = true rejects unsigned tokens. This handler then accepts
+//   only the service-role bearer. referral-docs.functions.ts and gmail-ingest
+//   call it after checking the referral row (or building the org path).
 // - Caller-supplied URL not accepted. Callers pass either:
 //     { bucket, path }   — service-role download from an allowed bucket
 //     { text }           — pasted email/forwarded text (no fetch)
-// - Caller (server fn) is responsible for verifying the user has manage_referrals.
 //
-// Output: { fields, rawText? } where fields is a partial referral pre-fill object.
+// Output: { fields } where fields is a partial referral pre-fill object.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { bearerIsServiceRole } from "../_shared/service-role-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,7 +35,7 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
-    if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
+    if (!bearerIsServiceRole(authHeader, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"))) {
       return json({ error: "Unauthorized" }, 401);
     }
 
@@ -42,8 +43,7 @@ Deno.serve(async (req) => {
     const { bucket, path, text } = body ?? {};
 
     const userContent: Array<
-      | { type: "text"; text: string }
-      | { type: "image_url"; image_url: { url: string } }
+      { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }
     > = [];
 
     userContent.push({
@@ -74,7 +74,8 @@ Deno.serve(async (req) => {
 
       const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
       const { data: blob, error: dlErr } = await admin.storage.from(bucket).download(path);
-      if (dlErr || !blob) return json({ error: `Read failed: ${dlErr?.message ?? "not found"}` }, 400);
+      if (dlErr || !blob)
+        return json({ error: `Read failed: ${dlErr?.message ?? "not found"}` }, 400);
       const ab = await blob.arrayBuffer();
       if (ab.byteLength > MAX_BYTES) return json({ error: "File too large" }, 413);
 
@@ -92,11 +93,14 @@ Deno.serve(async (req) => {
         // PDFs and unknown binary types: vision model can't read them directly
         // through the Bedrock Converse image path. Tell the caller so the doc is
         // still stored and linked, just not auto-prefilled.
-        return json({
-          error: "unsupported_for_parse",
-          message:
-            "This file type can't be auto-parsed yet (PDF or other). The document is still stored and linked to the referral — please fill the fields manually or paste the text.",
-        }, 415);
+        return json(
+          {
+            error: "unsupported_for_parse",
+            message:
+              "This file type can't be auto-parsed yet (PDF or other). The document is still stored and linked to the referral — please fill the fields manually or paste the text.",
+          },
+          415,
+        );
       }
     } else {
       return json({ error: "Provide { bucket, path } or { text }" }, 400);
@@ -123,7 +127,10 @@ Deno.serve(async (req) => {
             parameters: {
               type: "object",
               properties: {
-                first_name: { type: "string", description: "Client's first name (or first + last initial) as written." },
+                first_name: {
+                  type: "string",
+                  description: "Client's first name (or first + last initial) as written.",
+                },
                 age: { type: "integer" },
                 gender: { type: "string" },
                 date_of_birth: { type: "string", description: "YYYY-MM-DD if explicit." },
@@ -134,11 +141,15 @@ Deno.serve(async (req) => {
                 requested_codes: {
                   type: "array",
                   items: { type: "string" },
-                  description: "DSPD billing codes like RHS, HHS, DSG, SLN, SLH, DSI, SEI, COM if mentioned.",
+                  description:
+                    "DSPD billing codes like RHS, HHS, DSG, SLN, SLH, DSI, SEI, COM if mentioned.",
                 },
                 budget_note: { type: "string" },
                 need_level: { type: "string" },
-                description: { type: "string", description: "1-3 sentence summary of the request / situation." },
+                description: {
+                  type: "string",
+                  description: "1-3 sentence summary of the request / situation.",
+                },
                 category: {
                   type: "string",
                   enum: ["direct_support", "rhs", "hhs"],
@@ -149,7 +160,10 @@ Deno.serve(async (req) => {
                 support_coordinator_email: { type: "string" },
                 support_coordinator_phone: { type: "string" },
                 due_date: { type: "string", description: "YYYY-MM-DD if explicit." },
-                notes: { type: "string", description: "Any extra context worth preserving verbatim." },
+                notes: {
+                  type: "string",
+                  description: "Any extra context worth preserving verbatim.",
+                },
               },
               additionalProperties: false,
             },
@@ -162,19 +176,19 @@ Deno.serve(async (req) => {
     });
 
     if (!aiRes.ok) {
-      const t = await aiRes.text();
-      console.error("nectar parse error", aiRes.status, t);
-      return json({ error: "Parser unavailable", detail: t.slice(0, 400) }, aiRes.status === 429 ? 429 : 502);
+      await aiRes.text();
+      console.error("nectar parse error", aiRes.status);
+      return json({ error: "Parser unavailable" }, aiRes.status === 429 ? 429 : 502);
     }
 
-    const j = await aiRes.json() as {
+    const j = (await aiRes.json()) as {
       choices?: Array<{ message?: { tool_calls?: Array<{ function?: { arguments?: string } }> } }>;
     };
     const call = j.choices?.[0]?.message?.tool_calls?.[0];
     const fields = call?.function?.arguments ? JSON.parse(call.function.arguments) : {};
     return json({ fields }, 200);
-  } catch (e) {
-    console.error("parse-referral-doc error", e);
-    return json({ error: (e as Error).message }, 500);
+  } catch {
+    console.error("parse-referral-doc error");
+    return json({ error: "Parse failed" }, 500);
   }
 });

@@ -1,25 +1,19 @@
 project_id = "dhrrukdcigiiqksibdfb"
 
-[functions.parse-receipt-ocr]
+[functions.send-email]
 verify_jwt = true
 
-[functions.format-training-content]
+[functions.parse-receipt-ocr]
 verify_jwt = true
 
 [functions.parse-referral-doc]
 verify_jwt = true
 
-[functions.create-training-checkout]
-verify_jwt = true
-
-[functions.training-stripe-webhook]
-verify_jwt = false
-
 [functions.create-training-setup-intent]
 verify_jwt = true
 
 [functions.auto-renew-trainings]
-verify_jwt = false
+verify_jwt = true
 
 [functions.parse-recipe-doc]
 verify_jwt = true

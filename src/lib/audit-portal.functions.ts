@@ -2,7 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getAuditPackageData, type AuditPackagePayload } from "@/lib/audit-package-data";
-import { assertOrgAdmin, assertPackageAccess, assertPackageAccessViaChild } from "@/lib/audit-package-access";
+import {
+  assertOrgAdmin,
+  assertPackageAccess,
+  assertPackageAccessViaChild,
+} from "@/lib/audit-package-access";
 import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { DEFAULT_AUDIT_FROM_NAME, formatFromHeader } from "@/lib/managed-from";
 
@@ -68,7 +72,13 @@ export const getAuditorContext = createServerFn({ method: "GET" })
       .eq("user_id", userId)
       .maybeSingle();
     if (!data) return null;
-    const row = data as { id: string; email: string; full_name: string; agency_name: string; status: string };
+    const row = data as {
+      id: string;
+      email: string;
+      full_name: string;
+      agency_name: string;
+      status: string;
+    };
     if (row.status !== "active") return null;
     return {
       auditor_account_id: row.id,
@@ -93,25 +103,38 @@ export const listOrgAuditPackages = createServerFn({ method: "GET" })
 
     const { data: rows } = await supabase
       .from("audit_packages")
-      .select("id, organization_id, state_agency, status, date_range_start, date_range_end, title, created_at, released_at")
+      .select(
+        "id, organization_id, state_agency, status, date_range_start, date_range_end, title, created_at, released_at",
+      )
       .eq("organization_id", data.organizationId)
       .order("created_at", { ascending: false });
 
-    const list = (rows ?? []) as Array<Omit<AuditPackageRow, "subject_count" | "auditor_count" | "organization_name">>;
+    const list = (rows ?? []) as Array<
+      Omit<AuditPackageRow, "subject_count" | "auditor_count" | "organization_name">
+    >;
     if (list.length === 0) return [];
 
     const pkgIds = list.map((p) => p.id);
     const [subj, acc] = await Promise.all([
-      supabase.from("audit_package_subjects").select("audit_package_id").in("audit_package_id", pkgIds),
-      supabase.from("audit_package_access").select("audit_package_id, revoked_at").in("audit_package_id", pkgIds),
+      supabase
+        .from("audit_package_subjects")
+        .select("audit_package_id")
+        .in("audit_package_id", pkgIds),
+      supabase
+        .from("audit_package_access")
+        .select("audit_package_id, revoked_at")
+        .in("audit_package_id", pkgIds),
     ]);
 
     const subjCount = new Map<string, number>();
-    for (const s of ((subj.data ?? []) as Array<{ audit_package_id: string }>)) {
+    for (const s of (subj.data ?? []) as Array<{ audit_package_id: string }>) {
       subjCount.set(s.audit_package_id, (subjCount.get(s.audit_package_id) ?? 0) + 1);
     }
     const accCount = new Map<string, number>();
-    for (const a of ((acc.data ?? []) as Array<{ audit_package_id: string; revoked_at: string | null }>)) {
+    for (const a of (acc.data ?? []) as Array<{
+      audit_package_id: string;
+      revoked_at: string | null;
+    }>) {
       if (a.revoked_at) continue;
       accCount.set(a.audit_package_id, (accCount.get(a.audit_package_id) ?? 0) + 1);
     }
@@ -126,26 +149,32 @@ export const listOrgAuditPackages = createServerFn({ method: "GET" })
 export const createAuditPackage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      organizationId: z.string().uuid(),
-      stateAgency: z.string().min(1).max(200),
-      title: z.string().max(200).optional(),
-      dateRangeStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-      dateRangeEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-    }).parse(d),
+    z
+      .object({
+        organizationId: z.string().uuid(),
+        stateAgency: z.string().min(1).max(200),
+        title: z.string().max(200).optional(),
+        dateRangeStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        dateRangeEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { id: "" };
     await assertOrgAdmin(supabase, data.organizationId, userId);
 
-    const { data: row, error } = await (supabase as unknown as {
-      from: (t: string) => {
-        insert: (v: Record<string, unknown>) => {
-          select: (c: string) => { single: () => Promise<{ data: { id: string } | null; error: unknown }> };
+    const { data: row, error } = await (
+      supabase as unknown as {
+        from: (t: string) => {
+          insert: (v: Record<string, unknown>) => {
+            select: (c: string) => {
+              single: () => Promise<{ data: { id: string } | null; error: unknown }>;
+            };
+          };
         };
-      };
-    })
+      }
+    )
       .from("audit_packages")
       .insert({
         organization_id: data.organizationId,
@@ -165,28 +194,28 @@ export const createAuditPackage = createServerFn({ method: "POST" })
 export const addPackageSubject = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      auditPackageId: z.string().uuid(),
-      subjectType: z.enum(["staff", "client"]),
-      subjectId: z.string().uuid(),
-      subjectLabel: z.string().max(200).optional(),
-    }).parse(d),
+    z
+      .object({
+        auditPackageId: z.string().uuid(),
+        subjectType: z.enum(["staff", "client"]),
+        subjectId: z.string().uuid(),
+        subjectLabel: z.string().max(200).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: true };
     await assertPackageAccess(supabase, userId, data.auditPackageId);
-    const { error } = await supabase
-      .from("audit_package_subjects")
-      .upsert(
-        {
-          audit_package_id: data.auditPackageId,
-          subject_type: data.subjectType,
-          subject_id: data.subjectId,
-          subject_label: data.subjectLabel ?? null,
-        },
-        { onConflict: "audit_package_id,subject_type,subject_id" },
-      );
+    const { error } = await supabase.from("audit_package_subjects").upsert(
+      {
+        audit_package_id: data.auditPackageId,
+        subject_type: data.subjectType,
+        subject_id: data.subjectId,
+        subject_label: data.subjectLabel ?? null,
+      },
+      { onConflict: "audit_package_id,subject_type,subject_id" },
+    );
     if (error) throw error;
     return { ok: true };
   });
@@ -197,7 +226,12 @@ export const removePackageSubject = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: true };
-    await assertPackageAccessViaChild(supabase, userId, "audit_package_subjects", data.subjectRowId);
+    await assertPackageAccessViaChild(
+      supabase,
+      userId,
+      "audit_package_subjects",
+      data.subjectRowId,
+    );
     const { error } = await supabase
       .from("audit_package_subjects")
       .delete()
@@ -224,11 +258,13 @@ export const releaseAuditPackage = createServerFn({ method: "POST" })
 export const grantAuditorAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      auditPackageId: z.string().uuid(),
-      auditorAccountId: z.string().uuid(),
-      siteOrigin: z.string().url().optional(),
-    }).parse(d),
+    z
+      .object({
+        auditPackageId: z.string().uuid(),
+        auditorAccountId: z.string().uuid(),
+        siteOrigin: z.string().url().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { supabase, userId } = context;
@@ -240,22 +276,23 @@ export const grantAuditorAccess = createServerFn({ method: "POST" })
       .select("id, organization_id")
       .eq("id", data.auditorAccountId)
       .maybeSingle();
-    if (!auditorRow || (auditorRow as { organization_id: string | null }).organization_id !== organizationId) {
+    if (
+      !auditorRow ||
+      (auditorRow as { organization_id: string | null }).organization_id !== organizationId
+    ) {
       throw new Error("Forbidden — that auditor account does not belong to this organization");
     }
 
-    const { error } = await supabase
-      .from("audit_package_access")
-      .upsert(
-        {
-          audit_package_id: data.auditPackageId,
-          auditor_account_id: data.auditorAccountId,
-          granted_by: userId,
-          granted_at: new Date().toISOString(),
-          revoked_at: null,
-        },
-        { onConflict: "audit_package_id,auditor_account_id" },
-      );
+    const { error } = await supabase.from("audit_package_access").upsert(
+      {
+        audit_package_id: data.auditPackageId,
+        auditor_account_id: data.auditorAccountId,
+        granted_by: userId,
+        granted_at: new Date().toISOString(),
+        revoked_at: null,
+      },
+      { onConflict: "audit_package_id,auditor_account_id" },
+    );
     if (error) throw error;
 
     // Package-specific invite email — sends the auditor a fresh set-password
@@ -293,75 +330,114 @@ export const revokeAuditorAccess = createServerFn({ method: "POST" })
 export const getPackageBuilderDetail = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ auditPackageId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }): Promise<{
-    package: AuditPackageRow;
-    subjects: AuditPackageSubjectRow[];
-    access: AuditPackageAccessRow[];
-    availableAuditors: Array<{ id: string; email: string; full_name: string; agency_name: string }>;
-  }> => {
-    const { supabase, userId } = context;
-    if (!supabase || !userId) {
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{
+      package: AuditPackageRow;
+      subjects: AuditPackageSubjectRow[];
+      access: AuditPackageAccessRow[];
+      availableAuditors: Array<{
+        id: string;
+        email: string;
+        full_name: string;
+        agency_name: string;
+      }>;
+    }> => {
+      const { supabase, userId } = context;
+      if (!supabase || !userId) {
+        return {
+          package: {
+            id: "",
+            organization_id: "",
+            state_agency: "",
+            status: "draft",
+            date_range_start: "",
+            date_range_end: "",
+            title: null,
+            created_at: "",
+            released_at: null,
+            subject_count: 0,
+            auditor_count: 0,
+          },
+          subjects: [],
+          access: [],
+          availableAuditors: [],
+        };
+      }
+      await assertPackageAccess(supabase, userId, data.auditPackageId);
+
+      const { data: pkg, error: pkgErr } = await supabase
+        .from("audit_packages")
+        .select(
+          "id, organization_id, state_agency, status, date_range_start, date_range_end, title, created_at, released_at",
+        )
+        .eq("id", data.auditPackageId)
+        .single();
+      if (pkgErr || !pkg) throw new Error("Package not found");
+
+      const [{ data: subj }, { data: acc }, { data: auditors }] = await Promise.all([
+        supabase
+          .from("audit_package_subjects")
+          .select("id, subject_type, subject_id, subject_label")
+          .eq("audit_package_id", data.auditPackageId),
+        supabase
+          .from("audit_package_access")
+          .select("id, auditor_account_id, granted_at, revoked_at")
+          .eq("audit_package_id", data.auditPackageId),
+        supabase
+          .from("auditor_accounts")
+          .select("id, email, full_name, agency_name, status")
+          .eq("status", "active"),
+      ]);
+
+      const auditorList = (auditors ?? []) as Array<{
+        id: string;
+        email: string;
+        full_name: string;
+        agency_name: string;
+        status: string;
+      }>;
+      const auditorMap = new Map(auditorList.map((a) => [a.id, a]));
+
+      const accessRows: AuditPackageAccessRow[] = (
+        (acc ?? []) as Array<{
+          id: string;
+          auditor_account_id: string;
+          granted_at: string;
+          revoked_at: string | null;
+        }>
+      ).map((a) => {
+        const aud = auditorMap.get(a.auditor_account_id);
+        return {
+          id: a.id,
+          auditor_account_id: a.auditor_account_id,
+          auditor_email: aud?.email ?? "(deleted)",
+          auditor_name: aud?.full_name ?? "(deleted)",
+          auditor_agency: aud?.agency_name ?? "",
+          granted_at: a.granted_at,
+          revoked_at: a.revoked_at,
+        };
+      });
+
       return {
         package: {
-          id: "",
-          organization_id: "",
-          state_agency: "",
-          status: "draft",
-          date_range_start: "",
-          date_range_end: "",
-          title: null,
-          created_at: "",
-          released_at: null,
-          subject_count: 0,
-          auditor_count: 0,
+          ...(pkg as Omit<AuditPackageRow, "subject_count" | "auditor_count">),
+          subject_count: (subj ?? []).length,
+          auditor_count: accessRows.filter((a) => !a.revoked_at).length,
         },
-        subjects: [],
-        access: [],
-        availableAuditors: [],
+        subjects: (subj ?? []) as AuditPackageSubjectRow[],
+        access: accessRows,
+        availableAuditors: auditorList.map((a) => ({
+          id: a.id,
+          email: a.email,
+          full_name: a.full_name,
+          agency_name: a.agency_name,
+        })),
       };
-    }
-    await assertPackageAccess(supabase, userId, data.auditPackageId);
-
-    const { data: pkg, error: pkgErr } = await supabase
-      .from("audit_packages")
-      .select("id, organization_id, state_agency, status, date_range_start, date_range_end, title, created_at, released_at")
-      .eq("id", data.auditPackageId)
-      .single();
-    if (pkgErr || !pkg) throw new Error("Package not found");
-
-    const [{ data: subj }, { data: acc }, { data: auditors }] = await Promise.all([
-      supabase.from("audit_package_subjects").select("id, subject_type, subject_id, subject_label").eq("audit_package_id", data.auditPackageId),
-      supabase.from("audit_package_access").select("id, auditor_account_id, granted_at, revoked_at").eq("audit_package_id", data.auditPackageId),
-      supabase.from("auditor_accounts").select("id, email, full_name, agency_name, status").eq("status", "active"),
-    ]);
-
-    const auditorList = (auditors ?? []) as Array<{ id: string; email: string; full_name: string; agency_name: string; status: string }>;
-    const auditorMap = new Map(auditorList.map((a) => [a.id, a]));
-
-    const accessRows: AuditPackageAccessRow[] = ((acc ?? []) as Array<{ id: string; auditor_account_id: string; granted_at: string; revoked_at: string | null }>).map((a) => {
-      const aud = auditorMap.get(a.auditor_account_id);
-      return {
-        id: a.id,
-        auditor_account_id: a.auditor_account_id,
-        auditor_email: aud?.email ?? "(deleted)",
-        auditor_name: aud?.full_name ?? "(deleted)",
-        auditor_agency: aud?.agency_name ?? "",
-        granted_at: a.granted_at,
-        revoked_at: a.revoked_at,
-      };
-    });
-
-    return {
-      package: {
-        ...(pkg as Omit<AuditPackageRow, "subject_count" | "auditor_count">),
-        subject_count: (subj ?? []).length,
-        auditor_count: accessRows.filter((a) => !a.revoked_at).length,
-      },
-      subjects: (subj ?? []) as AuditPackageSubjectRow[],
-      access: accessRows,
-      availableAuditors: auditorList.map((a) => ({ id: a.id, email: a.email, full_name: a.full_name, agency_name: a.agency_name })),
-    };
-  });
+    },
+  );
 
 /**
  * Org-side picker lists — staff + clients for the current org, minimal fields.
@@ -369,47 +445,60 @@ export const getPackageBuilderDetail = createServerFn({ method: "GET" })
 export const listOrgSubjectCandidates = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ organizationId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }): Promise<{
-    staff: Array<{ id: string; label: string }>;
-    clients: Array<{ id: string; label: string }>;
-  }> => {
-    const { supabase, userId } = context;
-    if (!supabase || !userId) return { staff: [], clients: [] };
-    await assertOrgAdmin(supabase, data.organizationId, userId);
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{
+      staff: Array<{ id: string; label: string }>;
+      clients: Array<{ id: string; label: string }>;
+    }> => {
+      const { supabase, userId } = context;
+      if (!supabase || !userId) return { staff: [], clients: [] };
+      await assertOrgAdmin(supabase, data.organizationId, userId);
 
-    const [{ data: members }, { data: clients }] = await Promise.all([
-      supabase
-        .from("organization_members")
-        .select("user_id")
-        .eq("organization_id", data.organizationId)
-        .eq("active", true),
-      supabase
-        .from("clients")
-        .select("id, first_name, last_name")
-        .eq("organization_id", data.organizationId)
-        .limit(500),
-    ]);
+      const [{ data: members }, { data: clients }] = await Promise.all([
+        supabase
+          .from("organization_members")
+          .select("user_id")
+          .eq("organization_id", data.organizationId)
+          .eq("active", true),
+        supabase
+          .from("clients")
+          .select("id, first_name, last_name")
+          .eq("organization_id", data.organizationId)
+          .limit(500),
+      ]);
 
-    const memberIds = ((members ?? []) as Array<{ user_id: string }>).map((m) => m.user_id);
-    let staff: Array<{ id: string; label: string }> = [];
-    if (memberIds.length > 0) {
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", memberIds);
-      staff = ((profiles ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>).map((p) => ({
-        id: p.id,
-        label: p.full_name ?? p.email ?? p.id.slice(0, 8),
+      const memberIds = ((members ?? []) as Array<{ user_id: string }>).map((m) => m.user_id);
+      let staff: Array<{ id: string; label: string }> = [];
+      if (memberIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", memberIds);
+        staff = (
+          (profiles ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>
+        ).map((p) => ({
+          id: p.id,
+          label: p.full_name ?? p.email ?? p.id.slice(0, 8),
+        }));
+      }
+
+      const clientList = (
+        (clients ?? []) as Array<{
+          id: string;
+          first_name: string | null;
+          last_name: string | null;
+        }>
+      ).map((c) => ({
+        id: c.id,
+        label: `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || c.id.slice(0, 8),
       }));
-    }
 
-    const clientList = ((clients ?? []) as Array<{ id: string; first_name: string | null; last_name: string | null }>).map((c) => ({
-      id: c.id,
-      label: `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || c.id.slice(0, 8),
-    }));
-
-    return { staff, clients: clientList };
-  });
+      return { staff, clients: clientList };
+    },
+  );
 
 // ============================================================
 // Auditor-side: view granted packages
@@ -435,29 +524,40 @@ export const listMyAuditPackages = createServerFn({ method: "GET" })
       .select("audit_package_id, revoked_at")
       .eq("auditor_account_id", audRow.id)
       .is("revoked_at", null);
-    const pkgIds = ((access ?? []) as Array<{ audit_package_id: string }>).map((a) => a.audit_package_id);
+    const pkgIds = ((access ?? []) as Array<{ audit_package_id: string }>).map(
+      (a) => a.audit_package_id,
+    );
     if (pkgIds.length === 0) return [];
 
     const { data: pkgs } = await supabase
       .from("audit_packages")
-      .select("id, organization_id, state_agency, status, date_range_start, date_range_end, title, created_at, released_at")
+      .select(
+        "id, organization_id, state_agency, status, date_range_start, date_range_end, title, created_at, released_at",
+      )
       .in("id", pkgIds)
       .in("status", ["released", "closed"])
       .order("released_at", { ascending: false });
 
-    const list = (pkgs ?? []) as Array<Omit<AuditPackageRow, "subject_count" | "auditor_count" | "organization_name">>;
+    const list = (pkgs ?? []) as Array<
+      Omit<AuditPackageRow, "subject_count" | "auditor_count" | "organization_name">
+    >;
 
     const orgIds = [...new Set(list.map((p) => p.organization_id))];
     const { data: orgs } = await supabase.from("organizations").select("id, name").in("id", orgIds);
-    const orgMap = new Map(((orgs ?? []) as Array<{ id: string; name: string }>).map((o) => [o.id, o.name]));
+    const orgMap = new Map(
+      ((orgs ?? []) as Array<{ id: string; name: string }>).map((o) => [o.id, o.name]),
+    );
 
     // subject counts
     const { data: subj } = await supabase
       .from("audit_package_subjects")
       .select("audit_package_id")
-      .in("audit_package_id", list.map((p) => p.id));
+      .in(
+        "audit_package_id",
+        list.map((p) => p.id),
+      );
     const subjCount = new Map<string, number>();
-    for (const s of ((subj ?? []) as Array<{ audit_package_id: string }>)) {
+    for (const s of (subj ?? []) as Array<{ audit_package_id: string }>) {
       subjCount.set(s.audit_package_id, (subjCount.get(s.audit_package_id) ?? 0) + 1);
     }
 
@@ -475,80 +575,102 @@ export const listMyAuditPackages = createServerFn({ method: "GET" })
 export const getAuditorPackageView = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ auditPackageId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }): Promise<{
-    package: {
-      id: string;
-      state_agency: string;
-      title: string | null;
-      status: string;
-      date_range_start: string;
-      date_range_end: string;
-      organization_name: string;
-    };
-    payload: AuditPackagePayload;
-  }> => {
-    const { supabase, userId } = context;
-    if (!supabase || !userId) {
-      return {
-        package: {
-          id: "",
-          state_agency: "",
-          title: null,
-          status: "",
-          date_range_start: "",
-          date_range_end: "",
-          organization_name: "",
-        },
-        payload: {
-          package_id: "",
-          date_range_start: "",
-          date_range_end: "",
-          state_agency: "",
-          subjects: [],
-          nectar_summary: { overall: "", per_subject: {}, flags: [] },
-          is_seed: true,
-        },
-      };
-    }
-    await assertPackageAccess(supabase, userId, data.auditPackageId, { allowAuditor: true });
-
-    // RLS enforces: auditor can only see released/closed granted packages.
-    const { data: pkg, error } = await supabase
-      .from("audit_packages")
-      .select("id, organization_id, state_agency, status, date_range_start, date_range_end, title")
-      .eq("id", data.auditPackageId)
-      .single();
-    if (error || !pkg) throw new Error("Package not found or access revoked");
-    const p = pkg as { id: string; organization_id: string; state_agency: string; status: string; date_range_start: string; date_range_end: string; title: string | null };
-
-    const [{ data: subj }, { data: org }] = await Promise.all([
-      supabase.from("audit_package_subjects").select("subject_type, subject_id, subject_label").eq("audit_package_id", data.auditPackageId),
-      supabase.from("organizations").select("name").eq("id", p.organization_id).single(),
-    ]);
-
-    const subjects = ((subj ?? []) as Array<{ subject_type: "staff" | "client"; subject_id: string; subject_label: string | null }>);
-
-    // PHI SEAM — stubbed to seed data until compliant host + BAA.
-    const payload = await getAuditPackageData(data.auditPackageId, {
-      date_range_start: p.date_range_start,
-      date_range_end: p.date_range_end,
-      state_agency: p.state_agency,
-      subjects,
-    });
-
-    return {
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{
       package: {
-        id: p.id,
-        state_agency: p.state_agency,
-        title: p.title,
-        status: p.status,
+        id: string;
+        state_agency: string;
+        title: string | null;
+        status: string;
+        date_range_start: string;
+        date_range_end: string;
+        organization_name: string;
+      };
+      payload: AuditPackagePayload;
+    }> => {
+      const { supabase, userId } = context;
+      if (!supabase || !userId) {
+        return {
+          package: {
+            id: "",
+            state_agency: "",
+            title: null,
+            status: "",
+            date_range_start: "",
+            date_range_end: "",
+            organization_name: "",
+          },
+          payload: {
+            package_id: "",
+            date_range_start: "",
+            date_range_end: "",
+            state_agency: "",
+            subjects: [],
+            nectar_summary: { overall: "", per_subject: {}, flags: [] },
+            is_seed: true,
+          },
+        };
+      }
+      await assertPackageAccess(supabase, userId, data.auditPackageId, { allowAuditor: true });
+
+      // RLS enforces: auditor can only see released/closed granted packages.
+      const { data: pkg, error } = await supabase
+        .from("audit_packages")
+        .select(
+          "id, organization_id, state_agency, status, date_range_start, date_range_end, title",
+        )
+        .eq("id", data.auditPackageId)
+        .single();
+      if (error || !pkg) throw new Error("Package not found or access revoked");
+      const p = pkg as {
+        id: string;
+        organization_id: string;
+        state_agency: string;
+        status: string;
+        date_range_start: string;
+        date_range_end: string;
+        title: string | null;
+      };
+
+      const [{ data: subj }, { data: org }] = await Promise.all([
+        supabase
+          .from("audit_package_subjects")
+          .select("subject_type, subject_id, subject_label")
+          .eq("audit_package_id", data.auditPackageId),
+        supabase.from("organizations").select("name").eq("id", p.organization_id).single(),
+      ]);
+
+      const subjects = (subj ?? []) as Array<{
+        subject_type: "staff" | "client";
+        subject_id: string;
+        subject_label: string | null;
+      }>;
+
+      // PHI SEAM — stubbed to seed data until compliant host + BAA.
+      const payload = await getAuditPackageData(data.auditPackageId, {
         date_range_start: p.date_range_start,
         date_range_end: p.date_range_end,
-        organization_name: (org as { name: string } | null)?.name ?? "—",
-      },
-      payload,
-    };
-  });
+        state_agency: p.state_agency,
+        subjects,
+      });
+
+      return {
+        package: {
+          id: p.id,
+          state_agency: p.state_agency,
+          title: p.title,
+          status: p.status,
+          date_range_start: p.date_range_start,
+          date_range_end: p.date_range_end,
+          organization_name: (org as { name: string } | null)?.name ?? "—",
+        },
+        payload,
+      };
+    },
+  );
 
 // ============================================================
 // Folders + Files (org admin writes; auditor + org read)
@@ -592,22 +714,28 @@ export const listPackageFolders = createServerFn({ method: "GET" })
 export const createPackageFolder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      auditPackageId: z.string().uuid(),
-      name: z.string().trim().min(1).max(120),
-    }).parse(d),
+    z
+      .object({
+        auditPackageId: z.string().uuid(),
+        name: z.string().trim().min(1).max(120),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { id: "" };
     await assertPackageAccess(supabase, userId, data.auditPackageId);
-    const { data: row, error } = await (supabase as unknown as {
-      from: (t: string) => {
-        insert: (v: Record<string, unknown>) => {
-          select: (c: string) => { single: () => Promise<{ data: { id: string } | null; error: unknown }> };
+    const { data: row, error } = await (
+      supabase as unknown as {
+        from: (t: string) => {
+          insert: (v: Record<string, unknown>) => {
+            select: (c: string) => {
+              single: () => Promise<{ data: { id: string } | null; error: unknown }>;
+            };
+          };
         };
-      };
-    })
+      }
+    )
       .from("audit_package_folders")
       .insert({
         audit_package_id: data.auditPackageId,
@@ -627,10 +755,7 @@ export const deletePackageFolder = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: true };
     await assertPackageAccessViaChild(supabase, userId, "audit_package_folders", data.folderId);
-    const { error } = await supabase
-      .from("audit_package_folders")
-      .delete()
-      .eq("id", data.folderId);
+    const { error } = await supabase.from("audit_package_folders").delete().eq("id", data.folderId);
     if (error) throw error;
     return { ok: true };
   });
@@ -661,57 +786,69 @@ export const listPackageFiles = createServerFn({ method: "GET" })
 export const createPackageFileUpload = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      auditPackageId: z.string().uuid(),
-      folderId: z.string().uuid().nullable(),
-      fileName: z.string().trim().min(1).max(255),
-      contentType: z.string().max(255).optional(),
-      sizeBytes: z.number().int().nonnegative().optional(),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }): Promise<{ fileId: string; path: string; token: string; bucket: string }> => {
-    const { supabase, userId } = context;
-    if (!supabase || !userId) return { fileId: "", path: "", token: "", bucket: "" };
-    const { organizationId } = await assertPackageAccess(supabase, userId, data.auditPackageId);
-    const p = { organization_id: organizationId };
-
-    const bucket = "audit-files";
-    const fileId = (globalThis.crypto?.randomUUID?.() ??
-      // fallback shouldn't happen in a modern worker
-      `${Date.now()}-${Math.random().toString(36).slice(2)}`);
-    const safeName = data.fileName.replace(/[^\w.\- ]/g, "_");
-    const path = `${p.organization_id}/${data.auditPackageId}/${fileId}/${safeName}`;
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: signed, error: signedErr } = await supabaseAdmin.storage
-      .from(bucket)
-      .createSignedUploadUrl(path);
-    if (signedErr || !signed) throw new Error(signedErr?.message ?? "Failed to sign upload");
-
-    const { data: row, error: insErr } = await (supabase as unknown as {
-      from: (t: string) => {
-        insert: (v: Record<string, unknown>) => {
-          select: (c: string) => { single: () => Promise<{ data: { id: string } | null; error: unknown }> };
-        };
-      };
-    })
-      .from("audit_package_files")
-      .insert({
-        audit_package_id: data.auditPackageId,
-        folder_id: data.folderId,
-        file_name: data.fileName,
-        storage_bucket: bucket,
-        storage_path: path,
-        content_type: data.contentType ?? null,
-        size_bytes: data.sizeBytes ?? null,
-        uploaded_by: userId,
+    z
+      .object({
+        auditPackageId: z.string().uuid(),
+        folderId: z.string().uuid().nullable(),
+        fileName: z.string().trim().min(1).max(255),
+        contentType: z.string().max(255).optional(),
+        sizeBytes: z.number().int().nonnegative().optional(),
       })
-      .select("id")
-      .single();
-    if (insErr) throw insErr;
+      .parse(d),
+  )
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ fileId: string; path: string; token: string; bucket: string }> => {
+      const { supabase, userId } = context;
+      if (!supabase || !userId) return { fileId: "", path: "", token: "", bucket: "" };
+      const { organizationId } = await assertPackageAccess(supabase, userId, data.auditPackageId);
+      const p = { organization_id: organizationId };
 
-    return { fileId: row!.id, path, token: signed.token, bucket };
-  });
+      const bucket = "audit-files";
+      const fileId =
+        globalThis.crypto?.randomUUID?.() ??
+        // fallback shouldn't happen in a modern worker
+        `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const safeName = data.fileName.replace(/[^\w.\- ]/g, "_");
+      const path = `${p.organization_id}/${data.auditPackageId}/${fileId}/${safeName}`;
+
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: signed, error: signedErr } = await supabaseAdmin.storage
+        .from(bucket)
+        .createSignedUploadUrl(path);
+      if (signedErr || !signed) throw new Error(signedErr?.message ?? "Failed to sign upload");
+
+      const { data: row, error: insErr } = await (
+        supabase as unknown as {
+          from: (t: string) => {
+            insert: (v: Record<string, unknown>) => {
+              select: (c: string) => {
+                single: () => Promise<{ data: { id: string } | null; error: unknown }>;
+              };
+            };
+          };
+        }
+      )
+        .from("audit_package_files")
+        .insert({
+          audit_package_id: data.auditPackageId,
+          folder_id: data.folderId,
+          file_name: data.fileName,
+          storage_bucket: bucket,
+          storage_path: path,
+          content_type: data.contentType ?? null,
+          size_bytes: data.sizeBytes ?? null,
+          uploaded_by: userId,
+        })
+        .select("id")
+        .single();
+      if (insErr) throw insErr;
+
+      return { fileId: row!.id, path, token: signed.token, bucket };
+    },
+  );
 
 /**
  * Get a signed download URL for a file. RLS on audit_package_files SELECT
@@ -730,7 +867,12 @@ export const getPackageFileDownloadUrl = createServerFn({ method: "POST" })
       .eq("id", data.fileId)
       .maybeSingle();
     if (error || !row) throw new Error("File not found or forbidden");
-    const f = row as { audit_package_id: string; storage_bucket: string; storage_path: string; file_name: string };
+    const f = row as {
+      audit_package_id: string;
+      storage_bucket: string;
+      storage_path: string;
+      file_name: string;
+    };
     await assertPackageAccess(supabase, userId, f.audit_package_id, { allowAuditor: true });
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -760,7 +902,10 @@ export const deletePackageFile = createServerFn({ method: "POST" })
     // Best-effort storage delete first; row delete is RLS-checked
     await supabaseAdmin.storage.from(f.storage_bucket).remove([f.storage_path]);
 
-    const { error: delErr } = await supabase.from("audit_package_files").delete().eq("id", data.fileId);
+    const { error: delErr } = await supabase
+      .from("audit_package_files")
+      .delete()
+      .eq("id", data.fileId);
     if (delErr) throw delErr;
     return { ok: true };
   });
@@ -801,7 +946,10 @@ export const listOrgAuditors = createServerFn({ method: "GET" })
       .select("auditor_account_id, revoked_at")
       .in("auditor_account_id", audIds);
     const counts = new Map<string, number>();
-    for (const a of ((access ?? []) as Array<{ auditor_account_id: string; revoked_at: string | null }>)) {
+    for (const a of (access ?? []) as Array<{
+      auditor_account_id: string;
+      revoked_at: string | null;
+    }>) {
       if (a.revoked_at) continue;
       counts.set(a.auditor_account_id, (counts.get(a.auditor_account_id) ?? 0) + 1);
     }
@@ -818,14 +966,16 @@ export const listOrgAuditors = createServerFn({ method: "GET" })
 export const provisionOrgAuditor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      organizationId: z.string().uuid(),
-      email: z.string().email().max(255),
-      fullName: z.string().trim().min(1).max(200),
-      agencyName: z.string().trim().min(1).max(200),
-      auditPackageId: z.string().uuid(),
-      siteOrigin: z.string().url(),
-    }).parse(d),
+    z
+      .object({
+        organizationId: z.string().uuid(),
+        email: z.string().email().max(255),
+        fullName: z.string().trim().min(1).max(200),
+        agencyName: z.string().trim().min(1).max(200),
+        auditPackageId: z.string().uuid(),
+        siteOrigin: z.string().url(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ auditorAccountId: string }> => {
     const { supabase, userId } = context;
@@ -837,12 +987,16 @@ export const provisionOrgAuditor = createServerFn({ method: "POST" })
     // Find or create the auth user WITHOUT sending Supabase's generic invite.
     // We send our own branded, package-specific email below.
     let authUserId: string | null = null;
-    const { data: existing } = await (supabaseAdmin.auth.admin as unknown as {
-      listUsers: (opts?: { page?: number; perPage?: number }) => Promise<{
-        data: { users: Array<{ id: string; email?: string | null }> } | null;
-      }>;
-    }).listUsers({ page: 1, perPage: 200 });
-    const found = existing?.users.find((u) => (u.email ?? "").toLowerCase() === data.email.toLowerCase());
+    const { data: existing } = await (
+      supabaseAdmin.auth.admin as unknown as {
+        listUsers: (opts?: { page?: number; perPage?: number }) => Promise<{
+          data: { users: Array<{ id: string; email?: string | null }> } | null;
+        }>;
+      }
+    ).listUsers({ page: 1, perPage: 200 });
+    const found = existing?.users.find(
+      (u) => (u.email ?? "").toLowerCase() === data.email.toLowerCase(),
+    );
     if (found) {
       authUserId = found.id;
     } else {
@@ -856,18 +1010,26 @@ export const provisionOrgAuditor = createServerFn({ method: "POST" })
           organization_id: data.organizationId,
         },
       });
-      if (cErr || !created?.user) throw new Error(cErr?.message ?? "Failed to create auditor auth user");
+      if (cErr || !created?.user)
+        throw new Error(cErr?.message ?? "Failed to create auditor auth user");
       authUserId = created.user.id;
     }
 
     // Upsert auditor_accounts row (org-scoped, no organization_members entry).
-    const { data: row, error: upErr } = await (supabase as unknown as {
-      from: (t: string) => {
-        upsert: (v: Record<string, unknown>, o: { onConflict: string }) => {
-          select: (c: string) => { single: () => Promise<{ data: { id: string } | null; error: unknown }> };
+    const { data: row, error: upErr } = await (
+      supabase as unknown as {
+        from: (t: string) => {
+          upsert: (
+            v: Record<string, unknown>,
+            o: { onConflict: string },
+          ) => {
+            select: (c: string) => {
+              single: () => Promise<{ data: { id: string } | null; error: unknown }>;
+            };
+          };
         };
-      };
-    })
+      }
+    )
       .from("auditor_accounts")
       .upsert(
         {
@@ -886,18 +1048,16 @@ export const provisionOrgAuditor = createServerFn({ method: "POST" })
     if (upErr) throw upErr;
 
     // Grant access to the specific package.
-    const { error: accErr } = await supabase
-      .from("audit_package_access")
-      .upsert(
-        {
-          audit_package_id: data.auditPackageId,
-          auditor_account_id: row!.id,
-          granted_by: userId,
-          granted_at: new Date().toISOString(),
-          revoked_at: null,
-        },
-        { onConflict: "audit_package_id,auditor_account_id" },
-      );
+    const { error: accErr } = await supabase.from("audit_package_access").upsert(
+      {
+        audit_package_id: data.auditPackageId,
+        auditor_account_id: row!.id,
+        granted_by: userId,
+        granted_at: new Date().toISOString(),
+        revoked_at: null,
+      },
+      { onConflict: "audit_package_id,auditor_account_id" },
+    );
     if (accErr) throw accErr;
 
     // Send the branded, package-specific invite email.
@@ -960,13 +1120,18 @@ async function sendAuditorPackageInvite(args: {
 
   // Generate a recovery link (works for both new and existing users). If the
   // user has never signed in, this doubles as the set-password link.
-  const { data: linkData, error: linkErr } = await (supabaseAdmin.auth.admin as unknown as {
-    generateLink: (opts: {
-      type: "recovery" | "invite";
-      email: string;
-      options?: { redirectTo?: string };
-    }) => Promise<{ data: { properties?: { action_link?: string } } | null; error: { message: string } | null }>;
-  }).generateLink({
+  const { data: linkData, error: linkErr } = await (
+    supabaseAdmin.auth.admin as unknown as {
+      generateLink: (opts: {
+        type: "recovery" | "invite";
+        email: string;
+        options?: { redirectTo?: string };
+      }) => Promise<{
+        data: { properties?: { action_link?: string } } | null;
+        error: { message: string } | null;
+      }>;
+    }
+  ).generateLink({
     type: "recovery",
     email: aud.email as string,
     options: { redirectTo },
@@ -1006,7 +1171,10 @@ async function sendAuditorPackageInvite(args: {
     </div>
   `;
 
-  const { error: sendErr } = await supabase.functions.invoke("send-email", {
+  // supabaseAdmin is already loaded above for the recovery link. The edge
+  // function accepts only the service-role bearer.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: sendErr } = await (supabaseAdmin as any).functions.invoke("send-email", {
     body: {
       from: formatFromHeader(DEFAULT_AUDIT_FROM_NAME),
       to: aud.email,

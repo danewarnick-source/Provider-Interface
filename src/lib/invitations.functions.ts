@@ -163,8 +163,7 @@ async function sendInvitationEmail(args: {
       .select("name")
       .eq("id", organizationId)
       .maybeSingle();
-    const orgName =
-      stripFakeDisplayLabel(String(org?.name || "").trim()) || "your organization";
+    const orgName = stripFakeDisplayLabel(String(org?.name || "").trim()) || "your organization";
     const inviterName = await loadInviterName(supabase, inviterUserId);
     const link = inviteJoinUrl(siteOrigin, token);
     const { subject, html, text } = buildInvitationEmail({
@@ -174,16 +173,21 @@ async function sendInvitationEmail(args: {
       inviterName,
     });
 
-    const { data: invokeData, error: invokeErr } = await supabase.functions.invoke("send-email", {
-      body: {
-        from: sender.from,
-        to: email,
-        subject,
-        html,
-        text,
-        reply_to: sender.reply_to,
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: invokeData, error: invokeErr } = await (supabaseAdmin as any).functions.invoke(
+      "send-email",
+      {
+        body: {
+          from: sender.from,
+          to: email,
+          subject,
+          html,
+          text,
+          reply_to: sender.reply_to,
+        },
       },
-    });
+    );
     if (invokeErr) return { ok: false, error: invokeErr.message || "Email send failed" };
     if (!invokeData || invokeData.ok !== true) {
       return { ok: false, error: (invokeData && invokeData.error) || "Email send failed" };
@@ -196,34 +200,40 @@ async function sendInvitationEmail(args: {
 
 export const createInvitation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    organization_id: string;
-    email: string;
-    access_level: AccessLevel;
-    access_preset_id?: string | null;
-    site_origin: string;
-  }) =>
-    z
-      .object({
-        organization_id: ORG_ID,
-        email: z.string().trim().toLowerCase().email().max(255),
-        access_level: INVITE_LEVEL,
-        access_preset_id: z.string().uuid().nullish(),
-        site_origin: SITE_ORIGIN,
-      })
-      .parse(d),
+  .inputValidator(
+    (d: {
+      organization_id: string;
+      email: string;
+      access_level: AccessLevel;
+      access_preset_id?: string | null;
+      site_origin: string;
+    }) =>
+      z
+        .object({
+          organization_id: ORG_ID,
+          email: z.string().trim().toLowerCase().email().max(255),
+          access_level: INVITE_LEVEL,
+          access_preset_id: z.string().uuid().nullish(),
+          site_origin: SITE_ORIGIN,
+        })
+        .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    if (!supabase || !userId)
-      return { invitation: null, email_sent: false, email_error: null };
+    if (!supabase || !userId) return { invitation: null, email_sent: false, email_error: null };
     await requirePermission(
       supabase as unknown as SupabaseClient,
       userId,
       data.organization_id,
       "invite_staff",
     );
-    await assertCanInviteAt(supabase, userId, data.organization_id, data.access_level, data.access_preset_id);
+    await assertCanInviteAt(
+      supabase,
+      userId,
+      data.organization_id,
+      data.access_level,
+      data.access_preset_id,
+    );
     await assertAgencySetupCompleteForOrg(supabase, data.organization_id);
     const presetId = await presetIdForInvite(
       data.organization_id,
@@ -286,8 +296,7 @@ export const resendInvitation = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    if (!supabase || !userId)
-      return { invitation: null, email_sent: false, email_error: null };
+    if (!supabase || !userId) return { invitation: null, email_sent: false, email_error: null };
     await requirePermission(
       supabase as unknown as SupabaseClient,
       userId,
@@ -458,163 +467,172 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
     });
     if (!supabase || !userId) return { ...empty, email_error: "Unauthorized" };
     try {
-    await requirePermission(
-      supabase as unknown as SupabaseClient,
-      userId,
-      data.organization_id,
-      "invite_staff",
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
-    if (data.access_level) {
-      await assertCanInviteAt(sb, userId, data.organization_id, data.access_level, null);
-    }
-    type Target = {
-      userId: string | null;
-      email: string;
-      level: AccessLevel;
-      presetId: string | null;
-      mustChange: boolean | null;
-    };
-    const targets = new Map<string, Target>();
-
-    if (data.user_ids.length) {
-      const { data: members, error: memErr } = await sb
-        .from("organization_members")
-        .select("user_id, access_level, access_preset_id")
-        .eq("organization_id", data.organization_id)
-        .in("user_id", data.user_ids);
-      if (memErr) throw new Error(memErr.message);
-      type MemberAccessPick = { user_id: string; access_level: AccessLevel; access_preset_id: string | null };
-      const ids = (members ?? []).map((m: MemberAccessPick) => m.user_id);
-      const accessByUser = new Map<string, MemberAccessPick>(
-        (members ?? []).map((m: MemberAccessPick) => [m.user_id, m]),
+      await requirePermission(
+        supabase as unknown as SupabaseClient,
+        userId,
+        data.organization_id,
+        "invite_staff",
       );
-      if (ids.length) {
-        const { data: profs, error: pErr } = await sb
-          .from("profiles")
-          .select("id, email, must_change_password")
-          .in("id", ids);
-        if (pErr) throw new Error(pErr.message);
-        for (const p of profs ?? []) {
-          const email = String(p.email ?? "").trim().toLowerCase();
-          if (!email) continue;
-          targets.set(email, {
-            userId: p.id,
-            email,
-            level: data.access_level ?? accessByUser.get(p.id)?.access_level ?? "staff",
-            presetId: data.access_level ? null : (accessByUser.get(p.id)?.access_preset_id ?? null),
-            mustChange: p.must_change_password ?? null,
-          });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any;
+      if (data.access_level) {
+        await assertCanInviteAt(sb, userId, data.organization_id, data.access_level, null);
+      }
+      type Target = {
+        userId: string | null;
+        email: string;
+        level: AccessLevel;
+        presetId: string | null;
+        mustChange: boolean | null;
+      };
+      const targets = new Map<string, Target>();
+
+      if (data.user_ids.length) {
+        const { data: members, error: memErr } = await sb
+          .from("organization_members")
+          .select("user_id, access_level, access_preset_id")
+          .eq("organization_id", data.organization_id)
+          .in("user_id", data.user_ids);
+        if (memErr) throw new Error(memErr.message);
+        type MemberAccessPick = {
+          user_id: string;
+          access_level: AccessLevel;
+          access_preset_id: string | null;
+        };
+        const ids = (members ?? []).map((m: MemberAccessPick) => m.user_id);
+        const accessByUser = new Map<string, MemberAccessPick>(
+          (members ?? []).map((m: MemberAccessPick) => [m.user_id, m]),
+        );
+        if (ids.length) {
+          const { data: profs, error: pErr } = await sb
+            .from("profiles")
+            .select("id, email, must_change_password")
+            .in("id", ids);
+          if (pErr) throw new Error(pErr.message);
+          for (const p of profs ?? []) {
+            const email = String(p.email ?? "")
+              .trim()
+              .toLowerCase();
+            if (!email) continue;
+            targets.set(email, {
+              userId: p.id,
+              email,
+              level: data.access_level ?? accessByUser.get(p.id)?.access_level ?? "staff",
+              presetId: data.access_level
+                ? null
+                : (accessByUser.get(p.id)?.access_preset_id ?? null),
+              mustChange: p.must_change_password ?? null,
+            });
+          }
         }
       }
-    }
 
-    for (const raw of data.emails) {
-      const email = raw.trim().toLowerCase();
-      if (targets.has(email)) continue;
-      targets.set(email, {
-        userId: null,
-        email,
-        level: data.access_level ?? "staff",
-        presetId: null,
-        mustChange: true,
-      });
-    }
+      for (const raw of data.emails) {
+        const email = raw.trim().toLowerCase();
+        if (targets.has(email)) continue;
+        targets.set(email, {
+          userId: null,
+          email,
+          level: data.access_level ?? "staff",
+          presetId: null,
+          mustChange: true,
+        });
+      }
 
-    const emails = [...targets.keys()];
-    const inviteByEmail = new Map<string, string>();
-    if (emails.length) {
-      const { data: invites, error: invErr } = await sb
-        .from("invitations")
-        .select("email, status")
-        .eq("organization_id", data.organization_id)
-        .in("email", emails);
-      if (invErr) throw new Error(invErr.message);
-      for (const row of invites ?? []) {
-        const key = String(row.email ?? "").toLowerCase();
-        const prev = inviteByEmail.get(key);
-        if (row.status === "accepted" || prev !== "accepted") {
-          inviteByEmail.set(key, String(row.status ?? ""));
+      const emails = [...targets.keys()];
+      const inviteByEmail = new Map<string, string>();
+      if (emails.length) {
+        const { data: invites, error: invErr } = await sb
+          .from("invitations")
+          .select("email, status")
+          .eq("organization_id", data.organization_id)
+          .in("email", emails);
+        if (invErr) throw new Error(invErr.message);
+        for (const row of invites ?? []) {
+          const key = String(row.email ?? "").toLowerCase();
+          const prev = inviteByEmail.get(key);
+          if (row.status === "accepted" || prev !== "accepted") {
+            inviteByEmail.set(key, String(row.status ?? ""));
+          }
         }
       }
-    }
 
-    const results: InviteTargetResult[] = [];
-    let sent = 0;
-    let skipped = 0;
-    let errors = 0;
+      const results: InviteTargetResult[] = [];
+      let sent = 0;
+      let skipped = 0;
+      let errors = 0;
 
-    for (const t of targets.values()) {
-      const invitationStatus = inviteByEmail.get(t.email) ?? null;
-      if (
-        !canSendImportInvite(
-          {
+      for (const t of targets.values()) {
+        const invitationStatus = inviteByEmail.get(t.email) ?? null;
+        if (
+          !canSendImportInvite(
+            {
+              email: t.email,
+              mustChangePassword: t.mustChange,
+              invitationStatus,
+            },
+            { resendAccepted: data.resend_accepted, force: data.force },
+          )
+        ) {
+          skipped += 1;
+          results.push({
             email: t.email,
-            mustChangePassword: t.mustChange,
-            invitationStatus,
-          },
-          { resendAccepted: data.resend_accepted, force: data.force },
-        )
-      ) {
-        skipped += 1;
-        results.push({
-          email: t.email,
-          user_id: t.userId,
-          status: "skipped",
-          reason:
-            invitationStatus === "accepted"
-              ? "Already accepted — use Resend to send again"
-              : t.mustChange === false
-                ? "Already has a login"
-                : "Not inviteable",
-        });
-        continue;
-      }
+            user_id: t.userId,
+            status: "skipped",
+            reason:
+              invitationStatus === "accepted"
+                ? "Already accepted — use Resend to send again"
+                : t.mustChange === false
+                  ? "Already has a login"
+                  : "Not inviteable",
+          });
+          continue;
+        }
 
-      try {
-        const out = await upsertPendingInviteAndSend({
-          supabase: sb,
-          organizationId: data.organization_id,
-          userId,
-          email: t.email,
-          level: t.level,
-          presetId: t.presetId,
-          siteOrigin: data.site_origin,
-        });
-        if (out.email_sent) {
-          sent += 1;
-          results.push({ email: t.email, user_id: t.userId, status: "sent", reason: null });
-        } else {
+        try {
+          const out = await upsertPendingInviteAndSend({
+            supabase: sb,
+            organizationId: data.organization_id,
+            userId,
+            email: t.email,
+            level: t.level,
+            presetId: t.presetId,
+            siteOrigin: data.site_origin,
+          });
+          if (out.email_sent) {
+            sent += 1;
+            results.push({ email: t.email, user_id: t.userId, status: "sent", reason: null });
+          } else {
+            errors += 1;
+            results.push({
+              email: t.email,
+              user_id: t.userId,
+              status: "created_unsent",
+              reason: out.email_error,
+            });
+          }
+        } catch (e) {
           errors += 1;
           results.push({
             email: t.email,
             user_id: t.userId,
-            status: "created_unsent",
-            reason: out.email_error,
+            status: "error",
+            reason: e instanceof Error ? e.message : "Invite failed",
           });
         }
-      } catch (e) {
-        errors += 1;
-        results.push({
-          email: t.email,
-          user_id: t.userId,
-          status: "error",
-          reason: e instanceof Error ? e.message : "Invite failed",
-        });
       }
-    }
 
-    const emailError = results.find((r) => r.status === "created_unsent" || r.status === "error")?.reason ?? null;
-    return inviteSendPayload({
-      email_sent: sent > 0,
-      email_error: emailError,
-      sent,
-      skipped,
-      errors,
-      results,
-    });
+      const emailError =
+        results.find((r) => r.status === "created_unsent" || r.status === "error")?.reason ?? null;
+      return inviteSendPayload({
+        email_sent: sent > 0,
+        email_error: emailError,
+        sent,
+        skipped,
+        errors,
+        results,
+      });
     } catch (e) {
       return inviteSendPayload({
         email_sent: false,

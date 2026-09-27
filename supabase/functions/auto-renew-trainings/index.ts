@@ -6,6 +6,7 @@
 // PHI-free: only reads/writes hive_training_* tables.
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { bearerIsServiceRole } from "../_shared/service-role-guard.ts";
 
 type Settings = {
   organization_id: string;
@@ -32,24 +33,47 @@ Deno.serve(async (req) => {
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
   if (!stripeKey) return new Response("payments_not_configured", { status: 501 });
 
-  const admin = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { auth: { persistSession: false } },
-  );
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceKey) return new Response("not_configured", { status: 500 });
 
-  // Optional: run for a single org (manual trigger from UI).
+  const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
+  const serviceCaller = bearerIsServiceRole(authHeader, serviceKey);
+
+  const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+
+  // Manual trigger from the training page sends one organization_id.
+  // A sweep of every org is service-role only (no cron calls this today).
   let onlyOrgId: string | null = null;
   if (req.method === "POST") {
     const body = await req.json().catch(() => ({}));
-    onlyOrgId = body?.organization_id ?? null;
+    onlyOrgId = typeof body?.organization_id === "string" ? body.organization_id : null;
+  }
+
+  if (!serviceCaller) {
+    if (!onlyOrgId) return new Response("Unauthorized", { status: 401 });
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader ?? "" } },
+      auth: { persistSession: false },
+    });
+    const { data: userRes } = await userClient.auth.getUser();
+    const userId = userRes?.user?.id;
+    if (!userId) return new Response("Unauthorized", { status: 401 });
+    const { data: allowed } = await admin.rpc("is_org_admin_or_manager", {
+      _org: onlyOrgId,
+      _user: userId,
+    });
+    if (allowed !== true) return new Response("Forbidden", { status: 403 });
   }
 
   const stripe = new Stripe(stripeKey, { apiVersion: "2024-06-20" });
 
   const q = admin
     .from("hive_training_auto_renew_settings")
-    .select("organization_id, enabled, lead_days, scope, selected_catalog_ids, stripe_customer_id, stripe_payment_method_id")
+    .select(
+      "organization_id, enabled, lead_days, scope, selected_catalog_ids, stripe_customer_id, stripe_payment_method_id",
+    )
     .eq("enabled", true)
     .is("paused_reason", null);
   if (onlyOrgId) q.eq("organization_id", onlyOrgId);
@@ -94,7 +118,16 @@ async function processOrg(
     .eq("active", true);
   const catalog = (catalogAll ?? []) as Catalog[];
   if (catalog.length === 0) {
-    await logRun(admin, settings.organization_id, "no_eligible", 0, 0, 0, null, "no active catalog");
+    await logRun(
+      admin,
+      settings.organization_id,
+      "no_eligible",
+      0,
+      0,
+      0,
+      null,
+      "no active catalog",
+    );
     return { status: "no_eligible" };
   }
 
@@ -112,7 +145,11 @@ async function processOrg(
     .eq("organization_id", settings.organization_id);
 
   const expiringPairs: Array<{ user_id: string; course_id: string }> = [];
-  for (const a of (assignments ?? []) as Array<{ user_id: string; course_id: string; expires_at: string }>) {
+  for (const a of (assignments ?? []) as Array<{
+    user_id: string;
+    course_id: string;
+    expires_at: string;
+  }>) {
     // Skip if user already has a fresher assignment for this course.
     const fresher = (allAssign ?? []).some((x) => {
       const rx = x as { user_id: string; course_id: string; expires_at: string | null };
@@ -125,13 +162,22 @@ async function processOrg(
   }
 
   if (expiringPairs.length === 0) {
-    await logRun(admin, settings.organization_id, "no_eligible", 0, 0, 0, null, "nothing expiring within lead window");
+    await logRun(
+      admin,
+      settings.organization_id,
+      "no_eligible",
+      0,
+      0,
+      0,
+      null,
+      "nothing expiring within lead window",
+    );
     return { status: "no_eligible" };
   }
 
   // Apply scope.
   const fullProgram = catalog.find((c) => c.kind === "full_program");
-  const fpCourseIds = new Set<string>(((fullProgram?.fulfills_course_ids ?? []) as string[]));
+  const fpCourseIds = new Set<string>((fullProgram?.fulfills_course_ids ?? []) as string[]);
 
   const scopeFilter = (pair: { course_id: string }, catalogId: string | null): boolean => {
     if (settings.scope === "all") return true;
@@ -172,10 +218,14 @@ async function processOrg(
 
   for (const [uid, courseSet] of byUser) {
     // Consider bundling if user needs all Full Program courses AND it's cheaper.
-    const coversAllFp = fullProgram && fpCourseIds.size > 0 && Array.from(fpCourseIds).every((c) => courseSet.has(c));
+    const coversAllFp =
+      fullProgram && fpCourseIds.size > 0 && Array.from(fpCourseIds).every((c) => courseSet.has(c));
     let useBundle = false;
     if (fullProgram && coversAllFp) {
-      const aLaCarteTotal = Array.from(fpCourseIds).reduce((sum, cid) => sum + (catalogByCourse.get(cid)?.price_cents ?? 0), 0);
+      const aLaCarteTotal = Array.from(fpCourseIds).reduce(
+        (sum, cid) => sum + (catalogByCourse.get(cid)?.price_cents ?? 0),
+        0,
+      );
       if (aLaCarteTotal > fullProgram.price_cents) useBundle = true;
     }
 
@@ -196,14 +246,32 @@ async function processOrg(
   }
 
   if (groups.size === 0) {
-    await logRun(admin, settings.organization_id, "no_eligible", 0, 0, 0, null, "no in-scope items");
+    await logRun(
+      admin,
+      settings.organization_id,
+      "no_eligible",
+      0,
+      0,
+      0,
+      null,
+      "no in-scope items",
+    );
     return { status: "no_eligible" };
   }
 
   // Payment method required to charge off-session.
   if (!settings.stripe_customer_id || !settings.stripe_payment_method_id) {
     await pauseSettings(admin, settings.organization_id, "no_payment_method");
-    await logRun(admin, settings.organization_id, "card_failed", byUser.size, 0, 0, null, "no saved payment method");
+    await logRun(
+      admin,
+      settings.organization_id,
+      "card_failed",
+      byUser.size,
+      0,
+      0,
+      null,
+      "no saved payment method",
+    );
     return { status: "card_failed", reason: "no_payment_method" };
   }
 
@@ -236,13 +304,31 @@ async function processOrg(
   } catch (err) {
     const msg = (err as Error).message;
     await pauseSettings(admin, settings.organization_id, `charge_failed: ${msg}`);
-    await logRun(admin, settings.organization_id, "card_failed", byUser.size, 0, totalCents, null, msg);
+    await logRun(
+      admin,
+      settings.organization_id,
+      "card_failed",
+      byUser.size,
+      0,
+      totalCents,
+      null,
+      msg,
+    );
     return { status: "card_failed", reason: msg };
   }
 
   if (pi.status !== "succeeded") {
     await pauseSettings(admin, settings.organization_id, `charge_${pi.status}`);
-    await logRun(admin, settings.organization_id, "card_failed", byUser.size, 0, totalCents, pi.id, `payment intent status ${pi.status}`);
+    await logRun(
+      admin,
+      settings.organization_id,
+      "card_failed",
+      byUser.size,
+      0,
+      totalCents,
+      pi.id,
+      `payment intent status ${pi.status}`,
+    );
     return { status: "card_failed", reason: pi.status };
   }
 
@@ -312,7 +398,16 @@ async function processOrg(
     .update({ last_run_at: nowIso, paused_reason: null })
     .eq("organization_id", settings.organization_id);
 
-  await logRun(admin, settings.organization_id, "succeeded", byUser.size, totalSeats, totalCents, pi.id, null);
+  await logRun(
+    admin,
+    settings.organization_id,
+    "succeeded",
+    byUser.size,
+    totalSeats,
+    totalCents,
+    pi.id,
+    null,
+  );
   return { status: "succeeded", seats: totalSeats, amount_cents: totalCents };
 }
 
