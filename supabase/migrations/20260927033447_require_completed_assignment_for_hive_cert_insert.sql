@@ -1,0 +1,11 @@
+-- DB-18 (Lane A). Applied live as version 20260927033447.
+-- Fixes: staff could mint a Hive training certificate for any of their own assignments without completing it.
+-- Now: the assignment must belong to the caller AND have completed_at set.
+-- Not tied to D12 (D12 covers public.certifications / DB-17, which stays skipped).
+-- Callers: no src/ or edge code inserts into hive_training_certificates (only e2e mocks + docs). Table had 0 rows.
+-- Residual (not changed here): policy "assignments staff update own" lets staff set completed_at on their own
+--   assignment, so a staff member can still self-complete and then mint. Closing that needs a server-side completion path.
+-- Prior WITH CHECK:
+--   (EXISTS ( SELECT 1 FROM hive_training_assignments a
+--     WHERE ((a.id = hive_training_certificates.assignment_id) AND (a.user_id = auth.uid()))))
+ALTER POLICY "certs insert for own assignment" ON public.hive_training_certificates WITH CHECK (EXISTS (SELECT 1 FROM public.hive_training_assignments a WHERE a.id = assignment_id AND a.user_id = auth.uid() AND a.completed_at IS NOT NULL));
