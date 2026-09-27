@@ -17971,7 +17971,6 @@ export type Database = {
           similarity: number
         }[]
       }
-      mcp_exec_read_sql: { Args: { query: string }; Returns: Json }
       med_admin_role_permitted: {
         Args: {
           _client_id: string
