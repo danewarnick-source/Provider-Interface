@@ -20,6 +20,9 @@ import { z } from "zod";
 import { createIncidentInstances, resolveComplianceRequirement } from "@/lib/compliance-resolution";
 import { logPhiAccess } from "@/lib/phi-access-audit.server";
 import { isAdminLevel } from "@/lib/access/levels";
+import { insertIncidentNumbered } from "@/lib/incident-number";
+import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -108,16 +111,6 @@ export const createIncident = createServerFn({ method: "POST" })
       if (!sa) throw new Error("You are not assigned to this individual.");
     }
 
-    // Generate a short report number (org-local sequence by year + count).
-    const year = new Date().getFullYear();
-    const { count } = await supabase
-      .from("incident_reports")
-      .select("id", { count: "exact", head: true })
-      .eq("organization_id", m.organization_id)
-      .gte("created_at", `${year}-01-01T00:00:00Z`);
-    const seq = String((count ?? 0) + 1).padStart(4, "0");
-    const report_number = `IR-${year}-${seq}`;
-
     const discovered = new Date(data.discovered_at);
     const occurred = data.occurred_at ? new Date(data.occurred_at) : discovered;
 
@@ -125,7 +118,6 @@ export const createIncident = createServerFn({ method: "POST" })
       organization_id: m.organization_id,
       client_id: data.client_id,
       reported_by: userId,
-      report_number,
       // Legacy NOT-NULL columns (pre-existing schema): map to the new structured fields.
       incident_date: occurred.toISOString().slice(0, 10),
       incident_time: occurred.toISOString().slice(11, 19),
@@ -162,12 +154,32 @@ export const createIncident = createServerFn({ method: "POST" })
       ai_review_at: data.ai_review_status ? new Date().toISOString() : null,
     };
 
-    const { data: ins, error } = await supabase
-      .from("incident_reports")
-      .insert(row)
-      .select("id, report_number")
-      .single();
-    if (error) throw new Error(error.message);
+    const year = new Date().getFullYear();
+    const ins = await insertIncidentNumbered({
+      year,
+      listNumbers: async () => {
+        const { data: nums, error: numErr } = await (supabaseAdmin as AnySupabase)
+          .from("incident_reports")
+          .select("report_number")
+          .eq("organization_id", m.organization_id)
+          .like("report_number", `IR-${year}-%`);
+        if (numErr) throw new Error(numErr.message);
+        return ((nums ?? []) as Array<{ report_number: string | null }>)
+          .map((item) => item.report_number)
+          .filter((item): item is string => !!item);
+      },
+      insert: async (report_number) => {
+        const { data: created, error } = await supabase
+          .from("incident_reports")
+          .insert({ ...row, report_number })
+          .select("id, report_number")
+          .single();
+        return {
+          data: (created as { id: string; report_number: string } | null) ?? null,
+          error,
+        };
+      },
+    });
 
     const incidentCreatedAt = discovered;
     await createIncidentInstances(supabase, m.organization_id, ins.id, incidentCreatedAt);
@@ -208,7 +220,7 @@ export const listIncidents = createServerFn({ method: "GET" })
       .limit(data.limit);
     if (data.status === "closed") q = q.eq("status", "State_Confirmed");
     if (data.status === "open") q = q.or("status.neq.State_Confirmed,status.is.null");
-    if (data.client_id) q = q.eq("client_id", data.client_id);
+    if (data.client_id) q = q.or(incidentInvolvesClientOr(data.client_id));
     if (data.category) q = q.eq("category", data.category);
     if (data.from) q = q.gte("discovered_at", data.from);
     if (data.to) q = q.lte("discovered_at", data.to);
@@ -449,7 +461,7 @@ export const hasSubmittedIncidentForClientDate = createServerFn({ method: "GET" 
       .from("incident_reports")
       .select("id, report_number")
       .eq("organization_id", m.organization_id)
-      .eq("client_id", data.client_id)
+      .or(incidentInvolvesClientOr(data.client_id))
       .gte("discovered_at", start)
       .lte("discovered_at", end)
       .limit(1);

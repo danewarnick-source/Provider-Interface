@@ -257,7 +257,7 @@ function BillingLockedPage() {
           </div>
         )}
 
-        {state.testMode && (
+        {unpaid && state.testMode && (
           <div
             className="mt-6 w-full rounded-lg border border-[#F5A524]/40 bg-[#F5A524]/10 px-4 py-3 text-left text-sm text-[#F5A524]"
             data-testid="stripe-test-mode-hint"
@@ -267,7 +267,11 @@ function BillingLockedPage() {
           </div>
         )}
 
-        {state.isAdmin ? (
+        {!unpaid ? (
+          <div className="mt-8 w-full rounded-xl border border-white/10 bg-white/5 px-6 py-5 text-left text-sm text-white/80">
+            Contact us to reactivate.
+          </div>
+        ) : state.isAdmin ? (
           <div className="mt-8 w-full space-y-3 text-left">
             {!state.paymentsConfigured && (
               <div className="rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">

@@ -15,6 +15,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { RequirePermission } from "@/components/rbac-guard";
@@ -1738,7 +1739,7 @@ function IncidentsPanel({ clientId, orgId }: { clientId: string; orgId?: string 
           "id, incident_date, incident_types, status, is_abuse_neglect, is_fatality, report_number",
         )
         .eq("organization_id", orgId!)
-        .eq("client_id", clientId)
+        .or(incidentInvolvesClientOr(clientId))
         .order("incident_date", { ascending: false })
         .limit(100);
       if (error) throw error;

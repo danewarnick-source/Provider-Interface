@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { anchorsForPrompt, findAnchor } from "@/lib/nectar/tour-anchors";
+import { resolveNectarAudience } from "@/lib/nectar-trust";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 
@@ -88,9 +89,9 @@ export const planNectarGuide = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
     const { requireOrgMembership } = await import("@/integrations/supabase/require-org");
-    await requireOrgMembership(supabase, userId, data.orgId, "staff");
-
-    const isStaff = data.surface === "staff";
+    const access = await requireOrgMembership(supabase, userId, data.orgId, "staff");
+    const audience = resolveNectarAudience(access, { role: data.role, surface: data.surface });
+    const isStaff = audience.surface === "staff";
     const who = isStaff
       ? "a direct support staff member on the staff view"
       : "an admin";
@@ -113,7 +114,7 @@ listed anchor IDs verbatim — never invent anchors. If a step has no matching a
 omit the step and rely on the task's "why" text instead.
 ${staffHint}
 Available anchors:
-${anchorsForPrompt(data.surface)}
+${anchorsForPrompt(audience.surface)}
 
 Respond as strict JSON:
 {
@@ -129,7 +130,7 @@ Respond as strict JSON:
 
     const out = await callAi([
       { role: "system", content: system },
-      { role: "user", content: `Role: ${data.role}\nSurface: ${data.surface}\nGoal: ${data.goal}` },
+      { role: "user", content: `Role: ${audience.role}\nSurface: ${audience.surface}\nGoal: ${data.goal}` },
     ]) as { summary?: string; tasks?: Array<{ title?: string; why?: string; steps?: Array<{ anchor?: string; instruction?: string }> }> };
 
     const allowed = (id: string) => {
@@ -187,7 +188,7 @@ Respond as strict JSON:
         user_id: userId,
         goal: data.goal,
         summary: strField(out.summary ?? "", 400) || null,
-        surface: data.surface,
+        surface: audience.surface,
         status: "active",
       })
       .select("id")

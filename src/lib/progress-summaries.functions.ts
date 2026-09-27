@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { toIsoDateDay } from "@/lib/iso-date-day";
+import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
 import {
   clientNeedsGoalProgress,
   filterPeriodsByFloor,
@@ -651,7 +652,7 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
       .from("incident_reports")
       .select("id, report_number, incident_date, incident_types, narrative_before, narrative_during, narrative_after")
       .eq("organization_id", data.organizationId)
-      .eq("client_id", summaryRow.client_id)
+      .or(incidentInvolvesClientOr(summaryRow.client_id))
       .gte("incident_date", summaryRow.period_start)
       .lte("incident_date", summaryRow.period_end)
       .order("incident_date", { ascending: true });

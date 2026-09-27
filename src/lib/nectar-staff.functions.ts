@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { requireOrgMembership } from "@/integrations/supabase/require-org";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import {
@@ -9,6 +8,13 @@ import {
   slimPcspGoals,
   staffNectarFailureMessage,
 } from "@/lib/nectar-staff-errors";
+import { assertMemberPlanAddon } from "@/lib/entitlements.server";
+import {
+  UNTRUSTED_DOCUMENT_RULE,
+  delimitUntrustedDocument,
+  orgBoundaryRule,
+  otherMemberOrgNamedInQuestion,
+} from "@/lib/nectar-trust";
 import {
   buildSchedulePack,
   questionWantsPayOrHours,
@@ -249,12 +255,12 @@ export const askNectarStaff = createServerFn({ method: "POST" })
     const orgId = data.organizationId;
     const kw = keywords(data.question);
 
-    // 1. Verify caller is an active member of the PASSED org (employee+).
-    await requireOrgMembership(
-      context.supabase as unknown as Parameters<typeof requireOrgMembership>[0],
+    // Plan + membership are read on the server. A client flag cannot grant this.
+    await assertMemberPlanAddon(
+      context.supabase,
       userId,
+      "nectar_infusion",
       orgId,
-      "staff",
     );
 
     if (questionWantsPayOrHours(data.question)) {
@@ -402,10 +408,11 @@ export const askNectarStaff = createServerFn({ method: "POST" })
       const excerpt = bestExcerpt(d.raw_text, kw);
       const scored = kw.length === 0 ? 1 : kw.filter((k) => `${d.title} ${excerpt}`.toLowerCase().includes(k)).length;
       if (scored === 0 && (policies.length + training.length) >= 6) continue;
+      const untrusted = excerpt ? delimitUntrustedDocument(excerpt) : excerpt;
       if (d.document_type === "training") {
-        training.push({ id: d.id, title: d.title, kind: "doc", excerpt });
+        training.push({ id: d.id, title: d.title, kind: "doc", excerpt: untrusted });
       } else {
-        policies.push({ id: d.id, title: d.title, document_type: d.document_type, excerpt });
+        policies.push({ id: d.id, title: d.title, document_type: d.document_type, excerpt: untrusted });
       }
     }
 
@@ -493,7 +500,44 @@ export const askNectarStaff = createServerFn({ method: "POST" })
       notes: [],
     };
 
-    const system = `You are NECTAR Staff — a scoped, plain-language shift-manager assistant inside the Provider Interface staff app. You help one staff member do their job for the people they support.
+    const orgNameQ = await supabase
+      .from("organizations")
+      .select("name")
+      .eq("id", orgId)
+      .maybeSingle();
+    const orgName =
+      ((orgNameQ.data as { name?: string | null } | null)?.name ?? "").trim() || "this organization";
+    const memberNamesQ = await supabase
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", userId)
+      .eq("active", true);
+    const memberOrgIds = ((memberNamesQ.data ?? []) as Array<{ organization_id: string }>).map(
+      (row) => row.organization_id,
+    );
+    let memberNames = [orgName];
+    if (memberOrgIds.length) {
+      const namesQ = await supabase.from("organizations").select("id, name").in("id", memberOrgIds);
+      memberNames = ((namesQ.data ?? []) as Array<{ name: string | null }>)
+        .map((row) => (row.name ?? "").trim())
+        .filter((name) => name.length > 0);
+    }
+    const otherOrg = otherMemberOrgNamedInQuestion(data.question, orgName, memberNames);
+    if (otherOrg) {
+      return {
+        answer: `I can only answer about ${orgName}. I don't have numbers for ${otherOrg}.`,
+        citations: [],
+        usedClientIds: [],
+        refused: true,
+        deepLink: null,
+      };
+    }
+
+    const system = `You are NECTAR Staff — a scoped, plain-language shift-manager assistant inside the Provider Interface staff app. You help one team member do their job for the people they support.
+
+${UNTRUSTED_DOCUMENT_RULE}
+
+${orgBoundaryRule(orgId, orgName)}
 
 ABSOLUTE SCOPE RULES (you MUST refuse anything outside these):
 1. ALLOWED TOPICS:
