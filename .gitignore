@@ -1,3 +1,7 @@
+# Secrets. Keep a committed example if one is added later.
+.env*
+!.env.example
+
 # Logs
 logs
 *.log

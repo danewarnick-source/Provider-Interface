@@ -52,10 +52,12 @@ async function lookupUsernameEmailWithServiceRole(username: string): Promise<str
 export async function performPasswordSignIn(
   identifier: string,
   password: string,
+  captchaToken?: string | null,
 ): Promise<PasswordSession> {
   const session = await performPasswordSignInWithClient(identifier, password, {
     createPublishableClient: createPublishableAuthClient,
     lookupUsernameEmailWithServiceRole,
+    captchaToken,
   });
 
   if (isCognitoAuth()) {

@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
-  CANONICAL_SITE_ORIGIN,
   RESET_PASSWORD_PATH,
   VERCEL_PREVIEW_ORIGIN,
   authRedirectUrl,
@@ -39,20 +38,28 @@ describe("normalizeOrigin / isSafeAuthOrigin", () => {
       normalizeOrigin("agency-peace-of-mind.vercel.app"),
       "https://agency-peace-of-mind.vercel.app",
     );
-    assert.equal(isSafeAuthOrigin("https://hivecertify.com"), true);
+    assert.equal(isSafeAuthOrigin("https://providerinterface.com"), true);
+    assert.equal(isSafeAuthOrigin("https://www.providerinterface.com"), true);
+    assert.equal(isSafeAuthOrigin("https://hivecertify.com"), false);
+    assert.equal(isSafeAuthOrigin("https://evil.example"), false);
+    assert.equal(isSafeAuthOrigin("https://providerinterface.com.evil.example"), false);
     assert.equal(isSafeAuthOrigin("https://agency-peace-of-mind.vercel.app"), true);
+    assert.equal(isSafeAuthOrigin("https://agency-peace-of-mind.vercel.app.evil.example"), false);
+    assert.equal(isSafeAuthOrigin("http://localhost:5173"), true);
+    assert.equal(isSafeAuthOrigin("http://127.0.0.1:3000"), true);
     assert.equal(isSafeAuthOrigin("https://agency-peace-of-mind.lovable.app"), false);
     assert.equal(isSafeAuthOrigin(""), false);
   });
 });
 
 describe("resolveAuthOrigin / authRedirectUrl", () => {
-  it("keeps hivecertify.com and the Vercel preview host", () => {
-    assert.equal(resolveAuthOrigin("https://hivecertify.com"), CANONICAL_SITE_ORIGIN);
+  it("keeps providerinterface.com and the Vercel preview host", () => {
+    assert.equal(resolveAuthOrigin("https://providerinterface.com"), PROVIDER_INTERFACE_ORIGIN);
+    assert.equal(resolveAuthOrigin("https://www.providerinterface.com"), "https://www.providerinterface.com");
     assert.equal(resolveAuthOrigin(VERCEL_PREVIEW_ORIGIN), VERCEL_PREVIEW_ORIGIN);
     assert.equal(
-      passwordResetRedirectUrl("https://hivecertify.com"),
-      `https://hivecertify.com${RESET_PASSWORD_PATH}`,
+      passwordResetRedirectUrl("https://providerinterface.com"),
+      `https://providerinterface.com${RESET_PASSWORD_PATH}`,
     );
     assert.equal(
       passwordResetRedirectUrl("https://agency-peace-of-mind.vercel.app"),
@@ -60,14 +67,20 @@ describe("resolveAuthOrigin / authRedirectUrl", () => {
     );
   });
 
-  it("rewrites a Lovable candidate to hivecertify.com", () => {
+  it("rewrites hivecertify, Lovable, and other hosts to providerinterface.com", () => {
+    assert.equal(resolveAuthOrigin("https://hivecertify.com"), PROVIDER_INTERFACE_ORIGIN);
+    assert.equal(resolveAuthOrigin("https://evil.example"), PROVIDER_INTERFACE_ORIGIN);
     assert.equal(
       resolveAuthOrigin("https://agency-peace-of-mind.lovable.app"),
-      CANONICAL_SITE_ORIGIN,
+      PROVIDER_INTERFACE_ORIGIN,
     );
     assert.equal(
       passwordResetRedirectUrl("https://id-preview.lovable.app"),
-      "https://hivecertify.com/reset-password",
+      "https://providerinterface.com/reset-password",
+    );
+    assert.equal(
+      passwordResetRedirectUrl("https://evil.example"),
+      "https://providerinterface.com/reset-password",
     );
   });
 
@@ -82,27 +95,35 @@ describe("resolveAuthOrigin / authRedirectUrl", () => {
 });
 
 describe("sanitizeAuthRedirectUrl", () => {
-  it("rewrites Lovable reset links and keeps the existing path", () => {
+  it("rewrites unsafe reset links onto providerinterface.com and keeps the path", () => {
     assert.equal(
       sanitizeAuthRedirectUrl("https://agency-peace-of-mind.lovable.app/reset-password"),
-      "https://hivecertify.com/reset-password",
+      "https://providerinterface.com/reset-password",
     );
     assert.equal(
       sanitizeAuthRedirectUrl(
         "https://preview.lovable.dev/audit-portal/set-password?packageId=abc",
       ),
-      "https://hivecertify.com/audit-portal/set-password?packageId=abc",
+      "https://providerinterface.com/audit-portal/set-password?packageId=abc",
+    );
+    assert.equal(
+      sanitizeAuthRedirectUrl("https://evil.example/reset-password"),
+      "https://providerinterface.com/reset-password",
+    );
+    assert.equal(
+      sanitizeAuthRedirectUrl("https://hivecertify.com/reset-password"),
+      "https://providerinterface.com/reset-password",
     );
   });
 
-  it("leaves hivecertify.com and Vercel URLs alone", () => {
-    assert.equal(
-      sanitizeAuthRedirectUrl("https://hivecertify.com/reset-password"),
-      "https://hivecertify.com/reset-password",
-    );
+  it("leaves the Vercel preview URL alone", () => {
     assert.equal(
       sanitizeAuthRedirectUrl("https://agency-peace-of-mind.vercel.app/reset-password"),
       "https://agency-peace-of-mind.vercel.app/reset-password",
+    );
+    assert.equal(
+      sanitizeAuthRedirectUrl("http://localhost:5173/reset-password"),
+      "http://localhost:5173/reset-password",
     );
   });
 });
@@ -122,6 +143,10 @@ describe("email links use providerinterface.com", () => {
     );
     assert.equal(
       rewriteEmailRedirectUrl("not a url", "/reset-password"),
+      "https://providerinterface.com/reset-password",
+    );
+    assert.equal(
+      rewriteEmailRedirectUrl("https://evil.example/reset-password", "/reset-password"),
       "https://providerinterface.com/reset-password",
     );
   });

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
   asSignupOrgId,
@@ -98,5 +99,12 @@ describe("signup business write gate", () => {
       false,
     );
     assert.equal(signupBusinessWriteOk(null), false);
+  });
+
+  it("signup continues only an organization the user created", () => {
+    const route = readFileSync(new URL("../routes/signup.tsx", import.meta.url), "utf8");
+    const workspace = readFileSync(new URL("./signup-workspace.functions.ts", import.meta.url), "utf8");
+    assert.doesNotMatch(route, /orgIdFromMembershipRow/);
+    assert.doesNotMatch(workspace, /\.from\("organization_members"\)\s*\.select/);
   });
 });

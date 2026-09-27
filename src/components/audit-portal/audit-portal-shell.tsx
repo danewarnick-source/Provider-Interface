@@ -5,6 +5,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut, AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { PiBrand } from "@/components/brand/pi-brand";
 import { PageShell } from "@/components/layout/page-shell";
+import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
+import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth-captcha";
 import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 import { useAuth } from "@/hooks/use-auth";
@@ -99,10 +101,19 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (authCaptchaBlocked()) {
+      setError(AUTH_CAPTCHA_REQUIRED);
+      return;
+    }
+    const captchaToken = readAuthCaptchaToken();
     setSubmitting(true);
     setError(null);
     try {
-      const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        ...(captchaToken ? { options: { captchaToken } } : {}),
+      });
       if (signInErr) throw signInErr;
       // Trigger context refetch; if not an active auditor, sign out to avoid
       // stranding an org user in the auditor shell.
@@ -111,6 +122,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
       onSignedIn();
       toast.success("Signed in");
     } catch (err) {
+      resetAuthCaptcha();
       const msg = err instanceof Error ? err.message : "Sign-in failed";
       setError(msg);
       await completeClientSignOut(() => supabase.auth.signOut(), { markSignedOut: false }).catch(() => {});
@@ -180,6 +192,7 @@ function AuditorLoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
               {error}
             </div>
           )}
+          <AuthCaptcha />
           <button
             type="submit"
             disabled={submitting}

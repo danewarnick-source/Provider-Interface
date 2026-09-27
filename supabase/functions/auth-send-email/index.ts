@@ -139,12 +139,29 @@ function isHivecertifyHost(hostname: string): boolean {
   return host === "hivecertify.com" || host.endsWith(".hivecertify.com");
 }
 
-/** User-facing auth-email links. Lovable and hivecertify.com become providerinterface.com. */
+/** Same allowlist as isSafeAuthOrigin in src/lib/auth-redirect.ts. */
+const ALLOWED_AUTH_ORIGINS = new Set([
+  "https://providerinterface.com",
+  "https://www.providerinterface.com",
+  "https://agency-peace-of-mind.vercel.app",
+]);
+
+function isDevHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return host === "localhost" || host === "127.0.0.1";
+}
+
+function isAllowedAuthOrigin(url: URL): boolean {
+  if (isDevHost(url.hostname)) return url.protocol === "http:" || url.protocol === "https:";
+  return ALLOWED_AUTH_ORIGINS.has(url.origin);
+}
+
+/** User-facing auth-email links. Anything off the allowlist, including Lovable and hivecertify.com, becomes providerinterface.com. */
 function sanitizeRedirectTo(redirectTo: string, type: EmailActionType): string {
   const fallback = `${PUBLIC_EMAIL_ORIGIN}${defaultRedirectPath(type)}`;
   try {
     const url = new URL(redirectTo);
-    if (isLovableHost(url.hostname) || isHivecertifyHost(url.hostname)) {
+    if (isLovableHost(url.hostname) || isHivecertifyHost(url.hostname) || !isAllowedAuthOrigin(url)) {
       return `${PUBLIC_EMAIL_ORIGIN}${url.pathname}${url.search}${url.hash}`;
     }
     return `${url.origin}${url.pathname}${url.search}${url.hash}`;

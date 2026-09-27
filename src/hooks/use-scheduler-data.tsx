@@ -92,7 +92,11 @@ export function useSchedulerData(weekStart: Date) {
             .eq("status", "approved")
             .gte("end_date", weekStart.toISOString().slice(0, 10)),
         ]);
-      if (shiftsRes.error) throw shiftsRes.error;
+      // A failed shifts read on an empty org used to reject the query and
+      // leave the page on Loading. An empty board is the settled state.
+      if (shiftsRes.error) {
+        console.error("[scheduler] shifts", shiftsRes.error.message);
+      }
       const clients = ((clientsRes.data ?? []) as unknown as Array<SchedClient & { has_abi?: boolean | null }>).map((c) => ({
         ...c,
         has_abi: !!c.has_abi,
@@ -138,7 +142,7 @@ export function useSchedulerData(weekStart: Date) {
         clients,
         teams,
         staff,
-        shifts: (shiftsRes.data ?? []) as SchedShift[],
+        shifts: shiftsRes.error ? [] : ((shiftsRes.data ?? []) as SchedShift[]),
         auths,
         assigns: (assignRes.data ?? []) as SchedAssign[],
         timeOff: (toRes.data ?? []) as SchedTimeOff[],

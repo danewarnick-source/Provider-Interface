@@ -418,7 +418,7 @@ export const getBillingStatusFn = createServerFn({ method: "POST" })
     const { data: sub } = await billingDb(context.supabase)
       .from("org_subscriptions")
       .select(
-        "plan, status, mrr_cents, locked_at, lock_reason, current_period_end, stripe_customer_id, stripe_subscription_id, staff_count, billing_interval",
+        "plan, status, mrr_cents, locked_at, lock_reason, current_period_end, stripe_customer_id, stripe_subscription_id, staff_count, billing_interval, trial_ends_at",
       )
       .eq("organization_id", orgId)
       .maybeSingle();
@@ -434,6 +434,7 @@ export const getBillingStatusFn = createServerFn({ method: "POST" })
             locked_at: (sub.locked_at as string | null) ?? null,
             stripe_subscription_id:
               (sub as { stripe_subscription_id?: string | null }).stripe_subscription_id ?? null,
+            trial_ends_at: (sub as { trial_ends_at?: string | null }).trial_ends_at ?? null,
           }
         : null,
     });

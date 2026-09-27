@@ -14,6 +14,8 @@ import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
+import { AUTH_CAPTCHA_REQUIRED, captchaTokenOption } from "@/lib/auth-captcha";
 import { authRedirectUrl } from "@/lib/auth-redirect";
 import { checkEmailExists, checkPasswordPwnedRange } from "@/lib/signup-checks.functions";
 import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
@@ -40,7 +42,6 @@ import {
   isSignupServerFnFailure,
   orgIdFromCreatedByRow,
   orgIdFromEnsureWorkspaceResult,
-  orgIdFromMembershipRow,
   signupBusinessOrgPatch,
   signupBusinessWriteOk,
 } from "@/lib/signup-business";
@@ -471,6 +472,8 @@ function Step1Account({
     if (!lenOk) return toast.error("Password must be at least 8 characters.");
     if (!matchOk) return toast.error("Passwords don't match.");
     if (await verifyPasswordPwned(form.password)) return;
+    if (authCaptchaBlocked()) return toast.error(AUTH_CAPTCHA_REQUIRED);
+    const captchaToken = readAuthCaptchaToken();
     setBusy(true);
     try {
       let exists = false;
@@ -502,6 +505,7 @@ function Step1Account({
         password: form.password,
         options: {
           emailRedirectTo: authRedirectUrl("/signup"),
+          ...captchaTokenOption(captchaToken),
           data: {
             full_name: form.contactName || form.email.split("@")[0],
             agency_name: form.agencyName || `${form.email.split("@")[0]}'s workspace`,
@@ -519,10 +523,12 @@ function Step1Account({
           setAccountErr(sentence);
           toast.error(sentence);
         }
+        resetAuthCaptcha();
         setBusy(false);
         return;
       }
       if (!signupHasSession(signUpData.session)) {
+        resetAuthCaptcha();
         setConfirmEmailMsg(SIGNUP_CONFIRM_EMAIL_MESSAGE);
         setBusy(false);
         return;
@@ -543,12 +549,18 @@ function Step1Account({
   };
 
   const continueAfterConfirm = async () => {
+    if (authCaptchaBlocked()) {
+      toast.error(AUTH_CAPTCHA_REQUIRED);
+      return;
+    }
+    const captchaToken = readAuthCaptchaToken();
     setAccountErr(null);
     setBusy(true);
     try {
       const { data, error } = await (supabase as any).auth.signInWithPassword({
         email: form.email,
         password: form.password,
+        ...(captchaToken ? { options: { captchaToken } } : {}),
       });
       if (error) {
         if (isSignupEmailNotConfirmedError(error)) {
@@ -560,6 +572,7 @@ function Step1Account({
         const sentence = humanizeSignupAccountError(error);
         setAccountErr(sentence);
         toast.error(sentence);
+        resetAuthCaptcha();
         setBusy(false);
         return;
       }
@@ -754,6 +767,10 @@ function Step1Account({
         </span>
       </label>
 
+      <div className="mt-4">
+        <AuthCaptcha />
+      </div>
+
       <NavButtons
         showBack={false}
         onNext={confirmEmailMsg ? continueAfterConfirm : submit}
@@ -846,23 +863,13 @@ function Step3Business({
       }
 
       let orgId: string | null = null;
-      const { data: member } = await (supabase as any)
-        .from("organization_members")
-        .select("organization_id")
-        .eq("user_id", uid)
-        .eq("active", true)
+      const { data: created } = await (supabase as any)
+        .from("organizations")
+        .select("id")
+        .eq("created_by", uid)
         .limit(1)
         .maybeSingle();
-      orgId = orgIdFromMembershipRow(member);
-      if (!orgId) {
-        const { data: created } = await (supabase as any)
-          .from("organizations")
-          .select("id")
-          .eq("created_by", uid)
-          .limit(1)
-          .maybeSingle();
-        orgId = orgIdFromCreatedByRow(created);
-      }
+      orgId = orgIdFromCreatedByRow(created);
       if (!orgId) {
         let ensured: unknown;
         try {

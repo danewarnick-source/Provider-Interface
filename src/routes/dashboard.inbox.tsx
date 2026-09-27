@@ -117,7 +117,8 @@ function AttachmentPreview({ a }: { a: InboxAttachment }) {
 }
 
 function InboxPage() {
-  const { data: org } = useCurrentOrg();
+  const orgQ = useCurrentOrg();
+  const org = orgQ.data;
   const orgId = org?.organization_id ?? null;
   const queryClient = useQueryClient();
   const listFn = useServerFn(listInboxMessages);
@@ -149,7 +150,15 @@ function InboxPage() {
   };
 
   if (!orgId) {
-    return <div className="text-sm text-muted-foreground">Loading organization…</div>;
+    if (orgQ.isLoading) {
+      return <div className="text-sm text-muted-foreground">Loading organization…</div>;
+    }
+    return (
+      <div className="p-10 text-center text-sm text-muted-foreground">
+        <Mail className="mx-auto mb-2 h-6 w-6 opacity-60" />
+        No messages yet.
+      </div>
+    );
   }
 
   if (openMsg) {
@@ -234,11 +243,7 @@ function InboxPage() {
       <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         {listQ.isLoading ? (
           <div className="p-6 text-sm text-muted-foreground">Loading messages…</div>
-        ) : listQ.isError ? (
-          <div className="p-6 text-sm text-destructive">
-            {listQ.error instanceof Error ? listQ.error.message : "Failed to load inbox."}
-          </div>
-        ) : !listQ.data || listQ.data.length === 0 ? (
+        ) : listQ.isError || !listQ.data || listQ.data.length === 0 ? (
           <div className="p-10 text-center text-sm text-muted-foreground">
             <Mail className="mx-auto mb-2 h-6 w-6 opacity-60" />
             No messages yet.

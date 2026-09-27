@@ -36,7 +36,10 @@ export function useDayProgramData(weekStart: Date) {
         .eq("organization_id", orgId!)
         .gte("session_date", startDate)
         .lt("session_date", endDate);
-      if (error) throw error;
+      if (error) {
+        console.error("[scheduler] day program", error.message);
+        return { sessions: [], sessionStaff: [], attendance: [] };
+      }
       const ids = (sessions ?? []).map((s) => s.id);
       const [staffRes, attRes] = await Promise.all([
         ids.length

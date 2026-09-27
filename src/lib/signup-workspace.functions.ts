@@ -52,16 +52,8 @@ export const ensureSignupWorkspace = createServerFn({ method: "POST" })
     const userClient = context.supabase as any;
     if (userClient) {
       try {
-        const { data: member } = await userClient
-          .from("organization_members")
-          .select("organization_id")
-          .eq("user_id", userId)
-          .eq("active", true)
-          .limit(1)
-          .maybeSingle();
-        if (typeof member?.organization_id === "string") {
-          return { ok: true, orgId: member.organization_id, reason: null };
-        }
+        // Only an org this user created. A team-member membership is not a
+        // signup workspace — joining an existing agency is invite-only.
         const { data: created } = await userClient
           .from("organizations")
           .select("id")

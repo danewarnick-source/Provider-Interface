@@ -21,11 +21,14 @@ import {
 const SignInInput = z.object({
   identifier: z.string().trim().min(1).max(120),
   password: z.string().min(1).max(200),
+  captchaToken: z.string().trim().min(1).max(2048).optional(),
 });
 
 export const signInWithUsername = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => SignInInput.parse(d))
-  .handler(async ({ data }) => performPasswordSignIn(data.identifier, data.password));
+  .handler(async ({ data }) =>
+    performPasswordSignIn(data.identifier, data.password, data.captchaToken),
+  );
 
 export const signOutAwsSession = createServerFn({ method: "POST" }).handler(async () => {
   await performAwsSignOut();

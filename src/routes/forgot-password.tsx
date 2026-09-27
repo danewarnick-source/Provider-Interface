@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
+import { AUTH_CAPTCHA_REQUIRED, captchaTokenOption } from "@/lib/auth-captcha";
 import { passwordResetRedirectUrl } from "@/lib/auth-redirect";
 import { toast } from "sonner";
 import { AuthShell } from "./login";
@@ -19,12 +21,18 @@ function ForgotPassword() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    if (authCaptchaBlocked()) return toast.error(AUTH_CAPTCHA_REQUIRED);
+    const captchaToken = readAuthCaptchaToken();
     setBusy(true);
     const { error } = await supabase.auth.resetPasswordForEmail(String(fd.get("email")), {
       redirectTo: passwordResetRedirectUrl(),
+      ...captchaTokenOption(captchaToken),
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      resetAuthCaptcha();
+      return toast.error(error.message);
+    }
     setSent(true);
     toast.success("Check your email for the reset link.");
   };
@@ -38,6 +46,7 @@ function ForgotPassword() {
       ) : (
         <form onSubmit={onSubmit} className="grid gap-4">
           <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" required /></div>
+          <AuthCaptcha />
           <button type="submit" disabled={busy} className="pi-home-btn primary" style={{ width: "100%" }}>
             {busy ? "Sending…" : "Send reset link"}
           </button>

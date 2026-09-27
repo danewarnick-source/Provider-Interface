@@ -32,6 +32,7 @@ type LockSubRow = {
   status: string | null;
   locked_at: string | null;
   stripe_subscription_id: string | null;
+  trial_ends_at: string | null;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -78,7 +79,7 @@ async function readLockOrg(db: any, orgId: string): Promise<LockOrgRow | null> {
 async function readLockSub(db: any, orgId: string): Promise<LockSubRow | null> {
   const { data: sub } = await db
     .from("org_subscriptions")
-    .select("status, locked_at, stripe_subscription_id")
+    .select("status, locked_at, stripe_subscription_id, trial_ends_at")
     .eq("organization_id", orgId)
     .maybeSingle();
   if (!sub) return null;
@@ -87,6 +88,7 @@ async function readLockSub(db: any, orgId: string): Promise<LockSubRow | null> {
     locked_at: (sub.locked_at as string | null) ?? null,
     stripe_subscription_id:
       (sub as { stripe_subscription_id?: string | null }).stripe_subscription_id ?? null,
+    trial_ends_at: (sub as { trial_ends_at?: string | null }).trial_ends_at ?? null,
   };
 }
 
@@ -158,18 +160,20 @@ export const getBillingLockFn = createServerFn({ method: "POST" })
       }
       const { data: subRows } = await context.supabase
         .from("org_subscriptions")
-        .select("organization_id, status, locked_at, stripe_subscription_id")
+        .select("organization_id, status, locked_at, stripe_subscription_id, trial_ends_at")
         .in("organization_id", needIds);
       for (const row of (subRows ?? []) as Array<{
         organization_id: string;
         status: string | null;
         locked_at: string | null;
         stripe_subscription_id?: string | null;
+        trial_ends_at?: string | null;
       }>) {
         subById.set(row.organization_id, {
           status: row.status,
           locked_at: row.locked_at,
           stripe_subscription_id: row.stripe_subscription_id ?? null,
+          trial_ends_at: row.trial_ends_at ?? null,
         });
       }
       if (readSupabaseAdminEnv()) {

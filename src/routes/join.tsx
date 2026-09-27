@@ -5,6 +5,8 @@ import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
+import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth-captcha";
 import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 import { toast } from "sonner";
@@ -119,6 +121,8 @@ function JoinPage() {
       return toast.error("Enter the password you already use to sign in.");
     }
     if (password !== confirm) return toast.error("Passwords don't match.");
+    if (authCaptchaBlocked()) return toast.error(AUTH_CAPTCHA_REQUIRED);
+    const captchaToken = readAuthCaptchaToken();
 
     setBusy(true);
     try {
@@ -140,6 +144,7 @@ function JoinPage() {
       const { error: signErr } = await supabase.auth.signInWithPassword({
         email: prepared.email,
         password,
+        ...(captchaToken ? { options: { captchaToken } } : {}),
       });
       if (signErr) throw new Error(humanizeInviteError(signErr.message));
 
@@ -149,6 +154,7 @@ function JoinPage() {
       toast.success(`You're in — welcome to ${prepared.org_name}.`);
       window.location.replace(joinHomeForLevel(prepared.level, prepared.home));
     } catch (err) {
+      resetAuthCaptcha();
       toast.error(humanizeInviteError(err));
     } finally {
       setBusy(false);
@@ -356,6 +362,7 @@ function JoinPage() {
           </p>
           <LiveLine id="join-confirm-live" testId="join-confirm-live" status={confirmLive} />
         </div>
+        <AuthCaptcha />
         <Button
           type="submit"
           disabled={!canJoin}

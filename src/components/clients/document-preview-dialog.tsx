@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { sanitizeHtml } from "@/lib/sanitize-html";
 import { Download, Loader2, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -172,7 +173,7 @@ function DocxPreview({ url }: { url: string }) {
           convertToHtml: (input: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
         };
         const result = await mammoth.convertToHtml({ arrayBuffer: buf });
-        if (alive) setState({ loading: false, html: result.value, error: null });
+        if (alive) setState({ loading: false, html: sanitizeHtml(result.value), error: null });
       } catch (e) {
         if (alive) setState({ loading: false, html: "", error: (e as Error).message });
       }

@@ -2,18 +2,17 @@
  * Where auth emails (password reset, invite, magic link, email confirm)
  * send people after they click the link.
  *
- * Browser: current page origin (hivecertify.com, the Sep 1 Vercel host,
- * localhost). Lovable preview hosts are treated as unsafe and rewritten.
- * Server / SSR: PUBLIC_SITE_URL, PUBLIC_APP_URL, SITE_URL, then Vercel
- * URL env, then https://hivecertify.com.
+ * Only these origins are accepted. Anything else, including hivecertify.com
+ * and Lovable preview hosts, is rewritten to https://providerinterface.com.
+ *   https://providerinterface.com
+ *   https://www.providerinterface.com
+ *   https://agency-peace-of-mind.vercel.app
+ *   http(s)://localhost and http(s)://127.0.0.1 (any port, for dev)
  *
  * Ops (cannot be done from this repo): in the Supabase dashboard,
  * Authentication → URL Configuration, set Site URL to
- * https://hivecertify.com and add these Additional Redirect URLs:
- *   https://hivecertify.com/**
- *   https://agency-peace-of-mind.vercel.app/**
- * If Site URL stays a Lovable domain, Supabase can ignore our redirectTo
- * and the reset email will still open Lovable.
+ * https://providerinterface.com and keep Additional Redirect URLs to
+ * that host (and www) plus https://agency-peace-of-mind.vercel.app.
  */
 
 export const CANONICAL_SITE_ORIGIN = "https://hivecertify.com";
@@ -62,11 +61,28 @@ export function normalizeOrigin(raw: string | null | undefined): string | null {
   }
 }
 
+const ALLOWED_AUTH_ORIGINS = new Set([
+  PROVIDER_INTERFACE_ORIGIN,
+  "https://www.providerinterface.com",
+  VERCEL_PREVIEW_ORIGIN,
+]);
+
+function isLocalDevHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return host === "localhost" || host === "127.0.0.1";
+}
+
+/** Exact app origins only. Any other host is an open redirect. */
 export function isSafeAuthOrigin(origin: string): boolean {
   const normalized = normalizeOrigin(origin);
   if (!normalized) return false;
   try {
-    return !isLovableAuthHost(new URL(normalized).hostname);
+    const url = new URL(normalized);
+    if (url.username || url.password) return false;
+    if (isLocalDevHost(url.hostname)) {
+      return url.protocol === "http:" || url.protocol === "https:";
+    }
+    return ALLOWED_AUTH_ORIGINS.has(url.origin);
   } catch {
     return false;
   }
@@ -110,7 +126,7 @@ export function resolveAuthOrigin(candidate?: string | null): string {
     }
   }
 
-  return envAuthOrigin() ?? CANONICAL_SITE_ORIGIN;
+  return envAuthOrigin() ?? PROVIDER_INTERFACE_ORIGIN;
 }
 
 export function authRedirectUrl(path: string, candidate?: string | null): string {
@@ -123,26 +139,20 @@ export function passwordResetRedirectUrl(candidate?: string | null): string {
 }
 
 /**
- * Origin printed in email links. hivecertify.com stays valid for in-app auth
- * redirects, and is rewritten here so a person reading mail never sees it.
+ * Origin printed in email links. Unsafe hosts, including hivecertify.com,
+ * become providerinterface.com.
  */
 export function emailLinkOrigin(candidate?: string | null): string {
-  const resolved = resolveAuthOrigin(candidate);
-  try {
-    if (isHivecertifyHost(new URL(resolved).hostname)) return PROVIDER_INTERFACE_ORIGIN;
-  } catch {
-    return PROVIDER_INTERFACE_ORIGIN;
-  }
-  return resolved;
+  return resolveAuthOrigin(candidate);
 }
 
-/** Full redirect URL embedded in an auth email. Lovable and hivecertify.com become providerinterface.com. */
+/** Full redirect URL embedded in an auth email. Unsafe hosts become providerinterface.com. */
 export function rewriteEmailRedirectUrl(url: string, fallbackPath: string = "/"): string {
   const path = fallbackPath.startsWith("/") ? fallbackPath : `/${fallbackPath}`;
   const fallback = `${PROVIDER_INTERFACE_ORIGIN}${path}`;
   try {
     const parsed = new URL(url);
-    if (isLovableAuthHost(parsed.hostname) || isHivecertifyHost(parsed.hostname)) {
+    if (!isSafeAuthOrigin(parsed.origin)) {
       return `${PROVIDER_INTERFACE_ORIGIN}${parsed.pathname}${parsed.search}${parsed.hash}`;
     }
     return `${parsed.origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
@@ -152,21 +162,22 @@ export function rewriteEmailRedirectUrl(url: string, fallbackPath: string = "/")
 }
 
 /**
- * Rewrite a full redirect URL if it points at Lovable. Keeps path, query,
- * and hash so /reset-password and /audit-portal/set-password still land
- * on the right page after the host swap.
+ * Rewrite a full redirect URL when its origin is not on the allowlist.
+ * Keeps path, query, and hash so /reset-password still lands on the right page.
  */
 export function sanitizeAuthRedirectUrl(
   url: string,
   fallbackPath: string = RESET_PASSWORD_PATH,
 ): string {
+  const path = fallbackPath.startsWith("/") ? fallbackPath : `/${fallbackPath}`;
+  const fallback = `${PROVIDER_INTERFACE_ORIGIN}${path}`;
   try {
     const parsed = new URL(url);
-    if (isLovableAuthHost(parsed.hostname)) {
-      return `${CANONICAL_SITE_ORIGIN}${parsed.pathname}${parsed.search}${parsed.hash}`;
+    if (!isSafeAuthOrigin(parsed.origin)) {
+      return `${PROVIDER_INTERFACE_ORIGIN}${parsed.pathname}${parsed.search}${parsed.hash}`;
     }
     return `${parsed.origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
   } catch {
-    return authRedirectUrl(fallbackPath);
+    return fallback;
   }
 }
