@@ -76,15 +76,38 @@ describe("signupAuthCallbackError", () => {
 });
 
 describe("Payment and lock paths use VITE_ session env", () => {
-  it("createSubscriptionCheckoutFn does not touch supabaseAdmin", () => {
+  it("createSubscriptionCheckoutFn writes org_subscriptions with the service role after the owner check", () => {
     const checkout = readFileSync(new URL("./stripe-checkout.functions.ts", import.meta.url), "utf8");
-    const start = checkout.indexOf("export const createSubscriptionCheckoutFn");
-    const end = checkout.indexOf("export const createPortalSessionFn");
-    assert.ok(start >= 0 && end > start);
-    const handler = checkout.slice(start, end);
-    assert.doesNotMatch(handler, /supabaseAdmin/);
+    const pausedStart = checkout.indexOf("async function ensurePausedSubscription");
+    const exemptStart = checkout.indexOf("async function activateExemptOrg");
+    const handlerStart = checkout.indexOf("export const createSubscriptionCheckoutFn");
+    const handlerEnd = checkout.indexOf("export const createPortalSessionFn");
+    assert.ok(pausedStart >= 0 && exemptStart > pausedStart && handlerStart > exemptStart && handlerEnd > handlerStart);
+    const paused = checkout.slice(pausedStart, exemptStart);
+    const exempt = checkout.slice(exemptStart, checkout.indexOf("/** Public — signup payment step"));
+    const handler = checkout.slice(handlerStart, handlerEnd);
+
+    assert.match(handler, /requireOrgAdmin\(db, context\.userId, data\.organizationId\)/);
     assert.match(handler, /billingDb\(context\.supabase\)/);
     assert.match(handler, /humanizeCheckoutStartError/);
+    assert.match(handler, /subscriptionAdmin\(\)/);
+
+    for (const block of [paused, exempt]) {
+      assert.match(block, /subscriptionAdmin\(\)/);
+      assert.doesNotMatch(block, /billingDb\(/);
+      assert.doesNotMatch(block, /console\.warn/);
+      assert.match(block, /\.eq\("organization_id", orgId\)/);
+      assert.match(block, /throw new Error/);
+    }
+
+    assert.doesNotMatch(handler, /(?:\bdb|billingDb\([^)]*\))\s*\.from\("org_subscriptions"\)/);
+    assert.equal(handler.match(/subs\s*\.from\("org_subscriptions"\)/g)?.length, 3);
+    assert.match(
+      handler,
+      /\.update\(\{ stripe_customer_id: customerId \}\)\s*\.eq\("organization_id", data\.organizationId\)/,
+    );
+    assert.match(handler, /if \(custErr\) throw new Error\(custErr\.message\)/);
+    assert.doesNotMatch(handler, /console\.warn/);
   });
 
   it("signup Payment toasts the humanized checkout sentence", () => {

@@ -101,6 +101,12 @@ function billingDb(client: unknown) {
   return client as any;
 }
 
+/** org_subscriptions writes bypass RLS. Call only after requireOrgAdmin. */
+function subscriptionAdmin() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return supabaseAdmin as any;
+}
+
 async function loadOrgRow(orgId: string, client: unknown): Promise<OrgBillingRow> {
   const db = billingDb(client);
   const full = await db
@@ -247,18 +253,15 @@ async function resolveOrgSchedule(
   return { schedule, foundingEndsAt };
 }
 
-async function ensurePausedSubscription(
-  orgId: string,
-  quote: HiveQuote,
-  client: unknown,
-) {
-  const db = billingDb(client);
+async function ensurePausedSubscription(orgId: string, quote: HiveQuote) {
+  const db = subscriptionAdmin();
   const nowIso = new Date().toISOString();
-  const { data: existing } = await db
+  const { data: existing, error: readErr } = await db
     .from("org_subscriptions")
     .select("id, stripe_subscription_id, status")
     .eq("organization_id", orgId)
     .maybeSingle();
+  if (readErr) throw new Error(readErr.message);
 
   const patch = {
     plan: "hive_standard" as const,
@@ -272,10 +275,12 @@ async function ensurePausedSubscription(
 
   if (existing) {
     if (existing.stripe_subscription_id && existing.status === "active") return existing;
-    const { error } = await db.from("org_subscriptions").update(patch).eq("id", existing.id);
-    if (error) {
-      console.warn("[checkout] could not pause subscription row", { code: "sub_update" });
-    }
+    const { error } = await db
+      .from("org_subscriptions")
+      .update(patch)
+      .eq("id", existing.id)
+      .eq("organization_id", orgId);
+    if (error) throw new Error(error.message);
     return existing;
   }
   const { data, error } = await db
@@ -286,28 +291,23 @@ async function ensurePausedSubscription(
     })
     .select("id")
     .single();
-  if (error) {
-    // RLS often blocks org_subscriptions writes without a service-role client.
-    // Checkout can still open; webhook/confirm writes the paid row later.
-    console.warn("[checkout] could not insert paused subscription row", { code: "sub_insert" });
-    return null;
-  }
+  if (error) throw new Error(error.message);
   return data;
 }
 
 async function activateExemptOrg(
   orgId: string,
   plan: "hive_standard" | "enterprise" = "hive_standard",
-  client: unknown,
 ) {
-  const db = billingDb(client);
+  const db = subscriptionAdmin();
   const nowIso = new Date().toISOString();
   const periodEnd = new Date(Date.now() + 365 * 86_400_000).toISOString();
-  const { data: existing } = await db
+  const { data: existing, error: readErr } = await db
     .from("org_subscriptions")
     .select("id")
     .eq("organization_id", orgId)
     .maybeSingle();
+  if (readErr) throw new Error(readErr.message);
   const patch = {
     plan,
     status: "active" as const,
@@ -322,11 +322,15 @@ async function activateExemptOrg(
     started_at: nowIso,
   };
   if (existing) {
-    const { error } = await db.from("org_subscriptions").update(patch).eq("id", existing.id);
-    if (error) console.warn("[checkout] could not activate exempt row", { code: "exempt_update" });
+    const { error } = await db
+      .from("org_subscriptions")
+      .update(patch)
+      .eq("id", existing.id)
+      .eq("organization_id", orgId);
+    if (error) throw new Error(error.message);
   } else {
     const { error } = await db.from("org_subscriptions").insert({ organization_id: orgId, ...patch });
-    if (error) console.warn("[checkout] could not insert exempt row", { code: "exempt_insert" });
+    if (error) throw new Error(error.message);
   }
 }
 
@@ -525,7 +529,7 @@ export const createSubscriptionCheckoutFn = createServerFn({ method: "POST" })
 
     const org = await loadOrgRow(data.organizationId, db);
     if (orgIsComped(org)) {
-      await activateExemptOrg(data.organizationId, "enterprise", db);
+      await activateExemptOrg(data.organizationId, "enterprise");
       return { url: null, exempt: true, error: null as string | null };
     }
 
@@ -535,11 +539,13 @@ export const createSubscriptionCheckoutFn = createServerFn({ method: "POST" })
     }
 
     const usage = await liveUsageCounts(data.organizationId, db);
-    const { data: existingSub } = await db
+    const subs = subscriptionAdmin();
+    const { data: existingSub, error: existingSubErr } = await subs
       .from("org_subscriptions")
       .select("staff_count, billing_interval")
       .eq("organization_id", data.organizationId)
       .maybeSingle();
+    if (existingSubErr) throw new Error(existingSubErr.message);
     const staffCount = clampStaffCount(
       data.staffCount ?? (existingSub as { staff_count?: number | null } | null)?.staff_count ?? usage.staff ?? 1,
     );
@@ -583,23 +589,19 @@ export const createSubscriptionCheckoutFn = createServerFn({ method: "POST" })
       ) {
         throw new Error(scheduleErr.message);
       }
-      await ensurePausedSubscription(
-        data.organizationId,
-        {
-          ...quoteHiveSubscription({
-            staffCount,
-            clientCount,
-            schedule: "list",
-            interval: "monthly",
-          }),
-          monthlyCents: quote.monthlyCents,
-          billedCents: quote.billedCents,
-          clientCount: quote.clientCount,
-          interval: "monthly",
+      await ensurePausedSubscription(data.organizationId, {
+        ...quoteHiveSubscription({
+          staffCount,
+          clientCount,
           schedule: "list",
-        },
-        db,
-      );
+          interval: "monthly",
+        }),
+        monthlyCents: quote.monthlyCents,
+        billedCents: quote.billedCents,
+        clientCount: quote.clientCount,
+        interval: "monthly",
+        schedule: "list",
+      });
     } else {
       const assigned = await resolveOrgSchedule(org, db);
       const quote = quoteHiveSubscription({
@@ -617,14 +619,15 @@ export const createSubscriptionCheckoutFn = createServerFn({ method: "POST" })
         .from("organizations")
         .update({ approx_client_count: clientCount })
         .eq("id", data.organizationId);
-      await ensurePausedSubscription(data.organizationId, quote, db);
+      await ensurePausedSubscription(data.organizationId, quote);
     }
 
-    const { data: sub } = await db
+    const { data: sub, error: subErr } = await subs
       .from("org_subscriptions")
       .select("stripe_customer_id")
       .eq("organization_id", data.organizationId)
       .maybeSingle();
+    if (subErr) throw new Error(subErr.message);
 
     const stripe = getStripe();
     let customerId = (sub as { stripe_customer_id?: string | null } | null)?.stripe_customer_id ?? null;
@@ -634,13 +637,11 @@ export const createSubscriptionCheckoutFn = createServerFn({ method: "POST" })
         metadata: { organization_id: data.organizationId },
       });
       customerId = customer.id;
-      const { error: custErr } = await db
+      const { error: custErr } = await subs
         .from("org_subscriptions")
         .update({ stripe_customer_id: customerId })
         .eq("organization_id", data.organizationId);
-      if (custErr) {
-        console.warn("[checkout] could not save Stripe customer id", { code: "cust_update" });
-      }
+      if (custErr) throw new Error(custErr.message);
     }
 
     const origin = appOriginFromRequest(getRequest());
