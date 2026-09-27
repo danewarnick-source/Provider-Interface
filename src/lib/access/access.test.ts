@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { diffOverrides, effectiveCategories, hasCategory, hasPermission } from "./can.ts";
 import { CATEGORIES, CATEGORY_IDS } from "./categories.ts";
@@ -99,6 +100,18 @@ describe("levels", () => {
     assert.equal(isAgencyAdmin("admin", "assigned"), false);
     assert.equal(isAgencyAdmin("admin", "agency"), true);
     assert.equal(isAgencyAdmin("owner", "self"), true);
+  });
+
+  it("open-shift approve and deny are limited to an owner or an agency-wide admin", () => {
+    const fn = readFileSync(new URL("../scheduling/open-shifts.functions.ts", import.meta.url), "utf8");
+    const decide = fn.slice(fn.indexOf("export const decideClaim"), fn.length);
+    assert.match(decide, /requireOrgMembership\(supabase, userId, shift\.organization_id, "admin"\)/);
+    assert.match(decide, /isAgencyAdmin\(access\.level, access\.scope\)/);
+    const panel = readFileSync(
+      new URL("../../components/scheduling/open-shifts-panel.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(panel, /mode === "admin" && pending && isAgencyAdmin/);
   });
 
   it("has explain copy for every setting a category offers", () => {

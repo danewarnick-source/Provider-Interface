@@ -6,6 +6,7 @@ import { listOpenShifts, decideClaim, claimOpenShift } from "@/lib/scheduling/op
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { useAccess } from "@/hooks/use-access";
 
 function fmtWhen(iso: string) {
   const d = new Date(iso);
@@ -13,9 +14,9 @@ function fmtWhen(iso: string) {
 }
 
 /**
- * Admin variant: open shifts in range, with Approve/Deny on pending requests.
- * Team-member variant: Request shift, which waits for an admin. It does not
- * assign the shift.
+ * Admin variant: open shifts in range. Approve/Deny only when the viewer is
+ * an owner or an agency-wide admin. Team-member variant: Request shift, which
+ * waits for that approval. It does not assign the shift.
  */
 export function OpenShiftsPanel({
   organizationId, startIso, endIso, mode, clientNames, onJumpToShift,
@@ -29,6 +30,7 @@ export function OpenShiftsPanel({
 }) {
   const qc = useQueryClient();
   const { user } = useAuth();
+  const { isAgencyAdmin } = useAccess();
   const listFn = useServerFn(listOpenShifts);
   const decideFn = useServerFn(decideClaim);
   const claimFn = useServerFn(claimOpenShift);
@@ -95,7 +97,7 @@ export function OpenShiftsPanel({
                 </div>
               </button>
               <div className="flex shrink-0 items-center gap-2">
-                {mode === "admin" && pending && (
+                {mode === "admin" && pending && isAgencyAdmin && (
                   <>
                     <Button
                       size="sm"

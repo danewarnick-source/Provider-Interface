@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { isAgencyAdmin } from "@/lib/access/levels";
 
 /**
  * Open shifts = scheduled_shifts where staff_id IS NULL and status='open'.
@@ -100,8 +101,12 @@ export const decideClaim = createServerFn({ method: "POST" })
       .eq("id", data.shiftId).maybeSingle();
     if (gErr) throw gErr;
     if (!shift) throw new Error("Shift not found");
-    // Owner or Admin of this shift's agency. A team member must not approve their own claim.
-    await requireOrgMembership(supabase, userId, shift.organization_id, "admin");
+    // is_org_admin_or_manager: owner, or an admin whose scope is the whole agency.
+    // A home-scoped admin is still an Admin, and that update is denied by RLS.
+    const access = await requireOrgMembership(supabase, userId, shift.organization_id, "admin");
+    if (!isAgencyAdmin(access.level, access.scope)) {
+      throw new Error("Only an owner or an agency-wide admin can approve or deny a shift request.");
+    }
     if (!shift.claim_requested_by) throw new Error("No pending claim on this shift");
 
     const claimant = shift.claim_requested_by;
