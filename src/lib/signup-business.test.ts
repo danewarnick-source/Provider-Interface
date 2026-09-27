@@ -103,8 +103,18 @@ describe("signup business write gate", () => {
 
   it("signup continues only an organization the user created", () => {
     const route = readFileSync(new URL("../routes/signup.tsx", import.meta.url), "utf8");
-    const workspace = readFileSync(new URL("./signup-workspace.functions.ts", import.meta.url), "utf8");
+    const workspace = readFileSync(
+      new URL("./signup-workspace.functions.ts", import.meta.url),
+      "utf8",
+    );
     assert.doesNotMatch(route, /orgIdFromMembershipRow/);
-    assert.doesNotMatch(workspace, /\.from\("organization_members"\)\s*\.select/);
+    assert.doesNotMatch(workspace, /orgIdFromMembershipRow/);
+    // Org id comes from organizations.created_by. Membership reads confirm or
+    // insert the owner on that org; they do not pick a different agency.
+    assert.match(workspace, /\.eq\("created_by", userId\)/);
+    assert.doesNotMatch(
+      workspace,
+      /\.from\("organization_members"\)[\s\S]{0,120}\.select\("organization_id"\)/,
+    );
   });
 });

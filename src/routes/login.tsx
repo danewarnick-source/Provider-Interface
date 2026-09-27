@@ -16,6 +16,7 @@ import { signInWithUsername } from "@/lib/login.functions";
 import { checkHiveExecutive } from "@/lib/hive-exec.functions";
 import { completePasswordSignIn, GENERIC_LOGIN_ERROR } from "@/lib/login-auth";
 import { trainingOnlyHomeForMeFn } from "@/lib/training-only-access.functions";
+import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
 import {
   isCompanyAdminLevel,
   persistPortalView,
@@ -91,6 +92,7 @@ function LoginPage() {
   const signIn = useServerFn(signInWithUsername);
   const execCheck = useServerFn(checkHiveExecutive);
   const trainingHomeFn = useServerFn(trainingOnlyHomeForMeFn);
+  const ensureWorkspace = useServerFn(ensureSignupWorkspace);
   const search = Route.useSearch();
   const nextPath = search.next;
   const hadSessionOnArrival = useRef<boolean | null>(null);
@@ -178,8 +180,26 @@ function LoginPage() {
             .select("id, organization_id, access_level, organizations(name, is_demo, display_acronym)")
             .eq("user_id", session.user.id)
             .eq("active", true);
-          persistPreferredOrgFromRows(memberships ?? []);
-          if (!memberships?.length) {
+          let rows = memberships ?? [];
+          if (!rows.length) {
+            // Email confirmation no longer creates the workspace. A fresh
+            // agency that signs in here (other tab or device) gets one now.
+            // Invite, manual add, and training-only are skipped inside the fn.
+            try {
+              const ensured = await ensureWorkspace({ data: {} });
+              if (ensured?.orgId) persistActiveOrgId(ensured.orgId);
+            } catch {
+              /* training-only and invite logins continue below */
+            }
+            const { data: refreshed } = await supabase
+              .from("organization_members")
+              .select("id, organization_id, access_level, organizations(name, is_demo, display_acronym)")
+              .eq("user_id", session.user.id)
+              .eq("active", true);
+            rows = refreshed ?? [];
+          }
+          persistPreferredOrgFromRows(rows);
+          if (!rows.length) {
             const home = await trainingHomeFn();
             if (home?.hasThirtyDay) target = "/training/course";
           }
@@ -192,7 +212,16 @@ function LoginPage() {
     return () => {
       cancelled = true;
     };
-  }, [loading, session, navigate, execCheck, nextPath, justSignedIn, trainingHomeFn]);
+  }, [
+    loading,
+    session,
+    navigate,
+    execCheck,
+    nextPath,
+    justSignedIn,
+    trainingHomeFn,
+    ensureWorkspace,
+  ]);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

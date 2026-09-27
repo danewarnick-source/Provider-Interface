@@ -192,6 +192,10 @@ export async function hireEmployeeInternal(
 
     if (profErr) throw new Error(profErr.message);
 
+    // The live signup trigger may have opened a personal workspace. This
+    // hire writes the real membership itself and does not need that org.
+    // After docs/SQL_HANDOFF_signup_after_confirm.sql, the trigger only
+    // inserts a profile and this update is a no-op.
     await supabaseAdmin
       .from("organization_members")
       .update({ active: false })

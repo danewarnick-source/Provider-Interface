@@ -26,7 +26,9 @@ import {
   SIGNUP_PROVISION_FAILED_MESSAGE,
   isSignupEmailNotConfirmedError,
   signupHasSession,
+  signupSubmissionIsAutomated,
 } from "@/lib/signup-workspace";
+import { persistActiveOrgId } from "@/lib/current-org";
 import {
   AUTH_PWNED_PASSWORD_MESSAGE,
   hibpRangeIncludesSha1,
@@ -307,6 +309,16 @@ function SignupPage() {
     const goIfSession = (session: unknown) => {
       if (signupHasSession(session as { access_token?: string; user?: { id?: string } } | null)) {
         setStep((s) => (s === 0 ? 1 : s));
+        // Confirmed session (this tab, or the email link on another device).
+        // Workspace create no longer happens inside signUp once the SQL handoff
+        // is applied, so provision here before they reach the business step.
+        void ensureWorkspace({ data: {} })
+          .then((ensured) => {
+            if (ensured?.orgId) persistActiveOrgId(ensured.orgId);
+          })
+          .catch(() => {
+            /* business step retries */
+          });
       }
     };
     void (async () => {
@@ -321,7 +333,7 @@ function SignupPage() {
     return () => {
       sub?.subscription?.unsubscribe?.();
     };
-  }, []);
+  }, [ensureWorkspace]);
 
   const update = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((s) => ({ ...s, [k]: v }));
@@ -407,6 +419,8 @@ function Step1Account({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const weakCheckGen = useRef(0);
+  const formMountedAt = useRef(Date.now());
+  const [companyWebsite, setCompanyWebsite] = useState("");
 
   useEffect(() => {
     if (authCallbackError) setConfirmEmailMsg(authCallbackError);
@@ -497,6 +511,21 @@ function Step1Account({
       }
       if (exists) {
         setEmailErr(SIGNUP_EMAIL_IN_USE_MESSAGE);
+        setBusy(false);
+        return;
+      }
+      // Before signUp on either auth path. supabase.auth is supabase-js, or
+      // the Cognito adapter in src/lib/aws/auth-adapter.ts when that flag is on.
+      // A hit shows the same confirm-email state and does not create a user.
+      if (
+        signupSubmissionIsAutomated({
+          honeypot: companyWebsite,
+          mountedAtMs: formMountedAt.current,
+          submittedAtMs: Date.now(),
+        })
+      ) {
+        resetAuthCaptcha();
+        setConfirmEmailMsg(SIGNUP_CONFIRM_EMAIL_MESSAGE);
         setBusy(false);
         return;
       }
@@ -618,6 +647,29 @@ function Step1Account({
         </div>
       ) : null}
       <div className="grid gap-4">
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: "-10000px",
+            top: "auto",
+            width: "1px",
+            height: "1px",
+            overflow: "hidden",
+          }}
+        >
+          <label htmlFor="company_website">Company website</label>
+          <input
+            id="company_website"
+            name="company_website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            value={companyWebsite}
+            onChange={(e) => setCompanyWebsite(e.target.value)}
+          />
+        </div>
         <Field
           label="Email address"
           hint="This is also your username — you'll sign in with this email."
@@ -852,12 +904,28 @@ function Step3Business({
         return;
       }
 
-      // Best-effort profile update — don't block on failure.
+      // Best-effort profile + auth metadata update — don't block on failure.
+      // agency_name on the auth user is what a later confirm on another
+      // device reads when this form state is gone.
+      const agencyName = form.agencyName.trim();
       try {
-        await (supabase as any).from("profiles").update({
-          full_name: form.contactName,
-          agency_name: form.agencyName,
-        }).eq("id", uid);
+        await supabase.auth.updateUser({
+          data: {
+            full_name: form.contactName.trim(),
+            agency_name: agencyName,
+          },
+        });
+      } catch {
+        /* non-blocking */
+      }
+      try {
+        await (supabase as any)
+          .from("profiles")
+          .update({
+            full_name: form.contactName,
+            agency_name: agencyName,
+          })
+          .eq("id", uid);
       } catch {
         /* non-blocking */
       }
@@ -873,7 +941,7 @@ function Step3Business({
       if (!orgId) {
         let ensured: unknown;
         try {
-          ensured = await ensureWorkspace({ data: { agencyName: form.agencyName.trim() } });
+          ensured = await ensureWorkspace({ data: { agencyName } });
         } catch (e) {
           console.warn("[signup] ensure workspace failed", e);
           toast.error(SIGNUP_BUSINESS_SAVE_ERROR_MESSAGE);
@@ -886,6 +954,14 @@ function Step3Business({
           return;
         }
         orgId = orgIdFromEnsureWorkspaceResult(ensured);
+      } else {
+        // Org may already exist from the confirm-time provision. Re-run so the
+        // owner row exists and the typed name is stored before the patch.
+        try {
+          await ensureWorkspace({ data: { agencyName } });
+        } catch {
+          /* patch below fails closed if the workspace is not writable */
+        }
       }
       if (!orgId) {
         toast.error(SIGNUP_PROVISION_FAILED_MESSAGE);
