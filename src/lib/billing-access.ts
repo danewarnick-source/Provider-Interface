@@ -13,6 +13,8 @@ export type SubscriptionGate = {
   status: string | null;
   locked_at: string | null;
   stripe_subscription_id?: string | null;
+  /** Trial end. Missing or unparseable means the trial is still active. */
+  trial_ends_at?: string | null;
 };
 
 export type BillingGateInput = {
@@ -48,9 +50,18 @@ export function isBillingExempt(
  * Missing subscription row = unpaid new agency (fail closed).
  * locked_at set = locked.
  * paused without a Stripe subscription id = waiting on first Checkout.
- * trial is not a real product state — treat as unpaid.
+ * trial stays open until trial_ends_at is in the past. No end date stays open.
  * past_due stays usable until lockAccount runs (30-day dunning).
  */
+function trialPeriodHasEnded(trialEndsAt: string | null | undefined, nowMs = Date.now()): boolean {
+  if (trialEndsAt == null) return false;
+  const raw = String(trialEndsAt).trim();
+  if (!raw) return false;
+  const end = Date.parse(raw);
+  if (Number.isNaN(end)) return false;
+  return end <= nowMs;
+}
+
 export function orgAccessIsLocked(input: BillingGateInput): boolean {
   if (isBillingExempt(input)) return false;
   const sub = input.subscription;
@@ -59,7 +70,7 @@ export function orgAccessIsLocked(input: BillingGateInput): boolean {
   const status = (sub.status ?? "").toLowerCase();
   if (status === "canceled" || status === "cancelled") return true;
   if (status === "paused" && !sub.stripe_subscription_id) return true;
-  if (status === "trial") return true;
+  if (status === "trial") return trialPeriodHasEnded(sub.trial_ends_at);
   return false;
 }
 

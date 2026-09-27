@@ -6,6 +6,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
 
 import { supabase } from "@/integrations/supabase/client";
+import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
+import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth-captcha";
 import { authRedirectUrl } from "@/lib/auth-redirect";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
@@ -197,17 +199,30 @@ function LoginPage() {
     const fd = new FormData(e.currentTarget);
     const submittedId = String(fd.get("identifier")).trim();
     const password = String(fd.get("password"));
+    if (authCaptchaBlocked()) return toast.error(AUTH_CAPTCHA_REQUIRED);
+    const captchaToken = readAuthCaptchaToken();
     setBusy(true);
 
     const result = await completePasswordSignIn(submittedId, password, {
       signInWithEmail: async (email, pw) => {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password: pw });
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password: pw,
+          ...(captchaToken ? { options: { captchaToken } } : {}),
+        });
         return {
           error: error ? { message: error.message } : null,
           user: data.user ? { id: data.user.id } : null,
         };
       },
-      signInWithUsername: async (id, pw) => signIn({ data: { identifier: id, password: pw } }),
+      signInWithUsername: async (id, pw) =>
+        signIn({
+          data: {
+            identifier: id,
+            password: pw,
+            ...(captchaToken ? { captchaToken } : {}),
+          },
+        }),
       setSession: async (tokens) => {
         const { error } = await supabase.auth.setSession(tokens);
         return { error: error ? { message: error.message } : null };
@@ -227,6 +242,7 @@ function LoginPage() {
       },
     });
     if (!result.ok) {
+      resetAuthCaptcha();
       setBusy(false);
       return toast.error(result.message || GENERIC_LOGIN_ERROR);
     }
@@ -325,6 +341,7 @@ function LoginPage() {
             Saves your email on this device. You still click Sign in.
           </p>
 
+          <AuthCaptcha />
           <button type="submit" disabled={busy} className="pi-home-btn primary" style={{ width: "100%" }}>
             {busy ? "Signing in…" : "Sign in"}
           </button>
