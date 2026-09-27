@@ -17558,6 +17558,7 @@ export type Database = {
         Args: { _organization_id: string }
         Returns: number
       }
+      audit_package_org_id: { Args: { _pkg: string }; Returns: string }
       can_access_client_phi: { Args: { _client_id: string }; Returns: boolean }
       can_access_import_job: { Args: { _job_id: string }; Returns: boolean }
       can_view_client_intake: {
@@ -18058,9 +18059,6 @@ export type Database = {
         Args: { retention?: string }
         Returns: number
       }
-      rebuild_wipe_requirements_tns_fake:
-        | { Args: never; Returns: number }
-        | { Args: { p_keep_pending?: boolean }; Returns: number }
       reject_med_change_proposal: {
         Args: { _notes: string; _proposal_id: string }
         Returns: undefined
