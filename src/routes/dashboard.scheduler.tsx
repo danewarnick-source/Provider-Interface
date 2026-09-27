@@ -40,6 +40,7 @@ import {
 import { isClockableServiceCode } from "@/lib/service-billing";
 import { evvServiceLabel } from "@/lib/evv-codes";
 import { RequestsPanel } from "@/components/schedule-preview/requests-panel";
+import { OpenShiftsPanel } from "@/components/scheduling/open-shifts-panel";
 import { NectarBar } from "@/components/scheduler/nectar-bar";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { createRecurringShifts } from "@/lib/scheduler/repeat.functions";
@@ -316,6 +317,29 @@ function SchedulerBody({
           weekStart={startOfWeek(anchor)}
           staff={data.staff.map((s) => ({ id: s.id, name: s.name }))}
         />
+        {orgId && (
+          <OpenShiftsPanel
+            organizationId={orgId}
+            startIso={(view === "month" ? startOfMonth(anchor) : startOfWeek(anchor)).toISOString()}
+            endIso={(() => {
+              const from = view === "month" ? startOfMonth(anchor) : startOfWeek(anchor);
+              const to = new Date(from);
+              if (view === "month") to.setMonth(to.getMonth() + 1);
+              else to.setDate(to.getDate() + 7);
+              return to.toISOString();
+            })()}
+            mode="admin"
+            clientNames={
+              new Map(
+                data.clients.map((c) => [
+                  c.id,
+                  `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "Client",
+                ]),
+              )
+            }
+            onJumpToShift={(id) => setDetailShiftId(id)}
+          />
+        )}
 
         {/* Legend */}
         <div className="flex items-center gap-3 text-xs text-muted-foreground px-1">
