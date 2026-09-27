@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireOrgMembership } from "@/integrations/supabase/require-org";
 
 /**
  * Open shifts = scheduled_shifts where staff_id IS NULL and status='open'.
@@ -92,6 +93,8 @@ export const decideClaim = createServerFn({ method: "POST" })
       .eq("id", data.shiftId).maybeSingle();
     if (gErr) throw gErr;
     if (!shift) throw new Error("Shift not found");
+    // Owner or Admin of this shift's agency. A team member must not approve their own claim.
+    await requireOrgMembership(supabase, userId, shift.organization_id, "admin");
     if (!shift.claim_requested_by) throw new Error("No pending claim on this shift");
 
     const claimant = shift.claim_requested_by;
