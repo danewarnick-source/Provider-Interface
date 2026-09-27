@@ -7,6 +7,7 @@ import {
   extractEmailAddress,
   formatFromHeader,
   managedFromAddress,
+  pickReplyTo,
   stripFakeDisplayLabel,
 } from "./managed-from.ts";
 
@@ -90,6 +91,26 @@ describe("formatFromHeader", () => {
       formatFromHeader("True North Supports (FAKE)", DEFAULT_MANAGED_FROM_ADDRESS),
       /\(FAKE\)/i,
     );
+  });
+});
+
+describe("pickReplyTo", () => {
+  it("uses the org setting when it is a real mailbox", () => {
+    assert.equal(
+      pickReplyTo("billing@agency.example", "admin@agency.example"),
+      "billing@agency.example",
+    );
+  });
+
+  it("falls back to the inviting person's email", () => {
+    assert.equal(pickReplyTo("  ", "admin@agency.example"), "admin@agency.example");
+    assert.equal(pickReplyTo(null, " admin@agency.example "), "admin@agency.example");
+  });
+
+  it("returns null when neither address is usable", () => {
+    assert.equal(pickReplyTo(null, null), null);
+    assert.equal(pickReplyTo("", "not-an-email"), null);
+    assert.equal(pickReplyTo("missing-at", undefined), null);
   });
 });
 

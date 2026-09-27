@@ -1538,7 +1538,7 @@ Rules: 6–16 fields total. Use real interactive types — never a blank text bo
         model: "bedrock",
         messages: [{ role: "system", content: system }, { role: "user", content: data.description }],
         response_format: { type: "json_object" },
-      });
+      }, { orgId: m.organization_id });
     if (res.status === 429) throw new Error("AI rate limit reached. Please retry in a moment.");
     if (res.status === 402) throw new Error("AI workspace credits exhausted.");
     if (!res.ok) throw new Error(`Nectar draft failed (${res.status}).`);
@@ -1641,7 +1641,7 @@ Quality rules:
           ] },
         ],
         response_format: { type: "json_object" },
-      });
+      }, { orgId: m.organization_id });
     if (res.status === 429) throw new Error("AI rate limit reached. Please retry in a moment.");
     if (res.status === 402) throw new Error("AI workspace credits exhausted.");
     if (!res.ok) {
@@ -1713,7 +1713,7 @@ Total questions: ${data.fields.length}`;
         model: "bedrock",
         messages: [{ role: "system", content: system }, { role: "user", content: userMsg }],
         response_format: { type: "json_object" },
-      });
+      }, { orgId: m.organization_id });
     if (!res.ok) throw new Error(`Nectar notification draft failed (${res.status}).`);
     const json = await res.json() as { choices?: { message?: { content?: string } }[] };
     const raw = json.choices?.[0]?.message?.content ?? "{}";
@@ -1779,7 +1779,7 @@ Rules: propose only based on the purpose text and field labels. Never invent. If
         model: "bedrock",
         messages: [{ role: "system", content: system }, { role: "user", content: userMsg }],
         response_format: { type: "json_object" },
-      });
+      }, { orgId: m.organization_id });
     if (res.status === 429) throw new Error("AI rate limit reached. Please retry in a moment.");
     if (res.status === 402) throw new Error("AI workspace credits exhausted.");
     if (!res.ok) throw new Error(`Nectar routing proposal failed (${res.status}).`);

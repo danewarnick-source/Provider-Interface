@@ -72,5 +72,23 @@ export function formatFromHeader(displayName: string, address = managedFromAddre
   return `${name} <${address}>`;
 }
 
+const REPLY_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Reply-To for a transactional send. The org's Settings address wins.
+ * Otherwise the acting person's email. Otherwise null — the send still goes
+ * out, with no Reply-To header.
+ */
+export function pickReplyTo(
+  configured: string | null | undefined,
+  fallback: string | null | undefined,
+): string | null {
+  for (const candidate of [configured, fallback]) {
+    const value = String(candidate ?? "").trim();
+    if (value && value.length <= 320 && REPLY_EMAIL.test(value)) return value;
+  }
+  return null;
+}
+
 /** @deprecated Use managedFromAddress() so RESEND_FROM is honored at send time. */
 export const HIVE_MANAGED_FROM_ADDRESS = DEFAULT_MANAGED_FROM_ADDRESS;

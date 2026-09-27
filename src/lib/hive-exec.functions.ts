@@ -656,22 +656,28 @@ export const upsertSubscription = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: false };
     await ensureExecutive(supabase, userId);
 
-    const { data: existing } = await supabase
+    // Subscription rows are written with the service role after the exec check,
+    // so the write does not depend on an executive RLS policy.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const admin = supabaseAdmin as any;
+    const { data: existing, error: readErr } = await admin
       .from("org_subscriptions")
       .select("id")
       .eq("organization_id", data.organizationId)
       .maybeSingle();
+    if (readErr) throw readErr;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const patchAny = data.patch as any;
     if (existing) {
-      const { error } = await supabase
+      const { error } = await admin
         .from("org_subscriptions")
         .update(patchAny)
         .eq("id", existing.id);
       if (error) throw error;
     } else {
-      const { error } = await supabase.from("org_subscriptions").insert({
+      const { error } = await admin.from("org_subscriptions").insert({
         organization_id: data.organizationId,
         ...patchAny,
       });

@@ -40,9 +40,12 @@ function validateBackfill(input: unknown): BackfillInput {
   return { organizationId, limit };
 }
 
-async function embed(text: string): Promise<number[]> {
+async function embed(text: string, orgId?: string | null): Promise<number[]> {
   assertBedrockConfigured();
-  const res = await gatewayEmbeddingsFetch({ model: EMBED_MODEL, input: text.slice(0, 8000), dimensions: EMBED_DIMS });
+  const res = await gatewayEmbeddingsFetch(
+    { model: EMBED_MODEL, input: text.slice(0, 8000), dimensions: EMBED_DIMS },
+    { orgId },
+  );
   if (res.status === 429) throw new Error("AI rate limit reached. Please retry shortly.");
   if (res.status === 402) throw new Error("AI workspace credits exhausted.");
   if (!res.ok) throw new Error(`Embedding error (${res.status}).`);
@@ -64,7 +67,7 @@ type RouterResult = {
   requires_semantic: boolean;
 };
 
-async function routeQueryWithLLM(query: string): Promise<RouterResult> {
+async function routeQueryWithLLM(query: string, orgId?: string | null): Promise<RouterResult> {
   assertBedrockConfigured();
   const today = new Date().toISOString().slice(0, 10);
 
@@ -87,7 +90,7 @@ Return ONLY the JSON object, nothing else.`;
         { role: "system", content: system },
         { role: "user", content: query },
       ],
-    });
+    }, { orgId });
   if (res.status === 429) throw new Error("AI rate limit reached. Please retry shortly.");
   if (res.status === 402) throw new Error("AI workspace credits exhausted.");
   if (!res.ok) throw new Error(`Router error (${res.status}).`);
@@ -163,11 +166,11 @@ export const searchTimesheetsByVector = createServerFn({ method: "POST" })
         } as RouterResult,
       };
     await requireOrgMembership(context.supabase, context.userId, data.organizationId, "staff");
-    const route = await routeQueryWithLLM(data.query);
+    const route = await routeQueryWithLLM(data.query, data.organizationId);
 
     let vecLiteral: string | null = null;
     if (route.requires_semantic) {
-      const vec = await embed(data.query);
+      const vec = await embed(data.query, data.organizationId);
       vecLiteral = `[${vec.join(",")}]`;
     }
 
@@ -225,7 +228,7 @@ export const backfillTimesheetEmbeddings = createServerFn({ method: "POST" })
     for (const row of list) {
       const corpus = buildShiftCorpus(row);
       try {
-        const vec = await embed(corpus);
+        const vec = await embed(corpus, data.organizationId);
         const literal = `[${vec.join(",")}]`;
         const { error: upErr } = await context.supabase
           .from("evv_timesheets")

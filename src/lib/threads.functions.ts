@@ -65,10 +65,15 @@ async function sendAskEmail(input: {
   supabase: SupabaseClient<Database> | SupabaseClient;
   organizationId: string;
   to: string;
+  fallbackReplyTo?: string | null;
 }): Promise<{ ok: boolean }> {
   try {
     const copy = phiSafeAskNotify({ channel: "email" });
-    const sender = await resolveOrgSender(input.supabase, input.organizationId);
+    const sender = await resolveOrgSender(
+      input.supabase,
+      input.organizationId,
+      input.fallbackReplyTo,
+    );
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabaseAdmin as any).functions.invoke("send-email", {
@@ -77,7 +82,7 @@ async function sendAskEmail(input: {
         to: input.to,
         subject: copy.subject ?? copy.title,
         text: copy.body,
-        reply_to: sender.reply_to,
+        ...(sender.reply_to ? { reply_to: sender.reply_to } : {}),
       },
     });
     return { ok: !error };
@@ -309,11 +314,17 @@ export const askStaffOnTimesheet = createServerFn({ method: "POST" })
       .select("email, phone")
       .eq("id", sheet.staff_id)
       .maybeSingle();
+    const { data: asker } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", userId)
+      .maybeSingle();
     if (profile?.email) {
       await sendAskEmail({
         supabase,
         organizationId: data.organizationId,
         to: profile.email,
+        fallbackReplyTo: asker?.email ?? context.claims?.email ?? null,
       });
     }
     await sendAskSms(profile?.phone ?? null);

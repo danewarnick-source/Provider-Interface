@@ -177,6 +177,7 @@ async function aiPropose(
   reqDescription: string | null,
   citation: string | null,
   facts: OrgEntityFacts,
+  orgId?: string | null,
 ) {
   // AI credentials are validated inside the Bedrock adapter (fails loudly).
   const userBody = `REQUIREMENT TITLE: ${reqTitle}
@@ -202,6 +203,7 @@ PROVIDER ENTITIES:
         { role: "user", content: userBody },
       ],
       response_format: { type: "json_object" },
+      orgId,
     });
   } catch (e) {
     if (e instanceof BedrockError) {
@@ -262,6 +264,7 @@ export const proposeRequirementMappings = createServerFn({ method: "POST" })
       (req.description as string | null) ?? null,
       (req.source_citation as string | null) ?? null,
       facts,
+      req.organization_id as string,
     );
 
     // Normalize + filter: drop code/role scopes whose value isn't in the live set.
@@ -710,6 +713,7 @@ export const prefillRequirementMappings = createServerFn({ method: "POST" })
             req.description,
             req.source_citation,
             facts,
+            req.organization_id,
           );
 
           processed += 1;

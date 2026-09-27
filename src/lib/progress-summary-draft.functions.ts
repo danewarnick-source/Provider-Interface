@@ -20,7 +20,7 @@ import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
  * are listed separately for human review — Nectar must not invent a job code.
  */
 
-async function callAI(system: string, user: string): Promise<string> {
+async function callAI(system: string, user: string, orgId?: string | null): Promise<string> {
   assertBedrockConfigured();
   const res = await gatewayFetch({
     model: "bedrock",
@@ -29,7 +29,7 @@ async function callAI(system: string, user: string): Promise<string> {
       { role: "user", content: user },
     ],
     response_format: { type: "json_object" },
-  });
+  }, { orgId });
   if (res.status === 429) throw new Error("AI rate limit reached. Please retry in a moment.");
   if (res.status === 402) throw new Error("AI workspace credits exhausted. Please add credits.");
   if (!res.ok) throw new Error(`AI error (${res.status}).`);
@@ -359,7 +359,7 @@ ${formatReports(untaggedReports, "(none)")}
 INCIDENTS IN PERIOD (${incidentList.length}):
 ${incidentsBlock}`;
 
-    const raw = await callAI(system, user);
+    const raw = await callAI(system, user, data.organizationId);
     let parsed: { draft?: unknown } = {};
     try { parsed = JSON.parse(raw); } catch {
       const m = raw.match(/\{[\s\S]*\}/);

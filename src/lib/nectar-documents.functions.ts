@@ -63,8 +63,8 @@ function decodeBase64Text(base64: string): string {
 // uploader share one path. Field-key names match what
 // applyExtractedFieldsToClient consumes.
 
-async function callLovableAI(documentText: string, hint?: string) {
-  return parseDocumentWithAI(documentText, hint);
+async function callLovableAI(documentText: string, hint?: string, orgId?: string | null) {
+  return parseDocumentWithAI(documentText, hint, orgId);
 }
 
 // Client autofill logic lives in src/lib/client-import-schema.ts so both
@@ -193,7 +193,7 @@ export const ingestDocument = createServerFn({ method: "POST" })
         return { document: doc, extracted: [] as Array<{ field_key: string }> };
       }
 
-      const ai = await callLovableAI(text, `documentType=${data.documentType}`);
+      const ai = await callLovableAI(text, `documentType=${data.documentType}`, data.organizationId);
       const rows = (ai.fields ?? []).map((f) => {
         // Fold value_bool / value_array into value_json so they persist (the
         // table has no boolean/array columns).

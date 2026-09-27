@@ -1,4 +1,4 @@
-// Setup tools + Nectar drafting + open-shift conflict check.
+// Setup tools + Nectar drafting.
 // All writes go through requireSupabaseAuth so RLS enforces tenant scope.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -328,96 +328,6 @@ export const removeStaffFromClientCode = createServerFn({ method: "POST" })
   });
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Open shift — staff "take" with conflict pre-check.
-// Sets staff_id + status='accepted' atomically when no conflict; otherwise
-// throws a friendly error the UI surfaces as a pop-up.
-// ──────────────────────────────────────────────────────────────────────────────
-export const takeOpenShift = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { shift_id: string }) => z.object({ shift_id: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { ok: false };
-
-    const { data: shift, error: sErr } = await supabase
-      .from("scheduled_shifts")
-      .select("id, organization_id, staff_id, client_id, starts_at, ends_at, service_code, status")
-      .eq("id", data.shift_id)
-      .maybeSingle();
-    if (sErr) throw sErr;
-    if (!shift) throw new Error("Shift no longer available.");
-    if (shift.staff_id) throw new Error("Someone already took this shift.");
-    if (!["open", "pending"].includes(shift.status))
-      throw new Error("This shift isn't open anymore.");
-
-    // Caseload check
-    const { data: assign } = await supabase
-      .from("staff_assignments")
-      .select("id")
-      .eq("organization_id", shift.organization_id)
-      .eq("staff_id", userId)
-      .eq("client_id", shift.client_id)
-      .maybeSingle();
-    if (!assign) throw new Error("This client isn't on your caseload.");
-
-    // Time-off check
-    const day = (shift.starts_at as string).slice(0, 10);
-    const { data: off } = await supabase
-      .from("time_off_requests")
-      .select("id")
-      .eq("organization_id", shift.organization_id)
-      .eq("staff_id", userId)
-      .eq("status", "approved")
-      .lte("start_date", day)
-      .gte("end_date", day)
-      .maybeSingle();
-    if (off) throw new Error("You're marked off that day.");
-
-    // Conflict check — any of your other shifts overlap this window?
-    const { data: conflicts, error: cErr } = await supabase
-      .from("scheduled_shifts")
-      .select("id, starts_at, ends_at, service_code")
-      .eq("organization_id", shift.organization_id)
-      .eq("staff_id", userId)
-      .lt("starts_at", shift.ends_at)
-      .gt("ends_at", shift.starts_at);
-    if (cErr) throw cErr;
-    if ((conflicts ?? []).length > 0) {
-      const c = conflicts![0] as {
-        starts_at: string;
-        ends_at: string;
-        service_code: string | null;
-      };
-      const when = `${new Date(c.starts_at).toLocaleString(undefined, {
-        weekday: "short",
-        hour: "numeric",
-        minute: "2-digit",
-      })}–${new Date(c.ends_at).toLocaleTimeString(undefined, {
-        hour: "numeric",
-        minute: "2-digit",
-      })}`;
-      throw new Error(
-        `Can't take this shift — it conflicts with your ${c.service_code ?? "shift"} on ${when}.`,
-      );
-    }
-
-    const { error: uErr } = await supabase
-      .from("scheduled_shifts")
-      .update({
-        staff_id: userId,
-        status: "accepted",
-        claim_requested_by: null,
-        published: true,
-      })
-      .eq("id", data.shift_id)
-      .is("staff_id", null);
-    if (uErr) throw uErr;
-
-    return { ok: true };
-  });
-
-// ──────────────────────────────────────────────────────────────────────────────
 // Nectar — draft shifts from a free-text prompt.
 // Resolves names → real ids from this org's records. Unknown names/codes
 // come back as flagged drafts the admin fixes before publishing.
@@ -527,7 +437,7 @@ SERVICE CODES: ["SLH","SLN","COM","PAC","RP2","RP4","RP5","HHS","RHS","DSI","DSG
         { role: "user", content: data.prompt },
       ],
       response_format: { type: "json_object" },
-    });
+    }, { orgId: data.organization_id });
     if (!aiRes.ok) {
       const txt = await aiRes.text().catch(() => "");
       if (aiRes.status === 429) throw new Error("Nectar is rate-limited — try again shortly.");

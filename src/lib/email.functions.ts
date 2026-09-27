@@ -10,7 +10,8 @@
 // Two modes exist in org_email_settings.send_mode:
 //   - 'hive_managed' (default, active): sends from managedFromAddress()
 //     (RESEND_FROM / EMAIL_FROM, else noreply@providerinterface.com)
-//     with the org's display name and org-configured reply-to. Zero DNS setup.
+//     with the org's display name. Reply-To is the org setting, then the
+//     sender's own email, then omitted. Zero DNS setup.
 //   - 'own_domain' (deferred, not built yet): would send from the org's own
 //     verified domain. updateOrgEmailSettings rejects this mode for now.
 //
@@ -27,6 +28,7 @@ import {
   DEFAULT_MANAGED_FROM_NAME,
   formatFromHeader,
   managedFromAddress,
+  pickReplyTo,
   stripFakeDisplayLabel,
 } from "@/lib/managed-from";
 
@@ -36,20 +38,22 @@ const ORG_ID = z.string().uuid();
 
 export type ResolvedSender = {
   from: string; // "Display Name <address>"
-  reply_to: string; // Non-empty; enforced by resolveOrgSender
+  /** Null when neither the org nor the fallback address is a usable mailbox. */
+  reply_to: string | null;
   send_mode: "hive_managed";
 };
 
 /** Server-only helper. Loads org email settings + org name, composes the From
- *  header, and returns the reply-to address. Throws with a UI-friendly message
- *  when reply-to is missing (Mode 1 requires it so recipient replies actually
- *  reach the provider, not the shared sending domain). Any server fn /
- *  .server helper that sends email MUST go through this so all rails stay
- *  consistent when the From mailbox is swapped via RESEND_FROM. */
+ *  header, and returns the reply-to address. From stays the platform mailbox.
+ *  Reply-To is the org setting, then fallbackReplyTo (the person sending),
+ *  then omitted so the message still goes out. Any server fn / .server helper
+ *  that sends email MUST go through this so all rails stay consistent when
+ *  the From mailbox is swapped via RESEND_FROM. */
 export async function resolveOrgSender(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   organizationId: string,
+  fallbackReplyTo?: string | null,
 ): Promise<ResolvedSender> {
   const { data: settings, error: sErr } = await supabase
     .from("org_email_settings")
@@ -72,16 +76,10 @@ export async function resolveOrgSender(
 
   const displayName =
     String(settings?.from_name || "").trim() || orgName || DEFAULT_MANAGED_FROM_NAME;
-  const replyTo = String(settings?.reply_to || "").trim();
-  if (!replyTo) {
-    throw new Error(
-      "No reply-to address configured. Set one in Settings → Email so recipients can reply to your organization.",
-    );
-  }
 
   return {
     from: formatFromHeader(displayName),
-    reply_to: replyTo,
+    reply_to: pickReplyTo(settings?.reply_to, fallbackReplyTo),
     send_mode: "hive_managed",
   };
 }
@@ -218,7 +216,19 @@ export const sendEmail = createServerFn({ method: "POST" })
       "send_emails",
     );
 
-    const sender = await resolveOrgSender(supabase, data.organization_id);
+    const claimEmail =
+      context.claims && typeof context.claims.email === "string" ? context.claims.email : null;
+    let fallbackReplyTo = pickReplyTo(null, claimEmail);
+    if (!fallbackReplyTo) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", userId)
+        .maybeSingle();
+      fallbackReplyTo = pickReplyTo(null, profile?.email ?? null);
+    }
+    const sender = await resolveOrgSender(supabase, data.organization_id, fallbackReplyTo);
+    const replyTo = data.reply_to ?? sender.reply_to;
 
     if (data.forceFail) {
       return { ok: false as const, error: "Forced failure (verification path)" };
@@ -237,10 +247,9 @@ export const sendEmail = createServerFn({ method: "POST" })
           text: data.text,
           cc: data.cc,
           bcc: data.bcc,
-          // Per-call reply_to wins over org-level; org-level is always
-          // present (resolveOrgSender enforces it) so recipients can always
-          // reply back to a real inbox — never into the shared From mailbox.
-          reply_to: data.reply_to ?? sender.reply_to,
+          // Per-call reply_to wins. Org settings, then the sender's own
+          // email. Omit the header when neither is available.
+          ...(replyTo ? { reply_to: replyTo } : {}),
         },
       },
     );

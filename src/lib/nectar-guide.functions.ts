@@ -58,13 +58,13 @@ function parseGuideJson(raw: string): Record<string, unknown> {
   return {};
 }
 
-async function callAi(messages: Array<{ role: string; content: string }>) {
+async function callAi(messages: Array<{ role: string; content: string }>, orgId?: string | null) {
   assertBedrockConfigured();
   const res = await gatewayFetch({
       model: "bedrock",
       messages,
       response_format: { type: "json_object" },
-    });
+    }, { orgId });
   if (res.status === 429) throw new Error("NECTAR is busy — please try again in a moment.");
   if (res.status === 402) throw new Error("AI credits exhausted for this workspace.");
   if (!res.ok) throw new Error(`AI error ${res.status}`);
@@ -131,7 +131,7 @@ Respond as strict JSON:
     const out = await callAi([
       { role: "system", content: system },
       { role: "user", content: `Role: ${audience.role}\nSurface: ${audience.surface}\nGoal: ${data.goal}` },
-    ]) as { summary?: string; tasks?: Array<{ title?: string; why?: string; steps?: Array<{ anchor?: string; instruction?: string }> }> };
+    ], data.orgId) as { summary?: string; tasks?: Array<{ title?: string; why?: string; steps?: Array<{ anchor?: string; instruction?: string }> }> };
 
     const allowed = (id: string) => {
       const a = findAnchor(id);
