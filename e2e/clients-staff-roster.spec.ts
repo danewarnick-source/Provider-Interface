@@ -126,7 +126,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     });
     await expect(page.getByRole("button", { name: /^Active$/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /^Inactive$/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Add several at once/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Import team members/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /Smart Import/i })).toHaveCount(0);
     await expect(page.getByRole("link", { name: /Import CSV/i })).toHaveCount(0);
     await expect(rosterName(page, "Jake Probert")).toBeVisible();
@@ -379,7 +379,7 @@ test.describe("Employees flatten and Clients placements", () => {
   });
 });
 
-test.describe("Add several at once and Finish setup", () => {
+test.describe("Import team members and Finish setup", () => {
   test.beforeEach(async ({ page }) => {
     await installHiveMocks(page, { persona: "admin", needsSetupUserId: STAFF.jake.id });
   });
@@ -401,9 +401,9 @@ test.describe("Add several at once and Finish setup", () => {
     await mobileChip.scrollIntoViewIfNeeded();
     await shot(page, "needs_setup_roster_mobile");
 
-    await page.getByRole("button", { name: /Add several at once/i }).scrollIntoViewIfNeeded();
-    await page.getByRole("button", { name: /Add several at once/i }).click();
-    await expect(page.getByRole("heading", { name: /Add several at once/i })).toBeVisible();
+    await page.getByRole("button", { name: /Import team members/i }).scrollIntoViewIfNeeded();
+    await page.getByRole("button", { name: /Import team members/i }).click();
+    await expect(page.getByRole("heading", { name: /Import team members/i })).toBeVisible();
     await expect(page.getByText(/lands on the roster as Needs setup/i)).toBeVisible();
     await shot(page, "add_several_dialog_mobile");
 
@@ -486,7 +486,7 @@ test.describe("Access levels screenshots", () => {
     await shot(page, "access-presets", true);
 
     await gotoAdmin(page, "/dashboard/hub/employees");
-    await page.getByRole("button", { name: /Add several at once/i }).click();
+    await page.getByRole("button", { name: /Import team members/i }).click();
     await page.locator("#roster-paste").fill(
       "Sam Rivera, sam.rivera@example.test, 555-0100, 2026-07-01, Direct Support, Team member\n",
     );
