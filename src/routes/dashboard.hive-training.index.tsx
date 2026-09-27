@@ -9,20 +9,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch";
 import {
-  GraduationCap, Users, Loader2,
-  AlertTriangle, Sparkles, Clock,
-  Repeat, CreditCard, CheckCircle2,
-} from "lucide-react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { GraduationCap, Users, Loader2, AlertTriangle, Sparkles, Clock } from "lucide-react";
 import { z } from "zod";
 import { useEntitlements } from "@/hooks/use-entitlements";
-import { createTrainingCheckoutFn, confirmCheckoutSessionFn } from "@/lib/stripe-checkout.functions";
-import { ClassRosterDialog, type RosterMemberOption } from "@/components/training/class-roster-form";
+import {
+  createTrainingCheckoutFn,
+  confirmCheckoutSessionFn,
+} from "@/lib/stripe-checkout.functions";
+import {
+  ClassRosterDialog,
+  type RosterMemberOption,
+} from "@/components/training/class-roster-form";
 import { formatUsdFromCents, trainingPriceCentsForSku } from "@/lib/hive-pricing";
 import { isBillingExempt } from "@/lib/billing-access";
 import { getBillingStatusFn } from "@/lib/stripe-checkout.functions";
@@ -35,12 +47,13 @@ import { useFeatureEnabled } from "@/hooks/use-feature-enabled";
 import { FeatureLockedRoute } from "@/components/upgrade-gate";
 import { isAdminLevel } from "@/lib/access/levels";
 
-const searchSchema = z.object({
-  checkout: z.enum(["success", "cancelled"]).optional(),
-  session_id: z.string().optional(),
-  card: z.enum(["saved", "cancelled"]).optional(),
-  tab: z.enum(["classes", "internal"]).optional(),
-}).partial();
+const searchSchema = z
+  .object({
+    checkout: z.enum(["success", "cancelled"]).optional(),
+    session_id: z.string().optional(),
+    tab: z.enum(["classes", "internal"]).optional(),
+  })
+  .partial();
 
 export const Route = createFileRoute("/dashboard/hive-training/")({
   component: HiveTrainingHub,
@@ -91,13 +104,13 @@ function HiveTrainingHub() {
         confirmFn({ data: { sessionId } }).catch(() => undefined);
       }
     } else if (search.checkout === "cancelled") toast.info("Checkout cancelled.");
-    if (search.card === "saved") toast.success("Card saved. Auto-renew is ready to go.");
-    else if (search.card === "cancelled") toast.info("Card setup cancelled.");
-  }, [search.checkout, search.card]);
+  }, [search.checkout]);
 
   if (!org || !hydrated || entLoading) {
     return (
-      <div className="p-6 flex justify-center"><Loader2 className="h-5 w-5 animate-spin" /></div>
+      <div className="p-6 flex justify-center">
+        <Loader2 className="h-5 w-5 animate-spin" />
+      </div>
     );
   }
 
@@ -110,11 +123,11 @@ function HiveTrainingHub() {
     });
   };
 
-  const classRosterLocked = !featureOn
-    ? <FeatureLockedRoute featureKey="hive_training" />
-    : !hasAddon("hive_training")
-      ? <FeatureLocked featureName="Training" />
-      : null;
+  const classRosterLocked = !featureOn ? (
+    <FeatureLockedRoute featureKey="hive_training" />
+  ) : !hasAddon("hive_training") ? (
+    <FeatureLocked featureName="Training" />
+  ) : null;
 
   return (
     <div className="mx-auto max-w-6xl p-4 md:p-6 space-y-6" data-testid="hive-training-hub">
@@ -141,7 +154,10 @@ function HiveTrainingHub() {
 
       {isAdmin ? (
         <>
-          <div className="inline-flex rounded-lg border bg-card p-1 text-sm" data-testid="training-subnav">
+          <div
+            className="inline-flex rounded-lg border bg-card p-1 text-sm"
+            data-testid="training-subnav"
+          >
             <button
               type="button"
               data-testid="training-subtab-classes"
@@ -159,9 +175,11 @@ function HiveTrainingHub() {
               Internal trainings
             </button>
           </div>
-          {tab === "internal"
-            ? <InternalTrainingsPanel orgId={org.organization_id} />
-            : (classRosterLocked ?? <AdminView orgId={org.organization_id} />)}
+          {tab === "internal" ? (
+            <InternalTrainingsPanel orgId={org.organization_id} />
+          ) : (
+            (classRosterLocked ?? <AdminView orgId={org.organization_id} />)
+          )}
         </>
       ) : (
         <StaffView />
@@ -169,7 +187,6 @@ function HiveTrainingHub() {
     </div>
   );
 }
-
 
 // ============================================================
 // STAFF VIEW — mobile-first, no buying surface
@@ -221,6 +238,8 @@ function AdminView({ orgId }: { orgId: string }) {
   const { data: members } = useQuery({
     queryKey: ["ht-members", orgId],
     queryFn: async () => {
+      // Types lag organization_members; the row is narrowed below.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: mems } = await (supabase as any)
         .from("organization_members")
         .select("user_id")
@@ -228,23 +247,30 @@ function AdminView({ orgId }: { orgId: string }) {
         .eq("active", true);
       const ids = ((mems ?? []) as Array<{ user_id: string }>).map((m) => m.user_id);
       if (!ids.length) return [] as Member[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: profs } = await (supabase as any)
         .from("org_member_directory")
         .select("id, full_name, email, username")
         .in("id", ids);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: phones } = await (supabase as any)
         .from("profiles")
         .select("id, phone")
         .in("id", ids);
       const phoneById = new Map(
-        ((phones ?? []) as Array<{ id: string; phone?: string | null }>).map((p) => [p.id, p.phone ?? null]),
+        ((phones ?? []) as Array<{ id: string; phone?: string | null }>).map((p) => [
+          p.id,
+          p.phone ?? null,
+        ]),
       );
-      return ((profs ?? []) as Array<{
-        id: string | null;
-        full_name: string | null;
-        email: string | null;
-        username: string | null;
-      }>)
+      return (
+        (profs ?? []) as Array<{
+          id: string | null;
+          full_name: string | null;
+          email: string | null;
+          username: string | null;
+        }>
+      )
         .filter((p): p is typeof p & { id: string } => !!p.id)
         .map((p) => ({
           id: p.id,
@@ -260,7 +286,9 @@ function AdminView({ orgId }: { orgId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("hive_training_assignments")
-        .select("id, organization_id, user_id, course_id, status, progress_pct, completed_at, expires_at, payment_model, course:hive_training_courses(title, slug, cert_validity_months)")
+        .select(
+          "id, organization_id, user_id, course_id, status, progress_pct, completed_at, expires_at, payment_model, course:hive_training_courses(title, slug, cert_validity_months)",
+        )
         .eq("organization_id", orgId)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -273,7 +301,9 @@ function AdminView({ orgId }: { orgId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("hive_training_seats")
-        .select("id, catalog_id, status, assigned_to_user_id, catalog:hive_training_catalog(name, sku, fulfills_course_ids)")
+        .select(
+          "id, catalog_id, status, assigned_to_user_id, catalog:hive_training_catalog(name, sku, fulfills_course_ids)",
+        )
         .eq("organization_id", orgId)
         .eq("status", "available");
       if (error) throw error;
@@ -297,17 +327,9 @@ function AdminView({ orgId }: { orgId: string }) {
 
   return (
     <div className="space-y-6">
-      <ReadinessBanner
-        members={members ?? []}
-        assignments={assignments ?? []}
-      />
+      <ReadinessBanner members={members ?? []} assignments={assignments ?? []} />
 
-      <LaunchpadRoster
-        members={members ?? []}
-        flags={launchpadFlags ?? []}
-      />
-
-      <AutoRenewCard orgId={orgId} catalog={catalog ?? []} />
+      <LaunchpadRoster members={members ?? []} flags={launchpadFlags ?? []} />
 
       <div id="ht-renewals" tabIndex={-1} className="scroll-mt-6 rounded-xl outline-none">
         <RenewalsSection
@@ -344,7 +366,8 @@ function AdminView({ orgId }: { orgId: string }) {
 // ---- Readiness banner (trimmed — expirations handled by RenewalsSection) ----
 
 function ReadinessBanner({
-  members, assignments,
+  members,
+  assignments,
 }: {
   members: Member[];
   assignments: AssignmentRow[];
@@ -360,23 +383,30 @@ function ReadinessBanner({
       <BannerLine
         key="unassigned"
         icon={<AlertTriangle className="h-4 w-4 text-[#C8881E]" />}
-        text={<><b>{unassignedCount} staff</b> have no training assigned yet.</>}
+        text={
+          <>
+            <b>{unassignedCount} staff</b> have no training assigned yet.
+          </>
+        }
         cta="Review renewals"
         onClick={() => scrollToRenewals()}
-      />
+      />,
     );
   }
-
 
   if (inProgressCount > 0) {
     items.push(
       <BannerLine
         key="in-progress"
         icon={<Clock className="h-4 w-4 text-[#1A2B47]" />}
-        text={<><b>{inProgressCount} trainings</b> started but not completed.</>}
+        text={
+          <>
+            <b>{inProgressCount} trainings</b> started but not completed.
+          </>
+        }
         cta="See team"
         onClick={() => scrollToRoster()}
-      />
+      />,
     );
   }
 
@@ -388,9 +418,9 @@ function ReadinessBanner({
           <div>
             <div className="text-base font-semibold">Your team is current. Keep it that way.</div>
             <p className="text-sm text-white/80 mt-1 max-w-2xl">
-              CPR/First Aid, Mandt, and the 30-day orientation live here — with sign-off
-              and a certificate when each one is done. We track expirations so nothing
-              lapses on your watch.
+              CPR/First Aid, Mandt, and the 30-day orientation live here — with sign-off and a
+              certificate when each one is done. We track expirations so nothing lapses on your
+              watch.
             </p>
           </div>
         </div>
@@ -428,8 +458,8 @@ function LaunchpadRoster({
       <div>
         <h2 className="text-lg font-semibold text-[#1A2B47]">Launchpad clock-in gate</h2>
         <p className="text-sm text-muted-foreground">
-          Staff must pass Launchpad before the punch pad will clock them in.
-          This list reads the live pass flag — it is not a test override.
+          Staff must pass Launchpad before the punch pad will clock them in. This list reads the
+          live pass flag — it is not a test override.
         </p>
       </div>
       <p className="text-sm text-[#1A2B47]">
@@ -470,13 +500,28 @@ function LaunchpadRoster({
 }
 
 function BannerLine({
-  icon, text, cta, onClick,
-}: { icon: React.ReactNode; text: React.ReactNode; cta: string | null; onClick?: () => void }) {
+  icon,
+  text,
+  cta,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  text: React.ReactNode;
+  cta: string | null;
+  onClick?: () => void;
+}) {
   return (
     <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 text-sm">
-      <div className="flex items-center gap-2 flex-1">{icon}<span>{text}</span></div>
+      <div className="flex items-center gap-2 flex-1">
+        {icon}
+        <span>{text}</span>
+      </div>
       {cta && (
-        <Button size="sm" onClick={onClick} className="bg-[#C8881E] hover:bg-[#C8881E]/90 text-white self-start md:self-auto">
+        <Button
+          size="sm"
+          onClick={onClick}
+          className="bg-[#C8881E] hover:bg-[#C8881E]/90 text-white self-start md:self-auto"
+        >
           {cta}
         </Button>
       )}
@@ -519,23 +564,25 @@ function scrollToTrainingTarget(ids: string[]) {
   }, 250);
 }
 
-
 // ---- Renewals section (staff-level, checkbox-driven) ----
 
 type RenewalRow = {
-  key: string;                    // `${user_id}:${course_id}`
+  key: string; // `${user_id}:${course_id}`
   user_id: string;
   user_label: string;
   course_id: string;
   course_title: string;
-  expires_at: string | null;      // null = never assigned
+  expires_at: string | null; // null = never assigned
   days_left: number | null;
   status: "due_soon" | "upcoming" | "missing";
-  catalog_id: string | null;      // best-fit single SKU
+  catalog_id: string | null; // best-fit single SKU
 };
 
 function RenewalsSection({
-  orgId, assignments, members, catalog,
+  orgId,
+  assignments,
+  members,
+  catalog,
 }: {
   orgId: string;
   assignments: AssignmentRow[];
@@ -656,7 +703,9 @@ function RenewalsSection({
             Select all due within 60 days
           </Button>
           {selected.size > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearAll}>Clear</Button>
+            <Button variant="ghost" size="sm" onClick={clearAll}>
+              Clear
+            </Button>
           )}
         </div>
       </div>
@@ -681,7 +730,9 @@ function RenewalsSection({
                       className="h-4 w-4 accent-[#C8881E]"
                     />
                   </td>
-                  <td className="p-2 font-medium text-[#1A2B47] whitespace-nowrap">{r.user_label}</td>
+                  <td className="p-2 font-medium text-[#1A2B47] whitespace-nowrap">
+                    {r.user_label}
+                  </td>
                   <td className="p-2">{r.course_title}</td>
                   <td className="p-2 text-muted-foreground whitespace-nowrap">
                     {r.status === "missing"
@@ -690,10 +741,14 @@ function RenewalsSection({
                   </td>
                   <td className="p-2 pr-3 text-right">
                     {r.status === "due_soon" && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#C8881E]/15 text-[#C8881E] text-xs px-2 py-0.5">Due soon</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#C8881E]/15 text-[#C8881E] text-xs px-2 py-0.5">
+                        Due soon
+                      </span>
                     )}
                     {r.status === "missing" && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-700 text-xs px-2 py-0.5">Missing</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-700 text-xs px-2 py-0.5">
+                        Missing
+                      </span>
                     )}
                     {r.status === "upcoming" && (
                       <span className="text-xs text-muted-foreground">Upcoming</span>
@@ -708,9 +763,14 @@ function RenewalsSection({
 
       <div className="flex flex-col md:flex-row md:items-center gap-2 md:justify-between pt-2 border-t">
         <div className="text-sm text-muted-foreground">
-          {selected.size === 0
-            ? "Select trainings above to set up renewals."
-            : <><b>{selected.size} selected</b> · certificates auto-issued on completion, expirations tracked.</>}
+          {selected.size === 0 ? (
+            "Select trainings above to set up renewals."
+          ) : (
+            <>
+              <b>{selected.size} selected</b> · certificates auto-issued on completion, expirations
+              tracked.
+            </>
+          )}
         </div>
         <Button
           disabled={selected.size === 0}
@@ -735,7 +795,10 @@ function RenewalsSection({
 // ---- Setup renewals dialog ----
 
 function SetupRenewalsDialog({
-  open, onOpenChange, selection, catalog,
+  open,
+  onOpenChange,
+  selection,
+  catalog,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -762,24 +825,37 @@ function SetupRenewalsDialog({
     const bundledUsers: string[] = [];
     for (const [uid, courses] of byUser) {
       let covers = true;
-      for (const cid of fpCourses) if (!courses.has(cid)) { covers = false; break; }
+      for (const cid of fpCourses)
+        if (!courses.has(cid)) {
+          covers = false;
+          break;
+        }
       if (covers) bundledUsers.push(uid);
     }
     if (bundledUsers.length === 0) return null;
 
     // Cost with full program vs à la carte for those users.
     const perUserAlaCarte = Array.from(fpCourses).reduce((sum, cid) => {
-      const cat = catalog.find((c) => c.kind !== "full_program" && ((c.fulfills_course_ids ?? []) as string[]).includes(cid));
+      const cat = catalog.find(
+        (c) =>
+          c.kind !== "full_program" && ((c.fulfills_course_ids ?? []) as string[]).includes(cid),
+      );
       return sum + trainingPriceCentsForSku(cat?.sku ?? "", cat?.price_cents);
     }, 0);
-    const savingsPerUser = Math.max(0, perUserAlaCarte - trainingPriceCentsForSku(fullProgram.sku, fullProgram.price_cents));
+    const savingsPerUser = Math.max(
+      0,
+      perUserAlaCarte - trainingPriceCentsForSku(fullProgram.sku, fullProgram.price_cents),
+    );
     return { users: bundledUsers, savingsPerUser, fpCourses };
   }, [selection, fullProgram, catalog]);
 
   // Build purchase groups: catalog_id → renewal_intents[].
   const purchases = useMemo(() => {
     const bundledUserSet = new Set(bundle?.users ?? []);
-    const groups = new Map<string, { catalog: CatalogRow; intents: { user_id: string; course_id: string }[] }>();
+    const groups = new Map<
+      string,
+      { catalog: CatalogRow; intents: { user_id: string; course_id: string }[] }
+    >();
 
     // Bundled users → full program (one seat per user; intents cover all courses).
     if (bundle && fullProgram) {
@@ -787,7 +863,8 @@ function SetupRenewalsDialog({
         // Full program intents: one intent per fulfilled course for this user.
         // The webhook consumes one seat per intent, so we count qty by intents.
         for (const cid of bundle.fpCourses) {
-          if (!groups.has(fullProgram.id)) groups.set(fullProgram.id, { catalog: fullProgram, intents: [] });
+          if (!groups.has(fullProgram.id))
+            groups.set(fullProgram.id, { catalog: fullProgram, intents: [] });
           groups.get(fullProgram.id)!.intents.push({ user_id: uid, course_id: cid });
         }
       }
@@ -806,10 +883,18 @@ function SetupRenewalsDialog({
   }, [selection, bundle, fullProgram, catalog]);
 
   const totalCents = useMemo(
-    () => purchases.reduce((s, p) => s + trainingPriceCentsForSku(p.catalog.sku, p.catalog.price_cents) * p.intents.length, 0),
+    () =>
+      purchases.reduce(
+        (s, p) =>
+          s + trainingPriceCentsForSku(p.catalog.sku, p.catalog.price_cents) * p.intents.length,
+        0,
+      ),
     [purchases],
   );
-  const totalFmt = (totalCents / 100).toLocaleString(undefined, { style: "currency", currency: "USD" });
+  const totalFmt = (totalCents / 100).toLocaleString(undefined, {
+    style: "currency",
+    currency: "USD",
+  });
 
   const staffCount = new Set(selection.map((r) => r.user_id)).size;
 
@@ -854,12 +939,15 @@ function SetupRenewalsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Set up {selection.length} renewal{selection.length === 1 ? "" : "s"}</DialogTitle>
+          <DialogTitle>
+            Set up {selection.length} renewal{selection.length === 1 ? "" : "s"}
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 text-sm">
           <p>
-            Covers <b>{selection.length}</b> training{selection.length === 1 ? "" : "s"} for <b>{staffCount}</b> staff.
-            Certificates are auto-issued on completion, and we'll track every expiration for you.
+            Covers <b>{selection.length}</b> training{selection.length === 1 ? "" : "s"} for{" "}
+            <b>{staffCount}</b> staff. Certificates are auto-issued on completion, and we'll track
+            every expiration for you.
           </p>
 
           {bundle && fullProgram && bundle.users.length > 0 && (
@@ -868,7 +956,8 @@ function SetupRenewalsDialog({
                 Bundled as Full Program for {bundle.users.length} staff.
               </div>
               <div className="text-muted-foreground mt-0.5">
-                Saves ${(bundle.savingsPerUser / 100).toFixed(0)} per staff and covers everything they need.
+                Saves ${(bundle.savingsPerUser / 100).toFixed(0)} per staff and covers everything
+                they need.
               </div>
             </div>
           )}
@@ -876,8 +965,15 @@ function SetupRenewalsDialog({
           <ul className="text-xs text-muted-foreground space-y-1 border-t pt-2">
             {purchases.map((p) => (
               <li key={p.catalog.id} className="flex justify-between">
-                <span>{p.catalog.name} × {p.intents.length}</span>
-                <span>{formatUsdFromCents(trainingPriceCentsForSku(p.catalog.sku, p.catalog.price_cents) * p.intents.length)}</span>
+                <span>
+                  {p.catalog.name} × {p.intents.length}
+                </span>
+                <span>
+                  {formatUsdFromCents(
+                    trainingPriceCentsForSku(p.catalog.sku, p.catalog.price_cents) *
+                      p.intents.length,
+                  )}
+                </span>
               </li>
             ))}
           </ul>
@@ -889,12 +985,15 @@ function SetupRenewalsDialog({
 
           {purchases.length > 1 && (
             <p className="text-xs text-muted-foreground">
-              Note: your selection spans multiple programs. You'll be walked through the first checkout now; the next opens right after.
+              Note: your selection spans multiple programs. You'll be walked through the first
+              checkout now; the next opens right after.
             </p>
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           <Button
             onClick={startCheckout}
             disabled={busy || purchases.length === 0}
@@ -908,13 +1007,19 @@ function SetupRenewalsDialog({
   );
 }
 
-
-
 // ---- Storefront ----
 
 function Storefront({
-  orgId, catalog, members, onPurchased,
-}: { orgId: string; catalog: CatalogRow[]; members: Member[]; onPurchased: () => void }) {
+  orgId,
+  catalog,
+  members,
+  onPurchased,
+}: {
+  orgId: string;
+  catalog: CatalogRow[];
+  members: Member[];
+  onPurchased: () => void;
+}) {
   const { data: org } = useCurrentOrg();
   const billingFn = useServerFn(getBillingStatusFn);
   const billingQ = useQuery({
@@ -951,23 +1056,27 @@ function Storefront({
       {
         type: "package" as const,
         title: "Training package",
-        blurb: "CPR, Mandt, and the in-platform orientation seat (30-day, Person-Centered Thinking, ABI, and 12-hour CE) for the same roster. Saves $75 versus buying each seat.",
+        blurb:
+          "CPR, Mandt, and the in-platform orientation seat (30-day, Person-Centered Thinking, ABI, and 12-hour CE) for the same roster. Saves $75 versus buying each seat.",
         featured: true,
       },
       {
         type: "cpr_first_aid" as const,
         title: "CPR / First Aid",
-        blurb: "External class. After pay, Exec gets one alert. Staff see an obligation until you upload the card.",
+        blurb:
+          "External class. After pay, Exec gets one alert. Staff see an obligation until you upload the card.",
       },
       {
         type: "mandt" as const,
         title: "Mandt",
-        blurb: "External class. After pay, Exec gets one alert. Staff see an obligation until you upload the card.",
+        blurb:
+          "External class. After pay, Exec gets one alert. Staff see an obligation until you upload the card.",
       },
       {
         type: "thirty_day" as const,
         title: "30-day orientation",
-        blurb: "In-platform Essential Training from the staff file. A purchased 30-day or pack seat unlocks 30-day orientation, Person-Centered Thinking, ABI, and the 12-hour CE placeholder for that staff. True North Supports is never charged. Not an external class.",
+        blurb:
+          "In-platform Essential Training from the staff file. A purchased 30-day or pack seat unlocks 30-day orientation, Person-Centered Thinking, ABI, and the 12-hour CE placeholder for that staff. True North Supports is never charged. Not an external class.",
       },
     ] as const
   ).map((card) => {
@@ -994,7 +1103,11 @@ function Storefront({
         {cards.map((card) => (
           <Card
             key={card.type}
-            className={card.featured ? "relative border-2 border-[#C8881E] shadow-[0_0_0_4px_rgba(200,136,30,0.15)]" : undefined}
+            className={
+              card.featured
+                ? "relative border-2 border-[#C8881E] shadow-[0_0_0_4px_rgba(200,136,30,0.15)]"
+                : undefined
+            }
           >
             {card.featured && (
               <div className="absolute -top-3 left-4 rounded bg-[#C8881E] px-2 py-0.5 text-xs font-semibold text-white">
@@ -1021,7 +1134,9 @@ function Storefront({
                   trainingType={card.type}
                   billingExempt={billingExempt}
                   members={rosterMembers}
-                  triggerLabel={card.type === "thirty_day" ? "Assign 30-day course" : "Submit class roster"}
+                  triggerLabel={
+                    card.type === "thirty_day" ? "Assign 30-day course" : "Submit class roster"
+                  }
                   testId={`training-buy-${card.sku}`}
                   onSubmitted={onPurchased}
                 />
@@ -1031,7 +1146,9 @@ function Storefront({
         ))}
       </div>
       {catalog.length === 0 && (
-        <p className="text-xs text-muted-foreground">Locked prices are used even if the leftover catalog has not been updated yet.</p>
+        <p className="text-xs text-muted-foreground">
+          Locked prices are used even if the leftover catalog has not been updated yet.
+        </p>
       )}
     </section>
   );
@@ -1053,21 +1170,29 @@ function SubmittedClasses({ orgId }: { orgId: string }) {
             <CardContent className="p-4 text-sm">
               <div className="font-medium text-[#1A2B47]">
                 {trainingClassLabel(c.trainingType)} · {c.seatCount} staff ·{" "}
-                {formatUsdFromCents(c.unitPriceCents || trainingPriceCentsForSku(trainingClassSku(c.trainingType)))} / seat
+                {formatUsdFromCents(
+                  c.unitPriceCents || trainingPriceCentsForSku(trainingClassSku(c.trainingType)),
+                )}{" "}
+                / seat
                 {" · "}
-                {c.paymentStatus === "waived" || c.amountCents === 0 ? "$0" : formatUsdFromCents(c.amountCents)}
+                {c.paymentStatus === "waived" || c.amountCents === 0
+                  ? "$0"
+                  : formatUsdFromCents(c.amountCents)}
               </div>
               <div className="mt-1 text-xs text-muted-foreground">
-                {c.status} · submitted {c.submittedAt ? new Date(c.submittedAt).toLocaleDateString() : "—"}
+                {c.status} · submitted{" "}
+                {c.submittedAt ? new Date(c.submittedAt).toLocaleDateString() : "—"}
               </div>
               <ul className="mt-2 space-y-0.5 text-xs">
                 {c.roster.map((r) => (
-                  <li key={r.rosterId || `${r.email}-${r.name}`}>{r.name} · {r.email} · {r.phone}</li>
+                  <li key={r.rosterId || `${r.email}-${r.name}`}>
+                    {r.name} · {r.email} · {r.phone}
+                  </li>
                 ))}
               </ul>
-              {(c.trainingType === "cpr_first_aid" || c.trainingType === "mandt" || c.trainingType === "package") && (
-                <ClassCardUploadButtons orgId={orgId} row={c} />
-              )}
+              {(c.trainingType === "cpr_first_aid" ||
+                c.trainingType === "mandt" ||
+                c.trainingType === "package") && <ClassCardUploadButtons orgId={orgId} row={c} />}
             </CardContent>
           </Card>
         ))}
@@ -1090,7 +1215,10 @@ type SeatLite = {
 };
 
 function RosterSection({
-  orgId, assignments, seats, members,
+  orgId,
+  assignments,
+  seats,
+  members,
 }: {
   orgId: string;
   assignments: AssignmentRow[];
@@ -1105,7 +1233,15 @@ function RosterSection({
   }, [members]);
 
   const assignSeat = useMutation({
-    mutationFn: async ({ seatId, userId, catalogId }: { seatId: string; userId: string; catalogId: string }) => {
+    mutationFn: async ({
+      seatId,
+      userId,
+      catalogId,
+    }: {
+      seatId: string;
+      userId: string;
+      catalogId: string;
+    }) => {
       const { data: cat } = await supabase
         .from("hive_training_catalog")
         .select("fulfills_course_ids")
@@ -1116,7 +1252,11 @@ function RosterSection({
 
       const { error: sErr } = await supabase
         .from("hive_training_seats")
-        .update({ status: "consumed", assigned_to_user_id: userId, consumed_at: new Date().toISOString() })
+        .update({
+          status: "consumed",
+          assigned_to_user_id: userId,
+          consumed_at: new Date().toISOString(),
+        })
         .eq("id", seatId)
         .eq("status", "available");
       if (sErr) throw sErr;
@@ -1144,11 +1284,15 @@ function RosterSection({
     <section id="ht-roster" className="space-y-4">
       <div>
         <h2 className="text-lg font-semibold text-[#1A2B47]">Your team</h2>
-        <p className="text-sm text-muted-foreground">Available seats, current assignments, and expirations.</p>
+        <p className="text-sm text-muted-foreground">
+          Available seats, current assignments, and expirations.
+        </p>
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold mb-2 text-[#1A2B47]">Available seats ({seats.length})</h3>
+        <h3 className="text-sm font-semibold mb-2 text-[#1A2B47]">
+          Available seats ({seats.length})
+        </h3>
         {seats.length > 0 ? (
           <div className="grid gap-2">
             {(seats as SeatLite[]).map((s) => (
@@ -1156,7 +1300,9 @@ function RosterSection({
                 key={s.id}
                 seat={s}
                 members={members}
-                onAssign={(userId) => assignSeat.mutate({ seatId: s.id, userId, catalogId: s.catalog_id })}
+                onAssign={(userId) =>
+                  assignSeat.mutate({ seatId: s.id, userId, catalogId: s.catalog_id })
+                }
               />
             ))}
           </div>
@@ -1166,7 +1312,9 @@ function RosterSection({
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold mb-2 text-[#1A2B47]">Team assignments ({assignments.length})</h3>
+        <h3 className="text-sm font-semibold mb-2 text-[#1A2B47]">
+          Team assignments ({assignments.length})
+        </h3>
         <div className="overflow-x-auto rounded-md border">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left">
@@ -1183,13 +1331,21 @@ function RosterSection({
                 <tr key={a.id} className="border-t">
                   <td className="p-2">{nameById.get(a.user_id) ?? a.user_id.slice(0, 8)}</td>
                   <td className="p-2">{a.course?.title ?? "—"}</td>
-                  <td className="p-2"><StatusBadge status={a.status} /></td>
+                  <td className="p-2">
+                    <StatusBadge status={a.status} />
+                  </td>
                   <td className="p-2">{a.progress_pct ?? 0}%</td>
-                  <td className="p-2">{a.expires_at ? new Date(a.expires_at).toLocaleDateString() : "—"}</td>
+                  <td className="p-2">
+                    {a.expires_at ? new Date(a.expires_at).toLocaleDateString() : "—"}
+                  </td>
                 </tr>
               ))}
               {assignments.length === 0 && (
-                <tr><td colSpan={5} className="p-4 text-center text-muted-foreground">No assignments yet.</td></tr>
+                <tr>
+                  <td colSpan={5} className="p-4 text-center text-muted-foreground">
+                    No assignments yet.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
@@ -1200,7 +1356,9 @@ function RosterSection({
 }
 
 function SeatRow({
-  seat, members, onAssign,
+  seat,
+  members,
+  onAssign,
 }: {
   seat: SeatLite;
   members: Member[];
@@ -1214,225 +1372,20 @@ function SeatRow({
         <span className="text-sm">{seat.catalog?.name ?? "Seat"}</span>
       </div>
       <Select value={user} onValueChange={setUser}>
-        <SelectTrigger className="w-full md:w-48"><SelectValue placeholder="Assign to…" /></SelectTrigger>
+        <SelectTrigger className="w-full md:w-48">
+          <SelectValue placeholder="Assign to…" />
+        </SelectTrigger>
         <SelectContent>
-          {members.map((m) => <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>)}
+          {members.map((m) => (
+            <SelectItem key={m.id} value={m.id}>
+              {m.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
-      <Button size="sm" disabled={!user} onClick={() => user && onAssign(user)}>Assign</Button>
+      <Button size="sm" disabled={!user} onClick={() => user && onAssign(user)}>
+        Assign
+      </Button>
     </div>
   );
 }
-
-// ---- Auto-renew settings card ----
-
-type AutoRenewSettings = {
-  organization_id: string;
-  enabled: boolean;
-  lead_days: number;
-  scope: "all" | "full_program" | "selected";
-  selected_catalog_ids: string[];
-  stripe_customer_id: string | null;
-  stripe_payment_method_id: string | null;
-  payment_method_brand: string | null;
-  payment_method_last4: string | null;
-  last_run_at: string | null;
-  paused_reason: string | null;
-};
-
-function AutoRenewCard({ orgId, catalog }: { orgId: string; catalog: CatalogRow[] }) {
-  const qc = useQueryClient();
-  const { data: settings, isLoading } = useQuery({
-    queryKey: ["ht-auto-renew", orgId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("hive_training_auto_renew_settings")
-        .select("*")
-        .eq("organization_id", orgId)
-        .maybeSingle();
-      if (error) throw error;
-      return (data ?? null) as AutoRenewSettings | null;
-    },
-  });
-
-  const [saving, setSaving] = useState(false);
-
-  const upsert = async (patch: Partial<AutoRenewSettings>) => {
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from("hive_training_auto_renew_settings")
-        .upsert(
-          {
-            organization_id: orgId,
-            enabled: settings?.enabled ?? false,
-            lead_days: settings?.lead_days ?? 45,
-            scope: settings?.scope ?? "all",
-            selected_catalog_ids: settings?.selected_catalog_ids ?? [],
-            ...patch,
-          },
-          { onConflict: "organization_id" },
-        );
-      if (error) throw error;
-      await qc.invalidateQueries({ queryKey: ["ht-auto-renew", orgId] });
-    } catch (e) {
-      toast.error("Couldn't save auto-renew settings.");
-      console.error(e);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const saveCard = async () => {
-    setSaving(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-training-setup-intent", { body: {} });
-      if (error) throw error;
-      const url = (data as { url?: string })?.url;
-      if (!url) throw new Error("No checkout URL returned.");
-      window.location.href = url;
-    } catch (e) {
-      toast.error("Couldn't start card setup. Ensure payments are configured.");
-      console.error(e);
-      setSaving(false);
-    }
-  };
-
-  const runNow = async () => {
-    setSaving(true);
-    try {
-      const { error } = await supabase.functions.invoke("auto-renew-trainings", {
-        body: { organization_id: orgId },
-      });
-      if (error) throw error;
-      toast.success("Auto-renew check triggered.");
-      await qc.invalidateQueries({ queryKey: ["ht-auto-renew", orgId] });
-    } catch (e) {
-      toast.error("Couldn't run auto-renew.");
-      console.error(e);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (isLoading) return null;
-
-  const enabled = settings?.enabled ?? false;
-  const leadDays = settings?.lead_days ?? 45;
-  const scope = settings?.scope ?? "all";
-  const hasCard = !!settings?.stripe_payment_method_id;
-
-  return (
-    <section className="rounded-xl border border-border bg-gradient-to-br from-[#FFF9EE] to-white p-4 md:p-5">
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-        <div className="flex gap-3">
-          <div className="rounded-lg p-2 bg-[#C8881E]/15 text-[#C8881E] h-fit">
-            <Repeat className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-[#1A2B47]">Auto-renew expiring trainings</h2>
-            <p className="text-sm text-muted-foreground max-w-xl">
-              Set it once. The office re-purchases and re-assigns seats before certificates expire — no gap, no chase, no scramble.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Switch
-            checked={enabled}
-            disabled={saving}
-            onCheckedChange={(v) => upsert({ enabled: v })}
-          />
-          <span className="text-sm font-medium text-[#1A2B47]">{enabled ? "On" : "Off"}</span>
-        </div>
-      </div>
-
-      {enabled && (
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Renew how early?</Label>
-            <Select value={String(leadDays)} onValueChange={(v) => upsert({ lead_days: Number(v) })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="30">30 days before expiration</SelectItem>
-                <SelectItem value="45">45 days before expiration</SelectItem>
-                <SelectItem value="60">60 days before expiration</SelectItem>
-                <SelectItem value="90">90 days before expiration</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Scope</Label>
-            <Select value={scope} onValueChange={(v) => upsert({ scope: v as AutoRenewSettings["scope"] })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All required courses</SelectItem>
-                <SelectItem value="full_program">Full Program courses only</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">Payment method</Label>
-            {hasCard ? (
-              <div className="flex items-center justify-between rounded-md border bg-white px-3 py-2 h-10">
-                <span className="text-sm text-[#1A2B47] inline-flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" />
-                  {(settings?.payment_method_brand ?? "Card").toUpperCase()} •••• {settings?.payment_method_last4 ?? "----"}
-                </span>
-                <button
-                  onClick={saveCard}
-                  disabled={saving}
-                  className="text-xs text-[#C8881E] hover:underline"
-                >
-                  Change
-                </button>
-              </div>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={saveCard}
-                disabled={saving}
-                className="w-full h-10 border-[#C8881E] text-[#C8881E] hover:bg-[#C8881E]/10"
-              >
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CreditCard className="h-4 w-4 mr-2" />Save a card</>}
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {enabled && (
-        <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2 pt-3 border-t text-sm">
-          <div className="text-muted-foreground">
-            {settings?.paused_reason ? (
-              <span className="inline-flex items-center gap-1 text-red-700">
-                <AlertTriangle className="h-4 w-4" />
-                Paused: {settings.paused_reason}. Update your card and re-enable.
-              </span>
-            ) : hasCard ? (
-              <span className="inline-flex items-center gap-1 text-[#1A2B47]">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                Ready. We check daily and email a receipt for every renewal.
-                {settings?.last_run_at && (
-                  <span className="text-muted-foreground"> · Last check {new Date(settings.last_run_at).toLocaleDateString()}</span>
-                )}
-              </span>
-            ) : (
-              <span className="text-muted-foreground">Save a card to activate auto-renew.</span>
-            )}
-          </div>
-          {hasCard && (
-            <Button size="sm" variant="ghost" onClick={runNow} disabled={saving}>
-              Run check now
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Reference catalog is available for future 'selected' scope UI. */}
-      {catalog.length === 0 && enabled && (
-        <p className="mt-2 text-xs text-muted-foreground">No active courses in the catalog yet.</p>
-      )}
-    </section>
-  );
-}
-

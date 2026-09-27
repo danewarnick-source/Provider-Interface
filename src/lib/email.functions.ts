@@ -4,7 +4,8 @@
 // referral follow-ups, billing/onboarding notifications) goes through. It:
 //   1. Verifies caller has `send_emails` permission in the org.
 //   2. Resolves the org's sender via resolveOrgSender().
-//   3. Invokes the `send-email` edge function (Resend, RESEND_API_KEY).
+//   3. Invokes the `send-email` edge function with the service-role client
+//      (Resend, RESEND_API_KEY). The function rejects any other bearer.
 //
 // Two modes exist in org_email_settings.send_mode:
 //   - 'hive_managed' (default, active): sends from managedFromAddress()
@@ -106,9 +107,7 @@ export const getOrgEmailSettings = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: row, error } = await (supabase as any)
       .from("org_email_settings")
-      .select(
-        "organization_id, send_mode, from_name, from_address, reply_to, verified, updated_at",
-      )
+      .select("organization_id, send_mode, from_name, from_address, reply_to, verified, updated_at")
       .eq("organization_id", data.organization_id)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -120,20 +119,21 @@ export const getOrgEmailSettings = createServerFn({ method: "POST" })
 
 export const updateOrgEmailSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    organization_id: string;
-    send_mode?: "hive_managed" | "own_domain";
-    from_name?: string | null;
-    reply_to: string;
-  }) =>
-    z
-      .object({
-        organization_id: ORG_ID,
-        send_mode: z.enum(["hive_managed", "own_domain"]).optional(),
-        from_name: z.string().trim().max(200).nullable().optional(),
-        reply_to: z.string().trim().email().max(320),
-      })
-      .parse(d),
+  .inputValidator(
+    (d: {
+      organization_id: string;
+      send_mode?: "hive_managed" | "own_domain";
+      from_name?: string | null;
+      reply_to: string;
+    }) =>
+      z
+        .object({
+          organization_id: ORG_ID,
+          send_mode: z.enum(["hive_managed", "own_domain"]).optional(),
+          from_name: z.string().trim().max(200).nullable().optional(),
+          reply_to: z.string().trim().email().max(320),
+        })
+        .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -178,32 +178,33 @@ export const updateOrgEmailSettings = createServerFn({ method: "POST" })
 
 export const sendEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    organization_id: string;
-    to: string | string[];
-    subject: string;
-    html?: string;
-    text?: string;
-    cc?: string[];
-    bcc?: string[];
-    reply_to?: string;
-    /** Forces a failure path for honest-error verification. Server-side only. */
-    forceFail?: boolean;
-  }) =>
-    z
-      .object({
-        organization_id: ORG_ID,
-        to: z.union([z.string().email(), z.array(z.string().email()).min(1)]),
-        subject: z.string().trim().min(1).max(998),
-        html: z.string().max(200_000).optional(),
-        text: z.string().max(200_000).optional(),
-        cc: z.array(z.string().email()).optional(),
-        bcc: z.array(z.string().email()).optional(),
-        reply_to: z.string().email().optional(),
-        forceFail: z.boolean().optional(),
-      })
-      .refine((v) => !!(v.html || v.text), { message: "html or text required" })
-      .parse(d),
+  .inputValidator(
+    (d: {
+      organization_id: string;
+      to: string | string[];
+      subject: string;
+      html?: string;
+      text?: string;
+      cc?: string[];
+      bcc?: string[];
+      reply_to?: string;
+      /** Forces a failure path for honest-error verification. Server-side only. */
+      forceFail?: boolean;
+    }) =>
+      z
+        .object({
+          organization_id: ORG_ID,
+          to: z.union([z.string().email(), z.array(z.string().email()).min(1)]),
+          subject: z.string().trim().min(1).max(998),
+          html: z.string().max(200_000).optional(),
+          text: z.string().max(200_000).optional(),
+          cc: z.array(z.string().email()).optional(),
+          bcc: z.array(z.string().email()).optional(),
+          reply_to: z.string().email().optional(),
+          forceFail: z.boolean().optional(),
+        })
+        .refine((v) => !!(v.html || v.text), { message: "html or text required" })
+        .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -223,8 +224,9 @@ export const sendEmail = createServerFn({ method: "POST" })
       return { ok: false as const, error: "Forced failure (verification path)" };
     }
 
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: invokeData, error: invokeErr } = await (supabase as any).functions.invoke(
+    const { data: invokeData, error: invokeErr } = await (supabaseAdmin as any).functions.invoke(
       "send-email",
       {
         body: {

@@ -69,7 +69,9 @@ async function sendAskEmail(input: {
   try {
     const copy = phiSafeAskNotify({ channel: "email" });
     const sender = await resolveOrgSender(input.supabase, input.organizationId);
-    const { error } = await input.supabase.functions.invoke("send-email", {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabaseAdmin as any).functions.invoke("send-email", {
       body: {
         from: sender.from,
         to: input.to,
@@ -93,17 +95,14 @@ async function sendAskSms(phone: string | null): Promise<{ ok: boolean }> {
   try {
     const copy = phiSafeAskNotify({ channel: "sms" });
     const auth = Buffer.from(`${sid}:${token}`).toString("base64");
-    const res = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${auth}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({ To: e164, From: from, Body: copy.body }),
+    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-    );
+      body: new URLSearchParams({ To: e164, From: from, Body: copy.body }),
+    });
     return { ok: res.ok };
   } catch {
     return { ok: false };
@@ -112,9 +111,7 @@ async function sendAskSms(phone: string | null): Promise<{ ok: boolean }> {
 
 export const listMyThreads = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
-    z.object({ organizationId: ORG }).parse(input),
-  )
+  .inputValidator((input) => z.object({ organizationId: ORG }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) {
@@ -138,7 +135,15 @@ export const listMyThreads = createServerFn({ method: "POST" })
     const ids = (threadsRes.data ?? []).map((t) => t.id);
     const messagesRes =
       ids.length === 0
-        ? { data: [] as Array<{ thread_id: string; body: string; created_at: string; kind: string }>, error: null }
+        ? {
+            data: [] as Array<{
+              thread_id: string;
+              body: string;
+              created_at: string;
+              kind: string;
+            }>,
+            error: null,
+          }
         : await supabase
             .from("thread_messages")
             .select("thread_id, body, created_at, kind")

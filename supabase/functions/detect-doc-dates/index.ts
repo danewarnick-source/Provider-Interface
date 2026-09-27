@@ -8,10 +8,12 @@
 // Output: { detected: bool, effective_from, effective_to, effective_to_mode,
 //           confidence: "low"|"medium"|"high", source_snippet }
 //
-// Auth: verify_jwt=true. Caller must be authenticated; org membership is
-// re-checked here via service-role query against organization_members.
+// Auth: verify_jwt=true rejects unsigned tokens. This handler then accepts
+// only the service-role bearer. The server function
+// (document-effective-dating) checks caseload or admin before invoking.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { bearerIsServiceRole } from "../_shared/service-role-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,11 +53,11 @@ function empty() {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const authHeader = req.headers.get("Authorization") || "";
-    if (!authHeader.toLowerCase().startsWith("bearer ")) return json({ error: "Unauthorized" }, 401);
+    const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
+    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!bearerIsServiceRole(authHeader, SERVICE_ROLE)) return json({ error: "Unauthorized" }, 401);
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!SUPABASE_URL || !SERVICE_ROLE) return json({ error: "Not configured" }, 500);
 
     const body = await req.json().catch(() => ({}));
@@ -66,22 +68,7 @@ Deno.serve(async (req) => {
       return json({ error: "Invalid input" }, 400);
     }
 
-    // Verify caller via user client
-    const userClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userRes } = await userClient.auth.getUser();
-    if (!userRes?.user?.id) return json({ error: "Unauthorized" }, 401);
-    const userId = userRes.user.id;
-
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
-    const { data: mem } = await admin
-      .from("organization_members")
-      .select("id")
-      .eq("organization_id", orgId)
-      .eq("user_id", userId)
-      .maybeSingle();
-    if (!mem) return json({ error: "Forbidden" }, 403);
 
     // Load the doc row.
     let bucket = "";
@@ -127,8 +114,7 @@ Deno.serve(async (req) => {
 
     // Build message content.
     const userContent: Array<
-      | { type: "text"; text: string }
-      | { type: "image_url"; image_url: { url: string } }
+      { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }
     > = [];
     userContent.push({
       type: "text",
@@ -141,7 +127,10 @@ Deno.serve(async (req) => {
     });
 
     if (rawText && rawText.trim().length > 0) {
-      userContent.push({ type: "text", text: `--- DOCUMENT TEXT ---\n${rawText.slice(0, MAX_TEXT_CHARS)}` });
+      userContent.push({
+        type: "text",
+        text: `--- DOCUMENT TEXT ---\n${rawText.slice(0, MAX_TEXT_CHARS)}`,
+      });
     } else {
       const { data: blob, error: dlErr } = await admin.storage.from(bucket).download(path);
       if (dlErr || !blob) return json(empty());
@@ -186,18 +175,23 @@ Deno.serve(async (req) => {
             parameters: {
               type: "object",
               properties: {
-                detected: { type: "boolean", description: "True only if a clearly-stated effective date was found." },
+                detected: {
+                  type: "boolean",
+                  description: "True only if a clearly-stated effective date was found.",
+                },
                 effective_from: { type: "string", description: "YYYY-MM-DD start date if stated." },
                 effective_to: { type: "string", description: "YYYY-MM-DD end date if stated." },
                 effective_to_mode: {
                   type: "string",
                   enum: ["fixed_date", "ongoing", "until_replaced"],
-                  description: "fixed_date when there's a real end date; ongoing/until_replaced only if the document says so.",
+                  description:
+                    "fixed_date when there's a real end date; ongoing/until_replaced only if the document says so.",
                 },
                 confidence: { type: "string", enum: ["low", "medium", "high"] },
                 source_snippet: {
                   type: "string",
-                  description: "A short quote (<=240 chars) from the document that contains the dates.",
+                  description:
+                    "A short quote (<=240 chars) from the document that contains the dates.",
                 },
               },
               required: ["detected"],
@@ -212,7 +206,8 @@ Deno.serve(async (req) => {
     });
 
     if (!aiRes.ok) {
-      console.error("detect-doc-dates ai error", aiRes.status, await aiRes.text());
+      await aiRes.text();
+      console.error("detect-doc-dates ai error", aiRes.status);
       return json(empty());
     }
     const j = (await aiRes.json()) as {
@@ -221,7 +216,11 @@ Deno.serve(async (req) => {
     const args = j.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     if (!args) return json(empty());
     let parsed: Record<string, unknown> = {};
-    try { parsed = JSON.parse(args); } catch { return json(empty()); }
+    try {
+      parsed = JSON.parse(args);
+    } catch {
+      return json(empty());
+    }
 
     const detected = parsed.detected === true;
     const from = normDate(parsed.effective_from);
@@ -232,12 +231,16 @@ Deno.serve(async (req) => {
       detected: true,
       effective_from: from,
       effective_to: to,
-      effective_to_mode: (parsed.effective_to_mode as string | null) ?? (to ? "fixed_date" : "until_replaced"),
+      effective_to_mode:
+        (parsed.effective_to_mode as string | null) ?? (to ? "fixed_date" : "until_replaced"),
       confidence: (parsed.confidence as string | null) ?? "medium",
-      source_snippet: typeof parsed.source_snippet === "string" ? String(parsed.source_snippet).slice(0, 240) : null,
+      source_snippet:
+        typeof parsed.source_snippet === "string"
+          ? String(parsed.source_snippet).slice(0, 240)
+          : null,
     });
-  } catch (e) {
-    console.error("detect-doc-dates error", e);
+  } catch {
+    console.error("detect-doc-dates error");
     return json(empty());
   }
 });
@@ -256,14 +259,22 @@ function guessMime(name: string | null): string | null {
   if (!name) return null;
   const ext = name.toLowerCase().split(".").pop();
   switch (ext) {
-    case "pdf": return "application/pdf";
-    case "png": return "image/png";
+    case "pdf":
+      return "application/pdf";
+    case "png":
+      return "image/png";
     case "jpg":
-    case "jpeg": return "image/jpeg";
-    case "webp": return "image/webp";
-    case "txt": return "text/plain";
-    case "md": return "text/markdown";
-    case "json": return "application/json";
-    default: return null;
+    case "jpeg":
+      return "image/jpeg";
+    case "webp":
+      return "image/webp";
+    case "txt":
+      return "text/plain";
+    case "md":
+      return "text/markdown";
+    case "json":
+      return "application/json";
+    default:
+      return null;
   }
 }

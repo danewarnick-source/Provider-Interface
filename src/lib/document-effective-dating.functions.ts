@@ -15,6 +15,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { isAgencyAdmin } from "@/lib/access/levels";
 
 export type DocKind = "client" | "employee" | "nectar";
 
@@ -62,11 +63,13 @@ const dateSourceSchema = z.enum(["from_document", "provider_entered"]);
 export const detectEffectiveDates = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      organization_id: z.string().uuid(),
-      kind: kindSchema,
-      document_id: z.string().uuid(),
-    }).parse(d),
+    z
+      .object({
+        organization_id: z.string().uuid(),
+        kind: kindSchema,
+        document_id: z.string().uuid(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -79,17 +82,51 @@ export const detectEffectiveDates = createServerFn({ method: "POST" })
       source_snippet: null as string | null,
     };
     if (!supabase || !userId) return empty;
-    await requireOrgMembership(supabase, userId, data.organization_id);
+    const access = await requireOrgMembership(supabase, userId, data.organization_id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
     try {
+      if (data.kind === "employee") {
+        if (!isAgencyAdmin(access.level, access.scope)) return empty;
+        const { data: doc, error: docErr } = await sb
+          .from("employee_documents")
+          .select("id")
+          .eq("id", data.document_id)
+          .eq("organization_id", data.organization_id)
+          .maybeSingle();
+        if (docErr || !doc) return empty;
+      } else {
+        const { data: doc, error: docErr } = await sb
+          .from(data.kind === "client" ? "client_documents" : "nectar_documents")
+          .select("client_id")
+          .eq("id", data.document_id)
+          .eq("organization_id", data.organization_id)
+          .maybeSingle();
+        if (docErr || !doc) return empty;
+        const clientId = (doc.client_id as string | null) ?? null;
+        // Client files always need caseload. Org-level Nectar files (no client)
+        // stay available to any active member; a client-linked Nectar file does not.
+        if (data.kind === "client" || clientId) {
+          if (!clientId) return empty;
+          const { data: allowed, error: phiErr } = await sb.rpc("can_access_client_phi", {
+            _client_id: clientId,
+          });
+          if (phiErr || allowed !== true) return empty;
+        }
+      }
+
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
-      const { data: fnRes, error } = await sb.functions.invoke("detect-doc-dates", {
-        body: {
-          kind: data.kind,
-          document_id: data.document_id,
-          organization_id: data.organization_id,
+      const { data: fnRes, error } = await (supabaseAdmin as any).functions.invoke(
+        "detect-doc-dates",
+        {
+          body: {
+            kind: data.kind,
+            document_id: data.document_id,
+            organization_id: data.organization_id,
+          },
         },
-      });
+      );
       if (error || !fnRes || fnRes.detected !== true) return empty;
       return {
         detected: true as const,
@@ -120,14 +157,16 @@ export type CurrentSibling = {
 export const findCurrentSibling = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      organization_id: z.string().uuid(),
-      kind: kindSchema,
-      document_type: z.string().min(1),
-      exclude_document_id: z.string().uuid(),
-      client_id: z.string().uuid().nullable().optional(),
-      staff_id: z.string().uuid().nullable().optional(),
-    }).parse(d),
+    z
+      .object({
+        organization_id: z.string().uuid(),
+        kind: kindSchema,
+        document_type: z.string().min(1),
+        exclude_document_id: z.string().uuid(),
+        client_id: z.string().uuid().nullable().optional(),
+        staff_id: z.string().uuid().nullable().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ sibling: CurrentSibling | null }> => {
     const { supabase, userId } = context;
@@ -137,14 +176,24 @@ export const findCurrentSibling = createServerFn({ method: "POST" })
     const sb = supabase as any;
     let q = sb
       .from(TABLE[data.kind])
-      .select("id, file_name, effective_from, effective_to, effective_to_mode, uploaded_at, created_at")
+      .select(
+        "id, file_name, effective_from, effective_to, effective_to_mode, uploaded_at, created_at",
+      )
       .eq("organization_id", data.organization_id)
       .eq(TYPE_COL[data.kind], data.document_type)
       .eq("status", "current")
       .neq("id", data.exclude_document_id)
       .limit(1);
-    q = applySubjectFilter(q, data.kind, { clientId: data.client_id ?? null, staffId: data.staff_id ?? null });
-    const orderCol = data.kind === "employee" ? "uploaded_at" : (data.kind === "nectar" ? "created_at" : "uploaded_at");
+    q = applySubjectFilter(q, data.kind, {
+      clientId: data.client_id ?? null,
+      staffId: data.staff_id ?? null,
+    });
+    const orderCol =
+      data.kind === "employee"
+        ? "uploaded_at"
+        : data.kind === "nectar"
+          ? "created_at"
+          : "uploaded_at";
     q = q.order(orderCol, { ascending: false });
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -167,15 +216,17 @@ export const findCurrentSibling = createServerFn({ method: "POST" })
 export const setEffectiveDates = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      organization_id: z.string().uuid(),
-      kind: kindSchema,
-      document_id: z.string().uuid(),
-      effective_from: z.string().min(1), // YYYY-MM-DD
-      effective_to_mode: modeSchema,
-      effective_to: z.string().nullable().optional(), // required when fixed_date
-      date_source: dateSourceSchema,
-    }).parse(d),
+    z
+      .object({
+        organization_id: z.string().uuid(),
+        kind: kindSchema,
+        document_id: z.string().uuid(),
+        effective_from: z.string().min(1), // YYYY-MM-DD
+        effective_to_mode: modeSchema,
+        effective_to: z.string().nullable().optional(), // required when fixed_date
+        date_source: dateSourceSchema,
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -209,13 +260,15 @@ export const setEffectiveDates = createServerFn({ method: "POST" })
 export const replaceDocument = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      organization_id: z.string().uuid(),
-      kind: kindSchema,
-      old_document_id: z.string().uuid(),
-      new_document_id: z.string().uuid(),
-      new_effective_from: z.string().min(1),
-    }).parse(d),
+    z
+      .object({
+        organization_id: z.string().uuid(),
+        kind: kindSchema,
+        old_document_id: z.string().uuid(),
+        new_document_id: z.string().uuid(),
+        new_effective_from: z.string().min(1),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -237,7 +290,8 @@ export const replaceDocument = createServerFn({ method: "POST" })
     // Auto-close: if the old doc had an open-ended mode, set its effective_to
     // to the day before the new doc's effective_from so the timeline has no
     // gap or overlap.
-    const openEnded = oldDoc.effective_to_mode === "ongoing" || oldDoc.effective_to_mode === "until_replaced";
+    const openEnded =
+      oldDoc.effective_to_mode === "ongoing" || oldDoc.effective_to_mode === "until_replaced";
     let closedTo: string | null = oldDoc.effective_to ?? null;
     if (openEnded) {
       const d = new Date(data.new_effective_from + "T00:00:00Z");
@@ -268,12 +322,14 @@ export const replaceDocument = createServerFn({ method: "POST" })
 export const listOutdatedDocuments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      organization_id: z.string().uuid(),
-      kind: kindSchema,
-      client_id: z.string().uuid().nullable().optional(),
-      staff_id: z.string().uuid().nullable().optional(),
-    }).parse(d),
+    z
+      .object({
+        organization_id: z.string().uuid(),
+        kind: kindSchema,
+        client_id: z.string().uuid().nullable().optional(),
+        staff_id: z.string().uuid().nullable().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ documents: OutdatedDocument[] }> => {
     const { supabase, userId } = context;
@@ -323,4 +379,3 @@ export type OutdatedDocument = {
   superseded_by: string | null;
   superseded_at: string | null;
 };
-
