@@ -3,16 +3,7 @@ project_id = "dhrrukdcigiiqksibdfb"
 [functions.send-email]
 verify_jwt = true
 
-[functions.parse-receipt-ocr]
-verify_jwt = true
-
 [functions.parse-referral-doc]
-verify_jwt = true
-
-[functions.create-training-setup-intent]
-verify_jwt = true
-
-[functions.auto-renew-trainings]
 verify_jwt = true
 
 [functions.parse-recipe-doc]

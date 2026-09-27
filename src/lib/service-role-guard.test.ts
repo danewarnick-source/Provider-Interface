@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, it } from "node:test";
 import {
   DEFAULT_HIVE_FROM_ADDRESS,
@@ -116,11 +117,6 @@ describe("B1 edge callers", () => {
       /auth\.getUser/,
     );
 
-    const ocr = read("../../supabase/functions/parse-receipt-ocr/index.ts");
-    assert.doesNotMatch(ocr, /SUPABASE_SERVICE_ROLE_KEY/);
-    assert.match(ocr, /userClient\.storage\.from\(bucket\)\.download/);
-    assert.match(ocr, /auth\.getUser/);
-
     const detectCaller = read("../../src/lib/document-effective-dating.functions.ts");
     assert.match(detectCaller, /can_access_client_phi/);
     assert.match(detectCaller, /isAgencyAdmin/);
@@ -136,6 +132,9 @@ describe("B1 edge callers", () => {
       "create-training-checkout",
       "format-training-content",
       "training-stripe-webhook",
+      "auto-renew-trainings",
+      "create-training-setup-intent",
+      "parse-receipt-ocr",
     ]) {
       assert.equal(
         existsSync(new URL(`../../supabase/functions/${name}/index.ts`, import.meta.url)),
@@ -145,7 +144,42 @@ describe("B1 edge callers", () => {
     const config = read("../../supabase/config.toml");
     assert.doesNotMatch(
       config,
-      /create-training-checkout|format-training-content|training-stripe-webhook/,
+      /create-training-checkout|format-training-content|training-stripe-webhook|auto-renew-trainings|create-training-setup-intent|parse-receipt-ocr/,
     );
+    assert.doesNotMatch(read("../../src/routes/dashboard.pba-ledger.tsx"), /parse-receipt-ocr/);
+    assert.doesNotMatch(
+      read("../../src/routes/dashboard.hive-training.index.tsx"),
+      /auto-renew-trainings|create-training-setup-intent/,
+    );
+  });
+
+  it("does not call notify_incident_filed or flag_member_deactivated as the signed-in user", () => {
+    const lifecycle = read("../../src/lib/lifecycle.functions.ts");
+    assert.match(lifecycle, /supabaseAdmin\.rpc\("flag_member_deactivated"/);
+    assert.doesNotMatch(lifecycle, /(?<!Admin)\.rpc\("flag_member_deactivated"/);
+
+    const root = new URL("../../src/", import.meta.url).pathname;
+    const hits: string[] = [];
+    const walk = (dir: string) => {
+      for (const ent of readdirSync(dir, { withFileTypes: true })) {
+        const next = join(dir, ent.name);
+        if (ent.isDirectory()) {
+          if (ent.name === "integrations") continue;
+          walk(next);
+          continue;
+        }
+        if (!/\.(ts|tsx)$/.test(ent.name) || ent.name.endsWith(".test.ts")) continue;
+        const src = readFileSync(next, "utf8");
+        if (src.includes("notify_incident_filed")) hits.push(next);
+        if (
+          src.includes('rpc("flag_member_deactivated"') &&
+          !next.endsWith("lifecycle.functions.ts")
+        ) {
+          hits.push(next);
+        }
+      }
+    };
+    walk(root);
+    assert.deepEqual(hits, []);
   });
 });
