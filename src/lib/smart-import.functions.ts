@@ -13,6 +13,7 @@ import { gatewayFetch, assertBedrockConfigured, friendlyAiErrorMessage } from "@
 import { parseDocumentWithAI, extractGoalsOnly, documentLikelyHasGoals, CORE_CLIENT_FIELD_KEYS } from "@/lib/document-extraction";
 import { enrichNamesFromFull, firstNameWithMiddle, formatPersonName } from "@/lib/person-name";
 import { smartImportNeedsAi } from "@/lib/smart-import-ai-gate";
+import { findDuplicateClientInOrg, mayRunOrgWideClientDedup, type DedupClientRow } from "@/lib/smart-import-dedup";
 
 function digitsOnly(v: string | null | undefined): string {
   return (v ?? "").replace(/\D/g, "");
@@ -703,6 +704,36 @@ export const runSmartExtraction = createServerFn({ method: "POST" })
       }
 
       // ---- Dedup / match (read-only against real tables) ----
+      let orgClients: DedupClientRow[] = [];
+      if (mode === "client") {
+        const { data: isExec, error: execErr } = await sb.rpc("is_hive_executive", {
+          _user: context.userId,
+        });
+        const adminCheck =
+          isExec === true && !execErr
+            ? { data: false, error: null }
+            : await sb.rpc("is_org_admin_or_manager", {
+                _org: data.organizationId,
+                _user: context.userId,
+              });
+        if (
+          !mayRunOrgWideClientDedup({
+            isExec: isExec === true,
+            execRpcFailed: !!execErr,
+            isOrgAdmin: adminCheck.data === true,
+            adminRpcFailed: !!adminCheck.error,
+          })
+        ) {
+          throw new Error("Forbidden — executive or organization admin required to match clients.");
+        }
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: clientRows, error: clientErr } = await (supabaseAdmin as typeof sb)
+          .from("clients")
+          .select("id, organization_id, medicaid_id, first_name, last_name")
+          .eq("organization_id", data.organizationId);
+        if (clientErr) throw new Error(clientErr.message);
+        orgClients = (clientRows ?? []) as DedupClientRow[];
+      }
       let matchedCount = 0;
       let ambiguousCount = 0;
       for (const s of allSubjects) {
@@ -718,33 +749,14 @@ export const runSmartExtraction = createServerFn({ method: "POST" })
         let ambiguous = false;
 
         if (mode === "client") {
-          const mid = map.get("medicaid_id");
-          if (mid) {
-            const { data: rows } = await sb
-              .from("clients")
-              .select("id")
-              .eq("organization_id", data.organizationId)
-              .eq("medicaid_id", mid)
-              .limit(2);
-            if (rows && rows.length === 1) matchedId = rows[0].id;
-            else if (rows && rows.length > 1) ambiguous = true;
-          }
-          if (!matchedId && !ambiguous) {
-            const fn = map.get("first_name");
-            const ln = map.get("last_name");
-            const dob = map.get("date_of_birth");
-            if (fn && ln && dob) {
-              const { data: rows } = await sb
-                .from("clients")
-                .select("id")
-                .eq("organization_id", data.organizationId)
-                .ilike("first_name", fn)
-                .ilike("last_name", ln)
-                .limit(2);
-              if (rows && rows.length === 1) matchedId = rows[0].id;
-              else if (rows && rows.length > 1) ambiguous = true;
-            }
-          }
+          const match = findDuplicateClientInOrg(orgClients, data.organizationId, {
+            medicaid_id: map.get("medicaid_id"),
+            first_name: map.get("first_name"),
+            last_name: map.get("last_name"),
+            date_of_birth: map.get("date_of_birth"),
+          });
+          matchedId = match.matchedId;
+          ambiguous = match.ambiguous;
         } else {
           const email = map.get("email");
           if (email) {

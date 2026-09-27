@@ -10,6 +10,7 @@
 // We target 80% of RPM to leave headroom for retries and other NECTAR features.
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { decideBedrockSlot } from "@/lib/nectar-rate-decision";
 
 // Public knobs — kept as consts so callers can share the exact same key.
 export const BEDROCK_RATE_KEY = "bedrock:sonnet";
@@ -47,37 +48,23 @@ export async function acquireBedrockSlot(): Promise<{ dayTokensUsed: number }> {
       p_max_per_min: BEDROCK_MAX_PER_MIN,
       p_daily_token_cap: BEDROCK_DAILY_TOKEN_CAP,
     });
-    if (error) {
-      // Never let a bookkeeping failure block real work — log and let the caller
-      // proceed. The AWS quota will still enforce itself with a 429 if we're
-      // actually over.
-      console.warn("[nectar-rate] check_rate failed:", error.message);
-      return { dayTokensUsed: lastDayTokens };
-    }
-    const row = Array.isArray(data) ? data[0] : data;
+    const row = error ? null : Array.isArray(data) ? data[0] : data;
     const waitMs = Number(row?.wait_ms ?? 0);
-    lastDayTokens = Number(row?.day_tokens_used ?? 0);
-    const dayFull = Boolean(row?.day_full);
-
-    if (waitMs === 0) return { dayTokensUsed: lastDayTokens };
-
-    if (dayFull) {
-      throw new RateLimitError(
-        "Bedrock daily token budget exhausted. Resets at 00:00 UTC.",
-        waitMs,
-        true,
-      );
+    if (!error) lastDayTokens = Number(row?.day_tokens_used ?? 0);
+    const decision = decideBedrockSlot({
+      limiterError: error ? error.message : null,
+      waitMs,
+      dayTokensUsed: lastDayTokens,
+      dayFull: Boolean(row?.day_full),
+      elapsedMs: Date.now() - started,
+      maxWaitMs: ACQUIRE_MAX_WAIT_MS,
+    });
+    if (error) console.warn("[nectar-rate] check_rate failed:", error.message);
+    if (decision.action === "fail_closed") {
+      throw new RateLimitError(decision.message, decision.waitMs, decision.dayFull);
     }
-
-    const elapsed = Date.now() - started;
-    if (elapsed + waitMs > ACQUIRE_MAX_WAIT_MS) {
-      throw new RateLimitError(
-        `Bedrock rate limit: still waiting after ${Math.round(elapsed / 1000)}s.`,
-        waitMs,
-        false,
-      );
-    }
-    await sleep(Math.min(waitMs, ACQUIRE_POLL_CAP_MS));
+    if (decision.action === "grant") return { dayTokensUsed: decision.dayTokensUsed };
+    await sleep(Math.min(decision.waitMs, ACQUIRE_POLL_CAP_MS));
   }
 }
 

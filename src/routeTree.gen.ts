@@ -18,7 +18,6 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as NectarRouteImport } from './routes/nectar'
 import { Route as MfaSetupRouteImport } from './routes/mfa-setup'
-import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ManagerRouteImport } from './routes/manager'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JoinRouteImport } from './routes/join'
@@ -115,8 +114,6 @@ import { Route as ClientsNewRouteImport } from './routes/clients.new'
 import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 import { Route as AuditPortalSetPasswordRouteImport } from './routes/audit-portal.set-password'
 import { Route as AuditPortalPackageIdRouteImport } from './routes/audit-portal.$packageId'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
-import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as DashboardTrainingIndexRouteImport } from './routes/dashboard.training.index'
 import { Route as DashboardSmartImportIndexRouteImport } from './routes/dashboard.smart-import.index'
 import { Route as DashboardHiveTrainingIndexRouteImport } from './routes/dashboard.hive-training.index'
@@ -211,7 +208,6 @@ import { Route as DashboardAdminEmarAuditRouteImport } from './routes/dashboard.
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as ApiPublicRuntimeConfigRouteImport } from './routes/api/public/runtime-config'
 import { Route as ApiComplianceUrgentRouteImport } from './routes/api/compliance/urgent'
-import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as DashboardSmartImportJobIdReviewRouteImport } from './routes/dashboard.smart-import.$jobId.review'
 import { Route as DashboardSmartImportJobIdDoneRouteImport } from './routes/dashboard.smart-import.$jobId.done'
@@ -280,11 +276,6 @@ const NectarRoute = NectarRouteImport.update({
 const MfaSetupRoute = MfaSetupRouteImport.update({
   id: '/mfa-setup',
   path: '/mfa-setup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManagerRoute = ManagerRouteImport.update({
@@ -782,18 +773,6 @@ const AuditPortalPackageIdRoute = AuditPortalPackageIdRouteImport.update({
   path: '/audit-portal/$packageId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const DashboardTrainingIndexRoute = DashboardTrainingIndexRouteImport.update({
   id: '/training/',
   path: '/training/',
@@ -1319,12 +1298,6 @@ const ApiComplianceUrgentRoute = ApiComplianceUrgentRouteImport.update({
   path: '/api/compliance/urgent',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Char91DotmcpChar93InvokeToolToolRoute =
-  Char91DotmcpChar93InvokeToolToolRouteImport.update({
-    id: '/.mcp/invoke-tool/$tool',
-    path: '/.mcp/invoke-tool/$tool',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -1486,7 +1459,6 @@ export interface FileRoutesByFullPath {
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
   '/manager': typeof ManagerRoute
-  '/mcp': typeof McpRoute
   '/mfa-setup': typeof MfaSetupRoute
   '/nectar': typeof NectarRoute
   '/pricing': typeof PricingRoute
@@ -1496,8 +1468,6 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/training': typeof TrainingRouteWithChildren
   '/unauthorized': typeof UnauthorizedRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/audit-portal/$packageId': typeof AuditPortalPackageIdRoute
   '/audit-portal/set-password': typeof AuditPortalSetPasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
@@ -1578,7 +1548,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof DashboardIndexRoute
   '/employees/': typeof EmployeesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -1712,7 +1681,6 @@ export interface FileRoutesByTo {
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
   '/manager': typeof ManagerRoute
-  '/mcp': typeof McpRoute
   '/mfa-setup': typeof MfaSetupRoute
   '/nectar': typeof NectarRoute
   '/pricing': typeof PricingRoute
@@ -1722,8 +1690,6 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/training': typeof TrainingRouteWithChildren
   '/unauthorized': typeof UnauthorizedRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/audit-portal/$packageId': typeof AuditPortalPackageIdRoute
   '/audit-portal/set-password': typeof AuditPortalSetPasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
@@ -1798,7 +1764,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardIndexRoute
   '/employees': typeof EmployeesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -1936,7 +1901,6 @@ export interface FileRoutesById {
   '/join': typeof JoinRoute
   '/login': typeof LoginRoute
   '/manager': typeof ManagerRoute
-  '/mcp': typeof McpRoute
   '/mfa-setup': typeof MfaSetupRoute
   '/nectar': typeof NectarRoute
   '/pricing': typeof PricingRoute
@@ -1946,8 +1910,6 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/training': typeof TrainingRouteWithChildren
   '/unauthorized': typeof UnauthorizedRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/audit-portal/$packageId': typeof AuditPortalPackageIdRoute
   '/audit-portal/set-password': typeof AuditPortalSetPasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
@@ -2028,7 +1990,6 @@ export interface FileRoutesById {
   '/dashboard/': typeof DashboardIndexRoute
   '/employees/': typeof EmployeesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -2167,7 +2128,6 @@ export interface FileRouteTypes {
     | '/join'
     | '/login'
     | '/manager'
-    | '/mcp'
     | '/mfa-setup'
     | '/nectar'
     | '/pricing'
@@ -2177,8 +2137,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/training'
     | '/unauthorized'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
     | '/audit-portal/$packageId'
     | '/audit-portal/set-password'
     | '/certificate/$code'
@@ -2259,7 +2217,6 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/employees/'
     | '/.lovable/oauth/consent'
-    | '/.mcp/invoke-tool/$tool'
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
@@ -2393,7 +2350,6 @@ export interface FileRouteTypes {
     | '/join'
     | '/login'
     | '/manager'
-    | '/mcp'
     | '/mfa-setup'
     | '/nectar'
     | '/pricing'
@@ -2403,8 +2359,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/training'
     | '/unauthorized'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
     | '/audit-portal/$packageId'
     | '/audit-portal/set-password'
     | '/certificate/$code'
@@ -2479,7 +2433,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/employees'
     | '/.lovable/oauth/consent'
-    | '/.mcp/invoke-tool/$tool'
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
@@ -2616,7 +2569,6 @@ export interface FileRouteTypes {
     | '/join'
     | '/login'
     | '/manager'
-    | '/mcp'
     | '/mfa-setup'
     | '/nectar'
     | '/pricing'
@@ -2626,8 +2578,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/training'
     | '/unauthorized'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
     | '/audit-portal/$packageId'
     | '/audit-portal/set-password'
     | '/certificate/$code'
@@ -2708,7 +2658,6 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/employees/'
     | '/.lovable/oauth/consent'
-    | '/.mcp/invoke-tool/$tool'
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
@@ -2846,7 +2795,6 @@ export interface RootRouteChildren {
   JoinRoute: typeof JoinRoute
   LoginRoute: typeof LoginRoute
   ManagerRoute: typeof ManagerRoute
-  McpRoute: typeof McpRoute
   MfaSetupRoute: typeof MfaSetupRoute
   NectarRoute: typeof NectarRoute
   PricingRoute: typeof PricingRoute
@@ -2856,8 +2804,6 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TrainingRoute: typeof TrainingRouteWithChildren
   UnauthorizedRoute: typeof UnauthorizedRoute
-  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
-  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AuditPortalPackageIdRoute: typeof AuditPortalPackageIdRoute
   AuditPortalSetPasswordRoute: typeof AuditPortalSetPasswordRoute
   CertificateCodeRoute: typeof CertificateCodeRoute
@@ -2866,7 +2812,6 @@ export interface RootRouteChildren {
   VerifyCodeRoute: typeof VerifyCodeRoute
   AuditPortalIndexRoute: typeof AuditPortalIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
-  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiComplianceUrgentRoute: typeof ApiComplianceUrgentRoute
   ApiPublicRuntimeConfigRoute: typeof ApiPublicRuntimeConfigRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
@@ -2943,13 +2888,6 @@ declare module '@tanstack/react-router' {
       path: '/mfa-setup'
       fullPath: '/mfa-setup'
       preLoaderRoute: typeof MfaSetupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manager': {
@@ -3624,20 +3562,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuditPortalPackageIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/.mcp/list-tools': {
-      id: '/.mcp/list-tools'
-      path: '/.mcp/list-tools'
-      fullPath: '/.mcp/list-tools'
-      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dashboard/training/': {
       id: '/dashboard/training/'
       path: '/training'
@@ -4294,13 +4218,6 @@ declare module '@tanstack/react-router' {
       path: '/api/compliance/urgent'
       fullPath: '/api/compliance/urgent'
       preLoaderRoute: typeof ApiComplianceUrgentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/.mcp/invoke-tool/$tool': {
-      id: '/.mcp/invoke-tool/$tool'
-      path: '/.mcp/invoke-tool/$tool'
-      fullPath: '/.mcp/invoke-tool/$tool'
-      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.lovable/oauth/consent': {
@@ -5049,7 +4966,6 @@ const rootRouteChildren: RootRouteChildren = {
   JoinRoute: JoinRoute,
   LoginRoute: LoginRoute,
   ManagerRoute: ManagerRoute,
-  McpRoute: McpRoute,
   MfaSetupRoute: MfaSetupRoute,
   NectarRoute: NectarRoute,
   PricingRoute: PricingRoute,
@@ -5059,9 +4975,6 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TrainingRoute: TrainingRouteWithChildren,
   UnauthorizedRoute: UnauthorizedRoute,
-  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
-  Char91DotwellKnownChar93OauthProtectedResourceRoute:
-    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AuditPortalPackageIdRoute: AuditPortalPackageIdRoute,
   AuditPortalSetPasswordRoute: AuditPortalSetPasswordRoute,
   CertificateCodeRoute: CertificateCodeRoute,
@@ -5070,7 +4983,6 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyCodeRoute: VerifyCodeRoute,
   AuditPortalIndexRoute: AuditPortalIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
-  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiComplianceUrgentRoute: ApiComplianceUrgentRoute,
   ApiPublicRuntimeConfigRoute: ApiPublicRuntimeConfigRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,

@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import { MONTHLY_SUMMARY_REQUIRED_FIELDS } from "@/lib/progress-summaries";
+import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
 
 /**
  * Nectar drafter for periodic progress summaries.
@@ -166,7 +167,7 @@ export const draftProgressSummary = createServerFn({ method: "POST" })
       .from("incident_reports")
       .select("incident_date, report_number, incident_types, narrative_during")
       .eq("organization_id", data.organizationId)
-      .eq("client_id", row.client_id)
+      .or(incidentInvolvesClientOr(row.client_id))
       .gte("incident_date", row.period_start)
       .lte("incident_date", row.period_end)
       .order("incident_date", { ascending: true });

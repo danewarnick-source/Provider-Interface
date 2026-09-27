@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyEntitlements } from "@/lib/entitlements.functions";
@@ -11,12 +10,9 @@ import type { AddonId, TierId } from "@/lib/hive-tiers";
  * Drives the visible-but-locked pattern across PI: components ask
  * `hasAddon("internal_audit")` and render the AddonLock when it's false.
  * Server functions must independently enforce the same check
- * (see `assertAddon` in `entitlements.server.ts`) — the UI lock and the
- * server check must agree.
- *
- * A PI-Executive demo override (`hive.nectar.infusion = "on"` in
- * localStorage) force-enables the NECTAR Infusion add-on regardless of tier,
- * so platform staff can preview NECTAR-accelerated controls end-to-end.
+ * (see `assertAddonForOrg` / `assertMemberPlanAddon` in
+ * `entitlements.server.ts`) — the UI lock and the server check must agree.
+ * Team-member Nectar follows the org plan. A browser flag cannot add it.
  */
 export function useEntitlements() {
   const { session } = useAuth();
@@ -29,24 +25,7 @@ export function useEntitlements() {
     staleTime: 60_000,
   });
 
-  const [override, setOverride] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("hive.nectar.infusion") === "on";
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "hive.nectar.infusion") setOverride(e.newValue === "on");
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
-  const baseAddons = (q.data?.addons ?? []) as AddonId[];
-  const addons: AddonId[] = override && !baseAddons.includes("nectar_infusion")
-    ? [...baseAddons, "nectar_infusion"]
-    : baseAddons;
+  const addons = (q.data?.addons ?? []) as AddonId[];
 
   const tier = (q.data?.tier ?? "starter") as TierId;
 
