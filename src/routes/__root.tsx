@@ -16,6 +16,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { isChunkLoadError, tryAutoReloadOnce, clearChunkReloadGuard } from "@/lib/chunk-reload";
 import { inviteTokenFromSearchStr } from "@/lib/join-invite";
 import { getPublicRuntimeBlob } from "@/lib/aws/env";
+import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
+import { persistActiveOrgId } from "@/lib/current-org";
 
 function NotFoundComponent() {
   return (
@@ -141,6 +143,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       throw redirect({ to: "/reset-password" });
     }
 
+    let membershipRows = memberships ?? [];
+    // Confirmed sign-in with no membership: provision the agency workspace.
+    // /login and /signup return before this. Invite / training / manual adds
+    // are refused inside ensureSignupWorkspace.
+    if (typeof window !== "undefined" && membershipRows.length === 0) {
+      try {
+        const ensured = await ensureSignupWorkspace({ data: {} });
+        if (ensured?.orgId) {
+          persistActiveOrgId(ensured.orgId);
+          const { data: again } = await supabase
+            .from("organization_members")
+            .select("organization_id")
+            .eq("user_id", session.user.id)
+            .eq("active", true)
+            .limit(5);
+          membershipRows = again ?? [];
+        }
+      } catch {
+        /* leave the signed-in route; signup business step can retry */
+      }
+    }
+
     // MFA is off until real PHI launch. Planned: email one-time code after
     // password (not authenticator-app TOTP). Do not re-enable the AAL2 gate
     // here without that flow.
@@ -151,7 +175,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     // re-check this on a mounted page, or it would forcibly interrupt an
     // already-loaded session mid-shift.
     if (location.pathname.startsWith("/sign-policy/")) return;
-    const orgId = memberships?.[0]?.organization_id;
+    const orgId = membershipRows[0]?.organization_id;
     if (!orgId) return;
     const { data: gatingDocs } = await supabase
       .from("nectar_documents")

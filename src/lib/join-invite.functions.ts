@@ -200,8 +200,10 @@ export const prepareInviteAccount = createServerFn({ method: "POST" })
       }
       userId = created.user.id;
 
-      // handle_new_user() may still create a personal workspace until the
-      // skip-on-invitation SQL is applied. Same cleanup as Add manually.
+      // Until docs/SQL_HANDOFF_signup_after_confirm.sql is applied, the live
+      // trigger may still create a personal workspace (it does not skip
+      // created_via). This person does not need that row: the inviting org
+      // membership is written by accept_invitation. Deactivate a leftover.
       await supabaseAdmin
         .from("organization_members")
         .update({ active: false })

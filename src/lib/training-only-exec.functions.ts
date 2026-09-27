@@ -285,6 +285,7 @@ async function provisionThirtyDayLogin(email: string, personName: string): Promi
   }
 
   const { data: invited, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, {
+    // created_via keeps ensureSignupWorkspace from opening an agency workspace.
     data: { full_name: personName, created_via: "training_only" },
     redirectTo,
   });
