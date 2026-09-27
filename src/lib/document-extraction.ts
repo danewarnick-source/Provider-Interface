@@ -328,6 +328,7 @@ codes, allergies, diagnoses, etc.) stay in "fields" as usual.`;
 export async function parseDocumentWithAI(
   documentText: string,
   hint?: string,
+  orgId?: string | null,
 ): Promise<ParseOutT> {
   const res = await gatewayFetch({
     messages: [
@@ -342,7 +343,7 @@ export async function parseDocumentWithAI(
     // The 4096 default truncated responses mid-string and tripped JSON.parse,
     // surfacing to users as "AI returned malformed JSON". Give real headroom.
     max_tokens: 16000,
-  });
+  }, { orgId });
   if (res.status === 429) throw new Error(friendlyAiErrorMessage(429, "Throttled"));
   if (res.status === 401)
     throw new Error(friendlyAiErrorMessage(401, "AWS Bedrock credentials are not configured"));
@@ -427,7 +428,7 @@ Also include source_locator (e.g. "page 3", "Goal 2 row") and confidence 0..1.
 
 Return ONLY JSON, no commentary. If the document contains no goals at all, return {"fields": []}.`;
 
-export async function extractGoalsOnly(documentText: string): Promise<ParseOutT> {
+export async function extractGoalsOnly(documentText: string, orgId?: string | null): Promise<ParseOutT> {
   const res = await gatewayFetch({
     messages: [
       { role: "system", content: GOALS_ONLY_SYSTEM_PROMPT },
@@ -438,7 +439,7 @@ export async function extractGoalsOnly(documentText: string): Promise<ParseOutT>
     ],
     response_format: { type: "json_object" },
     max_tokens: 12000,
-  });
+  }, { orgId });
   if (res.status === 429) throw new Error(friendlyAiErrorMessage(429, "Throttled"));
   if (!res.ok) {
     const t = await res.text().catch(() => "");

@@ -191,7 +191,7 @@ function clipSystem(system: string): string {
   return `${system.slice(0, MAX_SYSTEM_CHARS)}\n\n[context truncated]`;
 }
 
-async function callAI(system: string, user: string): Promise<string> {
+async function callAI(system: string, user: string, orgId?: string | null): Promise<string> {
   try {
     assertBedrockConfigured();
   } catch (e) {
@@ -209,7 +209,7 @@ async function callAI(system: string, user: string): Promise<string> {
         { role: "user", content: user },
       ],
       response_format: { type: "json_object" },
-    });
+    }, { orgId });
   if (res.ok) {
     const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
     return json.choices?.[0]?.message?.content ?? "{}";
@@ -226,7 +226,7 @@ async function callAI(system: string, user: string): Promise<string> {
         { role: "user", content: user },
       ],
       response_format: { type: "json_object" },
-    });
+    }, { orgId });
     if (retry.ok) {
       const json = (await retry.json()) as { choices?: Array<{ message?: { content?: string } }> };
       return json.choices?.[0]?.message?.content ?? "{}";
@@ -589,7 +589,7 @@ OUTPUT — STRICT JSON ONLY:
 }
 "refused" = true ONLY when you declined an out-of-scope request. When you used FACTS.schedule, include a citation { "type": "schedule", "id": "own-schedule", "title": "Your schedule" }.`;
 
-    const raw = await callAI(system, data.question);
+    const raw = await callAI(system, data.question, orgId);
     let parsed: Partial<NectarStaffReply> = {};
     try { parsed = JSON.parse(raw); } catch {
       const m = raw.match(/\{[\s\S]*\}/);

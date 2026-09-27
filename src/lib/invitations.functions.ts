@@ -20,7 +20,7 @@ import { type AccessLevel } from "@/lib/access/levels";
 import { resolvePresetId } from "@/lib/access/preset-resolve";
 import { buildInvitationEmail } from "@/lib/invitation-email";
 import { inviteJoinUrl } from "@/lib/join-invite";
-import { stripFakeDisplayLabel } from "@/lib/managed-from";
+import { pickReplyTo, stripFakeDisplayLabel } from "@/lib/managed-from";
 import { canSendImportInvite } from "@/lib/import-invite";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
 
@@ -173,6 +173,15 @@ async function loadInviterName(
   return joined || "A teammate";
 }
 
+async function loadProfileEmail(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  userId: string,
+): Promise<string | null> {
+  const { data } = await supabase.from("profiles").select("email").eq("id", userId).maybeSingle();
+  return pickReplyTo(null, (data as { email?: string | null } | null)?.email ?? null);
+}
+
 async function sendInvitationEmail(args: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any;
@@ -182,10 +191,13 @@ async function sendInvitationEmail(args: {
   token: string;
   siteOrigin: string;
   inviterUserId: string;
+  /** Auth email for the person sending, used when profiles.email is empty. */
+  inviterEmail?: string | null;
 }): Promise<{ ok: boolean; error?: string }> {
-  const { supabase, organizationId, email, level, token, siteOrigin, inviterUserId } = args;
+  const { supabase, organizationId, email, level, token, siteOrigin, inviterUserId, inviterEmail } = args;
   try {
-    const sender = await resolveOrgSender(supabase, organizationId);
+    const actorEmail = (await loadProfileEmail(supabase, inviterUserId)) ?? pickReplyTo(null, inviterEmail);
+    const sender = await resolveOrgSender(supabase, organizationId, actorEmail);
     const { data: org } = await supabase
       .from("organizations")
       .select("name")
@@ -212,7 +224,7 @@ async function sendInvitationEmail(args: {
           subject,
           html,
           text,
-          reply_to: sender.reply_to,
+          ...(sender.reply_to ? { reply_to: sender.reply_to } : {}),
         },
       },
     );
@@ -303,6 +315,7 @@ export const createInvitation = createServerFn({ method: "POST" })
       token: (invite as InvitationRow).token,
       siteOrigin: data.site_origin,
       inviterUserId: userId,
+      inviterEmail: context.claims?.email ?? null,
     });
 
     return {
@@ -355,6 +368,7 @@ export const resendInvitation = createServerFn({ method: "POST" })
       token: row.token,
       siteOrigin: data.site_origin,
       inviterUserId: userId,
+      inviterEmail: context.claims?.email ?? null,
     });
 
     return {
@@ -408,8 +422,9 @@ async function upsertPendingInviteAndSend(args: {
   level: AccessLevel;
   presetId: string | null;
   siteOrigin: string;
+  inviterEmail?: string | null;
 }): Promise<{ invitation: InvitationRow; email_sent: boolean; email_error: string | null }> {
-  const { supabase, organizationId, userId, email, level, siteOrigin } = args;
+  const { supabase, organizationId, userId, email, level, siteOrigin, inviterEmail } = args;
   const presetId = await presetIdForInvite(organizationId, level, args.presetId);
   const access = { access_level: level, access_preset_id: presetId };
   await assertAgencySetupCompleteForOrg(supabase, organizationId);
@@ -458,6 +473,7 @@ async function upsertPendingInviteAndSend(args: {
     token: invite.token,
     siteOrigin,
     inviterUserId: userId,
+    inviterEmail,
   });
   return {
     invitation: invite,
@@ -630,6 +646,7 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
             level: t.level,
             presetId: t.presetId,
             siteOrigin: data.site_origin,
+            inviterEmail: context.claims?.email ?? null,
           });
           if (out.email_sent) {
             sent += 1;

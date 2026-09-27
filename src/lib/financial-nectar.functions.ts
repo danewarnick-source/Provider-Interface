@@ -505,7 +505,7 @@ export const askFinancialNectar = createServerFn({ method: "POST" })
         ],
         temperature: 0.2,
         max_tokens: 1024,
-      });
+      }, { orgId: data.organizationId });
       if (res.ok) {
         const json = await res.json();
         answer = json?.choices?.[0]?.message?.content?.trim?.() ?? "";

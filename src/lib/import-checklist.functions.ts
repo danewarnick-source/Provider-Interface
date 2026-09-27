@@ -239,7 +239,7 @@ export const extractAndApplyClientUpload = createServerFn({ method: "POST" })
 
     // 3) Extract via the shared NECTAR extractor with a category hint
     const { parseDocumentWithAI } = await import("@/lib/document-extraction");
-    const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`);
+    const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`, orgId);
     const fields = (parsed.fields ?? []).map((f) => ({
       field_key: f.field_key,
       value_text: f.value_text ?? null,
@@ -408,7 +408,7 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false as const, reason: "Not authenticated." };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await requireAdminForClient(sb, context.userId as string, data.clientId);
 
     const { data: file, error: dlErr } = await sb.storage
       .from(data.bucket)
@@ -428,7 +428,7 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
     }
 
     const { parseDocumentWithAI } = await import("@/lib/document-extraction");
-    const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`);
+    const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`, orgId);
     const rawFields = (parsed.fields ?? []).map((f) => ({
       field_key: f.field_key,
       value_text: f.value_text ?? null,

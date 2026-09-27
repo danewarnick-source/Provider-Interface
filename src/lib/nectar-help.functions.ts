@@ -74,7 +74,7 @@ STAFF AREA (employee/host_family):
 
 ROLE RULES: Staff & host-family NEVER see billing rates, dollar amounts, the 520 view, or other clients' data.`;
 
-async function callAI(system: string, user: string): Promise<string> {
+async function callAI(system: string, user: string, orgId?: string | null): Promise<string> {
   assertBedrockConfigured();
   const res = await gatewayFetch({
     model: "bedrock",
@@ -83,7 +83,7 @@ async function callAI(system: string, user: string): Promise<string> {
       { role: "user", content: user },
     ],
     response_format: { type: "json_object" },
-  });
+  }, { orgId });
   if (res.status === 429)
     throw new Error("NECTAR is busy right now — please try again in a moment.");
   if (res.status === 402)
@@ -690,7 +690,7 @@ OUTPUT FORMAT — return STRICT JSON only:
   "followUps": ["<short follow-up>", "<another>"]
 }`;
 
-    const raw = await callAI(system, data.question);
+    const raw = await callAI(system, data.question, data.organizationId);
     let parsed: Partial<NectarHelpReply> = {};
     try {
       parsed = JSON.parse(raw);

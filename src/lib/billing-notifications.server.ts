@@ -1,11 +1,11 @@
 // Billing email dispatch.
 //
 // Renders PI-branded templates from src/lib/billing-emails.ts and sends
-// via the existing `send-email` edge function when the org has a verified
-// sender configured in `org_email_settings`. If no sender is configured,
-// the call logs and returns gracefully — billing state changes must never
-// fail because email infrastructure is unavailable (the payment_events row
-// is the durable record of truth).
+// via the existing `send-email` edge function. From stays the platform
+// mailbox. Reply-To is the org setting when one is set; otherwise the
+// message still sends. A lookup failure logs and returns gracefully —
+// billing state changes must never fail because email infrastructure is
+// unavailable (the payment_events row is the durable record of truth).
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { renderBillingEmail, type BillingEmailKind, type BillingEmailVars } from "./billing-emails";
@@ -67,13 +67,13 @@ async function getAgencyName(orgId: string): Promise<string | undefined> {
   return data?.name ?? undefined;
 }
 
-async function getSenderFor(orgId: string): Promise<{ from: string; reply_to: string } | null> {
+async function getSenderFor(orgId: string): Promise<{ from: string; reply_to: string | null } | null> {
   try {
     const { resolveOrgSender } = await import("./email.functions");
+    // No acting person on billing mail. Missing reply-to still sends.
     return await resolveOrgSender(supabaseAdmin, orgId);
   } catch {
-    // No reply-to configured yet (or other lookup failure). Billing state
-    // changes must never break on email — caller logs and moves on.
+    // Lookup failure. Billing state changes must never break on email.
     return null;
   }
 }
@@ -112,7 +112,7 @@ export async function sendBillingEmail(ctx: BillingEmailContext): Promise<{
         subject: rendered.subject,
         html: rendered.html,
         text: rendered.text,
-        reply_to: sender.reply_to,
+        ...(sender.reply_to ? { reply_to: sender.reply_to } : {}),
       },
     });
 

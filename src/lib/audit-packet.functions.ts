@@ -52,7 +52,7 @@ const ExtractionSchema = z.object({
   items: z.array(ItemSchema).max(200),
 });
 
-async function callLovableAI(letterText: string) {
+async function callLovableAI(letterText: string, orgId?: string | null) {
   assertBedrockConfigured();
   const res = await gatewayFetch({
       model: "bedrock",
@@ -61,7 +61,7 @@ async function callLovableAI(letterText: string) {
         { role: "user", content: `AUDIT LETTER:\n\n${letterText.slice(0, 60000)}` },
       ],
       response_format: { type: "json_object" },
-    });
+    }, { orgId });
   if (res.status === 429) throw new Error("AI rate limit reached. Try again in a moment.");
   if (res.status === 402) throw new Error("AI credits exhausted. Add funds in Settings → Workspace → Usage.");
   if (!res.ok) throw new Error(`AI gateway error ${res.status}`);
@@ -102,7 +102,7 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
       throw new Error("Only admins or managers can produce an audit packet.");
     }
 
-    const extraction = await callLovableAI(data.letter_text);
+    const extraction = await callLovableAI(data.letter_text, data.organization_id);
     const fiscalYear =
       extraction.fiscal_year ?? data.fallback_fiscal_year ?? `FY${String(new Date().getFullYear() % 100).padStart(2, "0")}`;
     const packetName = `${fiscalYear} — ${data.provider_name}`;

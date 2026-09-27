@@ -497,6 +497,7 @@ export const providerConfirmRequirement = createServerFn({ method: "POST" })
           req.title as string,
           (req.description as string | null) ?? null,
           (req.source_citation as string | null) ?? null,
+          req.organization_id as string,
         );
         await context.supabase
           .from("nectar_requirements")

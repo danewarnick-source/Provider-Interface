@@ -342,7 +342,7 @@ async function assembleVerbatim(
         goals.length ? `PCSP goals:\n${goals.map((g, i) => `  ${i + 1}. ${g}`).join("\n")}` : "",
         intakeHighlights.length ? `Intake highlights:\n${intakeHighlights.slice(0, 12).map((h) => `  - ${h}`).join("\n")}` : "",
       ].filter(Boolean).join("\n");
-      const narrative = await draftTrainingNarrative(facts);
+      const narrative = await draftTrainingNarrative(facts, orgId);
       if (narrative && narrative.trim()) {
         sections.unshift({
           id: sid(),
@@ -366,7 +366,7 @@ async function assembleVerbatim(
 // before publishing. Returns "" on any AI failure so assembly degrades safely.
 // Deliberately excludes meds, behavior protocols, and legal restrictions —
 // those remain as exact structured records elsewhere in the training.
-async function draftTrainingNarrative(facts: string): Promise<string> {
+async function draftTrainingNarrative(facts: string, orgId?: string | null): Promise<string> {
   if (!facts.trim()) return "";
   try {
     const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
@@ -385,7 +385,7 @@ async function draftTrainingNarrative(facts: string): Promise<string> {
         { role: "user", content: `FACTS:\n${facts}` },
       ],
       response_format: { type: "json_object" },
-    });
+    }, { orgId });
     if (!res.ok) return "";
     const body = await res.json();
     const content: string = body?.choices?.[0]?.message?.content ?? "{}";
@@ -400,7 +400,7 @@ async function draftTrainingNarrative(facts: string): Promise<string> {
 // ── Verbatim PCSP goal extractor (admin, NECTAR) ────────────────────────────
 // Reads the uploaded PCSP document and returns one CSTGoal per goal/objective
 // row. Every field is STRICTLY verbatim — no summarisation, no authored prose.
-async function extractGoalsVerbatim(documentText: string): Promise<CSTGoal[]> {
+async function extractGoalsVerbatim(documentText: string, orgId?: string | null): Promise<CSTGoal[]> {
   const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
   const system = [
     "You are NECTAR, a STRICTLY VERBATIM extraction engine for a Utah DSPD PCSP.",
@@ -423,7 +423,7 @@ async function extractGoalsVerbatim(documentText: string): Promise<CSTGoal[]> {
       { role: "user", content: `PCSP DOCUMENT TEXT:\n\n${documentText.slice(0, 120_000)}` },
     ],
     response_format: { type: "json_object" },
-  });
+  }, { orgId });
   if (!res.ok) throw new Error(`NECTAR extraction failed (${res.status}).`);
   const body = await res.json();
   const content: string = body?.choices?.[0]?.message?.content ?? "{}";
@@ -486,7 +486,7 @@ export const extractPcspGoalsForTraining = createServerFn({ method: "POST" })
     }
 
     // 3) Verbatim goal extraction.
-    const goals = await extractGoalsVerbatim(text);
+    const goals = await extractGoalsVerbatim(text, m.organization_id);
 
     // 4) Store on the person_specific training row (create draft if none exists).
     const { data: existing } = await supabase
@@ -867,7 +867,7 @@ export const checkAnswerRelevance = createServerFn({ method: "POST" })
 // NECTAR drafts "Instructions to staff" for each PCSP goal. This is an
 // AI-drafted starting point only — the agency admin MUST review, edit, and
 // attest before publishing. NECTAR never auto-publishes; status stays "draft".
-async function draftSupportStrategyInstructions(goals: string[]): Promise<string[]> {
+async function draftSupportStrategyInstructions(goals: string[], orgId?: string | null): Promise<string[]> {
   if (!goals.length) return [];
   try {
     const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
@@ -887,7 +887,7 @@ async function draftSupportStrategyInstructions(goals: string[]): Promise<string
         { role: "user", content: user },
       ],
       response_format: { type: "json_object" },
-    });
+    }, { orgId });
     if (!res.ok) return goals.map(() => "");
     const body = await res.json();
     const content: string = body?.choices?.[0]?.message?.content ?? "{}";
@@ -921,7 +921,7 @@ async function assembleSupportStrategyStubs(
     ] }] };
   }
   // AI-drafted starting point; admin reviews/edits/attests before publish.
-  const instructions = await draftSupportStrategyInstructions(goals);
+  const instructions = await draftSupportStrategyInstructions(goals, orgId);
   const sections: CSTSection[] = goals.map((g, i) => ({
     id: sid(),
     title: "Support strategy",

@@ -65,7 +65,7 @@ export async function runNectarCertOcr(
   if (docErr || !doc) throw new Error("Document not found for OCR");
 
   return runNectarCertOcrFromStoragePath(
-    sb, bucket, doc.object_path, doc.mime_type ?? null, doc.file_name ?? null, training,
+    sb, bucket, doc.object_path, doc.mime_type ?? null, doc.file_name ?? null, training, organizationId,
   );
 }
 
@@ -82,6 +82,7 @@ export async function runNectarCertOcrFromStoragePath(
   mimeType: string | null,
   fileName: string | null,
   training: TrainingLike,
+  orgId?: string | null,
 ): Promise<NectarCertOcrResult> {
   const { data: signed, error: signErr } = await sb.storage
     .from(bucket)
@@ -143,7 +144,7 @@ If a field is not clearly visible on the document, return null for that field. D
     model: "bedrock",
     messages: [{ role: "user", content: contentBlocks }],
     response_format: { type: "json_object" },
-  });
+  }, { orgId });
   if (!aiRes.ok) {
     const t = await aiRes.text();
     throw new Error(`Nectar OCR ${aiRes.status}: ${t.slice(0, 200)}`);

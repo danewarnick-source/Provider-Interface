@@ -83,6 +83,7 @@ Be conservative — return "unknown" with low confidence rather than guessing.`;
 async function classifyWithAI(
   text: string,
   fileName: string,
+  orgId?: string | null,
 ): Promise<{ type: DetectedDocType; confidence: number; reason: string }> {
   assertBedrockConfigured();
   const snippet = (text || "").slice(0, 12000);
@@ -96,7 +97,7 @@ async function classifyWithAI(
         },
       ],
       response_format: { type: "json_object" },
-    });
+    }, { orgId });
   if (!res.ok) return { type: "unknown", confidence: 0, reason: `ai_${res.status}` };
   const body = (await res.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
@@ -148,7 +149,7 @@ export const detectAndOfferActions = createServerFn({ method: "POST" })
         reason: "cached",
       };
     } else {
-      detected = await classifyWithAI(doc.raw_text ?? "", doc.file_name);
+      detected = await classifyWithAI(doc.raw_text ?? "", doc.file_name, doc.organization_id);
       const nextMd = {
         ...(doc.metadata ?? {}),
         detected_type: detected.type,

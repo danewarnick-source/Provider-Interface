@@ -601,7 +601,7 @@ export const runSmartExtraction = createServerFn({ method: "POST" })
           extracted: Awaited<ReturnType<typeof aiExtractFieldsFromText>>;
         }> = [];
         for (const blob of blobs) {
-          const extracted = await aiExtractFieldsFromText(blob.text, mode);
+          const extracted = await aiExtractFieldsFromText(blob.text, mode, data.organizationId);
           extractions.push({ blob, extracted });
         }
         const hasAnyFields = extractions.some((e) => e.extracted.fields.length > 0);
@@ -898,12 +898,13 @@ async function extractDocxText(buf: Buffer): Promise<string> {
 async function aiExtractFieldsFromText(
   text: string,
   mode: "employee" | "client",
+  orgId?: string | null,
 ): Promise<{ display_name: string; fields: ExtractedFieldOut[]; unfiled: string[] }> {
   if (mode === "employee") {
-    return aiExtractEmployeeFieldsFromText(text);
+    return aiExtractEmployeeFieldsFromText(text, orgId);
   }
 
-  const parsed = await parseDocumentWithAI(text, `subject=client`);
+  const parsed = await parseDocumentWithAI(text, `subject=client`, orgId);
 
   const out: ExtractedFieldOut[] = [];
   const unfiled: string[] = [];
@@ -1004,7 +1005,7 @@ async function aiExtractFieldsFromText(
   const goalCount = out.filter((r) => r.target_field === "pcsp_goal").length;
   if (goalCount === 0 && documentLikelyHasGoals(text)) {
     try {
-      const retry = await extractGoalsOnly(text);
+      const retry = await extractGoalsOnly(text, orgId);
       for (const f of retry.fields ?? []) {
         if (f.field_key !== "pcsp_goal") continue;
         const conf = typeof f.confidence === "number" ? Math.max(0, Math.min(1, f.confidence)) : 0.7;
@@ -1114,6 +1115,7 @@ async function aiExtractFieldsFromText(
 // can reuse the same prompt/parse logic instead of duplicating it.
 export async function aiExtractEmployeeFieldsFromText(
   text: string,
+  orgId?: string | null,
 ): Promise<{ display_name: string; fields: ExtractedFieldOut[]; unfiled: string[] }> {
 
   const targetFields = [
@@ -1131,7 +1133,7 @@ Rules: dates ISO YYYY-MM-DD; never invent data; return ONLY JSON.`;
       { role: "user", content: `Extract from this document text:\n\n${truncated}` },
     ],
     response_format: { type: "json_object" },
-  });
+  }, { orgId });
   if (res.status === 429) throw new Error("AI is busy (rate limit). Try again in a moment.");
   if (res.status === 401) throw new Error("AWS Bedrock credentials are not configured.");
   if (!res.ok) {

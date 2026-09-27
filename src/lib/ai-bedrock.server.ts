@@ -34,6 +34,8 @@ export type BedrockChatRequest = {
   signal?: AbortSignal;
   /** Optional max tokens; defaults to 4096 which matches NECTAR's prior usage. */
   maxTokens?: number;
+  /** Agency for the per-org Bedrock cap. Omitted → global ceiling only. */
+  orgId?: string | null;
 };
 
 export type BedrockChatResponse = {
@@ -61,16 +63,19 @@ export function publicAiMessage(status: number): string {
   return "AI request failed. Try again in a moment.";
 }
 
-function rememberBedrockTokens(usage: {
-  inputTokens?: number;
-  outputTokens?: number;
-  totalTokens?: number;
-} | undefined): void {
+function rememberBedrockTokens(
+  usage: {
+    inputTokens?: number;
+    outputTokens?: number;
+    totalTokens?: number;
+  } | undefined,
+  orgId?: string | null,
+): void {
   const total =
     typeof usage?.totalTokens === "number" && usage.totalTokens > 0
       ? usage.totalTokens
       : Number(usage?.inputTokens ?? 0) + Number(usage?.outputTokens ?? 0);
-  if (total > 0) void recordBedrockTokens(total);
+  if (total > 0) void recordBedrockTokens(total, orgId);
 }
 
 function getClient(): BedrockRuntimeClient {
@@ -209,7 +214,7 @@ export async function callBedrockChatCompletions(
 
   let out;
   try {
-    await acquireBedrockSlot();
+    await acquireBedrockSlot(req.orgId);
     out = await client.send(command, { abortSignal: req.signal });
   } catch (e) {
     if (e instanceof RateLimitError) throw new BedrockError(429, publicAiMessage(429));
@@ -226,7 +231,7 @@ export async function callBedrockChatCompletions(
     throw new BedrockError(mapped, publicAiMessage(mapped));
   }
 
-  rememberBedrockTokens(out.usage);
+  rememberBedrockTokens(out.usage, req.orgId);
 
   const blocks = out.output?.message?.content ?? [];
   const text = blocks
@@ -416,7 +421,7 @@ export async function gatewayFetch(
   // varied content/tool shapes. Validated at runtime by buildBedrockMessages.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body: any,
-  opts?: { signal?: AbortSignal },
+  opts?: { signal?: AbortSignal; orgId?: string | null },
 ): Promise<GatewayFetchResponse> {
   try {
     const client = getClient();
@@ -468,9 +473,9 @@ export async function gatewayFetch(
       },
     });
 
-    await acquireBedrockSlot();
+    await acquireBedrockSlot(opts?.orgId);
     const out = await client.send(cmd, { abortSignal: opts?.signal });
-    rememberBedrockTokens(out.usage);
+    rememberBedrockTokens(out.usage, opts?.orgId);
     const blocks = out.output?.message?.content ?? [];
 
     let textOut = "";
@@ -559,6 +564,7 @@ export interface OpenAIEmbedBody {
 
 export async function gatewayEmbeddingsFetch(
   body: OpenAIEmbedBody,
+  opts?: { orgId?: string | null },
 ): Promise<GatewayFetchResponse> {
   try {
     const client = getClient();
@@ -578,13 +584,13 @@ export async function gatewayEmbeddingsFetch(
         accept: "application/json",
         body: JSON.stringify({ inputText: input, dimensions, normalize: true }),
       });
-      await acquireBedrockSlot();
+      await acquireBedrockSlot(opts?.orgId);
       const out = await client.send(cmd);
       const raw = new TextDecoder().decode(out.body);
       const parsed = JSON.parse(raw) as { embedding?: number[]; inputTextTokenCount?: number };
       const vec = parsed.embedding ?? [];
       if (typeof parsed.inputTextTokenCount === "number" && parsed.inputTextTokenCount > 0) {
-        void recordBedrockTokens(parsed.inputTextTokenCount);
+        void recordBedrockTokens(parsed.inputTextTokenCount, opts?.orgId);
       }
       data.push({ object: "embedding", index: i, embedding: vec });
     }

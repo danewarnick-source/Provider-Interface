@@ -991,7 +991,7 @@ export const generateRequirementsFromSource = createServerFn({ method: "POST" })
     let chunkCount = 1;
     let chunkFailures: string[] = [];
     try {
-      const extraction = await extractRequirementsFromText(rawText);
+      const extraction = await extractRequirementsFromText(rawText, doc.organization_id as string);
       aiItems = extraction.items;
       chunkCount = extraction.chunkCount;
       chunkFailures = extraction.chunkFailures;
@@ -1486,7 +1486,7 @@ export const startRequirementsDraft = createServerFn({ method: "POST" })
       }
       let bullets: string[];
       try {
-        bullets = await extractPolicySummary(rawTextForPolicy);
+        bullets = await extractPolicySummary(rawTextForPolicy, doc.organization_id as string);
       } catch (err) {
         throw new Error(
           `NECTAR couldn't summarize this policy: ${(err as Error).message}`,
@@ -1660,6 +1660,7 @@ export const processDraftChunk = createServerFn({ method: "POST" })
       const got = await extractChunkOnce(
         window,
         `PART ${data.chunkIndex + 1} OF ${ranges.length}`,
+        job.organization_id as string,
       );
       items = got.items;
       failures = got.failures;
@@ -2272,7 +2273,7 @@ export const explainRequirement = createServerFn({ method: "POST" })
     const { data: req, error } = await supabase
       .from("nectar_requirements")
       .select(
-        "id, title, description, category, source_citation, source_document_id",
+        "id, organization_id, title, description, category, source_citation, source_document_id",
       )
       .eq("id", data.requirementId)
       .single();
@@ -2303,7 +2304,7 @@ REQUIREMENT TEXT: ${req.description ?? "(no extended text — restate the title 
           { role: "user", content: userBody },
         ],
         response_format: { type: "json_object" },
-      });
+      }, { orgId: req.organization_id as string });
     if (res.status === 429) throw new Error("AI rate limit reached. Try again shortly.");
     if (res.status === 402) throw new Error("AI credits exhausted.");
     if (!res.ok) throw new Error(`AI gateway error ${res.status}`);

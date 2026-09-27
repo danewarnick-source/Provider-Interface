@@ -527,7 +527,7 @@ SERVICE CODES: ["SLH","SLN","COM","PAC","RP2","RP4","RP5","HHS","RHS","DSI","DSG
         { role: "user", content: data.prompt },
       ],
       response_format: { type: "json_object" },
-    });
+    }, { orgId: data.organization_id });
     if (!aiRes.ok) {
       const txt = await aiRes.text().catch(() => "");
       if (aiRes.status === 429) throw new Error("Nectar is rate-limited — try again shortly.");
