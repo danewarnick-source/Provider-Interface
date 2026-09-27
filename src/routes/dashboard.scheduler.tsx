@@ -285,7 +285,9 @@ function SchedulerBody({
   if (!data && isLoading) {
     return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
   }
-  if (!data) return <div className="p-8 text-sm text-muted-foreground">No data available.</div>;
+  if (!data) {
+    return <div className="p-8 text-sm text-muted-foreground">No shifts scheduled.</div>;
+  }
 
   if (tab === "day-program") {
     return <DayProgramBoard weekStart={startOfWeek(anchor)} sched={data} />;
@@ -1630,7 +1632,10 @@ function DayProgramBoard({
 
   const [createOpen, setCreateOpen] = useState(false);
 
-  if (isLoading || !dp) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (isLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (!dp) {
+    return <div className="p-8 text-sm text-muted-foreground">No day program sessions this week.</div>;
+  }
 
   const groups: Record<string, typeof dp.sessions> = { DSG: [], DSP: [], DSI: [], SED: [] };
   for (const s of dp.sessions) (groups[s.service_code] ??= []).push(s);

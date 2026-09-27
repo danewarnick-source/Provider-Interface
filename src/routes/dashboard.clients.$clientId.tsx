@@ -15,6 +15,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { RequirePermission } from "@/components/rbac-guard";
 import { Badge } from "@/components/ui/badge";
@@ -244,27 +245,13 @@ function CollapsibleSimpleCard({
 function ClientProfileHub() {
   const { clientId } = Route.useParams();
   const { tab: rawTab } = Route.useSearch();
-  const { data: org } = useCurrentOrg();
+  const { user, loading: authLoading } = useAuth();
+  const orgQ = useCurrentOrg();
+  const org = orgQ.data;
   const router = useRouter();
   const orgId = org?.organization_id;
   const recordAccessFn = useServerFn(recordPhiAccess);
   const chartAuditLogged = useRef(false);
-
-  useEffect(() => {
-    if (!orgId || !isRouteUuid(clientId) || chartAuditLogged.current) return;
-    chartAuditLogged.current = true;
-    void recordAccessFn({
-      data: {
-        organizationId: orgId,
-        resourceType: "client_chart",
-        resourceId: clientId,
-        clientId,
-        action: "view",
-        detail: "admin-client-profile-hub",
-        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-      },
-    });
-  }, [orgId, clientId, recordAccessFn]);
 
   const activeTab = resolveTab(rawTab);
 
@@ -291,6 +278,23 @@ function ClientProfileHub() {
   });
 
   const client = clientQ.data;
+
+  useEffect(() => {
+    if (!orgId || !client || !isRouteUuid(clientId) || chartAuditLogged.current) return;
+    chartAuditLogged.current = true;
+    void recordAccessFn({
+      data: {
+        organizationId: orgId,
+        resourceType: "client_chart",
+        resourceId: clientId,
+        clientId,
+        action: "view",
+        detail: "admin-client-profile-hub",
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      },
+    });
+  }, [orgId, clientId, client, recordAccessFn]);
+
   const fullName = client
     ? `${client.first_name ?? ""} ${client.last_name ?? ""}`.trim() || "—"
     : "Loading…";
@@ -328,6 +332,31 @@ function ClientProfileHub() {
   void hasMedications;
 
   const disabilityCategory = client?.disability_category as string | null | undefined;
+
+  const orgPending =
+    authLoading || orgQ.isLoading || (!!user && orgQ.data === undefined && !orgQ.isError);
+  const clientPending = !!orgId && isRouteUuid(clientId) && clientQ.isLoading;
+  if (orgPending || clientPending) {
+    return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  }
+  if (!client) {
+    return (
+      <div className="p-8">
+        <h1 className="text-lg font-semibold">Not found</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          This client is not in your organization.
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-4"
+          onClick={() => router.navigate({ to: "/dashboard/hub/clients" })}
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" /> Client directory
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-6 space-y-6">

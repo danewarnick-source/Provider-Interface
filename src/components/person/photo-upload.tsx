@@ -17,6 +17,46 @@ import { PersonAvatar } from "./person-avatar";
  */
 type Bucket = "client-photos" | "staff-photos" | "org-branding";
 
+type ImageType = "image/jpeg" | "image/png" | "image/webp";
+
+const IMAGE_EXT: Record<ImageType, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+async function sniffImageType(file: File): Promise<ImageType | null> {
+  const buf = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "image/jpeg";
+  if (
+    buf.length >= 8 &&
+    buf[0] === 0x89 &&
+    buf[1] === 0x50 &&
+    buf[2] === 0x4e &&
+    buf[3] === 0x47 &&
+    buf[4] === 0x0d &&
+    buf[5] === 0x0a &&
+    buf[6] === 0x1a &&
+    buf[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+  if (
+    buf.length >= 12 &&
+    buf[0] === 0x52 &&
+    buf[1] === 0x49 &&
+    buf[2] === 0x46 &&
+    buf[3] === 0x46 &&
+    buf[8] === 0x57 &&
+    buf[9] === 0x45 &&
+    buf[10] === 0x42 &&
+    buf[11] === 0x50
+  ) {
+    return "image/webp";
+  }
+  return null;
+}
+
 export function PhotoUpload({
   bucket,
   organizationId,
@@ -54,13 +94,17 @@ export function PhotoUpload({
       toast.error("Photo must be under 8 MB");
       return;
     }
+    const imageType = await sniffImageType(file);
+    if (!imageType) {
+      toast.error("Photo must be a JPEG, PNG, or WebP file");
+      return;
+    }
     setBusy(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-      const path = `${organizationId}/${subjectId}/photo-${Date.now()}.${ext}`;
+      const path = `${organizationId}/${subjectId}/photo-${Date.now()}.${IMAGE_EXT[imageType]}`;
       const { error } = await supabase.storage
         .from(bucket)
-        .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
+        .upload(path, file, { upsert: true, contentType: imageType });
       if (error) throw error;
       await onUploaded(path);
       toast.success("Photo saved");
