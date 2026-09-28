@@ -56,7 +56,7 @@ function emptyStore(): StoreV1 {
 }
 
 function tableMissing(message: string | undefined): boolean {
-  return /does not exist|schema cache|evidence_items|evidence_files|evidence_templates/i.test(
+  return /does not exist|schema cache|evidence_items|evidence_files/i.test(
     message ?? "",
   );
 }

@@ -19,7 +19,6 @@ export const IDS = {
   course: "66666666-6666-4666-8666-666666666666",
   topicReady: "77777777-7777-4777-8777-777777777777",
   topicSoon: "88888888-8888-4888-8888-888888888888",
-  htModule: "99999999-9999-4999-8999-999999999999",
   trainingModule: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
   membership: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
   catalogFull: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
@@ -599,29 +598,6 @@ function restRows(world: HiveE2EWorld, table: string, url: string): unknown[] {
       return [assignmentRow(IDS.assignment, "in_progress", uid)];
     }
     return rows;
-  }
-
-  if (table === "hive_training_course_modules") {
-    return [
-      {
-        id: IDS.htModule,
-        course_id: IDS.course,
-        sort: 1,
-        title: "Welcome to Launchpad",
-        body_md: "This is the first Launchpad module. It is available.",
-        video_url: null,
-        quiz_json: null,
-      },
-      {
-        id: "99999999-9999-4999-8999-999999999998",
-        course_id: IDS.course,
-        sort: 2,
-        title: "Competency check",
-        body_md: "Second module — still locked until the first is marked complete in a real session.",
-        video_url: null,
-        quiz_json: null,
-      },
-    ];
   }
 
   if (table === "hive_training_module_progress" || table === "hive_training_certificates" || table === "hive_training_seats") {
