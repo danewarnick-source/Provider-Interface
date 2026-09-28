@@ -194,7 +194,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByRole("tab", { name: /^Profile$/i })).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByRole("tab", { name: /Staff file/i })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /Team member file/i })).toBeVisible();
     await expect(page.getByRole("tab", { name: /^Activity$/i })).toBeVisible();
     await expect(page.getByRole("tab", { name: /^Permissions$/i })).toHaveCount(0);
     await expect(page.getByTestId("staff-profile-identity")).toContainText("Team member");
