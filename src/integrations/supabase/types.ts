@@ -13491,8 +13491,8 @@ export type Database = {
           photo_updated_at: string | null
           position: string | null
           positions: string[]
-          requires_abi: boolean
-          requires_deescalation: boolean
+          requires_abi: boolean | null
+          requires_deescalation: boolean | null
           scope_group_id: string | null
           ssn_last4: string | null
           staff_type_keys: string[]
@@ -13500,6 +13500,7 @@ export type Database = {
           system_role: string
           team_id: string | null
           tenant_id: string | null
+          transports_clients: boolean
           username: string | null
           worker_type: string
         }
@@ -13536,8 +13537,8 @@ export type Database = {
           photo_updated_at?: string | null
           position?: string | null
           positions?: string[]
-          requires_abi?: boolean
-          requires_deescalation?: boolean
+          requires_abi?: boolean | null
+          requires_deescalation?: boolean | null
           scope_group_id?: string | null
           ssn_last4?: string | null
           staff_type_keys?: string[]
@@ -13545,6 +13546,7 @@ export type Database = {
           system_role?: string
           team_id?: string | null
           tenant_id?: string | null
+          transports_clients?: boolean
           username?: string | null
           worker_type?: string
         }
@@ -13581,8 +13583,8 @@ export type Database = {
           photo_updated_at?: string | null
           position?: string | null
           positions?: string[]
-          requires_abi?: boolean
-          requires_deescalation?: boolean
+          requires_abi?: boolean | null
+          requires_deescalation?: boolean | null
           scope_group_id?: string | null
           ssn_last4?: string | null
           staff_type_keys?: string[]
@@ -13590,6 +13592,7 @@ export type Database = {
           system_role?: string
           team_id?: string | null
           tenant_id?: string | null
+          transports_clients?: boolean
           username?: string | null
           worker_type?: string
         }
