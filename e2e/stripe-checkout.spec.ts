@@ -67,11 +67,6 @@ test("c) training extra is skipped for exempt and charged for a paying org", asy
   await expect(page.getByTestId("training-price-mandt")).toContainText("$200");
   await expect(page.getByTestId("training-price-dspd_required")).toContainText("$75");
   await expect(page.getByTestId("training-price-full_program")).toContainText(/True North \$0/);
-  await expect(page.getByTestId("training-subtab-internal")).toBeVisible();
-  await page.getByTestId("training-subtab-internal").click();
-  await expect(page.getByTestId("internal-trainings-panel")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Internal trainings" })).toBeVisible();
-  await page.getByTestId("training-subtab-classes").click();
   await page.getByTestId("training-buy-full_program").click();
   await expect(page.getByTestId("training-roster-name-0")).toBeVisible();
   await expect(page.getByTestId("training-roster-multiselect")).toBeVisible();
@@ -87,7 +82,9 @@ test("c) training extra is skipped for exempt and charged for a paying org", asy
   await expect(page.getByTestId("training-roster-total")).toContainText(/True North \$0/);
   await page.getByTestId("training-roster-submit").click();
   await expect(page).not.toHaveURL(/checkout\.stripe\.com/);
-  await expect.poll(() => exempt.lastTrainingCharge === false || exempt.trainingGranted === true).toBeTruthy();
+  await expect
+    .poll(() => exempt.lastTrainingCharge === false || exempt.trainingGranted === true)
+    .toBeTruthy();
 
   const paying = payingWorld();
   await installStripeBillingMock(page, paying);
@@ -98,7 +95,9 @@ test("c) training extra is skipped for exempt and charged for a paying org", asy
   await expect(page.getByTestId("hive-training-hub")).toBeVisible({ timeout: 25_000 });
   await expect(page.getByText(/CPR/i).first()).toBeVisible();
   await expect(page.getByTestId("training-price-cpr_first_aid")).toContainText("$100");
-  await expect(page.getByTestId("training-price-cpr_first_aid")).not.toContainText(/True North \$0/);
+  await expect(page.getByTestId("training-price-cpr_first_aid")).not.toContainText(
+    /True North \$0/,
+  );
   await page.getByTestId("training-buy-cpr_first_aid").click();
   await expect(page.getByTestId("training-roster-name-0")).toBeVisible();
   await page.getByTestId("training-roster-name-0").fill("Pay Staff");

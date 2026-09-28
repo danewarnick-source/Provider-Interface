@@ -357,7 +357,7 @@ export type ThirtyDayWritePlan = {
 /**
  * What the course player writes after a segment or exam.
  * Certificate + obligation require every required topic completed and a passing exam.
- * TNS / training-only seats skip the office obligation write.
+ * Billing-exempt orgs skip the office obligation write.
  */
 export function planThirtyDayWrites(args: {
   examPassed: boolean;

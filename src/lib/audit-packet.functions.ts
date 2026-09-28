@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -25,7 +26,7 @@ Your job is to extract:
 Real audit letters often request different document types for different, independently-random date windows within the same letter — e.g. "shift notes from May through July" and "incident reports from November through December" are two different windows, not one shared range. For each item, ALSO try to extract that item's OWN period_start/period_end (ISO yyyy-mm-dd) whenever the letter specifies a date range specific to that document type. Only set period_start/period_end on an item when the letter clearly gives it its own range — leave them null when the item is only covered by the letter's one overall timeline, so the packet-level timeline applies to it instead.
 
 For each item, set source_hint to one of these platform tables when the document is something PI typically tracks:
-  evv_timesheets, billing_submissions, incident_reports, certifications, client_documents, profiles, courses, medications, pba_accounts, scheduled_shifts
+  evv_timesheets, billing_submissions, incident_reports, evidence_items, client_documents, profiles, medications, pba_accounts, scheduled_shifts
 Use null if no source matches.
 
 Return STRICT JSON only.`;
@@ -54,16 +55,20 @@ const ExtractionSchema = z.object({
 
 async function callLovableAI(letterText: string, orgId?: string | null) {
   assertBedrockConfigured();
-  const res = await gatewayFetch({
+  const res = await gatewayFetch(
+    {
       model: "bedrock",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: `AUDIT LETTER:\n\n${letterText.slice(0, 60000)}` },
       ],
       response_format: { type: "json_object" },
-    }, { orgId });
+    },
+    { orgId },
+  );
   if (res.status === 429) throw new Error("AI rate limit reached. Try again in a moment.");
-  if (res.status === 402) throw new Error("AI credits exhausted. Add funds in Settings → Workspace → Usage.");
+  if (res.status === 402)
+    throw new Error("AI credits exhausted. Add funds in Settings → Workspace → Usage.");
   if (!res.ok) throw new Error(`AI gateway error ${res.status}`);
   const json = await res.json();
   const content: string = json.choices?.[0]?.message?.content ?? "{}";
@@ -104,7 +109,9 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
 
     const extraction = await callLovableAI(data.letter_text, data.organization_id);
     const fiscalYear =
-      extraction.fiscal_year ?? data.fallback_fiscal_year ?? `FY${String(new Date().getFullYear() % 100).padStart(2, "0")}`;
+      extraction.fiscal_year ??
+      data.fallback_fiscal_year ??
+      `FY${String(new Date().getFullYear() % 100).padStart(2, "0")}`;
     const packetName = `${fiscalYear} — ${data.provider_name}`;
     const timelineStart = normalizeIsoDate(extraction.timeline_start);
     const timelineEnd = normalizeIsoDate(extraction.timeline_end);
@@ -116,7 +123,6 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
     // is edited later.
     const { data: orgRow, error: orgErr } = await supabase
       .from("organizations")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .select("go_live_date, created_at" as any)
       .eq("id", data.organization_id)
       .maybeSingle();
@@ -142,7 +148,7 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
         audit_letter_text: data.letter_text,
         status: "draft",
         created_by: userId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         predates_go_live_note: predatesGoLiveNote,
       } as any)
       .select("*")
@@ -184,7 +190,6 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
       })),
     ];
     if (itemRows.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: itErr } = await supabase.from("audit_packet_items").insert(itemRows as any);
       if (itErr) throw new Error(itErr.message);
     }
@@ -213,9 +218,9 @@ export const parseAndProduceAuditPacket = createServerFn({ method: "POST" })
           .eq("organization_id", orgId);
         return count ?? 0;
       },
-      certifications: async () => {
+      evidence_items: async () => {
         const { count } = await supabase
-          .from("certifications")
+          .from("evidence_items")
           .select("id", { count: "exact", head: true })
           .eq("organization_id", orgId);
         return count ?? 0;

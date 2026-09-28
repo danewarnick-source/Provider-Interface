@@ -26,8 +26,7 @@ export const PI_HOME_SERIF =
   '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif';
 export const PI_HOME_SANS = '"Inter", "Segoe UI", system-ui, sans-serif';
 
-export const PI_HOME_BODY_BG =
-  "radial-gradient(900px 600px at 50% 0%, #132038 0%, #0a0f1c 60%)";
+export const PI_HOME_BODY_BG = "radial-gradient(900px 600px at 50% 0%, #132038 0%, #0a0f1c 60%)";
 
 export const PI_HOME_MAX_WIDTH = 1120;
 export const PI_HOME_BTN_RADIUS = 14;
@@ -74,7 +73,6 @@ export const PI_HOME_NAV = [
 /** Same labels and order as the homepage, pointed at dedicated public routes. */
 export const PI_PUBLIC_NAV = [
   { label: "Nectar", to: "/nectar" as const },
-  { label: "Training", to: "/training" as const },
   { label: "Pricing", to: "/pricing" as const },
   { label: "About", to: "/about" as const },
 ] as const;

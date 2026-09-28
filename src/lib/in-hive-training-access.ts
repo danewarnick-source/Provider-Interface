@@ -11,15 +11,11 @@ import { isBillingExempt } from "./billing-access.ts";
 import { ANNUAL_CE_COURSE_ID } from "./in-hive-training-annual-ce.ts";
 import { PCT_COURSE_ID } from "./in-hive-training-pct.ts";
 
-export type ThirtyDayAccessReason =
-  | "tns_or_comped"
-  | "paid_roster_seat"
-  | "training_only_seat"
-  | "denied";
+export type ThirtyDayAccessReason = "tns_or_comped" | "paid_roster_seat" | "denied";
 
 /**
  * Orientation / compliance pack family. Stripe / roster today only sell
- * `thirty_day` and `package` / training-only `thirty_day` + `pack`.
+ * `thirty_day` and `package`.
  * `pack` still covers CPR + 30-day + Mandt — do not invent new prices.
  */
 export const TRAINING_SEAT_FAMILY = {
@@ -75,16 +71,12 @@ export function officeStaffMayTakeThirtyDay(input: {
 export function resolveThirtyDayAccess(input: {
   billingExempt: boolean;
   hasPaidRosterSeat: boolean;
-  hasTrainingOnlySeat?: boolean;
 }): { allowed: boolean; reason: ThirtyDayAccessReason; charged: boolean } {
   if (input.billingExempt) {
     return { allowed: true, reason: "tns_or_comped", charged: false };
   }
   if (input.hasPaidRosterSeat) {
     return { allowed: true, reason: "paid_roster_seat", charged: true };
-  }
-  if (input.hasTrainingOnlySeat) {
-    return { allowed: true, reason: "training_only_seat", charged: true };
   }
   return { allowed: false, reason: "denied", charged: false };
 }

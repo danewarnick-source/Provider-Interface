@@ -7,21 +7,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import {
-  entitlementsForOrg,
-  isBillingExempt,
-  orgAccessIsLocked,
-  trainingRequiresCharge,
-  UNPAID_LOCK_REASON,
-} from "@/lib/billing-access";
+import { isBillingExempt, orgAccessIsLocked, UNPAID_LOCK_REASON } from "@/lib/billing-access";
 import {
   PAYMENTS_NOT_CONFIGURED,
   isStripeLiveSecretKey,
   readStripeEnv,
   stripePaymentsConfigured,
   resolveAgencyCheckoutPricingModel,
-  stripePriceIdForTrainingSku,
-  stripeUnitAmountForTrainingSku,
   subscriptionLineItemsForPiListQuote,
   subscriptionLineItemsForQuote,
 } from "@/lib/stripe-config";
@@ -36,7 +28,6 @@ import {
 } from "@/lib/pi-signup-pricing";
 import { appOriginFromRequest, getStripe } from "@/lib/stripe.server";
 import { activateSubscriptionFromCheckout } from "@/lib/stripe-webhook";
-import { fulfillTrainingOrder } from "@/lib/training-fulfillment.server";
 import { fulfillTrainingClass } from "@/lib/training-class-fulfillment.server";
 import {
   cleanRosterRows,
@@ -133,7 +124,12 @@ async function loadOrgRow(orgId: string, client: unknown): Promise<OrgBillingRow
       legalName: row.legal_name,
       dbaName: row.dba_name,
       billingExempt: row.billing_exempt === true,
-      pricingSchedule: row.pricing_schedule === "founding" ? "founding" : row.pricing_schedule === "list" ? "list" : null,
+      pricingSchedule:
+        row.pricing_schedule === "founding"
+          ? "founding"
+          : row.pricing_schedule === "list"
+            ? "list"
+            : null,
       foundingEndsAt: row.founding_ends_at ?? null,
       approxClientCount: row.approx_client_count ?? null,
     };
@@ -197,7 +193,10 @@ function orgIsComped(org: OrgBillingRow): boolean {
   });
 }
 
-async function liveUsageCounts(orgId: string, client: unknown): Promise<{ staff: number; clients: number }> {
+async function liveUsageCounts(
+  orgId: string,
+  client: unknown,
+): Promise<{ staff: number; clients: number }> {
   const db = billingDb(client);
   let staff = 0;
   try {
@@ -247,7 +246,10 @@ async function resolveOrgSchedule(
       ...(foundingEndsAt ? { founding_ends_at: foundingEndsAt } : {}),
     })
     .eq("id", org.id);
-  if (error && !/pricing_schedule|founding_ends_at|row-level security|42501/i.test(error.message ?? "")) {
+  if (
+    error &&
+    !/pricing_schedule|founding_ends_at|row-level security|42501/i.test(error.message ?? "")
+  ) {
     throw new Error(error.message);
   }
   return { schedule, foundingEndsAt };
@@ -329,7 +331,9 @@ async function activateExemptOrg(
       .eq("organization_id", orgId);
     if (error) throw new Error(error.message);
   } else {
-    const { error } = await db.from("org_subscriptions").insert({ organization_id: orgId, ...patch });
+    const { error } = await db
+      .from("org_subscriptions")
+      .insert({ organization_id: orgId, ...patch });
     if (error) throw new Error(error.message);
   }
 }
@@ -469,7 +473,8 @@ export const getBillingStatusFn = createServerFn({ method: "POST" })
       lockedAt: (sub?.locked_at as string | null) ?? null,
       lockReason: (sub?.lock_reason as string | null) ?? null,
       currentPeriodEnd: (sub?.current_period_end as string | null) ?? null,
-      hasStripeCustomer: !!(sub as { stripe_customer_id?: string | null } | null)?.stripe_customer_id,
+      hasStripeCustomer: !!(sub as { stripe_customer_id?: string | null } | null)
+        ?.stripe_customer_id,
       orgName: org.name,
       pricingSchedule: "list" as PricingSchedule,
       foundingEndsAt: org.foundingEndsAt,
@@ -489,216 +494,185 @@ export const getBillingStatusFn = createServerFn({ method: "POST" })
 
 export const createSubscriptionCheckoutFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: {
-    organizationId: string;
-    staffCount?: number;
-    clientCount?: number;
-    interval?: BillingInterval;
-    pricingModel?: "pi_list" | "hive_staff";
-    trainingAddon?: SignupTrainingAddonId | "none" | null;
-    trainingPeople?: Array<{ name?: string | null; sku?: string | null }> | null;
-    fromSignup?: boolean;
-  }) => {
-    const organizationId = String(input?.organizationId ?? "");
-    if (!UUID_RE.test(organizationId)) throw new Error("Invalid organization.");
-    const trainingRaw = String(input?.trainingAddon ?? "none");
-    const trainingPeople = trainingPeopleForCheckout(
-      (Array.isArray(input?.trainingPeople) ? input.trainingPeople : []).map((row) => ({
-        name: row?.name,
-        sku: String(row?.sku ?? ""),
-      })),
-    );
-    return {
-      organizationId,
-      staffCount: input?.staffCount != null ? clampStaffCount(input.staffCount) : undefined,
-      clientCount: input?.clientCount != null ? clampClientCount(input.clientCount) : undefined,
-      interval: input?.interval === "annual" ? ("annual" as const) : ("monthly" as const),
-      pricingModel: resolveAgencyCheckoutPricingModel(input?.pricingModel),
-      trainingAddon: isSignupTrainingAddonId(trainingRaw) ? trainingRaw : ("none" as const),
-      trainingPeople,
-      fromSignup: input?.fromSignup === true,
-    };
-  })
+  .inputValidator(
+    (input: {
+      organizationId: string;
+      staffCount?: number;
+      clientCount?: number;
+      interval?: BillingInterval;
+      pricingModel?: "pi_list" | "hive_staff";
+      trainingAddon?: SignupTrainingAddonId | "none" | null;
+      trainingPeople?: Array<{ name?: string | null; sku?: string | null }> | null;
+      fromSignup?: boolean;
+    }) => {
+      const organizationId = String(input?.organizationId ?? "");
+      if (!UUID_RE.test(organizationId)) throw new Error("Invalid organization.");
+      const trainingRaw = String(input?.trainingAddon ?? "none");
+      const trainingPeople = trainingPeopleForCheckout(
+        (Array.isArray(input?.trainingPeople) ? input.trainingPeople : []).map((row) => ({
+          name: row?.name,
+          sku: String(row?.sku ?? ""),
+        })),
+      );
+      return {
+        organizationId,
+        staffCount: input?.staffCount != null ? clampStaffCount(input.staffCount) : undefined,
+        clientCount: input?.clientCount != null ? clampClientCount(input.clientCount) : undefined,
+        interval: input?.interval === "annual" ? ("annual" as const) : ("monthly" as const),
+        pricingModel: resolveAgencyCheckoutPricingModel(input?.pricingModel),
+        trainingAddon: isSignupTrainingAddonId(trainingRaw) ? trainingRaw : ("none" as const),
+        trainingPeople,
+        fromSignup: input?.fromSignup === true,
+      };
+    },
+  )
   .handler(async ({ data, context }) => {
     if (!context.supabase || !context.userId) {
       return { url: null as string | null, exempt: false, error: "Not signed in." };
     }
     const db = billingDb(context.supabase);
     try {
-    await requireOrgAdmin(db, context.userId, data.organizationId);
+      await requireOrgAdmin(db, context.userId, data.organizationId);
 
-    const org = await loadOrgRow(data.organizationId, db);
-    if (orgIsComped(org)) {
-      await activateExemptOrg(data.organizationId, "enterprise");
-      return { url: null, exempt: true, error: null as string | null };
-    }
-
-    const cfg = stripePaymentsConfigured();
-    if (!cfg.ok) {
-      return { url: null, exempt: false, error: cfg.message ?? PAYMENTS_NOT_CONFIGURED };
-    }
-
-    const usage = await liveUsageCounts(data.organizationId, db);
-    const subs = subscriptionAdmin();
-    const { data: existingSub, error: existingSubErr } = await subs
-      .from("org_subscriptions")
-      .select("staff_count, billing_interval")
-      .eq("organization_id", data.organizationId)
-      .maybeSingle();
-    if (existingSubErr) throw new Error(existingSubErr.message);
-    const staffCount = clampStaffCount(
-      data.staffCount ?? (existingSub as { staff_count?: number | null } | null)?.staff_count ?? usage.staff ?? 1,
-    );
-    const clientCount = clampClientCount(
-      usage.clients > 0 ? usage.clients : (data.clientCount ?? org.approxClientCount ?? 0),
-    );
-    const interval: BillingInterval = data.interval;
-    const usePiList = data.pricingModel === "pi_list";
-    const rosterQuantities = trainingQuantitiesFromPeople(data.trainingPeople);
-    const rosterLines = quoteSignupTrainingLines(rosterQuantities);
-    const training = quoteSignupTrainingAddon(data.trainingAddon);
-    const trainingForLines = rosterLines.length > 0 ? rosterLines : training;
-    const trainingCents = rosterLines.length > 0
-      ? rosterLines.reduce((sum, line) => sum + line.priceCents * line.quantity, 0)
-      : training.priceCents;
-    const trainingAddonLabel = rosterLines.length > 0
-      ? rosterLines.map((line) => `${line.id}x${line.quantity}`).join(",")
-      : training.id;
-
-    let monthlyCents: number;
-    let billedCents: number;
-    let scheduleLabel: string;
-    let built: { lineItems: ReturnType<typeof subscriptionLineItemsForPiListQuote>["lineItems"]; discounts?: Array<{ coupon: string }> };
-
-    if (usePiList) {
-      const quote = quotePiListSubscription({ clientCount, interval: "monthly" });
-      monthlyCents = quote.monthlyCents;
-      billedCents = quote.billedCents;
-      scheduleLabel = "list";
-      built = subscriptionLineItemsForPiListQuote(quote, trainingForLines);
-      const { error: scheduleErr } = await db
-        .from("organizations")
-        .update({
-          approx_client_count: clientCount,
-          pricing_schedule: "list",
-        })
-        .eq("id", data.organizationId);
-      if (
-        scheduleErr &&
-        !/pricing_schedule|approx_client_count|row-level security|42501/i.test(scheduleErr.message ?? "")
-      ) {
-        throw new Error(scheduleErr.message);
+      const org = await loadOrgRow(data.organizationId, db);
+      if (orgIsComped(org)) {
+        await activateExemptOrg(data.organizationId, "enterprise");
+        return { url: null, exempt: true, error: null as string | null };
       }
-      await ensurePausedSubscription(data.organizationId, {
-        ...quoteHiveSubscription({
+
+      const cfg = stripePaymentsConfigured();
+      if (!cfg.ok) {
+        return { url: null, exempt: false, error: cfg.message ?? PAYMENTS_NOT_CONFIGURED };
+      }
+
+      const usage = await liveUsageCounts(data.organizationId, db);
+      const subs = subscriptionAdmin();
+      const { data: existingSub, error: existingSubErr } = await subs
+        .from("org_subscriptions")
+        .select("staff_count, billing_interval")
+        .eq("organization_id", data.organizationId)
+        .maybeSingle();
+      if (existingSubErr) throw new Error(existingSubErr.message);
+      const staffCount = clampStaffCount(
+        data.staffCount ??
+          (existingSub as { staff_count?: number | null } | null)?.staff_count ??
+          usage.staff ??
+          1,
+      );
+      const clientCount = clampClientCount(
+        usage.clients > 0 ? usage.clients : (data.clientCount ?? org.approxClientCount ?? 0),
+      );
+      const interval: BillingInterval = data.interval;
+      const usePiList = data.pricingModel === "pi_list";
+      const rosterQuantities = trainingQuantitiesFromPeople(data.trainingPeople);
+      const rosterLines = quoteSignupTrainingLines(rosterQuantities);
+      const training = quoteSignupTrainingAddon(data.trainingAddon);
+      const trainingForLines = rosterLines.length > 0 ? rosterLines : training;
+      const trainingCents =
+        rosterLines.length > 0
+          ? rosterLines.reduce((sum, line) => sum + line.priceCents * line.quantity, 0)
+          : training.priceCents;
+      const trainingAddonLabel =
+        rosterLines.length > 0
+          ? rosterLines.map((line) => `${line.id}x${line.quantity}`).join(",")
+          : training.id;
+
+      let monthlyCents: number;
+      let billedCents: number;
+      let scheduleLabel: string;
+      let built: {
+        lineItems: ReturnType<typeof subscriptionLineItemsForPiListQuote>["lineItems"];
+        discounts?: Array<{ coupon: string }>;
+      };
+
+      if (usePiList) {
+        const quote = quotePiListSubscription({ clientCount, interval: "monthly" });
+        monthlyCents = quote.monthlyCents;
+        billedCents = quote.billedCents;
+        scheduleLabel = "list";
+        built = subscriptionLineItemsForPiListQuote(quote, trainingForLines);
+        const { error: scheduleErr } = await db
+          .from("organizations")
+          .update({
+            approx_client_count: clientCount,
+            pricing_schedule: "list",
+          })
+          .eq("id", data.organizationId);
+        if (
+          scheduleErr &&
+          !/pricing_schedule|approx_client_count|row-level security|42501/i.test(
+            scheduleErr.message ?? "",
+          )
+        ) {
+          throw new Error(scheduleErr.message);
+        }
+        await ensurePausedSubscription(data.organizationId, {
+          ...quoteHiveSubscription({
+            staffCount,
+            clientCount,
+            schedule: "list",
+            interval: "monthly",
+          }),
+          monthlyCents: quote.monthlyCents,
+          billedCents: quote.billedCents,
+          clientCount: quote.clientCount,
+          interval: "monthly",
+          schedule: "list",
+        });
+      } else {
+        const assigned = await resolveOrgSchedule(org, db);
+        const quote = quoteHiveSubscription({
           staffCount,
           clientCount,
-          schedule: "list",
-          interval: "monthly",
-        }),
-        monthlyCents: quote.monthlyCents,
-        billedCents: quote.billedCents,
-        clientCount: quote.clientCount,
-        interval: "monthly",
-        schedule: "list",
-      });
-    } else {
-      const assigned = await resolveOrgSchedule(org, db);
-      const quote = quoteHiveSubscription({
-        staffCount,
-        clientCount,
-        schedule: assigned.schedule,
-        interval,
-        foundingEndsAt: assigned.foundingEndsAt,
-      });
-      monthlyCents = quote.monthlyCents;
-      billedCents = quote.billedCents;
-      scheduleLabel = quote.schedule;
-      built = subscriptionLineItemsForQuote(quote);
-      await db
-        .from("organizations")
-        .update({ approx_client_count: clientCount })
-        .eq("id", data.organizationId);
-      await ensurePausedSubscription(data.organizationId, quote);
-    }
+          schedule: assigned.schedule,
+          interval,
+          foundingEndsAt: assigned.foundingEndsAt,
+        });
+        monthlyCents = quote.monthlyCents;
+        billedCents = quote.billedCents;
+        scheduleLabel = quote.schedule;
+        built = subscriptionLineItemsForQuote(quote);
+        await db
+          .from("organizations")
+          .update({ approx_client_count: clientCount })
+          .eq("id", data.organizationId);
+        await ensurePausedSubscription(data.organizationId, quote);
+      }
 
-    const { data: sub, error: subErr } = await subs
-      .from("org_subscriptions")
-      .select("stripe_customer_id")
-      .eq("organization_id", data.organizationId)
-      .maybeSingle();
-    if (subErr) throw new Error(subErr.message);
-
-    const stripe = getStripe();
-    let customerId = (sub as { stripe_customer_id?: string | null } | null)?.stripe_customer_id ?? null;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        name: org.name,
-        metadata: { organization_id: data.organizationId },
-      });
-      customerId = customer.id;
-      const { error: custErr } = await subs
+      const { data: sub, error: subErr } = await subs
         .from("org_subscriptions")
-        .update({ stripe_customer_id: customerId })
-        .eq("organization_id", data.organizationId);
-      if (custErr) throw new Error(custErr.message);
-    }
+        .select("stripe_customer_id")
+        .eq("organization_id", data.organizationId)
+        .maybeSingle();
+      if (subErr) throw new Error(subErr.message);
 
-    const origin = appOriginFromRequest(getRequest());
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer: customerId,
-      client_reference_id: data.organizationId,
-      success_url: `${origin}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: data.fromSignup
-        ? `${origin}/signup?checkout=cancelled`
-        : `${origin}/billing-locked?checkout=cancelled`,
-      line_items: built.lineItems,
-      ...(built.discounts ? { discounts: built.discounts } : {}),
-      metadata: {
-        hive_kind: "subscription",
-        organization_id: data.organizationId,
-        plan: "hive_standard",
-        pricing_model: usePiList ? "pi_list" : "hive_staff",
-        pricing_schedule: scheduleLabel,
-        staff_count: String(staffCount),
-        client_count: String(clientCount),
-        interval: usePiList ? "monthly" : interval,
-        monthly_cents: String(monthlyCents),
-        billed_cents: String(billedCents),
-        training_addon: trainingAddonLabel.slice(0, 500),
-        training_cents: String(trainingCents),
-        training_cpr_qty: String(rosterQuantities.cpr_first_aid),
-        training_thirty_day_qty: String(rosterQuantities.thirty_day),
-        training_mandt_qty: String(rosterQuantities.mandt),
-        training_pack_qty: String(rosterQuantities.pack),
-        training_cpr_names: data.trainingPeople
-          .filter((p) => p.sku === "cpr_first_aid")
-          .map((p) => p.name)
-          .filter(Boolean)
-          .join(", ")
-          .slice(0, 500),
-        training_thirty_day_names: data.trainingPeople
-          .filter((p) => p.sku === "thirty_day")
-          .map((p) => p.name)
-          .filter(Boolean)
-          .join(", ")
-          .slice(0, 500),
-        training_mandt_names: data.trainingPeople
-          .filter((p) => p.sku === "mandt")
-          .map((p) => p.name)
-          .filter(Boolean)
-          .join(", ")
-          .slice(0, 500),
-        training_pack_names: data.trainingPeople
-          .filter((p) => p.sku === "pack")
-          .map((p) => p.name)
-          .filter(Boolean)
-          .join(", ")
-          .slice(0, 500),
-        purchaser_user_id: context.userId,
-      },
-      subscription_data: {
+      const stripe = getStripe();
+      let customerId =
+        (sub as { stripe_customer_id?: string | null } | null)?.stripe_customer_id ?? null;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          name: org.name,
+          metadata: { organization_id: data.organizationId },
+        });
+        customerId = customer.id;
+        const { error: custErr } = await subs
+          .from("org_subscriptions")
+          .update({ stripe_customer_id: customerId })
+          .eq("organization_id", data.organizationId);
+        if (custErr) throw new Error(custErr.message);
+      }
+
+      const origin = appOriginFromRequest(getRequest());
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        customer: customerId,
+        client_reference_id: data.organizationId,
+        success_url: `${origin}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: data.fromSignup
+          ? `${origin}/signup?checkout=cancelled`
+          : `${origin}/billing-locked?checkout=cancelled`,
+        line_items: built.lineItems,
+        ...(built.discounts ? { discounts: built.discounts } : {}),
         metadata: {
           hive_kind: "subscription",
           organization_id: data.organizationId,
@@ -708,11 +682,55 @@ export const createSubscriptionCheckoutFn = createServerFn({ method: "POST" })
           staff_count: String(staffCount),
           client_count: String(clientCount),
           interval: usePiList ? "monthly" : interval,
+          monthly_cents: String(monthlyCents),
+          billed_cents: String(billedCents),
+          training_addon: trainingAddonLabel.slice(0, 500),
+          training_cents: String(trainingCents),
+          training_cpr_qty: String(rosterQuantities.cpr_first_aid),
+          training_thirty_day_qty: String(rosterQuantities.thirty_day),
+          training_mandt_qty: String(rosterQuantities.mandt),
+          training_pack_qty: String(rosterQuantities.pack),
+          training_cpr_names: data.trainingPeople
+            .filter((p) => p.sku === "cpr_first_aid")
+            .map((p) => p.name)
+            .filter(Boolean)
+            .join(", ")
+            .slice(0, 500),
+          training_thirty_day_names: data.trainingPeople
+            .filter((p) => p.sku === "thirty_day")
+            .map((p) => p.name)
+            .filter(Boolean)
+            .join(", ")
+            .slice(0, 500),
+          training_mandt_names: data.trainingPeople
+            .filter((p) => p.sku === "mandt")
+            .map((p) => p.name)
+            .filter(Boolean)
+            .join(", ")
+            .slice(0, 500),
+          training_pack_names: data.trainingPeople
+            .filter((p) => p.sku === "pack")
+            .map((p) => p.name)
+            .filter(Boolean)
+            .join(", ")
+            .slice(0, 500),
+          purchaser_user_id: context.userId,
         },
-      },
-    });
+        subscription_data: {
+          metadata: {
+            hive_kind: "subscription",
+            organization_id: data.organizationId,
+            plan: "hive_standard",
+            pricing_model: usePiList ? "pi_list" : "hive_staff",
+            pricing_schedule: scheduleLabel,
+            staff_count: String(staffCount),
+            client_count: String(clientCount),
+            interval: usePiList ? "monthly" : interval,
+          },
+        },
+      });
 
-    return { url: session.url, exempt: false, error: null as string | null };
+      return { url: session.url, exempt: false, error: null as string | null };
     } catch (e) {
       const { humanizeCheckoutStartError } = await import("@/lib/signup-checkout-error");
       return {
@@ -792,7 +810,11 @@ export const confirmCheckoutSessionFn = createServerFn({ method: "POST" })
         ? session.client_reference_id
         : "");
     if (!orgId) {
-      return { ok: false, error: "Checkout session is missing the company id.", organizationId: null };
+      return {
+        ok: false,
+        error: "Checkout session is missing the company id.",
+        organizationId: null,
+      };
     }
     await requireOrgAdmin(context.supabase, context.userId, orgId);
 
@@ -810,24 +832,6 @@ export const confirmCheckoutSessionFn = createServerFn({ method: "POST" })
       }
       return { ok: true, error: null as string | null, organizationId: orgId };
     }
-    if (hiveKind === "training") {
-      if (session.metadata?.hive_order_id && session.metadata?.catalog_id) {
-        await fulfillTrainingOrder({
-          orderId: session.metadata.hive_order_id,
-          catalogId: session.metadata.catalog_id,
-          organizationId: orgId,
-          modeContext: session.metadata.mode_context === "individual" ? "individual" : "bulk_seats",
-          quantity: Number(session.metadata.quantity ?? "1") || 1,
-          assigneeUserId: session.metadata.assignee_user_id || null,
-          stripeSessionId: session.id,
-          stripePaymentIntentId:
-            typeof session.payment_intent === "string" ? session.payment_intent : null,
-          stripeCustomerId: typeof session.customer === "string" ? session.customer : null,
-          amountCents: session.amount_total ?? 0,
-        });
-      }
-      return { ok: true, error: null as string | null, organizationId: orgId };
-    }
 
     const subscriptionRef = session.subscription;
     const subscriptionId =
@@ -837,7 +841,9 @@ export const confirmCheckoutSessionFn = createServerFn({ method: "POST" })
           ? String((subscriptionRef as { id?: string }).id ?? "") || null
           : null;
     const periodEndUnix =
-      subscriptionRef && typeof subscriptionRef === "object" && "current_period_end" in subscriptionRef
+      subscriptionRef &&
+      typeof subscriptionRef === "object" &&
+      "current_period_end" in subscriptionRef
         ? Number((subscriptionRef as { current_period_end?: number }).current_period_end)
         : NaN;
 
@@ -848,11 +854,13 @@ export const confirmCheckoutSessionFn = createServerFn({ method: "POST" })
           plan: session.metadata?.plan || "hive_standard",
           customerId: typeof session.customer === "string" ? session.customer : null,
           subscriptionId,
-          paymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : null,
+          paymentIntentId:
+            typeof session.payment_intent === "string" ? session.payment_intent : null,
           amountCents: session.amount_total ?? Number(session.metadata?.monthly_cents ?? 0),
-          periodEndIso: Number.isFinite(periodEndUnix) && periodEndUnix > 0
-            ? new Date(periodEndUnix * 1000).toISOString()
-            : null,
+          periodEndIso:
+            Number.isFinite(periodEndUnix) && periodEndUnix > 0
+              ? new Date(periodEndUnix * 1000).toISOString()
+              : null,
           eventId: `checkout_confirm:${session.id}`,
           staffCount: Number(session.metadata?.staff_count ?? 0) || null,
           billingInterval: session.metadata?.interval === "annual" ? "annual" : "monthly",
@@ -868,173 +876,13 @@ export const confirmCheckoutSessionFn = createServerFn({ method: "POST" })
       };
     } catch (e) {
       const { humanizeCheckoutConfirmError } = await import("@/lib/signup-checkout-error");
-      return { ok: false, error: humanizeCheckoutConfirmError(e), organizationId: orgId, status: null };
+      return {
+        ok: false,
+        error: humanizeCheckoutConfirmError(e),
+        organizationId: orgId,
+        status: null,
+      };
     }
-  });
-
-type TrainingCheckoutInput = {
-  organizationId: string;
-  catalogId: string;
-  modeContext: "bulk_seats" | "individual";
-  quantity?: number;
-  assigneeUserId?: string | null;
-  renewalIntents?: Array<{ user_id: string; course_id: string }>;
-};
-
-export const createTrainingCheckoutFn = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: TrainingCheckoutInput) => {
-    const organizationId = String(input?.organizationId ?? "");
-    const catalogId = String(input?.catalogId ?? "");
-    if (!UUID_RE.test(organizationId) || !UUID_RE.test(catalogId)) {
-      throw new Error("Invalid training purchase.");
-    }
-    const modeContext = input?.modeContext === "individual" ? "individual" : "bulk_seats";
-    const quantity = Math.max(1, Math.min(500, Math.floor(Number(input?.quantity ?? 1) || 1)));
-    const assigneeUserId =
-      typeof input?.assigneeUserId === "string" && UUID_RE.test(input.assigneeUserId)
-        ? input.assigneeUserId
-        : null;
-    const renewalIntents = Array.isArray(input?.renewalIntents)
-      ? input.renewalIntents.filter((i) => i && UUID_RE.test(i.user_id) && UUID_RE.test(i.course_id)).slice(0, 500)
-      : [];
-    return { organizationId, catalogId, modeContext, quantity, assigneeUserId, renewalIntents };
-  })
-  .handler(async ({ data, context }) => {
-    if (!context.supabase || !context.userId) {
-      return { url: null as string | null, granted: false, error: "Not signed in." };
-    }
-    await requireOrgAdmin(context.supabase, context.userId, data.organizationId);
-
-    const org = await loadOrgRow(data.organizationId, context.supabase);
-    const exempt = orgIsComped(org);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const admin = supabaseAdmin as any;
-    const { data: sku, error: skuErr } = await admin
-      .from("hive_training_catalog")
-      .select("id, sku, name, price_cents, currency, active, kind, stripe_price_id")
-      .eq("id", data.catalogId)
-      .eq("active", true)
-      .maybeSingle();
-    if (skuErr || !sku) return { url: null, granted: false, error: "That training is not available." };
-
-    const { data: sub } = await supabaseAdmin
-      .from("org_subscriptions")
-      .select("plan")
-      .eq("organization_id", data.organizationId)
-      .maybeSingle();
-    const ents = entitlementsForOrg({
-      billingExempt: exempt,
-      plan: (sub?.plan as string | null) ?? null,
-    });
-    const env = readStripeEnv();
-    const unitCents = stripeUnitAmountForTrainingSku(sku.sku, sku.price_cents);
-    const extraPriceId = stripePriceIdForTrainingSku(sku.sku, sku.stripe_price_id, env);
-
-    const needsCharge = trainingRequiresCharge({
-      billingExempt: exempt,
-      hasHiveTrainingAddon: ents.addons.includes("hive_training"),
-      catalogKind: sku.kind,
-      priceCents: unitCents,
-    });
-
-    const { data: order, error: orderErr } = await admin
-      .from("hive_training_orders")
-      .insert({
-        organization_id: data.organizationId,
-        purchaser_user_id: context.userId,
-        model: data.modeContext,
-        amount_cents: needsCharge ? unitCents * data.quantity : 0,
-        currency: sku.currency ?? "usd",
-        status: needsCharge ? "pending" : "paid",
-      })
-      .select("id")
-      .single();
-    if (orderErr || !order) {
-      return { url: null, granted: false, error: orderErr?.message ?? "Could not start the order." };
-    }
-
-    await admin.from("hive_training_order_items").insert({
-      order_id: order.id,
-      catalog_id: sku.id,
-      quantity: data.quantity,
-      unit_price_cents: needsCharge ? unitCents : 0,
-    });
-
-    if (!needsCharge) {
-      await fulfillTrainingOrder({
-        orderId: order.id,
-        catalogId: sku.id,
-        organizationId: data.organizationId,
-        modeContext: data.modeContext,
-        quantity: data.quantity,
-        assigneeUserId: data.assigneeUserId,
-        amountCents: 0,
-      });
-      return { url: null, granted: true, error: null as string | null };
-    }
-
-    const cfg = stripePaymentsConfigured();
-    if (!cfg.ok) {
-      return { url: null, granted: false, error: cfg.message ?? PAYMENTS_NOT_CONFIGURED };
-    }
-
-    const stripe = getStripe();
-    const origin = appOriginFromRequest(getRequest());
-    const priceId = extraPriceId;
-
-    const lineItems = priceId
-      ? [{ price: priceId, quantity: data.quantity }]
-      : [
-          {
-            quantity: data.quantity,
-            price_data: {
-              currency: sku.currency ?? "usd",
-              unit_amount: unitCents,
-              product_data: { name: sku.name, metadata: { sku: sku.sku } },
-            },
-          },
-        ];
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: lineItems,
-      client_reference_id: order.id,
-      success_url: `${origin}/dashboard/hive-training?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/dashboard/hive-training?checkout=cancelled`,
-      metadata: {
-        hive_kind: "training",
-        hive_order_id: order.id,
-        mode_context: data.modeContext,
-        catalog_id: sku.id,
-        catalog_sku: sku.sku,
-        quantity: String(data.quantity),
-        organization_id: data.organizationId,
-        purchaser_user_id: context.userId,
-        assignee_user_id: data.assigneeUserId ?? "",
-      },
-    });
-
-    await admin
-      .from("hive_training_orders")
-      .update({ stripe_checkout_session_id: session.id })
-      .eq("id", order.id);
-
-    if (data.modeContext === "bulk_seats" && data.renewalIntents.length > 0) {
-      const intentRows = data.renewalIntents.slice(0, data.quantity).map((i) => ({
-        organization_id: data.organizationId,
-        stripe_session_id: session.id,
-        catalog_id: sku.id,
-        user_id: i.user_id,
-        course_id: i.course_id,
-      }));
-      if (intentRows.length > 0) {
-        await admin.from("hive_training_renewal_intents").insert(intentRows);
-      }
-    }
-
-    return { url: session.url, granted: false, error: null as string | null };
   });
 
 type ClassRosterCheckoutInput = {
@@ -1049,7 +897,8 @@ export const createTrainingClassCheckoutFn = createServerFn({ method: "POST" })
     const organizationId = String(input?.organizationId ?? "");
     if (!UUID_RE.test(organizationId)) throw new Error("Invalid organization.");
     const trainingType = String(input?.trainingType ?? "");
-    if (!isTrainingClassType(trainingType)) throw new Error("Choose CPR, Mandt, 30-day, or the package.");
+    if (!isTrainingClassType(trainingType))
+      throw new Error("Choose CPR, Mandt, 30-day, or the package.");
     const roster = cleanRosterRows(Array.isArray(input?.roster) ? input.roster : []);
     const rosterError = validateRosterRows(roster);
     if (rosterError) throw new Error(rosterError);
@@ -1057,7 +906,12 @@ export const createTrainingClassCheckoutFn = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     if (!context.supabase || !context.userId) {
-      return { url: null as string | null, granted: false, classId: null as string | null, error: "Not signed in." };
+      return {
+        url: null as string | null,
+        granted: false,
+        classId: null as string | null,
+        error: "Not signed in.",
+      };
     }
     await requireOrgAdmin(context.supabase, context.userId, data.organizationId);
 
@@ -1118,7 +972,12 @@ export const createTrainingClassCheckoutFn = createServerFn({ method: "POST" })
 
     const cfg = stripePaymentsConfigured();
     if (!cfg.ok) {
-      return { url: null, granted: false, classId: cls.id, error: cfg.message ?? PAYMENTS_NOT_CONFIGURED };
+      return {
+        url: null,
+        granted: false,
+        classId: cls.id,
+        error: cfg.message ?? PAYMENTS_NOT_CONFIGURED,
+      };
     }
 
     const stripe = getStripe();

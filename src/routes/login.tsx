@@ -6,7 +6,12 @@ import { Eye, EyeOff } from "lucide-react";
 import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
 
 import { supabase } from "@/integrations/supabase/client";
-import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
+import {
+  AuthCaptcha,
+  authCaptchaBlocked,
+  readAuthCaptchaToken,
+  resetAuthCaptcha,
+} from "@/components/auth-captcha";
 import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth-captcha";
 import { authRedirectUrl } from "@/lib/auth-redirect";
 import { lovable } from "@/integrations/lovable";
@@ -15,7 +20,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { signInWithUsername } from "@/lib/login.functions";
 import { checkHiveExecutive } from "@/lib/hive-exec.functions";
 import { completePasswordSignIn, GENERIC_LOGIN_ERROR } from "@/lib/login-auth";
-import { trainingOnlyHomeForMeFn } from "@/lib/training-only-access.functions";
 import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
 import {
   isCompanyAdminLevel,
@@ -91,7 +95,6 @@ function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const signIn = useServerFn(signInWithUsername);
   const execCheck = useServerFn(checkHiveExecutive);
-  const trainingHomeFn = useServerFn(trainingOnlyHomeForMeFn);
   const ensureWorkspace = useServerFn(ensureSignupWorkspace);
   const search = Route.useSearch();
   const nextPath = search.next;
@@ -151,7 +154,9 @@ function LoginPage() {
           if (!storedView || storedView === "hive_exec" || storedView === "state_preview") {
             const { data: memberships, error } = await supabase
               .from("organization_members")
-              .select("access_level, organization_id, organizations(name, is_demo, display_acronym)")
+              .select(
+                "access_level, organization_id, organizations(name, is_demo, display_acronym)",
+              )
               .eq("user_id", session.user.id)
               .eq("active", true);
             if (error) {
@@ -177,32 +182,32 @@ function LoginPage() {
         try {
           const { data: memberships } = await supabase
             .from("organization_members")
-            .select("id, organization_id, access_level, organizations(name, is_demo, display_acronym)")
+            .select(
+              "id, organization_id, access_level, organizations(name, is_demo, display_acronym)",
+            )
             .eq("user_id", session.user.id)
             .eq("active", true);
           let rows = memberships ?? [];
           if (!rows.length) {
             // Email confirmation no longer creates the workspace. A fresh
             // agency that signs in here (other tab or device) gets one now.
-            // Invite, manual add, and training-only are skipped inside the fn.
+            // Invite and manual add are skipped inside the fn.
             try {
               const ensured = await ensureWorkspace({ data: {} });
               if (ensured?.orgId) persistActiveOrgId(ensured.orgId);
             } catch {
-              /* training-only and invite logins continue below */
+              /* invite logins continue below */
             }
             const { data: refreshed } = await supabase
               .from("organization_members")
-              .select("id, organization_id, access_level, organizations(name, is_demo, display_acronym)")
+              .select(
+                "id, organization_id, access_level, organizations(name, is_demo, display_acronym)",
+              )
               .eq("user_id", session.user.id)
               .eq("active", true);
             rows = refreshed ?? [];
           }
           persistPreferredOrgFromRows(rows);
-          if (!rows.length) {
-            const home = await trainingHomeFn();
-            if (home?.hasThirtyDay) target = "/training/course";
-          }
         } catch {
           /* stay on dashboard */
         }
@@ -212,16 +217,7 @@ function LoginPage() {
     return () => {
       cancelled = true;
     };
-  }, [
-    loading,
-    session,
-    navigate,
-    execCheck,
-    nextPath,
-    justSignedIn,
-    trainingHomeFn,
-    ensureWorkspace,
-  ]);
+  }, [loading, session, navigate, execCheck, nextPath, justSignedIn, ensureWorkspace]);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -371,7 +367,12 @@ function LoginPage() {
           </p>
 
           <AuthCaptcha />
-          <button type="submit" disabled={busy} className="pi-home-btn primary" style={{ width: "100%" }}>
+          <button
+            type="submit"
+            disabled={busy}
+            className="pi-home-btn primary"
+            style={{ width: "100%" }}
+          >
             {busy ? "Signing in…" : "Sign in"}
           </button>
         </form>
