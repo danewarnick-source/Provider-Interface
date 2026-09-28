@@ -618,6 +618,8 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
         requirementKeys: z.array(z.string().min(1)).min(1),
         suggestedKeys: z.array(z.string()).optional(),
         packKeys: z.array(z.string()).optional(),
+        /** Suggested SOW rows the admin unchecked. Accepted now; stored in a later step. */
+        optedOutKeys: z.array(z.string()).optional(),
         typeOverrides: z.record(z.string(), TypeEnum).optional(),
         dueOverrides: z.record(z.string(), DueDraftSchema).optional(),
         dualLinkClientId: z.string().uuid().nullable().optional(),
@@ -731,6 +733,7 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
     }
 
     void data.packKeys;
+    void data.optedOutKeys;
     return { ok: true as const, count };
   });
 
