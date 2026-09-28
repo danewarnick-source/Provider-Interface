@@ -20,9 +20,9 @@ import { PersonAvatar } from "@/components/person/person-avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SectionPanel, SectionGroup } from "@/components/clients/section-panel";
 import { RequirePermission } from "@/components/rbac-guard";
-import { EmployeeFaceSheetButton } from "@/components/employees/employee-face-sheet-button";
-import { StaffProfilePanel } from "@/components/employees/staff-profile-panel";
-import { StaffObligationsFilesTab } from "@/components/employees/staff-obligations-files-tab";
+import { EmployeeFaceSheetButton } from "@/components/team-members/profile/staff-record-button";
+import { StaffProfilePanel } from "@/components/team-members/profile/profile-tab";
+import { StaffObligationsFilesTab } from "@/components/team-members/profile/file-tab";
 import { useMemberAccess } from "@/components/access/queries";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import {

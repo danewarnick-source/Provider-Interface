@@ -240,11 +240,11 @@ describe("Admin employee profile lock", () => {
 
   it("keeps Department off the edit Profile person block", () => {
     const identity = readFileSync(
-      new URL("../../components/employees/staff-profile-identity.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/identity-fields.tsx", import.meta.url),
       "utf8",
     );
     const panel = readFileSync(
-      new URL("../../components/employees/staff-profile-panel.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/profile-tab.tsx", import.meta.url),
       "utf8",
     );
     assert.match(identity, /Team member ID/);
@@ -358,7 +358,7 @@ describe("Org-wide Staff file lock", () => {
     assert.doesNotMatch(panel, /EVV/);
     assert.doesNotMatch(panel, /HRC/);
     const filesTab = readFileSync(
-      new URL("../../components/employees/staff-obligations-files-tab.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/file-tab.tsx", import.meta.url),
       "utf8",
     );
     assert.match(filesTab, /Record override/);

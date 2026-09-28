@@ -22,7 +22,7 @@ import {
 import {
   HireDraftFields,
   type HireDraft,
-} from "@/components/employees/add-employee-wizard";
+} from "@/components/team-members/add/add-member-dialog";
 import type { AccessLevel } from "@/lib/access/levels";
 import { normalizeConfig, type StaffIntakeFieldsConfig } from "@/components/hr/staff-fields-panel";
 

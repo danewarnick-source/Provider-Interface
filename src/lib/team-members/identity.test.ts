@@ -176,11 +176,11 @@ describe("employee Profile identity source lock", () => {
       "utf8",
     );
     const panel = readFileSync(
-      new URL("../../components/employees/staff-profile-panel.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/profile-tab.tsx", import.meta.url),
       "utf8",
     );
     const identityUi = readFileSync(
-      new URL("../../components/employees/staff-profile-identity.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/identity-fields.tsx", import.meta.url),
       "utf8",
     );
     assert.match(route, /staffProfileIdentityQueryKey\(orgId, staffId\)/);

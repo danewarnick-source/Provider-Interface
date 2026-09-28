@@ -447,7 +447,7 @@ describe("cert review surface lock", () => {
     assert.match(staffFile, /cert-review/);
     assert.doesNotMatch(panel, /from\("certificate_reviews"\)/);
     const personFile = readFileSync(
-      new URL("../components/employees/staff-obligations-files-tab.tsx", import.meta.url),
+      new URL("../components/team-members/profile/file-tab.tsx", import.meta.url),
       "utf8",
     );
     assert.doesNotMatch(personFile, /Replace evidence/);

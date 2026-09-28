@@ -27,12 +27,12 @@ import {
 } from "@/lib/team-members/roster";
 import { splitPersonName } from "@/lib/team-members/import";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
-import { AddEmployeeButton, AddEmployeeWizard } from "@/components/employees/add-employee-wizard";
+import { AddEmployeeButton, AddEmployeeWizard } from "@/components/team-members/add/add-member-dialog";
 import {
   EmployeeRosterUploadButton,
   EmployeeRosterUploadWizard,
-} from "@/components/employees/employee-roster-upload-wizard";
-import { FinishEmployeeSetupWizard } from "@/components/employees/finish-employee-setup-wizard";
+} from "@/components/team-members/add/import-members-dialog";
+import { FinishEmployeeSetupWizard } from "@/components/team-members/add/finish-setup-dialog";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

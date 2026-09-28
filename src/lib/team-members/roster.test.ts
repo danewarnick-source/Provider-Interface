@@ -64,7 +64,7 @@ describe("uniqueHireEmails", () => {
 describe("Add employee wizard source lock", () => {
   it("drops hire-time behavior pickers, training tracks, and end date", () => {
     const src = readFileSync(
-      new URL("../../components/employees/add-employee-wizard.tsx", import.meta.url),
+      new URL("../../components/team-members/add/add-member-dialog.tsx", import.meta.url),
       "utf8",
     );
     assert.doesNotMatch(src, /Behavior-related training/);
@@ -159,7 +159,7 @@ describe("lastLoginByUserId", () => {
 describe("Finish setup reuses Add employee", () => {
   it("walks Needs-setup people through the hire fields and an optional invite", () => {
     const src = readFileSync(
-      new URL("../../components/employees/finish-employee-setup-wizard.tsx", import.meta.url),
+      new URL("../../components/team-members/add/finish-setup-dialog.tsx", import.meta.url),
       "utf8",
     );
     const hire = readFileSync(new URL("./members.functions.ts", import.meta.url), "utf8");
