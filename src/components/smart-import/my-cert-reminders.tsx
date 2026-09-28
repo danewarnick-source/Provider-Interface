@@ -10,7 +10,7 @@ import {
   listSmartImportReminders,
   employeeUploadImportCert,
   resolveSmartImportReminder,
-} from "@/lib/smart-import-reminders.functions";
+} from "@/lib/smart-import/smart-import-reminders.functions";
 import { toast } from "sonner";
 
 type Reminder = {

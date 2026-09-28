@@ -18,9 +18,9 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   listPendingClientSubjects,
   discardImportSubject,
-} from "@/lib/smart-import-review.functions";
+} from "@/lib/smart-import/smart-import-review.functions";
 import { FinalizeClientEditor } from "@/components/clients/finalize-client-editor";
-import { clientPendingStatusLabel } from "@/lib/smart-import-status";
+import { clientPendingStatusLabel } from "@/lib/smart-import/smart-import-status";
 
 
 export const Route = createFileRoute("/dashboard/clients/pending")({

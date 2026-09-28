@@ -10,8 +10,8 @@ import { Loader2, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { applyMissingClientFields } from "@/lib/smart-import-review.functions";
-import { parseOwnGuardianValue } from "@/lib/import-validation";
+import { applyMissingClientFields } from "@/lib/smart-import/smart-import-review.functions";
+import { parseOwnGuardianValue } from "@/lib/smart-import/import-validation";
 
 type FieldLike = {
   target_field: string;

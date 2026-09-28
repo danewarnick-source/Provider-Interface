@@ -58,10 +58,10 @@ import {
   listPendingClientSubjects,
   applyMissingClientFields,
   ISSUE_KEY_TO_TARGET,
-} from "@/lib/smart-import-review.functions";
+} from "@/lib/smart-import/smart-import-review.functions";
 
-import { resolveMergeFlag, overrideValidationIssue } from "@/lib/import-checklist.functions";
-import { parseOwnGuardianValue } from "@/lib/import-validation";
+import { resolveMergeFlag, overrideValidationIssue } from "@/lib/smart-import/import-checklist.functions";
+import { parseOwnGuardianValue } from "@/lib/smart-import/import-validation";
 import { type TenantIdentity, normalizeOrgName } from "@/lib/service-classification";
 import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
 import { Checkbox } from "@/components/ui/checkbox";

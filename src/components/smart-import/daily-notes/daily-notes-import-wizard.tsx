@@ -30,8 +30,8 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   createDailyNotesImportJob,
   importHistoricalDailyNotes,
-} from "@/lib/smart-import-daily-notes.functions";
-import { checkImportDuplicates } from "@/lib/smart-import-duplicate-check.functions";
+} from "@/lib/smart-import/smart-import-daily-notes.functions";
+import { checkImportDuplicates } from "@/lib/smart-import/smart-import-duplicate-check.functions";
 import {
   TEMPLATE_HEADERS,
   buildTemplateCsv,

@@ -7,7 +7,7 @@ import {
   sumClockedHours,
   usageCounts,
 } from "./exec-aggregates.ts";
-import { findDuplicateClientInOrg, mayRunOrgWideClientDedup } from "./smart-import-dedup.ts";
+import { findDuplicateClientInOrg, mayRunOrgWideClientDedup } from "./smart-import/smart-import-dedup.ts";
 
 describe("executive aggregate counts (item 9)", () => {
   it("allows service-role totals only after a successful is_hive_executive check", () => {

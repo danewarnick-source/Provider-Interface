@@ -5,7 +5,7 @@ import { AlertTriangle, BellRing, ChevronRight, Check, Loader2 } from "lucide-re
 import {
   listSmartImportReminders,
   resolveSmartImportReminder,
-} from "@/lib/smart-import-reminders.functions";
+} from "@/lib/smart-import/smart-import-reminders.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";

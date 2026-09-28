@@ -46,7 +46,7 @@ import {
   listHrcReviewsForClient,
   createHrcReview,
   setEndOfLifeStatus,
-} from "@/lib/import-checklist.functions";
+} from "@/lib/smart-import/import-checklist.functions";
 import {
   setFieldConfirmation,
   type FieldStateMap,

@@ -11,7 +11,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { listImportJobs, discardImportJob } from "@/lib/smart-import-history.functions";
+import { listImportJobs, discardImportJob } from "@/lib/smart-import/smart-import-history.functions";
 import { employeeSmartImportRedirect } from "@/lib/staff/employee-smart-import-block";
 
 export const Route = createFileRoute("/dashboard/smart-import/history")({

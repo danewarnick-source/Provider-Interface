@@ -5,7 +5,7 @@ import { FileText, ChevronRight, BellRing, MessageSquare } from "lucide-react";
 import { listMyThreads } from "@/lib/threads.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { listMyForms, getMyFormNotifications } from "@/lib/forms.functions";
-import { listSmartImportReminders } from "@/lib/smart-import-reminders.functions";
+import { listSmartImportReminders } from "@/lib/smart-import/smart-import-reminders.functions";
 import {
   periodKeyFor, formDueDateFor, isOverdue,
   type Frequency, type Schedule,

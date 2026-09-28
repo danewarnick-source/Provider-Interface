@@ -31,7 +31,7 @@ import {
   deleteDocument,
   getDocument,
 } from "@/lib/nectar/nectar-documents.functions";
-import { attachClientDocument } from "@/lib/import-checklist.functions";
+import { attachClientDocument } from "@/lib/smart-import/import-checklist.functions";
 import { NectarDocumentActionsDialog } from "@/components/nectar/document-actions-dialog";
 import { DocumentPreviewDialog } from "./document-preview-dialog";
 import { DocumentEffectiveDatingDialog } from "@/components/documents/document-effective-dating-dialog";

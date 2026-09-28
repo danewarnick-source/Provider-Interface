@@ -253,7 +253,7 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
     const hire = read("../staff/employees.functions.ts");
     const invites = read("../invitations.functions.ts");
     const clients = read("../../routes/dashboard.clients.tsx");
-    const importCommit = read("../smart-import-commit.functions.ts");
+    const importCommit = read("../smart-import/smart-import-commit.functions.ts");
     assert.match(hire, /assertAgencySetupCompleteForOrg/);
     assert.match(invites, /assertAgencySetupCompleteForOrg/);
     assert.match(clients, /assertAgencySetupCompleteForOrg|shouldBlockStaffClientCreate/);

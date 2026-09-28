@@ -22,11 +22,11 @@ import {
   recordImportDocument,
   runSmartExtraction,
   getSmartImportSummary,
-} from "@/lib/smart-import.functions";
+} from "@/lib/smart-import/smart-import.functions";
 import { TimesheetsImportWizard } from "@/components/smart-import/timesheets/timesheets-import-wizard";
 import { DailyNotesImportWizard } from "@/components/smart-import/daily-notes/daily-notes-import-wizard";
 import { downloadClientTemplate } from "@/lib/clients/client-import-template";
-import { smartImportNeedsAi } from "@/lib/smart-import-ai-gate";
+import { smartImportNeedsAi } from "@/lib/smart-import/smart-import-ai-gate";
 
 const SearchSchema = z.object({ mode: z.enum(["employee", "client", "timesheets", "daily_notes"]).optional() });
 

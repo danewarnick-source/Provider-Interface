@@ -65,7 +65,7 @@ describe("hire auto-assign", () => {
     );
     assert.match(pcspWriter, /reevaluateStaffAssignedToClientInternal/);
     const importWriter = readFileSync(
-      fileURLToPath(new URL(".././smart-import-commit.functions.ts", import.meta.url)),
+      fileURLToPath(new URL("../smart-import/smart-import-commit.functions.ts", import.meta.url)),
       "utf8",
     );
     assert.match(importWriter, /reevaluateStaffAssignedToClientInternal/);

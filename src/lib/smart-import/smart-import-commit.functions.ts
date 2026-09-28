@@ -14,7 +14,7 @@ import {
   normalizeGuardianFields,
   parseOwnGuardianValue,
   type ClientDraft,
-} from "@/lib/import-validation";
+} from "./import-validation.ts";
 import { fetchTenantIdentity, type TenantIdentity } from "@/lib/service-classification";
 import { BASELINE_STAFF_TRAININGS, isBaselineApplicable } from "@/lib/staff/staff-training-requirements";
 import { onPcspActivatedInternal } from "@/lib/company-obligations.functions";

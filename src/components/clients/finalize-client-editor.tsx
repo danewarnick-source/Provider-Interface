@@ -28,8 +28,8 @@ import {
   setSubjectReady,
   answerNectarQuestion,
   ISSUE_KEY_TO_TARGET,
-} from "@/lib/smart-import-review.functions";
-import { commitSingleSubject } from "@/lib/smart-import-commit.functions";
+} from "@/lib/smart-import/smart-import-review.functions";
+import { commitSingleSubject } from "@/lib/smart-import/smart-import-commit.functions";
 import { setClientCaseload } from "@/lib/scheduler/setup.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { CaseloadEditor, type CaseloadDraftValue } from "@/components/clients/caseload-editor";

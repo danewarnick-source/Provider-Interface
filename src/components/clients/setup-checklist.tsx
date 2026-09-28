@@ -17,7 +17,7 @@ import {
   getClientFieldStates,
   type FieldStateMap,
 } from "@/lib/field-confirmations.functions";
-import { submitForSetup } from "@/lib/smart-import-review.functions";
+import { submitForSetup } from "@/lib/smart-import/smart-import-review.functions";
 import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
 import {
   EndOfLifeGroup,

@@ -14,7 +14,7 @@ import { Sparkles, Upload, Loader2, Paperclip, Check, Pencil } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { attachClientDocument, extractAndApplyClientUpload } from "@/lib/import-checklist.functions";
+import { attachClientDocument, extractAndApplyClientUpload } from "@/lib/smart-import/import-checklist.functions";
 
 export type NectarAskKind = "confident_suggestion" | "data_rich_gap" | "simple_yes_no";
 

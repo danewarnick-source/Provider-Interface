@@ -13,7 +13,7 @@ import {
   parseOwnGuardianValue,
   type ClientDraft,
   type ValidationIssue,
-} from "@/lib/import-validation";
+} from "./import-validation.ts";
 import { fetchTenantIdentity, partitionCodeRows } from "@/lib/service-classification";
 import { isClockableServiceCode } from "@/lib/service-billing";
 import { isEvvLockedCode, evvServiceLabel } from "@/lib/evv-codes";
@@ -1075,7 +1075,7 @@ export const submitForSetup = createServerFn({ method: "POST" })
       return { ok: true, committed: false };
     }
 
-    const { runJobCommit } = await import("./smart-import-commit.functions");
+    const { runJobCommit } = await import("../smart-import/smart-import-commit.functions.ts");
     const result = await runJobCommit(sb, context.userId, data.jobId);
 
     await sb.from("import_audit").insert({

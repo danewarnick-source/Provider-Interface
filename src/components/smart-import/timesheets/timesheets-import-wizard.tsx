@@ -42,8 +42,8 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   createTimesheetImportJob,
   importHistoricalTimesheets,
-} from "@/lib/smart-import-timesheets.functions";
-import { checkImportDuplicates } from "@/lib/smart-import-duplicate-check.functions";
+} from "@/lib/smart-import/smart-import-timesheets.functions";
+import { checkImportDuplicates } from "@/lib/smart-import/smart-import-duplicate-check.functions";
 import {
   TEMPLATE_HEADERS,
   buildTemplateCsv,

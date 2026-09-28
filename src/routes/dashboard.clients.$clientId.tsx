@@ -37,7 +37,7 @@ import { Label } from "@/components/ui/label";
 import {
   previewClientUpdateFromDocument,
   applySelectedClientFields,
-} from "@/lib/import-checklist.functions";
+} from "@/lib/smart-import/import-checklist.functions";
 import { reclaimExternalCodesAsOurs } from "@/lib/clients/client-billing-fix.functions";
 import { AddCodesControl } from "@/components/clients/add-codes-control";
 import { BillingCodesDetail } from "@/components/clients/billing-codes-detail";
