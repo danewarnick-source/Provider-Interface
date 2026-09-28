@@ -56,7 +56,7 @@ import {
   correctionNoteFromAdminNotes,
   indexCompletionsByInstance,
   isCorrectionRequestedNote,
-} from "@/lib/cert-review";
+} from "@/lib/training/cert-review";
 import {
   buildStaffTask,
   dedupeOpenTasksByInstance,

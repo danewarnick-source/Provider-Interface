@@ -150,7 +150,7 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
     }
     const { rows } = await client.query("SELECT current_database() AS db");
     assert.notEqual(rows[0]?.db, "postgres");
-    await client.query(readRel("../../supabase/tests/agency-setup-gate/isolated-schema.sql"));
+    await client.query(readRel("../../../supabase/tests/agency-setup-gate/isolated-schema.sql"));
     await client.query("GRANT authenticated TO CURRENT_USER");
     await client.query("GRANT service_role TO CURRENT_USER");
     await client.query("GRANT anon TO CURRENT_USER");
@@ -217,7 +217,7 @@ describe("integration: agency setup gate on isolated Postgres", { concurrency: f
       [ORG_TWO, USER_TWO, USER_TWO_B],
     );
 
-    await client.query(readRel("../../supabase/migrations/20260914120000_agency_setup_gate.sql"));
+    await client.query(readRel("../../../supabase/migrations/20260914120000_agency_setup_gate.sql"));
   });
 
   after(async () => {

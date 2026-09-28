@@ -12,8 +12,8 @@ import {
   listTrainingClassesForExec,
   markTrainingClassComplete,
   type TrainingClassRow,
-} from "@/lib/training-class.functions";
-import { trainingClassLabel, trainingClassUnitCents, type TrainingClassType } from "@/lib/training-class";
+} from "@/lib/training/training-class.functions";
+import { trainingClassLabel, trainingClassUnitCents, type TrainingClassType } from "@/lib/training/training-class";
 import { formatUsdFromCents } from "@/lib/hive-pricing";
 import { ClassCardStatus } from "@/components/training/class-card-upload";
 import {
@@ -21,7 +21,7 @@ import {
   sendTrainingOnlySeatFn,
   setupTrainingOnlySeatFn,
   type TrainingOnlyExecSeat,
-} from "@/lib/training-only-exec.functions";
+} from "@/lib/training/training-only-exec.functions";
 
 export const Route = createFileRoute("/dashboard/hive-exec/classes")({
   head: () => ({ meta: [{ title: "Training — Provider Interface Executive" }] }),

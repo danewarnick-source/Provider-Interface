@@ -14,7 +14,7 @@ import {
   resolveScopeFromSnapshot,
   type ResolvedScope,
 } from "@/lib/obligations/scope";
-import { isCorrectionRequestedNote, staffSurfaceReviewKind } from "@/lib/cert-review";
+import { isCorrectionRequestedNote, staffSurfaceReviewKind } from "@/lib/training/cert-review";
 import {
   buildPacket,
   hiddenAgencyCardKeys,

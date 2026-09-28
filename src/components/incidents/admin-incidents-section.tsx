@@ -33,7 +33,7 @@ const IncidentTrendsStrip = lazy(() =>
 );
 
 import { AttestationDialog, type AttestationSignature } from "./attestation-dialog";
-import { renderUpiSubmittedAttestation } from "@/lib/incident-attestations";
+import { renderUpiSubmittedAttestation } from "@/lib/incidents/incident-attestations";
 
 type ClientLite = {
   first_name: string;

@@ -7,7 +7,7 @@
  */
 
 import { ABI_OBLIGATION_TITLE, THIRTY_DAY_OBLIGATION_TITLE } from "./in-hive-training.ts";
-import { CPR_OBLIGATION_TITLES, MANDT_OBLIGATION_TITLES } from "./training-class.ts";
+import { CPR_OBLIGATION_TITLES, MANDT_OBLIGATION_TITLES } from "./training/training-class.ts";
 import { PCT_HIRE_COURSE_TITLE } from "./clients/client-form-obligations.ts";
 
 export const CODE_OF_CONDUCT_TITLE = "DHHS Code of Conduct — Signed";

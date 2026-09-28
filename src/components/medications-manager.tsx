@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Pill, Plus, Upload, X, Loader2, Sparkles, Pencil, AlertTriangle, ClipboardCheck, Check, ShieldAlert, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { parseMedicationsAI } from "@/lib/medications.functions";
+import { parseMedicationsAI } from "@/lib/documents/medications.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

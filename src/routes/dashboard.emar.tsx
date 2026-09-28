@@ -19,8 +19,8 @@ import { Pill, CheckCircle2, AlertTriangle, AlertCircle, Eraser, Loader2 } from 
 import { toast } from "sonner";
 import { EmarLegalBanner } from "@/components/workspace/emar-chart";
 import { useAccess } from "@/hooks/use-access";
-import { logMedicationPass } from "@/lib/emar-pass.functions";
-import { type EmarStatus, normalizeEmarStatus } from "@/lib/emar-status";
+import { logMedicationPass } from "@/lib/documents/emar-pass.functions";
+import { type EmarStatus, normalizeEmarStatus } from "@/lib/documents/emar-status";
 import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 import { isAdminLevel } from "@/lib/access/levels";
 

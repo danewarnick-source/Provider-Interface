@@ -24,7 +24,7 @@ import {
 import {
   DETAIL_BLOCKS, detailKeyForCategory, type DetailField,
   APS_HOTLINE, INJURY_CATEGORY_NAME, MEDICAL_EMERGENCY_CATEGORY_NAME,
-} from "@/lib/incident-detail-schemas";
+} from "@/lib/incidents/incident-detail-schemas";
 import { scanNarrativeForCategories, type NarrativeCategoryHit } from "@/lib/nectar/nectar-triggers";
 import {
   validateNarrative, validatePersonName, validateRequiredText, findContradictions,

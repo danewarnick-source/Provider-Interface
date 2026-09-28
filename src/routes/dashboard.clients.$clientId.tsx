@@ -15,7 +15,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
+import { incidentInvolvesClientOr } from "@/lib/incidents/incident-visibility";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { RequirePermission } from "@/components/rbac-guard";

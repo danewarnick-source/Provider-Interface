@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 
-import { parseDocumentWithAI } from "@/lib/document-extraction";
+import { parseDocumentWithAI } from "@/lib/documents/document-extraction";
 
 // =============================================================
 // NECTAR Universal Document Store — server functions

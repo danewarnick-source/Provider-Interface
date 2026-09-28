@@ -33,7 +33,7 @@ import {
   setEffectiveDates,
   replaceDocument,
   type DocKind,
-} from "@/lib/document-effective-dating.functions";
+} from "@/lib/documents/document-effective-dating.functions";
 
 type Mode = "fixed_date" | "ongoing" | "until_replaced";
 

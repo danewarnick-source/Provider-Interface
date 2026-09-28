@@ -479,7 +479,7 @@ export const extractPcspGoalsForTraining = createServerFn({ method: "POST" })
       return { ok: false as const, reason: `Could not download the PCSP document: ${dlErr?.message ?? "no file"}` };
     }
     const buf = Buffer.from(await file.arrayBuffer());
-    const { extractTextFromUpload } = await import("@/lib/document-text.server");
+    const { extractTextFromUpload } = await import("@/lib/documents/document-text.server");
     const text = await extractTextFromUpload(buf, pcsp.file_name as string);
     if (!text || text.trim().length < 20) {
       return { ok: false as const, reason: "NECTAR couldn't read the PCSP text (scanned PDF?). Enter goals manually." };

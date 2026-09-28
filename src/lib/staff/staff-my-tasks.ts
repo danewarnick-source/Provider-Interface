@@ -10,7 +10,7 @@ import { dueLabel } from "./staff-obligation-files.ts";
 import { inHiveCourseIdForTitle, staffCourseProgressLabel } from "../in-hive-training.ts";
 import { clientFormKindForTitle } from "../clients/client-form-obligations.ts";
 import { isFormUuid } from "../resolve-obligation-form.ts";
-import { staffSurfaceReviewKind } from "../cert-review.ts";
+import { staffSurfaceReviewKind } from "../training/cert-review.ts";
 
 export const STAFF_TASK_ACTIONS = [
   "take_training",

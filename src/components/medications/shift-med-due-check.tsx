@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Pill, CheckCircle2, AlertTriangle, Pencil } from "lucide-react";
 import { useShiftMedDueStatus } from "@/hooks/use-shift-med-due-status";
-import { type EmarStatus } from "@/lib/emar-status";
+import { type EmarStatus } from "@/lib/documents/emar-status";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

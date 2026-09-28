@@ -14,7 +14,7 @@ import {
   certReviewStatus,
   nectarReviewDisposition,
   nextRenewalDueFromRules,
-} from "./cert-review.ts";
+} from "./training/cert-review.ts";
 import { evaluateEntryReadiness } from "./dspd-entry-readiness.ts";
 import { completenessFromChecks } from "./nectar/nectar-completeness.ts";
 import { TNS_ORG_ID } from "./obligations/escalation.ts";

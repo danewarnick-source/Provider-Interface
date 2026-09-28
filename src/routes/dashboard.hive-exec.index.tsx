@@ -5,9 +5,9 @@ import { useMemo, useState } from "react";
 import { Building2, Search, AlertTriangle, Lock, Users, Contact2, DollarSign, Sparkles, ArrowRight } from "lucide-react";
 import { getExecKpis, listCompanies, type CompanyRow } from "@/lib/hive-exec.functions";
 import { getPendingUpgradeRequestCount } from "@/lib/agency/org-features.functions";
-import { listRecentTrainingClassAlerts } from "@/lib/training-class.functions";
-import { formatRosterContactLine, trainingClassLabel } from "@/lib/training-class";
-import { listTrainingOnlyOrdersForExec } from "@/lib/training-only-exec.functions";
+import { listRecentTrainingClassAlerts } from "@/lib/training/training-class.functions";
+import { formatRosterContactLine, trainingClassLabel } from "@/lib/training/training-class";
+import { listTrainingOnlyOrdersForExec } from "@/lib/training/training-only-exec.functions";
 
 export const Route = createFileRoute("/dashboard/hive-exec/")({
   component: CompaniesPage,

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { EMAR_STATUS_LABELS, normalizeEmarStatus, type EmarStatus } from "@/lib/emar-status";
+import { EMAR_STATUS_LABELS, normalizeEmarStatus, type EmarStatus } from "@/lib/documents/emar-status";
 import {
   denverMonthUtcBounds,
   denverYmd,

@@ -64,7 +64,7 @@ import {
   resolvedCertExpiration,
   shouldReplaceCompletionForResubmit,
   usesCertExpirationCadence,
-} from "./cert-review";
+} from "./training/cert-review";
 import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

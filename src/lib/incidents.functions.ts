@@ -20,8 +20,8 @@ import { z } from "zod";
 import { createIncidentInstances, resolveComplianceRequirement } from "@/lib/compliance-resolution";
 import { logPhiAccess } from "@/lib/audit/phi-access-audit.server";
 import { isAdminLevel } from "@/lib/access/levels";
-import { insertIncidentNumbered } from "@/lib/incident-number";
-import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
+import { insertIncidentNumbered } from "@/lib/incidents/incident-number";
+import { incidentInvolvesClientOr } from "@/lib/incidents/incident-visibility";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

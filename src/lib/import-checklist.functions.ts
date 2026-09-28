@@ -227,7 +227,7 @@ export const extractAndApplyClientUpload = createServerFn({ method: "POST" })
     const buf = Buffer.from(await file.arrayBuffer());
 
     // 2) Text
-    const { extractTextFromUpload } = await import("@/lib/document-text.server");
+    const { extractTextFromUpload } = await import("@/lib/documents/document-text.server");
     const text = await extractTextFromUpload(buf, data.fileName);
     if (!text || text.trim().length < 20) {
       return {
@@ -238,7 +238,7 @@ export const extractAndApplyClientUpload = createServerFn({ method: "POST" })
     }
 
     // 3) Extract via the shared NECTAR extractor with a category hint
-    const { parseDocumentWithAI } = await import("@/lib/document-extraction");
+    const { parseDocumentWithAI } = await import("@/lib/documents/document-extraction");
     const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`, orgId);
     const fields = (parsed.fields ?? []).map((f) => ({
       field_key: f.field_key,
@@ -418,7 +418,7 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
     }
     const buf = Buffer.from(await file.arrayBuffer());
 
-    const { extractTextFromUpload } = await import("@/lib/document-text.server");
+    const { extractTextFromUpload } = await import("@/lib/documents/document-text.server");
     const text = await extractTextFromUpload(buf, data.fileName);
     if (!text || text.trim().length < 20) {
       return {
@@ -427,7 +427,7 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
       };
     }
 
-    const { parseDocumentWithAI } = await import("@/lib/document-extraction");
+    const { parseDocumentWithAI } = await import("@/lib/documents/document-extraction");
     const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`, orgId);
     const rawFields = (parsed.fields ?? []).map((f) => ({
       field_key: f.field_key,

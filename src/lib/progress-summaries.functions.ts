@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { toIsoDateDay } from "@/lib/iso-date-day";
-import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
+import { incidentInvolvesClientOr } from "@/lib/incidents/incident-visibility";
 import {
   clientNeedsGoalProgress,
   filterPeriodsByFloor,

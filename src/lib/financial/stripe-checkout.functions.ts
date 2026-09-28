@@ -36,8 +36,8 @@ import {
 } from "@/lib/pi-signup-pricing";
 import { appOriginFromRequest, getStripe } from "@/lib/financial/stripe.server";
 import { activateSubscriptionFromCheckout } from "@/lib/financial/stripe-webhook";
-import { fulfillTrainingOrder } from "@/lib/training-fulfillment.server";
-import { fulfillTrainingClass } from "@/lib/training-class-fulfillment.server";
+import { fulfillTrainingOrder } from "@/lib/training/training-fulfillment.server";
+import { fulfillTrainingClass } from "@/lib/training/training-class-fulfillment.server";
 import {
   cleanRosterRows,
   isTrainingClassType,
@@ -47,7 +47,7 @@ import {
   validateRosterRows,
   type TrainingClassRosterRow,
   type TrainingClassType,
-} from "@/lib/training-class";
+} from "@/lib/training/training-class";
 import { countPayingOrgs } from "@/lib/hive-pricing.functions";
 import { resolveCurrentMembership } from "@/lib/current-org";
 import { highWaterClientCount } from "@/lib/pi-list-billing.server";

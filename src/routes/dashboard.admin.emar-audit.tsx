@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Download, ShieldAlert } from "lucide-react";
-import { type EmarStatus, normalizeEmarStatus, EMAR_STATUS_LABELS } from "@/lib/emar-status";
+import { type EmarStatus, normalizeEmarStatus, EMAR_STATUS_LABELS } from "@/lib/documents/emar-status";
 
 export const Route = createFileRoute("/dashboard/admin/emar-audit")({
   head: () => ({ meta: [{ title: "eMAR Audit — Provider Interface" }] }),

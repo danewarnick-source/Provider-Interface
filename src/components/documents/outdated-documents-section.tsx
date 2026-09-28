@@ -15,7 +15,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Archive, FileText, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { listOutdatedDocuments, type DocKind, type OutdatedDocument } from "@/lib/document-effective-dating.functions";
+import { listOutdatedDocuments, type DocKind, type OutdatedDocument } from "@/lib/documents/document-effective-dating.functions";
 
 function formatRange(from: string | null, to: string | null, mode: string | null): string {
   const f = from ? new Date(from + "T00:00:00").toLocaleDateString() : "?";

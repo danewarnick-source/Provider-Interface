@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { incidentInvolvesAnyClientOr } from "@/lib/incident-visibility";
+import { incidentInvolvesAnyClientOr } from "@/lib/incidents/incident-visibility";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
 import { isDailyServiceCode } from "@/lib/service-billing";

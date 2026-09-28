@@ -40,7 +40,7 @@ import {
   staffFileCycleKind,
   type ObligationFileStatus,
 } from "@/lib/staff/staff-obligation-files";
-import { isNativePlatformEvidence } from "@/lib/cert-review";
+import { isNativePlatformEvidence } from "@/lib/training/cert-review";
 import { inHiveCourseIdForTitle } from "@/lib/in-hive-training";
 import { loadInHiveCourseCertificate } from "@/lib/in-hive-training.functions";
 import { InHiveCertificate } from "@/components/training/in-hive-certificate";

@@ -17,7 +17,7 @@ import {
 } from "./clients/client-form-obligations.ts";
 import { ABI_OBLIGATION_TITLE, THIRTY_DAY_OBLIGATION_TITLE } from "./in-hive-training.ts";
 import { CODE_OF_CONDUCT_TITLE, CONFLICT_OF_INTEREST_TITLE } from "./obligation-auto-assign.ts";
-import { CPR_OBLIGATION_TITLES, MANDT_OBLIGATION_TITLES } from "./training-class.ts";
+import { CPR_OBLIGATION_TITLES, MANDT_OBLIGATION_TITLES } from "./training/training-class.ts";
 
 export const LOCKED_PACK_KEYS = ["onboarding", "credentials", "client"] as const;
 export type LockedPackKey = (typeof LOCKED_PACK_KEYS)[number];

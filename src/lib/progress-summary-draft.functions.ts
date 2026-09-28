@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import { MONTHLY_SUMMARY_REQUIRED_FIELDS } from "@/lib/progress-summaries";
-import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
+import { incidentInvolvesClientOr } from "@/lib/incidents/incident-visibility";
 
 /**
  * Nectar drafter for periodic progress summaries.

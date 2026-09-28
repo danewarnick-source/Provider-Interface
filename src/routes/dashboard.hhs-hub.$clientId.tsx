@@ -368,7 +368,7 @@ function DailyNoteTab({
 
     if (pendingMedDoses.length > 0) {
       try {
-        const { logMedicationPass } = await import("@/lib/emar-pass.functions");
+        const { logMedicationPass } = await import("@/lib/documents/emar-pass.functions");
         for (const dose of pendingMedDoses) {
           await logMedicationPass({ data: dose });
         }

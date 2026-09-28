@@ -251,7 +251,7 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
     assert.throws(() => assertAgencySetupComplete(incomplete), /Agency setup is incomplete/);
 
     const hire = read("../staff/employees.functions.ts");
-    const invites = read("./invitations.functions.ts");
+    const invites = read("../invitations.functions.ts");
     const clients = read("../../routes/dashboard.clients.tsx");
     const importCommit = read("../smart-import-commit.functions.ts");
     assert.match(hire, /assertAgencySetupCompleteForOrg/);

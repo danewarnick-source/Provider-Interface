@@ -15,11 +15,11 @@ import {
   quoteTrainingOnlyPeople,
   type TrainingOnlyPersonRow,
   type TrainingOnlySku,
-} from "@/lib/training/training-only";
+} from "@/lib/training-only";
 import {
   createTrainingOnlyCheckoutFn,
   getTrainingOnlyPaymentsStatusFn,
-} from "@/lib/training/training-only-checkout.functions";
+} from "@/lib/training-only-checkout.functions";
 
 const JAKARTA = '"Inter", ui-sans-serif, system-ui, sans-serif';
 

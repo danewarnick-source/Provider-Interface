@@ -10,7 +10,7 @@ import { Buffer } from "node:buffer";
 
 
 import { gatewayFetch, assertBedrockConfigured, friendlyAiErrorMessage } from "@/lib/ai-bedrock.server";
-import { parseDocumentWithAI, extractGoalsOnly, documentLikelyHasGoals, CORE_CLIENT_FIELD_KEYS } from "@/lib/document-extraction";
+import { parseDocumentWithAI, extractGoalsOnly, documentLikelyHasGoals, CORE_CLIENT_FIELD_KEYS } from "@/lib/documents/document-extraction";
 import { enrichNamesFromFull, firstNameWithMiddle, formatPersonName } from "@/lib/person-name";
 import { smartImportNeedsAi } from "@/lib/smart-import-ai-gate";
 import { findDuplicateClientInOrg, mayRunOrgWideClientDedup, type DedupClientRow } from "@/lib/smart-import-dedup";

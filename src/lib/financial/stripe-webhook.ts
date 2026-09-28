@@ -12,9 +12,9 @@ import {
 } from "@/lib/billing-lockout.server";
 import { isBillingExempt, UNPAID_LOCK_REASON } from "@/lib/billing-access";
 import { shouldKeepPrepaidAccess, syncPiListQuantityForOrg } from "@/lib/pi-list-billing.server";
-import { fulfillTrainingOrder } from "@/lib/training-fulfillment.server";
-import { fulfillTrainingClass } from "@/lib/training-class-fulfillment.server";
-import { fulfillTrainingOnlyOrder } from "@/lib/training-only-fulfillment.server";
+import { fulfillTrainingOrder } from "@/lib/training/training-fulfillment.server";
+import { fulfillTrainingClass } from "@/lib/training/training-class-fulfillment.server";
+import { fulfillTrainingOnlyOrder } from "@/lib/training/training-only-fulfillment.server";
 import { activateSubscriptionFromCheckout } from "@/lib/agency/org-subscription-activate";
 
 export { activateSubscriptionFromCheckout } from "@/lib/agency/org-subscription-activate";

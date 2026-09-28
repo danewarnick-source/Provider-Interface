@@ -1,6 +1,6 @@
 import { neutralizeCsvFormula } from "../csv-safe.ts";
 import { toDisplayNameCase } from "../person-name.ts";
-import { isCorrectionRequestedNote } from "../cert-review.ts";
+import { isCorrectionRequestedNote } from "../training/cert-review.ts";
 
 export const OBLIGATION_FILE_STATUS_LABEL = {
   on_file: "On file",

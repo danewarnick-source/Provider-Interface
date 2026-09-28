@@ -26,7 +26,7 @@ import {
 import { toast } from "sonner";
 import {
   setRefillStatus, logShiftChangeCount, logMedicationTransfer,
-} from "@/lib/emar-pass.functions";
+} from "@/lib/documents/emar-pass.functions";
 import { isAdminLevel } from "@/lib/access/levels";
 
 type Med = {
