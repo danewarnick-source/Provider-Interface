@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAddonForOrg } from "../financial/entitlements.server.ts";
-import { loadOrgPersonnelFileIndex } from "@/lib/personnel-file-matrix.functions";
+import { loadOrgPersonnelFileIndex } from "../staff/personnel-file-matrix.functions.ts";
 
 /**
  * Internal Audit (QA / audit-prep) — Foundation: NECTAR.

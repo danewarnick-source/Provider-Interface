@@ -9,7 +9,7 @@ import {
   listFunctionalityReports,
   updateFunctionalityReport,
   type FunctionalityReport,
-} from "@/lib/functionality-reports.functions";
+} from "@/lib/agency/functionality-reports.functions";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/dashboard/hive-exec/functionality")({

@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ArrowLeft, Save } from "lucide-react";
 import { RequireCapability } from "@/hooks/use-exec-capability";
-import { getOrgAgreements, upsertOrgAgreement, type AgreementStatus, type OrgAgreementChecklistItem } from "@/lib/agreements.functions";
+import { getOrgAgreements, upsertOrgAgreement, type AgreementStatus, type OrgAgreementChecklistItem } from "@/lib/agency/agreements.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

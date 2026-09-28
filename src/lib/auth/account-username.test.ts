@@ -7,7 +7,7 @@ import {
   isValidUsername,
   resolveAccountUsername,
   usernameLiveMessage,
-} from "./account-username.ts";
+} from "../auth/account-username.ts";
 
 describe("account username (email-as-username)", () => {
   it("accepts a full email as a username", () => {

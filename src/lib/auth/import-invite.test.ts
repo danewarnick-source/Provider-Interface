@@ -5,7 +5,7 @@ import {
   classifyImportInvite,
   hasUsableInviteEmail,
   summarizeImportInviteBuckets,
-} from "./import-invite.ts";
+} from "../auth/import-invite.ts";
 
 describe("hasUsableInviteEmail", () => {
   it("requires a non-empty address with @", () => {

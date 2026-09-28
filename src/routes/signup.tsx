@@ -68,7 +68,7 @@ import {
   parseSignupStaffCount,
   signupCountDraftFromInput,
 } from "@/lib/auth/signup-count-input";
-import { defaultUsernameFromEmail } from "@/lib/account-username";
+import { defaultUsernameFromEmail } from "@/lib/auth/account-username";
 import { toast } from "sonner";
 import {
   SIGNUP_EMAIL_IN_USE_MESSAGE,

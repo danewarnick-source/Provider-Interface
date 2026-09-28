@@ -7,7 +7,7 @@
 // =============================================================
 
 import { z } from "zod";
-import { gatewayFetch, friendlyAiErrorMessage } from "@/lib/ai-bedrock.server";
+import { gatewayFetch, friendlyAiErrorMessage } from "../nectar/ai-bedrock.server.ts";
 
 export const FieldOut = z.object({
   field_key: z.string().min(1).max(80),

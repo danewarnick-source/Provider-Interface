@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { HistoricalTimesheetBadge } from "@/components/smart-import/timesheets/historical-timesheet-badge";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";
-import { draftShiftNote } from "@/lib/ai-coach.functions";
+import { draftShiftNote } from "@/lib/nectar/ai-coach.functions";
 import {
   listMyPendingHistoricalTimesheets,
   updateMyHistoricalTimesheetNote,

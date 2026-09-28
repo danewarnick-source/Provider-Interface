@@ -18,7 +18,7 @@ import { clientReadiness, type ReadinessReport } from "@/lib/clients/client-read
 import {
   getClientOnboardingState,
   addClientBillingCodes,
-} from "@/lib/finish-onboarding.functions";
+} from "@/lib/auth/finish-onboarding.functions";
 import {
   HomeForm,
   RatesForm,

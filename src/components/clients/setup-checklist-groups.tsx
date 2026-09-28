@@ -36,7 +36,7 @@ import {
   saveOnboardingBillingRate,
   saveOnboardingClientPatch,
   saveProfileField,
-} from "@/lib/finish-onboarding.functions";
+} from "@/lib/auth/finish-onboarding.functions";
 import {
   setLevelOfNeed,
   setEmergencyContact,
@@ -50,8 +50,8 @@ import {
 import {
   setFieldConfirmation,
   type FieldStateMap,
-} from "@/lib/field-confirmations.functions";
-import type { FieldState } from "@/lib/field-confirmations";
+} from "@/lib/staff/field-confirmations.functions";
+import type { FieldState } from "@/lib/staff/field-confirmations";
 import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
 import { isClockableServiceCode } from "@/lib/billing/service-billing";
 import {

@@ -27,7 +27,7 @@ import { HhsAttendanceCalendar } from "@/components/hhs/hhs-attendance-calendar"
 import { HhsMarOverviewCalendar } from "@/components/hhs/hhs-mar-overview-calendar";
 
 import { toast } from "sonner";
-import { evaluateShiftNote } from "@/lib/ai-coach.functions";
+import { evaluateShiftNote } from "@/lib/nectar/ai-coach.functions";
 import { saveDailyRecord, savePrnForm, saveIncidentReport } from "@/lib/residential/hhs.functions";
 import { denverYmd } from "@/lib/denver-date";
 import { invalidateStaffCaseloadWork } from "@/lib/staff/staff-caseload-cache";

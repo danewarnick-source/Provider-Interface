@@ -223,7 +223,7 @@ async function runExtraction(docText: string, sourceLabel: string): Promise<Extr
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 55_000);
 
-  const { callBedrockChatCompletions, BedrockError } = await import("@/lib/ai-bedrock.server");
+  const { callBedrockChatCompletions, BedrockError } = await import("../nectar/ai-bedrock.server.ts");
   let raw: string | undefined;
   try {
     const json = await callBedrockChatCompletions({

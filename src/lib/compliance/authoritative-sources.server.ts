@@ -3,7 +3,7 @@
 // splitter (?tss-serverfn-split) breaks sibling module-scope references
 // from within handler bodies. See docs/tanstack-serverfn-splitting.
 import { z } from "zod";
-import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
+import { assertBedrockConfigured, gatewayFetch } from "../nectar/ai-bedrock.server.ts";
 import { RateLimitError } from "@/lib/nectar/nectar-rate-limit.server";
 
 export const AUTH_KINDS = [

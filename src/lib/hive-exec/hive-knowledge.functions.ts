@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { gatewayFetch } from "@/lib/ai-bedrock.server";
+import { gatewayFetch } from "../nectar/ai-bedrock.server.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Steve Guide-me — retrieval over the authored hive_knowledge table ONLY.

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Clock, CheckCircle2 } from "lucide-react";
-import { computeDeadlines, type DeadlineRow } from "@/lib/bc-deadlines";
+import { computeDeadlines, type DeadlineRow } from "@/lib/compliance/bc-deadlines";
 
 export function SowDeadlinesPanel({
   clientId,

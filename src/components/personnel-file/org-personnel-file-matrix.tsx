@@ -13,7 +13,7 @@ import {
   listOrgPersonnelFileMatrix,
   listOrgPersonnelFilePack,
   type PersonnelFileMatrixRow,
-} from "@/lib/personnel-file-matrix.functions";
+} from "@/lib/staff/personnel-file-matrix.functions";
 import { missingPersonnelCsv, personnelPackHtml } from "@/lib/staff/staff-obligation-files";
 
 async function signedEvidenceUrl(path: string): Promise<string> {

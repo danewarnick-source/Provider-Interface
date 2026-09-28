@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { gatewayFetch } from "@/lib/ai-bedrock.server";
+import { gatewayFetch } from "../nectar/ai-bedrock.server.ts";
 
 const Input = z.object({
   clientId: z.string().uuid(),

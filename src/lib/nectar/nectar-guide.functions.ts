@@ -3,7 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { anchorsForPrompt, findAnchor } from "@/lib/nectar/tour-anchors";
 import { resolveNectarAudience } from "@/lib/nectar/nectar-trust";
 
-import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
+import { assertBedrockConfigured, gatewayFetch } from "../nectar/ai-bedrock.server.ts";
 
 export interface GuideStep {
   /** Anchor id from TOUR_ANCHORS (must exist). */

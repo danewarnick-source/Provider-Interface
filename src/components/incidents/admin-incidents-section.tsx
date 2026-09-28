@@ -9,7 +9,7 @@ import {
   submitToUpi,
   updateIncidentFollowupNotes,
   getIncidentActors,
-} from "@/lib/incidents.functions";
+} from "@/lib/incidents/incidents.functions";
 import { INCIDENT_CATEGORIES, GUARDIAN_METHODS, type GuardianMethod } from "./incident-categories";
 import { useCaseload } from "@/hooks/use-caseload";
 import { useCurrentOrg } from "@/hooks/use-org";

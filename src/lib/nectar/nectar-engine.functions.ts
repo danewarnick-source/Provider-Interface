@@ -192,8 +192,8 @@ PROVIDER ENTITIES:
 - Client count: ${facts.clientCount}
 - Jurisdictions: ${facts.jurisdictions.join(", ")}`;
 
-  const { callBedrockChatCompletions, BedrockError } = await import("@/lib/ai-bedrock.server");
-  const { TransientAIError } = await import("@/lib/authoritative-sources.server");
+  const { callBedrockChatCompletions, BedrockError } = await import("../nectar/ai-bedrock.server.ts");
+  const { TransientAIError } = await import("../compliance/authoritative-sources.server.ts");
 
   let json;
   try {
@@ -624,7 +624,7 @@ const sleepMs = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function aiProposeWithRetry(
   ...args: Parameters<typeof aiPropose>
 ): Promise<Awaited<ReturnType<typeof aiPropose>>> {
-  const { isTransientAIError } = await import("@/lib/authoritative-sources.server");
+  const { isTransientAIError } = await import("../compliance/authoritative-sources.server.ts");
   let lastErr: unknown;
   for (let attempt = 1; attempt <= PREFILL_MAX_ATTEMPTS; attempt += 1) {
     try {

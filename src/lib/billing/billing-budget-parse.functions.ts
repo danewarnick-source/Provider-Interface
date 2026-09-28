@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
+import { assertBedrockConfigured, gatewayFetch } from "../nectar/ai-bedrock.server.ts";
 
 /**
  * Server function: parse a client's 1056 budget or PCSP form using NECTAR

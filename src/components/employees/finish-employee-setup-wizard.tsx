@@ -5,7 +5,7 @@ import { Mail } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { finishEmployeeSetup } from "@/lib/staff/employees.functions";
-import { createInvitation, resendInvitation } from "@/lib/invitations.functions";
+import { createInvitation, resendInvitation } from "@/lib/auth/invitations.functions";
 import { interpretInviteSendResult } from "@/lib/auth/invite-send-result";
 import { resolveAuthOrigin } from "@/lib/auth/auth-redirect";
 import { Button } from "@/components/ui/button";

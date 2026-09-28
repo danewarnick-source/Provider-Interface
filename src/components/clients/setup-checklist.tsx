@@ -12,11 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
 import { clientReadiness, type ReadinessReport } from "@/lib/clients/client-readiness.functions";
-import { getClientOnboardingState } from "@/lib/finish-onboarding.functions";
+import { getClientOnboardingState } from "@/lib/auth/finish-onboarding.functions";
 import {
   getClientFieldStates,
   type FieldStateMap,
-} from "@/lib/field-confirmations.functions";
+} from "@/lib/staff/field-confirmations.functions";
 import { submitForSetup } from "@/lib/smart-import/smart-import-review.functions";
 import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
 import {

@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
+import { gatewayFetch, assertBedrockConfigured } from "../nectar/ai-bedrock.server.ts";
 import {
   type CompletenessItem,
   type CompletenessResult,

@@ -12,7 +12,7 @@ import {
   CATEGORY_LABEL,
   type SowCatalogEntry,
 } from "./sow-obligation-catalog.ts";
-import { STANDING_SOW_DUTIES } from "../standing-sow-duties.ts";
+import { STANDING_SOW_DUTIES } from "../compliance/standing-sow-duties.ts";
 
 /** Same keys as SOW_TRAINING_KEYS in sow-perimeters.functions.ts. */
 const PERIMETER_TRAINING = {

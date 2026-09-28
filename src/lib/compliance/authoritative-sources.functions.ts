@@ -3,9 +3,9 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import type { Json } from "@/integrations/supabase/types";
-import { reportPlatformEvent } from "./hive-exec/hive-tickets.functions.ts";
-import { markDraftedByNectar } from "./nectar/nectar-approvals.functions";
-import { EVV_SERVICE_CODES } from "./evv-codes";
+import { reportPlatformEvent } from "../hive-exec/hive-tickets.functions.ts";
+import { markDraftedByNectar } from "../nectar/nectar-approvals.functions";
+import { EVV_SERVICE_CODES } from "../evv-codes.ts";
 import {
   AUTH_KINDS,
   NON_OBLIGATION_KINDS,
@@ -19,9 +19,9 @@ import {
   ExplainResp,
   EXTERNAL_REGEX,
   matchFeatureLink,
-} from "./authoritative-sources.server";
-import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
-import { classifyServiceCodes } from "./nectar/nectar-code-classifier";
+} from "../compliance/authoritative-sources.server.ts";
+import { assertBedrockConfigured, gatewayFetch } from "../nectar/ai-bedrock.server.ts";
+import { classifyServiceCodes } from "../nectar/nectar-code-classifier";
 import { isAgencyAdmin } from "@/lib/access/levels";
 
 // =============================================================
@@ -1804,7 +1804,7 @@ export const nudgeDraftJob = createServerFn({ method: "POST" })
     // Auth: only members of the job's org can nudge it.
     await loadDraftJobDoc(supabase, data.jobId, userId);
     try {
-      const { fireDraftTick } = await import("./nectar/nectar-draft-tick.server");
+      const { fireDraftTick } = await import("../nectar/nectar-draft-tick.server");
       await fireDraftTick(data.jobId, { wait: false });
     } catch (err) {
       // Best-effort; the client driver is authoritative.

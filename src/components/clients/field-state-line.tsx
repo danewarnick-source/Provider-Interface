@@ -6,7 +6,7 @@
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, ShieldCheck, HelpCircle } from "lucide-react";
-import type { TrackedField, FieldState } from "@/lib/field-confirmations";
+import type { TrackedField, FieldState } from "@/lib/staff/field-confirmations";
 
 export function FieldStateLine({
   field, state, clientId, valueText,

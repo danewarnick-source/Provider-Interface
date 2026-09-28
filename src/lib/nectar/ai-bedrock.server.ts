@@ -14,7 +14,7 @@ import {
   type Message,
 } from "@aws-sdk/client-bedrock-runtime";
 import { FetchHttpHandler } from "@smithy/fetch-http-handler";
-import { resolveBedrockModelId } from "@/lib/bedrock-model-id";
+import { resolveBedrockModelId } from "../nectar/bedrock-model-id.ts";
 import {
   acquireBedrockSlot,
   recordBedrockTokens,

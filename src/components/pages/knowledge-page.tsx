@@ -28,7 +28,7 @@ import {
   listAuthoritativeSources,
   markAsAuthoritativeSource,
   ingestWebSource,
-} from "@/lib/authoritative-sources.functions";
+} from "@/lib/compliance/authoritative-sources.functions";
 
 const DOC_KINDS = [
   { value: "state_sow", label: "Scope of Work" },

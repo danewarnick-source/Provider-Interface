@@ -5,7 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { TRACKED_FIELDS, fieldState, type FieldState } from "@/lib/field-confirmations";
+import { TRACKED_FIELDS, fieldState, type FieldState } from "../staff/field-confirmations.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function assertOrgMember(sb: any, userId: string, organizationId: string) {

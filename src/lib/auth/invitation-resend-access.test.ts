@@ -67,7 +67,7 @@ describe("resolveResendAccess", () => {
 
 describe("resendInvitation source lock", () => {
   it("rewrites access_level / access_preset_id on resend and both wizards pass the chosen access", () => {
-    const fns = readFileSync(new URL(".././invitations.functions.ts", import.meta.url), "utf8");
+    const fns = readFileSync(new URL("../auth/invitations.functions.ts", import.meta.url), "utf8");
     const resend = fns.slice(
       fns.indexOf("export const resendInvitation"),
       fns.indexOf("export const revokeInvitation"),

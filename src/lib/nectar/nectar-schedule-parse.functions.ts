@@ -103,7 +103,7 @@ Rules:
       today_weekday_index: new Date().getDay(),
     });
 
-    const { callBedrockChatCompletions, BedrockError } = await import("@/lib/ai-bedrock.server");
+    const { callBedrockChatCompletions, BedrockError } = await import("../nectar/ai-bedrock.server.ts");
     let raw: string;
     try {
       const json = await callBedrockChatCompletions({
@@ -263,7 +263,7 @@ Rules:
       today_weekday_index: new Date().getDay(),
     });
 
-    const { callBedrockChatCompletions, BedrockError } = await import("@/lib/ai-bedrock.server");
+    const { callBedrockChatCompletions, BedrockError } = await import("../nectar/ai-bedrock.server.ts");
     let raw: string;
     try {
       const json = await callBedrockChatCompletions({

@@ -20,7 +20,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Json } from "@/integrations/supabase/types";
-import { generatePlainLanguageExplanation } from "../authoritative-sources.server";
+import { generatePlainLanguageExplanation } from "../compliance/authoritative-sources.server.ts";
 
 // Requirement keys PI already has a first-class feature for — these don't
 // need an admin's individual judgment call, just a bulk rubber-stamp.

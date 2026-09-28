@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createInvitation } from "@/lib/invitations.functions";
+import { createInvitation } from "@/lib/auth/invitations.functions";
 import { interpretInviteSendResult } from "@/lib/auth/invite-send-result";
 import {
   listTeamAccess,

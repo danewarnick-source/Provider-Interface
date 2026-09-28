@@ -25,7 +25,7 @@ import {
   getActiveDraftJobs,
   nudgeDraftJob,
   processDraftChunk,
-} from "@/lib/authoritative-sources.functions";
+} from "@/lib/compliance/authoritative-sources.functions";
 
 type ActiveJob = {
   jobId: string;

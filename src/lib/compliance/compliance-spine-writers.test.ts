@@ -80,7 +80,7 @@ describe("Compliance spine — parallel writers killed", () => {
     assert.doesNotMatch(incident, /\.from\(["']nectar_compliance_instances/);
     assert.doesNotMatch(incident, /\.insert\(/);
 
-    const attest = read(".././authoritative-sources.functions.ts");
+    const attest = read("../compliance/authoritative-sources.functions.ts");
     assert.doesNotMatch(attest, /export const getRequirementDrillDown/);
     assert.doesNotMatch(attest, /export const recordComplianceEvidence/);
     const held = read("../nectar/nectar-held-timesheets.functions.ts");

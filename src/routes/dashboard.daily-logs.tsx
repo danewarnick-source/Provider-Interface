@@ -33,7 +33,7 @@ import { invalidateStaffCaseloadWork } from "@/lib/staff/staff-caseload-cache";
 import {
   evaluateShiftNote, scanNoteForTriggers,
   type CoachResult, type ScanResult,
-} from "@/lib/ai-coach.functions";
+} from "@/lib/nectar/ai-coach.functions";
 import { freezeOriginalTranscript } from "@/lib/original-transcript";
 import {
   accumulateSpeechResults,

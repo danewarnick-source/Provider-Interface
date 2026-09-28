@@ -16,8 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   AlertTriangle, Skull, ShieldAlert, Sparkles, X, Loader2, ShieldCheck, Mic, MicOff, Wand2,
 } from "lucide-react";
-import { createIncident } from "@/lib/incidents.functions";
-import { draftIncidentNarrative, reviewIncidentReport } from "@/lib/ai-coach.functions";
+import { createIncident } from "@/lib/incidents/incidents.functions";
+import { draftIncidentNarrative, reviewIncidentReport } from "@/lib/nectar/ai-coach.functions";
 import {
   INCIDENT_CATEGORIES, ABUSE_CATEGORY, FATALITY_CATEGORY, type IncidentCategory,
 } from "./incident-categories";

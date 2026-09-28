@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ingestDocument } from "@/lib/nectar/nectar-documents.functions";
-import { markAsAuthoritativeSource } from "@/lib/authoritative-sources.functions";
+import { markAsAuthoritativeSource } from "@/lib/compliance/authoritative-sources.functions";
 
 const AUTH_KINDS = [
   { value: "state_sow", label: "State Scope of Work (SOW)" },

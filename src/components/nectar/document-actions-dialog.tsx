@@ -17,7 +17,7 @@ import {
   detectAndOfferActions,
   proposeStaffChecklistFromDocument,
 } from "@/lib/nectar/nectar-document-actions.functions";
-import { markAsAuthoritativeSource } from "@/lib/authoritative-sources.functions";
+import { markAsAuthoritativeSource } from "@/lib/compliance/authoritative-sources.functions";
 
 /**
  * Curated post-upload offer. The actions shown here are produced entirely by

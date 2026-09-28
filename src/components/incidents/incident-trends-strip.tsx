@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
-import { incidentTrends } from "@/lib/incidents.functions";
+import { incidentTrends } from "@/lib/incidents/incidents.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 
 

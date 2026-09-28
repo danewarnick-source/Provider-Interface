@@ -6,7 +6,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
+import { gatewayFetch, assertBedrockConfigured } from "../nectar/ai-bedrock.server.ts";
 
 type DraftShift = {
   staff_id: string | null;

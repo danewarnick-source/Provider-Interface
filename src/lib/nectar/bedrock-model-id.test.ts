@@ -4,7 +4,7 @@ import {
   geoPrefixForRegion,
   isInferenceProfileId,
   resolveBedrockModelId,
-} from "./bedrock-model-id.ts";
+} from "../nectar/bedrock-model-id.ts";
 
 describe("resolveBedrockModelId", () => {
   it("throws when unset — does not invent a Claude id", () => {

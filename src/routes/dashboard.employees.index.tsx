@@ -6,11 +6,11 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
 import { useServerFn } from "@tanstack/react-start";
 import { adminResetEmployeePassword } from "@/lib/staff/employees.functions";
-import { resendInvitation, revokeInvitation } from "@/lib/invitations.functions";
+import { resendInvitation, revokeInvitation } from "@/lib/auth/invitations.functions";
 import { archiveEntity, restoreEntity } from "@/lib/clients/lifecycle.functions";
 import { inviteJoinUrl } from "@/lib/auth/join-invite";
 import { resolveAuthOrigin } from "@/lib/auth/auth-redirect";
-import { generateTempPassword } from "@/lib/temp-password";
+import { generateTempPassword } from "@/lib/auth/temp-password";
 import {
   onStaffAssignmentCreated,
   onStaffAssignmentRemoved,

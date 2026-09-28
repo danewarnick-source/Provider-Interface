@@ -1,5 +1,5 @@
 import { PROVIDER_INTERFACE_ORIGIN } from "./auth-redirect.ts";
-import { defaultUsernameFromEmail } from "../account-username.ts";
+import { defaultUsernameFromEmail } from "../auth/account-username.ts";
 
 /** Shown on every failed join so testers are not dumped into new-agency signup. */
 export const ASK_ADMIN_MANUAL = "Ask your admin to add you manually.";
@@ -117,7 +117,7 @@ export {
   isValidUsername as isValidJoinUsername,
   resolveAccountUsername,
   usernameLiveMessage as joinUsernameLiveMessage,
-} from "../account-username.ts";
+} from "../auth/account-username.ts";
 
 export const JOIN_PASSWORD_TOO_SHORT = "Password must be at least 12 characters.";
 

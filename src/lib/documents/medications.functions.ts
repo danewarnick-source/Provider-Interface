@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
+import { gatewayFetch, assertBedrockConfigured } from "../nectar/ai-bedrock.server.ts";
 
 const MedSchema = z.object({
   medication_name: z.string().min(1).max(200),

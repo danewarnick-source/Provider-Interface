@@ -9,7 +9,7 @@ import { z } from "zod";
 import { Buffer } from "node:buffer";
 
 
-import { gatewayFetch, assertBedrockConfigured, friendlyAiErrorMessage } from "@/lib/ai-bedrock.server";
+import { gatewayFetch, assertBedrockConfigured, friendlyAiErrorMessage } from "../nectar/ai-bedrock.server.ts";
 import { parseDocumentWithAI, extractGoalsOnly, documentLikelyHasGoals, CORE_CLIENT_FIELD_KEYS } from "@/lib/documents/document-extraction";
 import { enrichNamesFromFull, firstNameWithMiddle, formatPersonName } from "@/lib/person-name";
 import { smartImportNeedsAi } from "./smart-import-ai-gate.ts";

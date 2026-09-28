@@ -8,7 +8,7 @@ import {
   onStaffAssignmentCreatedInternal,
   onStaffAssignmentRemovedInternal,
 } from "@/lib/staff/staff-assignment-hooks.functions";
-import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
+import { gatewayFetch, assertBedrockConfigured } from "../nectar/ai-bedrock.server.ts";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Setup tool A — bulk caseload editor (client → staff[])

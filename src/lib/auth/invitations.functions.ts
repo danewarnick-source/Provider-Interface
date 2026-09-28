@@ -21,7 +21,7 @@ import { resolvePresetId } from "@/lib/access/preset-resolve";
 import { buildInvitationEmail } from "@/lib/auth/invitation-email";
 import { inviteJoinUrl } from "@/lib/auth/join-invite";
 import { pickReplyTo, stripFakeDisplayLabel } from "@/lib/managed-from";
-import { canSendImportInvite } from "@/lib/import-invite";
+import { canSendImportInvite } from "../auth/import-invite.ts";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency/agency-setup-gate.functions";
 import {
   findMemberAccessByEmail,

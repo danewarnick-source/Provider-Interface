@@ -3,7 +3,7 @@
 // and a short summary used for keyword-group validation. Extracted from
 // staff-training-requirements.functions.ts (no behavior change) so it can
 // also be used against obligation-evidence uploads for Company Obligations.
-import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
+import { gatewayFetch, assertBedrockConfigured } from "../nectar/ai-bedrock.server.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

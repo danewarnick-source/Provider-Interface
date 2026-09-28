@@ -25,8 +25,8 @@ import {
 } from "@/lib/staff/staff-assignment-hooks.functions";
 import { enrichNamesFromFull } from "@/lib/person-name";
 import { hireEmployeeInternal } from "@/lib/staff/employees.functions";
-import { generateTempPassword } from "@/lib/temp-password";
-import { classifyImportInvite, hasUsableInviteEmail } from "@/lib/import-invite";
+import { generateTempPassword } from "../auth/temp-password.ts";
+import { classifyImportInvite, hasUsableInviteEmail } from "../auth/import-invite.ts";
 
 const JobId = z.object({ jobId: z.string().uuid() });
 

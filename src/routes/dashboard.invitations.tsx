@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Mail, UserPlus, Copy, RefreshCcw, Ban, Send } from "lucide-react";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
-import { resendInvitation, revokeInvitation } from "@/lib/invitations.functions";
+import { resendInvitation, revokeInvitation } from "@/lib/auth/invitations.functions";
 import { inviteJoinUrl } from "@/lib/auth/join-invite";
 import { resolveAuthOrigin } from "@/lib/auth/auth-redirect";
 import { toast } from "sonner";

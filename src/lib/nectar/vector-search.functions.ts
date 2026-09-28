@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 
-import { assertBedrockConfigured, gatewayEmbeddingsFetch, gatewayFetch } from "@/lib/ai-bedrock.server";
+import { assertBedrockConfigured, gatewayEmbeddingsFetch, gatewayFetch } from "../nectar/ai-bedrock.server.ts";
 
 const EMBED_MODEL = "google/gemini-embedding-001";
 const EMBED_DIMS = 1536;

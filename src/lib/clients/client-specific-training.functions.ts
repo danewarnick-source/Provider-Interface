@@ -369,7 +369,7 @@ async function assembleVerbatim(
 async function draftTrainingNarrative(facts: string, orgId?: string | null): Promise<string> {
   if (!facts.trim()) return "";
   try {
-    const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
+    const { gatewayFetch } = await import("../nectar/ai-bedrock.server.ts");
     const system = [
       "You are NECTAR, writing a brief, warm, professional orientation narrative for a Utah DSPD direct-support worker about to support a specific person.",
       "Using ONLY the facts provided, write 1–3 short flowing paragraphs introducing the person: who they are, what matters to them, their goals, and the general approach to supporting them.",
@@ -401,7 +401,7 @@ async function draftTrainingNarrative(facts: string, orgId?: string | null): Pro
 // Reads the uploaded PCSP document and returns one CSTGoal per goal/objective
 // row. Every field is STRICTLY verbatim — no summarisation, no authored prose.
 async function extractGoalsVerbatim(documentText: string, orgId?: string | null): Promise<CSTGoal[]> {
-  const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
+  const { gatewayFetch } = await import("../nectar/ai-bedrock.server.ts");
   const system = [
     "You are NECTAR, a STRICTLY VERBATIM extraction engine for a Utah DSPD PCSP.",
     "Extract each goal from the PCSP as a structured object. Use ONLY text that appears in the document.",
@@ -833,7 +833,7 @@ export const checkAnswerRelevance = createServerFn({ method: "POST" })
     context: z.string().max(8000).optional(),
   }).parse(d))
   .handler(async ({ data }) => {
-    const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
+    const { gatewayFetch } = await import("../nectar/ai-bedrock.server.ts");
     const system = [
       "You check whether a direct-support worker's written answer is RELEVANT to the question about a specific client.",
       "Be FORGIVING. Any genuine, on-topic attempt passes. Only fail answers that are clearly off-topic, empty filler, or unrelated to the question/client.",
@@ -870,7 +870,7 @@ export const checkAnswerRelevance = createServerFn({ method: "POST" })
 async function draftSupportStrategyInstructions(goals: string[], orgId?: string | null): Promise<string[]> {
   if (!goals.length) return [];
   try {
-    const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
+    const { gatewayFetch } = await import("../nectar/ai-bedrock.server.ts");
     const system = [
       "You are NECTAR, drafting staff support strategies for a Utah DSPD direct-support worker.",
       "For each PCSP goal, write clear, practical 'instructions to staff' — what the worker should DO on shift to help the client work toward that goal.",

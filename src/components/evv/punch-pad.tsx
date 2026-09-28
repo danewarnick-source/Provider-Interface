@@ -41,7 +41,7 @@ import { roundToQuarterHourISO } from "@/lib/time-rounding";
 import { computeEntryUnits } from "@/lib/billing/billing-units";
 import { invalidateStaffCaseloadWork } from "@/lib/staff/staff-caseload-cache";
 import { EvvConsentGate } from "@/components/evv/consent-gate";
-import { evaluateShiftNote } from "@/lib/ai-coach.functions";
+import { evaluateShiftNote } from "@/lib/nectar/ai-coach.functions";
 import { NectarShiftNoteDraft } from "@/components/nectar/nectar-shift-note-draft";
 import { NectarCompletenessErrors } from "@/components/nectar/nectar-completeness-errors";
 import { NECTAR_DRAFT_MIN_WORDS, countNoteWords } from "@/lib/nectar/nectar-note-gate";
@@ -57,7 +57,7 @@ import {
   type ContinuousSpeechSession,
 } from "@/lib/continuous-speech";
 import { OriginalSpeechAudit } from "@/components/staff-mobile/original-speech-audit";
-import { answerProceduralQuestion, type ProceduralResult } from "@/lib/ai-coach.functions";
+import { answerProceduralQuestion, type ProceduralResult } from "@/lib/nectar/ai-coach.functions";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";
 import { useNectarInfusion } from "@/hooks/use-nectar-infusion";
 import {

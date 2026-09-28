@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
+import { assertBedrockConfigured, gatewayFetch } from "../nectar/ai-bedrock.server.ts";
 import {
   questionWantsClientContext,
   questionWantsMedications,

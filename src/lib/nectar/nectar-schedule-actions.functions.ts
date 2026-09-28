@@ -96,7 +96,7 @@ export type NectarProposal =
 
 // ─── Shared gateway call (AWS Bedrock / Claude via Converse API) ───────────
 async function callGateway(_apiKey: string, system: string, user: string) {
-  const { callBedrockChatCompletions, BedrockError } = await import("@/lib/ai-bedrock.server");
+  const { callBedrockChatCompletions, BedrockError } = await import("../nectar/ai-bedrock.server.ts");
   try {
     const json = await callBedrockChatCompletions({
       messages: [

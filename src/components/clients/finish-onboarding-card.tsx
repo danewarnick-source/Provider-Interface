@@ -26,12 +26,12 @@ import {
   saveOnboardingBillingRate,
   saveProfileField,
   skipOnboardingItem,
-} from "@/lib/finish-onboarding.functions";
+} from "@/lib/auth/finish-onboarding.functions";
 import {
   getClientFieldStates,
   setFieldConfirmation,
-} from "@/lib/field-confirmations.functions";
-import { TRACKED_FIELDS } from "@/lib/field-confirmations";
+} from "@/lib/staff/field-confirmations.functions";
+import { TRACKED_FIELDS } from "@/lib/staff/field-confirmations";
 
 // EOL fields are surfaced by the "Advanced care / end-of-life" group on the
 // profile; exclude them here so they don't appear twice.

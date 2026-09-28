@@ -1054,7 +1054,7 @@ export async function applyExtractedFieldsToClient(
   // existing confirmation, flag it "unknown" in clients.field_confirmations
   // and queue a NECTAR question in `suggested`. Never guesses.
   try {
-    const { TRACKED_FIELDS } = await import("@/lib/field-confirmations");
+    const { TRACKED_FIELDS } = await import("../staff/field-confirmations.ts");
     const { data: cur } = await supabase
       .from("clients")
       .select(

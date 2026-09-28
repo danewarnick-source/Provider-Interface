@@ -9,7 +9,7 @@ import {
   listFeatureRegistry,
   upsertFeatureRegistryEntry,
   type FeatureRegistryRow,
-} from "@/lib/feature-registry-admin.functions";
+} from "@/lib/agency/feature-registry-admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

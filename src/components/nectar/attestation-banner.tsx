@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   recordAttestation,
   REDUCED_LIABILITY_NOTICE,
-} from "@/lib/authoritative-sources.functions";
+} from "@/lib/compliance/authoritative-sources.functions";
 
 type Scope =
   | "document_upload"

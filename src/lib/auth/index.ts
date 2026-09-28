@@ -2,7 +2,7 @@
 
 export * from './auth-redirect';
 export * from './auth-session-boot';
-export * from '../attach-supabase-auth';
+export * from '../auth/attach-supabase-auth.ts';
 export * from './cognito-login-gate';
 export * from './cognito-require-auth';
 export * from './login.functions';

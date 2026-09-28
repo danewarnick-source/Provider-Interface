@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { draftShiftNote } from "@/lib/ai-coach.functions";
+import { draftShiftNote } from "@/lib/nectar/ai-coach.functions";
 import { NECTAR_DRAFT_MIN_WORDS, nectarDraftReady } from "@/lib/nectar/nectar-note-gate";
 import { toast } from "sonner";
 

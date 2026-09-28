@@ -9,7 +9,7 @@ import {
   resolveSignupWorkspaceName,
   type SignupWorkspaceReason,
 } from "@/lib/auth/signup-workspace";
-import { defaultUsernameFromEmail } from "@/lib/account-username";
+import { defaultUsernameFromEmail } from "../auth/account-username.ts";
 
 export type EnsureSignupWorkspaceResult = {
   ok: boolean;

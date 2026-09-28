@@ -6,7 +6,7 @@ import { z } from "zod";
 import type { FormField, FormSettings, Schedule, Frequency } from "../documents/forms-utils.ts";
 import { periodKeyFor } from "../documents/forms-utils.ts";
 
-import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
+import { assertBedrockConfigured, gatewayFetch } from "../nectar/ai-bedrock.server.ts";
 import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

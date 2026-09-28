@@ -28,7 +28,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requirePermission, requireLevel } from "@/lib/access/require";
 import { computeBillableEntryUnits } from "@/lib/billing/billing-units";
-import { gatewayFetch } from "@/lib/ai-bedrock.server";
+import { gatewayFetch } from "../nectar/ai-bedrock.server.ts";
 
 const SOURCES = [
   "revenue",

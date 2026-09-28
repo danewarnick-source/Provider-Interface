@@ -8,5 +8,5 @@ export * from './sow-obligation-catalog';
 export * from '../state/state-requirements.functions.ts';
 export * from '../state/state-catalog.ts';
 export * from '../state/state-templates.ts';
-export * from '../authoritative-sources.functions';
+export * from '../compliance/authoritative-sources.functions.ts';
 export * from '../audit/dspd-audit-tool';

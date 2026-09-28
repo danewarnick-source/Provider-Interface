@@ -4,7 +4,7 @@ import { renderErrorPage } from "./lib/error-page";
 import { serializeErrorChain } from "./lib/error-chain";
 import { captureError } from "./lib/error-capture";
 import { shouldHtmlRewriteCatastrophic500 } from "./lib/catastrophic-ssr";
-import { attachSupabaseAuth } from "@/lib/attach-supabase-auth";
+import { attachSupabaseAuth } from "@/lib/auth/attach-supabase-auth";
 
 const errorMiddleware = createMiddleware().server(async (ctx) => {
   const { next, request, pathname, serverFnMeta } = ctx;

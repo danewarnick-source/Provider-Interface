@@ -28,7 +28,7 @@ export default defineConfig({
         replacement: path.join(here, "mocks/use-shift-behavior-setting.ts"),
       },
       {
-        find: "@/lib/ai-coach.functions",
+        find: "@/lib/nectar/ai-coach.functions",
         replacement: path.join(here, "mocks/ai-coach.functions.ts"),
       },
       {

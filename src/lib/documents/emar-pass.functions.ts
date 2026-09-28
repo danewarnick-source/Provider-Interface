@@ -5,7 +5,7 @@ import {
   requiredAttestation,
   isHandsOnRole,
   type AdministratorRole,
-} from "@/lib/med-attestation";
+} from "../compliance/med-attestation.ts";
 
 // 'given' = hands-on administration; distinct from 'self_administered'
 // (self-directed) so a hands-on pass never inherits the self-directed
