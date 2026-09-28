@@ -9,321 +9,229 @@ import {
   onStaffAssignmentRemovedInternal,
 } from "@/lib/staff-assignment-hooks.functions";
 import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
+import { assertCanManageMember } from "@/lib/team-members/guards.server";
+import {
+  assignmentCodes,
+  clientAuthorizedCodes,
+  normalizeServiceCode,
+  resolveStaffClientCodes,
+  withCodeAdded,
+  withCodeRemoved,
+} from "@/lib/assignment-codes";
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Setup tool A — bulk caseload editor (client → staff[])
-// Diffs the current staff_assignments rows for this client and applies the
-// minimum set of inserts/deletes. Idempotent.
-// ──────────────────────────────────────────────────────────────────────────────
-// Per the column comment on staff_assignments.service_codes:
-//   • NULL    → all of the client's authorized codes (legacy / default)
-//   • [a, b]  → assignment scoped to exactly those codes
-//   • []      → INVALID; the row must be deleted instead
+// Staff ↔ client code assignments — the single write path.
 //
-// Inputs (back-compat):
-//   • { staff_ids: uuid[] }                     → each staff = "All codes" (NULL)
-//   • { assignments: [{staff_id, service_codes|null}], ... } → per-staff scope
-export const setClientCaseload = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (d: {
-      organization_id: string;
-      client_id: string;
-      staff_ids?: string[];
-      assignments?: Array<{ staff_id: string; service_codes: string[] | null }>;
-    }) =>
-      z
-        .object({
-          organization_id: z.string().uuid(),
-          client_id: z.string().uuid(),
-          staff_ids: z.array(z.string().uuid()).optional(),
-          assignments: z
-            .array(
-              z.object({
-                staff_id: z.string().uuid(),
-                service_codes: z.array(z.string()).nullable(),
-              }),
-            )
-            .optional(),
-        })
-        .refine((v) => Array.isArray(v.staff_ids) || Array.isArray(v.assignments), {
-          message: "Provide either staff_ids or assignments",
-        })
-        .parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { supabase } = context as any;
-    if (!supabase) return { added: 0, removed: 0, updated: 0 };
-
-    // Authoritative set of codes this client may be scoped to.
-    const { data: clientRow } = await supabase
-      .from("clients")
-      .select("authorized_dspd_codes, job_code")
-      .eq("id", data.client_id)
-      .maybeSingle();
-    const allCodes: string[] = Array.from(
-      new Set(
-        [
-          ...((clientRow as { authorized_dspd_codes?: string[] } | null)?.authorized_dspd_codes ??
-            []),
-          ...((clientRow as { job_code?: string[] } | null)?.job_code ?? []),
-        ].filter(Boolean),
-      ),
-    );
-    const allCodesSet = new Set(allCodes);
-
-    // Desired state per staff_id.
-    const desired = new Map<string, string[] | null>();
-    if (data.assignments && !data.staff_ids) {
-      for (const a of data.assignments) {
-        let codes: string[] | null = a.service_codes;
-        if (codes !== null) {
-          codes = Array.from(new Set(codes));
-          const unknown = codes.filter((c) => !allCodesSet.has(c));
-          if (unknown.length > 0) {
-            throw new Error(
-              `Service code${unknown.length === 1 ? "" : "s"} not authorized for this client: ${unknown.join(", ")}`,
-            );
-          }
-          if (codes.length === 0) continue; // drop staff w/ empty scope
-          if (allCodes.length > 0 && codes.length === allCodes.length) codes = null;
-        }
-        desired.set(a.staff_id, codes);
-      }
-    } else if (data.staff_ids) {
-      for (const id of data.staff_ids) desired.set(id, null);
-    }
-
-    const { data: existing, error: rErr } = await supabase
-      .from("staff_assignments")
-      .select("id, staff_id, service_codes")
-      .eq("organization_id", data.organization_id)
-      .eq("client_id", data.client_id);
-    if (rErr) throw rErr;
-
-    type Existing = { id: string; staff_id: string; service_codes: string[] | null };
-    const existingByStaff = new Map<string, Existing>();
-    for (const r of (existing ?? []) as Existing[]) existingByStaff.set(r.staff_id, r);
-
-    let added = 0,
-      removed = 0,
-      updated = 0;
-
-    const toInsert: Array<{
-      organization_id: string;
-      client_id: string;
-      staff_id: string;
-      is_group_home_assignment: boolean;
-      service_codes: string[] | null;
-    }> = [];
-    for (const [staffId, codes] of desired.entries()) {
-      const prev = existingByStaff.get(staffId);
-      if (!prev) {
-        toInsert.push({
-          organization_id: data.organization_id,
-          client_id: data.client_id,
-          staff_id: staffId,
-          is_group_home_assignment: false,
-          service_codes: codes,
-        });
-      } else {
-        const a = JSON.stringify(prev.service_codes ?? null);
-        const b = JSON.stringify(codes ?? null);
-        if (a !== b) {
-          const { error: uErr } = await supabase
-            .from("staff_assignments")
-            .update({ service_codes: codes })
-            .eq("id", prev.id);
-          if (uErr) throw uErr;
-          updated++;
-        }
-      }
-    }
-    if (toInsert.length > 0) {
-      const { error: iErr } = await supabase
-        .from("staff_assignments")
-        .upsert(toInsert, { onConflict: "staff_id,client_id", ignoreDuplicates: false });
-      if (iErr) throw iErr;
-      added = toInsert.length;
-      for (const row of toInsert) {
-        try {
-          await onStaffAssignmentCreatedInternal(
-            supabase,
-            data.organization_id,
-            row.staff_id,
-            data.client_id,
-            row.service_codes ?? [],
-          );
-        } catch (e) {
-          console.warn("[obligations] assignment auto-assign failed:", e);
-        }
-      }
-    }
-
-    const toRemoveIds: string[] = [];
-    for (const [staffId, row] of existingByStaff.entries()) {
-      if (!desired.has(staffId)) toRemoveIds.push(row.id);
-    }
-    if (toRemoveIds.length > 0) {
-      const { error: dErr } = await supabase
-        .from("staff_assignments")
-        .delete()
-        .in("id", toRemoveIds);
-      if (dErr) throw dErr;
-      removed = toRemoveIds.length;
-    }
-
-    return { added, removed, updated };
-  });
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Setup tool A2 — single (staff, client, code) additive/subtractive edits.
-// Used by the per-code "+ Add staff" control on the client profile's
-// Authorized Codes section and by the intake add-codes prompt. Unlike
-// setClientCaseload (which replaces the client's full desired state), these
-// touch exactly one staff/code pairing and leave every other assignment on
-// the client untouched.
+// Every staff_assignments row lists its codes explicitly. NULL / [] is never
+// "all codes". Codes must be a subset of the client's currently authorized
+// codes (clientAuthorizedCodes). An empty list deletes the assignment row —
+// assignments are settings, not records.
+//
+// setStaffClientCodes is what the client profile (caseload editor +
+// Authorized Codes section), Caseloads page and Team Members call.
+// addStaffToClientCode / removeStaffFromClientCode are one-code wrappers
+// over the same writer.
+//
+// Permission (one rule, shared with Team Members): staff_roster Edit, and a
+// non-agency-scope actor must be able to see the team member
+// (access_can_see_staff) — assertCanManageMember("edit_caseload").
 // ──────────────────────────────────────────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function loadClientAuthorizedCodes(supabase: any, clientId: string): Promise<Set<string>> {
-  const { data: clientRow } = await supabase
+type AnySupabase = any;
+
+async function loadClientCodes(
+  supabase: AnySupabase,
+  organizationId: string,
+  clientId: string,
+): Promise<string[]> {
+  const { data: clientRow, error } = await supabase
     .from("clients")
     .select("authorized_dspd_codes, job_code")
+    .eq("organization_id", organizationId)
     .eq("id", clientId)
     .maybeSingle();
-  return new Set<string>(
-    [
-      ...((clientRow as { authorized_dspd_codes?: string[] } | null)?.authorized_dspd_codes ?? []),
-      ...((clientRow as { job_code?: string[] } | null)?.job_code ?? []),
-    ].filter(Boolean),
+  if (error) throw new Error(error.message);
+  if (!clientRow) throw new Error("Client not found in this organization");
+  return clientAuthorizedCodes(
+    clientRow as { authorized_dspd_codes?: string[] | null; job_code?: string[] | null },
   );
 }
 
+async function loadAssignmentRow(
+  supabase: AnySupabase,
+  organizationId: string,
+  staffId: string,
+  clientId: string,
+): Promise<{ id: string; service_codes: string[] | null } | null> {
+  const { data, error } = await supabase
+    .from("staff_assignments")
+    .select("id, service_codes")
+    .eq("organization_id", organizationId)
+    .eq("client_id", clientId)
+    .eq("staff_id", staffId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as { id: string; service_codes: string[] | null } | null) ?? null;
+}
+
+/**
+ * Write one staff member's explicit codes for one client. codes = [] deletes
+ * the row. Caller has already run the permission check and validated codes
+ * against clientAuthorizedCodes.
+ */
+/** Obligation hooks are best-effort: the assignment is already saved. */
+async function runAssignmentHook(label: string, fn: () => Promise<void>): Promise<void> {
+  try {
+    await fn();
+  } catch (e) {
+    console.warn(`[obligations] assignment ${label} hook failed:`, e);
+  }
+}
+
+async function writeStaffClientCodes(
+  supabase: AnySupabase,
+  args: { organizationId: string; staffId: string; clientId: string; codes: string[] },
+): Promise<{ status: "created" | "updated" | "removed" | "unchanged" }> {
+  const { organizationId, staffId, clientId, codes } = args;
+  const existing = await loadAssignmentRow(supabase, organizationId, staffId, clientId);
+
+  if (codes.length === 0) {
+    if (!existing) return { status: "unchanged" };
+    const { error } = await supabase.from("staff_assignments").delete().eq("id", existing.id);
+    if (error) throw new Error(error.message);
+    await runAssignmentHook("removed", () =>
+      onStaffAssignmentRemovedInternal(supabase, organizationId, staffId),
+    );
+    return { status: "removed" };
+  }
+
+  if (existing) {
+    const prev = assignmentCodes(existing.service_codes);
+    const same =
+      existing.service_codes !== null &&
+      prev.length === codes.length &&
+      codes.every((c) => prev.includes(c));
+    if (same) return { status: "unchanged" };
+    const { error } = await supabase
+      .from("staff_assignments")
+      .update({ service_codes: codes })
+      .eq("id", existing.id);
+    if (error) throw new Error(error.message);
+    // Dropped codes can end per-client duties; added codes can start them.
+    if (prev.some((c) => !codes.includes(c))) {
+      await runAssignmentHook("removed", () =>
+        onStaffAssignmentRemovedInternal(supabase, organizationId, staffId),
+      );
+    }
+  } else {
+    const { error } = await supabase.from("staff_assignments").insert({
+      organization_id: organizationId,
+      client_id: clientId,
+      staff_id: staffId,
+      is_group_home_assignment: false,
+      service_codes: codes,
+    });
+    if (error) throw new Error(error.message);
+  }
+  await runAssignmentHook("created", () =>
+    onStaffAssignmentCreatedInternal(supabase, organizationId, staffId, clientId, codes),
+  );
+  return { status: existing ? "updated" : "created" };
+}
+
+async function assertCanEditCaseload(
+  supabase: AnySupabase,
+  actorId: string,
+  organizationId: string,
+  staffId: string,
+): Promise<void> {
+  await assertCanManageMember({
+    supabase,
+    actorId,
+    organizationId,
+    targetUserId: staffId,
+    action: "edit_caseload",
+  });
+}
+
+const staffClientCodesInput = z.object({
+  organizationId: z.string().uuid(),
+  staffId: z.string().uuid(),
+  clientId: z.string().uuid(),
+  codes: z.array(z.string()),
+});
+
+export const setStaffClientCodes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.input<typeof staffClientCodesInput>) => staffClientCodesInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
+    if (!supabase || !userId) throw new Error("Not signed in");
+    await assertCanEditCaseload(supabase, userId, data.organizationId, data.staffId);
+    const authorized = await loadClientCodes(supabase, data.organizationId, data.clientId);
+    const codes = resolveStaffClientCodes(data.codes, authorized);
+    return writeStaffClientCodes(supabase, {
+      organizationId: data.organizationId,
+      staffId: data.staffId,
+      clientId: data.clientId,
+      codes,
+    });
+  });
+
+const singleCodeInput = z.object({
+  organization_id: z.string().uuid(),
+  client_id: z.string().uuid(),
+  staff_id: z.string().uuid(),
+  service_code: z.string().min(1),
+});
+
+/** Add one code to a staff member's assignment for this client (creates the row if needed). */
 export const addStaffToClientCode = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (d: { organization_id: string; client_id: string; staff_id: string; service_code: string }) =>
-      z
-        .object({
-          organization_id: z.string().uuid(),
-          client_id: z.string().uuid(),
-          staff_id: z.string().uuid(),
-          service_code: z.string().min(1),
-        })
-        .parse(d),
-  )
+  .inputValidator((d: z.input<typeof singleCodeInput>) => singleCodeInput.parse(d))
   .handler(async ({ data, context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { supabase } = context as any;
-    if (!supabase) return { ok: false };
-    const code = data.service_code.toUpperCase();
-
-    const allCodes = await loadClientAuthorizedCodes(supabase, data.client_id);
-    if (!allCodes.has(code)) {
-      throw new Error(`Service code not authorized for this client: ${code}`);
-    }
-
-    const { data: existing, error: rErr } = await supabase
-      .from("staff_assignments")
-      .select("id, service_codes")
-      .eq("organization_id", data.organization_id)
-      .eq("client_id", data.client_id)
-      .eq("staff_id", data.staff_id)
-      .maybeSingle();
-    if (rErr) throw rErr;
-
-    if (!existing) {
-      const { error: iErr } = await supabase.from("staff_assignments").insert({
-        organization_id: data.organization_id,
-        client_id: data.client_id,
-        staff_id: data.staff_id,
-        is_group_home_assignment: false,
-        service_codes: [code],
-      });
-      if (iErr) throw iErr;
-      await onStaffAssignmentCreatedInternal(
-        supabase,
-        data.organization_id,
-        data.staff_id,
-        data.client_id,
-        [code],
-      );
-      return { ok: true };
-    }
-
-    const scopes = (existing as { service_codes: string[] | null }).service_codes;
-    if (scopes === null) return { ok: true }; // already scoped to all codes
-    if (scopes.includes(code)) return { ok: true }; // already assigned
-
-    let next: string[] | null = Array.from(new Set([...scopes, code]));
-    if (allCodes.size > 0 && next.length === allCodes.size) next = null; // collapse to "all"
-    const { error: uErr } = await supabase
-      .from("staff_assignments")
-      .update({ service_codes: next })
-      .eq("id", (existing as { id: string }).id);
-    if (uErr) throw uErr;
-    await onStaffAssignmentCreatedInternal(
+    const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
+    if (!supabase || !userId) throw new Error("Not signed in");
+    await assertCanEditCaseload(supabase, userId, data.organization_id, data.staff_id);
+    const authorized = await loadClientCodes(supabase, data.organization_id, data.client_id);
+    const [code] = resolveStaffClientCodes([data.service_code], authorized);
+    if (!code) throw new Error("Pick a service code");
+    const existing = await loadAssignmentRow(
       supabase,
       data.organization_id,
       data.staff_id,
       data.client_id,
-      next ?? [],
     );
+    await writeStaffClientCodes(supabase, {
+      organizationId: data.organization_id,
+      staffId: data.staff_id,
+      clientId: data.client_id,
+      codes: withCodeAdded(existing?.service_codes, code),
+    });
     return { ok: true };
   });
 
+/** Remove one code; removing the last code deletes the assignment row. */
 export const removeStaffFromClientCode = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (d: { organization_id: string; client_id: string; staff_id: string; service_code: string }) =>
-      z
-        .object({
-          organization_id: z.string().uuid(),
-          client_id: z.string().uuid(),
-          staff_id: z.string().uuid(),
-          service_code: z.string().min(1),
-        })
-        .parse(d),
-  )
+  .inputValidator((d: z.input<typeof singleCodeInput>) => singleCodeInput.parse(d))
   .handler(async ({ data, context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { supabase } = context as any;
-    if (!supabase) return { ok: false };
-    const code = data.service_code.toUpperCase();
-
-    const { data: existing, error: rErr } = await supabase
-      .from("staff_assignments")
-      .select("id, service_codes")
-      .eq("organization_id", data.organization_id)
-      .eq("client_id", data.client_id)
-      .eq("staff_id", data.staff_id)
-      .maybeSingle();
-    if (rErr) throw rErr;
+    const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
+    if (!supabase || !userId) throw new Error("Not signed in");
+    await assertCanEditCaseload(supabase, userId, data.organization_id, data.staff_id);
+    const existing = await loadAssignmentRow(
+      supabase,
+      data.organization_id,
+      data.staff_id,
+      data.client_id,
+    );
     if (!existing) return { ok: true };
-
-    const scopes = (existing as { service_codes: string[] | null }).service_codes;
-    const id = (existing as { id: string }).id;
-
-    let remaining: string[];
-    if (scopes === null) {
-      const allCodes = await loadClientAuthorizedCodes(supabase, data.client_id);
-      remaining = Array.from(allCodes).filter((c) => c !== code);
-    } else {
-      remaining = scopes.filter((c) => c !== code);
-    }
-
-    if (remaining.length === 0) {
-      const { error: dErr } = await supabase.from("staff_assignments").delete().eq("id", id);
-      if (dErr) throw dErr;
-    } else {
-      const { error: uErr } = await supabase
-        .from("staff_assignments")
-        .update({ service_codes: remaining })
-        .eq("id", id);
-      if (uErr) throw uErr;
-    }
-    await onStaffAssignmentRemovedInternal(supabase, data.organization_id, data.staff_id);
+    await writeStaffClientCodes(supabase, {
+      organizationId: data.organization_id,
+      staffId: data.staff_id,
+      clientId: data.client_id,
+      codes: withCodeRemoved(existing.service_codes, data.service_code),
+    });
     return { ok: true };
   });
 
@@ -430,14 +338,17 @@ STAFF: ${JSON.stringify(staffList.map((s) => s.name))}
 CLIENTS: ${JSON.stringify(clientList.map((c) => c.name))}
 SERVICE CODES: ["SLH","SLN","COM","PAC","RP2","RP4","RP5","HHS","RHS","DSI","DSG","DSP","SEI","CHA","HSQ","PM1"]`;
 
-    const aiRes = await gatewayFetch({
-      model: "bedrock",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: data.prompt },
-      ],
-      response_format: { type: "json_object" },
-    }, { orgId: data.organization_id });
+    const aiRes = await gatewayFetch(
+      {
+        model: "bedrock",
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: data.prompt },
+        ],
+        response_format: { type: "json_object" },
+      },
+      { orgId: data.organization_id },
+    );
     if (!aiRes.ok) {
       const txt = await aiRes.text().catch(() => "");
       if (aiRes.status === 429) throw new Error("Nectar is rate-limited — try again shortly.");
@@ -525,7 +436,7 @@ export const autoFillOpenShifts = createServerFn({ method: "POST" })
         .lt("starts_at", end.toISOString()),
       supabase
         .from("staff_assignments")
-        .select("staff_id, client_id")
+        .select("staff_id, client_id, service_codes")
         .eq("organization_id", data.organization_id),
       supabase
         .from("time_off_requests")
@@ -551,6 +462,7 @@ export const autoFillOpenShifts = createServerFn({ method: "POST" })
     const assigns = (assignRes.data ?? []) as Array<{
       staff_id: string;
       client_id: string;
+      service_codes: string[] | null;
     }>;
     const off = (offRes.data ?? []) as Array<{
       staff_id: string;
@@ -558,11 +470,16 @@ export const autoFillOpenShifts = createServerFn({ method: "POST" })
       end_date: string;
     }>;
 
-    const staffByClient = new Map<string, Set<string>>();
+    // Candidates per client + code: only staff assigned that exact code.
+    // NULL / [] service_codes grant nothing.
+    const staffByClientCode = new Map<string, Set<string>>();
     for (const a of assigns) {
-      const set = staffByClient.get(a.client_id) ?? new Set<string>();
-      set.add(a.staff_id);
-      staffByClient.set(a.client_id, set);
+      for (const code of assignmentCodes(a.service_codes)) {
+        const key = `${a.client_id}|${code}`;
+        const set = staffByClientCode.get(key) ?? new Set<string>();
+        set.add(a.staff_id);
+        staffByClientCode.set(key, set);
+      }
     }
     const offByStaff = new Map<string, Array<[string, string]>>();
     for (const o of off) {
@@ -584,7 +501,9 @@ export const autoFillOpenShifts = createServerFn({ method: "POST" })
       reason: string;
     };
     const proposals: Proposal[] = open.map((s) => {
-      const candidates = Array.from(staffByClient.get(s.client_id) ?? []);
+      const candidates = Array.from(
+        staffByClientCode.get(`${s.client_id}|${normalizeServiceCode(s.service_code)}`) ?? [],
+      );
       const day = s.starts_at.slice(0, 10);
       const eligible = candidates.filter((sid) => {
         const offs = offByStaff.get(sid) ?? [];
@@ -613,7 +532,7 @@ export const autoFillOpenShifts = createServerFn({ method: "POST" })
         reason: pick
           ? "Eligible — caseload, no conflict, not on time off."
           : candidates.length === 0
-            ? "No staff on this client's caseload."
+            ? "No team member is assigned this code for this client."
             : "All caseload staff conflict or are off.",
       };
     });

@@ -258,9 +258,7 @@ function ReviewPage() {
   if (job.isError || !job.data)
     return <div className="text-sm text-destructive">Failed to load job.</div>;
   if (job.data.job.mode === "employee") {
-    return (
-      <p className="text-sm text-muted-foreground">Roster upload moved to Team Members.</p>
-    );
+    return <p className="text-sm text-muted-foreground">Roster upload moved to Team Members.</p>;
   }
 
   const subjects = (job.data.subjects ?? []) as SubjectRow[];
@@ -4974,7 +4972,7 @@ function ClientAssignerBlock({
   const remove = useServerFn(removeAssignmentMapRow);
 
   const upsertM = useMutation({
-    mutationFn: (vars: { staffId: string; serviceCodes: string[] | null }) =>
+    mutationFn: (vars: { staffId: string; serviceCodes: string[] }) =>
       upsert({
         data: { jobId, clientSubjectId, staffId: vars.staffId, serviceCodes: vars.serviceCodes },
       }),
@@ -5032,7 +5030,16 @@ function ClientAssignerBlock({
     if (ids.length === 0) return;
     try {
       for (const staffId of ids) {
-        await upsert({ data: { jobId, clientSubjectId, staffId, serviceCodes: null } });
+        // Pre-check every authorized code, saved as an explicit list. With no
+        // codes extracted yet, commit writes the client's authorized codes.
+        await upsert({
+          data: {
+            jobId,
+            clientSubjectId,
+            staffId,
+            serviceCodes: authorizedCodes.length ? [...authorizedCodes] : null,
+          },
+        });
       }
       toast.success(`Assigned ${ids.length} staff`);
       setPickerOpen(false);
@@ -5053,7 +5060,7 @@ function ClientAssignerBlock({
             </Badge>
           ) : (
             <Badge variant="outline" className="text-[10px] text-muted-foreground">
-              No own-org codes yet — staff default to all codes
+              No own-org codes yet — staff get the client's codes on commit
             </Badge>
           )}
         </div>
@@ -5126,8 +5133,8 @@ function ClientAssignerBlock({
           <DialogHeader>
             <DialogTitle>Assign staff to {clientName}</DialogTitle>
             <DialogDescription>
-              Select one, several, or all team members. Each will be assigned to this client with
-              access to all authorized codes — you can narrow the scope per staff after adding.
+              Select one, several, or all team members. Each is assigned every authorized code
+              listed explicitly — you can narrow the codes per staff after adding.
             </DialogDescription>
           </DialogHeader>
 
@@ -5197,28 +5204,32 @@ function AssignerScopePopover({
 }: {
   authorized: string[];
   value: string[] | null;
-  onChange: (next: string[] | null) => void;
+  onChange: (next: string[]) => void;
   disabled?: boolean;
 }) {
-  const isAll = value === null || value === undefined;
-  const subset = new Set(value ?? []);
-  const summary = isAll
-    ? `All codes${authorized.length ? ` (${authorized.length})` : ""}`
-    : value && value.length > 0
-      ? value.join(", ")
-      : "No codes";
+  // NULL is staging for "source had no codes" — shown as every authorized
+  // code pre-checked. Edits always save an explicit list, never NULL.
+  const current = value === null || value === undefined ? authorized : value;
+  const picked = new Set(current);
+  const summary =
+    value === null || value === undefined
+      ? authorized.length
+        ? authorized.join(", ")
+        : "Client's codes on commit"
+      : value.length > 0
+        ? value.join(", ")
+        : "No codes";
 
   function toggle(code: string) {
-    const cur = new Set<string>(isAll ? authorized : (value ?? []));
-    if (cur.has(code)) cur.delete(code);
-    else cur.add(code);
-    const arr = Array.from(cur);
+    const next = new Set(picked);
+    if (next.has(code)) next.delete(code);
+    else next.add(code);
+    const arr = authorized.filter((c) => next.has(c));
     if (arr.length === 0) {
-      onChange([]);
+      toast.error("Pick at least one code, or remove this staff from the client.");
       return;
     }
-    if (authorized.length > 0 && arr.length === authorized.length) onChange(null);
-    else onChange(arr);
+    onChange(arr);
   }
 
   return (
@@ -5236,35 +5247,33 @@ function AssignerScopePopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-2" align="end">
-        <div className="text-xs font-medium px-1 pb-1">Service-code scope</div>
+        <div className="text-xs font-medium px-1 pb-1">Service codes</div>
         {authorized.length === 0 ? (
           <div className="px-1 py-2 text-xs text-muted-foreground">
-            No own-org authorized codes for this client yet. Staff is assigned with "All codes" —
-            narrow later from the client's caseload tab once codes are in.
+            No own-org authorized codes for this client yet. On commit the staff is assigned the
+            client&apos;s authorized codes, listed explicitly — narrow later from the client&apos;s
+            caseload tab.
           </div>
         ) : (
           <>
             <button
               type="button"
-              className={`w-full text-left text-xs rounded px-2 py-1.5 hover:bg-muted ${isAll ? "bg-muted font-medium" : ""}`}
-              onClick={() => onChange(null)}
+              className="w-full text-left text-xs rounded px-2 py-1.5 hover:bg-muted"
+              onClick={() => onChange([...authorized])}
             >
-              All codes ({authorized.length})
+              Select all ({authorized.length})
             </button>
             <div className="my-1 h-px bg-border" />
             <div className="max-h-56 overflow-y-auto space-y-0.5">
-              {authorized.map((c) => {
-                const on = isAll ? true : subset.has(c);
-                return (
-                  <label
-                    key={c}
-                    className="flex items-center gap-2 text-xs px-2 py-1 rounded hover:bg-muted cursor-pointer"
-                  >
-                    <Checkbox checked={on} onCheckedChange={() => toggle(c)} />
-                    <span className="font-mono">{c}</span>
-                  </label>
-                );
-              })}
+              {authorized.map((c) => (
+                <label
+                  key={c}
+                  className="flex items-center gap-2 text-xs px-2 py-1 rounded hover:bg-muted cursor-pointer"
+                >
+                  <Checkbox checked={picked.has(c)} onCheckedChange={() => toggle(c)} />
+                  <span className="font-mono">{c}</span>
+                </label>
+              ))}
             </div>
           </>
         )}

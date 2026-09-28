@@ -39,10 +39,8 @@ import {
 import { toast } from "sonner";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { getUnmetStaffMandates, recordStaffMandateOverride } from "@/lib/forms.functions";
-import {
-  onStaffAssignmentCreated,
-  onStaffAssignmentRemoved,
-} from "@/lib/staff-assignment-hooks.functions";
+import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
+import { assignmentCodes, clientAuthorizedCodes } from "@/lib/assignment-codes";
 
 export const Route = createFileRoute("/dashboard/assignments")({
   head: () => ({ meta: [{ title: "Caseloads — Provider Interface" }] }),
@@ -65,14 +63,14 @@ type ClientRow = {
   first_name: string;
   last_name: string;
   job_code: string[] | null;
+  authorized_dspd_codes: string[] | null;
 };
 
 function AssignmentsPage() {
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();
   const [staffId, setStaffId] = useState("");
-  const assignmentHookFn = useServerFn(onStaffAssignmentCreated);
-  const assignmentRemovedFn = useServerFn(onStaffAssignmentRemoved);
+  const saveCodesFn = useServerFn(setStaffClientCodes);
 
   const { data: staff } = useQuery({
     enabled: !!org,
@@ -104,7 +102,7 @@ function AssignmentsPage() {
       const { data } = await supabase
         .from("clients")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .select("id, first_name, last_name, job_code" as any)
+        .select("id, first_name, last_name, job_code, authorized_dspd_codes" as any)
         .eq("organization_id", org!.organization_id)
         .order("last_name");
       return (data ?? []) as unknown as ClientRow[];
@@ -133,12 +131,8 @@ function AssignmentsPage() {
     if (!assignments || !clients) return;
     const next: Record<string, Set<string>> = {};
     for (const a of assignments) {
-      const c = clients.find((x) => x.id === a.client_id);
-      const all = (c?.job_code ?? []).filter(Boolean);
-      // null service_codes = legacy "all codes"
-      next[a.client_id] = new Set(
-        a.service_codes && a.service_codes.length ? a.service_codes : all,
-      );
+      // Explicit codes only — NULL / [] is no codes, never "all codes".
+      next[a.client_id] = new Set(assignmentCodes(a.service_codes));
     }
     setDraft(next);
   }, [assignments, clients]);
@@ -158,69 +152,23 @@ function AssignmentsPage() {
   const saveMut = useMutation({
     mutationFn: async () => {
       if (!org || !staffId) return;
-      // Diff: upsert rows where codes>0, delete rows that exist but are now empty/unassigned.
+      // Every change goes through setStaffClientCodes (the single write
+      // path): explicit codes upsert the row, [] deletes it. The server runs
+      // the assignment hooks.
       const existing = new Map<string, AssignmentRow>();
       (assignments ?? []).forEach((a) => existing.set(a.client_id, a));
-
-      const toDelete: string[] = [];
-      const toUpsert: { client_id: string; codes: string[] }[] = [];
 
       const allClientIds = new Set<string>([...Object.keys(draft), ...Array.from(existing.keys())]);
       for (const cid of allClientIds) {
         const codes = Array.from(draft[cid] ?? new Set<string>()).sort();
-        const wasAssigned = existing.has(cid);
-        if (codes.length === 0 && wasAssigned) {
-          toDelete.push(existing.get(cid)!.id);
-        } else if (codes.length > 0) {
-          toUpsert.push({ client_id: cid, codes });
-        }
-      }
-
-      if (toDelete.length) {
-        const { error } = await supabase.from("staff_assignments").delete().in("id", toDelete);
-        if (error) throw error;
-        try {
-          await assignmentRemovedFn({
-            data: { organizationId: org.organization_id, staffId },
-          });
-        } catch (e) {
-          console.warn("[obligations] assignment remove reevaluate failed:", e);
-        }
-      }
-
-      for (const row of toUpsert) {
-        const existingRow = existing.get(row.client_id);
-        if (existingRow) {
-          const { error } = await supabase
-            .from("staff_assignments")
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .update({ service_codes: row.codes } as any)
-            .eq("id", existingRow.id);
-          if (error) throw error;
-        } else {
-          const { error } = await supabase
-            .from("staff_assignments")
-
-            .insert({
-              organization_id: org.organization_id,
-              staff_id: staffId,
-              client_id: row.client_id,
-              service_codes: row.codes,
-            } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
-          if (error) throw error;
-        }
-        try {
-          await assignmentHookFn({
-            data: {
-              organizationId: org.organization_id,
-              staffId,
-              clientId: row.client_id,
-              serviceCodes: row.codes,
-            },
-          });
-        } catch (e) {
-          console.warn("[obligations] assignment auto-assign failed:", e);
-        }
+        const prev = existing.get(cid);
+        const prevCodes = prev ? assignmentCodes(prev.service_codes).sort() : [];
+        if (!prev && codes.length === 0) continue;
+        // Unchanged (incl. a legacy no-code row left untouched) → no write.
+        if (prev && prevCodes.join("|") === codes.join("|")) continue;
+        await saveCodesFn({
+          data: { organizationId: org.organization_id, staffId, clientId: cid, codes },
+        });
       }
     },
     onSuccess: () => {
@@ -572,7 +520,7 @@ function ClientAssignRow({
   onToggleCode: (code: string) => void;
   onToggleAll: (codes: string[]) => void;
 }) {
-  const codes = (client.job_code ?? []).filter(Boolean);
+  const codes = clientAuthorizedCodes(client);
   const [open, setOpen] = useState(false);
 
   const allChecked = codes.length > 0 && codes.every((c) => selected.has(c));

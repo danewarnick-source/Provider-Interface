@@ -2,6 +2,7 @@
 // or null flags (unanswered). Never invent SEI columns or a second assignment table.
 
 import { UNKNOWN_STAFF_DUTY_FACTS, type StaffDutyFacts } from "./duty-applicability.ts";
+import { assignmentCodes } from "../assignment-codes.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -31,7 +32,8 @@ export async function loadStaffDutyFactsInternal(
     out.set(staffId, { staffId, ...UNKNOWN_STAFF_DUTY_FACTS });
   }
 
-  let members: Array<{ user_id: string; access_level: string | null; manager_id?: string | null }> = [];
+  let members: Array<{ user_id: string; access_level: string | null; manager_id?: string | null }> =
+    [];
   let managerIdKnown = true;
   {
     const full = await supabase
@@ -78,14 +80,15 @@ export async function loadStaffDutyFactsInternal(
         client_id: string;
         service_codes: string[] | null;
       }>) {
+        // NULL / [] codes grant nothing: the row adds no client and no code.
+        const rowCodes = assignmentCodes(row.service_codes);
+        if (rowCodes.length === 0) continue;
         const bucket = assignedByStaff.get(row.staff_id) ?? {
           clientIds: new Set<string>(),
           codes: new Set<string>(),
         };
         if (row.client_id) bucket.clientIds.add(row.client_id);
-        for (const code of row.service_codes ?? []) {
-          if (code) bucket.codes.add(code.toUpperCase());
-        }
+        for (const code of rowCodes) bucket.codes.add(code);
         assignedByStaff.set(row.staff_id, bucket);
       }
     }

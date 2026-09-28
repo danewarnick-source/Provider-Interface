@@ -6,7 +6,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useMyAssignments, allowedCodesFor } from "@/hooks/use-my-assignments";
+import {
+  useMyAssignments,
+  allowedCodesFor,
+  clientAuthorizedCodes,
+} from "@/hooks/use-my-assignments";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -70,6 +74,7 @@ interface ClientFull {
   profile_photo_url: string | null;
   geofence_radius_feet: number | null;
   authorized_dspd_codes: string[] | null;
+  job_code?: string[] | null;
   feature_config: Record<string, boolean> | null;
   allergies: string[] | null;
   dysphagia: boolean | null;
@@ -97,7 +102,7 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
     queryFn: async () => {
       const { data } = await supabase
         .from("clients")
-        .select("id, first_name, last_name, pcsp_goals, physical_address, special_directions, profile_photo_url, geofence_radius_feet, authorized_dspd_codes, feature_config, allergies, dysphagia, swallowing_alerts" as any)
+        .select("id, first_name, last_name, pcsp_goals, physical_address, special_directions, profile_photo_url, geofence_radius_feet, authorized_dspd_codes, job_code, feature_config, allergies, dysphagia, swallowing_alerts" as any)
         .eq("id", clientId)
         .maybeSingle();
       return data as ClientFull | null;
@@ -120,8 +125,7 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
   const { data: assignments } = useMyAssignments();
   const allowedCodes = useMemo(() => {
     if (!client) return [];
-    const all = Array.isArray(client.authorized_dspd_codes) ? client.authorized_dspd_codes : [];
-    return allowedCodesFor(assignments, client.id, all);
+    return allowedCodesFor(assignments, client.id, clientAuthorizedCodes(client));
   }, [client, assignments]);
   const allowedDaily = useMemo(
     () => allowedCodes.filter(isDailyServiceCode),

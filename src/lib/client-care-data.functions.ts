@@ -27,6 +27,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { logPhiAccess } from "@/lib/phi-access-audit.server";
+import { assignmentCoversCode } from "@/lib/assignment-codes";
 import { queryOptions } from "@tanstack/react-query";
 import type { CSTGoal } from "./client-specific-training.functions";
 import {
@@ -481,15 +482,12 @@ export const getClientCareData = createServerFn({ method: "GET" })
 
     // Authorized codes have no visibility toggle — assignment IS visibility.
     // A staff member sees a code here iff they're assigned (via
-    // staff_assignments) to work that code for this client. NULL
-    // service_codes on their assignment row means "all of the client's
-    // authorized codes"; no row means no codes are visible to them.
+    // staff_assignments) to work that code for this client. Every row lists
+    // its codes; NULL / [] or no row means no codes are visible to them.
     const myCodeScope = (myAssignRes?.data as { service_codes: string[] | null } | null) ?? null;
-    const authorizedCodesStaff = myCodeScope === null
-      ? []
-      : myCodeScope.service_codes === null
-        ? authorized_codes
-        : authorized_codes.filter((c) => myCodeScope.service_codes!.includes(c.service_code));
+    const authorizedCodesStaff = authorized_codes.filter((c) =>
+      assignmentCoversCode(myCodeScope?.service_codes, c.service_code),
+    );
 
     // ── Custom fields ────────────────────────────────────────────────────
     // Scope defs to the client's own org (cross-org rows would be blocked

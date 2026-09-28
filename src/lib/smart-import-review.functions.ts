@@ -17,6 +17,7 @@ import {
 import { fetchTenantIdentity, partitionCodeRows } from "@/lib/service-classification";
 import { isClockableServiceCode } from "@/lib/service-billing";
 import { isEvvLockedCode, evvServiceLabel } from "@/lib/evv-codes";
+import { normalizeServiceCodes } from "@/lib/assignment-codes";
 
 
 
@@ -850,7 +851,8 @@ export const confirmAssignment = createServerFn({ method: "POST" })
 // assignment to specific authorized codes — persisted as `assignment_map`
 // rows with `relation_type='caseload'`, `staff_record_id=<real staff id>`,
 // `status='confirmed'`. Real `staff_assignments` rows are written by
-// `applyAssignmentMap` on commit (so failed commits don't leak).
+// `applyAssignmentMap` on commit (so failed commits don't leak), always with
+// explicit codes — never NULL / "all codes".
 
 
 function parseBillingRowLoose(v: unknown): { service_code: string; provider_name: string | null } | null {
@@ -994,7 +996,14 @@ export const upsertManualAssignment = createServerFn({ method: "POST" })
       .eq("relation_type", "caseload")
       .maybeSingle();
 
-    const codes = data.serviceCodes && data.serviceCodes.length === 0 ? null : data.serviceCodes;
+    // Explicit codes are staged as given. NULL means "the source has no
+    // codes" — commit then writes the client's authorized codes explicitly
+    // (applyAssignmentMap / importAssignmentCodes). [] is not "all codes":
+    // the admin removes the staff instead.
+    const codes = data.serviceCodes === null ? null : normalizeServiceCodes(data.serviceCodes);
+    if (codes !== null && codes.length === 0) {
+      throw new Error("Pick at least one code, or remove this staff from the client.");
+    }
 
     if (existing?.id) {
       const { error } = await sb.from("assignment_map").update({

@@ -30,7 +30,7 @@ import {
   ISSUE_KEY_TO_TARGET,
 } from "@/lib/smart-import-review.functions";
 import { commitSingleSubject } from "@/lib/smart-import-commit.functions";
-import { setClientCaseload } from "@/lib/scheduler/setup.functions";
+import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { CaseloadEditor, type CaseloadDraftValue } from "@/components/clients/caseload-editor";
 
@@ -110,7 +110,7 @@ export function FinalizeClientEditor({
   const markReady = useServerFn(setSubjectReady);
   const commitOne = useServerFn(commitSingleSubject);
   const answerQ = useServerFn(answerNectarQuestion);
-  const saveCaseload = useServerFn(setClientCaseload);
+  const saveStaffCodes = useServerFn(setStaffClientCodes);
   const { data: org } = useCurrentOrg();
 
   const subjectQ = useQuery({
@@ -244,16 +244,19 @@ export function FinalizeClientEditor({
       // admin retry on the detail-page caseload tab.
       if (first?.record_id && draftAssignments.size > 0 && org?.organization_id) {
         try {
-          const assignments = Array.from(draftAssignments.entries()).map(([staff_id, service_codes]) => ({
-            staff_id, service_codes,
-          }));
-          await saveCaseload({
-            data: {
-              organization_id: org.organization_id,
-              client_id: first.record_id,
-              assignments,
-            },
-          });
+          // Explicit codes per staff through the single write path; staff
+          // left with no codes are skipped (nothing to assign).
+          for (const [staffId, codes] of draftAssignments.entries()) {
+            if (codes.length === 0) continue;
+            await saveStaffCodes({
+              data: {
+                organizationId: org.organization_id,
+                staffId,
+                clientId: first.record_id,
+                codes,
+              },
+            });
+          }
         } catch (e) {
           toast.error(
             `Client created, but staff assignment failed: ${(e as Error).message}. You can assign on the client's Caseload tab.`,
@@ -442,7 +445,7 @@ export function FinalizeClientEditor({
 
             {/* Pre-commit staff assignment — written after the client row is
                 created. Optional; admin can also assign later on the Caseload
-                tab. Scoped per service code: default "All codes" per staff. */}
+                tab. Explicit codes per staff: checking a staff pre-checks every authorized code. */}
             <div className="rounded-lg border border-border p-3 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
