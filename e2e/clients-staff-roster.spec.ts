@@ -89,7 +89,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByRole("tab", { name: /^Identity$/i })).toBeVisible();
     await expect(page.getByRole("tab", { name: /Care plan/i })).toBeVisible();
     await expect(page.getByRole("tab", { name: /^Billing$/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /^Files$/i })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /^Client file$/i })).toBeVisible();
     await expect(page.getByRole("tab", { name: /Operations/i })).toBeVisible();
 
     await page.getByRole("tab", { name: /^Billing$/i }).click();
@@ -456,17 +456,17 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page).toHaveURL(/filter=missing(&|$)/);
   });
 
-  test("staff surfaces: teams→homes, roles", async ({ page }) => {
+  test("staff surfaces: teams→homes, access", async ({ page }) => {
     await gotoAdmin(page, "/dashboard/teams");
     await expect(page).toHaveURL(/\/dashboard\/homes/);
     await expect(page.getByRole("heading", { name: /Homes & Teams/i }).first()).toBeVisible();
 
-    await gotoAdmin(page, "/dashboard/roles");
-    await expect(page.getByRole("heading", { name: /Roles & permissions/i })).toBeVisible({
+    // /dashboard/roles was replaced by Settings → Access & presets (#389).
+    await gotoAdmin(page, "/dashboard/settings/team-access");
+    await expect(page.getByRole("heading", { name: /Access & presets/i })).toBeVisible({
       timeout: 20_000,
     });
-    await expect(rosterName(page, "Dane Warnick")).toBeVisible();
-    await assertPageNotBlank(page, "roles");
+    await assertPageNotBlank(page, "access");
     await shot(page, "staff_team_homes_roles");
   });
 

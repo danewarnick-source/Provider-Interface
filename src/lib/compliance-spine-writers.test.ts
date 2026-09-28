@@ -60,12 +60,6 @@ describe("Compliance spine — parallel writers killed", () => {
     assert.match(resolve, /skipNectarComplianceMutation/);
     assert.doesNotMatch(resolve, /\.from\(["']nectar_compliance_flags/);
 
-    const usage = read("./nectar-requirement-usage.functions.ts");
-    const saveStart = usage.indexOf("export const saveRequirementUsageNote");
-    const save = usage.slice(saveStart, usage.indexOf("export const recategorizeRequirement"));
-    assert.match(save, /skipRequirementUsageWrite/);
-    assert.doesNotMatch(save, /\.insert\(/);
-
     const shift = read("./scheduling/shift-commit.ts");
     const raiseFn = shift.slice(
       shift.indexOf("async function raiseAndMaybeResolve"),

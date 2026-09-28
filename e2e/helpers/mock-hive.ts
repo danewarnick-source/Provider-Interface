@@ -1451,6 +1451,10 @@ export async function waitForDashboard(page: Page): Promise<void> {
   if (await loading.isVisible().catch(() => false)) {
     await loading.waitFor({ state: "hidden", timeout: 20_000 }).catch(() => undefined);
   }
+  // The dashboard shell boots behind "Loading workspace…" (cold Vite compile
+  // on the first route can take 20s+); "^Loading…$" never matches it.
+  const workspace = page.getByText(/^Loading workspace…$/);
+  await workspace.waitFor({ state: "hidden", timeout: 45_000 }).catch(() => undefined);
 }
 
 export {
