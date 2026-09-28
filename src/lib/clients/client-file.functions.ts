@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { personNeedsSupportStrategies } from "@/lib/audit-evidence";
+import { personNeedsSupportStrategies } from "@/lib/audit/audit-evidence";
 import {
   buildClientFileCards,
   isHousemateObligationTitle,

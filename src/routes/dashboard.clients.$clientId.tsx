@@ -50,7 +50,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ClientFileTab } from "@/components/clients/client-file-tab";
-import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 
 import { displayMedicaidId } from "@/lib/medicaid-id";
 import { ClientBudgetPanel } from "@/components/clients/client-budget-panel";

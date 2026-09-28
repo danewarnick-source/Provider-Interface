@@ -3,7 +3,7 @@
  */
 import { getRequest, getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import type { PhiAccessAction, PhiAccessResourceType } from "@/lib/phi-access-audit.functions";
+import type { PhiAccessAction, PhiAccessResourceType } from "@/lib/audit/phi-access-audit.functions";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function isBreakGlass(supabaseUserClient: any, userId: string): Promise<boolean> {

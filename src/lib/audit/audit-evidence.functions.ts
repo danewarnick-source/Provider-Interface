@@ -5,8 +5,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { computeRestrictionCompletion, type RestrictionRecord } from "./hrc-restrictions";
-import { isEvvLockedCode } from "./evv-codes";
+import { computeRestrictionCompletion, type RestrictionRecord } from "../hrc-restrictions";
+import { isEvvLockedCode } from "../evv-codes";
 import {
   EMPTY_AUDIT_EVIDENCE,
   personNeedsSupportStrategies,

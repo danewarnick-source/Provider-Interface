@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { parseAndProduceAuditPacket } from "@/lib/audit-packet.functions";
+import { parseAndProduceAuditPacket } from "@/lib/audit/audit-packet.functions";
 import { AttestationBanner } from "@/components/nectar/attestation-banner";
 import { AuditorShareManager } from "@/components/audit/auditor-share-manager";
 

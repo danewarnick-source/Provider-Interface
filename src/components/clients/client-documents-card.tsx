@@ -36,7 +36,7 @@ import { NectarDocumentActionsDialog } from "@/components/nectar/document-action
 import { DocumentPreviewDialog } from "./document-preview-dialog";
 import { DocumentEffectiveDatingDialog } from "@/components/documents/document-effective-dating-dialog";
 import { OutdatedDocumentsSection } from "@/components/documents/outdated-documents-section";
-import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 
 const CLIENT_DOC_TYPES = [
   { value: "pcsp", label: "PCSP" },

@@ -21,7 +21,7 @@ import { EmarLegalBanner } from "@/components/workspace/emar-chart";
 import { useAccess } from "@/hooks/use-access";
 import { logMedicationPass } from "@/lib/emar-pass.functions";
 import { type EmarStatus, normalizeEmarStatus } from "@/lib/emar-status";
-import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 import { isAdminLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/emar")({

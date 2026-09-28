@@ -18,8 +18,8 @@ import {
   deletePackageFile,
   type AuditPackageFolderRow,
   type AuditPackageFileRow,
-} from "@/lib/audit-portal.functions";
-import type { AuditPackageSubjectSummary } from "@/lib/audit-package-data";
+} from "@/lib/audit/audit-portal.functions";
+import type { AuditPackageSubjectSummary } from "@/lib/audit/audit-package-data";
 
 /**
  * Shared page for both the auditor (read-only) and the org-side Auditor View

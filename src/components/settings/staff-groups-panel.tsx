@@ -1,6 +1,6 @@
 // Groups tab of Settings → Team Access. Admin-facing CRUD for staff_groups
 // (named subsets of staff used to target Company Obligations), built on the
-// server functions in @/lib/staff-groups.functions.
+// server functions in @/lib/staff/staff-groups.functions.
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

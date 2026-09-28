@@ -30,7 +30,7 @@ import { fmtHours, computeEntryUnits } from "@/lib/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { aggregateHourlyUnits, aggregateDailyDays } from "@/lib/accrual";
 import { RequireLevel } from "@/components/rbac-guard";
-import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 
 export const Route = createFileRoute("/dashboard/billing/form520")({
   head: () => ({ meta: [{ title: "520 Billing — Provider Interface" }] }),

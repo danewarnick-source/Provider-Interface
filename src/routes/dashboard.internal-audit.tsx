@@ -35,7 +35,7 @@ import {
   type AuditSummary,
   type FindingArea,
   type Severity,
-} from "@/lib/internal-audit.functions";
+} from "@/lib/audit/internal-audit.functions";
 import { RequirePermission } from "@/components/rbac-guard";
 import { FeatureGate } from "@/components/upgrade-gate";
 import { SamplePicker } from "@/components/internal-audit/sample-picker";

@@ -42,7 +42,7 @@ import {
 } from "@/lib/continuous-speech";
 import { OriginalSpeechAudit } from "@/components/staff-mobile/original-speech-audit";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
-import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 
 export const Route = createFileRoute("/dashboard/daily-logs")({
   head: () => ({ meta: [{ title: "Daily Logs — Provider Interface" }] }),

@@ -73,7 +73,7 @@ export const recordPhiAccess = createServerFn({ method: "POST" })
       data.organizationId,
       "staff",
     );
-    const { logPhiAccess, resolveRequestMeta } = await import("@/lib/phi-access-audit.server");
+    const { logPhiAccess, resolveRequestMeta } = await import("@/lib/audit/phi-access-audit.server");
     const { ip, userAgent } = resolveRequestMeta({
       ip: data.ip,
       userAgent: data.userAgent,

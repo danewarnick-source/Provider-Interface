@@ -19,7 +19,7 @@ import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { downloadCsv } from "@/lib/utah-evv-export";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 
 export interface ExportRow {
   recordType: "Billable" | "Non-billable";

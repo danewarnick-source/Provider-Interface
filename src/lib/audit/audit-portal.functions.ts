@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { getAuditPackageData, type AuditPackagePayload } from "@/lib/audit-package-data";
+import { getAuditPackageData, type AuditPackagePayload } from "@/lib/audit/audit-package-data";
 import {
   assertOrgAdmin,
   assertPackageAccess,
   assertPackageAccessViaChild,
-} from "@/lib/audit-package-access";
+} from "@/lib/audit/audit-package-access";
 import { resolveAuthOrigin } from "@/lib/auth/auth-redirect";
 import { DEFAULT_AUDIT_FROM_NAME, formatFromHeader } from "@/lib/managed-from";
 

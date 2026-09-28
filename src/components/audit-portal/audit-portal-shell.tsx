@@ -10,7 +10,7 @@ import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth/auth-captcha";
 import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/clients/client-sign-out";
 import { useAuth } from "@/hooks/use-auth";
-import { getAuditorContext, type AuditorContext } from "@/lib/audit-portal.functions";
+import { getAuditorContext, type AuditorContext } from "@/lib/audit/audit-portal.functions";
 import { toast } from "sonner";
 
 interface Props {

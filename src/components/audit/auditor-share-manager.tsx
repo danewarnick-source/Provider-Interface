@@ -8,7 +8,7 @@ import {
   revokeAuditorShare,
   extendAuditorShare,
   listSharesForPacket,
-} from "@/lib/auditor-shares.functions";
+} from "@/lib/audit/auditor-shares.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

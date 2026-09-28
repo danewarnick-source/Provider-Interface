@@ -25,7 +25,7 @@ import {
   revokeOrgAuditor,
   type AuditPackageRow,
   type OrgAuditorRow,
-} from "@/lib/audit-portal.functions";
+} from "@/lib/audit/audit-portal.functions";
 import { resolveAuthOrigin } from "@/lib/auth/auth-redirect";
 
 

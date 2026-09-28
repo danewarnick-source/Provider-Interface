@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import {
   listMyAuditorShares,
   getAuditorShareView,
-} from "@/lib/auditor-shares.functions";
+} from "@/lib/audit/auditor-shares.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

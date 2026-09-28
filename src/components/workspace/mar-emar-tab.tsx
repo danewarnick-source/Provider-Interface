@@ -40,7 +40,7 @@ import { MedicationsManager } from "@/components/medications-manager";
 import { useAccess } from "@/hooks/use-access";
 import { logMedicationPass, addEmarAddendum } from "@/lib/emar-pass.functions";
 import { type EmarStatus, normalizeEmarStatus, EMAR_STATUS_LABELS } from "@/lib/emar-status";
-import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 import { isAdminLevel } from "@/lib/access/levels";
 
 

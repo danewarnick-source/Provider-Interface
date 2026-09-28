@@ -8,7 +8,7 @@ import {
   obligationFileStatusLabel,
   type ObligationFileStatus,
 } from "../staff/staff-obligation-files.ts";
-import { personNeedsSupportStrategies } from "../audit-evidence.ts";
+import { personNeedsSupportStrategies } from "../audit/audit-evidence.ts";
 import {
   bucketCodes,
   isPeriodInProgress,

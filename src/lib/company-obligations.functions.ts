@@ -34,7 +34,7 @@ import {
   sowCatalogEntryByKey,
   STANDING_RECLASSIFY_REASON,
 } from "./sow-obligation-catalog";
-import { obligationAppliesToFootprint } from "./dspd-audit-tool";
+import { obligationAppliesToFootprint } from "./audit/dspd-audit-tool";
 import { STANDING_SOW_DUTIES } from "./standing-sow-duties";
 import { isRetiredPerClientPctTitle } from "./clients/client-form-obligations";
 import { homePeriodKey, obligationDutyKey, perHomeServiceCode } from "./obligation-assignee-rules";

@@ -18,7 +18,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { createIncidentInstances, resolveComplianceRequirement } from "@/lib/compliance-resolution";
-import { logPhiAccess } from "@/lib/phi-access-audit.server";
+import { logPhiAccess } from "@/lib/audit/phi-access-audit.server";
 import { isAdminLevel } from "@/lib/access/levels";
 import { insertIncidentNumbered } from "@/lib/incident-number";
 import { incidentInvolvesClientOr } from "@/lib/incident-visibility";

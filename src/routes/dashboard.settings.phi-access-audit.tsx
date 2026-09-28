@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { listPhiAccessAudit } from "@/lib/phi-access-audit.functions";
+import { listPhiAccessAudit } from "@/lib/audit/phi-access-audit.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/dashboard/settings/phi-access-audit")({

@@ -36,7 +36,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Home as HomeIcon } from "lucide-react";
 import { CheckboxMultiSelect } from "@/components/ui/checkbox-multi-select";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
-import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 import { reviewExceptions } from "@/lib/records-review-rules";
 import { RecordsReviewActions } from "@/components/records/records-review-actions";
 import { useAllClientBillingCodes } from "@/hooks/use-client-billing-codes";

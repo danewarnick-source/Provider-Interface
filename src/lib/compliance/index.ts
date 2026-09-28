@@ -9,4 +9,4 @@ export * from '../state-requirements.functions';
 export * from '../state-catalog';
 export * from '../state-templates';
 export * from '../authoritative-sources.functions';
-export * from '../dspd-audit-tool';
+export * from '../audit/dspd-audit-tool';
