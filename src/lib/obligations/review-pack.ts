@@ -1,5 +1,5 @@
 import { denverYmd } from "../admin-home-data.ts";
-import { PACK_STATE_CODE, PACK_VERSION } from "../sow-obligation-catalog-pack.ts";
+import { PACK_STATE_CODE, PACK_VERSION } from "../compliance/sow-obligation-catalog-pack.ts";
 import type { Decision, ThisWeekItem } from "./this-week.ts";
 
 export type PackChangeRow = {

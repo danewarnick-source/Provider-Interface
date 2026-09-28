@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { staffTasksWithoutElementDuplicates } from "../staff/staff-my-tasks.ts";
-import { sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
+import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import { UNKNOWN_STAFF_DUTY_FACTS, type StaffDutyFacts } from "./duty-applicability.ts";
 import { readCommittedCatalog } from "./draft-rules/catalog-fs.ts";
 import { canActivate, canPublish } from "./draft-rules/publication.ts";

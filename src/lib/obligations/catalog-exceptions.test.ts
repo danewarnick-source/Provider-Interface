@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   CATALOG_EXCEPTIONS_BY_KEY,
   sowCatalogEntryByKey,
-} from "../sow-obligation-catalog.ts";
+} from "../compliance/sow-obligation-catalog.ts";
 import { BLOCKS_SOLO_WHEN_LAPSED_KEYS } from "./solo-lapse.ts";
 import {
   catalogIsAssignmentGated,

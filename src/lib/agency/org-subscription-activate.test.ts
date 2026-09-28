@@ -7,7 +7,7 @@ import {
   paidOrgSubscriptionPatch,
 } from "./org-subscription-row.ts";
 import { TNS_ORGANIZATION_ID } from "../current-org.ts";
-import { isBillingExempt } from "../billing-access.ts";
+import { isBillingExempt } from "../billing/billing-access.ts";
 
 describe("paidOrgSubscriptionPatch", () => {
   it("writes status=active with locked_at null and Stripe ids", () => {

@@ -12,7 +12,7 @@ import {
   MTP_BLOCK_DSI_DAY,
   isMtpEligibleCode,
 } from "./day-program-billing";
-import { computeEntryUnits } from "./billing-units";
+import { computeEntryUnits } from "./billing/billing-units";
 
 const DayCode = z.enum(["DSG", "DSP", "DSI", "SED"]);
 

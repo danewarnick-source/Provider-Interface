@@ -6,7 +6,7 @@ import { CompanyPoliciesTab } from "@/components/agency-documents/company-polici
 import { PacketNextActionCard } from "@/components/compliance/packet-next-action";
 import { SowIndexPanel } from "@/components/compliance/sow-index-panel";
 import { isAdminLevel } from "@/lib/access/levels";
-import type { AgencyFileSubTab } from "@/lib/compliance-nav";
+import type { AgencyFileSubTab } from "@/lib/compliance/compliance-nav";
 
 export function AgencyFilePanel({
   agencyTab,

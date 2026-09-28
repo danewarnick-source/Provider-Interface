@@ -52,8 +52,8 @@ describe("clientFormKindForTitle", () => {
 
   it("does not seed the retired per-client PCT duty; catalog keeps a retired path", () => {
     const standing = readFileSync(new URL("../standing-sow-duties.ts", import.meta.url), "utf8");
-    const catalog = readFileSync(new URL("../sow-obligation-catalog.ts", import.meta.url), "utf8");
-    const pack = readFileSync(new URL("../sow-obligation-catalog-pack.ts", import.meta.url), "utf8");
+    const catalog = readFileSync(new URL("../compliance/sow-obligation-catalog.ts", import.meta.url), "utf8");
+    const pack = readFileSync(new URL("../compliance/sow-obligation-catalog-pack.ts", import.meta.url), "utf8");
     assert.doesNotMatch(standing, /title: "Person-Centered Thinking — \[Client Name\]"/);
     assert.match(catalog, /title: "Person-Centered Thinking — \[Client Name\]"/);
     assert.match(pack, /key: "pct_client"/);

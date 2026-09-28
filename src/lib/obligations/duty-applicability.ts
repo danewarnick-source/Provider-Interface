@@ -4,7 +4,7 @@
 // staff_assignments (staff_id, client_id). No extra applicability table,
 // no title matching, no invented SEI fact.
 
-import { sowCatalogEntry, sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
+import { sowCatalogEntry, sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import {
   obligationFactApplicability,
   type ApplicabilityStatus,

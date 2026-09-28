@@ -8,7 +8,7 @@ import {
   type ObligationInstanceRow,
   type StaffObligationCompletion,
 } from "@/lib/company-obligations.functions";
-import { isPackSentinel } from "@/lib/obligation-packs";
+import { isPackSentinel } from "@/lib/obligations/obligation-packs";
 import {
   emptyObligationFileStatusCounts,
   liveObligationTitle,

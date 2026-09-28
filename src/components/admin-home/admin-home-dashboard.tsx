@@ -19,7 +19,7 @@ import {
   whatChangedTitle,
   type ReviewDayMeta,
 } from "@/lib/obligations/review-pack";
-import { PACK_VERSION } from "@/lib/sow-obligation-catalog-pack";
+import { PACK_VERSION } from "@/lib/compliance/sow-obligation-catalog-pack";
 import { isAdminLevel } from "@/lib/access/levels";
 import "@/components/compliance/decision-card.css";
 import "./admin-home-decisions.css";

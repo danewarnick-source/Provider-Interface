@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { CONFLICT_OF_INTEREST_TITLE } from "./obligation-auto-assign.ts";
+import { CONFLICT_OF_INTEREST_TITLE } from "./obligations/obligation-auto-assign.ts";
 import { ensureOpenStaffObligationInternal } from "./ensure-staff-obligation.ts";
-import { obligationCreatesInstances } from "./sow-obligation-catalog.ts";
+import { obligationCreatesInstances } from "./compliance/sow-obligation-catalog.ts";
 
 function chain(result: { data: unknown; error: unknown }) {
   const self: Record<string, unknown> = {};

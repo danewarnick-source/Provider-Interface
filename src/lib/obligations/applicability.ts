@@ -2,7 +2,7 @@
 // Catalog `when_applicable` rows stay visible until the matching fact is
 // recorded. Service-code hides stay in obligationAppliesToFootprint.
 
-import { allSowCatalogEntries, sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
+import { allSowCatalogEntries, sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import {
   AWARDED_CODES_QUESTION,
   AWARDED_SERVICE_CODES_FACT_KEY,

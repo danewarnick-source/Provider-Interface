@@ -34,13 +34,13 @@ import {
   listRhsHospitalizationDays,
   setRhsHospitalizationDay,
   deleteRhsHospitalizationDay,
-} from "@/lib/rhs-hospitalization.functions";
+} from "@/lib/residential/rhs-hospitalization.functions";
 import { HealthcareProvidersCard } from "@/components/clients/healthcare-providers-card";
 import { BelongingsInventoryCard } from "@/components/clients/belongings-inventory-card";
 import {
   listRhsEvacuationDrills,
   recordRhsEvacuationDrill,
-} from "@/lib/rhs-evacuation-drills.functions";
+} from "@/lib/residential/rhs-evacuation-drills.functions";
 import {
   Select as UiSelect,
   SelectContent as UiSelectContent,

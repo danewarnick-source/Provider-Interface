@@ -6,7 +6,7 @@ import { formatUsdFromCents } from "@/lib/hive-pricing";
 import {
   confirmTrainingOnlyCheckoutFn,
   type TrainingOnlyConfirmOrder,
-} from "@/lib/training-only-checkout.functions";
+} from "@/lib/training/training-only-checkout.functions";
 
 export const Route = createFileRoute("/training/confirm")({
   validateSearch: (s: Record<string, unknown>): { session_id?: string } => {

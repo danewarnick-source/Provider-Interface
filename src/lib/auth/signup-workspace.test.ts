@@ -175,7 +175,7 @@ describe("signup workspace / session", () => {
     assert.match(hire, /created_via: createdVia/);
     assert.match(hire, /from\("organization_members"\)\.upsert/);
     const training = readFileSync(
-      new URL(".././training-only-exec.functions.ts", import.meta.url),
+      new URL("../training/training-only-exec.functions.ts", import.meta.url),
       "utf8",
     );
     assert.match(training, /created_via: "training_only"/);

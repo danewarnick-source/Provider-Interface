@@ -47,7 +47,7 @@ import {
 import { getMyClientTrainingStatuses } from "@/lib/clients/client-specific-training.functions";
 import { getAgencyPolicyForInstance } from "@/lib/agency/agency-policies.functions";
 import { policyMediaKind } from "@/lib/agency/agency-policies";
-import { isPackSentinel, obligationIsRequired } from "@/lib/obligation-packs";
+import { isPackSentinel, obligationIsRequired } from "@/lib/obligations/obligation-packs";
 import { PacketNextActionCard } from "@/components/compliance/packet-next-action";
 import { useCompliancePacket } from "@/hooks/use-compliance-packet";
 import { AttentionStrip } from "@/components/staff-mobile/attention-strip";

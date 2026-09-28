@@ -20,7 +20,7 @@ import {
   listHhsIncidents,
   listPrnForms,
   markIncidentFiled,
-} from "@/lib/hhs.functions";
+} from "@/lib/residential/hhs.functions";
 
 export const Route = createFileRoute("/dashboard/host-home-control")({
   head: () => ({ meta: [{ title: "Host Home Control — Provider Interface" }] }),

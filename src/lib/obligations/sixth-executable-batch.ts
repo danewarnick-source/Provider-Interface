@@ -12,7 +12,7 @@
  * Publication stays off until VERIFIED_PUBLICATIONS is filled deliberately.
  */
 
-import { sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
+import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import { liveObligationKeyForRule, staffTaskPolicyForRule } from "./catalog-live-bridge.ts";
 import { isBlocksSoloWhenLapsedKey } from "./solo-lapse.ts";
 import {

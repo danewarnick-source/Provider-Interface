@@ -2,7 +2,7 @@
 // Selects the obligation catalog and audit instrument by organizations.state_code.
 // UT is the only built pack. ID and WY are empty shells (no invented duties).
 
-import { allSowCatalogEntries, type SowCatalogEntry } from "./sow-obligation-catalog.ts";
+import { allSowCatalogEntries, type SowCatalogEntry } from "./compliance/sow-obligation-catalog.ts";
 
 export const CATALOG_STATE_CODES = ["UT", "ID", "WY"] as const;
 export type CatalogStateCode = (typeof CATALOG_STATE_CODES)[number];

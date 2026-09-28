@@ -12,7 +12,7 @@ import {
   sowCatalogEntry,
   sowCatalogEntryByKey,
   type SowCatalogEntry,
-} from "../src/lib/sow-obligation-catalog.ts";
+} from "../src/lib/compliance/sow-obligation-catalog.ts";
 
 export { SOFT_BACKFILL_TITLE_ALIASES };
 

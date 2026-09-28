@@ -26,7 +26,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { getMissingAbiStaffIds, getMissingThirtyDayStaffIds } from "@/lib/sow-perimeters.functions";
+import { getMissingAbiStaffIds, getMissingThirtyDayStaffIds } from "@/lib/compliance/sow-perimeters.functions";
 import { useAccess } from "@/hooks/use-access";
 import {
   useSchedulerData, startOfWeek, startOfDay, startOfMonth,

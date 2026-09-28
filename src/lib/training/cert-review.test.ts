@@ -77,7 +77,7 @@ describe("cert review rules", () => {
 
   it("never treats upload date as an expiration", () => {
     const fn = readFileSync(new URL("../company-obligations.functions.ts", import.meta.url), "utf8");
-    const due = readFileSync(new URL("../obligation-due-dates.ts", import.meta.url), "utf8");
+    const due = readFileSync(new URL("../obligations/obligation-due-dates.ts", import.meta.url), "utf8");
     const baseline = readFileSync(
       new URL("../staff/staff-training-requirements.functions.ts", import.meta.url),
       "utf8",

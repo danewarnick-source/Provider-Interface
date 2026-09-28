@@ -5,7 +5,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { sowCatalogEntry, sowCatalogEntryByKey } from "@/lib/sow-obligation-catalog";
+import { sowCatalogEntry, sowCatalogEntryByKey } from "@/lib/compliance/sow-obligation-catalog";
 import { EMPTY_ORG_FACTS, loadOrgFacts, type OrgFacts } from "@/lib/obligations/applicability";
 import { loadStaffDutyFactsInternal } from "@/lib/obligations/load-staff-duty-facts.functions";
 import {

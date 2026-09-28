@@ -11,7 +11,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   getHhsMonthData, getMonthCertification, certifyHhsMonth,
   type AttendanceRow, type BlockedDay,
-} from "@/lib/hhs-certifications.functions";
+} from "@/lib/residential/hhs-certifications.functions";
 import { isAdminLevel } from "@/lib/access/levels";
 
 const fmt = (d: Date) =>

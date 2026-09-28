@@ -10,7 +10,7 @@ import type {
   EntryReadiness,
   NoteCompletenessStatus,
   StaffReadinessStatus,
-} from "@/lib/dspd-entry-readiness";
+} from "@/lib/compliance/dspd-entry-readiness";
 
 const STAFF_LABEL: Record<StaffReadinessStatus, string> = {
   ready: "Staff ready",

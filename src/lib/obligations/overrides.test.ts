@@ -18,7 +18,7 @@ import {
   type OverrideRow,
 } from "./overrides.ts";
 import { BLOCKS_SOLO_WHEN_LAPSED_KEYS } from "./solo-lapse.ts";
-import { sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
+import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 
 const NOW = new Date("2026-09-11T12:00:00.000Z");
 const STAFF = "11111111-1111-1111-1111-111111111111";

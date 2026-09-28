@@ -1,7 +1,7 @@
 // Duty overrides on existing compliance_overrides rows.
 // Insert-only. Never completes the underlying instance or remediation plan.
 
-import { sowCatalogEntry } from "../sow-obligation-catalog.ts";
+import { sowCatalogEntry } from "../compliance/sow-obligation-catalog.ts";
 import { catalogIsNonwaivable } from "./catalog-exceptions.ts";
 import { isBlocksSoloWhenLapsedKey, overrideIsActive } from "./solo-lapse.ts";
 

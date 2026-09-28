@@ -848,7 +848,7 @@ export async function applyExtractedFieldsToClient(
       .eq("organization_id", organizationId)
       .maybeSingle();
     try {
-      const { syncHomePinFromAddress } = await import("@/lib/home-pin");
+      const { syncHomePinFromAddress } = await import("@/lib/residential/home-pin");
       const pin = await syncHomePinFromAddress(supabase, {
         clientId,
         organizationId,

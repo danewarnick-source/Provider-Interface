@@ -36,7 +36,7 @@ import { isDailyServiceCode } from "@/lib/service-billing";
 import { useClientIntakeProgress } from "@/hooks/use-client-intake-progress";
 import { DeleteClientDialog } from "@/components/clients/delete-client-dialog";
 import { ClientCompliancePanel } from "@/components/clients/client-compliance-panel";
-import { backfillOrgHomePinsFromAddresses } from "@/lib/home-pin.functions";
+import { backfillOrgHomePinsFromAddresses } from "@/lib/residential/home-pin.functions";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { useAgencySetup } from "@/hooks/use-agency-setup";
 import { getAgencySetupStatus } from "@/lib/agency/agency-setup-gate.functions";

@@ -7,7 +7,7 @@ import {
   type MyObligationInstanceRow,
 } from "@/lib/company-obligations.functions";
 import { isUnlinkedFormDuty } from "@/lib/resolve-obligation-form";
-import { isPackSentinel, obligationIsRequired } from "@/lib/obligation-packs";
+import { isPackSentinel, obligationIsRequired } from "@/lib/obligations/obligation-packs";
 
 const MY_OBLIGATIONS_KEY = "my-obligation-instances";
 

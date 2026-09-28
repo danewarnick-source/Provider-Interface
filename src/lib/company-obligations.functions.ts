@@ -26,18 +26,18 @@ import {
   isCalendarDueRule,
   periodsToEnsure,
   explainDueRule,
-} from "./obligation-due-dates";
+} from "./obligations/obligation-due-dates";
 import {
   obligationCreatesInstances,
   resolveDueRule,
   sowCatalogEntry,
   sowCatalogEntryByKey,
   STANDING_RECLASSIFY_REASON,
-} from "./sow-obligation-catalog";
+} from "./compliance/sow-obligation-catalog";
 import { obligationAppliesToFootprint } from "./audit/dspd-audit-tool";
 import { STANDING_SOW_DUTIES } from "./standing-sow-duties";
 import { isRetiredPerClientPctTitle } from "./clients/client-form-obligations";
-import { homePeriodKey, obligationDutyKey, perHomeServiceCode } from "./obligation-assignee-rules";
+import { homePeriodKey, obligationDutyKey, perHomeServiceCode } from "./obligations/obligation-assignee-rules";
 import { loadOrgFacts, type OrgFacts } from "./obligations/applicability";
 import {
   evaluateStaffDuty,
@@ -46,8 +46,8 @@ import {
 } from "./obligations/duty-applicability";
 import { loadStaffDutyFactsInternal } from "./obligations/load-staff-duty-facts.functions";
 import { toIsoDateDay } from "./iso-date-day";
-import { isPackSentinel, obligationIsRequired } from "./obligation-packs";
-import { ORPHAN_OBLIGATION_CREATE_GONE } from "./compliance-spine";
+import { isPackSentinel, obligationIsRequired } from "./obligations/obligation-packs";
+import { ORPHAN_OBLIGATION_CREATE_GONE } from "./compliance/compliance-spine";
 import {
   ADMIN_ACCEPTED_PREFIX,
   canAcceptCertEvidence,

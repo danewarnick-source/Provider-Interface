@@ -12,7 +12,7 @@ import {
   resolveAgencyFileSubTab,
   resolveComplianceFileTab,
   type ComplianceFileTab,
-} from "@/lib/compliance-nav";
+} from "@/lib/compliance/compliance-nav";
 
 export const Route = createFileRoute("/dashboard/compliance")({
   head: () => ({ meta: [{ title: "Compliance — Provider Interface" }] }),

@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { InHiveCoursePlayer } from "@/components/training/in-hive-course-player";
 import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
 import { THIRTY_DAY_OBLIGATION_TITLE } from "@/lib/in-hive-training";
-import { trainingOnlyHomeForMeFn } from "@/lib/training-only-access.functions";
+import { trainingOnlyHomeForMeFn } from "@/lib/training/training-only-access.functions";
 
 export const Route = createFileRoute("/training/course")({
   head: () => ({

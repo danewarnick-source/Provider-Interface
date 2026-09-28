@@ -14,7 +14,7 @@ import {
   packetSubjectForCatalog,
   type PacketClock,
 } from "./packet.ts";
-import { allSowCatalogEntries, sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
+import { allSowCatalogEntries, sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import { UNKNOWN_STAFF_DUTY_FACTS, type StaffDutyFacts } from "./duty-applicability.ts";
 
 const VIEWER = "55555555-5555-5555-5555-555555555555";

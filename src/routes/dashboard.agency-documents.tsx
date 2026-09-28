@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { complianceRedirectSearchFromAgencyDocuments } from "@/lib/compliance-nav";
+import { complianceRedirectSearchFromAgencyDocuments } from "@/lib/compliance/compliance-nav";
 
 type AgencyDocumentsSearch = {
   tab?: "documents" | "company-policies";

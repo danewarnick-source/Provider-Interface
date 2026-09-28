@@ -8,7 +8,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { syncHomePinFromAddress } from "@/lib/home-pin";
+import { syncHomePinFromAddress } from "@/lib/residential/home-pin";
 import {
   CLIENT_PROFILE_FIELDS,
   PROFILE_CLIENT_COLUMNS,

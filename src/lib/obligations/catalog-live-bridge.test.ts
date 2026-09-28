@@ -6,7 +6,7 @@ import {
   liveObligationKeyForRequirement,
   staffTaskPolicy,
 } from "./catalog-live-bridge.ts";
-import { sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
+import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 
 describe("catalog live bridge", () => {
   it("maps imported parents onto existing live keys — no second checklist", () => {

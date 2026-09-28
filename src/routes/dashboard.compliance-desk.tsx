@@ -40,7 +40,7 @@ import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 import { reviewExceptions } from "@/lib/records-review-rules";
 import { RecordsReviewActions } from "@/components/records/records-review-actions";
 import { useAllClientBillingCodes } from "@/hooks/use-client-billing-codes";
-import { evaluateEntryReadiness, factsFromTimesheet, matchAuthRow } from "@/lib/dspd-entry-readiness";
+import { evaluateEntryReadiness, factsFromTimesheet, matchAuthRow } from "@/lib/compliance/dspd-entry-readiness";
 import { EntryReadinessPanel } from "@/components/billing/billing-holds";
 
 // Rendered as the dedicated "Geofence Validation Status" column on both

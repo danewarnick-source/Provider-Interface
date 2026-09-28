@@ -6,7 +6,7 @@ import {
   sowCatalogEntryByKey,
   type CatalogExceptions,
   type SowCatalogEntry,
-} from "../sow-obligation-catalog.ts";
+} from "../compliance/sow-obligation-catalog.ts";
 import { isBlocksSoloWhenLapsedKey } from "./solo-lapse.ts";
 
 export type { CatalogExceptions };

@@ -74,7 +74,7 @@ describe("duty keys, not titles", () => {
 
   it("assignee rules match keys, not title prefixes", () => {
     const rules = readFileSync(
-      fileURLToPath(new URL("../obligation-assignee-rules.ts", import.meta.url)),
+      fileURLToPath(new URL("./obligation-assignee-rules.ts", import.meta.url)),
       "utf8",
     );
     const engine = readFileSync(

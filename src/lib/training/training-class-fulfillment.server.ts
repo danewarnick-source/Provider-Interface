@@ -14,7 +14,7 @@ import {
   type TrainingClassType,
 } from "@/lib/training/training-class";
 import { ensureOpenStaffObligationInternal } from "@/lib/ensure-staff-obligation";
-import { hireDueDaysForTitle } from "@/lib/obligation-auto-assign";
+import { hireDueDaysForTitle } from "@/lib/obligations/obligation-auto-assign";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

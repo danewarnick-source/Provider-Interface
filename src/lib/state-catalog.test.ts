@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { allSowCatalogEntries } from "./sow-obligation-catalog.ts";
+import { allSowCatalogEntries } from "./compliance/sow-obligation-catalog.ts";
 import {
   WY_EMPTY_SHELL_MESSAGE,
   catalogForState,

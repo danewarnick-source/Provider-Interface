@@ -6,8 +6,8 @@
  * Activation lock: review holds only; never silently reject the claim.
  */
 
-import type { HoldClearPath } from "../../dspd-entry-readiness.ts";
-import { clearPathForHold, type AuthFact } from "../../dspd-entry-readiness.ts";
+import type { HoldClearPath } from "../../compliance/dspd-entry-readiness.ts";
+import { clearPathForHold, type AuthFact } from "../../compliance/dspd-entry-readiness.ts";
 import { STAGE1_ACTIVATION_LOCKED } from "./types.ts";
 
 export const BILLING_RESTRICTION_KINDS = [

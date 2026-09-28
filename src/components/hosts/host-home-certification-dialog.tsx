@@ -25,12 +25,12 @@ import {
 import {
   ALL_SECTIONS, ALL_ITEM_CODES, statusLabel,
   type ChecklistAnswers, type ChecklistStatus,
-} from "@/lib/host-home-cert-items";
+} from "@/lib/residential/host-home-cert-items";
 import {
   createHostHomeCertification, setHostHomeCertificatePdfPath,
   resolveHostHomeCertConcern, HOST_HOME_CERT_ATTESTATION_TEXT,
-} from "@/lib/host-home-certifications.functions";
-import { renderCertificatePdf } from "@/lib/host-home-certificate-pdf";
+} from "@/lib/residential/host-home-certifications.functions";
+import { renderCertificatePdf } from "@/lib/residential/host-home-certificate-pdf";
 
 // ─── Types ──────────────────────────────────────────────
 type CertRow = {

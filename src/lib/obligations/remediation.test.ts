@@ -25,7 +25,7 @@ import {
   sortThisWeekItems,
   type Decision,
 } from "./this-week.functions.ts";
-import { sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
+import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import {
   TNS_ORG_ID,
   type EscalationHit,

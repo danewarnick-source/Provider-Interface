@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { searchSowIndex, sowIndexRowCount } from "@/lib/sow-index";
+import { searchSowIndex, sowIndexRowCount } from "@/lib/compliance/sow-index";
 
 export function SowIndexPanel() {
   const { data: org } = useCurrentOrg();

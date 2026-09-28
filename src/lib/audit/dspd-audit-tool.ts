@@ -16,7 +16,7 @@ import {
   sowCatalogEntry,
   sowCatalogEntryByKey,
   type FulfillmentChannel,
-} from "../sow-obligation-catalog";
+} from "../compliance/sow-obligation-catalog";
 
 export type AuditPart = "I" | "II" | "III" | "IV";
 

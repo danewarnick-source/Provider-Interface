@@ -15,7 +15,7 @@ import {
   sowCatalogEntry,
   sowCatalogEntryByKey,
   type SowCatalogEntry,
-} from "../sow-obligation-catalog.ts";
+} from "../compliance/sow-obligation-catalog.ts";
 
 export const CATALOG_RELATION_KINDS = ["match", "overlay", "conflict"] as const;
 export type CatalogRelationKind = (typeof CATALOG_RELATION_KINDS)[number];

@@ -9,7 +9,7 @@
  * deliberately.
  */
 
-import { sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
+import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import { awardedCodeDutyStatus, type OrgFacts } from "./applicability.ts";
 import { liveObligationKeyForRule, staffTaskPolicyForRule } from "./catalog-live-bridge.ts";
 import { isBlocksSoloWhenLapsedKey } from "./solo-lapse.ts";

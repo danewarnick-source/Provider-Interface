@@ -8,7 +8,7 @@ import {
   sowCatalogEntry,
   sowCatalogEntryByKey,
   type SowCatalogEntry,
-} from "../sow-obligation-catalog.ts";
+} from "../compliance/sow-obligation-catalog.ts";
 import {
   emptyObligationFileStatusCounts,
   statusForObligationInstance,

@@ -7,9 +7,9 @@
  * and only when disposition is obligation.
  */
 
-import { hireDueDaysForTitle } from "./obligation-auto-assign.ts";
-import { addDaysUTC, endOfDayUTC, formatShort } from "./obligation-due-dates.ts";
-import { obligationCreatesInstances, sowCatalogEntryByKey } from "./sow-obligation-catalog.ts";
+import { hireDueDaysForTitle } from "./obligations/obligation-auto-assign.ts";
+import { addDaysUTC, endOfDayUTC, formatShort } from "./obligations/obligation-due-dates.ts";
+import { obligationCreatesInstances, sowCatalogEntryByKey } from "./compliance/sow-obligation-catalog.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

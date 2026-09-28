@@ -10,7 +10,7 @@
 //   2. Seeded company_obligations rows (source = sow, is_locked) — live DB
 //   3. Authoritative Sources PDFs — reference / Nectar reading copy only
 
-import { allSowCatalogEntries } from "../sow-obligation-catalog";
+import { allSowCatalogEntries } from "../compliance/sow-obligation-catalog";
 import { DSPD_AUDIT_ITEMS } from "../audit/dspd-audit-tool";
 import { UTAH_DSPD_COVERAGE, type PackCoverageRow, type PackCoverageStatus } from "./coverage";
 import { unsectionedRowIds } from "./sections";

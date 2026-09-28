@@ -9,7 +9,7 @@ import {
   allSowCatalogEntries,
   sowCatalogEntryByKey,
   type SowCatalogEntry,
-} from "../sow-obligation-catalog.ts";
+} from "../compliance/sow-obligation-catalog.ts";
 import type { CatalogSheetRow, LoadedDraftRule } from "./draft-rules/catalog-loader.ts";
 import type { DraftRule } from "./draft-rules/types.ts";
 

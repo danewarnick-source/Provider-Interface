@@ -3,7 +3,7 @@
 // Awarded codes reuse organizations.services_offered. Staff / 1056 facts
 // stay on the live records the engine already reads.
 
-import { allSowCatalogEntries } from "../sow-obligation-catalog.ts";
+import { allSowCatalogEntries } from "../compliance/sow-obligation-catalog.ts";
 import { resolveCatalogExceptions, type CatalogExceptions } from "./catalog-exceptions.ts";
 
 export const AWARDED_SERVICE_CODES_FACT_KEY = "awarded_service_codes" as const;

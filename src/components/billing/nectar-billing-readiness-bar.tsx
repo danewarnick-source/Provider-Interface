@@ -20,7 +20,7 @@ import {
   factsFromTimesheet,
   matchAuthRow,
   type BillingHold,
-} from "@/lib/dspd-entry-readiness";
+} from "@/lib/compliance/dspd-entry-readiness";
 import { BillingHoldsList, EntryReadinessChips } from "@/components/billing/billing-holds";
 
 /**

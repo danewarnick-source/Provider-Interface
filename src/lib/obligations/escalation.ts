@@ -13,7 +13,7 @@ import {
   sowCatalogEntry,
   sowCatalogEntryByKey,
   type ObligationCategory,
-} from "../sow-obligation-catalog.ts";
+} from "../compliance/sow-obligation-catalog.ts";
 import { loadOrgFacts, type OrgFacts } from "./applicability.ts";
 import {
   assignmentGapsForStaff,

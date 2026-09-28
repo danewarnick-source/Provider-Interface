@@ -23,7 +23,7 @@ import {
   saveClientGeofenceRadius,
   saveClientHomePin,
   saveClientPhysicalAddress,
-} from "@/lib/home-pin.functions";
+} from "@/lib/residential/home-pin.functions";
 import {
   DEFAULT_GEOFENCE_RADIUS_FEET,
   isHomePinDraftDirty,

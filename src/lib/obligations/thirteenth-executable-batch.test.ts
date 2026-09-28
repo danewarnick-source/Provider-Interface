@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 import { staffTasksWithoutElementDuplicates } from "../staff/staff-my-tasks.ts";
-import { sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
+import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import { UNKNOWN_STAFF_DUTY_FACTS, type StaffDutyFacts } from "./duty-applicability.ts";
 import { DHHS91172_CATALOG_DIR, readCommittedCatalog } from "./draft-rules/catalog-fs.ts";
 import { canActivate, canPublish } from "./draft-rules/publication.ts";
