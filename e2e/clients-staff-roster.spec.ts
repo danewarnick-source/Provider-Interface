@@ -286,7 +286,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await nameLink(page, "Harvey Alisa").click();
     await page.waitForURL(new RegExp(`/dashboard/team-members/${STAFF.harvey.id}`));
     // Tabs replace history; both back buttons and browser Back return to the same list.
-    await page.getByRole("tab", { name: /Team member file/i }).click();
+    await page.getByRole("tab", { name: /^File$/i }).click();
     await expect(page).toHaveURL(/tab=file/);
     await page.getByRole("tab", { name: /^Activity$/i }).click();
     await expect(page).toHaveURL(/tab=activity/);
@@ -297,9 +297,6 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await page.getByTestId("profile-back").click();
     await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
     await expect(page).toHaveURL(/sort=-?evidence/);
-    await nameLink(page, "Harvey Alisa").click();
-    await page.getByTestId("profile-back-to-list").click();
-    await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
     await page.getByRole("button", { name: "Clear filter" }).click();
 
     await rosterName(page, "Jake Probert").click();
@@ -314,30 +311,53 @@ test.describe("Clients + Staff roster — mocked admin", () => {
       "data-staff-id",
       STAFF.jake.id,
     );
-    await expect(page.getByTestId("staff-profile-identity")).toContainText("Jake");
-    await expect(page.getByTestId("staff-profile-identity")).toContainText("Probert");
+    await expect(page.getByTestId("staff-profile-identity")).toContainText(
+      "jake.probert@example.test",
+    );
+    await expect(page.getByTestId("staff-profile-identity")).toContainText("123 Maple St");
     await expect(page.getByTestId("staff-profile-identity")).not.toContainText("Dane");
     await expect(page.getByTestId("staff-profile-identity")).not.toContainText("Owner");
     await expect(page.getByTestId("staff-profile-heading")).not.toHaveText(/Dane|Roster Admin/);
     await expect(page.getByRole("tab", { name: /^Profile$/i })).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByRole("tab", { name: /Team member file/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /^Activity$/i })).toBeVisible();
+    for (const name of [/^File$/i, /^Caseload$/i, /^Notes$/i, /^Activity$/i]) {
+      await expect(page.getByRole("tab", { name })).toBeVisible();
+    }
     await expect(page.getByRole("tab", { name: /^Permissions$/i })).toHaveCount(0);
-    await expect(page.getByTestId("staff-profile-identity")).toContainText("Team member");
+    await expect(page.getByTestId("profile-status")).toHaveText("Active");
+    await expect(page.getByTestId("profile-badge-background")).toContainText("Background on file");
+    await expect(page.getByTestId("profile-badge-oig")).toHaveText("OIG due");
+    await expect(page.getByTestId("profile-badge-drive")).toHaveText("Can drive clients");
+    await expect(page.getByTestId("profile-subline")).toContainText("Maple");
     await expect(
       page.getByText(/admin|employee|manager|Owner|Team member|Supervisor/i).first(),
     ).toBeVisible();
     await assertPageNotBlank(page, "staff profile");
 
     await expect(page.getByText(/Team member ID/i).first()).toBeVisible();
-    await expect(page.getByRole("button", { name: /Team Member Face Sheet/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Edit profile/i })).toBeVisible();
+    await expect(page.getByText(/Hourly rate/i)).toBeVisible();
+    await page.getByTestId("profile-menu").click();
+    for (const item of [
+      /Review evidence pack/,
+      /^Download$/,
+      /^Print$/,
+      /Save to documents/,
+      /Deactivate…/,
+    ]) {
+      await expect(page.getByRole("menuitem", { name: item })).toBeVisible();
+    }
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("button", { name: /^Edit$/ })).toBeVisible();
+    await page.getByRole("tab", { name: /^Notes$/i }).click();
+    await expect(page.getByText("Stayed late to cover the Maple overnight.")).toBeVisible();
+    await page.getByRole("tab", { name: /^Activity$/i }).click();
+    await page.getByRole("button", { name: "Account", exact: true }).click();
+    await expect(page.getByText("Invite sent")).toBeVisible();
+    await page.getByRole("tab", { name: /^Profile$/i }).click();
     await expect(page.getByRole("heading", { name: "Access", exact: true })).toBeVisible({
       timeout: 10_000,
     });
-    await expect(page.getByTestId("profile-access-level")).toBeVisible();
     await shot(page, "team_member_face_sheet_desktop");
     await page.setViewportSize({ width: 390, height: 844 });
     await shot(page, "team_member_face_sheet_mobile");
@@ -705,19 +725,15 @@ test.describe("Access levels screenshots", () => {
     });
     await expect(page.getByText("Leads group / Scope")).toHaveCount(0);
     await expect(page.getByText(/Scope columns are not live/i)).toHaveCount(0);
-    await expect(page.getByTestId("profile-access-level")).toHaveText("Admin");
-    await expect(page.getByTestId("profile-access-badge")).toHaveText("Admin");
     await page.getByRole("button", { name: /Edit access/i }).click();
     await page.getByText("Whole agency", { exact: true }).click();
     await page.getByRole("option", { name: /Assigned homes, team members, and clients/i }).click();
     await page.getByText("Pick homes").click();
-    await page.getByText("Maple House", { exact: true }).click();
+    await page.locator("#access").getByText("Maple House", { exact: true }).click();
     await page.getByRole("button", { name: /Save access/i }).click();
     await expect(page.getByText("Access saved")).toBeVisible();
     await expect(page.getByText(/Assigned homes, team members, and clients/i)).toBeVisible();
     await expect(page.getByText("1 assigned").first()).toBeVisible();
-    await expect(page.getByTestId("profile-access-level")).toHaveText("Admin");
-    await expect(page.getByTestId("profile-access-badge")).toHaveText("Admin");
     await shot(page, "profile-admin-scope-save", true);
   });
 });

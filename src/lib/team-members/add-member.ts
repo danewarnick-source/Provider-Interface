@@ -146,3 +146,24 @@ export function parseWorkerType(raw: string | null | undefined): WorkerType {
 
 /** Import max per save. */
 export const IMPORT_MAX_ROWS = 200;
+
+export const SUPERVISOR_NOT_ACTIVE_MESSAGE = "The supervisor must be an active team member here.";
+
+/**
+ * organization_members.manager_id references organization_members.id, so a
+ * supervisor is saved as their membership id. Accepts that id (what the Add
+ * dialog sends) or, from older clients, the supervisor's user id, and returns
+ * the membership id. Null for no supervisor. Throws unless the supervisor is
+ * an active member of this agency.
+ */
+export function resolveSupervisorMemberId(
+  supervisorId: string | null | undefined,
+  activeMembers: ReadonlyArray<{ id: string; user_id: string }>,
+): string | null {
+  if (!supervisorId) return null;
+  const match =
+    activeMembers.find((m) => m.id === supervisorId) ??
+    activeMembers.find((m) => m.user_id === supervisorId);
+  if (!match) throw new Error(SUPERVISOR_NOT_ACTIVE_MESSAGE);
+  return match.id;
+}

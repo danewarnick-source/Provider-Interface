@@ -8,8 +8,8 @@ import { csvCell } from "./file.ts";
  *
  * Soft-deactivate already lives on existing columns — no migration:
  *   - organization_members.active (list Deactivate / Reactivate)
- *   - profiles.is_active (hire + archiveEntity)
- *   - profiles.account_status 'active' | 'archived' (archiveEntity / LifecyclePanel)
+ *   - profiles.is_active (hire + deactivateMember)
+ *   - profiles.account_status 'active' | 'archived' (deactivateMember / reactivateMember)
  *
  * Active tab = operational roster. Inactive = deactivated or archived.
  * They must never mix.

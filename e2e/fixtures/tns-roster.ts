@@ -287,3 +287,94 @@ export const DAILY_LOGS = [
     word_count: 5,
   },
 ] as const;
+
+/**
+ * Profile page (getTeamMemberProfile) Evidence rows — the real server fn reads
+ * evidence_items / evidence_files. Jake: background on file, OIG due, and he
+ * transports clients with license + insurance on file. Harvey has no pack.
+ */
+const evidenceItem = (staffId: string, key: string, over: Record<string, unknown> = {}) => ({
+  id: `ev-${staffId.slice(-3)}-${key}`,
+  organization_id: ORG_ID,
+  subject_type: "staff",
+  subject_id: staffId,
+  requirement_key: key,
+  title: key,
+  evidence_type: "upload",
+  attestation_text: null,
+  cadence: "once",
+  sow_cite: null,
+  suggested: false,
+  sent_to_staff: false,
+  visible_to_staff_id: null,
+  dual_link_key: null,
+  dual_link_peer_id: null,
+  expires_on: null,
+  first_due_rule: null,
+  first_due_on: null,
+  document_date: null,
+  next_due_on: null,
+  renew_years: null,
+  send_message: null,
+  created_at: "2026-07-01T00:00:00.000Z",
+  updated_at: "2026-07-01T00:00:00.000Z",
+  ...over,
+});
+const evidenceFile = (itemId: string) => ({
+  id: `file-${itemId}`,
+  organization_id: ORG_ID,
+  item_id: itemId,
+  storage_path: `${ORG_ID}/${itemId}.pdf`,
+  filename: "scan.pdf",
+  attested_at: null,
+  attested_by: null,
+  attestation_text_snapshot: null,
+  uploaded_by: ADMIN_USER_ID,
+  uploaded_at: "2026-07-02T15:00:00.000Z",
+  notes: null,
+});
+const JAKE_ITEMS = [
+  evidenceItem(STAFF.jake.id, "background_screening", { document_date: "2026-07-02" }),
+  evidenceItem(STAFF.jake.id, "oig_exclusion", { first_due_on: "2099-01-01" }),
+  evidenceItem(STAFF.jake.id, "driver_license"),
+  evidenceItem(STAFF.jake.id, "auto_insurance_proof"),
+];
+export const PROFILE_EVIDENCE: Record<
+  string,
+  { items: Array<ReturnType<typeof evidenceItem>>; files: Array<ReturnType<typeof evidenceFile>> }
+> = {
+  [STAFF.jake.id]: {
+    items: JAKE_ITEMS,
+    files: JAKE_ITEMS.filter((i) => i.requirement_key !== "oig_exclusion").map((i) =>
+      evidenceFile(i.id),
+    ),
+  },
+};
+
+/** Notes tab (listStaffNotes), newest first. */
+export const PROFILE_NOTES = [
+  {
+    id: "00000000-0000-4000-a000-000000000701",
+    kind: "praise",
+    body: "Stayed late to cover the Maple overnight.",
+    createdAt: "2026-09-20T18:00:00.000Z",
+    authorId: ADMIN_USER_ID,
+    authorName: ADMIN_NAME,
+  },
+];
+
+/** Activity tab (getMemberActivity) account history. */
+export const PROFILE_ACCOUNT_ACTIVITY = [
+  {
+    id: "00000000-0000-4000-a000-000000000801",
+    change_type: "member_created",
+    changed_by_name: ADMIN_NAME,
+    created_at: "2025-01-15T00:00:00.000Z",
+  },
+  {
+    id: "00000000-0000-4000-a000-000000000802",
+    change_type: "invite_sent",
+    changed_by_name: ADMIN_NAME,
+    created_at: "2025-01-15T00:05:00.000Z",
+  },
+];

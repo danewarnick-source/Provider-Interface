@@ -203,6 +203,36 @@ async function loadProfileEmail(
   return pickReplyTo(null, (data as { email?: string | null } | null)?.email ?? null);
 }
 
+/**
+ * Account history for the profile's Activity tab. Never fails the invite: a
+ * log write that errors is only reported to the server console.
+ */
+async function logInviteSent(args: {
+  organizationId: string;
+  actorId: string;
+  email: string;
+  level: AccessLevel;
+}): Promise<void> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { logChange } = await import("@/lib/access/change-log.server");
+    const { data: prof } = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name")
+      .eq("email", args.email.trim().toLowerCase())
+      .maybeSingle();
+    await logChange(
+      args.organizationId,
+      args.actorId,
+      "invite_sent",
+      { userId: prof?.id ?? null, name: prof?.full_name ?? args.email },
+      { email: args.email, access_level: args.level },
+    );
+  } catch (e) {
+    console.warn("[invites] invite_sent log failed:", e);
+  }
+}
+
 async function sendInvitationEmail(args: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any;
@@ -253,6 +283,7 @@ async function sendInvitationEmail(args: {
     if (!invokeData || invokeData.ok !== true) {
       return { ok: false, error: (invokeData && invokeData.error) || "Email send failed" };
     }
+    await logInviteSent({ organizationId, actorId: inviterUserId, email, level });
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Email send failed" };

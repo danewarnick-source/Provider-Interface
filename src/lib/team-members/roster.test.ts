@@ -107,7 +107,7 @@ describe("Add team member dialog source lock", () => {
     assert.match(src, /Invite sent to \$\{email\}/);
     assert.match(src, /What they can see and do in PI/);
     assert.match(src, /createTeamMember/);
-    assert.match(src, /restoreEntity/);
+    assert.match(src, /reactivateMember/);
     // Gone: multi-person cards, the second invite screen, the old Evidence link,
     // org-configured fields and hardcoded staff types, client-side passwords.
     for (const gone of [
@@ -130,8 +130,8 @@ describe("Add team member dialog source lock", () => {
     ]) {
       assert.doesNotMatch(src, gone, String(gone));
     }
-    // User-facing wording is "team member"; restoreEntity's kind is data, not copy.
-    assert.doesNotMatch(src.replace(/kind: "employee"/g, ""), /employee/i);
+    // User-facing wording is "team member".
+    assert.doesNotMatch(src, /employee/i);
     assert.doesNotMatch(src, /[\u{1F300}-\u{1FAFF}]/u);
   });
 });
@@ -239,8 +239,8 @@ describe("Team roster page source lock", () => {
     assert.match(hook, /tab: "caseload"/);
     assert.match(hook, /DeactivateDialog/);
     assert.match(hook, /ResetPasswordDialog/);
-    assert.match(hook, /archiveEntity/);
-    assert.match(hook, /restoreEntity/);
+    assert.match(hook, /deactivateMember/);
+    assert.match(hook, /reactivateMember/);
   });
 
   it("invites view: per-row busy, awaited clipboard, AlertDialog uninvite, expiry badge", () => {
@@ -1071,16 +1071,20 @@ describe("query keys", () => {
 });
 
 describe("roster return search (profile back buttons)", () => {
-  it("profile: tabs replace history; both back buttons link to the remembered roster", () => {
-    const src = readFileSync(
+  it("profile: tabs replace history; the back link goes to the remembered roster", () => {
+    const page = readFileSync(
       new URL("../../components/team-members/profile/profile-page.tsx", import.meta.url),
       "utf8",
     );
-    assert.doesNotMatch(src, /history\.back|history\.go\(/);
-    assert.match(src, /replace: true,\s*search: \(prev\) => \(\{\s*\.\.\.prev,\s*tab:/);
-    assert.match(src, /const backSearch = lastRosterSearch\(\)/);
-    const backs = src.match(/<Link to="\/dashboard\/team-members" search=\{backSearch\}/g) ?? [];
-    assert.equal(backs.length, 2);
+    const header = readFileSync(
+      new URL("../../components/team-members/profile/profile-header.tsx", import.meta.url),
+      "utf8",
+    );
+    for (const src of [page, header]) assert.doesNotMatch(src, /history\.back|history\.go\(/);
+    assert.match(page, /replace: true,\s*search: \(prev\) => \(\{\s*\.\.\.prev,\s*tab:/);
+    assert.match(header, /const backSearch = lastRosterSearch\(\)/);
+    const backs = header.match(/<Link to="\/dashboard\/team-members" search=\{backSearch\}/g) ?? [];
+    assert.equal(backs.length, 1);
   });
 
   it("remembers view/filter/search/dropdowns/sort, drops dialog flags, defaults to {}", async () => {

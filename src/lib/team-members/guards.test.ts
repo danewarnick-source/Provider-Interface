@@ -193,6 +193,60 @@ describe("wiring locks — the real callers use the guard, and nothing hard-dele
     assert.doesNotMatch(src, /select\([^)]*\brole\b/);
   });
 
+  it("lifecycle.functions.ts: deactivateMember / reactivateMember record separation, stay in this agency", () => {
+    const src = read("./lifecycle.functions.ts");
+    assert.match(src, /export const deactivateMember/);
+    assert.match(src, /export const reactivateMember/);
+    assert.doesNotMatch(src, /archiveEntity|restoreEntity/);
+    assert.doesNotMatch(src, /team_id\s*:/);
+    const deact = src.slice(
+      src.indexOf("export const deactivateMember"),
+      src.indexOf("export const reactivateMember"),
+    );
+    assert.ok(deact.indexOf("assertCanManageMember(") < deact.indexOf(".update("), "guard first");
+    assert.match(deact, /end_date: data\.lastDay/);
+    assert.match(deact, /separation_reason: data\.reason/);
+    assert.match(deact, /rehire_eligible: data\.rehireEligible/);
+    assert.match(deact, /from\("staff_notes"\)\.insert/);
+    assert.match(deact, /kind: "note"/);
+    assert.match(deact, /otherActiveMemberships/);
+    assert.match(deact, /if \(!stillActiveElsewhere\) \{\s*await supabaseAdmin\.auth\.admin/);
+    assert.match(deact, /supabaseAdmin\.rpc\("flag_member_deactivated"/);
+    const react = src.slice(src.indexOf("export const reactivateMember"));
+    assert.match(react, /assertCanManageMember\(/);
+    assert.match(react, /end_date: null, separation_reason: null, rehire_eligible: null/);
+    assert.match(react, /logChange\([\s\S]*"reactivated"/);
+    assert.match(react, /account_status: "active", is_active: true/);
+  });
+
+  it("members.functions.ts: updateTeamMember is the one checked profile write", () => {
+    const src = read("./members.functions.ts");
+    const fn = src.slice(src.indexOf("export const updateTeamMember"));
+    const body = fn.slice(0, fn.indexOf("/* ----"));
+    assert.match(body, /action: "edit_profile"/);
+    assert.match(body, /"payroll", "edit"/);
+    assert.match(body, /"staff_hiring", "edit"/);
+    assert.match(
+      body,
+      /updateUserById\(data\.userId, \{\s*email: newEmail,\s*email_confirm: true,/,
+    );
+    assert.match(body, /resolveAccountUsername\(/);
+    assert.match(body, /reevaluateStaffDutiesInternal\(/);
+    assert.match(body, /Nothing was saved/);
+    assert.match(
+      body,
+      /manager_id = data\.supervisorMemberId|manager_id: data\.supervisorMemberId|memberPatch\.manager_id = data\.supervisorMemberId/,
+    );
+    assert.doesNotMatch(body, /\brole\b/);
+    assert.ok(body.indexOf("assertCanManageMember(") < body.indexOf(".update("), "guard first");
+  });
+
+  it("invites.functions.ts logs invite_sent for account history", () => {
+    const src = read("./invites.functions.ts");
+    assert.match(src, /"invite_sent"/);
+    assert.match(src, /await logInviteSent\(/);
+  });
+
   it("members.functions.ts: resetMemberPassword goes through the guard, generates the password, and logs", () => {
     const src = read("./members.functions.ts");
     assert.doesNotMatch(src, /adminResetEmployeePassword/);

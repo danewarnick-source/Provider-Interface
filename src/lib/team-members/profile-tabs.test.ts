@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   isTeamMemberProfileTab,
-  RENDERED_PROFILE_TABS,
+  PROFILE_TAB_LABEL,
   resolveProfileTab,
   TEAM_MEMBER_PROFILE_TABS,
+  visibleProfileTabs,
 } from "./profile-tabs.ts";
 
 describe("team member profile tabs", () => {
@@ -20,13 +21,27 @@ describe("team member profile tabs", () => {
     assert.equal(isTeamMemberProfileTab(undefined), false);
   });
 
-  it("draws Profile, Team member file, and Activity; everything else lands on Profile", () => {
-    assert.deepEqual([...RENDERED_PROFILE_TABS], ["profile", "file", "activity"]);
+  it("labels read Profile | File | Caseload | Notes | Activity", () => {
+    assert.deepEqual(
+      TEAM_MEMBER_PROFILE_TABS.map((t) => PROFILE_TAB_LABEL[t]),
+      ["Profile", "File", "Caseload", "Notes", "Activity"],
+    );
+  });
+
+  it("Notes only with Hire & deactivate View", () => {
+    assert.deepEqual(visibleProfileTabs({ canSeeNotes: true }), [...TEAM_MEMBER_PROFILE_TABS]);
+    assert.deepEqual(visibleProfileTabs({ canSeeNotes: false }), [
+      "profile",
+      "file",
+      "caseload",
+      "activity",
+    ]);
+  });
+
+  it("draws every tab; missing or hidden tabs land on Profile", () => {
     assert.equal(resolveProfileTab(undefined), "profile");
-    assert.equal(resolveProfileTab("profile"), "profile");
-    assert.equal(resolveProfileTab("file"), "file");
-    assert.equal(resolveProfileTab("activity"), "activity");
-    assert.equal(resolveProfileTab("caseload"), "profile");
-    assert.equal(resolveProfileTab("notes"), "profile");
+    for (const tab of TEAM_MEMBER_PROFILE_TABS) assert.equal(resolveProfileTab(tab), tab);
+    assert.equal(resolveProfileTab("notes", { canSeeNotes: false }), "profile");
+    assert.equal(resolveProfileTab("caseload", { canSeeNotes: false }), "caseload");
   });
 });

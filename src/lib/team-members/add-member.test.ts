@@ -12,6 +12,8 @@ import {
   parseWorkerType,
   presetGroups,
   resolveAccessChoice,
+  resolveSupervisorMemberId,
+  SUPERVISOR_NOT_ACTIVE_MESSAGE,
   type PresetPick,
 } from "./add-member.ts";
 
@@ -198,5 +200,51 @@ describe("Smart Import uses the shared hire path unchanged", () => {
     assert.match(args, /staffType:/);
     assert.match(args, /"smart_import"/);
     assert.doesNotMatch(src, /temporaryPassword|temp-password|hireEmployeeInternal/);
+  });
+});
+
+describe("supervisor is saved as the membership id (manager_id → organization_members.id)", () => {
+  const ACTIVE = [
+    { id: "mem-harvey", user_id: "user-harvey" },
+    { id: "mem-jake", user_id: "user-jake" },
+  ];
+
+  it("Add team member: the dialog's membership id is kept", () => {
+    assert.equal(resolveSupervisorMemberId("mem-harvey", ACTIVE), "mem-harvey");
+    assert.equal(resolveSupervisorMemberId(null, ACTIVE), null);
+    assert.equal(resolveSupervisorMemberId("", ACTIVE), null);
+  });
+
+  it("Import team members: a user id is turned into that person's membership id", () => {
+    assert.equal(resolveSupervisorMemberId("user-jake", ACTIVE), "mem-jake");
+  });
+
+  it("refuses anyone who isn't an active member here", () => {
+    assert.throws(() => resolveSupervisorMemberId("mem-gone", ACTIVE), {
+      message: SUPERVISOR_NOT_ACTIVE_MESSAGE,
+    });
+  });
+
+  it("both server paths save the resolved membership id, never the raw supervisorId", () => {
+    const src = readFileSync(new URL("./members.functions.ts", import.meta.url), "utf8");
+    assert.match(
+      src,
+      /\.select\("id, user_id"\)\s*\.eq\("organization_id", organizationId\)\s*\.eq\("active", true\)/,
+    );
+    assert.match(src, /resolveSupervisorMemberId\(row\.supervisorId, ctx\.activeMembers\)/);
+    assert.match(src, /managerId: supervisorMemberId,/);
+    assert.doesNotMatch(src, /managerId: row\.supervisorId/);
+    for (const fn of ["export const createTeamMember", "export const importTeamMembers"]) {
+      const body = src.slice(src.indexOf(fn), src.indexOf("export const", src.indexOf(fn) + 1));
+      assert.match(body, /const supervisorMemberId = assertRefsInAgency\(ctx, (data|row)\)/, fn);
+      assert.match(body, /hireInputFromFields\([^)]*supervisorMemberId\)/, fn);
+    }
+    const options = src.slice(src.indexOf("export const listTeamMemberFormOptions"));
+    assert.match(options, /memberId: m\.id/);
+    const dialog = readFileSync(
+      new URL("../../components/team-members/add/add-member-dialog.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(dialog, /value: s\.memberId/);
   });
 });

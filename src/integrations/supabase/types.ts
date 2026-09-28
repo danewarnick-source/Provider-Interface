@@ -12162,11 +12162,14 @@ export type Database = {
           access_scope: string
           active: boolean
           created_at: string
+          end_date: string | null
           id: string
           is_company_executive: boolean
           job_title: string | null
           manager_id: string | null
           organization_id: string
+          rehire_eligible: boolean | null
+          separation_reason: string | null
           user_id: string
         }
         Insert: {
@@ -12176,11 +12179,14 @@ export type Database = {
           access_scope: string
           active?: boolean
           created_at?: string
+          end_date?: string | null
           id?: string
           is_company_executive?: boolean
           job_title?: string | null
           manager_id?: string | null
           organization_id: string
+          rehire_eligible?: boolean | null
+          separation_reason?: string | null
           user_id: string
         }
         Update: {
@@ -12190,11 +12196,14 @@ export type Database = {
           access_scope?: string
           active?: boolean
           created_at?: string
+          end_date?: string | null
           id?: string
           is_company_executive?: boolean
           job_title?: string | null
           manager_id?: string | null
           organization_id?: string
+          rehire_eligible?: boolean | null
+          separation_reason?: string | null
           user_id?: string
         }
         Relationships: [
@@ -14594,6 +14603,44 @@ export type Database = {
           },
           {
             foreignKeyName: "staff_groups_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_notes: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          organization_id: string
+          staff_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          kind: string
+          organization_id: string
+          staff_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          organization_id?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_notes_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

@@ -7,7 +7,7 @@ import { useAccess } from "@/hooks/use-access";
 import { useAuth } from "@/hooks/use-auth";
 import { interpretInviteSendResult } from "@/lib/invite-send-result";
 import { inviteStaffMembers, resendInvitation } from "@/lib/team-members/invites.functions";
-import { archiveEntity, restoreEntity } from "@/lib/team-members/lifecycle.functions";
+import { deactivateMember, reactivateMember } from "@/lib/team-members/lifecycle.functions";
 import {
   rosterQueryKey,
   rowActionKeys,
@@ -15,7 +15,10 @@ import {
   type RosterActionKey,
   type RosterRow,
 } from "@/lib/team-members/roster";
-import { DeactivateDialog } from "@/components/team-members/dialogs/deactivate-dialog";
+import {
+  DeactivateDialog,
+  type DeactivateValues,
+} from "@/components/team-members/dialogs/deactivate-dialog";
 import {
   ResetPasswordDialog,
   type ResetPasswordTarget,
@@ -43,8 +46,8 @@ export function useRosterActions(organizationId: string | null): {
 } {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const archiveFn = useServerFn(archiveEntity);
-  const restoreFn = useServerFn(restoreEntity);
+  const deactivateFn = useServerFn(deactivateMember);
+  const reactivateFn = useServerFn(reactivateMember);
   const inviteFn = useServerFn(inviteStaffMembers);
   const resendFn = useServerFn(resendInvitation);
   const [resetTarget, setResetTarget] = useState<ResetPasswordTarget | null>(null);
@@ -56,11 +59,22 @@ export function useRosterActions(organizationId: string | null): {
   };
 
   const run = useMutation({
-    mutationFn: async ({ key, row }: { key: RosterActionKey; row: RosterRow }) => {
+    mutationFn: async ({
+      key,
+      row,
+      separation,
+    }: {
+      key: RosterActionKey;
+      row: RosterRow;
+      separation?: DeactivateValues;
+    }) => {
       if (!organizationId) throw new Error("No organization selected.");
-      const target = { kind: "employee" as const, id: row.userId, organizationId };
-      if (key === "deactivate") return { key, row, res: await archiveFn({ data: target }) };
-      if (key === "reactivate") return { key, row, res: await restoreFn({ data: target }) };
+      const target = { userId: row.userId, organizationId };
+      if (key === "deactivate") {
+        if (!separation) throw new Error("Choose a last day, reason and rehire answer.");
+        return { key, row, res: await deactivateFn({ data: { ...target, ...separation } }) };
+      }
+      if (key === "reactivate") return { key, row, res: await reactivateFn({ data: target }) };
       if (key === "resend_invite" && row.pendingInviteId) {
         const res = await resendFn({
           data: {
@@ -141,7 +155,9 @@ export function useRosterActions(organizationId: string | null): {
         <DeactivateDialog
           name={deactivateRow?.displayName ?? null}
           busy={run.isPending && run.variables?.key === "deactivate"}
-          onConfirm={() => deactivateRow && run.mutate({ key: "deactivate", row: deactivateRow })}
+          onConfirm={(separation) =>
+            deactivateRow && run.mutate({ key: "deactivate", row: deactivateRow, separation })
+          }
           onClose={() => setDeactivateRow(null)}
         />
       </>
