@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { aggregateHourlyUnits, aggregateDailyDays, type DailyRecordRow } from "@/lib/accrual";
-import { assertAddonForOrg } from "@/lib/entitlements.server";
+import { assertAddonForOrg } from "../financial/entitlements.server.ts";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 
 /**

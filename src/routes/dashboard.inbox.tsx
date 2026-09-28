@@ -13,7 +13,7 @@ import {
   openInboxMessage,
   type InboxMessageDetail,
   type InboxAttachment,
-} from "@/lib/inbox-messages.functions";
+} from "@/lib/messaging/inbox-messages.functions";
 import { listMyApprovalRequests, type ApprovalRequestRow } from "@/lib/billing/billing-approvals.functions";
 import { ApprovalDialog } from "@/components/billing/ApprovalDialog";
 

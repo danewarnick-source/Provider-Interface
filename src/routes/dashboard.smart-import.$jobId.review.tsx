@@ -76,7 +76,7 @@ import {
 } from "@/components/ui/dialog";
 import { Trash2, Plus, X, RotateCcw, Tag, UserPlus } from "lucide-react";
 
-import { providerSignoff } from "@/lib/hive-migration.functions";
+import { providerSignoff } from "@/lib/hive-exec/hive-migration.functions";
 import { DiscardImportDialog } from "@/components/smart-import/discard-import-dialog";
 import { GuardianConfirmCard } from "@/components/smart-import/guardian-confirm-card";
 import { ApprovalDialog } from "@/components/billing/ApprovalDialog";

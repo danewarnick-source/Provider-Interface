@@ -10,7 +10,7 @@ import {
   shiftAskSubject,
   TEAM_DAY_SUPPORT_SUBJECT,
   teamThreadSubject,
-} from "./threads.ts";
+} from "../messaging/threads.ts";
 
 describe("Ask staff / team thread copy", () => {
   it("uses a PHI-free shift subject", () => {
@@ -63,7 +63,7 @@ describe("Ask staff / team thread copy", () => {
 
 describe("Threads lock", () => {
   it("does not introduce UI emoji", () => {
-    const src = readFileSync(new URL("./threads.ts", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../messaging/threads.ts", import.meta.url), "utf8");
     assert.equal(/\p{Extended_Pictographic}/u.test(src), false);
   });
 });

@@ -10,7 +10,7 @@ import {
   parseYmd,
   ymdFromParts,
 } from "../denver-date.ts";
-import { ANNUAL_DISCOUNT } from "../hive-pricing.ts";
+import { ANNUAL_DISCOUNT } from "../hive-exec/hive-pricing.ts";
 import {
   PI_LIST_MINIMUM_CENTS,
   PI_LIST_PER_CLIENT_CENTS,

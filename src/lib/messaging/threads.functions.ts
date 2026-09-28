@@ -22,7 +22,7 @@ import {
   teamThreadSubject,
   type ThreadKind,
   type ThreadMessageKind,
-} from "./threads.ts";
+} from "../messaging/threads.ts";
 
 const ORG = z.string().uuid();
 

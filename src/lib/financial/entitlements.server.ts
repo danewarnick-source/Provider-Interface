@@ -1,5 +1,5 @@
 import { entitlementsForOrg, isBillingExempt } from "@/lib/billing/billing-access";
-import { type AddonId } from "@/lib/hive-tiers";
+import { type AddonId } from "./hive-exec/hive-tiers.ts";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 
 /**

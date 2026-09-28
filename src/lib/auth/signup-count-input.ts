@@ -8,7 +8,7 @@
  * do not invent a new minimum.
  */
 
-import { clampClientCount, clampStaffCount } from "../hive-pricing.ts";
+import { clampClientCount, clampStaffCount } from "../hive-exec/hive-pricing.ts";
 
 export const SIGNUP_STAFF_COUNT_ERROR = "Enter how many staff you will start with (1 or more).";
 export const SIGNUP_CLIENT_COUNT_ERROR = "Enter how many clients you will start with (0 or more).";

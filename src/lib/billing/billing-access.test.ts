@@ -10,7 +10,7 @@ import {
   trainingRequiresCharge,
   entitlementsForOrg,
 } from "./billing-access.ts";
-import { isPublicSelfServeTier, normalizeTierId, PUBLIC_SELF_SERVE_TIERS } from "../hive-tiers.ts";
+import { isPublicSelfServeTier, normalizeTierId, PUBLIC_SELF_SERVE_TIERS } from "../hive-exec/hive-tiers.ts";
 import {
   isStripeLiveSecretKey,
   isStripeTestPublishableKey,
@@ -25,7 +25,7 @@ import {
   resolveAgencyCheckoutPricingModel,
   STRIPE_SANDBOX_PRICE_IDS,
 } from "../financial/stripe-config.ts";
-import { quoteHiveSubscription } from "../hive-pricing.ts";
+import { quoteHiveSubscription } from "../hive-exec/hive-pricing.ts";
 import { quotePiListSubscription, quoteSignupTrainingAddon } from "../public-site/pi-signup-pricing.ts";
 
 describe("billing-access", () => {

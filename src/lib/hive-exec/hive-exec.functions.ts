@@ -10,7 +10,7 @@ import {
 import {
   quoteHiveSubscription,
   type PricingSchedule,
-} from "@/lib/hive-pricing";
+} from "../hive-exec/hive-pricing.ts";
 
 // ───── Public types ────────────────────────────────────────────────────────
 

@@ -12,14 +12,14 @@ import {
   type CompanyRow,
 } from "@/lib/hive-exec/hive-exec.functions";
 import { setOrgBillingExemptFn } from "@/lib/billing/billing-exempt.functions";
-import { setOrgPricingScheduleFn } from "@/lib/hive-pricing.functions";
+import { setOrgPricingScheduleFn } from "@/lib/hive-exec/hive-pricing.functions";
 import {
   TIER_CATALOG,
   ADDON_CATALOG,
   getTier,
   formatTierPrice,
   type TierId,
-} from "@/lib/hive-tiers";
+} from "@/lib/hive-exec/hive-tiers";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/dashboard/hive-exec/plans")({

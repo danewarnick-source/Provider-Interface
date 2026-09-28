@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertAddonForOrg } from "@/lib/entitlements.server";
+import { assertAddonForOrg } from "../financial/entitlements.server.ts";
 import { loadOrgPersonnelFileIndex } from "@/lib/personnel-file-matrix.functions";
 
 /**

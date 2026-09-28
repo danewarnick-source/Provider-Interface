@@ -24,7 +24,7 @@ import {
   type TrainingClassRosterRow,
   type TrainingClassType,
 } from "@/lib/training/training-class";
-import { formatUsdFromCents } from "@/lib/hive-pricing";
+import { formatUsdFromCents } from "@/lib/hive-exec/hive-pricing";
 
 export type RosterMemberOption = { id: string; label: string; email?: string | null; phone?: string | null };
 

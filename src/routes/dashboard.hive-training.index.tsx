@@ -35,7 +35,7 @@ import {
   ClassRosterDialog,
   type RosterMemberOption,
 } from "@/components/training/class-roster-form";
-import { formatUsdFromCents, trainingPriceCentsForSku } from "@/lib/hive-pricing";
+import { formatUsdFromCents, trainingPriceCentsForSku } from "@/lib/hive-exec/hive-pricing";
 import { isBillingExempt } from "@/lib/billing/billing-access";
 import { getBillingStatusFn } from "@/lib/financial/stripe-checkout.functions";
 import { getOrgTrainingClasses } from "@/lib/training/training-class.functions";

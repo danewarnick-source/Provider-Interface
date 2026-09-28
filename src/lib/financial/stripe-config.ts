@@ -16,7 +16,7 @@ import {
   LIST_PER_STAFF_CENTS_50_PLUS,
   type HiveQuote,
   trainingPriceCentsForSku,
-} from "../hive-pricing.ts";
+} from "../hive-exec/hive-pricing.ts";
 import type { PiListQuote, SignupTrainingLine, SignupTrainingQuote } from "../public-site/pi-signup-pricing.ts";
 
 /** PI sandbox (test mode). Not a secret. */

@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useEntitlements } from "@/hooks/use-entitlements";
-import { ADDON_CATALOG, type AddonId } from "@/lib/hive-tiers";
+import { ADDON_CATALOG, type AddonId } from "@/lib/hive-exec/hive-tiers";
 
 /**
  * Universal visible-but-locked wrapper for any tier-gated add-on.

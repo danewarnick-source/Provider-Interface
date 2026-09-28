@@ -7,7 +7,7 @@
  */
 
 import { TNS_ORGANIZATION_ID } from "../current-org.ts";
-import { addonsForTier, getTier, normalizeTierId, type AddonId, type TierId } from "../hive-tiers.ts";
+import { addonsForTier, getTier, normalizeTierId, type AddonId, type TierId } from "../hive-exec/hive-tiers.ts";
 
 export type SubscriptionGate = {
   status: string | null;

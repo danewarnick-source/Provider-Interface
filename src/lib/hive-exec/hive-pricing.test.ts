@@ -18,7 +18,7 @@ import {
   quoteHiveSubscription,
   signupScheduleFromPayingCount,
   trainingPriceCentsForSku,
-} from "./hive-pricing.ts";
+} from "../hive-exec/hive-pricing.ts";
 
 describe("list volume rates", () => {
   it("uses $125 / $109 / $99 by client count", () => {

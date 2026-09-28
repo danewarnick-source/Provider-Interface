@@ -7,7 +7,7 @@ import { ArrowLeft, Save, Users, Contact2, Clock, Activity, Pencil, AlertTriangl
 import { toast } from "sonner";
 import { getCompanyDetail, upsertSubscription, updateOrgNames, updateAccountContact } from "@/lib/hive-exec/hive-exec.functions";
 import { setOrgBillingExemptFn } from "@/lib/billing/billing-exempt.functions";
-import { setOrgPricingScheduleFn } from "@/lib/hive-pricing.functions";
+import { setOrgPricingScheduleFn } from "@/lib/hive-exec/hive-pricing.functions";
 import { MasterController } from "@/components/hive-exec/master-controller";
 
 export const Route = createFileRoute("/dashboard/hive-exec/$orgId")({

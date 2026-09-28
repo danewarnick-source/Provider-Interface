@@ -29,7 +29,7 @@ import {
   type ReviewAction,
 } from "@/lib/records/records-review-actions";
 import type { ReviewExceptionCode } from "@/lib/records/records-review-rules";
-import { askStaffOnTimesheet } from "@/lib/threads.functions";
+import { askStaffOnTimesheet } from "@/lib/messaging/threads.functions";
 
 export type ReviewableRow = {
   id: string;

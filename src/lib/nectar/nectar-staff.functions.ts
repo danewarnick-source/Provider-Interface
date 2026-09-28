@@ -8,7 +8,7 @@ import {
   slimPcspGoals,
   staffNectarFailureMessage,
 } from "@/lib/nectar/nectar-staff-errors";
-import { assertMemberPlanAddon } from "@/lib/entitlements.server";
+import { assertMemberPlanAddon } from "../financial/entitlements.server.ts";
 import {
   UNTRUSTED_DOCUMENT_RULE,
   delimitUntrustedDocument,

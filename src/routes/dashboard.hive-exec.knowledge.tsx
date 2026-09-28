@@ -10,7 +10,7 @@ import {
   upsertHiveKnowledgeEntry,
   deleteHiveKnowledgeEntry,
   type HiveKnowledgeRow,
-} from "@/lib/hive-knowledge.functions";
+} from "@/lib/hive-exec/hive-knowledge.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

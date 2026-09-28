@@ -48,7 +48,7 @@ import {
   type TrainingClassRosterRow,
   type TrainingClassType,
 } from "@/lib/training/training-class";
-import { countPayingOrgs } from "@/lib/hive-pricing.functions";
+import { countPayingOrgs } from "../hive-exec/hive-pricing.functions.ts";
 import { resolveCurrentMembership } from "@/lib/current-org";
 import { highWaterClientCount } from "../public-site/pi-list-billing.server.ts";
 import {
@@ -61,7 +61,7 @@ import {
   type BillingInterval,
   type HiveQuote,
   type PricingSchedule,
-} from "@/lib/hive-pricing";
+} from "../hive-exec/hive-pricing.ts";
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 

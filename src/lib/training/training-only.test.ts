@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { readFileSync } from "node:fs";
-import { TRAINING_PRICE_CENTS } from "../hive-pricing.ts";
+import { TRAINING_PRICE_CENTS } from "../hive-exec/hive-pricing.ts";
 import { STRIPE_SANDBOX_PRICE_IDS, readStripeEnv } from "../financial/stripe-config.ts";
 import {
   cleanTrainingOnlyPeople,

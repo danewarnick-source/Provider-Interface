@@ -11,7 +11,7 @@ import {
   foundingEndsAtFrom,
   signupScheduleFromPayingCount,
   type PricingSchedule,
-} from "@/lib/hive-pricing";
+} from "../hive-exec/hive-pricing.ts";
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 

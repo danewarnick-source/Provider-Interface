@@ -21,7 +21,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { runNectarCertOcr } from "@/lib/nectar/nectar-cert-ocr";
-import { assertAddonForOrg } from "@/lib/entitlements.server";
+import { assertAddonForOrg } from "../financial/entitlements.server.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

@@ -24,7 +24,7 @@ import {
   listPlatformTickets,
   createPlatformTicket,
   updatePlatformTicket,
-} from "@/lib/hive-tickets.functions";
+} from "@/lib/hive-exec/hive-tickets.functions";
 
 export const Route = createFileRoute("/dashboard/hive-exec/nectar")({
   component: HiveNectarPage,

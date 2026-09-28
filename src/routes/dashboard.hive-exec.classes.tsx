@@ -14,7 +14,7 @@ import {
   type TrainingClassRow,
 } from "@/lib/training/training-class.functions";
 import { trainingClassLabel, trainingClassUnitCents, type TrainingClassType } from "@/lib/training/training-class";
-import { formatUsdFromCents } from "@/lib/hive-pricing";
+import { formatUsdFromCents } from "@/lib/hive-exec/hive-pricing";
 import { ClassCardStatus } from "@/components/training/class-card-upload";
 import {
   listTrainingOnlyOrdersForExec,

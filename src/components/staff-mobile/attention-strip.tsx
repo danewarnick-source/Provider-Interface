@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { FileText, ChevronRight, BellRing, MessageSquare } from "lucide-react";
-import { listMyThreads } from "@/lib/threads.functions";
+import { listMyThreads } from "@/lib/messaging/threads.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { listMyForms, getMyFormNotifications } from "@/lib/forms.functions";
 import { listSmartImportReminders } from "@/lib/smart-import/smart-import-reminders.functions";

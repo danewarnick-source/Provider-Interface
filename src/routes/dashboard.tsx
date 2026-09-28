@@ -81,7 +81,7 @@ import { FeatureLockedRoute, UpgradeGate } from "@/components/upgrade-gate";
 import { OrgSwitcher, DemoBadge, DemoOrgBanner } from "@/components/org-switcher";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getInboxUnreadCount } from "@/lib/inbox-messages.functions";
+import { getInboxUnreadCount } from "@/lib/messaging/inbox-messages.functions";
 import { useOrgFeatures } from "@/hooks/use-feature-enabled";
 import {
   DASHBOARD_BOOT_TIMEOUT_MS,

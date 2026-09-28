@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
-import { formatUsdFromCents } from "@/lib/hive-pricing";
+import { formatUsdFromCents } from "@/lib/hive-exec/hive-pricing";
 import {
   confirmTrainingOnlyCheckoutFn,
   type TrainingOnlyConfirmOrder,

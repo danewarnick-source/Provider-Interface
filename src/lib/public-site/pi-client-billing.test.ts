@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { ANNUAL_DISCOUNT } from "../hive-pricing.ts";
+import { ANNUAL_DISCOUNT } from "../hive-exec/hive-pricing.ts";
 import {
   annualCancelRefundCents,
   calendarMonthPeriod,

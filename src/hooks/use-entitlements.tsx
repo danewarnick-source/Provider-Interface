@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getMyEntitlements } from "@/lib/entitlements.functions";
+import { getMyEntitlements } from "@/lib/financial/entitlements.functions";
 import { useAuth } from "@/hooks/use-auth";
-import type { AddonId, TierId } from "@/lib/hive-tiers";
+import type { AddonId, TierId } from "@/lib/hive-exec/hive-tiers";
 
 /**
  * Single source of truth for tier + add-on entitlements in the UI.

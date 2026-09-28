@@ -15,7 +15,7 @@ import {
   clampClientCount,
   formatUsdFromCents,
   type BillingInterval,
-} from "../hive-pricing.ts";
+} from "../hive-exec/hive-pricing.ts";
 
 export const PI_LIST_PER_CLIENT_CENTS = PI_LIST_PER_CLIENT_DOLLARS * 100;
 export const PI_LIST_MINIMUM_CENTS = PI_LIST_MINIMUM_DOLLARS * 100;

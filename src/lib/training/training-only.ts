@@ -18,7 +18,7 @@ import {
   type StripeLineItem,
   type StripePriceEnv,
 } from "../financial/stripe-config.ts";
-import { formatUsdFromCents } from "../hive-pricing.ts";
+import { formatUsdFromCents } from "../hive-exec/hive-pricing.ts";
 
 export const TRAINING_ONLY_SKUS = SIGNUP_TRAINING_ADDON_IDS;
 export type TrainingOnlySku = SignupTrainingAddonId;

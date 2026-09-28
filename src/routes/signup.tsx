@@ -51,7 +51,7 @@ import {
   createSubscriptionCheckoutFn,
   getSignupPaymentsStatusFn,
 } from "@/lib/financial/stripe-checkout.functions";
-import { formatUsdFromCents, type BillingInterval } from "@/lib/hive-pricing";
+import { formatUsdFromCents, type BillingInterval } from "@/lib/hive-exec/hive-pricing";
 import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_SIGNUP_PRICE_LINE } from "@/lib/public-site/pi-landing";
 import {
   SIGNUP_AGENCY_PLACEHOLDER,

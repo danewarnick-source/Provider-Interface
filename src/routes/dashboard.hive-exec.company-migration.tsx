@@ -36,7 +36,7 @@ import {
   setEngagement,
   logHiveAccess,
   listAccessLog,
-} from "@/lib/hive-migration.functions";
+} from "@/lib/hive-exec/hive-migration.functions";
 
 export const Route = createFileRoute("/dashboard/hive-exec/company-migration")({
   head: () => ({
