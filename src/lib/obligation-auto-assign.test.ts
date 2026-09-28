@@ -49,13 +49,13 @@ describe("hire auto-assign", () => {
       "utf8",
     );
     assert.match(roleWriter, /reevaluateStaffDutiesInternal/);
-    const empCaseload = readFileSync(
-      fileURLToPath(
-        new URL("../components/team-members/roster/team-roster-page.tsx", import.meta.url),
-      ),
+    // The roster caseload drawer is gone (caseload moves into the profile); the
+    // Assignments page is the caseload editor that still removes assignments.
+    const caseloadEditor = readFileSync(
+      fileURLToPath(new URL("../routes/dashboard.assignments.tsx", import.meta.url)),
       "utf8",
     );
-    assert.match(empCaseload, /onStaffAssignmentRemoved/);
+    assert.match(caseloadEditor, /onStaffAssignmentRemoved/);
     const nightly = readFileSync(
       fileURLToPath(new URL("./obligations/remediation.ts", import.meta.url)),
       "utf8",

@@ -1,365 +1,114 @@
-import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useCurrentOrg } from "@/hooks/use-org";
-import { useAuth } from "@/hooks/use-auth";
+import { getRouteApi } from "@tanstack/react-router";
+import { useCallback, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { adminResetEmployeePassword } from "@/lib/team-members/members.functions";
-import { resendInvitation, revokeInvitation } from "@/lib/team-members/invites.functions";
-import { archiveEntity, restoreEntity } from "@/lib/team-members/lifecycle.functions";
-import { inviteJoinUrl } from "@/lib/join-invite";
-import { resolveAuthOrigin } from "@/lib/auth-redirect";
-import { generateTempPassword } from "@/lib/temp-password";
+import { Loader2 } from "lucide-react";
+import { useCurrentOrg } from "@/hooks/use-org";
+import { useAccess } from "@/hooks/use-access";
+import { listTeamRoster } from "@/lib/team-members/roster.functions";
+import { listTeamInvites } from "@/lib/team-members/invites.functions";
 import {
-  onStaffAssignmentCreated,
-  onStaffAssignmentRemoved,
-} from "@/lib/staff-assignment-hooks.functions";
-import {
-  countEmployeesOnRosterTab,
-  filterEmployeesByRosterTab,
-  formatLastLogin,
-  formatRosterDate,
-  isEmployeeOnActiveRoster,
-  lastLoginByUserId,
-  profileNeedsSetup,
-  type EmployeeRosterTab,
+  baseRosterRows,
+  filterRosterRows,
+  parseRosterFilters,
+  parseRosterSort,
+  rosterFilterCounts,
+  rosterPickOptions,
+  rosterQueryKey,
+  rosterViewCounts,
+  serializeRosterFilters,
+  serializeRosterSort,
+  sortRosterRows,
+  teamInvitesQueryKey,
+  toggleRosterSort,
+  type RosterSortKey,
 } from "@/lib/team-members/roster";
-import { splitPersonName } from "@/lib/team-members/import";
-import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
-import {
-  AddEmployeeButton,
-  AddEmployeeWizard,
-} from "@/components/team-members/add/add-member-dialog";
-import {
-  EmployeeRosterUploadButton,
-  EmployeeRosterUploadWizard,
-} from "@/components/team-members/add/import-members-dialog";
-import { FinishEmployeeSetupWizard } from "@/components/team-members/add/finish-setup-dialog";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from "@/components/ui/sheet";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import {
-  Mail,
-  KeyRound,
-  Copy,
-  UserCheck,
-  UserX,
-  Users as UsersIcon,
-  Search,
-  Loader2,
-  MoreHorizontal,
-  Ban,
-  RefreshCcw,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
 import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
-import { useAgencySetup } from "@/hooks/use-agency-setup";
-import { shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
-import { PersonAvatar } from "@/components/person/person-avatar";
-
-function rosterAccessLabel(level: string | null | undefined): string {
-  if (level === "owner" || level === "admin" || level === "staff") return LEVEL_LABEL[level];
-  return LEVEL_LABEL.staff;
-}
-
-/** Job titles that are really old role names. The Access column carries Owner / Admin / Team member. */
-const LEGACY_ROSTER_ROLES = new Set([
-  "platform admin",
-  "company admin",
-  "supervisor",
-  "committee member",
-  "program manager",
-  "owner",
-  "admin",
-  "team member",
-  "staff",
-  "employee",
-  "manager",
-]);
-
-function rosterJobLine(
-  jobTitle: string | null | undefined,
-  position: string | null | undefined,
-): string | null {
-  const raw = (jobTitle || position || "").trim();
-  if (!raw || LEGACY_ROSTER_ROLES.has(raw.toLowerCase())) return null;
-  return raw;
-}
-
-function asAccessLevel(raw: string | null | undefined): AccessLevel {
-  if (raw === "owner" || raw === "admin" || raw === "staff") return raw;
-  return "staff";
-}
+import { RosterHeader } from "./roster-header";
+import { RosterToolbar, type RosterSearchPatch, type RosterView } from "./roster-toolbar";
+import { RosterTable } from "./roster-table";
+import { RosterCards } from "./roster-cards";
+import { InvitesView } from "./invites-view";
+import { InactiveView } from "./inactive-view";
+import { useRosterActions, useRowActionKeys } from "./use-roster-actions";
 
 const rosterRoute = getRouteApi("/dashboard/team-members/");
 
 /**
  * Team Members roster — the page body behind /dashboard/team-members.
- * The route validates the search params; ?add=1 and ?import=1 open the
- * matching dialog, ?view=inactive starts on the Inactive tab.
+ * One server call (listTeamRoster) loads every row; the Invited view comes
+ * from listTeamInvites. Toolbar state (view, q, filter, home, preset,
+ * supervisor, sort) lives in the route's search params.
  */
 export function TeamRosterPage() {
-  const { user } = useAuth();
   const { data: org } = useCurrentOrg();
-  const { status: setupStatus } = useAgencySetup();
-  const createBlocked = shouldBlockStaffClientCreate(setupStatus);
-  const navigate = useNavigate();
-  const qc = useQueryClient();
+  const orgId = org?.organization_id ?? null;
+  const { canCategory } = useAccess();
+  const seesHiring = canCategory("staff_hiring", "view");
   const search = rosterRoute.useSearch();
-  const [addOpen, setAddOpen] = useState(() => search.add === "1");
-  const [uploadOpen, setUploadOpen] = useState(() => search.import === "1");
-  const [finishOpen, setFinishOpen] = useState(false);
-  useEffect(() => {
-    if (search.add === "1") setAddOpen(true);
-  }, [search.add]);
-  useEffect(() => {
-    if (search.import === "1") setUploadOpen(true);
-  }, [search.import]);
-  const [rosterTab, setRosterTab] = useState<EmployeeRosterTab>(() =>
-    search.view === "inactive" ? "inactive" : "active",
-  );
-  const [resetUser, setResetUser] = useState<{ id: string; name: string } | null>(null);
-  const [tempPassword, setTempPassword] = useState(() => generateTempPassword());
-  const [credentialsShown, setCredentialsShown] = useState<{
-    identifier: string;
-    password: string;
-    newStaffId?: string;
-  } | null>(null);
-  const [caseloadFor, setCaseloadFor] = useState<{ id: string; name: string; role: string } | null>(
-    null,
-  );
-  const resetPwFn = useServerFn(adminResetEmployeePassword);
-  const resendInviteFn = useServerFn(resendInvitation);
-  const revokeInviteFn = useServerFn(revokeInvitation);
-  const archiveFn = useServerFn(archiveEntity);
-  const restoreFn = useServerFn(restoreEntity);
+  const navigate = rosterRoute.useNavigate();
 
-  const { data: members, isLoading: membersLoading } = useQuery({
-    enabled: !!org,
-    queryKey: ["members", org?.organization_id],
-    queryFn: async () => {
-      if (!org) throw new Error("No organization selected.");
-      const { data } = await supabase
-        .from("organization_members")
-        .select(
-          "id, access_level, access_preset_id, access_presets(name), job_title, active, user_id, created_at",
-        )
-        .eq("organization_id", org.organization_id);
-      const ids = (data ?? []).map((m) => m.user_id);
-      const profilesQuery = supabase
-        .from("profiles")
-        .select(
-          "id, full_name, first_name, last_name, email, phone, username, must_change_password, department, hire_date, start_date, employee_id, position, account_status, is_active, worker_type, photo_path, photo_updated_at, custom_attributes",
-        )
-        .in("id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
-      const lastLoginQuery = supabase.rpc(
-        "org_member_last_sign_ins" as never,
-        { _org: org.organization_id } as never,
-      );
-      const execQuery = supabase.from("hive_executives").select("user_id").eq("active", true);
-      const [{ data: profs }, lastLoginRes, execRes] = await Promise.all([
-        profilesQuery,
-        lastLoginQuery,
-        execQuery,
-      ]);
-      const lastLoginByUser = lastLoginByUserId(lastLoginRes.error ? null : lastLoginRes.data);
-      const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
-      const hiveExecIds = new Set(
-        (execRes.error ? [] : (execRes.data ?? [])).map((row) => row.user_id),
-      );
-      return (data ?? []).map((m) => ({
-        ...m,
-        hiveExecutive: hiveExecIds.has(m.user_id),
-        profile: profMap.get(m.user_id) ?? null,
-        lastSignInAt: lastLoginByUser.get(m.user_id) ?? null,
-        lastSignInKnown: lastLoginByUser.has(m.user_id),
-      }));
-    },
+  const listRosterFn = useServerFn(listTeamRoster);
+  const listInvitesFn = useServerFn(listTeamInvites);
+  const roster = useQuery({
+    enabled: !!orgId,
+    queryKey: rosterQueryKey(orgId),
+    queryFn: () => listRosterFn({ data: { organizationId: orgId! } }),
   });
-  const visibleMembers = useMemo(
-    () => filterEmployeesByRosterTab(members, rosterTab),
-    [members, rosterTab],
-  );
-  const activeCount = useMemo(() => countEmployeesOnRosterTab(members, "active"), [members]);
-  const inactiveCount = useMemo(() => countEmployeesOnRosterTab(members, "inactive"), [members]);
-  const needsSetupPeople = useMemo(() => {
-    return (members ?? [])
-      .filter((m) => isEmployeeOnActiveRoster(m) && profileNeedsSetup(m.profile?.custom_attributes))
-      .map((m) => {
-        const profile = m.profile;
-        const split = splitPersonName(profile?.full_name ?? "");
-        const hireRaw = profile?.start_date ?? profile?.hire_date ?? "";
-        const hireDate = /^\d{4}-\d{2}-\d{2}/.test(hireRaw) ? hireRaw.slice(0, 10) : "";
-        return {
-          userId: m.user_id,
-          firstName: profile?.first_name?.trim() || split.first_name,
-          lastName: profile?.last_name?.trim() || split.last_name,
-          email: profile?.email ?? "",
-          phone: profile?.phone ?? "",
-          hireDate,
-          accessLevel: asAccessLevel(m.access_level),
-          accessPresetId: m.access_preset_id,
-          jobTitle: m.job_title ?? "",
-          department: profile?.department ?? "",
-          employeeId: profile?.employee_id ?? "",
-          workerType: profile?.worker_type ?? "",
-        } as const;
-      });
-  }, [members]);
-  const { data: invites } = useQuery({
-    enabled: !!org,
-    queryKey: ["invites", org?.organization_id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("invitations")
-        .select("*")
-        .eq("organization_id", org!.organization_id)
-        .eq("status", "pending");
-      return data ?? [];
-    },
+  const invites = useQuery({
+    enabled: !!orgId && seesHiring,
+    queryKey: teamInvitesQueryKey(orgId),
+    queryFn: () => listInvitesFn({ data: { organizationId: orgId! } }),
   });
+  const actionKeys = useRowActionKeys();
+  const { onAction, dialogs } = useRosterActions(orgId);
 
-  // Service codes each staff member is assigned to work, aggregated across
-  // all their client assignments — used on the mobile card list.
-  const { data: serviceCodesByStaff = new Map<string, string[]>() } = useQuery({
-    enabled: !!org,
-    queryKey: ["staff-service-codes", org?.organization_id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("staff_assignments")
-        .select("staff_id, service_codes")
-        .eq("organization_id", org!.organization_id);
-      if (error) throw error;
-      const m = new Map<string, Set<string>>();
-      for (const row of (data ?? []) as Array<{
-        staff_id: string;
-        service_codes: string[] | null;
-      }>) {
-        const set = m.get(row.staff_id) ?? new Set<string>();
-        for (const code of row.service_codes ?? []) set.add(code);
-        m.set(row.staff_id, set);
-      }
-      const out = new Map<string, string[]>();
-      for (const [staffId, set] of m) out.set(staffId, Array.from(set).sort());
-      return out;
-    },
-  });
+  const rows = useMemo(() => roster.data ?? [], [roster.data]);
+  const activeRows = useMemo(() => rows.filter((r) => r.active), [rows]);
+  const inviteRows = invites.data ?? [];
+  // Invited and Inactive belong to Hire & deactivate (View).
+  const view: RosterView =
+    seesHiring && (search.view === "invited" || search.view === "inactive")
+      ? search.view
+      : "active";
+  const filters = parseRosterFilters(search.filter);
+  const sort = parseRosterSort(search.sort);
+  const query = {
+    view: view === "inactive" ? "inactive" : "active",
+    q: search.q,
+    home: search.home,
+    preset: search.preset,
+    supervisor: search.supervisor,
+  } as const;
+  const base = baseRosterRows(rows, query);
+  const visible = sortRosterRows(filterRosterRows(rows, { ...query, filters }), sort);
+  const counts = { ...rosterViewCounts(rows), invited: inviteRows.length };
 
-  const resendInviteMutation = useMutation({
-    mutationFn: async (invitationId: string) => {
-      if (!org) throw new Error("No organization selected.");
-      return await resendInviteFn({
-        data: {
-          organization_id: org.organization_id,
-          invitation_id: invitationId,
-          site_origin: resolveAuthOrigin(),
+  const onChange = useCallback(
+    (patch: RosterSearchPatch) => {
+      void navigate({
+        replace: true,
+        search: (prev) => {
+          const next = { ...prev };
+          if ("view" in patch) next.view = patch.view === "active" ? undefined : patch.view;
+          if ("q" in patch) next.q = patch.q?.trim() ? patch.q : undefined;
+          if ("filters" in patch) next.filter = serializeRosterFilters(patch.filters ?? []);
+          if ("home" in patch) next.home = patch.home;
+          if ("preset" in patch) next.preset = patch.preset;
+          if ("supervisor" in patch) next.supervisor = patch.supervisor;
+          return next;
         },
       });
     },
-    onSuccess: (res) => {
-      if (res.email_sent) {
-        toast.success(`Invitation re-emailed to ${res.invitation.email}`);
-      } else {
-        toast.warning(
-          `Invitation refreshed, but the email couldn't be sent (${res.email_error ?? "unknown error"}). Copy the join link instead.`,
-        );
-      }
-      qc.invalidateQueries({ queryKey: ["invites"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const revokeInviteMutation = useMutation({
-    mutationFn: async (invitationId: string) => {
-      if (!org) throw new Error("No organization selected.");
-      return await revokeInviteFn({
-        data: { organization_id: org.organization_id, invitation_id: invitationId },
-      });
-    },
-    onSuccess: (res) => {
-      toast.success(`Invitation revoked for ${res?.invitation?.email ?? "user"}`);
-      qc.invalidateQueries({ queryKey: ["invites"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const deactivateMutation = useMutation({
-    mutationFn: async (input: { userId: string; name: string }) => {
-      if (!org) throw new Error("No organization selected.");
-      await archiveFn({
-        data: { kind: "employee", id: input.userId, organizationId: org.organization_id },
-      });
-    },
-    onSuccess: (_d, vars) => {
-      toast.success(`${vars.name} moved to Inactive.`);
-      qc.invalidateQueries({ queryKey: ["members"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const reactivateMutation = useMutation({
-    mutationFn: async (input: { userId: string; name: string }) => {
-      if (!org) throw new Error("No organization selected.");
-      await restoreFn({
-        data: { kind: "employee", id: input.userId, organizationId: org.organization_id },
-      });
-    },
-    onSuccess: (_d, vars) => {
-      toast.success(`${vars.name} is active again.`);
-      qc.invalidateQueries({ queryKey: ["members"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const resetPwMutation = useMutation({
-    mutationFn: async (input: { userId: string; newPassword: string }) => {
-      if (!org) throw new Error("No organization selected.");
-      await resetPwFn({
-        data: {
-          organizationId: org.organization_id,
-          userId: input.userId,
-          newPassword: input.newPassword,
-        },
-      });
-    },
-    onSuccess: (_d, vars) => {
-      toast.success("Password reset");
-      setCredentialsShown({
-        identifier: resetUser?.name ?? "Team member",
-        password: vars.newPassword,
-      });
-      setResetUser(null);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+    [navigate],
+  );
+  const onSort = (key: RosterSortKey) =>
+    void navigate({
+      replace: true,
+      search: (prev) => ({ ...prev, sort: serializeRosterSort(toggleRosterSort(sort, key)) }),
+    });
 
   return (
     <AgencySetupCreateGate>
@@ -367,786 +116,80 @@ export function TeamRosterPage() {
         <OnboardingReturnBar />
         <OnboardingGuidanceBanner step={2} />
 
-        <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-          <div>
-            <h2 className="text-base font-semibold">Team Members</h2>
-            <p className="text-sm text-muted-foreground">
-              {activeCount} active
-              {inactiveCount > 0 && ` · ${inactiveCount} inactive`}
-              {(invites?.length ?? 0) > 0 &&
-                ` · ${invites!.length} pending invite${invites!.length === 1 ? "" : "s"}`}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <AddEmployeeButton onClick={() => setAddOpen(true)} disabled={!org || createBlocked} />
-            {needsSetupPeople.length > 0 && (
-              <Button
-                variant="outline"
-                onClick={() => setFinishOpen(true)}
-                disabled={!org || createBlocked}
-              >
-                Finish setup ({needsSetupPeople.length})
-              </Button>
-            )}
-            <EmployeeRosterUploadButton
-              onClick={() => setUploadOpen(true)}
-              disabled={!org || createBlocked}
-            />
-          </div>
-        </div>
+        <RosterHeader
+          organizationId={orgId}
+          counts={counts}
+          needsSetupRows={activeRows.filter((r) => r.needsSetup)}
+          exportRows={view === "invited" ? null : visible}
+          addFlag={search.add === "1"}
+          importFlag={search.import === "1"}
+        />
 
-        {!!invites?.length && (
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-            <h3 className="text-sm font-semibold">Pending invitations</h3>
-            <p className="text-xs text-muted-foreground">
-              Pending people join <strong>this</strong> organization via the link (not new-agency
-              signup). Resend keeps the same join email. For a new team member, use Add team member.
-            </p>
-            <ul className="mt-3 divide-y divide-border">
-              {invites.map((i) => {
-                const link = inviteJoinUrl(resolveAuthOrigin(), i.token);
-                return (
-                  <li key={i.id} className="flex items-center justify-between gap-3 py-3 text-sm">
-                    <div className="flex items-center gap-2 truncate">
-                      <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />{" "}
-                      <span className="truncate">{i.email}</span>{" "}
-                      <span className="shrink-0 text-xs text-muted-foreground">
-                        · {LEVEL_LABEL[asAccessLevel(i.access_level)]}
-                      </span>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={resendInviteMutation.isPending}
-                        onClick={() => resendInviteMutation.mutate(i.id)}
-                      >
-                        <RefreshCcw className="mr-1 h-3.5 w-3.5" /> Resend
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(link);
-                          toast.success("Invite link copied");
-                        }}
-                      >
-                        <Copy className="mr-1 h-3.5 w-3.5" /> Copy link
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:text-destructive"
-                        disabled={revokeInviteMutation.isPending}
-                        onClick={() => {
-                          if (confirm(`Uninvite ${i.email}? This link will stop working.`)) {
-                            revokeInviteMutation.mutate(i.id);
-                          }
-                        }}
-                      >
-                        <Ban className="mr-1 h-3.5 w-3.5" /> Uninvite
-                      </Button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-
-        <div className="inline-flex rounded-md border border-border bg-muted/40 p-0.5 text-xs">
-          {(["active", "inactive"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setRosterTab(t)}
-              className={
-                "rounded px-3 py-1 font-medium capitalize transition-colors " +
-                (rosterTab === t
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground")
-              }
-            >
-              {t === "active" ? "Active" : "Inactive"}
-              {t === "inactive" && inactiveCount > 0 && (
-                <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px] tabular-nums">
-                  {inactiveCount}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+        <RosterToolbar
+          view={view}
+          counts={counts}
+          showInvited={seesHiring}
+          showInactive={seesHiring}
+          q={search.q ?? ""}
+          filters={filters}
+          filterCounts={rosterFilterCounts(base)}
+          home={search.home}
+          preset={search.preset}
+          supervisor={search.supervisor}
+          homeOptions={rosterPickOptions(
+            activeRows,
+            (r) => r.homeId,
+            (r) => r.homeName,
+          )}
+          presetOptions={rosterPickOptions(
+            activeRows,
+            (r) => r.presetId,
+            (r) => r.presetName,
+          )}
+          supervisorOptions={rosterPickOptions(
+            activeRows,
+            (r) => r.supervisorId,
+            (r) => r.supervisorName,
+          )}
+          onChange={onChange}
+        />
 
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-          {membersLoading ? (
+          {view === "invited" ? (
+            <InvitesView organizationId={orgId} rows={inviteRows} loading={invites.isLoading} />
+          ) : roster.isLoading ? (
             <div className="flex items-center justify-center gap-2 p-12 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> Loading team members…
             </div>
-          ) : !visibleMembers.length ? (
-            <div className="flex flex-col items-center gap-2 p-12 text-center text-sm text-muted-foreground">
-              <p>
-                {rosterTab === "inactive"
-                  ? "No deactivated team members."
+          ) : roster.isError ? (
+            <p className="p-12 text-center text-sm text-destructive">
+              Couldn't load team members: {(roster.error as Error).message}
+            </p>
+          ) : !visible.length ? (
+            <p className="p-12 text-center text-sm text-muted-foreground">
+              {view === "inactive"
+                ? "No deactivated team members."
+                : base.length
+                  ? "No team members match these filters."
                   : "No active team members."}
-              </p>
-            </div>
+            </p>
+          ) : view === "inactive" ? (
+            <InactiveView rows={visible} actionKeys={actionKeys} onAction={onAction} />
           ) : (
             <>
-              {/* Mobile card list — the table overflows on small screens, so below
-            md we render the same roster as stacked cards instead. */}
-              <div className="block divide-y divide-border md:hidden">
-                {visibleMembers.map((m) => {
-                  const name = m.profile?.full_name ?? "—";
-                  const onActiveRoster = isEmployeeOnActiveRoster(m);
-                  const codes = serviceCodesByStaff.get(m.user_id) ?? [];
-                  const openProfile = () => {
-                    void navigate({
-                      to: "/dashboard/team-members/$staffId",
-                      params: { staffId: m.user_id },
-                    });
-                  };
-                  return (
-                    <div
-                      key={m.id}
-                      className="flex cursor-pointer flex-col gap-2 p-4 active:bg-muted/50"
-                      onClick={openProfile}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <PersonAvatar
-                            bucket="staff-photos"
-                            path={
-                              (m.profile as { photo_path?: string | null } | undefined)
-                                ?.photo_path ?? null
-                            }
-                            name={name === "—" ? null : name}
-                            className="h-9 w-9 text-xs"
-                          />
-                          <Link
-                            to="/dashboard/team-members/$staffId"
-                            params={{ staffId: m.user_id }}
-                            className="truncate font-bold hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {name}
-                          </Link>
-                          {profileNeedsSetup(m.profile?.custom_attributes) && <NeedsSetupChip />}
-                        </div>
-                        <span
-                          className={
-                            "shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium " +
-                            (onActiveRoster
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                              : "bg-muted text-muted-foreground")
-                          }
-                        >
-                          {onActiveRoster ? "Active" : "Deactivated"}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="rounded-full bg-secondary px-2 py-0.5 text-xs uppercase">
-                          {rosterAccessLabel(m.access_level)}
-                        </span>
-                        {codes.length ? (
-                          codes.map((code) => (
-                            <Badge key={code} variant="outline" className="font-mono text-[10px]">
-                              {code}
-                            </Badge>
-                          ))
-                        ) : (
-                          <span className="text-xs text-muted-foreground">No service codes</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Last login {formatLastLogin(m.lastSignInAt, m.lastSignInKnown)}
-                      </p>
-                      <div
-                        className="flex items-center justify-end gap-2 pt-1"
-                        data-no-row-nav
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {rosterTab === "inactive" && m.user_id !== user?.id && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-xs"
-                            disabled={reactivateMutation.isPending}
-                            onClick={() => reactivateMutation.mutate({ userId: m.user_id, name })}
-                          >
-                            Reactivate
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="hidden max-h-[calc(100vh-16rem)] overflow-auto md:block">
-                <table className="w-full text-sm">
-                  <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur supports-[backdrop-filter]:bg-muted/60 text-xs uppercase tracking-wider text-muted-foreground">
-                    <tr>
-                      <th className="px-4 py-3 text-left font-semibold">Name</th>
-                      <th className="px-4 py-3 text-left font-semibold">Login</th>
-                      <th className="px-4 py-3 text-left font-semibold">Access</th>
-                      <th className="px-4 py-3 text-left font-semibold">Status</th>
-                      <th className="px-4 py-3 text-left font-semibold">Start date</th>
-                      <th className="px-4 py-3 text-left font-semibold">Last Login</th>
-                      <th className="px-4 py-3 text-right font-semibold w-[140px]">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visibleMembers.map((m) => {
-                      const name = m.profile?.full_name ?? "—";
-                      const onActiveRoster = isEmployeeOnActiveRoster(m);
-                      const login = m.profile?.username ?? m.profile?.email ?? "—";
-                      const needsReset = m.profile?.must_change_password;
-                      const jobLine = rosterJobLine(m.job_title, m.profile?.position);
-                      const startDate = (m.profile?.start_date ?? m.profile?.hire_date ?? null) as
-                        | string
-                        | null;
-                      // Roster avatar now uses <PersonAvatar>, which handles the
-                      // initials fallback itself when photo_path is null.
-                      const openProfile = () => {
-                        void navigate({
-                          to: "/dashboard/team-members/$staffId",
-                          params: { staffId: m.user_id },
-                        });
-                      };
-                      return (
-                        <tr
-                          key={m.id}
-                          className="cursor-pointer h-12 border-b border-border/50 hover:bg-muted/50 transition-colors"
-                          onClick={openProfile}
-                        >
-                          <td className="px-4 py-2 font-medium whitespace-nowrap">
-                            <div className="flex items-center gap-2">
-                              <PersonAvatar
-                                bucket="staff-photos"
-                                path={
-                                  (m.profile as { photo_path?: string | null } | undefined)
-                                    ?.photo_path ?? null
-                                }
-                                name={name === "—" ? null : name}
-                                className="h-9 w-9 text-xs"
-                              />
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2 truncate">
-                                  <Link
-                                    to="/dashboard/team-members/$staffId"
-                                    params={{ staffId: m.user_id }}
-                                    className="truncate hover:underline"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {name}
-                                  </Link>
-                                  {needsReset && (
-                                    <span className="hive-role-pill rounded-full px-2 py-0.5 text-[10px] uppercase whitespace-nowrap">
-                                      Pending first login
-                                    </span>
-                                  )}
-                                  {profileNeedsSetup(m.profile?.custom_attributes) && (
-                                    <NeedsSetupChip />
-                                  )}
-                                </div>
-                                {m.hiveExecutive ? (
-                                  <div className="text-xs text-muted-foreground truncate">
-                                    Platform admin
-                                  </div>
-                                ) : null}
-                                {jobLine ? (
-                                  <div className="text-xs text-muted-foreground truncate">
-                                    {jobLine}
-                                  </div>
-                                ) : null}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-2 text-muted-foreground whitespace-nowrap max-w-[220px]">
-                            <Link
-                              to="/dashboard/team-members/$staffId"
-                              params={{ staffId: m.user_id }}
-                              className="block truncate hover:underline"
-                              title={login}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {login}
-                            </Link>
-                          </td>
-                          <td className="px-4 py-2 whitespace-nowrap">
-                            <span className="hive-role-pill rounded-full px-2 py-0.5 text-xs uppercase">
-                              {rosterAccessLabel(m.access_level)}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2 whitespace-nowrap">
-                            <span
-                              className={
-                                "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium " +
-                                (onActiveRoster
-                                  ? "hive-status-active"
-                                  : "bg-muted text-muted-foreground")
-                              }
-                            >
-                              {onActiveRoster ? "Active" : "Deactivated"}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap">
-                            {formatRosterDate(startDate)}
-                          </td>
-                          <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap">
-                            {formatLastLogin(m.lastSignInAt, m.lastSignInKnown)}
-                          </td>
-                          <td
-                            className="px-4 py-2 text-right whitespace-nowrap w-[160px]"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <div className="inline-flex items-center gap-1">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setCaseloadFor({
-                                    id: m.user_id,
-                                    name,
-                                    role:
-                                      rosterJobLine(m.job_title, m.profile?.position) ||
-                                      rosterAccessLabel(m.access_level),
-                                  });
-                                }}
-                              >
-                                <UsersIcon className="mr-1 h-3.5 w-3.5" /> Caseload
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    aria-label="More actions"
-                                  >
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem
-                                    onSelect={() => setResetUser({ id: m.user_id, name })}
-                                  >
-                                    <KeyRound className="mr-2 h-3.5 w-3.5" /> Reset password
-                                  </DropdownMenuItem>
-                                  {m.user_id !== user?.id && rosterTab === "active" && (
-                                    <DropdownMenuItem
-                                      onSelect={() =>
-                                        deactivateMutation.mutate({ userId: m.user_id, name })
-                                      }
-                                      className="text-destructive focus:text-destructive"
-                                    >
-                                      <UserX className="mr-2 h-3.5 w-3.5" /> Deactivate
-                                    </DropdownMenuItem>
-                                  )}
-                                  {m.user_id !== user?.id && rosterTab === "inactive" && (
-                                    <DropdownMenuItem
-                                      onSelect={() =>
-                                        reactivateMutation.mutate({ userId: m.user_id, name })
-                                      }
-                                    >
-                                      <UserCheck className="mr-2 h-3.5 w-3.5" /> Reactivate
-                                    </DropdownMenuItem>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <RosterCards rows={visible} actionKeys={actionKeys} onAction={onAction} />
+              <RosterTable
+                rows={visible}
+                sort={sort}
+                onSort={onSort}
+                actionKeys={actionKeys}
+                onAction={onAction}
+              />
             </>
           )}
         </div>
-
-        <AddEmployeeWizard
-          open={addOpen}
-          onOpenChange={setAddOpen}
-          organizationId={org?.organization_id ?? null}
-        />
-        <EmployeeRosterUploadWizard
-          open={uploadOpen}
-          onOpenChange={setUploadOpen}
-          organizationId={org?.organization_id ?? null}
-        />
-        <FinishEmployeeSetupWizard
-          open={finishOpen}
-          onOpenChange={setFinishOpen}
-          organizationId={org?.organization_id ?? null}
-          people={needsSetupPeople}
-        />
-
-        {/* Reset password */}
-        <Dialog open={!!resetUser} onOpenChange={(o) => !o && setResetUser(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Reset password for {resetUser?.name}</DialogTitle>
-              <DialogDescription>
-                A new temporary password will be set. The team member must change it on next
-                sign-in.
-              </DialogDescription>
-            </DialogHeader>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                resetPwMutation.mutate({
-                  userId: resetUser!.id,
-                  newPassword: String(fd.get("newpw")),
-                });
-              }}
-              className="grid gap-4"
-            >
-              <div className="grid gap-2">
-                <Label htmlFor="newpw">New temporary password</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="newpw"
-                    name="newpw"
-                    defaultValue={tempPassword}
-                    key={"r-" + tempPassword}
-                    required
-                    minLength={12}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setTempPassword(generateTempPassword())}
-                  >
-                    Regenerate
-                  </Button>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit" disabled={resetPwMutation.isPending}>
-                  Reset password
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Credentials reveal */}
-        <Dialog open={!!credentialsShown} onOpenChange={(o) => !o && setCredentialsShown(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Share these credentials</DialogTitle>
-              <DialogDescription>
-                This password is shown only once. Copy it and share securely.
-              </DialogDescription>
-            </DialogHeader>
-            {credentialsShown && (
-              <div className="grid gap-3 text-sm">
-                <div>
-                  <div className="text-xs text-muted-foreground">Login</div>
-                  <code className="block rounded bg-secondary p-2">
-                    {credentialsShown.identifier}
-                  </code>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Temporary password</div>
-                  <div className="flex gap-2">
-                    <code className="flex-1 rounded bg-secondary p-2">
-                      {credentialsShown.password}
-                    </code>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        navigator.clipboard.writeText(credentialsShown.password);
-                        toast.success("Copied");
-                      }}
-                    >
-                      <Copy className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-            <DialogFooter>
-              <Button
-                onClick={() => {
-                  const newStaffId = credentialsShown?.newStaffId;
-                  setCredentialsShown(null);
-                  if (newStaffId) {
-                    void navigate({
-                      to: "/dashboard/team-members/$staffId",
-                      params: { staffId: newStaffId },
-                      search: { tab: "file" },
-                    });
-                  }
-                }}
-              >
-                Done
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <CaseloadDrawer
-          member={caseloadFor}
-          organizationId={org?.organization_id ?? null}
-          onClose={() => setCaseloadFor(null)}
-        />
+        {dialogs}
       </div>
     </AgencySetupCreateGate>
-  );
-}
-
-/* ------------------------------------------------------------------------- */
-
-type ClientRow = {
-  id: string;
-  first_name: string;
-  last_name: string;
-  job_code: string[] | null;
-};
-
-function CaseloadDrawer({
-  member,
-  organizationId,
-  onClose,
-}: {
-  member: { id: string; name: string; role: string } | null;
-  organizationId: string | null;
-  onClose: () => void;
-}) {
-  const qc = useQueryClient();
-  const assignmentHookFn = useServerFn(onStaffAssignmentCreated);
-  const assignmentRemovedFn = useServerFn(onStaffAssignmentRemoved);
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [original, setOriginal] = useState<Set<string>>(new Set());
-
-  const { data: clients, isLoading: loadingClients } = useQuery({
-    enabled: !!member && !!organizationId,
-    queryKey: ["caseload-all-clients", organizationId],
-    queryFn: async (): Promise<ClientRow[]> => {
-      // Org caseload picker (id/name/codes), not a care-chart read.
-      // eslint-disable-next-line no-restricted-syntax
-      const { data, error } = await supabase
-        .from("clients")
-        .select("id, first_name, last_name, job_code")
-        .eq("organization_id", organizationId!)
-        .order("last_name");
-      if (error) throw error;
-      return (data ?? []) as ClientRow[];
-    },
-  });
-
-  const { data: existing, isLoading: loadingExisting } = useQuery({
-    enabled: !!member && !!organizationId,
-    queryKey: ["caseload-for-staff", organizationId, member?.id],
-    queryFn: async (): Promise<{ id: string; client_id: string }[]> => {
-      const { data, error } = await supabase
-        .from("staff_assignments" as never)
-        .select("id, client_id")
-        .eq("organization_id", organizationId!)
-        .eq("staff_id", member!.id);
-      if (error) throw error;
-      return (data ?? []) as unknown as { id: string; client_id: string }[];
-    },
-  });
-
-  // Seed selection when drawer opens / data loads
-  useEffect(() => {
-    if (existing) {
-      const ids = new Set(existing.map((e) => e.client_id));
-      setOriginal(ids);
-      setSelected(new Set(ids));
-    }
-  }, [existing]);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return (clients ?? []).filter(
-      (c) =>
-        !q ||
-        `${c.first_name} ${c.last_name}`.toLowerCase().includes(q) ||
-        (c.job_code ?? []).some((j) => j.toLowerCase().includes(q)),
-    );
-  }, [clients, search]);
-
-  const toggle = (id: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const saveMut = useMutation({
-    mutationFn: async () => {
-      if (!member || !organizationId) return;
-      const toAdd = [...selected].filter((id) => !original.has(id));
-      const toRemoveIds = (existing ?? [])
-        .filter((e) => !selected.has(e.client_id))
-        .map((e) => e.id);
-
-      if (toRemoveIds.length) {
-        const { error } = await supabase
-          .from("staff_assignments" as never)
-          .delete()
-          .in("id", toRemoveIds);
-        if (error) throw error;
-        try {
-          await assignmentRemovedFn({
-            data: { organizationId, staffId: member.id },
-          });
-        } catch (e) {
-          console.warn("[obligations] assignment remove reevaluate failed:", e);
-        }
-      }
-      if (toAdd.length) {
-        const rows = toAdd.map((client_id) => ({
-          organization_id: organizationId,
-          staff_id: member.id,
-          client_id,
-        }));
-        const { error } = await supabase.from("staff_assignments" as never).insert(rows as never);
-        if (error) throw error;
-        for (const clientId of toAdd) {
-          try {
-            await assignmentHookFn({
-              data: {
-                organizationId,
-                staffId: member.id,
-                clientId,
-                serviceCodes: [],
-              },
-            });
-          } catch (e) {
-            console.warn("[obligations] assignment auto-assign failed:", e);
-          }
-        }
-      }
-    },
-    onSuccess: () => {
-      toast.success(`Caseload updated successfully for ${member?.name ?? "team member"}`);
-      qc.invalidateQueries({ queryKey: ["caseload-for-staff"] });
-      qc.invalidateQueries({ queryKey: ["assignments"] });
-      qc.invalidateQueries({ queryKey: ["caseload"] });
-      onClose();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const dirty = useMemo(() => {
-    if (selected.size !== original.size) return true;
-    for (const id of selected) if (!original.has(id)) return true;
-    return false;
-  }, [selected, original]);
-
-  const loading = loadingClients || loadingExisting;
-
-  return (
-    <Sheet open={!!member} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
-        <SheetHeader>
-          <SheetTitle>Caseload Assignment Center: {member?.name ?? ""}</SheetTitle>
-          <SheetDescription>
-            Check every individual this staff member may serve. Changes restrict what they see in
-            Time Clock and Daily Logs.
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="relative mt-5">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by client name or service code…"
-            className="pl-9"
-          />
-        </div>
-
-        <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            {selected.size} of {clients?.length ?? 0} selected
-          </span>
-          {dirty && (
-            <span className="font-medium text-amber-600 dark:text-amber-400">Unsaved changes</span>
-          )}
-        </div>
-
-        <div className="mt-2 divide-y divide-border rounded-xl border border-border">
-          {loading ? (
-            <div className="grid place-items-center p-8 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-            </div>
-          ) : !filtered.length ? (
-            <p className="p-6 text-center text-sm text-muted-foreground">No clients found.</p>
-          ) : (
-            filtered.map((c: ClientRow) => {
-              const on = selected.has(c.id);
-              return (
-                <label
-                  key={c.id}
-                  className={`flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors ${
-                    on ? "bg-primary/5" : "hover:bg-muted/40"
-                  }`}
-                >
-                  <Checkbox checked={on} onCheckedChange={() => toggle(c.id)} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">
-                      {c.first_name} {c.last_name}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap justify-end gap-1">
-                    {(c.job_code ?? []).filter(Boolean).map((code: string) => (
-                      <Badge key={code} variant="secondary" className="font-mono text-[10px]">
-                        {code}
-                      </Badge>
-                    ))}
-                    {!c.job_code?.length && (
-                      <span className="text-[10px] text-muted-foreground">No codes</span>
-                    )}
-                  </div>
-                </label>
-              );
-            })
-          )}
-        </div>
-
-        <SheetFooter className="mt-6">
-          <Button
-            className="w-full"
-            disabled={!dirty || saveMut.isPending}
-            onClick={() => saveMut.mutate()}
-          >
-            {saveMut.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
-              </>
-            ) : (
-              "Save Caseload Modifications"
-            )}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-function NeedsSetupChip() {
-  return (
-    <span
-      data-testid="needs-setup-chip"
-      className="shrink-0 rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
-    >
-      Needs setup
-    </span>
   );
 }

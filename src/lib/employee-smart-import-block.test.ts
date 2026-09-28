@@ -53,7 +53,12 @@ describe("employee Smart Import hard block", () => {
     assert.match(done, /q\.data\.job\.mode === "employee"/);
 
     assert.match(employees, /search\.import === "1"/);
-    assert.match(employees, /EmployeeRosterUploadWizard/);
+    const header = readFileSync(
+      new URL("../components/team-members/roster/roster-header.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.match(header, /EmployeeRosterUploadWizard/);
+    assert.doesNotMatch(header, /Smart Import/);
     assert.doesNotMatch(employees, /Smart Import/);
   });
 
