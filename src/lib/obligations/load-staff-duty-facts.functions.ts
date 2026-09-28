@@ -131,37 +131,6 @@ export async function loadStaffDutyFactsInternal(
     abiCaseloadKnown.value = true;
   }
 
-  const behaviorClientIds = new Set<string>();
-  const behaviorCaseloadKnown = { value: false };
-  {
-    const [{ data: bsc, error: bErr }, { data: targets, error: tErr }] = await Promise.all([
-      supabase
-        .from("behavior_support_clients")
-        .select("client_id")
-        .eq("organization_id", organizationId)
-        .eq("features_enabled", true),
-      supabase
-        .from("client_target_behaviors")
-        .select("client_id")
-        .eq("organization_id", organizationId),
-    ]);
-    if (
-      (bErr && !tableMissing(bErr.message) && !columnsMissing(bErr.message)) ||
-      (tErr && !tableMissing(tErr.message) && !columnsMissing(tErr.message))
-    ) {
-      throw new Error((bErr ?? tErr)!.message);
-    }
-    if (!bErr && !tErr) {
-      behaviorCaseloadKnown.value = true;
-      for (const row of (bsc ?? []) as Array<{ client_id: string }>) {
-        if (row.client_id) behaviorClientIds.add(row.client_id);
-      }
-      for (const row of (targets ?? []) as Array<{ client_id: string }>) {
-        if (row.client_id) behaviorClientIds.add(row.client_id);
-      }
-    }
-  }
-
   const profileById = new Map<
     string,
     { requires_abi: boolean | null; requires_deescalation: boolean | null }
@@ -196,7 +165,9 @@ export async function loadStaffDutyFactsInternal(
     const clientIds = assigned ? [...assigned.clientIds] : [];
     const codes = assigned ? [...assigned.codes] : [];
     const hasAbiCaseload = clientIds.some((id) => abiClientIds.has(id));
-    const hasBehaviorCaseload = clientIds.some((id) => behaviorClientIds.has(id));
+    // Behavior-support caseload tracking was removed. De-escalation follows
+    // profiles.requires_deescalation only.
+    const hasBehaviorCaseload = false;
     const prof = profileById.get(staffId);
     const isTransporter =
       transporterIds.has(staffId) || codes.some((c) => c.toUpperCase() === "MTP");
@@ -212,7 +183,7 @@ export async function loadStaffDutyFactsInternal(
       abiCaseloadKnown: abiCaseloadKnown.value,
       hasAbiCaseload,
       requiresAbi: prof?.requires_abi ?? null,
-      behaviorCaseloadKnown: behaviorCaseloadKnown.value,
+      behaviorCaseloadKnown: true,
       hasBehaviorCaseload,
       requiresDeescalation: prof?.requires_deescalation ?? null,
       managerIdKnown,

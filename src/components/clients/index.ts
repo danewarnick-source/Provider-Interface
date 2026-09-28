@@ -17,5 +17,4 @@ export * from './finish-onboarding-card';
 export * from './healthcare-providers-card';
 export * from './home-pin-card';
 export * from './intake-progress';
-export * from './target-behaviors-panel';
 export * from './visibility-toggles';

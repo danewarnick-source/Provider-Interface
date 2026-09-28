@@ -79,7 +79,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/timeclock",
   // Admin sub-routes
   "/dashboard/admin/emar-audit",
-  "/dashboard/behaviorist",
 
   // Billing
   "/dashboard/billing",
@@ -150,7 +149,6 @@ const STATIC_ROUTES: string[] = [
 // Parameterised routes — each entry includes the rendered URL and whether it's
 // a "detail page" that must show a Back/Cancel button.
 const PARAM_ROUTES: Array<{ url: string; isDetail: boolean }> = [
-  { url: `/dashboard/behavior-support/${ID.clientId}`, isDetail: true },
   { url: `/dashboard/billing/${ID.clientId}`, isDetail: true },
   { url: `/dashboard/client-intake/${ID.clientId}`, isDetail: true },
   { url: `/dashboard/client-training/${ID.clientId}`, isDetail: true },

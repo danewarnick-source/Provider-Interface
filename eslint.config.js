@@ -120,7 +120,6 @@ export default tseslint.config(
     files: [
       "src/components/clients/profile-tab.tsx",
       "src/components/clients/face-sheet-info-card.tsx",
-      "src/components/behavior-support/bs-config-card.tsx",
     ],
     rules: { "prettier/prettier": "off" },
   },

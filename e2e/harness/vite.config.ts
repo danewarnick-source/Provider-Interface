@@ -24,16 +24,8 @@ export default defineConfig({
         replacement: path.join(here, "mocks/use-client-care-data.ts"),
       },
       {
-        find: "@/hooks/use-shift-behavior-setting",
-        replacement: path.join(here, "mocks/use-shift-behavior-setting.ts"),
-      },
-      {
         find: "@/lib/ai-coach.functions",
         replacement: path.join(here, "mocks/ai-coach.functions.ts"),
-      },
-      {
-        find: "@/lib/client-target-behaviors.functions",
-        replacement: path.join(here, "mocks/client-target-behaviors.functions.ts"),
       },
       { find: "@tanstack/react-start", replacement: path.join(here, "mocks/tanstack-start.ts") },
       { find: "@tanstack/react-router", replacement: path.join(here, "mocks/tanstack-router.ts") },

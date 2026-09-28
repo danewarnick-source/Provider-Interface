@@ -690,7 +690,7 @@ function restRows(world: HiveE2EWorld, table: string, url: string): unknown[] {
     return [{ feature_key: "hive_training", enabled: true, updated_by: null, updated_at: null }];
   }
 
-  if (table === "platform_states" || table === "behavior_support_clients" || table === "bc_behaviors") {
+  if (table === "platform_states") {
     return [];
   }
 

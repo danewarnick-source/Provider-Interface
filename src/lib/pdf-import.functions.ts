@@ -103,9 +103,6 @@ const ExtractedSchema = z.object({
   pcsp_goals: lenientArray(z.string()),
   // Clinical alerts
   special_directions: lenientOptionalString(),
-  // Behavior
-  bc_tier: lenientOptionalString(),
-  assigned_behaviorist: lenientOptionalString(),
   // Prompting
   prompting_levels: lenientArray(z.string()),
   // Unmapped
@@ -204,10 +201,6 @@ PCSP goals:
 
 Clinical alerts:
 - special_directions: a single short paragraph combining diet, swallowing, seizure protocol, choking/aspiration precautions, and de-escalation guidance the document specifies. Leave null if none.
-
-Behavior:
-- bc_tier (e.g. "Tier 1", "Mild", "Moderate", "Severe")
-- assigned_behaviorist (name of BCBA / behavior specialist)
 
 Prompting levels (informational): prompting_levels (array of strings)
 

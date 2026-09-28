@@ -274,31 +274,6 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
         )}
       </Card>
 
-      {/* Behavioral triggers */}
-      <Card className="p-5">
-        <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold">
-          <AlertTriangle className="h-3.5 w-3.5 text-amber-500" /> Behavioral
-          Trigger Flags
-        </h3>
-        {(staffCare?.target_behaviors ?? []).length > 0 ? (
-          <ul className="space-y-2">
-            {(staffCare?.target_behaviors ?? []).map((b) => (
-              <li key={b.id} className="rounded-md border border-border bg-background px-3 py-2">
-                <p className="text-sm font-medium leading-snug">{b.behavior_name}</p>
-                {b.description && (
-                  <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{b.description}</p>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            No documented triggers on file. Triggers added by your supervisor
-            will appear here so you can recognize them in real time.
-          </p>
-        )}
-      </Card>
-
       {/* Interests / hobbies */}
       <Card className="p-5">
         <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold">

@@ -1458,22 +1458,6 @@ async function applyProvisioning(
         const fc = (c?.feature_config ?? {}) as Record<string, boolean>;
         fc[p.target_module] = true;
         await sb.from("clients").update({ feature_config: fc }).eq("id", recordId);
-      } else if (
-        p.planned_action === "create_draft" &&
-        p.target_module === "behavior_plan" &&
-        subj.subject_type === "client"
-      ) {
-        // BSP as draft (features_enabled=false). bc_code required — guess Tier 1 default.
-        const { error } = await sb.from("behavior_support_clients").upsert(
-          {
-            organization_id: orgId,
-            client_id: recordId,
-            bc_code: "BC1",
-            features_enabled: false,
-          },
-          { onConflict: "client_id" },
-        );
-        if (error) throw new Error(`BSP draft: ${error.message}`);
       } else if (p.planned_action === "activate_requirements") {
         // Reuses existing nectar_requirements / staff_checklist_completion — no row to write here;
         // existing matrix surfaces this automatically once the person record exists.

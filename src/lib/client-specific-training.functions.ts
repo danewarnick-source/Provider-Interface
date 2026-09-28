@@ -269,34 +269,7 @@ async function assembleVerbatim(
     }
   } catch { /* ignore */ }
 
-  // f. Behavior support — SAFETY-CRITICAL — status + published behaviors, exact
-  try {
-    const { data: bsc } = await supabase
-      .from("behavior_support_clients")
-      .select("status")
-      .eq("client_id", clientId)
-      .maybeSingle();
-    const { data: behaviors } = await supabase
-      .from("bc_behaviors")
-      .select("name, operational_definition, status")
-      .eq("client_id", clientId)
-      .eq("status", "published");
-    const items: CSTItem[] = [];
-    if (bsc?.status) items.push({ kind: "text", label: "BSP status", value: String(bsc.status) });
-    if (behaviors && behaviors.length) {
-      items.push({
-        kind: "kv",
-        label: "Published behaviors",
-        pairs: (behaviors as Array<{ name: string; operational_definition: string | null }>).map((b) => ({
-          label: b.name,
-          value: b.operational_definition ?? "",
-        })),
-      });
-    }
-    if (items.length) sections.push({ id: sid(), title: "Behavior support", items });
-  } catch { /* ignore */ }
-
-  // g. Rights & safeguards — SAFETY-CRITICAL — HRC status + restriction_summary, exact
+  // f. Rights & safeguards — SAFETY-CRITICAL — HRC status + restriction_summary, exact
   try {
     const { data: hrc } = await supabase
       .from("hrc_reviews")

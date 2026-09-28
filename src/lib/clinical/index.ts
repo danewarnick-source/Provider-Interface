@@ -12,4 +12,3 @@ export * from '../medications.functions';
 export * from '../med-attestation';
 export * from '../incidents.functions';
 export * from '../incident-deadlines';
-export * from '../behavior-support';

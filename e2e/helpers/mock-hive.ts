@@ -723,7 +723,6 @@ function emptyClientCareData(clientId: string) {
     medications: [],
     authorized_codes: [],
     custom_fields: [],
-    target_behaviors: [],
     emergency_contacts: [],
     preferred_activities: [],
     visibilityRow: { sections: {}, fields: {} },
@@ -738,7 +737,6 @@ function emptyClientCareData(clientId: string) {
         medications: [],
         authorized_codes: [],
         custom_fields: [],
-        target_behaviors: [],
         emergency_contacts: [],
         preferred_activities: [],
       },
@@ -1186,9 +1184,6 @@ function serverFnPayload(url: string, body: string): unknown {
   }
   if (/draftShiftNote/i.test(fn)) {
     return "Mocked NECTAR draft — not used in this suite.";
-  }
-  if (/listClientTargetBehaviors/i.test(fn)) {
-    return { ok: true };
   }
   if (/getClientCareData/i.test(fn)) {
     const idMatch = `${url}\n${body}`.match(/00000000-0000-4000-a000-00000000010[1-4]/);

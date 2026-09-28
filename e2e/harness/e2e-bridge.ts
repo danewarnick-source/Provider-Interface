@@ -1,4 +1,4 @@
-import { TOMMY_BEHAVIORS, TOMMY_ID } from "./fixtures";
+import { TOMMY_ID } from "./fixtures";
 
 export type GpsMode = "ok" | "denied" | "timeout" | "unavailable";
 
@@ -30,7 +30,6 @@ export type E2EBridge = {
   navigations: NavCall[];
   clockInCalls: ClockInCall[];
   timesheetWrites: number;
-  targetBehaviors: string[];
   hasActiveShift: boolean;
 };
 
@@ -68,7 +67,6 @@ export function createBridge(): E2EBridge {
     navigations: [],
     clockInCalls: [],
     timesheetWrites: 0,
-    targetBehaviors: TOMMY_BEHAVIORS,
     hasActiveShift: scenario === "clock-out",
   };
 }

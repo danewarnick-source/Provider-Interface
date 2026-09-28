@@ -43,8 +43,6 @@ Source: `src/lib/rbac.ts`. Labels are what the UI shows.
 
 **Hive Executive** is a separate table (`hive_executives`), not an org role. Exec login sets portal view `hive_exec` and lands on `/dashboard/hive-exec`. Org admins run one company; executives run the platform.
 
-**Behaviorist** is a profile flag (`profiles.bc_role`), not an org role. `/dashboard` redirects them to `/dashboard/behaviorist`.
-
 Portal view (`localStorage` `portal-view`) can switch admin-capable users between Admin / Staff / Staff-mobile preview. First login with no stored view defaults **admin-capable users to Admin Home** (`src/routes/dashboard.tsx`). That June finding is **fixed**.
 
 ### 1.2 Live navigation

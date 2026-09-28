@@ -135,12 +135,6 @@ export type CustomFieldWithValue = {
   value: CustomFieldValue;
 };
 
-export type CareTargetBehavior = {
-  id: string;
-  behavior_name: string;
-  description: string;
-};
-
 export type CareEmergencyContact = {
   id: string;
   name: string;
@@ -175,8 +169,6 @@ export type ClientCareVisibility = {
      *  their section's toggle exclusively. */
     custom_fields: CustomFieldWithValue[];
     /** Always mirrors admin — no visibility gating. */
-    target_behaviors: CareTargetBehavior[];
-    /** Always mirrors admin — no visibility gating. */
     emergency_contacts: CareEmergencyContact[];
     /** Always mirrors admin — no visibility gating. */
     preferred_activities: string[];
@@ -195,7 +187,6 @@ export type ClientCareData = {
   /** All custom fields (admin view). Staff view uses
    *  `visibility.staffCare.custom_fields` (filtered by section toggle). */
   custom_fields: CustomFieldWithValue[];
-  target_behaviors: CareTargetBehavior[];
   emergency_contacts: CareEmergencyContact[];
   preferred_activities: string[];
   /** Raw visibility row (as stored). Admin toggle UIs read this. */
@@ -267,7 +258,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
         medications: [],
         authorized_codes: [],
         custom_fields: [],
-        target_behaviors: [],
         emergency_contacts: [],
         preferred_activities: [],
         visibilityRow: emptyVisibilityRow,
@@ -282,7 +272,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
             medications: [],
             authorized_codes: [],
             custom_fields: [],
-            target_behaviors: [],
             emergency_contacts: [],
             preferred_activities: [],
           },
@@ -290,7 +279,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
       };
     }
 
-    const [clientRes, cstRes, medsRes, codesRes, visRes, cfDefsRes, cfValsRes, tbRes, ecRes, myAssignRes] =
+    const [clientRes, cstRes, medsRes, codesRes, visRes, cfDefsRes, cfValsRes, ecRes, myAssignRes] =
       await Promise.all([
       supabase
         .from("clients")
@@ -334,12 +323,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
         .select("definition_id, value_text, value_number, value_boolean, value_date")
         .eq("entity_kind", "client")
         .eq("entity_id", clientId),
-      supabase
-        .from("client_target_behaviors")
-        .select("id, behavior_name, description")
-        .eq("client_id", clientId)
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: true }),
       supabase
         .from("client_emergency_contacts")
         .select("id, name, phone, relationship")
@@ -544,11 +527,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
       isFieldVisible(visibilityRow, fieldKey("care_plan", "goal", goalId)),
     );
 
-    const target_behaviors: CareTargetBehavior[] = ((tbRes?.data ?? []) as any[]).map((b) => ({
-      id: String(b.id),
-      behavior_name: String(b.behavior_name ?? ""),
-      description: String(b.description ?? ""),
-    }));
     const emergency_contacts: CareEmergencyContact[] = ((ecRes?.data ?? []) as any[]).map((c) => ({
       id: String(c.id),
       name: String(c.name ?? ""),
@@ -570,7 +548,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
         medications: medicationsStaff,
         authorized_codes: authorizedCodesStaff,
         custom_fields: customFieldsStaff,
-        target_behaviors,
         emergency_contacts,
         preferred_activities,
       },
@@ -585,7 +562,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
       medications,
       authorized_codes,
       custom_fields,
-      target_behaviors,
       emergency_contacts,
       preferred_activities,
       visibilityRow,
