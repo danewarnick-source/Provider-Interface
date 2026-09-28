@@ -15,8 +15,8 @@ import {
   yearlyDiscountForInterval,
   type BillableClientRow,
   type BillingPeriod,
-} from "@/lib/pi-client-billing";
-import { quotePiListSubscription } from "@/lib/pi-signup-pricing";
+} from "../public-site/pi-client-billing.ts";
+import { quotePiListSubscription } from "../public-site/pi-signup-pricing.ts";
 import { readStripeEnv, subscriptionLineItemsForPiListQuote } from "@/lib/financial/stripe-config";
 import { getStripe } from "@/lib/financial/stripe.server";
 

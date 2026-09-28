@@ -12,7 +12,7 @@ import {
   isSignupTrainingAddonId,
   quoteSignupTrainingAddon,
   type SignupTrainingAddonId,
-} from "../pi-signup-pricing.ts";
+} from "../public-site/pi-signup-pricing.ts";
 import {
   stripePriceIdForTrainingSku,
   type StripeLineItem,

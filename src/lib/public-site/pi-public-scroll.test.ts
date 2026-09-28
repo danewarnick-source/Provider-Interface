@@ -6,7 +6,7 @@ import {
   publicHashId,
   resetPublicPageScroll,
   shouldScrollPublicPageToTop,
-} from "./pi-public-scroll.ts";
+} from "../public-site/pi-public-scroll.ts";
 
 function read(rel: string) {
   return readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -115,11 +115,11 @@ describe("public page scroll", () => {
 
 describe("public chrome wires page-top scroll", () => {
   it("resets scroll on PiPublicPage path change and clears leftover hashes", () => {
-    const page = read("../components/pi-landing/pi-public-page.tsx");
-    const header = read("../components/pi-landing/pi-public-header.tsx");
-    const footer = read("../components/pi-landing/pi-public-footer.tsx");
-    const mark = read("../components/pi-landing/pi-mark.tsx");
-    const home = read("../components/pi-landing/pi-marketing-page.tsx");
+    const page = read("../../components/pi-landing/pi-public-page.tsx");
+    const header = read("../../components/pi-landing/pi-public-header.tsx");
+    const footer = read("../../components/pi-landing/pi-public-footer.tsx");
+    const mark = read("../../components/pi-landing/pi-mark.tsx");
+    const home = read("../../components/pi-landing/pi-marketing-page.tsx");
     assert.match(page, /applyPublicPageScroll/);
     assert.match(page, /usePiPublicPageScroll/);
     assert.match(page, /s\.location\.pathname/);

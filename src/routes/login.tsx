@@ -22,7 +22,7 @@ import {
   persistPortalView,
   readStoredPortalView,
   resolvePostLoginLanding,
-} from "@/lib/portal-view-landing";
+} from "@/lib/public-site/portal-view-landing";
 import {
   persistActiveOrgId,
   readStoredActiveOrgId,

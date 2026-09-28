@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { levelHome, type AccessLevel } from "@/lib/access/levels";
-import { persistPortalView, resolveRoleEntryLanding, type PortalView } from "@/lib/portal-view-landing";
+import { persistPortalView, resolveRoleEntryLanding, type PortalView } from "@/lib/public-site/portal-view-landing";
 
 /** Bookmark-entry redirector: checks the user's access level, then sends them into /dashboard. */
 function makeRoleEntry(allowed: AccessLevel[], persistView: PortalView | null) {

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { PiHomeLockup } from "@/components/pi-landing/pi-mark";
-import { PI_HOME_FOOTER_HCBS, PI_HOME_FOOTER_LINKS } from "@/lib/pi-homepage";
-import { PI_COPYRIGHT } from "@/lib/pi-landing";
+import { PI_HOME_FOOTER_HCBS, PI_HOME_FOOTER_LINKS } from "@/lib/public-site/pi-homepage";
+import { PI_COPYRIGHT } from "@/lib/public-site/pi-landing";
 
 export function PiPublicFooter({ home: _home = false }: { home?: boolean }) {
   return (

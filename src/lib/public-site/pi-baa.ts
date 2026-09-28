@@ -3,7 +3,7 @@
  * I-agree only — no signature pad, typed name, or DocuSign.
  */
 
-import { PI_LEGAL_NAME } from "./pi-terms.ts";
+import { PI_LEGAL_NAME } from "../public-site/pi-terms.ts";
 
 export const PI_BAA_TITLE = "Business Associate Agreement";
 

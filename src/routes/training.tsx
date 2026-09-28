@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { SIGNUP_TRAINING_ADDONS } from "@/lib/pi-signup-pricing";
+import { SIGNUP_TRAINING_ADDONS } from "@/lib/public-site/pi-signup-pricing";
 import { formatUsdFromCents } from "@/lib/hive-pricing";
 import {
   TRAINING_ONLY_TERMS,

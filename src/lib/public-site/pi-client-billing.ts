@@ -9,13 +9,13 @@ import {
   denverYmdFromInstant,
   parseYmd,
   ymdFromParts,
-} from "./denver-date.ts";
-import { ANNUAL_DISCOUNT } from "./hive-pricing.ts";
+} from "../denver-date.ts";
+import { ANNUAL_DISCOUNT } from "../hive-pricing.ts";
 import {
   PI_LIST_MINIMUM_CENTS,
   PI_LIST_PER_CLIENT_CENTS,
   quotePiListSubscription,
-} from "./pi-signup-pricing.ts";
+} from "../public-site/pi-signup-pricing.ts";
 
 /** YYYY-MM-DD. `end` is exclusive (first day after the period). */
 export type BillingPeriod = {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { PI_LIST_MINIMUM_DOLLARS, PI_LIST_PER_CLIENT_DOLLARS, PI_TRAINING_ADDONS } from "./pi-landing.ts";
-import { TRAINING_PRICE_CENTS } from "./hive-pricing.ts";
+import { PI_LIST_MINIMUM_DOLLARS, PI_LIST_PER_CLIENT_DOLLARS, PI_TRAINING_ADDONS } from "../public-site/pi-landing.ts";
+import { TRAINING_PRICE_CENTS } from "../hive-pricing.ts";
 import {
   PI_LIST_MINIMUM_CENTS,
   PI_LIST_PER_CLIENT_CENTS,
@@ -13,7 +13,7 @@ import {
   signupTrainingMatchesPublicCopy,
   trainingQuantitiesFromPeople,
   trainingRosterTotalCents,
-} from "./pi-signup-pricing.ts";
+} from "../public-site/pi-signup-pricing.ts";
 
 describe("quotePiListSubscription", () => {
   it("uses locked $69 / client and $350 floor from pi-landing", () => {

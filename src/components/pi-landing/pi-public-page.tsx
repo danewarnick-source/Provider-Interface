@@ -2,7 +2,7 @@ import { useLayoutEffect, type ReactNode } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { PiPublicHeader } from "@/components/pi-landing/pi-public-header";
 import { PiPublicFooter } from "@/components/pi-landing/pi-public-footer";
-import { applyPublicPageScroll } from "@/lib/pi-public-scroll";
+import { applyPublicPageScroll } from "@/lib/public-site/pi-public-scroll";
 
 export function usePiLandingHtmlClass() {
   useLayoutEffect(() => {

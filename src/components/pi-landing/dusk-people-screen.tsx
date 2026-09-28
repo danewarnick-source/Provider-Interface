@@ -1,5 +1,5 @@
 import { PiMark } from "@/components/pi-landing/pi-mark";
-import { PI_ACTION, PI_CREAM, PI_GOLD, PI_NAVY } from "@/lib/pi-landing";
+import { PI_ACTION, PI_CREAM, PI_GOLD, PI_NAVY } from "@/lib/public-site/pi-landing";
 
 type PersonRow = {
   initials: string;

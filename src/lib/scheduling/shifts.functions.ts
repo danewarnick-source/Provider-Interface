@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isDailyCode } from "./code-colors";
-import { launchpadBlockedMessage } from "@/lib/launchpad-gate";
+import { launchpadBlockedMessage } from "../public-site/launchpad-gate.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 

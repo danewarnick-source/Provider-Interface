@@ -11,7 +11,7 @@ import {
   resolvePostLoginLanding,
   resolveRoleEntryLanding,
   STAFF_VIEW_ACCESSIBLE_NAME,
-} from "./portal-view-landing.ts";
+} from "../public-site/portal-view-landing.ts";
 
 describe("resolvePostLoginLanding — do not force hive_exec", () => {
   it("executive + stored view admin does not overwrite portal-view to hive_exec", () => {
@@ -119,9 +119,9 @@ describe("resolvePortalSwitcherPath", () => {
   });
 
   it("dashboard and staff top bar navigate via resolvePortalSwitcherPath", () => {
-    const dash = readFileSync(fileURLToPath(new URL("../routes/dashboard.tsx", import.meta.url)), "utf8");
+    const dash = readFileSync(fileURLToPath(new URL("../../routes/dashboard.tsx", import.meta.url)), "utf8");
     const staff = readFileSync(
-      fileURLToPath(new URL("../components/staff-mobile/staff-top-bar.tsx", import.meta.url)),
+      fileURLToPath(new URL("../../components/staff-mobile/staff-top-bar.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(dash, /resolvePortalSwitcherPath/);
@@ -148,7 +148,7 @@ describe("hive-exec Open company / Admin View control", () => {
 
   it("OpenCompanyViews uses those accessible names", () => {
     const path = fileURLToPath(
-      new URL("../components/hive-exec/open-company-views.tsx", import.meta.url),
+      new URL("../../components/hive-exec/open-company-views.tsx", import.meta.url),
     );
     const src = readFileSync(path, "utf8");
     assert.match(src, /companyAdminSwitchAccessibleName/);
@@ -159,20 +159,20 @@ describe("hive-exec Open company / Admin View control", () => {
   });
 
   it("dashboard Portal View uses the portaled switcher, not Radix Select", () => {
-    const path = fileURLToPath(new URL("../routes/dashboard.tsx", import.meta.url));
+    const path = fileURLToPath(new URL("../../routes/dashboard.tsx", import.meta.url));
     const src = readFileSync(path, "utf8");
     assert.match(src, /PortalViewSwitcher/);
     assert.doesNotMatch(src, /SelectItem value="admin"/);
   });
 
   it("phone Sheet ignores taps on the portaled Portal View menu", () => {
-    const dash = readFileSync(fileURLToPath(new URL("../routes/dashboard.tsx", import.meta.url)), "utf8");
+    const dash = readFileSync(fileURLToPath(new URL("../../routes/dashboard.tsx", import.meta.url)), "utf8");
     const staff = readFileSync(
-      fileURLToPath(new URL("../components/staff-mobile/staff-top-bar.tsx", import.meta.url)),
+      fileURLToPath(new URL("../../components/staff-mobile/staff-top-bar.tsx", import.meta.url)),
       "utf8",
     );
     const switcher = readFileSync(
-      fileURLToPath(new URL("../components/portal-view-switcher.tsx", import.meta.url)),
+      fileURLToPath(new URL("../../components/portal-view-switcher.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(dash, /preventSheetDismissForPortalViewMenu/);
@@ -188,7 +188,7 @@ describe("hive-exec Open company / Admin View control", () => {
   });
 
   it("dashboard hamburger stays on hive-exec (not gated off)", () => {
-    const path = fileURLToPath(new URL("../routes/dashboard.tsx", import.meta.url));
+    const path = fileURLToPath(new URL("../../routes/dashboard.tsx", import.meta.url));
     const src = readFileSync(path, "utf8");
     assert.match(src, /aria-label="Open menu"/);
     assert.doesNotMatch(
@@ -247,7 +247,7 @@ describe("hive-exec Open company / Admin View control", () => {
   });
 
   it("login no longer blindly writes hive_exec for every executive", () => {
-    const path = fileURLToPath(new URL("../routes/login.tsx", import.meta.url));
+    const path = fileURLToPath(new URL("../../routes/login.tsx", import.meta.url));
     const src = readFileSync(path, "utf8");
     assert.match(src, /resolvePostLoginLanding/);
     assert.doesNotMatch(src, /localStorage\.setItem\("portal-view", "hive_exec"\)/);

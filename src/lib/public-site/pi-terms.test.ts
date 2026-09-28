@@ -9,7 +9,7 @@ import {
   PI_TERMS_CONTRACTS_PARAS,
   PI_TERMS_INTRO,
   PI_TERMS_TITLE,
-} from "./pi-terms.ts";
+} from "../public-site/pi-terms.ts";
 
 describe("Provider Interface terms draft", () => {
   it("names Provider Interface LLC, not Hive or Hive Certify", () => {
@@ -50,9 +50,9 @@ describe("Provider Interface terms draft", () => {
   });
 
   it("renders the locked copy on /terms and the signup checkbox", () => {
-    const page = readFileSync(new URL("../routes/terms.tsx", import.meta.url), "utf8");
-    const signup = readFileSync(new URL("../routes/signup.tsx", import.meta.url), "utf8");
-    const footer = readFileSync(new URL("../components/pi-landing/pi-public-footer.tsx", import.meta.url), "utf8");
+    const page = readFileSync(new URL("../../routes/terms.tsx", import.meta.url), "utf8");
+    const signup = readFileSync(new URL("../../routes/signup.tsx", import.meta.url), "utf8");
+    const footer = readFileSync(new URL("../../components/pi-landing/pi-public-footer.tsx", import.meta.url), "utf8");
     assert.match(page, /PI_LEGAL_NAME/);
     assert.match(page, /PI_TERMS_CONTRACTS_HEADING/);
     assert.match(page, /createFileRoute\("\/terms"\)/);
@@ -64,7 +64,7 @@ describe("Provider Interface terms draft", () => {
     assert.match(signup, /target="_blank"/);
     assert.match(signup, /rel="noopener noreferrer"/);
     assert.match(footer, /PI_HOME_FOOTER_LINKS/);
-    const links = readFileSync(new URL("./pi-landing.ts", import.meta.url), "utf8");
+    const links = readFileSync(new URL("../public-site/pi-landing.ts", import.meta.url), "utf8");
     assert.match(links, /to: "\/terms"/);
     assert.match(links, /to: "\/baa"/);
   });

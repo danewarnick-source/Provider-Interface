@@ -5,7 +5,7 @@ import {
   PUBLIC_MARKETING_NAV_CLASS,
   PUBLIC_MOBILE_MENU_BUTTON_CLASS,
   PUBLIC_MOBILE_MENU_MIN_PX,
-} from "./public-landing-nav.ts";
+} from "../public-site/public-landing-nav.ts";
 
 describe("public landing hamburger", () => {
   it("keeps a 44px phone hit target that owns its tap", () => {

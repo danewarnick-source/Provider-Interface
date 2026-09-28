@@ -16,7 +16,7 @@ import {
   PI_TRAINING_QUIET_LINK,
   PI_TRAINING_SECTION_BODY,
   PI_TRAINING_SECTION_HEADLINE,
-} from "@/lib/pi-landing";
+} from "@/lib/public-site/pi-landing";
 
 export function PiPricingSection({
   heading = "The number",

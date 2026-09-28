@@ -1,5 +1,5 @@
 import { Menu, X } from "lucide-react";
-import { PUBLIC_MOBILE_MENU_BUTTON_CLASS } from "@/lib/public-landing-nav";
+import { PUBLIC_MOBILE_MENU_BUTTON_CLASS } from "@/lib/public-site/public-landing-nav";
 
 export function PublicMobileMenuButton({
   open,

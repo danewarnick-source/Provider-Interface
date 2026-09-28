@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { PI_GRAIN_SVG, PI_THEME } from "./pi-theme.ts";
-import { PI_CREAM, PI_GOLD, PI_NAVY, PI_THEME as FROM_LANDING } from "./pi-landing.ts";
+import { PI_GRAIN_SVG, PI_THEME } from "../public-site/pi-theme.ts";
+import { PI_CREAM, PI_GOLD, PI_NAVY, PI_THEME as FROM_LANDING } from "../public-site/pi-landing.ts";
 
 function read(rel: string) {
   return readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -52,14 +52,14 @@ describe("PI theme tokens", () => {
     assert.match(PI_GRAIN_SVG, /feTurbulence/);
     assert.match(PI_GRAIN_SVG, /baseFrequency='\.9'/);
     assert.match(PI_GRAIN_SVG, /numOctaves='2'/);
-    const css = read("../components/pi-landing/pi-landing.css");
+    const css = read("../../components/pi-landing/pi-landing.css");
     assert.match(css, /feTurbulence type='fractalNoise' baseFrequency='\.9' numOctaves='2'/);
     assert.match(css, /opacity: 0\.045/);
     assert.match(css, /mix-blend-mode: overlay/);
   });
 
   it("keeps Newsreader + Inter on the root font link", () => {
-    const root = read("../routes/__root.tsx");
+    const root = read("../../routes/__root.tsx");
     assert.match(root, /family=Newsreader/);
     assert.match(root, /family=Inter/);
   });

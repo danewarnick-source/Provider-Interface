@@ -23,7 +23,7 @@ import {
   PI_HOME_START_SIGNUP,
   PI_HOME_TRAINING_ROWS,
   PI_HOME_UTAH_LINE,
-} from "@/lib/pi-homepage";
+} from "@/lib/public-site/pi-homepage";
 import {
   PI_LIST_PRICE_DISPLAY,
   PI_NECTAR_AFTER_NOTE,
@@ -34,7 +34,7 @@ import {
   PI_NECTAR_BEFORE_TAG,
   PI_NECTAR_LABEL,
   PI_SUBHEAD,
-} from "@/lib/pi-landing";
+} from "@/lib/public-site/pi-landing";
 
 function EmWord({ children }: { children: string }) {
   return <em className="pi-home-em">{children}</em>;

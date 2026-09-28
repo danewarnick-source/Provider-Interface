@@ -7,7 +7,7 @@ import {
   isCompanyAdminLevel,
   resolvePortalSwitcherPath,
   STAFF_VIEW_ACCESSIBLE_NAME,
-} from "@/lib/portal-view-landing";
+} from "@/lib/public-site/portal-view-landing";
 import { resetStaffPhoneScroll } from "@/lib/staff/staff-phone-chrome";
 
 /**

@@ -7,7 +7,7 @@ import {
   SCENARIO_STEPS_BY_CODE,
   THIRTY_DAY_SAS_TOPICS,
 } from "@/lib/training/in-hive-training-thirty-day-sas";
-import { PI_THEME } from "@/lib/pi-theme";
+import { PI_THEME } from "@/lib/public-site/pi-theme";
 import { choiceFollowUp, scoreSegmentGate, shouldPersistResumeStep, shuffleCopy, SEGMENT_GATE_PASS, SEGMENT_GATE_TOTAL } from "@/lib/training/in-hive-training";
 import { TrainingDiagram, type DiagramId } from "@/components/training/in-hive-diagrams";
 import { SafeHtml } from "@/components/safe-html";

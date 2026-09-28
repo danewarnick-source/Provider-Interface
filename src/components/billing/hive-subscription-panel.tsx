@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { isComplimentaryHiveOrg } from "@/lib/current-org";
 import { formatUsdFromCents } from "@/lib/hive-pricing";
-import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_LIST_PRICE_UNIT, PI_SIGNUP_PRICE_LINE } from "@/lib/pi-landing";
-import { quotePiListSubscription } from "@/lib/pi-signup-pricing";
+import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_LIST_PRICE_UNIT, PI_SIGNUP_PRICE_LINE } from "@/lib/public-site/pi-landing";
+import { quotePiListSubscription } from "@/lib/public-site/pi-signup-pricing";
 import {
   confirmCheckoutSessionFn,
   createPortalSessionFn,

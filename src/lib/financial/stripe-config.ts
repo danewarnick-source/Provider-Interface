@@ -17,7 +17,7 @@ import {
   type HiveQuote,
   trainingPriceCentsForSku,
 } from "../hive-pricing.ts";
-import type { PiListQuote, SignupTrainingLine, SignupTrainingQuote } from "../pi-signup-pricing.ts";
+import type { PiListQuote, SignupTrainingLine, SignupTrainingQuote } from "../public-site/pi-signup-pricing.ts";
 
 /** PI sandbox (test mode). Not a secret. */
 export const STRIPE_TEST_ACCOUNT_ID = "acct_1Ti6CMIQWmyptLnb";

@@ -27,7 +27,7 @@ import {
   DEFAULT_MATCH_WEIGHTS,
   getProviderInterestOutline,
   saveProviderInterestOutline,
-} from "@/lib/provider-interest-outline.functions";
+} from "@/lib/public-site/provider-interest-outline.functions";
 
 type Mode = "anywhere" | "county" | "city";
 

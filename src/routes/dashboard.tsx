@@ -107,7 +107,7 @@ import {
   OPEN_DASHBOARD_MENU_EVENT,
   preventSheetDismissForPortalViewMenu,
   resolvePortalSwitcherPath,
-} from "@/lib/portal-view-landing";
+} from "@/lib/public-site/portal-view-landing";
 import { isCognitoAuth } from "@/lib/aws/env";
 import { AWS_DB_ERROR_EVENT } from "@/lib/aws/exec-http";
 import {

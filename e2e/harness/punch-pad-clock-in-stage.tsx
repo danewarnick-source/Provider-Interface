@@ -1,5 +1,5 @@
 import { CASELOAD } from "./fixtures";
-import { LAUNCHPAD_CLOCK_IN_BLOCKED_MESSAGE } from "@/lib/launchpad-gate";
+import { LAUNCHPAD_CLOCK_IN_BLOCKED_MESSAGE } from "@/lib/public-site/launchpad-gate";
 
 export function PunchPadClockInStage({
   clientId,

@@ -9,7 +9,7 @@ import {
   PI_GET_STARTED,
   PI_TALK_TO_US,
   PI_WHAT_IS_MARK,
-} from "@/lib/pi-landing";
+} from "@/lib/public-site/pi-landing";
 
 export function PiAboutPage() {
   return (

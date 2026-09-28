@@ -52,7 +52,7 @@ import {
   getSignupPaymentsStatusFn,
 } from "@/lib/financial/stripe-checkout.functions";
 import { formatUsdFromCents, type BillingInterval } from "@/lib/hive-pricing";
-import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_SIGNUP_PRICE_LINE } from "@/lib/pi-landing";
+import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_SIGNUP_PRICE_LINE } from "@/lib/public-site/pi-landing";
 import {
   SIGNUP_AGENCY_PLACEHOLDER,
   SIGNUP_TRAINING_ADDONS,
@@ -62,7 +62,7 @@ import {
   trainingQuantitiesFromPeople,
   trainingRosterTotalCents,
   type TrainingPersonRow,
-} from "@/lib/pi-signup-pricing";
+} from "@/lib/public-site/pi-signup-pricing";
 import {
   parseSignupClientCount,
   parseSignupStaffCount,

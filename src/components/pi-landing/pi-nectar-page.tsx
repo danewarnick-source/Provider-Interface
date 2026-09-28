@@ -14,7 +14,7 @@ import {
   PI_NECTAR_PAGE_HEADLINE,
   PI_NECTAR_PAGE_KICKER,
   PI_NECTAR_PAGE_LEAD,
-} from "@/lib/pi-landing";
+} from "@/lib/public-site/pi-landing";
 
 export function PiNectarPage() {
   return (

@@ -8,7 +8,7 @@ import {
   PI_TERMS_CONTRACTS_PARAS,
   PI_TERMS_INTRO,
   PI_TERMS_TITLE,
-} from "@/lib/pi-terms";
+} from "@/lib/public-site/pi-terms";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({

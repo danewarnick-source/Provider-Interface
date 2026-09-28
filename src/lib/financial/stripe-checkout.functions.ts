@@ -33,7 +33,7 @@ import {
   trainingPeopleForCheckout,
   trainingQuantitiesFromPeople,
   type SignupTrainingAddonId,
-} from "@/lib/pi-signup-pricing";
+} from "../public-site/pi-signup-pricing.ts";
 import { appOriginFromRequest, getStripe } from "@/lib/financial/stripe.server";
 import { activateSubscriptionFromCheckout } from "@/lib/financial/stripe-webhook";
 import { fulfillTrainingOrder } from "@/lib/training/training-fulfillment.server";
@@ -50,7 +50,7 @@ import {
 } from "@/lib/training/training-class";
 import { countPayingOrgs } from "@/lib/hive-pricing.functions";
 import { resolveCurrentMembership } from "@/lib/current-org";
-import { highWaterClientCount } from "@/lib/pi-list-billing.server";
+import { highWaterClientCount } from "../public-site/pi-list-billing.server.ts";
 import {
   clampClientCount,
   clampStaffCount,

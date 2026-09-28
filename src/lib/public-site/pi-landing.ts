@@ -1,9 +1,9 @@
 /** Copy and tokens for Provider Interface public marketing. */
 
-import { PI_THEME } from "./pi-theme.ts";
+import { PI_THEME } from "../public-site/pi-theme.ts";
 
-export { PI_THEME, PI_GRAIN_SVG } from "./pi-theme.ts";
-export type { PiTheme } from "./pi-theme.ts";
+export { PI_THEME, PI_GRAIN_SVG } from "../public-site/pi-theme.ts";
+export type { PiTheme } from "../public-site/pi-theme.ts";
 
 export const PI_PRODUCT_NAME = "Provider Interface";
 export const PI_PRODUCT_SHORT = "PI";

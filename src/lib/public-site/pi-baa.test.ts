@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { PI_LEGAL_NAME } from "./pi-terms.ts";
-import { PI_BAA_AGREE_COPY, PI_BAA_INTRO, PI_BAA_SECTIONS, PI_BAA_TITLE, PI_BAA_VERSION } from "./pi-baa.ts";
+import { PI_LEGAL_NAME } from "../public-site/pi-terms.ts";
+import { PI_BAA_AGREE_COPY, PI_BAA_INTRO, PI_BAA_SECTIONS, PI_BAA_TITLE, PI_BAA_VERSION } from "../public-site/pi-baa.ts";
 
 describe("Provider Interface BAA", () => {
   it("names Provider Interface LLC and has I-agree copy only", () => {
@@ -19,8 +19,8 @@ describe("Provider Interface BAA", () => {
   });
 
   it("renders I-agree on /baa and the signup checkbox", () => {
-    const page = readFileSync(new URL("../routes/baa.tsx", import.meta.url), "utf8");
-    const signup = readFileSync(new URL("../routes/signup.tsx", import.meta.url), "utf8");
+    const page = readFileSync(new URL("../../routes/baa.tsx", import.meta.url), "utf8");
+    const signup = readFileSync(new URL("../../routes/signup.tsx", import.meta.url), "utf8");
     assert.match(page, /createFileRoute\("\/baa"\)/);
     assert.match(page, /baa-agree-checkbox/);
     assert.match(page, /PI_BAA_AGREE_COPY/);

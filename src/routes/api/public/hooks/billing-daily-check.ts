@@ -82,7 +82,7 @@ export const Route = createFileRoute("/api/public/hooks/billing-daily-check")({
         }
 
         try {
-          const { syncPiListQuantitiesForActiveOrgs } = await import("@/lib/pi-list-billing.server");
+          const { syncPiListQuantitiesForActiveOrgs } = await import("@/lib/public-site/pi-list-billing.server");
           result.quantity = await syncPiListQuantitiesForActiveOrgs();
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);

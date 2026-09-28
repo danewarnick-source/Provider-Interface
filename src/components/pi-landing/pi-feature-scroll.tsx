@@ -4,7 +4,7 @@ import {
   PI_HIGHLIGHTS_HEADLINE,
   PI_HIGHLIGHTS_KICKER,
   PI_LEARN_MORE,
-} from "@/lib/pi-landing";
+} from "@/lib/public-site/pi-landing";
 
 function CheckDot({ done }: { done: boolean }) {
   return <span className={done ? "pi-hl-dot done" : "pi-hl-dot"} aria-hidden />;

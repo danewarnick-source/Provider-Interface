@@ -22,7 +22,7 @@ import {
   requirePermission,
   requireAnyPermission,
 } from "@/lib/access/require";
-import { DEFAULT_MATCH_WEIGHTS } from "@/lib/provider-interest-outline.functions";
+import { DEFAULT_MATCH_WEIGHTS } from "@/lib/public-site/provider-interest-outline.functions";
 
 // ────────── Types ──────────
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { ANNUAL_DISCOUNT } from "./hive-pricing.ts";
+import { ANNUAL_DISCOUNT } from "../hive-pricing.ts";
 import {
   annualCancelRefundCents,
   calendarMonthPeriod,
@@ -13,7 +13,7 @@ import {
   monthlyCentsForClientCount,
   prepaidYearKeepsAccess,
   yearlyDiscountForInterval,
-} from "./pi-client-billing.ts";
+} from "../public-site/pi-client-billing.ts";
 
 const jan = { start: "2026-01-01", end: "2026-02-01" };
 const feb = { start: "2026-02-01", end: "2026-03-01" };
@@ -49,7 +49,7 @@ describe("high-water client count", () => {
   });
 
   it("does not invent discharged_at or inactive", () => {
-    const src = readFileSync(new URL("./pi-client-billing.ts", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../public-site/pi-client-billing.ts", import.meta.url), "utf8");
     assert.doesNotMatch(src, /row\.discharged_at|discharged_at:/);
     assert.doesNotMatch(src, /account_status\s*===|["']inactive["']/);
   });

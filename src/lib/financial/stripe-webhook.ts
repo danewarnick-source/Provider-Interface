@@ -11,7 +11,7 @@ import {
   unlockAccount,
 } from "@/lib/billing/billing-lockout.server";
 import { isBillingExempt, UNPAID_LOCK_REASON } from "@/lib/billing/billing-access";
-import { shouldKeepPrepaidAccess, syncPiListQuantityForOrg } from "@/lib/pi-list-billing.server";
+import { shouldKeepPrepaidAccess, syncPiListQuantityForOrg } from "../public-site/pi-list-billing.server.ts";
 import { fulfillTrainingOrder } from "@/lib/training/training-fulfillment.server";
 import { fulfillTrainingClass } from "@/lib/training/training-class-fulfillment.server";
 import { fulfillTrainingOnlyOrder } from "@/lib/training/training-only-fulfillment.server";

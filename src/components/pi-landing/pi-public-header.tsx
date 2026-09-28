@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { PiHomeLockup } from "@/components/pi-landing/pi-mark";
 import { PublicMobileMenuButton } from "@/components/landing/public-mobile-menu-button";
-import { PI_HOME_NAV, PI_PUBLIC_NAV } from "@/lib/pi-homepage";
-import { PI_SIGN_IN } from "@/lib/pi-landing";
-import { LANDING_MOBILE_NAV_ID } from "@/lib/public-landing-nav";
+import { PI_HOME_NAV, PI_PUBLIC_NAV } from "@/lib/public-site/pi-homepage";
+import { PI_SIGN_IN } from "@/lib/public-site/pi-landing";
+import { LANDING_MOBILE_NAV_ID } from "@/lib/public-site/public-landing-nav";
 
 export function PiPublicHeader({ home = false }: { home?: boolean }) {
   const [open, setOpen] = useState(false);

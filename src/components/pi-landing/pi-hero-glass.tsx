@@ -6,7 +6,7 @@ import {
   PI_NECTAR_BEFORE_QUOTE,
   PI_NECTAR_BEFORE_TAG,
   PI_NECTAR_LABEL,
-} from "@/lib/pi-landing";
+} from "@/lib/public-site/pi-landing";
 
 /** Decorative chrome only — not live data, not a product claim. */
 const DAY_ITEMS = [

@@ -12,7 +12,7 @@ import {
   stripePaymentsConfigured,
 } from "@/lib/financial/stripe-config";
 import { appOriginFromRequest, getStripe } from "@/lib/financial/stripe.server";
-import { quoteSignupTrainingAddon } from "@/lib/pi-signup-pricing";
+import { quoteSignupTrainingAddon } from "../public-site/pi-signup-pricing.ts";
 import {
   cleanTrainingOnlyPeople,
   isTrainingOnlySku,

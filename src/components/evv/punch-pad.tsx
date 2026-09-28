@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useHasPassedLaunchpad } from "@/hooks/use-launchpad-pass";
-import { LAUNCHPAD_CLOCK_IN_BLOCKED_MESSAGE } from "@/lib/launchpad-gate";
+import { LAUNCHPAD_CLOCK_IN_BLOCKED_MESSAGE } from "@/lib/public-site/launchpad-gate";
 import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,

@@ -22,7 +22,7 @@ import { PiBrand } from "@/components/brand/pi-brand";
 import {
   preventSheetDismissForPortalViewMenu,
   resolvePortalSwitcherPath,
-} from "@/lib/portal-view-landing";
+} from "@/lib/public-site/portal-view-landing";
 import { resetStaffPhoneScroll } from "@/lib/staff/staff-phone-chrome";
 import { isAdminLevel, LEVEL_LABEL } from "@/lib/access/levels";
 
