@@ -14,6 +14,588 @@ export type Database = {
   }
   public: {
     Tables: {
+      _backup_20260928_certifications: {
+        Row: {
+          certification_type_code: string | null
+          course_id: string | null
+          course_title: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string | null
+          issued_at: string | null
+          organization_id: string | null
+          origin: string | null
+          recipient_name: string | null
+          requirement_id: string | null
+          user_id: string | null
+          verification_code: string | null
+        }
+        Insert: {
+          certification_type_code?: string | null
+          course_id?: string | null
+          course_title?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          issued_at?: string | null
+          organization_id?: string | null
+          origin?: string | null
+          recipient_name?: string | null
+          requirement_id?: string | null
+          user_id?: string | null
+          verification_code?: string | null
+        }
+        Update: {
+          certification_type_code?: string | null
+          course_id?: string | null
+          course_title?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          issued_at?: string | null
+          organization_id?: string | null
+          origin?: string | null
+          recipient_name?: string | null
+          requirement_id?: string | null
+          user_id?: string | null
+          verification_code?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_course_assignments: {
+        Row: {
+          assigned_by: string | null
+          completed_at: string | null
+          course_id: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string | null
+          organization_id: string | null
+          progress: number | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assigned_by?: string | null
+          completed_at?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string | null
+          organization_id?: string | null
+          progress?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assigned_by?: string | null
+          completed_at?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string | null
+          organization_id?: string | null
+          progress?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_course_modules: {
+        Row: {
+          body: string | null
+          course_id: string | null
+          created_at: string | null
+          id: string | null
+          order_index: number | null
+          pdf_url: string | null
+          quiz: Json | null
+          title: string | null
+          video_url: string | null
+        }
+        Insert: {
+          body?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_index?: number | null
+          pdf_url?: string | null
+          quiz?: Json | null
+          title?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          body?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_index?: number | null
+          pdf_url?: string | null
+          quiz?: Json | null
+          title?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_courses: {
+        Row: {
+          category: string | null
+          certificate_validity_months: number | null
+          cover_url: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string | null
+          is_global: boolean | null
+          is_published: boolean | null
+          organization_id: string | null
+          title: string | null
+        }
+        Insert: {
+          category?: string | null
+          certificate_validity_months?: number | null
+          cover_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string | null
+          is_global?: boolean | null
+          is_published?: boolean | null
+          organization_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          category?: string | null
+          certificate_validity_months?: number | null
+          cover_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string | null
+          is_global?: boolean | null
+          is_published?: boolean | null
+          organization_id?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_hive_training_auto_renew_settings: {
+        Row: {
+          created_at: string | null
+          enabled: boolean | null
+          last_run_at: string | null
+          lead_days: number | null
+          organization_id: string | null
+          paused_reason: string | null
+          payment_method_brand: string | null
+          payment_method_last4: string | null
+          scope: string | null
+          selected_catalog_ids: string[] | null
+          stripe_customer_id: string | null
+          stripe_payment_method_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          enabled?: boolean | null
+          last_run_at?: string | null
+          lead_days?: number | null
+          organization_id?: string | null
+          paused_reason?: string | null
+          payment_method_brand?: string | null
+          payment_method_last4?: string | null
+          scope?: string | null
+          selected_catalog_ids?: string[] | null
+          stripe_customer_id?: string | null
+          stripe_payment_method_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          enabled?: boolean | null
+          last_run_at?: string | null
+          lead_days?: number | null
+          organization_id?: string | null
+          paused_reason?: string | null
+          payment_method_brand?: string | null
+          payment_method_last4?: string | null
+          scope?: string | null
+          selected_catalog_ids?: string[] | null
+          stripe_customer_id?: string | null
+          stripe_payment_method_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_lesson_progress: {
+        Row: {
+          assignment_id: string | null
+          completed: boolean | null
+          completed_at: string | null
+          id: string | null
+          lesson_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assignment_id?: string | null
+          completed?: boolean | null
+          completed_at?: string | null
+          id?: string | null
+          lesson_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assignment_id?: string | null
+          completed?: boolean | null
+          completed_at?: string | null
+          id?: string | null
+          lesson_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_lesson_quiz_attempts: {
+        Row: {
+          answers: Json | null
+          created_at: string | null
+          id: string | null
+          lesson_id: string | null
+          passed: boolean | null
+          score: number | null
+          total: number | null
+          user_id: string | null
+        }
+        Insert: {
+          answers?: Json | null
+          created_at?: string | null
+          id?: string | null
+          lesson_id?: string | null
+          passed?: boolean | null
+          score?: number | null
+          total?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          answers?: Json | null
+          created_at?: string | null
+          id?: string | null
+          lesson_id?: string | null
+          passed?: boolean | null
+          score?: number | null
+          total?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_lessons: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          data: Json | null
+          duration_minutes: number | null
+          id: string | null
+          lesson_type: string | null
+          module_id: string | null
+          order_index: number | null
+          pdf_url: string | null
+          required: boolean | null
+          title: string | null
+          video_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          data?: Json | null
+          duration_minutes?: number | null
+          id?: string | null
+          lesson_type?: string | null
+          module_id?: string | null
+          order_index?: number | null
+          pdf_url?: string | null
+          required?: boolean | null
+          title?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          data?: Json | null
+          duration_minutes?: number | null
+          id?: string | null
+          lesson_type?: string | null
+          module_id?: string | null
+          order_index?: number | null
+          pdf_url?: string | null
+          required?: boolean | null
+          title?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_program_courses: {
+        Row: {
+          course_id: string | null
+          created_at: string | null
+          id: string | null
+          order_index: number | null
+          program_id: string | null
+          required: boolean | null
+          unlock_after: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_index?: number | null
+          program_id?: string | null
+          required?: boolean | null
+          unlock_after?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_index?: number | null
+          program_id?: string | null
+          required?: boolean | null
+          unlock_after?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_training_assets_objects: {
+        Row: {
+          archived_at: string | null
+          bucket_id: string | null
+          created_at: string | null
+          id: string | null
+          is_delete_marker: boolean | null
+          is_versioned: boolean | null
+          last_accessed_at: string | null
+          metadata: Json | null
+          name: string | null
+          owner: string | null
+          owner_id: string | null
+          path_tokens: string[] | null
+          updated_at: string | null
+          user_metadata: Json | null
+          version: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          bucket_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_delete_marker?: boolean | null
+          is_versioned?: boolean | null
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          name?: string | null
+          owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
+          updated_at?: string | null
+          user_metadata?: Json | null
+          version?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          bucket_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_delete_marker?: boolean | null
+          is_versioned?: boolean | null
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          name?: string | null
+          owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
+          updated_at?: string | null
+          user_metadata?: Json | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_training_checklist_mappings: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_active: boolean | null
+          notes: string | null
+          requirement_key: string | null
+          training_topic_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          notes?: string | null
+          requirement_key?: string | null
+          training_topic_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          notes?: string | null
+          requirement_key?: string | null
+          training_topic_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_training_modules: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          mindsmith_url: string | null
+          sequence_order: number | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          mindsmith_url?: string | null
+          sequence_order?: number | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          mindsmith_url?: string | null
+          sequence_order?: number | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_training_programs: {
+        Row: {
+          annual_renewal: boolean | null
+          category: string | null
+          cover_url: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_global: boolean | null
+          is_published: boolean | null
+          name: string | null
+          organization_id: string | null
+          slug: string | null
+          validity_months: number | null
+        }
+        Insert: {
+          annual_renewal?: boolean | null
+          category?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_global?: boolean | null
+          is_published?: boolean | null
+          name?: string | null
+          organization_id?: string | null
+          slug?: string | null
+          validity_months?: number | null
+        }
+        Update: {
+          annual_renewal?: boolean | null
+          category?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_global?: boolean | null
+          is_published?: boolean | null
+          name?: string | null
+          organization_id?: string | null
+          slug?: string | null
+          validity_months?: number | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_training_topics: {
+        Row: {
+          attestation_statement: string | null
+          category: string | null
+          code: string | null
+          created_at: string | null
+          default_hours: number | null
+          description: string | null
+          dspd_letter: string | null
+          id: string | null
+          mindsmith_url: string | null
+          sort_order: number | null
+          title: string | null
+        }
+        Insert: {
+          attestation_statement?: string | null
+          category?: string | null
+          code?: string | null
+          created_at?: string | null
+          default_hours?: number | null
+          description?: string | null
+          dspd_letter?: string | null
+          id?: string | null
+          mindsmith_url?: string | null
+          sort_order?: number | null
+          title?: string | null
+        }
+        Update: {
+          attestation_statement?: string | null
+          category?: string | null
+          code?: string | null
+          created_at?: string | null
+          default_hours?: number | null
+          description?: string | null
+          dspd_letter?: string | null
+          id?: string | null
+          mindsmith_url?: string | null
+          sort_order?: number | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_user_training_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          id: string | null
+          is_completed: boolean | null
+          module_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_completed?: boolean | null
+          module_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_completed?: boolean | null
+          module_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       access_assignments: {
         Row: {
           created_at: string
@@ -1924,76 +2506,6 @@ export type Database = {
           tier?: number
         }
         Relationships: []
-      }
-      certifications: {
-        Row: {
-          certification_type_code: string | null
-          course_id: string
-          course_title: string | null
-          created_at: string
-          expires_at: string | null
-          id: string
-          issued_at: string
-          organization_id: string
-          origin: string | null
-          recipient_name: string | null
-          requirement_id: string | null
-          user_id: string
-          verification_code: string
-        }
-        Insert: {
-          certification_type_code?: string | null
-          course_id: string
-          course_title?: string | null
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          issued_at?: string
-          organization_id: string
-          origin?: string | null
-          recipient_name?: string | null
-          requirement_id?: string | null
-          user_id: string
-          verification_code?: string
-        }
-        Update: {
-          certification_type_code?: string | null
-          course_id?: string
-          course_title?: string | null
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          issued_at?: string
-          organization_id?: string
-          origin?: string | null
-          recipient_name?: string | null
-          requirement_id?: string | null
-          user_id?: string
-          verification_code?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "certifications_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "certifications_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "certifications_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       client_approved_locations: {
         Row: {
@@ -4894,157 +5406,6 @@ export type Database = {
           },
         ]
       }
-      course_assignments: {
-        Row: {
-          assigned_by: string | null
-          completed_at: string | null
-          course_id: string
-          created_at: string
-          due_date: string | null
-          id: string
-          organization_id: string
-          progress: number
-          status: Database["public"]["Enums"]["assignment_status"]
-          user_id: string
-        }
-        Insert: {
-          assigned_by?: string | null
-          completed_at?: string | null
-          course_id: string
-          created_at?: string
-          due_date?: string | null
-          id?: string
-          organization_id: string
-          progress?: number
-          status?: Database["public"]["Enums"]["assignment_status"]
-          user_id: string
-        }
-        Update: {
-          assigned_by?: string | null
-          completed_at?: string | null
-          course_id?: string
-          created_at?: string
-          due_date?: string | null
-          id?: string
-          organization_id?: string
-          progress?: number
-          status?: Database["public"]["Enums"]["assignment_status"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_assignments_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_assignments_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      course_modules: {
-        Row: {
-          body: string | null
-          course_id: string
-          created_at: string
-          id: string
-          order_index: number
-          pdf_url: string | null
-          quiz: Json | null
-          title: string
-          video_url: string | null
-        }
-        Insert: {
-          body?: string | null
-          course_id: string
-          created_at?: string
-          id?: string
-          order_index?: number
-          pdf_url?: string | null
-          quiz?: Json | null
-          title: string
-          video_url?: string | null
-        }
-        Update: {
-          body?: string | null
-          course_id?: string
-          created_at?: string
-          id?: string
-          order_index?: number
-          pdf_url?: string | null
-          quiz?: Json | null
-          title?: string
-          video_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_modules_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courses: {
-        Row: {
-          category: string | null
-          certificate_validity_months: number | null
-          cover_url: string | null
-          created_at: string
-          created_by: string | null
-          description: string | null
-          duration_minutes: number | null
-          id: string
-          is_global: boolean
-          is_published: boolean
-          organization_id: string | null
-          title: string
-        }
-        Insert: {
-          category?: string | null
-          certificate_validity_months?: number | null
-          cover_url?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          duration_minutes?: number | null
-          id?: string
-          is_global?: boolean
-          is_published?: boolean
-          organization_id?: string | null
-          title: string
-        }
-        Update: {
-          category?: string | null
-          certificate_validity_months?: number | null
-          cover_url?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          duration_minutes?: number | null
-          id?: string
-          is_global?: boolean
-          is_published?: boolean
-          organization_id?: string | null
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       custom_field_definitions: {
         Row: {
           created_at: string
@@ -6683,63 +7044,6 @@ export type Database = {
           id?: string
           sender_user_id?: string
           subject?: string
-        }
-        Relationships: []
-      }
-      external_certifications: {
-        Row: {
-          cert_name: string | null
-          cert_type: string
-          certification_type_id: string | null
-          created_at: string
-          expires_at: string | null
-          file_url: string | null
-          id: string
-          issued_date: string | null
-          issuer: string | null
-          organization_id: string
-          renewal_reminder_sent_at: string | null
-          reviewed_at: string | null
-          reviewer_id: string | null
-          reviewer_notes: string | null
-          status: Database["public"]["Enums"]["external_cert_status"]
-          user_id: string
-        }
-        Insert: {
-          cert_name?: string | null
-          cert_type: string
-          certification_type_id?: string | null
-          created_at?: string
-          expires_at?: string | null
-          file_url?: string | null
-          id?: string
-          issued_date?: string | null
-          issuer?: string | null
-          organization_id: string
-          renewal_reminder_sent_at?: string | null
-          reviewed_at?: string | null
-          reviewer_id?: string | null
-          reviewer_notes?: string | null
-          status?: Database["public"]["Enums"]["external_cert_status"]
-          user_id: string
-        }
-        Update: {
-          cert_name?: string | null
-          cert_type?: string
-          certification_type_id?: string | null
-          created_at?: string
-          expires_at?: string | null
-          file_url?: string | null
-          id?: string
-          issued_date?: string | null
-          issuer?: string | null
-          organization_id?: string
-          renewal_reminder_sent_at?: string | null
-          reviewed_at?: string | null
-          reviewer_id?: string | null
-          reviewer_notes?: string | null
-          status?: Database["public"]["Enums"]["external_cert_status"]
-          user_id?: string
         }
         Relationships: []
       }
@@ -8423,62 +8727,6 @@ export type Database = {
           },
         ]
       }
-      hive_training_auto_renew_settings: {
-        Row: {
-          created_at: string
-          enabled: boolean
-          last_run_at: string | null
-          lead_days: number
-          organization_id: string
-          paused_reason: string | null
-          payment_method_brand: string | null
-          payment_method_last4: string | null
-          scope: Database["public"]["Enums"]["hive_training_auto_renew_scope"]
-          selected_catalog_ids: string[]
-          stripe_customer_id: string | null
-          stripe_payment_method_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          enabled?: boolean
-          last_run_at?: string | null
-          lead_days?: number
-          organization_id: string
-          paused_reason?: string | null
-          payment_method_brand?: string | null
-          payment_method_last4?: string | null
-          scope?: Database["public"]["Enums"]["hive_training_auto_renew_scope"]
-          selected_catalog_ids?: string[]
-          stripe_customer_id?: string | null
-          stripe_payment_method_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          enabled?: boolean
-          last_run_at?: string | null
-          lead_days?: number
-          organization_id?: string
-          paused_reason?: string | null
-          payment_method_brand?: string | null
-          payment_method_last4?: string | null
-          scope?: Database["public"]["Enums"]["hive_training_auto_renew_scope"]
-          selected_catalog_ids?: string[]
-          stripe_customer_id?: string | null
-          stripe_payment_method_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hive_training_auto_renew_settings_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: true
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       hive_training_catalog: {
         Row: {
           active: boolean
@@ -8526,44 +8774,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      hive_training_certificates: {
-        Row: {
-          assignment_id: string
-          code: string
-          created_at: string
-          expires_at: string | null
-          id: string
-          issued_at: string
-          pdf_url: string | null
-        }
-        Insert: {
-          assignment_id: string
-          code: string
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          issued_at?: string
-          pdf_url?: string | null
-        }
-        Update: {
-          assignment_id?: string
-          code?: string
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          issued_at?: string
-          pdf_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hive_training_certificates_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "hive_training_assignments"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       hive_training_course_modules: {
         Row: {
@@ -8658,51 +8868,6 @@ export type Database = {
             columns: ["catalog_id"]
             isOneToOne: false
             referencedRelation: "hive_training_catalog"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hive_training_module_progress: {
-        Row: {
-          assignment_id: string
-          completed_at: string | null
-          created_at: string
-          id: string
-          module_id: string
-          quiz_score: number | null
-          updated_at: string
-        }
-        Insert: {
-          assignment_id: string
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          module_id: string
-          quiz_score?: number | null
-          updated_at?: string
-        }
-        Update: {
-          assignment_id?: string
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          module_id?: string
-          quiz_score?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hive_training_module_progress_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "hive_training_assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hive_training_module_progress_module_id_fkey"
-            columns: ["module_id"]
-            isOneToOne: false
-            referencedRelation: "hive_training_course_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -10265,134 +10430,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lesson_progress: {
-        Row: {
-          assignment_id: string | null
-          completed: boolean
-          completed_at: string
-          id: string
-          lesson_id: string
-          user_id: string
-        }
-        Insert: {
-          assignment_id?: string | null
-          completed?: boolean
-          completed_at?: string
-          id?: string
-          lesson_id: string
-          user_id: string
-        }
-        Update: {
-          assignment_id?: string | null
-          completed?: boolean
-          completed_at?: string
-          id?: string
-          lesson_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_progress_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "course_assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_progress_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lesson_quiz_attempts: {
-        Row: {
-          answers: Json
-          created_at: string
-          id: string
-          lesson_id: string
-          passed: boolean
-          score: number
-          total: number
-          user_id: string
-        }
-        Insert: {
-          answers?: Json
-          created_at?: string
-          id?: string
-          lesson_id: string
-          passed?: boolean
-          score?: number
-          total?: number
-          user_id: string
-        }
-        Update: {
-          answers?: Json
-          created_at?: string
-          id?: string
-          lesson_id?: string
-          passed?: boolean
-          score?: number
-          total?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
-      lessons: {
-        Row: {
-          content: string | null
-          created_at: string
-          data: Json
-          duration_minutes: number | null
-          id: string
-          lesson_type: string
-          module_id: string
-          order_index: number
-          pdf_url: string | null
-          required: boolean
-          title: string
-          video_url: string | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string
-          data?: Json
-          duration_minutes?: number | null
-          id?: string
-          lesson_type?: string
-          module_id: string
-          order_index?: number
-          pdf_url?: string | null
-          required?: boolean
-          title: string
-          video_url?: string | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string
-          data?: Json
-          duration_minutes?: number | null
-          id?: string
-          lesson_type?: string
-          module_id?: string
-          order_index?: number
-          pdf_url?: string | null
-          required?: boolean
-          title?: string
-          video_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lessons_module_id_fkey"
-            columns: ["module_id"]
-            isOneToOne: false
-            referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -12699,53 +12736,6 @@ export type Database = {
           },
         ]
       }
-      org_training_orders: {
-        Row: {
-          amount_cents: number
-          created_at: string
-          id: string
-          organization_id: string
-          selected_modules: Json
-          staff_count: number
-          status: string
-          stripe_payment_intent_id: string | null
-          training_type: string
-          updated_at: string
-        }
-        Insert: {
-          amount_cents?: number
-          created_at?: string
-          id?: string
-          organization_id: string
-          selected_modules?: Json
-          staff_count?: number
-          status?: string
-          stripe_payment_intent_id?: string | null
-          training_type: string
-          updated_at?: string
-        }
-        Update: {
-          amount_cents?: number
-          created_at?: string
-          id?: string
-          organization_id?: string
-          selected_modules?: Json
-          staff_count?: number
-          status?: string
-          stripe_payment_intent_id?: string | null
-          training_type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_training_orders_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       organization_agreements: {
         Row: {
           created_at: string
@@ -13620,147 +13610,6 @@ export type Database = {
           },
         ]
       }
-      program_acknowledgements: {
-        Row: {
-          acknowledged_at: string
-          course_id: string
-          id: string
-          program_assignment_id: string
-          user_id: string
-        }
-        Insert: {
-          acknowledged_at?: string
-          course_id: string
-          id?: string
-          program_assignment_id: string
-          user_id: string
-        }
-        Update: {
-          acknowledged_at?: string
-          course_id?: string
-          id?: string
-          program_assignment_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "program_acknowledgements_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "program_acknowledgements_program_assignment_id_fkey"
-            columns: ["program_assignment_id"]
-            isOneToOne: false
-            referencedRelation: "program_assignments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      program_assignments: {
-        Row: {
-          assigned_by: string | null
-          completed_at: string | null
-          created_at: string
-          due_date: string | null
-          expires_at: string | null
-          id: string
-          organization_id: string
-          program_id: string
-          progress: number
-          status: Database["public"]["Enums"]["assignment_status"]
-          user_id: string
-        }
-        Insert: {
-          assigned_by?: string | null
-          completed_at?: string | null
-          created_at?: string
-          due_date?: string | null
-          expires_at?: string | null
-          id?: string
-          organization_id: string
-          program_id: string
-          progress?: number
-          status?: Database["public"]["Enums"]["assignment_status"]
-          user_id: string
-        }
-        Update: {
-          assigned_by?: string | null
-          completed_at?: string | null
-          created_at?: string
-          due_date?: string | null
-          expires_at?: string | null
-          id?: string
-          organization_id?: string
-          program_id?: string
-          progress?: number
-          status?: Database["public"]["Enums"]["assignment_status"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "program_assignments_program_id_fkey"
-            columns: ["program_id"]
-            isOneToOne: false
-            referencedRelation: "training_programs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      program_courses: {
-        Row: {
-          course_id: string
-          created_at: string
-          id: string
-          order_index: number
-          program_id: string
-          required: boolean
-          unlock_after: string | null
-        }
-        Insert: {
-          course_id: string
-          created_at?: string
-          id?: string
-          order_index?: number
-          program_id: string
-          required?: boolean
-          unlock_after?: string | null
-        }
-        Update: {
-          course_id?: string
-          created_at?: string
-          id?: string
-          order_index?: number
-          program_id?: string
-          required?: boolean
-          unlock_after?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "program_courses_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "program_courses_program_id_fkey"
-            columns: ["program_id"]
-            isOneToOne: false
-            referencedRelation: "training_programs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "program_courses_unlock_after_fkey"
-            columns: ["unlock_after"]
-            isOneToOne: false
-            referencedRelation: "program_courses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       provider_authorized_codes: {
         Row: {
           added_by: string | null
@@ -13941,78 +13790,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "provider_ledger_entries_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      provider_training_modules: {
-        Row: {
-          attestation_statement: string
-          client_id: string | null
-          created_at: string
-          created_by: string | null
-          est_min: number
-          id: string
-          intro: string | null
-          kind: Database["public"]["Enums"]["provider_training_kind"]
-          organization_id: string
-          person_label: string | null
-          source_doc_name: string | null
-          status: Database["public"]["Enums"]["provider_training_status"]
-          steps: Json
-          title: string
-          updated_at: string
-          version: number
-        }
-        Insert: {
-          attestation_statement: string
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          est_min?: number
-          id?: string
-          intro?: string | null
-          kind: Database["public"]["Enums"]["provider_training_kind"]
-          organization_id: string
-          person_label?: string | null
-          source_doc_name?: string | null
-          status?: Database["public"]["Enums"]["provider_training_status"]
-          steps?: Json
-          title: string
-          updated_at?: string
-          version?: number
-        }
-        Update: {
-          attestation_statement?: string
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          est_min?: number
-          id?: string
-          intro?: string | null
-          kind?: Database["public"]["Enums"]["provider_training_kind"]
-          organization_id?: string
-          person_label?: string | null
-          source_doc_name?: string | null
-          status?: Database["public"]["Enums"]["provider_training_status"]
-          steps?: Json
-          title?: string
-          updated_at?: string
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "provider_training_modules_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "provider_training_modules_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -15539,89 +15316,6 @@ export type Database = {
         }
         Relationships: []
       }
-      staff_baseline_training_completions: {
-        Row: {
-          admin_signed_off_at: string | null
-          admin_signed_off_by: string | null
-          completed_by: string | null
-          completed_date: string | null
-          created_at: string
-          evidence_document_id: string | null
-          expires_at: string | null
-          id: string
-          nectar_extracted_cert_type: string | null
-          nectar_extracted_completed_date: string | null
-          nectar_extracted_name: string | null
-          nectar_extracted_summary: string | null
-          nectar_name_match: string | null
-          nectar_reviewed_at: string | null
-          nectar_suggested_expires: boolean
-          nectar_validation_reasons: Json | null
-          nectar_validation_status: string | null
-          notes: string | null
-          organization_id: string
-          staff_id: string
-          training_key: string
-          updated_at: string
-        }
-        Insert: {
-          admin_signed_off_at?: string | null
-          admin_signed_off_by?: string | null
-          completed_by?: string | null
-          completed_date?: string | null
-          created_at?: string
-          evidence_document_id?: string | null
-          expires_at?: string | null
-          id?: string
-          nectar_extracted_cert_type?: string | null
-          nectar_extracted_completed_date?: string | null
-          nectar_extracted_name?: string | null
-          nectar_extracted_summary?: string | null
-          nectar_name_match?: string | null
-          nectar_reviewed_at?: string | null
-          nectar_suggested_expires?: boolean
-          nectar_validation_reasons?: Json | null
-          nectar_validation_status?: string | null
-          notes?: string | null
-          organization_id: string
-          staff_id: string
-          training_key: string
-          updated_at?: string
-        }
-        Update: {
-          admin_signed_off_at?: string | null
-          admin_signed_off_by?: string | null
-          completed_by?: string | null
-          completed_date?: string | null
-          created_at?: string
-          evidence_document_id?: string | null
-          expires_at?: string | null
-          id?: string
-          nectar_extracted_cert_type?: string | null
-          nectar_extracted_completed_date?: string | null
-          nectar_extracted_name?: string | null
-          nectar_extracted_summary?: string | null
-          nectar_name_match?: string | null
-          nectar_reviewed_at?: string | null
-          nectar_suggested_expires?: boolean
-          nectar_validation_reasons?: Json | null
-          nectar_validation_status?: string | null
-          notes?: string | null
-          organization_id?: string
-          staff_id?: string
-          training_key?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "staff_baseline_training_completions_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       staff_checklist_completion: {
         Row: {
           auto_checked_at: string | null
@@ -16665,44 +16359,6 @@ export type Database = {
         }
         Relationships: []
       }
-      training_checklist_mappings: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean
-          notes: string | null
-          requirement_key: string
-          training_topic_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          notes?: string | null
-          requirement_key: string
-          training_topic_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          notes?: string | null
-          requirement_key?: string
-          training_topic_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_checklist_mappings_training_topic_id_fkey"
-            columns: ["training_topic_id"]
-            isOneToOne: false
-            referencedRelation: "training_topics"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       training_class_roster: {
         Row: {
           card_filename: string | null
@@ -16927,204 +16583,6 @@ export type Database = {
         }
         Relationships: []
       }
-      training_modules: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          mindsmith_url: string | null
-          sequence_order: number
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          sequence_order: number
-          title: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          sequence_order?: number
-          title?: string
-        }
-        Relationships: []
-      }
-      training_person_modules: {
-        Row: {
-          attestation_statement: string
-          client_id: string | null
-          created_at: string
-          description: string | null
-          id: string
-          mindsmith_url: string | null
-          organization_id: string
-          title: string
-          user_id: string
-        }
-        Insert: {
-          attestation_statement?: string
-          client_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          organization_id: string
-          title: string
-          user_id: string
-        }
-        Update: {
-          attestation_statement?: string
-          client_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          organization_id?: string
-          title?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_person_modules_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      training_programs: {
-        Row: {
-          annual_renewal: boolean
-          category: string | null
-          cover_url: string | null
-          created_at: string
-          created_by: string | null
-          description: string | null
-          estimated_minutes: number | null
-          id: string
-          is_global: boolean
-          is_published: boolean
-          name: string
-          organization_id: string | null
-          slug: string
-          validity_months: number | null
-        }
-        Insert: {
-          annual_renewal?: boolean
-          category?: string | null
-          cover_url?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          estimated_minutes?: number | null
-          id?: string
-          is_global?: boolean
-          is_published?: boolean
-          name: string
-          organization_id?: string | null
-          slug: string
-          validity_months?: number | null
-        }
-        Update: {
-          annual_renewal?: boolean
-          category?: string | null
-          cover_url?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          estimated_minutes?: number | null
-          id?: string
-          is_global?: boolean
-          is_published?: boolean
-          name?: string
-          organization_id?: string | null
-          slug?: string
-          validity_months?: number | null
-        }
-        Relationships: []
-      }
-      training_runs: {
-        Row: {
-          completed_at: string | null
-          course_key: string | null
-          created_at: string
-          evidence_file_id: string | null
-          id: string
-          instance_id: string | null
-          organization_id: string
-          passed: boolean | null
-          requirement_key: string | null
-          score: number | null
-          source_system: string
-          started_at: string | null
-          subject_id: string
-          subject_kind: string
-          updated_at: string
-        }
-        Insert: {
-          completed_at?: string | null
-          course_key?: string | null
-          created_at?: string
-          evidence_file_id?: string | null
-          id?: string
-          instance_id?: string | null
-          organization_id: string
-          passed?: boolean | null
-          requirement_key?: string | null
-          score?: number | null
-          source_system?: string
-          started_at?: string | null
-          subject_id: string
-          subject_kind?: string
-          updated_at?: string
-        }
-        Update: {
-          completed_at?: string | null
-          course_key?: string | null
-          created_at?: string
-          evidence_file_id?: string | null
-          id?: string
-          instance_id?: string | null
-          organization_id?: string
-          passed?: boolean | null
-          requirement_key?: string | null
-          score?: number | null
-          source_system?: string
-          started_at?: string | null
-          subject_id?: string
-          subject_kind?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_runs_evidence_file_id_fkey"
-            columns: ["evidence_file_id"]
-            isOneToOne: false
-            referencedRelation: "file_records"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_runs_instance_id_fkey"
-            columns: ["instance_id"]
-            isOneToOne: false
-            referencedRelation: "obligation_instances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_runs_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       training_topic_progress: {
         Row: {
           id: string
@@ -17152,48 +16610,6 @@ export type Database = {
           topic_kind?: Database["public"]["Enums"]["training_topic_kind"]
           updated_at?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      training_topics: {
-        Row: {
-          attestation_statement: string
-          category: string
-          code: string
-          created_at: string
-          default_hours: number | null
-          description: string | null
-          dspd_letter: string | null
-          id: string
-          mindsmith_url: string | null
-          sort_order: number
-          title: string
-        }
-        Insert: {
-          attestation_statement?: string
-          category: string
-          code: string
-          created_at?: string
-          default_hours?: number | null
-          description?: string | null
-          dspd_letter?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          sort_order?: number
-          title: string
-        }
-        Update: {
-          attestation_statement?: string
-          category?: string
-          code?: string
-          created_at?: string
-          default_hours?: number | null
-          description?: string | null
-          dspd_letter?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          sort_order?: number
-          title?: string
         }
         Relationships: []
       }
@@ -17261,41 +16677,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      user_training_progress: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          id: string
-          is_completed: boolean
-          module_id: string
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          is_completed?: boolean
-          module_id: string
-          user_id: string
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          is_completed?: boolean
-          module_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_training_progress_module_id_fkey"
-            columns: ["module_id"]
-            isOneToOne: false
-            referencedRelation: "training_modules"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_ui_dismissals: {
         Row: {
@@ -18083,31 +17464,10 @@ export type Database = {
         Returns: boolean
       }
       user_org_ids: { Args: { _user: string }; Returns: string[] }
-      verify_certificate: {
-        Args: { p_code: string }
-        Returns: {
-          course_title: string
-          expires_at: string
-          issued_at: string
-          recipient_name: string
-          verification_code: string
-        }[]
-      }
-      verify_certification: {
-        Args: { _code: string }
-        Returns: {
-          course_title: string
-          expires_at: string
-          issued_at: string
-          recipient_name: string
-          verification_code: string
-        }[]
-      }
     }
     Enums: {
       access_level: "owner" | "admin" | "staff"
       agreement_status: "not_started" | "sent" | "signed" | "expired"
-      assignment_status: "not_started" | "in_progress" | "completed" | "overdue"
       bc_behavior_source: "nectar" | "manual"
       bc_behavior_status: "draft" | "approved" | "published" | "archived"
       bc_code: "BC1" | "BC2" | "BC3"
@@ -18138,7 +17498,6 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "expired"
-      hive_training_auto_renew_scope: "all" | "full_program" | "selected"
       hive_training_catalog_kind: "full_program" | "ala_carte"
       hive_training_order_model: "bulk_seats" | "individual"
       hive_training_seat_status: "available" | "assigned" | "consumed"
@@ -18297,7 +17656,6 @@ export const Constants = {
     Enums: {
       access_level: ["owner", "admin", "staff"],
       agreement_status: ["not_started", "sent", "signed", "expired"],
-      assignment_status: ["not_started", "in_progress", "completed", "overdue"],
       bc_behavior_source: ["nectar", "manual"],
       bc_behavior_status: ["draft", "approved", "published", "archived"],
       bc_code: ["BC1", "BC2", "BC3"],
@@ -18330,7 +17688,6 @@ export const Constants = {
         "completed",
         "expired",
       ],
-      hive_training_auto_renew_scope: ["all", "full_program", "selected"],
       hive_training_catalog_kind: ["full_program", "ala_carte"],
       hive_training_order_model: ["bulk_seats", "individual"],
       hive_training_seat_status: ["available", "assigned", "consumed"],
