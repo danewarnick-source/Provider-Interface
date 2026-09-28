@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { checkHiveExecutive } from "@/lib/hive-exec.functions";
+import { checkHiveExecutive } from "@/lib/hive-exec/hive-exec.functions";
 import { useAuth } from "./use-auth";
 
 export function useIsHiveExecutive() {

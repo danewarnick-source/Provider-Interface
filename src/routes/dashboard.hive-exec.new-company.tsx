@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Building2, UserPlus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { createCompany } from "@/lib/hive-exec-admin.functions";
+import { createCompany } from "@/lib/hive-exec/hive-exec-admin.functions";
 
 export const Route = createFileRoute("/dashboard/hive-exec/new-company")({
   head: () => ({ meta: [{ title: "Add New Company — Provider Interface Executive" }] }),

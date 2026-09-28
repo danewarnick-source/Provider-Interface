@@ -6,8 +6,8 @@ import {
   execAggregateAllowed,
   sumClockedHours,
   usageCounts,
-} from "./exec-aggregates.ts";
-import { findDuplicateClientInOrg, mayRunOrgWideClientDedup } from "./smart-import/smart-import-dedup.ts";
+} from "../hive-exec/exec-aggregates.ts";
+import { findDuplicateClientInOrg, mayRunOrgWideClientDedup } from "../smart-import/smart-import-dedup.ts";
 
 describe("executive aggregate counts (item 9)", () => {
   it("allows service-role totals only after a successful is_hive_executive check", () => {
@@ -58,7 +58,7 @@ describe("executive aggregate counts (item 9)", () => {
   });
 
   it("reads client counts and evv timesheets with the service role behind is_hive_executive", () => {
-    const src = readFileSync(new URL("./hive-exec.functions.ts", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../hive-exec/hive-exec.functions.ts", import.meta.url), "utf8");
     assert.match(src, /is_hive_executive/);
     assert.match(src, /supabaseAdmin/);
     assert.match(src, /loadExecUsageAggregates/);

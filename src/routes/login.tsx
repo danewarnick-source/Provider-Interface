@@ -13,7 +13,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/use-auth";
 import { useServerFn } from "@tanstack/react-start";
 import { signInWithUsername } from "@/lib/auth/login.functions";
-import { checkHiveExecutive } from "@/lib/hive-exec.functions";
+import { checkHiveExecutive } from "@/lib/hive-exec/hive-exec.functions";
 import { completePasswordSignIn, GENERIC_LOGIN_ERROR } from "@/lib/auth/login-auth";
 import { trainingOnlyHomeForMeFn } from "@/lib/training/training-only-access.functions";
 import { ensureSignupWorkspace } from "@/lib/auth/signup-workspace.functions";

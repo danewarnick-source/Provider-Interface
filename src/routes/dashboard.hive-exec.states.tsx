@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin, Star, Building2, X, Sparkles, Copy } from "lucide-react";
 import { useState } from "react";
-import { listPlatformStates } from "@/lib/state-templates.functions";
+import { listPlatformStates } from "@/lib/state/state-templates.functions";
 
 export const Route = createFileRoute("/dashboard/hive-exec/states")({
   head: () => ({ meta: [{ title: "States — Provider Interface Executive" }] }),

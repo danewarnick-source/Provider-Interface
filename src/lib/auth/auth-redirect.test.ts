@@ -164,7 +164,7 @@ describe("auth email call sites do not hardcode Lovable", () => {
     const signup = readFileSync(new URL("../../routes/signup.tsx", import.meta.url), "utf8");
     const auditor = readFileSync(new URL("../../routes/auditor.tsx", import.meta.url), "utf8");
     const hiveExec = readFileSync(
-      new URL(".././hive-exec-admin.functions.ts", import.meta.url),
+      new URL("../hive-exec/hive-exec-admin.functions.ts", import.meta.url),
       "utf8",
     );
     assert.match(signup, /authRedirectUrl\("\/signup"\)/);

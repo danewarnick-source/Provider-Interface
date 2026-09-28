@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Activity, AlertTriangle, TrendingUp, Users, Clock } from "lucide-react";
 import { RequireHiveExecutive } from "@/components/hive-executive-guard";
-import { listCompanies, type CompanyRow } from "@/lib/hive-exec.functions";
+import { listCompanies, type CompanyRow } from "@/lib/hive-exec/hive-exec.functions";
 
 export const Route = createFileRoute("/dashboard/hive-exec/health")({
   head: () => ({ meta: [{ title: "Account Health — Provider Interface Executive" }] }),

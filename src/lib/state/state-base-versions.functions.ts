@@ -5,7 +5,7 @@ import {
   diffBaseSchemas,
   type BaseTemplateSchema,
   type BaseTemplateVersion,
-} from "./state-base-versions";
+} from "../state/state-base-versions.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function ensureExecutive(supabase: any, userId: string): Promise<void> {

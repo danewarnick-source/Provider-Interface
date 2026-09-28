@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Sparkles, ShieldCheck, FileSignature, Wrench, DollarSign, Building2, AlertTriangle, ShieldAlert } from "lucide-react";
-import { getCommandMetrics, getNeedsYouSummary } from "@/lib/exec-command.functions";
+import { getCommandMetrics, getNeedsYouSummary } from "@/lib/hive-exec/exec-command.functions";
 import { SteveDockPanel } from "@/components/hive-exec/command/steve-panel";
 import { OpenCompanyViews } from "@/components/hive-exec/open-company-views";
 

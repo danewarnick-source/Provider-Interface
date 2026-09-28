@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { projectAnswersToTemplate, templateToAnswers } from "./state-onboarding";
+import { projectAnswersToTemplate, templateToAnswers } from "../state/state-onboarding.ts";
 
 const STATE_CODE_RE = /^[A-Z]{2}$/;
 

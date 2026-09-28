@@ -20,7 +20,7 @@ import {
   GraduationCap,
   type LucideIcon,
 } from "lucide-react";
-import type { ExecCapability } from "@/lib/exec-capabilities";
+import type { ExecCapability } from "./exec-capabilities.ts";
 
 export type ExecNavItem = {
   to: string;

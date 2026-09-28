@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { Building2, Search, AlertTriangle, Lock, Users, Contact2, DollarSign, Sparkles, ArrowRight } from "lucide-react";
-import { getExecKpis, listCompanies, type CompanyRow } from "@/lib/hive-exec.functions";
+import { getExecKpis, listCompanies, type CompanyRow } from "@/lib/hive-exec/hive-exec.functions";
 import { getPendingUpgradeRequestCount } from "@/lib/agency/org-features.functions";
 import { listRecentTrainingClassAlerts } from "@/lib/training/training-class.functions";
 import { formatRosterContactLine, trainingClassLabel } from "@/lib/training/training-class";

@@ -10,7 +10,7 @@ import {
   upsertSubscription,
   getExecKpis,
   type CompanyRow,
-} from "@/lib/hive-exec.functions";
+} from "@/lib/hive-exec/hive-exec.functions";
 import { setOrgBillingExemptFn } from "@/lib/billing/billing-exempt.functions";
 import { setOrgPricingScheduleFn } from "@/lib/hive-pricing.functions";
 import {

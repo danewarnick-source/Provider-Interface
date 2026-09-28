@@ -6,7 +6,7 @@ import {
   execAggregateAllowed,
   sumClockedHours,
   usageCounts,
-} from "@/lib/exec-aggregates";
+} from "./exec-aggregates.ts";
 import {
   quoteHiveSubscription,
   type PricingSchedule,

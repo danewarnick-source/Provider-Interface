@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { LifeBuoy } from "lucide-react";
-import { listAllTickets, updateTicket } from "@/lib/hive-exec.functions";
+import { listAllTickets, updateTicket } from "@/lib/hive-exec/hive-exec.functions";
 
 export const Route = createFileRoute("/dashboard/hive-exec/tickets")({
   component: TicketsPage,

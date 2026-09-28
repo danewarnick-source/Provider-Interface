@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { allSowCatalogEntries } from "./compliance/sow-obligation-catalog.ts";
+import { allSowCatalogEntries } from "../compliance/sow-obligation-catalog.ts";
 import {
   WY_EMPTY_SHELL_MESSAGE,
   catalogForState,
   emptyCatalogShellMessage,
   isCatalogStateCode,
   normalizeStateCode,
-} from "./state-catalog.ts";
+} from "../state/state-catalog.ts";
 
 describe("catalogForState", () => {
   it("returns the full UT pack and empty ID/WY shells", () => {
@@ -41,7 +41,7 @@ describe("catalogForState", () => {
 
 describe("AUDIT_INSTRUMENTS ID/WY empty", () => {
   it("declares UT plus empty ID and WY shells", () => {
-    const auditSrc = readFileSync(new URL("./dspd-audit-tool.ts", import.meta.url), "utf8");
+    const auditSrc = readFileSync(new URL("../audit/dspd-audit-tool.ts", import.meta.url), "utf8");
     assert.match(
       auditSrc,
       /export const AUDIT_INSTRUMENTS = \{\s*UT: DSPD_AUDIT_ITEMS,\s*ID: \[\] as const,\s*WY: \[\] as const,/s,

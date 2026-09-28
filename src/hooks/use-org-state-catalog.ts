@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { supabase } from "@/integrations/supabase/client";
-import { catalogForState, emptyCatalogShellMessage, normalizeStateCode } from "@/lib/state-catalog";
+import { catalogForState, emptyCatalogShellMessage, normalizeStateCode } from "@/lib/state/state-catalog";
 
 export function useOrgStateCatalog() {
   const { data: org, isLoading: orgLoading } = useCurrentOrg();

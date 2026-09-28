@@ -11,7 +11,7 @@ import {
   setHiveExecutiveByEmail,
   listAuditLog,
   type MemberRow,
-} from "@/lib/hive-exec-admin.functions";
+} from "@/lib/hive-exec/hive-exec-admin.functions";
 import { ACCESS_LEVELS, LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/hive-exec/permissions")({

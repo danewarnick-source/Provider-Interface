@@ -13,25 +13,25 @@ import {
   publishStateTemplate,
   updatePlatformStateBasics,
   listPlatformStates,
-} from "@/lib/state-templates.functions";
+} from "@/lib/state/state-templates.functions";
 import {
   previewStateBaseUpgrade,
   upgradeStateToBaseVersion,
-} from "@/lib/state-base-versions.functions";
+} from "@/lib/state/state-base-versions.functions";
 
 import {
   listStateRequirementSources,
   createStateRequirementSource,
   deleteStateRequirementSource,
   listStateProviders,
-} from "@/lib/state-requirements.functions";
+} from "@/lib/state/state-requirements.functions";
 import type {
   StateBillingCode, StateRequiredDoc, StateForm, StateTrainingMandate,
   StateCitation, StateCapsSection, StateRegulatorSection,
-} from "@/lib/state-templates";
-import { TEMPLATE_SECTIONS } from "@/lib/state-templates";
-import { STATE_INVENTORY, INVENTORY_AREAS, type InventoryItem } from "@/lib/state-inventory";
-import { listStructuralGaps, fileStructuralGap, updateStructuralGap } from "@/lib/state-structural-gaps.functions";
+} from "@/lib/state/state-templates";
+import { TEMPLATE_SECTIONS } from "@/lib/state/state-templates";
+import { STATE_INVENTORY, INVENTORY_AREAS, type InventoryItem } from "@/lib/state/state-inventory";
+import { listStructuralGaps, fileStructuralGap, updateStructuralGap } from "@/lib/state/state-structural-gaps.functions";
 
 
 export const Route = createFileRoute("/dashboard/hive-exec/states/$stateCode")({

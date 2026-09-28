@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { StateTemplate, TemplateSectionKey } from "./state-templates";
+import type { StateTemplate, TemplateSectionKey } from "../state/state-templates.ts";
 
 async function ensureExecutive(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

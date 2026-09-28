@@ -12,13 +12,13 @@ import {
   Wrench,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ONBOARDING_SECTIONS, type OnboardingField } from "@/lib/state-onboarding";
+import { ONBOARDING_SECTIONS, type OnboardingField } from "@/lib/state/state-onboarding";
 import {
   completeOnboardingSession,
   getOrCreateOnboardingSession,
   saveOnboardingProgress,
   type BuildFlag,
-} from "@/lib/state-onboarding.functions";
+} from "@/lib/state/state-onboarding.functions";
 import { z } from "zod";
 
 const onboardingSearchSchema = z.object({

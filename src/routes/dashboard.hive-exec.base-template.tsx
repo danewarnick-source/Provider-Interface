@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import {
   listBaseTemplateVersions,
   publishBaseTemplateVersion,
-} from "@/lib/state-base-versions.functions";
-import type { BaseTemplateSchema, BaseTemplateVersion } from "@/lib/state-base-versions";
+} from "@/lib/state/state-base-versions.functions";
+import type { BaseTemplateSchema, BaseTemplateVersion } from "@/lib/state/state-base-versions";
 
 export const Route = createFileRoute("/dashboard/hive-exec/base-template")({
   head: () => ({ meta: [{ title: "Base template versions — Provider Interface Executive" }] }),

@@ -14,7 +14,7 @@ import { Landmark, ArrowRight, ShieldCheck, Wand2, ListChecks, BookOpenCheck, Cr
 import { toast } from "sonner";
 import { OrgBrandingCard } from "@/components/settings/org-branding-card";
 import { ShiftBehaviorToggleCard } from "@/components/evv/shift-behavior-toggle-card";
-import { getAccountContact, updateAccountContact } from "@/lib/hive-exec.functions";
+import { getAccountContact, updateAccountContact } from "@/lib/hive-exec/hive-exec.functions";
 
 export const Route = createFileRoute("/dashboard/settings")({ component: SettingsPage });
 

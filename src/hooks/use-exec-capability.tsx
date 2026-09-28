@@ -4,7 +4,7 @@ import { useIsHiveExecutive } from "@/hooks/use-hive-executive";
 import {
   EXECUTIVE_ROLE_CAPABILITIES,
   type ExecCapability,
-} from "@/lib/exec-capabilities";
+} from "@/lib/hive-exec/exec-capabilities";
 
 export function useExecCapabilities(): {
   capabilities: ExecCapability[];

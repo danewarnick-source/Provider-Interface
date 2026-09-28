@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { PiMark } from "@/components/pi-landing/pi-mark";
 import { toast } from "sonner";
-import { listCompanies } from "@/lib/hive-exec.functions";
+import { listCompanies } from "@/lib/hive-exec/hive-exec.functions";
 import {
   listPlatformTickets,
   createPlatformTicket,

@@ -23,7 +23,7 @@ import {
   listSentExecMessages,
   type OrgForMessaging,
   type SentMessageRow,
-} from "@/lib/exec-messages.functions";
+} from "@/lib/hive-exec/exec-messages.functions";
 
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024; // 25 MB per file

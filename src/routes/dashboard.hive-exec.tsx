@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router"
 import { useState, useMemo } from "react";
 import { Shield, ShieldAlert, HelpCircle } from "lucide-react";
 import { RequireHiveExecutive } from "@/components/hive-executive-guard";
-import { EXEC_NAV } from "@/lib/exec-nav";
+import { EXEC_NAV } from "@/lib/hive-exec/exec-nav";
 import { useCapability } from "@/hooks/use-exec-capability";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";

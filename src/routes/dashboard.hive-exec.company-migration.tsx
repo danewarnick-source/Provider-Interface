@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { NectarGuidanceStrip } from "@/components/nectar/nectar-guidance-strip";
 import { RequireHiveExecutive } from "@/components/hive-executive-guard";
-import { listCompanies, type CompanyRow } from "@/lib/hive-exec.functions";
+import { listCompanies, type CompanyRow } from "@/lib/hive-exec/hive-exec.functions";
 import { createSmartImportJob } from "@/lib/smart-import/smart-import.functions";
 import {
   listMigrationJobs,
