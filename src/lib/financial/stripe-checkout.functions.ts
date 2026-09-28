@@ -49,7 +49,7 @@ import {
   type TrainingClassType,
 } from "@/lib/training/training-class";
 import { countPayingOrgs } from "../hive-exec/hive-pricing.functions.ts";
-import { resolveCurrentMembership } from "@/lib/current-org";
+import { resolveCurrentMembership } from "../shared/current-org.ts";
 import { highWaterClientCount } from "../public-site/pi-list-billing.server.ts";
 import {
   clampClientCount,

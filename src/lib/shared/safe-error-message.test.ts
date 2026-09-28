@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { safeErrorMessage } from "./safe-error-message.ts";
+import { safeErrorMessage } from "../shared/safe-error-message.ts";
 
 const LAST_RESORT = "Could not complete that request. Please try again.";
 

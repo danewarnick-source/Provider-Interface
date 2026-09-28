@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/shared/route-uuid";
 import { z } from "zod";
 import { useCaseload } from "@/hooks/use-caseload";
 import { useMyAssignments, allowedCodesFor, clientAuthorizedCodes } from "@/hooks/use-my-assignments";

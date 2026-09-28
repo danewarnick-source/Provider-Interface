@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "./use-org";
-import { denverYmd } from "@/lib/denver-date";
+import { denverYmd } from "@/lib/shared/denver-date";
 
 /**
  * Client IDs that already have a daily note for America/Denver today.

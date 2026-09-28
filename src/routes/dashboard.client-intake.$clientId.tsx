@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/shared/route-uuid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef } from "react";

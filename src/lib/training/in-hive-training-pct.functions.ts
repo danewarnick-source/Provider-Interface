@@ -20,7 +20,7 @@ import {
   type PctPublicCourse,
   type PctPublicQuizItem,
 } from "./in-hive-training-pct.ts";
-import contentJson from "../person-centered-training-content.json";
+import contentJson from "./person-centered-training-content.json";
 
 const PCT_CONTENT = contentJson as PctContentFile;
 const COURSE_ID = PCT_COURSE_ID as InHiveCourseId;

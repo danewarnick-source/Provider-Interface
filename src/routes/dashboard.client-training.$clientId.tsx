@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/shared/route-uuid";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";

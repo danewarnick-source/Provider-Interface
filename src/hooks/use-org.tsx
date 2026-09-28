@@ -8,7 +8,7 @@ import {
   persistActiveOrgId,
   readStoredActiveOrgId,
   resolveCurrentMembership,
-} from "@/lib/current-org";
+} from "@/lib/shared/current-org";
 import { isCognitoAuth } from "@/lib/aws/env";
 import { isAwsBootstrapFailure } from "@/lib/auth/cognito-login-gate";
 

@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { neutralizeCsvFormula } from "@/lib/csv-safe";
+import { neutralizeCsvFormula } from "@/lib/shared/csv-safe";
 import { RequirePermission } from "@/components/rbac-guard";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,

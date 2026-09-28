@@ -59,7 +59,7 @@ import {
 import {
   discardReferral,
   archiveAutoIngestedReferral,
-} from "@/lib/gmail.functions";
+} from "@/lib/agency/gmail.functions";
 import {
   PipelineStatsBar,
   ReferralDetailDialog,

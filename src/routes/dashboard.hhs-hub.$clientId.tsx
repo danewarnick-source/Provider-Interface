@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/shared/route-uuid";
 import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -29,7 +29,7 @@ import { HhsMarOverviewCalendar } from "@/components/hhs/hhs-mar-overview-calend
 import { toast } from "sonner";
 import { evaluateShiftNote } from "@/lib/nectar/ai-coach.functions";
 import { saveDailyRecord, savePrnForm, saveIncidentReport } from "@/lib/residential/hhs.functions";
-import { denverYmd } from "@/lib/denver-date";
+import { denverYmd } from "@/lib/shared/denver-date";
 import { invalidateStaffCaseloadWork } from "@/lib/staff/staff-caseload-cache";
 import { useClientFeature } from "@/lib/clients/client-features";
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Building2, ChevronDown, GraduationCap, Lock, MapPin } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import type { PortalView } from "@/hooks/use-portal-view";
 
 export type PortalViewOption = {

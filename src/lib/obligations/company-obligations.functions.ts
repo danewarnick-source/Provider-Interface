@@ -45,7 +45,7 @@ import {
   staffSeesDuty,
 } from "../obligations/duty-applicability";
 import { loadStaffDutyFactsInternal } from "../obligations/load-staff-duty-facts.functions";
-import { toIsoDateDay } from "../iso-date-day.ts";
+import { toIsoDateDay } from "../shared/iso-date-day.ts";
 import { isPackSentinel, obligationIsRequired } from "../obligations/obligation-packs";
 import { ORPHAN_OBLIGATION_CREATE_GONE } from "../compliance/compliance-spine";
 import {

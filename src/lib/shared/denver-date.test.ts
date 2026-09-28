@@ -9,7 +9,7 @@ import {
   parseYmd,
   weekdaySunday0,
   ymdFromParts,
-} from "./denver-date.ts";
+} from "../shared/denver-date.ts";
 
 describe("denver-date", () => {
   it("formats a known Mountain instant as the Denver calendar day", () => {

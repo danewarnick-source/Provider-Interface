@@ -9,7 +9,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
+import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/shared/route-uuid";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { toast } from "sonner";

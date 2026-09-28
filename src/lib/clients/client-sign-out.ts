@@ -7,7 +7,7 @@
  * form convenience, not a session.
  */
 
-import { ACTIVE_ORG_STORAGE_KEY } from "../current-org.ts";
+import { ACTIVE_ORG_STORAGE_KEY } from "../shared/current-org.ts";
 import { SESSION_HINT_KEY } from "../auth/auth-session-boot.ts";
 import { COGNITO_SESSION_KEY } from "../aws/session-store.ts";
 import { PORTAL_VIEW_CHANGE_EVENT, PORTAL_VIEW_KEY } from "../public-site/portal-view-landing.ts";

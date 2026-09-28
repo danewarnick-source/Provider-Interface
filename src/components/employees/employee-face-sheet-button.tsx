@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { generateEmployeeFaceSheetFn } from "@/lib/staff/employee-face-sheet.functions";
-import { safeErrorMessage } from "@/lib/safe-error-message";
+import { safeErrorMessage } from "@/lib/shared/safe-error-message";
 
 /**
  * Employee Face Sheet trigger — parallel to the client's `FaceSheetButton`.

@@ -11,7 +11,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import type { Database } from "@/integrations/supabase/types";
 import { resolveOrgSender } from "../agency/email.functions.ts";
-import { normalizeUSPhoneToE164 } from "@/lib/us-phone";
+import { normalizeUSPhoneToE164 } from "../shared/us-phone.ts";
 import {
   ASK_NOTIFICATION_TYPE,
   advisoryMoveToClientThread,

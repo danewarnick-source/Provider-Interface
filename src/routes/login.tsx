@@ -28,7 +28,7 @@ import {
   readStoredActiveOrgId,
   resolveCurrentMembership,
   type MembershipPick,
-} from "@/lib/current-org";
+} from "@/lib/shared/current-org";
 import { toast } from "sonner";
 import { isCognitoAuth } from "@/lib/aws/env";
 import { shouldSkipLoginAutoRedirect } from "@/lib/auth/cognito-login-gate";

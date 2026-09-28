@@ -57,7 +57,7 @@ export const getGmailOAuthStartUrl = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { url: "" };
     await requireOrgMembership(supabase, userId, data.organization_id, "owner");
-    const { signOAuthState, buildAuthorizeUrl } = await import("@/lib/gmail-oauth.server");
+    const { signOAuthState, buildAuthorizeUrl } = await import("../agency/gmail-oauth.server.ts");
     const state = signOAuthState({ org: data.organization_id, uid: userId });
     const redirectUri = callbackUrlFromRequest();
     return { url: buildAuthorizeUrl(state, redirectUri) };

@@ -55,7 +55,7 @@ import {
   accumulateSpeechResults,
   beginContinuousRecognition,
   type ContinuousSpeechSession,
-} from "@/lib/continuous-speech";
+} from "@/lib/shared/continuous-speech";
 import { OriginalSpeechAudit } from "@/components/staff-mobile/original-speech-audit";
 import { answerProceduralQuestion, type ProceduralResult } from "@/lib/nectar/ai-coach.functions";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";

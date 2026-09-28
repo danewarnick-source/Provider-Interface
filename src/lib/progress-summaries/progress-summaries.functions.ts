@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { toIsoDateDay } from "@/lib/iso-date-day";
+import { toIsoDateDay } from "../shared/iso-date-day.ts";
 import { incidentInvolvesClientOr } from "@/lib/incidents/incident-visibility";
 import {
   clientNeedsGoalProgress,

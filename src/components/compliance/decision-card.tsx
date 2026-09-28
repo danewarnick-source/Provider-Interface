@@ -2,7 +2,7 @@ import type { Decision, DecisionActionKind } from "@/lib/obligations/this-week";
 import { decorateDecision } from "@/lib/obligations/this-week";
 import { OVERRIDE_STATE_LABEL, OVERRIDE_STILL_REQUIRED } from "@/lib/obligations/overrides";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import "./decision-card.css";
 
 function urgencyBar(urgency: Decision["urgency"]): string {

@@ -7,7 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { DEFAULT_TRAINING_FROM_NAME, formatFromHeader } from "@/lib/managed-from";
+import { DEFAULT_TRAINING_FROM_NAME, formatFromHeader } from "../shared/managed-from.ts";
 import { authRedirectUrl } from "@/lib/auth/auth-redirect";
 import { quoteSignupTrainingAddon } from "../public-site/pi-signup-pricing.ts";
 import {

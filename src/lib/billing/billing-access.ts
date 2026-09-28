@@ -6,7 +6,7 @@
  * fallback so TNS still works if the SQL handoff has not been run yet.
  */
 
-import { TNS_ORGANIZATION_ID } from "../current-org.ts";
+import { TNS_ORGANIZATION_ID } from "../shared/current-org.ts";
 import { addonsForTier, getTier, normalizeTierId, type AddonId, type TierId } from "../hive-exec/hive-tiers.ts";
 
 export type SubscriptionGate = {

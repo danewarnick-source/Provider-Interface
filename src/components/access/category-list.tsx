@@ -12,7 +12,7 @@ import {
   type CategoryValue,
 } from "@/lib/access/categories";
 import type { AccessLevel } from "@/lib/access/levels";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 /** Staff can only get read-only views outside the phone app. */
 function choicesFor(cat: AccessCategory, level: AccessLevel): CategoryValue[] {

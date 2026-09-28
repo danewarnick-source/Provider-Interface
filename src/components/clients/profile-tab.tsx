@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { isRouteUuid } from "@/lib/route-uuid";
+import { isRouteUuid } from "@/lib/shared/route-uuid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import { ClientPhotoCard } from "@/components/clients/client-photo-card";
 import { NectarAsk } from "@/components/clients/nectar-ask";
 import { Textarea } from "@/components/ui/textarea";

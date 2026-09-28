@@ -39,7 +39,7 @@ import {
   accumulateSpeechResults,
   beginContinuousRecognition,
   type ContinuousSpeechSession,
-} from "@/lib/continuous-speech";
+} from "@/lib/shared/continuous-speech";
 import { OriginalSpeechAudit } from "@/components/staff-mobile/original-speech-audit";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";

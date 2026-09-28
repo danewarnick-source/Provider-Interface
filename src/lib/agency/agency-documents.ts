@@ -4,7 +4,7 @@
  * One card per duty; renew uses the same card. Company policies stay off this pack.
  */
 
-import { neutralizeCsvFormula } from "../csv-safe.ts";
+import { neutralizeCsvFormula } from "../shared/csv-safe.ts";
 import {
   obligationFileStatusLabel,
   statusForObligationInstance,

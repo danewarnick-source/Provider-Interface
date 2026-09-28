@@ -12,7 +12,7 @@ import {
   DEFAULT_MANAGED_FROM_ADDRESS,
   DEFAULT_MANAGED_FROM_NAME,
   stripFakeDisplayLabel,
-} from "@/lib/managed-from";
+} from "@/lib/shared/managed-from";
 import { isAdminLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/settings/email")({

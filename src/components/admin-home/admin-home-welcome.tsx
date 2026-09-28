@@ -8,7 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import {
   ADMIN_HOME_CARDS,
   ADMIN_HOME_EYEBROW,

@@ -16,7 +16,7 @@ import {
   type PctContentFile,
 } from "./in-hive-training-pct.ts";
 
-const jsonPath = fileURLToPath(new URL("../person-centered-training-content.json", import.meta.url));
+const jsonPath = fileURLToPath(new URL("./person-centered-training-content.json", import.meta.url));
 const content = JSON.parse(readFileSync(jsonPath, "utf8")) as PctContentFile;
 
 const LESSON_TITLES = [

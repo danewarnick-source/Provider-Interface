@@ -12,7 +12,7 @@ import { EvidenceRoster } from "@/components/evidence/evidence-roster.tsx";
 import { EvidenceStatusChip } from "@/components/evidence/evidence-status-chip.tsx";
 import { EvidenceSubjectCards } from "@/components/evidence/evidence-subject-cards.tsx";
 import { parseServiceCodeFlags } from "@/lib/evidence/catalog.ts";
-import { denverYmd } from "@/lib/denver-date.ts";
+import { denverYmd } from "@/lib/shared/denver-date";
 import { draftFromItem, dueSubtitleFromItem, type EvidenceDueDraft } from "@/lib/evidence/due.ts";
 import {
   applyEvidenceRequirements,

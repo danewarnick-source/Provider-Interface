@@ -23,7 +23,7 @@ import {
   type AccessScope,
   type AssignmentKind,
 } from "@/lib/access/levels";
-import { safeErrorMessage } from "@/lib/safe-error-message";
+import { safeErrorMessage } from "@/lib/shared/safe-error-message";
 import { CategoryList } from "./category-list";
 import { accessKeys, useAccessTargets, useMemberAccess, usePresets } from "./queries";
 

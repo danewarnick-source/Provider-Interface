@@ -8,7 +8,7 @@ import {
   denverYmd,
   denverYmdFromInstant,
   parseYmd,
-} from "@/lib/denver-date";
+} from "@/lib/shared/denver-date";
 import { HhsMonthGrid } from "@/components/hhs/hhs-month-grid";
 
 type LogRow = {

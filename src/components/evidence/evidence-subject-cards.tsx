@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import type { EvidenceSubject } from "@/lib/evidence/types.ts";
 
 type CardDef = {

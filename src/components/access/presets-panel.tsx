@@ -14,8 +14,8 @@ import { deleteAccessPreset, saveAccessPreset, type AccessPreset } from "@/lib/a
 import { effectiveCategories } from "@/lib/access/can";
 import type { CategoryId, CategoryValue } from "@/lib/access/categories";
 import { LEVEL_LABEL, LEVEL_SUMMARY, SCOPE_LABEL, type AccessScope } from "@/lib/access/levels";
-import { safeErrorMessage } from "@/lib/safe-error-message";
-import { cn } from "@/lib/utils";
+import { safeErrorMessage } from "@/lib/shared/safe-error-message";
+import { cn } from "@/lib/shared/utils";
 import { CategoryList } from "./category-list";
 import { accessKeys, usePresets } from "./queries";
 

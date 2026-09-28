@@ -3,7 +3,7 @@ import { Search, X, ChevronDown, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { EVV_SERVICE_CODES } from "@/lib/scheduling/evv-codes";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 interface Props {
   value: string[];

@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import {
   isCatastrophicSsrErrorBody,
   shouldHtmlRewriteCatastrophic500,
-} from "./catastrophic-ssr.ts";
+} from "../shared/catastrophic-ssr.ts";
 
 describe("catastrophic SSR JSON 500 must not become HTML for POSTs", () => {
   const unhandled = JSON.stringify({ status: 500, unhandled: true, message: "HTTPError" });
@@ -76,15 +76,15 @@ describe("catastrophic SSR JSON 500 must not become HTML for POSTs", () => {
   });
 
   it("wires the rewrite guard into server.ts, start.ts, and the Nitro error handler", () => {
-    const serverSrc = readFileSync(new URL("../server.ts", import.meta.url), "utf8");
+    const serverSrc = readFileSync(new URL("../../server.ts", import.meta.url), "utf8");
     assert.match(serverSrc, /shouldHtmlRewriteCatastrophic500/);
     assert.match(serverSrc, /method=\$\{method\} url=\$\{url\} accept=\$\{accept\}/);
     assert.match(serverSrc, /if \(!rewrite\) return response/);
     assert.match(serverSrc, /stripped HTML 500/);
-    const startSrc = readFileSync(new URL("../start.ts", import.meta.url), "utf8");
+    const startSrc = readFileSync(new URL("../../start.ts", import.meta.url), "utf8");
     assert.match(startSrc, /shouldHtmlRewriteCatastrophic500/);
     assert.match(startSrc, /Response\.json\(\{ status: 500, unhandled: true, message \}/);
-    const nitroSrc = readFileSync(new URL("../nitro-plugins/error-handler.ts", import.meta.url), "utf8");
+    const nitroSrc = readFileSync(new URL("../../nitro-plugins/error-handler.ts", import.meta.url), "utf8");
     assert.match(nitroSrc, /captureError\(error\)/);
     assert.match(nitroSrc, /method=\$\{method\} url=\$\{url\} accept=\$\{accept\}/);
     assert.match(nitroSrc, /from "h3"/);

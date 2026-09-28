@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sanitizeHtml } from "@/lib/sanitize-html";
+import { sanitizeHtml } from "@/lib/shared/sanitize-html";
 import { Download, Loader2, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";

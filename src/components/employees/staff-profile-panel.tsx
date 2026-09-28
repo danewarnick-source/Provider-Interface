@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useAccess } from "@/hooks/use-access";
 import { onStaffHired } from "@/lib/staff/staff-assignment-hooks.functions";
-import { safeErrorMessage } from "@/lib/safe-error-message";
+import { safeErrorMessage } from "@/lib/shared/safe-error-message";
 import { StaffProfileIdentity } from "@/components/employees/staff-profile-identity";
 import {
   identityDraftFrom,

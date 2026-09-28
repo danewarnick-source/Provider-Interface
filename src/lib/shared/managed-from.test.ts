@@ -9,15 +9,15 @@ import {
   managedFromAddress,
   pickReplyTo,
   stripFakeDisplayLabel,
-} from "./managed-from.ts";
+} from "../shared/managed-from.ts";
 
 const FROM_RAILS = [
-  new URL("./agency/email.functions.ts", import.meta.url),
-  new URL("./audit-portal.functions.ts", import.meta.url),
-  new URL("./training-only-exec.functions.ts", import.meta.url),
-  new URL("../routes/dashboard.settings.email.tsx", import.meta.url),
-  new URL("../../supabase/functions/auth-send-email/index.ts", import.meta.url),
-  new URL("../../supabase/functions/send-email/index.ts", import.meta.url),
+  new URL("../agency/email.functions.ts", import.meta.url),
+  new URL("../audit/audit-portal.functions.ts", import.meta.url),
+  new URL("../training/training-only-exec.functions.ts", import.meta.url),
+  new URL("../../routes/dashboard.settings.email.tsx", import.meta.url),
+  new URL("../../../supabase/functions/auth-send-email/index.ts", import.meta.url),
+  new URL("../../../supabase/functions/send-email/index.ts", import.meta.url),
 ];
 
 describe("extractEmailAddress", () => {

@@ -44,7 +44,7 @@ import {
   Upload,
   ImageIcon,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 export const Route = createFileRoute("/dashboard/pba-ledger")({
   head: () => ({ meta: [{ title: "PBA Trust Ledger — Provider Interface" }] }),

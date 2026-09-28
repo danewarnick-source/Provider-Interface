@@ -10,7 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import Papa from "papaparse";
 import readXlsxFile from "read-excel-file/browser";
-import { neutralizeCsvFields } from "@/lib/csv-safe";
+import { neutralizeCsvFields } from "@/lib/shared/csv-safe";
 import { toast } from "sonner";
 import {
   Upload,

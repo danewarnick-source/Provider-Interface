@@ -34,7 +34,7 @@ export const Route = createFileRoute("/api/public/oauth/gmail/callback")({
 
         let state;
         try {
-          const { verifyOAuthState } = await import("@/lib/gmail-oauth.server");
+          const { verifyOAuthState } = await import("@/lib/agency/gmail-oauth.server");
           state = verifyOAuthState(stateRaw);
         } catch (e) {
           return htmlError((e as Error).message);
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/api/public/oauth/gmail/callback")({
         let tokens;
         let userinfo;
         try {
-          const { exchangeCodeForTokens, getGoogleUserinfo } = await import("@/lib/gmail-oauth.server");
+          const { exchangeCodeForTokens, getGoogleUserinfo } = await import("@/lib/agency/gmail-oauth.server");
           tokens = await exchangeCodeForTokens(code, redirectUri);
           userinfo = await getGoogleUserinfo(tokens.access_token);
         } catch (e) {

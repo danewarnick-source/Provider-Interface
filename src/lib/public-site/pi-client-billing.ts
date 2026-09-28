@@ -9,7 +9,7 @@ import {
   denverYmdFromInstant,
   parseYmd,
   ymdFromParts,
-} from "../denver-date.ts";
+} from "../shared/denver-date.ts";
 import { ANNUAL_DISCOUNT } from "../hive-exec/hive-pricing.ts";
 import {
   PI_LIST_MINIMUM_CENTS,

@@ -30,9 +30,9 @@ import {
   managedFromAddress,
   pickReplyTo,
   stripFakeDisplayLabel,
-} from "@/lib/managed-from";
+} from "../shared/managed-from.ts";
 
-export { HIVE_MANAGED_FROM_ADDRESS, managedFromAddress } from "@/lib/managed-from";
+export { HIVE_MANAGED_FROM_ADDRESS, managedFromAddress } from "../shared/managed-from.ts";
 
 const ORG_ID = z.string().uuid();
 

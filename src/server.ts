@@ -1,12 +1,12 @@
-import "./lib/error-capture";
+import "./lib/shared/error-capture";
 
-import { consumeLastCapturedError } from "./lib/error-capture";
-import { serializeErrorChain } from "./lib/error-chain";
-import { renderErrorPage } from "./lib/error-page";
+import { consumeLastCapturedError } from "./lib/shared/error-capture";
+import { serializeErrorChain } from "./lib/shared/error-chain";
+import { renderErrorPage } from "./lib/shared/error-page";
 import {
   isCatastrophicSsrErrorBody,
   shouldHtmlRewriteCatastrophic500,
-} from "./lib/catastrophic-ssr";
+} from "./lib/shared/catastrophic-ssr";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;

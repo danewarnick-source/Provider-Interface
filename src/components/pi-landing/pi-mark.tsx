@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { Link } from "@tanstack/react-router";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import { PI_PRODUCT_NAME, PI_PRODUCT_SHORT, PI_WORDMARK } from "@/lib/public-site/pi-landing";
 
 export type PiMarkVariant = "inherit" | "cream" | "hero" | "gold";

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { type PendingMedDose } from "@/components/medications/shift-med-due-check";
 import { type EmarStatus } from "@/lib/documents/emar-status";
-import { denverWallToIso, denverYmd } from "@/lib/denver-date";
+import { denverWallToIso, denverYmd } from "@/lib/shared/denver-date";
 
 export type DailyNoteMedication = {
   id: string;

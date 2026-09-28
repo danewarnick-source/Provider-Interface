@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { listAttendance } from "@/lib/residential/hhs.functions";
-import { denverYmd, parseYmd, ymdFromParts } from "@/lib/denver-date";
+import { denverYmd, parseYmd, ymdFromParts } from "@/lib/shared/denver-date";
 import { HhsMonthGrid } from "@/components/hhs/hhs-month-grid";
 
 type Presence = "Present" | "Away" | null;

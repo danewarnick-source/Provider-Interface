@@ -1,4 +1,4 @@
-import { neutralizeCsvFormula } from "../csv-safe.ts";
+import { neutralizeCsvFormula } from "../shared/csv-safe.ts";
 import { toDisplayNameCase } from "../clients/person-name.ts";
 import { isCorrectionRequestedNote } from "../training/cert-review.ts";
 

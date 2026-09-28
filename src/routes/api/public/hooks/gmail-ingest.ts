@@ -152,7 +152,7 @@ async function processConnection(connection: {
   last_polled_at: string | null;
 }): Promise<{ processed: number; created: number; errors: number }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { refreshAccessToken } = await import("@/lib/gmail-oauth.server");
+  const { refreshAccessToken } = await import("@/lib/agency/gmail-oauth.server");
 
   let accessToken = connection.access_token;
   const isExpired = !connection.token_expires_at || new Date(connection.token_expires_at).getTime() < Date.now();

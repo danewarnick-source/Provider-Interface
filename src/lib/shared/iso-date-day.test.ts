@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { toIsoDateDay } from "./iso-date-day.ts";
+import { toIsoDateDay } from "../shared/iso-date-day.ts";
 
 describe("toIsoDateDay", () => {
   it("returns YYYY-MM-DD from an ISO string without calling Date", () => {

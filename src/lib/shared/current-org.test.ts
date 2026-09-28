@@ -8,7 +8,7 @@ import {
   pickDefaultMembership,
   pickUnlockedMembership,
   resolveCurrentMembership,
-} from "./current-org.ts";
+} from "../shared/current-org.ts";
 
 const TNS = {
   organization_id: TNS_ORGANIZATION_ID,

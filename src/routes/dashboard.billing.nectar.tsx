@@ -8,7 +8,7 @@ import { useNectarAlerts, DEFAULT_NECTAR_ALERT_SETTINGS, type NectarAlert, type 
 import { askNectarReport, type NectarReportResult } from "@/lib/nectar/nectar-reports.functions";
 import { listSavedReports, saveReport, deleteSavedReport, togglePinReport, upsertReportSchedule, unscheduleReport, type SavedReport } from "@/lib/agency/saved-reports.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { neutralizeCsvFormula } from "@/lib/csv-safe";
+import { neutralizeCsvFormula } from "@/lib/shared/csv-safe";
 import { NectarBadge, NectarMark, NectarButton } from "@/components/nectar/nectar-brand";
 
 

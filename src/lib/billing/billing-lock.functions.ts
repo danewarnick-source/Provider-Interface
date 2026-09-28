@@ -16,7 +16,7 @@ import {
   isComplimentaryMembership,
   pickUnlockedMembership,
   type MembershipPick,
-} from "@/lib/current-org";
+} from "../shared/current-org.ts";
 import { readSupabaseAdminEnv } from "../auth/supabase-public-env.ts";
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;

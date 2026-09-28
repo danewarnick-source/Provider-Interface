@@ -1,5 +1,5 @@
 import { BookOpen, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 /**
  * Hairline chip used everywhere NECTAR surfaces a checklist item, requirement,

@@ -20,7 +20,7 @@ import { type AccessLevel } from "@/lib/access/levels";
 import { resolvePresetId } from "@/lib/access/preset-resolve";
 import { buildInvitationEmail } from "@/lib/auth/invitation-email";
 import { inviteJoinUrl } from "@/lib/auth/join-invite";
-import { pickReplyTo, stripFakeDisplayLabel } from "@/lib/managed-from";
+import { pickReplyTo, stripFakeDisplayLabel } from "../shared/managed-from.ts";
 import { canSendImportInvite } from "../auth/import-invite.ts";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency/agency-setup-gate.functions";
 import {

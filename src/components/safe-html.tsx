@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { sanitizeHtml } from "@/lib/sanitize-html";
+import { sanitizeHtml } from "@/lib/shared/sanitize-html";
 
 /**
  * Renders HTML only after DOMPurify runs in the browser.

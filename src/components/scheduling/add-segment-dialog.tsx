@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import { classesForCode, familyForCode, isDailyCode } from "@/lib/scheduling/code-colors";
 import { listClientAuthorizedCodes } from "@/lib/scheduling/client-codes.functions";
 import { createShift } from "@/lib/scheduling/shifts.functions";

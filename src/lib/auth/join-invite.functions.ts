@@ -14,7 +14,7 @@ import {
   resolveAccountUsername,
   type InviteFailureReason,
 } from "@/lib/auth/join-invite";
-import { stripFakeDisplayLabel } from "@/lib/managed-from";
+import { stripFakeDisplayLabel } from "../shared/managed-from.ts";
 
 const TokenInput = z.object({
   token: z.string().trim().min(1).max(200),

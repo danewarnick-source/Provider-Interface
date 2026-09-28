@@ -13,11 +13,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/clients/client-sign-out";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
-import { isChunkLoadError, tryAutoReloadOnce, clearChunkReloadGuard } from "@/lib/chunk-reload";
+import { isChunkLoadError, tryAutoReloadOnce, clearChunkReloadGuard } from "@/lib/shared/chunk-reload";
 import { inviteTokenFromSearchStr } from "@/lib/auth/join-invite";
 import { getPublicRuntimeBlob } from "@/lib/aws/env";
 import { ensureSignupWorkspace } from "@/lib/auth/signup-workspace.functions";
-import { persistActiveOrgId } from "@/lib/current-org";
+import { persistActiveOrgId } from "@/lib/shared/current-org";
 
 function NotFoundComponent() {
   return (

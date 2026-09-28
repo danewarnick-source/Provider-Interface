@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Send, ShieldCheck, GraduationCap, AlertTriangle, FileCheck2, X } from "lucide-react";
 import { PiMark } from "@/components/pi-landing/pi-mark";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 const PROMPTS = [
   { icon: ShieldCheck, text: "What's my compliance score?" },

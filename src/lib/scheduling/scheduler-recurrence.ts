@@ -14,7 +14,7 @@ import {
   parseYmd,
   weekdaySunday0,
   ymdFromParts,
-} from "../denver-date.ts";
+} from "../shared/denver-date.ts";
 
 export const SCHEDULER_TZ = "America/Denver";
 

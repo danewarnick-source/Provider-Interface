@@ -3,7 +3,7 @@
  * One card per duty; renew keeps the same card. HRC restrictions stay in HRC.
  */
 
-import { neutralizeCsvFormula } from "../csv-safe.ts";
+import { neutralizeCsvFormula } from "../shared/csv-safe.ts";
 import {
   obligationFileStatusLabel,
   type ObligationFileStatus,

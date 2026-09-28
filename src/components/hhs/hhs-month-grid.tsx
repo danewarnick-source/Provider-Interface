@@ -6,7 +6,7 @@ import {
   daysInCalendarMonth,
   weekdaySunday0,
   ymdFromParts,
-} from "@/lib/denver-date";
+} from "@/lib/shared/denver-date";
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"] as const;
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { denverYmd, denverWallToIso } from "../denver-date.ts";
+import { denverYmd, denverWallToIso } from "../shared/denver-date.ts";
 import {
   addDaysYmd,
   denverHourMinute,

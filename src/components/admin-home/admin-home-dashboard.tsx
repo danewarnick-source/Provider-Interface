@@ -6,7 +6,7 @@
 import { Suspense, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import { Button } from "@/components/ui/button";
 import { greetingWord, useAdminHomeData } from "@/components/admin-home/use-admin-home-data";
 import { AdminHomeWelcome } from "@/components/admin-home/admin-home-welcome";

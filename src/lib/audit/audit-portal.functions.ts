@@ -8,7 +8,7 @@ import {
   assertPackageAccessViaChild,
 } from "@/lib/audit/audit-package-access";
 import { resolveAuthOrigin } from "@/lib/auth/auth-redirect";
-import { DEFAULT_AUDIT_FROM_NAME, formatFromHeader } from "@/lib/managed-from";
+import { DEFAULT_AUDIT_FROM_NAME, formatFromHeader } from "../shared/managed-from.ts";
 
 // ============================================================
 // Types

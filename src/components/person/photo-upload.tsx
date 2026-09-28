@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Upload, Trash2 } from "lucide-react";
-import { safeErrorMessage } from "@/lib/safe-error-message";
+import { safeErrorMessage } from "@/lib/shared/safe-error-message";
 import { PersonAvatar } from "./person-avatar";
 
 /**

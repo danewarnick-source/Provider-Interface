@@ -38,7 +38,7 @@ import {
   summaryFilingDestination,
 } from "@/lib/progress-summaries/progress-summaries";
 import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi/upi-attestations.functions";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import { isAdminLevel } from "@/lib/access/levels";
 
 const searchSchema = z.object({

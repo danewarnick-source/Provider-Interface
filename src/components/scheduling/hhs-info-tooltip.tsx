@@ -1,7 +1,7 @@
 import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HHS_VISIT_TOOLTIP } from "@/lib/scheduling/hhs-visit";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 /**
  * The ⓘ affordance shown on every HHS visit card and in the creation flow's

@@ -23,7 +23,7 @@ import {
   upsertGmailRule,
   deleteGmailRule,
   listGmailAudit,
-} from "@/lib/gmail.functions";
+} from "@/lib/agency/gmail.functions";
 
 const searchSchema = z.object({ connected: z.coerce.number().optional() });
 

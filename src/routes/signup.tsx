@@ -28,7 +28,7 @@ import {
   signupHasSession,
   signupSubmissionIsAutomated,
 } from "@/lib/auth/signup-workspace";
-import { persistActiveOrgId } from "@/lib/current-org";
+import { persistActiveOrgId } from "@/lib/shared/current-org";
 import {
   AUTH_PWNED_PASSWORD_MESSAGE,
   hibpRangeIncludesSha1,
@@ -37,7 +37,7 @@ import {
   sha1HexUpper,
   weakPasswordCopyFromAuth,
 } from "@/lib/auth/signup-password";
-import { isValidUSPhone, normalizeUSPhoneToE164 } from "@/lib/us-phone";
+import { isValidUSPhone, normalizeUSPhoneToE164 } from "@/lib/shared/us-phone";
 import {
   SIGNUP_BUSINESS_SAVE_ERROR_MESSAGE,
   SIGNUP_BUSINESS_VERIFY_SELECT,

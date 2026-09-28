@@ -17,7 +17,7 @@ import {
   pickUnlockedMembership,
   readStoredActiveOrgId,
   type MembershipPick,
-} from "@/lib/current-org";
+} from "@/lib/shared/current-org";
 import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_LIST_PRICE_UNIT, PI_SIGNUP_PRICE_LINE } from "@/lib/public-site/pi-landing";
 import { quotePiListSubscription } from "@/lib/public-site/pi-signup-pricing";
 import { completeClientSignOut } from "@/lib/clients/client-sign-out";

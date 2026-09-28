@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import type { EvidenceMatrixChip, EvidenceMatrixChipKind } from "@/lib/evidence/status.ts";
 
 const CHIP: Record<EvidenceMatrixChipKind, string> = {

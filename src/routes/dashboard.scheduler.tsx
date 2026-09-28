@@ -47,7 +47,7 @@ import { createRecurringShifts } from "@/lib/scheduling/scheduler-repeat.functio
 import { SoloLapseDialog } from "@/components/scheduler/solo-lapse-dialog";
 import { listSoloLapsesForStaff } from "@/lib/obligations/remediation.functions";
 import type { SoloLapse } from "@/lib/obligations/solo-lapse";
-import { denverYmd } from "@/lib/denver-date";
+import { denverYmd } from "@/lib/shared/denver-date";
 import { layoutShiftBars } from "@/lib/scheduling/scheduler-recurrence";
 
 export const Route = createFileRoute("/dashboard/scheduler")({

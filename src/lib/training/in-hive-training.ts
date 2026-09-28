@@ -6,7 +6,7 @@
  * Progress uses existing training_topic_progress / training_completions.
  */
 
-import { neutralizeCsvFormula } from "../csv-safe.ts";
+import { neutralizeCsvFormula } from "../shared/csv-safe.ts";
 import {
   ANNUAL_CE_COURSE_FULFILLS_OBLIGATION,
   ANNUAL_CE_COURSE_ID,

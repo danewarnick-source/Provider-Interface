@@ -1,9 +1,9 @@
 import { createStart, createMiddleware } from "@tanstack/react-start";
 
-import { renderErrorPage } from "./lib/error-page";
-import { serializeErrorChain } from "./lib/error-chain";
-import { captureError } from "./lib/error-capture";
-import { shouldHtmlRewriteCatastrophic500 } from "./lib/catastrophic-ssr";
+import { renderErrorPage } from "./lib/shared/error-page";
+import { serializeErrorChain } from "./lib/shared/error-chain";
+import { captureError } from "./lib/shared/error-capture";
+import { shouldHtmlRewriteCatastrophic500 } from "./lib/shared/catastrophic-ssr";
 import { attachSupabaseAuth } from "@/lib/auth/attach-supabase-auth";
 
 const errorMiddleware = createMiddleware().server(async (ctx) => {

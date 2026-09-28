@@ -870,7 +870,7 @@ export const updateOrgNames = createServerFn({ method: "POST" })
 // ───── Account contact (editable from exec view + provider settings) ───────
 
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { normalizeUSPhoneToE164 } from "@/lib/us-phone";
+import { normalizeUSPhoneToE164 } from "../shared/us-phone.ts";
 
 function validateAccountContactInput(input: unknown): {
   organizationId: string;

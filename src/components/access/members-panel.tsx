@@ -18,7 +18,7 @@ import {
   type TeamMemberAccess,
 } from "@/lib/access/access.functions";
 import { LEVEL_LABEL, SCOPE_LABEL } from "@/lib/access/levels";
-import { safeErrorMessage } from "@/lib/safe-error-message";
+import { safeErrorMessage } from "@/lib/shared/safe-error-message";
 import { LevelPresetFields, type LevelPresetValue } from "./level-preset-fields";
 import { accessKeys } from "./queries";
 

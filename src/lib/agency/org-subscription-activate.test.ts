@@ -6,7 +6,7 @@ import {
   paidOrgSubscriptionCore,
   paidOrgSubscriptionPatch,
 } from "./org-subscription-row.ts";
-import { TNS_ORGANIZATION_ID } from "../current-org.ts";
+import { TNS_ORGANIZATION_ID } from "../shared/current-org.ts";
 import { isBillingExempt } from "../billing/billing-access.ts";
 
 describe("paidOrgSubscriptionPatch", () => {

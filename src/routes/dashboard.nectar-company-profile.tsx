@@ -13,7 +13,7 @@ import { Card } from "@/components/ui/card";
 import { RequireLevel } from "@/components/rbac-guard";
 import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/nectar-company-profile")({

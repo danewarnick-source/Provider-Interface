@@ -12,7 +12,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import Papa from "papaparse";
 import readXlsxFile from "read-excel-file/browser";
-import { neutralizeCsvFields } from "@/lib/csv-safe";
+import { neutralizeCsvFields } from "@/lib/shared/csv-safe";
 import { toast } from "sonner";
 import {
   Upload, X, Loader2, ArrowRight, ArrowLeft, Download,
