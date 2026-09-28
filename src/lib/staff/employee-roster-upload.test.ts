@@ -196,7 +196,9 @@ describe("employee roster template", () => {
       /xl\/worksheets\/sheet\d+\.xml$/.test(name),
     );
     assert.ok(sheetPath);
-    const xml = await zip.file(sheetPath)!.async("string");
+    let xml = await zip.file(sheetPath)!.async("string");
+    const sharedStrings = zip.file("xl/sharedStrings.xml");
+    if (sharedStrings) xml += await sharedStrings.async("string");
     assert.match(xml, /dataValidation type="list"/);
     assert.match(xml, new RegExp(bulkAccessExcelList().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     assert.match(xml, /Admin,Team member,Billing,DSP,Group Home Manager/);

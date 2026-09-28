@@ -25,7 +25,7 @@ import {
   type DailyDetailRow,
 } from "@/lib/financial/financial-detail.functions";
 import { jsPDF } from "jspdf";
-import * as XLSX from "xlsx";
+import writeXlsxFile from "write-excel-file/browser";
 import { toast } from "sonner";
 
 const MONTH_LABELS = [
@@ -144,16 +144,18 @@ function exportCsv(filename: string, rows: ExportRow[]) {
   downloadBlob(filename, new Blob([csv], { type: "text/csv;charset=utf-8;" }));
 }
 
-function exportXlsx(filename: string, rows: ExportRow[]) {
+async function exportXlsx(filename: string, rows: ExportRow[]) {
   if (rows.length === 0) {
     toast.error("Nothing to export.");
     return;
   }
-  const ws = XLSX.utils.json_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Detail");
-  const buf = XLSX.write(wb, { type: "array", bookType: "xlsx" });
-  downloadBlob(filename, new Blob([buf], { type: "application/octet-stream" }));
+  const headers = Object.keys(rows[0]) as (keyof ExportRow)[];
+  const data = [
+    headers.map((h) => ({ value: String(h), fontWeight: "bold" as const })),
+    ...rows.map((r) => headers.map((h) => ({ value: r[h] == null ? "" : String(r[h]) }))),
+  ];
+  const blob = await writeXlsxFile(data, { sheet: "Detail" }).toBlob();
+  downloadBlob(filename, blob);
 }
 
 function exportPdf(

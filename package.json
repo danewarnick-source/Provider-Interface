@@ -87,6 +87,7 @@
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^4.6.5",
     "react-signature-canvas": "^1.1.0-alpha.2",
+    "read-excel-file": "^9.3.10",
     "recharts": "^2.15.4",
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
@@ -97,8 +98,8 @@
     "unpdf": "^1.6.2",
     "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.0.2",
+    "write-excel-file": "^4.1.1",
     "ws": "^8.21.1",
-    "xlsx": "0.18.5",
     "zod": "^3.24.2"
   },
   "devDependencies": {

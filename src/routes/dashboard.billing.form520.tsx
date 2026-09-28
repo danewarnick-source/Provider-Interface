@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import * as XLSX from "xlsx";
+import writeXlsxFile from "write-excel-file/browser";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
@@ -676,10 +676,15 @@ function Billing520Page() {
   const exportXlsx = () => {
     log520Export("xlsx");
     const exportRows = visibleRows.map(({ _key: _k, _client_id: _c, ...r }) => r);
-    const ws = XLSX.utils.json_to_sheet(exportRows, { header: HEADERS as unknown as string[] });
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "520");
-    XLSX.writeFile(wb, `520-${rangeStartStr}_${rangeEndStr}.xlsx`);
+    const data = [
+      HEADERS.map((h) => ({ value: String(h), fontWeight: "bold" as const })),
+      ...exportRows.map((r) =>
+        HEADERS.map((h) => ({
+          value: (r as Record<string, unknown>)[h] == null ? "" : String((r as Record<string, unknown>)[h]),
+        })),
+      ),
+    ];
+    void writeXlsxFile(data, { sheet: "520" }).toFile(`520-${rangeStartStr}_${rangeEndStr}.xlsx`);
   };
 
   const exportCsv = () => {

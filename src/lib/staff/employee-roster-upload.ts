@@ -5,7 +5,7 @@
  * Existing roster emails are skipped. There is no update mode.
  */
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
+import writeXlsxFile from "write-excel-file/browser";
 import { isValidSignupEmail, normalizeSignupEmail } from "../auth/signup-email.ts";
 
 export const EMPLOYEE_ROSTER_HEADERS = [
@@ -349,15 +349,18 @@ function accessLevelColumnLetter(): string {
 
 /** Excel template with a real list dropdown on Access level. CSV has no dropdown. */
 export async function buildEmployeeRosterTemplateXlsx(): Promise<Uint8Array> {
-  const ws = XLSX.utils.json_to_sheet([EXAMPLE_ROW], {
-    header: [...EMPLOYEE_ROSTER_HEADERS],
-  });
-  ws["!cols"] = EMPLOYEE_ROSTER_HEADERS.map((header) => ({
-    wch: Math.max(header.length, String(EXAMPLE_ROW[header]).length, 18),
+  const data = [
+    EMPLOYEE_ROSTER_HEADERS.map((h) => ({ value: h, fontWeight: "bold" as const })),
+    EMPLOYEE_ROSTER_HEADERS.map((h) => ({ value: EXAMPLE_ROW[h] ?? "" })),
+  ];
+  const columns = EMPLOYEE_ROSTER_HEADERS.map((header) => ({
+    width: Math.max(header.length, String(EXAMPLE_ROW[header]).length, 18),
   }));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Team members");
-  const out = XLSX.write(wb, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
+  const blob = await writeXlsxFile(data, {
+    sheet: "Team members",
+    columns,
+  }).toBlob();
+  const out = await blob.arrayBuffer();
   const { default: JSZip } = await import("jszip");
   const zip = await JSZip.loadAsync(out);
   const sheetPath = Object.keys(zip.files).find((name) =>

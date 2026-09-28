@@ -9,7 +9,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
+import readXlsxFile from "read-excel-file/browser";
 import { neutralizeCsvFields } from "@/lib/csv-safe";
 import { toast } from "sonner";
 import {
@@ -101,17 +101,15 @@ async function parseFile(file: File): Promise<ParsedFile> {
     });
     return { headers, rows, fileName: file.name };
   }
-  const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf, { type: "array", cellDates: true });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "", raw: false });
-  const headers = json.length ? Object.keys(json[0]) : [];
-  const rows = json.map((r) => {
+  const dataRows = await readXlsxFile(file);
+  if (!dataRows.length) return { headers: [], rows: [], fileName: file.name };
+  const headers = dataRows[0].map((h) => String(h ?? ""));
+  const rows = dataRows.slice(1).map((row) => {
     const out: Record<string, string> = {};
-    for (const h of headers) {
-      const v = r[h];
+    headers.forEach((h, i) => {
+      const v = row[i];
       out[h] = v instanceof Date ? v.toISOString() : String(v ?? "").trim();
-    }
+    });
     return out;
   });
   return { headers, rows, fileName: file.name };
@@ -740,8 +738,8 @@ function UploadStep({ onPick }: { onPick: (f: File) => void }) {
       "historical-timesheets-template.csv",
     );
   };
-  const onDownloadXlsx = () => {
-    triggerDownload(buildTemplateXlsxBlob(), "historical-timesheets-template.xlsx");
+  const onDownloadXlsx = async () => {
+    triggerDownload(await buildTemplateXlsxBlob(), "historical-timesheets-template.xlsx");
   };
   return (
     <div className="space-y-4">

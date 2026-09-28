@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import * as XLSX from "xlsx";
+import readXlsxFile from "read-excel-file/browser";
 import { Download, FileSpreadsheet, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,15 +58,14 @@ async function parseRosterFile(
     if (!/email/i.test(first)) return parseEmployeeRosterPaste(text);
     return parseEmployeeRosterCsv(text);
   }
-  const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0] ?? ""];
-  if (!sheet) return { rows: [], ignoredColumns: [] };
-  const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "", raw: false });
-  const headers = json.length ? Object.keys(json[0] ?? {}) : [];
-  const records = json.map((r) => {
+  const dataRows = await readXlsxFile(file);
+  if (!dataRows.length) return { rows: [], ignoredColumns: [] };
+  const headers = dataRows[0].map((h) => String(h ?? ""));
+  const records = dataRows.slice(1).map((row) => {
     const out: Record<string, string> = {};
-    for (const h of headers) out[h] = String(r[h] ?? "").trim();
+    headers.forEach((h, i) => {
+      out[h] = String(row[i] ?? "").trim();
+    });
     return out;
   });
   return parseEmployeeRosterRecords(records, headers);

@@ -2,7 +2,7 @@
 // Six fixed columns, in this exact order, one header row. This shape is
 // the ONLY accepted input for the import wizard — there is no free-form
 // column-mapping fallback.
-import * as XLSX from "xlsx";
+import writeXlsxFile from "write-excel-file/browser";
 import Papa from "papaparse";
 
 export const TEMPLATE_HEADERS = [
@@ -32,16 +32,12 @@ export function buildTemplateCsv(): string {
   });
 }
 
-export function buildTemplateXlsxBlob(): Blob {
-  const ws = XLSX.utils.json_to_sheet([EXAMPLE_ROW], {
-    header: [...TEMPLATE_HEADERS],
-  });
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Timesheets");
-  const buf = XLSX.write(wb, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
-  return new Blob([buf], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
+export async function buildTemplateXlsxBlob(): Promise<Blob> {
+  const data = [
+    TEMPLATE_HEADERS.map((h) => ({ value: h, fontWeight: "bold" as const })),
+    TEMPLATE_HEADERS.map((h) => ({ value: EXAMPLE_ROW[h] ?? "" })),
+  ];
+  return writeXlsxFile(data, { sheet: "Timesheets" }).toBlob();
 }
 
 /** Case-insensitive, trimmed header match against TEMPLATE_HEADERS in order. */

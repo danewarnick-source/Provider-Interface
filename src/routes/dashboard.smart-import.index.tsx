@@ -7,7 +7,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
+import readXlsxFile from "read-excel-file/browser";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
@@ -95,14 +95,14 @@ async function parseRoster(file: File): Promise<ParsedRoster> {
     });
     return { headers, rows };
   }
-  const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: "" });
-  const headers = json.length ? Object.keys(json[0]) : [];
-  const rows = json.map((r) => {
+  const dataRows = await readXlsxFile(file);
+  if (!dataRows.length) return { headers: [], rows: [] };
+  const headers = dataRows[0].map((h) => String(h ?? ""));
+  const rows = dataRows.slice(1).map((row) => {
     const out: Record<string, string> = {};
-    for (const h of headers) out[h] = String(r[h] ?? "").trim();
+    headers.forEach((h, i) => {
+      out[h] = String(row[i] ?? "").trim();
+    });
     return out;
   });
   return { headers, rows };
