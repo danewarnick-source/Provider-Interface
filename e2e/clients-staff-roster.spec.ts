@@ -528,7 +528,7 @@ test.describe("RBAC — DSP / employee cannot open employee admin", () => {
     await gotoAdmin(page, "/dashboard/team-members");
     await expect(page).toHaveURL(/\/unauthorized/, { timeout: 20_000 });
     await expect(page.getByRole("heading", { name: /Access denied/i })).toBeVisible();
-    await expect(page.getByText(/View team member records/i)).toBeVisible();
+    await expect(page.getByText(/Team roster & profiles: View/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^Add team member$/i })).toHaveCount(0);
     await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toHaveCount(0);
