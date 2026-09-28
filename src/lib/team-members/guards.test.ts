@@ -17,7 +17,11 @@ import {
 const ACTOR = "11111111-1111-4111-8111-111111111111";
 const TARGET = "22222222-2222-4222-8222-222222222222";
 
-type Calls = { requireCategory: Array<[string, string]>; canSeeStaff: string[]; loadTargetLevel: string[] };
+type Calls = {
+  requireCategory: Array<[string, string]>;
+  canSeeStaff: string[];
+  loadTargetLevel: string[];
+};
 
 /** Fake data sources. Every call is recorded so tests can assert what ran and what didn't. */
 function fakeDeps(opts: {
@@ -45,15 +49,22 @@ function fakeDeps(opts: {
   return { deps, calls };
 }
 
-const run = (action: ManageMemberAction, deps: ManageMemberGuardDeps, targetUserId: string | null = TARGET) =>
-  runManageMemberGuard({ actorId: ACTOR, targetUserId, action }, deps);
+const run = (
+  action: ManageMemberAction,
+  deps: ManageMemberGuardDeps,
+  targetUserId: string | null = TARGET,
+) => runManageMemberGuard({ actorId: ACTOR, targetUserId, action }, deps);
 
 describe("rule (a): each action needs Edit on the right category", () => {
   it("edit_profile and edit_caseload need staff_roster; everything else needs staff_hiring", () => {
     assert.deepEqual(categoryForAction("edit_profile"), { category: "staff_roster", min: "edit" });
     assert.deepEqual(categoryForAction("edit_caseload"), { category: "staff_roster", min: "edit" });
     for (const action of ["deactivate", "reactivate", "reset_password", "invite"] as const) {
-      assert.deepEqual(categoryForAction(action), { category: "staff_hiring", min: "edit" }, action);
+      assert.deepEqual(
+        categoryForAction(action),
+        { category: "staff_hiring", min: "edit" },
+        action,
+      );
     }
     assert.equal(MANAGE_MEMBER_ACTIONS.length, 6);
   });
@@ -62,7 +73,11 @@ describe("rule (a): each action needs Edit on the right category", () => {
     for (const action of MANAGE_MEMBER_ACTIONS) {
       const { deps, calls } = fakeDeps({});
       await run(action, deps);
-      assert.deepEqual(calls.requireCategory, [[categoryForAction(action).category, "edit"]], action);
+      assert.deepEqual(
+        calls.requireCategory,
+        [[categoryForAction(action).category, "edit"]],
+        action,
+      );
     }
   });
 
@@ -76,7 +91,10 @@ describe("rule (a): each action needs Edit on the right category", () => {
 
 describe("rule (b): a non-agency-scope actor must be able to see the target", () => {
   it("assigned scope + access_can_see_staff false → blocked", async () => {
-    const { deps, calls } = fakeDeps({ actor: { level: "admin", scope: "assigned" }, canSee: false });
+    const { deps, calls } = fakeDeps({
+      actor: { level: "admin", scope: "assigned" },
+      canSee: false,
+    });
     await assert.rejects(() => run("deactivate", deps), new RegExp(OUT_OF_SCOPE_MESSAGE));
     assert.deepEqual(calls.canSeeStaff, [TARGET]);
   });
@@ -116,7 +134,10 @@ describe("rule (d): nobody deactivates or resets their own account", () => {
     assert.equal(isSelfBlockedAction("deactivate"), true);
     assert.equal(isSelfBlockedAction("reset_password"), true);
     for (const action of ["deactivate", "reset_password"] as const) {
-      const { deps } = fakeDeps({ actor: { level: "owner", scope: "agency" }, targetLevel: "owner" });
+      const { deps } = fakeDeps({
+        actor: { level: "owner", scope: "agency" },
+        targetLevel: "owner",
+      });
       await assert.rejects(() => run(action, deps, ACTOR), new Error(SELF_ACTION_MESSAGE), action);
     }
   });
@@ -124,7 +145,10 @@ describe("rule (d): nobody deactivates or resets their own account", () => {
   it("other actions on yourself are not blocked by this rule", async () => {
     for (const action of ["reactivate", "edit_profile", "edit_caseload", "invite"] as const) {
       assert.equal(isSelfBlockedAction(action), false);
-      const { deps } = fakeDeps({ actor: { level: "owner", scope: "agency" }, targetLevel: "owner" });
+      const { deps } = fakeDeps({
+        actor: { level: "owner", scope: "agency" },
+        targetLevel: "owner",
+      });
       await assert.doesNotReject(() => run(action, deps, ACTOR), action);
     }
   });
@@ -132,7 +156,10 @@ describe("rule (d): nobody deactivates or resets their own account", () => {
 
 describe("no target yet (e.g. inviting a new email)", () => {
   it("runs only rule (a)", async () => {
-    const { deps, calls } = fakeDeps({ actor: { level: "admin", scope: "assigned" }, canSee: false });
+    const { deps, calls } = fakeDeps({
+      actor: { level: "admin", scope: "assigned" },
+      canSee: false,
+    });
     await assert.doesNotReject(() => run("invite", deps, null));
     assert.deepEqual(calls.requireCategory, [["staff_hiring", "edit"]]);
     assert.deepEqual(calls.canSeeStaff, []);
@@ -166,13 +193,22 @@ describe("wiring locks — the real callers use the guard, and nothing hard-dele
     assert.doesNotMatch(src, /select\([^)]*\brole\b/);
   });
 
-  it("members.functions.ts: adminResetEmployeePassword goes through the guard as reset_password", () => {
+  it("members.functions.ts: resetMemberPassword goes through the guard, generates the password, and logs", () => {
     const src = read("./members.functions.ts");
-    const fn = src.slice(src.indexOf("export const adminResetEmployeePassword"));
+    assert.doesNotMatch(src, /adminResetEmployeePassword/);
+    const fn = src.slice(src.indexOf("export const resetMemberPassword"));
     const body = fn.slice(0, fn.indexOf("/* ----"));
     assert.match(body, /assertCanManageMember\(/);
     assert.match(body, /action: "reset_password"/);
     assert.doesNotMatch(body, /assertOrgManager\(/);
+    assert.match(body, /generateTempPassword\(14\)/);
+    assert.doesNotMatch(body, /newPassword/);
+    assert.match(body, /logChange\(/);
+    assert.match(body, /"password_reset"/);
+    assert.ok(
+      body.indexOf("assertCanManageMember(") < body.indexOf("updateUserById"),
+      "guard runs before the password write",
+    );
   });
 
   it("the roster page and the e2e mocks no longer reference the hard-delete fn", () => {
