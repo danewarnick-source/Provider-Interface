@@ -9,7 +9,7 @@ import {
 import { FeatureGate } from "@/components/upgrade-gate";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { toast } from "sonner";
-import { AuditorPackagePreview } from "@/components/audit-portal/auditor-package-preview";
+import { AuditorPackagePreview } from "@/components/audit/auditor-package-preview";
 import {
   listOrgAuditPackages,
   createAuditPackage,

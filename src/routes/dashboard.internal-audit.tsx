@@ -38,7 +38,7 @@ import {
 } from "@/lib/audit/internal-audit.functions";
 import { RequirePermission } from "@/components/rbac-guard";
 import { FeatureGate } from "@/components/upgrade-gate";
-import { SamplePicker } from "@/components/internal-audit/sample-picker";
+import { SamplePicker } from "@/components/audit/sample-picker";
 import { toast } from "sonner";
 
 

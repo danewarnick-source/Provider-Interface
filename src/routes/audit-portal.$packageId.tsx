@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { AuditPortalShell } from "@/components/audit-portal/audit-portal-shell";
-import { AuditorPackagePreview } from "@/components/audit-portal/auditor-package-preview";
+import { AuditPortalShell } from "@/components/audit/audit-portal-shell";
+import { AuditorPackagePreview } from "@/components/audit/auditor-package-preview";
 
 export const Route = createFileRoute("/audit-portal/$packageId")({
   head: () => ({

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { FileText, Calendar, Building2, ArrowRight, ShieldCheck } from "lucide-react";
-import { AuditPortalShell } from "@/components/audit-portal/audit-portal-shell";
+import { AuditPortalShell } from "@/components/audit/audit-portal-shell";
 import { listMyAuditPackages } from "@/lib/audit/audit-portal.functions";
 
 export const Route = createFileRoute("/audit-portal/")({

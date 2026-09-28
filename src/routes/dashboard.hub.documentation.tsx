@@ -4,7 +4,7 @@ import { HubShell } from "@/components/admin-hubs/hub-shell";
 import { FormsIndex } from "./dashboard.forms.index";
 import { InternalAuditPage } from "./dashboard.internal-audit";
 import { AuditPage } from "./dashboard.audit";
-import { AuditZone } from "@/components/audit-zone/audit-zone";
+import { AuditZone } from "@/components/audit/audit-zone";
 import { HrcPage } from "./dashboard.hrc";
 import { AdminIncidentsSection } from "@/components/incidents/admin-incidents-section";
 import { RecordsTab } from "@/components/records/records-tab";
