@@ -27,7 +27,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sparkles, Loader2, CheckCircle2, RefreshCw, Pencil, Trash2, Plus, ArrowUp, ArrowDown, Shield, BookOpen, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { setClientCaseload } from "@/lib/scheduler/setup.functions";
+import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
+import { clientAuthorizedCodes } from "@/lib/assignment-codes";
 
 type Training = {
   id: string;
@@ -934,7 +935,7 @@ export function PublishConfirmDialog({
 }) {
 
   const qc = useQueryClient();
-  const setCaseloadFn = useServerFn(setClientCaseload);
+  const setStaffCodesFn = useServerFn(setStaffClientCodes);
   const [stagedAdds, setStagedAdds] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
 
@@ -976,19 +977,36 @@ export function PublishConfirmDialog({
   const currentQ = useQuery({
     enabled: !!orgId && !!clientId && open,
     queryKey: ["caseload-editor-current", orgId, clientId],
-    queryFn: async (): Promise<string[]> => {
-      const { data, error } = await supabase
-        .from("staff_assignments")
-        .select("staff_id")
-        .eq("organization_id", orgId!)
-        .eq("client_id", clientId);
-      if (error) throw error;
-      return (data ?? []).map((r) => (r as { staff_id: string }).staff_id);
+    queryFn: async (): Promise<{ staffIds: string[]; codes: string[] }> => {
+      const [a, c] = await Promise.all([
+        supabase
+          .from("staff_assignments")
+          .select("staff_id")
+          .eq("organization_id", orgId!)
+          .eq("client_id", clientId),
+        supabase
+          .from("clients")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .select("authorized_dspd_codes, job_code" as any)
+          .eq("id", clientId)
+          .maybeSingle(),
+      ]);
+      if (a.error) throw a.error;
+      if (c.error) throw c.error;
+      return {
+        staffIds: (a.data ?? []).map((r) => (r as { staff_id: string }).staff_id),
+        codes: clientAuthorizedCodes(
+          (c.data ?? {}) as { authorized_dspd_codes?: string[] | null; job_code?: string[] | null },
+        ),
+      };
     },
   });
 
   const staff = staffQ.data ?? [];
-  const currentIds = currentQ.data ?? [];
+  const currentIds = currentQ.data?.staffIds ?? [];
+  // New staff get every authorized code, listed explicitly (narrow later on
+  // the client's Caseload). No authorized codes → nobody can be added.
+  const clientCodes = currentQ.data?.codes ?? [];
   const currentSet = new Set(currentIds);
   const assignedStaff = staff.filter((s) => currentSet.has(s.id));
   const availableStaff = staff.filter((s) => !currentSet.has(s.id));
@@ -1002,13 +1020,11 @@ export function PublishConfirmDialog({
     try {
       const adds = Array.from(stagedAdds);
       if (adds.length > 0) {
-        await setCaseloadFn({
-          data: {
-            organization_id: orgId,
-            client_id: clientId,
-            staff_ids: [...currentIds, ...adds],
-          },
-        });
+        for (const staffId of adds) {
+          await setStaffCodesFn({
+            data: { organizationId: orgId, staffId, clientId, codes: clientCodes },
+          });
+        }
         qc.invalidateQueries({ queryKey: ["caseload-editor-current"] });
         qc.invalidateQueries({ queryKey: ["caseload"] });
         qc.invalidateQueries({ queryKey: ["my-assignments"] });
@@ -1077,7 +1093,11 @@ export function PublishConfirmDialog({
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
               Add more staff (assigns them to this client)
             </p>
-            {loading ? null : availableStaff.length === 0 ? (
+            {loading ? null : clientCodes.length === 0 ? (
+              <p className="text-sm text-muted-foreground italic">
+                This client has no authorized codes yet. Add a code before assigning staff.
+              </p>
+            ) : availableStaff.length === 0 ? (
               <p className="text-sm text-muted-foreground italic">All active staff are already assigned.</p>
             ) : (
               <div className="space-y-1 max-h-48 overflow-y-auto rounded border p-2">
@@ -1100,6 +1120,12 @@ export function PublishConfirmDialog({
                   );
                 })}
               </div>
+            )}
+            {!loading && clientCodes.length > 0 && availableStaff.length > 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Added staff get all of this client&apos;s codes ({clientCodes.join(", ")}). Narrow
+                them on the Caseload tab.
+              </p>
             )}
           </div>
 

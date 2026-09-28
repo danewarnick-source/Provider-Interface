@@ -34,10 +34,12 @@ import {
 } from "@/hooks/use-scheduler-data";
 import { useDayProgramData } from "@/hooks/use-day-program-data";
 import {
-  saveShift, deleteShift, publishWeek, addToCaseload, setAdminTimeOff,
+  saveShift, deleteShift, publishWeek, setAdminTimeOff,
   saveDayProgramSession, markAttendance, addSessionStaff,
 } from "@/lib/scheduler/scheduler.functions";
 import { isClockableServiceCode } from "@/lib/service-billing";
+import { addStaffToClientCode } from "@/lib/scheduler/setup.functions";
+import { assignmentCoversCode } from "@/lib/assignment-codes";
 import { evvServiceLabel } from "@/lib/evv-codes";
 import { RequestsPanel } from "@/components/schedule-preview/requests-panel";
 import { OpenShiftsPanel } from "@/components/scheduling/open-shifts-panel";
@@ -959,11 +961,23 @@ function AddShiftDialog({
     return Array.from(new Set(sched.auths.filter((a) => a.client_id === clientId).map((a) => a.service_code)));
   }, [sched.auths, clientId]);
 
-  // Staff assignable for selected client (caseload gate)
+  // Staff assignable for selected client + code (caseload gate): only staff
+  // whose assignment lists this exact code. Before a code is picked, anyone
+  // with any code on this client is listed.
   const caseloadStaffIds = useMemo(() => {
     if (!clientId) return new Set<string>();
-    return new Set(sched.assigns.filter((a) => a.client_id === clientId).map((a) => a.staff_id));
-  }, [sched.assigns, clientId]);
+    return new Set(
+      sched.assigns
+        .filter(
+          (a) =>
+            a.client_id === clientId &&
+            (code
+              ? assignmentCoversCode(a.service_codes, code)
+              : (a.service_codes ?? []).length > 0),
+        )
+        .map((a) => a.staff_id),
+    );
+  }, [sched.assigns, clientId, code]);
   const caseloadStaff = useMemo(
     () => sched.staff.filter((s) => caseloadStaffIds.has(s.id)),
     [sched.staff, caseloadStaffIds],
@@ -1316,7 +1330,7 @@ function ShiftDetailPanel({
   const qc = useQueryClient();
   const save = useServerFn(saveShift);
   const del = useServerFn(deleteShift);
-  const add = useServerFn(addToCaseload);
+  const add = useServerFn(addStaffToClientCode);
   const missingThirtyDayFn = useServerFn(getMissingThirtyDayStaffIds);
   const listSoloLapses = useServerFn(listSoloLapsesForStaff);
   const [lapseOpen, setLapseOpen] = useState(false);
@@ -1339,7 +1353,12 @@ function ShiftDetailPanel({
   const [search, setSearch] = useState("");
   const [openOther, setOpenOther] = useState(false);
 
-  const caseloadStaffIds = new Set(sched.assigns.filter((a) => a.client_id === shift.client_id).map((a) => a.staff_id));
+  // Only staff assigned this shift's exact code (NULL / [] covers nothing).
+  const caseloadStaffIds = new Set(
+    sched.assigns
+      .filter((a) => a.client_id === shift.client_id && assignmentCoversCode(a.service_codes, code))
+      .map((a) => a.staff_id),
+  );
   const caseloadStaff = sched.staff.filter((s) => caseloadStaffIds.has(s.id));
 
   const matchOthers = openOther
@@ -1442,15 +1461,18 @@ function ShiftDetailPanel({
 
   const addCl = useMutation({
     mutationFn: (staffId: string) =>
+      // Adds this shift's code to the staff member's explicit list (single
+      // write path; the server rejects a code the client isn't authorized for).
       add({
         data: {
           organization_id: org!.organization_id,
           client_id: shift.client_id,
           staff_id: staffId,
+          service_code: code,
         },
       }),
     onSuccess: () => {
-      toast.success("Added to caseload.");
+      toast.success(`Added to caseload for ${code}.`);
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -1553,8 +1575,8 @@ function ShiftDetailPanel({
                         <Button size="sm" variant="outline" onClick={() => void tryAssign(s.id)}>Assign</Button>
                       ) : (
                         <>
-                          <Button size="sm" variant="outline" onClick={async () => { await addCl.mutateAsync(s.id); await tryAssign(s.id); }}>
-                            Add to caseload
+                          <Button size="sm" variant="outline" disabled={!code} onClick={async () => { await addCl.mutateAsync(s.id); await tryAssign(s.id); }}>
+                            Add to caseload{code ? ` (${code})` : ""}
                           </Button>
                           <Link to="/dashboard/team-members/$staffId" params={{ staffId: s.id }} aria-label="Open profile">
                             <ArrowRight className="h-4 w-4" />

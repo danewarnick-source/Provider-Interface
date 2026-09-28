@@ -71,11 +71,6 @@ export function useNectarPayPeriod() {
   let has_daily_assignment = false;
   if (assignments) {
     for (const codes of assignments.values()) {
-      if (codes === null) {
-        has_hourly_assignment = true;
-        has_daily_assignment = true;
-        break;
-      }
       for (const c of codes) {
         if (isDailyServiceCode(c)) has_daily_assignment = true;
         else has_hourly_assignment = true;
@@ -129,7 +124,10 @@ export function useNectarPayPeriod() {
           if (assignments) {
             const allow = assignments.get(r.client_id);
             if (allow === undefined) continue;
-            if (allow && r.service_type_code && !allow.has(r.service_type_code)) continue;
+            const punchCode = String(r.service_type_code ?? "")
+              .trim()
+              .toUpperCase();
+            if (punchCode && !allow.has(punchCode)) continue;
           }
           const hrs = staffDisplayHours(r);
           if (hrs <= 0 || !isFinite(hrs)) continue;
@@ -162,13 +160,14 @@ export function useNectarPayPeriod() {
             const allow = assignments.get(r.client_id);
             if (allow === undefined) continue;
             // Daily-billed clients: any daily code in allow-list is enough.
-            if (allow) {
-              let ok = false;
-              for (const c of allow) {
-                if (isDailyServiceCode(c)) { ok = true; break; }
+            let ok = false;
+            for (const c of allow) {
+              if (isDailyServiceCode(c)) {
+                ok = true;
+                break;
               }
-              if (!ok) continue;
             }
+            if (!ok) continue;
           }
           dayKeys.add(`${r.client_id}|${r.record_date}`);
         }
@@ -184,8 +183,10 @@ export function useNectarPayPeriod() {
           if (vErr) throw vErr;
           const verdictByKey = new Map<string, { billable: boolean; reason: string | null }>();
           for (const v of (vRows ?? []) as Array<{
-            client_id: string | null; record_date: string | null;
-            billable: boolean | null; blocked_reason: string | null;
+            client_id: string | null;
+            record_date: string | null;
+            billable: boolean | null;
+            blocked_reason: string | null;
           }>) {
             if (!v.client_id || !v.record_date) continue;
             const k = `${v.client_id}|${v.record_date}`;
@@ -243,8 +244,7 @@ export function useNectarPayPeriod() {
           clock_out_timestamp: string;
         }>) {
           const h =
-            (new Date(r.clock_out_timestamp).getTime() -
-              new Date(r.clock_in_timestamp).getTime()) /
+            (new Date(r.clock_out_timestamp).getTime() - new Date(r.clock_in_timestamp).getTime()) /
             3_600_000;
           if (isFinite(h) && h > 0) general_hours += h;
         }
@@ -359,4 +359,3 @@ export function useLivePayPeriod() {
       liveEarnings,
   };
 }
-

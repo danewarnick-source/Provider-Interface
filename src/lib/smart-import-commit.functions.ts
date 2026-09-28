@@ -24,6 +24,7 @@ import {
   reevaluateStaffAssignedToClientInternal,
 } from "@/lib/staff-assignment-hooks.functions";
 import { enrichNamesFromFull } from "@/lib/person-name";
+import { clientAuthorizedCodes, importAssignmentCodes } from "@/lib/assignment-codes";
 import { hireTeamMemberInternal } from "@/lib/team-members/members.functions";
 import { classifyImportInvite, hasUsableInviteEmail } from "@/lib/import-invite";
 
@@ -1538,11 +1539,41 @@ async function applyAssignmentMap(
     if (!staffId || !clientId) continue;
 
     const isGroupHome = r.relation_type === "home";
-    // Per assignment_map.service_codes: NULL = all of the client's authorized
-    // codes (default); a populated array scopes to those codes; an empty array
-    // is invalid (treat as NULL).
-    const codes: string[] | null =
-      Array.isArray(r.service_codes) && r.service_codes.length > 0 ? r.service_codes : null;
+    // Every staff_assignments row lists its codes explicitly. The source's
+    // codes (∩ the client's authorized codes) when it has some; otherwise the
+    // client's currently authorized codes. Never NULL / "all codes".
+    const { data: clientRow } = await sb
+      .from("clients")
+      .select("authorized_dspd_codes, job_code")
+      .eq("organization_id", orgId)
+      .eq("id", clientId)
+      .maybeSingle();
+    const codes = importAssignmentCodes(
+      r.service_codes,
+      clientAuthorizedCodes(
+        (clientRow ?? {}) as {
+          authorized_dspd_codes?: string[] | null;
+          job_code?: string[] | null;
+        },
+      ),
+    );
+    if (codes.length === 0) {
+      await audit(
+        sb,
+        jobId,
+        orgId,
+        null,
+        `Skipped assignment ${r.relation_type}: the client has no authorized codes${
+          Array.isArray(r.service_codes) && r.service_codes.length
+            ? ` matching ${r.service_codes.join(", ")}`
+            : ""
+        } — assign on the client's Caseload after adding codes`,
+        "rule",
+        userId,
+        "wire_assignment",
+      );
+      continue;
+    }
     // Existing row? Update service_codes (don't error on the unique pair).
     const { data: prior } = await sb
       .from("staff_assignments")
@@ -1571,7 +1602,7 @@ async function applyAssignmentMap(
     }
     if (!writeError) {
       try {
-        await onStaffAssignmentCreatedInternal(sb, orgId, staffId, clientId, codes ?? []);
+        await onStaffAssignmentCreatedInternal(sb, orgId, staffId, clientId, codes);
       } catch (e) {
         console.warn("[obligations] import assignment auto-assign failed:", e);
       }
@@ -1584,7 +1615,7 @@ async function applyAssignmentMap(
         jobId,
         orgId,
         null,
-        `Wired assignment ${r.relation_type}${codes ? ` (codes: ${codes.join(", ")})` : ""}`,
+        `Wired assignment ${r.relation_type} (codes: ${codes.join(", ")})`,
         "admin_override",
         userId,
         "wire_assignment",

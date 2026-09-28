@@ -236,9 +236,25 @@ function auths() {
 
 function assigns() {
   return [
-    { staff_id: STAFF.tommy, client_id: CLIENT.jake, organization_id: ORG_ID },
-    { staff_id: STAFF.blake, client_id: CLIENT.harvey, organization_id: ORG_ID },
-    { staff_id: STAFF.stephen, client_id: CLIENT.tom, organization_id: ORG_ID },
+    // Explicit codes on every row, matching auths() above.
+    {
+      staff_id: STAFF.tommy,
+      client_id: CLIENT.jake,
+      organization_id: ORG_ID,
+      service_codes: ["SEI"],
+    },
+    {
+      staff_id: STAFF.blake,
+      client_id: CLIENT.harvey,
+      organization_id: ORG_ID,
+      service_codes: ["HHS"],
+    },
+    {
+      staff_id: STAFF.stephen,
+      client_id: CLIENT.tom,
+      organization_id: ORG_ID,
+      service_codes: ["SLH"],
+    },
   ];
 }
 

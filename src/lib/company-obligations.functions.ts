@@ -66,6 +66,7 @@ import {
   usesCertExpirationCadence,
 } from "./cert-review";
 import { isAdminLevel } from "@/lib/access/levels";
+import { assignmentCodes } from "@/lib/assignment-codes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -385,11 +386,7 @@ export async function snapshotAssigneesInternal(
       .map((uid: string) => {
         const role = roleById.get(uid);
         if (!role) return null;
-        if (
-          ob.assignee_role === "managers_only" &&
-          !isAdminLevel(role)
-        )
-          return null;
+        if (ob.assignee_role === "managers_only" && !isAdminLevel(role)) return null;
         if (ob.assignee_role === "admin_only" && role !== "owner") return null;
         return { staff_id: uid, staff_name: nameById.get(uid) ?? "Unknown", staff_role: role };
       })
@@ -584,11 +581,7 @@ async function resolveAllAssigneesInternal(
       .map((uid: string) => {
         const role = roleById.get(uid);
         if (!role) return null;
-        if (
-          ob.assignee_role === "managers_only" &&
-          !isAdminLevel(role)
-        )
-          return null;
+        if (ob.assignee_role === "managers_only" && !isAdminLevel(role)) return null;
         if (ob.assignee_role === "admin_only" && role !== "owner") return null;
         return { staff_id: uid, staff_name: nameById.get(uid) ?? "Unknown", staff_role: role };
       })
@@ -802,7 +795,8 @@ async function fetchClientNamesInternal(
 /**
  * scope = 'staff_per_client': one instance per active staff_assignments row
  * whose service_codes overlap the obligation's target_service_codes (empty
- * target = every assignment qualifies). due_day_config.days_after_assignment
+ * target = every assignment with at least one code qualifies; a row with no
+ * codes never qualifies). due_day_config.days_after_assignment
  * bases the due date on the assignment's own created_at rather than a
  * shared calendar period; other cadences fall back to computePeriod, with
  * the client name prefixed onto the period key.
@@ -826,9 +820,12 @@ async function generatePerClientInstancesInternal(
     service_codes: string[] | null;
     created_at: string;
   }>;
-  const qualifying = list.filter((a) =>
-    arraysOverlapCaseInsensitive(ob.target_service_codes ?? [], a.service_codes ?? []),
-  );
+  // Rows with NULL / [] codes grant nothing — they never qualify, not even
+  // for an obligation with an empty target list.
+  const qualifying = list.filter((a) => {
+    const codes = assignmentCodes(a.service_codes);
+    return codes.length > 0 && arraysOverlapCaseInsensitive(ob.target_service_codes ?? [], codes);
+  });
   if (!qualifying.length) return [];
 
   const staffIds = Array.from(new Set(qualifying.map((a) => a.staff_id)));

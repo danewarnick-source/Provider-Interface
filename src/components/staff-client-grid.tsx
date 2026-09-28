@@ -106,9 +106,7 @@ function ClientDetail({
   const codes = allowedCodesFor(assignments, c.id, allCodes);
   const isOnTheClock = !!activeShift && activeShift.client_id === c.id;
 
-  const initial = isOnTheClock
-    ? activeShift!.service_type_code
-    : defaultCaseloadCode(codes, allCodes);
+  const initial = isOnTheClock ? activeShift!.service_type_code : defaultCaseloadCode(codes);
   const [selected, setSelected] = useState<string>(initial);
   useEffect(() => {
     if (isOnTheClock) setSelected(activeShift!.service_type_code);
@@ -134,10 +132,7 @@ function ClientDetail({
         >
           {pills.map((code) => {
             const active = selected === code;
-            const locked =
-              isOnTheClock &&
-              !stackDual &&
-              code !== activeShift!.service_type_code;
+            const locked = isOnTheClock && !stackDual && code !== activeShift!.service_type_code;
             return (
               <button
                 key={code}
@@ -159,7 +154,9 @@ function ClientDetail({
                 <span
                   className={[
                     "block text-[10px] font-medium uppercase tracking-wide leading-tight",
-                    active ? "text-[color:var(--navy-900,var(--hive-text))]/70" : "text-muted-foreground",
+                    active
+                      ? "text-[color:var(--navy-900,var(--hive-text))]/70"
+                      : "text-muted-foreground",
                   ].join(" ")}
                 >
                   {billingLabel(code)}
@@ -290,8 +287,8 @@ function ClientRow({
   useTick(isOnTheClock);
   const navigate = useNavigate();
   const allCodes = clientAuthorizedCodes(c);
-  const codes = allowedCodesFor(assignments, c.id, allCodes);
-  const effectiveCodes = codes.length ? codes : allCodes;
+  // Assigned ∩ authorized only — no fallback to every client code.
+  const effectiveCodes = allowedCodesFor(assignments, c.id, allCodes);
   const hasHhs = hasHostHomeDailyCode(effectiveCodes);
   const hasClockableToday = !!(todayShift && isClockableServiceCode(todayShift.job_code));
   const hostHomeCard = isHostHomeDailyNoteCard({

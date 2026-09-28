@@ -1,6 +1,8 @@
-// Bulk caseload editor for a single client. Multi-select staff with
-// per-service-code scope (default "All codes", optionally a subset of the
-// client's authorized codes). Saves via setClientCaseload.
+// Bulk caseload editor for a single client. Multi-select staff with an
+// explicit list of the client's authorized codes per staff. Checking a staff
+// pre-checks every authorized code; what's saved is always that explicit
+// list (never "all codes"). Saves via setStaffClientCodes — the same single
+// write path the Authorized Codes section and Team Members use.
 //
 // Two modes:
 //   • Live mode (clientId set, draftMode unset): fetches the current
@@ -24,12 +26,25 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { Search, Save, X, Tag } from "lucide-react";
-import { setClientCaseload } from "@/lib/scheduler/setup.functions";
+import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
+import {
+  assignmentCodes,
+  clientAuthorizedCodes,
+  normalizeServiceCodes,
+  uncoveredCodes,
+} from "@/lib/assignment-codes";
 
 type StaffOption = { id: string; name: string };
 
-/** value semantics: null = "all codes"; string[] = explicit subset. */
-export type CaseloadDraftValue = Map<string, string[] | null>;
+/** staff_id → the explicit codes that staff will be assigned. Never null. */
+export type CaseloadDraftValue = Map<string, string[]>;
+
+/** Staff checked with no codes picked — Save is blocked until fixed. */
+export function staffMissingCodes(state: CaseloadDraftValue): string[] {
+  return Array.from(state.entries())
+    .filter(([, codes]) => codes.length === 0)
+    .map(([id]) => id);
+}
 
 export type CaseloadEditorProps = {
   clientId?: string;
@@ -46,7 +61,7 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
   const qc = useQueryClient();
-  const saveFn = useServerFn(setClientCaseload);
+  const saveFn = useServerFn(setStaffClientCodes);
 
   // Staff pool (same in both modes).
   const staffQ = useQuery({
@@ -107,10 +122,9 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
       ]);
       if (a.error) throw a.error;
       if (c.error) throw c.error;
-      const codes = Array.from(new Set([
-        ...(((c.data as { authorized_dspd_codes?: string[] } | null)?.authorized_dspd_codes) ?? []),
-        ...(((c.data as { job_code?: string[] } | null)?.job_code) ?? []),
-      ].filter(Boolean)));
+      const codes = clientAuthorizedCodes(
+        (c.data ?? {}) as { authorized_dspd_codes?: string[] | null; job_code?: string[] | null },
+      );
       return {
         assignments: ((a.data ?? []) as Array<{ staff_id: string; service_codes: string[] | null }>),
         codes,
@@ -128,13 +142,13 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
     if (!currentQ.data) return;
     const next: CaseloadDraftValue = new Map();
     for (const r of currentQ.data.assignments) {
-      next.set(r.staff_id, r.service_codes ?? null);
+      next.set(r.staff_id, assignmentCodes(r.service_codes));
     }
     setLiveState(next);
   }, [draftMode, currentQ.data]);
 
   const codes = draftMode
-    ? (authorizedCodes ?? [])
+    ? normalizeServiceCodes(authorizedCodes ?? [])
     : (currentQ.data?.codes ?? []);
 
   const state: CaseloadDraftValue = draftMode ? (value ?? new Map()) : liveState;
@@ -146,7 +160,7 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
   const original = useMemo<CaseloadDraftValue>(() => {
     if (draftMode) return new Map(); // draft starts empty; parent owns persistence
     const m: CaseloadDraftValue = new Map();
-    for (const r of currentQ.data?.assignments ?? []) m.set(r.staff_id, r.service_codes ?? null);
+    for (const r of currentQ.data?.assignments ?? []) m.set(r.staff_id, assignmentCodes(r.service_codes));
     return m;
   }, [draftMode, currentQ.data]);
 
@@ -157,9 +171,7 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
     return all.filter((s) => s.name.toLowerCase().includes(q));
   }, [staffQ.data, search]);
 
-  function eqCodes(a: string[] | null, b: string[] | null): boolean {
-    if (a === b) return true;
-    if (a === null || b === null) return false;
+  function eqCodes(a: string[], b: string[]): boolean {
     if (a.length !== b.length) return false;
     const s = new Set(a);
     return b.every((x) => s.has(x));
@@ -171,7 +183,7 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
     const change: string[] = [];
     for (const [id, codes] of state.entries()) {
       if (!original.has(id)) add.push(id);
-      else if (!eqCodes(original.get(id) ?? null, codes)) change.push(id);
+      else if (!eqCodes(original.get(id) ?? [], codes)) change.push(id);
     }
     for (const id of original.keys()) {
       if (!state.has(id)) remove.push(id);
@@ -179,25 +191,37 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
     return { toAdd: add, toRemove: remove, toChange: change };
   }, [state, original]);
   const dirty = toAdd.length + toRemove.length + toChange.length > 0;
+  const missing = staffMissingCodes(state);
+  const noStaffFor = uncoveredCodes(
+    codes,
+    Array.from(state.values()).map((service_codes) => ({ service_codes })),
+  );
 
   const saveM = useMutation({
-    mutationFn: () => {
-      const assignments = Array.from(state.entries()).map(([staff_id, service_codes]) => ({
-        staff_id, service_codes,
-      }));
-      return saveFn({
-        data: {
-          organization_id: orgId!,
-          client_id: clientId!,
-          assignments,
-        },
-      });
+    mutationFn: async () => {
+      if (missing.length > 0) {
+        throw new Error("Pick at least one code for each checked staff, or uncheck them.");
+      }
+      const r = { added: 0, updated: 0, removed: 0 };
+      const writes: Array<[string, string[], keyof typeof r]> = [
+        ...toAdd.map((id): [string, string[], keyof typeof r] => [id, state.get(id) ?? [], "added"]),
+        ...toChange.map((id): [string, string[], keyof typeof r] => [id, state.get(id) ?? [], "updated"]),
+        ...toRemove.map((id): [string, string[], keyof typeof r] => [id, [], "removed"]),
+      ];
+      for (const [staffId, staffCodes, bucket] of writes) {
+        await saveFn({
+          data: { organizationId: orgId!, staffId, clientId: clientId!, codes: staffCodes },
+        });
+        r[bucket]++;
+      }
+      return r;
     },
-    onSuccess: (r: { added: number; removed: number; updated?: number }) => {
+    onSuccess: (r: { added: number; removed: number; updated: number }) => {
       toast.success(
-        `Caseload saved — ${r.added} added, ${r.updated ?? 0} updated, ${r.removed} removed.`,
+        `Caseload saved — ${r.added} added, ${r.updated} updated, ${r.removed} removed.`,
       );
       qc.invalidateQueries({ queryKey: ["caseload-editor-current-v2"] });
+      qc.invalidateQueries({ queryKey: ["client-code-assignments", clientId] });
       qc.invalidateQueries({ queryKey: ["caseload"] });
       qc.invalidateQueries({ queryKey: ["my-assignments"] });
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
@@ -210,11 +234,11 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
   function toggleStaff(id: string) {
     const next = new Map(state);
     if (next.has(id)) next.delete(id);
-    else next.set(id, null); // default = All codes
+    else next.set(id, [...codes]); // pre-check every authorized code; saved as an explicit list
     setState(next);
   }
 
-  function setStaffCodes(id: string, codes: string[] | null) {
+  function setStaffCodes(id: string, codes: string[]) {
     const next = new Map(state);
     next.set(id, codes);
     setState(next);
@@ -224,9 +248,8 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
     setState(new Map(original));
   }
 
-  function scopeSummary(v: string[] | null | undefined): string {
-    if (v === null || v === undefined) return "All codes";
-    if (v.length === 0) return "No codes";
+  function scopeSummary(v: string[] | undefined): string {
+    if (!v || v.length === 0) return "No codes";
     return v.join(", ");
   }
 
@@ -242,10 +265,10 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
               : "Caseload — staff who can work with this client"}
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            Each staff defaults to <strong>All codes</strong>. Open the
-            scope picker to limit a staff to specific service codes (e.g.
-            “Julie covers HHS only”). Only assigned staff can be scheduled or
-            take open shifts for this client.
+            Checking a staff pre-checks every authorized code. Open the code
+            picker to narrow it (e.g. “Julie covers HHS only”). Staff can
+            only be scheduled for, and clock into, the codes checked here.
+            A new authorized code adds nobody automatically.
           </p>
         </div>
         {showSaveBar && (
@@ -262,7 +285,7 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
             <Button
               size="sm"
               onClick={() => saveM.mutate()}
-              disabled={!dirty || saveM.isPending || !orgId || !clientId}
+              disabled={!dirty || missing.length > 0 || saveM.isPending || !orgId || !clientId}
               className="min-h-11"
             >
               <Save className="h-4 w-4 mr-1" />
@@ -274,6 +297,25 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
         )}
       </CardHeader>
       <CardContent className="space-y-3">
+        {codes.length === 0 && !(!draftMode && currentQ.isLoading) && (
+          <p className="text-sm text-muted-foreground" data-testid="caseload-no-codes">
+            This client has no authorized codes yet. Add a code before assigning staff.
+          </p>
+        )}
+        {noStaffFor.length > 0 && (
+          <ul className="space-y-0.5" data-testid="caseload-uncovered-codes">
+            {noStaffFor.map((code) => (
+              <li key={code} className="text-xs text-amber-700 dark:text-amber-400">
+                No staff assigned to <span className="font-mono">{code}</span> yet
+              </li>
+            ))}
+          </ul>
+        )}
+        {missing.length > 0 && (
+          <p className="text-xs text-destructive">
+            Pick at least one code for each checked staff, or uncheck them.
+          </p>
+        )}
         <div className="flex items-center gap-2">
           <Search className="h-4 w-4 text-muted-foreground" />
           <Input
@@ -296,7 +338,7 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
             {filtered.map((s) => {
               const checked = state.has(s.id);
               const wasOriginal = original.has(s.id);
-              const scope = state.get(s.id) ?? null;
+              const scope = state.get(s.id) ?? [];
               return (
                 <div
                   key={s.id}
@@ -307,6 +349,7 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
                   <label className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer">
                     <Checkbox
                       checked={checked}
+                      disabled={!checked && codes.length === 0}
                       onCheckedChange={() => toggleStaff(s.id)}
                     />
                     <span className="flex-1 truncate">{s.name}</span>
@@ -342,31 +385,19 @@ function CodeScopePopover({
   summary,
 }: {
   authorized: string[];
-  value: string[] | null;
-  onChange: (next: string[] | null) => void;
+  value: string[];
+  onChange: (next: string[]) => void;
   summary: string;
 }) {
-  const isAll = value === null;
-  const subset = new Set(value ?? []);
+  const picked = new Set(value);
+  const allPicked = authorized.length > 0 && authorized.every((c) => picked.has(c));
 
   function toggle(code: string) {
-    // Start from current effective set.
-    const cur = new Set<string>(isAll ? authorized : value ?? []);
-    if (cur.has(code)) cur.delete(code);
-    else cur.add(code);
-    const arr = Array.from(cur);
-    if (arr.length === 0) {
-      // Treat empty pick as "no codes" — but the writer drops empty,
-      // so let the user uncheck the staff entirely. Keep as empty so the
-      // summary reflects intent; parent validates on submit.
-      onChange([]);
-      return;
-    }
-    if (authorized.length > 0 && arr.length === authorized.length) {
-      onChange(null);
-    } else {
-      onChange(arr);
-    }
+    const next = new Set(picked);
+    if (next.has(code)) next.delete(code);
+    else next.add(code);
+    // Keep the client's code order. Empty is allowed here; Save blocks it.
+    onChange(authorized.filter((c) => next.has(c)));
   }
 
   return (
@@ -383,36 +414,33 @@ function CodeScopePopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-2" align="end">
-        <div className="text-xs font-medium px-1 pb-1">Service-code scope</div>
+        <div className="text-xs font-medium px-1 pb-1">Service codes</div>
         {authorized.length === 0 ? (
           <div className="px-1 py-2 text-xs text-muted-foreground">
-            No authorized codes on this client yet — staff will be assigned to
-            All codes by default. Add codes on the client&apos;s billing tab to
-            narrow scope.
+            No authorized codes on this client yet. Add a code before
+            assigning staff.
           </div>
         ) : (
           <>
             <button
               type="button"
-              className={`w-full text-left text-xs rounded px-2 py-1.5 hover:bg-muted ${isAll ? "bg-muted font-medium" : ""}`}
-              onClick={() => onChange(null)}
+              className="w-full text-left text-xs rounded px-2 py-1.5 hover:bg-muted disabled:opacity-50"
+              disabled={allPicked}
+              onClick={() => onChange([...authorized])}
             >
-              All codes ({authorized.length})
+              Select all ({authorized.length})
             </button>
             <div className="my-1 h-px bg-border" />
             <div className="max-h-56 overflow-y-auto space-y-0.5">
-              {authorized.map((c) => {
-                const on = isAll ? true : subset.has(c);
-                return (
-                  <label
-                    key={c}
-                    className="flex items-center gap-2 text-xs px-2 py-1 rounded hover:bg-muted cursor-pointer"
-                  >
-                    <Checkbox checked={on} onCheckedChange={() => toggle(c)} />
-                    <span className="font-mono">{c}</span>
-                  </label>
-                );
-              })}
+              {authorized.map((c) => (
+                <label
+                  key={c}
+                  className="flex items-center gap-2 text-xs px-2 py-1 rounded hover:bg-muted cursor-pointer"
+                >
+                  <Checkbox checked={picked.has(c)} onCheckedChange={() => toggle(c)} />
+                  <span className="font-mono">{c}</span>
+                </label>
+              ))}
             </div>
           </>
         )}

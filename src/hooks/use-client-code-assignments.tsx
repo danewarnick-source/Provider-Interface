@@ -2,11 +2,18 @@
 // code for this client". Single source of truth for both the persistent
 // Authorized Codes section on the client profile and the intake add-codes
 // prompt — both read/write the same staff_assignments rows via
-// addStaffToClientCode / removeStaffFromClientCode (setup.functions.ts).
+// setStaffClientCodes (setup.functions.ts). Every row lists its codes;
+// NULL / [] covers no code (never "all codes").
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
+import {
+  assignmentCodes,
+  assignmentCoversCode,
+  clientAuthorizedCodes,
+  uncoveredCodes,
+} from "@/lib/assignment-codes";
 
 export type StaffOption = { id: string; name: string };
 
@@ -48,10 +55,9 @@ export function useClientCodeAssignments(clientId: string | undefined) {
       if (clientRes.error) throw clientRes.error;
       if (membersRes.error) throw membersRes.error;
 
-      const authorizedCodes = Array.from(new Set([
-        ...(((clientRes.data as { authorized_dspd_codes?: string[] } | null)?.authorized_dspd_codes) ?? []),
-        ...(((clientRes.data as { job_code?: string[] } | null)?.job_code) ?? []),
-      ].filter(Boolean)));
+      const authorizedCodes = clientAuthorizedCodes(
+        (clientRes.data ?? {}) as { authorized_dspd_codes?: string[] | null; job_code?: string[] | null },
+      );
 
       const memberIds = ((membersRes.data ?? []) as Array<{ user_id: string | null }>)
         .map((m) => m.user_id)
@@ -93,12 +99,11 @@ export function useClientCodeAssignments(clientId: string | undefined) {
     return m;
   }, [q.data?.staffPool]);
 
-  /** Staff currently assigned to work the given code (null-scope = all codes). */
+  /** Staff currently assigned to work the given code (explicit codes only). */
   function staffForCode(code: string): StaffOption[] {
     const out: StaffOption[] = [];
     for (const a of q.data?.assignments ?? []) {
-      const covers = a.service_codes === null || a.service_codes.includes(code);
-      if (!covers) continue;
+      if (!assignmentCoversCode(a.service_codes, code)) continue;
       const s = staffById.get(a.staff_id);
       out.push(s ?? { id: a.staff_id, name: "Staff" });
     }
@@ -111,11 +116,24 @@ export function useClientCodeAssignments(clientId: string | undefined) {
     return (q.data?.staffPool ?? []).filter((s) => !assignedIds.has(s.id));
   }
 
+  /** The explicit codes a staff member currently has on this client ([] when unassigned). */
+  function codesForStaff(staffId: string): string[] {
+    const row = (q.data?.assignments ?? []).find((a) => a.staff_id === staffId);
+    return assignmentCodes(row?.service_codes);
+  }
+
+  /** Authorized codes nobody is assigned to yet. [] while loading. */
+  const codesWithoutStaff = q.data
+    ? uncoveredCodes(q.data.authorizedCodes, q.data.assignments)
+    : [];
+
   return {
     ...q,
     orgId,
     authorizedCodes: q.data?.authorizedCodes ?? [],
     staffForCode,
     unassignedForCode,
+    codesForStaff,
+    codesWithoutStaff,
   };
 }

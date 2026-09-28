@@ -7,6 +7,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { coerceScheduledShiftStatus } from "@/lib/scheduling/shift-status";
 import { denverWeekUtcBounds } from "@/lib/scheduler/recurrence";
+import { assignmentCoversCode, normalizeServiceCode } from "@/lib/assignment-codes";
 
 const ShiftInput = z.object({
   id: z.string().uuid().optional(),
@@ -53,12 +54,13 @@ async function assertStaffOnCaseload(
   orgId: string,
   staffId: string,
   clientId: string,
+  code: string,
   staffName: string,
   clientName: string,
 ) {
   const { data, error } = await supabase
     .from("staff_assignments")
-    .select("id")
+    .select("id, service_codes")
     .eq("organization_id", orgId)
     .eq("staff_id", staffId)
     .eq("client_id", clientId)
@@ -67,6 +69,12 @@ async function assertStaffOnCaseload(
   if (!data) {
     throw new Error(
       `You can't schedule this — ${staffName} isn't authorized to work with ${clientName}.`,
+    );
+  }
+  // The assignment lists its codes explicitly; NULL / [] covers nothing.
+  if (!assignmentCoversCode((data as { service_codes: string[] | null }).service_codes, code)) {
+    throw new Error(
+      `You can't schedule this — ${staffName} isn't assigned ${normalizeServiceCode(code)} for ${clientName}.`,
     );
   }
 }
@@ -133,6 +141,7 @@ export const saveShift = createServerFn({ method: "POST" })
         data.organization_id,
         data.staff_id,
         data.client_id,
+        data.job_code,
         staffName,
         clientName,
       );
@@ -242,55 +251,6 @@ export const publishWeek = createServerFn({ method: "POST" })
       await supabase.from("notifications").insert(notifs);
     }
     return { shifts: rows?.length ?? 0, staff: byStaff.size };
-  });
-
-export const addToCaseload = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { organization_id: string; staff_id: string; client_id: string }) =>
-    z.object({
-      organization_id: z.string().uuid(),
-      staff_id: z.string().uuid(),
-      client_id: z.string().uuid(),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { ok: false };
-    // Idempotent — unique (staff_id, client_id)
-    const { error } = await supabase
-      .from("staff_assignments")
-      .upsert(
-        {
-          organization_id: data.organization_id,
-          staff_id: data.staff_id,
-          client_id: data.client_id,
-        },
-        { onConflict: "staff_id,client_id", ignoreDuplicates: true },
-      );
-    if (error) throw error;
-    return { ok: true };
-  });
-
-export const removeFromCaseload = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { organization_id: string; staff_id: string; client_id: string }) =>
-    z.object({
-      organization_id: z.string().uuid(),
-      staff_id: z.string().uuid(),
-      client_id: z.string().uuid(),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as any;
-    if (!supabase || !userId) return { ok: false };
-    const { error } = await supabase
-      .from("staff_assignments")
-      .delete()
-      .eq("organization_id", data.organization_id)
-      .eq("staff_id", data.staff_id)
-      .eq("client_id", data.client_id);
-    if (error) throw error;
-    return { ok: true };
   });
 
 export const setAdminTimeOff = createServerFn({ method: "POST" })
