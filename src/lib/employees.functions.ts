@@ -11,6 +11,7 @@ import { requireCategory, requireLevel } from "@/lib/access/require";
 import type { AccessLevel } from "@/lib/access/levels";
 import { resolvePresetId } from "@/lib/access/preset-resolve";
 import { logChange } from "@/lib/access/change-log.server";
+import { assertCanManageMember } from "@/lib/team-members/guards.server";
 
 type MemberInsert = Database["public"]["Tables"]["organization_members"]["Insert"];
 
@@ -516,16 +517,15 @@ export const adminResetEmployeePassword = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ResetInput.parse(d))
   .handler(async ({ data, context }) => {
     if (!context.userId) return { ok: false };
-    await assertOrgManager(context.userId, data.organizationId);
-
-    // Confirm target user belongs to that org
-    const { data: mem } = await supabaseAdmin
-      .from("organization_members")
-      .select("id")
-      .eq("user_id", data.userId)
-      .eq("organization_id", data.organizationId)
-      .maybeSingle();
-    if (!mem) throw new Error("Team member not found in this organization");
+    // Hire & deactivate = Edit, in-scope target, not an Owner unless the actor
+    // is one, never your own account — and the same-org target check.
+    await assertCanManageMember({
+      supabase: supabaseAdmin,
+      actorId: context.userId,
+      organizationId: data.organizationId,
+      targetUserId: data.userId,
+      action: "reset_password",
+    });
 
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
       password: data.newPassword,

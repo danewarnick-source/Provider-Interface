@@ -76,10 +76,21 @@ const ROSTER_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   year: "numeric",
 };
 
-/** Same date style as the Employees roster Start date column. */
+const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/**
+ * Same date style as the roster Start date column.
+ * A bare "YYYY-MM-DD" (hire_date / start_date columns) is a calendar day, not an
+ * instant: parse it as a LOCAL date. `new Date("2025-01-15")` is midnight UTC,
+ * which in America/Denver is still Jan 14 — the roster would show a day earlier
+ * than the profile. Full timestamps keep their instant.
+ */
 export function formatRosterDate(value: string | null | undefined): string {
   if (!value) return "—";
-  const parsed = new Date(value);
+  const dateOnly = DATE_ONLY_RE.exec(value.trim());
+  const parsed = dateOnly
+    ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+    : new Date(value);
   if (Number.isNaN(parsed.getTime())) return "—";
   return parsed.toLocaleDateString("en-US", ROSTER_DATE_FORMAT);
 }

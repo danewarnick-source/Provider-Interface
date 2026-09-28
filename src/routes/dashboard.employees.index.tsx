@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useServerFn } from "@tanstack/react-start";
 import { adminResetEmployeePassword } from "@/lib/employees.functions";
 import { resendInvitation, revokeInvitation } from "@/lib/invitations.functions";
-import { archiveEntity, deleteEntity, restoreEntity } from "@/lib/lifecycle.functions";
+import { archiveEntity, restoreEntity } from "@/lib/lifecycle.functions";
 import { inviteJoinUrl } from "@/lib/join-invite";
 import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { generateTempPassword } from "@/lib/temp-password";
@@ -67,8 +67,6 @@ import {
   MoreHorizontal,
   Ban,
   RefreshCcw,
-  Trash2,
-  AlertTriangle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -146,8 +144,6 @@ export function EmployeesPage() {
     if (search.upload) setUploadOpen(true);
   }, [search.upload]);
   const [rosterTab, setRosterTab] = useState<EmployeeRosterTab>("active");
-  const [deleteTarget, setDeleteTarget] = useState<{ userId: string; name: string } | null>(null);
-  const [confirmDeleteName, setConfirmDeleteName] = useState("");
   const [resetUser, setResetUser] = useState<{ id: string; name: string } | null>(null);
   const [tempPassword, setTempPassword] = useState(() => generateTempPassword());
   const [credentialsShown, setCredentialsShown] = useState<{
@@ -163,7 +159,6 @@ export function EmployeesPage() {
   const revokeInviteFn = useServerFn(revokeInvitation);
   const archiveFn = useServerFn(archiveEntity);
   const restoreFn = useServerFn(restoreEntity);
-  const deleteFn = useServerFn(deleteEntity);
 
   const { data: members, isLoading: membersLoading } = useQuery({
     enabled: !!org,
@@ -342,26 +337,6 @@ export function EmployeesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const deleteEmployeeMutation = useMutation({
-    mutationFn: async (input: { userId: string; name: string; confirmName: string }) => {
-      if (!org) throw new Error("No organization selected.");
-      await deleteFn({
-        data: {
-          kind: "employee",
-          id: input.userId,
-          organizationId: org.organization_id,
-          confirmName: input.confirmName,
-        },
-      });
-    },
-    onSuccess: (_d, vars) => {
-      toast.success(`${vars.name} permanently deleted.`);
-      setDeleteTarget(null);
-      setConfirmDeleteName("");
-      qc.invalidateQueries({ queryKey: ["members"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   const resetPwMutation = useMutation({
     mutationFn: async (input: { userId: string; newPassword: string }) => {
@@ -593,28 +568,15 @@ export function EmployeesPage() {
                         onClick={(e) => e.stopPropagation()}
                       >
                         {rosterTab === "inactive" && m.user_id !== user?.id && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 text-xs"
-                              disabled={reactivateMutation.isPending}
-                              onClick={() => reactivateMutation.mutate({ userId: m.user_id, name })}
-                            >
-                              Reactivate
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 text-xs text-destructive hover:text-destructive"
-                              onClick={() => {
-                                setConfirmDeleteName("");
-                                setDeleteTarget({ userId: m.user_id, name });
-                              }}
-                            >
-                              <Trash2 className="mr-1 h-3 w-3" /> Delete
-                            </Button>
-                          </>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs"
+                            disabled={reactivateMutation.isPending}
+                            onClick={() => reactivateMutation.mutate({ userId: m.user_id, name })}
+                          >
+                            Reactivate
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -793,17 +755,6 @@ export function EmployeesPage() {
                                       <UserCheck className="mr-2 h-3.5 w-3.5" /> Reactivate
                                     </DropdownMenuItem>
                                   )}
-                                  {m.user_id !== user?.id && (
-                                    <DropdownMenuItem
-                                      onSelect={() => {
-                                        setConfirmDeleteName("");
-                                        setDeleteTarget({ userId: m.user_id, name });
-                                      }}
-                                      className="text-destructive focus:text-destructive"
-                                    >
-                                      <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
-                                    </DropdownMenuItem>
-                                  )}
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </div>
@@ -834,79 +785,6 @@ export function EmployeesPage() {
           organizationId={org?.organization_id ?? null}
           people={needsSetupPeople}
         />
-
-        <Dialog
-          open={!!deleteTarget}
-          onOpenChange={(o) => {
-            if (!o) {
-              setDeleteTarget(null);
-              setConfirmDeleteName("");
-            }
-          }}
-        >
-          <DialogContent className="border-destructive/60">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-5 w-5" /> Delete {deleteTarget?.name}?
-              </DialogTitle>
-              <DialogDescription>
-                This permanently removes {deleteTarget?.name} from this organization. Type their
-                full name to confirm. This cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-2">
-              <Label htmlFor="confirm-employee-delete" className="text-sm">
-                Type <span className="font-mono font-semibold">{deleteTarget?.name}</span> to
-                confirm
-              </Label>
-              <Input
-                id="confirm-employee-delete"
-                value={confirmDeleteName}
-                onChange={(e) => setConfirmDeleteName(e.target.value)}
-                placeholder={deleteTarget?.name}
-                autoComplete="off"
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setDeleteTarget(null);
-                  setConfirmDeleteName("");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                disabled={
-                  !deleteTarget ||
-                  confirmDeleteName.trim().toLowerCase() !==
-                    (deleteTarget.name ?? "").trim().toLowerCase() ||
-                  deleteEmployeeMutation.isPending
-                }
-                onClick={() => {
-                  if (!deleteTarget) return;
-                  deleteEmployeeMutation.mutate({
-                    userId: deleteTarget.userId,
-                    name: deleteTarget.name,
-                    confirmName: confirmDeleteName,
-                  });
-                }}
-              >
-                {deleteEmployeeMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting…
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete permanently
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
         {/* Reset password */}
         <Dialog open={!!resetUser} onOpenChange={(o) => !o && setResetUser(null)}>

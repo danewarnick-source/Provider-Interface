@@ -70,7 +70,7 @@ Baseline from `DEFAULT_MATRIX` (live `role_permissions` may override per org; §
 | Add employee / Upload roster (server fn `assertOrgManager` → admin, program_manager, manager) | yes | yes | yes | no |
 | Edit profile identity (`edit_staff_records`) | yes | yes | no | no |
 | Change role (`manage_staff_roles`) | yes | no | no | no |
-| Deactivate / Delete (`deactivate_staff` in UI; server fn accepts admin/PM/manager) | yes | UI: no | UI: no | no |
+| Deactivate (`deactivate_staff` in UI; server fn requires Hire & deactivate = Edit via `assertCanManageMember`) | yes | UI: no | UI: no | no |
 | Save Staff Fields settings (RLS `organizations` UPDATE = `has_org_role(...,'admin')`) | yes | **no (silent)** | **no (silent)** | no |
 | Edit host cue cards (`manage_referrals`) | yes | no | no | no |
 | Read/write employee loans (RLS `is_org_admin_or_manager`) | yes | yes (helper includes `program_manager` since `20260825020000`; confirm live with Q7) | yes | no |
@@ -104,7 +104,6 @@ Baseline from `DEFAULT_MATRIX` (live `role_permissions` may override per org; §
 | ⋯ → Reset password | `adminResetEmployeePassword` | `auth.users.password` set via `auth.admin.updateUserById`; `profiles.must_change_password = true` | Dialog shows the generated password once with Copy |
 | ⋯ → Deactivate | `archiveEntity(kind="employee")` | `profiles.account_status='archived', team_id=null, is_active=false`; `organization_members.active=false` | Global sign-out of that user; blocked if the caller is not admin/PM/manager in that org |
 | ⋯ → Reactivate (Inactive tab only) | `restoreEntity` | `profiles.account_status='active', is_active=true`; `organization_members.active=true` | — |
-| ⋯ → Delete → type name → Delete permanently | `deleteEntity` | removes `organization_members` row for **this org**; if it was the user's last org: deletes `course_assignments`, `external_certifications`, `pba_*`, `profiles`, and the `auth.users` row | Cannot be undone; requires exact (case-insensitive) name match |
 | Pending invitations → Resend / Copy link / Uninvite | `resendInvitation` / clipboard / `revokeInvitation` | `invitations.status` → `revoked` on Uninvite | Uninvite uses a browser `confirm()` |
 | Settings → any toggle | **direct client** `organizations.update({feature_config})` debounced 500 ms | `organizations.feature_config.staff_intake_fields` | **No error handling** — see Finding F-1 |
 
@@ -136,7 +135,7 @@ Baseline from `DEFAULT_MATRIX` (live `role_permissions` may override per org; §
 - **② Pending invitations.** Not in the tree but always present when a join link is outstanding. Resend keeps the same token/email; Copy link copies the join URL built from `resolveAuthOrigin()`; Uninvite asks `confirm()` then revokes.
 - **③ Active / Inactive pill.** Pure client-side filter (`filterEmployeesByRosterTab`). Counts in the pills come from `countEmployeesOnRosterTab`. Empty Inactive tab shows "No deactivated employees".
 - **④ Row.** Clicking anywhere on the row (except inside ACTIONS) navigates to `/dashboard/employees/$staffId`. NAME shows full name over `job_title`. LOGIN shows `profiles.username` if set, else email. STATUS badge = Active / Deactivated. START DATE = `profiles.hire_date` (fallback `start_date`) formatted by `formatRosterDate`. LAST LOGIN = "Never" or a date from the RPC.
-- **ACTIONS → Caseload** opens the side sheet (2.1.3.7.1). **ACTIONS → ⋯** opens the menu: Reset password; Deactivate (Active tab) or Reactivate (Inactive tab); Delete.
+- **ACTIONS → Caseload** opens the side sheet (2.1.3.7.1). **ACTIONS → ⋯** opens the menu: Reset password; Deactivate (Active tab) or Reactivate (Inactive tab). There is no Delete — team members are never hard-deleted.
 
 **Upload roster dialog (2.1.1.1)**
 
@@ -228,7 +227,7 @@ Baseline from `DEFAULT_MATRIX` (live `role_permissions` may override per org; §
 | US-R5 | Owner | to control which intake fields staff see | Toggling Department ON then reopening the Add-employee wizard shows a Department dropdown; adding an option makes it selectable; a custom Date field appears as a date input; toggles survive a page reload. **Currently fails for non-Owner roles without any error (F-1).** |
 | US-R6 | Supervisor | to assign a client caseload | Open Caseload → check two clients → Save → reopen shows both checked; unchecking one and saving removes it; `staff_assignments` has exactly the checked rows for that staff. |
 | US-R7 | Owner | to reset a password for a locked-out staffer | Reset password → dialog shows a new temporary password + Copy → staffer logs in and is forced to change it (`must_change_password` enforced at router root). |
-| US-R8 | Owner | to remove access safely | Deactivate moves the row to Inactive immediately, the staffer's sessions are ended, and Reactivate restores them. Delete requires typing the exact name; after Delete the row is gone and — if this was their only org — the login no longer exists. |
+| US-R8 | Owner | to remove access safely | Deactivate moves the row to Inactive immediately, the staffer's sessions are ended, and Reactivate restores them. There is no permanent delete: a team member's work records (shifts, logs, incident reports, training, signatures, pay) stay attached to them, and the database refuses to delete a person who has any (`ON DELETE RESTRICT`). |
 
 ### 2.1.D Status by tree ID — Roster
 
@@ -254,7 +253,7 @@ Baseline from `DEFAULT_MATRIX` (live `role_permissions` may override per org; §
 | 2.1.3.7.1 | Caseload sheet | **UNTESTED** / **NEEDS ATTENTION** | F-4: direct client writes, empty `serviceCodes`, swallowed hook errors |
 | 2.1.3.7.2.1 | Reset password | **UNTESTED** | Supabase Auth write; needs live pass |
 | 2.1.3.7.2.2 | Deactivate | **UNTESTED** | server fn traced; also Reactivate on Inactive tab (not in tree) |
-| 2.1.3.7.2.3 | Delete | **UNTESTED** | typed-name confirm; cascade rules in §2.1.A |
+| 2.1.3.7.2.3 | Delete | **REMOVED** | permanent delete no longer exists (`deleteEntity` removed); Deactivate / Reactivate only |
 
 ---
 
@@ -651,7 +650,7 @@ Editor (replaces the ledger in place):
 | **F-12** | Send for e-signature | Only one signer per send; added Signature parties are PDF text only. | Token model is one signer per token; dialog collects one name/email. | Product decision: multi-party = one token per party + "all signed" state. Tester's request noted. |
 | **F-13** | e2e harness (not product) | `e2e/clients-staff-roster.spec.ts` failed 5/8 on `main` before this work because `mock-hive.ts` did not mock `getAgencySetupStatus` / `loadEmployeeScope` (both added after the harness) and the wizard step-2 copy had changed. | Harness drift. | Fixed in this PR (mocks + copy). Two remaining failures are in the **Clients** chart (Files tab, empty state) — outside this tab. |
 
-Also observed, not defects: the invite-step "Set up Evidence pack" button navigates by full page load to `/dashboard/evidence?tab=staff&wizard=1&person=<id>` (**YET TO BREAK DOWN**); Deactivate/Delete/Uninvite use native `confirm()` in two places and a typed-name dialog in one.
+Also observed, not defects: the invite-step "Set up Evidence pack" button navigates by full page load to `/dashboard/evidence?tab=staff&wizard=1&person=<id>` (**YET TO BREAK DOWN**); Deactivate/Uninvite use native `confirm()`; the typed-name Delete dialog went away with permanent delete.
 
 ---
 
@@ -859,7 +858,7 @@ Default grants from `DEFAULT_MATRIX` (`src/lib/rbac.ts`). Live values come from 
 | Server function | File | Called from |
 |---|---|---|
 | `createEmployeeManually`, `applyEmployeeRosterRow`, `adminResetEmployeePassword`, `hireEmployeeInternal` | `src/lib/employees.functions.ts` | wizards, roster ⋯ |
-| `archiveEntity`, `restoreEntity`, `deleteEntity` | `src/lib/lifecycle.functions.ts` | roster ⋯ |
+| `archiveEntity`, `restoreEntity` | `src/lib/lifecycle.functions.ts` | roster ⋯ |
 | `createInvitation`, `resendInvitation`, `revokeInvitation` | `src/lib/invitations.functions.ts` | wizards, pending invitations |
 | `onStaffHiredInternal`, `onStaffAssignmentCreated`, `onStaffAssignmentRemoved` | `src/lib/staff-assignment-hooks.functions.ts` | hire, caseload |
 | `setMemberGrants` | `src/lib/team-access.functions.ts` | profile role |

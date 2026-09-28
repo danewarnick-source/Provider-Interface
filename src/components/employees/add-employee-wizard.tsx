@@ -238,8 +238,16 @@ export function AddEmployeeWizard({
               .maybeSingle();
             if (error) throw new Error(error.message);
             if (!pending?.id) throw e;
+            // Pass the access chosen in this wizard so the resent invite can never
+            // hand back whatever access the older pending row was created with.
             raw = await resendInviteFn({
-              data: { organization_id: organizationId, invitation_id: pending.id, site_origin },
+              data: {
+                organization_id: organizationId,
+                invitation_id: pending.id,
+                site_origin,
+                access_level: row.access.level,
+                access_preset_id: row.access.presetId,
+              },
             });
           }
           const out = interpretInviteSendResult(raw);
