@@ -9,7 +9,7 @@ import {
   STAFF_PROFILE_IDENTITY_QUERY_ROOT,
   staffProfileDisplayName,
   staffProfileIdentityQueryKey,
-} from "./staff-profile-identity.ts";
+} from "./identity.ts";
 
 const ORG = "org-tns";
 const JEFF = "staff-jeff";
@@ -172,15 +172,15 @@ describe("route staff identity guards", () => {
 describe("employee Profile identity source lock", () => {
   it("route and panel load identity via the staffId-keyed helper", () => {
     const route = readFileSync(
-      new URL("../routes/dashboard.employees.$staffId.tsx", import.meta.url),
+      new URL("../../routes/dashboard.employees.$staffId.tsx", import.meta.url),
       "utf8",
     );
     const panel = readFileSync(
-      new URL("../components/employees/staff-profile-panel.tsx", import.meta.url),
+      new URL("../../components/employees/staff-profile-panel.tsx", import.meta.url),
       "utf8",
     );
     const identityUi = readFileSync(
-      new URL("../components/employees/staff-profile-identity.tsx", import.meta.url),
+      new URL("../../components/employees/staff-profile-identity.tsx", import.meta.url),
       "utf8",
     );
     assert.match(route, /staffProfileIdentityQueryKey\(orgId, staffId\)/);

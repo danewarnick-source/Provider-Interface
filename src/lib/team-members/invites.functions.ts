@@ -1,5 +1,5 @@
-// Shared employee-invitation rail. Both invite surfaces (the "Invite by
-// email" dialog on dashboard.employees.index.tsx and the dedicated
+// Shared team-member invitation rail. Both invite surfaces (the Add team
+// member dialog on the Team Members roster and the dedicated
 // dashboard.invitations.tsx management page) call these server fns instead
 // of inserting into `invitations` directly, so invite creation, resend, and
 // the actual email send live in exactly one place.

@@ -17,7 +17,7 @@ import {
   type StaffIdentityDraft,
   type StaffIdentityMember,
   type StaffIdentityProfile,
-} from "@/lib/staff-profile-identity";
+} from "@/lib/team-members/identity";
 import { AccessSection } from "@/components/access/access-section";
 
 export function StaffProfilePanel({

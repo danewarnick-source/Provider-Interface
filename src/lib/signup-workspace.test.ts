@@ -171,7 +171,7 @@ describe("signup workspace / session", () => {
     assert.match(invite, /from\("profiles"\)/);
     const join = readFileSync(new URL("../routes/join.tsx", import.meta.url), "utf8");
     assert.match(join, /accept_invitation/);
-    const hire = readFileSync(new URL("./employees.functions.ts", import.meta.url), "utf8");
+    const hire = readFileSync(new URL("./team-members/members.functions.ts", import.meta.url), "utf8");
     assert.match(hire, /created_via: createdVia/);
     assert.match(hire, /from\("organization_members"\)\.upsert/);
     const training = readFileSync(

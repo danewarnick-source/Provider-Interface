@@ -85,7 +85,7 @@ describe("B1 edge callers", () => {
   it("send-email callers invoke with the service-role client", () => {
     for (const file of [
       "../../src/lib/email.functions.ts",
-      "../../src/lib/invitations.functions.ts",
+      "../../src/lib/team-members/invites.functions.ts",
       "../../src/lib/threads.functions.ts",
       "../../src/lib/audit-portal.functions.ts",
       "../../src/lib/billing-notifications.server.ts",
@@ -100,7 +100,7 @@ describe("B1 edge callers", () => {
       /\(supabase as any\)\.functions\.invoke/,
     );
     assert.doesNotMatch(
-      read("../../src/lib/invitations.functions.ts"),
+      read("../../src/lib/team-members/invites.functions.ts"),
       /supabase\.functions\.invoke\("send-email"/,
     );
   });
@@ -154,7 +154,7 @@ describe("B1 edge callers", () => {
   });
 
   it("does not call notify_incident_filed or flag_member_deactivated as the signed-in user", () => {
-    const lifecycle = read("../../src/lib/lifecycle.functions.ts");
+    const lifecycle = read("../../src/lib/team-members/lifecycle.functions.ts");
     assert.match(lifecycle, /supabaseAdmin\.rpc\("flag_member_deactivated"/);
     assert.doesNotMatch(lifecycle, /(?<!Admin)\.rpc\("flag_member_deactivated"/);
 

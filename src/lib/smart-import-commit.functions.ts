@@ -24,7 +24,7 @@ import {
   reevaluateStaffAssignedToClientInternal,
 } from "@/lib/staff-assignment-hooks.functions";
 import { enrichNamesFromFull } from "@/lib/person-name";
-import { hireEmployeeInternal } from "@/lib/employees.functions";
+import { hireEmployeeInternal } from "@/lib/team-members/members.functions";
 import { generateTempPassword } from "@/lib/temp-password";
 import { classifyImportInvite, hasUsableInviteEmail } from "@/lib/import-invite";
 

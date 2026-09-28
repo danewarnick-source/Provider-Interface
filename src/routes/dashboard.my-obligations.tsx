@@ -24,7 +24,7 @@ import {
   dueLabel,
   obligationFileStatus,
   obligationFileStatusLabel,
-} from "@/lib/staff-obligation-files";
+} from "@/lib/team-members/file";
 import {
   IN_HIVE_COURSE_EVIDENCE,
   inHiveCourseIdForTitle,

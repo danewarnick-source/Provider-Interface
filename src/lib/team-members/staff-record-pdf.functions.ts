@@ -12,7 +12,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   generateEmployeeFaceSheet,
   shipEmployeeFaceSheet,
-} from "@/lib/employee-face-sheet";
+} from "@/lib/team-members/staff-record-pdf";
 
 const Input = z.object({
   staffId: z.string().uuid(),

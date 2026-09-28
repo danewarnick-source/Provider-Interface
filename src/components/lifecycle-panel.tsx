@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Archive, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { archiveEntity, deleteEntity } from "@/lib/lifecycle.functions";
+import { archiveEntity, deleteEntity } from "@/lib/team-members/lifecycle.functions";
 
 type Props = {
   kind: "employee" | "client";

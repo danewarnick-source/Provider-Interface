@@ -7,7 +7,7 @@ import { neutralizeCsvFormula } from "./csv-safe.ts";
 import {
   obligationFileStatusLabel,
   type ObligationFileStatus,
-} from "./staff-obligation-files.ts";
+} from "./team-members/file.ts";
 import { personNeedsSupportStrategies } from "./audit-evidence.ts";
 import {
   bucketCodes,

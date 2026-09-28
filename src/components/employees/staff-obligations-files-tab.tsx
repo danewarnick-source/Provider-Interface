@@ -39,7 +39,7 @@ import {
   personnelPackHtml,
   staffFileCycleKind,
   type ObligationFileStatus,
-} from "@/lib/staff-obligation-files";
+} from "@/lib/team-members/file";
 import { isNativePlatformEvidence } from "@/lib/cert-review";
 import { inHiveCourseIdForTitle } from "@/lib/in-hive-training";
 import { loadInHiveCourseCertificate } from "@/lib/in-hive-training.functions";

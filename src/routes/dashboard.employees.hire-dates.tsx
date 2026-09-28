@@ -17,7 +17,7 @@ import {
   listStaffHireDates,
   bulkSetStaffHireDates,
   type StaffHireDateRow,
-} from "@/lib/employees.functions";
+} from "@/lib/team-members/members.functions";
 
 export const Route = createFileRoute("/dashboard/employees/hire-dates")({
   head: () => ({

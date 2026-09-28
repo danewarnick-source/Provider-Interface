@@ -72,7 +72,7 @@ import {
   hasValidObligationEvidence,
   obligationFileStatus,
   staffFileCycleKind,
-} from "./staff-obligation-files.ts";
+} from "./team-members/file.ts";
 
 const NOW = new Date("2026-09-12T12:00:00.000Z");
 const STAFF = "11111111-1111-1111-1111-111111111111";

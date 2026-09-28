@@ -5,9 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
 import { useServerFn } from "@tanstack/react-start";
-import { adminResetEmployeePassword } from "@/lib/employees.functions";
-import { resendInvitation, revokeInvitation } from "@/lib/invitations.functions";
-import { archiveEntity, deleteEntity, restoreEntity } from "@/lib/lifecycle.functions";
+import { adminResetEmployeePassword } from "@/lib/team-members/members.functions";
+import { resendInvitation, revokeInvitation } from "@/lib/team-members/invites.functions";
+import { archiveEntity, deleteEntity, restoreEntity } from "@/lib/team-members/lifecycle.functions";
 import { inviteJoinUrl } from "@/lib/join-invite";
 import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { generateTempPassword } from "@/lib/temp-password";
@@ -24,8 +24,8 @@ import {
   lastLoginByUserId,
   profileNeedsSetup,
   type EmployeeRosterTab,
-} from "@/lib/employee-roster";
-import { splitPersonName } from "@/lib/employee-roster-upload";
+} from "@/lib/team-members/roster";
+import { splitPersonName } from "@/lib/team-members/import";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import { AddEmployeeButton, AddEmployeeWizard } from "@/components/employees/add-employee-wizard";
 import {

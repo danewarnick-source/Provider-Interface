@@ -14,7 +14,7 @@ import {
   parseEmployeeRosterCsv,
   parseEmployeeRosterPaste,
   validateEmployeeRosterRows,
-} from "./employee-roster-upload.ts";
+} from "./import.ts";
 
 describe("employee roster template", () => {
   it("uses basics only, with one filled sample row, and never client-record fields", () => {
@@ -114,7 +114,7 @@ describe("employee roster template", () => {
 
   it("keeps Import team members off update modes and off automatic invites", () => {
     const src = readFileSync(
-      new URL("../components/employees/employee-roster-upload-wizard.tsx", import.meta.url),
+      new URL("../../components/employees/employee-roster-upload-wizard.tsx", import.meta.url),
       "utf8",
     );
     assert.match(src, /Import team members/);

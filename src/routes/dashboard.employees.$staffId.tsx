@@ -29,7 +29,7 @@ import {
   loadStaffProfileIdentity,
   staffProfileDisplayName,
   staffProfileIdentityQueryKey,
-} from "@/lib/staff-profile-identity";
+} from "@/lib/team-members/identity";
 
 const PROFILE_TABS = ["profile", "personnel", "activity"] as const;
 type ProfileTab = (typeof PROFILE_TABS)[number];
