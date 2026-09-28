@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import {
   openClockableShifts,
   scheduledShiftIsClockedOut,
-} from "./caseload-open-work.ts";
+} from "../clients/caseload-open-work.ts";
 
 const stephenShift = {
   id: "sched-stephen-slh",

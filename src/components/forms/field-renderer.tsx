@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { FormField } from "@/lib/forms-utils";
+import type { FormField } from "@/lib/documents/forms-utils";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";

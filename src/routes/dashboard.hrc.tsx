@@ -17,7 +17,7 @@ import {
   RESTRICTION_ELEMENTS,
   computeRestrictionCompletion,
   type RestrictionRecord,
-} from "@/lib/hrc-restrictions";
+} from "@/lib/clients/hrc-restrictions";
 import { useAccess } from "@/hooks/use-access";
 
 export const Route = createFileRoute("/dashboard/hrc")({

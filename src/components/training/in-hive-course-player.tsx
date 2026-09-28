@@ -58,7 +58,7 @@ import {
   loadInHiveExamAttempts,
   saveInHiveTopicProgress,
 } from "@/lib/training/in-hive-training.functions";
-import { recordCompletion } from "@/lib/company-obligations.functions";
+import { recordCompletion } from "@/lib/obligations/company-obligations.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";

@@ -1,6 +1,6 @@
 // Domain Lib: Compliance, Obligations & Regulations
 
-export * from '../company-obligations.functions';
+export * from '../obligations/company-obligations.functions.ts';
 export * from './compliance-nav';
 export * from './compliance-spine';
 export * from './sow-index';

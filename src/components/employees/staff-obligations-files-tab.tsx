@@ -28,7 +28,7 @@ import {
   listStaffObligationInstances,
   recordCompletion,
   type StaffObligationFileRow,
-} from "@/lib/company-obligations.functions";
+} from "@/lib/obligations/company-obligations.functions";
 import {
   hasValidObligationEvidence,
   isAwaitingEvidenceReview,

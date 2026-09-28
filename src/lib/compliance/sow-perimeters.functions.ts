@@ -20,7 +20,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { computeRequirementDueState } from "@/lib/requirement-tracking";
+import { computeRequirementDueState } from "../obligations/requirement-tracking.ts";
 
 /** Training key constants — shared with callers so the strings aren't scattered. */
 export const SOW_TRAINING_KEYS = {

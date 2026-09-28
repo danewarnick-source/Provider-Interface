@@ -7,8 +7,8 @@
  * different window, so today’s punch does not hide it.
  */
 
-import { staffDisplayPunchPair } from "./staff/staff-display-hours.ts";
-import type { RecordPunchTimes } from "./record-duration.ts";
+import { staffDisplayPunchPair } from "../staff/staff-display-hours.ts";
+import type { RecordPunchTimes } from "../record-duration.ts";
 
 export type CompletedPunch = RecordPunchTimes & {
   client_id: string;

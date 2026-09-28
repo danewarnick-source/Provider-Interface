@@ -60,7 +60,7 @@ describe("hire auto-assign", () => {
     );
     assert.match(nightly, /persistAutomationHeartbeat/);
     const pcspWriter = readFileSync(
-      fileURLToPath(new URL(".././company-obligations.functions.ts", import.meta.url)),
+      fileURLToPath(new URL("../obligations/company-obligations.functions.ts", import.meta.url)),
       "utf8",
     );
     assert.match(pcspWriter, /reevaluateStaffAssignedToClientInternal/);

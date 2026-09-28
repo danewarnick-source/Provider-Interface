@@ -76,7 +76,7 @@ import { FieldVisibilityToggle } from "@/components/clients/visibility-toggles";
 import { CodeAssignedStaff } from "@/components/clients/code-assigned-staff";
 import { CustomFieldsForSection } from "@/components/clients/custom-fields-panel";
 import { TargetBehaviorsPanel } from "@/components/clients/target-behaviors-panel";
-import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/hrc-restrictions";
+import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/clients/hrc-restrictions";
 import { Scale } from "lucide-react";
 import {
   AlertTriangle,
@@ -126,8 +126,8 @@ import {
   type CSTReviewQuestion,
 } from "@/lib/clients/client-specific-training.functions";
 import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
-import { onPcspActivated } from "@/lib/company-obligations.functions";
-import { computeSupportStrategyCoverage } from "@/lib/support-strategy-coverage";
+import { onPcspActivated } from "@/lib/obligations/company-obligations.functions";
+import { computeSupportStrategyCoverage } from "@/lib/clients/support-strategy-coverage";
 
 type ProfileTab =
   | "identity"

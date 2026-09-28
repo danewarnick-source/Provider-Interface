@@ -76,7 +76,7 @@ describe("cert review rules", () => {
   });
 
   it("never treats upload date as an expiration", () => {
-    const fn = readFileSync(new URL("../company-obligations.functions.ts", import.meta.url), "utf8");
+    const fn = readFileSync(new URL("../obligations/company-obligations.functions.ts", import.meta.url), "utf8");
     const due = readFileSync(new URL("../obligations/obligation-due-dates.ts", import.meta.url), "utf8");
     const baseline = readFileSync(
       new URL("../staff/staff-training-requirements.functions.ts", import.meta.url),
@@ -427,7 +427,7 @@ describe("cert review surface lock", () => {
     assert.match(engine, /pickStaffCompletionForSurface/);
     assert.match(engine, /Waiting for the staff member to re-upload/);
     const fns = readFileSync(
-      new URL("../company-obligations.functions.ts", import.meta.url),
+      new URL("../obligations/company-obligations.functions.ts", import.meta.url),
       "utf8",
     );
     assert.match(fns, /shouldReplaceCompletionForResubmit/);

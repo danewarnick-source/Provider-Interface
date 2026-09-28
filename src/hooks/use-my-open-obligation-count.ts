@@ -5,8 +5,8 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   listMyObligationInstances,
   type MyObligationInstanceRow,
-} from "@/lib/company-obligations.functions";
-import { isUnlinkedFormDuty } from "@/lib/resolve-obligation-form";
+} from "@/lib/obligations/company-obligations.functions";
+import { isUnlinkedFormDuty } from "@/lib/obligations/resolve-obligation-form";
 import { isPackSentinel, obligationIsRequired } from "@/lib/obligations/obligation-packs";
 
 const MY_OBLIGATIONS_KEY = "my-obligation-instances";

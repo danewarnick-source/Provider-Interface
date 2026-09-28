@@ -11,10 +11,10 @@ import {
   resolveGroupMembersInternal,
   type ResolvedStaffMember,
   ensureAllStaffGroupInternal,
-} from "./staff/staff-groups.functions";
-import { runNectarCertOcrFromStoragePath } from "./nectar/nectar-cert-ocr";
-import { compareNames } from "./name-matching";
-import { isFormUuid, resolveObligationFormId } from "./resolve-obligation-form";
+} from "../staff/staff-groups.functions";
+import { runNectarCertOcrFromStoragePath } from "../nectar/nectar-cert-ocr";
+import { compareNames } from "../name-matching.ts";
+import { isFormUuid, resolveObligationFormId } from "../obligations/resolve-obligation-form.ts";
 import {
   addDaysUTC,
   addMonthsUTC,
@@ -26,28 +26,28 @@ import {
   isCalendarDueRule,
   periodsToEnsure,
   explainDueRule,
-} from "./obligations/obligation-due-dates";
+} from "../obligations/obligation-due-dates";
 import {
   obligationCreatesInstances,
   resolveDueRule,
   sowCatalogEntry,
   sowCatalogEntryByKey,
   STANDING_RECLASSIFY_REASON,
-} from "./compliance/sow-obligation-catalog";
-import { obligationAppliesToFootprint } from "./audit/dspd-audit-tool";
-import { STANDING_SOW_DUTIES } from "./standing-sow-duties";
-import { isRetiredPerClientPctTitle } from "./clients/client-form-obligations";
-import { homePeriodKey, obligationDutyKey, perHomeServiceCode } from "./obligations/obligation-assignee-rules";
-import { loadOrgFacts, type OrgFacts } from "./obligations/applicability";
+} from "../compliance/sow-obligation-catalog";
+import { obligationAppliesToFootprint } from "../audit/dspd-audit-tool";
+import { STANDING_SOW_DUTIES } from "../standing-sow-duties.ts";
+import { isRetiredPerClientPctTitle } from "../clients/client-form-obligations";
+import { homePeriodKey, obligationDutyKey, perHomeServiceCode } from "../obligations/obligation-assignee-rules";
+import { loadOrgFacts, type OrgFacts } from "../obligations/applicability";
 import {
   evaluateStaffDuty,
   staffReceivesDutyClock,
   staffSeesDuty,
-} from "./obligations/duty-applicability";
-import { loadStaffDutyFactsInternal } from "./obligations/load-staff-duty-facts.functions";
-import { toIsoDateDay } from "./iso-date-day";
-import { isPackSentinel, obligationIsRequired } from "./obligations/obligation-packs";
-import { ORPHAN_OBLIGATION_CREATE_GONE } from "./compliance/compliance-spine";
+} from "../obligations/duty-applicability";
+import { loadStaffDutyFactsInternal } from "../obligations/load-staff-duty-facts.functions";
+import { toIsoDateDay } from "../iso-date-day.ts";
+import { isPackSentinel, obligationIsRequired } from "../obligations/obligation-packs";
+import { ORPHAN_OBLIGATION_CREATE_GONE } from "../compliance/compliance-spine";
 import {
   ADMIN_ACCEPTED_PREFIX,
   canAcceptCertEvidence,
@@ -64,7 +64,7 @@ import {
   resolvedCertExpiration,
   shouldReplaceCompletionForResubmit,
   usesCertExpirationCadence,
-} from "./training/cert-review";
+} from "../training/cert-review";
 import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

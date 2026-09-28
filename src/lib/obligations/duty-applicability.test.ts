@@ -92,7 +92,7 @@ describe("duty keys, not titles", () => {
 
   it("generation uses keys, not obligation titles", () => {
     const gen = readFileSync(
-      fileURLToPath(new URL("../company-obligations.functions.ts", import.meta.url)),
+      fileURLToPath(new URL("../obligations/company-obligations.functions.ts", import.meta.url)),
       "utf8",
     );
     assert.doesNotMatch(gen, /filterAssigneesByServiceCodesInternal/);

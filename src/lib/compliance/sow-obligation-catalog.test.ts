@@ -139,7 +139,7 @@ describe("SOW catalog pack identity", () => {
 
   it("blocks policy clones of catalog titles; orphan creates stay 410", () => {
     const createSrc = readFileSync(
-      new URL(".././company-obligations.functions.ts", import.meta.url),
+      new URL("../obligations/company-obligations.functions.ts", import.meta.url),
       "utf8",
     );
     const policySrc = readFileSync(new URL("../agency/agency-policies.functions.ts", import.meta.url), "utf8");

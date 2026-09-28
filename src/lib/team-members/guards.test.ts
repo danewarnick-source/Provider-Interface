@@ -155,7 +155,7 @@ describe("wiring locks — the real callers use the guard, and nothing hard-dele
   });
 
   it("lifecycle.functions.ts: the hard-delete fn and assertManager are gone; archive/restore go through the guard", () => {
-    const src = read("../lifecycle.functions.ts");
+    const src = read("../clients/lifecycle.functions.ts");
     assert.doesNotMatch(src, HARD_DELETE_FN);
     assert.doesNotMatch(src, /assertManager/);
     assert.doesNotMatch(src, /auth\.admin\.deleteUser/);

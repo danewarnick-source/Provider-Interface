@@ -53,7 +53,7 @@ describe("employee Smart Import hard block", () => {
     }
     const review = readFileSync(new URL("../../routes/dashboard.smart-import.$jobId.review.tsx", import.meta.url), "utf8");
     const done = readFileSync(new URL("../../routes/dashboard.smart-import.$jobId.done.tsx", import.meta.url), "utf8");
-    const fields = readFileSync(new URL("../custom-fields.functions.ts", import.meta.url), "utf8");
+    const fields = readFileSync(new URL("../clients/custom-fields.functions.ts", import.meta.url), "utf8");
     const reviewFns = readFileSync(new URL("../smart-import/smart-import-review.functions.ts", import.meta.url), "utf8");
     assert.doesNotMatch(review, /CertsPanel/);
     assert.doesNotMatch(review, /EMPLOYEE_FIELDS/);

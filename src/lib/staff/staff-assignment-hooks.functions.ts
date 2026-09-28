@@ -4,12 +4,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { generateNextInstanceInternal } from "../company-obligations.functions";
+import { generateNextInstanceInternal } from "../obligations/company-obligations.functions.ts";
 import { assignMatchingPoliciesForStaffInternal } from "../agency/agency-policies.functions";
 import {
   ensureOpenStaffObligationByKeyInternal,
   loadStaffForEnsure,
-} from "../ensure-staff-obligation";
+} from "../obligations/ensure-staff-obligation.ts";
 import { loadOrgFacts } from "../obligations/applicability";
 import {
   dutyKeyForObligation,

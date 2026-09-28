@@ -11,7 +11,7 @@ import { CPR_OBLIGATION_TITLES, MANDT_OBLIGATION_TITLES, type TrainingClassType 
 import {
   ensureOpenStaffObligationInternal,
   loadStaffForEnsure,
-} from "@/lib/ensure-staff-obligation";
+} from "../obligations/ensure-staff-obligation.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

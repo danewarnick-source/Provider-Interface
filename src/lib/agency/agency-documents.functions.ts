@@ -6,7 +6,7 @@ import {
   checkAndMarkOverdueInternal,
   type CompanyObligationRow,
   type ObligationInstanceRow,
-} from "@/lib/company-obligations.functions";
+} from "../obligations/company-obligations.functions.ts";
 import {
   buildAgencyDocCards,
   isCompanyPolicyObligation,

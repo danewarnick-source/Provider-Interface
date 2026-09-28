@@ -8,4 +8,4 @@ export * from './client-readiness.functions';
 export * from './client-lifecycle.functions';
 export * from './client-target-behaviors.functions';
 export * from './client-staff-visibility';
-export * from '../caseload-open-work';
+export * from '../clients/caseload-open-work.ts';

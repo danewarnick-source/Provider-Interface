@@ -7,9 +7,9 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   listMyObligationInstances,
   type MyObligationInstanceRow,
-} from "@/lib/company-obligations.functions";
+} from "@/lib/obligations/company-obligations.functions";
 import { isPackSentinel, obligationIsRequired } from "@/lib/obligations/obligation-packs";
-import { isUnlinkedFormDuty, isFormUuid } from "@/lib/resolve-obligation-form";
+import { isUnlinkedFormDuty, isFormUuid } from "@/lib/obligations/resolve-obligation-form";
 import { inHiveCourseIdForTitle, topicCodesForCourse } from "@/lib/training/in-hive-training";
 import { clientFormKindForTitle } from "@/lib/clients/client-form-obligations";
 import {

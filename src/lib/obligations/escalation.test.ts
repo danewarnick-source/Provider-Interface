@@ -468,7 +468,7 @@ describe("no dual escalation writers", () => {
     assert.match(src, /export async function persistAutomationHeartbeat/);
     assert.match(src, /AUTOMATION_HEARTBEAT_RECURRENCE_KEY/);
     const obligations = readFileSync(
-      new URL("../company-obligations.functions.ts", import.meta.url),
+      new URL("../obligations/company-obligations.functions.ts", import.meta.url),
       "utf8",
     );
     assert.doesNotMatch(obligations, /type:\s*"escalation"/);

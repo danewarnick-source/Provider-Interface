@@ -43,8 +43,8 @@ import {
   createCustomFieldDefinition,
   deleteCustomFieldDefinitions,
   setCustomFieldValue,
-} from "@/lib/custom-fields.functions";
-import { chunkIds, customFieldDeleteCopy } from "@/lib/custom-field-delete";
+} from "@/lib/clients/custom-fields.functions";
+import { chunkIds, customFieldDeleteCopy } from "@/lib/clients/custom-field-delete";
 import { SECTION_LABEL, type SectionName } from "@/lib/clients/client-staff-visibility";
 
 type DataType = "text" | "number" | "boolean" | "date";

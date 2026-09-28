@@ -14,7 +14,7 @@ import { FileDown, Printer, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   BC_CONFIG, evaluateCredentialMatch, type BcCode,
-} from "@/lib/behavior-support";
+} from "@/lib/clients/behavior-support";
 
 type ClientRow = { id: string; first_name: string | null; last_name: string | null };
 type BscRow = {

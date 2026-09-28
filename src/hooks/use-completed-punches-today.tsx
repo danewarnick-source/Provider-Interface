@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
 import { denverWallToIso, denverYmd } from "@/lib/denver-date";
-import type { CompletedPunch } from "@/lib/caseload-open-work";
+import type { CompletedPunch } from "@/lib/clients/caseload-open-work";
 
 /**
  * Clocked-out punches for this staff member from Denver yesterday

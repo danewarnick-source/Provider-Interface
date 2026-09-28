@@ -5,7 +5,7 @@ import { InHiveCoursePlayer } from "@/components/training/in-hive-course-player"
 import { StaffPageHeader } from "@/components/staff-mobile/staff-page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { getObligationInstanceContext } from "@/lib/company-obligations.functions";
+import { getObligationInstanceContext } from "@/lib/obligations/company-obligations.functions";
 import {
   inHiveCourseIdForTitle,
   lastExamResetAt,

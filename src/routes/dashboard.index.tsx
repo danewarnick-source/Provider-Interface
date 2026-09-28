@@ -11,7 +11,7 @@ import { usePortalView } from "@/hooks/use-portal-view";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Clock, FileText, ArrowRight, Users, FileSignature } from "lucide-react";
-import { listMyPendingPolicies } from "@/lib/policy-signatures.functions";
+import { listMyPendingPolicies } from "@/lib/documents/policy-signatures.functions";
 import { displayPersonName } from "@/lib/person-name";
 
 import { StaffClientGrid } from "@/components/staff-client-grid";

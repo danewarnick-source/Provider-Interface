@@ -38,7 +38,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { getUnmetStaffMandates, recordStaffMandateOverride } from "@/lib/forms.functions";
+import { getUnmetStaffMandates, recordStaffMandateOverride } from "@/lib/documents/forms.functions";
 import {
   onStaffAssignmentCreated,
   onStaffAssignmentRemoved,

@@ -27,7 +27,7 @@ import {
   type MealMenuReportArgs,
   type MealMenuReportResult,
   type ShippedMealMenuReport,
-} from "../meal-plan-menu-report";
+} from "../clients/meal-plan-menu-report.ts";
 import {
   generatePlanVsActualReport,
   shipPlanVsActualReport,
@@ -35,7 +35,7 @@ import {
   type GenerateArgs as PlanVsActualArgs,
   type GenerateResult as PlanVsActualResult,
   type ShipResult as ShippedPlanVsActual,
-} from "../meal-plan-vs-actual-report";
+} from "../clients/meal-plan-vs-actual-report.ts";
 import {
   generateEmployeeFaceSheet,
   shipEmployeeFaceSheet,

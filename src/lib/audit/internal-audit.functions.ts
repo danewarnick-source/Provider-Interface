@@ -604,7 +604,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
       // frequency on a confirmed requirement AND it's due/overdue per their
       // own last-checked date.
       const { computeRequirementDueState, frequencyLabel } = await import(
-        "@/lib/requirement-tracking"
+        "../obligations/requirement-tracking.ts"
       );
       for (const r of reqRows) {
         if (r.approval_state !== "provider_confirmed" && r.review_status !== "confirmed")

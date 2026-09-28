@@ -19,7 +19,7 @@ import {
   type PolicyAudienceKind,
   type StaffAudienceFacts,
 } from "@/lib/agency/agency-policies";
-import { ensureOpenStaffObligationInternal } from "@/lib/ensure-staff-obligation";
+import { ensureOpenStaffObligationInternal } from "../obligations/ensure-staff-obligation.ts";
 import { addToAllStaffGroupInternal, ensureAllStaffGroupInternal } from "@/lib/staff/staff-groups.functions";
 import { mergeDueDayPackFields } from "@/lib/obligations/obligation-packs";
 import { catalogTitleIsReserved } from "@/lib/compliance/sow-obligation-catalog";

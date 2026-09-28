@@ -49,7 +49,7 @@ import {
   archiveReferral,
   restoreReferral,
   listArchivedReferrals,
-} from "@/lib/retention.functions";
+} from "@/lib/documents/retention.functions";
 import {
   recordReferralDocument,
   parseReferralDocument,

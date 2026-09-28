@@ -23,7 +23,7 @@ import {
   toGoverningSource,
   type DocEffectiveRange,
   type GoverningSource,
-} from "@/lib/effective-document";
+} from "../documents/effective-document.ts";
 
 const kindSchema = z.enum(["client", "employee", "nectar"]);
 

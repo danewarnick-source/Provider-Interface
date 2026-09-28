@@ -4,12 +4,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { FileText, ChevronRight, BellRing, MessageSquare } from "lucide-react";
 import { listMyThreads } from "@/lib/messaging/threads.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { listMyForms, getMyFormNotifications } from "@/lib/forms.functions";
+import { listMyForms, getMyFormNotifications } from "@/lib/documents/forms.functions";
 import { listSmartImportReminders } from "@/lib/smart-import/smart-import-reminders.functions";
 import {
   periodKeyFor, formDueDateFor, isOverdue,
   type Frequency, type Schedule,
-} from "@/lib/forms-utils";
+} from "@/lib/documents/forms-utils";
 
 type FormRow = { id: string; name: string; frequency: Frequency; schedule: Schedule };
 

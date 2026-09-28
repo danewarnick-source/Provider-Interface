@@ -36,7 +36,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { AlertTriangle, Upload } from "lucide-react";
-import { recordCompletion } from "@/lib/company-obligations.functions";
+import { recordCompletion } from "@/lib/obligations/company-obligations.functions";
 import { useOutstandingRoster, RosterMultiSelect } from "./outstanding-roster";
 
 type EvidenceChoice = "attestation" | "upload" | "notes";

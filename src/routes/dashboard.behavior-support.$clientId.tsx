@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Brain } from "lucide-react";
-import { BC_CONFIG, type BcCode } from "@/lib/behavior-support";
+import { BC_CONFIG, type BcCode } from "@/lib/clients/behavior-support";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { FbaBspStrip } from "@/components/behavior-support/fba-bsp-strip";

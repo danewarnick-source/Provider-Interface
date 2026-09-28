@@ -37,7 +37,7 @@ import {
   updateHhpCueCard,
   type HhpCueCard,
   type HhpStatus,
-} from "@/lib/hhp-cue-cards.functions";
+} from "@/lib/clients/hhp-cue-cards.functions";
 import { HostCertificationPanel, HostCertBadge } from "./host-home-certification-dialog";
 
 type StaffOpt = { id: string; name: string };

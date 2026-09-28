@@ -28,12 +28,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateRequirementTracking } from "@/lib/requirement-tracking.functions";
+import { updateRequirementTracking } from "@/lib/obligations/requirement-tracking.functions";
 import {
   FREQUENCY_OPTIONS,
   type RequirementFrequency,
   type RequirementTracking,
-} from "@/lib/requirement-tracking";
+} from "@/lib/obligations/requirement-tracking";
 
 interface Props {
   open: boolean;

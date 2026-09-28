@@ -13,7 +13,7 @@ import {
   trainingClassLabel,
   type TrainingClassType,
 } from "@/lib/training/training-class";
-import { ensureOpenStaffObligationInternal } from "@/lib/ensure-staff-obligation";
+import { ensureOpenStaffObligationInternal } from "../obligations/ensure-staff-obligation.ts";
 import { hireDueDaysForTitle } from "@/lib/obligations/obligation-auto-assign";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -9,7 +9,7 @@ function read(rel: string) {
 
 describe("Compliance spine — parallel writers killed", () => {
   it("bell / deadlines fetch is skipMutations and does not generate", () => {
-    const src = read(".././company-obligations.functions.ts");
+    const src = read("../obligations/company-obligations.functions.ts");
     const fnStart = src.indexOf("export const listDeadlineObligationInstances");
     assert.ok(fnStart >= 0, "listDeadlineObligationInstances");
     const fn = src.slice(fnStart, src.indexOf("export const getCompanyObligation", fnStart));
@@ -22,7 +22,7 @@ describe("Compliance spine — parallel writers killed", () => {
   });
 
   it("skipMutations also skips standing seeds and instance minting", () => {
-    const src = read(".././company-obligations.functions.ts");
+    const src = read("../obligations/company-obligations.functions.ts");
     assert.match(src, /const skipMutations = opts\?\.skipMutations === true/);
     assert.match(src, /if \(skipMutations \|\| opts\?\.generateMissing === false\)/);
   });
@@ -90,7 +90,7 @@ describe("Compliance spine — parallel writers killed", () => {
 
   it("orphan create APIs throw 410 and do not insert", () => {
     assert.match(ORPHAN_OBLIGATION_CREATE_GONE, /410 Gone/);
-    const obligations = read(".././company-obligations.functions.ts");
+    const obligations = read("../obligations/company-obligations.functions.ts");
     const createStart = obligations.indexOf("export const createCompanyObligation");
     const create = obligations.slice(
       createStart,

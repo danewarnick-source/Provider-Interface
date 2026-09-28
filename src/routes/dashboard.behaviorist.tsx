@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Brain, ChevronRight } from "lucide-react";
-import { BC_CONFIG, type BcCode } from "@/lib/behavior-support";
+import { BC_CONFIG, type BcCode } from "@/lib/clients/behavior-support";
 
 export const Route = createFileRoute("/dashboard/behaviorist")({
   head: () => ({ meta: [{ title: "Behaviorist Caseload — Provider Interface" }] }),

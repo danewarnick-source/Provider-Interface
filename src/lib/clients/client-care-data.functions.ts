@@ -40,7 +40,7 @@ import {
   mergeClientGoalSources,
   selectGoalsForStaffClockOut,
   type StaffPcspGoal,
-} from "../pcsp-goals-for-staff";
+} from "../clients/pcsp-goals-for-staff.ts";
 
 // ── Return types ────────────────────────────────────────────────────────────
 

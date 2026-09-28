@@ -5,7 +5,7 @@ import {
   CUSTOM_FIELD_DELETE_CHUNK,
   chunkIds,
   customFieldDeleteCopy,
-} from "./custom-field-delete.ts";
+} from "../clients/custom-field-delete.ts";
 
 describe("chunkIds", () => {
   it("returns empty for no ids", () => {
@@ -47,7 +47,7 @@ describe("client custom field delete wiring", () => {
     new URL("../components/clients/custom-fields-panel.tsx", import.meta.url),
     "utf8",
   );
-  const fns = readFileSync(new URL("./custom-fields.functions.ts", import.meta.url), "utf8");
+  const fns = readFileSync(new URL("../clients/custom-fields.functions.ts", import.meta.url), "utf8");
 
   it("selects rows, select-all, and delete selected on the existing panel", () => {
     assert.match(panel, /Select all/);

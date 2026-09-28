@@ -6,16 +6,16 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Send, Loader2, ClipboardList } from "lucide-react";
-import { getStaffForm, submitForm, submitIntakeForm } from "@/lib/forms.functions";
+import { getStaffForm, submitForm, submitIntakeForm } from "@/lib/documents/forms.functions";
 import {
   getObligationInstanceContext,
   recordCompletion,
   submitObligationForm,
   cadenceDescription,
-} from "@/lib/company-obligations.functions";
+} from "@/lib/obligations/company-obligations.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { FieldRenderer } from "@/components/forms/field-renderer";
-import { type FormField, isFieldVisible } from "@/lib/forms-utils";
+import { type FormField, isFieldVisible } from "@/lib/documents/forms-utils";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPersonName } from "@/lib/person-name";
 import { toast } from "sonner";

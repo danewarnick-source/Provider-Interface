@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
-import type { FormField, FieldType, FieldCondition } from "@/lib/forms-utils";
-import { operatorsFor } from "@/lib/forms-utils";
+import type { FormField, FieldType, FieldCondition } from "@/lib/documents/forms-utils";
+import { operatorsFor } from "@/lib/documents/forms-utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";

@@ -12,7 +12,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus } from "lucide-react";
 
 import { FieldEditor } from "./field-editor";
-import { sanitizeConditions, type FormField, type FieldType } from "@/lib/forms-utils";
+import { sanitizeConditions, type FormField, type FieldType } from "@/lib/documents/forms-utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 

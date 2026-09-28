@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ChevronLeft, Download, Printer } from "lucide-react";
-import { getForm, listSubmissions } from "@/lib/forms.functions";
-import type { FormField } from "@/lib/forms-utils";
+import { getForm, listSubmissions } from "@/lib/documents/forms.functions";
+import type { FormField } from "@/lib/documents/forms-utils";
 
 export const Route = createFileRoute("/dashboard/forms/$formId/submissions")({
   head: () => ({ meta: [{ title: "Submissions — Provider Interface" }] }),

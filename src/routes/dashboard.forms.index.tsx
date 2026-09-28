@@ -18,12 +18,12 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   listForms, listMyForms, archiveForm, saveForm,
   getMyFormNotifications, markFormNotificationsRead, seedIntakeForms,
-} from "@/lib/forms.functions";
-import { pauseObligationsForArchivedForm } from "@/lib/company-obligations.functions";
+} from "@/lib/documents/forms.functions";
+import { pauseObligationsForArchivedForm } from "@/lib/obligations/company-obligations.functions";
 import {
   periodKeyFor, formDueDateFor, formatDue, describeFrequency, isOverdue,
   type Frequency, type Schedule, type FormSettings,
-} from "@/lib/forms-utils";
+} from "@/lib/documents/forms-utils";
 import { DeleteFormDialog } from "@/components/forms/delete-form-dialog";
 import { toast } from "sonner";
 

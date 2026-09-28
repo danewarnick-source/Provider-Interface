@@ -7,9 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Sparkles, Loader2, FileUp, AlertTriangle } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { nectarDraftForm, nectarDraftFormFromPdf } from "@/lib/forms.functions";
+import { nectarDraftForm, nectarDraftFormFromPdf } from "@/lib/documents/forms.functions";
 import { toast } from "sonner";
-import { defaultFieldFor, type FormField } from "@/lib/forms-utils";
+import { defaultFieldFor, type FormField } from "@/lib/documents/forms-utils";
 
 const MAX_PDF_BYTES = 10 * 1024 * 1024; // 10MB
 

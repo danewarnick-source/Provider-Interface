@@ -4,7 +4,7 @@ import {
   flattenPcspGoalRows,
   mergeClientGoalSources,
   selectGoalsForStaffClockOut,
-} from "./pcsp-goals-for-staff.ts";
+} from "../clients/pcsp-goals-for-staff.ts";
 
 const visible = () => true;
 const hideSecond = (id: string) => id !== "g2";

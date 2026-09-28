@@ -69,7 +69,7 @@ import {
   shipPlanVsActualReport,
   rangeLabelOf,
   rangeTagOf,
-} from "@/lib/meal-plan-vs-actual-report";
+} from "@/lib/clients/meal-plan-vs-actual-report";
 import { isAdminLevel } from "@/lib/access/levels";
 
 

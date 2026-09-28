@@ -10,7 +10,7 @@ import {
   getCertReview,
   requestObligationCorrection,
   type CertReviewRow,
-} from "@/lib/company-obligations.functions";
+} from "@/lib/obligations/company-obligations.functions";
 import {
   CERT_REVIEW_AI_NOTE,
   canAcceptCertEvidence,

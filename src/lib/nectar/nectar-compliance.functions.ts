@@ -185,10 +185,10 @@ export const checkBillingEntry = createServerFn({ method: "POST" })
           .filter((v): v is string => !!v),
       ),
     );
-    let governingById: Record<string, import("@/lib/effective-document").GoverningSource> = {};
+    let governingById: Record<string, import("../documents/effective-document.ts").GoverningSource> = {};
     let effectiveIds = new Set<string>();
     if (sourceIds.length) {
-      const { filterSourcesEffectiveOn } = await import("@/lib/effective-document.functions");
+      const { filterSourcesEffectiveOn } = await import("../documents/effective-document.functions.ts");
       const res = await filterSourcesEffectiveOn({
         data: {
           organization_id: data.organizationId,
@@ -206,7 +206,7 @@ export const checkBillingEntry = createServerFn({ method: "POST" })
       matchedCodes: string[];
       humanExplanation: string;
       source: { title: string; verbatim: string; citation: string | null };
-      governingSource: import("@/lib/effective-document").GoverningSource | null;
+      governingSource: import("../documents/effective-document.ts").GoverningSource | null;
     }> = [];
 
     for (const r of rulesArr) {

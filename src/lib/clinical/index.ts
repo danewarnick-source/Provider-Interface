@@ -12,4 +12,4 @@ export * from '../documents/medications.functions';
 export * from '../med-attestation';
 export * from '../incidents.functions';
 export * from '../incidents/incident-deadlines';
-export * from '../behavior-support';
+export * from '../clients/behavior-support.ts';

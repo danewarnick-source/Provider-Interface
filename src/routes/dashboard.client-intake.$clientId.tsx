@@ -17,7 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { RequirePermission } from "@/components/rbac-guard";
-import { listIntakeFormsForClient, seedIntakeForms } from "@/lib/forms.functions";
+import { listIntakeFormsForClient, seedIntakeForms } from "@/lib/documents/forms.functions";
 import { ClientPhotoCard } from "@/components/clients/client-photo-card";
 import { FaceSheetInfoCard } from "@/components/clients/face-sheet-info-card";
 

@@ -29,7 +29,7 @@ import {
   RESTRICTION_ELEMENTS,
   computeRestrictionCompletion,
   type RestrictionRecord,
-} from "@/lib/hrc-restrictions";
+} from "@/lib/clients/hrc-restrictions";
 import {
   listRhsHospitalizationDays,
   setRhsHospitalizationDay,

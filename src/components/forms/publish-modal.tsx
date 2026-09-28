@@ -6,9 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2, Sparkles } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { nectarDraftNotification, publishForm } from "@/lib/forms.functions";
+import { nectarDraftNotification, publishForm } from "@/lib/documents/forms.functions";
 import { toast } from "sonner";
-import type { FormField, Frequency, Schedule } from "@/lib/forms-utils";
+import type { FormField, Frequency, Schedule } from "@/lib/documents/forms-utils";
 
 export function PublishModal({
   open, onOpenChange, formId, formMeta, onPublished,

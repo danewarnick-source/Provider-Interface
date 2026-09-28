@@ -15,7 +15,7 @@ import { AlertTriangle, CheckCircle2, Info, ShieldAlert, Brain } from "lucide-re
 import { toast } from "sonner";
 import {
   BC_CONFIG, TIER_RANK, evaluateCredentialMatch, type BcCode,
-} from "@/lib/behavior-support";
+} from "@/lib/clients/behavior-support";
 
 type Behaviorist = { id: string; full_name: string | null; email: string | null; bc_role: BcCode };
 

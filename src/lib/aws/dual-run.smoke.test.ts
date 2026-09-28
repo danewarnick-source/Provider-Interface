@@ -451,7 +451,7 @@ describe("Cognito login / dashboard hang guards", () => {
 
   it("fetchOrgGoLiveDate never calls slice on raw pg values", () => {
     const src = readFileSync(
-      new URL("../company-obligations.functions.ts", import.meta.url),
+      new URL("../obligations/company-obligations.functions.ts", import.meta.url),
       "utf8",
     );
     assert.match(src, /toIsoDateDay/);

@@ -22,7 +22,7 @@ import { DualCaseloadActions } from "@/components/staff-mobile/dual-caseload-act
 import { useTodayShifts, type TodayShiftRow } from "@/hooks/use-today-shifts";
 import { useTodayDailyNoteClients } from "@/hooks/use-today-daily-notes";
 import { useCompletedPunchesToday } from "@/hooks/use-completed-punches-today";
-import { scheduledShiftIsClockedOut } from "@/lib/caseload-open-work";
+import { scheduledShiftIsClockedOut } from "@/lib/clients/caseload-open-work";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {

@@ -11,9 +11,9 @@ import {
   type MealPdfMeal,
   type MealPdfShoppingItem,
   type MealSlot,
-} from "./clients/client-meal-plan-pdf";
-import { mondayOf, weekLabelOf } from "./meal-plan-vs-actual-report";
-import { fetchOrgLogo, fetchOrgName, fetchClientIdentity } from "./clients/client-report-shared";
+} from "../clients/client-meal-plan-pdf";
+import { mondayOf, weekLabelOf } from "../clients/meal-plan-vs-actual-report.ts";
+import { fetchOrgLogo, fetchOrgName, fetchClientIdentity } from "../clients/client-report-shared";
 
 export type MealMenuReportArgs = {
   clientId: string;

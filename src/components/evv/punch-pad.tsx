@@ -69,7 +69,7 @@ import {
 import { BehaviorObservationsBoundary } from "@/components/evv/behavior-observations-boundary";
 import { useShiftBehaviorSetting } from "@/hooks/use-shift-behavior-setting";
 import { listClientTargetBehaviors } from "@/lib/clients/client-target-behaviors.functions";
-import { getPendingTrackingForms } from "@/lib/forms.functions";
+import { getPendingTrackingForms } from "@/lib/documents/forms.functions";
 import { PendingTrackingFormsDialog, type PendingForm } from "@/components/evv/pending-tracking-forms-dialog";
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";
 import { IncidentReportDialog } from "@/components/incidents/incident-report-dialog";

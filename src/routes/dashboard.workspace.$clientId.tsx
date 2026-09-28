@@ -10,7 +10,7 @@ import { resolveGeofenceRadiusFeet } from "@/lib/geo";
 import { Badge } from "@/components/ui/badge";
 import { PunchPad } from "@/components/evv/punch-pad";
 import { padMemberId } from "@/lib/evv-codes";
-import { bindSpecialDirections } from "@/lib/bind-special-directions";
+import { bindSpecialDirections } from "@/lib/clients/bind-special-directions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,

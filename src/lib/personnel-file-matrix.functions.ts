@@ -7,7 +7,7 @@ import {
   type CompanyObligationRow,
   type ObligationInstanceRow,
   type StaffObligationCompletion,
-} from "@/lib/company-obligations.functions";
+} from "./obligations/company-obligations.functions.ts";
 import { isPackSentinel } from "@/lib/obligations/obligation-packs";
 import {
   emptyObligationFileStatusCounts,

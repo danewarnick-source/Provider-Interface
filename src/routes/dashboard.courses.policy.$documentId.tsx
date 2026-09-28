@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { trackAnnualPolicyRenewal } from "@/lib/policy-signatures.functions";
+import { trackAnnualPolicyRenewal } from "@/lib/documents/policy-signatures.functions";
 
 export const Route = createFileRoute("/dashboard/courses/policy/$documentId")({
   component: PolicySignPage,

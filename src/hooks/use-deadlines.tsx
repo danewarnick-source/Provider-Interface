@@ -13,7 +13,7 @@ import {
   cadenceDescription,
   listDeadlineObligationInstances,
   type DeadlineObligationItem,
-} from "@/lib/company-obligations.functions";
+} from "@/lib/obligations/company-obligations.functions";
 import { isAdminLevel } from "@/lib/access/levels";
 
 /**

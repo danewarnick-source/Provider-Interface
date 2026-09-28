@@ -20,7 +20,7 @@ import { displayPersonName } from "@/lib/person-name";
 import { DualCaseloadActions } from "@/components/staff-mobile/dual-caseload-actions";
 import { useTodayDailyNoteClients } from "@/hooks/use-today-daily-notes";
 import { useCompletedPunchesToday } from "@/hooks/use-completed-punches-today";
-import { openClockableShifts } from "@/lib/caseload-open-work";
+import { openClockableShifts } from "@/lib/clients/caseload-open-work";
 import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 
 function fmtTime(iso: string) {

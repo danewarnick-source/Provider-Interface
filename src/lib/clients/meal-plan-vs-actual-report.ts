@@ -20,7 +20,7 @@ import {
   type MealPlanLogo,
   type MealSlot,
   type PlanActualRow,
-} from "./clients/client-meal-plan-pdf";
+} from "../clients/client-meal-plan-pdf";
 
 const SLOTS: MealSlot[] = ["breakfast", "lunch", "dinner", "snack"];
 

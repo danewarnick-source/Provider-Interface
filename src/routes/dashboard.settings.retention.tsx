@@ -13,7 +13,7 @@ import {
   updateRetentionSettings,
   sweepArchiveEligible,
   purgeAgedReferrals,
-} from "@/lib/retention.functions";
+} from "@/lib/documents/retention.functions";
 import { isAdminLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/settings/retention")({

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import type { FormSettings } from "@/lib/forms-utils";
+import type { FormSettings } from "@/lib/documents/forms-utils";
 import { useState } from "react";
 
 const TABS = ["General", "Sharing", "Limitations", "Reminders"] as const;

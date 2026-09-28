@@ -3,8 +3,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import type { FormField, FormSettings, Schedule, Frequency } from "./forms-utils";
-import { periodKeyFor } from "./forms-utils";
+import type { FormField, FormSettings, Schedule, Frequency } from "../documents/forms-utils.ts";
+import { periodKeyFor } from "../documents/forms-utils.ts";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import { isAdminLevel } from "@/lib/access/levels";

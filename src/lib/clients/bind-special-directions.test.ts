@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { bindSpecialDirections } from "./bind-special-directions.ts";
+import { bindSpecialDirections } from "../clients/bind-special-directions.ts";
 
 describe("bindSpecialDirections", () => {
   it("substitutes placeholders with the page client", () => {

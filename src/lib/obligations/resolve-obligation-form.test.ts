@@ -4,7 +4,7 @@ import {
   isFormUuid,
   isUnlinkedFormDuty,
   resolveObligationFormId,
-} from "./resolve-obligation-form.ts";
+} from "../obligations/resolve-obligation-form.ts";
 
 const FORMS = [
   { id: "11111111-1111-4111-8111-111111111111", name: "Medication Error Report" },
