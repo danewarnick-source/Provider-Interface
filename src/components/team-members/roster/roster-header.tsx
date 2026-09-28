@@ -6,34 +6,14 @@ import { useAgencySetup } from "@/hooks/use-agency-setup";
 import { shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
 import { rosterCsv, rosterCsvFileName, type RosterRow } from "@/lib/team-members/roster";
 import {
-  AddEmployeeButton,
-  AddEmployeeWizard,
+  AddTeamMemberButton,
+  AddTeamMemberDialog,
 } from "@/components/team-members/add/add-member-dialog";
 import {
-  EmployeeRosterUploadButton,
-  EmployeeRosterUploadWizard,
+  ImportTeamMembersButton,
+  ImportTeamMembersDialog,
 } from "@/components/team-members/add/import-members-dialog";
-import {
-  FinishEmployeeSetupWizard,
-  type NeedsSetupPerson,
-} from "@/components/team-members/add/finish-setup-dialog";
-
-function toNeedsSetup(r: RosterRow): NeedsSetupPerson {
-  return {
-    userId: r.userId,
-    firstName: r.firstName,
-    lastName: r.lastName,
-    email: r.email,
-    phone: r.phone,
-    hireDate: r.hireDate ?? "",
-    accessLevel: r.accessLevel,
-    accessPresetId: r.presetId,
-    jobTitle: r.jobTitle ?? "",
-    department: r.setup?.department ?? "",
-    employeeId: r.employeeId,
-    workerType: r.setup?.workerType ?? "",
-  };
-}
+import { ReviewEvidencePackDialog } from "@/components/team-members/add/review-evidence-dialog";
 
 /** Client-side CSV of exactly the rows on screen. */
 function downloadCsv(rows: RosterRow[]) {
@@ -47,21 +27,19 @@ function downloadCsv(rows: RosterRow[]) {
 }
 
 /**
- * Title, counts and the page buttons, plus the Add / Import / Finish setup
- * dialogs they open. Add and Import need Hire & deactivate: Edit. On phones the
+ * Title, counts and the page buttons, plus the Add / Import dialogs they open
+ * and the Evidence questionnaire those hand off to. Add and Import need Hire & deactivate: Edit. On phones the
  * title sits on its own row and the buttons go full width underneath.
  */
 export function RosterHeader({
   organizationId,
   counts,
-  needsSetupRows,
   exportRows,
   addFlag,
   importFlag,
 }: {
   organizationId: string | null;
   counts: { active: number; inactive: number; invited: number };
-  needsSetupRows: RosterRow[];
   exportRows: RosterRow[] | null;
   addFlag: boolean;
   importFlag: boolean;
@@ -72,7 +50,7 @@ export function RosterHeader({
   const blocked = !organizationId || shouldBlockStaffClientCreate(setupStatus);
   const [addOpen, setAddOpen] = useState(addFlag);
   const [importOpen, setImportOpen] = useState(importFlag);
-  const [finishOpen, setFinishOpen] = useState(false);
+  const [reviewIds, setReviewIds] = useState<string[]>([]);
   useEffect(() => {
     if (addFlag) setAddOpen(true);
   }, [addFlag]);
@@ -90,14 +68,9 @@ export function RosterHeader({
           </p>
         </div>
         <div className="grid w-full gap-2 md:flex md:w-auto md:flex-wrap [&>button]:w-full md:[&>button]:w-auto">
-          {canHire && <AddEmployeeButton onClick={() => setAddOpen(true)} disabled={blocked} />}
-          {canHire && needsSetupRows.length > 0 && (
-            <Button variant="outline" onClick={() => setFinishOpen(true)} disabled={blocked}>
-              Finish setup ({needsSetupRows.length})
-            </Button>
-          )}
+          {canHire && <AddTeamMemberButton onClick={() => setAddOpen(true)} disabled={blocked} />}
           {canHire && (
-            <EmployeeRosterUploadButton onClick={() => setImportOpen(true)} disabled={blocked} />
+            <ImportTeamMembersButton onClick={() => setImportOpen(true)} disabled={blocked} />
           )}
           <Button
             variant="ghost"
@@ -110,21 +83,22 @@ export function RosterHeader({
       </div>
       {canHire && (
         <>
-          <AddEmployeeWizard
+          <AddTeamMemberDialog
             open={addOpen}
             onOpenChange={setAddOpen}
             organizationId={organizationId}
+            onReviewEvidence={setReviewIds}
           />
-          <EmployeeRosterUploadWizard
+          <ImportTeamMembersDialog
             open={importOpen}
             onOpenChange={setImportOpen}
             organizationId={organizationId}
+            onReviewEvidence={setReviewIds}
           />
-          <FinishEmployeeSetupWizard
-            open={finishOpen}
-            onOpenChange={setFinishOpen}
+          <ReviewEvidencePackDialog
             organizationId={organizationId}
-            people={needsSetupRows.map(toNeedsSetup)}
+            userIds={reviewIds}
+            onClose={() => setReviewIds([])}
           />
         </>
       )}

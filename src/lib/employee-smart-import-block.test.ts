@@ -57,7 +57,7 @@ describe("employee Smart Import hard block", () => {
       new URL("../components/team-members/roster/roster-header.tsx", import.meta.url),
       "utf8",
     );
-    assert.match(header, /EmployeeRosterUploadWizard/);
+    assert.match(header, /ImportTeamMembersDialog/);
     assert.doesNotMatch(header, /Smart Import/);
     assert.doesNotMatch(employees, /Smart Import/);
   });

@@ -7,13 +7,7 @@ import type { RosterActionKey, RosterRow } from "@/lib/team-members/roster";
 import { EvidencePill } from "./evidence-status";
 import { RowActionsSheet, type RosterActionHandler } from "./row-actions";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import {
-  LevelTag,
-  MissingInfoChip,
-  NeedsSetupChip,
-  PendingFirstLoginChip,
-  PositionText,
-} from "./roster-table";
+import { LevelTag, MissingInfoChip, PendingFirstLoginChip, PositionText } from "./roster-table";
 
 /** Roster below 768 px: tap a card for the profile, ⋯ for the actions sheet. */
 export function RosterCards({
@@ -61,7 +55,6 @@ export function RosterCards({
                 <div className="flex items-center gap-2">
                   <span className="truncate font-semibold">{r.displayName}</span>
                   <LevelTag level={r.accessLevel} />
-                  {r.needsSetup && <NeedsSetupChip />}
                 </div>
                 <div className="truncate text-xs">
                   <PositionText row={r} />

@@ -22,7 +22,6 @@ import {
   isEmployeeOnActiveRoster,
   lastLoginByUserId,
   missingInfoFor,
-  profileNeedsSetup,
   resolvePositions,
   summarizeEvidence,
   type RosterEvidenceFile,
@@ -80,14 +79,11 @@ type ProfileRow = {
   must_change_password: boolean | null;
   account_status: string | null;
   is_active: boolean | null;
-  department: string | null;
-  worker_type: string | null;
-  custom_attributes: unknown;
   staff_type_keys: string[] | null;
 };
 
 const PROFILE_SELECT =
-  "id, full_name, first_name, last_name, email, phone, employee_id, photo_path, position, team_id, hire_date, start_date, date_of_birth, home_address, emergency_contact_name, emergency_contact_phone, must_change_password, account_status, is_active, department, worker_type, custom_attributes, staff_type_keys";
+  "id, full_name, first_name, last_name, email, phone, employee_id, photo_path, position, team_id, hire_date, start_date, date_of_birth, home_address, emergency_contact_name, emergency_contact_phone, must_change_password, account_status, is_active, staff_type_keys";
 
 export function displayNameOf(p: ProfileRow | undefined): {
   display: string;
@@ -281,7 +277,6 @@ export const listTeamRoster = createServerFn({ method: "POST" })
       const supervisorId = m.manager_id ? (userIdByMemberId.get(m.manager_id) ?? null) : null;
       const email = p?.email ?? "";
       const level = asRosterLevel(m.access_level);
-      const needsSetup = profileNeedsSetup(p?.custom_attributes);
       return {
         userId: m.user_id,
         memberId: m.id,
@@ -294,7 +289,6 @@ export const listTeamRoster = createServerFn({ method: "POST" })
         photoPath: p?.photo_path ?? null,
         jobTitle: m.job_title?.trim() || p?.position?.trim() || null,
         accessLevel: level,
-        presetId: level === "owner" ? null : m.access_preset_id,
         positions: resolvePositions(p?.staff_type_keys, positionTypes),
         homeId: p?.team_id ?? null,
         homeName: p?.team_id ? (teamName.get(p.team_id) ?? null) : null,
@@ -308,10 +302,6 @@ export const listTeamRoster = createServerFn({ method: "POST" })
         pendingInviteId: inviteByEmail.get(email.trim().toLowerCase()) ?? null,
         evidence: myItems.length ? summarizeEvidence(myItems, myFiles, today) : EMPTY_EVIDENCE,
         missingInfo: missingInfoFor(p),
-        needsSetup,
-        setup: needsSetup
-          ? { department: p?.department ?? "", workerType: p?.worker_type ?? "" }
-          : null,
       };
     });
   });

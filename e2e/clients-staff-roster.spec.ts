@@ -356,35 +356,68 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByRole("button", { name: /Add manually/i })).toHaveCount(0);
 
     await page.getByRole("button", { name: /^Add team member$/i }).click();
-    await expect(page.getByRole("heading", { name: /Add team member/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Add another team member/i })).toBeVisible();
+    const dialog = page.getByTestId("add-team-member-dialog");
+    await expect(dialog.getByRole("heading", { name: /Add team member/i })).toBeVisible();
+    // One person, one screen: no multi-person cards, no org-configured fields.
+    await expect(page.getByRole("button", { name: /Add another team member/i })).toHaveCount(0);
+    await expect(page.getByText(/Your organization's fields/i)).toHaveCount(0);
+    await expect(page.getByText(/drives training requirements/i)).toHaveCount(0);
+    await expect(dialog.getByText("Job title")).toHaveCount(0);
+    for (const label of ["Basics", "Role", "DSPD"]) {
+      await expect(dialog.getByText(label, { exact: true })).toBeVisible();
+    }
     await expect(page.getByLabel(/Hire date/i)).toBeVisible();
+    await expect(page.getByLabel(/Date of birth/i)).toBeVisible();
+    await expect(page.getByRole("switch", { name: /Transports clients/i })).toBeVisible();
+    await expect(dialog.getByText(/What they can see and do in PI/i)).toBeVisible();
+    await expect(dialog.getByRole("checkbox", { name: /Email an invite now/i })).toBeChecked();
+    await expect(page.getByLabel(/End date/i)).toHaveCount(0);
+    await expect(page.getByText(/Assigned training tracks/i)).toHaveCount(0);
+    await expect(page.getByText(/Behavior-related training/i)).toHaveCount(0);
     await shot(page, "add_team_member_wizard_desktop");
     await page.setViewportSize({ width: 390, height: 844 });
     await shot(page, "add_team_member_wizard_mobile");
     await page.setViewportSize({ width: 1280, height: 720 });
-    await expect(page.getByLabel(/End date/i)).toHaveCount(0);
-    await expect(page.getByText(/Assigned training tracks/i)).toHaveCount(0);
-    await expect(page.getByText(/Behavior-related training/i)).toHaveCount(0);
+
+    // Access: grouped presets; the admin persona is an Owner, so Owner + Admin presets show.
+    await page.locator("#access").click();
+    await expect(page.getByRole("option", { name: "Owner", exact: true })).toBeVisible();
+    await expect(page.getByText("Admin presets", { exact: true })).toBeVisible();
+    await expect(page.getByText("Team member presets", { exact: true })).toBeVisible();
+    await page.getByRole("option", { name: "DSP", exact: true }).click();
+
+    // Position is one multi-select from staff_types.
+    await dialog.getByText("Choose positions").click();
+    await page.getByRole("button", { name: /Host Home Provider/ }).click();
+    await dialog.getByRole("heading", { name: /Add team member/i }).click();
+
     await page.locator("#first_name").fill("Sep");
     await page.locator("#last_name").fill("Tester");
     await page.locator("#email").fill("sep1.tester@example.test");
     await page.locator("#phone").fill("555-010-0199");
     await page.locator("#hire_date").fill("2026-07-01");
-    await page.getByRole("button", { name: /Create team member/i }).click();
+    await dialog.getByRole("button", { name: /^Add team member$/i }).click();
 
-    await expect(page.getByRole("heading", { name: /Send invites\?/i })).toBeVisible({
+    await expect(dialog.getByText("Invite sent to sep1.tester@example.test")).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByRole("button", { name: /Show temporary password/i })).toBeVisible();
-    await page.getByRole("checkbox").check();
-    await page.getByRole("button", { name: /Send 1 invite/i }).click();
-    const toast = page.locator("[data-sonner-toast]").filter({
-      hasText: /Invite emailed|couldn't be sent|Invitation created|Unauthorized/i,
-    });
-    await expect(toast.first()).toBeVisible({ timeout: 10_000 });
-
+    await expect(dialog.getByRole("button", { name: /Open profile/i })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: /Add another/i })).toBeVisible();
     await shot(page, "add_employee_wizard_access");
+
+    // Review evidence pack opens the existing Evidence questionnaire, pre-filled
+    // from Position (Host Home Provider → HHS host pack). Nothing is created yet.
+    await dialog.getByRole("button", { name: /Review evidence pack/i }).click();
+    const quiz = page.locator("[data-evidence-quiz]");
+    await expect(quiz).toBeVisible({ timeout: 15_000 });
+    await expect(quiz.getByText(/Team member packs · Sep Tester/)).toBeVisible();
+    await quiz.getByRole("button", { name: /See team member suggestions/i }).click();
+    await expect(quiz.getByText("Host Home Certification")).toBeVisible();
+    await expect(quiz.getByRole("button", { name: /Apply packs/i })).toBeDisabled();
+    await shot(page, "add_team_member_review_evidence");
+    await quiz.getByRole("button", { name: /^Back$/ }).click();
+    await quiz.getByRole("button", { name: /^Back$/ }).click();
+    await expect(quiz).toHaveCount(0);
 
     // The old invitations page redirects to the roster's Invited view.
     await gotoAdmin(page, "/dashboard/invitations");
@@ -526,87 +559,102 @@ test.describe("Employees flatten and Clients placements", () => {
   });
 });
 
-test.describe("Import team members and Finish setup", () => {
+test.describe("Add team member — used to work here", () => {
+  test("offers Reactivate instead of a new account", async ({ page }) => {
+    await installHiveMocks(page, { persona: "admin", inactiveMatch: true });
+    await gotoAdmin(page, "/dashboard/team-members");
+    await page.getByRole("button", { name: /^Add team member$/i }).click();
+    const dialog = page.getByTestId("add-team-member-dialog");
+    await page.locator("#first_name").fill("Tom");
+    await page.locator("#last_name").fill("Returning");
+    await page.locator("#email").fill("tom.returning@example.test");
+    await page.locator("#hire_date").fill("2026-07-01");
+    await dialog.getByRole("button", { name: /^Add team member$/i }).click();
+    await expect(dialog.getByText(/used to work here\. Reactivate instead\?/)).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(dialog.getByRole("button", { name: /^Reactivate$/ })).toBeVisible();
+    await shot(page, "add_team_member_inactive_match");
+  });
+});
+
+test.describe("Import team members", () => {
   test.beforeEach(async ({ page }) => {
-    await installHiveMocks(page, { persona: "admin", needsSetupUserId: STAFF.jake.id });
+    await installHiveMocks(page, { persona: "admin" });
   });
 
-  test("roster chip, add dialog, preview, and finish step", async ({ page }) => {
+  test("editable, removable review rows, invites, then Evidence for everyone", async ({ page }) => {
     await gotoAdmin(page, "/dashboard/team-members");
     await expect(page.getByRole("heading", { level: 2, name: /Team members/i })).toBeVisible({
       timeout: 20_000,
     });
-    await expect(page.getByRole("button", { name: /Finish setup \(1\)/i })).toBeVisible();
-    const desktopChip = page.locator("table").getByTestId("needs-setup-chip");
-    await desktopChip.scrollIntoViewIfNeeded();
-    await expect(desktopChip).toBeVisible();
-    await shot(page, "needs_setup_roster_desktop");
+    await expect(page.getByRole("button", { name: /Finish setup/i })).toHaveCount(0);
+    await expect(page.getByTestId("needs-setup-chip")).toHaveCount(0);
 
-    await page.setViewportSize({ width: 390, height: 844 });
-    await expect(page.getByRole("button", { name: /Finish setup \(1\)/i })).toBeVisible();
-    const mobileChip = page.locator(".md\\:hidden").getByTestId("needs-setup-chip");
-    await mobileChip.scrollIntoViewIfNeeded();
-    await shot(page, "needs_setup_roster_mobile");
-
-    await page.getByRole("button", { name: /Import team members/i }).scrollIntoViewIfNeeded();
     await page.getByRole("button", { name: /Import team members/i }).click();
     await expect(page.getByRole("heading", { name: /Import team members/i })).toBeVisible();
-    await expect(page.getByText(/lands on the roster as Needs setup/i)).toBeVisible();
-    await shot(page, "add_several_dialog_mobile");
-
-    await page.setViewportSize({ width: 1280, height: 720 });
+    await expect(page.getByTestId("import-drop-zone")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Download Excel template/i })).toBeEnabled();
     await shot(page, "add_several_dialog_desktop");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await shot(page, "add_several_dialog_mobile");
+    await page.setViewportSize({ width: 1280, height: 1100 });
 
     await page
       .locator("#roster-paste")
       .fill(
         [
-          "name,email,phone,hire_date,job_title,access_level",
-          "Alex Kim,alex.kim@example.test,555-0199,2026-08-01,Coach,Owner",
-          "Sam Rivera,sam.rivera@example.test,555-0100,2026-07-01,Direct Support,Team member",
-          "Pat,not-an-email,,,",
-          "Jake Probert,jake.probert@example.test,555-0101,2026-01-15,DSP,",
+          "name,email,phone,hire_date,preset,home,job_title,transports",
+          "Alex Kim,alex.kim@example.test,555-0199,8/1/26,Owner,,Coach,",
+          "Sam Rivera,sam.rivera@example.test,555-0100,2026-07-01,Lead DSP,Maple House,,yes",
+          "Pat,not-an-email,,,,,,",
+          "Jake Probert,jake.probert@example.test,555-0101,2026-01-15,DSP,,,",
         ].join("\n"),
       );
     await page.getByRole("button", { name: /Review pasted rows/i }).click();
-    await expect(page.getByText(/Already on the roster — skipped/i)).toBeVisible();
-    await expect(page.getByText(/Enter a valid email/i)).toBeVisible();
-    await expect(page.getByText(/Will add as Needs setup/i)).toBeVisible();
-    await expect(page.getByText(/Owner can't be assigned from a spreadsheet/i)).toBeVisible();
-    await expect(page.getByText(/Team member/i).first()).toBeVisible();
+    const review = page.getByTestId("import-review");
+    await expect(review.getByText(/Already here — skipped/i)).toBeVisible();
+    await expect(review.getByText(/Enter a valid email/i)).toBeVisible();
+    await expect(review.getByText(/Owner can't be given from a spreadsheet/i)).toBeVisible();
+    await expect(
+      review.getByRole("checkbox", { name: /Email invites to everyone/i }),
+    ).toBeChecked();
+    await expect(review.getByLabel("Hire date").first()).toHaveValue("2026-08-01");
     await shot(page, "add_several_preview_desktop");
-    await page.setViewportSize({ width: 1280, height: 1100 });
-    const invalidAccess = page.getByLabel("Access level").first();
-    await invalidAccess.scrollIntoViewIfNeeded();
-    await invalidAccess.click();
-    for (const name of ["Admin", "Team member"]) {
-      await expect(page.getByRole("option", { name, exact: true })).toBeVisible();
-    }
-    await expect(page.getByRole("option", { name: "Owner", exact: true })).toHaveCount(0);
-    await expect(page.getByRole("option", { name: "Supervisor", exact: true })).toHaveCount(0);
-    await expect(page.getByRole("option", { name: "Committee Member", exact: true })).toHaveCount(
-      0,
-    );
-    await shot(page, "add_several_access_level_desktop");
-    await page.keyboard.press("Escape");
 
+    // The preset dropdown is the agency's presets, without Owner.
+    await review.getByTestId("access-preset-select").first().click();
+    await expect(page.getByRole("option", { name: "Lead DSP", exact: true })).toBeVisible();
+    await expect(page.getByRole("option", { name: "Owner", exact: true })).toHaveCount(0);
+    await page.getByRole("option", { name: "DSP", exact: true }).click();
+
+    // Remove the bad row.
+    await expect(review.getByTestId("import-row")).toHaveCount(4);
+    await review
+      .getByTestId("import-row")
+      .nth(2)
+      .getByRole("button", { name: /Remove row/i })
+      .click();
+    await expect(review.getByTestId("import-row")).toHaveCount(3);
     await page.setViewportSize({ width: 390, height: 844 });
     await shot(page, "add_several_preview_mobile");
+    await page.setViewportSize({ width: 1280, height: 1100 });
 
-    await page.setViewportSize({ width: 1280, height: 720 });
-    await page.getByRole("button", { name: /^Back$/i }).click();
-    await page.keyboard.press("Escape");
-
-    await page.getByRole("button", { name: /Finish setup \(1\)/i }).click();
-    await expect(page.getByTestId("finish-setup-dialog")).toBeVisible();
-    await expect(page.getByText(/same questions as Add team member/i)).toBeVisible();
-    await expect(page.getByText("Direct Support Professional")).toBeVisible();
-    await expect(page.getByLabel("Job title")).toHaveValue("DSP");
-    await shot(page, "finish_setup_step_desktop");
-
-    await page.setViewportSize({ width: 390, height: 844 });
-    await expect(page.getByText("Direct Support Professional")).toBeVisible();
-    await shot(page, "finish_setup_step_mobile");
+    await review.getByRole("button", { name: /Add 2 people/i }).click();
+    await expect(page.getByTestId("import-done-summary")).toHaveText(
+      "Added 2. Invites sent to 2.",
+      {
+        timeout: 15_000,
+      },
+    );
+    await expect(
+      page.getByText(/jake\.probert@example\.test: Already on the roster/),
+    ).toBeVisible();
+    await page.getByRole("button", { name: /Review evidence packs for 2 people/i }).click();
+    const quiz = page.locator("[data-evidence-quiz]");
+    await expect(quiz).toBeVisible({ timeout: 15_000 });
+    await expect(quiz.getByText(/Team member packs · 2 people/)).toBeVisible();
+    await shot(page, "import_review_evidence_packs");
   });
 });
 
@@ -640,14 +688,12 @@ test.describe("Access levels screenshots", () => {
     await page.getByRole("button", { name: /Import team members/i }).click();
     await page
       .locator("#roster-paste")
-      .fill(
-        "Sam Rivera, sam.rivera@example.test, 555-0100, 2026-07-01, Direct Support, Team member\n",
-      );
+      .fill("Sam Rivera, sam.rivera@example.test, 555-0100, 2026-07-01, DSP\n");
     await page.getByRole("button", { name: /Review pasted rows/i }).click();
-    await expect(page.getByTestId("bulk-access-level")).toBeVisible();
-    await page.getByTestId("bulk-access-level").click();
-    await expect(page.getByRole("option", { name: "Admin", exact: true })).toBeVisible();
-    await expect(page.getByRole("option", { name: "Team member", exact: true })).toBeVisible();
+    await expect(page.getByTestId("access-preset-select")).toBeVisible();
+    await page.getByTestId("access-preset-select").click();
+    await expect(page.getByText("Team member presets", { exact: true })).toBeVisible();
+    await expect(page.getByRole("option", { name: "DSP", exact: true })).toBeVisible();
     await expect(page.getByRole("option", { name: "Owner", exact: true })).toHaveCount(0);
     await expect(page.getByRole("option", { name: "Supervisor", exact: true })).toHaveCount(0);
     await shot(page, "bulk-upload-access-level");

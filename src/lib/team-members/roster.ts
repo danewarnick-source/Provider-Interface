@@ -52,29 +52,6 @@ export function countEmployeesOnRosterTab(
   return filterEmployeesByRosterTab(members, tab).length;
 }
 
-/** Bulk-added people stay on the roster until an admin finishes their job questions. */
-export function profileNeedsSetup(customAttributes: unknown): boolean {
-  if (
-    !customAttributes ||
-    typeof customAttributes !== "object" ||
-    Array.isArray(customAttributes)
-  ) {
-    return false;
-  }
-  return (customAttributes as Record<string, unknown>).needs_setup === true;
-}
-
-export function uniqueHireEmails(emails: readonly string[]): string | null {
-  const seen = new Set<string>();
-  for (const raw of emails) {
-    const email = raw.trim().toLowerCase();
-    if (!email) continue;
-    if (seen.has(email)) return email;
-    seen.add(email);
-  }
-  return null;
-}
-
 const ROSTER_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   month: "short",
   day: "numeric",
@@ -218,8 +195,6 @@ export type RosterRow = {
   photoPath: string | null;
   jobTitle: string | null;
   accessLevel: "owner" | "admin" | "staff";
-  /** Only for the Finish setup pre-fill. The roster never shows a preset. */
-  presetId: string | null;
   /** From profiles.staff_type_keys, labelled by staff_types. */
   positions: RosterPosition[];
   homeId: string | null;
@@ -237,10 +212,6 @@ export type RosterRow = {
   pendingInviteId: string | null;
   evidence: RosterEvidenceSummary;
   missingInfo: MissingInfoKey[];
-  /** Bulk-added and still waiting on Finish setup. */
-  needsSetup: boolean;
-  /** Only filled for needsSetup people — what the Finish setup dialog pre-fills. */
-  setup: { department: string; workerType: string } | null;
 };
 
 /** Days ahead that count as "due soon" on the roster. */
@@ -753,8 +724,8 @@ export async function filterByViewerScope(args: {
 
 /* ----------------------------- row actions ------------------------------- */
 
-/** React Query keys. They sit under ["members"] / ["invites"] so the Add, Import
- *  and Finish setup dialogs' existing invalidations refresh the roster too. */
+/** React Query keys. They sit under ["members"] / ["invites"] so any invalidation
+ *  of those prefixes refreshes the roster too. */
 export const rosterQueryKey = (orgId: string | null | undefined) =>
   ["members", orgId ?? null, "team-roster"] as const;
 export const teamInvitesQueryKey = (orgId: string | null | undefined) =>
