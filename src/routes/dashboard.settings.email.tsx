@@ -7,7 +7,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getOrgEmailSettings, updateOrgEmailSettings, sendEmail } from "@/lib/email.functions";
+import { getOrgEmailSettings, updateOrgEmailSettings, sendEmail } from "@/lib/agency/email.functions";
 import {
   DEFAULT_MANAGED_FROM_ADDRESS,
   DEFAULT_MANAGED_FROM_NAME,

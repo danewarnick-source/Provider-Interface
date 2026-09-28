@@ -8,7 +8,7 @@ function read(rel: string) {
 
 describe("Admin notification bell", () => {
   it("portals the list out of the clipped Admin chrome header", () => {
-    const bell = read("../components/NotificationBell.tsx");
+    const bell = read("../../components/NotificationBell.tsx");
     assert.match(bell, /from ["']@\/components\/ui\/popover["']/);
     assert.match(bell, /<Popover/);
     assert.match(bell, /<PopoverTrigger asChild>/);
@@ -19,7 +19,7 @@ describe("Admin notification bell", () => {
   });
 
   it("keeps the Admin-only mount and the chrome conditions that clip in-tree panels", () => {
-    const shell = read("../routes/dashboard.tsx");
+    const shell = read("../../routes/dashboard.tsx");
     assert.match(
       shell,
       /isAdminCapable && effectiveView === "admin" && \(\s*<NotificationBell/,

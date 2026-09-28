@@ -34,7 +34,7 @@ import {
   evaluateShiftNote, scanNoteForTriggers,
   type CoachResult, type ScanResult,
 } from "@/lib/nectar/ai-coach.functions";
-import { freezeOriginalTranscript } from "@/lib/original-transcript";
+import { freezeOriginalTranscript } from "@/lib/nectar/original-transcript";
 import {
   accumulateSpeechResults,
   beginContinuousRecognition,

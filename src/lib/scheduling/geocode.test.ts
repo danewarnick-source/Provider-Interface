@@ -4,7 +4,7 @@ import {
   expandUsAddressForNominatim,
   pickStreetLevelGeocode,
   type NominatimHit,
-} from "./geocode.ts";
+} from "../scheduling/geocode.ts";
 
 describe("expandUsAddressForNominatim", () => {
   it("expands Utah grid compass letters (7675 S 2450 W)", () => {

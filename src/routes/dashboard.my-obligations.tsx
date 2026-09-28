@@ -18,7 +18,7 @@ import {
   type MyObligationInstanceRow,
 } from "@/lib/obligations/company-obligations.functions";
 import { isFormUuid, isUnlinkedFormDuty } from "@/lib/obligations/resolve-obligation-form";
-import { toDisplayNameCase } from "@/lib/person-name";
+import { toDisplayNameCase } from "@/lib/clients/person-name";
 import { StaffPageHeader } from "@/components/staff-mobile/staff-page-header";
 import {
   dueLabel,

@@ -5,7 +5,7 @@ import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import type { Json } from "@/integrations/supabase/types";
 import { reportPlatformEvent } from "../hive-exec/hive-tickets.functions.ts";
 import { markDraftedByNectar } from "../nectar/nectar-approvals.functions";
-import { EVV_SERVICE_CODES } from "../evv-codes.ts";
+import { EVV_SERVICE_CODES } from "../scheduling/evv-codes.ts";
 import {
   AUTH_KINDS,
   NON_OBLIGATION_KINDS,

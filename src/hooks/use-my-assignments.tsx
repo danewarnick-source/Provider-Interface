@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
 import { useCurrentOrg } from "./use-org";
-import type { AssignmentMap } from "@/lib/assignment-codes";
+import type { AssignmentMap } from "@/lib/scheduling/assignment-codes";
 
 export {
   allowedCodesFor,
@@ -20,7 +20,7 @@ export {
   isHostHomeOnlyAssignment,
   stackDualCaseloadActions,
   type AssignmentMap,
-} from "@/lib/assignment-codes";
+} from "@/lib/scheduling/assignment-codes";
 
 /**
  * Per-staff caseload assignments scoped to specific service codes.

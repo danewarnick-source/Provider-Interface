@@ -211,7 +211,7 @@ async function liveUsageCounts(orgId: string, client: unknown): Promise<{ staff:
     staff = 0;
   }
   try {
-    const { readSupabaseAdminEnv } = await import("@/lib/supabase-public-env");
+    const { readSupabaseAdminEnv } = await import("../auth/supabase-public-env.ts");
     if (readSupabaseAdminEnv()) {
       const highWater = await highWaterClientCount(orgId);
       return { staff, clients: highWater.count };

@@ -7,7 +7,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 import { getDatabaseUrl, isCognitoAuth, isS3StorageEnabled } from "@/lib/aws/env";
-import { readSupabaseAdminEnv } from "@/lib/supabase-public-env";
+import { readSupabaseAdminEnv } from "@/lib/auth/supabase-public-env";
 import { getAwsDataClient } from "@/lib/aws/db-client.server";
 import { getS3StorageAdapter } from "@/lib/aws/s3-storage.server";
 import { createAwsAuthAdmin } from "@/lib/aws/auth-admin.server";

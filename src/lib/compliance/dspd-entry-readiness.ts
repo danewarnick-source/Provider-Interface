@@ -8,8 +8,8 @@
  *
  * Pure: facts in, statuses + holds out. No I/O, no second checklist table.
  */
-import { isEvvLockedCode } from "../evv-codes.ts";
-import { isLikelyBadCoord } from "../geo.ts";
+import { isEvvLockedCode } from "../scheduling/evv-codes.ts";
+import { isLikelyBadCoord } from "../scheduling/geo.ts";
 import type { CompletenessResult } from "../nectar/nectar-completeness.ts";
 import { requiresUpiFiling } from "../progress-summaries/progress-summaries.ts";
 

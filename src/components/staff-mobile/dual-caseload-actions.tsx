@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Clock, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { caseloadDailyNoteLabel, caseloadTimeClockLabel } from "@/lib/assignment-codes";
+import { caseloadDailyNoteLabel, caseloadTimeClockLabel } from "@/lib/scheduling/assignment-codes";
 import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 
 /**

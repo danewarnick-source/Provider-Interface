@@ -17,7 +17,7 @@ import {
   pickUnlockedMembership,
   type MembershipPick,
 } from "@/lib/current-org";
-import { readSupabaseAdminEnv } from "@/lib/supabase-public-env";
+import { readSupabaseAdminEnv } from "../auth/supabase-public-env.ts";
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 

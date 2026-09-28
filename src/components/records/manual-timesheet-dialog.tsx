@@ -20,7 +20,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { EVV_SERVICE_CODES, padMemberId } from "@/lib/evv-codes";
+import { EVV_SERVICE_CODES, padMemberId } from "@/lib/scheduling/evv-codes";
 import { toast } from "sonner";
 
 type StaffOption = { value: string; label: string };

@@ -22,7 +22,7 @@ import {
   staffSeesDuty,
   type StaffDutyFacts,
 } from "../duty-applicability.ts";
-import { isEvvLockedCode } from "../../evv-codes.ts";
+import { isEvvLockedCode } from "../../scheduling/evv-codes.ts";
 import { isDailyServiceCode } from "../../billing/service-billing.ts";
 import {
   evaluateClaimRestrictions,

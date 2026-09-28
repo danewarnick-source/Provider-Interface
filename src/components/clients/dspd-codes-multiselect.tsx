@@ -2,7 +2,7 @@ import { useMemo, useRef, useState, useEffect } from "react";
 import { Search, X, ChevronDown, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
+import { EVV_SERVICE_CODES } from "@/lib/scheduling/evv-codes";
 import { cn } from "@/lib/utils";
 
 interface Props {

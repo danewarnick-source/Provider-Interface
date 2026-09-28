@@ -8,4 +8,4 @@ export * from './cognito-require-auth';
 export * from './login.functions';
 export * from './login-auth';
 export * from './login-password-signin';
-export * from '../role-entry';
+export * from '../auth/role-entry.ts';

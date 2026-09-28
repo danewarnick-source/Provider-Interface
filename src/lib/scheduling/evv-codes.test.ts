@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { maskMemberId, padMemberId } from "./evv-codes.ts";
+import { maskMemberId, padMemberId } from "../scheduling/evv-codes.ts";
 
 describe("maskMemberId", () => {
   it("shows only the last 4 characters", () => {

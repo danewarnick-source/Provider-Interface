@@ -7,7 +7,7 @@
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-import { NITRO_AWS_LAMBDA_PRESET } from "./src/lib/nitro-lambda-preset";
+import { NITRO_AWS_LAMBDA_PRESET } from "./src/lib/aws/nitro-lambda-preset";
 
 /**
  * `.functions.ts` client stubs still parse top-level imports. Those files

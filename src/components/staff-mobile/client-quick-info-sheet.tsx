@@ -11,7 +11,7 @@ import {
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
 import { useActiveShift } from "@/hooks/use-active-shift";
 import type { CaseloadClient } from "@/hooks/use-caseload";
-import { displayPersonName } from "@/lib/person-name";
+import { displayPersonName } from "@/lib/clients/person-name";
 import { AlertTriangle, Target, Phone, Heart, IdCard, ChevronRight } from "lucide-react";
 
 type Props = {

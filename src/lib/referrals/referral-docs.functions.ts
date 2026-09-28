@@ -127,7 +127,7 @@ export const parseReferralDocument = createServerFn({ method: "POST" })
     }
 
     const { readSupabasePublicUrl, readSupabaseServiceRoleKey } =
-      await import("@/lib/supabase-public-env");
+      await import("../auth/supabase-public-env.ts");
     const SUPABASE_URL = readSupabasePublicUrl();
     const serviceRole = readSupabaseServiceRoleKey();
     if (!SUPABASE_URL || !serviceRole) throw new Error("Server misconfigured");

@@ -7,7 +7,7 @@ import {
   bearerIsServiceRole,
   hiveMailboxFromEnv,
   pinHiveFrom,
-} from "../../supabase/functions/_shared/service-role-guard.ts";
+} from "../../../supabase/functions/_shared/service-role-guard.ts";
 
 const KEY = "service-role-test-key";
 
@@ -84,45 +84,45 @@ describe("pinHiveFrom", () => {
 describe("B1 edge callers", () => {
   it("send-email callers invoke with the service-role client", () => {
     for (const file of [
-      "../../src/lib/email.functions.ts",
-      "../../src/lib/invitations.functions.ts",
-      "../../src/lib/threads.functions.ts",
-      "../../src/lib/audit/audit-portal.functions.ts",
-      "../../src/lib/billing-notifications.server.ts",
-      "../../src/lib/training/training-only-exec.functions.ts",
+      "../agency/email.functions.ts",
+      "./invitations.functions.ts",
+      "../messaging/threads.functions.ts",
+      "../audit/audit-portal.functions.ts",
+      "../billing/billing-notifications.server.ts",
+      "../training/training-only-exec.functions.ts",
     ]) {
       const src = read(file);
       assert.match(src, /functions\.invoke\(\s*"send-email"/);
       assert.match(src, /supabaseAdmin|admin\.functions\.invoke/);
     }
     assert.doesNotMatch(
-      read("../../src/lib/email.functions.ts"),
+      read("../agency/email.functions.ts"),
       /\(supabase as any\)\.functions\.invoke/,
     );
     assert.doesNotMatch(
-      read("../../src/lib/invitations.functions.ts"),
+      read("./invitations.functions.ts"),
       /supabase\.functions\.invoke\("send-email"/,
     );
   });
 
   it("referral parse and date detection are not open service-role reads", () => {
     assert.match(
-      read("../../supabase/functions/parse-referral-doc/index.ts"),
+      read("../../../supabase/functions/parse-referral-doc/index.ts"),
       /bearerIsServiceRole/,
     );
-    assert.match(read("../../supabase/functions/detect-doc-dates/index.ts"), /bearerIsServiceRole/);
-    assert.match(read("../../supabase/functions/send-email/index.ts"), /pinHiveFrom/);
+    assert.match(read("../../../supabase/functions/detect-doc-dates/index.ts"), /bearerIsServiceRole/);
+    assert.match(read("../../../supabase/functions/send-email/index.ts"), /pinHiveFrom/);
     assert.doesNotMatch(
-      read("../../supabase/functions/detect-doc-dates/index.ts"),
+      read("../../../supabase/functions/detect-doc-dates/index.ts"),
       /auth\.getUser/,
     );
 
-    const detectCaller = read("../../src/lib/document-effective-dating.functions.ts");
+    const detectCaller = read("../documents/document-effective-dating.functions.ts");
     assert.match(detectCaller, /can_access_client_phi/);
     assert.match(detectCaller, /isAgencyAdmin/);
     assert.match(detectCaller, /supabaseAdmin/);
 
-    const referralCaller = read("../../src/lib/referral-docs.functions.ts");
+    const referralCaller = read("../referrals/referral-docs.functions.ts");
     assert.match(referralCaller, /readSupabaseServiceRoleKey/);
     assert.doesNotMatch(referralCaller, /getRequest\(\)/);
   });
@@ -141,24 +141,24 @@ describe("B1 edge callers", () => {
         false,
       );
     }
-    const config = read("../../supabase/config.toml");
+    const config = read("../../../supabase/config.toml");
     assert.doesNotMatch(
       config,
       /create-training-checkout|format-training-content|training-stripe-webhook|auto-renew-trainings|create-training-setup-intent|parse-receipt-ocr/,
     );
-    assert.doesNotMatch(read("../../src/routes/dashboard.pba-ledger.tsx"), /parse-receipt-ocr/);
+    assert.doesNotMatch(read("../../routes/dashboard.pba-ledger.tsx"), /parse-receipt-ocr/);
     assert.doesNotMatch(
-      read("../../src/routes/dashboard.hive-training.index.tsx"),
+      read("../../routes/dashboard.hive-training.index.tsx"),
       /auto-renew-trainings|create-training-setup-intent/,
     );
   });
 
   it("does not call notify_incident_filed or flag_member_deactivated as the signed-in user", () => {
-    const lifecycle = read("../../src/lib/lifecycle.functions.ts");
+    const lifecycle = read("../clients/lifecycle.functions.ts");
     assert.match(lifecycle, /supabaseAdmin\.rpc\("flag_member_deactivated"/);
     assert.doesNotMatch(lifecycle, /(?<!Admin)\.rpc\("flag_member_deactivated"/);
 
-    const root = new URL("../../src/", import.meta.url).pathname;
+    const root = new URL("../../../src/", import.meta.url).pathname;
     const hits: string[] = [];
     const walk = (dir: string) => {
       for (const ent of readdirSync(dir, { withFileTypes: true })) {

@@ -6,7 +6,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { computeRestrictionCompletion, type RestrictionRecord } from "../clients/hrc-restrictions.ts";
-import { isEvvLockedCode } from "../evv-codes";
+import { isEvvLockedCode } from "../scheduling/evv-codes.ts";
 import {
   EMPTY_AUDIT_EVIDENCE,
   personNeedsSupportStrategies,

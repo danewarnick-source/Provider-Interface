@@ -93,7 +93,7 @@ export const ensureSignupWorkspace = createServerFn({ method: "POST" })
       }
     }
 
-    const { readSupabaseAdminEnv } = await import("@/lib/supabase-public-env");
+    const { readSupabaseAdminEnv } = await import("../auth/supabase-public-env.ts");
     if (!readSupabaseAdminEnv()) {
       if (!isSelfServeAgencySignup(claimsMeta)) return skipped();
       return { ok: false, orgId: null, reason: "provision_failed" };

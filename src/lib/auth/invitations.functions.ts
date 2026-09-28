@@ -15,7 +15,7 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireLevel, requirePermission } from "@/lib/access/require";
-import { resolveOrgSender } from "@/lib/email.functions";
+import { resolveOrgSender } from "../agency/email.functions.ts";
 import { type AccessLevel } from "@/lib/access/levels";
 import { resolvePresetId } from "@/lib/access/preset-resolve";
 import { buildInvitationEmail } from "@/lib/auth/invitation-email";

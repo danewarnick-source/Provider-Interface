@@ -3,7 +3,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import type { Database } from "./types";
 import { getDatabaseUrl, isCognitoAuth } from "@/lib/aws/env";
-import { readSupabasePublicEnv } from "@/lib/supabase-public-env";
+import { readSupabasePublicEnv } from "@/lib/auth/supabase-public-env";
 import { resolveRequestUser } from "@/lib/aws/resolve-user.server";
 import { getAwsDataClient } from "@/lib/aws/db-client.server";
 import { readAwsSessionCookie } from "@/lib/aws/session-cookie.server";

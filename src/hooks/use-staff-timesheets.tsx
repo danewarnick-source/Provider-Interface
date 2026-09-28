@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
 import { useNectarPayPeriod } from "./use-nectar-pay-period";
-import { displayPersonName } from "@/lib/person-name";
+import { displayPersonName } from "@/lib/clients/person-name";
 import {
   staffDisplayHours,
   staffTimesheetStatus,

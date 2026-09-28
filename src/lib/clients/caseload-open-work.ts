@@ -8,7 +8,7 @@
  */
 
 import { staffDisplayPunchPair } from "../staff/staff-display-hours.ts";
-import type { RecordPunchTimes } from "../record-duration.ts";
+import type { RecordPunchTimes } from "../scheduling/record-duration.ts";
 
 export type CompletedPunch = RecordPunchTimes & {
   client_id: string;

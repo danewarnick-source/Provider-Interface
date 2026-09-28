@@ -8,7 +8,7 @@ function read(rel: string) {
 
 describe("Knowledge surface lock", () => {
   it("is a single upload + list page with no retired Knowledge tabs", () => {
-    const hub = read("../routes/dashboard.hub.knowledge.tsx");
+    const hub = read("../../routes/dashboard.hub.knowledge.tsx");
     assert.match(hub, /KnowledgePage/);
     assert.doesNotMatch(hub, /HubShell/);
     assert.doesNotMatch(hub, /AuthoritativeSourcesPage/);
@@ -20,7 +20,7 @@ describe("Knowledge surface lock", () => {
   });
 
   it("frames Knowledge as Nectar document ingest, not compliance tracing", () => {
-    const page = read("../components/pages/knowledge-page.tsx");
+    const page = read("../../components/pages/knowledge-page.tsx");
     assert.match(page, /Nectar ingests them into its knowledge base/);
     assert.match(page, /Nectar search/);
     assert.doesNotMatch(page, /Requirements/);
@@ -35,10 +35,10 @@ describe("Knowledge surface lock", () => {
   });
 
   it("retires External compliance and Authoritative Sources to Knowledge", () => {
-    const ext = read("../routes/dashboard.external-compliance.tsx");
+    const ext = read("../../routes/dashboard.external-compliance.tsx");
     assert.match(ext, /to: "\/dashboard\/hub\/knowledge"/);
     assert.doesNotMatch(ext, /tab: "external"/);
-    const auth = read("../routes/dashboard.authoritative-sources.tsx");
+    const auth = read("../../routes/dashboard.authoritative-sources.tsx");
     assert.match(auth, /to: "\/dashboard\/hub\/knowledge"/);
   });
 });

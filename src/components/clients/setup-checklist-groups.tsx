@@ -52,7 +52,7 @@ import {
   type FieldStateMap,
 } from "@/lib/staff/field-confirmations.functions";
 import type { FieldState } from "@/lib/staff/field-confirmations";
-import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
+import { EVV_SERVICE_CODES } from "@/lib/scheduling/evv-codes";
 import { isClockableServiceCode } from "@/lib/billing/service-billing";
 import {
   PROFILE_FIELD_BY_KEY,

@@ -11,7 +11,7 @@ import {
   DEFAULT_GEOFENCE_RADIUS_FEET,
   HOME_PIN_MISMATCH_FEET,
   MAX_GPS_ACCURACY_METERS,
-} from "./geo.ts";
+} from "../scheduling/geo.ts";
 
 // Salt Lake City downtown-ish, used as a stand-in home pin.
 const HOME = { lat: 40.7608, lng: -111.891 };

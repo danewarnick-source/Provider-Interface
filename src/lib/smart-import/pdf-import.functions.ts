@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
+import { EVV_SERVICE_CODES } from "../scheduling/evv-codes.ts";
 
 // ---------- Schemas ----------
 

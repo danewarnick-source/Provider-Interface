@@ -16,12 +16,12 @@ import {
   validateAddress,
 } from "@/lib/nectar/nectar-quality";
 
-import { padMemberId } from "@/lib/evv-codes";
+import { padMemberId } from "../scheduling/evv-codes.ts";
 import { isDailyServiceCode } from "../billing/service-billing.ts";
 import {
   classifyExtractedService,
   type TenantIdentity,
-} from "@/lib/service-classification";
+} from "../clients/service-classification.ts";
 
 export type ValidationSeverity = "error" | "warning";
 

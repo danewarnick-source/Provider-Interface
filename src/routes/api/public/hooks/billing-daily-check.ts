@@ -36,7 +36,7 @@
 // -----------------------------------------------------------------------------
 
 import { createFileRoute } from "@tanstack/react-router";
-import { verifyCronSecret } from "@/lib/cron-auth";
+import { verifyCronSecret } from "@/lib/auth/cron-auth";
 
 export const Route = createFileRoute("/api/public/hooks/billing-daily-check")({
   server: {

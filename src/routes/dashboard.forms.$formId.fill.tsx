@@ -17,7 +17,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { FieldRenderer } from "@/components/forms/field-renderer";
 import { type FormField, isFieldVisible } from "@/lib/documents/forms-utils";
 import { supabase } from "@/integrations/supabase/client";
-import { formatPersonName } from "@/lib/person-name";
+import { formatPersonName } from "@/lib/clients/person-name";
 import { toast } from "sonner";
 
 const fillSearch = z.object({

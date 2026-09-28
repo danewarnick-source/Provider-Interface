@@ -13,7 +13,7 @@ import {
   ensureAllStaffGroupInternal,
 } from "../staff/staff-groups.functions";
 import { runNectarCertOcrFromStoragePath } from "../nectar/nectar-cert-ocr";
-import { compareNames } from "../name-matching.ts";
+import { compareNames } from "../clients/name-matching.ts";
 import { isFormUuid, resolveObligationFormId } from "../obligations/resolve-obligation-form.ts";
 import {
   addDaysUTC,

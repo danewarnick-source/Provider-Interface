@@ -5,7 +5,7 @@
  * ~300 searchable rows. No invented duties — only what the product already
  * encodes. Promote overlay stays on the Step 7 catalog-relation path.
  */
-import { EVV_SERVICE_CODES } from "../evv-codes.ts";
+import { EVV_SERVICE_CODES } from "../scheduling/evv-codes.ts";
 import { DAILY_SERVICE_CODES } from "../billing/service-billing.ts";
 import {
   allSowCatalogEntries,

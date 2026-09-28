@@ -4,8 +4,8 @@ import { describe, it } from "node:test";
 import {
   readSupabaseAdminEnv,
   readSupabasePublicEnv,
-} from "./supabase-public-env.ts";
-import { resolveSupabaseClientEnv } from "./aws/env.ts";
+} from "../auth/supabase-public-env.ts";
+import { resolveSupabaseClientEnv } from "../aws/env.ts";
 
 describe("readSupabasePublicEnv", () => {
   it("accepts the preview pair VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY", () => {
@@ -101,10 +101,10 @@ describe("resolveSupabaseClientEnv with VITE_ preview names", () => {
 describe("signup Create account env wiring", () => {
   it("admin client and client resolver map from VITE_ names", () => {
     const admin = readFileSync(
-      new URL("../integrations/supabase/client.server.ts", import.meta.url),
+      new URL("../../integrations/supabase/client.server.ts", import.meta.url),
       "utf8",
     );
-    const resolver = readFileSync(new URL("./aws/env.ts", import.meta.url), "utf8");
+    const resolver = readFileSync(new URL("../aws/env.ts", import.meta.url), "utf8");
     const helper = readFileSync(new URL("./supabase-public-env.ts", import.meta.url), "utf8");
     const checks = readFileSync(new URL("./signup-checks.functions.ts", import.meta.url), "utf8");
     assert.match(admin, /readSupabaseAdminEnv/);

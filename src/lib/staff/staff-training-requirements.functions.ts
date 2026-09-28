@@ -21,7 +21,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { baselineByKey } from "@/lib/staff/staff-training-requirements";
 import { runNectarCertOcr } from "@/lib/nectar/nectar-cert-ocr";
-import { compareNames } from "@/lib/name-matching";
+import { compareNames } from "../clients/name-matching.ts";
 
 const orgStaffKey = z.object({
   organization_id: z.string().uuid(),

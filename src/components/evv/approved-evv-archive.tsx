@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { CheckboxMultiSelect } from "@/components/ui/checkbox-multi-select";
-import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
+import { EVV_SERVICE_CODES } from "@/lib/scheduling/evv-codes";
 import { downloadCsv } from "@/lib/billing/utah-evv-export";
 import { HistoricalTimesheetBadge } from "@/components/smart-import/timesheets/historical-timesheet-badge";
 import { toast } from "sonner";

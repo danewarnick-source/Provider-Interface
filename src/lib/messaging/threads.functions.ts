@@ -10,7 +10,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import type { Database } from "@/integrations/supabase/types";
-import { resolveOrgSender } from "@/lib/email.functions";
+import { resolveOrgSender } from "../agency/email.functions.ts";
 import { normalizeUSPhoneToE164 } from "@/lib/us-phone";
 import {
   ASK_NOTIFICATION_TYPE,

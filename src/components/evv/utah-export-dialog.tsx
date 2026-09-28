@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Download, AlertTriangle, Loader2, History } from "lucide-react";
 import { toast } from "sonner";
-import { isEvvLockedCode, padMemberId, evvServiceLabel } from "@/lib/evv-codes";
+import { isEvvLockedCode, padMemberId, evvServiceLabel } from "@/lib/scheduling/evv-codes";
 import {
   buildUtahCsv, downloadCsv, defaultPreviousWeek, isValidIso, parseUsAddress, type UtahExportLine,
 } from "@/lib/billing/utah-evv-export";

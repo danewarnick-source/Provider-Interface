@@ -14,9 +14,9 @@ import {
   type ClientDraft,
   type ValidationIssue,
 } from "./import-validation.ts";
-import { fetchTenantIdentity, partitionCodeRows } from "@/lib/service-classification";
+import { fetchTenantIdentity, partitionCodeRows } from "../clients/service-classification.ts";
 import { isClockableServiceCode } from "../billing/service-billing.ts";
-import { isEvvLockedCode, evvServiceLabel } from "@/lib/evv-codes";
+import { isEvvLockedCode, evvServiceLabel } from "../scheduling/evv-codes.ts";
 
 
 

@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { remainingUnitsForCode } from "@/lib/billing/billing-units";
-import { displayMedicaidId } from "@/lib/medicaid-id";
+import { displayMedicaidId } from "@/lib/clients/medicaid-id";
 import { isVariableRateCode } from "@/lib/billing/variable-rate-codes";
 import {
   parseClientBudgetDocument,

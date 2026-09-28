@@ -22,7 +22,7 @@
 //                 known code, no codes_held configured, etc.)
 // =============================================================
 
-import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
+import { EVV_SERVICE_CODES } from "../scheduling/evv-codes.ts";
 
 export type ServiceBucket = "ours" | "other_provider" | "not_a_service";
 

@@ -5,7 +5,7 @@ import {
   headersFromNitroRequestEvent,
   nitroEventHasReadableHeaders,
   requestFromNitroEvent,
-} from "./nitro-origin-headers.ts";
+} from "../aws/nitro-origin-headers.ts";
 
 describe("nitro origin headers — node-server and Lambda Function URL", () => {
   it("reads Node IncomingMessage headers (ALB / node-server)", () => {
@@ -57,7 +57,7 @@ describe("nitro origin headers — node-server and Lambda Function URL", () => {
   });
 
   it("plugin is a plain export (no defineNitroPlugin) and uses the shared header helper", () => {
-    const src = readFileSync(new URL("../nitro-plugins/alb-origin-verify.ts", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../../nitro-plugins/alb-origin-verify.ts", import.meta.url), "utf8");
     assert.match(src, /export default function albOriginVerifyPlugin/);
     assert.match(src, /requestFromNitroEvent/);
     assert.doesNotMatch(src, /defineNitroPlugin\s*\(/);

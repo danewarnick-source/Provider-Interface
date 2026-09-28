@@ -44,8 +44,8 @@ import {
   isClockableServiceCode,
   isDailyServiceCode,
 } from "@/lib/billing/service-billing";
-import { isEvvLockedCode } from "@/lib/evv-codes";
-import { displayPersonName } from "@/lib/person-name";
+import { isEvvLockedCode } from "@/lib/scheduling/evv-codes";
+import { displayPersonName } from "@/lib/clients/person-name";
 
 type ClientTraining = {
   type: "person_specific" | "support_strategies" | "person_centered";

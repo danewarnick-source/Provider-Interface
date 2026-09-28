@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { computeNextRunAt } from "@/lib/saved-reports.functions";
+import { computeNextRunAt } from "@/lib/agency/saved-reports.functions";
 
 function verifyCronSecret(request: Request): boolean {
   const expected = process.env.NECTAR_CRON_SECRET;

@@ -14,7 +14,7 @@ import {
   type CheckboxMultiSelectOption,
 } from "@/components/ui/checkbox-multi-select";
 import { supabase } from "@/integrations/supabase/client";
-import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
+import { EVV_SERVICE_CODES } from "@/lib/scheduling/evv-codes";
 import { addClientBillingCodes } from "@/lib/auth/finish-onboarding.functions";
 import { CodeAssignedStaff } from "@/components/clients/code-assigned-staff";
 import { UserPlus } from "lucide-react";

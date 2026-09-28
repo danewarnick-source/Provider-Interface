@@ -11,7 +11,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { verifyCronSecret } from "@/lib/cron-auth";
+import { verifyCronSecret } from "@/lib/auth/cron-auth";
 // Step 4 wraps Step 2's runNightlyEscalationEvaluator (plan outcomes after hits).
 import { runNightlyEscalationAndPlans } from "@/lib/obligations/remediation";
 

@@ -30,7 +30,7 @@ export async function resolveSupabaseBearer(
   const header = request?.headers?.get("authorization");
   const token = header?.startsWith("Bearer ") ? header.slice(7).trim() : "";
   if (!token) return null;
-  const { readSupabasePublicEnv } = await import("@/lib/supabase-public-env");
+  const { readSupabasePublicEnv } = await import("../auth/supabase-public-env.ts");
   const mapped = readSupabasePublicEnv();
   const url = mapped?.url;
   const key = mapped?.key;

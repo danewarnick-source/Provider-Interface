@@ -5,7 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { isLikelyBadCoord } from "@/lib/geo";
+import { isLikelyBadCoord } from "../scheduling/geo.ts";
 import { syncHomePinFromAddress } from "@/lib/residential/home-pin";
 import { isAdminLevel } from "@/lib/access/levels";
 

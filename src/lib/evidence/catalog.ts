@@ -3,7 +3,7 @@
  * Staff / Client / Company catalogs do not share rows except Host Home Cert.
  */
 
-import { evvServiceLabel } from "../evv-codes.ts";
+import { evvServiceLabel } from "../scheduling/evv-codes.ts";
 import { dueDefaultForRequirement, dueSubtitle } from "./due.ts";
 import {
   CLIENT_QUIZ_CODES,

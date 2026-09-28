@@ -38,7 +38,7 @@ import {
   saveDayProgramSession, markAttendance, addSessionStaff,
 } from "@/lib/scheduling/scheduler-scheduler.functions";
 import { isClockableServiceCode } from "@/lib/billing/service-billing";
-import { evvServiceLabel } from "@/lib/evv-codes";
+import { evvServiceLabel } from "@/lib/scheduling/evv-codes";
 import { RequestsPanel } from "@/components/schedule-preview/requests-panel";
 import { OpenShiftsPanel } from "@/components/scheduling/open-shifts-panel";
 import { NectarBar } from "@/components/scheduler/nectar-bar";

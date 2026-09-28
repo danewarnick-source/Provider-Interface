@@ -5,7 +5,7 @@ import {
   isGpsFixConfident,
   pickBetterGpsFix,
   type GpsFix,
-} from "@/lib/geo";
+} from "../scheduling/geo.ts";
 
 export const HIGH_ACCURACY_GPS_OPTIONS: PositionOptions = {
   enableHighAccuracy: true,

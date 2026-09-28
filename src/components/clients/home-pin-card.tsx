@@ -28,7 +28,7 @@ import {
   DEFAULT_GEOFENCE_RADIUS_FEET,
   isHomePinDraftDirty,
   resolveGeofenceRadiusFeet,
-} from "@/lib/geo";
+} from "@/lib/scheduling/geo";
 import "leaflet/dist/leaflet.css";
 
 type HomePinMapProps = {

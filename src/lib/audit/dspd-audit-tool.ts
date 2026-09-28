@@ -11,7 +11,7 @@
 // features that already produce the evidence (HRC, summaries, EVV, belongings)
 // are linked rather than duplicated as a second to-do.
 
-import { EVV_SERVICE_CODES } from "../evv-codes";
+import { EVV_SERVICE_CODES } from "../scheduling/evv-codes.ts";
 import {
   sowCatalogEntry,
   sowCatalogEntryByKey,

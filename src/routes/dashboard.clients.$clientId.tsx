@@ -52,7 +52,7 @@ import {
 import { ClientFileTab } from "@/components/clients/client-file-tab";
 import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 
-import { displayMedicaidId } from "@/lib/medicaid-id";
+import { displayMedicaidId } from "@/lib/clients/medicaid-id";
 import { ClientBudgetPanel } from "@/components/clients/client-budget-panel";
 import { ClientMealPlannerMount } from "@/components/clients/client-meal-planner-mount";
 

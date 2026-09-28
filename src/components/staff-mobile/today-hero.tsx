@@ -16,7 +16,7 @@ import {
   stackDualCaseloadActions,
 } from "@/hooks/use-my-assignments";
 import { isClockableServiceCode } from "@/lib/billing/service-billing";
-import { displayPersonName } from "@/lib/person-name";
+import { displayPersonName } from "@/lib/clients/person-name";
 import { DualCaseloadActions } from "@/components/staff-mobile/dual-caseload-actions";
 import { useTodayDailyNoteClients } from "@/hooks/use-today-daily-notes";
 import { useCompletedPunchesToday } from "@/hooks/use-completed-punches-today";

@@ -108,7 +108,7 @@ const GEOFENCE_OPTIONS = [
 
 // ─── Geocoding helpers (preserved exactly) ───────────────────────────────────
 
-import { geocodeAddress } from "@/lib/geocode";
+import { geocodeAddress } from "@/lib/scheduling/geocode";
 
 
 

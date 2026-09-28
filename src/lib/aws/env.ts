@@ -8,7 +8,7 @@
  * `window.__HIVE_RUNTIME__` blob (booleans + Cognito region/ids only).
  */
 
-import { readSupabasePublicEnv } from "../supabase-public-env.ts";
+import { readSupabasePublicEnv } from "../auth/supabase-public-env.ts";
 
 export type AuthProvider = "cognito" | "supabase";
 

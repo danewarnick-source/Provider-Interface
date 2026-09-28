@@ -16,7 +16,7 @@ import {
   isHostHomeOnlyAssignment,
   stackDualCaseloadActions,
   type AssignmentMap,
-} from "./assignment-codes.ts";
+} from "../scheduling/assignment-codes.ts";
 
 describe("clientAuthorizedCodes", () => {
   it("uses authorized_dspd_codes when job_code is empty (Stephen / SLH)", () => {

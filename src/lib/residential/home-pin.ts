@@ -2,8 +2,8 @@
 // Never invents coordinates: a failed, city-level, or road-only geocode
 // leaves the pin. Dane can drag it on the map.
 
-import { geocodeAddress } from "@/lib/geocode";
-import { homePinMismatchesGeocode, isLikelyBadCoord } from "@/lib/geo";
+import { geocodeAddress } from "../scheduling/geocode.ts";
+import { homePinMismatchesGeocode, isLikelyBadCoord } from "../scheduling/geo.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = any;

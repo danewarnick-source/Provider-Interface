@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { isEvvLockedCode } from "@/lib/evv-codes";
+import { isEvvLockedCode } from "@/lib/scheduling/evv-codes";
 import { toast } from "sonner";
 
 type Row = {

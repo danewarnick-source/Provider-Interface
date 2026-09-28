@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { displayPersonName, toDisplayNameCase } from "./person-name.ts";
+import { displayPersonName, toDisplayNameCase } from "../clients/person-name.ts";
 
 describe("toDisplayNameCase — display layer only", () => {
   it("title-cases ALL CAPS imports", () => {

@@ -7,7 +7,7 @@ import {
   isLongOpenPunch,
   recordDurationMin,
   staffDisplayName,
-} from "./record-duration.ts";
+} from "../scheduling/record-duration.ts";
 
 describe("live 30e77b63 Tommy Jones DSI — do not manufacture 3h45m", () => {
   // Hive-Platform: clock_in 2026-08-17 02:56:07 UTC (Denver evening Aug 16)

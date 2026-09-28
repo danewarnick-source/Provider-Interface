@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { getUiDismissals, dismissUiPref } from "@/lib/ui-dismissals.functions";
+import { getUiDismissals, dismissUiPref } from "@/lib/agency/ui-dismissals.functions";
 
 /**
  * Per-user, DB-persisted one-time dismissal of a UI hint (banner, etc).

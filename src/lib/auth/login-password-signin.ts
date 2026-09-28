@@ -4,7 +4,7 @@
  * SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY only.
  */
 
-import { readSupabasePublicEnv } from "../supabase-public-env.ts";
+import { readSupabasePublicEnv } from "../auth/supabase-public-env.ts";
 
 export const GENERIC_PASSWORD_ERROR = "Invalid username or password";
 

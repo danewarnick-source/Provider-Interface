@@ -28,8 +28,8 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
 } from "@/components/ui/sheet";
-import { EVV_SERVICE_CODES, isEvvLockedCode } from "@/lib/evv-codes";
-import { roundToQuarterHourISO } from "@/lib/time-rounding";
+import { EVV_SERVICE_CODES, isEvvLockedCode } from "@/lib/scheduling/evv-codes";
+import { roundToQuarterHourISO } from "@/lib/scheduling/time-rounding";
 import { toast } from "sonner";
 import {
   saveRecordFields, saveManagerNote as saveManagerNoteFields,

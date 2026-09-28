@@ -62,8 +62,8 @@ import {
 
 import { resolveMergeFlag, overrideValidationIssue } from "@/lib/smart-import/import-checklist.functions";
 import { parseOwnGuardianValue } from "@/lib/smart-import/import-validation";
-import { type TenantIdentity, normalizeOrgName } from "@/lib/service-classification";
-import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
+import { type TenantIdentity, normalizeOrgName } from "@/lib/clients/service-classification";
+import { EVV_SERVICE_CODES } from "@/lib/scheduling/evv-codes";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {

@@ -17,7 +17,7 @@ import {
   loadInHiveCourseProgress,
 } from "@/lib/training/in-hive-training.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { toDisplayNameCase } from "@/lib/person-name";
+import { toDisplayNameCase } from "@/lib/clients/person-name";
 import { indexCompletionsByInstance, isCorrectionRequestedNote } from "@/lib/training/cert-review";
 import {
   buildStaffTask,

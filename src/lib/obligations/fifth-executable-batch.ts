@@ -13,7 +13,7 @@
  * Publication stays off until VERIFIED_PUBLICATIONS is filled deliberately.
  */
 
-import { isEvvLockedCode } from "../evv-codes.ts";
+import { isEvvLockedCode } from "../scheduling/evv-codes.ts";
 import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import { liveObligationKeyForRule, staffTaskPolicyForRule } from "./catalog-live-bridge.ts";
 import { isBlocksSoloWhenLapsedKey } from "./solo-lapse.ts";

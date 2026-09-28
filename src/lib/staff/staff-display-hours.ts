@@ -11,7 +11,7 @@ import {
   durationMs,
   punchPair,
   type RecordPunchTimes,
-} from "../record-duration.ts";
+} from "../scheduling/record-duration.ts";
 
 export function staffDisplayPunchPair(row: RecordPunchTimes): {
   in: string | null | undefined;

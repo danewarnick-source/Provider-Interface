@@ -13,7 +13,7 @@
 //  - Upserts client_billing_codes by (org, client, service_code).
 // =============================================================
 
-import { enrichNamesFromFull, firstNameWithMiddle } from "@/lib/person-name";
+import { enrichNamesFromFull, firstNameWithMiddle } from "../clients/person-name.ts";
 
 export interface ExtractedField {
   field_key: string;
@@ -541,7 +541,7 @@ export async function applyExtractedFieldsToClient(
     // Anything not "ours" is filed as coordination info (or dropped if the
     // admin explicitly chose to ignore). This narrows within the existing
     // authoritative-set gate; it never widens it.
-    const { partitionCodeRows } = await import("@/lib/service-classification");
+    const { partitionCodeRows } = await import("../clients/service-classification.ts");
     const tenant = ctx.tenant ?? { codesHeld: [], names: [] };
     const overrides = ctx.overrides ?? {};
     const partition = partitionCodeRows(codeRows, tenant, overrides);

@@ -35,9 +35,9 @@ import {
 import { PiMark } from "@/components/pi-landing/pi-mark";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode, maskMemberId, padMemberId } from "@/lib/evv-codes";
-import { clientAuthorizedCodes } from "@/lib/assignment-codes";
-import { roundToQuarterHourISO } from "@/lib/time-rounding";
+import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode, maskMemberId, padMemberId } from "@/lib/scheduling/evv-codes";
+import { clientAuthorizedCodes } from "@/lib/scheduling/assignment-codes";
+import { roundToQuarterHourISO } from "@/lib/scheduling/time-rounding";
 import { computeEntryUnits } from "@/lib/billing/billing-units";
 import { invalidateStaffCaseloadWork } from "@/lib/staff/staff-caseload-cache";
 import { EvvConsentGate } from "@/components/evv/consent-gate";
@@ -50,7 +50,7 @@ import {
   COMPLETENESS_PASS_FEEDBACK,
   localWordCountCheck,
 } from "@/lib/nectar/nectar-completeness";
-import { freezeOriginalTranscript } from "@/lib/original-transcript";
+import { freezeOriginalTranscript } from "@/lib/nectar/original-transcript";
 import {
   accumulateSpeechResults,
   beginContinuousRecognition,
@@ -129,8 +129,8 @@ import {
   resolveGeofenceRadiusFeet,
   MAX_GPS_ACCURACY_METERS,
   type GpsFix,
-} from "@/lib/geo";
-import { gpsFixFromPosition, HIGH_ACCURACY_GPS_OPTIONS } from "@/lib/gps";
+} from "@/lib/scheduling/geo";
+import { gpsFixFromPosition, HIGH_ACCURACY_GPS_OPTIONS } from "@/lib/scheduling/gps";
 import { selectedPill, unselectedPill } from "@/components/evv/toggle-styles";
 import { isAdminLevel } from "@/lib/access/levels";
 

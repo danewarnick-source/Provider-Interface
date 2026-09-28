@@ -15,7 +15,7 @@ import {
   parseOwnGuardianValue,
   type ClientDraft,
 } from "./import-validation.ts";
-import { fetchTenantIdentity, type TenantIdentity } from "@/lib/service-classification";
+import { fetchTenantIdentity, type TenantIdentity } from "../clients/service-classification.ts";
 import { BASELINE_STAFF_TRAININGS, isBaselineApplicable } from "@/lib/staff/staff-training-requirements";
 import { onPcspActivatedInternal } from "../obligations/company-obligations.functions.ts";
 import {
@@ -23,7 +23,7 @@ import {
   onStaffHiredInternal,
   reevaluateStaffAssignedToClientInternal,
 } from "@/lib/staff/staff-assignment-hooks.functions";
-import { enrichNamesFromFull } from "@/lib/person-name";
+import { enrichNamesFromFull } from "../clients/person-name.ts";
 import { hireEmployeeInternal } from "@/lib/staff/employees.functions";
 import { generateTempPassword } from "../auth/temp-password.ts";
 import { classifyImportInvite, hasUsableInviteEmail } from "../auth/import-invite.ts";

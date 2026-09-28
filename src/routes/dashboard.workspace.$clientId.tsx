@@ -5,11 +5,11 @@ import { z } from "zod";
 import { useCaseload } from "@/hooks/use-caseload";
 import { useMyAssignments, allowedCodesFor, clientAuthorizedCodes } from "@/hooks/use-my-assignments";
 import { isClockableServiceCode } from "@/lib/billing/service-billing";
-import { resolveGeofenceRadiusFeet } from "@/lib/geo";
+import { resolveGeofenceRadiusFeet } from "@/lib/scheduling/geo";
 
 import { Badge } from "@/components/ui/badge";
 import { PunchPad } from "@/components/evv/punch-pad";
-import { padMemberId } from "@/lib/evv-codes";
+import { padMemberId } from "@/lib/scheduling/evv-codes";
 import { bindSpecialDirections } from "@/lib/clients/bind-special-directions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {

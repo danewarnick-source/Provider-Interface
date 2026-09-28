@@ -12,7 +12,7 @@ import {
 } from "./managed-from.ts";
 
 const FROM_RAILS = [
-  new URL("./email.functions.ts", import.meta.url),
+  new URL("./agency/email.functions.ts", import.meta.url),
   new URL("./audit-portal.functions.ts", import.meta.url),
   new URL("./training-only-exec.functions.ts", import.meta.url),
   new URL("../routes/dashboard.settings.email.tsx", import.meta.url),

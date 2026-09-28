@@ -11,7 +11,7 @@
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { isBillingExempt } from "@/lib/billing/billing-access";
-import { readSupabaseAdminEnv } from "@/lib/supabase-public-env";
+import { readSupabaseAdminEnv } from "../auth/supabase-public-env.ts";
 import {
   paidOrgSubscriptionCore,
   paidOrgSubscriptionPatch,

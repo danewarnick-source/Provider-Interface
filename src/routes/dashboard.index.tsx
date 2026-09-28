@@ -12,7 +12,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Clock, FileText, ArrowRight, Users, FileSignature } from "lucide-react";
 import { listMyPendingPolicies } from "@/lib/documents/policy-signatures.functions";
-import { displayPersonName } from "@/lib/person-name";
+import { displayPersonName } from "@/lib/clients/person-name";
 
 import { StaffClientGrid } from "@/components/staff-client-grid";
 import { StaffPageHeader } from "@/components/staff-mobile/staff-page-header";

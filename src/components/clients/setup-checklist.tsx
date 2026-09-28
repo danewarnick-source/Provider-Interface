@@ -18,7 +18,7 @@ import {
   type FieldStateMap,
 } from "@/lib/staff/field-confirmations.functions";
 import { submitForSetup } from "@/lib/smart-import/smart-import-review.functions";
-import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
+import { EVV_SERVICE_CODES } from "@/lib/scheduling/evv-codes";
 import {
   EndOfLifeGroup,
   NectarAsksGroup,

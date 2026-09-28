@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { NITRO_AWS_LAMBDA_PRESET } from "./nitro-lambda-preset.ts";
+import { NITRO_AWS_LAMBDA_PRESET } from "../aws/nitro-lambda-preset.ts";
 
 describe("Lambda build path does not collide with Vercel or build:aws", () => {
   it("uses a Nitro aws-lambda preset alias this repo can switch in one file", () => {
@@ -9,7 +9,7 @@ describe("Lambda build path does not collide with Vercel or build:aws", () => {
   });
 
   it("package.json keeps build / build:aws and adds build:lambda", () => {
-    const pkg = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8"));
+    const pkg = JSON.parse(readFileSync(new URL("../../../package.json", import.meta.url), "utf8"));
     // 6144, not 8192: Vercel Hobby/Pro builders are 8 GB. An 8 GB heap
     // plus native/Vite overhead is what SIGKILL'd production after #233.
     assert.equal(pkg.scripts.build, "NODE_OPTIONS=--max-old-space-size=6144 vite build");
@@ -26,7 +26,7 @@ describe("Lambda build path does not collide with Vercel or build:aws", () => {
   });
 
   it("vite.config only switches nitro when BUILD_TARGET is aws or lambda", () => {
-    const src = readFileSync(new URL("../../vite.config.ts", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../../../vite.config.ts", import.meta.url), "utf8");
     assert.match(src, /BUILD_TARGET === "aws"/);
     assert.match(src, /BUILD_TARGET === "lambda"/);
     assert.match(src, /NITRO_AWS_LAMBDA_PRESET/);
@@ -38,7 +38,7 @@ describe("Lambda build path does not collide with Vercel or build:aws", () => {
   });
 
   it("nitro.config applies serveStatic false + plugins for aws and lambda only", () => {
-    const src = readFileSync(new URL("../../nitro.config.ts", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../../../nitro.config.ts", import.meta.url), "utf8");
     assert.match(src, /BUILD_TARGET === "aws"/);
     assert.match(src, /BUILD_TARGET === "lambda"/);
     assert.match(src, /serveStatic: false/);
@@ -48,14 +48,14 @@ describe("Lambda build path does not collide with Vercel or build:aws", () => {
   });
 
   it("verify-lambda-output script looks for index.handler and .output/public", () => {
-    const src = readFileSync(new URL("../../scripts/verify-lambda-output.mjs", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../../../scripts/verify-lambda-output.mjs", import.meta.url), "utf8");
     assert.match(src, /\.output\/server/);
     assert.match(src, /index\.handler|exports\.handler|export[\s\S]*handler/);
     assert.match(src, /\.output\/public/);
   });
 
   it("docs and Tony script reuse hive-app-server / hive-app-static / E1BPLMZE2XLSKD only", () => {
-    const docs = readFileSync(new URL("../../docs/AWS_LAMBDA.md", import.meta.url), "utf8");
+    const docs = readFileSync(new URL("../../../docs/AWS_LAMBDA.md", import.meta.url), "utf8");
     assert.match(docs, /hive-app-server/);
     assert.match(docs, /hive-app-static/);
     assert.match(docs, /E1BPLMZE2XLSKD/);
@@ -69,7 +69,7 @@ describe("Lambda build path does not collide with Vercel or build:aws", () => {
     assert.doesNotMatch(docs, /Content-Security-Policy/);
     assert.match(docs, /No API Gateway/);
 
-    const tony = readFileSync(new URL("../../scripts/tony-hive-app-server-cutover.sh", import.meta.url), "utf8");
+    const tony = readFileSync(new URL("../../../scripts/tony-hive-app-server-cutover.sh", import.meta.url), "utf8");
     assert.match(tony, /CONFIRM=I_AM_TONY/);
     assert.match(tony, /function-name hive-app-server|fn="hive-app-server"/);
     assert.match(tony, /hive-app-static/);
@@ -83,7 +83,7 @@ describe("Lambda build path does not collide with Vercel or build:aws", () => {
   });
 
   it("deploy-aws.yml updates matching Lambda before S3 --delete, then CloudFront", () => {
-    const yml = readFileSync(new URL("../../.github/workflows/deploy-aws.yml", import.meta.url), "utf8");
+    const yml = readFileSync(new URL("../../../.github/workflows/deploy-aws.yml", import.meta.url), "utf8");
     assert.match(yml, /npm run build:lambda/);
     assert.doesNotMatch(yml, /npm run build:aws/);
     assert.match(yml, /verify-aws-supabase-bundle/);
@@ -125,7 +125,7 @@ describe("Lambda build path does not collide with Vercel or build:aws", () => {
   });
 
   it("AWS_DEPLOY.md examples use Hive-Platform and hivecertify.com", () => {
-    const docs = readFileSync(new URL("../../docs/AWS_DEPLOY.md", import.meta.url), "utf8");
+    const docs = readFileSync(new URL("../../../docs/AWS_DEPLOY.md", import.meta.url), "utf8");
     assert.match(docs, /https:\/\/dhrrukdcigiiqksibdfb\.supabase\.co/);
     assert.match(docs, /https:\/\/hivecertify\.com/);
     assert.match(docs, /Vercel production/);
