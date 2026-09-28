@@ -27,6 +27,7 @@ import {
   classifyEmailMatch,
   normalizeEmail,
   resolveAccessChoice,
+  resolveSupervisorMemberId,
   type EmailMatch,
   type PresetPick,
   type ResolvedAccess,
@@ -248,7 +249,8 @@ type HireContext = {
   presets: PresetPick[];
   positionKeys: Set<string>;
   homeIds: Set<string>;
-  activeMemberIds: Set<string>;
+  /** Active memberships here: id (organization_members.id) + user_id. */
+  activeMembers: Array<{ id: string; user_id: string }>;
 };
 
 async function loadHireContext(organizationId: string): Promise<HireContext> {
@@ -261,7 +263,7 @@ async function loadHireContext(organizationId: string): Promise<HireContext> {
     supabaseAdmin.from("teams").select("id").eq("organization_id", organizationId),
     supabaseAdmin
       .from("organization_members")
-      .select("user_id")
+      .select("id, user_id")
       .eq("organization_id", organizationId)
       .eq("active", true),
   ]);
@@ -272,19 +274,21 @@ async function loadHireContext(organizationId: string): Promise<HireContext> {
     presets: (presets.data ?? []) as PresetPick[],
     positionKeys: new Set((staffTypes.data ?? []).map((r) => r.key)),
     homeIds: new Set((teams.data ?? []).map((r) => r.id)),
-    activeMemberIds: new Set((members.data ?? []).map((r) => r.user_id)),
+    activeMembers: members.data ?? [],
   };
 }
 
-/** Throws a user-facing message when a Home, Supervisor or Position isn't this agency's. */
-function assertRefsInAgency(ctx: HireContext, row: TeamMemberFieldsValue): void {
+/**
+ * Throws a user-facing message when a Home, Supervisor or Position isn't this
+ * agency's. Returns the supervisor's membership id for manager_id.
+ */
+function assertRefsInAgency(ctx: HireContext, row: TeamMemberFieldsValue): string | null {
   if (row.homeId && !ctx.homeIds.has(row.homeId))
     throw new Error("That home isn't in this agency.");
-  if (row.supervisorId && !ctx.activeMemberIds.has(row.supervisorId)) {
-    throw new Error("The supervisor must be an active team member here.");
-  }
+  const supervisorMemberId = resolveSupervisorMemberId(row.supervisorId, ctx.activeMembers);
   const unknown = row.positions.filter((k) => !ctx.positionKeys.has(k));
   if (unknown.length) throw new Error(`Unknown position: ${unknown.join(", ")}.`);
+  return supervisorMemberId;
 }
 
 type EmailLookup = { match: EmailMatch; userId: string | null; name: string | null };
@@ -357,6 +361,7 @@ const TeamMemberFields = z.object({
   /** profiles.staff_type_keys — staff_types keys. */
   positions: z.array(z.string().trim().min(1).max(80)).max(20).default([]),
   homeId: z.string().uuid().nullable().optional(),
+  /** The supervisor's organization_members.id (manager_id references it). */
   supervisorId: z.string().uuid().nullable().optional(),
   /** Import's job title column. Add team member uses Position instead. */
   jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
@@ -393,6 +398,7 @@ function hireInputFromFields(
   organizationId: string,
   row: TeamMemberFieldsValue,
   access: ResolvedAccess,
+  supervisorMemberId: string | null,
 ): HireTeamMemberInput {
   return {
     organizationId,
@@ -409,7 +415,7 @@ function hireInputFromFields(
     workerType: row.workerType,
     transportsClients: row.transportsClients,
     teamId: row.homeId ?? null,
-    managerId: row.supervisorId ?? null,
+    managerId: supervisorMemberId,
     jobTitle: row.jobTitle || null,
   };
 }
@@ -433,7 +439,7 @@ export const createTeamMember = createServerFn({ method: "POST" })
       await requireLevel(supabaseAdmin, context.userId, data.organizationId, "owner");
     }
     await assertAgencySetupCompleteForOrg(supabaseAdmin, data.organizationId);
-    assertRefsInAgency(ctx, data);
+    const supervisorMemberId = assertRefsInAgency(ctx, data);
 
     const email = normalizeEmail(data.email);
     const found = (await lookupEmails(data.organizationId, [email])).get(email);
@@ -455,7 +461,7 @@ export const createTeamMember = createServerFn({ method: "POST" })
     if (found?.match === "other_agency") throw new Error(EMAIL_TAKEN_MESSAGE);
 
     const hired = await hireTeamMemberInternal(
-      hireInputFromFields(data.organizationId, data, access),
+      hireInputFromFields(data.organizationId, data, access, supervisorMemberId),
       context.userId,
       "manual_admin",
     );
@@ -595,9 +601,9 @@ export const importTeamMembers = createServerFn({ method: "POST" })
         continue;
       }
       try {
-        assertRefsInAgency(ctx, row);
+        const supervisorMemberId = assertRefsInAgency(ctx, row);
         const hired = await hireTeamMemberInternal(
-          hireInputFromFields(data.organizationId, row, access),
+          hireInputFromFields(data.organizationId, row, access, supervisorMemberId),
           actorId,
           "manual_admin",
         );
@@ -655,7 +661,8 @@ export const importTeamMembers = createServerFn({ method: "POST" })
 
 export type TeamMemberFormOptions = {
   homes: Array<{ id: string; name: string }>;
-  supervisors: Array<{ userId: string; name: string }>;
+  /** memberId = organization_members.id, what supervisorId / manager_id take. */
+  supervisors: Array<{ memberId: string; name: string }>;
   positions: Array<{ key: string; label: string }>;
 };
 
@@ -683,7 +690,7 @@ export const listTeamMemberFormOptions = createServerFn({ method: "POST" })
         .eq("organization_id", data.organizationId),
       supabaseAdmin
         .from("organization_members")
-        .select("user_id")
+        .select("id, user_id")
         .eq("organization_id", data.organizationId)
         .eq("active", true),
     ]);
@@ -712,8 +719,8 @@ export const listTeamMemberFormOptions = createServerFn({ method: "POST" })
         .filter((t) => t.active !== false)
         .map((t) => ({ id: t.id, name: String(t.team_name ?? "").trim() || "Unnamed home" }))
         .sort((a, b) => a.name.localeCompare(b.name)),
-      supervisors: ids
-        .map((userId) => ({ userId, name: names.get(userId) || "Team member" }))
+      supervisors: (members.data ?? [])
+        .map((m) => ({ memberId: m.id, name: names.get(m.user_id) || "Team member" }))
         .sort((a, b) => a.name.localeCompare(b.name)),
       positions: (staffTypes.data ?? [])
         .map((s) => ({ key: s.key, label: String(s.label ?? "").trim() || s.key }))

@@ -929,7 +929,7 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/listTeamMemberFormOptions/i.test(fn)) {
     return {
       homes: TEAMS.map((t) => ({ id: t.id, name: t.team_name })),
-      supervisors: STAFF_LIST.map((st) => ({ userId: st.id, name: st.name })),
+      supervisors: STAFF_LIST.map((st) => ({ memberId: `mem-${st.id.slice(-8)}`, name: st.name })),
       positions: TNS_POSITIONS.map((p) => ({ ...p })),
     };
   }

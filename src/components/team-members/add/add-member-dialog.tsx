@@ -383,7 +383,7 @@ export function AddTeamMemberDialog({
                       value={draft.supervisorId}
                       onChange={(supervisorId) => patch({ supervisorId })}
                       options={(options?.supervisors ?? []).map((s) => ({
-                        value: s.userId,
+                        value: s.memberId,
                         label: s.name,
                       }))}
                     />
