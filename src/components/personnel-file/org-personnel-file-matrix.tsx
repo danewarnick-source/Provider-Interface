@@ -14,7 +14,7 @@ import {
   listOrgPersonnelFilePack,
   type PersonnelFileMatrixRow,
 } from "@/lib/personnel-file-matrix.functions";
-import { missingPersonnelCsv, personnelPackHtml } from "@/lib/staff-obligation-files";
+import { missingPersonnelCsv, personnelPackHtml } from "@/lib/team-members/file";
 
 async function signedEvidenceUrl(path: string): Promise<string> {
   const { data, error } = await supabase.storage
@@ -255,9 +255,9 @@ function MatrixRow({
       className="cursor-pointer border-t border-border hover:bg-muted/30"
       onClick={() =>
         void navigate({
-          to: "/dashboard/employees/$staffId",
+          to: "/dashboard/team-members/$staffId",
           params: { staffId: row.staff_id },
-          search: { tab: "personnel" },
+          search: { tab: "file" },
         })
       }
     >
@@ -270,9 +270,9 @@ function MatrixRow({
       </td>
       <td className="px-3 py-2">
         <Link
-          to="/dashboard/employees/$staffId"
+          to="/dashboard/team-members/$staffId"
           params={{ staffId: row.staff_id }}
-          search={{ tab: "personnel" }}
+          search={{ tab: "file" }}
           className="font-medium text-[var(--hive-ink)] hover:underline"
           onClick={(e) => e.stopPropagation()}
         >

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Mail, UserPlus, Copy, RefreshCcw, Ban, Send } from "lucide-react";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
-import { resendInvitation, revokeInvitation } from "@/lib/invitations.functions";
+import { resendInvitation, revokeInvitation } from "@/lib/team-members/invites.functions";
 import { inviteJoinUrl } from "@/lib/join-invite";
 import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { toast } from "sonner";
@@ -109,7 +109,7 @@ function InvitationsPage() {
           </div>
         </div>
         <Button asChild className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]">
-          <Link to="/dashboard/hub/employees">
+          <Link to="/dashboard/team-members">
             <UserPlus className="mr-2 h-4 w-4" /> Add team member
           </Link>
         </Button>

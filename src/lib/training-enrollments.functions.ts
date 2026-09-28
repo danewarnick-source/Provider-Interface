@@ -159,7 +159,7 @@ export async function markTrainingLinkSentInternal(
     enr.organization_id,
     `Training link sent to ${enr.staff_name}`,
     `${enr.staff_name}'s enrollment link for "${productName}" has been sent.`,
-    `/dashboard/employees/${enr.staff_id ?? ""}?tab=record`,
+    `/dashboard/team-members/${enr.staff_id ?? ""}?tab=file`,
     enrollmentId,
   );
 }
@@ -195,7 +195,7 @@ export async function markTrainingCompletedInternal(
     enr.organization_id,
     `${enr.staff_name} completed ${productName}`,
     `${enr.staff_name} completed "${productName}". Please upload their certificate.`,
-    `/dashboard/employees/${enr.staff_id}?tab=record`,
+    `/dashboard/team-members/${enr.staff_id}?tab=file`,
     enrollmentId,
   );
 }
@@ -218,7 +218,7 @@ export async function remindAdminInternal(
     enr.organization_id,
     `Reminder: upload ${enr.staff_name}'s certificate`,
     `${enr.staff_name} completed "${productName}" and is still waiting on a certificate upload.`,
-    `/dashboard/employees/${enr.staff_id}?tab=record`,
+    `/dashboard/team-members/${enr.staff_id}?tab=file`,
     enrollmentId,
   );
 }
@@ -715,14 +715,14 @@ export const bulkUpdateEnrollments = createServerFn({ method: "POST" })
 
     for (const [orgId, staffList] of byOrg) {
       const body = staffList
-        .map((s) => `${s.staff_name} — ${s.product_name} (upload: /dashboard/employees/${s.staff_id}?tab=record)`)
+        .map((s) => `${s.staff_name} — ${s.product_name} (upload: /dashboard/team-members/${s.staff_id}?tab=file)`)
         .join("\n");
       await notifyOrgAdminsInternal(
         sb,
         orgId,
         `${staffList.length} staff completed training — certificates needed`,
         body,
-        "/dashboard/employees",
+        "/dashboard/team-members",
         null,
       );
     }
@@ -840,7 +840,7 @@ export const uploadTrainingCertificate = createServerFn({ method: "POST" })
           enr.organization_id,
           `Renewal coming up: ${enr.staff_name}'s ${product?.name ?? "certification"}`,
           `${enr.staff_name}'s "${product?.name ?? "certification"}" expires ${expiresOn}. Time to renew.`,
-          `/dashboard/employees/${enr.staff_id}?tab=record`,
+          `/dashboard/team-members/${enr.staff_id}?tab=file`,
           data.enrollment_id,
           remindDate.toISOString(),
         );

@@ -15,7 +15,7 @@ import {
   type ClientFileMatrixRow,
 } from "@/lib/client-file.functions";
 import { missingClientFileCsv } from "@/lib/client-file";
-import { personnelPackHtml } from "@/lib/staff-obligation-files";
+import { personnelPackHtml } from "@/lib/team-members/file";
 
 async function signedEvidenceUrl(
   bucket: "client-documents" | "client-photos",

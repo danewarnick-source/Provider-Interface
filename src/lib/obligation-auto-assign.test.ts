@@ -50,7 +50,9 @@ describe("hire auto-assign", () => {
     );
     assert.match(roleWriter, /reevaluateStaffDutiesInternal/);
     const empCaseload = readFileSync(
-      fileURLToPath(new URL("../routes/dashboard.employees.index.tsx", import.meta.url)),
+      fileURLToPath(
+        new URL("../components/team-members/roster/team-roster-page.tsx", import.meta.url),
+      ),
       "utf8",
     );
     assert.match(empCaseload, /onStaffAssignmentRemoved/);

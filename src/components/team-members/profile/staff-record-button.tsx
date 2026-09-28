@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { generateEmployeeFaceSheetFn } from "@/lib/employee-face-sheet.functions";
+import { generateEmployeeFaceSheetFn } from "@/lib/team-members/staff-record-pdf.functions";
 import { safeErrorMessage } from "@/lib/safe-error-message";
 
 /**

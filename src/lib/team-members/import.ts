@@ -6,7 +6,7 @@
  */
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import { isValidSignupEmail, normalizeSignupEmail } from "./signup-email.ts";
+import { isValidSignupEmail, normalizeSignupEmail } from "../signup-email.ts";
 
 export const EMPLOYEE_ROSTER_HEADERS = [
   "name",

@@ -10,7 +10,7 @@ import {
   lastLoginByUserId,
   profileNeedsSetup,
   uniqueHireEmails,
-} from "./employee-roster.ts";
+} from "./roster.ts";
 
 const active = { active: true, profile: { account_status: "active", is_active: true } };
 const deactivated = { active: false, profile: { account_status: "active", is_active: true } };
@@ -64,7 +64,7 @@ describe("uniqueHireEmails", () => {
 describe("Add employee wizard source lock", () => {
   it("drops hire-time behavior pickers, training tracks, and end date", () => {
     const src = readFileSync(
-      new URL("../components/employees/add-employee-wizard.tsx", import.meta.url),
+      new URL("../../components/team-members/add/add-member-dialog.tsx", import.meta.url),
       "utf8",
     );
     assert.doesNotMatch(src, /Behavior-related training/);
@@ -88,12 +88,17 @@ describe("Add employee wizard source lock", () => {
   });
 });
 
-describe("Employees list source lock", () => {
+describe("Team roster page source lock", () => {
   it("splits Active / Inactive, uses archive/restore RPCs, and has no hard delete", () => {
     const src = readFileSync(
-      new URL("../routes/dashboard.employees.index.tsx", import.meta.url),
+      new URL("../../components/team-members/roster/team-roster-page.tsx", import.meta.url),
       "utf8",
     );
+    assert.match(src, /export function TeamRosterPage/);
+    assert.match(src, /getRouteApi\("\/dashboard\/team-members\/"\)/);
+    assert.doesNotMatch(src, /createFileRoute|RequirePermission/);
+    assert.doesNotMatch(src, /\/dashboard\/employees/);
+    assert.match(src, /\/dashboard\/team-members\/\$staffId/);
     assert.match(src, /filterEmployeesByRosterTab/);
     assert.match(src, /archiveEntity/);
     assert.match(src, /restoreEntity/);
@@ -113,7 +118,9 @@ describe("Employees list source lock", () => {
     assert.match(src, /Finish setup/);
     assert.match(src, /Team Members/);
     assert.doesNotMatch(src, /StaffFieldsPanel/);
-    assert.match(src, /upload/);
+    assert.match(src, /search\.import === "1"/);
+    assert.match(src, /search\.add === "1"/);
+    assert.doesNotMatch(src, /search\.upload/);
     assert.match(src, /Last Login/);
     assert.match(src, /org_member_last_sign_ins/);
     assert.match(src, /Caseload/);
@@ -179,10 +186,10 @@ describe("lastLoginByUserId", () => {
 describe("Finish setup reuses Add employee", () => {
   it("walks Needs-setup people through the hire fields and an optional invite", () => {
     const src = readFileSync(
-      new URL("../components/employees/finish-employee-setup-wizard.tsx", import.meta.url),
+      new URL("../../components/team-members/add/finish-setup-dialog.tsx", import.meta.url),
       "utf8",
     );
-    const hire = readFileSync(new URL("./employees.functions.ts", import.meta.url), "utf8");
+    const hire = readFileSync(new URL("./members.functions.ts", import.meta.url), "utf8");
     assert.match(src, /HireDraftFields/);
     assert.match(src, /finishEmployeeSetup/);
     assert.match(src, /Skip for now/);

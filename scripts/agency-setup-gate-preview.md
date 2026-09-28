@@ -57,7 +57,7 @@ After SQL is applied to an **isolated test project or local Supabase only**:
 
 1. Sign in as a new-org owner (not grandfathered).
 2. Confirm Home still loads and Skip stays disabled at 1 of 6.
-3. Open `/dashboard/employees` and `/dashboard/clients` — should redirect to
+3. Open `/dashboard/team-members` and `/dashboard/clients` — should redirect to
    `/dashboard/settings/compliance-setup?reason=setup_incomplete`.
 4. Direct-request the create APIs (`createEmployeeManually`,
    `createInvitation`, `clients.insert`) — expect

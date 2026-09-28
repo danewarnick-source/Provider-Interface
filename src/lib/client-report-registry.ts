@@ -42,7 +42,7 @@ import {
   type EmployeeFaceSheetArgs,
   type EmployeeFaceSheetResult,
   type ShippedEmployeeFaceSheet,
-} from "./employee-face-sheet";
+} from "./team-members/staff-record-pdf";
 
 // ── Report type keys ────────────────────────────────────────────────────────
 

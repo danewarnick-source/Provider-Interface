@@ -7,7 +7,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 export const Route = createFileRoute("/dashboard/hr-admin/settings")({
   beforeLoad: () => {
     throw redirect({
-      to: "/dashboard/hub/employees",
+      to: "/dashboard/team-members",
       search: {},
       replace: true,
     });

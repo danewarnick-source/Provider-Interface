@@ -153,7 +153,7 @@ export const computeSowAlerts = createServerFn({ method: "POST" })
           subject: name,
           subjectKind: "staff",
           dueAt: overdueIso,
-          href: `/dashboard/employees/${staffId}`,
+          href: `/dashboard/team-members/${staffId}`,
           staffId,
         });
       }
@@ -173,7 +173,7 @@ export const computeSowAlerts = createServerFn({ method: "POST" })
           subject: name,
           subjectKind: "staff",
           dueAt: overdueIso,
-          href: `/dashboard/employees/${staffId}`,
+          href: `/dashboard/team-members/${staffId}`,
           staffId,
         });
       }
@@ -189,7 +189,7 @@ export const computeSowAlerts = createServerFn({ method: "POST" })
           subject: name,
           subjectKind: "staff",
           dueAt: overdueIso,
-          href: `/dashboard/employees/${p.id}`,
+          href: `/dashboard/team-members/${p.id}`,
           staffId: p.id,
         });
       }

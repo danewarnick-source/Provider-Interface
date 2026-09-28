@@ -19,9 +19,9 @@ if (origin.includes(PROD_REF) || process.env.AGENCY_SETUP_PREVIEW_ORIGIN?.includ
 }
 
 const checks = [
-  { name: "employees list", path: "/dashboard/employees" },
+  { name: "employees list", path: "/dashboard/team-members" },
   { name: "clients list", path: "/dashboard/clients" },
-  { name: "new employee", path: "/dashboard/employees/new" },
+  { name: "new employee", path: "/dashboard/team-members?add=1" },
   { name: "new client", path: "/dashboard/clients/new" },
   { name: "home stays available", path: "/dashboard" },
 ];

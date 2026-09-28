@@ -47,7 +47,7 @@ ADMIN AREA (admin/manager/super_admin):
 - /dashboard/compliance-desk — Records review: review submitted timesheets, daily logs, EVV punches, incidents.
 - /dashboard/pba-ledger — PBA Trust Ledger: client personal-budget accounts, deposits, withdrawals, audit samples.
 - /dashboard/scheduling — Scheduling: publish/edit staff shifts on a calendar.
-- /dashboard/employees — Team Members: staff roster, profiles, pay rates, certifications, role assignments.
+- /dashboard/team-members — Team Members: staff roster, profiles, pay rates, certifications, role assignments.
 - /dashboard/evidence — Evidence: Staff / Client / Company people × requirements grid. Suggestions only. Not a scoreboard.
 - /dashboard/compliance — Legacy staff / client / agency files (Company policies is a sub-tab under Agency file).
 - /dashboard/compliance?tab=staff — Staff file: org-wide staff file status (missing / due soon / on file). Opens each team member's Staff file.

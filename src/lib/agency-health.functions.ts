@@ -78,7 +78,7 @@ const LINKS: Record<HealthMetricKey, string> = {
   policy_acknowledgments: "/dashboard/settings",
   hhs_host_home: "/dashboard/hub/documentation?tab=hhs",
   billing_accuracy: "/dashboard/hub/documentation?tab=billing",
-  hr_document_currency: "/dashboard/hub/employees",
+  hr_document_currency: "/dashboard/team-members",
 };
 
 const LABELS: Record<HealthMetricKey, string> = {

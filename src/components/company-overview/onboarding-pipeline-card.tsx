@@ -7,15 +7,15 @@ export function OnboardingPipelineCard({ counts }: { counts: PipelineCounts }) {
   const total = counts.invited + counts.inProgress + counts.complete;
   const stages = [
     { key: "invited", label: "Invited", value: counts.invited, icon: UserPlus, to: "/dashboard/invitations" },
-    { key: "in_progress", label: "In progress", value: counts.inProgress, icon: Activity, to: "/dashboard/employees" },
-    { key: "complete", label: "Complete", value: counts.complete, icon: CheckCircle2, to: "/dashboard/employees" },
+    { key: "in_progress", label: "In progress", value: counts.inProgress, icon: Activity, to: "/dashboard/team-members" },
+    { key: "complete", label: "Complete", value: counts.complete, icon: CheckCircle2, to: "/dashboard/team-members" },
   ] as const;
 
   return (
     <section className="rounded-2xl border border-border bg-card/80 p-5 shadow-card backdrop-blur">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="font-display text-base font-semibold tracking-tight">Onboarding pipeline</h2>
-        <Link to="/dashboard/employees" className="inline-flex items-center gap-1 text-xs font-medium text-[#7a4a0a] hover:underline">
+        <Link to="/dashboard/team-members" className="inline-flex items-center gap-1 text-xs font-medium text-[#7a4a0a] hover:underline">
           View all <ArrowRight className="h-3 w-3" />
         </Link>
       </div>

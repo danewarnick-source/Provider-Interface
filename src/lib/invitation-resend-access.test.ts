@@ -67,7 +67,10 @@ describe("resolveResendAccess", () => {
 
 describe("resendInvitation source lock", () => {
   it("rewrites access_level / access_preset_id on resend and both wizards pass the chosen access", () => {
-    const fns = readFileSync(new URL("./invitations.functions.ts", import.meta.url), "utf8");
+    const fns = readFileSync(
+      new URL("./team-members/invites.functions.ts", import.meta.url),
+      "utf8",
+    );
     const resend = fns.slice(
       fns.indexOf("export const resendInvitation"),
       fns.indexOf("export const revokeInvitation"),
@@ -81,8 +84,8 @@ describe("resendInvitation source lock", () => {
     assert.doesNotMatch(resend, /profiles\s*\(/);
 
     for (const rel of [
-      "../components/employees/add-employee-wizard.tsx",
-      "../components/employees/finish-employee-setup-wizard.tsx",
+      "../components/team-members/add/add-member-dialog.tsx",
+      "../components/team-members/add/finish-setup-dialog.tsx",
     ]) {
       const src = readFileSync(new URL(rel, import.meta.url), "utf8");
       const call = src.slice(src.indexOf("await resendInviteFn("));

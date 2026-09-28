@@ -155,7 +155,7 @@ describe("wiring locks — the real callers use the guard, and nothing hard-dele
   });
 
   it("lifecycle.functions.ts: the hard-delete fn and assertManager are gone; archive/restore go through the guard", () => {
-    const src = read("../lifecycle.functions.ts");
+    const src = read("./lifecycle.functions.ts");
     assert.doesNotMatch(src, HARD_DELETE_FN);
     assert.doesNotMatch(src, /assertManager/);
     assert.doesNotMatch(src, /auth\.admin\.deleteUser/);
@@ -166,8 +166,8 @@ describe("wiring locks — the real callers use the guard, and nothing hard-dele
     assert.doesNotMatch(src, /select\([^)]*\brole\b/);
   });
 
-  it("employees.functions.ts: adminResetEmployeePassword goes through the guard as reset_password", () => {
-    const src = read("../employees.functions.ts");
+  it("members.functions.ts: adminResetEmployeePassword goes through the guard as reset_password", () => {
+    const src = read("./members.functions.ts");
     const fn = src.slice(src.indexOf("export const adminResetEmployeePassword"));
     const body = fn.slice(0, fn.indexOf("/* ----"));
     assert.match(body, /assertCanManageMember\(/);
@@ -175,8 +175,11 @@ describe("wiring locks — the real callers use the guard, and nothing hard-dele
     assert.doesNotMatch(body, /assertOrgManager\(/);
   });
 
-  it("the roster route and the e2e mocks no longer reference the hard-delete fn", () => {
-    assert.doesNotMatch(read("../../routes/dashboard.employees.index.tsx"), HARD_DELETE_FN);
+  it("the roster page and the e2e mocks no longer reference the hard-delete fn", () => {
+    assert.doesNotMatch(
+      read("../../components/team-members/roster/team-roster-page.tsx"),
+      HARD_DELETE_FN,
+    );
     assert.doesNotMatch(read("../../../e2e/helpers/mock-hive.ts"), HARD_DELETE_FN);
     assert.doesNotMatch(read("../../../e2e/helpers/mock-hive-1056.ts"), HARD_DELETE_FN);
   });

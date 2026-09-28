@@ -544,66 +544,6 @@ export const adminResetEmployeePassword = createServerFn({ method: "POST" })
 /* Bulk hire-date maintenance                                          */
 /* ------------------------------------------------------------------ */
 
-const OrgInput = z.object({ organizationId: z.string().uuid() });
-
-export interface StaffHireDateRow {
-  userId: string;
-  name: string;
-  email: string | null;
-  accessLevel: AccessLevel;
-  department: string | null;
-  hireDate: string | null;
-}
-
-export const listStaffHireDates = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => OrgInput.parse(d))
-  .handler(async ({ data, context }): Promise<StaffHireDateRow[]> => {
-    if (!context.userId) return [];
-    await assertOrgManager(context.userId, data.organizationId);
-
-    const { data: members, error } = await supabaseAdmin
-      .from("organization_members")
-      .select("user_id, access_level, job_title")
-      .eq("organization_id", data.organizationId)
-      .eq("active", true);
-    if (error) throw new Error(error.message);
-
-    const ids = (members ?? []).map((m) => m.user_id);
-    if (!ids.length) return [];
-
-    const { data: profiles } = await supabaseAdmin
-      .from("profiles")
-      .select(
-        "id, full_name, first_name, last_name, email, department, hire_date, start_date, is_active",
-      )
-      .in("id", ids);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const byId = new Map((profiles ?? []).map((p) => [p.id, p as any]));
-
-    return (members ?? [])
-      .map((m) => {
-        const p = byId.get(m.user_id);
-        if (p && p.is_active === false) return null;
-        const name =
-          (p?.full_name as string | null) ||
-          [p?.first_name, p?.last_name].filter(Boolean).join(" ") ||
-          (p?.email as string | null) ||
-          "Unknown";
-        return {
-          userId: m.user_id,
-          name,
-          email: (p?.email as string | null) ?? null,
-          accessLevel: (m.access_level ?? "staff") as AccessLevel,
-          department: (p?.department as string | null) ?? (m.job_title as string | null) ?? null,
-          hireDate: ((p?.start_date ?? p?.hire_date) as string | null) ?? null,
-        };
-      })
-      .filter(Boolean)
-      .sort((a, b) => a!.name.localeCompare(b!.name)) as StaffHireDateRow[];
-  });
-
 const BulkHireDateInput = z.object({
   organizationId: z.string().uuid(),
   updates: z

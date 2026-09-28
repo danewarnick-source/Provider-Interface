@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAccess } from "@/hooks/use-access";
 import { onStaffHired } from "@/lib/staff-assignment-hooks.functions";
 import { safeErrorMessage } from "@/lib/safe-error-message";
-import { StaffProfileIdentity } from "@/components/employees/staff-profile-identity";
+import { StaffProfileIdentity } from "@/components/team-members/profile/identity-fields";
 import {
   identityDraftFrom,
   loadStaffProfileIdentity,
@@ -17,7 +17,7 @@ import {
   type StaffIdentityDraft,
   type StaffIdentityMember,
   type StaffIdentityProfile,
-} from "@/lib/staff-profile-identity";
+} from "@/lib/team-members/identity";
 import { AccessSection } from "@/components/access/access-section";
 
 export function StaffProfilePanel({

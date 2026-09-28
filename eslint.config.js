@@ -93,7 +93,7 @@ export default tseslint.config(
       "src/routes/dashboard.hhs-hub.$clientId.tsx",
       "src/routes/dashboard.clients.$clientId.tsx",
       "src/routes/dashboard.clients.tsx",
-      "src/routes/dashboard.employees.$staffId.tsx",
+      "src/components/team-members/profile/profile-page.tsx",
       "src/routes/dashboard.daily-logs.tsx",
       "src/routes/dashboard.summaries.tsx",
       "src/routes/dashboard.historical-daily-notes-former-staff.tsx",

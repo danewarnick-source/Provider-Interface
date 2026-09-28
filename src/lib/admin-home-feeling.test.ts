@@ -29,7 +29,7 @@ describe("feeling-hero B (parked for Step 3)", () => {
     assert.deepEqual(
       ADMIN_HOME_CARDS.map((c) => ({ title: c.title, to: c.to, cta: c.cta })),
       [
-        { title: "Staff ready", to: "/dashboard/hub/employees", cta: "Add team member" },
+        { title: "Staff ready", to: "/dashboard/team-members", cta: "Add team member" },
         { title: "Clients covered", to: "/dashboard/hub/clients", cta: "Add client" },
         { title: "Notes done", to: "/dashboard/hub/documentation", cta: "Documentation" },
       ],

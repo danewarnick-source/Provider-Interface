@@ -9,7 +9,7 @@ import {
   STAFF_PROFILE_IDENTITY_QUERY_ROOT,
   staffProfileDisplayName,
   staffProfileIdentityQueryKey,
-} from "./staff-profile-identity.ts";
+} from "./identity.ts";
 
 const ORG = "org-tns";
 const JEFF = "staff-jeff";
@@ -112,7 +112,10 @@ describe("loadStaffProfileIdentity", () => {
 
 describe("route staff identity guards", () => {
   it("accepts only the route staff member and profile", () => {
-    assert.equal(memberBelongsToRouteStaff({ id: "m", access_level: "owner", user_id: DANE }, JEFF), false);
+    assert.equal(
+      memberBelongsToRouteStaff({ id: "m", access_level: "owner", user_id: DANE }, JEFF),
+      false,
+    );
     assert.equal(
       memberBelongsToRouteStaff({ id: "m", access_level: "staff", user_id: JEFF }, JEFF),
       true,
@@ -169,23 +172,24 @@ describe("route staff identity guards", () => {
   });
 });
 
-describe("employee Profile identity source lock", () => {
-  it("route and panel load identity via the staffId-keyed helper", () => {
+describe("team member Profile identity source lock", () => {
+  it("page and panel load identity via the staffId-keyed helper", () => {
     const route = readFileSync(
-      new URL("../routes/dashboard.employees.$staffId.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/profile-page.tsx", import.meta.url),
       "utf8",
     );
     const panel = readFileSync(
-      new URL("../components/employees/staff-profile-panel.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/profile-tab.tsx", import.meta.url),
       "utf8",
     );
     const identityUi = readFileSync(
-      new URL("../components/employees/staff-profile-identity.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/identity-fields.tsx", import.meta.url),
       "utf8",
     );
     assert.match(route, /staffProfileIdentityQueryKey\(orgId, staffId\)/);
     assert.match(route, /loadStaffProfileIdentity/);
-    assert.match(route, /Route\.useParams\(\)/);
+    assert.match(route, /profileRoute\.useParams\(\)/);
+    assert.match(route, /getRouteApi\("\/dashboard\/team-members\/\$staffId"\)/);
     assert.match(route, /data-testid="staff-profile-heading"/);
     assert.match(route, /key=\{staffId\}/);
     assert.doesNotMatch(route, /useAuth/);

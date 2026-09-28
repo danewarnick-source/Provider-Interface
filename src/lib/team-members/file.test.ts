@@ -13,7 +13,7 @@ import {
   obligationFileStatusLabel,
   staffFileCycleKind,
   statusForObligationInstance,
-} from "./staff-obligation-files.ts";
+} from "./file.ts";
 
 const now = new Date("2026-09-10T12:00:00.000Z");
 
@@ -209,18 +209,19 @@ describe("dueLabel", () => {
   });
 });
 
-describe("Admin employee profile lock", () => {
+describe("Admin team member profile lock", () => {
   it("keeps Profile / Team member file / Activity and drops junk surfaces", () => {
     const src = readFileSync(
-      new URL("../routes/dashboard.employees.$staffId.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/profile-page.tsx", import.meta.url),
       "utf8",
     );
     assert.match(src, /Team member file/);
     assert.doesNotMatch(src, />Staff file</);
-    assert.match(src, /s\.tab === "staff"/);
+    assert.match(src, /resolveProfileTab\(tab\)/);
     assert.doesNotMatch(src, /Personnel file/);
     assert.match(src, /value="profile"/);
-    assert.match(src, /value="personnel"/);
+    assert.match(src, /value="file"/);
+    assert.doesNotMatch(src, /value="personnel"/);
     assert.match(src, /value="activity"/);
     assert.match(src, /StaffProfilePanel/);
     assert.doesNotMatch(src, /<TabsTrigger value="permissions">/);
@@ -240,11 +241,11 @@ describe("Admin employee profile lock", () => {
 
   it("keeps Department off the edit Profile person block", () => {
     const identity = readFileSync(
-      new URL("../components/employees/staff-profile-identity.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/identity-fields.tsx", import.meta.url),
       "utf8",
     );
     const panel = readFileSync(
-      new URL("../components/employees/staff-profile-panel.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/profile-tab.tsx", import.meta.url),
       "utf8",
     );
     assert.match(identity, /Team member ID/);
@@ -314,7 +315,7 @@ describe("missingPersonnelCsv", () => {
 describe("Staff staff-file page lock", () => {
   it("renames the staff surface and keeps 30-day course or upload on one card", () => {
     const src = readFileSync(
-      new URL("../routes/dashboard.my-obligations.tsx", import.meta.url),
+      new URL("../../routes/dashboard.my-obligations.tsx", import.meta.url),
       "utf8",
     );
     assert.match(src, /title: "Staff file/);
@@ -329,20 +330,20 @@ describe("Staff staff-file page lock", () => {
   });
 
   it("does not assign an all-staff driving_record baseline", () => {
-    const src = readFileSync(new URL("./staff-training-requirements.ts", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../staff-training-requirements.ts", import.meta.url), "utf8");
     assert.doesNotMatch(src, /key: "driving_record"/);
   });
 });
 
 describe("Org-wide Staff file lock", () => {
   it("folds Staff file under Admin Compliance and keeps the legacy URL", () => {
-    const nav = readFileSync(new URL("../routes/dashboard.tsx", import.meta.url), "utf8");
+    const nav = readFileSync(new URL("../../routes/dashboard.tsx", import.meta.url), "utf8");
     assert.match(nav, /to: "\/dashboard\/evidence", label: "Evidence"/);
     assert.doesNotMatch(nav, /label: "State Audit"/);
     assert.doesNotMatch(nav, /to: "\/dashboard\/personnel-file", label: "/);
     assert.doesNotMatch(nav, /label: "Personnel file"/);
     const route = readFileSync(
-      new URL("../routes/dashboard.personnel-file.tsx", import.meta.url),
+      new URL("../../routes/dashboard.personnel-file.tsx", import.meta.url),
       "utf8",
     );
     assert.match(route, /createFileRoute\("\/dashboard\/personnel-file"\)/);
@@ -350,7 +351,7 @@ describe("Org-wide Staff file lock", () => {
     assert.match(route, /tab: "staff"/);
     assert.match(route, /redirect/);
     const panel = readFileSync(
-      new URL("../components/compliance/staff-file-panel.tsx", import.meta.url),
+      new URL("../../components/compliance/staff-file-panel.tsx", import.meta.url),
       "utf8",
     );
     assert.match(panel, /Staff file/);
@@ -358,7 +359,7 @@ describe("Org-wide Staff file lock", () => {
     assert.doesNotMatch(panel, /EVV/);
     assert.doesNotMatch(panel, /HRC/);
     const filesTab = readFileSync(
-      new URL("../components/employees/staff-obligations-files-tab.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/file-tab.tsx", import.meta.url),
       "utf8",
     );
     assert.match(filesTab, /Record override/);
@@ -369,15 +370,15 @@ describe("Org-wide Staff file lock", () => {
 
   it("deletes the leftover open-every-profile HR matrix", () => {
     const hrAdmin = readFileSync(
-      new URL("../routes/dashboard.hr-admin.tsx", import.meta.url),
+      new URL("../../routes/dashboard.hr-admin.tsx", import.meta.url),
       "utf8",
     );
     assert.doesNotMatch(hrAdmin, /HrComplianceMatrix/);
     assert.doesNotMatch(hrAdmin, /getHrAdminRollup/);
     assert.doesNotMatch(hrAdmin, /OtherAssignmentsRollup/);
     assert.match(hrAdmin, /redirect/);
-    assert.match(hrAdmin, /\/dashboard\/hub\/employees/);
-    assert.equal(existsSync(new URL("./hr-staff.functions.ts", import.meta.url)), false);
+    assert.match(hrAdmin, /\/dashboard\/team-members/);
+    assert.equal(existsSync(new URL("../hr-staff.functions.ts", import.meta.url)), false);
   });
 
   it("prefixes a quote on formula-looking CSV cells", () => {

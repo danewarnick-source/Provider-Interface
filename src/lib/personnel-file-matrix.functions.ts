@@ -14,7 +14,7 @@ import {
   liveObligationTitle,
   statusForObligationInstance,
   tallyObligationFileStatus,
-} from "@/lib/staff-obligation-files";
+} from "@/lib/team-members/file";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

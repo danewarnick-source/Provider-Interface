@@ -1,4 +1,4 @@
-import { firstNameWithMiddle, splitPersonName } from "./person-name.ts";
+import { firstNameWithMiddle, splitPersonName } from "../person-name.ts";
 
 export const STAFF_PROFILE_IDENTITY_QUERY_ROOT = "staff-profile" as const;
 

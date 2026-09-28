@@ -7,8 +7,8 @@
 // always rewrites both columns: from the values the caller passes in, or
 // else from the member's current organization_members row.
 //
-// Pure and alias-free so node --test can import it; invitations.functions.ts
-// does the reads and the update.
+// Pure and alias-free so node --test can import it;
+// team-members/invites.functions.ts does the reads and the update.
 
 import type { AccessLevel } from "./access/levels.ts";
 
