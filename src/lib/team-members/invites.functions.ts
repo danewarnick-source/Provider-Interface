@@ -23,6 +23,13 @@ import { inviteJoinUrl } from "@/lib/join-invite";
 import { pickReplyTo, stripFakeDisplayLabel } from "@/lib/managed-from";
 import { canSendImportInvite } from "@/lib/import-invite";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
+import {
+  findMemberAccessByEmail,
+  resolveResendAccess,
+  type InviteAccessValues,
+  type MemberAccessPick,
+  type ProfileEmailPick,
+} from "@/lib/invitation-resend-access";
 
 const ORG_ID = z.string().uuid();
 const INVITE_LEVEL = z.enum(["owner", "admin", "staff"]);
@@ -325,16 +332,31 @@ export const createInvitation = createServerFn({ method: "POST" })
     };
   });
 
+/**
+ * Resend also rewrites access_level / access_preset_id (see
+ * invitation-resend-access.ts): from the values passed in, or else from the
+ * person's current organization_members row. Without this, an invite created
+ * before an access change would hand the OLD access back when they join.
+ */
 export const resendInvitation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { organization_id: string; invitation_id: string; site_origin: string }) =>
-    z
-      .object({
-        organization_id: ORG_ID,
-        invitation_id: z.string().uuid(),
-        site_origin: SITE_ORIGIN,
-      })
-      .parse(d),
+  .inputValidator(
+    (d: {
+      organization_id: string;
+      invitation_id: string;
+      site_origin: string;
+      access_level?: AccessLevel;
+      access_preset_id?: string | null;
+    }) =>
+      z
+        .object({
+          organization_id: ORG_ID,
+          invitation_id: z.string().uuid(),
+          site_origin: SITE_ORIGIN,
+          access_level: INVITE_LEVEL.optional(),
+          access_preset_id: z.string().uuid().nullish(),
+        })
+        .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -346,12 +368,64 @@ export const resendInvitation = createServerFn({ method: "POST" })
       "invite_staff",
     );
     await assertInviteRate(userId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+
+    const { data: current, error: readErr } = await sb
+      .from("invitations")
+      .select(INVITE_SELECT)
+      .eq("id", data.invitation_id)
+      .eq("organization_id", data.organization_id)
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+    if (!current) throw new Error("Invitation not found");
+    const currentRow = current as InvitationRow;
+
+    // Explicit values go through the same checks as a new invite (Owner/Admin
+    // needs an Owner; preset must belong to the org and match the level).
+    let requested: InviteAccessValues | null = null;
+    if (data.access_level) {
+      await assertCanInviteAt(sb, userId, data.organization_id, data.access_level, data.access_preset_id);
+      requested = {
+        access_level: data.access_level,
+        access_preset_id: await presetIdForInvite(
+          data.organization_id,
+          data.access_level,
+          data.access_preset_id,
+        ),
+      };
+    }
+
+    // Otherwise mirror what the person holds right now. organization_members
+    // and profiles share no FK — two queries, joined by email in JS.
+    let member: InviteAccessValues | null = null;
+    if (!requested) {
+      const { data: members, error: memErr } = await sb
+        .from("organization_members")
+        .select("user_id, access_level, access_preset_id")
+        .eq("organization_id", data.organization_id);
+      if (memErr) throw new Error(memErr.message);
+      const memberRows = (members ?? []) as MemberAccessPick[];
+      let profiles: ProfileEmailPick[] = [];
+      if (memberRows.length) {
+        const { data: profs, error: pErr } = await sb
+          .from("profiles")
+          .select("id, email")
+          .in(
+            "id",
+            memberRows.map((m) => m.user_id),
+          );
+        if (pErr) throw new Error(pErr.message);
+        profiles = (profs ?? []) as ProfileEmailPick[];
+      }
+      member = findMemberAccessByEmail(currentRow.email, memberRows, profiles);
+    }
+    const access = resolveResendAccess({ requested, member });
 
     const expires = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: invite, error } = await (supabase as any)
+    const { data: invite, error } = await sb
       .from("invitations")
-      .update({ expires_at: expires, status: "pending" })
+      .update({ expires_at: expires, status: "pending", ...(access ?? {}) })
       .eq("id", data.invitation_id)
       .eq("organization_id", data.organization_id)
       .select(INVITE_SELECT)

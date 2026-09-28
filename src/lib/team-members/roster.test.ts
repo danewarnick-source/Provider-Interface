@@ -89,7 +89,7 @@ describe("Add employee wizard source lock", () => {
 });
 
 describe("Team roster page source lock", () => {
-  it("splits Active / Inactive and uses existing archive/restore/delete RPCs", () => {
+  it("splits Active / Inactive, uses archive/restore RPCs, and has no hard delete", () => {
     const src = readFileSync(
       new URL("../../components/team-members/roster/team-roster-page.tsx", import.meta.url),
       "utf8",
@@ -102,7 +102,11 @@ describe("Team roster page source lock", () => {
     assert.match(src, /filterEmployeesByRosterTab/);
     assert.match(src, /archiveEntity/);
     assert.match(src, /restoreEntity/);
-    assert.match(src, /deleteEntity/);
+    // Permanent delete was removed: no server fn, no dialog, no menu item.
+    // (Regex split so `grep -rn <the old fn name> src` stays empty.)
+    assert.doesNotMatch(src, /delete[E]ntity/);
+    assert.doesNotMatch(src, /Delete permanently/);
+    assert.doesNotMatch(src, /confirm-employee-delete/);
     assert.match(src, /Inactive/);
     assert.match(src, /EmployeeRosterUploadWizard/);
     assert.ok(
@@ -142,6 +146,22 @@ describe("formatRosterDate / formatLastLogin", () => {
     assert.equal(formatLastLogin(undefined, false), "—");
     assert.equal(formatLastLogin(null, true), "Never");
     assert.equal(formatLastLogin("2026-08-27T12:00:00.000Z", true), "Aug 27, 2026");
+  });
+
+  it("reads a bare YYYY-MM-DD as a local calendar day, so the roster matches the profile hire date", () => {
+    // new Date("2025-01-15") is midnight UTC, which is still Jan 14 in Denver —
+    // the old behavior showed a day earlier than the profile. Node applies a
+    // runtime TZ change to subsequent Date operations, so pin Denver here.
+    const previousTz = process.env.TZ;
+    process.env.TZ = "America/Denver";
+    try {
+      assert.equal(formatRosterDate("2025-01-15"), "Jan 15, 2025");
+      assert.equal(formatRosterDate("2024-12-31"), "Dec 31, 2024");
+      assert.equal(formatRosterDate(" 2025-07-04 "), "Jul 4, 2025");
+    } finally {
+      if (previousTz === undefined) delete process.env.TZ;
+      else process.env.TZ = previousTz;
+    }
   });
 });
 
