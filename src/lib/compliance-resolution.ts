@@ -1,10 +1,10 @@
 /**
- * Shared helpers that used to wire app events into nectar_compliance_instances.
+ * Shared helpers that used to wire app events into a retired compliance-instance table.
  *
  * Parallel writer DISABLED: punch-pad / shift-commit / incident paths must
- * not mint nectar_compliance_instances. Clocks live on the Compliance spine
- * (company_obligations* catalog/instance engine). Tables stay; these
- * helpers no-op so callers do not need to change.
+ * not mint those instances. Clocks live on the Compliance spine
+ * (company_obligations* catalog/instance engine). These helpers no-op so
+ * callers do not need to change.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 
