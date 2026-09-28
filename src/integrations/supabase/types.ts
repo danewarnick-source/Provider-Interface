@@ -1048,60 +1048,6 @@ export type Database = {
           },
         ]
       }
-      attestations: {
-        Row: {
-          attestation_text_snapshot: string | null
-          attested_at: string
-          attested_by: string
-          created_at: string
-          id: string
-          instance_id: string | null
-          organization_id: string
-          requirement_key: string | null
-          subject_id: string | null
-          subject_kind: string
-        }
-        Insert: {
-          attestation_text_snapshot?: string | null
-          attested_at?: string
-          attested_by: string
-          created_at?: string
-          id?: string
-          instance_id?: string | null
-          organization_id: string
-          requirement_key?: string | null
-          subject_id?: string | null
-          subject_kind: string
-        }
-        Update: {
-          attestation_text_snapshot?: string | null
-          attested_at?: string
-          attested_by?: string
-          created_at?: string
-          id?: string
-          instance_id?: string | null
-          organization_id?: string
-          requirement_key?: string | null
-          subject_id?: string | null
-          subject_kind?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "attestations_instance_id_fkey"
-            columns: ["instance_id"]
-            isOneToOne: false
-            referencedRelation: "obligation_instances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "attestations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       audit_file_documents: {
         Row: {
           added_by: string | null
@@ -2448,62 +2394,54 @@ export type Database = {
           },
         ]
       }
-      celebration_acknowledgements: {
+      celebration_acknowledgements_backup_20260928b: {
         Row: {
-          acknowledged_at: string
-          event_id: string
-          id: string
-          user_id: string
+          acknowledged_at: string | null
+          event_id: string | null
+          id: string | null
+          user_id: string | null
         }
         Insert: {
-          acknowledged_at?: string
-          event_id: string
-          id?: string
-          user_id: string
+          acknowledged_at?: string | null
+          event_id?: string | null
+          id?: string | null
+          user_id?: string | null
         }
         Update: {
-          acknowledged_at?: string
-          event_id?: string
-          id?: string
-          user_id?: string
+          acknowledged_at?: string | null
+          event_id?: string | null
+          id?: string | null
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "celebration_acknowledgements_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "celebration_events"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      celebration_events: {
+      celebration_events_backup_20260928b: {
         Row: {
-          created_at: string
-          event_key: string
-          id: string
-          organization_id: string
-          payload: Json
+          created_at: string | null
+          event_key: string | null
+          id: string | null
+          organization_id: string | null
+          payload: Json | null
           scope_user_id: string | null
-          tier: number
+          tier: number | null
         }
         Insert: {
-          created_at?: string
-          event_key: string
-          id?: string
-          organization_id: string
-          payload?: Json
+          created_at?: string | null
+          event_key?: string | null
+          id?: string | null
+          organization_id?: string | null
+          payload?: Json | null
           scope_user_id?: string | null
-          tier: number
+          tier?: number | null
         }
         Update: {
-          created_at?: string
-          event_key?: string
-          id?: string
-          organization_id?: string
-          payload?: Json
+          created_at?: string | null
+          event_key?: string | null
+          id?: string | null
+          organization_id?: string | null
+          payload?: Json | null
           scope_user_id?: string | null
-          tier?: number
+          tier?: number | null
         }
         Relationships: []
       }
@@ -2870,86 +2808,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      client_discharges: {
-        Row: {
-          additional_notes: string | null
-          attested_items: Json
-          client_id: string
-          discharge_date: string
-          discharge_reason: string
-          id: string
-          initiated_by: string
-          organization_id: string
-          prior_team_id: string | null
-          recorded_at: string
-          recorded_by: string
-          source_citation: string
-          source_document_id: string | null
-          source_excerpt: string
-        }
-        Insert: {
-          additional_notes?: string | null
-          attested_items?: Json
-          client_id: string
-          discharge_date: string
-          discharge_reason: string
-          id?: string
-          initiated_by: string
-          organization_id: string
-          prior_team_id?: string | null
-          recorded_at?: string
-          recorded_by: string
-          source_citation: string
-          source_document_id?: string | null
-          source_excerpt: string
-        }
-        Update: {
-          additional_notes?: string | null
-          attested_items?: Json
-          client_id?: string
-          discharge_date?: string
-          discharge_reason?: string
-          id?: string
-          initiated_by?: string
-          organization_id?: string
-          prior_team_id?: string | null
-          recorded_at?: string
-          recorded_by?: string
-          source_citation?: string
-          source_document_id?: string | null
-          source_excerpt?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_discharges_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_discharges_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_discharges_prior_team_id_fkey"
-            columns: ["prior_team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_discharges_source_document_id_fkey"
-            columns: ["source_document_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_documents"
             referencedColumns: ["id"]
           },
         ]
@@ -5966,56 +5824,6 @@ export type Database = {
           },
         ]
       }
-      document_attestations: {
-        Row: {
-          attestation_text: string
-          attested_at: string
-          attested_by: string
-          attested_by_name: string | null
-          created_at: string
-          hr_document_id: string | null
-          id: string
-          organization_id: string
-          staff_id: string
-          subject_kind: string
-          subject_ref: string
-        }
-        Insert: {
-          attestation_text: string
-          attested_at?: string
-          attested_by: string
-          attested_by_name?: string | null
-          created_at?: string
-          hr_document_id?: string | null
-          id?: string
-          organization_id: string
-          staff_id: string
-          subject_kind: string
-          subject_ref: string
-        }
-        Update: {
-          attestation_text?: string
-          attested_at?: string
-          attested_by?: string
-          attested_by_name?: string | null
-          created_at?: string
-          hr_document_id?: string | null
-          id?: string
-          organization_id?: string
-          staff_id?: string
-          subject_kind?: string
-          subject_ref?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "document_attestations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       emar_log_addenda: {
         Row: {
           created_at: string
@@ -6508,47 +6316,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "evidence_items_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      evidence_templates: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          id: string
-          name: string
-          organization_id: string
-          pack_keys: string[]
-          requirement_keys: string[]
-          subject_type: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name: string
-          organization_id: string
-          pack_keys?: string[]
-          requirement_keys?: string[]
-          subject_type: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name?: string
-          organization_id?: string
-          pack_keys?: string[]
-          requirement_keys?: string[]
-          subject_type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "evidence_templates_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -7235,72 +7002,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "feature_upgrade_requests_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      file_records: {
-        Row: {
-          byte_size: number | null
-          created_at: string
-          filename: string | null
-          id: string
-          instance_id: string | null
-          metadata: Json
-          mime_type: string | null
-          organization_id: string
-          requirement_key: string | null
-          storage_bucket: string
-          storage_path: string
-          subject_id: string | null
-          subject_kind: string
-          uploaded_by: string | null
-        }
-        Insert: {
-          byte_size?: number | null
-          created_at?: string
-          filename?: string | null
-          id?: string
-          instance_id?: string | null
-          metadata?: Json
-          mime_type?: string | null
-          organization_id: string
-          requirement_key?: string | null
-          storage_bucket?: string
-          storage_path: string
-          subject_id?: string | null
-          subject_kind: string
-          uploaded_by?: string | null
-        }
-        Update: {
-          byte_size?: number | null
-          created_at?: string
-          filename?: string | null
-          id?: string
-          instance_id?: string | null
-          metadata?: Json
-          mime_type?: string | null
-          organization_id?: string
-          requirement_key?: string | null
-          storage_bucket?: string
-          storage_path?: string
-          subject_id?: string | null
-          subject_kind?: string
-          uploaded_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "file_records_instance_id_fkey"
-            columns: ["instance_id"]
-            isOneToOne: false
-            referencedRelation: "obligation_instances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "file_records_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -8775,49 +8476,41 @@ export type Database = {
         }
         Relationships: []
       }
-      hive_training_course_modules: {
+      hive_training_course_modules_backup_20260928b: {
         Row: {
           body_md: string | null
-          course_id: string
-          created_at: string
-          id: string
+          course_id: string | null
+          created_at: string | null
+          id: string | null
           quiz_json: Json | null
-          sort: number
-          title: string
-          updated_at: string
+          sort: number | null
+          title: string | null
+          updated_at: string | null
           video_url: string | null
         }
         Insert: {
           body_md?: string | null
-          course_id: string
-          created_at?: string
-          id?: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
           quiz_json?: Json | null
-          sort?: number
-          title: string
-          updated_at?: string
+          sort?: number | null
+          title?: string | null
+          updated_at?: string | null
           video_url?: string | null
         }
         Update: {
           body_md?: string | null
-          course_id?: string
-          created_at?: string
-          id?: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
           quiz_json?: Json | null
-          sort?: number
-          title?: string
-          updated_at?: string
+          sort?: number | null
+          title?: string | null
+          updated_at?: string | null
           video_url?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "hive_training_course_modules_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "hive_training_courses"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       hive_training_courses: {
         Row: {
@@ -10743,13 +10436,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "nectar_attestations_covers_instance_id_fkey"
-            columns: ["covers_instance_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_compliance_instances"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "nectar_attestations_covers_staff_id_fkey"
             columns: ["covers_staff_id"]
             isOneToOne: false
@@ -10758,49 +10444,41 @@ export type Database = {
           },
         ]
       }
-      nectar_code_activations: {
+      nectar_code_activations_backup_20260928b: {
         Row: {
-          confirmed_at: string
-          confirmed_by: string
-          created_at: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string | null
           deactivated_at: string | null
           deactivated_by: string | null
-          id: string
-          organization_id: string
-          requirement_count_at_confirm: number
-          service_code: string
+          id: string | null
+          organization_id: string | null
+          requirement_count_at_confirm: number | null
+          service_code: string | null
         }
         Insert: {
-          confirmed_at?: string
-          confirmed_by: string
-          created_at?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string | null
           deactivated_at?: string | null
           deactivated_by?: string | null
-          id?: string
-          organization_id: string
-          requirement_count_at_confirm?: number
-          service_code: string
+          id?: string | null
+          organization_id?: string | null
+          requirement_count_at_confirm?: number | null
+          service_code?: string | null
         }
         Update: {
-          confirmed_at?: string
-          confirmed_by?: string
-          created_at?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string | null
           deactivated_at?: string | null
           deactivated_by?: string | null
-          id?: string
-          organization_id?: string
-          requirement_count_at_confirm?: number
-          service_code?: string
+          id?: string | null
+          organization_id?: string | null
+          requirement_count_at_confirm?: number | null
+          service_code?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "nectar_code_activations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       nectar_compliance_flags: {
         Row: {
@@ -10868,92 +10546,6 @@ export type Database = {
             columns: ["rule_id"]
             isOneToOne: false
             referencedRelation: "nectar_compliance_rules"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      nectar_compliance_instances: {
-        Row: {
-          attestation_id: string | null
-          created_at: string
-          deadline_at: string
-          document_url: string | null
-          external_reference: string | null
-          id: string
-          organization_id: string
-          requirement_id: string
-          resolution_note: string | null
-          resolved_at: string | null
-          resolved_by: string | null
-          resolved_via: string | null
-          status: string
-          triggered_at: string
-          triggered_by_id: string | null
-          triggered_by_kind: string | null
-        }
-        Insert: {
-          attestation_id?: string | null
-          created_at?: string
-          deadline_at: string
-          document_url?: string | null
-          external_reference?: string | null
-          id?: string
-          organization_id: string
-          requirement_id: string
-          resolution_note?: string | null
-          resolved_at?: string | null
-          resolved_by?: string | null
-          resolved_via?: string | null
-          status?: string
-          triggered_at?: string
-          triggered_by_id?: string | null
-          triggered_by_kind?: string | null
-        }
-        Update: {
-          attestation_id?: string | null
-          created_at?: string
-          deadline_at?: string
-          document_url?: string | null
-          external_reference?: string | null
-          id?: string
-          organization_id?: string
-          requirement_id?: string
-          resolution_note?: string | null
-          resolved_at?: string | null
-          resolved_by?: string | null
-          resolved_via?: string | null
-          status?: string
-          triggered_at?: string
-          triggered_by_id?: string | null
-          triggered_by_kind?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nectar_compliance_instances_attestation_id_fkey"
-            columns: ["attestation_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_attestations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_compliance_instances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_compliance_instances_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_compliance_instances_resolved_by_fkey"
-            columns: ["resolved_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -11656,54 +11248,6 @@ export type Database = {
           },
         ]
       }
-      nectar_requirement_category_history: {
-        Row: {
-          change_source: string
-          changed_at: string
-          changed_by: string | null
-          from_category: string | null
-          id: string
-          organization_id: string
-          requirement_id: string
-          to_category: string
-        }
-        Insert: {
-          change_source: string
-          changed_at?: string
-          changed_by?: string | null
-          from_category?: string | null
-          id?: string
-          organization_id: string
-          requirement_id: string
-          to_category: string
-        }
-        Update: {
-          change_source?: string
-          changed_at?: string
-          changed_by?: string | null
-          from_category?: string | null
-          id?: string
-          organization_id?: string
-          requirement_id?: string
-          to_category?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nectar_requirement_category_history_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_requirement_category_history_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       nectar_requirement_mappings: {
         Row: {
           cadence: string | null
@@ -11766,71 +11310,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "nectar_requirements"
             referencedColumns: ["id"]
-          },
-        ]
-      }
-      nectar_requirement_usage: {
-        Row: {
-          created_at: string
-          edit_reason: string | null
-          edited_at: string
-          edited_by: string
-          id: string
-          organization_id: string
-          requirement_id: string
-          supersedes_id: string | null
-          usage_note: string
-        }
-        Insert: {
-          created_at?: string
-          edit_reason?: string | null
-          edited_at?: string
-          edited_by: string
-          id?: string
-          organization_id: string
-          requirement_id: string
-          supersedes_id?: string | null
-          usage_note: string
-        }
-        Update: {
-          created_at?: string
-          edit_reason?: string | null
-          edited_at?: string
-          edited_by?: string
-          id?: string
-          organization_id?: string
-          requirement_id?: string
-          supersedes_id?: string | null
-          usage_note?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nectar_requirement_usage_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_requirement_usage_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_requirement_usage_supersedes_id_fkey"
-            columns: ["supersedes_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirement_usage"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_requirement_usage_supersedes_id_fkey"
-            columns: ["supersedes_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirement_usage_current_v"
-            referencedColumns: ["usage_id"]
           },
         ]
       }
@@ -12143,160 +11622,6 @@ export type Database = {
           },
         ]
       }
-      obligation_instance_assignees: {
-        Row: {
-          created_at: string
-          id: string
-          instance_id: string
-          organization_id: string
-          staff_id: string
-          staff_name: string | null
-          staff_role: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          instance_id: string
-          organization_id: string
-          staff_id: string
-          staff_name?: string | null
-          staff_role?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          instance_id?: string
-          organization_id?: string
-          staff_id?: string
-          staff_name?: string | null
-          staff_role?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "obligation_instance_assignees_instance_id_fkey"
-            columns: ["instance_id"]
-            isOneToOne: false
-            referencedRelation: "obligation_instances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "obligation_instance_assignees_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      obligation_instances: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          due_at: string | null
-          evidence_file_id: string | null
-          gate_fact_key: string | null
-          id: string
-          organization_id: string
-          period_key: string | null
-          requirement_def_id: string | null
-          requirement_key: string
-          source_sow_cite: string | null
-          status: string
-          subject_id: string | null
-          subject_kind: string
-          updated_at: string
-          waived_at: string | null
-          waived_reason: string | null
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          due_at?: string | null
-          evidence_file_id?: string | null
-          gate_fact_key?: string | null
-          id?: string
-          organization_id: string
-          period_key?: string | null
-          requirement_def_id?: string | null
-          requirement_key: string
-          source_sow_cite?: string | null
-          status?: string
-          subject_id?: string | null
-          subject_kind: string
-          updated_at?: string
-          waived_at?: string | null
-          waived_reason?: string | null
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          due_at?: string | null
-          evidence_file_id?: string | null
-          gate_fact_key?: string | null
-          id?: string
-          organization_id?: string
-          period_key?: string | null
-          requirement_def_id?: string | null
-          requirement_key?: string
-          source_sow_cite?: string | null
-          status?: string
-          subject_id?: string | null
-          subject_kind?: string
-          updated_at?: string
-          waived_at?: string | null
-          waived_reason?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "obligation_instances_evidence_file_id_fkey"
-            columns: ["evidence_file_id"]
-            isOneToOne: false
-            referencedRelation: "file_records"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "obligation_instances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "obligation_instances_requirement_def_id_fkey"
-            columns: ["requirement_def_id"]
-            isOneToOne: false
-            referencedRelation: "requirement_defs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      org_celebration_settings: {
-        Row: {
-          enabled: boolean
-          organization_id: string
-          tier1_enabled: boolean
-          tier2_enabled: boolean
-          tier3_enabled: boolean
-          updated_at: string
-        }
-        Insert: {
-          enabled?: boolean
-          organization_id: string
-          tier1_enabled?: boolean
-          tier2_enabled?: boolean
-          tier3_enabled?: boolean
-          updated_at?: string
-        }
-        Update: {
-          enabled?: boolean
-          organization_id?: string
-          tier1_enabled?: boolean
-          tier2_enabled?: boolean
-          tier3_enabled?: boolean
-          updated_at?: string
-        }
-        Relationships: []
-      }
       org_email_settings: {
         Row: {
           from_address: string | null
@@ -12333,56 +11658,6 @@ export type Database = {
             foreignKeyName: "org_email_settings_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: true
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      org_facts: {
-        Row: {
-          created_at: string
-          fact_key: string
-          fact_value: Json
-          id: string
-          organization_id: string
-          recorded_at: string | null
-          recorded_by: string | null
-          source: string
-          subject_id: string | null
-          subject_kind: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          fact_key: string
-          fact_value?: Json
-          id?: string
-          organization_id: string
-          recorded_at?: string | null
-          recorded_by?: string | null
-          source?: string
-          subject_id?: string | null
-          subject_kind: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          fact_key?: string
-          fact_value?: Json
-          id?: string
-          organization_id?: string
-          recorded_at?: string | null
-          recorded_by?: string | null
-          source?: string
-          subject_id?: string | null
-          subject_kind?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_facts_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -13491,8 +12766,8 @@ export type Database = {
           photo_updated_at: string | null
           position: string | null
           positions: string[]
-          requires_abi: boolean
-          requires_deescalation: boolean
+          requires_abi: boolean | null
+          requires_deescalation: boolean | null
           scope_group_id: string | null
           ssn_last4: string | null
           staff_type_keys: string[]
@@ -13500,6 +12775,7 @@ export type Database = {
           system_role: string
           team_id: string | null
           tenant_id: string | null
+          transports_clients: boolean
           username: string | null
           worker_type: string
         }
@@ -13536,8 +12812,8 @@ export type Database = {
           photo_updated_at?: string | null
           position?: string | null
           positions?: string[]
-          requires_abi?: boolean
-          requires_deescalation?: boolean
+          requires_abi?: boolean | null
+          requires_deescalation?: boolean | null
           scope_group_id?: string | null
           ssn_last4?: string | null
           staff_type_keys?: string[]
@@ -13545,6 +12821,7 @@ export type Database = {
           system_role?: string
           team_id?: string | null
           tenant_id?: string | null
+          transports_clients?: boolean
           username?: string | null
           worker_type?: string
         }
@@ -13581,8 +12858,8 @@ export type Database = {
           photo_updated_at?: string | null
           position?: string | null
           positions?: string[]
-          requires_abi?: boolean
-          requires_deescalation?: boolean
+          requires_abi?: boolean | null
+          requires_deescalation?: boolean | null
           scope_group_id?: string | null
           ssn_last4?: string | null
           staff_type_keys?: string[]
@@ -13590,6 +12867,7 @@ export type Database = {
           system_role?: string
           team_id?: string | null
           tenant_id?: string | null
+          transports_clients?: boolean
           username?: string | null
           worker_type?: string
         }
@@ -14392,175 +13670,6 @@ export type Database = {
           },
         ]
       }
-      requirement_applicability: {
-        Row: {
-          applies: boolean
-          computed_at: string
-          created_at: string
-          gate_fact_key: string | null
-          id: string
-          organization_id: string
-          requirement_key: string
-          source: string
-          subject_id: string | null
-          subject_kind: string
-          unanswered: boolean
-          updated_at: string
-        }
-        Insert: {
-          applies: boolean
-          computed_at?: string
-          created_at?: string
-          gate_fact_key?: string | null
-          id?: string
-          organization_id: string
-          requirement_key: string
-          source?: string
-          subject_id?: string | null
-          subject_kind: string
-          unanswered?: boolean
-          updated_at?: string
-        }
-        Update: {
-          applies?: boolean
-          computed_at?: string
-          created_at?: string
-          gate_fact_key?: string | null
-          id?: string
-          organization_id?: string
-          requirement_key?: string
-          source?: string
-          subject_id?: string | null
-          subject_kind?: string
-          unanswered?: boolean
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "requirement_applicability_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      requirement_defs: {
-        Row: {
-          created_at: string
-          default_on: boolean
-          evidence_kinds: string[]
-          gate_fact_key: string | null
-          id: string
-          layer: string
-          metadata: Json
-          organization_id: string | null
-          requirement_key: string
-          source_sow_cite: string | null
-          subject_kind: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          default_on?: boolean
-          evidence_kinds?: string[]
-          gate_fact_key?: string | null
-          id?: string
-          layer: string
-          metadata?: Json
-          organization_id?: string | null
-          requirement_key: string
-          source_sow_cite?: string | null
-          subject_kind: string
-          title?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          default_on?: boolean
-          evidence_kinds?: string[]
-          gate_fact_key?: string | null
-          id?: string
-          layer?: string
-          metadata?: Json
-          organization_id?: string | null
-          requirement_key?: string
-          source_sow_cite?: string | null
-          subject_kind?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "requirement_defs_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      reviews: {
-        Row: {
-          created_at: string
-          id: string
-          instance_id: string | null
-          notes: string | null
-          organization_id: string
-          requirement_key: string | null
-          review_kind: string
-          reviewer_id: string | null
-          status: string
-          subject_id: string | null
-          subject_kind: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          instance_id?: string | null
-          notes?: string | null
-          organization_id: string
-          requirement_key?: string | null
-          review_kind?: string
-          reviewer_id?: string | null
-          status?: string
-          subject_id?: string | null
-          subject_kind: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          instance_id?: string | null
-          notes?: string | null
-          organization_id?: string
-          requirement_key?: string | null
-          review_kind?: string
-          reviewer_id?: string | null
-          status?: string
-          subject_id?: string | null
-          subject_kind?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reviews_instance_id_fkey"
-            columns: ["instance_id"]
-            isOneToOne: false
-            referencedRelation: "obligation_instances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       scheduled_shifts: {
         Row: {
           callout_reason: string | null
@@ -15178,62 +14287,47 @@ export type Database = {
           },
         ]
       }
-      shift_templates: {
+      shift_templates_backup_20260928b: {
         Row: {
-          active: boolean
+          active: boolean | null
           color: string | null
-          created_at: string
-          end_time: string
-          id: string
-          name: string
-          organization_id: string
-          sort: number
-          start_time: string
+          created_at: string | null
+          end_time: string | null
+          id: string | null
+          name: string | null
+          organization_id: string | null
+          sort: number | null
+          start_time: string | null
           team_id: string | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
-          active?: boolean
+          active?: boolean | null
           color?: string | null
-          created_at?: string
-          end_time: string
-          id?: string
-          name: string
-          organization_id: string
-          sort?: number
-          start_time: string
+          created_at?: string | null
+          end_time?: string | null
+          id?: string | null
+          name?: string | null
+          organization_id?: string | null
+          sort?: number | null
+          start_time?: string | null
           team_id?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
-          active?: boolean
+          active?: boolean | null
           color?: string | null
-          created_at?: string
-          end_time?: string
-          id?: string
-          name?: string
-          organization_id?: string
-          sort?: number
-          start_time?: string
+          created_at?: string | null
+          end_time?: string | null
+          id?: string | null
+          name?: string | null
+          organization_id?: string | null
+          sort?: number | null
+          start_time?: string | null
           team_id?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "shift_templates_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_templates_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       sjd_assessment_selections: {
         Row: {
@@ -16660,24 +15754,6 @@ export type Database = {
           },
         ]
       }
-      user_celebration_mute: {
-        Row: {
-          muted: boolean
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          muted?: boolean
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          muted?: boolean
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_ui_dismissals: {
         Row: {
           dismissed_at: string
@@ -16699,91 +15775,38 @@ export type Database = {
         }
         Relationships: []
       }
-      week_templates: {
+      whiteboard_notes_backup_20260928b: {
         Row: {
-          created_at: string
+          created_at: string | null
           created_by: string | null
-          id: string
-          name: string
-          organization_id: string
-          payload: Json
-          updated_at: string
+          id: string | null
+          note_text: string | null
+          organization_id: string | null
+          subject_id: string | null
+          subject_type: string | null
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           created_by?: string | null
-          id?: string
-          name: string
-          organization_id: string
-          payload: Json
-          updated_at?: string
+          id?: string | null
+          note_text?: string | null
+          organization_id?: string | null
+          subject_id?: string | null
+          subject_type?: string | null
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           created_by?: string | null
-          id?: string
-          name?: string
-          organization_id?: string
-          payload?: Json
-          updated_at?: string
+          id?: string | null
+          note_text?: string | null
+          organization_id?: string | null
+          subject_id?: string | null
+          subject_type?: string | null
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "week_templates_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "week_templates_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      whiteboard_notes: {
-        Row: {
-          created_at: string
-          created_by: string
-          id: string
-          note_text: string
-          organization_id: string
-          subject_id: string
-          subject_type: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          id?: string
-          note_text: string
-          organization_id: string
-          subject_id: string
-          subject_type: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          id?: string
-          note_text?: string
-          organization_id?: string
-          subject_id?: string
-          subject_type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "whiteboard_notes_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -16865,32 +15888,6 @@ export type Database = {
           table_name: unknown
         }
         Relationships: []
-      }
-      nectar_requirement_usage_current_v: {
-        Row: {
-          edited_at: string | null
-          edited_by: string | null
-          organization_id: string | null
-          requirement_id: string | null
-          usage_id: string | null
-          usage_note: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nectar_requirement_usage_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_requirement_usage_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       org_member_directory: {
         Row: {
