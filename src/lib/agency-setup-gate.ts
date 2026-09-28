@@ -121,10 +121,9 @@ export const SETUP_GATED_PATHS = [
 ] as const;
 
 export const SETUP_CREATE_APIS = [
-  "createEmployeeManually",
-  "hireEmployeeInternal",
-  "applyEmployeeRosterRow",
-  "finishEmployeeSetup",
+  "createTeamMember",
+  "importTeamMembers",
+  "hireTeamMemberInternal",
   "createInvitation",
   "clients.insert",
   "smartImportCommitClient",

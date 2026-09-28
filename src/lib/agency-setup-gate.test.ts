@@ -261,6 +261,14 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
     for (const api of SETUP_CREATE_APIS) {
       assert.ok(api.length > 0);
     }
+    for (const api of ["createTeamMember", "importTeamMembers", "hireTeamMemberInternal"]) {
+      assert.ok((SETUP_CREATE_APIS as readonly string[]).includes(api));
+      assert.match(hire, new RegExp(`export (const|async function) ${api}\\b`));
+    }
+    for (const gone of ["createEmployeeManually", "applyEmployeeRosterRow", "finishEmployeeSetup"]) {
+      assert.ok(!(SETUP_CREATE_APIS as readonly string[]).includes(gone));
+      assert.doesNotMatch(hire, new RegExp(gone));
+    }
   });
 
   it("redirects protected staff/client URLs to setup when incomplete", () => {

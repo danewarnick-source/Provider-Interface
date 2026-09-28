@@ -21,10 +21,10 @@ export function inviteTokenFromSearchStr(searchStr: string | null | undefined): 
 }
 
 /**
- * Team-member join links always open providerinterface.com.
- * The caller's origin (hivecertify.com, Lovable, localhost, a preview) is not the link in the email.
+ * Team-member join links always open providerinterface.com, whatever origin
+ * (hivecertify.com, Lovable, localhost, a preview) the invite was sent from.
  */
-export function inviteJoinUrl(_origin: string, token: string): string {
+export function inviteJoinUrl(token: string): string {
   return `${PROVIDER_INTERFACE_ORIGIN}/join?invite=${encodeURIComponent(token)}`;
 }
 
@@ -97,7 +97,10 @@ export function humanizeInviteError(raw: unknown): string {
   return inviteFailureMessage("unknown");
 }
 
-export function joinHomeForLevel(level: string | null | undefined, presetHome?: string | null): string {
+export function joinHomeForLevel(
+  level: string | null | undefined,
+  presetHome?: string | null,
+): string {
   if (presetHome) return presetHome;
   return level === "owner" || level === "admin" ? "/dashboard" : "/employee";
 }

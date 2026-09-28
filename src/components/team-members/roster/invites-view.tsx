@@ -15,7 +15,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAccess } from "@/hooks/use-access";
-import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { interpretInviteSendResult } from "@/lib/invite-send-result";
 import { inviteJoinUrl } from "@/lib/join-invite";
 import {
@@ -90,7 +89,6 @@ function InviteRowItem({
   const act = useMutation({
     mutationFn: async (kind: "resend" | "send" | "uninvite") => {
       if (!organizationId) throw new Error("No organization selected.");
-      const site_origin = resolveAuthOrigin();
       if (kind === "uninvite" && row.invitationId) {
         await revokeFn({
           data: { organization_id: organizationId, invitation_id: row.invitationId },
@@ -99,13 +97,13 @@ function InviteRowItem({
       }
       if (kind === "resend" && row.invitationId) {
         const res = await resendFn({
-          data: { organization_id: organizationId, invitation_id: row.invitationId, site_origin },
+          data: { organization_id: organizationId, invitation_id: row.invitationId },
         });
         return { kind, res };
       }
       if (!row.userId) throw new Error("This person isn't on the roster yet.");
       const res = await inviteFn({
-        data: { organization_id: organizationId, site_origin, user_ids: [row.userId], force: true },
+        data: { organization_id: organizationId, user_ids: [row.userId], force: true },
       });
       return { kind, res };
     },
@@ -130,7 +128,7 @@ function InviteRowItem({
   const copyLink = async () => {
     if (!row.token) return;
     try {
-      await navigator.clipboard.writeText(inviteJoinUrl(resolveAuthOrigin(), row.token));
+      await navigator.clipboard.writeText(inviteJoinUrl(row.token));
       toast.success("Invite link copied");
     } catch {
       toast.error("Couldn't copy the invite link. Your browser blocked the clipboard.");

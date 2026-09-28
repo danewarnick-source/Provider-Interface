@@ -66,7 +66,7 @@ describe("resolveResendAccess", () => {
 });
 
 describe("resendInvitation source lock", () => {
-  it("rewrites access_level / access_preset_id on resend and both wizards pass the chosen access", () => {
+  it("rewrites access_level / access_preset_id on resend and Add / Import invite with the chosen access", () => {
     const fns = readFileSync(
       new URL("./team-members/invites.functions.ts", import.meta.url),
       "utf8",
@@ -83,15 +83,11 @@ describe("resendInvitation source lock", () => {
     // organization_members ↔ profiles share no FK: two queries, never an embed.
     assert.doesNotMatch(resend, /profiles\s*\(/);
 
-    for (const rel of [
-      "../components/team-members/add/add-member-dialog.tsx",
-      "../components/team-members/add/finish-setup-dialog.tsx",
-    ]) {
-      const src = readFileSync(new URL(rel, import.meta.url), "utf8");
-      const call = src.slice(src.indexOf("await resendInviteFn("));
-      const args = call.slice(0, call.indexOf("});") + 3);
-      assert.match(args, /access_level:/, rel);
-      assert.match(args, /access_preset_id:/, rel);
-    }
+    // Add / Import invite through sendTeamMemberInvitesInternal, which updates a
+    // pending invite with the access just chosen (never the older row's access).
+    const upsert = fns.slice(fns.indexOf("async function upsertPendingInviteAndSend"));
+    assert.match(upsert, /update\(\{ expires_at: expires, \.\.\.access \}\)/);
+    const team = fns.slice(fns.indexOf("export async function sendTeamMemberInvitesInternal"));
+    assert.match(team, /level: t\.level,\s+presetId: t\.presetId/);
   });
 });

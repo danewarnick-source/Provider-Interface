@@ -47,19 +47,10 @@ describe("inviteTokenFromSearchStr", () => {
 });
 
 describe("inviteJoinUrl", () => {
-  it("always opens providerinterface.com, including hivecertify and Lovable callers", () => {
-    assert.equal(
-      inviteJoinUrl("https://app.example.com/", "tok+en"),
-      "https://providerinterface.com/join?invite=tok%2Ben",
-    );
-    assert.equal(
-      inviteJoinUrl("https://hivecertify.com", "tok"),
-      "https://providerinterface.com/join?invite=tok",
-    );
-    assert.equal(
-      inviteJoinUrl("https://agency-peace-of-mind.lovable.app", "tok"),
-      "https://providerinterface.com/join?invite=tok",
-    );
+  it("always opens providerinterface.com and takes no caller origin", () => {
+    assert.equal(inviteJoinUrl("tok+en"), "https://providerinterface.com/join?invite=tok%2Ben");
+    assert.equal(inviteJoinUrl("tok"), "https://providerinterface.com/join?invite=tok");
+    assert.equal(inviteJoinUrl.length, 1);
   });
 });
 

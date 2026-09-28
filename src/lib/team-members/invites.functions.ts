@@ -42,7 +42,6 @@ import { displayNameOf, loadVisibleMembers, selectIn } from "@/lib/team-members/
 
 const ORG_ID = z.string().uuid();
 const INVITE_LEVEL = z.enum(["owner", "admin", "staff"]);
-const SITE_ORIGIN = z.string().trim().min(1).max(500);
 
 type InvitationRow = {
   id: string;
@@ -205,13 +204,11 @@ async function sendInvitationEmail(args: {
   email: string;
   level: AccessLevel;
   token: string;
-  siteOrigin: string;
   inviterUserId: string;
   /** Auth email for the person sending, used when profiles.email is empty. */
   inviterEmail?: string | null;
 }): Promise<{ ok: boolean; error?: string }> {
-  const { supabase, organizationId, email, level, token, siteOrigin, inviterUserId, inviterEmail } =
-    args;
+  const { supabase, organizationId, email, level, token, inviterUserId, inviterEmail } = args;
   try {
     const actorEmail =
       (await loadProfileEmail(supabase, inviterUserId)) ?? pickReplyTo(null, inviterEmail);
@@ -223,7 +220,7 @@ async function sendInvitationEmail(args: {
       .maybeSingle();
     const orgName = stripFakeDisplayLabel(String(org?.name || "").trim()) || "your organization";
     const inviterName = await loadInviterName(supabase, inviterUserId);
-    const link = inviteJoinUrl(siteOrigin, token);
+    const link = inviteJoinUrl(token);
     const { subject, html, text } = buildInvitationEmail({
       orgName,
       role: level,
@@ -264,7 +261,6 @@ export const createInvitation = createServerFn({ method: "POST" })
       email: string;
       access_level: AccessLevel;
       access_preset_id?: string | null;
-      site_origin: string;
     }) =>
       z
         .object({
@@ -272,7 +268,6 @@ export const createInvitation = createServerFn({ method: "POST" })
           email: z.string().trim().toLowerCase().email().max(255),
           access_level: INVITE_LEVEL,
           access_preset_id: z.string().uuid().nullish(),
-          site_origin: SITE_ORIGIN,
         })
         .parse(d),
   )
@@ -331,7 +326,6 @@ export const createInvitation = createServerFn({ method: "POST" })
       email: data.email,
       level: data.access_level,
       token: (invite as InvitationRow).token,
-      siteOrigin: data.site_origin,
       inviterUserId: userId,
       inviterEmail: context.claims?.email ?? null,
     });
@@ -355,7 +349,6 @@ export const resendInvitation = createServerFn({ method: "POST" })
     (d: {
       organization_id: string;
       invitation_id: string;
-      site_origin: string;
       access_level?: AccessLevel;
       access_preset_id?: string | null;
     }) =>
@@ -363,7 +356,6 @@ export const resendInvitation = createServerFn({ method: "POST" })
         .object({
           organization_id: ORG_ID,
           invitation_id: z.string().uuid(),
-          site_origin: SITE_ORIGIN,
           access_level: INVITE_LEVEL.optional(),
           access_preset_id: z.string().uuid().nullish(),
         })
@@ -457,7 +449,6 @@ export const resendInvitation = createServerFn({ method: "POST" })
       email: row.email,
       level: row.access_level,
       token: row.token,
-      siteOrigin: data.site_origin,
       inviterUserId: userId,
       inviterEmail: context.claims?.email ?? null,
     });
@@ -512,10 +503,9 @@ async function upsertPendingInviteAndSend(args: {
   email: string;
   level: AccessLevel;
   presetId: string | null;
-  siteOrigin: string;
   inviterEmail?: string | null;
 }): Promise<{ invitation: InvitationRow; email_sent: boolean; email_error: string | null }> {
-  const { supabase, organizationId, userId, email, level, siteOrigin, inviterEmail } = args;
+  const { supabase, organizationId, userId, email, level, inviterEmail } = args;
   const presetId = await presetIdForInvite(organizationId, level, args.presetId);
   const access = { access_level: level, access_preset_id: presetId };
   await assertAgencySetupCompleteForOrg(supabase, organizationId);
@@ -562,7 +552,6 @@ async function upsertPendingInviteAndSend(args: {
     email,
     level,
     token: invite.token,
-    siteOrigin,
     inviterUserId: userId,
     inviterEmail,
   });
@@ -573,9 +562,66 @@ async function upsertPendingInviteAndSend(args: {
   };
 }
 
+export type TeamMemberInviteTarget = {
+  email: string;
+  level: AccessLevel;
+  presetId: string | null;
+};
+
+export type TeamMemberInviteOutcome = {
+  email: string;
+  email_sent: boolean;
+  error: string | null;
+};
+
 /**
- * Invite already-created roster members (Add employee access step + Smart Import
- * bulk/per-row). Never emails during CSV parse. Never re-invites an accepted
+ * Add / Import team members: invite the people just created. Creates the
+ * pending invitation, or updates and resends the one already pending for that
+ * email. Checks invite_staff and the inviter's rate once for the whole batch.
+ * Never throws per person — each outcome says whether the email went out.
+ */
+export async function sendTeamMemberInvitesInternal(args: {
+  organizationId: string;
+  actorId: string;
+  actorEmail?: string | null;
+  targets: TeamMemberInviteTarget[];
+}): Promise<TeamMemberInviteOutcome[]> {
+  if (!args.targets.length) return [];
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  await requirePermission(
+    supabaseAdmin as unknown as SupabaseClient,
+    args.actorId,
+    args.organizationId,
+    "invite_staff",
+  );
+  await assertInviteRate(args.actorId);
+  const out: TeamMemberInviteOutcome[] = [];
+  for (const t of args.targets) {
+    try {
+      const res = await upsertPendingInviteAndSend({
+        supabase: supabaseAdmin,
+        organizationId: args.organizationId,
+        userId: args.actorId,
+        email: t.email,
+        level: t.level,
+        presetId: t.presetId,
+        inviterEmail: args.actorEmail ?? null,
+      });
+      out.push({ email: t.email, email_sent: res.email_sent, error: res.email_error });
+    } catch (e) {
+      out.push({
+        email: t.email,
+        email_sent: false,
+        error: e instanceof Error ? e.message : "Invite failed",
+      });
+    }
+  }
+  return out;
+}
+
+/**
+ * Invite already-created roster members (roster Send invite and the Invited
+ * view). Never emails during CSV parse. Never re-invites an accepted
  * join unless resend_accepted is explicit.
  */
 export const inviteStaffMembers = createServerFn({ method: "POST" })
@@ -584,7 +630,6 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
     z
       .object({
         organization_id: ORG_ID,
-        site_origin: SITE_ORIGIN,
         user_ids: z.array(z.string().uuid()).max(200).default([]),
         emails: z.array(z.string().trim().toLowerCase().email().max(255)).max(200).default([]),
         access_level: INVITE_LEVEL.optional(),
@@ -736,7 +781,6 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
             email: t.email,
             level: t.level,
             presetId: t.presetId,
-            siteOrigin: data.site_origin,
             inviterEmail: context.claims?.email ?? null,
           });
           if (out.email_sent) {

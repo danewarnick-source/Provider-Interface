@@ -24,8 +24,7 @@ import {
   reevaluateStaffAssignedToClientInternal,
 } from "@/lib/staff-assignment-hooks.functions";
 import { enrichNamesFromFull } from "@/lib/person-name";
-import { hireEmployeeInternal } from "@/lib/team-members/members.functions";
-import { generateTempPassword } from "@/lib/temp-password";
+import { hireTeamMemberInternal } from "@/lib/team-members/members.functions";
 import { classifyImportInvite, hasUsableInviteEmail } from "@/lib/import-invite";
 
 const JobId = z.object({ jobId: z.string().uuid() });
@@ -1175,14 +1174,13 @@ async function commitEmployee(
     const names = enrichNamesFromFull(firstRaw, lastRaw, fullRaw);
     const firstName = names.first_name || names.display_name || "Staff";
     const lastName = names.last_name || "Member";
-    const hired = await hireEmployeeInternal(
+    const hired = await hireTeamMemberInternal(
       {
         organizationId: orgId,
         firstName,
         lastName,
         email,
         phone: extractedFieldValue(fields, "phone"),
-        temporaryPassword: generateTempPassword(),
         accessLevel: importedAccessLevel(
           extractedFieldValue(fields, "position") || extractedFieldValue(fields, "role"),
         ),
@@ -1197,7 +1195,6 @@ async function commitEmployee(
           .filter(Boolean),
         requiresDeescalation: true,
         requiresAbi: true,
-        customFieldValues: {},
       },
       userId,
       "smart_import",
@@ -1224,7 +1221,7 @@ async function commitEmployee(
     if (!col) continue;
     mapped[col] = coerceProfileValue(col, f.value);
   }
-  // start_date is the CE source of truth (see createEmployeeManually); mirror
+  // start_date is the CE source of truth (see hireTeamMemberInternal); mirror
   // an imported hire_date onto it so the same profile reads consistently.
   if (mapped.hire_date && !mapped.start_date) mapped.start_date = mapped.hire_date;
   const recordId = subj.matched_record_id;
