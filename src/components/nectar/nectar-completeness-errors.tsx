@@ -1,4 +1,4 @@
-import { COMPLETENESS_LABELS, type CompletenessItem } from "@/lib/nectar-completeness";
+import { COMPLETENESS_LABELS, type CompletenessItem } from "@/lib/nectar/nectar-completeness";
 
 /**
  * Inline submit-gate errors for the four NECTAR completeness items.

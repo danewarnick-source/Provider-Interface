@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { ingestDocument, queryDocuments } from "@/lib/nectar-documents.functions";
+import { ingestDocument, queryDocuments } from "@/lib/nectar/nectar-documents.functions";
 
 const DAY = 86_400_000;
 const EXPIRING_SOON_DAYS = 60;

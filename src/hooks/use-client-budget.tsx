@@ -11,7 +11,7 @@ import {
   UNITS_PER_HOUR,
 } from "@/lib/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { isNonAnswer } from "@/lib/nectar-quality";
+import { isNonAnswer } from "@/lib/nectar/nectar-quality";
 import { isRouteUuid } from "@/lib/route-uuid";
 
 /**

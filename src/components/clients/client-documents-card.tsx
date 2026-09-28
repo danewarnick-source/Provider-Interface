@@ -30,7 +30,7 @@ import {
   queryDocuments,
   deleteDocument,
   getDocument,
-} from "@/lib/nectar-documents.functions";
+} from "@/lib/nectar/nectar-documents.functions";
 import { attachClientDocument } from "@/lib/import-checklist.functions";
 import { NectarDocumentActionsDialog } from "@/components/nectar/document-actions-dialog";
 import { DocumentPreviewDialog } from "./document-preview-dialog";

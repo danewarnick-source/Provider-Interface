@@ -19,7 +19,7 @@ import {
   POLICE_CATEGORY_NAME,
   MISSING_CATEGORY_NAME,
   FATALITY_CATEGORY_NAME,
-} from "./incident-detail-schemas";
+} from "../incident-detail-schemas";
 
 export type TriggerKind = "incident" | "appointment";
 

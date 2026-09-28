@@ -6,11 +6,11 @@ import { Send, Loader2, Shield, AlertTriangle, ArrowRight } from "lucide-react";
 import {
   STAFF_PAY_PERIOD_LINK_LABEL,
   STAFF_PAY_PERIOD_PATH,
-} from "@/lib/nectar-staff-scope";
+} from "@/lib/nectar/nectar-staff-scope";
 import {
   askNectarStaff,
   type NectarStaffReply,
-} from "@/lib/nectar-staff.functions";
+} from "@/lib/nectar/nectar-staff.functions";
 import {
   NectarMark,
   NectarButton,
@@ -19,7 +19,7 @@ import { NectarAnswer } from "@/components/nectar/nectar-answer";
 import { useMobileShellContainer } from "./mobile-shell-context";
 import { useActiveShiftBarVisible } from "@/hooks/use-active-shift-bar";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { staffNectarFailureMessage } from "@/lib/nectar-staff-errors";
+import { staffNectarFailureMessage } from "@/lib/nectar/nectar-staff-errors";
 import {
   STAFF_CLOCK_BAR_PX,
   STAFF_TAB_BAR_OFFSET_CSS,

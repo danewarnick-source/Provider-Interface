@@ -6,7 +6,7 @@ import {
   saveRequirementUsageNote,
   recategorizeRequirement,
   toggleRequirementOptionalConfirm,
-} from "@/lib/nectar-requirement-usage.functions";
+} from "@/lib/nectar/nectar-requirement-usage.functions";
 import { SourceCitationChip } from "./source-citation-chip";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

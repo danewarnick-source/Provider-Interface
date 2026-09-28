@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles, AlertTriangle } from "lucide-react";
-import { emarNectarHelper } from "@/lib/emar-nectar.functions";
+import { emarNectarHelper } from "@/lib/nectar/emar-nectar.functions";
 
 type Kind = "refusal_then_success" | "controlled_history" | "swallowing_risk_meds" | "documentation_gap_check";
 const KIND_LABEL: Record<Kind, string> = {

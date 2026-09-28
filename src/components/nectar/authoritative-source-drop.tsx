@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ingestDocument } from "@/lib/nectar-documents.functions";
+import { ingestDocument } from "@/lib/nectar/nectar-documents.functions";
 import { markAsAuthoritativeSource } from "@/lib/authoritative-sources.functions";
 
 const AUTH_KINDS = [

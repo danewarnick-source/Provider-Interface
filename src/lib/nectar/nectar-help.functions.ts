@@ -12,7 +12,7 @@ import {
   otherMemberOrgNamedInQuestion,
   resolveNectarAudience,
   type NectarAudience,
-} from "@/lib/nectar-trust";
+} from "@/lib/nectar/nectar-trust";
 
 export interface NectarHelpReply {
   answer: string;

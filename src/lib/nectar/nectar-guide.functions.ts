@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { anchorsForPrompt, findAnchor } from "@/lib/nectar/tour-anchors";
-import { resolveNectarAudience } from "@/lib/nectar-trust";
+import { resolveNectarAudience } from "@/lib/nectar/nectar-trust";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 

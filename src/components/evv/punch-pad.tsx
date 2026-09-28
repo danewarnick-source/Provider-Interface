@@ -44,12 +44,12 @@ import { EvvConsentGate } from "@/components/evv/consent-gate";
 import { evaluateShiftNote } from "@/lib/ai-coach.functions";
 import { NectarShiftNoteDraft } from "@/components/nectar/nectar-shift-note-draft";
 import { NectarCompletenessErrors } from "@/components/nectar/nectar-completeness-errors";
-import { NECTAR_DRAFT_MIN_WORDS, countNoteWords } from "@/lib/nectar-note-gate";
+import { NECTAR_DRAFT_MIN_WORDS, countNoteWords } from "@/lib/nectar/nectar-note-gate";
 import {
   type CompletenessItem,
   COMPLETENESS_PASS_FEEDBACK,
   localWordCountCheck,
-} from "@/lib/nectar-completeness";
+} from "@/lib/nectar/nectar-completeness";
 import { freezeOriginalTranscript } from "@/lib/original-transcript";
 import {
   accumulateSpeechResults,
@@ -80,7 +80,7 @@ import { ShiftMedDueCheck, type PendingMedDose } from "@/components/medications/
 import { useComplianceGate } from "@/hooks/use-compliance-gate";
 import { useAccess } from "@/hooks/use-access";
 import { useServerFn } from "@tanstack/react-start";
-import { checkBillingEntry, checkStaffPrerequisite, raiseComplianceFlag } from "@/lib/nectar-compliance.functions";
+import { checkBillingEntry, checkStaffPrerequisite, raiseComplianceFlag } from "@/lib/nectar/nectar-compliance.functions";
 
 
 

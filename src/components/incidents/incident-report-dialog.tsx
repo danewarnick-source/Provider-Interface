@@ -25,11 +25,11 @@ import {
   DETAIL_BLOCKS, detailKeyForCategory, type DetailField,
   APS_HOTLINE, INJURY_CATEGORY_NAME, MEDICAL_EMERGENCY_CATEGORY_NAME,
 } from "@/lib/incident-detail-schemas";
-import { scanNarrativeForCategories, type NarrativeCategoryHit } from "@/lib/nectar-triggers";
+import { scanNarrativeForCategories, type NarrativeCategoryHit } from "@/lib/nectar/nectar-triggers";
 import {
   validateNarrative, validatePersonName, validateRequiredText, findContradictions,
   validateAddress, validateDateLogic,
-} from "@/lib/nectar-quality";
+} from "@/lib/nectar/nectar-quality";
 import { useCaseload } from "@/hooks/use-caseload";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";

@@ -23,7 +23,7 @@ import {
   askFinancialNectar,
   type NectarFinReport,
   type NectarFinSource,
-} from "@/lib/financial-nectar.functions";
+} from "@/lib/nectar/financial-nectar.functions";
 
 export const Route = createFileRoute("/dashboard/financial/nectar")({
   head: () => ({ meta: [{ title: "NECTAR Financial — Provider Interface" }] }),

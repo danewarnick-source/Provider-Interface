@@ -16,7 +16,7 @@ import {
   listPendingHiveExecApprovals,
   hiveExecApproveRequirement,
   hiveExecRejectRequirement,
-} from "@/lib/nectar-approvals.functions";
+} from "@/lib/nectar/nectar-approvals.functions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 

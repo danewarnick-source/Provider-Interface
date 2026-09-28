@@ -11,7 +11,7 @@
 // A requirement whose text mentions no known code returns { primary: null,
 // all: [] } — that's a legitimate org-wide obligation, not a failure.
 
-import { EVV_SERVICE_CODES } from "./evv-codes";
+import { EVV_SERVICE_CODES } from "../evv-codes";
 
 const KNOWN_CODES: readonly string[] = EVV_SERVICE_CODES.map((c) => c.code);
 

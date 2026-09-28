@@ -37,12 +37,12 @@ import { DailyNoteMedsBlock, type DailyNoteMedication } from "@/components/medic
 import { type PendingMedDose } from "@/components/medications/shift-med-due-check";
 import { NectarShiftNoteDraft } from "@/components/nectar/nectar-shift-note-draft";
 import { NectarCompletenessErrors } from "@/components/nectar/nectar-completeness-errors";
-import { NECTAR_DRAFT_MIN_WORDS, countNoteWords } from "@/lib/nectar-note-gate";
+import { NECTAR_DRAFT_MIN_WORDS, countNoteWords } from "@/lib/nectar/nectar-note-gate";
 import {
   type CompletenessItem,
   COMPLETENESS_PASS_FEEDBACK,
   localWordCountCheck,
-} from "@/lib/nectar-completeness";
+} from "@/lib/nectar/nectar-completeness";
 
 const hhsSearch = z.object({
   tab: z.string().optional(),

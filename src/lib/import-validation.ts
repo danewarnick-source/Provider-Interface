@@ -14,7 +14,7 @@
 import {
   isNonAnswer,
   validateAddress,
-} from "@/lib/nectar-quality";
+} from "@/lib/nectar/nectar-quality";
 
 import { padMemberId } from "@/lib/evv-codes";
 import { isDailyServiceCode } from "@/lib/service-billing";

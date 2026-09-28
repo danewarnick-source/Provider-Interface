@@ -12,7 +12,7 @@
 // the whole account quota. The global key stays the hard ceiling.
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { decideBedrockSlot } from "@/lib/nectar-rate-decision";
+import { decideBedrockSlot } from "@/lib/nectar/nectar-rate-decision";
 
 // Public knobs — kept as consts so callers can share the exact same key.
 export const BEDROCK_RATE_KEY = "bedrock:sonnet";

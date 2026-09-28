@@ -7,14 +7,14 @@ import {
   questionWantsMedications,
   slimPcspGoals,
   staffNectarFailureMessage,
-} from "@/lib/nectar-staff-errors";
+} from "@/lib/nectar/nectar-staff-errors";
 import { assertMemberPlanAddon } from "@/lib/entitlements.server";
 import {
   UNTRUSTED_DOCUMENT_RULE,
   delimitUntrustedDocument,
   orgBoundaryRule,
   otherMemberOrgNamedInQuestion,
-} from "@/lib/nectar-trust";
+} from "@/lib/nectar/nectar-trust";
 import {
   buildSchedulePack,
   questionWantsPayOrHours,
@@ -26,7 +26,7 @@ import {
   type NamedPerson,
   type StaffScheduleFact,
   type StaffShiftRow,
-} from "@/lib/nectar-staff-scope";
+} from "@/lib/nectar/nectar-staff-scope";
 
 /**
  * NECTAR Staff — a scoped, lower-privilege assistant for the staff app.

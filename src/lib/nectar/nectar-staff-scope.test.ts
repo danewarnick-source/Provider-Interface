@@ -13,7 +13,7 @@ import {
   scheduleQueryWindow,
   staffPayHoursRefusalReply,
 } from "./nectar-staff-scope.ts";
-import { denverYmdFromInstant } from "./denver-date.ts";
+import { denverYmdFromInstant } from "../denver-date.ts";
 
 const johnny = { id: "c-johnny", first_name: "Johnny", last_name: "Rivera" };
 const abby = { id: "c-abby", first_name: "Abby", last_name: "Chen" };

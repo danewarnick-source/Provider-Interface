@@ -30,7 +30,7 @@ import {
 import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode } from "@/lib/evv-codes";
 import { haversineFeet, isLikelyBadCoord, isDistanceSuspicious, formatDistanceFeet } from "@/lib/geo";
 import { UtahExportDialog, EvvExportArchiveStrip } from "@/components/evv/utah-export-dialog";
-import { searchTimesheetsByVector, backfillTimesheetEmbeddings } from "@/lib/vector-search.functions";
+import { searchTimesheetsByVector, backfillTimesheetEmbeddings } from "@/lib/nectar/vector-search.functions";
 import { ResidentialDailyTab } from "@/components/residential/residential-daily-tab";
 import { useNavigate } from "@tanstack/react-router";
 import { Home as HomeIcon } from "lucide-react";

@@ -12,7 +12,7 @@ import {
   type ResolvedStaffMember,
   ensureAllStaffGroupInternal,
 } from "./staff-groups.functions";
-import { runNectarCertOcrFromStoragePath } from "./nectar-cert-ocr";
+import { runNectarCertOcrFromStoragePath } from "./nectar/nectar-cert-ocr";
 import { compareNames } from "./name-matching";
 import { isFormUuid, resolveObligationFormId } from "./resolve-obligation-form";
 import {

@@ -9,7 +9,7 @@ import {
   localWordCountCheck,
   mergeLocalAndNectarChecks,
   parseNectarCompletenessPayload,
-} from "@/lib/nectar-completeness";
+} from "@/lib/nectar/nectar-completeness";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

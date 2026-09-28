@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { X, ChevronLeft, ChevronRight, SkipForward, Pause } from "lucide-react";
 import { findAnchor } from "@/lib/nectar/tour-anchors";
-import type { GuideStep, GuideTask } from "@/lib/nectar-guide.functions";
+import type { GuideStep, GuideTask } from "@/lib/nectar/nectar-guide.functions";
 
 interface ActiveTour {
   task: GuideTask;

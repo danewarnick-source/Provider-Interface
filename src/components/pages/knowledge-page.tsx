@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ingestDocument, deleteDocument, getDocument } from "@/lib/nectar-documents.functions";
+import { ingestDocument, deleteDocument, getDocument } from "@/lib/nectar/nectar-documents.functions";
 import {
   listAuthoritativeSources,
   markAsAuthoritativeSource,

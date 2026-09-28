@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   activateCodeRequirements,
   listPendingCodeActivations,
-} from "@/lib/nectar-requirement-usage.functions";
+} from "@/lib/nectar/nectar-requirement-usage.functions";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";

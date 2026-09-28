@@ -34,7 +34,7 @@ import {
   fourthExecutableBatchParents,
   fifthExecutableBatchParents,
   sixthExecutableBatchParents,
-} from "@/lib/obligations/draft-rules";
+} from "@/lib/obligations/draft-rules/index";
 
 const WIRED_BATCH_IDS = new Set<string>([
   ...FIRST_EXECUTABLE_BATCH_RULE_IDS,

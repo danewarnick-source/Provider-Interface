@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Loader2, Sparkles, PlayCircle, MessageSquare, Check, Trash2, X } from "lucide-react";
-import { listNectarGuides, planNectarGuide, updateGuideTask, deleteGuide, type Guide, type GuideTask } from "@/lib/nectar-guide.functions";
+import { listNectarGuides, planNectarGuide, updateGuideTask, deleteGuide, type Guide, type GuideTask } from "@/lib/nectar/nectar-guide.functions";
 import { useGuidedTour } from "@/components/nectar/guided-tour-provider";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { toast } from "sonner";

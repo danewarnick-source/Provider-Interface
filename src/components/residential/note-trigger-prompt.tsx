@@ -15,7 +15,7 @@ import {
   triggerDismissalKey,
   type NoteTriggerHit,
   type TriggerKind,
-} from "@/lib/nectar-triggers";
+} from "@/lib/nectar/nectar-triggers";
 
 /**
  * Reusable Nectar trigger block. Pure UI:

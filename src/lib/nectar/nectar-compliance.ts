@@ -27,4 +27,4 @@ export {
   NECTAR_COMPLIANCE_WRITES_RETIRED,
   skipNectarComplianceMutation,
   skipNectarComplianceWrite,
-} from "./nectar-compliance/stop-writes";
+} from "./nectar-compliance-stop-writes";

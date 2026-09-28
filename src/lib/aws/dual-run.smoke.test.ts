@@ -197,7 +197,7 @@ describe("query builder SQL safety", () => {
       "utf8",
     );
     assert.match(util, /record_date:log_date/);
-    const docs = readFileSync(new URL("../nectar-documents.functions.ts", import.meta.url), "utf8");
+    const docs = readFileSync(new URL("../nectar/nectar-documents.functions.ts", import.meta.url), "utf8");
     assert.match(docs, /uploaded_at:created_at/);
     const audit = readFileSync(new URL("../internal-audit.functions.ts", import.meta.url), "utf8");
     assert.match(audit, /record_date:log_date/);

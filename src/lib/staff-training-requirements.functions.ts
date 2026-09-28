@@ -20,7 +20,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { baselineByKey } from "@/lib/staff-training-requirements";
-import { runNectarCertOcr } from "@/lib/nectar-cert-ocr";
+import { runNectarCertOcr } from "@/lib/nectar/nectar-cert-ocr";
 import { compareNames } from "@/lib/name-matching";
 
 const orgStaffKey = z.object({

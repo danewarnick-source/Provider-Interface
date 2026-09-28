@@ -11,7 +11,7 @@ import {
   narrativePassIsNotBillingReady,
   serviceLimitFromDuration,
 } from "./dspd-entry-readiness.ts";
-import { completenessFromChecks } from "./nectar-completeness.ts";
+import { completenessFromChecks } from "./nectar/nectar-completeness.ts";
 
 const NARRATIVE_PASS = completenessFromChecks([
   { key: "word_count", passed: true, message: "ok" },

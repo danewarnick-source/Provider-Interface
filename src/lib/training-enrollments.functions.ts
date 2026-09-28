@@ -20,7 +20,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { runNectarCertOcr } from "@/lib/nectar-cert-ocr";
+import { runNectarCertOcr } from "@/lib/nectar/nectar-cert-ocr";
 import { assertAddonForOrg } from "@/lib/entitlements.server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

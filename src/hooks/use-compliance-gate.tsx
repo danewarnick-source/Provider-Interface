@@ -17,7 +17,7 @@
  */
 import { useCallback, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { complianceDetectors, detectionTypeFor, type ComplianceDetectorKey } from "@/lib/nectar-compliance.detectors";
+import { complianceDetectors, detectionTypeFor, type ComplianceDetectorKey } from "@/lib/nectar/nectar-compliance.detectors";
 import { ComplianceFlagDialog, type CandidateFlag } from "@/components/nectar/compliance-flag-dialog";
 
 type DetectorInput = Record<string, unknown>;

@@ -10,7 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   raiseComplianceFlag,
   resolveComplianceFlag,
-} from "@/lib/nectar-compliance.functions";
+} from "@/lib/nectar/nectar-compliance.functions";
 import {
   Dialog,
   DialogContent,

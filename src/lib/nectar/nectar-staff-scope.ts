@@ -12,7 +12,7 @@ import {
   parseYmd,
   weekdaySunday0,
   ymdFromParts,
-} from "./denver-date.ts";
+} from "../denver-date.ts";
 
 /** Staff Caseload home — NECTAR pay-period card + submitted timesheets. */
 export const STAFF_PAY_PERIOD_PATH = "/dashboard";

@@ -8,8 +8,8 @@ function read(rel: string) {
 
 describe("NECTAR onboarding — agency setup gate, no Home wizard", () => {
   it("does not require SOW upload or document_upload attestation to finish setup", () => {
-    const hook = read("../hooks/use-onboarding-progress.tsx");
-    const banner = read("../components/onboarding/onboarding-guidance-banner.tsx");
+    const hook = read("../../hooks/use-onboarding-progress.tsx");
+    const banner = read("../../components/onboarding/onboarding-guidance-banner.tsx");
 
     assert.doesNotMatch(hook, /sowCount/);
     assert.doesNotMatch(hook, /attestationCount/);
@@ -27,8 +27,8 @@ describe("NECTAR onboarding — agency setup gate, no Home wizard", () => {
   });
 
   it("keeps the company documents hub as optional storage, not a SOW gate", () => {
-    const docs = read("../components/pages/nectar-docs-page.tsx");
-    const bar = read("../components/onboarding/onboarding-return-bar.tsx");
+    const docs = read("../../components/pages/nectar-docs-page.tsx");
+    const bar = read("../../components/onboarding/onboarding-return-bar.tsx");
     assert.match(bar, /useAgencySetup/);
     assert.match(bar, /AGENCY_SETUP_PATH/);
     assert.doesNotMatch(bar, /useOnboardingProgress/);
@@ -38,7 +38,7 @@ describe("NECTAR onboarding — agency setup gate, no Home wizard", () => {
   });
 
   it("does not mount the agency-setup wizard on Admin Home", () => {
-    const dash = read("../components/admin-home/admin-home-dashboard.tsx");
+    const dash = read("../../components/admin-home/admin-home-dashboard.tsx");
     assert.doesNotMatch(dash, /NectarOnboardingPanel/);
     assert.doesNotMatch(dash, /nectar-onboarding-panel/);
     assert.doesNotMatch(dash, /agency-setup-panel/);

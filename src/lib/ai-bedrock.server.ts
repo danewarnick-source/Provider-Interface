@@ -19,7 +19,7 @@ import {
   acquireBedrockSlot,
   recordBedrockTokens,
   RateLimitError,
-} from "@/lib/nectar-rate-limit.server";
+} from "@/lib/nectar/nectar-rate-limit.server";
 
 export type ChatMessage = {
   role: "system" | "user" | "assistant";

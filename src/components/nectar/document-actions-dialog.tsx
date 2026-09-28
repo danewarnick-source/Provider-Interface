@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   detectAndOfferActions,
   proposeStaffChecklistFromDocument,
-} from "@/lib/nectar-document-actions.functions";
+} from "@/lib/nectar/nectar-document-actions.functions";
 import { markAsAuthoritativeSource } from "@/lib/authoritative-sources.functions";
 
 /**
