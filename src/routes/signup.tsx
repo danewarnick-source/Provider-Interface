@@ -1,20 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  Eye,
-  EyeOff,
-  Loader2,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
+import {
+  AuthCaptcha,
+  authCaptchaBlocked,
+  readAuthCaptchaToken,
+  resetAuthCaptcha,
+} from "@/components/auth-captcha";
 import { AUTH_CAPTCHA_REQUIRED, captchaTokenOption } from "@/lib/auth-captcha";
 import { authRedirectUrl } from "@/lib/auth-redirect";
 import { checkPasswordPwnedRange } from "@/lib/signup-checks.functions";
@@ -52,7 +50,11 @@ import {
   getSignupPaymentsStatusFn,
 } from "@/lib/stripe-checkout.functions";
 import { formatUsdFromCents, type BillingInterval } from "@/lib/hive-pricing";
-import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_SIGNUP_PRICE_LINE } from "@/lib/pi-landing";
+import {
+  PI_LIST_MINIMUM_LINE,
+  PI_LIST_PRICE_DISPLAY,
+  PI_SIGNUP_PRICE_LINE,
+} from "@/lib/pi-landing";
 import {
   SIGNUP_AGENCY_PLACEHOLDER,
   SIGNUP_TRAINING_ADDONS,
@@ -75,16 +77,17 @@ import {
   humanizeSignupAccountError,
   isAlreadyUsedEmailError,
 } from "@/lib/signup-account-error";
-import {
-  humanizeCheckoutStartError,
-  signupAuthCallbackError,
-} from "@/lib/signup-checkout-error";
+import { humanizeCheckoutStartError, signupAuthCallbackError } from "@/lib/signup-checkout-error";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
       { title: "Get started — Provider Interface" },
-      { name: "description", content: "Create your Provider Interface account and start running your agency from one place." },
+      {
+        name: "description",
+        content:
+          "Create your Provider Interface account and start running your agency from one place.",
+      },
     ],
   }),
   component: SignupPage,
@@ -103,13 +106,7 @@ const inputStyle: React.CSSProperties = {
   fontFamily: JAKARTA,
 };
 
-const STEPS = [
-  "Account",
-  "Your business",
-  "Plan",
-  "Training",
-  "Payment",
-] as const;
+const STEPS = ["Account", "Your business", "Plan", "Training", "Payment"] as const;
 
 /* ──────────────────────────── form state ──────────────────────────── */
 
@@ -342,49 +339,50 @@ function SignupPage() {
     <PiPublicPage surface="paper">
       <main className="wrap pi-home-signup">
         <p className="pi-home-signup-account">
-          Already have an account?{" "}
-          <Link to="/login">Sign in</Link>
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
         <Stepper step={step} />
-          <div
-            className="rounded-2xl border border-[var(--hive-border)] bg-[var(--hive-surface)] p-6 text-[var(--hive-text)] shadow-[var(--shadow-card)] sm:p-8"
-            data-testid="signup-new-agency"
-          >
-            {step === 0 && (
-              <Step1Account
-                form={form}
-                update={update}
-                checkPwnedRange={checkPwnedRange}
-                onNext={() => setStep(1)}
-                authCallbackError={authCallbackError}
-              />
-            )}
-            {step === 1 && (
-              <Step3Business
-                form={form}
-                update={update}
-                ensureWorkspace={ensureWorkspace}
-                setSmsPhoneFn={setSmsPhoneFn}
-                onBack={goBack}
-                onNext={() => setStep(2)}
-              />
-            )}
-            {step === 2 && (
-              <Step4Pricing form={form} update={update} onBack={goBack} onNext={() => setStep(3)} />
-            )}
-            {step === 3 && (
-              <Step5Training form={form} update={update} onBack={goBack} onNext={() => setStep(4)} />
-            )}
-            {step === 4 && (
-              <Step6Payment
-                form={form}
-                onBack={goBack}
-                onComplete={async () => {
-                  await navigate({ to: "/dashboard", search: { welcome: "1" } as never }).catch(() => navigate({ to: "/dashboard" }));
-                }}
-              />
-            )}
-          </div>
+        <div
+          className="rounded-2xl border border-[var(--hive-border)] bg-[var(--hive-surface)] p-6 text-[var(--hive-text)] shadow-[var(--shadow-card)] sm:p-8"
+          data-testid="signup-new-agency"
+        >
+          {step === 0 && (
+            <Step1Account
+              form={form}
+              update={update}
+              checkPwnedRange={checkPwnedRange}
+              onNext={() => setStep(1)}
+              authCallbackError={authCallbackError}
+            />
+          )}
+          {step === 1 && (
+            <Step3Business
+              form={form}
+              update={update}
+              ensureWorkspace={ensureWorkspace}
+              setSmsPhoneFn={setSmsPhoneFn}
+              onBack={goBack}
+              onNext={() => setStep(2)}
+            />
+          )}
+          {step === 2 && (
+            <Step4Pricing form={form} update={update} onBack={goBack} onNext={() => setStep(3)} />
+          )}
+          {step === 3 && (
+            <Step5Training form={form} update={update} onBack={goBack} onNext={() => setStep(4)} />
+          )}
+          {step === 4 && (
+            <Step6Payment
+              form={form}
+              onBack={goBack}
+              onComplete={async () => {
+                await navigate({ to: "/dashboard", search: { welcome: "1" } as never }).catch(() =>
+                  navigate({ to: "/dashboard" }),
+                );
+              }}
+            />
+          )}
+        </div>
       </main>
     </PiPublicPage>
   );
@@ -426,25 +424,28 @@ function Step1Account({
   const matchOk = form.password.length > 0 && form.password === form.confirm;
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
 
-  const verifyPasswordPwned = useCallback(async (password: string): Promise<boolean> => {
-    const gen = ++weakCheckGen.current;
-    if (password.length < SIGNUP_PASSWORD_MIN) {
-      setPasswordWeakErr(null);
-      return false;
-    }
-    try {
-      const sha1 = await sha1HexUpper(password);
-      const { range } = await checkPwnedRange({ data: { sha1Prefix: hibpSha1Prefix(sha1) } });
-      if (gen !== weakCheckGen.current) return false;
-      const pwned = hibpRangeIncludesSha1(range, sha1);
-      setPasswordWeakErr(pwned ? AUTH_PWNED_PASSWORD_MESSAGE : null);
-      return pwned;
-    } catch {
-      if (gen !== weakCheckGen.current) return false;
-      // fail-open — Auth still rejects on submit
-      return false;
-    }
-  }, [checkPwnedRange]);
+  const verifyPasswordPwned = useCallback(
+    async (password: string): Promise<boolean> => {
+      const gen = ++weakCheckGen.current;
+      if (password.length < SIGNUP_PASSWORD_MIN) {
+        setPasswordWeakErr(null);
+        return false;
+      }
+      try {
+        const sha1 = await sha1HexUpper(password);
+        const { range } = await checkPwnedRange({ data: { sha1Prefix: hibpSha1Prefix(sha1) } });
+        if (gen !== weakCheckGen.current) return false;
+        const pwned = hibpRangeIncludesSha1(range, sha1);
+        setPasswordWeakErr(pwned ? AUTH_PWNED_PASSWORD_MESSAGE : null);
+        return pwned;
+      } catch {
+        if (gen !== weakCheckGen.current) return false;
+        // fail-open — Auth still rejects on submit
+        return false;
+      }
+    },
+    [checkPwnedRange],
+  );
 
   useEffect(() => {
     if (form.password.length < SIGNUP_PASSWORD_MIN) {
@@ -461,7 +462,8 @@ function Step1Account({
     setEmailErr(null);
     setAccountErr(null);
     if (!form.acceptedTos) return toast.error("Agree to the Terms to continue.");
-    if (!form.acceptedBaa) return toast.error("Agree to the Business Associate Agreement to continue.");
+    if (!form.acceptedBaa)
+      return toast.error("Agree to the Business Associate Agreement to continue.");
     if (!emailValid) return setEmailErr("Please enter a valid email address.");
     if (!lenOk) return toast.error(`Password must be at least ${SIGNUP_PASSWORD_MIN} characters.`);
     if (!matchOk) return toast.error("Passwords don't match.");
@@ -583,7 +585,10 @@ function Step1Account({
 
   return (
     <>
-      <Header title="Create your account" subtitle="Start with a few quick details to get your workspace ready." />
+      <Header
+        title="Create your account"
+        subtitle="Start with a few quick details to get your workspace ready."
+      />
       {accountErr ? (
         <div
           role="alert"
@@ -697,7 +702,10 @@ function Step1Account({
           <PwRule ok={lenOk}>At least {SIGNUP_PASSWORD_MIN} characters</PwRule>
         </ul>
 
-        <Field label="Confirm password" error={!matchOk && form.confirm ? "Passwords don't match." : null}>
+        <Field
+          label="Confirm password"
+          error={!matchOk && form.confirm ? "Passwords don't match." : null}
+        >
           <div className="relative">
             <input
               type={showConfirm ? "text" : "password"}
@@ -832,8 +840,7 @@ function Step3Business({
 }) {
   const [busy, setBusy] = useState(false);
   const phoneOk = isValidUSPhone(form.phone);
-  const canContinue =
-    !!form.agencyName.trim() && !!form.contactName.trim() && phoneOk;
+  const canContinue = !!form.agencyName.trim() && !!form.contactName.trim() && phoneOk;
   const showPhoneError = form.phone.trim().length > 0 && !phoneOk;
 
   const save = async () => {
@@ -923,9 +930,6 @@ function Step3Business({
         return;
       }
 
-      const isTrainingOnly =
-        typeof window !== "undefined" &&
-        new URLSearchParams(window.location.search).get("flow") === "training";
       const phoneE164 = normalizeUSPhoneToE164(form.phone);
       if (!phoneE164) {
         toast.error("Enter a valid US mobile number to continue.");
@@ -942,7 +946,7 @@ function Step3Business({
             contactEmail: userResp.user?.email ?? null,
             providerNumber: form.providerNumber,
             phoneE164,
-            trainingOnly: isTrainingOnly,
+            trainingOnly: false,
           }),
         )
         .eq("id", orgId)
@@ -994,7 +998,10 @@ function Step3Business({
 
   return (
     <>
-      <Header title="Tell us about your business" subtitle="This becomes your workspace name across Provider Interface." />
+      <Header
+        title="Tell us about your business"
+        subtitle="This becomes your workspace name across Provider Interface."
+      />
       <div className="grid gap-4">
         <Field label="Agency or company name">
           <TextInput
@@ -1005,7 +1012,11 @@ function Step3Business({
           />
         </Field>
         <Field label="Primary contact (full name)">
-          <TextInput value={form.contactName} onChange={(v) => update("contactName", v)} placeholder="Jane Doe" />
+          <TextInput
+            value={form.contactName}
+            onChange={(v) => update("contactName", v)}
+            placeholder="Jane Doe"
+          />
         </Field>
         <Field
           label="Mobile number"
@@ -1032,7 +1043,11 @@ function Step3Business({
             <TextInput value="Utah" onChange={() => {}} disabled />
           </Field>
           <Field label="Provider number" hint="Optional — you can add this later in settings.">
-            <TextInput value={form.providerNumber} onChange={(v) => update("providerNumber", v)} placeholder="" />
+            <TextInput
+              value={form.providerNumber}
+              onChange={(v) => update("providerNumber", v)}
+              placeholder=""
+            />
           </Field>
         </div>
       </div>
@@ -1136,12 +1151,15 @@ function Step4Pricing({
       >
         <p className="text-lg font-semibold text-[var(--hive-text)]">
           {PI_LIST_PRICE_DISPLAY}{" "}
-          <span className="text-sm font-normal text-[var(--hive-text-muted)]">per active client / month</span>
+          <span className="text-sm font-normal text-[var(--hive-text-muted)]">
+            per active client / month
+          </span>
         </p>
         <p className="mt-1 text-sm text-[var(--hive-text-muted)]">{PI_LIST_MINIMUM_LINE}</p>
         <p className="mt-3 text-sm text-[var(--hive-text)]">This page does not charge you.</p>
         <p className="mt-3 text-sm text-[var(--hive-text)]" data-testid="signup-plan-math">
-          Example: if 12 clients are active, that month is $828. If fewer than 6 are active, you still pay $350.
+          Example: if 12 clients are active, that month is $828. If fewer than 6 are active, you
+          still pay $350.
         </p>
       </div>
       <div className="grid gap-4">
@@ -1231,20 +1249,12 @@ function Step5Training({
               className="rounded-lg border border-[var(--hive-border)] bg-[var(--hive-canvas)] px-3 py-2 text-sm"
             >
               <span className="block font-medium text-[var(--hive-text)]">{addon.name}</span>
-              <span className="text-[var(--hive-text-muted)]">{formatUsdFromCents(addon.priceCents)}</span>
+              <span className="text-[var(--hive-text-muted)]">
+                {formatUsdFromCents(addon.priceCents)}
+              </span>
             </div>
           ))}
         </div>
-
-        <p className="text-sm">
-          <Link
-            to="/training"
-            className="text-[var(--hive-text-muted)] underline-offset-4 hover:text-[var(--hive-text)] hover:underline"
-            data-testid="signup-training-only-link"
-          >
-            Just need training? Buy classes without the office.
-          </Link>
-        </p>
 
         {people.map((person, index) => (
           <div
@@ -1273,7 +1283,9 @@ function Step5Training({
               </Button>
             </div>
             <fieldset className="mt-3 grid grid-cols-2 gap-2">
-              <legend className="sr-only">Training for {person.name || `person ${index + 1}`}</legend>
+              <legend className="sr-only">
+                Training for {person.name || `person ${index + 1}`}
+              </legend>
               {SIGNUP_TRAINING_ADDONS.map((addon) => {
                 const selected = person.sku === addon.id;
                 return (
@@ -1323,8 +1335,8 @@ function Step5Training({
             Training total {formatUsdFromCents(totalCents)}
           </p>
           <p className="mt-1 text-[var(--hive-text-muted)]">
-            {quantities.cpr_first_aid}× CPR · {quantities.pack}× Pack · {quantities.thirty_day}× 30-day ·{" "}
-            {quantities.mandt}× Mandt
+            {quantities.cpr_first_aid}× CPR · {quantities.pack}× Pack · {quantities.thirty_day}×
+            30-day · {quantities.mandt}× Mandt
           </p>
           <p className="mt-2 text-[var(--hive-text)]">This page does not charge you.</p>
         </div>
@@ -1459,12 +1471,10 @@ function Step6Payment({
         >
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
           <span>
-            <strong>TEST MODE</strong> — no real charge. Use card 4242 4242 4242 4242, any future expiry, any CVC, any ZIP.
+            <strong>TEST MODE</strong> — no real charge. Use card 4242 4242 4242 4242, any future
+            expiry, any CVC, any ZIP.
             {payStatus && !payStatus.paymentsConfigured ? (
-              <>
-                {" "}
-                {payStatus.message ?? "Payments are not set up on this host yet."}
-              </>
+              <> {payStatus.message ?? "Payments are not set up on this host yet."}</>
             ) : null}
           </span>
         </div>
@@ -1477,10 +1487,14 @@ function Step6Payment({
         <p className="font-medium text-[var(--hive-text)]">{PI_SIGNUP_PRICE_LINE}</p>
         <p className="mt-2 text-[var(--hive-text)]">{quote.summaryLine}</p>
         {trainingLines.length > 0 ? (
-          <div className="mt-2 space-y-1 text-[var(--hive-text)]" data-testid="signup-payment-training">
+          <div
+            className="mt-2 space-y-1 text-[var(--hive-text)]"
+            data-testid="signup-payment-training"
+          >
             {trainingLines.map((line) => (
               <p key={line.id}>
-                Training · {line.name} × {line.quantity}: {formatUsdFromCents(line.priceCents * line.quantity)} one-time
+                Training · {line.name} × {line.quantity}:{" "}
+                {formatUsdFromCents(line.priceCents * line.quantity)} one-time
               </p>
             ))}
             <p className="font-medium">Training total {formatUsdFromCents(trainingTotalCents)}</p>
@@ -1506,9 +1520,7 @@ function Step6Payment({
 function Header({ title, subtitle }: { title: string; subtitle: React.ReactNode }) {
   return (
     <div className="mb-6">
-      <h1
-        className="text-2xl font-semibold tracking-tight text-[var(--hive-text)] sm:text-3xl"
-      >
+      <h1 className="text-2xl font-semibold tracking-tight text-[var(--hive-text)] sm:text-3xl">
         {title}
       </h1>
       <p className="mt-1.5 text-sm text-[#3a4553]">{subtitle}</p>

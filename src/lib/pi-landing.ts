@@ -55,21 +55,20 @@ export const PI_PRICING_PAGE_DESCRIPTION =
 
 export const PI_KICKER = "PI · Built for Utah Medicaid disability providers";
 export const PI_HERO_FINE = "$69 per client / month · $350 / month minimum · Nectar included";
-export const PI_PRICE_MIN_AND_TRAINING = "$350 / month minimum · Optional training classes sold separately";
+export const PI_PRICE_MIN_AND_TRAINING =
+  "$350 / month minimum · Optional training classes sold separately";
 export const PI_LEARN_MORE = "Learn more";
 
 export const PI_NAV_WHY = "Why PI";
 export const PI_NAV_PRICING = "Pricing";
 export const PI_NAV_NECTAR = "Nectar";
 export const PI_NAV_ABOUT = "About";
-export const PI_NAV_TRAINING = "Training";
 export const PI_NAV_CONTACT = "Contact";
 export const PI_NAV_TERMS = "Terms";
 export const PI_NAV_BAA = "BAA";
 
 export const PI_NAV_LINKS = [
   { href: "/nectar", label: PI_NAV_NECTAR, to: "/nectar" as const },
-  { href: "/training", label: PI_NAV_TRAINING, to: "/training" as const },
   { href: "/pricing", label: PI_NAV_PRICING, to: "/pricing" as const },
   { href: "/about", label: PI_NAV_ABOUT, to: "/about" as const },
 ] as const;
@@ -80,7 +79,6 @@ export const PI_FOOTER_LINKS = [
   { href: "/pricing", label: PI_NAV_PRICING, to: "/pricing" as const },
   { href: "/nectar", label: PI_NAV_NECTAR, to: "/nectar" as const },
   { href: "/about", label: PI_NAV_ABOUT, to: "/about" as const },
-  { href: "/training", label: PI_NAV_TRAINING, to: "/training" as const },
   { href: "/contact", label: PI_NAV_CONTACT, to: "/contact" as const },
   { href: "/privacy", label: PI_NAV_PRIVACY, to: "/privacy" as const },
   { href: "/terms", label: PI_NAV_TERMS, to: "/terms" as const },
@@ -144,7 +142,8 @@ export const PI_WHAT_PI_DOES = [
 
 export const PI_NECTAR_KICKER = "Nectar, included in PI";
 export const PI_NECTAR_HEADLINE = "A second set of eyes on every shift.";
-export const PI_NECTAR_SUB = "Not an add-on. Not a tier. Nectar is in the price and runs on every note.";
+export const PI_NECTAR_SUB =
+  "Not an add-on. Not a tier. Nectar is in the price and runs on every note.";
 export const PI_NECTAR_LABEL = "Nectar";
 export const PI_NECTAR_BEFORE_TAG = "Before";
 export const PI_NECTAR_AFTER_TAG = "After";

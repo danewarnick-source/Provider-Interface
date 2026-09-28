@@ -243,20 +243,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Provider Interface" },
       {
         name: "description",
-        content:
-          "One quiet office for people, the schedule, notes, trainings, and Nectar.",
+        content: "One quiet office for people, the schedule, notes, trainings, and Nectar.",
       },
       { property: "og:title", content: "Provider Interface" },
       { name: "twitter:title", content: "Provider Interface" },
       {
         property: "og:description",
-        content:
-          "One quiet office for people, the schedule, notes, trainings, and Nectar.",
+        content: "One quiet office for people, the schedule, notes, trainings, and Nectar.",
       },
       {
         name: "twitter:description",
-        content:
-          "One quiet office for people, the schedule, notes, trainings, and Nectar.",
+        content: "One quiet office for people, the schedule, notes, trainings, and Nectar.",
       },
       {
         property: "og:image",

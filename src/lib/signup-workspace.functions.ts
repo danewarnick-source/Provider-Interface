@@ -123,16 +123,6 @@ export const ensureSignupWorkspace = createServerFn({ method: "POST" })
     if (isBlockedSignupMeta(meta) || !isSelfServeAgencySignup(meta)) return skipped();
 
     try {
-      const { data: seats } = await admin
-        .from("training_only_seats")
-        .select("id")
-        .eq("access_user_id", userId)
-        .limit(1);
-      if (Array.isArray(seats) && seats.length > 0) return skipped();
-    } catch {
-      /* table may not be applied yet */
-    }
-    try {
       const { data: auditor } = await admin
         .from("auditor_accounts")
         .select("id")

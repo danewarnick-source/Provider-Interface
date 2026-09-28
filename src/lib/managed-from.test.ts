@@ -14,7 +14,6 @@ import {
 const FROM_RAILS = [
   new URL("./email.functions.ts", import.meta.url),
   new URL("./audit-portal.functions.ts", import.meta.url),
-  new URL("./training-only-exec.functions.ts", import.meta.url),
   new URL("../routes/dashboard.settings.email.tsx", import.meta.url),
   new URL("../../supabase/functions/auth-send-email/index.ts", import.meta.url),
   new URL("../../supabase/functions/send-email/index.ts", import.meta.url),
@@ -22,7 +21,10 @@ const FROM_RAILS = [
 
 describe("extractEmailAddress", () => {
   it("accepts a bare mailbox", () => {
-    assert.equal(extractEmailAddress("noreply@providerinterface.com"), "noreply@providerinterface.com");
+    assert.equal(
+      extractEmailAddress("noreply@providerinterface.com"),
+      "noreply@providerinterface.com",
+    );
   });
 
   it("pulls the address out of a Name <addr> header", () => {
@@ -66,7 +68,10 @@ describe("managedFromAddress", () => {
 
   it("never returns @resend.dev, including a leftover sandbox env", () => {
     assert.doesNotMatch(managedFromAddress({}), /@resend\.dev/);
-    assert.equal(managedFromAddress({ RESEND_FROM: "onboarding@resend.dev" }), DEFAULT_MANAGED_FROM_ADDRESS);
+    assert.equal(
+      managedFromAddress({ RESEND_FROM: "onboarding@resend.dev" }),
+      DEFAULT_MANAGED_FROM_ADDRESS,
+    );
   });
 });
 

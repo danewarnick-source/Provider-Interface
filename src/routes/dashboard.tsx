@@ -184,40 +184,6 @@ export const Route = createFileRoute("/dashboard")({
         throw redirect({ to: "/audit-portal" });
       }
 
-      if (!location.pathname.startsWith("/dashboard/hive-exec")) {
-        try {
-          const { data: memberships } = await supabase
-            .from("organization_members")
-            .select("id")
-            .eq("user_id", session.user.id)
-            .eq("active", true)
-            .limit(1);
-          if (!memberships?.length) {
-            const { data: execRow } = await supabase
-              .from("hive_executives")
-              .select("id")
-              .eq("user_id", session.user.id)
-              .eq("active", true)
-              .maybeSingle();
-            if (!execRow) {
-              // training_only_seats is not in the generated Database types.
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const { data: seats } = await (supabase as any)
-                .from("training_only_seats")
-                .select("id")
-                .eq("access_user_id", session.user.id)
-                .limit(1);
-              if (seats?.length) {
-                throw redirect({ to: "/training/course", replace: true });
-              }
-            }
-          }
-        } catch (err) {
-          if (isRedirect(err)) throw err;
-          /* table may not be applied yet */
-        }
-      }
-
       let activeOrgId: string | null = null;
       try {
         activeOrgId = window.localStorage.getItem("hive.activeOrgId");
@@ -468,10 +434,7 @@ function DashboardLayout() {
 
   const role = org?.access.level ?? "staff";
   const isCommitteeMember = isCommitteeOnly(org?.access);
-  const isAdminCapable =
-    !isCommitteeMember &&
-    (can("view_staff_records") ||
-      isAdminLevel(role));
+  const isAdminCapable = !isCommitteeMember && (can("view_staff_records") || isAdminLevel(role));
 
   // Fail-closed gate: committee-only staff can ONLY access /dashboard/hrc.
   // Redirect away from anything else immediately.
@@ -539,7 +502,7 @@ function DashboardLayout() {
   const nav: NavItem[] = baseNav
     .filter((n) => !n.perm || can(n.perm))
     // Master-Controller gating: keep item visible; mark isLocked when feature is OFF.
-    // Training stays visible without hive_training — Internal trainings replaced Policies.
+    // Training stays visible without hive_training — class roster lives on this page.
     .map((n) => ({ ...n, isLocked: n.feature ? !isFeatureOn(n.feature) : false }));
 
   // Load states for the State portal dropdown (executives only).

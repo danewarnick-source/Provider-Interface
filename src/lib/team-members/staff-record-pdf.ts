@@ -9,8 +9,8 @@
  *   - profiles (identity, contact, position, hire date, emergency contact)
  *   - organization_members (PI role, job title, active status)
  *   - teams (team assignment)
- *   - certifications + external_certifications + baseline training
- *     completions (certs & trainings with expirations)
+ *   - evidence_items (certs and trainings on the team member file)
+ *   - in-platform course certificates (training_completions)
  *   - employee_documents (HR docs list)
  *
  * CRITICAL: no fabrication. Every empty value renders literally as "—".
@@ -21,6 +21,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase as defaultSupabase } from "@/integrations/supabase/client";
+import { inHiveRefUuid } from "@/lib/in-hive-training";
 import {
   PDFDocument,
   StandardFonts,
@@ -81,7 +82,7 @@ function fmtDate(d: string | null | undefined): string {
 
 type CertRow = {
   label: string;
-  source: string; // "PI cert" | "External cert" | "Baseline training"
+  source: string;
   issued: string | null;
   expires: string | null;
 };
@@ -151,65 +152,66 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
 
   const jobTitle = String((member as { job_title?: string | null }).job_title ?? "").trim();
 
-  // 4) Certifications from all three sources.
+  // 4) Evidence on the team member file, plus in-platform course certificates.
   const certs: CertRow[] = [];
-  const { data: hiveCerts } = await sb
-    .from("certifications")
-    .select("course_title, issued_at, expires_at, certification_type_code")
-    .eq("user_id", staffId);
-  for (const r of (hiveCerts ?? []) as Array<{
-    course_title: string | null;
-    issued_at: string | null;
-    expires_at: string | null;
-    certification_type_code: string | null;
-  }>) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: evidenceItems } = await (sb as any)
+    .from("evidence_items")
+    .select("id, title, requirement_key, document_date, expires_on")
+    .eq("organization_id", orgId)
+    .eq("subject_type", "staff")
+    .eq("subject_id", staffId);
+  const evidenceRows = (evidenceItems ?? []) as Array<{
+    id: string;
+    title: string | null;
+    requirement_key: string | null;
+    document_date: string | null;
+    expires_on: string | null;
+  }>;
+  const filedIds = new Set<string>();
+  if (evidenceRows.length) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: files } = await (sb as any)
+      .from("evidence_files")
+      .select("item_id")
+      .in(
+        "item_id",
+        evidenceRows.map((r) => r.id),
+      );
+    for (const f of (files ?? []) as Array<{ item_id: string }>) filedIds.add(f.item_id);
+  }
+  for (const r of evidenceRows) {
+    if (!filedIds.has(r.id) && !r.document_date && !r.expires_on) continue;
     certs.push({
-      label: r.course_title ?? r.certification_type_code ?? "PI certification",
-      source: "PI cert",
-      issued: r.issued_at,
-      expires: r.expires_at,
+      label: r.title ?? r.requirement_key ?? "Evidence",
+      source: "Evidence",
+      issued: r.document_date,
+      expires: r.expires_on,
     });
   }
-  const { data: extCerts } = await sb
-    .from("external_certifications")
-    .select("cert_name, cert_type, issuer, issued_date, expires_at, status")
-    .eq("user_id", staffId);
-  for (const r of (extCerts ?? []) as Array<{
-    cert_name: string | null;
-    cert_type: string | null;
-    issuer: string | null;
-    issued_date: string | null;
-    expires_at: string | null;
-    status: string | null;
+  const courseCertRefs = [
+    inHiveRefUuid("thirty-day", "__cert__"),
+    inHiveRefUuid("abi", "__cert__"),
+  ];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: courseCerts } = await (sb as any)
+    .from("training_completions")
+    .select("topic_title, completed_at, ref_id")
+    .eq("user_id", staffId)
+    .eq("topic_kind", "core")
+    .eq("topic_code", "CERT")
+    .in("ref_id", courseCertRefs);
+  for (const r of (courseCerts ?? []) as Array<{
+    topic_title: string | null;
+    completed_at: string | null;
+    ref_id: string;
   }>) {
+    if (!r.completed_at) continue;
     certs.push({
-      label: [
-        r.cert_name ?? r.cert_type ?? "External certification",
-        r.issuer ? `— ${r.issuer}` : "",
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .trim(),
-      source: `External cert${r.status ? ` · ${r.status}` : ""}`,
-      issued: r.issued_date,
-      expires: r.expires_at,
-    });
-  }
-  const { data: baseline } = await sb
-    .from("staff_baseline_training_completions")
-    .select("training_key, completed_date, expires_at")
-    .eq("staff_id", staffId)
-    .eq("organization_id", orgId);
-  for (const r of (baseline ?? []) as Array<{
-    training_key: string | null;
-    completed_date: string | null;
-    expires_at: string | null;
-  }>) {
-    certs.push({
-      label: (r.training_key ?? "Baseline training").replace(/_/g, " "),
-      source: "Baseline training",
-      issued: r.completed_date,
-      expires: r.expires_at,
+      label: r.topic_title ?? "In-platform course",
+      source: "Course",
+      issued: r.completed_at,
+      expires: null,
     });
   }
   // Sort: soonest expiration first, then non-expiring at the bottom.

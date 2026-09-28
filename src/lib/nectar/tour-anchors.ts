@@ -230,8 +230,7 @@ export const TOUR_ANCHORS: TourAnchor[] = [
     id: "nav.hive-training",
     label: "Training",
     route: "/dashboard/hive-training",
-    description:
-      "Admin class roster, locked seat prices, and Internal trainings (agency policy binder).",
+    description: "Admin class roster and locked seat prices.",
     surface: "admin",
   },
 

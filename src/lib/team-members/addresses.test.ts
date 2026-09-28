@@ -61,10 +61,6 @@ describe("Team Members addresses", () => {
       read("lib/internal-audit.functions.ts"),
       /`\/dashboard\/team-members\/\$\{row\.staff_id\}\?tab=file`/,
     );
-    const enrollments = read("lib/training-enrollments.functions.ts");
-    assert.equal(enrollments.match(/\/dashboard\/team-members\/\$\{/g)?.length, 5);
-    assert.match(enrollments, /"\/dashboard\/team-members"/);
-    assert.doesNotMatch(enrollments, /tab=record/);
     assert.equal(
       read("lib/sow-perimeters.functions.ts").match(/\/dashboard\/team-members\//g)?.length,
       3,

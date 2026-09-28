@@ -165,21 +165,18 @@ describe("signup workspace / session", () => {
     assert.equal(adapter.split("async signUp(").length - 1, 2);
   });
 
-  it("invite, manual add, and training-only write their own rows", () => {
+  it("invite and manual add write their own rows", () => {
     const invite = readFileSync(new URL("./join-invite.functions.ts", import.meta.url), "utf8");
     assert.match(invite, /created_via: "invitation"/);
     assert.match(invite, /from\("profiles"\)/);
     const join = readFileSync(new URL("../routes/join.tsx", import.meta.url), "utf8");
     assert.match(join, /accept_invitation/);
-    const hire = readFileSync(new URL("./team-members/members.functions.ts", import.meta.url), "utf8");
-    assert.match(hire, /created_via: createdVia/);
-    assert.match(hire, /from\("organization_members"\)\.upsert/);
-    const training = readFileSync(
-      new URL("./training-only-exec.functions.ts", import.meta.url),
+    const hire = readFileSync(
+      new URL("./team-members/members.functions.ts", import.meta.url),
       "utf8",
     );
-    assert.match(training, /created_via: "training_only"/);
-    assert.doesNotMatch(training, /from\("organizations"\)\.insert/);
+    assert.match(hire, /created_via: createdVia/);
+    assert.match(hire, /from\("organization_members"\)\.upsert/);
     const login = readFileSync(new URL("../routes/login.tsx", import.meta.url), "utf8");
     assert.match(login, /ensureSignupWorkspace/);
     const root = readFileSync(new URL("../routes/__root.tsx", import.meta.url), "utf8");

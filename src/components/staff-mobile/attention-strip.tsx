@@ -7,8 +7,11 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { listMyForms, getMyFormNotifications } from "@/lib/forms.functions";
 import { listSmartImportReminders } from "@/lib/smart-import-reminders.functions";
 import {
-  periodKeyFor, formDueDateFor, isOverdue,
-  type Frequency, type Schedule,
+  periodKeyFor,
+  formDueDateFor,
+  isOverdue,
+  type Frequency,
+  type Schedule,
 } from "@/lib/forms-utils";
 
 type FormRow = { id: string; name: string; frequency: Frequency; schedule: Schedule };
@@ -33,9 +36,21 @@ export function AttentionStrip() {
   const fetchSI = useServerFn(listSmartImportReminders);
   const fetchThreads = useServerFn(listMyThreads);
 
-  const { data: formsData } = useQuery({ queryKey: ["my-forms"], queryFn: () => fetchForms(), staleTime: 60_000 });
-  const { data: bell } = useQuery({ queryKey: ["my-form-notifs"], queryFn: () => fetchBell(), staleTime: 60_000 });
-  const { data: si } = useQuery({ queryKey: ["my-smart-import-reminders"], queryFn: () => fetchSI({ data: { scope: "mine" } }), staleTime: 60_000 });
+  const { data: formsData } = useQuery({
+    queryKey: ["my-forms"],
+    queryFn: () => fetchForms(),
+    staleTime: 60_000,
+  });
+  const { data: bell } = useQuery({
+    queryKey: ["my-form-notifs"],
+    queryFn: () => fetchBell(),
+    staleTime: 60_000,
+  });
+  const { data: si } = useQuery({
+    queryKey: ["my-smart-import-reminders"],
+    queryFn: () => fetchSI({ data: { scope: "mine" } }),
+    staleTime: 60_000,
+  });
   const { data: threads } = useQuery({
     queryKey: ["threads", orgId],
     enabled: !!orgId,
@@ -43,13 +58,13 @@ export function AttentionStrip() {
     staleTime: 30_000,
   });
 
-
   const chips: Chip[] = [];
 
   // Forms — compute due/overdue exactly like FormsReminderCard.
   const forms = (formsData?.forms ?? []) as FormRow[];
   const subs = formsData?.submissions ?? [];
-  let due = 0, overdue = 0;
+  let due = 0,
+    overdue = 0;
   for (const f of forms) {
     if (f.frequency === "as_needed") continue;
     const periodKey = periodKeyFor(f.frequency);
@@ -59,21 +74,30 @@ export function AttentionStrip() {
     if (isOverdue(formDueDateFor(f.frequency, f.schedule))) overdue++;
   }
   const unreadAssigned = (bell?.notifications ?? []).filter(
-    (n: { read_at: string | null; type: string }) => !n.read_at && n.type === "form_assigned"
+    (n: { read_at: string | null; type: string }) => !n.read_at && n.type === "form_assigned",
   ).length;
   if (overdue > 0) {
     chips.push({
-      key: "forms-overdue", to: "/dashboard/forms", icon: FileText, tone: "danger",
+      key: "forms-overdue",
+      to: "/dashboard/forms",
+      icon: FileText,
+      tone: "danger",
       label: `${overdue} form${overdue === 1 ? "" : "s"} overdue`,
     });
   } else if (due > 0) {
     chips.push({
-      key: "forms-due", to: "/dashboard/forms", icon: FileText, tone: "warn",
+      key: "forms-due",
+      to: "/dashboard/forms",
+      icon: FileText,
+      tone: "warn",
       label: `${due} form${due === 1 ? "" : "s"} due`,
     });
   } else if (unreadAssigned > 0) {
     chips.push({
-      key: "forms-new", to: "/dashboard/forms", icon: FileText, tone: "info",
+      key: "forms-new",
+      to: "/dashboard/forms",
+      icon: FileText,
+      tone: "info",
       label: `${unreadAssigned} new form${unreadAssigned === 1 ? "" : "s"}`,
     });
   }
@@ -81,10 +105,12 @@ export function AttentionStrip() {
   // Smart Import reminders for me — provisional/expiring certs needing upload.
   const siCount = (si?.reminders ?? []).length;
   if (siCount > 0) {
-    const hasCritical = (si?.reminders ?? []).some((r: { urgency: string }) => r.urgency === "critical");
+    const hasCritical = (si?.reminders ?? []).some(
+      (r: { urgency: string }) => r.urgency === "critical",
+    );
     chips.push({
       key: "smart-import",
-      to: "/dashboard/external-certifications",
+      to: "/dashboard/my-evidence",
       icon: BellRing,
       tone: hasCritical ? "danger" : "warn",
       label: `${siCount} cert reminder${siCount === 1 ? "" : "s"}`,

@@ -58,12 +58,16 @@ export const generateSmartImportReminders = createServerFn({ method: "POST" })
     if (!jobs?.length) return { generated: 0 };
 
     const jobIds = jobs.map((j: { id: string }) => j.id);
-    const jobOrg = new Map<string, string>(jobs.map((j: { id: string; org_id: string }) => [j.id, j.org_id]));
+    const jobOrg = new Map<string, string>(
+      jobs.map((j: { id: string; org_id: string }) => [j.id, j.org_id]),
+    );
 
     // 1) Subjects flagged / skipped during review
     const { data: subjects } = await sb
       .from("import_subjects")
-      .select("id, import_job_id, display_name, subject_type, review_status, review_decision, match_status, committed_record_id, committed_at")
+      .select(
+        "id, import_job_id, display_name, subject_type, review_status, review_decision, match_status, committed_record_id, committed_at",
+      )
       .in("import_job_id", jobIds);
     for (const s of subjects ?? []) {
       const orgId = jobOrg.get(s.import_job_id)!;
@@ -90,7 +94,14 @@ export const generateSmartImportReminders = createServerFn({ method: "POST" })
 
     // 2) Certs: provisional / unverified, and expiring
     const subjectById = new Map(
-      (subjects ?? []).map((s: { id: string; display_name: string; subject_type: string; committed_record_id: string | null }) => [s.id, s]),
+      (subjects ?? []).map(
+        (s: {
+          id: string;
+          display_name: string;
+          subject_type: string;
+          committed_record_id: string | null;
+        }) => [s.id, s],
+      ),
     );
     const { data: certs } = await sb
       .from("import_cert_documents")
@@ -105,7 +116,10 @@ export const generateSmartImportReminders = createServerFn({ method: "POST" })
 
       // Provisional / unverified → recurring reminder until a verifying doc is on file
       if (c.state === "provisional" || c.state === "unverified") {
-        const type = c.state === "provisional" ? "smart_import_provisional_cert" : "smart_import_unverified_cert";
+        const type =
+          c.state === "provisional"
+            ? "smart_import_provisional_cert"
+            : "smart_import_unverified_cert";
         inserts.push({
           organization_id: orgId,
           recipient_role: "admin",
@@ -133,7 +147,7 @@ export const generateSmartImportReminders = createServerFn({ method: "POST" })
             urgency: "urgent",
             title: `Upload your ${c.cert_key}`,
             body: `Snap a photo or upload your current cert. Your admin verifies once it's in.`,
-            link_to: `/dashboard/external-certifications?cert=${encodeURIComponent(c.cert_key)}`,
+            link_to: "/dashboard/my-evidence",
             related_id: c.id,
             related_type: "import_cert_document",
             recurrence_key: `si:cert:${c.id}:user:${subj.committed_record_id}`,
@@ -144,7 +158,9 @@ export const generateSmartImportReminders = createServerFn({ method: "POST" })
 
       // Expiring (verified but within 30 days) or expired → forward to renewal alert surface
       if (c.state === "verified" && c.expiry_date) {
-        const days = Math.round((new Date(c.expiry_date as string).getTime() - now) / (24 * 60 * 60 * 1000));
+        const days = Math.round(
+          (new Date(c.expiry_date as string).getTime() - now) / (24 * 60 * 60 * 1000),
+        );
         if (days <= 30) {
           inserts.push({
             organization_id: orgId,
@@ -168,7 +184,7 @@ export const generateSmartImportReminders = createServerFn({ method: "POST" })
               urgency: urgencyFor(days),
               title: `${c.cert_key} ${days <= 0 ? "expired" : "expires in " + days + " day" + (days === 1 ? "" : "s")}`,
               body: "Upload your renewed cert from your phone — admin verifies the new one.",
-              link_to: `/dashboard/external-certifications?cert=${encodeURIComponent(c.cert_key)}`,
+              link_to: "/dashboard/my-evidence",
               related_id: c.id,
               related_type: "import_cert_document",
               recurrence_key: `si:cert-expiry:${c.id}:user:${subj.committed_record_id}`,
@@ -186,7 +202,9 @@ export const generateSmartImportReminders = createServerFn({ method: "POST" })
       .in("import_job_id", jobIds)
       .is("answered_at", null);
     for (const q of questions ?? []) {
-      const subj = q.import_subject_id ? (subjectById.get(q.import_subject_id) as { display_name: string } | undefined) : undefined;
+      const subj = q.import_subject_id
+        ? (subjectById.get(q.import_subject_id) as { display_name: string } | undefined)
+        : undefined;
       inserts.push({
         organization_id: q.org_id as string,
         recipient_role: "admin",
@@ -226,7 +244,12 @@ export const generateSmartImportReminders = createServerFn({ method: "POST" })
       .in("recurrence_key", keys);
     if (exErr) throw new Error(exErr.message);
     const existingByKey = new Map(
-      (existing ?? []).map((r: { id: string; organization_id: string; recurrence_key: string | null }) => [`${r.organization_id}::${r.recurrence_key ?? ""}`, r.id]),
+      (existing ?? []).map(
+        (r: { id: string; organization_id: string; recurrence_key: string | null }) => [
+          `${r.organization_id}::${r.recurrence_key ?? ""}`,
+          r.id,
+        ],
+      ),
     );
 
     const toInsert: typeof inserts = [];
@@ -252,7 +275,6 @@ export const generateSmartImportReminders = createServerFn({ method: "POST" })
       const { error } = await notificationDb.from("notifications").insert(toInsert);
       if (error) throw new Error(error.message);
     }
-
 
     return { generated: inserts.length };
   });
@@ -281,7 +303,9 @@ export const listSmartImportReminders = createServerFn({ method: "POST" })
     ];
     let q = sb
       .from("notifications")
-      .select("id, type, urgency, title, body, link_to, related_id, related_type, recurrence_key, next_remind_at, created_at, resolved_at, recipient_user_id")
+      .select(
+        "id, type, urgency, title, body, link_to, related_id, related_type, recurrence_key, next_remind_at, created_at, resolved_at, recipient_user_id",
+      )
       .in("type", TYPES)
       .is("resolved_at", null)
       .order("urgency", { ascending: false })
@@ -301,7 +325,9 @@ export const listSmartImportReminders = createServerFn({ method: "POST" })
     if (data.relatedRecordId) {
       // Filter to reminders whose subject committed to the given live record.
       // We resolve via import_subjects → committed_record_id == relatedRecordId.
-      const subjectIds = filtered.map((r: { related_id: string | null }) => r.related_id).filter(Boolean) as string[];
+      const subjectIds = filtered
+        .map((r: { related_id: string | null }) => r.related_id)
+        .filter(Boolean) as string[];
       if (subjectIds.length === 0) return { reminders: [] };
       // related_id may point at subject / cert doc / question — resolve all paths.
       const { data: subs } = await sb
@@ -319,13 +345,15 @@ export const listSmartImportReminders = createServerFn({ method: "POST" })
         .select("id, import_subject_id")
         .in("import_subject_id", Array.from(allowedSubs));
       const allowedQs = new Set((qs ?? []).map((x: { id: string }) => x.id));
-      filtered = filtered.filter((r: { related_id: string | null; related_type: string | null }) => {
-        if (!r.related_id || !r.related_type) return false;
-        if (r.related_type === "import_subject") return allowedSubs.has(r.related_id);
-        if (r.related_type === "import_cert_document") return allowedDocs.has(r.related_id);
-        if (r.related_type === "import_nectar_question") return allowedQs.has(r.related_id);
-        return false;
-      });
+      filtered = filtered.filter(
+        (r: { related_id: string | null; related_type: string | null }) => {
+          if (!r.related_id || !r.related_type) return false;
+          if (r.related_type === "import_subject") return allowedSubs.has(r.related_id);
+          if (r.related_type === "import_cert_document") return allowedDocs.has(r.related_id);
+          if (r.related_type === "import_nectar_question") return allowedQs.has(r.related_id);
+          return false;
+        },
+      );
     }
     return { reminders: filtered };
   });
@@ -351,7 +379,11 @@ export const resolveSmartImportReminder = createServerFn({ method: "POST" })
 
     const { error } = await sb
       .from("notifications")
-      .update({ resolved_at: new Date().toISOString(), resolved_by: context.userId, read_at: new Date().toISOString() })
+      .update({
+        resolved_at: new Date().toISOString(),
+        resolved_by: context.userId,
+        read_at: new Date().toISOString(),
+      })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
 
@@ -428,7 +460,9 @@ export const employeeUploadImportCert = createServerFn({ method: "POST" })
         traces_to: "import_cert_documents",
         actor_id: context.userId,
       });
-    } catch { /* non-fatal */ }
+    } catch {
+      /* non-fatal */
+    }
 
     return { ok: true, path };
   });

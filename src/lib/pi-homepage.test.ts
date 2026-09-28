@@ -85,11 +85,11 @@ describe("public homepage tokens stay off the in-app cream theme", () => {
     );
     assert.deepEqual(
       PI_PUBLIC_NAV.map((item) => item.label),
-      ["Nectar", "Training", "Pricing", "About"],
+      ["Nectar", "Pricing", "About"],
     );
     assert.deepEqual(
       PI_PUBLIC_NAV.map((item) => item.to),
-      ["/nectar", "/training", "/pricing", "/about"],
+      ["/nectar", "/pricing", "/about"],
     );
     assert.deepEqual(
       PI_HOME_FOOTER_LINKS.map((item) => item.to),
