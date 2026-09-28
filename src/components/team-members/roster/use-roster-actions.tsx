@@ -5,7 +5,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useAccess } from "@/hooks/use-access";
 import { useAuth } from "@/hooks/use-auth";
-import { resolveAuthOrigin } from "@/lib/auth-redirect";
 import { interpretInviteSendResult } from "@/lib/invite-send-result";
 import { inviteStaffMembers, resendInvitation } from "@/lib/team-members/invites.functions";
 import { archiveEntity, restoreEntity } from "@/lib/team-members/lifecycle.functions";
@@ -67,7 +66,6 @@ export function useRosterActions(organizationId: string | null): {
           data: {
             organization_id: organizationId,
             invitation_id: row.pendingInviteId,
-            site_origin: resolveAuthOrigin(),
           },
         });
         return { key, row, res };
@@ -75,7 +73,6 @@ export function useRosterActions(organizationId: string | null): {
       const res = await inviteFn({
         data: {
           organization_id: organizationId,
-          site_origin: resolveAuthOrigin(),
           user_ids: [row.userId],
           force: true,
         },

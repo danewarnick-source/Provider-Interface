@@ -609,8 +609,8 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/addClientBillingCodes/i.test(fn)) {
     return { ok: true, added: 0 };
   }
-  if (/createEmployeeManually/i.test(fn)) {
-    return { userId: "00000000-0000-4000-a000-000000000499", email: "sep1.tester@example.test" };
+  if (/createTeamMember/i.test(fn)) {
+    return { status: "created", userId: "00000000-0000-4000-a000-000000000499", invited: true };
   }
   if (/inviteStaffMembers/i.test(fn)) {
     return {

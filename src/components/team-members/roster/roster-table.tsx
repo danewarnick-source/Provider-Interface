@@ -24,17 +24,6 @@ export function PendingFirstLoginChip() {
   );
 }
 
-export function NeedsSetupChip() {
-  return (
-    <span
-      data-testid="needs-setup-chip"
-      className="shrink-0 rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
-    >
-      Needs setup
-    </span>
-  );
-}
-
 /** Owner / Admin badge beside the name. Team member (staff) shows nothing. */
 export function LevelTag({ level }: { level: RosterRow["accessLevel"] }) {
   if (level === "staff") return null;
@@ -177,7 +166,6 @@ export function RosterTable({
                           </Link>
                           <LevelTag level={r.accessLevel} />
                           {r.mustChangePassword && <PendingFirstLoginChip />}
-                          {r.needsSetup && <NeedsSetupChip />}
                           <MissingInfoChip row={r} />
                         </div>
                         {jobLine && (

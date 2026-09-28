@@ -86,7 +86,7 @@ describe("Team Members addresses", () => {
     );
     assert.match(
       read("components/team-members/add/add-member-dialog.tsx"),
-      /\/dashboard\/team-members\/\$\{id\}\?tab=file/,
+      /to: "\/dashboard\/team-members\/\$staffId", params: \{ staffId: id \}/,
     );
   });
 
@@ -165,10 +165,6 @@ describe("Team Members addresses", () => {
       [
         "components/employees/employee-roster-upload-wizard.tsx",
         "components/team-members/add/import-members-dialog.tsx",
-      ],
-      [
-        "components/employees/finish-employee-setup-wizard.tsx",
-        "components/team-members/add/finish-setup-dialog.tsx",
       ],
       [
         "components/employees/staff-profile-panel.tsx",
@@ -271,6 +267,14 @@ describe("Team Members addresses", () => {
     ]) {
       assert.equal(existsSync(join(SRC, rel)), false, `${rel} should be deleted`);
     }
-    assert.equal(existsSync(join(SRC, "components/hr/staff-fields-panel.tsx")), true);
+    assert.equal(existsSync(join(SRC, "components/hr/staff-fields-panel.tsx")), false);
+    assert.equal(
+      existsSync(join(SRC, "components/team-members/add/finish-setup-dialog.tsx")),
+      false,
+    );
+    assert.equal(
+      existsSync(join(SRC, "components/employees/finish-employee-setup-wizard.tsx")),
+      false,
+    );
   });
 });

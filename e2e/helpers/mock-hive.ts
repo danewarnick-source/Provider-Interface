@@ -16,6 +16,7 @@ import {
   CLIENTS,
   DAILY_LOGS,
   LAST_SIGN_IN,
+  NEW_TEAM_MEMBER,
   ORG_ID,
   ORG_NAME,
   PENDING_INVITE,
@@ -24,6 +25,7 @@ import {
   STAFF,
   STAFF_LIST,
   TEAMS,
+  TNS_POSITIONS,
 } from "../fixtures/tns-roster";
 import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
 import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
@@ -51,8 +53,8 @@ export type MockOptions = {
   logsError?: boolean;
   /** Skip staff_assignments so the HHS hub bounce path can be asserted. */
   noAssignments?: boolean;
-  /** Mark one roster profile custom_attributes.needs_setup so Finish setup can render. */
-  needsSetupUserId?: string;
+  /** createTeamMember answers inactive_match (the email used to work here). */
+  inactiveMatch?: boolean;
   /** rosterOrgHasHomes answers false (the roster hides its Home filter). */
   noHomes?: boolean;
 };
@@ -159,8 +161,8 @@ function profileRow(staff: (typeof STAFF_LIST)[number], opts: MockOptions): Row 
     requires_abi: true,
     is_active: true,
     bc_role: null,
-    custom_attributes: opts.needsSetupUserId === staff.id ? { needs_setup: true } : {},
-    phone: opts.needsSetupUserId === staff.id ? "555-0142" : null,
+    custom_attributes: {},
+    phone: null,
   };
 }
 
@@ -744,18 +746,11 @@ function emptyClientCareData(clientId: string) {
 /** Options of the most recent installHiveMocks call (server fns don't get them otherwise). */
 let activeMockOpts: MockOptions = {};
 
-const PRESET_ID = {
-  staff: "00000000-0000-4000-a000-000000000951",
-  admin: "00000000-0000-4000-a000-000000000952",
-} as const;
-
 /** listTeamRoster — the RosterRow shape from src/lib/team-members/roster.ts. */
 function teamRosterRows(): Row[] {
-  const opts = activeMockOpts;
   return STAFF_LIST.map((s) => {
     const level = levelForRole(s.role);
     const [first, ...rest] = s.name.split(" ");
-    const needsSetup = opts.needsSetupUserId === s.id;
     const teamId = "teamId" in s ? s.teamId : null;
     const supervisor =
       teamId === STAFF.jake.teamId && s.id !== STAFF.harvey.id ? STAFF.harvey : null;
@@ -766,12 +761,11 @@ function teamRosterRows(): Row[] {
       firstName: first ?? "",
       lastName: rest.join(" "),
       email: s.email,
-      phone: needsSetup ? "555-0142" : "",
+      phone: "",
       employeeId: `TM-${s.id.slice(-3)}`,
       photoPath: null,
       jobTitle: s.jobTitle,
       accessLevel: level,
-      presetId: level === "owner" ? null : PRESET_ID[level],
       positions: ROSTER_POSITIONS[s.id] ?? [],
       homeId: teamId,
       homeName: TEAMS.find((t) => t.id === teamId)?.team_name ?? null,
@@ -785,8 +779,6 @@ function teamRosterRows(): Row[] {
       pendingInviteId: null,
       evidence: ROSTER_EVIDENCE[s.id],
       missingInfo: s.id === STAFF.tom.id ? ["date_of_birth", "address"] : [],
-      needsSetup,
-      setup: needsSetup ? { department: "", workerType: "w2" } : null,
     };
   });
 }
@@ -859,23 +851,72 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/resetMemberPassword/i.test(fn)) {
     return { login: "jake.probert@example.test", password: "Mock-Temp-Pass1" };
   }
-  if (/applyEmployeeRosterRow/i.test(fn)) {
+  if (/listTeamMemberFormOptions/i.test(fn)) {
     return {
-      userId: "00000000-0000-4000-a000-000000000498",
-      email: "sam.rivera@example.test",
-      action: "created",
+      homes: TEAMS.map((t) => ({ id: t.id, name: t.team_name })),
+      supervisors: STAFF_LIST.map((st) => ({ userId: st.id, name: st.name })),
+      positions: TNS_POSITIONS.map((p) => ({ ...p })),
+    };
+  }
+  if (/createTeamMember/i.test(fn)) {
+    if (activeMockOpts.inactiveMatch) {
+      return {
+        status: "inactive_match",
+        userId: STAFF.tom.id,
+        name: STAFF.tom.name,
+        rehireEligible: null,
+      };
+    }
+    const invite = !/"sendInvite":false|sendInvite[^,}]*false/i.test(body);
+    return invite
+      ? { status: "created", userId: NEW_TEAM_MEMBER.id, invited: true, inviteError: null }
+      : {
+          status: "created",
+          userId: NEW_TEAM_MEMBER.id,
+          invited: false,
+          tempPassword: NEW_TEAM_MEMBER.tempPassword,
+        };
+  }
+  if (/previewTeamImport/i.test(fn)) {
+    const emails = [...new Set(body.match(/[a-z0-9._%+-]+@example\.test/gi) ?? [])].map((e) =>
+      e.toLowerCase(),
+    );
+    const here = new Set(STAFF_LIST.map((st) => st.email.toLowerCase()));
+    return emails.map((email) => ({
+      email,
+      match: here.has(email) ? "already_here" : "new",
+      name: STAFF_LIST.find((st) => st.email.toLowerCase() === email)?.name ?? null,
+    }));
+  }
+  if (/importTeamMembers/i.test(fn)) {
+    const emails = [...new Set(body.match(/[a-z0-9._%+-]+@example\.test/gi) ?? [])];
+    const invite = !/sendInvites[^,}]*false/i.test(body);
+    return emails.map((email, index) => ({
+      index,
+      email: email.toLowerCase(),
+      name: email.split("@")[0],
+      status: "created",
+      userId: `00000000-0000-4000-a000-0000000005${String(index).padStart(2, "0")}`,
+      invited: invite,
       reason: null,
-    };
+    }));
   }
-  if (/finishEmployeeSetup/i.test(fn)) {
+  if (/applyEvidenceRequirements/i.test(fn)) return { ok: true, count: 2 };
+  if (/loadTeamMemberEvidenceFacts/i.test(fn)) {
+    const ids = [...new Set(body.match(/00000000-0000-4000-a000-[0-9a-f]{12}/gi) ?? [])].filter(
+      (id) => id !== ORG_ID,
+    );
     return {
-      userId: "00000000-0000-4000-a000-000000000201",
-      email: "jake.probert@example.test",
-      name: "Jake Probert",
+      people: ids.map((userId, i) => ({
+        userId,
+        name: userId === NEW_TEAM_MEMBER.id ? NEW_TEAM_MEMBER.name : `Imported ${i + 1}`,
+        hireDate: "2026-07-01",
+        transportsClients: false,
+        positions:
+          userId === NEW_TEAM_MEMBER.id ? [{ key: "hhp", label: "Host Home Provider" }] : [],
+      })),
+      caseload: {},
     };
-  }
-  if (/createEmployeeManually/i.test(fn)) {
-    return { userId: "00000000-0000-4000-a000-000000000499", email: "sep1.tester@example.test" };
   }
   if (/inviteStaffMembers/i.test(fn)) {
     return {

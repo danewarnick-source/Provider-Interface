@@ -173,6 +173,23 @@ export const ROSTER_POSITIONS: Record<string, Array<{ key: string; label: string
   [ADMIN_USER_ID]: [],
 };
 
+/** The agency's staff_types — the Position list on Add / Import team members. */
+export const TNS_POSITIONS = [
+  { key: "dsp", label: "Direct Support Professional" },
+  { key: "executive_assistant", label: "Executive Assistant" },
+  { key: "executive_director", label: "Executive Director" },
+  { key: "hhp", label: "Host Home Provider" },
+  { key: "operations_director", label: "Operations Director" },
+];
+
+/** The person createTeamMember / importTeamMembers "adds" in the mocks. */
+export const NEW_TEAM_MEMBER = {
+  id: "00000000-0000-4000-a000-000000000499",
+  name: "Sep Tester",
+  email: "sep1.tester@example.test",
+  tempPassword: "Mock-Temp-Pass2",
+} as const;
+
 /** Mocked org_member_last_sign_ins: the roster admin has never signed in. */
 export const LAST_SIGN_IN: Record<string, string | null> = {
   [ADMIN_USER_ID]: null,

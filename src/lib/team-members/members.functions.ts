@@ -12,113 +12,109 @@ import type { AccessLevel } from "@/lib/access/levels";
 import { resolvePresetId } from "@/lib/access/preset-resolve";
 import { logChange } from "@/lib/access/change-log.server";
 import { assertCanManageMember } from "@/lib/team-members/guards.server";
+import { sendTeamMemberInvitesInternal } from "@/lib/team-members/invites.functions";
+import { loadStaffDutyFactsInternal } from "@/lib/obligations/load-staff-duty-facts.functions";
+import {
+  EMAIL_TAKEN_MESSAGE,
+  IMPORT_MAX_ROWS,
+  OWNER_ACCESS,
+  WORKER_TYPES,
+  accessNeedsOwner,
+  classifyEmailMatch,
+  normalizeEmail,
+  resolveAccessChoice,
+  type EmailMatch,
+  type PresetPick,
+  type ResolvedAccess,
+} from "@/lib/team-members/add-member";
+import type { CaseloadFacts, EvidencePersonFacts } from "@/lib/team-members/evidence-answers";
 
 type MemberInsert = Database["public"]["Tables"]["organization_members"]["Insert"];
 
-const LevelEnum = z.enum(["owner", "admin", "staff"]);
+const YMD = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
-export const CreateEmployeeInput = z.object({
-  organizationId: z.string().uuid(),
-  firstName: z.string().trim().min(1).max(80),
-  lastName: z.string().trim().min(1).max(80),
-  email: z.string().trim().email().max(255),
-  phone: z.string().trim().max(30).optional().or(z.literal("")),
-  temporaryPassword: z.string().min(12).max(128),
-  accessLevel: LevelEnum,
-  /** Null for Owner. Blank for Admin / Team member uses that level's default preset. */
-  accessPresetId: z.string().uuid().nullable().optional(),
-  department: z.string().trim().max(120).optional().or(z.literal("")),
-  hireDate: z.string().optional().or(z.literal("")),
-  startDate: z.string().optional().or(z.literal("")),
-  endDate: z.string().optional().or(z.literal("")),
-  requiresDeescalation: z.boolean().default(true),
-  requiresAbi: z.boolean().default(true),
-  staffType: z.array(z.string()).optional().default([]),
-  employeeId: z.string().trim().max(80).optional().or(z.literal("")),
-  workerType: z.string().trim().max(80).optional().or(z.literal("")),
-  customFieldValues: z.record(z.string(), z.unknown()).optional().default({}),
-  username: z.string().trim().max(254).optional().or(z.literal("")),
-  managerId: z.string().uuid().nullable().optional(),
-});
+/* ------------------------------------------------------------------ */
+/* Shared hire path                                                    */
+/* ------------------------------------------------------------------ */
 
-export type HireEmployeeInput = z.infer<typeof CreateEmployeeInput>;
-
-export type HireEmployeeOptions = {
-  /** Bulk add: person is on the roster but job questions are not answered yet. */
-  needsSetup?: boolean;
-  /** Skip Evidence-pack assignment until Finish setup, when job answers exist. */
-  deferHirePack?: boolean;
-  /** Spreadsheet job title. Omit to keep the Add employee department → job title path. */
+export type HireTeamMemberInput = {
+  organizationId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string | null;
+  accessLevel: AccessLevel;
+  /** Null for Owner. Undefined for Admin / Team member uses that level's default preset. */
+  accessPresetId?: string | null;
+  hireDate?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  dateOfBirth?: string | null;
+  department?: string | null;
+  employeeId?: string | null;
+  /** profiles.staff_type_keys — the Position list (staff_types keys). */
+  staffType?: string[];
+  workerType?: string | null;
+  /** Only written when given; new rows otherwise take the column default (false). */
+  transportsClients?: boolean;
+  /** profiles.team_id — the person's home. Only written when given. */
+  teamId?: string | null;
+  /** organization_members.manager_id. Only written when given. */
+  managerId?: string | null;
+  /** organization_members.job_title. Omit to keep the department → job title path. */
   jobTitle?: string | null;
+  /** Only written when given. Add team member leaves them null ("not answered"). */
+  requiresAbi?: boolean;
+  requiresDeescalation?: boolean;
+  username?: string | null;
 };
 
-async function customAttributesFromIntake(
-  organizationId: string,
-  customFieldValues: Record<string, unknown> | undefined,
-): Promise<Record<string, unknown>> {
-  const customFieldEntries = Object.entries(customFieldValues ?? {}).filter(
-    ([, v]) => v !== undefined && v !== "",
-  );
-  const customAttributes: Record<string, unknown> = {};
-  if (!customFieldEntries.length) return customAttributes;
-  const { data: orgRow } = await supabaseAdmin
-    .from("organizations")
-    .select("feature_config")
-    .eq("id", organizationId)
-    .maybeSingle();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customFieldDefs = ((orgRow as any)?.feature_config?.staff_intake_fields?.custom_fields ??
-    []) as Array<{ id: string; name: string }>;
-  const nameById = new Map(customFieldDefs.map((f) => [f.id, f.name]));
-  for (const [fieldId, value] of customFieldEntries) {
-    const name = nameById.get(fieldId);
-    if (name && name !== "needs_setup") customAttributes[name] = value;
-  }
-  return customAttributes;
-}
+export type HireTeamMemberResult = {
+  userId: string;
+  email: string;
+  created: boolean;
+  /** Server-generated, only when a new login was created. Shown once, never stored. */
+  tempPassword: string | null;
+  presetId: string | null;
+};
 
-async function assertOrgManager(actorId: string, orgId: string) {
-  await requireCategory(supabaseAdmin, actorId, orgId, "staff_hiring", "edit");
-}
-
-/** Hiring or re-leveling someone above Team member takes an Owner. */
-async function assertCanGrantLevel(actorId: string, orgId: string, level: AccessLevel) {
-  if (level !== "staff") await requireLevel(supabaseAdmin, actorId, orgId, "owner");
-}
-
-/** Shared hire path for Add employee and roster upload. Never sends email. */
-export async function hireEmployeeInternal(
-  data: HireEmployeeInput,
+/**
+ * One hire path for Add team member, Import team members and Smart Import.
+ * Generates the password on the server. Never sends email. Manual adds refuse
+ * an existing account; Smart Import links it.
+ */
+export async function hireTeamMemberInternal(
+  data: HireTeamMemberInput,
   actorUserId: string,
   createdVia: "manual_admin" | "smart_import" = "manual_admin",
-  options: HireEmployeeOptions = {},
-): Promise<{ userId: string; email: string; created: boolean }> {
+): Promise<HireTeamMemberResult> {
   await assertAgencySetupCompleteForOrg(supabaseAdmin, data.organizationId);
 
-  const effectiveEmail = data.email.trim().toLowerCase();
+  const effectiveEmail = normalizeEmail(data.email);
   const startDate = data.startDate || data.hireDate || null;
   const endDate = data.endDate || null;
   if (startDate && endDate && endDate < startDate) {
     throw new Error("End date must be on or after Start date.");
   }
 
-  const { data: existingProf } = await supabaseAdmin
-    .from("profiles")
-    .select("id")
-    .ilike("email", effectiveEmail)
-    .maybeSingle();
+  const findByEmail = async () =>
+    (await supabaseAdmin.from("profiles").select("id").eq("email", effectiveEmail).maybeSingle())
+      .data;
 
+  const existingProf = await findByEmail();
   if (existingProf?.id && createdVia === "manual_admin") {
-    throw new Error("An account with this email already exists.");
+    throw new Error(EMAIL_TAKEN_MESSAGE);
   }
 
   let newUserId = existingProf?.id ?? "";
   let created = false;
+  let tempPassword: string | null = null;
 
   if (!newUserId) {
+    const password = generateTempPassword();
     const { data: createdUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
       email: effectiveEmail,
-      password: data.temporaryPassword,
+      password,
       email_confirm: true,
       user_metadata: {
         full_name: `${data.firstName} ${data.lastName}`.trim(),
@@ -127,33 +123,19 @@ export async function hireEmployeeInternal(
     });
     if (createErr || !createdUser.user) {
       const msg = createErr?.message || "Failed to create user";
-      if (/already/i.test(msg)) {
-        const { data: again } = await supabaseAdmin
-          .from("profiles")
-          .select("id")
-          .ilike("email", effectiveEmail)
-          .maybeSingle();
-        if (again?.id) {
-          newUserId = again.id;
-        } else {
-          throw new Error(msg);
-        }
-      } else {
-        throw new Error(msg);
-      }
+      if (!/already/i.test(msg)) throw new Error(msg);
+      if (createdVia === "manual_admin") throw new Error(EMAIL_TAKEN_MESSAGE);
+      const again = await findByEmail();
+      if (!again?.id) throw new Error(msg);
+      newUserId = again.id;
     } else {
       newUserId = createdUser.user.id;
       created = true;
+      tempPassword = password;
     }
   }
 
   try {
-    const customAttributes = await customAttributesFromIntake(
-      data.organizationId,
-      data.customFieldValues,
-    );
-    if (options.needsSetup) customAttributes.needs_setup = true;
-
     const profileRow: Record<string, unknown> = {
       id: newUserId,
       email: effectiveEmail,
@@ -163,19 +145,25 @@ export async function hireEmployeeInternal(
       phone: data.phone?.trim() || null,
       department: data.department || null,
       employee_id: data.employeeId || null,
-      staff_type_keys: data.staffType,
+      staff_type_keys: data.staffType ?? [],
       hire_date: startDate,
       start_date: startDate,
       end_date: endDate,
       is_active: true,
-      requires_deescalation: data.requiresDeescalation,
-      requires_abi: data.requiresAbi,
     };
+    if (data.dateOfBirth) profileRow.date_of_birth = data.dateOfBirth;
     if (data.workerType) profileRow.worker_type = data.workerType;
+    if (data.transportsClients !== undefined)
+      profileRow.transports_clients = data.transportsClients;
+    if (data.teamId !== undefined) profileRow.team_id = data.teamId;
+    if (data.requiresAbi !== undefined) profileRow.requires_abi = data.requiresAbi;
+    if (data.requiresDeescalation !== undefined) {
+      profileRow.requires_deescalation = data.requiresDeescalation;
+    }
     if (created) {
       profileRow.must_change_password = true;
       profileRow.username = resolveAccountUsername({
-        username: data.username,
+        username: data.username ?? "",
         email: effectiveEmail,
       });
     } else if (data.username?.trim()) {
@@ -184,13 +172,11 @@ export async function hireEmployeeInternal(
         email: effectiveEmail,
       });
     }
-    if (Object.keys(customAttributes).length) profileRow.custom_attributes = customAttributes;
 
     const { error: profErr } = await supabaseAdmin
       .from("profiles")
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .upsert(profileRow as any, { onConflict: "id" });
-
     if (profErr) throw new Error(profErr.message);
 
     // The live signup trigger may have opened a personal workspace. This
@@ -204,7 +190,7 @@ export async function hireEmployeeInternal(
       .neq("organization_id", data.organizationId);
 
     const jobTitle =
-      options.jobTitle !== undefined ? options.jobTitle?.trim() || null : data.department || null;
+      data.jobTitle !== undefined ? data.jobTitle?.trim() || null : data.department || null;
     const presetId =
       data.accessLevel === "owner"
         ? null
@@ -234,16 +220,15 @@ export async function hireEmployeeInternal(
       { access_level: data.accessLevel, access_preset_id: presetId, created_via: createdVia },
     );
 
-    if (!options.deferHirePack) {
-      try {
-        await onStaffHiredInternal(supabaseAdmin, data.organizationId, newUserId);
-      } catch (hireErr) {
-        console.warn("[obligations] hire auto-assign failed:", hireErr);
-      }
+    try {
+      await onStaffHiredInternal(supabaseAdmin, data.organizationId, newUserId);
+    } catch (hireErr) {
+      console.warn("[obligations] hire auto-assign failed:", hireErr);
     }
 
-    return { userId: newUserId, email: effectiveEmail, created };
+    return { userId: newUserId, email: effectiveEmail, created, tempPassword, presetId };
   } catch (e) {
+    // Undo only the login this request just made; no existing person is touched.
     if (created) {
       await supabaseAdmin.auth.admin.deleteUser(newUserId).catch(() => {});
     }
@@ -251,260 +236,563 @@ export async function hireEmployeeInternal(
   }
 }
 
-export const createEmployeeManually = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => CreateEmployeeInput.parse(d))
-  .handler(async ({ data, context }) => {
-    if (!context.userId) return { userId: "", email: "" };
-    await assertOrgManager(context.userId, data.organizationId);
-    await assertCanGrantLevel(context.userId, data.organizationId, data.accessLevel);
-    const hired = await hireEmployeeInternal(data, context.userId, "manual_admin");
-    return { userId: hired.userId, email: hired.email };
-  });
+/* ------------------------------------------------------------------ */
+/* Agency lookups shared by Add and Import                             */
+/* ------------------------------------------------------------------ */
 
-const RosterApplyInput = z.object({
-  organizationId: z.string().uuid(),
-  firstName: z.string().trim().min(1).max(80),
-  lastName: z.string().trim().min(1).max(80),
-  email: z.string().trim().email().max(255),
-  phone: z.string().trim().min(1).max(30),
-  hireDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
-  accessLevel: z.enum(["admin", "staff"]).default("staff"),
-  presetName: z.string().trim().max(80).optional().or(z.literal("")),
-});
-
-export type RosterApplyResult = {
-  userId: string;
-  email: string;
-  action: "created" | "skipped";
-  reason: string | null;
+type HireContext = {
+  presets: PresetPick[];
+  positionKeys: Set<string>;
+  homeIds: Set<string>;
+  activeMemberIds: Set<string>;
 };
 
-/** Add basics only. Existing emails are skipped. Never updates, never emails. */
-export const applyEmployeeRosterRow = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => RosterApplyInput.parse(d))
-  .handler(async ({ data, context }): Promise<RosterApplyResult> => {
-    const email = data.email.trim().toLowerCase();
-    const empty: RosterApplyResult = {
-      userId: "",
-      email,
-      action: "skipped",
-      reason: "Not signed in.",
-    };
-    if (!context.userId) return empty;
-    await assertOrgManager(context.userId, data.organizationId);
-    await assertCanGrantLevel(context.userId, data.organizationId, data.accessLevel);
-    const presetId = await resolvePresetId(data.organizationId, data.accessLevel, {
-      name: data.presetName,
-    });
-
-    const { data: existingProf } = await supabaseAdmin
-      .from("profiles")
-      .select("id")
-      .ilike("email", email)
-      .maybeSingle();
-
-    if (existingProf?.id) {
-      const { data: mem } = await supabaseAdmin
-        .from("organization_members")
-        .select("id")
-        .eq("user_id", existingProf.id)
-        .eq("organization_id", data.organizationId)
-        .maybeSingle();
-      return {
-        userId: existingProf.id,
-        email,
-        action: "skipped",
-        reason: mem ? "Already on the roster." : "An account with this email already exists.",
-      };
-    }
-
-    try {
-      const hired = await hireEmployeeInternal(
-        {
-          organizationId: data.organizationId,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email,
-          phone: data.phone,
-          temporaryPassword: generateTempPassword(),
-          accessLevel: data.accessLevel,
-          accessPresetId: presetId,
-          department: "",
-          hireDate: data.hireDate,
-          startDate: data.hireDate,
-          requiresDeescalation: false,
-          requiresAbi: false,
-          staffType: [],
-          customFieldValues: {},
-        },
-        context.userId,
-        "manual_admin",
-        {
-          needsSetup: true,
-          deferHirePack: true,
-          jobTitle: data.jobTitle ?? "",
-        },
-      );
-      return {
-        userId: hired.userId,
-        email: hired.email,
-        action: "created",
-        reason: null,
-      };
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "";
-      if (/already exists/i.test(msg)) {
-        return { userId: "", email, action: "skipped", reason: "Already on the roster." };
-      }
-      throw e;
-    }
-  });
-
-const FinishSetupInput = z.object({
-  organizationId: z.string().uuid(),
-  userId: z.string().uuid(),
-  firstName: z.string().trim().min(1).max(80),
-  lastName: z.string().trim().min(1).max(80),
-  email: z.string().trim().email().max(255),
-  phone: z.string().trim().min(1).max(30),
-  accessLevel: LevelEnum,
-  accessPresetId: z.string().uuid().nullable().optional(),
-  department: z.string().trim().max(120).optional().or(z.literal("")),
-  hireDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
-  staffType: z.array(z.string()).optional().default([]),
-  employeeId: z.string().trim().max(80).optional().or(z.literal("")),
-  workerType: z.string().trim().max(80).optional().or(z.literal("")),
-  customFieldValues: z.record(z.string(), z.unknown()).optional().default({}),
-});
-
-export type FinishEmployeeSetupResult = {
-  userId: string;
-  email: string;
-  name: string;
-};
-
-/**
- * Same profile writes as Add employee, for someone already created as Needs setup.
- * Clears the flag and runs the hire pack once job answers exist. Never sends email.
- */
-export const finishEmployeeSetup = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => FinishSetupInput.parse(d))
-  .handler(async ({ data, context }): Promise<FinishEmployeeSetupResult> => {
-    if (!context.userId) throw new Error("Not signed in.");
-    await assertOrgManager(context.userId, data.organizationId);
-    await assertCanGrantLevel(context.userId, data.organizationId, data.accessLevel);
-    await assertAgencySetupCompleteForOrg(supabaseAdmin, data.organizationId);
-
-    const { data: mem, error: memLookupErr } = await supabaseAdmin
+async function loadHireContext(organizationId: string): Promise<HireContext> {
+  const [presets, staffTypes, teams, members] = await Promise.all([
+    supabaseAdmin
+      .from("access_presets")
+      .select("id, name, access_level")
+      .eq("organization_id", organizationId),
+    supabaseAdmin.from("staff_types").select("key").eq("organization_id", organizationId),
+    supabaseAdmin.from("teams").select("id").eq("organization_id", organizationId),
+    supabaseAdmin
       .from("organization_members")
-      .select("id, access_level, access_preset_id")
-      .eq("user_id", data.userId)
-      .eq("organization_id", data.organizationId)
-      .maybeSingle();
-    if (memLookupErr) throw new Error(memLookupErr.message);
-    if (!mem) throw new Error("Team member not found in this organization");
+      .select("user_id")
+      .eq("organization_id", organizationId)
+      .eq("active", true),
+  ]);
+  for (const r of [presets, staffTypes, teams, members]) {
+    if (r.error) throw new Error(r.error.message);
+  }
+  return {
+    presets: (presets.data ?? []) as PresetPick[],
+    positionKeys: new Set((staffTypes.data ?? []).map((r) => r.key)),
+    homeIds: new Set((teams.data ?? []).map((r) => r.id)),
+    activeMemberIds: new Set((members.data ?? []).map((r) => r.user_id)),
+  };
+}
 
-    const email = data.email.trim().toLowerCase();
-    const { data: emailOwner } = await supabaseAdmin
-      .from("profiles")
-      .select("id")
-      .ilike("email", email)
-      .maybeSingle();
-    if (emailOwner?.id && emailOwner.id !== data.userId) {
-      throw new Error("An account with this email already exists.");
-    }
+/** Throws a user-facing message when a Home, Supervisor or Position isn't this agency's. */
+function assertRefsInAgency(ctx: HireContext, row: TeamMemberFieldsValue): void {
+  if (row.homeId && !ctx.homeIds.has(row.homeId))
+    throw new Error("That home isn't in this agency.");
+  if (row.supervisorId && !ctx.activeMemberIds.has(row.supervisorId)) {
+    throw new Error("The supervisor must be an active team member here.");
+  }
+  const unknown = row.positions.filter((k) => !ctx.positionKeys.has(k));
+  if (unknown.length) throw new Error(`Unknown position: ${unknown.join(", ")}.`);
+}
 
-    const { data: current } = await supabaseAdmin
-      .from("profiles")
-      .select("email")
-      .eq("id", data.userId)
-      .maybeSingle();
-    if ((current?.email ?? "").trim().toLowerCase() !== email) {
-      const { error: authErr } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
-        email,
-        email_confirm: true,
-      });
-      if (authErr) throw new Error(authErr.message);
-    }
+type EmailLookup = { match: EmailMatch; userId: string | null; name: string | null };
 
-    const customAttributes = await customAttributesFromIntake(
-      data.organizationId,
-      data.customFieldValues,
+/** Exact lower-case email match (never ilike), and that person's membership here. */
+async function lookupEmails(
+  organizationId: string,
+  emails: string[],
+): Promise<Map<string, EmailLookup>> {
+  const wanted = [...new Set(emails.map(normalizeEmail).filter(Boolean))];
+  const out = new Map<string, EmailLookup>();
+  for (const e of wanted) out.set(e, { match: "new", userId: null, name: null });
+  if (!wanted.length) return out;
+  const { data: profs, error } = await supabaseAdmin
+    .from("profiles")
+    .select("id, email, full_name, first_name, last_name")
+    .in("email", wanted);
+  if (error) throw new Error(error.message);
+  const rows = profs ?? [];
+  if (!rows.length) return out;
+  // organization_members ↔ profiles share no FK — two queries, joined here.
+  const { data: mems, error: memErr } = await supabaseAdmin
+    .from("organization_members")
+    .select("user_id, active")
+    .eq("organization_id", organizationId)
+    .in(
+      "user_id",
+      rows.map((p) => p.id),
     );
-    const startDate = data.hireDate;
-    const profilePatch: Record<string, unknown> = {
-      email,
-      full_name: `${data.firstName} ${data.lastName}`.trim(),
-      first_name: data.firstName,
-      last_name: data.lastName,
-      phone: data.phone.trim(),
-      department: data.department || null,
-      employee_id: data.employeeId || null,
-      staff_type_keys: data.staffType,
-      hire_date: startDate,
-      start_date: startDate,
-      requires_deescalation: false,
-      requires_abi: false,
-      custom_attributes: customAttributes,
-    };
-    if (data.workerType) profilePatch.worker_type = data.workerType;
+  if (memErr) throw new Error(memErr.message);
+  const activeByUser = new Map((mems ?? []).map((m) => [m.user_id, m.active === true]));
+  for (const p of rows) {
+    const email = normalizeEmail(String(p.email ?? ""));
+    if (!out.has(email)) continue;
+    const name =
+      String(p.full_name ?? "").trim() ||
+      [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
+      null;
+    out.set(email, {
+      match: classifyEmailMatch(p.id, activeByUser.has(p.id) ? activeByUser.get(p.id) : null),
+      userId: p.id,
+      name,
+    });
+  }
+  return out;
+}
 
-    const { error: profErr } = await supabaseAdmin
-      .from("profiles")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update(profilePatch as any)
-      .eq("id", data.userId);
-    if (profErr) throw new Error(profErr.message);
+async function actorIsOwner(actorId: string, organizationId: string): Promise<boolean> {
+  try {
+    await requireLevel(supabaseAdmin, actorId, organizationId, "owner");
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-    const presetId =
-      data.accessLevel === "owner"
-        ? null
-        : await resolvePresetId(data.organizationId, data.accessLevel, {
-            id: data.accessPresetId,
-          });
-    const { error: memErr } = await supabaseAdmin
-      .from("organization_members")
-      .update({
-        access_level: data.accessLevel,
-        access_preset_id: presetId,
-        job_title: data.jobTitle?.trim() || null,
-        active: true,
-      })
-      .eq("organization_id", data.organizationId)
-      .eq("user_id", data.userId);
-    if (memErr) throw new Error(memErr.message);
+/* ------------------------------------------------------------------ */
+/* Add team member                                                     */
+/* ------------------------------------------------------------------ */
 
-    if (mem.access_level !== data.accessLevel || mem.access_preset_id !== presetId) {
-      await logChange(
-        data.organizationId,
-        context.userId,
-        "member_access",
-        { userId: data.userId, name: `${data.firstName} ${data.lastName}`.trim() },
-        {
-          before: { access_level: mem.access_level, access_preset_id: mem.access_preset_id },
-          after: { access_level: data.accessLevel, access_preset_id: presetId },
-          change_method: "finishEmployeeSetup",
-        },
-      );
+const TeamMemberFields = z.object({
+  firstName: z.string().trim().min(1).max(80),
+  lastName: z.string().trim().min(1).max(80),
+  email: z.string().trim().email().max(255),
+  phone: z.string().trim().max(30).optional().or(z.literal("")),
+  hireDate: YMD,
+  dateOfBirth: YMD.optional().or(z.literal("")),
+  /** "owner", or one of this agency's access_presets ids. The level comes from the preset. */
+  access: z.union([z.literal(OWNER_ACCESS), z.string().uuid()]),
+  /** profiles.staff_type_keys — staff_types keys. */
+  positions: z.array(z.string().trim().min(1).max(80)).max(20).default([]),
+  homeId: z.string().uuid().nullable().optional(),
+  supervisorId: z.string().uuid().nullable().optional(),
+  /** Import's job title column. Add team member uses Position instead. */
+  jobTitle: z.string().trim().max(120).optional().or(z.literal("")),
+  workerType: z.enum(WORKER_TYPES).default("w2"),
+  transportsClients: z.boolean().default(false),
+});
+
+type TeamMemberFieldsValue = z.infer<typeof TeamMemberFields>;
+
+const CreateTeamMemberInput = TeamMemberFields.extend({
+  organizationId: z.string().uuid(),
+  sendInvite: z.boolean().default(true),
+});
+
+export type CreateTeamMemberResult =
+  | {
+      status: "created";
+      userId: string;
+      invited: boolean;
+      /** Why the invite email didn't go out, when one was requested. */
+      inviteError?: string | null;
+      /** Only when no invite went out. Shown once. */
+      tempPassword?: string;
     }
+  | {
+      status: "inactive_match";
+      userId: string;
+      name: string;
+      /** No rehire-eligibility column exists yet, so this is null (unknown) until one does. */
+      rehireEligible: boolean | null;
+    };
 
-    try {
-      await onStaffHiredInternal(supabaseAdmin, data.organizationId, data.userId);
-    } catch (hireErr) {
-      console.warn("[obligations] finish-setup auto-assign failed:", hireErr);
+function hireInputFromFields(
+  organizationId: string,
+  row: TeamMemberFieldsValue,
+  access: ResolvedAccess,
+): HireTeamMemberInput {
+  return {
+    organizationId,
+    firstName: row.firstName,
+    lastName: row.lastName,
+    email: row.email,
+    phone: row.phone || null,
+    accessLevel: access.level,
+    accessPresetId: access.presetId,
+    hireDate: row.hireDate,
+    startDate: row.hireDate,
+    dateOfBirth: row.dateOfBirth || null,
+    staffType: row.positions,
+    workerType: row.workerType,
+    transportsClients: row.transportsClients,
+    teamId: row.homeId ?? null,
+    managerId: row.supervisorId ?? null,
+    jobTitle: row.jobTitle || null,
+  };
+}
+
+export const createTeamMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => CreateTeamMemberInput.parse(d))
+  .handler(async ({ data, context }): Promise<CreateTeamMemberResult> => {
+    if (!context.userId) throw new Error("Not signed in.");
+    await requireCategory(
+      supabaseAdmin,
+      context.userId,
+      data.organizationId,
+      "staff_hiring",
+      "edit",
+    );
+    const ctx = await loadHireContext(data.organizationId);
+    const access = resolveAccessChoice(data.access, ctx.presets);
+    if (!access) throw new Error("Choose an access preset from this agency.");
+    if (accessNeedsOwner(access.level)) {
+      await requireLevel(supabaseAdmin, context.userId, data.organizationId, "owner");
+    }
+    await assertAgencySetupCompleteForOrg(supabaseAdmin, data.organizationId);
+    assertRefsInAgency(ctx, data);
+
+    const email = normalizeEmail(data.email);
+    const found = (await lookupEmails(data.organizationId, [email])).get(email);
+    if (found?.match === "inactive_here" && found.userId) {
+      return {
+        status: "inactive_match",
+        userId: found.userId,
+        name: found.name ?? email,
+        rehireEligible: null,
+      };
+    }
+    if (found?.match === "already_here") throw new Error(`${email} is already on the roster.`);
+    if (found?.match === "other_agency") throw new Error(EMAIL_TAKEN_MESSAGE);
+
+    const hired = await hireTeamMemberInternal(
+      hireInputFromFields(data.organizationId, data, access),
+      context.userId,
+      "manual_admin",
+    );
+
+    let invited = false;
+    let inviteError: string | null = null;
+    if (data.sendInvite) {
+      const [outcome] = await sendTeamMemberInvitesInternal({
+        organizationId: data.organizationId,
+        actorId: context.userId,
+        actorEmail: context.claims?.email ?? null,
+        targets: [{ email: hired.email, level: access.level, presetId: hired.presetId }],
+      }).catch((e: unknown) => [
+        {
+          email: hired.email,
+          email_sent: false,
+          error: e instanceof Error ? e.message : "Invite failed",
+        },
+      ]);
+      invited = !!outcome?.email_sent;
+      inviteError = outcome?.error ?? null;
     }
 
     return {
-      userId: data.userId,
-      email,
-      name: `${data.firstName} ${data.lastName}`.trim(),
+      status: "created",
+      userId: hired.userId,
+      invited,
+      ...(data.sendInvite ? { inviteError } : {}),
+      ...(!invited && hired.tempPassword ? { tempPassword: hired.tempPassword } : {}),
     };
   });
+
+/* ------------------------------------------------------------------ */
+/* Import team members                                                 */
+/* ------------------------------------------------------------------ */
+
+export type TeamImportPreviewRow = { email: string; match: EmailMatch; name: string | null };
+
+/** What each email means here: new / already here / inactive here / other agency. */
+export const previewTeamImport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        organizationId: z.string().uuid(),
+        emails: z.array(z.string().trim().max(255)).max(IMPORT_MAX_ROWS),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<TeamImportPreviewRow[]> => {
+    if (!context.userId) throw new Error("Not signed in.");
+    await requireCategory(
+      supabaseAdmin,
+      context.userId,
+      data.organizationId,
+      "staff_hiring",
+      "edit",
+    );
+    const found = await lookupEmails(data.organizationId, data.emails);
+    return [...found.entries()].map(([email, f]) => ({ email, match: f.match, name: f.name }));
+  });
+
+export type TeamImportRowResult = {
+  /** Index into the rows that were sent. */
+  index: number;
+  email: string;
+  name: string;
+  status: "created" | "skipped";
+  userId: string | null;
+  invited: boolean;
+  reason: string | null;
+};
+
+export const importTeamMembers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        organizationId: z.string().uuid(),
+        rows: z.array(TeamMemberFields).min(1).max(IMPORT_MAX_ROWS),
+        sendInvites: z.boolean().default(true),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<TeamImportRowResult[]> => {
+    if (!context.userId) throw new Error("Not signed in.");
+    const actorId = context.userId;
+    await requireCategory(supabaseAdmin, actorId, data.organizationId, "staff_hiring", "edit");
+    await assertAgencySetupCompleteForOrg(supabaseAdmin, data.organizationId);
+    const ctx = await loadHireContext(data.organizationId);
+    const isOwner = await actorIsOwner(actorId, data.organizationId);
+    const found = await lookupEmails(
+      data.organizationId,
+      data.rows.map((r) => r.email),
+    );
+
+    const results: TeamImportRowResult[] = [];
+    const seen = new Set<string>();
+    const toInvite: Array<{
+      index: number;
+      email: string;
+      level: AccessLevel;
+      presetId: string | null;
+    }> = [];
+
+    for (const [index, row] of data.rows.entries()) {
+      const email = normalizeEmail(row.email);
+      const name = `${row.firstName} ${row.lastName}`.trim();
+      const skip = (reason: string, userId: string | null = null) =>
+        results.push({ index, email, name, status: "skipped", userId, invited: false, reason });
+
+      if (seen.has(email)) {
+        skip("This email is listed more than once.");
+        continue;
+      }
+      seen.add(email);
+      const match = found.get(email);
+      if (match?.match === "already_here") {
+        skip("Already on the roster.", match.userId);
+        continue;
+      }
+      if (match?.match === "inactive_here") {
+        skip("Used to work here — reactivate them from the Inactive list.", match.userId);
+        continue;
+      }
+      if (match?.match === "other_agency") {
+        skip(EMAIL_TAKEN_MESSAGE);
+        continue;
+      }
+      const access = resolveAccessChoice(row.access, ctx.presets);
+      if (!access) {
+        skip("Choose an access preset from this agency.");
+        continue;
+      }
+      if (accessNeedsOwner(access.level) && !isOwner) {
+        skip("Only an Owner can give Owner or Admin access.");
+        continue;
+      }
+      try {
+        assertRefsInAgency(ctx, row);
+        const hired = await hireTeamMemberInternal(
+          hireInputFromFields(data.organizationId, row, access),
+          actorId,
+          "manual_admin",
+        );
+        results.push({
+          index,
+          email: hired.email,
+          name,
+          status: "created",
+          userId: hired.userId,
+          invited: false,
+          reason: null,
+        });
+        if (data.sendInvites) {
+          toInvite.push({
+            index,
+            email: hired.email,
+            level: access.level,
+            presetId: hired.presetId,
+          });
+        }
+      } catch (e) {
+        skip(e instanceof Error ? e.message : "Could not add.");
+      }
+    }
+
+    if (toInvite.length) {
+      const outcomes = await sendTeamMemberInvitesInternal({
+        organizationId: data.organizationId,
+        actorId,
+        actorEmail: context.claims?.email ?? null,
+        targets: toInvite.map(({ email, level, presetId }) => ({ email, level, presetId })),
+      }).catch((e: unknown) =>
+        toInvite.map((t) => ({
+          email: t.email,
+          email_sent: false,
+          error: e instanceof Error ? e.message : "Invite failed",
+        })),
+      );
+      const sentTo = new Set(outcomes.filter((o) => o.email_sent).map((o) => o.email));
+      const errorBy = new Map(outcomes.map((o) => [o.email, o.error]));
+      for (const r of results) {
+        if (r.status !== "created") continue;
+        r.invited = sentTo.has(r.email);
+        if (!r.invited && errorBy.get(r.email))
+          r.reason = `Invite not sent: ${errorBy.get(r.email)}`;
+      }
+    }
+
+    return results.sort((a, b) => a.index - b.index);
+  });
+
+/* ------------------------------------------------------------------ */
+/* Dropdowns and Evidence facts                                        */
+/* ------------------------------------------------------------------ */
+
+export type TeamMemberFormOptions = {
+  homes: Array<{ id: string; name: string }>;
+  supervisors: Array<{ userId: string; name: string }>;
+  positions: Array<{ key: string; label: string }>;
+};
+
+/** Home (teams), Supervisor (active team members) and Position (staff_types) lists. */
+export const listTeamMemberFormOptions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ organizationId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }): Promise<TeamMemberFormOptions> => {
+    if (!context.userId) throw new Error("Not signed in.");
+    await requireCategory(
+      supabaseAdmin,
+      context.userId,
+      data.organizationId,
+      "staff_hiring",
+      "edit",
+    );
+    const [teams, staffTypes, members] = await Promise.all([
+      supabaseAdmin
+        .from("teams")
+        .select("id, team_name, active")
+        .eq("organization_id", data.organizationId),
+      supabaseAdmin
+        .from("staff_types")
+        .select("key, label")
+        .eq("organization_id", data.organizationId),
+      supabaseAdmin
+        .from("organization_members")
+        .select("user_id")
+        .eq("organization_id", data.organizationId)
+        .eq("active", true),
+    ]);
+    for (const r of [teams, staffTypes, members]) {
+      if (r.error) throw new Error(r.error.message);
+    }
+    const ids = (members.data ?? []).map((m) => m.user_id);
+    let names = new Map<string, string>();
+    if (ids.length) {
+      const { data: profs, error } = await supabaseAdmin
+        .from("profiles")
+        .select("id, full_name, first_name, last_name, email")
+        .in("id", ids);
+      if (error) throw new Error(error.message);
+      names = new Map(
+        (profs ?? []).map((p) => [
+          p.id,
+          String(p.full_name ?? "").trim() ||
+            [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
+            String(p.email ?? ""),
+        ]),
+      );
+    }
+    return {
+      homes: (teams.data ?? [])
+        .filter((t) => t.active !== false)
+        .map((t) => ({ id: t.id, name: String(t.team_name ?? "").trim() || "Unnamed home" }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      supervisors: ids
+        .map((userId) => ({ userId, name: names.get(userId) || "Team member" }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      positions: (staffTypes.data ?? [])
+        .map((s) => ({ key: s.key, label: String(s.label ?? "").trim() || s.key }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    };
+  });
+
+export type TeamMemberEvidenceFacts = {
+  people: Array<EvidencePersonFacts & { name: string; hireDate: string | null }>;
+  caseload: Record<string, CaseloadFacts>;
+};
+
+/** What "Review evidence pack" pre-fills from. Reads only; creates nothing. */
+export const loadTeamMemberEvidenceFacts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        organizationId: z.string().uuid(),
+        userIds: z.array(z.string().uuid()).min(1).max(IMPORT_MAX_ROWS),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<TeamMemberEvidenceFacts> => {
+    if (!context.userId) throw new Error("Not signed in.");
+    await requireCategory(
+      supabaseAdmin,
+      context.userId,
+      data.organizationId,
+      "staff_hiring",
+      "edit",
+    );
+    const { data: mems, error: memErr } = await supabaseAdmin
+      .from("organization_members")
+      .select("user_id")
+      .eq("organization_id", data.organizationId)
+      .in("user_id", data.userIds);
+    if (memErr) throw new Error(memErr.message);
+    const ids = (mems ?? []).map((m) => m.user_id);
+    if (!ids.length) return { people: [], caseload: {} };
+
+    const [profs, staffTypes] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select(
+          "id, full_name, first_name, last_name, hire_date, transports_clients, staff_type_keys",
+        )
+        .in("id", ids),
+      supabaseAdmin
+        .from("staff_types")
+        .select("key, label")
+        .eq("organization_id", data.organizationId),
+    ]);
+    if (profs.error) throw new Error(profs.error.message);
+    const labelByKey = new Map(
+      (staffTypes.data ?? []).map((s) => [s.key, String(s.label ?? "").trim() || s.key]),
+    );
+    const duty = await loadStaffDutyFactsInternal(supabaseAdmin, data.organizationId, ids);
+
+    const caseload: Record<string, CaseloadFacts> = {};
+    for (const [userId, f] of duty) {
+      caseload[userId] = {
+        clientIds: f.assignedClientIds,
+        serviceCodes: f.assignedServiceCodes,
+        hasAbiClient: f.hasAbiCaseload,
+        hasBehaviorSupportClient: f.hasBehaviorCaseload,
+      };
+    }
+    return {
+      people: (profs.data ?? []).map((p) => ({
+        userId: p.id,
+        name:
+          String(p.full_name ?? "").trim() ||
+          [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
+          "Team member",
+        hireDate: p.hire_date ?? null,
+        transportsClients: p.transports_clients === true,
+        positions: (p.staff_type_keys ?? []).map((key) => ({
+          key,
+          label: labelByKey.get(key) ?? key,
+        })),
+      })),
+      caseload,
+    };
+  });
+
+/* ------------------------------------------------------------------ */
+/* Reset password                                                      */
+/* ------------------------------------------------------------------ */
 
 const ResetInput = z.object({
   organizationId: z.string().uuid(),
@@ -582,7 +870,13 @@ export const bulkSetStaffHireDates = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => BulkHireDateInput.parse(d))
   .handler(async ({ data, context }) => {
     if (!context.userId) return { updated: 0 };
-    await assertOrgManager(context.userId, data.organizationId);
+    await requireCategory(
+      supabaseAdmin,
+      context.userId,
+      data.organizationId,
+      "staff_hiring",
+      "edit",
+    );
 
     const { data: members, error } = await supabaseAdmin
       .from("organization_members")

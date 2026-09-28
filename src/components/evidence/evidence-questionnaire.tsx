@@ -40,6 +40,7 @@ export function EvidenceQuestionnaire({
   personName,
   hireDate,
   initialCodes,
+  initialAnswers,
   onApply,
   onApplyCustom,
   onCreateForm,
@@ -50,6 +51,8 @@ export function EvidenceQuestionnaire({
   personName: string;
   hireDate?: string | null;
   initialCodes?: ServiceCodeFlag[];
+  /** Starting answers (e.g. from answersForPeople). Everything stays editable. */
+  initialAnswers?: QuestionnaireAnswers;
   onApply: (args: {
     answers: QuestionnaireAnswers;
     requirementKeys: string[];
@@ -78,10 +81,11 @@ export function EvidenceQuestionnaire({
   const [step, setStep] = useState<"quiz" | "rows" | "custom" | "form">(
     subject === "company" ? "rows" : "quiz",
   );
-  const [answers, setAnswers] = useState<QuestionnaireAnswers>(() => ({
-    ...defaultQuestionnaireAnswers(subject),
-    serviceCodes: initialCodes ?? [],
-  }));
+  const [answers, setAnswers] = useState<QuestionnaireAnswers>(() =>
+    initialAnswers
+      ? { ...initialAnswers, subject }
+      : { ...defaultQuestionnaireAnswers(subject), serviceCodes: initialCodes ?? [] },
+  );
   const suggested = useMemo(() => suggestPacks(answers), [answers]);
   const suggestedKeys = useMemo(
     () => suggested.flatMap((row) => [...row.pack.requirementKeys]),
@@ -183,7 +187,7 @@ export function EvidenceQuestionnaire({
       ? "Company packs"
       : subject === "client"
         ? `Client packs · ${personName}`
-        : `Employee packs · ${personName}`;
+        : `Team member packs · ${personName}`;
   const named = liability && isAttestFullName(firstName, lastName);
   const canApply = named && checked.size > 0 && !pending;
   const canSaveCustom = named && customTitle.trim().length > 0 && !pending;

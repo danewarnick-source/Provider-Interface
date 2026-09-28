@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import type { EvidenceFileRow, EvidenceItemRow } from "../evidence/types.ts";
 import {
@@ -44,8 +44,6 @@ import {
   formatRosterDate,
   isEmployeeOnActiveRoster,
   lastLoginByUserId,
-  profileNeedsSetup,
-  uniqueHireEmails,
 } from "./roster.ts";
 
 const active = { active: true, profile: { account_status: "active", is_active: true } };
@@ -78,48 +76,62 @@ describe("isEmployeeOnActiveRoster", () => {
   });
 });
 
-describe("profileNeedsSetup", () => {
-  it("reads the existing custom_attributes flag and ignores anything else", () => {
-    assert.equal(profileNeedsSetup({ needs_setup: true }), true);
-    assert.equal(profileNeedsSetup({ needs_setup: false }), false);
-    assert.equal(profileNeedsSetup({}), false);
-    assert.equal(profileNeedsSetup(null), false);
-    assert.equal(profileNeedsSetup("yes"), false);
-    assert.equal(profileNeedsSetup([]), false);
-  });
-});
-
-describe("uniqueHireEmails", () => {
-  it("returns the first duplicate, ignoring case and blanks", () => {
-    assert.equal(uniqueHireEmails(["a@agency.org", "b@agency.org"]), null);
-    assert.equal(uniqueHireEmails(["a@agency.org", "A@agency.org"]), "a@agency.org");
-    assert.equal(uniqueHireEmails(["", "a@agency.org", ""]), null);
-  });
-});
-
-describe("Add employee wizard source lock", () => {
-  it("drops hire-time behavior pickers, training tracks, and end date", () => {
+describe("Add team member dialog source lock", () => {
+  it("is one person on one screen with DSPD fields, an optional invite, then Evidence", () => {
     const src = readFileSync(
       new URL("../../components/team-members/add/add-member-dialog.tsx", import.meta.url),
       "utf8",
     );
-    assert.doesNotMatch(src, /Behavior-related training/);
-    assert.doesNotMatch(src, /TrainingRequirementField/);
-    assert.doesNotMatch(src, /Assigned training tracks/);
-    assert.doesNotMatch(src, /name=["']track_ids["']/);
-    assert.doesNotMatch(src, /End date/);
-    assert.doesNotMatch(src, /name=["']end_date["']/);
-    assert.match(src, /requiresDeescalation: false/);
-    assert.match(src, /requiresAbi: false/);
-    assert.match(src, /Add another team member/);
-    assert.doesNotMatch(src, /Configure staff fields/);
-    assert.doesNotMatch(src, /Open settings/);
-    assert.match(src, /createInvitation/);
-    assert.match(src, /interpretInviteSendResult/);
-    assert.match(src, /invite yet/);
-    assert.match(src, /Checkbox/);
-    assert.doesNotMatch(src, /inviteStaffMembers\(/);
-    assert.doesNotMatch(src, /Hive Platform/);
+    for (const label of [
+      "First name",
+      "Last name",
+      "Email (for sign-in)",
+      "Phone",
+      "Hire date",
+      "Position",
+      "Access",
+      "Home",
+      "Supervisor",
+      "Date of birth",
+      "Transports clients",
+      "Worker type",
+      "Email an invite now",
+      "Add team member",
+      "Review evidence pack",
+      "Open profile",
+      "Add another",
+      "used to work here. Reactivate instead?",
+    ]) {
+      assert.ok(src.includes(label), label);
+    }
+    assert.match(src, /Invite sent to \$\{email\}/);
+    assert.match(src, /What they can see and do in PI/);
+    assert.match(src, /createTeamMember/);
+    assert.match(src, /restoreEntity/);
+    // Gone: multi-person cards, the second invite screen, the old Evidence link,
+    // org-configured fields and hardcoded staff types, client-side passwords.
+    for (const gone of [
+      /Add another team member/,
+      /Send invites\?/,
+      /wizard=1/,
+      /Set up Evidence pack/,
+      /Your organization's fields/,
+      /drives training requirements/,
+      /feature_config/,
+      /staff-fields-panel/,
+      /lib\/temp-password/,
+      /generateTempPassword/,
+      /site_origin/,
+      /createEmployeeManually/,
+      /newStaffId/,
+      /finish\(true\)/,
+      /Job title/,
+      /requiresAbi|requiresDeescalation/,
+    ]) {
+      assert.doesNotMatch(src, gone, String(gone));
+    }
+    // User-facing wording is "team member"; restoreEntity's kind is data, not copy.
+    assert.doesNotMatch(src.replace(/kind: "employee"/g, ""), /employee/i);
     assert.doesNotMatch(src, /[\u{1F300}-\u{1FAFF}]/u);
   });
 });
@@ -170,13 +182,14 @@ describe("Team roster page source lock", () => {
     assert.match(src, /Team Members/);
     assert.match(src, /active · \{counts\.inactive\} inactive · \{counts\.invited\} invited/);
     assert.match(src, /canCategory\("staff_hiring", "edit"\)/);
-    assert.match(src, /\{canHire && <AddEmployeeButton/);
-    assert.match(src, /\{canHire && \(\s*<EmployeeRosterUploadButton/);
-    assert.ok(src.indexOf("<AddEmployeeButton") < src.indexOf("<EmployeeRosterUploadButton"));
+    assert.match(src, /\{canHire && <AddTeamMemberButton/);
+    assert.match(src, /\{canHire && \(\s*<ImportTeamMembersButton/);
+    assert.ok(src.indexOf("<AddTeamMemberButton") < src.indexOf("<ImportTeamMembersButton"));
     assert.match(src, /variant="ghost"[\s\S]*Export CSV/);
     assert.match(src, /rosterCsvFileName\(\)/);
-    assert.match(src, /FinishEmployeeSetupWizard/);
-    assert.match(src, /Finish setup/);
+    assert.match(src, /<ReviewEvidencePackDialog/);
+    assert.match(src, /onReviewEvidence=\{setReviewIds\}/);
+    assert.doesNotMatch(src, /FinishEmployeeSetupWizard|Finish setup/);
   });
 
   it("table: the new columns, sortable headers, and the old Login/Status/Caseload are gone", () => {
@@ -195,7 +208,7 @@ describe("Team roster page source lock", () => {
       assert.match(src, new RegExp(`sortKey="${key}"`));
     }
     assert.match(src, /Pending first login/);
-    assert.match(src, /Needs setup/);
+    assert.doesNotMatch(src, /Needs setup|NeedsSetupChip/);
     assert.match(src, /EvidenceBar/);
     assert.doesNotMatch(src, />Login</);
     assert.doesNotMatch(src, />Status</);
@@ -347,28 +360,38 @@ describe("lastLoginByUserId", () => {
   });
 });
 
-describe("Finish setup reuses Add employee", () => {
-  it("walks Needs-setup people through the hire fields and an optional invite", () => {
-    const src = readFileSync(
-      new URL("../../components/team-members/add/finish-setup-dialog.tsx", import.meta.url),
+describe("Finish setup is gone", () => {
+  it("has no dialog, server fn, roster chip, or needs_setup flag", () => {
+    const at = (rel: string) => new URL(rel, import.meta.url);
+    assert.equal(
+      existsSync(at("../../components/team-members/add/finish-setup-dialog.tsx")),
+      false,
+    );
+    assert.equal(existsSync(at("../../components/hr/staff-fields-panel.tsx")), false);
+    const hire = readFileSync(at("./members.functions.ts"), "utf8");
+    const rosterLib = readFileSync(at("./roster.ts"), "utf8");
+    const rosterFns = readFileSync(at("./roster.functions.ts"), "utf8");
+    const header = readFileSync(
+      at("../../components/team-members/roster/roster-header.tsx"),
       "utf8",
     );
-    const hire = readFileSync(new URL("./members.functions.ts", import.meta.url), "utf8");
-    assert.match(src, /HireDraftFields/);
-    assert.match(src, /finishEmployeeSetup/);
-    assert.match(src, /Skip for now/);
-    assert.match(src, /createInvitation/);
-    assert.match(src, /interpretInviteSendResult/);
-    assert.match(src, /Send invite/);
-    assert.match(src, /Set up Evidence pack/);
-    assert.doesNotMatch(src, /Behavior-related training/);
-    assert.doesNotMatch(src, /inviteStaffMembers\(/);
-    assert.doesNotMatch(src, /[\u{1F300}-\u{1FAFF}]/u);
-    assert.match(hire, /needs_setup/);
-    assert.match(hire, /deferHirePack/);
-    assert.match(hire, /finishEmployeeSetup/);
-    assert.match(hire, /onStaffHiredInternal/);
-    assert.match(hire, /requires_deescalation: false/);
+    for (const gone of [
+      /finishEmployeeSetup/,
+      /applyEmployeeRosterRow/,
+      /createEmployeeManually/,
+      /hireEmployeeInternal/,
+      /needs_?[sS]etup/,
+      /deferHirePack/,
+      /feature_config/,
+    ]) {
+      assert.doesNotMatch(hire, gone, String(gone));
+    }
+    for (const src of [rosterLib, rosterFns, header]) {
+      assert.doesNotMatch(src, /needs_?[sS]etup|NeedsSetup|Finish setup/);
+    }
+    assert.match(hire, /onStaffHiredInternal\(supabaseAdmin, data\.organizationId, newUserId\)/);
+    assert.doesNotMatch(hire, /\.ilike\(/);
+    assert.match(hire, /\.eq\("email", effectiveEmail\)/);
     assert.doesNotMatch(hire, /add_and_update/);
     assert.doesNotMatch(hire, /update_only/);
   });
@@ -606,7 +629,6 @@ function row(p: Partial<RosterRow>): RosterRow {
     photoPath: null,
     jobTitle: null,
     accessLevel: "staff",
-    presetId: "p-dsp",
     positions: [{ key: "dsp", label: "Direct Support Professional" }],
     homeId: null,
     homeName: null,
@@ -620,8 +642,6 @@ function row(p: Partial<RosterRow>): RosterRow {
     pendingInviteId: null,
     evidence: { ...EMPTY_EVIDENCE, hasPack: true, total: 1, done: 1 },
     missingInfo: [],
-    needsSetup: false,
-    setup: null,
     ...p,
   };
 }
@@ -654,7 +674,6 @@ const ROWS: RosterRow[] = [
     evidence: { ...EMPTY_EVIDENCE, hasPack: true, total: 2, missing: 1, dueSoon: 1 },
     supervisorId: "a",
     supervisorName: "Alex Kim",
-    presetId: "p-pm",
     positions: [
       { key: "operations_director", label: "Operations Director" },
       { key: "dsp", label: "Direct Support Professional" },
@@ -1044,7 +1063,7 @@ describe("Invited view rows", () => {
 });
 
 describe("query keys", () => {
-  it("sit under the prefixes the Add / Import / Finish setup dialogs already invalidate", () => {
+  it("sit under the prefixes the Add / Import dialogs invalidate", () => {
     assert.deepEqual(rosterQueryKey("o").slice(0, 1), ["members"]);
     assert.deepEqual(teamInvitesQueryKey("o").slice(0, 1), ["invites"]);
     assert.notDeepEqual(rosterQueryKey("o"), ["members", "o"]);

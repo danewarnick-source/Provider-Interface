@@ -2,209 +2,266 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
-  buildEmployeeRosterTemplateCsv,
-  buildEmployeeRosterTemplateXlsx,
-  classifyRosterRowAction,
-  isClientOnlyRosterHeader,
-  mapRawRosterRow,
-  normalizeEmployeeRosterHeader,
-  normalizeHireDate,
-  bulkAccessExcelList,
-  parseBulkAccessLevel,
-  parseEmployeeRosterCsv,
-  parseEmployeeRosterPaste,
-  validateEmployeeRosterRows,
+  TEAM_IMPORT_HEADERS,
+  buildTeamImportTemplateCsv,
+  buildTeamImportTemplateXlsx,
+  columnForHeader,
+  importPayloadRow,
+  isHeaderRow,
+  normalizeImportDate,
+  parseTeamImportGrid,
+  parseTeamImportText,
+  parseYesNo,
+  resolvePresetCell,
+  templatePresetNames,
+  validateTeamImportRows,
+  type ImportAgency,
 } from "./import.ts";
 
-describe("employee roster template", () => {
-  it("uses basics only, with one filled sample row, and never client-record fields", () => {
-    const csv = buildEmployeeRosterTemplateCsv();
-    assert.match(csv, /name/);
-    assert.match(csv, /email/);
-    assert.match(csv, /phone/);
-    assert.match(csv, /hire_date/);
-    assert.match(csv, /job_title/);
-    assert.match(csv, /access_level/);
-    assert.match(csv, /Jane Doe/);
-    assert.match(csv, /jane\.doe@example\.com/);
-    assert.match(csv, /555-123-4567/);
-    assert.match(csv, /2026-07-01/);
-    assert.match(csv, /Direct Support/);
-    assert.match(csv, /Team member/);
-    assert.doesNotMatch(csv, /first_name/);
-    assert.doesNotMatch(csv, /Owner/);
-    assert.doesNotMatch(csv, /username/);
-    assert.doesNotMatch(csv, /guardian/i);
-    assert.doesNotMatch(csv, /pcsp/i);
-    assert.doesNotMatch(csv, /medicaid/i);
-    assert.doesNotMatch(csv, /medication/i);
-    assert.doesNotMatch(csv, /billing/i);
-    assert.doesNotMatch(csv, /staff_type/);
+const DSP = "11111111-1111-4111-8111-111111111111";
+const LEAD = "22222222-2222-4222-8222-222222222222";
+const PM = "33333333-3333-4333-8333-333333333333";
+const CUSTOM = "44444444-4444-4444-8444-444444444444";
+const MAPLE = "55555555-5555-4555-8555-555555555555";
+
+const AGENCY: ImportAgency = {
+  presets: [
+    { id: DSP, name: "DSP", access_level: "staff", seed_key: "dsp" },
+    { id: LEAD, name: "Lead DSP", access_level: "staff", seed_key: "lead_dsp" },
+    { id: CUSTOM, name: "Night Shift Float", access_level: "staff", seed_key: null },
+    { id: PM, name: "Program Manager", access_level: "admin", seed_key: "program_manager" },
+  ],
+  homes: [{ id: MAPLE, name: "Maple House" }],
+  positions: [
+    { key: "dsp", label: "Direct Support Professional" },
+    { key: "hhp", label: "Host Home Provider" },
+  ],
+  viewerIsOwner: false,
+};
+const OWNER_AGENCY: ImportAgency = { ...AGENCY, viewerIsOwner: true };
+const TODAY = "2026-09-28";
+
+describe("import dates", () => {
+  it("reads YYYY-MM-DD, M/D/YYYY, M/D/YY (20YY) and Excel serials", () => {
+    assert.equal(normalizeImportDate("2026-07-01"), "2026-07-01");
+    assert.equal(normalizeImportDate("2026-7-1"), "2026-07-01");
+    assert.equal(normalizeImportDate("7/1/2026"), "2026-07-01");
+    assert.equal(normalizeImportDate("12/31/2026"), "2026-12-31");
+    assert.equal(normalizeImportDate("7/1/26"), "2026-07-01");
+    assert.equal(normalizeImportDate(46204), "2026-07-01");
+    assert.equal(normalizeImportDate("46204"), "2026-07-01");
+    assert.equal(normalizeImportDate(" "), "");
   });
 
-  it("maps human headers and ignores client-only columns", () => {
-    assert.equal(normalizeEmployeeRosterHeader("Full name"), "name");
-    assert.equal(normalizeEmployeeRosterHeader("Hire date"), "hire_date");
-    assert.equal(normalizeEmployeeRosterHeader("Job Title"), "job_title");
-    assert.equal(normalizeEmployeeRosterHeader("Access level"), "access_level");
-    assert.equal(isClientOnlyRosterHeader("guardian_name"), true);
-    assert.equal(isClientOnlyRosterHeader("medicaid_id"), true);
-    assert.equal(isClientOnlyRosterHeader("PCSP goals"), true);
-    assert.equal(isClientOnlyRosterHeader("billing_code"), true);
-    const blank = parseBulkAccessLevel("");
-    assert.equal(blank.invalid, false);
-    assert.equal(blank.level, "staff");
-    assert.equal(blank.presetName, "DSP");
-    const staff = parseBulkAccessLevel("staff");
-    assert.equal(staff.level, "staff");
-    assert.equal(staff.presetName, "DSP");
-    assert.equal(parseBulkAccessLevel("STAFF").invalid, false);
-    assert.equal(parseBulkAccessLevel("employee").presetName, "DSP");
-    assert.equal(parseBulkAccessLevel("Team member").level, "staff");
-    const admin = parseBulkAccessLevel("Admin");
-    assert.equal(admin.invalid, false);
-    assert.equal(admin.level, "admin");
-    assert.equal(admin.presetName, "Program Manager");
-    const program = parseBulkAccessLevel("Program Manager");
-    assert.equal(program.invalid, false);
-    assert.equal(program.level, "admin");
-    assert.equal(program.presetName, "Program Manager");
-    const dsp = parseBulkAccessLevel("DSP");
-    assert.equal(dsp.level, "staff");
-    assert.equal(dsp.presetName, "DSP");
-    assert.equal(parseBulkAccessLevel("Owner").invalid, true);
-    assert.equal(parseBulkAccessLevel("Supervisor").invalid, true);
-    assert.equal(parseBulkAccessLevel("Committee Member").invalid, true);
-    assert.equal(parseBulkAccessLevel("wizard").invalid, true);
-    assert.equal(normalizeHireDate("7/1/2026"), "2026-07-01");
+  it("leaves impossible or unknown dates as typed so review flags them", () => {
+    assert.equal(normalizeImportDate("2/30/2026"), "2/30/2026");
+    assert.equal(normalizeImportDate("next Tuesday"), "next Tuesday");
+    assert.equal(normalizeImportDate("12"), "12");
+  });
+});
+
+describe("header detector", () => {
+  it("matches whole cells, never a substring", () => {
+    assert.equal(isHeaderRow(["Name", "Email", "Phone"]), true);
+    assert.equal(isHeaderRow(["first name", "last name"]), true);
+    assert.equal(isHeaderRow(["E-mail"]), true);
+    assert.equal(isHeaderRow(["Jane Doe", "jane.email@x.test", "555-0100"]), false);
+    assert.equal(isHeaderRow(["Emailia Smith", "e@x.test"]), false);
+    assert.equal(columnForHeader("Date of birth"), "date_of_birth");
+    assert.equal(columnForHeader("DOB"), "date_of_birth");
+    assert.equal(columnForHeader("Transports"), "transports");
+    assert.equal(columnForHeader("Preset"), "preset");
+    assert.equal(columnForHeader("Team"), "home");
+    assert.equal(columnForHeader("Guardian"), null);
   });
 
-  it("splits a full name and flags missing basics", () => {
-    const { rows, ignoredColumns } = parseEmployeeRosterCsv(
-      "name,email,phone,hire_date,job_title,guardian_name,access_level\nJane Doe,jane@agency.org,555-0100,2026-07-01,Direct Support,Mom,staff\n",
+  it("paste and file share the grid parser", () => {
+    const text = "Name,Email,Hire date\nJane Doe,jane@x.test,7/1/2026\n";
+    const pasted = parseTeamImportText(text, AGENCY);
+    const grid = parseTeamImportGrid(
+      [
+        ["Name", "Email", "Hire date"],
+        ["Jane Doe", "jane@x.test", 46204],
+      ],
+      AGENCY,
     );
-    assert.deepEqual(ignoredColumns.sort(), ["guardian_name"]);
-    assert.equal(rows.length, 1);
-    assert.equal(rows[0].first_name, "Jane");
-    assert.equal(rows[0].last_name, "Doe");
-    assert.equal(rows[0].job_title, "Direct Support");
-    assert.equal(rows[0].level, "staff");
-    assert.equal(rows[0].presetName, "DSP");
-    assert.equal(validateEmployeeRosterRows(rows).size, 0);
+    for (const parsed of [pasted, grid]) {
+      assert.equal(parsed.rows.length, 1);
+      assert.equal(parsed.rows[0].first_name, "Jane");
+      assert.equal(parsed.rows[0].last_name, "Doe");
+      assert.equal(parsed.rows[0].hire_date, "2026-07-01");
+    }
+  });
 
-    const pasted = parseEmployeeRosterPaste(
-      "Sam Rivera, sam@agency.org, 555-0101, 7/1/2026, DSP\n",
+  it("uses the paste column order without a header", () => {
+    const { rows } = parseTeamImportText(
+      "Sam Rivera\tsam@x.test\t555-0100\t2026-07-01\tLead DSP\tMaple House\tCoach\tHost Home Provider\t1/2/1990\tyes",
+      AGENCY,
     );
-    assert.equal(pasted.rows[0].first_name, "Sam");
-    assert.equal(pasted.rows[0].last_name, "Rivera");
-    assert.equal(pasted.rows[0].hire_date, "2026-07-01");
+    const [r] = rows;
+    assert.equal(r.email, "sam@x.test");
+    assert.equal(r.access, LEAD);
+    assert.equal(r.homeId, MAPLE);
+    assert.equal(r.job_title, "Coach");
+    assert.deepEqual(r.positions, ["hhp"]);
+    assert.equal(r.date_of_birth, "1990-01-02");
+    assert.equal(r.transports, true);
+  });
 
-    const mapped = mapRawRosterRow({ name: "Pat", email: "bad", phone: "", hire_date: "" }, [
-      "name",
-      "email",
-      "phone",
-      "hire_date",
+  it("reports ignored columns", () => {
+    const { ignoredColumns } = parseTeamImportText(
+      "name,email,guardian\nA B,a@x.test,Mom\n",
+      AGENCY,
+    );
+    assert.deepEqual(ignoredColumns, ["guardian"]);
+  });
+});
+
+describe("presets from the agency", () => {
+  it("keeps custom presets and defaults blank to DSP", () => {
+    assert.equal(resolvePresetCell("Night Shift Float", AGENCY), CUSTOM);
+    assert.equal(resolvePresetCell("night shift float", AGENCY), CUSTOM);
+    assert.equal(resolvePresetCell("", AGENCY), DSP);
+  });
+
+  it("Admin presets only for an Owner; Owner never from a sheet", () => {
+    assert.equal(resolvePresetCell("Program Manager", AGENCY), "");
+    assert.equal(resolvePresetCell("Program Manager", OWNER_AGENCY), PM);
+    assert.equal(resolvePresetCell("Owner", OWNER_AGENCY), "");
+    assert.deepEqual(templatePresetNames(AGENCY), ["DSP", "Lead DSP", "Night Shift Float"]);
+    assert.deepEqual(templatePresetNames(OWNER_AGENCY), [
+      "DSP",
+      "Lead DSP",
+      "Night Shift Float",
+      "Program Manager",
     ]);
-    const fields = (validateEmployeeRosterRows([mapped]).get(mapped.id) ?? []).map((i) => i.field);
-    assert.ok(fields.includes("name"));
-    assert.ok(fields.includes("email"));
-    assert.ok(fields.includes("phone"));
-    assert.ok(fields.includes("hire_date"));
+  });
+});
+
+describe("review", () => {
+  const parse = (lines: string[], agency = AGENCY) =>
+    parseTeamImportText(
+      ["name,email,hire_date,preset,home,position,date_of_birth,transports", ...lines].join("\n"),
+      agency,
+    ).rows;
+
+  it("passes a complete row", () => {
+    const rows = parse(["Jane Doe,jane@x.test,2026-07-01,DSP,Maple House,,,no"]);
+    assert.equal(validateTeamImportRows(rows, AGENCY, TODAY).size, 0);
   });
 
-  it("keeps Import team members off update modes and off automatic invites", () => {
+  it("flags each bad field", () => {
+    const rows = parse([
+      "Pat,not-an-email,,Program Manager,Oak House,Janitor,5/3/85,maybe",
+      "A One,dup@x.test,2026-07-01,Owner,,,,",
+      "B Two,DUP@x.test,2026-07-01,,,,,",
+    ]);
+    const issues = validateTeamImportRows(rows, AGENCY, TODAY);
+    const fields = (i: number) => (issues.get(rows[i].id) ?? []).map((x) => x.field).sort();
+    assert.deepEqual(fields(0), [
+      "date_of_birth",
+      "email",
+      "hire_date",
+      "home",
+      "name",
+      "position",
+      "preset",
+      "transports",
+    ]);
+    assert.ok(fields(1).includes("preset"));
+    assert.match((issues.get(rows[1].id) ?? []).map((x) => x.message).join(" "), /Owner/);
+    assert.ok(fields(1).includes("email"));
+    assert.ok(fields(2).includes("email"));
+  });
+
+  it("builds the importTeamMembers row with resolved ids", () => {
+    const [row] = parse([
+      "Jane Doe,Jane@X.test,7/1/2026,Lead DSP,maple house,Host Home Provider,,yes",
+    ]);
+    assert.deepEqual(importPayloadRow(row), {
+      firstName: "Jane",
+      lastName: "Doe",
+      email: "jane@x.test",
+      phone: "",
+      hireDate: "2026-07-01",
+      dateOfBirth: "",
+      access: LEAD,
+      positions: ["hhp"],
+      homeId: MAPLE,
+      jobTitle: "",
+      workerType: "w2",
+      transportsClients: true,
+    });
+  });
+
+  it("yes/no", () => {
+    assert.equal(parseYesNo("Yes"), true);
+    assert.equal(parseYesNo("n"), false);
+    assert.equal(parseYesNo(""), false);
+    assert.equal(parseYesNo("sometimes"), null);
+  });
+});
+
+describe("templates from the agency", () => {
+  it("CSV uses the agency's presets and homes and no client fields", () => {
+    const csv = buildTeamImportTemplateCsv(AGENCY);
+    assert.equal(csv.split(/\r?\n/)[0], TEAM_IMPORT_HEADERS.join(","));
+    assert.match(csv, /DSP/);
+    assert.match(csv, /Maple House/);
+    assert.doesNotMatch(csv, /guardian|pcsp|medicaid|billing|Owner|access_level/i);
+  });
+
+  it("Excel has list dropdowns pointing at a Lists sheet of agency names", async () => {
+    const bytes = await buildTeamImportTemplateXlsx(OWNER_AGENCY);
+    const { default: JSZip } = await import("jszip");
+    const zip = await JSZip.loadAsync(bytes);
+    const sheet = await zip.file("xl/worksheets/sheet1.xml")!.async("string");
+    assert.match(sheet, /dataValidation type="list"/);
+    assert.match(sheet, /Lists!\$A\$2:\$A\$5/);
+    assert.match(sheet, /Lists!\$B\$2:\$B\$2/);
+    const shared = await zip.file("xl/sharedStrings.xml")?.async("string");
+    const all = `${shared ?? ""}${sheet}${await zip.file("xl/worksheets/sheet2.xml")!.async("string")}`;
+    for (const name of [
+      "Night Shift Float",
+      "Program Manager",
+      "Maple House",
+      "Host Home Provider",
+    ]) {
+      assert.ok(all.includes(name), name);
+    }
+    assert.doesNotMatch(all, />Owner</);
+  });
+});
+
+describe("Import team members dialog source lock", () => {
+  it("reviews editable, removable rows, previews emails, invites everyone, then Evidence", () => {
     const src = readFileSync(
       new URL("../../components/team-members/add/import-members-dialog.tsx", import.meta.url),
       "utf8",
     );
-    assert.match(src, /Import team members/);
-    assert.doesNotMatch(src, /Add several at once/);
-    assert.match(src, /Needs setup/);
-    assert.match(src, /Already on the roster/);
-    assert.match(src, /No invites/);
-    assert.doesNotMatch(src, /add_new/);
-    assert.doesNotMatch(src, /add_and_update/);
-    assert.doesNotMatch(src, /update_only/);
-    assert.doesNotMatch(src, /createInvitation/);
-    assert.doesNotMatch(src, /invite yet/);
-    assert.doesNotMatch(src, /inviteStaffMembers\(/);
-    assert.doesNotMatch(src, /smart-import/);
-    assert.doesNotMatch(src, /guardian/i);
-    assert.doesNotMatch(src, /pcsp/i);
-    assert.doesNotMatch(src, /Hive Platform/);
-  });
-
-  it("skips emails already on the roster and never updates", () => {
-    const existing = ["jake@agency.org"];
-    assert.equal(classifyRosterRowAction("new@agency.org", existing), "create");
-    assert.equal(classifyRosterRowAction("Jake@agency.org", existing), "skip");
-  });
-
-  it("flags duplicate emails in the file", () => {
-    const { rows } = parseEmployeeRosterCsv(
-      "name,email,phone,hire_date\nA One,a@agency.org,555-1,2026-07-01\nB Two,A@agency.org,555-2,2026-07-01\n",
-    );
-    const issues = validateEmployeeRosterRows(rows);
-    assert.equal(issues.size, 2);
-    const messages = [...issues.values()].flat().map((i) => i.message);
-    assert.ok(messages.some((m) => /more than once/i.test(m)));
-  });
-
-  it("accepts separate first and last name columns", () => {
-    const { rows } = parseEmployeeRosterCsv(
-      "first_name,last_name,email,phone,hire_date,job_title\nJane,Doe,jane@agency.org,555-0100,2026-07-01,DSP\n",
-    );
-    assert.equal(rows[0].first_name, "Jane");
-    assert.equal(rows[0].last_name, "Doe");
-    assert.equal(rows[0].level, "staff");
-    assert.equal(rows[0].presetName, "DSP");
-    assert.equal(validateEmployeeRosterRows(rows).size, 0);
-  });
-
-  it("flags an access level outside the bulk list and defaults a blank to Team member", () => {
-    const { rows } = parseEmployeeRosterCsv(
-      [
-        "name,email,phone,hire_date,job_title,access_level",
-        "A One,a@agency.org,555-0100,2026-07-01,DSP,",
-        "B Two,b@agency.org,555-0101,2026-07-01,DSP,Owner",
-        "C Three,c@agency.org,555-0102,2026-07-01,,Supervisor",
-      ].join("\n"),
-    );
-    assert.equal(rows[0].level, "staff");
-    assert.equal(rows[0].presetName, "DSP");
-    assert.equal(rows[0].job_title, "DSP");
-    assert.equal(validateEmployeeRosterRows([rows[0]]).size, 0);
-    assert.equal(rows[2].level, "staff");
-    assert.equal(rows[2].presetName, "");
-    assert.equal(rows[2].job_title, "");
-    const issues = validateEmployeeRosterRows(rows);
-    const owner = issues.get(rows[1].id) ?? [];
-    assert.equal(owner.length, 1);
-    assert.equal(owner[0].field, "access_level");
-    assert.match(owner[0].message, /Owner/);
-    assert.match(owner[0].message, /Team member/);
-    const supervisor = issues.get(rows[2].id) ?? [];
-    assert.ok(supervisor.some((i) => i.field === "access_level"));
-    assert.match(supervisor.map((i) => i.message).join(" "), /Supervisor/);
-  });
-
-  it("puts a list dropdown on the Excel access level column", async () => {
-    const bytes = await buildEmployeeRosterTemplateXlsx();
-    const { default: JSZip } = await import("jszip");
-    const zip = await JSZip.loadAsync(bytes);
-    const sheetPath = Object.keys(zip.files).find((name) =>
-      /xl\/worksheets\/sheet\d+\.xml$/.test(name),
-    );
-    assert.ok(sheetPath);
-    const xml = await zip.file(sheetPath)!.async("string");
-    assert.match(xml, /dataValidation type="list"/);
-    assert.match(xml, new RegExp(bulkAccessExcelList().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-    assert.match(xml, /Admin,Team member,Billing,DSP,Group Home Manager/);
-    assert.match(xml, /HR \/ Office/);
-    assert.match(xml, /Program Manager/);
-    assert.doesNotMatch(xml, /Supervisor/);
-    assert.doesNotMatch(xml, /Committee Member/);
-    assert.doesNotMatch(xml, />Owner</);
-    assert.match(xml, /Jane Doe/);
+    for (const text of [
+      "Import team members",
+      "Remove row",
+      "Email invites to everyone",
+      "Invites sent to",
+      "Review evidence packs for",
+      "onDrop",
+      "previewTeamImport",
+      "importTeamMembers",
+      "includeOwner={false}",
+    ]) {
+      assert.ok(src.includes(text), text);
+    }
+    for (const gone of [
+      /Needs setup/,
+      /applyEmployeeRosterRow/,
+      /Finish setup/,
+      /add_and_update|update_only/,
+      /smart-import/,
+      /guardian|pcsp/i,
+      /lib\/temp-password/,
+    ]) {
+      assert.doesNotMatch(src, gone, String(gone));
+    }
   });
 });

@@ -142,7 +142,6 @@ export function TeamRosterPage() {
         <RosterHeader
           organizationId={orgId}
           counts={counts}
-          needsSetupRows={activeRows.filter((r) => r.needsSetup)}
           exportRows={view === "invited" ? null : visible}
           addFlag={search.add === "1"}
           importFlag={search.import === "1"}
