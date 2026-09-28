@@ -4,12 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileDown, FileBarChart } from "lucide-react";
 import { toast } from "sonner";
 
 import { RequirePermission } from "@/components/rbac-guard";
-import { BehaviorSupportsReport } from "@/components/behavior-support/behavior-supports-report";
 
 export const Route = createFileRoute("/dashboard/reports")({
   component: () => (
@@ -31,18 +29,7 @@ function ReportsPage() {
           Training exports use assignments on the team member record. Certificates live in Evidence.
         </p>
       </div>
-      <Tabs defaultValue="standard">
-        <TabsList>
-          <TabsTrigger value="standard">Standard Reports</TabsTrigger>
-          <TabsTrigger value="behavior">Behavior Supports</TabsTrigger>
-        </TabsList>
-        <TabsContent value="standard" className="mt-4">
-          <StandardReports />
-        </TabsContent>
-        <TabsContent value="behavior" className="mt-4">
-          <BehaviorSupportsReport />
-        </TabsContent>
-      </Tabs>
+      <StandardReports />
     </div>
   );
 }

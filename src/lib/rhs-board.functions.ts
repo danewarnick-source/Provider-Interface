@@ -4,7 +4,7 @@
  * READ-ONLY. Returns RHS residential homes + their currently-placed RHS
  * clients, plus the small set of REAL composition signals we have stored
  * (capacity, DOB→age, medication load incl. choking-risk and controlled
- * counts, presence of special_directions, compliance flag count).
+ * counts, presence of special_directions).
  *
  * What we deliberately do NOT return (because it isn't stored) and what
  * the UI therefore must NOT claim to score:
@@ -77,7 +77,7 @@ export const getRhsBoardSnapshot = createServerFn({ method: "GET" })
       "manage_referrals",
     ]);
 
-    const [teamQ, clientQ, medQ, flagQ] = await Promise.all([
+    const [teamQ, clientQ, medQ] = await Promise.all([
       supabase
         .from("teams")
         .select("id, team_name, setting, capacity, address, team_type, active")
@@ -95,13 +95,9 @@ export const getRhsBoardSnapshot = createServerFn({ method: "GET" })
         .select("client_id, is_active, choking_risk, is_controlled")
         .eq("organization_id", data.organization_id)
         .eq("is_active", true),
-      supabase
-        .from("bc_flags")
-        .select("client_id")
-        .eq("organization_id", data.organization_id),
     ]);
 
-    for (const q of [teamQ, clientQ, medQ, flagQ]) {
+    for (const q of [teamQ, clientQ, medQ]) {
       if (q.error) throw new Error(q.error.message);
     }
 
@@ -153,11 +149,6 @@ export const getRhsBoardSnapshot = createServerFn({ method: "GET" })
       medByClient.set(m.client_id, prev);
     }
 
-    const flagByClient = new Map<string, number>();
-    for (const f of (flagQ.data ?? []) as Array<{ client_id: string }>) {
-      flagByClient.set(f.client_id, (flagByClient.get(f.client_id) ?? 0) + 1);
-    }
-
     // Only RHS-authorized clients. RHS is a residential daily-rate; if it's
     // not on authorized_dspd_codes the client isn't an RHS planning target.
     const isRhs = (codes: string[] | null | undefined) =>
@@ -194,7 +185,7 @@ export const getRhsBoardSnapshot = createServerFn({ method: "GET" })
           med_count: med.count,
           choking_risk: med.choking,
           controlled_med: med.controlled,
-          compliance_flag_count: flagByClient.get(c.id) ?? 0,
+          compliance_flag_count: 0,
         };
       });
 

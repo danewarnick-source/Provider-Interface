@@ -15,8 +15,6 @@ export const TOMMY_GOALS = [
   "Community access and public transportation",
 ];
 
-export const TOMMY_BEHAVIORS = ["Elopement"];
-
 export const NECTAR_DRAFT = [
   "Tommy independently selected ingredients and followed the cooking prompt with two verbal cues.",
   "Staff stayed nearby for safety oversight and praised each completed step.",

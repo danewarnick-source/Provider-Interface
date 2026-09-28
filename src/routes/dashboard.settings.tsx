@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Landmark, ArrowRight, ShieldCheck, Wand2, ListChecks, BookOpenCheck, CreditCard, Mail, Inbox, UserCircle2, Building2, Receipt, BadgeCheck, ScrollText, ClipboardList, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { OrgBrandingCard } from "@/components/settings/org-branding-card";
-import { ShiftBehaviorToggleCard } from "@/components/evv/shift-behavior-toggle-card";
 import { getAccountContact, updateAccountContact } from "@/lib/hive-exec.functions";
 
 export const Route = createFileRoute("/dashboard/settings")({ component: SettingsPage });
@@ -197,9 +196,6 @@ function SettingsPage() {
       </section>
 
       <OrgBrandingCard />
-
-      <ShiftBehaviorToggleCard isAdmin={isOwner(org?.access.level)} />
-
 
       {isOwner(org?.access.level) && (
         <Link to="/dashboard/settings/team-access" className="group lg:col-span-2">

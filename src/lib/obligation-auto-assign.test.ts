@@ -82,11 +82,6 @@ describe("hire auto-assign", () => {
       "utf8",
     );
     assert.match(faceSheet, /onClientDutyFactsChanged/);
-    const bsConfig = readFileSync(
-      fileURLToPath(new URL("../components/behavior-support/bs-config-card.tsx", import.meta.url)),
-      "utf8",
-    );
-    assert.match(bsConfig, /onClientDutyFactsChanged/);
   });
 
   it("uses existing due windows (30 / 90 / 180) instead of a second cadence", () => {

@@ -3,7 +3,8 @@ import { useDisabledFeatures, type FeatureKey as TierFeatureKey } from "@/hooks/
 // ─── Code-driven feature areas (DSPD SOW catalog) ─────────────────────────
 //
 // A client's authorized service codes determine which feature AREAS apply
-// to them. No Behavior Consultation codes → no behavior surfaces; no
+// to them. The behaviorist workspace is gone; BC1/BC2/BC3 stay in this
+// catalog so client readiness still offers those clockable codes. No
 // supported-employment codes → no SE surfaces; etc. Per-client
 // `feature_config[<feature>]` overrides the code-derived default in either
 // direction (admin force-on or force-off).

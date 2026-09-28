@@ -33,7 +33,6 @@ describe("route UUID params", () => {
       "../routes/dashboard.hhs-hub.$clientId.tsx",
       "../routes/dashboard.billing.$clientId.tsx",
       "../routes/dashboard.client-training.$clientId.tsx",
-      "../routes/dashboard.behavior-support.$clientId.tsx",
       "../routes/dashboard.team-members.$staffId.tsx",
       "../routes/dashboard.hive-exec.$orgId.tsx",
     ];

@@ -410,27 +410,6 @@ function DashboardLayout() {
 
   // must_change_password is enforced globally at the router root
   // (MustChangePasswordGate in __root.tsx) — no per-layout check needed here.
-  useEffect(() => {
-    const uid = session?.user?.id;
-    if (!uid) return;
-    let cancelled = false;
-    supabase
-      .from("profiles")
-      .select("bc_role")
-      .eq("id", uid)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancelled) return;
-        // Behaviorists (bc_role set) route directly to their caseload — no time clock,
-        // no staff caseload. Only redirect from the dashboard home, not from deep links.
-        if (data?.bc_role && pathname === "/dashboard") {
-          navigate({ to: "/dashboard/behaviorist", replace: true });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [session?.user?.id, pathname, navigate]);
 
   const role = org?.access.level ?? "staff";
   const isCommitteeMember = isCommitteeOnly(org?.access);

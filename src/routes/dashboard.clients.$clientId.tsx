@@ -75,7 +75,6 @@ import {
 import { FieldVisibilityToggle } from "@/components/clients/visibility-toggles";
 import { CodeAssignedStaff } from "@/components/clients/code-assigned-staff";
 import { CustomFieldsForSection } from "@/components/clients/custom-fields-panel";
-import { TargetBehaviorsPanel } from "@/components/clients/target-behaviors-panel";
 import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/hrc-restrictions";
 import { Scale } from "lucide-react";
 import {
@@ -429,7 +428,6 @@ function ClientProfileHub() {
           <Tabs defaultValue="goals">
             <TabsList className="mb-4">
               <TabsTrigger value="goals">Goals</TabsTrigger>
-              <TabsTrigger value="behaviors">Target Behaviors</TabsTrigger>
               <TabsTrigger value="medications">Medications</TabsTrigger>
             </TabsList>
 
@@ -437,21 +435,6 @@ function ClientProfileHub() {
               <CareGroup label="Goals" hint="Structured PCSP goals — sole editable home">
                 <CareSection icon={Target} accent="indigo">
                   <PlanGoalsPanel client={client} clientId={clientId} orgId={orgId} />
-                </CareSection>
-              </CareGroup>
-            </TabsContent>
-
-            <TabsContent value="behaviors" className="space-y-6">
-              <CareGroup
-                label="Target Behaviors"
-                hint="Named behaviors staff should recognize and document — surfaces in clock-out behavior observations"
-              >
-                <CareSection icon={ClipboardList} accent="amber">
-                  {orgId ? (
-                    <TargetBehaviorsPanel clientId={clientId} orgId={orgId} />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Organization not loaded.</p>
-                  )}
                 </CareSection>
               </CareGroup>
             </TabsContent>

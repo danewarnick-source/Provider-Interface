@@ -48,7 +48,6 @@ type TargetModule =
   | "daily_logs"
   | "med_mgmt"
   | "incident_reporting"
-  | "behavior_plan"
   | "compliance_track"
   | "training"
   | "eligibility"
@@ -74,7 +73,6 @@ const MODULE_LABELS: Record<TargetModule, string> = {
   daily_logs: "Daily Logs",
   med_mgmt: "Medication Management",
   incident_reporting: "Incident Reporting",
-  behavior_plan: "Behavior Plan",
   compliance_track: "Compliance Track",
   training: "Training",
   eligibility: "Eligibility",

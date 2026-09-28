@@ -28,7 +28,7 @@ export type CaseloadFacts = {
   serviceCodes: readonly string[];
   /** Any caseload client with clients.has_abi. */
   hasAbiClient: boolean;
-  /** Any caseload client in behavior_support_clients or with client_target_behaviors. */
+  /** Behavior-support caseload tracking was removed. The live loader passes false. */
   hasBehaviorSupportClient: boolean;
 };
 
@@ -75,7 +75,7 @@ function inQuizOrder(codes: Iterable<ServiceCodeFlag>): ServiceCodeFlag[] {
  *                   codes every person's Position implies (Host Home Provider → HHS)
  *   transportsPeople = profiles.transports_clients (all of them, for a batch)
  *   worksWithAbi  = any caseload client has_abi
- *   maySupportAggressiveBehavior = any caseload client with behavior support / target behaviors
+ *   maySupportAggressiveBehavior = caseload fact hasBehaviorSupportClient (live loader passes false)
  *   includeCompanyCustoms = false
  * With no caseload yet: defaultQuestionnaireAnswers('staff'), but transport from
  * the profile and the Position codes.

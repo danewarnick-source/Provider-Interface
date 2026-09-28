@@ -1,12 +1,6 @@
 import { useMemo, useState } from "react";
 import { OriginalSpeechAudit } from "@/components/staff-mobile/original-speech-audit";
-import {
-  BehaviorObservationsBlock,
-  emptyBehaviorAnswers,
-  validateBehaviorAnswers,
-  type BehaviorAnswers,
-} from "@/components/evv/behavior-observations-block";
-import { TOMMY_BEHAVIORS, TOMMY_GOALS } from "./fixtures";
+import { TOMMY_GOALS } from "./fixtures";
 
 const FRAUD =
   "I attest that this shift note is accurate and truthful, that it reflects services I personally provided, and that I understand submitting false Medicaid documentation constitutes fraud.";
@@ -18,7 +12,6 @@ export function PunchPadClockOutStage({ search }: { search: Record<string, strin
   const [checkedGoals, setCheckedGoals] = useState<Record<string, boolean>>({});
   const [baseline, setBaseline] = useState(false);
   const [incidentAnswer, setIncidentAnswer] = useState<"yes" | "no" | null>(null);
-  const [behaviorAnswers, setBehaviorAnswers] = useState<BehaviorAnswers>(emptyBehaviorAnswers);
   const [medsDue] = useState(true);
   const [medDosesResolved, setMedDosesResolved] = useState(false);
   const [attestationChecked, setAttestationChecked] = useState(false);
@@ -32,11 +25,9 @@ export function PunchPadClockOutStage({ search }: { search: Record<string, strin
 
   const hasGoalSelected = baseline || Object.values(checkedGoals).some(Boolean);
   const narrativeOk = wordCount >= 30;
-  const behaviorOk = validateBehaviorAnswers(behaviorAnswers) === null;
   const canSubmit =
     hasGoalSelected &&
     narrativeOk &&
-    behaviorOk &&
     incidentAnswer !== null &&
     (!medsDue || medDosesResolved) &&
     attestationChecked;
@@ -100,12 +91,6 @@ export function PunchPadClockOutStage({ search }: { search: Record<string, strin
         </button>
         <p>Incident: {incidentAnswer ?? "unanswered"}</p>
       </section>
-
-      <BehaviorObservationsBlock
-        value={behaviorAnswers}
-        onChange={setBehaviorAnswers}
-        targetBehaviorOptions={TOMMY_BEHAVIORS}
-      />
 
       <section>
         <h2>Medications due this shift</h2>

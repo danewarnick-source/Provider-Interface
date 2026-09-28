@@ -64,8 +64,6 @@ function describeUndo(r: unknown): string {
       return `Delete client profile: ${x.display_name}`;
     case "feature_flag":
       return `Disable ${x.module} on ${x.display_name}`;
-    case "bsp_draft":
-      return `Remove draft behavior plan for ${x.display_name}`;
     case "custom_field":
       return `Clear custom field "${x.field_key}" on ${x.display_name}`;
     case "filed_scrap":
