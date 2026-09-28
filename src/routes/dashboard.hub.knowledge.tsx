@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { KnowledgePage } from "@/components/pages/knowledge-page";
+import { KnowledgePage } from "@/components/nectar/knowledge-page";
 import { FeatureGate } from "@/components/upgrade-gate";
 
 const search = z.object({

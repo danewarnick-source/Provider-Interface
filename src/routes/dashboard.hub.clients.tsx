@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
-import { HubShell, type HubTab } from "@/components/admin-hubs/hub-shell";
+import { HubShell, type HubTab } from "@/components/admin-home/hub-shell";
 import { RequireLevel, RequirePermission } from "@/components/rbac-guard";
 import { useAccess } from "@/hooks/use-access";
 import { ClientsPage } from "./dashboard.clients";

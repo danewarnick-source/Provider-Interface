@@ -20,7 +20,7 @@ describe("Knowledge surface lock", () => {
   });
 
   it("frames Knowledge as Nectar document ingest, not compliance tracing", () => {
-    const page = read("../../components/pages/knowledge-page.tsx");
+    const page = read("../../components/nectar/knowledge-page.tsx");
     assert.match(page, /Nectar ingests them into its knowledge base/);
     assert.match(page, /Nectar search/);
     assert.doesNotMatch(page, /Requirements/);

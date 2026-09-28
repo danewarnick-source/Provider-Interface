@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { NectarDocsPage } from "@/components/pages/nectar-docs-page";
+import { NectarDocsPage } from "@/components/nectar/nectar-docs-page";
 import { FeatureGate } from "@/components/upgrade-gate";
 
 export const Route = createFileRoute("/dashboard/nectar-docs")({

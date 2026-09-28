@@ -27,7 +27,7 @@ describe("NECTAR onboarding — agency setup gate, no Home wizard", () => {
   });
 
   it("keeps the company documents hub as optional storage, not a SOW gate", () => {
-    const docs = read("../../components/pages/nectar-docs-page.tsx");
+    const docs = read("../../components/nectar/nectar-docs-page.tsx");
     const bar = read("../../components/onboarding/onboarding-return-bar.tsx");
     assert.match(bar, /useAgencySetup/);
     assert.match(bar, /AGENCY_SETUP_PATH/);
