@@ -12,7 +12,7 @@
  * deliberately.
  */
 
-import { SUPPORT_STRATEGIES_OBLIGATION_TITLE } from "../client-form-obligations.ts";
+import { SUPPORT_STRATEGIES_OBLIGATION_TITLE } from "../clients/client-form-obligations.ts";
 import { sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
 import { awardedCodeDutyStatus, type OrgFacts } from "./applicability.ts";
 import { liveObligationKeyForRule, staffTaskPolicyForRule } from "./catalog-live-bridge.ts";

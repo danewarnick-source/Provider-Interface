@@ -15,9 +15,9 @@ import {
 } from "lucide-react";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAccess } from "@/hooks/use-access";
-import { getBilledRevenueByYear } from "@/lib/financial-revenue.functions";
-import { getTotalsLedger } from "@/lib/financial-totals.functions";
-import { getBillingSnapshot } from "@/lib/financial-hub.functions";
+import { getBilledRevenueByYear } from "@/lib/financial/financial-revenue.functions";
+import { getTotalsLedger } from "@/lib/financial/financial-totals.functions";
+import { getBillingSnapshot } from "@/lib/financial/financial-hub.functions";
 import { isAdminLevel } from "@/lib/access/levels";
 
 /**

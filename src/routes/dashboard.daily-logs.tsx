@@ -29,7 +29,7 @@ import {
   Pen, ShieldAlert, Mic, MicOff,
 } from "lucide-react";
 import { toast } from "sonner";
-import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
+import { invalidateStaffCaseloadWork } from "@/lib/staff/staff-caseload-cache";
 import {
   evaluateShiftNote, scanNoteForTriggers,
   type CoachResult, type ScanResult,

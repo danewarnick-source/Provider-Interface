@@ -17,8 +17,8 @@ import {
   type BillingPeriod,
 } from "@/lib/pi-client-billing";
 import { quotePiListSubscription } from "@/lib/pi-signup-pricing";
-import { readStripeEnv, subscriptionLineItemsForPiListQuote } from "@/lib/stripe-config";
-import { getStripe } from "@/lib/stripe.server";
+import { readStripeEnv, subscriptionLineItemsForPiListQuote } from "@/lib/financial/stripe-config";
+import { getStripe } from "@/lib/financial/stripe.server";
 
 type OrgSubRow = {
   id: string;

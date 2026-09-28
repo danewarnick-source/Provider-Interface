@@ -24,7 +24,7 @@ import {
   addClientBelonging,
   discardClientBelonging,
   type ClientBelongingRow,
-} from "@/lib/client-belongings.functions";
+} from "@/lib/clients/client-belongings.functions";
 
 function fmtDate(d: string | null): string {
   if (!d) return "—";

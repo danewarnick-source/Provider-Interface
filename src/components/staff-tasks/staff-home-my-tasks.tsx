@@ -11,7 +11,7 @@ import {
 import { isPackSentinel, obligationIsRequired } from "@/lib/obligation-packs";
 import { isUnlinkedFormDuty, isFormUuid } from "@/lib/resolve-obligation-form";
 import { inHiveCourseIdForTitle, topicCodesForCourse } from "@/lib/in-hive-training";
-import { clientFormKindForTitle } from "@/lib/client-form-obligations";
+import { clientFormKindForTitle } from "@/lib/clients/client-form-obligations";
 import {
   completedCodesFromProgress,
   loadInHiveCourseProgress,
@@ -23,7 +23,7 @@ import {
   buildStaffTask,
   dedupeOpenTasksByInstance,
   staffTaskOpensUpload,
-} from "@/lib/staff-my-tasks";
+} from "@/lib/staff/staff-my-tasks";
 import { MyTasksQueue } from "@/components/staff-tasks/my-tasks-queue";
 import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
 import {

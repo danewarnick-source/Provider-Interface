@@ -7,7 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { z } from "zod";
-import { applyExtractedFieldsToClient } from "@/lib/client-import-schema";
+import { applyExtractedFieldsToClient } from "@/lib/clients/client-import-schema";
 import {
   validateClientDraft,
   filterBlocking,
@@ -16,15 +16,15 @@ import {
   type ClientDraft,
 } from "@/lib/import-validation";
 import { fetchTenantIdentity, type TenantIdentity } from "@/lib/service-classification";
-import { BASELINE_STAFF_TRAININGS, isBaselineApplicable } from "@/lib/staff-training-requirements";
+import { BASELINE_STAFF_TRAININGS, isBaselineApplicable } from "@/lib/staff/staff-training-requirements";
 import { onPcspActivatedInternal } from "@/lib/company-obligations.functions";
 import {
   onStaffAssignmentCreatedInternal,
   onStaffHiredInternal,
   reevaluateStaffAssignedToClientInternal,
-} from "@/lib/staff-assignment-hooks.functions";
+} from "@/lib/staff/staff-assignment-hooks.functions";
 import { enrichNamesFromFull } from "@/lib/person-name";
-import { hireEmployeeInternal } from "@/lib/employees.functions";
+import { hireEmployeeInternal } from "@/lib/staff/employees.functions";
 import { generateTempPassword } from "@/lib/temp-password";
 import { classifyImportInvite, hasUsableInviteEmail } from "@/lib/import-invite";
 

@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
-import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth-captcha";
+import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth/auth-captcha";
 import { supabase } from "@/integrations/supabase/client";
-import { completeClientSignOut } from "@/lib/client-sign-out";
+import { completeClientSignOut } from "@/lib/clients/client-sign-out";
 import { toast } from "sonner";
 import { AuthShell } from "./login";
 import { levelInvitePhrase } from "@/lib/access/levels";
@@ -30,12 +30,12 @@ import {
   joinSetsAuthPassword,
   joinUsernameLiveMessage,
   suggestJoinUsername,
-} from "@/lib/join-invite";
+} from "@/lib/auth/join-invite";
 import {
   previewInvitation,
   prepareInviteAccount,
   type InvitePreview,
-} from "@/lib/join-invite.functions";
+} from "@/lib/auth/join-invite.functions";
 
 export const Route = createFileRoute("/join")({
   head: () => ({

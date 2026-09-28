@@ -14,7 +14,7 @@ import {
   listOrgPersonnelFilePack,
   type PersonnelFileMatrixRow,
 } from "@/lib/personnel-file-matrix.functions";
-import { missingPersonnelCsv, personnelPackHtml } from "@/lib/staff-obligation-files";
+import { missingPersonnelCsv, personnelPackHtml } from "@/lib/staff/staff-obligation-files";
 
 async function signedEvidenceUrl(path: string): Promise<string> {
   const { data, error } = await supabase.storage

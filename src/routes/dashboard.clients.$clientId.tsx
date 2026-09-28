@@ -38,7 +38,7 @@ import {
   previewClientUpdateFromDocument,
   applySelectedClientFields,
 } from "@/lib/import-checklist.functions";
-import { reclaimExternalCodesAsOurs } from "@/lib/client-billing-fix.functions";
+import { reclaimExternalCodesAsOurs } from "@/lib/clients/client-billing-fix.functions";
 import { AddCodesControl } from "@/components/clients/add-codes-control";
 import { BillingCodesDetail } from "@/components/clients/billing-codes-detail";
 import {
@@ -109,7 +109,7 @@ import {
   FolderOpen,
   X,
 } from "lucide-react";
-import { clientFeatureVisible, useClientFeature } from "@/lib/client-features";
+import { clientFeatureVisible, useClientFeature } from "@/lib/clients/client-features";
 import { MarEmarTab } from "@/components/workspace/mar-emar-tab";
 import {
   getClientSpecificTraining,
@@ -124,7 +124,7 @@ import {
   type CSTSection,
   type CSTGoal,
   type CSTReviewQuestion,
-} from "@/lib/client-specific-training.functions";
+} from "@/lib/clients/client-specific-training.functions";
 import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
 import { onPcspActivated } from "@/lib/company-obligations.functions";
 import { computeSupportStrategyCoverage } from "@/lib/support-strategy-coverage";

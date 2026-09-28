@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useAccess } from "@/hooks/use-access";
-import { onStaffHired } from "@/lib/staff-assignment-hooks.functions";
+import { onStaffHired } from "@/lib/staff/staff-assignment-hooks.functions";
 import { safeErrorMessage } from "@/lib/safe-error-message";
 import { StaffProfileIdentity } from "@/components/employees/staff-profile-identity";
 import {
@@ -17,7 +17,7 @@ import {
   type StaffIdentityDraft,
   type StaffIdentityMember,
   type StaffIdentityProfile,
-} from "@/lib/staff-profile-identity";
+} from "@/lib/staff/staff-profile-identity";
 import { AccessSection } from "@/components/access/access-section";
 
 export function StaffProfilePanel({

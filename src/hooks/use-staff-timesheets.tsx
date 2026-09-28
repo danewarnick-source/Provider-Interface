@@ -6,7 +6,7 @@ import { displayPersonName } from "@/lib/person-name";
 import {
   staffDisplayHours,
   staffTimesheetStatus,
-} from "@/lib/staff-display-hours";
+} from "@/lib/staff/staff-display-hours";
 
 export type StaffTimesheetRow = {
   id: string;

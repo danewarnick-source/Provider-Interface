@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
 import { useCurrentOrg } from "./use-org";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { staffDisplayHours } from "@/lib/staff-display-hours";
+import { staffDisplayHours } from "@/lib/staff/staff-display-hours";
 
 export type ClientCodeUsage = {
   client_id: string;

@@ -13,7 +13,7 @@ import { useMobileShellContainer } from "@/components/staff-mobile/mobile-shell-
 type CapBehavior = "warn" | "acknowledge" | "auto_clock_out";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { unitsToHours, fmtHours, computeEntryUnits } from "@/lib/billing-units";
-import { staffClockOutSearch } from "@/lib/staff-clock-out";
+import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 
 /**
  * Threshold engine: while a staff member is clocked in, watches the

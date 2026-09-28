@@ -17,7 +17,7 @@
 // infrastructure is offline.
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { resolveAuthOrigin } from "@/lib/auth-redirect";
+import { resolveAuthOrigin } from "@/lib/auth/auth-redirect";
 
 export type BillingSmsKind =
   | "payment_declined_day0"

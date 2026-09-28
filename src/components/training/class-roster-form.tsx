@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { createTrainingClassCheckoutFn } from "@/lib/stripe-checkout.functions";
+import { createTrainingClassCheckoutFn } from "@/lib/financial/stripe-checkout.functions";
 import {
   mergeSelectedMembersIntoRoster,
   quoteTrainingClass,

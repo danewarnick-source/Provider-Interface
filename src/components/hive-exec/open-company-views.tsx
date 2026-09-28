@@ -8,7 +8,7 @@ import {
   resolvePortalSwitcherPath,
   STAFF_VIEW_ACCESSIBLE_NAME,
 } from "@/lib/portal-view-landing";
-import { resetStaffPhoneScroll } from "@/lib/staff-phone-chrome";
+import { resetStaffPhoneScroll } from "@/lib/staff/staff-phone-chrome";
 
 /**
  * Visible escape hatch off Command Center onto the company portal.

@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { CheckCircle2, XCircle, ShieldCheck, AlertTriangle, X as XIcon } from "lucide-react";
 import { CheckboxMultiSelect, type CheckboxMultiSelectOption } from "@/components/ui/checkbox-multi-select";
 import { supabase } from "@/integrations/supabase/client";
-import { clientReadiness, type ReadinessReport } from "@/lib/client-readiness.functions";
+import { clientReadiness, type ReadinessReport } from "@/lib/clients/client-readiness.functions";
 import {
   getClientOnboardingState,
   addClientBillingCodes,
@@ -26,7 +26,7 @@ import {
   type State as OnboardingState,
 } from "@/components/clients/finish-onboarding-card";
 import { CaseloadEditor } from "@/components/clients/caseload-editor";
-import { FEATURE_CODES } from "@/lib/client-features";
+import { FEATURE_CODES } from "@/lib/clients/client-features";
 import { isClockableServiceCode, isDailyServiceCode } from "@/lib/service-billing";
 
 type CheckKey =

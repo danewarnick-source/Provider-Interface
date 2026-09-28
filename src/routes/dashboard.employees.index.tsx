@@ -5,16 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
 import { useServerFn } from "@tanstack/react-start";
-import { adminResetEmployeePassword } from "@/lib/employees.functions";
+import { adminResetEmployeePassword } from "@/lib/staff/employees.functions";
 import { resendInvitation, revokeInvitation } from "@/lib/invitations.functions";
 import { archiveEntity, restoreEntity } from "@/lib/lifecycle.functions";
-import { inviteJoinUrl } from "@/lib/join-invite";
-import { resolveAuthOrigin } from "@/lib/auth-redirect";
+import { inviteJoinUrl } from "@/lib/auth/join-invite";
+import { resolveAuthOrigin } from "@/lib/auth/auth-redirect";
 import { generateTempPassword } from "@/lib/temp-password";
 import {
   onStaffAssignmentCreated,
   onStaffAssignmentRemoved,
-} from "@/lib/staff-assignment-hooks.functions";
+} from "@/lib/staff/staff-assignment-hooks.functions";
 import {
   countEmployeesOnRosterTab,
   filterEmployeesByRosterTab,
@@ -24,8 +24,8 @@ import {
   lastLoginByUserId,
   profileNeedsSetup,
   type EmployeeRosterTab,
-} from "@/lib/employee-roster";
-import { splitPersonName } from "@/lib/employee-roster-upload";
+} from "@/lib/staff/employee-roster";
+import { splitPersonName } from "@/lib/staff/employee-roster-upload";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
 import { AddEmployeeButton, AddEmployeeWizard } from "@/components/employees/add-employee-wizard";
 import {

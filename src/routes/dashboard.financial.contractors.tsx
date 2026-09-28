@@ -19,7 +19,7 @@ import {
   getCtrClients,
   getCtrStaff,
   getCtrInputs,
-} from "@/lib/financial-contractors.functions";
+} from "@/lib/financial/financial-contractors.functions";
 
 export const Route = createFileRoute("/dashboard/financial/contractors")({
   head: () => ({ meta: [{ title: "Contractors — Provider Interface" }] }),

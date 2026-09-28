@@ -20,7 +20,7 @@ import {
   Info,
   Send,
 } from "lucide-react";
-import { employeeSmartImportRedirect } from "@/lib/employee-smart-import-block";
+import { employeeSmartImportRedirect } from "@/lib/staff/employee-smart-import-block";
 import { RequirePermission } from "@/components/rbac-guard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

@@ -57,7 +57,7 @@ import { isClockableServiceCode } from "@/lib/service-billing";
 import {
   PROFILE_FIELD_BY_KEY,
   type ProfileField,
-} from "@/lib/client-profile-fields";
+} from "@/lib/clients/client-profile-fields";
 import { CaseloadEditor } from "@/components/clients/caseload-editor";
 import { NectarAsk } from "@/components/clients/nectar-ask";
 

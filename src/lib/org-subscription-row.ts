@@ -4,7 +4,7 @@
  */
 
 import { normalizeTierId } from "./hive-tiers.ts";
-import { mrrCentsForPlan } from "./stripe-config.ts";
+import { mrrCentsForPlan } from "./financial/stripe-config.ts";
 
 export type ActivatePaidSubscriptionInput = {
   orgId: string;

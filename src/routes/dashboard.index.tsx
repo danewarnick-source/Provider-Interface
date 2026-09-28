@@ -19,7 +19,7 @@ import { StaffPageHeader } from "@/components/staff-mobile/staff-page-header";
 import { TodayHero } from "@/components/staff-mobile/today-hero";
 import { NectarPayPeriodCard } from "@/components/staff-mobile/nectar-pay-period-card";
 import { AdminHomeDashboard } from "@/components/admin-home/admin-home-dashboard";
-import { staffClockOutSearch } from "@/lib/staff-clock-out";
+import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 import { parseCheckoutReturnSearch } from "@/lib/billing-access";
 import { StaffHomeMyTasks } from "@/components/staff-tasks/staff-home-my-tasks";
 import { isAdminLevel } from "@/lib/access/levels";

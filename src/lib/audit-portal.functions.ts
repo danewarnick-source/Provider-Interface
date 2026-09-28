@@ -7,7 +7,7 @@ import {
   assertPackageAccess,
   assertPackageAccessViaChild,
 } from "@/lib/audit-package-access";
-import { resolveAuthOrigin } from "@/lib/auth-redirect";
+import { resolveAuthOrigin } from "@/lib/auth/auth-redirect";
 import { DEFAULT_AUDIT_FROM_NAME, formatFromHeader } from "@/lib/managed-from";
 
 // ============================================================

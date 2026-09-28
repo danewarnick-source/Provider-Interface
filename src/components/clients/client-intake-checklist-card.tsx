@@ -25,7 +25,7 @@ import {
 import {
   getClientIntakeChecklist,
   upsertClientIntakeCompletion,
-} from "@/lib/client-hr.functions";
+} from "@/lib/clients/client-hr.functions";
 import { ClientDocumentsCard } from "@/components/clients/client-documents-card";
 
 const STATUSES = [
@@ -263,7 +263,7 @@ function ChecklistRowView({
   row,
   onSetStatus,
 }: {
-  row: import("@/lib/client-hr.functions").ClientIntakeRow;
+  row: import("@/lib/clients/client-hr.functions").ClientIntakeRow;
   onSetStatus: (status: (typeof STATUSES)[number]) => void;
 }) {
   const navigate = useNavigate();

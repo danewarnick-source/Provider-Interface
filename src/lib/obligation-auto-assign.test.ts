@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import { ABI_OBLIGATION_TITLE, THIRTY_DAY_OBLIGATION_TITLE } from "./in-hive-training.ts";
-import { PCT_HIRE_COURSE_TITLE } from "./client-form-obligations.ts";
+import { PCT_HIRE_COURSE_TITLE } from "./clients/client-form-obligations.ts";
 import {
   CODE_OF_CONDUCT_TITLE,
   CONFLICT_OF_INTEREST_TITLE,

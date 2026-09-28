@@ -39,7 +39,7 @@ import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode, maskMemberId, padM
 import { clientAuthorizedCodes } from "@/lib/assignment-codes";
 import { roundToQuarterHourISO } from "@/lib/time-rounding";
 import { computeEntryUnits } from "@/lib/billing-units";
-import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
+import { invalidateStaffCaseloadWork } from "@/lib/staff/staff-caseload-cache";
 import { EvvConsentGate } from "@/components/evv/consent-gate";
 import { evaluateShiftNote } from "@/lib/ai-coach.functions";
 import { NectarShiftNoteDraft } from "@/components/nectar/nectar-shift-note-draft";
@@ -68,7 +68,7 @@ import {
 } from "@/components/evv/behavior-observations-block";
 import { BehaviorObservationsBoundary } from "@/components/evv/behavior-observations-boundary";
 import { useShiftBehaviorSetting } from "@/hooks/use-shift-behavior-setting";
-import { listClientTargetBehaviors } from "@/lib/client-target-behaviors.functions";
+import { listClientTargetBehaviors } from "@/lib/clients/client-target-behaviors.functions";
 import { getPendingTrackingForms } from "@/lib/forms.functions";
 import { PendingTrackingFormsDialog, type PendingForm } from "@/components/evv/pending-tracking-forms-dialog";
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";

@@ -15,7 +15,7 @@ import {
   getGrossCtr,
   getGrossLedger,
   getGrossTrackingStart,
-} from "@/lib/financial-gross.functions";
+} from "@/lib/financial/financial-gross.functions";
 
 export const Route = createFileRoute("/dashboard/financial/gross")({
   head: () => ({ meta: [{ title: "Gross — Provider Interface" }] }),

@@ -20,15 +20,15 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { clientCareDataQueryOptions } from "@/lib/client-care-data.functions";
-import { setClientStaffVisibility } from "@/lib/client-staff-visibility.functions";
+import { clientCareDataQueryOptions } from "@/lib/clients/client-care-data.functions";
+import { setClientStaffVisibility } from "@/lib/clients/client-staff-visibility.functions";
 import {
   SECTION_DEFAULTS,
   SECTION_LABEL,
   isFieldVisible,
   isSectionVisible,
   type SectionName,
-} from "@/lib/client-staff-visibility";
+} from "@/lib/clients/client-staff-visibility";
 
 function useVisibility(clientId: string) {
   const qc = useQueryClient();

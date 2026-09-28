@@ -12,7 +12,7 @@ import {
   disableLoanFeature,
   getLoanFeatureStatus,
   LOAN_ATTESTATION_TEXT,
-} from "@/lib/client-loans.functions";
+} from "@/lib/clients/client-loans.functions";
 
 export function LoanFeatureGate({
   organizationId,

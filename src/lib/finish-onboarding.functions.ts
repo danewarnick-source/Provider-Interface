@@ -17,7 +17,7 @@ import {
   writeProfileFieldValue,
   type ProfileCustomsMap,
   type ProfileField,
-} from "@/lib/client-profile-fields";
+} from "@/lib/clients/client-profile-fields";
 
 // Whitelist of clients-table columns the wizard may patch directly via
 // saveOnboardingClientPatch (legacy helpers below). The registry's

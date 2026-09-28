@@ -37,7 +37,7 @@ import { previewUndoImport, undoCommittedImport } from "@/lib/smart-import-histo
 import { ClientLiveBadge } from "@/components/clients/client-readiness-card";
 import { SetupChecklist } from "@/components/clients/setup-checklist";
 import { FinalizeClientEditor } from "@/components/clients/finalize-client-editor";
-import { employeeSmartImportRedirect } from "@/lib/employee-smart-import-block";
+import { employeeSmartImportRedirect } from "@/lib/staff/employee-smart-import-block";
 
 export const Route = createFileRoute("/dashboard/smart-import/$jobId/done")({
   head: () => ({ meta: [{ title: "Smart Import — Done" }] }),

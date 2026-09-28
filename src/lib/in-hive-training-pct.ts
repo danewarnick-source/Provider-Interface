@@ -3,7 +3,7 @@
  * Answer keys live only in person-centered-training-content.json and are
  * scored on the server. This module never imports that file.
  */
-import { PCT_HIRE_COURSE_TITLE } from "./client-form-obligations.ts";
+import { PCT_HIRE_COURSE_TITLE } from "./clients/client-form-obligations.ts";
 
 export const PCT_COURSE_ID = "pi-person-centered-foundations" as const;
 export const PCT_COURSE_TITLE = "Person-centered thinking in everyday support";

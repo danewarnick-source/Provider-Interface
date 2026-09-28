@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { SECTION_NAMES } from "@/lib/client-staff-visibility";
+import { SECTION_NAMES } from "@/lib/clients/client-staff-visibility";
 import { chunkIds } from "@/lib/custom-field-delete";
 
 const Kind = z.enum(["employee", "client"]);

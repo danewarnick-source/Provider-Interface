@@ -11,7 +11,7 @@
 
 import { ABI_OBLIGATION_TITLE, THIRTY_DAY_OBLIGATION_TITLE } from "../in-hive-training.ts";
 import { ANNUAL_CE_OBLIGATION_TITLE } from "../in-hive-training-annual-ce.ts";
-import { PCT_HIRE_COURSE_TITLE } from "../client-form-obligations.ts";
+import { PCT_HIRE_COURSE_TITLE } from "../clients/client-form-obligations.ts";
 import { HIRE_ALWAYS_TITLES, hireDueDaysForTitle } from "../obligation-auto-assign.ts";
 import { sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
 import { CPR_OBLIGATION_TITLES } from "../training-class.ts";

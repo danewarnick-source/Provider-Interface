@@ -6,7 +6,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { reevaluateStaffDutiesInternal } from "@/lib/staff-assignment-hooks.functions";
+import { reevaluateStaffDutiesInternal } from "@/lib/staff/staff-assignment-hooks.functions";
 import { logChange, nameOf } from "./change-log.server";
 import { asCategoryMap, diffOverrides } from "./can";
 import { CATEGORY_IDS, type CategoryId, type CategoryMap, type CategoryValue } from "./categories";

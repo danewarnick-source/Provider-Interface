@@ -10,7 +10,7 @@ import {
   resolveCurrentMembership,
 } from "@/lib/current-org";
 import { isCognitoAuth } from "@/lib/aws/env";
-import { isAwsBootstrapFailure } from "@/lib/cognito-login-gate";
+import { isAwsBootstrapFailure } from "@/lib/auth/cognito-login-gate";
 
 export interface CurrentMembership {
   membership_id: string;

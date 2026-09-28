@@ -14,7 +14,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { resolveStaffQualifications, qualificationKey, type QualificationKind } from "../staff-qualifications.functions";
+import { resolveStaffQualifications, qualificationKey, type QualificationKind } from "../staff/staff-qualifications.functions";
 import { skipNectarComplianceMutation, skipNectarComplianceWrite } from "./nectar-compliance-stop-writes";
 
 const RULE_TYPES = ["billing_conflict", "staff_prerequisite", "deadline", "activity"] as const;

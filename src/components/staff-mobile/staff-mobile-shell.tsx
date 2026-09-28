@@ -6,7 +6,7 @@ import { ActiveShiftBar } from "./active-shift-bar";
 import { CapThresholdModal } from "./cap-threshold-modal";
 import { MobileShellProvider, useMobileShellContainer } from "./mobile-shell-context";
 import { useActiveShiftBarVisible } from "@/hooks/use-active-shift-bar";
-import { resetStaffPhoneScroll, staffMainBottomPadCss } from "@/lib/staff-phone-chrome";
+import { resetStaffPhoneScroll, staffMainBottomPadCss } from "@/lib/staff/staff-phone-chrome";
 
 /**
  * Mobile-only chrome for the staff portal. The shell is a fixed-viewport

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getClientIntakeChecklist } from "@/lib/client-hr.functions";
+import { getClientIntakeChecklist } from "@/lib/clients/client-hr.functions";
 
 /**
  * Read-only intake progress derived from the existing client intake checklist.

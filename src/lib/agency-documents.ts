@@ -9,7 +9,7 @@ import {
   obligationFileStatusLabel,
   statusForObligationInstance,
   type ObligationFileStatus,
-} from "./staff-obligation-files.ts";
+} from "./staff/staff-obligation-files.ts";
 
 export const AGENCY_DOC_STATUS_LABEL = {
   on_file: "On file",

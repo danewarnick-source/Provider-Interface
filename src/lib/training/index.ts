@@ -7,4 +7,4 @@ export * from '../in-hive-training.functions';
 export * from '../in-hive-training-access.functions';
 export * from '../in-hive-training-pct.functions';
 export * from '../in-hive-training-exams';
-export * from '../staff-training-requirements.functions';
+export * from '../staff/staff-training-requirements.functions';

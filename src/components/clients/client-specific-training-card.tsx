@@ -16,7 +16,7 @@ import {
   type CSTItem,
   type CSTGoal,
   type CSTReviewQuestion,
-} from "@/lib/client-specific-training.functions";
+} from "@/lib/clients/client-specific-training.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";

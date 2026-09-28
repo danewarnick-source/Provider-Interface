@@ -24,7 +24,7 @@ import {
   STAFF_CLOCK_BAR_PX,
   STAFF_TAB_BAR_OFFSET_CSS,
   STAFF_TAB_BAR_PX,
-} from "@/lib/staff-phone-chrome";
+} from "@/lib/staff/staff-phone-chrome";
 
 interface ChatMsg {
   id: string;

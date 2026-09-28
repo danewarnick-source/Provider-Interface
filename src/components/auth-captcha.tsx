@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { authCaptchaSiteKey } from "@/lib/auth-captcha";
+import { authCaptchaSiteKey } from "@/lib/auth/auth-captcha";
 
 const SCRIPT_ID = "cf-turnstile-api";
 const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";

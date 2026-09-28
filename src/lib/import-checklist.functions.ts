@@ -252,7 +252,7 @@ export const extractAndApplyClientUpload = createServerFn({ method: "POST" })
     }));
 
     // 4) Apply, with audit-on-error so nothing vanishes
-    const { applyExtractedFieldsToClient } = await import("@/lib/client-import-schema");
+    const { applyExtractedFieldsToClient } = await import("@/lib/clients/client-import-schema");
     const summary = await applyExtractedFieldsToClient({
       supabase: sb,
       organizationId: orgId,
@@ -523,7 +523,7 @@ export const applySelectedClientFields = createServerFn({ method: "POST" })
       confidence: f.confidence ?? 0.95,
     }));
 
-    const { applyExtractedFieldsToClient } = await import("@/lib/client-import-schema");
+    const { applyExtractedFieldsToClient } = await import("@/lib/clients/client-import-schema");
     const summary = await applyExtractedFieldsToClient({
       supabase: sb,
       organizationId: orgId,
@@ -531,7 +531,7 @@ export const applySelectedClientFields = createServerFn({ method: "POST" })
       fields,
       // "profile_update" is outside the SourceDocumentType union but the
       // helper only uses it for downstream conflict tagging — cast is safe.
-      sourceDocumentType: "profile_update" as unknown as import("@/lib/client-import-schema").SourceDocumentType,
+      sourceDocumentType: "profile_update" as unknown as import("@/lib/clients/client-import-schema").SourceDocumentType,
       onError: async (action, message) => {
         try {
           await sb.from("import_audit").insert({

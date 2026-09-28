@@ -6,12 +6,12 @@ import { Eye, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { listClientFileCards } from "@/lib/client-file.functions";
+import { listClientFileCards } from "@/lib/clients/client-file.functions";
 import {
   clientFileStatusLabel,
   type ClientFileCard,
   type ClientFileStatus,
-} from "@/lib/client-file";
+} from "@/lib/clients/client-file";
 import { ClientDocumentsCard } from "@/components/clients/client-documents-card";
 
 function statusBadgeClass(status: ClientFileStatus): string {

@@ -73,7 +73,7 @@ import {
   STAFF_PHONE_MQ,
   resetStaffPhoneScroll,
   shouldUnmountDuplicateStaffOutlet,
-} from "@/lib/staff-phone-chrome";
+} from "@/lib/staff/staff-phone-chrome";
 import { NectarTaskCenter } from "@/components/nectar/nectar-task-center";
 import { NectarSearchBar } from "@/components/nectar/nectar-search-bar";
 import { Clock } from "lucide-react";
@@ -89,7 +89,7 @@ import {
   dashboardShellShowsLoading,
   readSessionHint,
   writeSessionHint,
-} from "@/lib/auth-session-boot";
+} from "@/lib/auth/auth-session-boot";
 import { PortalViewSwitcher } from "@/components/portal-view-switcher";
 import { PiBrand } from "@/components/brand/pi-brand";
 import { PiMark } from "@/components/pi-landing/pi-mark";
@@ -98,8 +98,8 @@ import { BillingBanner } from "@/components/billing/billing-banner";
 import { orgDashboardIsLocked, pathBypassesBillingLock } from "@/lib/billing-lock-client";
 import { parseCheckoutReturnSearch } from "@/lib/billing-access";
 import { persistActiveOrgId } from "@/lib/current-org";
-import { completeClientSignOut } from "@/lib/client-sign-out";
-import { confirmCheckoutSessionFn } from "@/lib/stripe-checkout.functions";
+import { completeClientSignOut } from "@/lib/clients/client-sign-out";
+import { confirmCheckoutSessionFn } from "@/lib/financial/stripe-checkout.functions";
 import { DraftJobsProvider } from "@/components/nectar/draft-jobs-driver";
 import { DraftJobsHeaderPill } from "@/components/nectar/draft-jobs-header-pill";
 import { GuidedTourProvider } from "@/components/nectar/guided-tour-provider";
@@ -115,7 +115,7 @@ import {
   installBootstrapFailureWatch,
   shouldLeaveCognitoLoadingOverlay,
   type BootstrapFailureKind,
-} from "@/lib/cognito-login-gate";
+} from "@/lib/auth/cognito-login-gate";
 
 function DashboardShellError({ error }: { error: Error; reset: () => void }) {
   return (

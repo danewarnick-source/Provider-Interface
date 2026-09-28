@@ -24,7 +24,7 @@ import {
   readStripeEnv,
   resolveAgencyCheckoutPricingModel,
   STRIPE_SANDBOX_PRICE_IDS,
-} from "./stripe-config.ts";
+} from "./financial/stripe-config.ts";
 import { quoteHiveSubscription } from "./hive-pricing.ts";
 import { quotePiListSubscription, quoteSignupTrainingAddon } from "./pi-signup-pricing.ts";
 

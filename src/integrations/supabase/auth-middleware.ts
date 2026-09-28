@@ -11,7 +11,7 @@ import {
   cookieHeaderHasAwsSession,
   emptySsrAuthContext,
   logCognitoRequireAuth,
-} from "@/lib/cognito-require-auth";
+} from "@/lib/auth/cognito-require-auth";
 
 type SupabaseAuthContext = {
   supabase: SupabaseClient<Database>;

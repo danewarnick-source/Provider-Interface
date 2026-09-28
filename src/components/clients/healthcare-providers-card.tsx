@@ -15,7 +15,7 @@ import {
   upsertHealthcareProvider,
   deleteHealthcareProvider,
   type HealthcareProvider,
-} from "@/lib/client-healthcare-providers.functions";
+} from "@/lib/clients/client-healthcare-providers.functions";
 
 export function HealthcareProvidersCard({ clientId, orgId }: { clientId: string; orgId: string }) {
   const qc = useQueryClient();

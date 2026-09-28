@@ -20,7 +20,7 @@ import {
   type StaffAudienceFacts,
 } from "@/lib/agency-policies";
 import { ensureOpenStaffObligationInternal } from "@/lib/ensure-staff-obligation";
-import { addToAllStaffGroupInternal, ensureAllStaffGroupInternal } from "@/lib/staff-groups.functions";
+import { addToAllStaffGroupInternal, ensureAllStaffGroupInternal } from "@/lib/staff/staff-groups.functions";
 import { mergeDueDayPackFields } from "@/lib/obligation-packs";
 import { catalogTitleIsReserved } from "@/lib/sow-obligation-catalog";
 

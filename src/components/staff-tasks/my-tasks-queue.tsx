@@ -5,7 +5,7 @@ import {
   staffTaskReviewLabel,
   type StaffTask,
   type StaffTaskActionKind,
-} from "@/lib/staff-my-tasks";
+} from "@/lib/staff/staff-my-tasks";
 import { OVERRIDE_STATE_LABEL, OVERRIDE_STILL_REQUIRED } from "@/lib/obligations/overrides";
 
 export function MyTasksQueue({

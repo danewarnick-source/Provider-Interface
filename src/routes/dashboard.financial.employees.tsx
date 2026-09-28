@@ -20,7 +20,7 @@ import {
   getEmpClients,
   getEmpStaff,
   getEmpInputs,
-} from "@/lib/financial-employees.functions";
+} from "@/lib/financial/financial-employees.functions";
 
 /**
  * Financial → Employees tab. Mirrors Contractors but:

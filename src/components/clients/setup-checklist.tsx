@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
-import { clientReadiness, type ReadinessReport } from "@/lib/client-readiness.functions";
+import { clientReadiness, type ReadinessReport } from "@/lib/clients/client-readiness.functions";
 import { getClientOnboardingState } from "@/lib/finish-onboarding.functions";
 import {
   getClientFieldStates,

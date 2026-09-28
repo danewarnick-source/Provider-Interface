@@ -10,8 +10,8 @@ import {
   isStripeLiveSecretKey,
   readStripeEnv,
   stripePaymentsConfigured,
-} from "@/lib/stripe-config";
-import { appOriginFromRequest, getStripe } from "@/lib/stripe.server";
+} from "@/lib/financial/stripe-config";
+import { appOriginFromRequest, getStripe } from "@/lib/financial/stripe.server";
 import { quoteSignupTrainingAddon } from "@/lib/pi-signup-pricing";
 import {
   cleanTrainingOnlyPeople,

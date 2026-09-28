@@ -12,7 +12,7 @@ import {
   upsertClientTargetBehavior,
   deleteClientTargetBehavior,
   type ClientTargetBehavior,
-} from "@/lib/client-target-behaviors.functions";
+} from "@/lib/clients/client-target-behaviors.functions";
 
 const QK = (clientId: string) => ["client-target-behaviors", clientId];
 

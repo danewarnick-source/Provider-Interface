@@ -10,7 +10,7 @@ import {
   MobileShellProvider,
   useMobileShellContainer,
 } from "./mobile-shell-context";
-import { resetStaffPhoneScroll, staffMainBottomPadCss } from "@/lib/staff-phone-chrome";
+import { resetStaffPhoneScroll, staffMainBottomPadCss } from "@/lib/staff/staff-phone-chrome";
 
 const DEVICES = [
   { id: "se", label: "iPhone SE", w: 375, h: 667 },

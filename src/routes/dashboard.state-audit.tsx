@@ -26,7 +26,7 @@ import {
   type AuditPackageRow,
   type OrgAuditorRow,
 } from "@/lib/audit-portal.functions";
-import { resolveAuthOrigin } from "@/lib/auth-redirect";
+import { resolveAuthOrigin } from "@/lib/auth/auth-redirect";
 
 
 export const Route = createFileRoute("/dashboard/state-audit")({

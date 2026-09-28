@@ -14,8 +14,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { STAFF_CLOCK_BAR_OFFSET_CSS } from "@/lib/staff-phone-chrome";
-import { staffClockOutSearch } from "@/lib/staff-clock-out";
+import { STAFF_CLOCK_BAR_OFFSET_CSS } from "@/lib/staff/staff-phone-chrome";
+import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 
 const fmtUSD = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD" });

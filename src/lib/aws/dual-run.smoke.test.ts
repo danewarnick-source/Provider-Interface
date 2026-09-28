@@ -351,7 +351,7 @@ describe("Cognito login / dashboard hang guards", () => {
 
   it("leaves the Cognito Loading overlay on aws-db 5xx, org error, or timeout", async () => {
     const { shouldLeaveCognitoLoadingOverlay, inspectBootstrapFailure } =
-      await import("../cognito-login-gate.ts");
+      await import("../auth/cognito-login-gate.ts");
     assert.equal(
       shouldLeaveCognitoLoadingOverlay({
         isCognito: true,

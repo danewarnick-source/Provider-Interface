@@ -11,7 +11,7 @@ import {
   type CSTContent,
   type CSTReviewQuestion,
   type CSTGoal,
-} from "@/lib/client-specific-training.functions";
+} from "@/lib/clients/client-specific-training.functions";
 import { SectionsView, GoalsView } from "@/components/clients/client-specific-training-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

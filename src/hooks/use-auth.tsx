@@ -3,7 +3,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { attachGetSessionBoot } from "@/lib/auth-session-boot";
+import { attachGetSessionBoot } from "@/lib/auth/auth-session-boot";
 
 interface AuthCtx {
   user: User | null;

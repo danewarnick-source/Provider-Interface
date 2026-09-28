@@ -29,7 +29,7 @@ import {
   budgetPdfFilename,
   type BudgetPdfPayload,
   type BudgetPdfLogo,
-} from "@/lib/client-budget-pdf";
+} from "@/lib/clients/client-budget-pdf";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { isAdminLevel } from "@/lib/access/levels";
 

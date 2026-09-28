@@ -16,7 +16,7 @@ import {
   getHhDays,
   getHhSettings,
   getHhMonthly,
-} from "@/lib/financial-host-home.functions";
+} from "@/lib/financial/financial-host-home.functions";
 
 export const Route = createFileRoute("/dashboard/financial/host-home")({
   head: () => ({ meta: [{ title: "Host Home — Provider Interface" }] }),

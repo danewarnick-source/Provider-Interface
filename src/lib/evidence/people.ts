@@ -1,4 +1,4 @@
-import { isEmployeeOnActiveRoster } from "../employee-roster.ts";
+import { isEmployeeOnActiveRoster } from "../staff/employee-roster.ts";
 import { resolveHireDate } from "./due.ts";
 import { staffInitials } from "./status.ts";
 import type { EvidenceItemRow, EvidencePerson, EvidenceSubject } from "./types.ts";

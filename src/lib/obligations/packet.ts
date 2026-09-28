@@ -15,7 +15,7 @@ import {
   tallyObligationFileStatus,
   type ObligationFileStatus,
   type ObligationFileStatusCounts,
-} from "../staff-obligation-files.ts";
+} from "../staff/staff-obligation-files.ts";
 import {
   computeObligationApplicability,
   obligationFactApplicability,

@@ -15,7 +15,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { qualificationKey, type QualificationKind } from "@/lib/staff-qualifications.functions";
+import { qualificationKey, type QualificationKind } from "@/lib/staff/staff-qualifications.functions";
 
 // ─── Legacy hardcoded requirements (DHHS91172 minimums) ───────────────────
 // KEEP as fallback until every listed code has confirmed-rule coverage.

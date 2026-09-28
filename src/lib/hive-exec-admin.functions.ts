@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
-import { passwordResetRedirectUrl } from "@/lib/auth-redirect";
+import { passwordResetRedirectUrl } from "@/lib/auth/auth-redirect";
 
 type MemberInsert = Database["public"]["Tables"]["organization_members"]["Insert"];
 

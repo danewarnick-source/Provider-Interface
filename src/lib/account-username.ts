@@ -6,7 +6,7 @@
  * Existing letter-led handles (3–32 letters / numbers / underscores) stay valid.
  */
 
-import { isValidSignupEmail, normalizeSignupEmail } from "./signup-email.ts";
+import { isValidSignupEmail, normalizeSignupEmail } from "./auth/signup-email.ts";
 
 /** RFC 5321 practical max for an email / email-as-username. */
 export const USERNAME_MAX_LENGTH = 254;

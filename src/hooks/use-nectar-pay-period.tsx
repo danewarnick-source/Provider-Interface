@@ -9,7 +9,7 @@ import { useMyAssignments } from "./use-my-assignments";
 import { useGeneralShift, useGeneralShiftLog } from "./use-general-shift";
 import { computePeriodBounds, type PaySchedule } from "@/lib/pay-periods";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { staffDisplayHours } from "@/lib/staff-display-hours";
+import { staffDisplayHours } from "@/lib/staff/staff-display-hours";
 
 /**
  * NECTAR pay-period intelligence. Pay-period window comes from the staff

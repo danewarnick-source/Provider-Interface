@@ -60,7 +60,7 @@ import {
   syncGroupFromTeam,
   updateStaffGroup,
   type StaffGroupRow,
-} from "@/lib/staff-groups.functions";
+} from "@/lib/staff/staff-groups.functions";
 
 const COLOR_SWATCHES = [
   { label: "Blue", hex: "#3B82F6" },

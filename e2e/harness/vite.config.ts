@@ -32,7 +32,7 @@ export default defineConfig({
         replacement: path.join(here, "mocks/ai-coach.functions.ts"),
       },
       {
-        find: "@/lib/client-target-behaviors.functions",
+        find: "@/lib/clients/client-target-behaviors.functions",
         replacement: path.join(here, "mocks/client-target-behaviors.functions.ts"),
       },
       { find: "@tanstack/react-start", replacement: path.join(here, "mocks/tanstack-start.ts") },

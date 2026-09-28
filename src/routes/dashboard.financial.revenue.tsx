@@ -7,7 +7,7 @@ import {
   listBilledManualEntries,
   upsertBilledManualEntry,
   deleteBilledManualEntry,
-} from "@/lib/financial-revenue.functions";
+} from "@/lib/financial/financial-revenue.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,7 +46,7 @@ import {
 import { YourInputsSection } from "@/components/financial/your-inputs-section";
 import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
 import { toast } from "sonner";
-import { getRevenueClientPills } from "@/lib/financial-detail.functions";
+import { getRevenueClientPills } from "@/lib/financial/financial-detail.functions";
 import { BillingDetailDialog } from "@/components/financial/billing-detail-dialog";
 
 export const Route = createFileRoute("/dashboard/financial/revenue")({

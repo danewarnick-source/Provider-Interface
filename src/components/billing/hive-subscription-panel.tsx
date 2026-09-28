@@ -15,8 +15,8 @@ import {
   createPortalSessionFn,
   createSubscriptionCheckoutFn,
   getBillingStatusFn,
-} from "@/lib/stripe-checkout.functions";
-import { humanizeCheckoutConfirmError, humanizeCheckoutStartError } from "@/lib/signup-checkout-error";
+} from "@/lib/financial/stripe-checkout.functions";
+import { humanizeCheckoutConfirmError, humanizeCheckoutStartError } from "@/lib/auth/signup-checkout-error";
 
 function fmtMoney(cents: number): string {
   return formatUsdFromCents(cents);

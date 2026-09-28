@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import { Download, FileSpreadsheet, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { applyEmployeeRosterRow } from "@/lib/employees.functions";
+import { applyEmployeeRosterRow } from "@/lib/staff/employees.functions";
 import { usePresets } from "@/components/access/queries";
 import {
   type BulkAccessLevel,
@@ -25,7 +25,7 @@ import {
   triggerEmployeeRosterTemplateDownload,
   triggerEmployeeRosterTemplateXlsxDownload,
   validateEmployeeRosterRows,
-} from "@/lib/employee-roster-upload";
+} from "@/lib/staff/employee-roster-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

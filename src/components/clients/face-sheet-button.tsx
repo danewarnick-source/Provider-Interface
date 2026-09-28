@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { generateClientFaceSheet } from "@/lib/client-face-sheet.functions";
+import { generateClientFaceSheet } from "@/lib/clients/client-face-sheet.functions";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { toast } from "sonner";

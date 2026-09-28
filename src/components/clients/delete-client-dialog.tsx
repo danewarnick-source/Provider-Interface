@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { deleteClientPermanently, getClientDeletionImpact } from "@/lib/client-lifecycle.functions";
+import { deleteClientPermanently, getClientDeletionImpact } from "@/lib/clients/client-lifecycle.functions";
 
 type Props = {
   open: boolean;
@@ -19,7 +19,7 @@ type Props = {
   onDeleted?: () => void;
 };
 
-const IMPACT_ROWS: Array<{ key: keyof import("@/lib/client-lifecycle.functions").ClientDeletionImpact; label: string }> = [
+const IMPACT_ROWS: Array<{ key: keyof import("@/lib/clients/client-lifecycle.functions").ClientDeletionImpact; label: string }> = [
   { key: "documents", label: "Uploaded documents (incl. PCSP)" },
   { key: "billing_codes", label: "Billing authorizations (1056)" },
   { key: "emergency_contacts", label: "Emergency contacts" },

@@ -24,7 +24,7 @@ import {
   dueLabel,
   obligationFileStatus,
   obligationFileStatusLabel,
-} from "@/lib/staff-obligation-files";
+} from "@/lib/staff/staff-obligation-files";
 import {
   IN_HIVE_COURSE_EVIDENCE,
   inHiveCourseIdForTitle,
@@ -43,8 +43,8 @@ import {
   clientFormKindForTitle,
   clientFormTitleForKind,
   type ClientFormKind,
-} from "@/lib/client-form-obligations";
-import { getMyClientTrainingStatuses } from "@/lib/client-specific-training.functions";
+} from "@/lib/clients/client-form-obligations";
+import { getMyClientTrainingStatuses } from "@/lib/clients/client-specific-training.functions";
 import { getAgencyPolicyForInstance } from "@/lib/agency-policies.functions";
 import { policyMediaKind } from "@/lib/agency-policies";
 import { isPackSentinel, obligationIsRequired } from "@/lib/obligation-packs";
@@ -63,7 +63,7 @@ import {
   staffFileExpandIdFromHash,
   staffTaskOpensUpload,
   STAFF_TASKS_FOOTER,
-} from "@/lib/staff-my-tasks";
+} from "@/lib/staff/staff-my-tasks";
 import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
 import {
   activeOverrideForTarget,

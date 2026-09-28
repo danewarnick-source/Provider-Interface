@@ -15,10 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
-import { AUTH_CAPTCHA_REQUIRED, captchaTokenOption } from "@/lib/auth-captcha";
-import { authRedirectUrl } from "@/lib/auth-redirect";
-import { checkPasswordPwnedRange } from "@/lib/signup-checks.functions";
-import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
+import { AUTH_CAPTCHA_REQUIRED, captchaTokenOption } from "@/lib/auth/auth-captcha";
+import { authRedirectUrl } from "@/lib/auth/auth-redirect";
+import { checkPasswordPwnedRange } from "@/lib/auth/signup-checks.functions";
+import { ensureSignupWorkspace } from "@/lib/auth/signup-workspace.functions";
 import { setBillingSmsPhoneAtSignup } from "@/lib/billing-sms.functions";
 import {
   SIGNUP_CONFIRM_CONTINUE_LABEL,
@@ -27,7 +27,7 @@ import {
   isSignupEmailNotConfirmedError,
   signupHasSession,
   signupSubmissionIsAutomated,
-} from "@/lib/signup-workspace";
+} from "@/lib/auth/signup-workspace";
 import { persistActiveOrgId } from "@/lib/current-org";
 import {
   AUTH_PWNED_PASSWORD_MESSAGE,
@@ -36,7 +36,7 @@ import {
   isAuthPwnedPasswordMessage,
   sha1HexUpper,
   weakPasswordCopyFromAuth,
-} from "@/lib/signup-password";
+} from "@/lib/auth/signup-password";
 import { isValidUSPhone, normalizeUSPhoneToE164 } from "@/lib/us-phone";
 import {
   SIGNUP_BUSINESS_SAVE_ERROR_MESSAGE,
@@ -46,11 +46,11 @@ import {
   orgIdFromEnsureWorkspaceResult,
   signupBusinessOrgPatch,
   signupBusinessWriteOk,
-} from "@/lib/signup-business";
+} from "@/lib/auth/signup-business";
 import {
   createSubscriptionCheckoutFn,
   getSignupPaymentsStatusFn,
-} from "@/lib/stripe-checkout.functions";
+} from "@/lib/financial/stripe-checkout.functions";
 import { formatUsdFromCents, type BillingInterval } from "@/lib/hive-pricing";
 import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_SIGNUP_PRICE_LINE } from "@/lib/pi-landing";
 import {
@@ -67,18 +67,18 @@ import {
   parseSignupClientCount,
   parseSignupStaffCount,
   signupCountDraftFromInput,
-} from "@/lib/signup-count-input";
+} from "@/lib/auth/signup-count-input";
 import { defaultUsernameFromEmail } from "@/lib/account-username";
 import { toast } from "sonner";
 import {
   SIGNUP_EMAIL_IN_USE_MESSAGE,
   humanizeSignupAccountError,
   isAlreadyUsedEmailError,
-} from "@/lib/signup-account-error";
+} from "@/lib/auth/signup-account-error";
 import {
   humanizeCheckoutStartError,
   signupAuthCallbackError,
-} from "@/lib/signup-checkout-error";
+} from "@/lib/auth/signup-checkout-error";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({

@@ -7,7 +7,7 @@ import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import {
   onStaffAssignmentCreatedInternal,
   onStaffAssignmentRemovedInternal,
-} from "@/lib/staff-assignment-hooks.functions";
+} from "@/lib/staff/staff-assignment-hooks.functions";
 import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
 
 // ──────────────────────────────────────────────────────────────────────────────

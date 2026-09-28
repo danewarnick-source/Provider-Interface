@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
-import { AUTH_CAPTCHA_REQUIRED, captchaTokenOption } from "@/lib/auth-captcha";
-import { passwordResetRedirectUrl } from "@/lib/auth-redirect";
+import { AUTH_CAPTCHA_REQUIRED, captchaTokenOption } from "@/lib/auth/auth-captcha";
+import { passwordResetRedirectUrl } from "@/lib/auth/auth-redirect";
 import { toast } from "sonner";
 import { AuthShell } from "./login";
 

@@ -23,7 +23,7 @@ import {
   type CodeLine,
   type ShiftDetailRow,
   type DailyDetailRow,
-} from "@/lib/financial-detail.functions";
+} from "@/lib/financial/financial-detail.functions";
 import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";

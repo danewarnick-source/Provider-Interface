@@ -31,7 +31,7 @@ import {
   addDistParticipant,
   updateDistParticipant,
   deleteDistParticipant,
-} from "@/lib/financial-distributions.functions";
+} from "@/lib/financial/financial-distributions.functions";
 
 export const Route = createFileRoute("/dashboard/financial/distributions")({
   head: () => ({ meta: [{ title: "Distributions — Provider Interface" }] }),

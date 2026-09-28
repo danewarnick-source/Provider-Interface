@@ -13,7 +13,7 @@ import {
   addStaffHoursEntry,
   deleteStaffHoursEntry,
   type AnnualHoursProgress,
-} from "@/lib/hr-training-hours.functions";
+} from "@/lib/staff/hr-training-hours.functions";
 
 export function statusColor(s: AnnualHoursProgress["status"]) {
   switch (s) {

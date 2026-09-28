@@ -30,14 +30,14 @@ import { useEntitlements } from "@/hooks/use-entitlements";
 import {
   createTrainingCheckoutFn,
   confirmCheckoutSessionFn,
-} from "@/lib/stripe-checkout.functions";
+} from "@/lib/financial/stripe-checkout.functions";
 import {
   ClassRosterDialog,
   type RosterMemberOption,
 } from "@/components/training/class-roster-form";
 import { formatUsdFromCents, trainingPriceCentsForSku } from "@/lib/hive-pricing";
 import { isBillingExempt } from "@/lib/billing-access";
-import { getBillingStatusFn } from "@/lib/stripe-checkout.functions";
+import { getBillingStatusFn } from "@/lib/financial/stripe-checkout.functions";
 import { getOrgTrainingClasses } from "@/lib/training-class.functions";
 import { trainingClassLabel, trainingClassSku, type TrainingClassType } from "@/lib/training-class";
 import { ClassCardUploadButtons } from "@/components/training/class-card-upload";

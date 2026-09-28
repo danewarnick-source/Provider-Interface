@@ -42,7 +42,7 @@ import { getUnmetStaffMandates, recordStaffMandateOverride } from "@/lib/forms.f
 import {
   onStaffAssignmentCreated,
   onStaffAssignmentRemoved,
-} from "@/lib/staff-assignment-hooks.functions";
+} from "@/lib/staff/staff-assignment-hooks.functions";
 
 export const Route = createFileRoute("/dashboard/assignments")({
   head: () => ({ meta: [{ title: "Caseloads — Provider Interface" }] }),

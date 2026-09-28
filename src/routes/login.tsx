@@ -7,16 +7,16 @@ import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
 
 import { supabase } from "@/integrations/supabase/client";
 import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
-import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth-captcha";
-import { authRedirectUrl } from "@/lib/auth-redirect";
+import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth/auth-captcha";
+import { authRedirectUrl } from "@/lib/auth/auth-redirect";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/use-auth";
 import { useServerFn } from "@tanstack/react-start";
-import { signInWithUsername } from "@/lib/login.functions";
+import { signInWithUsername } from "@/lib/auth/login.functions";
 import { checkHiveExecutive } from "@/lib/hive-exec.functions";
-import { completePasswordSignIn, GENERIC_LOGIN_ERROR } from "@/lib/login-auth";
+import { completePasswordSignIn, GENERIC_LOGIN_ERROR } from "@/lib/auth/login-auth";
 import { trainingOnlyHomeForMeFn } from "@/lib/training-only-access.functions";
-import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
+import { ensureSignupWorkspace } from "@/lib/auth/signup-workspace.functions";
 import {
   isCompanyAdminLevel,
   persistPortalView,
@@ -31,13 +31,13 @@ import {
 } from "@/lib/current-org";
 import { toast } from "sonner";
 import { isCognitoAuth } from "@/lib/aws/env";
-import { shouldSkipLoginAutoRedirect } from "@/lib/cognito-login-gate";
+import { shouldSkipLoginAutoRedirect } from "@/lib/auth/cognito-login-gate";
 import {
   clearExplicitSignOut,
   completeClientSignOut,
   hasExplicitSignOut,
-} from "@/lib/client-sign-out";
-import { applyRememberMeOnSuccess, readRememberedLoginEmail } from "@/lib/remember-login";
+} from "@/lib/clients/client-sign-out";
+import { applyRememberMeOnSuccess, readRememberedLoginEmail } from "@/lib/auth/remember-login";
 
 function isSafeNext(v: unknown): v is string {
   return typeof v === "string" && v.startsWith("/") && !v.startsWith("//");

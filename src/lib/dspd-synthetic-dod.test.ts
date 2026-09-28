@@ -67,12 +67,12 @@ import {
   type SyntheticStaff,
 } from "./obligations/draft-rules/index.ts";
 import { sowCatalogEntryByKey } from "./sow-obligation-catalog.ts";
-import { buildStaffTask } from "./staff-my-tasks.ts";
+import { buildStaffTask } from "./staff/staff-my-tasks.ts";
 import {
   hasValidObligationEvidence,
   obligationFileStatus,
   staffFileCycleKind,
-} from "./staff-obligation-files.ts";
+} from "./staff/staff-obligation-files.ts";
 
 const NOW = new Date("2026-09-12T12:00:00.000Z");
 const STAFF = "11111111-1111-1111-1111-111111111111";

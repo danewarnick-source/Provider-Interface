@@ -45,7 +45,7 @@ import {
   PROFILE_FIELD_BY_KEY,
   getProfileFieldValue,
   type ProfileField,
-} from "@/lib/client-profile-fields";
+} from "@/lib/clients/client-profile-fields";
 
 
 

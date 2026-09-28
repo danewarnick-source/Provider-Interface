@@ -10,13 +10,13 @@ import {
 } from "@tanstack/react-router";
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
-import { completeClientSignOut } from "@/lib/client-sign-out";
+import { completeClientSignOut } from "@/lib/clients/client-sign-out";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { isChunkLoadError, tryAutoReloadOnce, clearChunkReloadGuard } from "@/lib/chunk-reload";
-import { inviteTokenFromSearchStr } from "@/lib/join-invite";
+import { inviteTokenFromSearchStr } from "@/lib/auth/join-invite";
 import { getPublicRuntimeBlob } from "@/lib/aws/env";
-import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
+import { ensureSignupWorkspace } from "@/lib/auth/signup-workspace.functions";
 import { persistActiveOrgId } from "@/lib/current-org";
 
 function NotFoundComponent() {

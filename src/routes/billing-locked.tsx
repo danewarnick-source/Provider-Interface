@@ -9,7 +9,7 @@ import {
   confirmCheckoutSessionFn,
   createSubscriptionCheckoutFn,
   getBillingStatusFn,
-} from "@/lib/stripe-checkout.functions";
+} from "@/lib/financial/stripe-checkout.functions";
 import { parseCheckoutReturnSearch } from "@/lib/billing-access";
 import {
   isComplimentaryMembership,
@@ -20,7 +20,7 @@ import {
 } from "@/lib/current-org";
 import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_LIST_PRICE_UNIT, PI_SIGNUP_PRICE_LINE } from "@/lib/pi-landing";
 import { quotePiListSubscription } from "@/lib/pi-signup-pricing";
-import { completeClientSignOut } from "@/lib/client-sign-out";
+import { completeClientSignOut } from "@/lib/clients/client-sign-out";
 
 export const Route = createFileRoute("/billing-locked")({
   head: () => ({ meta: [{ title: "Account locked — Provider Interface" }] }),

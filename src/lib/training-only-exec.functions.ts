@@ -8,7 +8,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { DEFAULT_TRAINING_FROM_NAME, formatFromHeader } from "@/lib/managed-from";
-import { authRedirectUrl } from "@/lib/auth-redirect";
+import { authRedirectUrl } from "@/lib/auth/auth-redirect";
 import { quoteSignupTrainingAddon } from "@/lib/pi-signup-pricing";
 import {
   isTrainingOnlySku,

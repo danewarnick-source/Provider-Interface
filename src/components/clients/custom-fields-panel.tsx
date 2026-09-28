@@ -38,14 +38,14 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useClientCareData } from "@/hooks/use-client-care-data";
-import type { CustomFieldWithValue } from "@/lib/client-care-data.functions";
+import type { CustomFieldWithValue } from "@/lib/clients/client-care-data.functions";
 import {
   createCustomFieldDefinition,
   deleteCustomFieldDefinitions,
   setCustomFieldValue,
 } from "@/lib/custom-fields.functions";
 import { chunkIds, customFieldDeleteCopy } from "@/lib/custom-field-delete";
-import { SECTION_LABEL, type SectionName } from "@/lib/client-staff-visibility";
+import { SECTION_LABEL, type SectionName } from "@/lib/clients/client-staff-visibility";
 
 type DataType = "text" | "number" | "boolean" | "date";
 

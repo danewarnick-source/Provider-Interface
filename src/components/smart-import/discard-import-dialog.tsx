@@ -6,7 +6,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { discardImportJobHard } from "@/lib/client-lifecycle.functions";
+import { discardImportJobHard } from "@/lib/clients/client-lifecycle.functions";
 
 type Props = {
   open: boolean;

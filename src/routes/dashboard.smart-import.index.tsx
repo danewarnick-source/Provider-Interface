@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, useSearch, Link, redirect } from "@tansta
 import {
   employeeSmartImportRedirect,
   shouldBlockEmployeeSmartImport,
-} from "@/lib/employee-smart-import-block";
+} from "@/lib/staff/employee-smart-import-block";
 import { useCallback, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,7 +25,7 @@ import {
 } from "@/lib/smart-import.functions";
 import { TimesheetsImportWizard } from "@/components/smart-import/timesheets/timesheets-import-wizard";
 import { DailyNotesImportWizard } from "@/components/smart-import/daily-notes/daily-notes-import-wizard";
-import { downloadClientTemplate } from "@/lib/client-import-template";
+import { downloadClientTemplate } from "@/lib/clients/client-import-template";
 import { smartImportNeedsAi } from "@/lib/smart-import-ai-gate";
 
 const SearchSchema = z.object({ mode: z.enum(["employee", "client", "timesheets", "daily_notes"]).optional() });

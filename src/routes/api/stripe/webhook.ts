@@ -6,7 +6,7 @@
  */
 
 import { createFileRoute } from "@tanstack/react-router";
-import { handleStripeWebhookRequest } from "@/lib/stripe-webhook-http";
+import { handleStripeWebhookRequest } from "@/lib/financial/stripe-webhook-http";
 
 export const Route = createFileRoute("/api/stripe/webhook")({
   server: {

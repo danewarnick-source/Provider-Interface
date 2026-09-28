@@ -18,8 +18,8 @@ import { requireLevel, requirePermission } from "@/lib/access/require";
 import { resolveOrgSender } from "@/lib/email.functions";
 import { type AccessLevel } from "@/lib/access/levels";
 import { resolvePresetId } from "@/lib/access/preset-resolve";
-import { buildInvitationEmail } from "@/lib/invitation-email";
-import { inviteJoinUrl } from "@/lib/join-invite";
+import { buildInvitationEmail } from "@/lib/auth/invitation-email";
+import { inviteJoinUrl } from "@/lib/auth/join-invite";
 import { pickReplyTo, stripFakeDisplayLabel } from "@/lib/managed-from";
 import { canSendImportInvite } from "@/lib/import-invite";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
@@ -29,7 +29,7 @@ import {
   type InviteAccessValues,
   type MemberAccessPick,
   type ProfileEmailPick,
-} from "@/lib/invitation-resend-access";
+} from "@/lib/auth/invitation-resend-access";
 
 const ORG_ID = z.string().uuid();
 const INVITE_LEVEL = z.enum(["owner", "admin", "staff"]);

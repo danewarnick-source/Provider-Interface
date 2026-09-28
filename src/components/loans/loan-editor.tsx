@@ -32,8 +32,8 @@ import {
   getLoan,
   upsertLoan,
   type LoanInput,
-} from "@/lib/client-loans.functions";
-import { downloadLoanPdf } from "@/lib/client-loan-pdf";
+} from "@/lib/clients/client-loans.functions";
+import { downloadLoanPdf } from "@/lib/clients/client-loan-pdf";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);

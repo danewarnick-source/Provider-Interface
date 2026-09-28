@@ -11,7 +11,7 @@
 import { addDaysUTC, addMonthsUTC, addYearsUTC, utcDay } from "../../obligation-due-dates.ts";
 import { sowCatalogEntryByKey } from "../../sow-obligation-catalog.ts";
 import { liveObligationKeyForRequirement, staffTaskPolicyForRule } from "../catalog-live-bridge.ts";
-import { buildStaffTask, type StaffTask } from "../../staff-my-tasks.ts";
+import { buildStaffTask, type StaffTask } from "../../staff/staff-my-tasks.ts";
 import { allRequiredTopicsComplete } from "../../in-hive-training.ts";
 import { awardedCodeDutyStatus, humanRightsPlanStatus, type OrgFacts } from "../applicability.ts";
 import { awardedCodesUnanswered } from "../setup-facts.ts";

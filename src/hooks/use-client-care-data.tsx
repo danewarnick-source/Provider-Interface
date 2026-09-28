@@ -8,7 +8,7 @@
  * code on admin surfaces (PCSP tab, workspace) for the same full list.
  */
 import { useQuery } from "@tanstack/react-query";
-import { clientCareDataQueryOptions } from "@/lib/client-care-data.functions";
+import { clientCareDataQueryOptions } from "@/lib/clients/client-care-data.functions";
 
 export function useClientCareData(
   clientId: string | null | undefined,
@@ -17,4 +17,4 @@ export function useClientCareData(
   return useQuery(clientCareDataQueryOptions(clientId, shiftServiceCode));
 }
 
-export type { ClientCareData } from "@/lib/client-care-data.functions";
+export type { ClientCareData } from "@/lib/clients/client-care-data.functions";

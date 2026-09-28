@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import {
   employeeSmartImportRedirect,
   shouldBlockEmployeeSmartImport,
-} from "@/lib/employee-smart-import-block";
+} from "@/lib/staff/employee-smart-import-block";
 
 function modeFromSearch(search: unknown): string | undefined {
   if (!search || typeof search !== "object" || !("mode" in search)) return undefined;

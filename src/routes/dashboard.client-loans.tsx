@@ -19,7 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus } from "lucide-react";
 import { LoanFeatureGate } from "@/components/loans/loan-feature-gate";
 import { LoanEditor } from "@/components/loans/loan-editor";
-import { listOrgLoans } from "@/lib/client-loans.functions";
+import { listOrgLoans } from "@/lib/clients/client-loans.functions";
 
 export const Route = createFileRoute("/dashboard/client-loans")({
   head: () => ({ meta: [{ title: "Client Loan Ledger — Provider Interface" }] }),

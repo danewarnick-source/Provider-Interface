@@ -63,7 +63,7 @@ import {
   weekTag,
   type MealPlanLogo,
   type PlanActualRow,
-} from "@/lib/client-meal-plan-pdf";
+} from "@/lib/clients/client-meal-plan-pdf";
 import {
   generatePlanVsActualReport,
   shipPlanVsActualReport,

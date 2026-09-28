@@ -11,7 +11,7 @@ import {
   resolveGroupMembersInternal,
   type ResolvedStaffMember,
   ensureAllStaffGroupInternal,
-} from "./staff-groups.functions";
+} from "./staff/staff-groups.functions";
 import { runNectarCertOcrFromStoragePath } from "./nectar/nectar-cert-ocr";
 import { compareNames } from "./name-matching";
 import { isFormUuid, resolveObligationFormId } from "./resolve-obligation-form";
@@ -36,7 +36,7 @@ import {
 } from "./sow-obligation-catalog";
 import { obligationAppliesToFootprint } from "./dspd-audit-tool";
 import { STANDING_SOW_DUTIES } from "./standing-sow-duties";
-import { isRetiredPerClientPctTitle } from "./client-form-obligations";
+import { isRetiredPerClientPctTitle } from "./clients/client-form-obligations";
 import { homePeriodKey, obligationDutyKey, perHomeServiceCode } from "./obligation-assignee-rules";
 import { loadOrgFacts, type OrgFacts } from "./obligations/applicability";
 import {
@@ -3694,7 +3694,7 @@ export const onPcspActivated = createServerFn({ method: "POST" })
     }
     try {
       const { reevaluateStaffAssignedToClientInternal } =
-        await import("@/lib/staff-assignment-hooks.functions");
+        await import("@/lib/staff/staff-assignment-hooks.functions");
       await reevaluateStaffAssignedToClientInternal(supabase, data.organizationId, data.clientId);
     } catch (e) {
       console.warn("[obligations] PCSP duty reevaluate failed:", e);

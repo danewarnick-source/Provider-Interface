@@ -5,8 +5,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
-import { completeClientSignOut } from "@/lib/client-sign-out";
-import { authRedirectUrl } from "@/lib/auth-redirect";
+import { completeClientSignOut } from "@/lib/clients/client-sign-out";
+import { authRedirectUrl } from "@/lib/auth/auth-redirect";
 import { useAuth } from "@/hooks/use-auth";
 import {
   listMyAuditorShares,

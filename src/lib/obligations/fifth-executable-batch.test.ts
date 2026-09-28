@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { staffTasksWithoutElementDuplicates } from "../staff-my-tasks.ts";
+import { staffTasksWithoutElementDuplicates } from "../staff/staff-my-tasks.ts";
 import { sowCatalogEntryByKey } from "../sow-obligation-catalog.ts";
 import { isEvvLockedCode } from "../evv-codes.ts";
 import { UNKNOWN_STAFF_DUTY_FACTS, type StaffDutyFacts } from "./duty-applicability.ts";

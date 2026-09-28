@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight, Home, Info } from "lucide-react";
 import { fmtUSD } from "@/lib/billing-units";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RequirePermission } from "@/components/rbac-guard";
-import { getRhsCodes, getRhsClients, getRhsDays } from "@/lib/financial-rhs.functions";
+import { getRhsCodes, getRhsClients, getRhsDays } from "@/lib/financial/financial-rhs.functions";
 
 /**
  * Financial → RHS tab. Mirrors the Host Home tab structure but lean:

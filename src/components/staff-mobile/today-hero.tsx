@@ -21,7 +21,7 @@ import { DualCaseloadActions } from "@/components/staff-mobile/dual-caseload-act
 import { useTodayDailyNoteClients } from "@/hooks/use-today-daily-notes";
 import { useCompletedPunchesToday } from "@/hooks/use-completed-punches-today";
 import { openClockableShifts } from "@/lib/caseload-open-work";
-import { staffClockOutSearch } from "@/lib/staff-clock-out";
+import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 
 function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString(undefined, {

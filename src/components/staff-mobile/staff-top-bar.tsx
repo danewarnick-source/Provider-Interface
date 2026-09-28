@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { PortalViewSwitcher } from "@/components/portal-view-switcher";
 import { supabase } from "@/integrations/supabase/client";
-import { completeClientSignOut } from "@/lib/client-sign-out";
+import { completeClientSignOut } from "@/lib/clients/client-sign-out";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAccess } from "@/hooks/use-access";
@@ -23,7 +23,7 @@ import {
   preventSheetDismissForPortalViewMenu,
   resolvePortalSwitcherPath,
 } from "@/lib/portal-view-landing";
-import { resetStaffPhoneScroll } from "@/lib/staff-phone-chrome";
+import { resetStaffPhoneScroll } from "@/lib/staff/staff-phone-chrome";
 import { isAdminLevel, LEVEL_LABEL } from "@/lib/access/levels";
 
 export function StaffTopBar({ title, framed = false }: { title: string; framed?: boolean }) {

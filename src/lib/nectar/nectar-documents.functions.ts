@@ -69,7 +69,7 @@ async function callLovableAI(documentText: string, hint?: string, orgId?: string
 
 // Client autofill logic lives in src/lib/client-import-schema.ts so both
 // per-client upload and Smart Import call the same path.
-import { applyExtractedFieldsToClient } from "@/lib/client-import-schema";
+import { applyExtractedFieldsToClient } from "@/lib/clients/client-import-schema";
 
 
 

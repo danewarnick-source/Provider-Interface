@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Clock, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { caseloadDailyNoteLabel, caseloadTimeClockLabel } from "@/lib/assignment-codes";
-import { staffClockOutSearch } from "@/lib/staff-clock-out";
+import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 
 /**
  * Caseload card actions. Daily note is always available for HHS/host-home.
