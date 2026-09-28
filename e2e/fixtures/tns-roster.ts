@@ -65,9 +65,7 @@ const TOMMY_GOALS = [
   "Daily living — prepare a simple meal with staff support",
 ] as const;
 
-const BLAKE_GOALS = [
-  "Health — complete daily hygiene routine independently",
-] as const;
+const BLAKE_GOALS = ["Health — complete daily hygiene routine independently"] as const;
 
 export const CLIENTS = {
   tommy: {
@@ -139,6 +137,37 @@ export const PENDING_INVITE = {
 };
 
 export const STAFF_LIST = [STAFF.admin, STAFF.jake, STAFF.harvey, STAFF.tom, STAFF.dane];
+
+/**
+ * Evidence summaries the mocked listTeamRoster returns (the real server fn
+ * derives them from evidence_items / evidence_files). One of each roster label:
+ * All current, N missing, N due soon, No pack yet.
+ */
+const EVIDENCE_NONE = {
+  hasPack: false,
+  total: 0,
+  done: 0,
+  dueSoon: 0,
+  missing: 0,
+  awaitingReview: 0,
+  skipped: 0,
+};
+export const ROSTER_EVIDENCE: Record<string, typeof EVIDENCE_NONE> = {
+  [STAFF.jake.id]: { ...EVIDENCE_NONE, hasPack: true, total: 4, done: 4 },
+  [STAFF.harvey.id]: { ...EVIDENCE_NONE, hasPack: true, total: 5, done: 3, missing: 2 },
+  [STAFF.tom.id]: { ...EVIDENCE_NONE, hasPack: true, total: 3, done: 3, dueSoon: 1 },
+  [STAFF.dane.id]: EVIDENCE_NONE,
+  [ADMIN_USER_ID]: EVIDENCE_NONE,
+};
+
+/** Mocked org_member_last_sign_ins: the roster admin has never signed in. */
+export const LAST_SIGN_IN: Record<string, string | null> = {
+  [ADMIN_USER_ID]: null,
+  [STAFF.jake.id]: "2026-08-27T12:00:00.000Z",
+  [STAFF.harvey.id]: "2026-08-27T12:00:00.000Z",
+  [STAFF.tom.id]: "2026-08-27T12:00:00.000Z",
+  [STAFF.dane.id]: "2026-08-27T12:00:00.000Z",
+};
 export const CLIENT_LIST = [CLIENTS.tommy, CLIENTS.blake, CLIENTS.stephen, CLIENTS.marcus];
 
 /** Fake daily_logs rows — IDs and narrative are synthetic, not live PHI. */
@@ -163,7 +192,8 @@ export const DAILY_LOGS = [
     pcsp_goals_addressed: [...TOMMY_GOALS],
     narrative:
       "Tommy joined a community outing to the library, chose two books, and practiced meal prep at dinner with staff support. Mood was calm all evening.",
-    signature_data_url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
+    signature_data_url:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
     submitted_at: `${isoDaysAgo(1)}T22:15:00.000Z`,
     created_at: `${isoDaysAgo(1)}T22:15:00.000Z`,
     status: "pending_approval",
@@ -187,7 +217,8 @@ export const DAILY_LOGS = [
     pcsp_goals_addressed: [...BLAKE_GOALS],
     narrative:
       "Blake completed his morning hygiene routine independently and attended a short walk. No incidents. Evening was quiet.",
-    signature_data_url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
+    signature_data_url:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
     submitted_at: `${isoDaysAgo(2)}T21:40:00.000Z`,
     created_at: `${isoDaysAgo(2)}T21:40:00.000Z`,
     status: "approved",
@@ -210,7 +241,8 @@ export const DAILY_LOGS = [
     log_date: isoDaysAgo(3),
     pcsp_goals_addressed: [...TOMMY_GOALS],
     narrative: "Tommy had a good day.",
-    signature_data_url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
+    signature_data_url:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
     submitted_at: `${isoDaysAgo(3)}T20:05:00.000Z`,
     created_at: `${isoDaysAgo(3)}T20:05:00.000Z`,
     status: "rejected",
