@@ -1,6 +1,6 @@
-// Settings → Access & presets → Members: who has which level/preset, executive flags, and invites.
+// Settings → Access & presets → Members: who has which level/preset and executive flags.
+// Invites live on the Team Members roster's Invited view.
 
-import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -8,10 +8,6 @@ import { Lock, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { createInvitation } from "@/lib/team-members/invites.functions";
-import { interpretInviteSendResult } from "@/lib/invite-send-result";
 import {
   listTeamAccess,
   setExecutiveGrants,
@@ -19,72 +15,7 @@ import {
 } from "@/lib/access/access.functions";
 import { LEVEL_LABEL, SCOPE_LABEL } from "@/lib/access/levels";
 import { safeErrorMessage } from "@/lib/safe-error-message";
-import { LevelPresetFields, type LevelPresetValue } from "./level-preset-fields";
 import { accessKeys } from "./queries";
-
-function InviteForm({ orgId }: { orgId: string }) {
-  const inviteFn = useServerFn(createInvitation);
-  const [email, setEmail] = useState("");
-  const [access, setAccess] = useState<LevelPresetValue>({ level: "staff", presetId: null });
-
-  const invite = useMutation({
-    mutationFn: () =>
-      inviteFn({
-        data: {
-          organization_id: orgId,
-          email,
-          access_level: access.level,
-          access_preset_id: access.presetId,
-          site_origin: window.location.origin,
-        },
-      }),
-    onSuccess: (res) => {
-      const out = interpretInviteSendResult(res);
-      if (out.email_sent) toast.success(`Invitation emailed to ${email}`);
-      else if (out.rpc_failure) toast.error(out.message);
-      else toast.warning(`Invitation created, but the email didn't send: ${out.email_error ?? out.message}`);
-      setEmail("");
-    },
-    onError: (e) => toast.error(safeErrorMessage(e, "Could not create invitation")),
-  });
-
-  return (
-    <form
-      className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
-      onSubmit={(e) => {
-        e.preventDefault();
-        invite.mutate();
-      }}
-    >
-      <div className="flex items-center gap-2">
-        <Mail className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-sm font-semibold">Invite someone</h3>
-      </div>
-      <div className="mt-4 grid items-start gap-3 sm:grid-cols-3">
-        <div className="grid gap-2">
-          <Label htmlFor="invite-email">Email</Label>
-          <Input
-            id="invite-email"
-            type="email"
-            placeholder="person@company.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <LevelPresetFields orgId={orgId} value={access} onChange={setAccess} idPrefix="invite" />
-      </div>
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <p className="text-xs text-muted-foreground">
-          Prefer Team Members → Add team member for a complete file. This sends a join link only.
-        </p>
-        <Button type="submit" disabled={invite.isPending || !email}>
-          Send invitation
-        </Button>
-      </div>
-    </form>
-  );
-}
 
 export function MembersPanel({ orgId, isHiveExec }: { orgId: string; isHiveExec: boolean }) {
   const qc = useQueryClient();
@@ -116,11 +47,29 @@ export function MembersPanel({ orgId, isHiveExec }: { orgId: string; isHiveExec:
 
   return (
     <div className="space-y-6">
-      <InviteForm orgId={orgId} />
+      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-2">
+          <Mail className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+          <div>
+            <h3 className="text-sm font-semibold">Invites</h3>
+            <p className="text-xs text-muted-foreground">
+              Send, resend and copy invite links from Team Members. Add team member there builds a
+              complete file first.
+            </p>
+          </div>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/dashboard/team-members" search={{ view: "invited" }}>
+            Open invited team members
+          </Link>
+        </Button>
+      </div>
       <div className="rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
         <div className="border-b border-border p-4">
           <h3 className="text-sm font-semibold">Members ({members.length})</h3>
-          <p className="text-xs text-muted-foreground">Open a person to change their level, preset, assignments or settings.</p>
+          <p className="text-xs text-muted-foreground">
+            Open a person to change their level, preset, assignments or settings.
+          </p>
         </div>
         {isLoading ? (
           <div className="p-6 text-sm text-muted-foreground">Loading members…</div>
@@ -134,7 +83,9 @@ export function MembersPanel({ orgId, isHiveExec }: { orgId: string; isHiveExec:
                   <th className="px-4 py-3 text-left">Sees</th>
                   <th className="px-4 py-3 text-center">Company Executive</th>
                   <th className="px-4 py-3 text-center">
-                    <span className="inline-flex items-center gap-1"><Lock className="h-3 w-3" /> PI Executive</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Lock className="h-3 w-3" /> PI Executive
+                    </span>
                   </th>
                 </tr>
               </thead>
@@ -154,16 +105,24 @@ export function MembersPanel({ orgId, isHiveExec }: { orgId: string; isHiveExec:
                     </td>
                     <td className="px-4 py-3">
                       {LEVEL_LABEL[m.access_level]}
-                      {m.preset_name && <span className="text-muted-foreground"> · {m.preset_name}</span>}
+                      {m.preset_name && (
+                        <span className="text-muted-foreground"> · {m.preset_name}</span>
+                      )}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{SCOPE_LABEL[m.access_scope]}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {SCOPE_LABEL[m.access_scope]}
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <Checkbox
                         checked={m.company_executive}
                         disabled={grant.isPending}
                         aria-label={`Company Executive for ${m.email}`}
                         onCheckedChange={(v) =>
-                          grant.mutate({ m, company_executive: v === true, hive_executive: m.hive_executive })
+                          grant.mutate({
+                            m,
+                            company_executive: v === true,
+                            hive_executive: m.hive_executive,
+                          })
                         }
                       />
                     </td>
@@ -173,7 +132,11 @@ export function MembersPanel({ orgId, isHiveExec }: { orgId: string; isHiveExec:
                         disabled={!isHiveExec || grant.isPending}
                         aria-label={`PI Executive for ${m.email}`}
                         onCheckedChange={(v) =>
-                          grant.mutate({ m, company_executive: m.company_executive, hive_executive: v === true })
+                          grant.mutate({
+                            m,
+                            company_executive: m.company_executive,
+                            hive_executive: v === true,
+                          })
                         }
                       />
                     </td>
