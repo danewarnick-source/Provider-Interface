@@ -41,7 +41,8 @@ export function latestFileForItem(
   });
 }
 
-function itemHasCompletedEvidence(
+/** True when the item's latest file satisfies it (attested, or an upload on file). */
+export function itemHasCompletedEvidence(
   item: EvidenceItemRow,
   file: EvidenceFileRow | null,
 ): boolean {
