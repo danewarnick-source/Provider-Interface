@@ -11,7 +11,7 @@ import {
   listMySentEvidence,
   recordEvidenceAttestation,
   recordEvidenceUpload,
-} from "@/lib/evidence.functions";
+} from "@/lib/evidence/evidence.functions";
 import { cellStatus, latestFileForItem } from "@/lib/evidence/status.ts";
 import { EvidenceStatusGlyph } from "./evidence-status-dot";
 

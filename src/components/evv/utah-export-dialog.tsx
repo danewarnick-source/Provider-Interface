@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { isEvvLockedCode, padMemberId, evvServiceLabel } from "@/lib/evv-codes";
 import {
   buildUtahCsv, downloadCsv, defaultPreviousWeek, isValidIso, parseUsAddress, type UtahExportLine,
-} from "@/lib/utah-evv-export";
+} from "@/lib/billing/utah-evv-export";
 import { isBillableForReview } from "@/lib/billing/billing-units";
 
 type Coord = { latitude: number; longitude: number } | null;

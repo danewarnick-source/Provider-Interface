@@ -9,7 +9,7 @@ import {
   LEDGER_CATEGORIES,
   CATEGORY_SIGN,
   type LedgerCategory,
-} from "@/lib/provider-ledger.functions";
+} from "@/lib/billing/provider-ledger.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

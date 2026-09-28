@@ -48,7 +48,7 @@ import {
   SelectTrigger as UiSelectTrigger,
   SelectValue as UiSelectValue,
 } from "@/components/ui/select";
-import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestations.functions";
+import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi/upi-attestations.functions";
 import { formatPeriodMonthYear } from "@/lib/progress-summaries/progress-summaries";
 import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 import { onClientDutyFactsChanged } from "@/lib/staff/staff-assignment-hooks.functions";

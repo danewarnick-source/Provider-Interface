@@ -4,7 +4,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { isClockableServiceCode } from "@/lib/service-billing";
+import { isClockableServiceCode } from "../billing/service-billing.ts";
 import { isAdminLevel } from "@/lib/access/levels";
 
 export type ReadinessReport = {

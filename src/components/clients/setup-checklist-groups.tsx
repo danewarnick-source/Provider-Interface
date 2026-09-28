@@ -53,7 +53,7 @@ import {
 } from "@/lib/field-confirmations.functions";
 import type { FieldState } from "@/lib/field-confirmations";
 import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
-import { isClockableServiceCode } from "@/lib/service-billing";
+import { isClockableServiceCode } from "@/lib/billing/service-billing";
 import {
   PROFILE_FIELD_BY_KEY,
   type ProfileField,

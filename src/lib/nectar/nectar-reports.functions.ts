@@ -3,7 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { computeEntryUnits } from "@/lib/billing/billing-units";
 
 const roundHours = (h: number): number => Math.round(h * 10) / 10;
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "../billing/service-billing.ts";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 

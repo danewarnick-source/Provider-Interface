@@ -6,7 +6,7 @@
  * encodes. Promote overlay stays on the Step 7 catalog-relation path.
  */
 import { EVV_SERVICE_CODES } from "../evv-codes.ts";
-import { DAILY_SERVICE_CODES } from "../service-billing.ts";
+import { DAILY_SERVICE_CODES } from "../billing/service-billing.ts";
 import {
   allSowCatalogEntries,
   CATEGORY_LABEL,

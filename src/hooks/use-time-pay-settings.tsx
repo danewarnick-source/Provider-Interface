@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "./use-org";
-import type { PaySchedule } from "@/lib/pay-periods";
+import type { PaySchedule } from "@/lib/billing/pay-periods";
 
 /**
  * Org-level Time & Pay settings + clock-in categories.

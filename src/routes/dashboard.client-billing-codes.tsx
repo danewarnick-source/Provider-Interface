@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { unitsToHours, fmtHours, fmtUnits, UNITS_PER_HOUR } from "@/lib/billing/billing-units";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { Trash2, Plus } from "lucide-react";
 
 import { RequireLevel } from "@/components/rbac-guard";

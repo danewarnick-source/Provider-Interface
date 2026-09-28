@@ -32,7 +32,7 @@ import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-b
 import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
 import { jobCodeLabel } from "@/lib/job-codes";
 import { DspdCodesMultiSelect } from "@/components/clients/dspd-codes-multiselect";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { useClientIntakeProgress } from "@/hooks/use-client-intake-progress";
 import { DeleteClientDialog } from "@/components/clients/delete-client-dialog";
 import { ClientCompliancePanel } from "@/components/clients/client-compliance-panel";

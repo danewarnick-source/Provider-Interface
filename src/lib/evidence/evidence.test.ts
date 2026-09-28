@@ -15,14 +15,14 @@ import {
   requirementByKey,
   suggestPacks,
   suggestedRequirementKeys,
-} from "./evidence/catalog.ts";
+} from "./catalog.ts";
 import {
   evidenceSearchFor,
   leaveEvidenceWizard,
   parseEvidenceSearch,
   resolveEvidenceStep,
   resolveEvidenceTab,
-} from "./evidence/nav.ts";
+} from "./nav.ts";
 import {
   companyEvidencePerson,
   isAttestFullName,
@@ -32,16 +32,16 @@ import {
   mapClientRowsToPeople,
   mapEmployeeRowsToPeople,
   peopleForEvidenceTab,
-} from "./evidence/people.ts";
+} from "./people.ts";
 import {
   computeFirstDueOn,
   computeNextDueOn,
   dueSubtitle,
   LOCKED_DUE_DEFAULTS,
   needsHireDate,
-} from "./evidence/due.ts";
-import { personRowSubtitle, rowSummaryChips } from "./evidence/matrix.ts";
-import { cellStatus, dueChipLabel, matrixChip, staffInitials } from "./evidence/status.ts";
+} from "./due.ts";
+import { personRowSubtitle, rowSummaryChips } from "./matrix.ts";
+import { cellStatus, dueChipLabel, matrixChip, staffInitials } from "./status.ts";
 import {
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_PUSH_BODY,
@@ -52,7 +52,7 @@ import {
   type EvidenceFileRow,
   type EvidenceItemRow,
   type ServiceCodeFlag,
-} from "./evidence/types.ts";
+} from "./types.ts";
 
 function item(partial: Partial<EvidenceItemRow>): EvidenceItemRow {
   return {
@@ -797,14 +797,14 @@ describe("Evidence nav + product lock", () => {
   });
 
   it("renames admin Obligations/Compliance nav to Evidence and keeps legacy file routes", () => {
-    const nav = readFileSync(new URL("./../routes/dashboard.tsx", import.meta.url), "utf8");
+    const nav = readFileSync(new URL("../../routes/dashboard.tsx", import.meta.url), "utf8");
     assert.match(nav, /to: "\/dashboard\/evidence", label: "Evidence"/);
     assert.doesNotMatch(nav, /to: "\/dashboard\/compliance", label: "Compliance"/);
     assert.doesNotMatch(nav, /label: "Obligations"/);
     assert.doesNotMatch(nav, /Hive Certify/);
 
     const evidence = readFileSync(
-      new URL("./../routes/dashboard.evidence.tsx", import.meta.url),
+      new URL("../../routes/dashboard.evidence.tsx", import.meta.url),
       "utf8",
     );
     assert.match(evidence, /createFileRoute\("\/dashboard\/evidence"\)/);
@@ -813,44 +813,44 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(evidence, /compliance scoreboard/i);
 
     const company = readFileSync(
-      new URL("./../routes/dashboard.company-obligations.tsx", import.meta.url),
+      new URL("../../routes/dashboard.company-obligations.tsx", import.meta.url),
       "utf8",
     );
     assert.match(company, /\/dashboard\/evidence/);
 
     const compliance = readFileSync(
-      new URL("./../routes/dashboard.compliance.tsx", import.meta.url),
+      new URL("../../routes/dashboard.compliance.tsx", import.meta.url),
       "utf8",
     );
     assert.match(compliance, /StaffFilePanel/);
     assert.doesNotMatch(compliance, /EvidencePage/);
 
     const staffPhone = readFileSync(
-      new URL("./../routes/dashboard.my-evidence.tsx", import.meta.url),
+      new URL("../../routes/dashboard.my-evidence.tsx", import.meta.url),
       "utf8",
     );
     assert.match(staffPhone, /createFileRoute\("\/dashboard\/my-evidence"\)/);
     const staffList = readFileSync(
-      new URL("./../components/evidence/staff-evidence-list.tsx", import.meta.url),
+      new URL("../../components/evidence/staff-evidence-list.tsx", import.meta.url),
       "utf8",
     );
     assert.match(staffList, /send_message/);
     assert.match(staffList, /Message from your agency/);
 
     const workspace = readFileSync(
-      new URL("./../components/evidence/evidence-workspace.tsx", import.meta.url),
+      new URL("../../components/evidence/evidence-workspace.tsx", import.meta.url),
       "utf8",
     );
     const cards = readFileSync(
-      new URL("./../components/evidence/evidence-subject-cards.tsx", import.meta.url),
+      new URL("../../components/evidence/evidence-subject-cards.tsx", import.meta.url),
       "utf8",
     );
     const roster = readFileSync(
-      new URL("./../components/evidence/evidence-roster.tsx", import.meta.url),
+      new URL("../../components/evidence/evidence-roster.tsx", import.meta.url),
       "utf8",
     );
     const chips = readFileSync(
-      new URL("./../components/evidence/evidence-status-chip.tsx", import.meta.url),
+      new URL("../../components/evidence/evidence-status-chip.tsx", import.meta.url),
       "utf8",
     );
     const evidenceUi = `${workspace}\n${cards}\n${roster}\n${chips}`;
@@ -879,7 +879,7 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(roster, /Add packs/);
     assert.doesNotMatch(roster, /Open a row|add or review evidence/i);
     assert.doesNotMatch(
-      readFileSync(new URL("./evidence/matrix.ts", import.meta.url), "utf8"),
+      readFileSync(new URL("./matrix.ts", import.meta.url), "utf8"),
       /label:\s*"Overdue"|N missing/,
     );
     assert.doesNotMatch(cards, /fill="#c9a227"|-right-2\.5 -top-2\.5|opacity-10/);
@@ -888,7 +888,7 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(workspace, /EvidenceMatrix|matrixColumns|evidence-matrix/);
     assert.equal(
       existsSync(
-        fileURLToPath(new URL("./../components/evidence/evidence-matrix.tsx", import.meta.url)),
+        fileURLToPath(new URL("../../components/evidence/evidence-matrix.tsx", import.meta.url)),
       ),
       false,
     );
@@ -909,14 +909,14 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(evidenceUi, /\p{Extended_Pictographic}/u);
 
     const fetchClients = readFileSync(
-      new URL("./evidence/fetch-clients.ts", import.meta.url),
+      new URL("./fetch-clients.ts", import.meta.url),
       "utf8",
     );
     assert.match(fetchClients, /supabase as any/);
     assert.match(fetchClients, /\.from\(["']clients["']\)/);
 
     const fetchEmployees = readFileSync(
-      new URL("./evidence/fetch-employees.ts", import.meta.url),
+      new URL("./fetch-employees.ts", import.meta.url),
       "utf8",
     );
     assert.match(fetchEmployees, /supabase as any/);
@@ -925,7 +925,7 @@ describe("Evidence nav + product lock", () => {
     assert.match(fetchEmployees, /hire_date/);
 
     const quiz = readFileSync(
-      new URL("./../components/evidence/evidence-questionnaire.tsx", import.meta.url),
+      new URL("../../components/evidence/evidence-questionnaire.tsx", import.meta.url),
       "utf8",
     );
     assert.match(quiz, /data-evidence-quiz/);
@@ -954,13 +954,13 @@ describe("Evidence nav + product lock", () => {
     assert.match(quiz, /EvidenceDueFields/);
     assert.doesNotMatch(quiz, /evidence-custom-cadence|Keep current|>Once</);
     const dueFields = readFileSync(
-      new URL("./../components/evidence/evidence-due-fields.tsx", import.meta.url),
+      new URL("../../components/evidence/evidence-due-fields.tsx", import.meta.url),
       "utf8",
     );
     assert.match(dueFields, /First due/);
     assert.match(dueFields, /Next due after on file/);
     assert.match(dueFields, /Set a date/);
-    const dueLib = readFileSync(new URL("./evidence/due.ts", import.meta.url), "utf8");
+    const dueLib = readFileSync(new URL("./due.ts", import.meta.url), "utf8");
     assert.match(dueLib, /Document date \+ 2 years/);
     assert.doesNotMatch(dueFields, /keep current|>Once</);
     assert.match(workspace, /dueSubtitleFromItem|Save due dates/);
@@ -980,7 +980,7 @@ describe("Evidence nav + product lock", () => {
     assert.match(fn, /hasSendMessage|sendMessageColumnMissing/);
     assert.match(fn, /first_due_rule|dueColumnMissing/);
     const dueSql = fileURLToPath(
-      new URL("../../supabase/migrations/20260918070000_evidence_due_model.sql", import.meta.url),
+      new URL("../../../supabase/migrations/20260918070000_evidence_due_model.sql", import.meta.url),
     );
     assert.equal(existsSync(dueSql), true, dueSql);
     assert.match(readFileSync(dueSql, "utf8"), /ADD COLUMN IF NOT EXISTS first_due_rule/);
@@ -989,7 +989,7 @@ describe("Evidence nav + product lock", () => {
     assert.match(EVIDENCE_STORAGE_UNAVAILABLE, /isn’t set up on this database yet/);
     const sendSql = fileURLToPath(
       new URL(
-        "../../supabase/migrations/20260918053000_evidence_send_message.sql",
+        "../../../supabase/migrations/20260918053000_evidence_send_message.sql",
         import.meta.url,
       ),
     );
@@ -1002,7 +1002,7 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(EVIDENCE_PUSH_BODY, /client|medicaid|diagnosis/i);
 
     const migration = fileURLToPath(
-      new URL("../../supabase/migrations/20260917220000_evidence_phase1.sql", import.meta.url),
+      new URL("../../../supabase/migrations/20260917220000_evidence_phase1.sql", import.meta.url),
     );
     assert.equal(existsSync(migration), true, migration);
     const sql = readFileSync(migration, "utf8");
@@ -1011,7 +1011,7 @@ describe("Evidence nav + product lock", () => {
   });
 
   it("keeps twelve primary admin labels with Evidence in Compliance's slot", () => {
-    const labels = readFileSync(new URL("./compliance-nav.ts", import.meta.url), "utf8");
+    const labels = readFileSync(new URL("../compliance/compliance-nav.ts", import.meta.url), "utf8");
     assert.match(labels, /"Evidence"/);
     assert.doesNotMatch(labels, /"Compliance",/);
   });

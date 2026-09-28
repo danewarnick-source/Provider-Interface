@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useOrgActiveServiceCodes } from "@/hooks/use-org-service-codes";
 import { OrgComplianceDocCard } from "@/components/settings/org-compliance-doc-card";
-import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestations.functions";
+import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi/upi-attestations.functions";
 
 const SEI_CUTOVER = "2026-07-01"; // DHHS91172 effective date
 const USOR_SEI_FALLBACK_DEADLINE = "2027-01-31T23:59:59";

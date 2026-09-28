@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { isDailyServiceCode } from "@/lib/service-billing";
-import { aggregateHourlyUnits, aggregateDailyDays, type DailyRecordRow } from "@/lib/accrual";
+import { isDailyServiceCode } from "../billing/service-billing.ts";
+import { aggregateHourlyUnits, aggregateDailyDays, type DailyRecordRow } from "../billing/accrual.ts";
 import { assertAddonForOrg } from "../financial/entitlements.server.ts";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 

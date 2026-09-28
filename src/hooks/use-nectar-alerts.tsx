@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "./use-org";
 import { useAllClientBillingCodes, type ClientBillingCode } from "./use-client-billing-codes";
 import { computeEntryUnits, unitsToHours } from "@/lib/billing/billing-units";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 
 /**
  * Sensitivity controls how aggressively NECTAR flags over/under utilization.

@@ -37,7 +37,7 @@ import {
   summaryCadenceLabel,
   summaryFilingDestination,
 } from "@/lib/progress-summaries/progress-summaries";
-import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestations.functions";
+import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi/upi-attestations.functions";
 import { cn } from "@/lib/utils";
 import { isAdminLevel } from "@/lib/access/levels";
 

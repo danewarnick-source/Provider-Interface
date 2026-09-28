@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "./use-org";
-import { DAILY_SERVICE_CODES, isDailyServiceCode } from "@/lib/service-billing";
+import { DAILY_SERVICE_CODES, isDailyServiceCode } from "@/lib/billing/service-billing";
 
 export type ShiftRow = {
   id: string;

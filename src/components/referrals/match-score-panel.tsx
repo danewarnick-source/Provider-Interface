@@ -26,7 +26,7 @@ import {
   type MatchReason,
   type ReferralMatchScore,
   type ScoredComponent,
-} from "@/lib/referral-matching.functions";
+} from "@/lib/referrals/referral-matching.functions";
 
 const ALL_COMPONENTS: ScoredComponent[] = [
   "location",

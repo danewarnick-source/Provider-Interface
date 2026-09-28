@@ -5,7 +5,7 @@
  * Select by the actual service code + service date. Do not invent schemas.
  */
 
-import { isDailyServiceCode } from "../../service-billing.ts";
+import { isDailyServiceCode } from "../../billing/service-billing.ts";
 import type { MemberCondition, NoteFieldSpec, ServiceNoteTemplate } from "./types.ts";
 
 /** DHHS91172 effective date. Pre-cutover dates have no invented historical schema. */

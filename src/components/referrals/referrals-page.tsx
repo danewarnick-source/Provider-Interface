@@ -44,7 +44,7 @@ import {
   listReferrals,
   listSupportCoordinators,
   type ReferralStage,
-} from "@/lib/referrals.functions";
+} from "@/lib/referrals/referrals.functions";
 import {
   archiveReferral,
   restoreReferral,
@@ -55,7 +55,7 @@ import {
   parseReferralDocument,
   attachDraftDocumentsToReferral,
   type ReferralPrefill,
-} from "@/lib/referral-docs.functions";
+} from "@/lib/referrals/referral-docs.functions";
 import {
   discardReferral,
   archiveAutoIngestedReferral,

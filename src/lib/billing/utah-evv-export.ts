@@ -1,4 +1,4 @@
-import { neutralizeCsvFormula } from "./csv-safe.ts";
+import { neutralizeCsvFormula } from "../csv-safe.ts";
 
 // Utah DHHS 30-column EVV CSV builder + types.
 // The format mirrors what dashboard.compliance-desk.tsx already emits — the

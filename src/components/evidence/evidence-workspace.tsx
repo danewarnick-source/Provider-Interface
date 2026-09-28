@@ -26,7 +26,7 @@ import {
   updateEvidenceDue,
   upsertEvidenceRequirement,
   type EvidenceBoard,
-} from "@/lib/evidence.functions";
+} from "@/lib/evidence/evidence.functions";
 import { leaveEvidenceWizard, type EvidenceStep } from "@/lib/evidence/nav.ts";
 import { fetchEvidenceClientPeople } from "@/lib/evidence/fetch-clients.ts";
 import { fetchEvidenceEmployees } from "@/lib/evidence/fetch-employees.ts";

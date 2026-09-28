@@ -500,7 +500,7 @@ export const addClientBillingCodes = createServerFn({ method: "POST" })
     if (!context.supabase || !context.userId) return { ok: false, added: 0 };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = context.supabase as any;
-    const { isDailyServiceCode } = await import("@/lib/service-billing");
+    const { isDailyServiceCode } = await import("./billing/service-billing.ts");
 
     const { data: client } = await sb
       .from("clients")

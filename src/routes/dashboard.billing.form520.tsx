@@ -27,8 +27,8 @@ import {
   ArrowLeft, Copy, Download, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, Lock, FileSearch,
 } from "lucide-react";
 import { fmtHours, computeEntryUnits } from "@/lib/billing/billing-units";
-import { isDailyServiceCode } from "@/lib/service-billing";
-import { aggregateHourlyUnits, aggregateDailyDays } from "@/lib/accrual";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
+import { aggregateHourlyUnits, aggregateDailyDays } from "@/lib/billing/accrual";
 import { RequireLevel } from "@/components/rbac-guard";
 import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 

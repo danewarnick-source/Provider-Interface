@@ -14,7 +14,7 @@ import {
   CheckCircle2, AlertTriangle, ShieldCheck, FileSpreadsheet,
   ChevronRight, ListChecks,
 } from "lucide-react";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import {
   evaluateEntryReadiness,
   factsFromTimesheet,

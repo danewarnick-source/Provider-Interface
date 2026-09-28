@@ -609,7 +609,7 @@ export async function applyExtractedFieldsToClient(
       update.job_code = codes;
     }
 
-    const { isDailyServiceCode } = await import("@/lib/service-billing");
+    const { isDailyServiceCode } = await import("../billing/service-billing.ts");
 
     // Authoritative-source rule for UNITS: the 1056 wins. A PCSP may seed
     // units only when no prior authorization row exists; the 1056 always

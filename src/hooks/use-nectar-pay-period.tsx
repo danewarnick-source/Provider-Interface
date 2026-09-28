@@ -7,8 +7,8 @@ import { useTimePaySettings } from "./use-time-pay-settings";
 import { useWorkerProfile } from "./use-worker-profile";
 import { useMyAssignments } from "./use-my-assignments";
 import { useGeneralShift, useGeneralShiftLog } from "./use-general-shift";
-import { computePeriodBounds, type PaySchedule } from "@/lib/pay-periods";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { computePeriodBounds, type PaySchedule } from "@/lib/billing/pay-periods";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { staffDisplayHours } from "@/lib/staff/staff-display-hours";
 
 /**

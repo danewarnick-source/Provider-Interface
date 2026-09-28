@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/collapsible";
 import { StaffPageHeader } from "@/components/staff-mobile/staff-page-header";
 import { GeneralTimeClock } from "@/components/staff-mobile/general-time-clock";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { RequestTimeOffDialog } from "@/components/schedule-preview/request-time-off-dialog";
 import { RequestSwapDialog } from "@/components/schedule-preview/request-swap-dialog";
 import { useMyScheduleRequests } from "@/lib/scheduling/schedule-requests";

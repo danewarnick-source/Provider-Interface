@@ -45,10 +45,10 @@ import {
   Trash2,
   Loader2,
 } from "lucide-react";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { remainingUnitsForCode } from "@/lib/billing/billing-units";
 import { displayMedicaidId } from "@/lib/medicaid-id";
-import { isVariableRateCode } from "@/lib/variable-rate-codes";
+import { isVariableRateCode } from "@/lib/billing/variable-rate-codes";
 import {
   parseClientBudgetDocument,
   type ParsedBudget,

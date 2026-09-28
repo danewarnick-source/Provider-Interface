@@ -2,7 +2,7 @@
 // Used everywhere a shift is rendered (cards, coverage bars, chips, NECTAR suggestions).
 // Colors live as Tailwind class tokens so dark mode + theming behave; we never
 // hardcode hex values into components.
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "../billing/service-billing.ts";
 
 export type CodeFamily =
   | "residential"

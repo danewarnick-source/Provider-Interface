@@ -23,7 +23,7 @@ import { CheckboxMultiSelect } from "@/components/ui/checkbox-multi-select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { EVV_SERVICE_CODES, isEvvLockedCode, padMemberId } from "@/lib/evv-codes";
-import { buildUtahCsv, downloadCsv, isValidIso, type UtahExportLine } from "@/lib/utah-evv-export";
+import { buildUtahCsv, downloadCsv, isValidIso, type UtahExportLine } from "@/lib/billing/utah-evv-export";
 import { reviewExceptions, type ReviewException } from "@/lib/records/records-review-rules";
 import {
   saveRecordFields, saveManagerNote, toLocalInput, fromLocalInput, type AuditEntry,

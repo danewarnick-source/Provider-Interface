@@ -15,7 +15,7 @@ import {
   hostHomeDailyNoteCode,
   stackDualCaseloadActions,
 } from "@/hooks/use-my-assignments";
-import { isClockableServiceCode } from "@/lib/service-billing";
+import { isClockableServiceCode } from "@/lib/billing/service-billing";
 import { displayPersonName } from "@/lib/person-name";
 import { DualCaseloadActions } from "@/components/staff-mobile/dual-caseload-actions";
 import { useTodayDailyNoteClients } from "@/hooks/use-today-daily-notes";

@@ -41,7 +41,7 @@ import {
   listReferralActivities,
   updateReferralStage,
   type ReferralStage,
-} from "@/lib/referrals.functions";
+} from "@/lib/referrals/referrals.functions";
 
 type Activity = Awaited<ReturnType<typeof listReferralActivities>>[number];
 

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { incidentInvolvesAnyClientOr } from "@/lib/incidents/incident-visibility";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { effectiveBillingTimes, isBillableForReview } from "@/lib/billing/billing-units";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { HistoricalRecordBadge } from "@/components/shared/historical-record-badge";
-import { downloadCsv } from "@/lib/utah-evv-export";
+import { downloadCsv } from "@/lib/billing/utah-evv-export";
 import { toast } from "sonner";
 import {
   Plus, Home as HomeIcon, Users as UsersIcon, Calendar as CalendarIcon, CalendarRange,

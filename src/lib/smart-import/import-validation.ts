@@ -17,7 +17,7 @@ import {
 } from "@/lib/nectar/nectar-quality";
 
 import { padMemberId } from "@/lib/evv-codes";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "../billing/service-billing.ts";
 import {
   classifyExtractedService,
   type TenantIdentity,

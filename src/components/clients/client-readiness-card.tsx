@@ -27,7 +27,7 @@ import {
 } from "@/components/clients/finish-onboarding-card";
 import { CaseloadEditor } from "@/components/clients/caseload-editor";
 import { FEATURE_CODES } from "@/lib/clients/client-features";
-import { isClockableServiceCode, isDailyServiceCode } from "@/lib/service-billing";
+import { isClockableServiceCode, isDailyServiceCode } from "@/lib/billing/service-billing";
 
 type CheckKey =
   | "schedulable"

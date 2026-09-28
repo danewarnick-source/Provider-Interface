@@ -11,7 +11,7 @@ import { useTimePaySettings } from "@/hooks/use-time-pay-settings";
 import { useMobileShellContainer } from "@/components/staff-mobile/mobile-shell-context";
 
 type CapBehavior = "warn" | "acknowledge" | "auto_clock_out";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { unitsToHours, fmtHours, computeEntryUnits } from "@/lib/billing/billing-units";
 import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 

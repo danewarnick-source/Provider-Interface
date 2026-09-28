@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronLeft, ChevronRight, TableProperties, Info } from "lucide-react";
 import { computeEntryUnits, fmtUSD } from "@/lib/billing/billing-units";
-import { computePeriodBounds, type PaySchedule } from "@/lib/pay-periods";
+import { computePeriodBounds, type PaySchedule } from "@/lib/billing/pay-periods";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import {

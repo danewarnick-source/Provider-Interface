@@ -2,7 +2,7 @@ import { Clock, CalendarDays } from "lucide-react";
 import { useClientCaps } from "@/hooks/use-client-caps";
 import { useClientUtilization, getUsage } from "@/hooks/use-client-utilization";
 import { useTimePaySettings } from "@/hooks/use-time-pay-settings";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { capTone, unitsToHours, fmtHours, fmtUnits } from "@/lib/billing/billing-units";
 
 function toneClasses(tone: "ok" | "warn" | "over") {

@@ -6,7 +6,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "../billing/service-billing.ts";
 
 const ReclaimInput = z.object({
   clientId: z.string().uuid(),

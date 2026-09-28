@@ -8,13 +8,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { hostHomeDualLinkPeerKey, requirementByKey } from "./evidence/catalog.ts";
+import { hostHomeDualLinkPeerKey, requirementByKey } from "./catalog.ts";
 import {
   companyEvidencePerson,
   loadEvidenceClientPeople,
   mapEmployeeRowsToPeople,
   type EvidenceEmployeeRow,
-} from "./evidence/people.ts";
+} from "./people.ts";
 import {
   applyDueDraft,
   cadenceFromDue,
@@ -22,8 +22,8 @@ import {
   dueDefaultForRequirement,
   parseIsoDate,
   type EvidenceDueDraft,
-} from "./evidence/due.ts";
-import { latestFileForItem } from "./evidence/status.ts";
+} from "./due.ts";
+import { latestFileForItem } from "./status.ts";
 import {
   EVIDENCE_PUSH_BODY,
   EVIDENCE_PUSH_LINK,
@@ -38,7 +38,7 @@ import {
   type EvidenceType,
   type FirstDueRule,
   type RenewYears,
-} from "./evidence/types.ts";
+} from "./types.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

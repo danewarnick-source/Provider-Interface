@@ -37,7 +37,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { getUnmetStaffMandates, recordStaffMandateOverride } from "@/lib/documents/forms.functions";
 import {
   onStaffAssignmentCreated,

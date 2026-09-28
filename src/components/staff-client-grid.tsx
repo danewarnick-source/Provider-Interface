@@ -43,7 +43,7 @@ import {
   billingUnitLabel,
   isClockableServiceCode,
   isDailyServiceCode,
-} from "@/lib/service-billing";
+} from "@/lib/billing/service-billing";
 import { isEvvLockedCode } from "@/lib/evv-codes";
 import { displayPersonName } from "@/lib/person-name";
 

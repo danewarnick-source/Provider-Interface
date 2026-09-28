@@ -37,7 +37,7 @@ import {
   saveShift, deleteShift, publishWeek, addToCaseload, setAdminTimeOff,
   saveDayProgramSession, markAttendance, addSessionStaff,
 } from "@/lib/scheduling/scheduler-scheduler.functions";
-import { isClockableServiceCode } from "@/lib/service-billing";
+import { isClockableServiceCode } from "@/lib/billing/service-billing";
 import { evvServiceLabel } from "@/lib/evv-codes";
 import { RequestsPanel } from "@/components/schedule-preview/requests-panel";
 import { OpenShiftsPanel } from "@/components/scheduling/open-shifts-panel";

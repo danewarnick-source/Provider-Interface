@@ -32,7 +32,7 @@
  */
 
 import { computeEntryUnits, effectiveBillingTimes, isBillableForReview } from "@/lib/billing/billing-units";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "../billing/service-billing.ts";
 
 export type TimesheetRow = {
   client_id: string;

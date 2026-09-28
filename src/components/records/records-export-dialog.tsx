@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
-import { downloadCsv } from "@/lib/utah-evv-export";
+import { downloadCsv } from "@/lib/billing/utah-evv-export";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { recordPhiAccess } from "@/lib/audit/phi-access-audit.functions";
 

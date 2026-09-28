@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { fmtHours, fmtUnits, unitsToHours, UNITS_PER_HOUR } from "@/lib/billing/billing-units";
-import { isDailyServiceCode } from "@/lib/service-billing";
+import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { ArrowLeft, Plus, Trash2, AlertTriangle, CheckCircle2, Clock, CalendarDays, History, ChevronDown, ChevronRight } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { listRateHistory, type RateHistoryRow } from "@/lib/billing/billing-rates.functions";
