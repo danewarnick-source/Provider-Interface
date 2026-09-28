@@ -48,7 +48,6 @@ const PUBLIC_FILES = [
   new URL("../routes/nectar.tsx", import.meta.url),
   new URL("../routes/about.tsx", import.meta.url),
   new URL("../routes/signup.tsx", import.meta.url),
-  new URL("../routes/training.tsx", import.meta.url),
   new URL("../routes/terms.tsx", import.meta.url),
   new URL("../routes/baa.tsx", import.meta.url),
   new URL("../routes/privacy.tsx", import.meta.url),
@@ -94,7 +93,10 @@ describe("Provider Interface marketing homepage", () => {
     assert.equal(PI_LIST_PRICE_DISPLAY, "$69");
     assert.equal(PI_LIST_MINIMUM_LINE, "$350 / month minimum");
     assert.equal(PI_LIST_PRICE_LEAD, "The list price is the price.");
-    assert.equal(PI_LIST_PRICE_CONTRAST, "No setup fee. No feature tiers. Training classes optional.");
+    assert.equal(
+      PI_LIST_PRICE_CONTRAST,
+      "No setup fee. No feature tiers. Training classes optional.",
+    );
     assert.equal(
       PI_PRICE_MIN_AND_TRAINING,
       "$350 / month minimum · Optional training classes sold separately",
@@ -115,7 +117,9 @@ describe("Provider Interface marketing homepage", () => {
 
   it("scrolls through real sections and does not reuse Hive marketing chrome", () => {
     const page = read(new URL("../routes/index.tsx", import.meta.url));
-    const landing = read(new URL("../components/pi-landing/pi-marketing-page.tsx", import.meta.url));
+    const landing = read(
+      new URL("../components/pi-landing/pi-marketing-page.tsx", import.meta.url),
+    );
     const pricing = read(new URL("../components/pi-landing/pi-pricing.tsx", import.meta.url));
     const shots = read(new URL("../components/pi-landing/pi-product-shots.tsx", import.meta.url));
     const header = read(new URL("../components/pi-landing/pi-public-header.tsx", import.meta.url));
@@ -152,7 +156,7 @@ describe("Provider Interface marketing homepage", () => {
     assert.match(copy, /to: "\/pricing"/);
     assert.match(copy, /to: "\/nectar"/);
     assert.match(copy, /to: "\/about"/);
-    assert.match(copy, /to: "\/training"/);
+    assert.doesNotMatch(copy, /to: "\/training"/);
     assert.match(shots, /Nectar/);
     assert.match(pricing, /PI_LIST_PRICE_DISPLAY/);
     assert.match(pricing, /PI_TRAINING_ADDONS/);
@@ -167,7 +171,10 @@ describe("Provider Interface marketing homepage", () => {
     assert.match(pricing, /className="btn s"/);
     assert.doesNotMatch(pricing, /text-\[#0b1220\]/);
     assert.doesNotMatch(pricing, /FOUNDING_PER_STAFF_CENTS|LIST_VOLUME_TIERS|ANNUAL_DISCOUNT/);
-    assert.doesNotMatch(landing, /PublicLandingHeader|HexBackdrop|HiveWordmark|Honeycomb|hivecertify/);
+    assert.doesNotMatch(
+      landing,
+      /PublicLandingHeader|HexBackdrop|HiveWordmark|Honeycomb|hivecertify/,
+    );
     assert.doesNotMatch(landing, /landing\/hero-phone/);
     for (const word of PI_FORBIDDEN_MARKETING) {
       assert.equal(landing.includes(word), false, `homepage must not mention ${word}`);
@@ -178,7 +185,9 @@ describe("Provider Interface marketing homepage", () => {
   });
 
   it("does not mount the old dusk laptop mock on the public landing", () => {
-    const landing = read(new URL("../components/pi-landing/pi-marketing-page.tsx", import.meta.url));
+    const landing = read(
+      new URL("../components/pi-landing/pi-marketing-page.tsx", import.meta.url),
+    );
     assert.doesNotMatch(landing, /DuskDeskStill|DuskPeopleScreen|PI_DIFFERENCE_HEADLINE/);
     assert.match(landing, /PI_NECTAR_BEFORE_QUOTE/);
     assert.match(landing, /PiHeroPhone/);
@@ -209,17 +218,9 @@ describe("Provider Interface marketing homepage", () => {
     const signup = read(new URL("../routes/signup.tsx", import.meta.url));
     assert.match(signup, /PI_SIGNUP_PRICE_LINE|PI_LIST_PRICE_DISPLAY/);
     assert.match(signup, /Skip training/);
-    assert.match(signup, /Just need training\? Buy classes without the office/);
-    assert.match(signup, /signup-training-only-link/);
-    assert.match(signup, /to="\/training"/);
-    const account = signup.slice(
-      signup.indexOf("function Step1Account"),
-      signup.indexOf("function Step3Business"),
-    );
+    assert.doesNotMatch(signup, /signup-training-only-link/);
+    assert.doesNotMatch(signup, /to="\/training"/);
     const training = signup.slice(signup.indexOf("function Step5Training"));
-    assert.doesNotMatch(account, /Just need training\?/);
-    assert.match(training, /Just need training\? Buy classes without the office\./);
-    assert.match(training, /to="\/training"/);
     assert.match(training, /Skip training/);
     assert.match(signup, /4242 4242 4242 4242/);
     assert.match(signup, /pricingModel: "pi_list"/);
@@ -296,7 +297,7 @@ describe("Provider Interface marketing homepage", () => {
     assert.equal(PI_ABOUT_PAGE_HEADLINE, "The office, already standing.");
     assert.deepEqual(
       PI_NAV_LINKS.map((item) => item.to),
-      ["/nectar", "/training", "/pricing", "/about"],
+      ["/nectar", "/pricing", "/about"],
     );
     assert.equal(PI_FEATURE_HIGHLIGHTS.length >= 3, true);
     assert.equal(PI_FEATURE_HIGHLIGHTS.length <= 6, true);
@@ -309,7 +310,9 @@ describe("Provider Interface marketing homepage", () => {
     assert.match(scroll, /PI_LEARN_MORE/);
     assert.doesNotMatch(nectar, /Hive Certify/);
     assert.doesNotMatch(about, /Hive Certify/);
-    const nectarPage = read(new URL("../components/pi-landing/pi-nectar-page.tsx", import.meta.url));
+    const nectarPage = read(
+      new URL("../components/pi-landing/pi-nectar-page.tsx", import.meta.url),
+    );
     const aboutPage = read(new URL("../components/pi-landing/pi-about-page.tsx", import.meta.url));
     assert.doesNotMatch(nectarPage, /DSPD|compliance|audit/i);
     assert.doesNotMatch(aboutPage, /Hive Certify/);
@@ -346,7 +349,7 @@ describe("Provider Interface marketing homepage", () => {
     assert.match(section, /pi-pricing-close/);
     assert.match(css, /\.wrap\.pi-pricing-page/);
     assert.match(css, /max-width:\s*800px/);
-    assert.match(css, /\.pi-landing-root a\.btn\.p \{\n  color: var\(--navy\);\n\}/);
+    assert.match(css, /\.pi-landing-root a\.btn\.p \{\n {2}color: var\(--navy\);\n\}/);
     assert.equal(PI_PRICING_HERO_LEDE, "The list price is the price. Sign in when you are ready.");
   });
 });

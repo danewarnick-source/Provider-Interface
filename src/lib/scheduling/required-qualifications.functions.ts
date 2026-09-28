@@ -15,11 +15,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { qualificationKey, type QualificationKind } from "@/lib/staff-qualifications.functions";
+import {
+  addEvidenceQualifications,
+  qualificationKey,
+  type QualificationKind,
+} from "@/lib/staff-qualifications.functions";
 
 // ─── Legacy hardcoded requirements (DHHS91172 minimums) ───────────────────
 // KEEP as fallback until every listed code has confirmed-rule coverage.
-// Values are external_certifications.cert_type keys.
+// Values are the legacy qualification keys still used by the scheduler.
 export const HARDCODED_SERVICE_CODE_REQUIRED_CERTS: Record<string, string[]> = {
   HHS: ["cpr-fa", "abuse-neglect"],
   SLH: ["cpr-fa", "abuse-neglect"],
@@ -75,15 +79,15 @@ async function loadConfirmedRules(
 ): Promise<RuleRow[]> {
   const { data, error } = await supabase
     .from("nectar_compliance_rules")
-    .select(
-      "id, rule_definition, requirement:nectar_requirements!inner(activation_state)",
-    )
+    .select("id, rule_definition, requirement:nectar_requirements!inner(activation_state)")
     .eq("organization_id", organizationId)
     .eq("rule_type", "staff_prerequisite")
     .eq("status", "confirmed");
   if (error) throw new Error(error.message);
   return ((data ?? []) as RuleRow[]).filter(
-    (r) => r.requirement && (ACTIVE_STATES as readonly string[]).includes(r.requirement.activation_state),
+    (r) =>
+      r.requirement &&
+      (ACTIVE_STATES as readonly string[]).includes(r.requirement.activation_state),
   );
 }
 
@@ -169,7 +173,6 @@ export async function resolveRequiredQualsForCodes(
     }
   }
   if (fallbackCodes.length) {
-    // eslint-disable-next-line no-console
     console.warn(
       `[required-qualifications] Using hardcoded fallback for codes with no confirmed staff_prerequisite rule: ${fallbackCodes.join(
         ", ",
@@ -195,35 +198,17 @@ export async function loadStaffQualsBulk(
   for (const id of staffIds) out.set(id, new Set<string>());
   const add = (staffId: string, k: string) => out.get(staffId)?.add(k);
 
-  // 1. external_certifications
-  const { data: certs } = await supabase
-    .from("external_certifications")
-    .select("user_id, cert_type, expires_at, status")
-    .in("user_id", staffIds)
-    .eq("status", "approved");
-  for (const c of (certs ?? []) as Array<{ user_id: string; cert_type: string; expires_at: string | null }>) {
-    if (c.expires_at && c.expires_at <= atIso) continue;
-    add(c.user_id, qualificationKey("external_cert", c.cert_type));
-  }
+  await addEvidenceQualifications(
+    supabase,
+    organizationId,
+    staffIds,
+    atIso.slice(0, 10),
+    (staffId, key, active) => {
+      if (active) add(staffId, key);
+    },
+  );
 
-  // 2. staff_baseline_training_completions
-  const { data: baseline } = await supabase
-    .from("staff_baseline_training_completions")
-    .select("staff_id, training_key, expires_at, completed_date")
-    .eq("organization_id", organizationId)
-    .in("staff_id", staffIds);
-  for (const b of (baseline ?? []) as Array<{
-    staff_id: string;
-    training_key: string | null;
-    expires_at: string | null;
-    completed_date: string | null;
-  }>) {
-    if (!b.training_key || !b.completed_date) continue;
-    if (b.expires_at && b.expires_at <= atIso) continue;
-    add(b.staff_id, qualificationKey("baseline_training", b.training_key));
-  }
-
-  // 3. hive_training_assignments — completed
+  // hive_training_assignments — completed
   const { data: assigns } = await supabase
     .from("hive_training_assignments")
     .select("user_id, course_id, status, expires_at")

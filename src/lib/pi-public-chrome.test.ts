@@ -9,7 +9,6 @@ function read(rel: string) {
 
 const PUBLIC_SHELL_FILES = [
   "../routes/contact.tsx",
-  "../routes/training.tsx",
   "../routes/pricing.tsx",
   "../components/pi-landing/pi-nectar-page.tsx",
   "../components/pi-landing/pi-about-page.tsx",
@@ -24,16 +23,24 @@ describe("public pages share homepage marketing chrome", () => {
   it("keeps one homepage nav order for every non-home public page", () => {
     assert.deepEqual(
       PI_PUBLIC_NAV.map((item) => `${item.label}:${item.to}`),
-      ["Nectar:/nectar", "Training:/training", "Pricing:/pricing", "About:/about"],
+      ["Nectar:/nectar", "Pricing:/pricing", "About:/about"],
     );
   });
 
-  it("routes Contact, Training, legal, and auth through PiPublicPage", () => {
+  it("routes Contact, legal, and auth through PiPublicPage", () => {
     for (const rel of PUBLIC_SHELL_FILES) {
       const text = read(rel);
       assert.match(text, /PiPublicPage/, `${rel} must use PiPublicPage`);
-      assert.equal(text.includes('from "@/components/site-header"'), false, `${rel} must not use SiteHeader`);
-      assert.equal(text.includes('from "@/components/landing/footer"'), false, `${rel} must not use landing Footer`);
+      assert.equal(
+        text.includes('from "@/components/site-header"'),
+        false,
+        `${rel} must not use SiteHeader`,
+      );
+      assert.equal(
+        text.includes('from "@/components/landing/footer"'),
+        false,
+        `${rel} must not use landing Footer`,
+      );
     }
     const forgot = read("../routes/forgot-password.tsx");
     assert.match(forgot, /AuthShell/);

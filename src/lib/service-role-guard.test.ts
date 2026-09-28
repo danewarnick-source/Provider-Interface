@@ -89,7 +89,6 @@ describe("B1 edge callers", () => {
       "../../src/lib/threads.functions.ts",
       "../../src/lib/audit-portal.functions.ts",
       "../../src/lib/billing-notifications.server.ts",
-      "../../src/lib/training-only-exec.functions.ts",
     ]) {
       const src = read(file);
       assert.match(src, /functions\.invoke\(\s*"send-email"/);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -8,10 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 import { authRedirectUrl } from "@/lib/auth-redirect";
 import { useAuth } from "@/hooks/use-auth";
-import {
-  listMyAuditorShares,
-  getAuditorShareView,
-} from "@/lib/auditor-shares.functions";
+import { listMyAuditorShares, getAuditorShareView } from "@/lib/auditor-shares.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -100,9 +98,7 @@ function AuditorPortal() {
             onBack={() => navigate({ to: "/auditor", search: {} })}
           />
         ) : (
-          <AuditorShareList
-            onOpen={(id) => navigate({ to: "/auditor", search: { share: id } })}
-          />
+          <AuditorShareList onOpen={(id) => navigate({ to: "/auditor", search: { share: id } })} />
         )}
       </main>
     </div>
@@ -144,7 +140,8 @@ function AuditorSignIn() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Enter the email address the provider granted you access with. We'll send a one-time link — you verify yourself, no account creation needed.
+            Enter the email address the provider granted you access with. We'll send a one-time link
+            — you verify yourself, no account creation needed.
           </p>
           {sent ? (
             <div className="rounded-md border border-[color:var(--amber-300)] bg-[color:var(--amber-50)] px-3 py-3 text-sm">
@@ -167,7 +164,11 @@ function AuditorSignIn() {
                 />
               </div>
               <Button variant="cta" className="w-full" onClick={send} disabled={sending}>
-                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                {sending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Mail className="h-4 w-4" />
+                )}
                 Send sign-in link
               </Button>
             </>
@@ -190,7 +191,8 @@ function AuditorShareList({ onOpen }: { onOpen: (id: string) => void }) {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Shared with you</h1>
         <p className="text-sm text-muted-foreground">
-          Audit folders that providers have granted you access to. Only files explicitly shared are visible.
+          Audit folders that providers have granted you access to. Only files explicitly shared are
+          visible.
         </p>
       </div>
 
@@ -199,9 +201,7 @@ function AuditorShareList({ onOpen }: { onOpen: (id: string) => void }) {
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
       )}
-      {error && (
-        <div className="text-sm text-destructive">{(error as Error).message}</div>
-      )}
+      {error && <div className="text-sm text-destructive">{(error as Error).message}</div>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {(data?.shares ?? []).map((s: any) => {
@@ -314,7 +314,11 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
           <div className="grid grid-cols-3 gap-2 text-sm pt-1">
             <Stat label="Items needed" value={counts.total} />
             <Stat label="Provided" value={counts.provided} tone="amber" />
-            <Stat label="Missing" value={counts.missing} tone={counts.missing > 0 ? "red" : undefined} />
+            <Stat
+              label="Missing"
+              value={counts.missing}
+              tone={counts.missing > 0 ? "red" : undefined}
+            />
           </div>
         </CardContent>
       </Card>
@@ -324,7 +328,8 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
           <CardHeader>
             <CardTitle className="text-sm capitalize flex items-center gap-2">
               <Folder className="h-4 w-4 text-[color:var(--navy-700)]" />
-              {folder} <span className="text-muted-foreground font-normal">({grouped[folder].length})</span>
+              {folder}{" "}
+              <span className="text-muted-foreground font-normal">({grouped[folder].length})</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -359,14 +364,19 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
                         provided
                           ? "bg-[color:var(--amber-100)] text-[color:var(--navy-900)] border-0"
                           : missing
-                          ? "bg-destructive/10 text-destructive border border-destructive/30"
-                          : "bg-[color:var(--surface-2)] text-foreground border-0"
+                            ? "bg-destructive/10 text-destructive border border-destructive/30"
+                            : "bg-[color:var(--surface-2)] text-foreground border-0"
                       }
                     >
                       {provided ? (
-                        <><CheckCircle2 className="h-3 w-3" /> Provided{it.evidence_count > 0 ? ` (${it.evidence_count})` : ""}</>
+                        <>
+                          <CheckCircle2 className="h-3 w-3" /> Provided
+                          {it.evidence_count > 0 ? ` (${it.evidence_count})` : ""}
+                        </>
                       ) : missing ? (
-                        <><AlertTriangle className="h-3 w-3" /> Missing</>
+                        <>
+                          <AlertTriangle className="h-3 w-3" /> Missing
+                        </>
                       ) : (
                         it.status.replace("_", " ")
                       )}
@@ -407,7 +417,9 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <p className="text-xs text-muted-foreground">
-            Based on the documents the provider uploaded. NECTAR places the standard from the SOW/contract alongside the training PI has on file so you can compare requirement vs. evidence directly.
+            Based on the documents the provider uploaded. NECTAR places the standard from the
+            SOW/contract alongside the training PI has on file so you can compare requirement vs.
+            evidence directly.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="rounded-md border border-[color:var(--border-light)] bg-white/70 p-3">
@@ -432,24 +444,15 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
                 PI training evidence
               </div>
               <div className="space-y-1">
-                {(data.nectar.training_courses ?? []).slice(0, 8).map((c: any) => (
+                {(data.nectar.evidence ?? []).slice(0, 8).map((c: any) => (
                   <div key={c.id} className="text-xs flex items-center gap-2">
                     <CheckCircle2 className="h-3 w-3 text-[color:var(--amber-600)]" />
                     {c.title}
                   </div>
                 ))}
-                {(data.nectar.certifications ?? []).slice(0, 8).map((c: any) => (
-                  <div key={c.id} className="text-xs flex items-center gap-2">
-                    <ShieldCheck className="h-3 w-3 text-[color:var(--navy-700)]" />
-                    {c.name}
-                  </div>
-                ))}
-                {(data.nectar.training_courses ?? []).length === 0 &&
-                  (data.nectar.certifications ?? []).length === 0 && (
-                    <div className="text-xs text-muted-foreground">
-                      No training records on file.
-                    </div>
-                  )}
+                {(data.nectar.evidence ?? []).length === 0 && (
+                  <div className="text-xs text-muted-foreground">No Evidence on file.</div>
+                )}
               </div>
             </div>
           </div>
@@ -459,21 +462,13 @@ function AuditorShareDetail({ shareId, onBack }: { shareId: string; onBack: () =
   );
 }
 
-function Stat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone?: "amber" | "red";
-}) {
+function Stat({ label, value, tone }: { label: string; value: number; tone?: "amber" | "red" }) {
   const cls =
     tone === "amber"
       ? "text-[color:var(--amber-600)]"
       : tone === "red"
-      ? "text-destructive"
-      : "text-foreground";
+        ? "text-destructive"
+        : "text-foreground";
   return (
     <div className="rounded-md border border-[color:var(--border-light)] bg-white/70 px-3 py-2">
       <div className={`text-xl font-semibold ${cls}`}>{value}</div>

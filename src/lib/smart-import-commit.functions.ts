@@ -1359,20 +1359,6 @@ async function commitCerts(
     .select("*")
     .eq("import_subject_id", subj.id);
   for (const c of certs ?? []) {
-    if (subj.subject_type === "employee") {
-      // external_certifications expects user_id; record_id IS the user_id for employees
-      await sb
-        .from("external_certifications")
-        .insert({
-          user_id: recordId,
-          organization_id: orgId,
-          cert_type: c.cert_key,
-          // verification_status / expires would map per existing schema if those columns exist; keep minimal
-        })
-        .select("id")
-        .maybeSingle()
-        .catch(() => null);
-    }
     if (c.state === "provisional") {
       gaps.push(`Cert "${c.cert_key}" provisional — reminder queued`);
     }

@@ -20,6 +20,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { cellStatus, latestFileForItem } from "@/lib/evidence/status";
+import type { EvidenceFileRow, EvidenceItemRow } from "@/lib/evidence/types";
+import { inHiveRefUuid } from "@/lib/in-hive-training";
 import { computeRequirementDueState } from "@/lib/requirement-tracking";
 
 /** Training key constants — shared with callers so the strings aren't scattered. */
@@ -53,6 +56,117 @@ type TrainingRow = {
  * Pure helper (safe to import anywhere): is a given training key current for a staff member?
  * "Current" = has a completed_date AND (no expires_at OR expires_at >= today).
  */
+const SOW_EVIDENCE_KEY: Record<string, string> = {
+  [SOW_TRAINING_KEYS.THIRTY_DAY]: "thirty_day_orientation",
+  [SOW_TRAINING_KEYS.ABI]: "abi_training",
+  [SOW_TRAINING_KEYS.DEESCALATION]: "mandt_behavior",
+};
+
+const SOW_COURSE_CERT_REF: Record<string, string> = {
+  [SOW_TRAINING_KEYS.THIRTY_DAY]: inHiveRefUuid("thirty-day", "__cert__"),
+  [SOW_TRAINING_KEYS.ABI]: inHiveRefUuid("abi", "__cert__"),
+};
+
+/** Evidence (and the in-platform course certificate) stand in for the old baseline rows. */
+async function loadSowTrainingRows(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sb: any,
+  orgId: string,
+  today: string,
+): Promise<TrainingRow[]> {
+  const evidenceKeyToSow = new Map(
+    Object.entries(SOW_EVIDENCE_KEY).map(([sow, evidence]) => [evidence, sow]),
+  );
+  const certRefToSow = new Map(Object.entries(SOW_COURSE_CERT_REF).map(([sow, ref]) => [ref, sow]));
+  const [{ data: items }, { data: completions }] = await Promise.all([
+    sb
+      .from("evidence_items")
+      .select(
+        "id, subject_id, requirement_key, evidence_type, expires_on, first_due_on, next_due_on, document_date",
+      )
+      .eq("organization_id", orgId)
+      .eq("subject_type", "staff")
+      .in("requirement_key", [...evidenceKeyToSow.keys()]),
+    sb
+      .from("training_completions")
+      .select("user_id, ref_id, completed_at")
+      .eq("topic_kind", "core")
+      .eq("topic_code", "CERT")
+      .in("ref_id", [...certRefToSow.keys()]),
+  ]);
+  const itemRows = (items ?? []) as Array<{
+    id: string;
+    subject_id: string;
+    requirement_key: string;
+    evidence_type: string;
+    expires_on: string | null;
+    first_due_on: string | null;
+    next_due_on: string | null;
+    document_date: string | null;
+  }>;
+  let fileRows: EvidenceFileRow[] = [];
+  if (itemRows.length) {
+    const { data: files } = await sb
+      .from("evidence_files")
+      .select("id, item_id, storage_path, filename, attested_at, uploaded_at")
+      .in(
+        "item_id",
+        itemRows.map((r) => r.id),
+      );
+    fileRows = (
+      (files ?? []) as Array<Partial<EvidenceFileRow> & { id: string; item_id: string }>
+    ).map((f) => ({
+      id: f.id,
+      organization_id: orgId,
+      item_id: f.item_id,
+      storage_path: f.storage_path ?? null,
+      filename: f.filename ?? null,
+      attested_at: f.attested_at ?? null,
+      attested_by: null,
+      attestation_text_snapshot: null,
+      uploaded_by: null,
+      uploaded_at: f.uploaded_at ?? null,
+      notes: null,
+    }));
+  }
+  const out: TrainingRow[] = [];
+  for (const item of itemRows) {
+    const sowKey = evidenceKeyToSow.get(item.requirement_key);
+    if (!sowKey || !item.subject_id) continue;
+    const file = latestFileForItem(fileRows, item.id);
+    if (
+      cellStatus({
+        item: item as EvidenceItemRow,
+        file,
+        today,
+      }) !== "done"
+    ) {
+      continue;
+    }
+    out.push({
+      staff_id: item.subject_id,
+      training_key: sowKey,
+      completed_date: item.document_date ?? today,
+      expires_at: item.expires_on,
+    });
+  }
+  for (const row of (completions ?? []) as Array<{
+    user_id: string;
+    ref_id: string;
+    completed_at: string | null;
+  }>) {
+    const sowKey = certRefToSow.get(row.ref_id);
+    if (!sowKey || !row.user_id || !row.completed_at) continue;
+    out.push({
+      staff_id: row.user_id,
+      training_key: sowKey,
+      completed_date: row.completed_at.slice(0, 10),
+      expires_at: null,
+    });
+  }
+  return out;
+}
+
 export function isTrainingCurrent(
   trainings: TrainingRow[],
   staffId: string,
@@ -68,9 +182,7 @@ export function isTrainingCurrent(
 /** Returns all SOW perimeter alerts for an org (R1–R5). */
 export const computeSowAlerts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ organizationId: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ organizationId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     if (!context.supabase || !context.userId) return { alerts: [] as SowAlert[] };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -93,40 +205,50 @@ export const computeSowAlerts = createServerFn({ method: "POST" })
     if (memberIds.length === 0) return { alerts };
 
     // Step 2: load all data in parallel
-    const [
-      profilesRes,
-      trainingsRes,
-      incidentsRes,
-      requirementsRes,
-      clientsRes,
-    ] = await Promise.all([
-      sb.from("profiles")
-        .select("id, full_name, requires_abi, requires_deescalation, is_active")
-        .in("id", memberIds),
-      sb.from("staff_baseline_training_completions")
-        .select("staff_id, training_key, completed_date, expires_at")
-        .eq("organization_id", orgId),
-      sb.from("incident_reports")
-        .select("id, report_number, client_id, state_submission_deadline, status")
-        .eq("organization_id", orgId)
-        .neq("status", "State_Confirmed")
-        .not("state_submission_deadline", "is", null)
-        .lt("state_submission_deadline", now.toISOString()),
-      sb.from("nectar_requirements")
-        .select("id, title, review_status, metadata")
-        .eq("organization_id", orgId),
-      sb.from("clients")
-        .select("id, first_name, last_name")
-        .eq("organization_id", orgId),
-    ]);
+    const [profilesRes, trainingsRes, incidentsRes, requirementsRes, clientsRes] =
+      await Promise.all([
+        sb
+          .from("profiles")
+          .select("id, full_name, requires_abi, requires_deescalation, is_active")
+          .in("id", memberIds),
+        loadSowTrainingRows(sb, orgId, today),
+        sb
+          .from("incident_reports")
+          .select("id, report_number, client_id, state_submission_deadline, status")
+          .eq("organization_id", orgId)
+          .neq("status", "State_Confirmed")
+          .not("state_submission_deadline", "is", null)
+          .lt("state_submission_deadline", now.toISOString()),
+        sb
+          .from("nectar_requirements")
+          .select("id, title, review_status, metadata")
+          .eq("organization_id", orgId),
+        sb.from("clients").select("id, first_name, last_name").eq("organization_id", orgId),
+      ]);
 
-    type Profile = { id: string; full_name: string | null; requires_abi: boolean; requires_deescalation: boolean; is_active: boolean };
-    type Incident = { id: string; report_number: string; client_id: string; state_submission_deadline: string };
-    type Requirement = { id: string; title: string; review_status: string | null; metadata: Record<string, unknown> | null };
+    type Profile = {
+      id: string;
+      full_name: string | null;
+      requires_abi: boolean;
+      requires_deescalation: boolean;
+      is_active: boolean;
+    };
+    type Incident = {
+      id: string;
+      report_number: string;
+      client_id: string;
+      state_submission_deadline: string;
+    };
+    type Requirement = {
+      id: string;
+      title: string;
+      review_status: string | null;
+      metadata: Record<string, unknown> | null;
+    };
     type ClientRow = { id: string; first_name: string; last_name: string };
 
     const profiles = ((profilesRes.data ?? []) as Profile[]).filter((p) => p.is_active);
-    const trainings = (trainingsRes.data ?? []) as TrainingRow[];
+    const trainings = (trainingsRes ?? []) as TrainingRow[];
     const incidents = (incidentsRes.data ?? []) as Incident[];
     const requirements = (requirementsRes.data ?? []) as Requirement[];
     const clientList = (clientsRes.data ?? []) as ClientRow[];
@@ -219,9 +341,7 @@ export const computeSowAlerts = createServerFn({ method: "POST" })
       const ds = computeRequirementDueState(req.metadata);
       if (ds.state === "not_applicable" || ds.state === "ok") continue;
       const isUntraced = !req.review_status || req.review_status === "draft";
-      const dueAt = ds.dueOn
-        ? new Date(`${ds.dueOn}T23:59:59Z`).toISOString()
-        : overdueIso;
+      const dueAt = ds.dueOn ? new Date(`${ds.dueOn}T23:59:59Z`).toISOString() : overdueIso;
       alerts.push({
         key: `sow:r5:${req.id}`,
         title: isUntraced ? `[Untraced] ${req.title}` : req.title,
@@ -242,9 +362,7 @@ export const computeSowAlerts = createServerFn({ method: "POST" })
  */
 export const getMissingThirtyDayStaffIds = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ organizationId: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ organizationId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     if (!context.supabase || !context.userId) return { missingIds: [] as string[] };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -262,28 +380,19 @@ export const getMissingThirtyDayStaffIds = createServerFn({ method: "POST" })
 
     if (memberIds.length === 0) return { missingIds: [] as string[] };
 
-    const [profilesRes, trainingsRes] = await Promise.all([
-      sb.from("profiles")
-        .select("id, is_active")
-        .in("id", memberIds),
-      sb.from("staff_baseline_training_completions")
-        .select("staff_id, completed_date, expires_at")
-        .eq("organization_id", orgId)
-        .eq("training_key", SOW_TRAINING_KEYS.THIRTY_DAY),
+    const [profilesRes, trainings] = await Promise.all([
+      sb.from("profiles").select("id, is_active").in("id", memberIds),
+      loadSowTrainingRows(sb, orgId, today),
     ]);
 
     const activeIds = ((profilesRes.data ?? []) as Array<{ id: string; is_active: boolean }>)
       .filter((p) => p.is_active)
       .map((p) => p.id);
 
-    const trainings = (trainingsRes.data ?? []) as Array<{
-      staff_id: string;
-      completed_date: string | null;
-      expires_at: string | null;
-    }>;
+    const thirtyDay = trainings.filter((t) => t.training_key === SOW_TRAINING_KEYS.THIRTY_DAY);
 
     const missingIds = activeIds.filter(
-      (id) => !isTrainingCurrent(trainings.map((t) => ({ ...t, training_key: SOW_TRAINING_KEYS.THIRTY_DAY })), id, SOW_TRAINING_KEYS.THIRTY_DAY, today),
+      (id) => !isTrainingCurrent(thirtyDay, id, SOW_TRAINING_KEYS.THIRTY_DAY, today),
     );
 
     return { missingIds };
@@ -295,9 +404,7 @@ export const getMissingThirtyDayStaffIds = createServerFn({ method: "POST" })
  */
 export const getMissingAbiStaffIds = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ organizationId: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ organizationId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     if (!context.supabase || !context.userId) return { missingIds: [] as string[] };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -315,33 +422,19 @@ export const getMissingAbiStaffIds = createServerFn({ method: "POST" })
 
     if (memberIds.length === 0) return { missingIds: [] as string[] };
 
-    const [profilesRes, trainingsRes] = await Promise.all([
-      sb.from("profiles")
-        .select("id, is_active")
-        .in("id", memberIds),
-      sb.from("staff_baseline_training_completions")
-        .select("staff_id, completed_date, expires_at")
-        .eq("organization_id", orgId)
-        .eq("training_key", SOW_TRAINING_KEYS.ABI),
+    const [profilesRes, trainings] = await Promise.all([
+      sb.from("profiles").select("id, is_active").in("id", memberIds),
+      loadSowTrainingRows(sb, orgId, today),
     ]);
 
     const activeIds = ((profilesRes.data ?? []) as Array<{ id: string; is_active: boolean }>)
       .filter((p) => p.is_active)
       .map((p) => p.id);
 
-    const trainings = (trainingsRes.data ?? []) as Array<{
-      staff_id: string;
-      completed_date: string | null;
-      expires_at: string | null;
-    }>;
+    const abi = trainings.filter((t) => t.training_key === SOW_TRAINING_KEYS.ABI);
 
     const missingIds = activeIds.filter(
-      (id) => !isTrainingCurrent(
-        trainings.map((t) => ({ ...t, training_key: SOW_TRAINING_KEYS.ABI })),
-        id,
-        SOW_TRAINING_KEYS.ABI,
-        today,
-      ),
+      (id) => !isTrainingCurrent(abi, id, SOW_TRAINING_KEYS.ABI, today),
     );
 
     return { missingIds };

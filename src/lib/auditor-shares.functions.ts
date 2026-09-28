@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -183,7 +184,12 @@ export const listMyAuditorShares = createServerFn({ method: "GET" })
     const orgIds = Array.from(new Set((shares ?? []).map((s) => s.organization_id)));
     const [{ data: packets }, { data: orgs }] = await Promise.all([
       packetIds.length
-        ? supabase.from("audit_packets").select("id, name, fiscal_year, provider_name, timeline_start, timeline_end, expectations_summary").in("id", packetIds)
+        ? supabase
+            .from("audit_packets")
+            .select(
+              "id, name, fiscal_year, provider_name, timeline_start, timeline_end, expectations_summary",
+            )
+            .in("id", packetIds)
         : Promise.resolve({ data: [] as any[] }),
       orgIds.length
         ? supabase.from("organizations").select("id, name").in("id", orgIds)
@@ -217,7 +223,7 @@ export const getAuditorShareView = createServerFn({ method: "POST" })
         organization: null,
         items: [],
         linked_files: [],
-        nectar: { authoritative_sources: [], training_courses: [], certifications: [] },
+        nectar: { authoritative_sources: [], evidence: [] },
       };
     }
     const email = (claims?.email as string | undefined)?.toLowerCase();
@@ -266,36 +272,47 @@ export const getAuditorShareView = createServerFn({ method: "POST" })
         live === "scheduled"
           ? `Access opens ${new Date(share.starts_at).toLocaleString()}`
           : live === "expired"
-          ? "Access window has ended."
-          : "Access has been revoked.",
+            ? "Access window has ended."
+            : "Access has been revoked.",
       );
     }
 
-    const [{ data: packet }, { data: org }, { data: items }, { data: shareItems }, { data: linkedFiles }] =
-      await Promise.all([
-        supabase.from("audit_packets").select("*").eq("id", share.packet_id).single(),
-        supabase.from("organizations").select("id, name").eq("id", share.organization_id).single(),
-        supabase
-          .from("audit_packet_items")
-          .select("id, sub_folder, title, description, status, source_hint, evidence_count, evidence_refs, position")
-          .eq("packet_id", share.packet_id)
-          .order("sub_folder")
-          .order("position"),
-        supabase
-          .from("auditor_share_items")
-          .select("packet_item_id, audit_file_id")
-          .eq("share_id", share.id),
-        supabase
-          .from("audit_files")
-          .select("id, period_month, status")
-          .eq("audit_packet_id", share.packet_id),
-      ]);
+    const [
+      { data: packet },
+      { data: org },
+      { data: items },
+      { data: shareItems },
+      { data: linkedFiles },
+    ] = await Promise.all([
+      supabase.from("audit_packets").select("*").eq("id", share.packet_id).single(),
+      supabase.from("organizations").select("id, name").eq("id", share.organization_id).single(),
+      supabase
+        .from("audit_packet_items")
+        .select(
+          "id, sub_folder, title, description, status, source_hint, evidence_count, evidence_refs, position",
+        )
+        .eq("packet_id", share.packet_id)
+        .order("sub_folder")
+        .order("position"),
+      supabase
+        .from("auditor_share_items")
+        .select("packet_item_id, audit_file_id")
+        .eq("share_id", share.id),
+      supabase
+        .from("audit_files")
+        .select("id, period_month, status")
+        .eq("audit_packet_id", share.packet_id),
+    ]);
 
     let visibleItems = items ?? [];
     let visibleFiles = linkedFiles ?? [];
     if (!share.share_all_items) {
-      const allowedItems = new Set((shareItems ?? []).map((s: any) => s.packet_item_id).filter(Boolean));
-      const allowedFiles = new Set((shareItems ?? []).map((s: any) => s.audit_file_id).filter(Boolean));
+      const allowedItems = new Set(
+        (shareItems ?? []).map((s: any) => s.packet_item_id).filter(Boolean),
+      );
+      const allowedFiles = new Set(
+        (shareItems ?? []).map((s: any) => s.audit_file_id).filter(Boolean),
+      );
       visibleItems = visibleItems.filter((i: any) => allowedItems.has(i.id));
       visibleFiles = visibleFiles.filter((f: any) => allowedFiles.has(f.id));
     }
@@ -311,7 +328,7 @@ export const getAuditorShareView = createServerFn({ method: "POST" })
     }
 
     // NECTAR: pull authoritative sources (SOW/contract) + PI training evidence
-    const [{ data: sources }, { data: courses }, { data: certs }] = await Promise.all([
+    const [{ data: sources }, { data: evidence }] = await Promise.all([
       supabase
         .from("nectar_documents")
         .select("id, title, authoritative_kind, created_at")
@@ -319,15 +336,10 @@ export const getAuditorShareView = createServerFn({ method: "POST" })
         .eq("is_authoritative_source", true)
         .limit(20),
       supabase
-        .from("courses")
-        .select("id, title, description")
+        .from("evidence_items")
+        .select("id, title")
         .eq("organization_id", share.organization_id)
         .limit(50),
-      supabase
-        .from("certifications")
-        .select("id, name")
-        .eq("organization_id", share.organization_id)
-        .limit(100),
     ]);
 
     return {
@@ -339,8 +351,7 @@ export const getAuditorShareView = createServerFn({ method: "POST" })
       linked_files: visibleFiles,
       nectar: {
         authoritative_sources: sources ?? [],
-        training_courses: courses ?? [],
-        certifications: certs ?? [],
+        evidence: evidence ?? [],
       },
     };
   });
