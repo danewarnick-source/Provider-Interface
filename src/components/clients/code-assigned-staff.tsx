@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { CheckboxMultiSelect } from "@/components/ui/checkbox-multi-select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, X, UserPlus } from "lucide-react";
-import { addStaffToClientCode, removeStaffFromClientCode } from "@/lib/scheduler/setup.functions";
+import { addStaffToClientCode, removeStaffFromClientCode } from "@/lib/scheduling/scheduler-setup.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 import {
   clientCodeAssignmentsQueryKey,

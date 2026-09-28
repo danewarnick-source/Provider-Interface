@@ -10,7 +10,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { nectarImportSchedule } from "@/lib/scheduler/import.functions";
+import { nectarImportSchedule } from "@/lib/scheduling/scheduler-import.functions";
 
 type Draft = {
   staff_id: string | null;

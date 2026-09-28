@@ -14,7 +14,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { supabase } from "@/integrations/supabase/client";
-import { createSwapRequest } from "@/lib/schedule-requests";
+import { createSwapRequest } from "@/lib/scheduling/schedule-requests";
 
 export function RequestSwapDialog({
   shiftId,

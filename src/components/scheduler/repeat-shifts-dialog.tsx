@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { previewRepeat, applyRepeat } from "@/lib/scheduler/repeat.functions";
+import { previewRepeat, applyRepeat } from "@/lib/scheduling/scheduler-repeat.functions";
 
 type SourceMode = "prev_week" | "prev_month" | "pick_week";
 

@@ -26,7 +26,7 @@ import {
   SCHEDULE_NON_CLIENT_SECTION,
   scheduleNonClientClockInAllowed,
   scheduleStaffHidesStatusBadge,
-} from "@/lib/schedule-staff-clock";
+} from "@/lib/scheduling/schedule-staff-clock";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -38,7 +38,7 @@ import { GeneralTimeClock } from "@/components/staff-mobile/general-time-clock";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { RequestTimeOffDialog } from "@/components/schedule-preview/request-time-off-dialog";
 import { RequestSwapDialog } from "@/components/schedule-preview/request-swap-dialog";
-import { useMyScheduleRequests } from "@/lib/schedule-requests";
+import { useMyScheduleRequests } from "@/lib/scheduling/schedule-requests";
 import { CalendarOff, ArrowLeftRight } from "lucide-react";
 import { hhsVisitLabel, hostHomeRowLabel } from "@/lib/scheduling/hhs-visit";
 import { HhsInfoTooltip } from "@/components/scheduling/hhs-info-tooltip";

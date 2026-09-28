@@ -36,19 +36,19 @@ import { useDayProgramData } from "@/hooks/use-day-program-data";
 import {
   saveShift, deleteShift, publishWeek, addToCaseload, setAdminTimeOff,
   saveDayProgramSession, markAttendance, addSessionStaff,
-} from "@/lib/scheduler/scheduler.functions";
+} from "@/lib/scheduling/scheduler-scheduler.functions";
 import { isClockableServiceCode } from "@/lib/service-billing";
 import { evvServiceLabel } from "@/lib/evv-codes";
 import { RequestsPanel } from "@/components/schedule-preview/requests-panel";
 import { OpenShiftsPanel } from "@/components/scheduling/open-shifts-panel";
 import { NectarBar } from "@/components/scheduler/nectar-bar";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
-import { createRecurringShifts } from "@/lib/scheduler/repeat.functions";
+import { createRecurringShifts } from "@/lib/scheduling/scheduler-repeat.functions";
 import { SoloLapseDialog } from "@/components/scheduler/solo-lapse-dialog";
 import { listSoloLapsesForStaff } from "@/lib/obligations/remediation.functions";
 import type { SoloLapse } from "@/lib/obligations/solo-lapse";
 import { denverYmd } from "@/lib/denver-date";
-import { layoutShiftBars } from "@/lib/scheduler/recurrence";
+import { layoutShiftBars } from "@/lib/scheduling/scheduler-recurrence";
 
 export const Route = createFileRoute("/dashboard/scheduler")({
   head: () => ({
@@ -1597,7 +1597,7 @@ function ShiftDetailPanel({
 function AdminHoursDialog({ client, onClose }: { client: SchedClient; onClose: () => void }) {
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();
-  const { saveAdminHours } = require("@/lib/scheduler/scheduler.functions");
+  const { saveAdminHours } = require("@/lib/scheduling/scheduler-scheduler.functions");
   const save = useServerFn(saveAdminHours as any);
   const [val, setVal] = useState<number>(client.admin_hours_per_week ?? 0);
   const saveMut = useMutation({

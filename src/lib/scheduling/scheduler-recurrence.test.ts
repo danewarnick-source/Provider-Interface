@@ -9,7 +9,7 @@ import {
   isStaffVisibleShiftStatus,
   layoutShiftBars,
   occurrenceSlotKey,
-} from "./recurrence.ts";
+} from "./scheduler-recurrence.ts";
 
 describe("expandRecurringOccurrences — weekly MWF in America/Denver", () => {
   it("Sunday 10am Denver seed + MWF materializes Monday this week (not UTC getDay)", () => {

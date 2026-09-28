@@ -15,7 +15,7 @@ import {
   fetchConflictingShifts,
   type SwapRequest,
   type TimeOffRequest,
-} from "@/lib/schedule-requests";
+} from "@/lib/scheduling/schedule-requests";
 import type { StaffRow } from "@/hooks/use-schedule-preview";
 import { SCHED } from "./sched-ui";
 

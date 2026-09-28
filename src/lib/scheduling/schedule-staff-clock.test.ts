@@ -12,7 +12,7 @@ import {
   scheduleShiftCta,
   scheduleShiftOpensPunchPad,
   scheduleStaffHidesStatusBadge,
-} from "./schedule-staff-clock.ts";
+} from "../scheduling/schedule-staff-clock.ts";
 
 describe("scheduleHasOpenPunch", () => {
   it("is true for a client EVV punch or a general punch", () => {

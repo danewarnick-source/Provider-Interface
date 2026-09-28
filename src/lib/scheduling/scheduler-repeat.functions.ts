@@ -11,7 +11,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { newShiftStatus } from "@/lib/scheduling/shift-status";
-import { expandRecurringOccurrences, occurrenceSlotKey } from "@/lib/scheduler/recurrence";
+import { expandRecurringOccurrences, occurrenceSlotKey } from "@/lib/scheduling/scheduler-recurrence";
 
 type ShiftRow = {
   id: string;

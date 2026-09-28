@@ -6,7 +6,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { coerceScheduledShiftStatus } from "@/lib/scheduling/shift-status";
-import { denverWeekUtcBounds } from "@/lib/scheduler/recurrence";
+import { denverWeekUtcBounds } from "@/lib/scheduling/scheduler-recurrence";
 
 const ShiftInput = z.object({
   id: z.string().uuid().optional(),

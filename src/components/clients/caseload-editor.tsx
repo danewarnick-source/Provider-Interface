@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { Search, Save, X, Tag } from "lucide-react";
-import { setClientCaseload } from "@/lib/scheduler/setup.functions";
+import { setClientCaseload } from "@/lib/scheduling/scheduler-setup.functions";
 
 type StaffOption = { id: string; name: string };
 

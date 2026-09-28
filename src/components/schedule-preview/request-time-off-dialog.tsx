@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { createTimeOffRequest, type TimeOffRequest } from "@/lib/schedule-requests";
+import { createTimeOffRequest, type TimeOffRequest } from "@/lib/scheduling/schedule-requests";
 
 const TYPES: TimeOffRequest["type"][] = ["pto", "sick", "personal", "unpaid", "other"];
 

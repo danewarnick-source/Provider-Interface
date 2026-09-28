@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
-import { saveShift } from "@/lib/scheduler/scheduler.functions";
+import { saveShift } from "@/lib/scheduling/scheduler-scheduler.functions";
 
 export type TimeOffRequest = {
   id: string;

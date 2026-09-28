@@ -27,7 +27,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sparkles, Loader2, CheckCircle2, RefreshCw, Pencil, Trash2, Plus, ArrowUp, ArrowDown, Shield, BookOpen, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { setClientCaseload } from "@/lib/scheduler/setup.functions";
+import { setClientCaseload } from "@/lib/scheduling/scheduler-setup.functions";
 
 type Training = {
   id: string;
