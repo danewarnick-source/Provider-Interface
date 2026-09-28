@@ -633,7 +633,7 @@ function HostDetailDialog({
                     </SelectContent>
                   </Select>
                   <Button asChild size="sm" variant="outline">
-                    <Link to="/dashboard/invitations">
+                    <Link to="/dashboard/team-members" search={{ view: "invited" }}>
                       <Plus className="mr-1 h-3.5 w-3.5" /> Invite as staff
                     </Link>
                   </Button>

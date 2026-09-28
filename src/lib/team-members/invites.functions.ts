@@ -1,6 +1,6 @@
-// Shared team-member invitation rail. Both invite surfaces (the Add team
-// member dialog on the Team Members roster and the dedicated
-// dashboard.invitations.tsx management page) call these server fns instead
+// Shared team-member invitation rail. Every invite surface (the Add team
+// member dialog and the Invited view on the Team Members roster) calls these
+// server fns instead
 // of inserting into `invitations` directly, so invite creation, resend, and
 // the actual email send live in exactly one place.
 //
@@ -14,7 +14,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { requireLevel, requirePermission } from "@/lib/access/require";
+import { requireCategory, requireLevel, requirePermission } from "@/lib/access/require";
 import { resolveOrgSender } from "@/lib/email.functions";
 import { type AccessLevel } from "@/lib/access/levels";
 import { resolvePresetId } from "@/lib/access/preset-resolve";
@@ -30,6 +30,15 @@ import {
   type MemberAccessPick,
   type ProfileEmailPick,
 } from "@/lib/invitation-resend-access";
+import {
+  asRosterLevel,
+  buildTeamInviteRows,
+  isEmployeeOnActiveRoster,
+  lastLoginByUserId,
+  type InviteSourceInvitation,
+  type TeamInviteRow,
+} from "@/lib/team-members/roster";
+import { displayNameOf, loadVisibleMembers, selectIn } from "@/lib/team-members/roster.functions";
 
 const ORG_ID = z.string().uuid();
 const INVITE_LEVEL = z.enum(["owner", "admin", "staff"]);
@@ -201,9 +210,11 @@ async function sendInvitationEmail(args: {
   /** Auth email for the person sending, used when profiles.email is empty. */
   inviterEmail?: string | null;
 }): Promise<{ ok: boolean; error?: string }> {
-  const { supabase, organizationId, email, level, token, siteOrigin, inviterUserId, inviterEmail } = args;
+  const { supabase, organizationId, email, level, token, siteOrigin, inviterUserId, inviterEmail } =
+    args;
   try {
-    const actorEmail = (await loadProfileEmail(supabase, inviterUserId)) ?? pickReplyTo(null, inviterEmail);
+    const actorEmail =
+      (await loadProfileEmail(supabase, inviterUserId)) ?? pickReplyTo(null, inviterEmail);
     const sender = await resolveOrgSender(supabase, organizationId, actorEmail);
     const { data: org } = await supabase
       .from("organizations")
@@ -385,7 +396,13 @@ export const resendInvitation = createServerFn({ method: "POST" })
     // needs an Owner; preset must belong to the org and match the level).
     let requested: InviteAccessValues | null = null;
     if (data.access_level) {
-      await assertCanInviteAt(sb, userId, data.organization_id, data.access_level, data.access_preset_id);
+      await assertCanInviteAt(
+        sb,
+        userId,
+        data.organization_id,
+        data.access_level,
+        data.access_preset_id,
+      );
       requested = {
         access_level: data.access_level,
         access_preset_id: await presetIdForInvite(
@@ -765,4 +782,96 @@ export const inviteStaffMembers = createServerFn({ method: "POST" })
         status: "error",
       });
     }
+  });
+
+/**
+ * Invited view on the Team Members roster: pending invitations (with expiry)
+ * plus active members who have never signed in and have no pending invite
+ * ("not_invited"). Scoped viewers see invites for the people they can see and
+ * the invites they sent themselves.
+ */
+export const listTeamInvites = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { organizationId: string }) => z.object({ organizationId: ORG_ID }).parse(d))
+  .handler(async ({ data, context }): Promise<TeamInviteRow[]> => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) throw new Error("Not signed in.");
+    const orgId = data.organizationId;
+    const access = await requireCategory(
+      supabase as unknown as SupabaseClient,
+      userId,
+      orgId,
+      "staff_hiring",
+      "view",
+    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const admin = supabaseAdmin as any;
+    const { members, profiles } = await loadVisibleMembers({
+      admin,
+      organizationId: orgId,
+      viewerId: userId,
+      scope: access.scope,
+    });
+
+    const { data: inviteData, error: invErr } = await admin
+      .from("invitations")
+      .select(
+        "id, token, email, access_level, access_preset_id, created_at, expires_at, invited_by",
+      )
+      .eq("organization_id", orgId)
+      .eq("status", "pending");
+    if (invErr) throw new Error(invErr.message);
+    const visibleEmails = new Set(
+      members
+        .map((m) => profiles.get(m.user_id)?.email?.trim().toLowerCase() ?? "")
+        .filter(Boolean),
+    );
+    const invitations = (
+      (inviteData ?? []) as Array<InviteSourceInvitation & { invited_by: string | null }>
+    ).filter(
+      (i) =>
+        access.scope === "agency" ||
+        i.invited_by === userId ||
+        visibleEmails.has(i.email.trim().toLowerCase()),
+    );
+
+    const signIns = await admin.rpc("org_member_last_sign_ins", { _org: orgId });
+    const known = !signIns.error;
+    const lastLogin = lastLoginByUserId(known ? signIns.data : null);
+
+    const presetIds = [
+      ...new Set(
+        [
+          ...members.map((m) => m.access_preset_id),
+          ...invitations.map((i) => i.access_preset_id),
+        ].filter((id): id is string => !!id),
+      ),
+    ];
+    const presets = await selectIn<{ id: string; name: string }>(
+      (ids) =>
+        admin.from("access_presets").select("id, name").eq("organization_id", orgId).in("id", ids),
+      presetIds,
+    );
+
+    return buildTeamInviteRows({
+      invitations,
+      members: members.map((m) => {
+        const p = profiles.get(m.user_id);
+        const level = asRosterLevel(m.access_level);
+        return {
+          userId: m.user_id,
+          email: p?.email ?? "",
+          name: p ? displayNameOf(p).display : null,
+          accessLevel: level,
+          presetId: level === "owner" ? null : m.access_preset_id,
+          createdAt: m.created_at,
+          active: isEmployeeOnActiveRoster({ active: m.active !== false, profile: p }),
+          lastSignInAt: lastLogin.get(m.user_id) ?? null,
+          lastSignInKnown: known && lastLogin.has(m.user_id),
+        };
+      }),
+      presetNames: new Map(presets.map((p) => [p.id, p.name])),
+      nowMs: Date.now(),
+    });
   });

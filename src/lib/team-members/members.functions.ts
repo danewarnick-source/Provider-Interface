@@ -509,14 +509,24 @@ export const finishEmployeeSetup = createServerFn({ method: "POST" })
 const ResetInput = z.object({
   organizationId: z.string().uuid(),
   userId: z.string().uuid(),
-  newPassword: z.string().min(12).max(128),
 });
 
-export const adminResetEmployeePassword = createServerFn({ method: "POST" })
+export type ResetMemberPasswordResult = {
+  /** Username when set, else email — what the person types to sign in. */
+  login: string;
+  /** 14 characters, generated here. Shown once; never stored in plain text. */
+  password: string;
+};
+
+/**
+ * Sets a new server-generated temporary password and forces a change at next
+ * sign-in. The browser never picks the password.
+ */
+export const resetMemberPassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => ResetInput.parse(d))
-  .handler(async ({ data, context }) => {
-    if (!context.userId) return { ok: false };
+  .handler(async ({ data, context }): Promise<ResetMemberPasswordResult> => {
+    if (!context.userId) throw new Error("Not signed in.");
     // Hire & deactivate = Edit, in-scope target, not an Owner unless the actor
     // is one, never your own account — and the same-org target check.
     await assertCanManageMember({
@@ -527,17 +537,27 @@ export const adminResetEmployeePassword = createServerFn({ method: "POST" })
       action: "reset_password",
     });
 
-    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
-      password: data.newPassword,
-    });
+    const password = generateTempPassword(14);
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { password });
     if (error) throw new Error(error.message);
 
-    await supabaseAdmin
+    const { data: prof, error: profErr } = await supabaseAdmin
       .from("profiles")
       .update({ must_change_password: true })
-      .eq("id", data.userId);
+      .eq("id", data.userId)
+      .select("username, email, full_name")
+      .maybeSingle();
+    if (profErr) throw new Error(profErr.message);
 
-    return { ok: true };
+    await logChange(
+      data.organizationId,
+      context.userId,
+      "password_reset",
+      { userId: data.userId, name: prof?.full_name ?? null },
+      { must_change_password: true },
+    );
+
+    return { login: prof?.username?.trim() || prof?.email?.trim() || "", password };
   });
 
 /* ------------------------------------------------------------------ */

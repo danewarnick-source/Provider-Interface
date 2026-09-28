@@ -15,9 +15,12 @@ import {
   CLIENT_LIST,
   CLIENTS,
   DAILY_LOGS,
+  LAST_SIGN_IN,
   ORG_ID,
   ORG_NAME,
   PENDING_INVITE,
+  ROSTER_EVIDENCE,
+  ROSTER_POSITIONS,
   STAFF,
   STAFF_LIST,
   TEAMS,
@@ -25,7 +28,7 @@ import {
 import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
 import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
 import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
-import { withAccessLevel } from "./access-level";
+import { levelForRole, withAccessLevel } from "./access-level";
 
 export type MockPersona = "admin" | "dsp" | "manager";
 
@@ -50,6 +53,8 @@ export type MockOptions = {
   noAssignments?: boolean;
   /** Mark one roster profile custom_attributes.needs_setup so Finish setup can render. */
   needsSetupUserId?: string;
+  /** rosterOrgHasHomes answers false (the roster hides its Home filter). */
+  noHomes?: boolean;
 };
 
 type Row = Record<string, unknown>;
@@ -736,6 +741,88 @@ function emptyClientCareData(clientId: string) {
   };
 }
 
+/** Options of the most recent installHiveMocks call (server fns don't get them otherwise). */
+let activeMockOpts: MockOptions = {};
+
+const PRESET_ID = {
+  staff: "00000000-0000-4000-a000-000000000951",
+  admin: "00000000-0000-4000-a000-000000000952",
+} as const;
+
+/** listTeamRoster — the RosterRow shape from src/lib/team-members/roster.ts. */
+function teamRosterRows(): Row[] {
+  const opts = activeMockOpts;
+  return STAFF_LIST.map((s) => {
+    const level = levelForRole(s.role);
+    const [first, ...rest] = s.name.split(" ");
+    const needsSetup = opts.needsSetupUserId === s.id;
+    const teamId = "teamId" in s ? s.teamId : null;
+    const supervisor =
+      teamId === STAFF.jake.teamId && s.id !== STAFF.harvey.id ? STAFF.harvey : null;
+    return {
+      userId: s.id,
+      memberId: `mem-${s.id.slice(-8)}`,
+      displayName: s.name,
+      firstName: first ?? "",
+      lastName: rest.join(" "),
+      email: s.email,
+      phone: needsSetup ? "555-0142" : "",
+      employeeId: `TM-${s.id.slice(-3)}`,
+      photoPath: null,
+      jobTitle: s.jobTitle,
+      accessLevel: level,
+      presetId: level === "owner" ? null : PRESET_ID[level],
+      positions: ROSTER_POSITIONS[s.id] ?? [],
+      homeId: teamId,
+      homeName: TEAMS.find((t) => t.id === teamId)?.team_name ?? null,
+      supervisorId: supervisor?.id ?? null,
+      supervisorName: supervisor?.name ?? null,
+      hireDate: "2025-01-15",
+      active: true,
+      mustChangePassword: s.id === STAFF.tom.id,
+      lastSignInAt: LAST_SIGN_IN[s.id] ?? null,
+      lastSignInKnown: true,
+      pendingInviteId: null,
+      evidence: ROSTER_EVIDENCE[s.id],
+      missingInfo: s.id === STAFF.tom.id ? ["date_of_birth", "address"] : [],
+      needsSetup,
+      setup: needsSetup ? { department: "", workerType: "w2" } : null,
+    };
+  });
+}
+
+/** listTeamInvites — the one pending invite (expired on the fixture date) first. */
+function teamInviteRows(): Row[] {
+  return [
+    {
+      status: "pending",
+      invitationId: PENDING_INVITE.id,
+      token: PENDING_INVITE.token,
+      userId: null,
+      name: null,
+      email: PENDING_INVITE.email,
+      accessLevel: "staff",
+      presetName: "DSP",
+      createdAt: PENDING_INVITE.created_at,
+      expiresAt: PENDING_INVITE.expires_at,
+      expired: Date.parse(PENDING_INVITE.expires_at) < Date.now(),
+    },
+    {
+      status: "not_invited",
+      invitationId: null,
+      token: null,
+      userId: ADMIN_USER_ID,
+      name: ADMIN_NAME,
+      email: ADMIN_EMAIL,
+      accessLevel: "owner",
+      presetName: null,
+      createdAt: "2025-01-15T00:00:00.000Z",
+      expiresAt: null,
+      expired: false,
+    },
+  ];
+}
+
 function decodeServerFnExport(url: string): string {
   try {
     const id = decodeURIComponent(url.split("/_serverFn/")[1]?.split("?")[0] ?? "");
@@ -766,6 +853,12 @@ function inferServerFn(url: string, body: string): string {
 function serverFnPayload(url: string, body: string): unknown {
   const fn = inferServerFn(url, body);
   const fnBlob = `${fn}\n${url}\n${body}`;
+  if (/listTeamRoster/i.test(fn)) return teamRosterRows();
+  if (/listTeamInvites/i.test(fn)) return teamInviteRows();
+  if (/rosterOrgHasHomes/i.test(fn)) return !activeMockOpts.noHomes;
+  if (/resetMemberPassword/i.test(fn)) {
+    return { login: "jake.probert@example.test", password: "Mock-Temp-Pass1" };
+  }
   if (/applyEmployeeRosterRow/i.test(fn)) {
     return {
       userId: "00000000-0000-4000-a000-000000000498",
@@ -1033,7 +1126,8 @@ function sampleAccessPresets() {
     access_level,
     access_scope,
     home_page,
-    categories: access_level === "staff" ? { phone_app: "edit" } : { staff_roster: "edit", clients: "edit" },
+    categories:
+      access_level === "staff" ? { phone_app: "edit" } : { staff_roster: "edit", clients: "edit" },
     seed_key,
     member_count: 1,
   });
@@ -1044,7 +1138,14 @@ function sampleAccessPresets() {
     row(PRESET_HR, "HR / Office", "admin", "agency", "hr_office", "/dashboard"),
     row(PRESET_HRC, "HRC Committee", "staff", "assigned", "hrc_committee", "/dashboard/hrc"),
     row(PRESET_LEAD, "Lead DSP", "staff", "assigned", "lead_dsp", "/employee"),
-    row(PRESET_PROGRAM_MANAGER, "Program Manager", "admin", "agency", "program_manager", "/dashboard"),
+    row(
+      PRESET_PROGRAM_MANAGER,
+      "Program Manager",
+      "admin",
+      "agency",
+      "program_manager",
+      "/dashboard",
+    ),
   ];
 }
 
@@ -1119,8 +1220,7 @@ function parseAccessWrite(blob: string): {
   const scopePlain = decoded.match(/"access_scope"\s*:\s*"(agency|assigned|self)"/)?.[1];
   if (levelPlain && scopePlain) {
     const assignments: SavedMemberAccess["assignments"] = [];
-    const re =
-      /"kind"\s*:\s*"(home|staff|client)"\s*,\s*"target_id"\s*:\s*"([0-9a-f-]{36})"/gi;
+    const re = /"kind"\s*:\s*"(home|staff|client)"\s*,\s*"target_id"\s*:\s*"([0-9a-f-]{36})"/gi;
     for (const match of decoded.matchAll(re)) {
       assignments.push({
         kind: match[1] as SavedMemberAccess["assignments"][number]["kind"],
@@ -1220,6 +1320,7 @@ function isServerFnUrl(url: URL): boolean {
 
 export async function installHiveMocks(page: Page, opts: MockOptions = {}): Promise<void> {
   const persona = opts.persona ?? "admin";
+  activeMockOpts = opts;
   const personaStaff =
     persona === "dsp" ? STAFF.jake : persona === "manager" ? STAFF.harvey : STAFF.admin;
   const personaId = personaStaff.id;

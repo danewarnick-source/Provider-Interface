@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { getRouteApi, Link, useRouter } from "@tanstack/react-router";
+import { getRouteApi, Link } from "@tanstack/react-router";
 import { isRouteUuid } from "@/lib/route-uuid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -30,6 +30,7 @@ import {
   staffProfileIdentityQueryKey,
 } from "@/lib/team-members/identity";
 import { resolveProfileTab, type RenderedProfileTab } from "@/lib/team-members/profile-tabs";
+import { lastRosterSearch } from "@/lib/team-members/roster-return";
 
 const profileRoute = getRouteApi("/dashboard/team-members/$staffId");
 
@@ -38,10 +39,11 @@ export function ProfilePage() {
   const { staffId } = profileRoute.useParams();
   const { tab } = profileRoute.useSearch();
   const { data: org } = useCurrentOrg();
-  const router = useRouter();
   const qc = useQueryClient();
   const navigate = profileRoute.useNavigate();
   const activeTab = resolveProfileTab(tab);
+  // Back buttons always go to the roster, as the person last left it.
+  const backSearch = lastRosterSearch();
 
   const orgId = org?.organization_id;
 
@@ -90,16 +92,10 @@ export function ProfilePage() {
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              window.history.length > 1
-                ? router.history.back()
-                : router.navigate({ to: "/dashboard/team-members" })
-            }
-          >
-            <ArrowLeft className="mr-1 h-4 w-4" /> Team Members
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/dashboard/team-members" search={backSearch} data-testid="profile-back">
+              <ArrowLeft className="mr-1 h-4 w-4" /> Team Members
+            </Link>
           </Button>
           <PersonAvatar
             bucket="staff-photos"
@@ -140,22 +136,19 @@ export function ProfilePage() {
             </div>
           </div>
         </div>
-        <Button
-          variant="outline"
-          onClick={() =>
-            window.history.length > 1
-              ? router.history.back()
-              : router.navigate({ to: "/dashboard/team-members" })
-          }
-        >
-          Back to list
+        <Button variant="outline" asChild>
+          <Link to="/dashboard/team-members" search={backSearch} data-testid="profile-back-to-list">
+            Back to list
+          </Link>
         </Button>
       </div>
 
       <Tabs
         value={activeTab}
         onValueChange={(v) =>
+          // Tabs replace the entry: Back leaves the profile in one step.
           navigate({
+            replace: true,
             search: (prev) => ({
               ...prev,
               tab: v === "profile" ? undefined : (v as RenderedProfileTab),

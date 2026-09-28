@@ -32,7 +32,13 @@ async function gotoAdmin(page: Page, url: string) {
 
 /** Names render in both the mobile card list (hidden on desktop) and the table. */
 function rosterName(page: Page, name: string) {
-  return page.locator("table").getByText(name, { exact: true });
+  // .first(): a name can also appear in another row's Supervisor cell.
+  return page.locator("table").getByText(name, { exact: true }).first();
+}
+
+/** The roster Name-column link (a name can also sit in the Supervisor cell). */
+function nameLink(page: Page, name: string) {
+  return page.locator("table").getByRole("link", { name, exact: true });
 }
 
 test.describe("Clients + Staff roster — mocked admin", () => {
@@ -140,25 +146,38 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(rosterName(page, "Harvey Alisa")).toBeVisible();
     await expect(rosterName(page, "Tom Jones")).toBeVisible();
     await expect(rosterName(page, "Dane Warnick")).toBeVisible();
+    // Position column (two, then +N); Owner / Admin badge by the name; no preset anywhere.
     await expect(
-      page
-        .locator("table")
-        .getByText(/^admin$/i)
-        .first(),
+      page.locator("table").getByRole("columnheader", { name: "Position" }),
     ).toBeVisible();
+    await expect(page.locator("table").getByRole("columnheader", { name: "Preset" })).toHaveCount(
+      0,
+    );
     await expect(
-      page
-        .locator("table")
-        .getByText(/^team member$/i)
-        .first(),
+      page.locator("table").getByText("Operations Director, Direct Support Professional"),
     ).toBeVisible();
-    await expect(page.locator("table").getByText(/^Last Login$/i)).toBeVisible();
+    await expect(page.locator("table").getByText("+1", { exact: true })).toBeVisible();
+    await expect(page.locator("table").getByTestId("level-badge").first()).toHaveText(
+      /^(Owner|Admin)$/,
+    );
+    await expect(page.locator("table").getByText(/Program Manager|Full access/)).toHaveCount(0);
+    await expect(page.locator("table").getByText("Maple House").first()).toBeVisible();
+    // Evidence column: same labels as the Evidence page data, including No pack yet.
+    await expect(page.locator("table").getByText("All current").first()).toBeVisible();
+    await expect(page.locator("table").getByText("2 missing")).toBeVisible();
+    await expect(page.locator("table").getByText("1 due soon")).toBeVisible();
     await expect(
-      page
-        .locator("table")
-        .getByRole("button", { name: /Caseload/i })
-        .first(),
+      page.locator("table").getByRole("link", { name: "No pack yet" }).first(),
     ).toBeVisible();
+    await expect(page.locator("table").getByText("Pending first login")).toBeVisible();
+    await expect(page.locator("table").getByRole("button", { name: /^Last login/i })).toBeVisible();
+    await expect(page.locator("table").getByRole("columnheader", { name: /^Login$/i })).toHaveCount(
+      0,
+    );
+    await expect(
+      page.locator("table").getByRole("columnheader", { name: /^Status$/i }),
+    ).toHaveCount(0);
+    await expect(page.locator("table").getByRole("button", { name: /Caseload/i })).toHaveCount(0);
     await expect(
       page
         .locator("table")
@@ -168,11 +187,120 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.locator("table").getByRole("link", { name: /Staff file/i })).toHaveCount(0);
     await expect(page.locator("table").getByRole("link", { name: /^View$/i })).toHaveCount(0);
     await expect(page.locator("table").getByText("Aug 27, 2026").first()).toBeVisible();
+    await expect(page.getByText("Platform admin")).toHaveCount(0);
+    await expect(page.getByTestId("roster-counts")).toHaveText(/5 active · 0 inactive · 2 invited/);
+
+    // Search (debounced) and filter chips live in the URL.
+    await page.getByLabel("Search team members").fill("probert");
+    await expect(page).toHaveURL(/q=probert/);
+    await expect(nameLink(page, "Harvey Alisa")).toHaveCount(0);
+    await expect(nameLink(page, "Jake Probert")).toBeVisible();
+    await expect(page.getByTestId("roster-showing")).toHaveText(/Showing 1 of 5 · Clear filter/);
+    await page.getByLabel("Clear search").click();
+    await expect(page.getByTestId("roster-showing")).toHaveCount(0);
+
+    // Filter buttons: one at a time, solid when on, click again to clear.
+    const missingBtn = page.getByTestId("roster-filter-missing");
+    const expiringBtn = page.getByTestId("roster-filter-expiring");
+    await missingBtn.click();
+    await expect(page).toHaveURL(/filter=missing(&|$)/);
+    await expect(missingBtn).toHaveAttribute("aria-pressed", "true");
+    await expect(missingBtn).toHaveClass(/bg-primary/);
+    await expect(nameLink(page, "Harvey Alisa")).toBeVisible();
+    await expect(nameLink(page, "Jake Probert")).toHaveCount(0);
+    await expect(page.getByTestId("roster-showing")).toHaveText(/Showing 1 of 5/);
+    await expiringBtn.click();
+    await expect(page).toHaveURL(/filter=expiring(&|$)/);
+    await expect(missingBtn).toHaveAttribute("aria-pressed", "false");
+    await expect(nameLink(page, "Tom Jones")).toBeVisible();
+    await expect(nameLink(page, "Harvey Alisa")).toHaveCount(0);
+    await expiringBtn.click();
+    await expect(page).not.toHaveURL(/filter=/);
+    await expect(nameLink(page, "Jake Probert")).toBeVisible();
+    // A button with nobody in it is disabled and says why.
+    const reviewBtn = page.getByTestId("roster-filter-review");
+    await expect(reviewBtn).toBeDisabled();
+    await reviewBtn.locator("..").hover();
+    await expect(
+      page.getByRole("tooltip").filter({ hasText: "Nothing is awaiting review." }).first(),
+    ).toBeVisible();
+    // Missing info lists what's missing on hover.
+    await page.locator("table").getByTestId("missing-info-chip").first().hover();
+    await expect(
+      page.getByRole("tooltip").filter({ hasText: "Date of birth, address" }).first(),
+    ).toBeVisible();
+    // Position dropdown narrows the list; Clear filter resets everything.
+    await page.getByRole("combobox", { name: "Position" }).click();
+    await page.getByRole("option", { name: "Host Home Provider" }).click();
+    await expect(page).toHaveURL(/position=hhp/);
+    await expect(page.getByTestId("roster-showing")).toHaveText(/Showing 2 of 5/);
+    await page.getByRole("button", { name: "Clear filter" }).click();
+    await expect(page).not.toHaveURL(/position=/);
+    await expect(page.getByRole("combobox", { name: "Preset" })).toHaveCount(0);
+    await expect(page.getByRole("combobox", { name: "Home" })).toBeVisible();
+    await page.getByRole("button", { name: /^Evidence/ }).click();
+    await expect(page).toHaveURL(/sort=evidence/);
+
+    // Export CSV downloads the filtered rows with today's date in the name.
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: /Export CSV/i }).click();
+    expect((await download).suggestedFilename()).toMatch(/^team-members-\d{4}-\d{2}-\d{2}\.csv$/);
+
+    // Reset password: the app's own dialog, server-generated password shown once.
+    await page.getByRole("button", { name: "More actions for Jake Probert" }).click();
+    await expect(page.getByRole("menuitem", { name: /Review evidence pack/i })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: /Edit caseload/i })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: /Deactivate/i })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: /Delete/i })).toHaveCount(0);
+    await page.getByRole("menuitem", { name: /Reset password/i }).click();
+    await page
+      .getByTestId("reset-password-dialog")
+      .getByRole("button", { name: /^Reset password$/ })
+      .click();
+    await expect(page.getByText("Mock-Temp-Pass1")).toBeVisible();
+    await shot(page, "team_members_reset_password");
+    await page.getByRole("button", { name: /^Done$/ }).click();
+    // No Reset / Deactivate on your own row.
+    await page.getByRole("button", { name: "More actions for Roster Admin" }).click();
+    await expect(page.getByRole("menuitem", { name: /Reset password/i })).toHaveCount(0);
+    await expect(page.getByRole("menuitem", { name: /Deactivate/i })).toHaveCount(0);
+    await expect(page.getByRole("menuitem", { name: /Send invite/i })).toBeVisible();
+    await page.keyboard.press("Escape");
     await expect(page.getByRole("button", { name: /^Settings$/i })).toHaveCount(0);
     await shot(page, "team_members_roster_desktop");
     await page.setViewportSize({ width: 390, height: 844 });
+    // Cards below 768 px; ⋯ opens the same actions in a bottom sheet.
+    await page.getByRole("button", { name: "More actions for Harvey Alisa" }).click();
+    await expect(
+      page.getByRole("dialog").getByRole("button", { name: /Open profile/i }),
+    ).toBeVisible();
+    await shot(page, "team_members_roster_mobile_sheet");
+    await page.keyboard.press("Escape");
     await shot(page, "team_members_roster_mobile");
     await page.setViewportSize({ width: 1280, height: 720 });
+
+    // Leave the roster filtered so the profile's back buttons can bring it back.
+    await missingBtn.click();
+    await page.getByRole("button", { name: /^Evidence/ }).click();
+    await expect(page).toHaveURL(/filter=missing/);
+    await nameLink(page, "Harvey Alisa").click();
+    await page.waitForURL(new RegExp(`/dashboard/team-members/${STAFF.harvey.id}`));
+    // Tabs replace history; both back buttons and browser Back return to the same list.
+    await page.getByRole("tab", { name: /Team member file/i }).click();
+    await expect(page).toHaveURL(/tab=file/);
+    await page.getByRole("tab", { name: /^Activity$/i }).click();
+    await expect(page).toHaveURL(/tab=activity/);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
+    await expect(page.getByTestId("roster-filter-missing")).toHaveAttribute("aria-pressed", "true");
+    await nameLink(page, "Harvey Alisa").click();
+    await page.getByTestId("profile-back").click();
+    await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
+    await expect(page).toHaveURL(/sort=-?evidence/);
+    await nameLink(page, "Harvey Alisa").click();
+    await page.getByTestId("profile-back-to-list").click();
+    await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
+    await page.getByRole("button", { name: "Clear filter" }).click();
 
     await rosterName(page, "Jake Probert").click();
     await page.waitForURL(new RegExp(`/dashboard/team-members/${STAFF.jake.id}`));
@@ -258,13 +386,41 @@ test.describe("Clients + Staff roster — mocked admin", () => {
 
     await shot(page, "add_employee_wizard_access");
 
+    // The old invitations page redirects to the roster's Invited view.
     await gotoAdmin(page, "/dashboard/invitations");
-    await expect(page.getByRole("heading", { name: /Team member invitations/i })).toBeVisible({
-      timeout: 20_000,
-    });
-    await expect(page.getByRole("link", { name: /^Add team member$/i })).toBeVisible();
+    await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?view=invited/, { timeout: 20_000 });
+    const invited = page.getByTestId("invites-view");
+    await expect(invited.getByText("new.dsp@example.test")).toBeVisible();
+    await expect(invited.getByText(/^Expired$/).first()).toBeVisible();
+    await expect(invited.getByRole("button", { name: /Resend/i })).toBeVisible();
+    await expect(invited.getByRole("button", { name: /Copy link/i })).toBeVisible();
+    await expect(invited.getByRole("button", { name: /^Send invite$/i })).toBeVisible();
+    await expect(invited.getByText(/Account created — no invite email sent/)).toBeVisible();
+    await expect(invited.getByText(/Not invited yet/)).toHaveCount(0);
+    await expect(invited.getByText(/Program Manager|Default preset|DSP/)).toHaveCount(0);
+    await invited.getByRole("button", { name: /Uninvite/i }).click();
+    await expect(page.getByRole("alertdialog")).toContainText(/Uninvite new\.dsp@example\.test\?/);
+    await shot(page, "team_members_invited_view");
+    await page.getByRole("button", { name: /^Cancel$/ }).click();
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
     await assertPageNotBlank(page, "invitations");
+  });
+
+  test("roster hides the Home filter when the org has no homes", async ({ page }) => {
+    await installHiveMocks(page, { persona: "admin", noHomes: true });
+    await gotoAdmin(page, "/dashboard/team-members?filter=bogus,review,missing");
+    await expect(page.getByRole("combobox", { name: "Position" })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("combobox", { name: "Supervisor" })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: "Home" })).toHaveCount(0);
+    // An old comma list keeps its first valid key, one filter on.
+    await expect(page.getByTestId("roster-filter-review")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("roster-filter-missing")).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    // Clicking another filter replaces it with a single value.
+    await page.getByTestId("roster-filter-missing").click();
+    await expect(page).toHaveURL(/filter=missing(&|$)/);
   });
 
   test("staff surfaces: teams→homes, roles", async ({ page }) => {
@@ -428,7 +584,9 @@ test.describe("Import team members and Finish setup", () => {
     }
     await expect(page.getByRole("option", { name: "Owner", exact: true })).toHaveCount(0);
     await expect(page.getByRole("option", { name: "Supervisor", exact: true })).toHaveCount(0);
-    await expect(page.getByRole("option", { name: "Committee Member", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("option", { name: "Committee Member", exact: true })).toHaveCount(
+      0,
+    );
     await shot(page, "add_several_access_level_desktop");
     await page.keyboard.press("Escape");
 
@@ -473,14 +631,18 @@ test.describe("Access levels screenshots", () => {
     await rosterCategory.scrollIntoViewIfNeeded();
     await expect(rosterCategory).toBeVisible();
     await expect(page.getByText("Hire & deactivate team members").first()).toBeVisible();
-    await expect(page.getByText(/Staff roster|Hire & deactivate staff|Staff compliance/i)).toHaveCount(0);
+    await expect(
+      page.getByText(/Staff roster|Hire & deactivate staff|Staff compliance/i),
+    ).toHaveCount(0);
     await shot(page, "access-presets", true);
 
     await gotoAdmin(page, "/dashboard/team-members");
     await page.getByRole("button", { name: /Import team members/i }).click();
-    await page.locator("#roster-paste").fill(
-      "Sam Rivera, sam.rivera@example.test, 555-0100, 2026-07-01, Direct Support, Team member\n",
-    );
+    await page
+      .locator("#roster-paste")
+      .fill(
+        "Sam Rivera, sam.rivera@example.test, 555-0100, 2026-07-01, Direct Support, Team member\n",
+      );
     await page.getByRole("button", { name: /Review pasted rows/i }).click();
     await expect(page.getByTestId("bulk-access-level")).toBeVisible();
     await page.getByTestId("bulk-access-level").click();

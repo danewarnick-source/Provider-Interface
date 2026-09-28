@@ -41,7 +41,13 @@ import {
   needsHireDate,
 } from "./evidence/due.ts";
 import { personRowSubtitle, rowSummaryChips } from "./evidence/matrix.ts";
-import { cellStatus, dueChipLabel, matrixChip, staffInitials } from "./evidence/status.ts";
+import {
+  cellStatus,
+  dueChipLabel,
+  itemHasCompletedEvidence,
+  matrixChip,
+  staffInitials,
+} from "./evidence/status.ts";
 import {
   EVIDENCE_LIABILITY_TEXT,
   EVIDENCE_PUSH_BODY,
@@ -654,6 +660,26 @@ describe("Evidence cell status", () => {
       "missing",
     );
     assert.equal(staffInitials("Dane Warnick"), "DW");
+  });
+
+  it("itemHasCompletedEvidence: upload needs a file, attestation needs attested_at", () => {
+    assert.equal(itemHasCompletedEvidence(item({}), null), false);
+    assert.equal(itemHasCompletedEvidence(item({}), file({})), true);
+    assert.equal(
+      itemHasCompletedEvidence(item({}), file({ storage_path: null, filename: null })),
+      false,
+    );
+    assert.equal(
+      itemHasCompletedEvidence(item({ evidence_type: "attestation" }), file({ attested_at: null })),
+      false,
+    );
+    assert.equal(
+      itemHasCompletedEvidence(
+        item({ evidence_type: "attestation" }),
+        file({ attested_at: "2026-09-01T00:00:00Z" }),
+      ),
+      true,
+    );
   });
 
   it("maps matrix chips from existing due and file fields", () => {
