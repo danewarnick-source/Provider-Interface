@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { unitsToHours, fmtHours, fmtUnits, UNITS_PER_HOUR } from "@/lib/billing-units";
+import { unitsToHours, fmtHours, fmtUnits, UNITS_PER_HOUR } from "@/lib/billing/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { Trash2, Plus } from "lucide-react";
 

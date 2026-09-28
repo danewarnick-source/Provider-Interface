@@ -10,7 +10,7 @@
  */
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { isBillingExempt } from "@/lib/billing-access";
+import { isBillingExempt } from "@/lib/billing/billing-access";
 import { readSupabaseAdminEnv } from "@/lib/supabase-public-env";
 import {
   paidOrgSubscriptionCore,
@@ -170,7 +170,7 @@ export async function activateSubscriptionFromCheckout(
   }
 
   try {
-    const { recordPaymentSuccess } = await import("@/lib/billing-lockout.server");
+    const { recordPaymentSuccess } = await import("@/lib/billing/billing-lockout.server");
     await recordPaymentSuccess(opts.orgId, opts.amountCents, opts.eventId);
   } catch {
     console.warn("[checkout] payment event write skipped", { code: "pay_event" });

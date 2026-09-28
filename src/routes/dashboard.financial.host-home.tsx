@@ -7,7 +7,7 @@ import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronLeft, ChevronRight, Home, Info } from "lucide-react";
-import { fmtUSD } from "@/lib/billing-units";
+import { fmtUSD } from "@/lib/billing/billing-units";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import {

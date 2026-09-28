@@ -12,7 +12,7 @@ import { useMobileShellContainer } from "@/components/staff-mobile/mobile-shell-
 
 type CapBehavior = "warn" | "acknowledge" | "auto_clock_out";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { unitsToHours, fmtHours, computeEntryUnits } from "@/lib/billing-units";
+import { unitsToHours, fmtHours, computeEntryUnits } from "@/lib/billing/billing-units";
 import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 
 /**

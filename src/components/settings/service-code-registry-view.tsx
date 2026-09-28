@@ -5,7 +5,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
-import { fmtUSD } from "@/lib/billing-units";
+import { fmtUSD } from "@/lib/billing/billing-units";
 
 type RegistryRow = {
   id: string;

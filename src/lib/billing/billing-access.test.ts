@@ -10,7 +10,7 @@ import {
   trainingRequiresCharge,
   entitlementsForOrg,
 } from "./billing-access.ts";
-import { isPublicSelfServeTier, normalizeTierId, PUBLIC_SELF_SERVE_TIERS } from "./hive-tiers.ts";
+import { isPublicSelfServeTier, normalizeTierId, PUBLIC_SELF_SERVE_TIERS } from "../hive-tiers.ts";
 import {
   isStripeLiveSecretKey,
   isStripeTestPublishableKey,
@@ -24,9 +24,9 @@ import {
   readStripeEnv,
   resolveAgencyCheckoutPricingModel,
   STRIPE_SANDBOX_PRICE_IDS,
-} from "./financial/stripe-config.ts";
-import { quoteHiveSubscription } from "./hive-pricing.ts";
-import { quotePiListSubscription, quoteSignupTrainingAddon } from "./pi-signup-pricing.ts";
+} from "../financial/stripe-config.ts";
+import { quoteHiveSubscription } from "../hive-pricing.ts";
+import { quotePiListSubscription, quoteSignupTrainingAddon } from "../pi-signup-pricing.ts";
 
 describe("billing-access", () => {
   it("True North name match is exempt even without the flag", () => {

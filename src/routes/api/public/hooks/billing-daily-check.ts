@@ -53,7 +53,7 @@ export const Route = createFileRoute("/api/public/hooks/billing-daily-check")({
 
         const startedAt = new Date().toISOString();
         const { checkAndLockPastDueAccounts, checkCardExpiryWarnings } = await import(
-          "@/lib/billing-lockout.server"
+          "@/lib/billing/billing-lockout.server"
         );
 
         const result: {

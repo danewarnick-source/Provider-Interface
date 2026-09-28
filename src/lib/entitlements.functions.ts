@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { entitlementsForOrg, isBillingExempt } from "@/lib/billing-access";
+import { entitlementsForOrg, isBillingExempt } from "@/lib/billing/billing-access";
 import type { AddonId, TierId } from "@/lib/hive-tiers";
 
 export interface MyEntitlements {

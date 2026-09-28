@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, BarChart3, Info } from "lucide-react";
-import { computeEntryUnits, fmtUSD } from "@/lib/billing-units";
+import { computeEntryUnits, fmtUSD } from "@/lib/billing/billing-units";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RequirePermission } from "@/components/rbac-guard";
 import {

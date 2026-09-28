@@ -7,10 +7,10 @@
  * so a client query returns "no row" after a successful pay and fail-closes.
  */
 
-import { getBillingLockFn } from "@/lib/billing-lock.functions";
-import { parseCheckoutReturnSearch } from "@/lib/billing-access";
+import { getBillingLockFn } from "@/lib/billing/billing-lock.functions";
+import { parseCheckoutReturnSearch } from "@/lib/billing/billing-access";
 
-export { BILLING_LOCK_ALLOWLIST, pathBypassesBillingLock } from "@/lib/billing-access";
+export { BILLING_LOCK_ALLOWLIST, pathBypassesBillingLock } from "@/lib/billing/billing-access";
 
 export function checkoutReturnFromLocation(search: string): ReturnType<typeof parseCheckoutReturnSearch> {
   return parseCheckoutReturnSearch(search);

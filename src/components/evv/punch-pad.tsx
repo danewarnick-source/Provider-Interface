@@ -38,7 +38,7 @@ import { toast } from "sonner";
 import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode, maskMemberId, padMemberId } from "@/lib/evv-codes";
 import { clientAuthorizedCodes } from "@/lib/assignment-codes";
 import { roundToQuarterHourISO } from "@/lib/time-rounding";
-import { computeEntryUnits } from "@/lib/billing-units";
+import { computeEntryUnits } from "@/lib/billing/billing-units";
 import { invalidateStaffCaseloadWork } from "@/lib/staff/staff-caseload-cache";
 import { EvvConsentGate } from "@/components/evv/consent-gate";
 import { evaluateShiftNote } from "@/lib/ai-coach.functions";

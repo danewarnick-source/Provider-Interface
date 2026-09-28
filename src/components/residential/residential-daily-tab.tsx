@@ -5,7 +5,7 @@ import { incidentInvolvesAnyClientOr } from "@/lib/incidents/incident-visibility
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { effectiveBillingTimes, isBillableForReview } from "@/lib/billing-units";
+import { effectiveBillingTimes, isBillableForReview } from "@/lib/billing/billing-units";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

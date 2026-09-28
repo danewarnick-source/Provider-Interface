@@ -95,8 +95,8 @@ import { PiBrand } from "@/components/brand/pi-brand";
 import { PiMark } from "@/components/pi-landing/pi-mark";
 
 import { BillingBanner } from "@/components/billing/billing-banner";
-import { orgDashboardIsLocked, pathBypassesBillingLock } from "@/lib/billing-lock-client";
-import { parseCheckoutReturnSearch } from "@/lib/billing-access";
+import { orgDashboardIsLocked, pathBypassesBillingLock } from "@/lib/billing/billing-lock-client";
+import { parseCheckoutReturnSearch } from "@/lib/billing/billing-access";
 import { persistActiveOrgId } from "@/lib/current-org";
 import { completeClientSignOut } from "@/lib/clients/client-sign-out";
 import { confirmCheckoutSessionFn } from "@/lib/financial/stripe-checkout.functions";

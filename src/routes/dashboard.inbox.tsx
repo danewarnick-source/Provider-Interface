@@ -14,7 +14,7 @@ import {
   type InboxMessageDetail,
   type InboxAttachment,
 } from "@/lib/inbox-messages.functions";
-import { listMyApprovalRequests, type ApprovalRequestRow } from "@/lib/billing-approvals.functions";
+import { listMyApprovalRequests, type ApprovalRequestRow } from "@/lib/billing/billing-approvals.functions";
 import { ApprovalDialog } from "@/components/billing/ApprovalDialog";
 
 

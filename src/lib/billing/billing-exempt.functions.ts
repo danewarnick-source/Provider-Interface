@@ -5,7 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { UNPAID_LOCK_REASON } from "@/lib/billing-access";
+import { UNPAID_LOCK_REASON } from "@/lib/billing/billing-access";
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 

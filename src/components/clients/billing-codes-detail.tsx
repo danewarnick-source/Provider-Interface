@@ -46,15 +46,15 @@ import {
   Loader2,
 } from "lucide-react";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { remainingUnitsForCode } from "@/lib/billing-units";
+import { remainingUnitsForCode } from "@/lib/billing/billing-units";
 import { displayMedicaidId } from "@/lib/medicaid-id";
 import { isVariableRateCode } from "@/lib/variable-rate-codes";
 import {
   parseClientBudgetDocument,
   type ParsedBudget,
   type ParsedBudgetRow,
-} from "@/lib/billing-budget-parse.functions";
-import { getAuthStatus, AuthStatusBadge } from "@/lib/billing-auth-status";
+} from "@/lib/billing/billing-budget-parse.functions";
+import { getAuthStatus, AuthStatusBadge } from "@/lib/billing/billing-auth-status";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 type Draft = { annual: string; rate: string; endDate: string };

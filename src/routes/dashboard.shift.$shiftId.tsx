@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { computeEntryUnits } from "@/lib/billing-units";
+import { computeEntryUnits } from "@/lib/billing/billing-units";
 import { invalidateStaffCaseloadWork } from "@/lib/staff/staff-caseload-cache";
 import { monthlySupportHoursTarget } from "@/lib/scheduling/hhs-visit";
 import { Button } from "@/components/ui/button";

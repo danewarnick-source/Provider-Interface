@@ -3,7 +3,7 @@ import { useClientCaps } from "@/hooks/use-client-caps";
 import { useClientUtilization, getUsage } from "@/hooks/use-client-utilization";
 import { useTimePaySettings } from "@/hooks/use-time-pay-settings";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { capTone, unitsToHours, fmtHours, fmtUnits } from "@/lib/billing-units";
+import { capTone, unitsToHours, fmtHours, fmtUnits } from "@/lib/billing/billing-units";
 
 function toneClasses(tone: "ok" | "warn" | "over") {
   if (tone === "over") return { bar: "bg-[#dc2626]", chip: "bg-[#fde2e2] text-[#991b1b]" };

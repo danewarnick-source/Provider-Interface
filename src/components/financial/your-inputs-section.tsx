@@ -30,7 +30,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { fmtUSD } from "@/lib/billing-units";
+import { fmtUSD } from "@/lib/billing/billing-units";
 import { Pencil, Plus, Trash2, UserPen } from "lucide-react";
 import { toast } from "sonner";
 

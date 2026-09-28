@@ -19,7 +19,7 @@ import { AUTH_CAPTCHA_REQUIRED, captchaTokenOption } from "@/lib/auth/auth-captc
 import { authRedirectUrl } from "@/lib/auth/auth-redirect";
 import { checkPasswordPwnedRange } from "@/lib/auth/signup-checks.functions";
 import { ensureSignupWorkspace } from "@/lib/auth/signup-workspace.functions";
-import { setBillingSmsPhoneAtSignup } from "@/lib/billing-sms.functions";
+import { setBillingSmsPhoneAtSignup } from "@/lib/billing/billing-sms.functions";
 import {
   SIGNUP_CONFIRM_CONTINUE_LABEL,
   SIGNUP_CONFIRM_EMAIL_MESSAGE,

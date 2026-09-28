@@ -27,7 +27,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requirePermission, requireLevel } from "@/lib/access/require";
-import { computeBillableEntryUnits } from "@/lib/billing-units";
+import { computeBillableEntryUnits } from "@/lib/billing/billing-units";
 import { gatewayFetch } from "@/lib/ai-bedrock.server";
 
 const SOURCES = [

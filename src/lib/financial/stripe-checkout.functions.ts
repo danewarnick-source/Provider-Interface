@@ -13,7 +13,7 @@ import {
   orgAccessIsLocked,
   trainingRequiresCharge,
   UNPAID_LOCK_REASON,
-} from "@/lib/billing-access";
+} from "@/lib/billing/billing-access";
 import {
   PAYMENTS_NOT_CONFIGURED,
   isStripeLiveSecretKey,

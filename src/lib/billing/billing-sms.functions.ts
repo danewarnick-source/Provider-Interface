@@ -6,7 +6,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { normalizeUSPhoneToE164 } from "./us-phone";
+import { normalizeUSPhoneToE164 } from "../us-phone";
 
 interface UpdateInput {
   organizationId: string;

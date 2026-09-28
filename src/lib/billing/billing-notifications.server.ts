@@ -69,7 +69,7 @@ async function getAgencyName(orgId: string): Promise<string | undefined> {
 
 async function getSenderFor(orgId: string): Promise<{ from: string; reply_to: string | null } | null> {
   try {
-    const { resolveOrgSender } = await import("./email.functions");
+    const { resolveOrgSender } = await import("../email.functions");
     // No acting person on billing mail. Missing reply-to still sends.
     return await resolveOrgSender(supabaseAdmin, orgId);
   } catch {

@@ -5,7 +5,7 @@ import { NectarBillingReadinessBar } from "@/components/billing/nectar-billing-r
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { useAccess } from "@/hooks/use-access";
 import type { Permission } from "@/lib/access/permission-keys";
-import { parseCheckoutReturnSearch } from "@/lib/billing-access";
+import { parseCheckoutReturnSearch } from "@/lib/billing/billing-access";
 
 
 function BillingError({ error }: { error: Error; reset: () => void }) {

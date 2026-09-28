@@ -118,7 +118,7 @@ describe("Payment and lock paths use VITE_ session env", () => {
   });
 
   it("getBillingLockFn reads the session first and does not require service role", () => {
-    const lock = readFileSync(new URL("../billing-lock.functions.ts", import.meta.url), "utf8");
+    const lock = readFileSync(new URL("../billing/billing-lock.functions.ts", import.meta.url), "utf8");
     assert.match(lock, /readSupabaseAdminEnv/);
     assert.match(lock, /readLockSub\(context\.supabase/);
     assert.match(lock, /VITE_SUPABASE_URL/);

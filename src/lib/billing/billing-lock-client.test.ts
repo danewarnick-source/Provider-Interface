@@ -9,10 +9,10 @@ function read(url: URL): string {
 
 describe("billing-lock-client", () => {
   it("login and lock gate persist True North over leftover test agencies", () => {
-    const login = read(new URL("../routes/login.tsx", import.meta.url));
+    const login = read(new URL("../../routes/login.tsx", import.meta.url));
     assert.match(login, /persistPreferredOrgFromRows/);
     assert.match(login, /resolveCurrentMembership/);
-    const dash = read(new URL("../routes/dashboard.tsx", import.meta.url));
+    const dash = read(new URL("../../routes/dashboard.tsx", import.meta.url));
     assert.match(dash, /persistActiveOrgId/);
   });
 
@@ -34,7 +34,7 @@ describe("billing-lock-client", () => {
   });
 
   it("billing-locked confirms Checkout before deciding to stay", () => {
-    const page = read(new URL("../routes/billing-locked.tsx", import.meta.url));
+    const page = read(new URL("../../routes/billing-locked.tsx", import.meta.url));
     const confirmAt = page.indexOf("confirmFn");
     const stayAt = page.indexOf("setState({");
     assert.ok(confirmAt > 0 && stayAt > confirmAt, "confirm must run before the paywall renders");
@@ -47,7 +47,7 @@ describe("billing-lock-client", () => {
   });
 
   it("Checkout success returns to the app with session_id so the gate can unlock", () => {
-    const checkout = read(new URL("./stripe-checkout.functions.ts", import.meta.url));
+    const checkout = read(new URL("../financial/stripe-checkout.functions.ts", import.meta.url));
     assert.match(
       checkout,
       /success_url: `\$\{origin\}\/dashboard\?checkout=success&session_id=\{CHECKOUT_SESSION_ID\}`/,

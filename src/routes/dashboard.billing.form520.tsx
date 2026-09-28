@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Copy, Download, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, Lock, FileSearch,
 } from "lucide-react";
-import { fmtHours, computeEntryUnits } from "@/lib/billing-units";
+import { fmtHours, computeEntryUnits } from "@/lib/billing/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { aggregateHourlyUnits, aggregateDailyDays } from "@/lib/accrual";
 import { RequireLevel } from "@/components/rbac-guard";

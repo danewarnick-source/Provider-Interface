@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { fmtUSD, fmtHours, fmtUnits } from "@/lib/billing-units";
+import { fmtUSD, fmtHours, fmtUnits } from "@/lib/billing/billing-units";
 import { Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
 import {
   getRevenueClientDetail,

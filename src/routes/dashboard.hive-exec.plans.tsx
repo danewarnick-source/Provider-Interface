@@ -11,7 +11,7 @@ import {
   getExecKpis,
   type CompanyRow,
 } from "@/lib/hive-exec.functions";
-import { setOrgBillingExemptFn } from "@/lib/billing-exempt.functions";
+import { setOrgBillingExemptFn } from "@/lib/billing/billing-exempt.functions";
 import { setOrgPricingScheduleFn } from "@/lib/hive-pricing.functions";
 import {
   TIER_CATALOG,

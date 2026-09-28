@@ -83,7 +83,7 @@ import { ApprovalDialog } from "@/components/billing/ApprovalDialog";
 import {
   lookupApprovalRequestsForFields,
   type ApprovalRequestRow,
-} from "@/lib/billing-approvals.functions";
+} from "@/lib/billing/billing-approvals.functions";
 
 /** Dirty-field flush registry — saves in-progress editors before step changes. */
 type FlushFn = () => Promise<unknown>;

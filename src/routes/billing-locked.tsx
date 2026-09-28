@@ -10,7 +10,7 @@ import {
   createSubscriptionCheckoutFn,
   getBillingStatusFn,
 } from "@/lib/financial/stripe-checkout.functions";
-import { parseCheckoutReturnSearch } from "@/lib/billing-access";
+import { parseCheckoutReturnSearch } from "@/lib/billing/billing-access";
 import {
   isComplimentaryMembership,
   persistActiveOrgId,

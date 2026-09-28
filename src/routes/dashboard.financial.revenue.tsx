@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { fmtUSD } from "@/lib/billing-units";
+import { fmtUSD } from "@/lib/billing/billing-units";
 import {
   ChevronDown,
   ChevronRight,

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   listPendingHiveApprovals,
   type ApprovalRequestRow,
-} from "@/lib/billing-approvals.functions";
+} from "@/lib/billing/billing-approvals.functions";
 import { ApprovalDialog } from "@/components/billing/ApprovalDialog";
 
 export const Route = createFileRoute("/dashboard/hive-exec/billing-approvals")({

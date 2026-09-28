@@ -203,7 +203,7 @@ export async function lockAccount(orgId: string, reason: string): Promise<{ ok: 
     org = retry.data as typeof org;
   }
   if (org) {
-    const { isBillingExempt } = await import("@/lib/billing-access");
+    const { isBillingExempt } = await import("@/lib/billing/billing-access");
     if (
       isBillingExempt({
         billingExempt: org.billing_exempt === true,

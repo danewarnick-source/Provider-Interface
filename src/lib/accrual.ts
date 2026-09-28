@@ -31,7 +31,7 @@
  * views. Daily-rate revenue comes only from hhs_daily_records_v.
  */
 
-import { computeEntryUnits, effectiveBillingTimes, isBillableForReview } from "@/lib/billing-units";
+import { computeEntryUnits, effectiveBillingTimes, isBillableForReview } from "@/lib/billing/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
 
 export type TimesheetRow = {

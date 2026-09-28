@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { isBillingExempt } from "@/lib/billing-access";
+import { isBillingExempt } from "@/lib/billing/billing-access";
 
 async function ensureExecutive(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

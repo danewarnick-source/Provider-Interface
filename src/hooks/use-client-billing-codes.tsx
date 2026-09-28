@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "./use-org";
-import { billingCodesForLiveClients } from "@/lib/billing-codes-live-clients";
+import { billingCodesForLiveClients } from "@/lib/billing/billing-codes-live-clients";
 
 export type ClientBillingCode = {
   id: string;

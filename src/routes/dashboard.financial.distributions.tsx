@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Copy, Sparkles, Info, ShieldCheck, AlertTriangle, Save } from "lucide-react";
-import { computeEntryUnits, fmtUSD } from "@/lib/billing-units";
+import { computeEntryUnits, fmtUSD } from "@/lib/billing/billing-units";
 import { toast } from "sonner";
 import { RequireLevel } from "@/components/rbac-guard";
 import {

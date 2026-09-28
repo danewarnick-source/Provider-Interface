@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Users2, Info } from "lucide-react";
-import { unitsToHours, fmtHours, fmtUSD } from "@/lib/billing-units";
+import { unitsToHours, fmtHours, fmtUSD } from "@/lib/billing/billing-units";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import {

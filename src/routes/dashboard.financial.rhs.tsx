@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Home, Info } from "lucide-react";
-import { fmtUSD } from "@/lib/billing-units";
+import { fmtUSD } from "@/lib/billing/billing-units";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RequirePermission } from "@/components/rbac-guard";
 import { getRhsCodes, getRhsClients, getRhsDays } from "@/lib/financial/financial-rhs.functions";

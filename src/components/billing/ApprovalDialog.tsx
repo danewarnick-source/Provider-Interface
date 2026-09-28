@@ -39,7 +39,7 @@ import {
   type ApprovalMessageRow,
   type ApprovalRequestRow,
   type SenderRole,
-} from "@/lib/billing-approvals.functions";
+} from "@/lib/billing/billing-approvals.functions";
 
 export interface ApprovalDialogProps {
   open: boolean;

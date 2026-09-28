@@ -5,7 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { isBillingExempt } from "@/lib/billing-access";
+import { isBillingExempt } from "@/lib/billing/billing-access";
 import {
   FOUNDING_ORG_CAP,
   foundingEndsAtFrom,
