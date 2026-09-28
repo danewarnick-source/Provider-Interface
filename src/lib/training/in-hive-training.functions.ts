@@ -13,7 +13,7 @@ import {
   type SegmentProof,
   parseInHiveCertificateRecord,
   type ThirtyDayCertificateRecord,
-} from "@/lib/in-hive-training";
+} from "@/lib/training/in-hive-training";
 
 export async function loadInHiveTopicProgress(
   userId: string,

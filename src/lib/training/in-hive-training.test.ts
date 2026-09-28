@@ -50,7 +50,7 @@ import {
 import { examQuestionsFor } from "./in-hive-training-exams.ts";
 import { ANNUAL_CE_COURSE_ID, ANNUAL_CE_OBLIGATION_TITLE } from "./in-hive-training-annual-ce.ts";
 import { PCT_COURSE_ID, PCT_OBLIGATION_TITLE } from "./in-hive-training-pct.ts";
-import { PCT_CLIENT_OBLIGATION_TITLE } from "./clients/client-form-obligations.ts";
+import { PCT_CLIENT_OBLIGATION_TITLE } from "../clients/client-form-obligations.ts";
 
 const Q: ExamQuestion[] = [
   {
@@ -584,7 +584,7 @@ describe("obligation and certificate write path", () => {
 describe("staff vs admin auditor export (source)", () => {
   it("removes the staff Download auditor export and keeps the saved-on-file notice", () => {
     const player = readFileSync(
-      fileURLToPath(new URL("../components/training/in-hive-course-player.tsx", import.meta.url)),
+      fileURLToPath(new URL("../../components/training/in-hive-course-player.tsx", import.meta.url)),
       "utf8",
     );
     assert.doesNotMatch(player, /Download auditor export/);
@@ -598,19 +598,19 @@ describe("staff vs admin auditor export (source)", () => {
   it("keeps auditor export on the admin Staff file only", () => {
     const exportBtn = readFileSync(
       fileURLToPath(
-        new URL("../components/compliance/admin-exam-export-button.tsx", import.meta.url),
+        new URL("../../components/compliance/admin-exam-export-button.tsx", import.meta.url),
       ),
       "utf8",
     );
     const staffFile = readFileSync(
-      fileURLToPath(new URL("../components/compliance/staff-file-panel.tsx", import.meta.url)),
+      fileURLToPath(new URL("../../components/compliance/staff-file-panel.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(exportBtn, /Auditor export/);
     assert.match(exportBtn, /AdminExamExportButton/);
     assert.match(staffFile, /AdminExamExportButton/);
     const obligations = readFileSync(
-      fileURLToPath(new URL("../routes/dashboard.my-obligations.tsx", import.meta.url)),
+      fileURLToPath(new URL("../../routes/dashboard.my-obligations.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(obligations, /Review course/);
@@ -626,7 +626,7 @@ describe("staff vs admin auditor export (source)", () => {
     assert.match(progressFns, /loadInHiveCourseCertificate/);
     assert.doesNotMatch(progressFns, /topicCodes\.map\(async/);
     const certUi = readFileSync(
-      fileURLToPath(new URL("../components/training/in-hive-certificate.tsx", import.meta.url)),
+      fileURLToPath(new URL("../../components/training/in-hive-certificate.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(certUi, /already on the staff file/);
@@ -635,7 +635,7 @@ describe("staff vs admin auditor export (source)", () => {
 
   it("gates a failed segment behind Retake this segment and does not flash the answer key", () => {
     const engine = readFileSync(
-      fileURLToPath(new URL("../components/training/hive-training-engine.tsx", import.meta.url)),
+      fileURLToPath(new URL("../../components/training/hive-training-engine.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(engine, /Retake this segment/);
@@ -643,7 +643,7 @@ describe("staff vs admin auditor export (source)", () => {
     assert.match(engine, /shouldPersistResumeStep/);
     assert.doesNotMatch(engine, /THAT IS RIGHT/);
     const diagrams = readFileSync(
-      fileURLToPath(new URL("../components/training/in-hive-diagrams.tsx", import.meta.url)),
+      fileURLToPath(new URL("../../components/training/in-hive-diagrams.tsx", import.meta.url)),
       "utf8",
     );
     assert.doesNotMatch(diagrams, /Picture:/i);

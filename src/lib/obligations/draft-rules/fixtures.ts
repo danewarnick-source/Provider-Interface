@@ -7,7 +7,7 @@
  * retention) — do not invent a fix.
  */
 
-import { THIRTY_DAY_SOW_LETTERS, THIRTY_DAY_TOPIC_CITE } from "../../in-hive-training.ts";
+import { THIRTY_DAY_SOW_LETTERS, THIRTY_DAY_TOPIC_CITE } from "../../training/in-hive-training.ts";
 import { linkWorkbookSource, WORKBOOK_SOURCE_INDEX } from "./source.ts";
 import type {
   CompletionRoute,

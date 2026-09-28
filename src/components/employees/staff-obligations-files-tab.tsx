@@ -41,10 +41,10 @@ import {
   type ObligationFileStatus,
 } from "@/lib/staff/staff-obligation-files";
 import { isNativePlatformEvidence } from "@/lib/training/cert-review";
-import { inHiveCourseIdForTitle } from "@/lib/in-hive-training";
-import { loadInHiveCourseCertificate } from "@/lib/in-hive-training.functions";
+import { inHiveCourseIdForTitle } from "@/lib/training/in-hive-training";
+import { loadInHiveCourseCertificate } from "@/lib/training/in-hive-training.functions";
 import { InHiveCertificate } from "@/components/training/in-hive-certificate";
-import type { ThirtyDayCertificateRecord } from "@/lib/in-hive-training";
+import type { ThirtyDayCertificateRecord } from "@/lib/training/in-hive-training";
 import { RecordOverrideDialog } from "@/components/compliance/record-override-dialog";
 import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
 import {

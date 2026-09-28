@@ -4,7 +4,7 @@
  */
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { THIRTY_DAY_OBLIGATION_TITLE } from "@/lib/in-hive-training";
+import { THIRTY_DAY_OBLIGATION_TITLE } from "./in-hive-training.ts";
 import {
   CPR_OBLIGATION_TITLES,
   MANDT_OBLIGATION_TITLES,

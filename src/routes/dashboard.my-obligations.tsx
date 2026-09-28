@@ -31,13 +31,13 @@ import {
   staffCompletedTabEmptyCopy,
   staffCourseProgressLabel,
   topicCodesForCourse,
-} from "@/lib/in-hive-training";
-import { ANNUAL_CE_COURSE_ID } from "@/lib/in-hive-training-annual-ce";
-import { PCT_COURSE_ID } from "@/lib/in-hive-training-pct";
+} from "@/lib/training/in-hive-training";
+import { ANNUAL_CE_COURSE_ID } from "@/lib/training/in-hive-training-annual-ce";
+import { PCT_COURSE_ID } from "@/lib/training/in-hive-training-pct";
 import {
   completedCodesFromProgress,
   loadInHiveCourseProgress,
-} from "@/lib/in-hive-training.functions";
+} from "@/lib/training/in-hive-training.functions";
 import {
   CLIENT_FORM_LABEL,
   clientFormKindForTitle,

@@ -7,7 +7,7 @@
  */
 
 import { TRAINING_PRICE_CENTS, trainingPriceCentsForSku } from "../hive-pricing.ts";
-import { THIRTY_DAY_OBLIGATION_TITLE } from "../in-hive-training.ts";
+import { THIRTY_DAY_OBLIGATION_TITLE } from "./in-hive-training.ts";
 
 export const TRAINING_CLASS_TYPES = ["cpr_first_aid", "mandt", "thirty_day", "package"] as const;
 export type TrainingClassType = (typeof TRAINING_CLASS_TYPES)[number];

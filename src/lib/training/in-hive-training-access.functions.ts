@@ -17,7 +17,7 @@ import {
   thirtyDayOrgIsComped,
   type ThirtyDayAccessReason,
   type ThirtyDayOrgRow,
-} from "@/lib/in-hive-training-access";
+} from "@/lib/training/in-hive-training-access";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

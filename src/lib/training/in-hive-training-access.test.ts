@@ -82,7 +82,7 @@ describe("thirty-day paywall", () => {
       ANNUAL_CE_COURSE_ID,
     ]);
     const courseRoute = readFileSync(
-      new URL("../routes/dashboard.my-obligations_.course.$instanceId.tsx", import.meta.url),
+      new URL("../../routes/dashboard.my-obligations_.course.$instanceId.tsx", import.meta.url),
       "utf8",
     );
     assert.match(courseRoute, /courseUsesTrainingSeat/);

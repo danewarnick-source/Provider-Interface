@@ -7,7 +7,7 @@
  * Stripe `pack` is still CPR + 30-day + Mandt; that seat unlocks this family.
  */
 
-import { isBillingExempt } from "./billing/billing-access.ts";
+import { isBillingExempt } from "../billing/billing-access.ts";
 import { ANNUAL_CE_COURSE_ID } from "./in-hive-training-annual-ce.ts";
 import { PCT_COURSE_ID } from "./in-hive-training-pct.ts";
 

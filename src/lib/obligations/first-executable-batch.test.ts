@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { inHiveCourseIdForTitle } from "../in-hive-training.ts";
+import { inHiveCourseIdForTitle } from "../training/in-hive-training.ts";
 import { staffTasksWithoutElementDuplicates } from "../staff/staff-my-tasks.ts";
 import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import { UNKNOWN_STAFF_DUTY_FACTS, type StaffDutyFacts } from "./duty-applicability.ts";

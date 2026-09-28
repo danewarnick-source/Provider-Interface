@@ -1,6 +1,6 @@
 import { ANNUAL_CE_COURSE_ID } from "./in-hive-training-annual-ce.ts";
-import type { ExamQuestion } from "./in-hive-training";
-import type { InHiveCourseId } from "./in-hive-training";
+import type { ExamQuestion } from "@/lib/training/in-hive-training";
+import type { InHiveCourseId } from "@/lib/training/in-hive-training";
 
 const thirtyDayExam: ExamQuestion[] = [
   {

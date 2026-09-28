@@ -10,8 +10,8 @@ import {
   type AttestPayload,
   type Topic,
 } from "@/components/training/hive-training-engine";
-import { ABI_TOPICS } from "@/lib/in-hive-training-abi";
-import { examQuestionsFor, examTitleFor } from "@/lib/in-hive-training-exams";
+import { ABI_TOPICS } from "@/lib/training/in-hive-training-abi";
+import { examQuestionsFor, examTitleFor } from "@/lib/training/in-hive-training-exams";
 import {
   EXAM_MAX_ATTEMPTS,
   EXAM_PASS_RATIO,
@@ -35,20 +35,20 @@ import {
   type ExamQuestion,
   type InHiveCourseId,
   type SegmentProof,
-} from "@/lib/in-hive-training";
-import { ANNUAL_CE_COURSE_ID } from "@/lib/in-hive-training-annual-ce";
+} from "@/lib/training/in-hive-training";
+import { ANNUAL_CE_COURSE_ID } from "@/lib/training/in-hive-training-annual-ce";
 import {
   PCT_COURSE_ID,
   pctTopicsFromPublic,
   type PctPublicLesson,
   type PctPublicQuizItem,
-} from "@/lib/in-hive-training-pct";
+} from "@/lib/training/in-hive-training-pct";
 import {
   getPctCoursePublic,
   getPctExamPublic,
   gradePctFormativeFn,
   submitPctExamFn,
-} from "@/lib/in-hive-training-pct.functions";
+} from "@/lib/training/in-hive-training-pct.functions";
 import { InHiveCertificate } from "@/components/training/in-hive-certificate";
 import {
   insertInHiveCourseCertificate,
@@ -57,7 +57,7 @@ import {
   loadInHiveCourseProgress,
   loadInHiveExamAttempts,
   saveInHiveTopicProgress,
-} from "@/lib/in-hive-training.functions";
+} from "@/lib/training/in-hive-training.functions";
 import { recordCompletion } from "@/lib/company-obligations.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -2,13 +2,13 @@
 // Course shell (My Obligations) lives in in-hive-course-player.tsx.
 
 import { useEffect, useState } from "react";
-import { O_STEPS, P_STEPS } from "@/lib/in-hive-training-thirty-day-extra";
+import { O_STEPS, P_STEPS } from "@/lib/training/in-hive-training-thirty-day-extra";
 import {
   SCENARIO_STEPS_BY_CODE,
   THIRTY_DAY_SAS_TOPICS,
-} from "@/lib/in-hive-training-thirty-day-sas";
+} from "@/lib/training/in-hive-training-thirty-day-sas";
 import { PI_THEME } from "@/lib/pi-theme";
-import { choiceFollowUp, scoreSegmentGate, shouldPersistResumeStep, shuffleCopy, SEGMENT_GATE_PASS, SEGMENT_GATE_TOTAL } from "@/lib/in-hive-training";
+import { choiceFollowUp, scoreSegmentGate, shouldPersistResumeStep, shuffleCopy, SEGMENT_GATE_PASS, SEGMENT_GATE_TOTAL } from "@/lib/training/in-hive-training";
 import { TrainingDiagram, type DiagramId } from "@/components/training/in-hive-diagrams";
 import { SafeHtml } from "@/components/safe-html";
 import {

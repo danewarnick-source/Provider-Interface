@@ -9,10 +9,10 @@ import { getObligationInstanceContext } from "@/lib/company-obligations.function
 import {
   inHiveCourseIdForTitle,
   lastExamResetAt,
-} from "@/lib/in-hive-training";
-import { thirtyDayCourseAccessFn } from "@/lib/in-hive-training-access.functions";
-import { courseUsesTrainingSeat, thirtyDayOrgIsComped } from "@/lib/in-hive-training-access";
-import { ANNUAL_CE_COURSE_ID } from "@/lib/in-hive-training-annual-ce";
+} from "@/lib/training/in-hive-training";
+import { thirtyDayCourseAccessFn } from "@/lib/training/in-hive-training-access.functions";
+import { courseUsesTrainingSeat, thirtyDayOrgIsComped } from "@/lib/training/in-hive-training-access";
+import { ANNUAL_CE_COURSE_ID } from "@/lib/training/in-hive-training-annual-ce";
 import { supabase } from "@/integrations/supabase/client";
 import { ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";

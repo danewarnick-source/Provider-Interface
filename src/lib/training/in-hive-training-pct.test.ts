@@ -16,7 +16,7 @@ import {
   type PctContentFile,
 } from "./in-hive-training-pct.ts";
 
-const jsonPath = fileURLToPath(new URL("./person-centered-training-content.json", import.meta.url));
+const jsonPath = fileURLToPath(new URL("../person-centered-training-content.json", import.meta.url));
 const content = JSON.parse(readFileSync(jsonPath, "utf8")) as PctContentFile;
 
 const LESSON_TITLES = [
@@ -109,11 +109,11 @@ describe("PCT server grading", () => {
 describe("PCT client lock", () => {
   it("does not import the answer-key JSON from the course shell or staff card", () => {
     const player = readFileSync(
-      new URL("../components/training/in-hive-course-player.tsx", import.meta.url),
+      new URL("../../components/training/in-hive-course-player.tsx", import.meta.url),
       "utf8",
     );
     const card = readFileSync(
-      new URL("../routes/dashboard.my-obligations.tsx", import.meta.url),
+      new URL("../../routes/dashboard.my-obligations.tsx", import.meta.url),
       "utf8",
     );
     assert.doesNotMatch(player, /person-centered-training-content\.json/);

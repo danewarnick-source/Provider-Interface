@@ -2,9 +2,9 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatExamExportCsv, inHiveCourseIdForTitle } from "@/lib/in-hive-training";
-import { examTitleFor } from "@/lib/in-hive-training-exams";
-import { loadInHiveExamAttempts } from "@/lib/in-hive-training.functions";
+import { formatExamExportCsv, inHiveCourseIdForTitle } from "@/lib/training/in-hive-training";
+import { examTitleFor } from "@/lib/training/in-hive-training-exams";
+import { loadInHiveExamAttempts } from "@/lib/training/in-hive-training.functions";
 
 function downloadCsv(filename: string, csv: string) {
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });

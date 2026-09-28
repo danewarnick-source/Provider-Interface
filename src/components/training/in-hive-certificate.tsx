@@ -1,7 +1,7 @@
 import { CheckCircle2, Circle, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PI_THEME } from "@/lib/pi-theme";
-import type { ThirtyDayCertificateRecord } from "@/lib/in-hive-training";
+import type { ThirtyDayCertificateRecord } from "@/lib/training/in-hive-training";
 
 export function InHiveCertificate({
   record,

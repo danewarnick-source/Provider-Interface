@@ -7,7 +7,7 @@ import { OrgPersonnelFileMatrix } from "@/components/personnel-file/org-personne
 import { AdminExamExportButton } from "@/components/compliance/admin-exam-export-button";
 import { PacketNextActionCard, PacketScopeNote } from "@/components/compliance/packet-next-action";
 import { listPendingCertReviews, type CertReviewRow } from "@/lib/company-obligations.functions";
-import { inHiveCourseIdForTitle } from "@/lib/in-hive-training";
+import { inHiveCourseIdForTitle } from "@/lib/training/in-hive-training";
 import { isAdminLevel } from "@/lib/access/levels";
 
 export function StaffFilePanel() {

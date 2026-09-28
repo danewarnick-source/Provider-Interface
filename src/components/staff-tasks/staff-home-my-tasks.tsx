@@ -10,12 +10,12 @@ import {
 } from "@/lib/company-obligations.functions";
 import { isPackSentinel, obligationIsRequired } from "@/lib/obligations/obligation-packs";
 import { isUnlinkedFormDuty, isFormUuid } from "@/lib/resolve-obligation-form";
-import { inHiveCourseIdForTitle, topicCodesForCourse } from "@/lib/in-hive-training";
+import { inHiveCourseIdForTitle, topicCodesForCourse } from "@/lib/training/in-hive-training";
 import { clientFormKindForTitle } from "@/lib/clients/client-form-obligations";
 import {
   completedCodesFromProgress,
   loadInHiveCourseProgress,
-} from "@/lib/in-hive-training.functions";
+} from "@/lib/training/in-hive-training.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { toDisplayNameCase } from "@/lib/person-name";
 import { indexCompletionsByInstance, isCorrectionRequestedNote } from "@/lib/training/cert-review";

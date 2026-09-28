@@ -24,11 +24,11 @@ describe("annual CE placeholder", () => {
     assert.doesNotMatch(lib, /correct:/);
     assert.doesNotMatch(lib, /lessons:/);
     const player = readFileSync(
-      new URL("../components/training/in-hive-course-player.tsx", import.meta.url),
+      new URL("../../components/training/in-hive-course-player.tsx", import.meta.url),
       "utf8",
     );
     const route = readFileSync(
-      new URL("../routes/dashboard.my-obligations_.course.$instanceId.tsx", import.meta.url),
+      new URL("../../routes/dashboard.my-obligations_.course.$instanceId.tsx", import.meta.url),
       "utf8",
     );
     assert.match(player, /Coming soon/);

@@ -7,7 +7,7 @@ import {
   filterDuplicateElementTasks,
 } from "../obligations/catalog-live-bridge.ts";
 import { dueLabel } from "./staff-obligation-files.ts";
-import { inHiveCourseIdForTitle, staffCourseProgressLabel } from "../in-hive-training.ts";
+import { inHiveCourseIdForTitle, staffCourseProgressLabel } from "../training/in-hive-training.ts";
 import { clientFormKindForTitle } from "../clients/client-form-obligations.ts";
 import { isFormUuid } from "../resolve-obligation-form.ts";
 import { staffSurfaceReviewKind } from "../training/cert-review.ts";
