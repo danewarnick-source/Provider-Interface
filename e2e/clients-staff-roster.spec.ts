@@ -146,14 +146,21 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(rosterName(page, "Harvey Alisa")).toBeVisible();
     await expect(rosterName(page, "Tom Jones")).toBeVisible();
     await expect(rosterName(page, "Dane Warnick")).toBeVisible();
-    // Preset column: preset name plus an Owner / Admin tag when the level isn't staff.
-    await expect(page.locator("table").getByText("Program Manager").first()).toBeVisible();
+    // Position column (two, then +N); Owner / Admin badge by the name; no preset anywhere.
     await expect(
-      page
-        .locator("table")
-        .getByText(/^Owner$/)
-        .first(),
+      page.locator("table").getByRole("columnheader", { name: "Position" }),
     ).toBeVisible();
+    await expect(page.locator("table").getByRole("columnheader", { name: "Preset" })).toHaveCount(
+      0,
+    );
+    await expect(
+      page.locator("table").getByText("Operations Director, Direct Support Professional"),
+    ).toBeVisible();
+    await expect(page.locator("table").getByText("+1", { exact: true })).toBeVisible();
+    await expect(page.locator("table").getByTestId("level-badge").first()).toHaveText(
+      /^(Owner|Admin)$/,
+    );
+    await expect(page.locator("table").getByText(/Program Manager|Full access/)).toHaveCount(0);
     await expect(page.locator("table").getByText("Maple House").first()).toBeVisible();
     // Evidence column: same labels as the Evidence page data, including No pack yet.
     await expect(page.locator("table").getByText("All current").first()).toBeVisible();
@@ -188,12 +195,45 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page).toHaveURL(/q=probert/);
     await expect(nameLink(page, "Harvey Alisa")).toHaveCount(0);
     await expect(nameLink(page, "Jake Probert")).toBeVisible();
+    await expect(page.getByTestId("roster-showing")).toHaveText(/Showing 1 of 5 · Clear filter/);
     await page.getByLabel("Clear search").click();
-    await page.getByRole("button", { name: /Missing items/i }).click();
-    await expect(page).toHaveURL(/filter=missing/);
+    await expect(page.getByTestId("roster-showing")).toHaveCount(0);
+
+    // Filter buttons: one at a time, solid when on, click again to clear.
+    const missingBtn = page.getByTestId("roster-filter-missing");
+    const expiringBtn = page.getByTestId("roster-filter-expiring");
+    await missingBtn.click();
+    await expect(page).toHaveURL(/filter=missing(&|$)/);
+    await expect(missingBtn).toHaveAttribute("aria-pressed", "true");
+    await expect(missingBtn).toHaveClass(/bg-primary/);
     await expect(nameLink(page, "Harvey Alisa")).toBeVisible();
     await expect(nameLink(page, "Jake Probert")).toHaveCount(0);
-    await page.getByRole("button", { name: /Missing items/i }).click();
+    await expect(page.getByTestId("roster-showing")).toHaveText(/Showing 1 of 5/);
+    await expiringBtn.click();
+    await expect(page).toHaveURL(/filter=expiring(&|$)/);
+    await expect(missingBtn).toHaveAttribute("aria-pressed", "false");
+    await expect(nameLink(page, "Tom Jones")).toBeVisible();
+    await expect(nameLink(page, "Harvey Alisa")).toHaveCount(0);
+    await expiringBtn.click();
+    await expect(page).not.toHaveURL(/filter=/);
+    await expect(nameLink(page, "Jake Probert")).toBeVisible();
+    // A button with nobody in it is disabled and says why.
+    const reviewBtn = page.getByTestId("roster-filter-review");
+    await expect(reviewBtn).toBeDisabled();
+    await reviewBtn.locator("..").hover();
+    await expect(page.getByRole("tooltip")).toContainText("Nothing is awaiting review.");
+    // Missing info lists what's missing on hover.
+    await page.locator("table").getByTestId("missing-info-chip").first().hover();
+    await expect(page.getByRole("tooltip")).toContainText("Date of birth, address");
+    // Position dropdown narrows the list; Clear filter resets everything.
+    await page.getByRole("combobox", { name: "Position" }).click();
+    await page.getByRole("option", { name: "Host Home Provider" }).click();
+    await expect(page).toHaveURL(/position=hhp/);
+    await expect(page.getByTestId("roster-showing")).toHaveText(/Showing 2 of 5/);
+    await page.getByRole("button", { name: "Clear filter" }).click();
+    await expect(page).not.toHaveURL(/position=/);
+    await expect(page.getByRole("combobox", { name: "Preset" })).toHaveCount(0);
+    await expect(page.getByRole("combobox", { name: "Home" })).toBeVisible();
     await page.getByRole("button", { name: /^Evidence/ }).click();
     await expect(page).toHaveURL(/sort=evidence/);
 
@@ -234,6 +274,29 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await page.keyboard.press("Escape");
     await shot(page, "team_members_roster_mobile");
     await page.setViewportSize({ width: 1280, height: 720 });
+
+    // Leave the roster filtered so the profile's back buttons can bring it back.
+    await missingBtn.click();
+    await page.getByRole("button", { name: /^Evidence/ }).click();
+    await expect(page).toHaveURL(/filter=missing/);
+    await nameLink(page, "Harvey Alisa").click();
+    await page.waitForURL(new RegExp(`/dashboard/team-members/${STAFF.harvey.id}`));
+    // Tabs replace history; both back buttons and browser Back return to the same list.
+    await page.getByRole("tab", { name: /Team member file/i }).click();
+    await expect(page).toHaveURL(/tab=file/);
+    await page.getByRole("tab", { name: /^Activity$/i }).click();
+    await expect(page).toHaveURL(/tab=activity/);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
+    await expect(page.getByTestId("roster-filter-missing")).toHaveAttribute("aria-pressed", "true");
+    await nameLink(page, "Harvey Alisa").click();
+    await page.getByTestId("profile-back").click();
+    await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
+    await expect(page).toHaveURL(/sort=-?evidence/);
+    await nameLink(page, "Harvey Alisa").click();
+    await page.getByTestId("profile-back-to-list").click();
+    await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
+    await page.getByRole("button", { name: "Clear filter" }).click();
 
     await rosterName(page, "Jake Probert").click();
     await page.waitForURL(new RegExp(`/dashboard/team-members/${STAFF.jake.id}`));
@@ -328,12 +391,32 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(invited.getByRole("button", { name: /Resend/i })).toBeVisible();
     await expect(invited.getByRole("button", { name: /Copy link/i })).toBeVisible();
     await expect(invited.getByRole("button", { name: /^Send invite$/i })).toBeVisible();
+    await expect(invited.getByText(/Account created — no invite email sent/)).toBeVisible();
+    await expect(invited.getByText(/Not invited yet/)).toHaveCount(0);
+    await expect(invited.getByText(/Program Manager|Default preset|DSP/)).toHaveCount(0);
     await invited.getByRole("button", { name: /Uninvite/i }).click();
     await expect(page.getByRole("alertdialog")).toContainText(/Uninvite new\.dsp@example\.test\?/);
     await shot(page, "team_members_invited_view");
     await page.getByRole("button", { name: /^Cancel$/ }).click();
     await expect(page.getByRole("button", { name: /Invite by email/i })).toHaveCount(0);
     await assertPageNotBlank(page, "invitations");
+  });
+
+  test("roster hides the Home filter when the org has no homes", async ({ page }) => {
+    await installHiveMocks(page, { persona: "admin", noHomes: true });
+    await gotoAdmin(page, "/dashboard/team-members?filter=bogus,review,missing");
+    await expect(page.getByRole("combobox", { name: "Position" })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("combobox", { name: "Supervisor" })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: "Home" })).toHaveCount(0);
+    // An old comma list keeps its first valid key, one filter on.
+    await expect(page.getByTestId("roster-filter-review")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("roster-filter-missing")).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    // Clicking another filter replaces it with a single value.
+    await page.getByTestId("roster-filter-missing").click();
+    await expect(page).toHaveURL(/filter=missing(&|$)/);
   });
 
   test("staff surfaces: teams→homes, roles", async ({ page }) => {

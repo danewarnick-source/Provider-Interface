@@ -1,22 +1,23 @@
 import { getRouteApi } from "@tanstack/react-router";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2 } from "lucide-react";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAccess } from "@/hooks/use-access";
-import { listTeamRoster } from "@/lib/team-members/roster.functions";
+import { listTeamRoster, rosterOrgHasHomes } from "@/lib/team-members/roster.functions";
 import { listTeamInvites } from "@/lib/team-members/invites.functions";
 import {
   baseRosterRows,
   filterRosterRows,
-  parseRosterFilters,
+  parseRosterFilter,
   parseRosterSort,
   rosterFilterCounts,
   rosterPickOptions,
+  rosterPositionOptions,
+  rosterQueryIsNarrowed,
   rosterQueryKey,
   rosterViewCounts,
-  serializeRosterFilters,
   serializeRosterSort,
   sortRosterRows,
   teamInvitesQueryKey,
@@ -33,13 +34,14 @@ import { RosterCards } from "./roster-cards";
 import { InvitesView } from "./invites-view";
 import { InactiveView } from "./inactive-view";
 import { useRosterActions, useRowActionKeys } from "./use-roster-actions";
+import { rememberRosterSearch } from "@/lib/team-members/roster-return";
 
 const rosterRoute = getRouteApi("/dashboard/team-members/");
 
 /**
  * Team Members roster — the page body behind /dashboard/team-members.
  * One server call (listTeamRoster) loads every row; the Invited view comes
- * from listTeamInvites. Toolbar state (view, q, filter, home, preset,
+ * from listTeamInvites. Toolbar state (view, q, filter, position, home,
  * supervisor, sort) lives in the route's search params.
  */
 export function TeamRosterPage() {
@@ -49,6 +51,8 @@ export function TeamRosterPage() {
   const seesHiring = canCategory("staff_hiring", "view");
   const search = rosterRoute.useSearch();
   const navigate = rosterRoute.useNavigate();
+  // The profile's back buttons return to this exact list.
+  useEffect(() => rememberRosterSearch(search), [search]);
 
   const listRosterFn = useServerFn(listTeamRoster);
   const listInvitesFn = useServerFn(listTeamInvites);
@@ -62,6 +66,13 @@ export function TeamRosterPage() {
     queryKey: teamInvitesQueryKey(orgId),
     queryFn: () => listInvitesFn({ data: { organizationId: orgId! } }),
   });
+  // Home filter only when the org has homes (a failed check keeps it shown).
+  const hasHomesFn = useServerFn(rosterOrgHasHomes);
+  const hasHomes = useQuery({
+    enabled: !!orgId,
+    queryKey: ["teams", orgId, "roster-has-homes"],
+    queryFn: () => hasHomesFn({ data: { organizationId: orgId! } }),
+  });
   const actionKeys = useRowActionKeys();
   const { onAction, dialogs } = useRosterActions(orgId);
 
@@ -73,18 +84,22 @@ export function TeamRosterPage() {
     seesHiring && (search.view === "invited" || search.view === "inactive")
       ? search.view
       : "active";
-  const filters = parseRosterFilters(search.filter);
+  const filter = view === "active" ? parseRosterFilter(search.filter) : null;
   const sort = parseRosterSort(search.sort);
+  // A hidden Home dropdown never filters.
+  const showHome = hasHomes.data !== false;
   const query = {
     view: view === "inactive" ? "inactive" : "active",
     q: search.q,
-    home: search.home,
-    preset: search.preset,
+    home: showHome ? search.home : undefined,
+    position: search.position,
     supervisor: search.supervisor,
   } as const;
   const base = baseRosterRows(rows, query);
-  const visible = sortRosterRows(filterRosterRows(rows, { ...query, filters }), sort);
+  const visible = sortRosterRows(filterRosterRows(rows, { ...query, filter }), sort);
   const counts = { ...rosterViewCounts(rows), invited: inviteRows.length };
+  const viewTotal = view === "inactive" ? counts.inactive : counts.active;
+  const narrowed = view !== "invited" && rosterQueryIsNarrowed({ ...query, filter });
 
   const onChange = useCallback(
     (patch: RosterSearchPatch) => {
@@ -94,9 +109,9 @@ export function TeamRosterPage() {
           const next = { ...prev };
           if ("view" in patch) next.view = patch.view === "active" ? undefined : patch.view;
           if ("q" in patch) next.q = patch.q?.trim() ? patch.q : undefined;
-          if ("filters" in patch) next.filter = serializeRosterFilters(patch.filters ?? []);
+          if ("filter" in patch) next.filter = patch.filter ?? undefined;
           if ("home" in patch) next.home = patch.home;
-          if ("preset" in patch) next.preset = patch.preset;
+          if ("position" in patch) next.position = patch.position;
           if ("supervisor" in patch) next.supervisor = patch.supervisor;
           return next;
         },
@@ -104,6 +119,14 @@ export function TeamRosterPage() {
     },
     [navigate],
   );
+  const clearAll = () =>
+    onChange({
+      q: "",
+      filter: null,
+      home: undefined,
+      position: undefined,
+      supervisor: undefined,
+    });
   const onSort = (key: RosterSortKey) =>
     void navigate({
       replace: true,
@@ -131,21 +154,18 @@ export function TeamRosterPage() {
           showInvited={seesHiring}
           showInactive={seesHiring}
           q={search.q ?? ""}
-          filters={filters}
+          filter={filter}
           filterCounts={rosterFilterCounts(base)}
           home={search.home}
-          preset={search.preset}
+          position={search.position}
           supervisor={search.supervisor}
           homeOptions={rosterPickOptions(
             activeRows,
             (r) => r.homeId,
             (r) => r.homeName,
           )}
-          presetOptions={rosterPickOptions(
-            activeRows,
-            (r) => r.presetId,
-            (r) => r.presetName,
-          )}
+          showHome={showHome}
+          positionOptions={rosterPositionOptions(activeRows)}
           supervisorOptions={rosterPickOptions(
             activeRows,
             (r) => r.supervisorId,
@@ -153,6 +173,24 @@ export function TeamRosterPage() {
           )}
           onChange={onChange}
         />
+
+        {narrowed && !roster.isLoading && (
+          <p
+            className="text-xs text-muted-foreground"
+            data-testid="roster-showing"
+            aria-live="polite"
+          >
+            Showing {visible.length} of {viewTotal}
+            {" · "}
+            <button
+              type="button"
+              onClick={clearAll}
+              className="font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Clear filter
+            </button>
+          </p>
+        )}
 
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           {view === "invited" ? (

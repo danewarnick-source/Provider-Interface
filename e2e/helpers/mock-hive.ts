@@ -20,6 +20,7 @@ import {
   ORG_NAME,
   PENDING_INVITE,
   ROSTER_EVIDENCE,
+  ROSTER_POSITIONS,
   STAFF,
   STAFF_LIST,
   TEAMS,
@@ -52,6 +53,8 @@ export type MockOptions = {
   noAssignments?: boolean;
   /** Mark one roster profile custom_attributes.needs_setup so Finish setup can render. */
   needsSetupUserId?: string;
+  /** rosterOrgHasHomes answers false (the roster hides its Home filter). */
+  noHomes?: boolean;
 };
 
 type Row = Record<string, unknown>;
@@ -769,7 +772,7 @@ function teamRosterRows(): Row[] {
       jobTitle: s.jobTitle,
       accessLevel: level,
       presetId: level === "owner" ? null : PRESET_ID[level],
-      presetName: level === "owner" ? null : level === "admin" ? "Program Manager" : "DSP",
+      positions: ROSTER_POSITIONS[s.id] ?? [],
       homeId: teamId,
       homeName: TEAMS.find((t) => t.id === teamId)?.team_name ?? null,
       supervisorId: supervisor?.id ?? null,
@@ -852,6 +855,7 @@ function serverFnPayload(url: string, body: string): unknown {
   const fnBlob = `${fn}\n${url}\n${body}`;
   if (/listTeamRoster/i.test(fn)) return teamRosterRows();
   if (/listTeamInvites/i.test(fn)) return teamInviteRows();
+  if (/rosterOrgHasHomes/i.test(fn)) return !activeMockOpts.noHomes;
   if (/resetMemberPassword/i.test(fn)) {
     return { login: "jake.probert@example.test", password: "Mock-Temp-Pass1" };
   }

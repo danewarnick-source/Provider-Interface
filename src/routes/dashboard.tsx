@@ -116,6 +116,7 @@ import {
   shouldLeaveCognitoLoadingOverlay,
   type BootstrapFailureKind,
 } from "@/lib/cognito-login-gate";
+import { createSamePageGate } from "@/lib/route-gate";
 
 function DashboardShellError({ error }: { error: Error; reset: () => void }) {
   return (
@@ -142,6 +143,8 @@ function DashboardShellError({ error }: { error: Error; reset: () => void }) {
   );
 }
 
+const dashboardGate = createSamePageGate();
+
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [{ title: "Dashboard — Provider Interface" }],
@@ -149,8 +152,10 @@ export const Route = createFileRoute("/dashboard")({
   // Lockout gate — runs on every dashboard navigation. Paid+active orgs stay
   // in the app. Unpaid / missing org_subscriptions rows go to /billing-locked.
   // Admins keep access to the billing/subscription page so they can pay.
-  beforeLoad: async ({ location }) => {
+  // Entering a page runs every check; a search-param-only change skips them.
+  beforeLoad: async ({ location, cause }) => {
     if (typeof window === "undefined") return; // SSR has no session
+    if (dashboardGate.skip(cause, location.pathname)) return;
     try {
       const returned = parseCheckoutReturnSearch(window.location.search);
 

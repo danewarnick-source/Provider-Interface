@@ -115,7 +115,7 @@ describe("Team Members addresses", () => {
       "q",
       "filter",
       "home",
-      "preset",
+      "position",
       "supervisor",
       "sort",
       "add",

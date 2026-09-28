@@ -23,6 +23,7 @@ import {
   lastLoginByUserId,
   missingInfoFor,
   profileNeedsSetup,
+  resolvePositions,
   summarizeEvidence,
   type RosterEvidenceFile,
   type RosterEvidenceItem,
@@ -82,10 +83,11 @@ type ProfileRow = {
   department: string | null;
   worker_type: string | null;
   custom_attributes: unknown;
+  staff_type_keys: string[] | null;
 };
 
 const PROFILE_SELECT =
-  "id, full_name, first_name, last_name, email, phone, employee_id, photo_path, position, team_id, hire_date, start_date, date_of_birth, home_address, emergency_contact_name, emergency_contact_phone, must_change_password, account_status, is_active, department, worker_type, custom_attributes";
+  "id, full_name, first_name, last_name, email, phone, employee_id, photo_path, position, team_id, hire_date, start_date, date_of_birth, home_address, emergency_contact_name, emergency_contact_phone, must_change_password, account_status, is_active, department, worker_type, custom_attributes, staff_type_keys";
 
 export function displayNameOf(p: ProfileRow | undefined): {
   display: string;
@@ -183,9 +185,6 @@ export const listTeamRoster = createServerFn({ method: "POST" })
           .filter((id): id is string => !!id),
       ),
     ];
-    const presetIds = [
-      ...new Set(members.map((m) => m.access_preset_id).filter((id): id is string => !!id)),
-    ];
     const teamIds = [
       ...new Set(
         userIds.map((id) => profiles.get(id)?.team_id ?? null).filter((id): id is string => !!id),
@@ -199,16 +198,8 @@ export const listTeamRoster = createServerFn({ method: "POST" })
       ),
     ];
 
-    const [presets, teams, supervisors, signIns, invites, items] = await Promise.all([
-      selectIn<{ id: string; name: string }>(
-        (ids) =>
-          admin
-            .from("access_presets")
-            .select("id, name")
-            .eq("organization_id", orgId)
-            .in("id", ids),
-        presetIds,
-      ),
+    const [staffTypes, teams, supervisors, signIns, invites, items] = await Promise.all([
+      admin.from("staff_types").select("key, label").eq("organization_id", orgId),
       selectIn<{ id: string; team_name: string | null }>(
         (ids) =>
           admin.from("teams").select("id, team_name").eq("organization_id", orgId).in("id", ids),
@@ -257,7 +248,10 @@ export const listTeamRoster = createServerFn({ method: "POST" })
       items.map((i) => i.id),
     );
 
-    const presetName = new Map(presets.map((p) => [p.id, p.name]));
+    // A failed staff_types read still shows the saved values as-is.
+    const positionTypes = ((staffTypes.data ?? []) as Array<{ key: string; label: string | null }>)
+      .filter((t) => !!t.key)
+      .map((t) => ({ key: t.key, label: t.label?.trim() || t.key }));
     const teamName = new Map(teams.map((t) => [t.id, t.team_name ?? null]));
     const supervisorName = new Map(
       supervisors.map((p) => [p.id, displayNameOf(p as ProfileRow).display]),
@@ -301,10 +295,7 @@ export const listTeamRoster = createServerFn({ method: "POST" })
         jobTitle: m.job_title?.trim() || p?.position?.trim() || null,
         accessLevel: level,
         presetId: level === "owner" ? null : m.access_preset_id,
-        presetName:
-          level === "owner" || !m.access_preset_id
-            ? null
-            : (presetName.get(m.access_preset_id) ?? null),
+        positions: resolvePositions(p?.staff_type_keys, positionTypes),
         homeId: p?.team_id ?? null,
         homeName: p?.team_id ? (teamName.get(p.team_id) ?? null) : null,
         supervisorId,
@@ -323,4 +314,24 @@ export const listTeamRoster = createServerFn({ method: "POST" })
           : null,
       };
     });
+  });
+
+/** Does the org have any homes (teams)? Hides the roster's Home filter when not. */
+export const rosterOrgHasHomes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { organizationId: string }) =>
+    z.object({ organizationId: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<boolean> => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) throw new Error("Not signed in.");
+    await requireCategory(supabase as Sb, userId, data.organizationId, "staff_roster", "view");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await (supabaseAdmin as unknown as Sb)
+      .from("teams")
+      .select("id")
+      .eq("organization_id", data.organizationId)
+      .limit(1);
+    if (error) throw new Error(error.message);
+    return (rows ?? []).length > 0;
   });

@@ -30,7 +30,7 @@ import {
   type TeamInviteRow,
 } from "@/lib/team-members/roster";
 
-/** Invited view: pending invites with expiry, then people who were never invited. */
+/** Invited view: pending invites with expiry, then accounts that never got an invite email. */
 export function InvitesView({
   organizationId,
   rows,
@@ -151,18 +151,24 @@ function InviteRowItem({
           )}
         </div>
         <div className="truncate pl-6 text-xs text-muted-foreground">
-          {row.name ? `${row.email} · ` : ""}
-          {row.presetName ?? (row.accessLevel === "owner" ? "Owner" : "Default preset")}
+          {row.name ? row.email : ""}
+          {row.accessLevel !== "staff" && (
+            <>
+              {row.name ? " · " : ""}
+              {row.accessLevel === "owner" ? "Owner" : "Admin"}
+            </>
+          )}
+          {row.name || row.accessLevel !== "staff" ? " · " : ""}
           {row.status === "pending" ? (
             <>
-              {" · "}Invited {formatRosterDate(row.createdAt)}
+              Invited {formatRosterDate(row.createdAt)}
               {" · "}
               <span className={row.expired ? "text-destructive" : undefined}>
                 {row.expired ? "Expired" : "Expires"} {formatRosterDate(row.expiresAt)}
               </span>
             </>
           ) : (
-            " · Not invited yet"
+            "Account created — no invite email sent"
           )}
         </div>
       </div>
@@ -193,7 +199,7 @@ function InviteRowItem({
               </Button>
             </>
           ) : (
-            <Button variant="outline" size="sm" disabled={busy} onClick={() => act.mutate("send")}>
+            <Button size="sm" disabled={busy} onClick={() => act.mutate("send")}>
               <Mail className="mr-1 h-3.5 w-3.5" /> Send invite
             </Button>
           )}

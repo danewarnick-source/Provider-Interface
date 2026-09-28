@@ -136,6 +136,66 @@ export const MISSING_INFO_KEYS = [
 ] as const;
 export type MissingInfoKey = (typeof MISSING_INFO_KEYS)[number];
 
+export const MISSING_INFO_LABEL: Record<MissingInfoKey, string> = {
+  hire_date: "Start date",
+  date_of_birth: "Date of birth",
+  address: "Address",
+  emergency_contact: "Emergency contact",
+};
+
+/** Hover text for the Missing info chip: "Date of birth, emergency contact". */
+export function missingInfoText(keys: readonly MissingInfoKey[]): string {
+  const words = MISSING_INFO_KEYS.filter((k) => keys.includes(k)).map((k, i) => {
+    const w = MISSING_INFO_LABEL[k];
+    return i === 0 ? w : w.toLowerCase();
+  });
+  return words.join(", ");
+}
+
+export type RosterPosition = { key: string; label: string };
+
+const slug = (v: string) =>
+  v
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+/**
+ * profiles.staff_type_keys -> Position chips. Most rows hold staff_types keys
+ * ("dsp"); the Add dialog saves labels ("Executive Director"). Both resolve to
+ * the org's staff_types row by key, then by label, then by slug, so the same
+ * position always gets one key. Unknown values keep their text.
+ */
+export function resolvePositions(
+  saved: readonly string[] | null | undefined,
+  staffTypes: readonly RosterPosition[],
+): RosterPosition[] {
+  const byKey = new Map(staffTypes.map((t) => [t.key.toLowerCase(), t]));
+  const byLabel = new Map(staffTypes.map((t) => [t.label.trim().toLowerCase(), t]));
+  const out = new Map<string, RosterPosition>();
+  for (const raw of saved ?? []) {
+    const v = typeof raw === "string" ? raw.trim() : "";
+    if (!v) continue;
+    const lower = v.toLowerCase();
+    const hit = byKey.get(lower) ?? byLabel.get(lower) ?? byKey.get(slug(v));
+    const pos = hit ? { key: hit.key, label: hit.label } : { key: slug(v) || v, label: v };
+    if (!out.has(pos.key)) out.set(pos.key, pos);
+  }
+  return [...out.values()];
+}
+
+/** Position cell: up to two labels, then "+N". */
+export function positionSummary(positions: readonly RosterPosition[]): {
+  shown: string[];
+  more: number;
+} {
+  return {
+    shown: positions.slice(0, 2).map((p) => p.label),
+    more: Math.max(0, positions.length - 2),
+  };
+}
+
 export type RosterEvidenceSummary = {
   hasPack: boolean;
   total: number;
@@ -158,8 +218,10 @@ export type RosterRow = {
   photoPath: string | null;
   jobTitle: string | null;
   accessLevel: "owner" | "admin" | "staff";
+  /** Only for the Finish setup pre-fill. The roster never shows a preset. */
   presetId: string | null;
-  presetName: string | null;
+  /** From profiles.staff_type_keys, labelled by staff_types. */
+  positions: RosterPosition[];
   homeId: string | null;
   homeName: string | null;
   supervisorId: string | null;
@@ -285,7 +347,7 @@ export function missingInfoFor(p: MissingInfoProfile | null | undefined): Missin
   return out;
 }
 
-/** Job titles that are really old role names. The Preset column carries access. */
+/** Job titles that are really old role names. Access shows as the Owner / Admin badge. */
 const LEGACY_ROSTER_ROLES = new Set([
   "platform admin",
   "company admin",
@@ -322,15 +384,33 @@ export const ROSTER_FILTER_LABEL: Record<RosterFilter, string> = {
   missing_info: "Missing info",
 };
 
-/** ?filter=missing,review -> ["missing","review"]; unknown keys dropped. */
-export function parseRosterFilters(raw: string | null | undefined): RosterFilter[] {
-  const parts = (raw ?? "").split(",").map((s) => s.trim());
-  return ROSTER_FILTERS.filter((f) => parts.includes(f));
+/** Tooltip on a filter button with nobody in it. */
+export const ROSTER_FILTER_EMPTY: Record<RosterFilter, string> = {
+  no_pack: "Everyone has an evidence pack.",
+  expiring: "No one is expiring soon.",
+  missing: "No one is missing items.",
+  review: "Nothing is awaiting review.",
+  missing_info: "No one is missing info.",
+};
+
+/**
+ * ?filter= holds one filter. Old links carried a comma list
+ * ("bogus,missing,review"): the first valid key wins.
+ */
+export function parseRosterFilter(raw: string | null | undefined): RosterFilter | null {
+  for (const part of (raw ?? "").split(",")) {
+    const f = part.trim() as RosterFilter;
+    if (ROSTER_FILTERS.includes(f)) return f;
+  }
+  return null;
 }
 
-export function serializeRosterFilters(filters: readonly RosterFilter[]): string | undefined {
-  const keep = ROSTER_FILTERS.filter((f) => filters.includes(f));
-  return keep.length ? keep.join(",") : undefined;
+/** Clicking a button: the active one clears, any other replaces it. */
+export function toggleRosterFilter(
+  current: RosterFilter | null,
+  clicked: RosterFilter,
+): RosterFilter | null {
+  return current === clicked ? null : clicked;
 }
 
 export function rowMatchesFilter(row: RosterRow, filter: RosterFilter): boolean {
@@ -364,14 +444,32 @@ function matchesPick(value: string | null, pick: string | null | undefined): boo
   return value === pick;
 }
 
+/** Same, for a multi-value field: any value matches. */
+function matchesPickAny(values: readonly string[], pick: string | null | undefined): boolean {
+  if (!pick) return true;
+  if (pick === "none") return values.length === 0;
+  return values.includes(pick);
+}
+
 export type RosterQuery = {
   view: "active" | "inactive";
   q?: string | null;
-  filters?: readonly RosterFilter[];
+  filter?: RosterFilter | null;
   home?: string | null;
-  preset?: string | null;
+  position?: string | null;
   supervisor?: string | null;
 };
+
+/** True when anything narrows the list — shows "Showing X of Y · Clear filter". */
+export function rosterQueryIsNarrowed(query: RosterQuery): boolean {
+  return !!(
+    query.filter ||
+    (query.q ?? "").trim() ||
+    query.home ||
+    query.position ||
+    query.supervisor
+  );
+}
 
 /** Everything but the chips — so chip counts reflect the rest of the toolbar. */
 export function baseRosterRows(rows: readonly RosterRow[], query: RosterQuery): RosterRow[] {
@@ -380,14 +478,17 @@ export function baseRosterRows(rows: readonly RosterRow[], query: RosterQuery): 
       (query.view === "active" ? r.active : !r.active) &&
       rowMatchesSearch(r, query.q) &&
       matchesPick(r.homeId, query.home) &&
-      matchesPick(r.presetId, query.preset) &&
+      matchesPickAny(
+        r.positions.map((p) => p.key),
+        query.position,
+      ) &&
       matchesPick(r.supervisorId, query.supervisor),
   );
 }
 
 export function filterRosterRows(rows: readonly RosterRow[], query: RosterQuery): RosterRow[] {
-  const filters = query.filters ?? [];
-  return baseRosterRows(rows, query).filter((r) => filters.every((f) => rowMatchesFilter(r, f)));
+  const f = query.filter;
+  return baseRosterRows(rows, query).filter((r) => !f || rowMatchesFilter(r, f));
 }
 
 export function rosterFilterCounts(rows: readonly RosterRow[]): Record<RosterFilter, number> {
@@ -461,7 +562,8 @@ export const ROSTER_CSV_HEADER = [
   "Name",
   "Email",
   "Phone",
-  "Preset",
+  "Position",
+  "Access",
   "Home",
   "Supervisor",
   "Start date",
@@ -484,7 +586,8 @@ export function rosterCsv(rows: readonly RosterRow[]): string {
         r.displayName,
         r.email,
         r.phone,
-        r.presetName ?? LEVEL_WORD[r.accessLevel],
+        r.positions.map((p) => p.label).join("; "),
+        LEVEL_WORD[r.accessLevel],
         r.homeName ?? "",
         r.supervisorName ?? "",
         r.hireDate ?? "",
@@ -705,6 +808,22 @@ export function rowActionKeys(
   }
   if (hiring && !self) out.push("deactivate");
   return out;
+}
+
+/** Position dropdown: every position someone holds, sorted; "None" when someone has none. */
+export function rosterPositionOptions(
+  rows: readonly RosterRow[],
+): Array<{ value: string; label: string }> {
+  const seen = new Map<string, string>();
+  let hasNone = false;
+  for (const r of rows) {
+    if (!r.positions.length) hasNone = true;
+    for (const p of r.positions) seen.set(p.key, p.label);
+  }
+  const out = [...seen]
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  return hasNone ? [...out, { value: "none", label: "None" }] : out;
 }
 
 /** Dropdown options from the rows themselves, sorted; "None" when someone has nothing set. */

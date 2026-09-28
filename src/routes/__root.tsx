@@ -18,6 +18,7 @@ import { inviteTokenFromSearchStr } from "@/lib/join-invite";
 import { getPublicRuntimeBlob } from "@/lib/aws/env";
 import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
 import { persistActiveOrgId } from "@/lib/current-org";
+import { createSamePageGate } from "@/lib/route-gate";
 
 function NotFoundComponent() {
   return (
@@ -87,8 +88,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+// Search-param-only navigations (roster filter, sort, search) skip the checks.
+const rootGate = createSamePageGate();
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async ({ location, cause }) => {
+    if (rootGate.skip(cause, location.pathname)) return;
     // Enforce must_change_password BEFORE any child route renders.
     // Running here (not in a useEffect) means the Outlet never renders
     // protected content — the redirect fires synchronously during navigation.

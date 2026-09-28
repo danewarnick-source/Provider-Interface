@@ -10,13 +10,16 @@ import { TeamRosterPage } from "@/components/team-members/roster/team-roster-pag
  * The router JSON-parses `?add=1` to the number 1 and would quote a string
  * "1" back into the address, so links pass the number and the page reads the
  * validated string "1".
+ *
+ * `filter` is one key; an old comma list keeps its first valid key
+ * (parseRosterFilter). The retired `preset` param is dropped.
  */
 type RosterSearchInput = {
   view?: "active" | "invited" | "inactive";
   q?: string;
   filter?: string;
   home?: string;
-  preset?: string;
+  position?: string;
   supervisor?: string;
   sort?: string;
   add?: 1 | "1";
@@ -31,7 +34,7 @@ const rosterSearch = z.object({
   q: text,
   filter: text,
   home: text,
-  preset: text,
+  position: text,
   supervisor: text,
   sort: text,
   add: flag,

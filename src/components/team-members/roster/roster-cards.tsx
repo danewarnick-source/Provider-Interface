@@ -6,7 +6,14 @@ import { PersonAvatar } from "@/components/person/person-avatar";
 import type { RosterActionKey, RosterRow } from "@/lib/team-members/roster";
 import { EvidencePill } from "./evidence-status";
 import { RowActionsSheet, type RosterActionHandler } from "./row-actions";
-import { LevelTag, NeedsSetupChip, PendingFirstLoginChip } from "./roster-table";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import {
+  LevelTag,
+  MissingInfoChip,
+  NeedsSetupChip,
+  PendingFirstLoginChip,
+  PositionText,
+} from "./roster-table";
 
 /** Roster below 768 px: tap a card for the profile, ⋯ for the actions sheet. */
 export function RosterCards({
@@ -21,7 +28,7 @@ export function RosterCards({
   const navigate = useNavigate();
   const [sheetRow, setSheetRow] = useState<RosterRow | null>(null);
   return (
-    <>
+    <TooltipProvider delayDuration={150}>
       <ul className="block divide-y divide-border md:hidden">
         {rows.map((r) => (
           <li key={r.memberId}>
@@ -53,17 +60,16 @@ export function RosterCards({
               <div className="min-w-0 flex-1 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="truncate font-semibold">{r.displayName}</span>
+                  <LevelTag level={r.accessLevel} />
                   {r.needsSetup && <NeedsSetupChip />}
                 </div>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <span className="truncate">
-                    {r.presetName ?? (r.accessLevel === "owner" ? "Full access" : "—")}
-                  </span>
-                  <LevelTag level={r.accessLevel} />
+                <div className="truncate text-xs">
+                  <PositionText row={r} />
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <EvidencePill row={r} />
                   {r.mustChangePassword && <PendingFirstLoginChip />}
+                  <MissingInfoChip row={r} />
                 </div>
               </div>
               <Button
@@ -88,6 +94,6 @@ export function RosterCards({
         onAction={onAction}
         onClose={() => setSheetRow(null)}
       />
-    </>
+    </TooltipProvider>
   );
 }

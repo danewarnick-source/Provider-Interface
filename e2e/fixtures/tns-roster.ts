@@ -160,6 +160,19 @@ export const ROSTER_EVIDENCE: Record<string, typeof EVIDENCE_NONE> = {
   [ADMIN_USER_ID]: EVIDENCE_NONE,
 };
 
+/** Roster Position chips (profiles.staff_type_keys labelled by staff_types). */
+export const ROSTER_POSITIONS: Record<string, Array<{ key: string; label: string }>> = {
+  [STAFF.jake.id]: [{ key: "dsp", label: "Direct Support Professional" }],
+  [STAFF.harvey.id]: [
+    { key: "operations_director", label: "Operations Director" },
+    { key: "dsp", label: "Direct Support Professional" },
+    { key: "hhp", label: "Host Home Provider" },
+  ],
+  [STAFF.tom.id]: [{ key: "hhp", label: "Host Home Provider" }],
+  [STAFF.dane.id]: [{ key: "executive_director", label: "Executive Director" }],
+  [ADMIN_USER_ID]: [],
+};
+
 /** Mocked org_member_last_sign_ins: the roster admin has never signed in. */
 export const LAST_SIGN_IN: Record<string, string | null> = {
   [ADMIN_USER_ID]: null,

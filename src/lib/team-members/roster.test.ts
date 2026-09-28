@@ -13,21 +13,26 @@ import {
   filterRosterRows,
   isInviteExpired,
   missingInfoFor,
-  parseRosterFilters,
+  missingInfoText,
+  parseRosterFilter,
   parseRosterSort,
+  positionSummary,
+  resolvePositions,
   rosterCsv,
   rosterCsvFileName,
   rosterFilterCounts,
   rosterJobLine,
   rosterPickOptions,
+  rosterPositionOptions,
+  rosterQueryIsNarrowed,
   rosterQueryKey,
   rosterViewCounts,
   rowActionKeys,
-  serializeRosterFilters,
   serializeRosterSort,
   sortRosterRows,
   summarizeEvidence,
   teamInvitesQueryKey,
+  toggleRosterFilter,
   toggleRosterSort,
   type InviteSourceMember,
   type RosterEvidenceSummary,
@@ -126,6 +131,7 @@ describe("Team roster page source lock", () => {
     "team-roster-page.tsx",
     "roster-header.tsx",
     "roster-toolbar.tsx",
+    "roster-filter-buttons.tsx",
     "roster-table.tsx",
     "roster-cards.tsx",
     "row-actions.tsx",
@@ -175,9 +181,16 @@ describe("Team roster page source lock", () => {
 
   it("table: the new columns, sortable headers, and the old Login/Status/Caseload are gone", () => {
     const src = roster("roster-table.tsx");
-    for (const col of ["Preset", "Home · Supervisor", "Start date", "Last login"]) {
+    for (const col of ["Position", "Home · Supervisor", "Start date", "Last login"]) {
       assert.match(src, new RegExp(col));
     }
+    // No preset name anywhere on the roster; Owner / Admin is a badge by the name.
+    for (const f of ROSTER_FILES) {
+      assert.doesNotMatch(roster(f), /presetName|Full access|>Preset<|"Preset"/, f);
+    }
+    assert.match(src, /<LevelTag level=\{r\.accessLevel\} \/>\s*\{r\.mustChangePassword/);
+    assert.match(src, /MissingInfoChip/);
+    assert.match(src, /missingInfoText/);
     for (const key of ["name", "evidence", "start", "login"]) {
       assert.match(src, new RegExp(`sortKey="${key}"`));
     }
@@ -228,6 +241,29 @@ describe("Team roster page source lock", () => {
     assert.match(src, /resendInvitation/);
     assert.match(src, /revokeInvitation/);
     assert.match(src, /Send invite/);
+    assert.match(src, /Account created — no invite email sent/);
+    assert.doesNotMatch(src, /Not invited yet/);
+    // Send invite is the primary button (no outline variant).
+    assert.match(
+      src,
+      /<Button size="sm" disabled=\{busy\} onClick=\{\(\) => act\.mutate\("send"\)\}>/,
+    );
+  });
+
+  it("filters: one at a time, solid when on, disabled with a reason at 0", () => {
+    const src = roster("roster-filter-buttons.tsx");
+    assert.match(src, /toggleRosterFilter\(filter, f\)/);
+    assert.match(src, /bg-primary text-primary-foreground/);
+    assert.match(src, /disabled=\{empty\}/);
+    assert.match(src, /ROSTER_FILTER_EMPTY\[f\]/);
+    const toolbar = roster("roster-toolbar.tsx");
+    assert.match(toolbar, /label="Position"/);
+    assert.match(toolbar, /\{showHome && \(/);
+    assert.doesNotMatch(toolbar, /label="Preset"/);
+    const page = roster("team-roster-page.tsx");
+    assert.match(page, /Showing \{visible\.length\} of \{viewTotal\}/);
+    assert.match(page, /Clear filter/);
+    assert.match(page, /rememberRosterSearch\(search\)/);
   });
 
   it("reset password: server-generated, shown once, roster invalidated, no browser generator", () => {
@@ -571,7 +607,7 @@ function row(p: Partial<RosterRow>): RosterRow {
     jobTitle: null,
     accessLevel: "staff",
     presetId: "p-dsp",
-    presetName: "DSP",
+    positions: [{ key: "dsp", label: "Direct Support Professional" }],
     homeId: null,
     homeName: null,
     supervisorId: null,
@@ -619,7 +655,11 @@ const ROWS: RosterRow[] = [
     supervisorId: "a",
     supervisorName: "Alex Kim",
     presetId: "p-pm",
-    presetName: "Program Manager",
+    positions: [
+      { key: "operations_director", label: "Operations Director" },
+      { key: "dsp", label: "Direct Support Professional" },
+      { key: "hhp", label: "Host Home Provider" },
+    ],
     accessLevel: "admin",
   }),
   row({ userId: "d", memberId: "md", displayName: "Dana Pine", active: false }),
@@ -642,17 +682,21 @@ describe("roster toolbar: search, filters, dropdowns, counts", () => {
     assert.deepEqual(rosterViewCounts(ROWS), { active: 3, inactive: 1 });
   });
 
-  it("chips AND together; unknown chip keys are dropped; counts follow the rest of the toolbar", () => {
-    assert.deepEqual(parseRosterFilters("missing,bogus,expiring"), ["expiring", "missing"]);
-    assert.deepEqual(parseRosterFilters(undefined), []);
-    assert.equal(serializeRosterFilters([]), undefined);
-    assert.equal(serializeRosterFilters(["missing_info", "no_pack"]), "no_pack,missing_info");
-    const f = (filters: ReturnType<typeof parseRosterFilters>) =>
-      filterRosterRows(ROWS, { view: "active", filters }).map((r) => r.userId);
-    assert.deepEqual(f(["no_pack"]), ["b"]);
-    assert.deepEqual(f(["missing", "expiring"]), ["c"]);
-    assert.deepEqual(f(["missing_info"]), ["b"]);
-    assert.deepEqual(f(["review"]), []);
+  it("one filter at a time; old comma lists keep the first valid key; counts follow the rest of the toolbar", () => {
+    assert.equal(parseRosterFilter("missing"), "missing");
+    assert.equal(parseRosterFilter("bogus,expiring,missing"), "expiring");
+    assert.equal(parseRosterFilter("bogus"), null);
+    assert.equal(parseRosterFilter(undefined), null);
+    assert.equal(toggleRosterFilter(null, "missing"), "missing");
+    assert.equal(toggleRosterFilter("missing", "review"), "review");
+    assert.equal(toggleRosterFilter("review", "review"), null);
+    const f = (filter: ReturnType<typeof parseRosterFilter>) =>
+      filterRosterRows(ROWS, { view: "active", filter }).map((r) => r.userId);
+    assert.deepEqual(f(null), ["a", "b", "c"]);
+    assert.deepEqual(f("no_pack"), ["b"]);
+    assert.deepEqual(f("missing"), ["c"]);
+    assert.deepEqual(f("missing_info"), ["b"]);
+    assert.deepEqual(f("review"), []);
     assert.deepEqual(rosterFilterCounts(baseRosterRows(ROWS, { view: "active" })), {
       no_pack: 1,
       expiring: 1,
@@ -662,12 +706,20 @@ describe("roster toolbar: search, filters, dropdowns, counts", () => {
     });
   });
 
-  it("Home / Preset / Supervisor dropdowns; 'none' finds people with nothing set", () => {
+  it("Position / Home / Supervisor dropdowns; 'none' finds people with nothing set", () => {
     const pick = (q: Partial<Parameters<typeof baseRosterRows>[1]>) =>
       baseRosterRows(ROWS, { view: "active", ...q }).map((r) => r.userId);
     assert.deepEqual(pick({ home: "h1" }), ["a"]);
     assert.deepEqual(pick({ home: "none" }), ["b", "c"]);
-    assert.deepEqual(pick({ preset: "p-pm" }), ["c"]);
+    assert.deepEqual(pick({ position: "hhp" }), ["c"]);
+    assert.deepEqual(pick({ position: "dsp" }), ["a", "b", "c"]);
+    assert.deepEqual(pick({ position: "none" }), []);
+    assert.deepEqual(rosterPositionOptions([...ROWS, row({ userId: "e", positions: [] })]), [
+      { value: "dsp", label: "Direct Support Professional" },
+      { value: "hhp", label: "Host Home Provider" },
+      { value: "operations_director", label: "Operations Director" },
+      { value: "none", label: "None" },
+    ]);
     assert.deepEqual(pick({ supervisor: "a" }), ["c"]);
     assert.deepEqual(
       rosterPickOptions(
@@ -680,6 +732,52 @@ describe("roster toolbar: search, filters, dropdowns, counts", () => {
         { value: "none", label: "None" },
       ],
     );
+  });
+});
+
+describe("roster positions, missing info, Showing X of Y", () => {
+  const TYPES = [
+    { key: "dsp", label: "Direct Support Professional" },
+    { key: "executive_director", label: "Executive Director" },
+  ];
+
+  it("resolves staff_type_keys by key, then label (Add dialog saves labels), then slug", () => {
+    assert.deepEqual(resolvePositions(["dsp", "Executive Director"], TYPES), TYPES);
+    // Same position saved both ways collapses to one.
+    assert.deepEqual(resolvePositions(["executive_director", "Executive Director"], TYPES), [
+      TYPES[1],
+    ]);
+    assert.deepEqual(resolvePositions(["DSP", " ", "Night Owl"], TYPES), [
+      TYPES[0],
+      { key: "night_owl", label: "Night Owl" },
+    ]);
+    assert.deepEqual(resolvePositions(null, TYPES), []);
+  });
+
+  it("shows up to two positions, then +N", () => {
+    const c = ROWS[2]!;
+    assert.deepEqual(positionSummary(c.positions), {
+      shown: ["Operations Director", "Direct Support Professional"],
+      more: 1,
+    });
+    assert.deepEqual(positionSummary([]), { shown: [], more: 0 });
+  });
+
+  it("Missing info hover lists what's missing, in order", () => {
+    assert.equal(
+      missingInfoText(["emergency_contact", "date_of_birth"]),
+      "Date of birth, emergency contact",
+    );
+    assert.equal(missingInfoText([]), "");
+  });
+
+  it("any filter, search or dropdown counts as narrowed", () => {
+    assert.equal(rosterQueryIsNarrowed({ view: "active" }), false);
+    assert.equal(rosterQueryIsNarrowed({ view: "active", q: "  " }), false);
+    assert.equal(rosterQueryIsNarrowed({ view: "active", filter: "missing" }), true);
+    assert.equal(rosterQueryIsNarrowed({ view: "active", q: "pat" }), true);
+    assert.equal(rosterQueryIsNarrowed({ view: "active", position: "dsp" }), true);
+    assert.equal(rosterQueryIsNarrowed({ view: "inactive", home: "none" }), true);
   });
 });
 
@@ -728,7 +826,7 @@ describe("rosterCsv", () => {
       row({
         displayName: "Owner Person",
         accessLevel: "owner",
-        presetName: null,
+        positions: [],
         lastSignInAt: null,
         active: false,
       }),
@@ -743,7 +841,8 @@ describe("rosterCsv", () => {
         "Name",
         "Email",
         "Phone",
-        "Preset",
+        "Position",
+        "Access",
         "Home",
         "Supervisor",
         "Start date",
@@ -755,9 +854,9 @@ describe("rosterCsv", () => {
     assert.doesNotMatch(lines[1]!, /^"=/);
     assert.match(
       lines[1]!,
-      /"DSP","Maple","Alex","2025-01-15","2026-09-01","All current","Active"$/,
+      /"Direct Support Professional","Team member","Maple","Alex","2025-01-15","2026-09-01","All current","Active"$/,
     );
-    assert.match(lines[2]!, /"Owner","","","","Never","All current","Inactive"$/);
+    assert.match(lines[2]!, /"","Owner","","","","Never","All current","Inactive"$/);
     assert.match(lines[3]!, /"","All current","Active"$/);
   });
 
@@ -949,5 +1048,43 @@ describe("query keys", () => {
     assert.deepEqual(rosterQueryKey("o").slice(0, 1), ["members"]);
     assert.deepEqual(teamInvitesQueryKey("o").slice(0, 1), ["invites"]);
     assert.notDeepEqual(rosterQueryKey("o"), ["members", "o"]);
+  });
+});
+
+describe("roster return search (profile back buttons)", () => {
+  it("profile: tabs replace history; both back buttons link to the remembered roster", () => {
+    const src = readFileSync(
+      new URL("../../components/team-members/profile/profile-page.tsx", import.meta.url),
+      "utf8",
+    );
+    assert.doesNotMatch(src, /history\.back|history\.go\(/);
+    assert.match(src, /replace: true,\s*search: \(prev\) => \(\{\s*\.\.\.prev,\s*tab:/);
+    assert.match(src, /const backSearch = lastRosterSearch\(\)/);
+    const backs = src.match(/<Link to="\/dashboard\/team-members" search=\{backSearch\}/g) ?? [];
+    assert.equal(backs.length, 2);
+  });
+
+  it("remembers view/filter/search/dropdowns/sort, drops dialog flags, defaults to {}", async () => {
+    const { lastRosterSearch, rememberRosterSearch } = await import("./roster-return.ts");
+    assert.deepEqual(lastRosterSearch(), {});
+    rememberRosterSearch({
+      view: "inactive",
+      filter: "missing",
+      q: "pat",
+      position: "dsp",
+      sort: "-start",
+      add: "1",
+      import: "1",
+      home: "",
+    });
+    assert.deepEqual(lastRosterSearch(), {
+      view: "inactive",
+      filter: "missing",
+      q: "pat",
+      position: "dsp",
+      sort: "-start",
+    });
+    rememberRosterSearch({});
+    assert.deepEqual(lastRosterSearch(), {});
   });
 });

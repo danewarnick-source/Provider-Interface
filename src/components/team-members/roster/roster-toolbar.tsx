@@ -9,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ROSTER_FILTERS, ROSTER_FILTER_LABEL, type RosterFilter } from "@/lib/team-members/roster";
+import type { RosterFilter } from "@/lib/team-members/roster";
+import { RosterFilterButtons } from "./roster-filter-buttons";
 
 export type RosterView = "active" | "invited" | "inactive";
 export type PickOption = { value: string; label: string };
@@ -18,9 +19,9 @@ export type PickOption = { value: string; label: string };
 export type RosterSearchPatch = {
   view?: RosterView;
   q?: string;
-  filters?: RosterFilter[];
+  filter?: RosterFilter | null;
   home?: string;
-  preset?: string;
+  position?: string;
   supervisor?: string;
 };
 
@@ -32,13 +33,14 @@ export function RosterToolbar({
   showInvited,
   showInactive,
   q,
-  filters,
+  filter,
   filterCounts,
   home,
-  preset,
+  position,
   supervisor,
   homeOptions,
-  presetOptions,
+  showHome,
+  positionOptions,
   supervisorOptions,
   onChange,
 }: {
@@ -47,13 +49,15 @@ export function RosterToolbar({
   showInvited: boolean;
   showInactive: boolean;
   q: string;
-  filters: RosterFilter[];
+  filter: RosterFilter | null;
   filterCounts: Record<RosterFilter, number>;
   home: string | undefined;
-  preset: string | undefined;
+  position: string | undefined;
   supervisor: string | undefined;
   homeOptions: PickOption[];
-  presetOptions: PickOption[];
+  /** False when the org has no homes (teams). */
+  showHome: boolean;
+  positionOptions: PickOption[];
   supervisorOptions: PickOption[];
   onChange: (patch: RosterSearchPatch) => void;
 }) {
@@ -71,9 +75,6 @@ export function RosterToolbar({
     { key: "invited", label: `Invited (${counts.invited})`, show: showInvited },
     { key: "inactive", label: "Inactive", show: showInactive },
   ];
-
-  const toggleFilter = (f: RosterFilter) =>
-    onChange({ filters: filters.includes(f) ? filters.filter((x) => x !== f) : [...filters, f] });
 
   return (
     <div className="space-y-3">
@@ -127,48 +128,27 @@ export function RosterToolbar({
       </div>
 
       {view === "active" && (
-        <div className="flex flex-wrap items-center gap-2">
-          {ROSTER_FILTERS.map((f) => {
-            const on = filters.includes(f);
-            return (
-              <button
-                key={f}
-                type="button"
-                aria-pressed={on}
-                onClick={() => toggleFilter(f)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                  on
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {ROSTER_FILTER_LABEL[f]}
-                <span className="rounded-full bg-muted px-1.5 text-[10px] tabular-nums text-foreground">
-                  {filterCounts[f]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <RosterFilterButtons filter={filter} counts={filterCounts} onChange={onChange} />
       )}
 
       {view !== "invited" && (
         <div className="grid gap-2 sm:grid-cols-3 md:flex md:flex-wrap">
           <Pick
-            label="Home"
-            allLabel="All homes"
-            value={home}
-            options={homeOptions}
-            onChange={(v) => onChange({ home: v })}
+            label="Position"
+            allLabel="All positions"
+            value={position}
+            options={positionOptions}
+            onChange={(v) => onChange({ position: v })}
           />
-          <Pick
-            label="Preset"
-            allLabel="All presets"
-            value={preset}
-            options={presetOptions}
-            onChange={(v) => onChange({ preset: v })}
-          />
+          {showHome && (
+            <Pick
+              label="Home"
+              allLabel="All homes"
+              value={home}
+              options={homeOptions}
+              onChange={(v) => onChange({ home: v })}
+            />
+          )}
           <Pick
             label="Supervisor"
             allLabel="All supervisors"
