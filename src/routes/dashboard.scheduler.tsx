@@ -39,12 +39,12 @@ import {
 } from "@/lib/scheduling/scheduler-scheduler.functions";
 import { isClockableServiceCode } from "@/lib/billing/service-billing";
 import { evvServiceLabel } from "@/lib/scheduling/evv-codes";
-import { RequestsPanel } from "@/components/schedule-preview/requests-panel";
+import { RequestsPanel } from "@/components/scheduling/requests-panel";
 import { OpenShiftsPanel } from "@/components/scheduling/open-shifts-panel";
-import { NectarBar } from "@/components/scheduler/nectar-bar";
+import { NectarBar } from "@/components/scheduling/nectar-bar";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { createRecurringShifts } from "@/lib/scheduling/scheduler-repeat.functions";
-import { SoloLapseDialog } from "@/components/scheduler/solo-lapse-dialog";
+import { SoloLapseDialog } from "@/components/scheduling/solo-lapse-dialog";
 import { listSoloLapsesForStaff } from "@/lib/obligations/remediation.functions";
 import type { SoloLapse } from "@/lib/obligations/solo-lapse";
 import { denverYmd } from "@/lib/shared/denver-date";

@@ -36,8 +36,8 @@ import {
 import { StaffPageHeader } from "@/components/staff-mobile/staff-page-header";
 import { GeneralTimeClock } from "@/components/staff-mobile/general-time-clock";
 import { isDailyServiceCode } from "@/lib/billing/service-billing";
-import { RequestTimeOffDialog } from "@/components/schedule-preview/request-time-off-dialog";
-import { RequestSwapDialog } from "@/components/schedule-preview/request-swap-dialog";
+import { RequestTimeOffDialog } from "@/components/scheduling/request-time-off-dialog";
+import { RequestSwapDialog } from "@/components/scheduling/request-swap-dialog";
 import { useMyScheduleRequests } from "@/lib/scheduling/schedule-requests";
 import { CalendarOff, ArrowLeftRight } from "lucide-react";
 import { hhsVisitLabel, hostHomeRowLabel } from "@/lib/scheduling/hhs-visit";

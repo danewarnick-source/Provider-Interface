@@ -94,7 +94,7 @@ describe("staff Schedule page source", () => {
 
 describe("Request time off dialog", () => {
   const src = readFileSync(
-    fileURLToPath(new URL("../components/schedule-preview/request-time-off-dialog.tsx", import.meta.url)),
+    fileURLToPath(new URL("../../components/scheduling/request-time-off-dialog.tsx", import.meta.url)),
     "utf8",
   );
 
