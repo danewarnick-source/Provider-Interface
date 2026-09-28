@@ -217,18 +217,17 @@ export type RosterRow = {
 /** Days ahead that count as "due soon" on the roster. */
 export const ROSTER_DUE_SOON_DAYS = 30;
 
-/** Loose rows: review_status / opted_out_at arrive in a later migration. */
-export type RosterEvidenceItem = EvidenceItemRow & { opted_out_at?: string | null };
-export type RosterEvidenceFile = EvidenceFileRow & { review_status?: string | null };
+export type RosterEvidenceItem = EvidenceItemRow;
+export type RosterEvidenceFile = EvidenceFileRow;
 
 /**
  * One person's Evidence summary — the same status rules the Evidence page uses
  * (cellStatus / latestFileForItem / effectiveAttentionDate), never re-derived.
- *  - done: on file and not past due
+ *  - done: cellStatus 'done' (accepted, on file, not past due)
+ *  - missing: cellStatus 'missing' or 'sent_back'
+ *  - awaitingReview: cellStatus 'awaiting_review' (latest file pending) — not missing, not done
  *  - dueSoon: attention date between today and today + 30 days
- *  - missing: no file, or past due
- *  - awaitingReview: latest file has review_status 'pending'
- *  - skipped: opted_out_at set; excluded from every other count
+ *  - skipped: cellStatus 'skipped'; excluded from every other count
  */
 export function summarizeEvidence(
   items: readonly RosterEvidenceItem[],
@@ -246,13 +245,15 @@ export function summarizeEvidence(
   };
   const soonEnd = addDays(today, ROSTER_DUE_SOON_DAYS) ?? today;
   for (const item of items) {
-    if (item.opted_out_at) {
+    const file = latestFileForItem(files, item.id);
+    const status = cellStatus({ item, file, today });
+    if (status === "skipped") {
       out.skipped += 1;
       continue;
     }
     out.total += 1;
-    const file = latestFileForItem(files, item.id) as RosterEvidenceFile | null;
-    if (cellStatus({ item, file, today }) === "done") out.done += 1;
+    if (status === "done") out.done += 1;
+    else if (status === "awaiting_review") out.awaitingReview += 1;
     else out.missing += 1;
     const attention = parseIsoDate(
       effectiveAttentionDate({
@@ -263,7 +264,6 @@ export function summarizeEvidence(
       }),
     );
     if (attention && attention >= today && attention <= soonEnd) out.dueSoon += 1;
-    if (file?.review_status === "pending") out.awaitingReview += 1;
   }
   return out;
 }

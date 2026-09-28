@@ -32,7 +32,20 @@ export type FirstDueRule = (typeof FIRST_DUE_RULES)[number];
 
 export type RenewYears = 1 | 2 | null;
 
-export const EVIDENCE_CELL_STATUSES = ["done", "missing"] as const;
+/**
+ * done: accepted evidence on file and not past due.
+ * missing: nothing accepted on file, or past due.
+ * awaiting_review: the latest file is a team member's upload waiting on an admin.
+ * sent_back: the latest file was sent back to the team member.
+ * skipped: the item was skipped (opted out) — never counts as missing.
+ */
+export const EVIDENCE_CELL_STATUSES = [
+  "done",
+  "missing",
+  "awaiting_review",
+  "sent_back",
+  "skipped",
+] as const;
 export type EvidenceCellStatus = (typeof EVIDENCE_CELL_STATUSES)[number];
 
 export const SERVICE_CODE_FLAGS = [
@@ -173,9 +186,28 @@ export type EvidenceItemRow = {
   renew_years: RenewYears;
   /** Admin note attached when sending to an employee. Optional; column may be missing live. */
   send_message: string | null;
+  /** Skip (opt-out) record. Set = skipped; cleared on Restore. */
+  opted_out_at?: string | null;
+  opted_out_by?: string | null;
+  opt_out_reason?: string | null;
+  /** Append-only skip / restore log. */
+  history?: EvidenceHistoryEntry[] | null;
   created_at: string;
   updated_at: string;
 };
+
+export const EVIDENCE_REVIEW_STATUSES = ["pending", "accepted", "sent_back"] as const;
+export type EvidenceReviewStatus = (typeof EVIDENCE_REVIEW_STATUSES)[number];
+
+export type EvidenceHistoryEntry = {
+  action: "skipped" | "restored";
+  by: string;
+  at: string;
+  reason?: string | null;
+};
+
+/** Reason saved when a suggested SOW row is unchecked in the evidence pack review. */
+export const EVIDENCE_UNCHECKED_REASON = "Unchecked during evidence pack review";
 
 export type EvidenceFileRow = {
   id: string;
@@ -189,6 +221,11 @@ export type EvidenceFileRow = {
   uploaded_by: string | null;
   uploaded_at: string | null;
   notes: string | null;
+  /** Missing (older rows / slim selects) reads as 'accepted'. */
+  review_status?: EvidenceReviewStatus | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  review_note?: string | null;
 };
 
 export type EvidencePerson = {

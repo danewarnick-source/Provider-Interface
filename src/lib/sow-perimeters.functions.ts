@@ -82,7 +82,7 @@ async function loadSowTrainingRows(
     sb
       .from("evidence_items")
       .select(
-        "id, subject_id, requirement_key, evidence_type, expires_on, first_due_on, next_due_on, document_date",
+        "id, subject_id, requirement_key, evidence_type, expires_on, first_due_on, next_due_on, document_date, opted_out_at",
       )
       .eq("organization_id", orgId)
       .eq("subject_type", "staff")
@@ -103,12 +103,13 @@ async function loadSowTrainingRows(
     first_due_on: string | null;
     next_due_on: string | null;
     document_date: string | null;
+    opted_out_at: string | null;
   }>;
   let fileRows: EvidenceFileRow[] = [];
   if (itemRows.length) {
     const { data: files } = await sb
       .from("evidence_files")
-      .select("id, item_id, storage_path, filename, attested_at, uploaded_at")
+      .select("id, item_id, storage_path, filename, attested_at, uploaded_at, review_status")
       .in(
         "item_id",
         itemRows.map((r) => r.id),
@@ -127,6 +128,7 @@ async function loadSowTrainingRows(
       uploaded_by: null,
       uploaded_at: f.uploaded_at ?? null,
       notes: null,
+      review_status: f.review_status ?? null,
     }));
   }
   const out: TrainingRow[] = [];

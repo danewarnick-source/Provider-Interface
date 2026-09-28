@@ -44,7 +44,7 @@ export function StaffEvidenceList() {
         },
       }),
     onSuccess: () => {
-      toast.success("Uploaded.");
+      toast.success("Uploaded. Your agency will review it.");
       void qc.invalidateQueries({ queryKey: ["my-sent-evidence"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -112,6 +112,16 @@ export function StaffEvidenceList() {
                   </div>
                   <EvidenceStatusGlyph status={status} />
                 </div>
+                {status === "sent_back" && file?.review_note ? (
+                  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+                    <p className="text-xs font-semibold text-amber-900">Sent back — please fix</p>
+                    <p className="mt-1 whitespace-pre-wrap text-sm">{file.review_note}</p>
+                  </div>
+                ) : status === "awaiting_review" ? (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Uploaded — waiting for your agency to review.
+                  </p>
+                ) : null}
                 {item.renew_years === 1 || item.renew_years === 2 ? (
                   <label className="mt-3 block">
                     <span className="mb-1 block text-xs text-muted-foreground">

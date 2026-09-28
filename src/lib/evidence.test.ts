@@ -662,6 +662,33 @@ describe("Evidence cell status", () => {
     assert.equal(staffInitials("Dane Warnick"), "DW");
   });
 
+  it("review and skip: pending is awaiting_review (not done), sent_back, skipped never missing", () => {
+    const today = "2026-09-17";
+    const it1 = item({ expires_on: "2027-03-12" });
+    assert.equal(
+      cellStatus({ item: it1, file: file({ review_status: "pending" }), today }),
+      "awaiting_review",
+    );
+    assert.equal(
+      cellStatus({ item: it1, file: file({ review_status: "sent_back" }), today }),
+      "sent_back",
+    );
+    assert.equal(
+      cellStatus({ item: it1, file: file({ review_status: "accepted" }), today }),
+      "done",
+    );
+    // Older rows with no review_status read as accepted.
+    assert.equal(cellStatus({ item: it1, file: file({ review_status: null }), today }), "done");
+    assert.equal(itemHasCompletedEvidence(it1, file({ review_status: "pending" })), false);
+    const skipped = item({ opted_out_at: "2026-09-01T00:00:00Z", expires_on: "2026-01-01" });
+    assert.equal(cellStatus({ item: skipped, file: null, today }), "skipped");
+    assert.equal(matrixChip({ item: skipped, file: null, today }).kind, "skipped");
+    assert.equal(
+      matrixChip({ item: it1, file: file({ review_status: "pending" }), today }).kind,
+      "awaiting_review",
+    );
+  });
+
   it("itemHasCompletedEvidence: upload needs a file, attestation needs attested_at", () => {
     assert.equal(itemHasCompletedEvidence(item({}), null), false);
     assert.equal(itemHasCompletedEvidence(item({}), file({})), true);

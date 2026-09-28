@@ -403,7 +403,7 @@ describe("Finish setup is gone", () => {
 
 const TODAY = "2026-09-28";
 
-function evItem(partial: Partial<EvidenceItemRow> & { opted_out_at?: string | null }) {
+function evItem(partial: Partial<EvidenceItemRow>) {
   return {
     id: "i1",
     organization_id: "org",
@@ -430,10 +430,10 @@ function evItem(partial: Partial<EvidenceItemRow> & { opted_out_at?: string | nu
     created_at: "2026-01-01T00:00:00Z",
     updated_at: "2026-01-01T00:00:00Z",
     ...partial,
-  } as EvidenceItemRow & { opted_out_at?: string | null };
+  } as EvidenceItemRow;
 }
 
-function evFile(partial: Partial<EvidenceFileRow> & { review_status?: string | null }) {
+function evFile(partial: Partial<EvidenceFileRow>) {
   return {
     id: "f1",
     organization_id: "org",
@@ -447,7 +447,7 @@ function evFile(partial: Partial<EvidenceFileRow> & { review_status?: string | n
     uploaded_at: "2026-09-01T00:00:00Z",
     notes: null,
     ...partial,
-  } as EvidenceFileRow & { review_status?: string | null };
+  } as EvidenceFileRow;
 }
 
 describe("summarizeEvidence", () => {
@@ -504,7 +504,7 @@ describe("summarizeEvidence", () => {
     );
   });
 
-  it("awaiting review reads only the latest file; missing column counts 0", () => {
+  it("awaiting review reads only the latest file (via cellStatus); missing column counts 0", () => {
     const items = [evItem({ id: "r" })];
     const older = evFile({
       id: "old",
@@ -518,10 +518,27 @@ describe("summarizeEvidence", () => {
       uploaded_at: "2026-09-10T00:00:00Z",
       review_status: "pending",
     });
-    assert.equal(summarizeEvidence(items, [older, newer], TODAY).awaitingReview, 1);
-    const approved = { ...newer, review_status: "approved" };
-    assert.equal(summarizeEvidence(items, [older, approved], TODAY).awaitingReview, 0);
+    const pending = summarizeEvidence(items, [older, newer], TODAY);
+    assert.equal(pending.awaitingReview, 1);
+    // A pending upload is neither done nor missing.
+    assert.equal(pending.done, 0);
+    assert.equal(pending.missing, 0);
+    const accepted = { ...newer, review_status: "accepted" as const };
+    const afterAccept = summarizeEvidence(items, [older, accepted], TODAY);
+    assert.equal(afterAccept.awaitingReview, 0);
+    assert.equal(afterAccept.done, 1);
     assert.equal(summarizeEvidence(items, [evFile({ item_id: "r" })], TODAY).awaitingReview, 0);
+  });
+
+  it("a sent-back upload counts as missing, not done", () => {
+    const s = summarizeEvidence(
+      [evItem({ id: "sb" })],
+      [evFile({ item_id: "sb", review_status: "sent_back" })],
+      TODAY,
+    );
+    assert.equal(s.missing, 1);
+    assert.equal(s.done, 0);
+    assert.equal(s.awaitingReview, 0);
   });
 
   it("skipped items are excluded from every other count but still mean a pack exists", () => {

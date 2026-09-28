@@ -9,6 +9,10 @@ const CHIP: Record<EvidenceMatrixChipKind, string> = {
   add: "border border-dashed border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-steel)]",
   open: "bg-[var(--hive-muted-surface)] text-[var(--hive-text)]",
   na: "border border-dashed border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-steel)]",
+  awaiting_review: "bg-[var(--hive-info-soft)] text-[var(--hive-info-fg)]",
+  sent_back: "bg-[var(--hive-gold-soft)] text-[#6b5420]",
+  skipped:
+    "border border-dashed border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-steel)]",
 };
 
 const ICO: Record<EvidenceMatrixChipKind, { mark: string; fill: string }> = {
@@ -19,6 +23,9 @@ const ICO: Record<EvidenceMatrixChipKind, { mark: string; fill: string }> = {
   add: { mark: "+", fill: "bg-[var(--hive-steel)]" },
   open: { mark: "·", fill: "bg-[var(--hive-steel)]" },
   na: { mark: "–", fill: "bg-[var(--hive-steel)]" },
+  awaiting_review: { mark: "o", fill: "bg-[var(--hive-info)]" },
+  sent_back: { mark: "!", fill: "bg-[var(--hive-gold)]" },
+  skipped: { mark: "–", fill: "bg-[var(--hive-steel)]" },
 };
 
 export function EvidenceStatusChip({

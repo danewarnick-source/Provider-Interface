@@ -174,6 +174,10 @@ export const getTeamMemberProfile = createServerFn({ method: "POST" })
         ...activeOthers.map((x) => x.user_id),
         ...(supervisorMember ? [supervisorMember.user_id] : []),
         ...evidenceItems.map((i) => i.opted_out_by).filter((id): id is string => !!id),
+        ...evidenceItems
+          .flatMap((i) => (Array.isArray(i.history) ? i.history.map((h) => h?.by) : []))
+          .filter((id): id is string => typeof id === "string" && !!id),
+        ...files.flatMap((f) => [f.reviewed_by, f.uploaded_by]).filter((id): id is string => !!id),
       ]),
     ];
     const nameRows = await selectIn<NameRow>(

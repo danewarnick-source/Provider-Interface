@@ -1,14 +1,24 @@
-import { Check, Minus } from "lucide-react";
+import { Check, Clock, Minus, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { statusLabel, type EvidenceCellStatus } from "@/lib/evidence/status.ts";
 
 const RING: Record<EvidenceCellStatus, string> = {
   done: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   missing: "bg-rose-50 text-rose-700 ring-rose-200",
+  awaiting_review: "bg-sky-50 text-sky-700 ring-sky-200",
+  sent_back: "bg-amber-50 text-amber-800 ring-amber-200",
+  skipped: "bg-muted text-muted-foreground ring-border",
 };
 
 export function EvidenceStatusGlyph({ status }: { status: EvidenceCellStatus }) {
-  const Icon = status === "done" ? Check : Minus;
+  const Icon =
+    status === "done"
+      ? Check
+      : status === "awaiting_review"
+        ? Clock
+        : status === "sent_back"
+          ? Undo2
+          : Minus;
   return (
     <span
       title={statusLabel(status)}
