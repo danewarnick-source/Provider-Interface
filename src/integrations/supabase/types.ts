@@ -1694,370 +1694,6 @@ export type Database = {
           },
         ]
       }
-      bc_behaviors: {
-        Row: {
-          approved_at: string | null
-          approved_by_user_id: string | null
-          bsp_citation: string
-          client_id: string
-          created_at: string
-          data_method: string
-          drafted_by_user_id: string | null
-          expected_cadence: string
-          id: string
-          last_logged_at: string | null
-          name: string
-          operational_definition: string
-          organization_id: string
-          published_at: string | null
-          published_by_user_id: string | null
-          source: Database["public"]["Enums"]["bc_behavior_source"]
-          status: Database["public"]["Enums"]["bc_behavior_status"]
-          updated_at: string
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by_user_id?: string | null
-          bsp_citation?: string
-          client_id: string
-          created_at?: string
-          data_method?: string
-          drafted_by_user_id?: string | null
-          expected_cadence?: string
-          id?: string
-          last_logged_at?: string | null
-          name: string
-          operational_definition?: string
-          organization_id: string
-          published_at?: string | null
-          published_by_user_id?: string | null
-          source?: Database["public"]["Enums"]["bc_behavior_source"]
-          status?: Database["public"]["Enums"]["bc_behavior_status"]
-          updated_at?: string
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by_user_id?: string | null
-          bsp_citation?: string
-          client_id?: string
-          created_at?: string
-          data_method?: string
-          drafted_by_user_id?: string | null
-          expected_cadence?: string
-          id?: string
-          last_logged_at?: string | null
-          name?: string
-          operational_definition?: string
-          organization_id?: string
-          published_at?: string | null
-          published_by_user_id?: string | null
-          source?: Database["public"]["Enums"]["bc_behavior_source"]
-          status?: Database["public"]["Enums"]["bc_behavior_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bc_behaviors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_behaviors_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bc_data_entries: {
-        Row: {
-          abc_antecedent: string
-          abc_behavior: string
-          abc_consequence: string
-          behavior_id: string
-          client_id: string
-          count: number | null
-          created_at: string
-          duration_seconds: number | null
-          id: string
-          intensity: number | null
-          note: string
-          occurred_at: string
-          organization_id: string
-          staff_user_id: string
-          updated_at: string
-        }
-        Insert: {
-          abc_antecedent?: string
-          abc_behavior?: string
-          abc_consequence?: string
-          behavior_id: string
-          client_id: string
-          count?: number | null
-          created_at?: string
-          duration_seconds?: number | null
-          id?: string
-          intensity?: number | null
-          note?: string
-          occurred_at?: string
-          organization_id: string
-          staff_user_id: string
-          updated_at?: string
-        }
-        Update: {
-          abc_antecedent?: string
-          abc_behavior?: string
-          abc_consequence?: string
-          behavior_id?: string
-          client_id?: string
-          count?: number | null
-          created_at?: string
-          duration_seconds?: number | null
-          id?: string
-          intensity?: number | null
-          note?: string
-          occurred_at?: string
-          organization_id?: string
-          staff_user_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bc_data_entries_behavior_id_fkey"
-            columns: ["behavior_id"]
-            isOneToOne: false
-            referencedRelation: "bc_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_data_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_data_entries_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bc_documents: {
-        Row: {
-          client_id: string
-          created_at: string
-          doc_type: Database["public"]["Enums"]["bc_doc_type"]
-          id: string
-          is_current: boolean
-          organization_id: string
-          storage_path: string
-          updated_at: string
-          uploaded_at: string
-          uploaded_by_user_id: string
-          version: number
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          doc_type: Database["public"]["Enums"]["bc_doc_type"]
-          id?: string
-          is_current?: boolean
-          organization_id: string
-          storage_path: string
-          updated_at?: string
-          uploaded_at?: string
-          uploaded_by_user_id: string
-          version?: number
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          doc_type?: Database["public"]["Enums"]["bc_doc_type"]
-          id?: string
-          is_current?: boolean
-          organization_id?: string
-          storage_path?: string
-          updated_at?: string
-          uploaded_at?: string
-          uploaded_by_user_id?: string
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bc_documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_documents_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bc_flags: {
-        Row: {
-          acknowledged_at: string | null
-          acknowledged_by_user_id: string | null
-          client_id: string
-          created_at: string
-          detail: string
-          flag_type: Database["public"]["Enums"]["bc_flag_type"]
-          id: string
-          organization_id: string
-          updated_at: string
-        }
-        Insert: {
-          acknowledged_at?: string | null
-          acknowledged_by_user_id?: string | null
-          client_id: string
-          created_at?: string
-          detail?: string
-          flag_type: Database["public"]["Enums"]["bc_flag_type"]
-          id?: string
-          organization_id: string
-          updated_at?: string
-        }
-        Update: {
-          acknowledged_at?: string | null
-          acknowledged_by_user_id?: string | null
-          client_id?: string
-          created_at?: string
-          detail?: string
-          flag_type?: Database["public"]["Enums"]["bc_flag_type"]
-          id?: string
-          organization_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bc_flags_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_flags_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bc_review_notes: {
-        Row: {
-          author_user_id: string
-          body: string
-          client_id: string
-          created_at: string
-          id: string
-          note_type: Database["public"]["Enums"]["bc_review_note_type"]
-          organization_id: string
-          period_end: string | null
-          period_start: string | null
-          updated_at: string
-        }
-        Insert: {
-          author_user_id: string
-          body?: string
-          client_id: string
-          created_at?: string
-          id?: string
-          note_type?: Database["public"]["Enums"]["bc_review_note_type"]
-          organization_id: string
-          period_end?: string | null
-          period_start?: string | null
-          updated_at?: string
-        }
-        Update: {
-          author_user_id?: string
-          body?: string
-          client_id?: string
-          created_at?: string
-          id?: string
-          note_type?: Database["public"]["Enums"]["bc_review_note_type"]
-          organization_id?: string
-          period_end?: string | null
-          period_start?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bc_review_notes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_review_notes_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      behavior_support_clients: {
-        Row: {
-          assigned_behaviorist_user_id: string | null
-          bc_code: Database["public"]["Enums"]["bc_code"]
-          client_id: string
-          created_at: string
-          features_enabled: boolean
-          id: string
-          organization_id: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_behaviorist_user_id?: string | null
-          bc_code: Database["public"]["Enums"]["bc_code"]
-          client_id: string
-          created_at?: string
-          features_enabled?: boolean
-          id?: string
-          organization_id: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_behaviorist_user_id?: string | null
-          bc_code?: Database["public"]["Enums"]["bc_code"]
-          client_id?: string
-          created_at?: string
-          features_enabled?: boolean
-          id?: string
-          organization_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "behavior_support_clients_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: true
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "behavior_support_clients_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       billing_code_approval_messages: {
         Row: {
           action: string | null
@@ -4122,53 +3758,38 @@ export type Database = {
           },
         ]
       }
-      client_target_behaviors: {
+      client_target_behaviors_backup_20260928c: {
         Row: {
-          behavior_name: string
-          client_id: string
-          created_at: string
-          description: string
-          id: string
-          organization_id: string
-          sort_order: number
-          updated_at: string
+          behavior_name: string | null
+          client_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          organization_id: string | null
+          sort_order: number | null
+          updated_at: string | null
         }
         Insert: {
-          behavior_name: string
-          client_id: string
-          created_at?: string
-          description?: string
-          id?: string
-          organization_id: string
-          sort_order?: number
-          updated_at?: string
+          behavior_name?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          organization_id?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
         }
         Update: {
-          behavior_name?: string
-          client_id?: string
-          created_at?: string
-          description?: string
-          id?: string
-          organization_id?: string
-          sort_order?: number
-          updated_at?: string
+          behavior_name?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          organization_id?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "client_target_behaviors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_target_behaviors_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       client_weekly_targets: {
         Row: {
@@ -11813,7 +11434,6 @@ export type Database = {
       }
       org_shift_behavior_settings: {
         Row: {
-          enabled: boolean
           organization_id: string
           ot_threshold_hours: number
           rule_settings: Json
@@ -11821,7 +11441,6 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
-          enabled?: boolean
           organization_id: string
           ot_threshold_hours?: number
           rule_settings?: Json
@@ -11829,7 +11448,6 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
-          enabled?: boolean
           organization_id?: string
           ot_threshold_hours?: number
           rule_settings?: Json
@@ -11845,6 +11463,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      org_shift_behavior_settings_backup_20260928c: {
+        Row: {
+          enabled: boolean | null
+          organization_id: string | null
+          ot_threshold_hours: number | null
+          rule_settings: Json | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean | null
+          organization_id?: string | null
+          ot_threshold_hours?: number | null
+          rule_settings?: Json | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean | null
+          organization_id?: string | null
+          ot_threshold_hours?: number | null
+          rule_settings?: Json | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       org_shopping_library: {
         Row: {
@@ -13920,87 +13565,65 @@ export type Database = {
           },
         ]
       }
-      shift_behavior_observations: {
+      shift_behavior_observations_backup_20260928c: {
         Row: {
           antecedent_context: string | null
-          behavior_counts: Json
-          behaviors_observed: boolean
-          client_id: string
-          created_at: string
-          id: string
+          behavior_counts: Json | null
+          behaviors_observed: boolean | null
+          client_id: string | null
+          created_at: string | null
+          id: string | null
           intervention_response: string | null
           objective_description: string | null
-          observed_at: string
-          organization_id: string
+          observed_at: string | null
+          organization_id: string | null
           positives: string | null
-          reportable_incident: boolean
-          shift_id: string
-          staff_id: string
-          target_behaviors: Json
+          reportable_incident: boolean | null
+          shift_id: string | null
+          staff_id: string | null
+          target_behaviors: Json | null
           trend_vs_recent: string | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           antecedent_context?: string | null
-          behavior_counts?: Json
-          behaviors_observed: boolean
-          client_id: string
-          created_at?: string
-          id?: string
+          behavior_counts?: Json | null
+          behaviors_observed?: boolean | null
+          client_id?: string | null
+          created_at?: string | null
+          id?: string | null
           intervention_response?: string | null
           objective_description?: string | null
-          observed_at?: string
-          organization_id: string
+          observed_at?: string | null
+          organization_id?: string | null
           positives?: string | null
-          reportable_incident?: boolean
-          shift_id: string
-          staff_id: string
-          target_behaviors?: Json
+          reportable_incident?: boolean | null
+          shift_id?: string | null
+          staff_id?: string | null
+          target_behaviors?: Json | null
           trend_vs_recent?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           antecedent_context?: string | null
-          behavior_counts?: Json
-          behaviors_observed?: boolean
-          client_id?: string
-          created_at?: string
-          id?: string
+          behavior_counts?: Json | null
+          behaviors_observed?: boolean | null
+          client_id?: string | null
+          created_at?: string | null
+          id?: string | null
           intervention_response?: string | null
           objective_description?: string | null
-          observed_at?: string
-          organization_id?: string
+          observed_at?: string | null
+          organization_id?: string | null
           positives?: string | null
-          reportable_incident?: boolean
-          shift_id?: string
-          staff_id?: string
-          target_behaviors?: Json
+          reportable_incident?: boolean | null
+          shift_id?: string | null
+          staff_id?: string | null
+          target_behaviors?: Json | null
           trend_vs_recent?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "shift_behavior_observations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_behavior_observations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_behavior_observations_shift_id_fkey"
-            columns: ["shift_id"]
-            isOneToOne: true
-            referencedRelation: "evv_timesheets"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       shift_callouts: {
         Row: {
