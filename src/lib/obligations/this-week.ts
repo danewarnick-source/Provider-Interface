@@ -1,7 +1,7 @@
 // This Week decisions — rollup, decoration, human due dates, QuietLine.
 // getThisWeek (I/O) lives in this-week.functions.ts and calls these first.
 
-import { addDaysYmd, daysBetweenYmd, denverYmd } from "../admin-home-data.ts";
+import { addDaysYmd, daysBetweenYmd, denverYmd } from "../admin-home/admin-home-data.ts";
 import {
   auditRefForObligationKey,
   type EscalationHit,

@@ -11,8 +11,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { MyHistoricalTimesheetsPage } from "./dashboard.my-historical-timesheets";
 import { MyHistoricalDailyNotesPage } from "./dashboard.my-historical-daily-notes";
-import { listMyPendingHistoricalTimesheets } from "@/lib/historical-timesheet-confirmation.functions";
-import { listMyPendingHistoricalDailyNotes } from "@/lib/historical-daily-note-attestation.functions";
+import { listMyPendingHistoricalTimesheets } from "@/lib/historical-import/historical-timesheet-confirmation.functions";
+import { listMyPendingHistoricalDailyNotes } from "@/lib/historical-import/historical-daily-note-attestation.functions";
 
 export const Route = createFileRoute("/dashboard/my-historical-records")({
   head: () => ({ meta: [{ title: "Historical records — Provider Interface" }] }),

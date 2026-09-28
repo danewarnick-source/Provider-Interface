@@ -15,7 +15,7 @@ import {
   requiresUpiFiling,
   summaryPeriodFloor,
   type SummaryPeriod,
-} from "./progress-summaries";
+} from "../progress-summaries/progress-summaries.ts";
 
 export type ProgressSummaryStatus =
   | "pending"

@@ -50,7 +50,7 @@ import {
   buildTemplateXlsxBlob,
   triggerDownload,
   validateTemplateHeaders,
-} from "@/lib/historical-timesheets-template";
+} from "@/lib/historical-import/historical-timesheets-template";
 
 type ParsedFile = { headers: string[]; rows: Record<string, string>[]; fileName: string };
 

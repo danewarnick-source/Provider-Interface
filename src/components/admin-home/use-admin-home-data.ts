@@ -6,9 +6,9 @@
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { formatDenverLongDate, sessionFirstName } from "@/lib/admin-home-data";
+import { formatDenverLongDate, sessionFirstName } from "@/lib/admin-home/admin-home-data";
 
-export { greetingWord, sessionFirstName } from "@/lib/admin-home-data";
+export { greetingWord, sessionFirstName } from "@/lib/admin-home/admin-home-data";
 
 export function useAdminHomeData() {
   const { user } = useAuth();

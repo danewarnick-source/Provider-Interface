@@ -14,7 +14,7 @@ import {
   isPeriodInProgress,
   recentMonthlyPeriods,
   recentQuarterlyPeriods,
-} from "../progress-summaries.ts";
+} from "../progress-summaries/progress-summaries.ts";
 
 export const CLIENT_FILE_STATUS_LABEL = {
   on_file: "On file",

@@ -18,11 +18,11 @@ import {
   listMyPendingHistoricalDailyNotes,
   updateMyHistoricalDailyNote,
   attestMyHistoricalDailyNote,
-} from "@/lib/historical-daily-note-attestation.functions";
+} from "@/lib/historical-import/historical-daily-note-attestation.functions";
 import {
   HISTORICAL_DAILY_NOTE_ATTESTATION_VERSION,
   historicalDailyNoteAttestationText,
-} from "@/lib/historical-daily-note-attestation-text";
+} from "@/lib/historical-import/historical-daily-note-attestation-text";
 
 export const Route = createFileRoute("/dashboard/my-historical-daily-notes")({
   head: () => ({ meta: [{ title: "Historical daily notes to attest — Provider Interface" }] }),

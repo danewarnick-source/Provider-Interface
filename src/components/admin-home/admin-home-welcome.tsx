@@ -14,9 +14,9 @@ import {
   ADMIN_HOME_EYEBROW,
   ADMIN_HOME_HEADLINE,
   ADMIN_HOME_SUBHEAD,
-} from "@/lib/admin-home-feeling";
-import { dismissAdminWelcome } from "@/lib/admin-home-welcome.functions";
-import { shouldShowWelcome, welcomeSetupProgress } from "@/lib/admin-home-welcome-rule";
+} from "@/lib/admin-home/admin-home-feeling";
+import { dismissAdminWelcome } from "@/lib/admin-home/admin-home-welcome.functions";
+import { shouldShowWelcome, welcomeSetupProgress } from "@/lib/admin-home/admin-home-welcome-rule";
 import {
   adminHomeWelcomeQueryKey,
   useAdminHomeWelcomeCounts,

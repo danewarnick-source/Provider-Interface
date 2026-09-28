@@ -23,7 +23,7 @@ import {
   planOwnerLabel,
   urgencyForPlan,
 } from "./remediation.ts";
-import { addDaysYmd, denverYmd } from "../admin-home-data.ts";
+import { addDaysYmd, denverYmd } from "../admin-home/admin-home-data.ts";
 import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import { evvStaffIdsForScope, resolveScopeFromSnapshot } from "./scope.ts";
 import {

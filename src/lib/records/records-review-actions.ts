@@ -12,8 +12,8 @@
  *             (ReviewReconciliationDialog)
  *   Flag    → incident_flag=true + reconciliation_status='flagged'
  */
-import { roundToQuarterHourISO } from "./time-rounding.ts";
-import type { ReviewExceptionCode } from "./records-review-rules.ts";
+import { roundToQuarterHourISO } from "../time-rounding.ts";
+import type { ReviewExceptionCode } from "../records/records-review-rules.ts";
 
 export const REVIEW_ACTIONS = ["ask", "approve", "trim", "accept", "flag"] as const;
 export type ReviewAction = (typeof REVIEW_ACTIONS)[number];

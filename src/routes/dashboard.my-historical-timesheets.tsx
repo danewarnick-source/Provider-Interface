@@ -23,7 +23,7 @@ import {
   flagMyHistoricalTimesheet,
   clearMyHistoricalTimesheetFlag,
   confirmMyHistoricalTimesheet,
-} from "@/lib/historical-timesheet-confirmation.functions";
+} from "@/lib/historical-import/historical-timesheet-confirmation.functions";
 
 export const Route = createFileRoute("/dashboard/my-historical-timesheets")({
   head: () => ({ meta: [{ title: "Historical timesheets to confirm — Provider Interface" }] }),

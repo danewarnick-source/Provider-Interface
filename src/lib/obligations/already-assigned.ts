@@ -2,7 +2,7 @@
  * Home "Already assigned" companion + honest automation heartbeat.
  * Counts come from the existing obligation engine — not a second queue.
  */
-import { addDaysYmd, daysBetweenYmd, denverYmd } from "../admin-home-data.ts";
+import { addDaysYmd, daysBetweenYmd, denverYmd } from "../admin-home/admin-home-data.ts";
 import { sowCatalogEntryByKey } from "../compliance/sow-obligation-catalog.ts";
 import type { EvaluateInput, InstanceSnapshot, ObligationSnapshot } from "./escalation.ts";
 

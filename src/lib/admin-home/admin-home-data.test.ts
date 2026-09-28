@@ -8,7 +8,7 @@ import {
   isComplete,
   selectAdminHomeStaffStatus,
   type InstanceRow,
-} from "./admin-home-data.ts";
+} from "../admin-home/admin-home-data.ts";
 
 function row(partial: Partial<InstanceRow> & Pick<InstanceRow, "id" | "due_at">): InstanceRow {
   return {

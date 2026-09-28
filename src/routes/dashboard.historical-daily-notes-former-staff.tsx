@@ -17,7 +17,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   listFormerStaffHistoricalDailyNotes,
   adminAttestHistoricalDailyNoteOnBehalf,
-} from "@/lib/historical-daily-note-attestation.functions";
+} from "@/lib/historical-import/historical-daily-note-attestation.functions";
 
 export const Route = createFileRoute("/dashboard/historical-daily-notes-former-staff")({
   head: () => ({ meta: [{ title: "Attest on behalf of former staff — Provider Interface" }] }),

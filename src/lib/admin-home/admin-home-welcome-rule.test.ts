@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { shouldShowWelcome, welcomeSetupProgress } from "./admin-home-welcome-rule.ts";
+import { shouldShowWelcome, welcomeSetupProgress } from "../admin-home/admin-home-welcome-rule.ts";
 
 const NOW = new Date("2026-09-05T12:00:00.000Z");
 

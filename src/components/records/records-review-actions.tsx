@@ -17,7 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
-import { fromLocalInput, saveRecordFields } from "@/lib/records-edit";
+import { fromLocalInput, saveRecordFields } from "@/lib/records/records-edit";
 import {
   ACCEPT_ATTESTATION_TEXT,
   REVIEW_ACTION_LABEL,
@@ -27,8 +27,8 @@ import {
   flagTimesheetPatch,
   trimClockOutPatch,
   type ReviewAction,
-} from "@/lib/records-review-actions";
-import type { ReviewExceptionCode } from "@/lib/records-review-rules";
+} from "@/lib/records/records-review-actions";
+import type { ReviewExceptionCode } from "@/lib/records/records-review-rules";
 import { askStaffOnTimesheet } from "@/lib/threads.functions";
 
 export type ReviewableRow = {

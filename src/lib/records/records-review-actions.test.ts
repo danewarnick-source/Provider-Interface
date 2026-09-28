@@ -10,7 +10,7 @@ import {
   flagTimesheetPatch,
   REVIEW_ACTION_LABEL,
   trimClockOutPatch,
-} from "./records-review-actions.ts";
+} from "../records/records-review-actions.ts";
 
 describe("Records review buttons per exception", () => {
   it("maps Ask / Accept / Flag for out of geofence", () => {
@@ -128,7 +128,7 @@ describe("late clock-out Ask / Trim / Approve path", () => {
 
 describe("Records review lock", () => {
   it("does not introduce UI emoji in the action module", () => {
-    const src = readFileSync(new URL("./records-review-actions.ts", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../records/records-review-actions.ts", import.meta.url), "utf8");
     assert.equal(/\p{Extended_Pictographic}/u.test(src), false);
   });
 });

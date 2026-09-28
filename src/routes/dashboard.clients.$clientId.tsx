@@ -1964,7 +1964,7 @@ function NewSummaryDialog({
           .maybeSingle();
         hiveStart = (hs?.hive_start_date as string | null) ?? null;
       } catch { /* column may not exist yet */ }
-      const { summaryPeriodFloor } = await import("@/lib/progress-summaries");
+      const { summaryPeriodFloor } = await import("@/lib/progress-summaries/progress-summaries");
       const floor = summaryPeriodFloor({
         orgGoLiveDate: org?.go_live_date ?? org?.created_at,
         clientHiveStartDate: hiveStart,

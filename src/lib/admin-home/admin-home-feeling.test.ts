@@ -9,7 +9,7 @@ import {
   ADMIN_HOME_FOOTER,
   ADMIN_HOME_HEADLINE,
   ADMIN_HOME_SUBHEAD,
-} from "./admin-home-feeling.ts";
+} from "../admin-home/admin-home-feeling.ts";
 
 function read(rel: string) {
   return readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -37,9 +37,9 @@ describe("feeling-hero B (parked for Step 3)", () => {
   });
 
   it("keeps feeling-hero copy locked and the schedule tablet unused by Home", () => {
-    const welcome = read("../components/admin-home/admin-home-welcome.tsx");
-    const dash = read("../components/admin-home/admin-home-dashboard.tsx");
-    const tablet = read("../components/admin-home/admin-home-schedule-tablet.tsx");
+    const welcome = read("../../components/admin-home/admin-home-welcome.tsx");
+    const dash = read("../../components/admin-home/admin-home-dashboard.tsx");
+    const tablet = read("../../components/admin-home/admin-home-schedule-tablet.tsx");
     assert.match(welcome, /ADMIN_HOME_HEADLINE/);
     assert.match(welcome, /export function AdminHomeWelcome/);
     assert.match(tablet, /AdminHomeScheduleTablet/);
@@ -52,8 +52,8 @@ describe("feeling-hero B (parked for Step 3)", () => {
   });
 
   it("lets the shell main scroll — page must not clip at 100% height", () => {
-    const dash = read("../components/admin-home/admin-home-dashboard.tsx");
-    const index = read("../routes/dashboard.index.tsx");
+    const dash = read("../../components/admin-home/admin-home-dashboard.tsx");
+    const index = read("../../routes/dashboard.index.tsx");
     const sectionOpen = dash.slice(
       dash.indexOf('data-testid="admin-home-dashboard"'),
       dash.indexOf('data-testid="home-column"'),
@@ -66,7 +66,7 @@ describe("feeling-hero B (parked for Step 3)", () => {
   });
 
   it("puts the π + PI brand lockup in the sidebar and never a NECTAR wordmark there", () => {
-    const shell = read("../routes/dashboard.tsx");
+    const shell = read("../../routes/dashboard.tsx");
     const markSlot = shell.slice(
       shell.indexOf('<PiBrand to="/dashboard"'),
       shell.indexOf("{(isAdminCapable || isExecutive) &&"),
@@ -77,7 +77,7 @@ describe("feeling-hero B (parked for Step 3)", () => {
   });
 
   it("wraps the shell org subtitle and keeps the full name on title", () => {
-    const shell = read("../routes/dashboard.tsx");
+    const shell = read("../../routes/dashboard.tsx");
     assert.match(shell, /data-testid="shell-org-subtitle"/);
     assert.match(shell, /whitespace-normal break-words/);
     assert.match(shell, /title=\{/);
@@ -97,7 +97,7 @@ describe("Admin Home Step 2 — demote command-center and compliance-desk", () =
   });
 
   it("omits command-center and compliance-desk from ADMIN_NAV", () => {
-    const shell = read("../routes/dashboard.tsx");
+    const shell = read("../../routes/dashboard.tsx");
     const start = shell.indexOf("const ADMIN_NAV: NavItem[] = [");
     const end = shell.indexOf("];", start);
     assert.ok(start >= 0 && end > start, "ADMIN_NAV block");
@@ -108,8 +108,8 @@ describe("Admin Home Step 2 — demote command-center and compliance-desk", () =
   });
 
   it("retires Command Center to Home and keeps Compliance Desk mounted for EVV CSV", () => {
-    const cc = read("../routes/dashboard.command-center.tsx");
-    const desk = read("../routes/dashboard.compliance-desk.tsx");
+    const cc = read("../../routes/dashboard.command-center.tsx");
+    const desk = read("../../routes/dashboard.compliance-desk.tsx");
     assert.match(cc, /createFileRoute\("\/dashboard\/command-center"\)/);
     assert.match(cc, /throw redirect/);
     assert.match(cc, /to: "\/dashboard"/);
@@ -119,7 +119,7 @@ describe("Admin Home Step 2 — demote command-center and compliance-desk", () =
   });
 
   it("points Home overdue, View all, and greeting power links at Compliance", () => {
-    const dash = read("../components/admin-home/admin-home-dashboard.tsx");
+    const dash = read("../../components/admin-home/admin-home-dashboard.tsx");
     assert.doesNotMatch(dash, /command-center/);
     assert.doesNotMatch(dash, /hash="obligations"/);
     assert.doesNotMatch(dash, /hash="due"/);
@@ -143,7 +143,7 @@ describe("Admin Home Step 2 — demote command-center and compliance-desk", () =
   });
 
   it("does not load instance or client rows for dead Home KPI tiles", () => {
-    const hook = read("../components/admin-home/use-admin-home-data.ts");
+    const hook = read("../../components/admin-home/use-admin-home-data.ts");
     assert.doesNotMatch(hook, /\.from\(/);
     assert.doesNotMatch(hook, /useQuery/);
     assert.doesNotMatch(hook, /adminHomeInstancesQueryKey|adminHomeClientsQueryKey/);
@@ -155,9 +155,9 @@ describe("Admin Home Step 2 — demote command-center and compliance-desk", () =
 
 describe("Admin Home Step 3 — welcome banner", () => {
   it("mounts AdminHomeWelcome above the greeting and passes welcomeFlag", () => {
-    const dash = read("../components/admin-home/admin-home-dashboard.tsx");
-    const index = read("../routes/dashboard.index.tsx");
-    const welcome = read("../components/admin-home/admin-home-welcome.tsx");
+    const dash = read("../../components/admin-home/admin-home-dashboard.tsx");
+    const index = read("../../routes/dashboard.index.tsx");
+    const welcome = read("../../components/admin-home/admin-home-welcome.tsx");
     assert.match(index, /welcomeFlag=\{!!search\.welcome\}/);
     assert.match(dash, /<AdminHomeWelcome welcomeFlag=\{welcomeFlag\} \/>/);
     assert.doesNotMatch(dash, /NectarOnboardingPanel/);
@@ -177,7 +177,7 @@ describe("Admin Home Step 3 — welcome banner", () => {
   });
 
   it("counts attested EVV narratives plus daily logs for documentedShiftCount", () => {
-    const hook = read("../components/admin-home/use-admin-home-welcome.ts");
+    const hook = read("../../components/admin-home/use-admin-home-welcome.ts");
     assert.match(hook, /evv_timesheets/);
     assert.match(hook, /attested_accurate\.eq\.true,attested_at\.not\.is\.null/);
     assert.match(hook, /daily_logs/);
@@ -188,9 +188,9 @@ describe("Admin Home Step 3 — welcome banner", () => {
   });
 
   it("drops localStorage welcome dismissal so Home uses welcome_dismissed_at", () => {
-    const welcome = read("../components/admin-home/admin-home-welcome.tsx");
-    const hook = read("../hooks/use-onboarding-progress.tsx");
-    const fn = read("./admin-home-welcome.functions.ts");
+    const welcome = read("../../components/admin-home/admin-home-welcome.tsx");
+    const hook = read("../../hooks/use-onboarding-progress.tsx");
+    const fn = read("../admin-home/admin-home-welcome.functions.ts");
     assert.doesNotMatch(
       welcome,
       /hive_onboarding_\$\{orgId\}_dismissed|lsKey\(orgId, "dismissed"\)/,

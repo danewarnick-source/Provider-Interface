@@ -309,7 +309,7 @@ describe("optional client_progress_summaries upsert", () => {
 
   it("ensureCurrentSummaryPeriods skips unknown client_id and does not throw on FK", () => {
     const src = readFileSync(
-      new URL("../progress-summaries.functions.ts", import.meta.url),
+      new URL("../progress-summaries/progress-summaries.functions.ts", import.meta.url),
       "utf8",
     );
     assert.match(src, /if \(!clientMeta\.has\(clientId\)\) continue/);

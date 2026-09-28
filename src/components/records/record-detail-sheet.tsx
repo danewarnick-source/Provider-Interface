@@ -35,7 +35,7 @@ import {
   saveRecordFields, saveManagerNote as saveManagerNoteFields,
   toLocalInput, fromLocalInput,
   type AuditEntry,
-} from "@/lib/records-edit";
+} from "@/lib/records/records-edit";
 
 export type { AuditEntry };
 

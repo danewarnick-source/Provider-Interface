@@ -28,15 +28,15 @@ import {
   attestSummarySentToSc,
   type ProgressSummaryRow,
   type SummarySourceBundle,
-} from "@/lib/progress-summaries.functions";
-import { draftProgressSummary } from "@/lib/progress-summary-draft.functions";
-import { renderSummaryPdf } from "@/lib/progress-summary-pdf";
+} from "@/lib/progress-summaries/progress-summaries.functions";
+import { draftProgressSummary } from "@/lib/progress-summaries/progress-summary-draft.functions";
+import { renderSummaryPdf } from "@/lib/progress-summaries/progress-summary-pdf";
 import {
   formatPeriodMonthYear,
   isPeriodInProgress,
   summaryCadenceLabel,
   summaryFilingDestination,
-} from "@/lib/progress-summaries";
+} from "@/lib/progress-summaries/progress-summaries";
 import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestations.functions";
 import { cn } from "@/lib/utils";
 import { isAdminLevel } from "@/lib/access/levels";

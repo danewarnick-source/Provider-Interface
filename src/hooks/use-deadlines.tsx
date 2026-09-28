@@ -8,7 +8,7 @@ import {
   ensureCurrentSummaryPeriods,
   listOpenSummaries,
   type ProgressSummaryRow,
-} from "@/lib/progress-summaries.functions";
+} from "@/lib/progress-summaries/progress-summaries.functions";
 import {
   cadenceDescription,
   listDeadlineObligationInstances,

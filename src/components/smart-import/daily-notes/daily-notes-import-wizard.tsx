@@ -38,7 +38,7 @@ import {
   buildTemplateXlsxBlob,
   triggerDownload,
   validateTemplateHeaders,
-} from "@/lib/historical-daily-notes-template";
+} from "@/lib/historical-import/historical-daily-notes-template";
 
 
 type ParsedFile = { headers: string[]; rows: Record<string, string>[]; fileName: string };
