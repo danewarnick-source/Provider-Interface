@@ -221,10 +221,14 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     const reviewBtn = page.getByTestId("roster-filter-review");
     await expect(reviewBtn).toBeDisabled();
     await reviewBtn.locator("..").hover();
-    await expect(page.getByRole("tooltip")).toContainText("Nothing is awaiting review.");
+    await expect(
+      page.getByRole("tooltip").filter({ hasText: "Nothing is awaiting review." }).first(),
+    ).toBeVisible();
     // Missing info lists what's missing on hover.
     await page.locator("table").getByTestId("missing-info-chip").first().hover();
-    await expect(page.getByRole("tooltip")).toContainText("Date of birth, address");
+    await expect(
+      page.getByRole("tooltip").filter({ hasText: "Date of birth, address" }).first(),
+    ).toBeVisible();
     // Position dropdown narrows the list; Clear filter resets everything.
     await page.getByRole("combobox", { name: "Position" }).click();
     await page.getByRole("option", { name: "Host Home Provider" }).click();
