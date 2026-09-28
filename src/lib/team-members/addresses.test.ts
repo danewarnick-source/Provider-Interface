@@ -265,4 +265,16 @@ describe("Team Members addresses", () => {
       for (const pattern of patterns) assert.match(src, pattern, `${rel} ${pattern}`);
     }
   });
+
+  it("the dead training-hours code and the old barrels are gone", () => {
+    for (const rel of [
+      "components/hr/annual-hours-progress.tsx",
+      "lib/hr-training-hours.functions.ts",
+      "lib/staff/index.ts",
+      "components/staff/index.ts",
+    ]) {
+      assert.equal(existsSync(join(SRC, rel)), false, `${rel} should be deleted`);
+    }
+    assert.equal(existsSync(join(SRC, "components/hr/staff-fields-panel.tsx")), true);
+  });
 });
