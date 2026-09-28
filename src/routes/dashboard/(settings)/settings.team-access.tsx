@@ -3,7 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAccess } from "@/hooks/use-access";
-import { useIsHiveExecutive } from "@/hooks/use-hive-executive";
+import { useIsHiveExecutive } from "@/hooks/org/use-hive-executive";
 import { MembersPanel } from "@/components/access/members-panel";
 import { PresetsPanel } from "@/components/access/presets-panel";
 import { ChangeLogPanel } from "@/components/access/change-log-panel";

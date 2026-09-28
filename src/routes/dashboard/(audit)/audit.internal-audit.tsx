@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useCaseload } from "@/hooks/use-caseload";
+import { useCaseload } from "@/hooks/clients/use-caseload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,7 +27,7 @@ import {
 import { PiMark } from "@/components/public-site/pi-mark";
 
 import { AddonLock } from "@/components/nectar/addon-lock";
-import { useEntitlements } from "@/hooks/use-entitlements";
+import { useEntitlements } from "@/hooks/org/use-entitlements";
 import {
   runInternalAudit,
   listAuditableStaff,

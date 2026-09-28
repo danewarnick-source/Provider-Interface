@@ -4,10 +4,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useActiveShift } from "@/hooks/use-active-shift";
-import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
-import { useClientUtilization, getUsage } from "@/hooks/use-client-utilization";
-import { useTimePaySettings } from "@/hooks/use-time-pay-settings";
+import { useActiveShift } from "@/hooks/scheduling/use-active-shift";
+import { useClientBillingCodes } from "@/hooks/clients/use-client-billing-codes";
+import { useClientUtilization, getUsage } from "@/hooks/clients/use-client-utilization";
+import { useTimePaySettings } from "@/hooks/scheduling/use-time-pay-settings";
 import { useMobileShellContainer } from "@/components/staff-mobile/mobile-shell-context";
 
 type CapBehavior = "warn" | "acknowledge" | "auto_clock_out";

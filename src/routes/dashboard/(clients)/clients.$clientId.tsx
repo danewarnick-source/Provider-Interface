@@ -125,7 +125,7 @@ import {
   type CSTGoal,
   type CSTReviewQuestion,
 } from "@/lib/clients/client-specific-training.functions";
-import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
+import { useClientBillingCodes } from "@/hooks/clients/use-client-billing-codes";
 import { onPcspActivated } from "@/lib/obligations/company-obligations.functions";
 import { computeSupportStrategyCoverage } from "@/lib/clients/support-strategy-coverage";
 

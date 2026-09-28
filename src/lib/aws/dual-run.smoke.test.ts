@@ -183,23 +183,23 @@ describe("query builder SQL safety", () => {
       );
     }
     const deadlines = readFileSync(
-      new URL("../../hooks/use-deadlines.tsx", import.meta.url),
+      new URL("../../hooks/compliance/use-deadlines.tsx", import.meta.url),
       "utf8",
     );
     assert.match(deadlines, /upi_submitted_at:state_submitted_at/);
     const pay = readFileSync(
-      new URL("../../hooks/use-nectar-pay-period.tsx", import.meta.url),
+      new URL("../../hooks/nectar/use-nectar-pay-period.tsx", import.meta.url),
       "utf8",
     );
     assert.match(pay, /record_date:log_date/);
     const util = readFileSync(
-      new URL("../../hooks/use-client-utilization.tsx", import.meta.url),
+      new URL("../../hooks/clients/use-client-utilization.tsx", import.meta.url),
       "utf8",
     );
     assert.match(util, /record_date:log_date/);
     const docs = readFileSync(new URL("../nectar/nectar-documents.functions.ts", import.meta.url), "utf8");
     assert.match(docs, /uploaded_at:created_at/);
-    const audit = readFileSync(new URL("../internal-audit.functions.ts", import.meta.url), "utf8");
+    const audit = readFileSync(new URL("../audit/internal-audit.functions.ts", import.meta.url), "utf8");
     assert.match(audit, /record_date:log_date/);
     assert.match(audit, /provider_id:user_id/);
   });

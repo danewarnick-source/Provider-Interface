@@ -19,7 +19,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   clientCodeAssignmentsQueryKey,
   useClientCodeAssignments,
-} from "@/hooks/use-client-code-assignments";
+} from "@/hooks/clients/use-client-code-assignments";
 
 function invalidateAssignmentQueries(qc: ReturnType<typeof useQueryClient>, clientId: string) {
   qc.invalidateQueries({ queryKey: clientCodeAssignmentsQueryKey(clientId) });

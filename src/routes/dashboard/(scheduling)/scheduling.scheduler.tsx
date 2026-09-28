@@ -31,8 +31,8 @@ import { useAccess } from "@/hooks/use-access";
 import {
   useSchedulerData, startOfWeek, startOfDay, startOfMonth,
   type SchedClient, type SchedStaff, type SchedShift,
-} from "@/hooks/use-scheduler-data";
-import { useDayProgramData } from "@/hooks/use-day-program-data";
+} from "@/hooks/scheduling/use-scheduler-data";
+import { useDayProgramData } from "@/hooks/scheduling/use-day-program-data";
 import {
   saveShift, deleteShift, publishWeek, addToCaseload, setAdminTimeOff,
   saveDayProgramSession, markAttendance, addSessionStaff,

@@ -7,7 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Send, Sparkles, Loader2, ExternalLink, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useCapability } from "@/hooks/use-exec-capability";
+import { useCapability } from "@/hooks/org/use-exec-capability";
 import { askSteve, type SteveAnswer } from "@/lib/hive-exec/hive-knowledge.functions";
 
 /**

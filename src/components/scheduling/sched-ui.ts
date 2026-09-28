@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { ShiftRow } from "@/hooks/use-schedule-preview";
+import type { ShiftRow } from "@/hooks/scheduling/use-schedule-preview";
 
 // ── Design tokens ported from PI-Schedule-Demo-v6.html ──────────────
 export const SCHED = {

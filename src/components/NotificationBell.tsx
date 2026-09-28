@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useDeadlines } from "@/hooks/use-deadlines";
+import { useDeadlines } from "@/hooks/compliance/use-deadlines";
 import { isUpiReminderFireDay } from "@/lib/upi/upi-reminder-cadence";
 
 type Urgency = "normal" | "urgent" | "critical";

@@ -1,6 +1,6 @@
 import { Link, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Sparkles } from "lucide-react";
-import { useAgencySetup } from "@/hooks/use-agency-setup";
+import { useAgencySetup } from "@/hooks/org/use-agency-setup";
 import { AGENCY_SETUP_PATH } from "@/lib/agency/agency-setup-gate";
 
 /**

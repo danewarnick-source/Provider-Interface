@@ -21,7 +21,7 @@ import {
 } from "@/lib/obligations/setup-facts";
 import { persistAgencySetupFacts } from "@/lib/agency/agency-setup-gate.functions";
 import { REQUIRED_SETUP_QUESTIONS } from "@/lib/agency/agency-setup-gate";
-import { agencySetupQueryKey, useAgencySetup } from "@/hooks/use-agency-setup";
+import { agencySetupQueryKey, useAgencySetup } from "@/hooks/org/use-agency-setup";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { isAdminLevel } from "@/lib/access/levels";

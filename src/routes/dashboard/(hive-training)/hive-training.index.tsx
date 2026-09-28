@@ -26,7 +26,7 @@ import {
 import { toast } from "sonner";
 import { GraduationCap, Users, Loader2, AlertTriangle, Sparkles, Clock } from "lucide-react";
 import { z } from "zod";
-import { useEntitlements } from "@/hooks/use-entitlements";
+import { useEntitlements } from "@/hooks/org/use-entitlements";
 import {
   createTrainingCheckoutFn,
   confirmCheckoutSessionFn,
@@ -43,7 +43,7 @@ import { trainingClassLabel, trainingClassSku, type TrainingClassType } from "@/
 import { ClassCardUploadButtons } from "@/components/training/class-card-upload";
 import { InternalTrainingsPanel } from "@/components/training/internal-trainings-panel";
 import { FeatureLocked } from "@/components/feature-locked";
-import { useFeatureEnabled } from "@/hooks/use-feature-enabled";
+import { useFeatureEnabled } from "@/hooks/org/use-feature-enabled";
 import { FeatureLockedRoute } from "@/components/upgrade-gate";
 import { isAdminLevel } from "@/lib/access/levels";
 

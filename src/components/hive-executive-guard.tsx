@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useIsHiveExecutive } from "@/hooks/use-hive-executive";
+import { useIsHiveExecutive } from "@/hooks/org/use-hive-executive";
 
 export function RequireHiveExecutive({ children }: { children: ReactNode }) {
   const { isExecutive, isLoading } = useIsHiveExecutive();

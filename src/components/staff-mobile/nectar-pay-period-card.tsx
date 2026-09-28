@@ -6,8 +6,8 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   useNectarPayPeriod, useLivePayPeriod,
-} from "@/hooks/use-nectar-pay-period";
-import { useStaffTimesheets } from "@/hooks/use-staff-timesheets";
+} from "@/hooks/nectar/use-nectar-pay-period";
+import { useStaffTimesheets } from "@/hooks/staff/use-staff-timesheets";
 import { useCountUp } from "@/hooks/use-count-up";
 import { NectarBadge } from "@/components/nectar/nectar-brand";
 

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./use-auth";
-import { useCurrentOrg } from "./use-org";
-import { usePortalView } from "./use-portal-view";
+import { useAuth } from "@/hooks/use-auth";
+import { useCurrentOrg } from "@/hooks/use-org";
+import { usePortalView } from "@/hooks/use-portal-view";
 import { isAdminLevel } from "@/lib/access/levels";
 
 export type CaseloadClient = {

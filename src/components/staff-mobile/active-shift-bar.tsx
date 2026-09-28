@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { useActiveShift } from "@/hooks/use-active-shift";
-import { useGeneralShift } from "@/hooks/use-general-shift";
-import { useLivePayPeriod } from "@/hooks/use-nectar-pay-period";
+import { useActiveShift } from "@/hooks/scheduling/use-active-shift";
+import { useGeneralShift } from "@/hooks/scheduling/use-general-shift";
+import { useLivePayPeriod } from "@/hooks/nectar/use-nectar-pay-period";
 import {
   AlertDialog,
   AlertDialogAction,

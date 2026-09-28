@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Clock, CalendarCheck2, Sun, AlertTriangle, Home } from "lucide-react";
-import { useTodayShift } from "@/hooks/use-today-shift";
-import { useTodayShifts, type TodayShiftRow } from "@/hooks/use-today-shifts";
-import { useCaseload } from "@/hooks/use-caseload";
+import { useTodayShift } from "@/hooks/scheduling/use-today-shift";
+import { useTodayShifts, type TodayShiftRow } from "@/hooks/scheduling/use-today-shifts";
+import { useCaseload } from "@/hooks/clients/use-caseload";
 import {
   useMyAssignments,
   allowedCodesFor,
@@ -14,12 +14,12 @@ import {
   hasHostHomeDailyCode,
   hostHomeDailyNoteCode,
   stackDualCaseloadActions,
-} from "@/hooks/use-my-assignments";
+} from "@/hooks/staff/use-my-assignments";
 import { isClockableServiceCode } from "@/lib/billing/service-billing";
 import { displayPersonName } from "@/lib/clients/person-name";
 import { DualCaseloadActions } from "@/components/staff-mobile/dual-caseload-actions";
-import { useTodayDailyNoteClients } from "@/hooks/use-today-daily-notes";
-import { useCompletedPunchesToday } from "@/hooks/use-completed-punches-today";
+import { useTodayDailyNoteClients } from "@/hooks/staff/use-today-daily-notes";
+import { useCompletedPunchesToday } from "@/hooks/scheduling/use-completed-punches-today";
 import { openClockableShifts } from "@/lib/clients/caseload-open-work";
 import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 

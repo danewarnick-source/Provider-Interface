@@ -37,7 +37,7 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useClientCareData } from "@/hooks/use-client-care-data";
+import { useClientCareData } from "@/hooks/clients/use-client-care-data";
 import type { CustomFieldWithValue } from "@/lib/clients/client-care-data.functions";
 import {
   createCustomFieldDefinition,

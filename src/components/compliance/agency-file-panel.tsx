@@ -1,5 +1,5 @@
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useCompliancePacket } from "@/hooks/use-compliance-packet";
+import { useCompliancePacket } from "@/hooks/compliance/use-compliance-packet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AgencyDocumentsCards } from "@/components/agency-documents/agency-documents-cards";
 import { CompanyPoliciesTab } from "@/components/agency-documents/company-policies-tab";

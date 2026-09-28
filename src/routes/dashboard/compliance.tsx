@@ -4,7 +4,7 @@ import { StaffFilePanel } from "@/components/compliance/staff-file-panel";
 import { ClientFilePanel } from "@/components/compliance/client-file-panel";
 import { AgencyFilePanel } from "@/components/compliance/agency-file-panel";
 import { StateCatalogEmptyShell } from "@/components/compliance/state-catalog-empty-shell";
-import { useOrgStateCatalog } from "@/hooks/use-org-state-catalog";
+import { useOrgStateCatalog } from "@/hooks/org/use-org-state-catalog";
 import {
   complianceSearchForAgencySubTab,
   complianceSearchForFileTab,

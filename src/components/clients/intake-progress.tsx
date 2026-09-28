@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { useClientIntakeProgress } from "@/hooks/use-client-intake-progress";
+import { useClientIntakeProgress } from "@/hooks/clients/use-client-intake-progress";
 
 /**
  * Read-only intake progress bar driven by the existing intake checklist.

@@ -25,7 +25,7 @@ import {
   staffTaskOpensUpload,
 } from "@/lib/staff/staff-my-tasks";
 import { MyTasksQueue } from "@/components/employees/my-tasks-queue";
-import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
+import { useStaffOverrides } from "@/hooks/compliance/use-obligation-overrides";
 import {
   activeOverrideForTarget,
   dutyKeyFromObligation,

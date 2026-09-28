@@ -16,7 +16,7 @@ import {
   type SwapRequest,
   type TimeOffRequest,
 } from "@/lib/scheduling/schedule-requests";
-import type { StaffRow } from "@/hooks/use-schedule-preview";
+import type { StaffRow } from "@/hooks/scheduling/use-schedule-preview";
 import { SCHED } from "./sched-ui";
 
 // ── tokens / small style helpers (ported from the demo weekstrip) ─────

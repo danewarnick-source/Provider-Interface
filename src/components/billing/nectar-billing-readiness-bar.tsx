@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useAllClientBillingCodes } from "@/hooks/use-client-billing-codes";
+import { useAllClientBillingCodes } from "@/hooks/clients/use-client-billing-codes";
 import { NectarHeader, NectarBadge } from "@/components/nectar/nectar-brand";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";
 import {

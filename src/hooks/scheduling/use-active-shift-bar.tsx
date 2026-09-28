@@ -1,5 +1,5 @@
-import { useActiveShift } from "@/hooks/use-active-shift";
-import { useGeneralShift } from "@/hooks/use-general-shift";
+import { useActiveShift } from "@/hooks/scheduling/use-active-shift";
+import { useGeneralShift } from "@/hooks/scheduling/use-general-shift";
 
 /**
  * Whether the persistent "Clocked in" bar is currently rendered above the

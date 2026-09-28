@@ -1,4 +1,4 @@
-import { useShiftBehaviorSetting, useSetShiftBehaviorSetting } from "@/hooks/use-shift-behavior-setting";
+import { useShiftBehaviorSetting, useSetShiftBehaviorSetting } from "@/hooks/scheduling/use-shift-behavior-setting";
 import { ClipboardList, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 

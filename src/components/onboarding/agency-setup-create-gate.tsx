@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useAgencySetup } from "@/hooks/use-agency-setup";
+import { useAgencySetup } from "@/hooks/org/use-agency-setup";
 import {
   isSetupGatedPath,
   setupRedirectForPath,

@@ -33,12 +33,12 @@ import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-gui
 import { jobCodeLabel } from "@/lib/staff/job-codes";
 import { DspdCodesMultiSelect } from "@/components/clients/dspd-codes-multiselect";
 import { isDailyServiceCode } from "@/lib/billing/service-billing";
-import { useClientIntakeProgress } from "@/hooks/use-client-intake-progress";
+import { useClientIntakeProgress } from "@/hooks/clients/use-client-intake-progress";
 import { DeleteClientDialog } from "@/components/clients/delete-client-dialog";
 import { ClientCompliancePanel } from "@/components/clients/client-compliance-panel";
 import { backfillOrgHomePinsFromAddresses } from "@/lib/residential/home-pin.functions";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
-import { useAgencySetup } from "@/hooks/use-agency-setup";
+import { useAgencySetup } from "@/hooks/org/use-agency-setup";
 import { getAgencySetupStatus } from "@/lib/agency/agency-setup-gate.functions";
 import { assertAgencySetupComplete, shouldBlockStaffClientCreate } from "@/lib/agency/agency-setup-gate";
 

@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Building2 } from "lucide-react";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { agencySetupQueryKey } from "@/hooks/use-agency-setup";
+import { agencySetupQueryKey } from "@/hooks/org/use-agency-setup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

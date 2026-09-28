@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { useTodayShift } from "@/hooks/use-today-shift";
+import { useTodayShift } from "@/hooks/scheduling/use-today-shift";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { usePortalView } from "@/hooks/use-portal-view";
 import { useNavigate } from "@tanstack/react-router";

@@ -30,7 +30,7 @@ import {
   validateNarrative, validatePersonName, validateRequiredText, findContradictions,
   validateAddress, validateDateLogic,
 } from "@/lib/nectar/nectar-quality";
-import { useCaseload } from "@/hooks/use-caseload";
+import { useCaseload } from "@/hooks/clients/use-caseload";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
 import { useAccess } from "@/hooks/use-access";

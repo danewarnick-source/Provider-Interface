@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, FileText, Sparkles, Archive, Send, Edit3, Trash2, ChevronRight } from "lucide-react";
 import { useEffectiveView } from "@/hooks/use-effective-view";
-import { useCaseload } from "@/hooks/use-caseload";
+import { useCaseload } from "@/hooks/clients/use-caseload";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { supabase } from "@/integrations/supabase/client";
 import {

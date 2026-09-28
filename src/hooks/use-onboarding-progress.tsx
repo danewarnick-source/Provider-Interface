@@ -1,4 +1,4 @@
-import { useAgencySetup } from "@/hooks/use-agency-setup";
+import { useAgencySetup } from "@/hooks/org/use-agency-setup";
 
 /**
  * Compatibility shim. Setup completion / create unlock is ONLY

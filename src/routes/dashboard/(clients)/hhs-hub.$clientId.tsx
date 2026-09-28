@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useMyAssignments, allowedCodesFor } from "@/hooks/use-my-assignments";
+import { useMyAssignments, allowedCodesFor } from "@/hooks/staff/use-my-assignments";
 import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

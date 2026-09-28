@@ -1,4 +1,4 @@
-import { useEntitlements } from "@/hooks/use-entitlements";
+import { useEntitlements } from "@/hooks/org/use-entitlements";
 
 /**
  * NECTAR Infusion entitlement — thin wrapper around the shared

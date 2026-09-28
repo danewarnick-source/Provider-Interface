@@ -11,7 +11,7 @@ import {
   getIncidentActors,
 } from "@/lib/incidents/incidents.functions";
 import { INCIDENT_CATEGORIES, GUARDIAN_METHODS, type GuardianMethod } from "./incident-categories";
-import { useCaseload } from "@/hooks/use-caseload";
+import { useCaseload } from "@/hooks/clients/use-caseload";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAccess } from "@/hooks/use-access";
 

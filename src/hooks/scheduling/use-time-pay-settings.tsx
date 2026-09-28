@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentOrg } from "./use-org";
+import { useCurrentOrg } from "@/hooks/use-org";
 import type { PaySchedule } from "@/lib/billing/pay-periods";
 
 /**

@@ -14,11 +14,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useTimePaySettings } from "@/hooks/use-time-pay-settings";
+import { useTimePaySettings } from "@/hooks/scheduling/use-time-pay-settings";
 import { respondToShift } from "@/lib/scheduling/workflow.functions";
 import { OpenShiftsPanel } from "@/components/scheduling/open-shifts-panel";
-import { useActiveShift } from "@/hooks/use-active-shift";
-import { useGeneralShift } from "@/hooks/use-general-shift";
+import { useActiveShift } from "@/hooks/scheduling/use-active-shift";
+import { useGeneralShift } from "@/hooks/scheduling/use-general-shift";
 import { fmtElapsed } from "@/components/staff-mobile/general-time-clock";
 import {
   SCHEDULE_NON_CLIENT_CLOCK_IN_TITLE,

@@ -10,7 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useOrgActiveServiceCodes } from "@/hooks/use-org-service-codes";
+import { useOrgActiveServiceCodes } from "@/hooks/org/use-org-service-codes";
 import { OrgComplianceDocCard } from "@/components/settings/org-compliance-doc-card";
 import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi/upi-attestations.functions";
 

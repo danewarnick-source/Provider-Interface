@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useOrgFeatures } from "@/hooks/use-feature-enabled";
+import { useOrgFeatures } from "@/hooks/org/use-feature-enabled";
 import { requestFeatureUpgrade } from "@/lib/agency/org-features.functions";
 
 type Props = {

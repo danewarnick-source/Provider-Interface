@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/shared/route-uuid";
 import { z } from "zod";
-import { useCaseload } from "@/hooks/use-caseload";
-import { useMyAssignments, allowedCodesFor, clientAuthorizedCodes } from "@/hooks/use-my-assignments";
+import { useCaseload } from "@/hooks/clients/use-caseload";
+import { useMyAssignments, allowedCodesFor, clientAuthorizedCodes } from "@/hooks/staff/use-my-assignments";
 import { isClockableServiceCode } from "@/lib/billing/service-billing";
 import { resolveGeofenceRadiusFeet } from "@/lib/scheduling/geo";
 
@@ -34,8 +34,8 @@ import { StaffMedicationsPanel } from "@/components/medications/staff-medication
 import { FormsHubTab } from "@/components/workspace/forms-hub-tab";
 import { ReimbursementShiftPanel } from "@/components/staff-mobile/reimbursement-shift-panel";
 import { ClientSpendingShiftPanel } from "@/components/staff-mobile/client-spending-shift-panel";
-import { useActiveShift } from "@/hooks/use-active-shift";
-import { useTodayShifts } from "@/hooks/use-today-shifts";
+import { useActiveShift } from "@/hooks/scheduling/use-active-shift";
+import { useTodayShifts } from "@/hooks/scheduling/use-today-shifts";
 import { ClientPhoto } from "@/components/client-photo";
 import { FaceSheetButton } from "@/components/clients/face-sheet-button";
 import { useClientFeature, clientFeatureVisible } from "@/lib/clients/client-features";

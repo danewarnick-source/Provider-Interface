@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./use-auth";
-import { useActiveShift } from "./use-active-shift";
-import { useTimePaySettings } from "./use-time-pay-settings";
-import { useWorkerProfile } from "./use-worker-profile";
-import { useMyAssignments } from "./use-my-assignments";
-import { useGeneralShift, useGeneralShiftLog } from "./use-general-shift";
+import { useAuth } from "@/hooks/use-auth";
+import { useActiveShift } from "@/hooks/scheduling/use-active-shift";
+import { useTimePaySettings } from "@/hooks/scheduling/use-time-pay-settings";
+import { useWorkerProfile } from "@/hooks/staff/use-worker-profile";
+import { useMyAssignments } from "@/hooks/staff/use-my-assignments";
+import { useGeneralShift, useGeneralShiftLog } from "@/hooks/scheduling/use-general-shift";
 import { computePeriodBounds, type PaySchedule } from "@/lib/billing/pay-periods";
 import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { staffDisplayHours } from "@/lib/staff/staff-display-hours";

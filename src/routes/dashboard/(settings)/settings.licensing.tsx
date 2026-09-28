@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, BadgeCheck } from "lucide-react";
-import { useOrgActiveServiceCodes } from "@/hooks/use-org-service-codes";
+import { useOrgActiveServiceCodes } from "@/hooks/org/use-org-service-codes";
 import { OrgComplianceDocumentsSection } from "@/components/settings/org-compliance-documents-section";
 
 export const Route = createFileRoute("/dashboard/(settings)/settings/licensing")({

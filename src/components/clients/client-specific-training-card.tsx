@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
+import { useClientBillingCodes } from "@/hooks/clients/use-client-billing-codes";
 import {
   getClientSpecificTraining,
   draftClientSpecificTrainingWithNectar,

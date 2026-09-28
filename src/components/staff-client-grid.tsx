@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useCaseload, type CaseloadClient } from "@/hooks/use-caseload";
-import { useActiveShift, type ActiveShift } from "@/hooks/use-active-shift";
-import { useNectarPayPeriod } from "@/hooks/use-nectar-pay-period";
+import { useCaseload, type CaseloadClient } from "@/hooks/clients/use-caseload";
+import { useActiveShift, type ActiveShift } from "@/hooks/scheduling/use-active-shift";
+import { useNectarPayPeriod } from "@/hooks/nectar/use-nectar-pay-period";
 import {
   useMyAssignments,
   allowedCodesFor,
@@ -17,11 +17,11 @@ import {
   isHostHomeDailyNoteCard,
   stackDualCaseloadActions,
   type AssignmentMap,
-} from "@/hooks/use-my-assignments";
+} from "@/hooks/staff/use-my-assignments";
 import { DualCaseloadActions } from "@/components/staff-mobile/dual-caseload-actions";
-import { useTodayShifts, type TodayShiftRow } from "@/hooks/use-today-shifts";
-import { useTodayDailyNoteClients } from "@/hooks/use-today-daily-notes";
-import { useCompletedPunchesToday } from "@/hooks/use-completed-punches-today";
+import { useTodayShifts, type TodayShiftRow } from "@/hooks/scheduling/use-today-shifts";
+import { useTodayDailyNoteClients } from "@/hooks/staff/use-today-daily-notes";
+import { useCompletedPunchesToday } from "@/hooks/scheduling/use-completed-punches-today";
 import { scheduledShiftIsClockedOut } from "@/lib/clients/caseload-open-work";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

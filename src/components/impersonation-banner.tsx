@@ -1,4 +1,4 @@
-import { useImpersonation } from "@/hooks/use-impersonation";
+import { useImpersonation } from "@/hooks/org/use-impersonation";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 

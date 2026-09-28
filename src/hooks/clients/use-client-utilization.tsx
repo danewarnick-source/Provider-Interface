@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./use-auth";
-import { useCurrentOrg } from "./use-org";
+import { useAuth } from "@/hooks/use-auth";
+import { useCurrentOrg } from "@/hooks/use-org";
 import { isDailyServiceCode } from "@/lib/billing/service-billing";
 import { staffDisplayHours } from "@/lib/staff/staff-display-hours";
 

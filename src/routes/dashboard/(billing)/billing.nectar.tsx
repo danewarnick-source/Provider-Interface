@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, TrendingDown, TrendingUp, Download, History, Loader2, Settings, Save, Pin, PinOff, Trash2, Calendar, X, Play } from "lucide-react";
-import { useNectarAlerts, DEFAULT_NECTAR_ALERT_SETTINGS, type NectarAlert, type NectarAlertSettings } from "@/hooks/use-nectar-alerts";
+import { useNectarAlerts, DEFAULT_NECTAR_ALERT_SETTINGS, type NectarAlert, type NectarAlertSettings } from "@/hooks/nectar/use-nectar-alerts";
 import { askNectarReport, type NectarReportResult } from "@/lib/nectar/nectar-reports.functions";
 import { listSavedReports, saveReport, deleteSavedReport, togglePinReport, upsertReportSchedule, unscheduleReport, type SavedReport } from "@/lib/agency/saved-reports.functions";
 import { useCurrentOrg } from "@/hooks/use-org";

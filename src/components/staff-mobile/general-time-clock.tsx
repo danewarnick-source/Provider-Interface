@@ -13,8 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useGeneralShift } from "@/hooks/use-general-shift";
-import { useTimePaySettings, type TimePayCategory } from "@/hooks/use-time-pay-settings";
+import { useGeneralShift } from "@/hooks/scheduling/use-general-shift";
+import { useTimePaySettings, type TimePayCategory } from "@/hooks/scheduling/use-time-pay-settings";
 import {
   AlertDialog,
   AlertDialogAction,

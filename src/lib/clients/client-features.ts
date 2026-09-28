@@ -1,4 +1,4 @@
-import { useDisabledFeatures, type FeatureKey as TierFeatureKey } from "@/hooks/use-tenant-features";
+import { useDisabledFeatures, type FeatureKey as TierFeatureKey } from "@/hooks/org/use-tenant-features";
 
 // ─── Code-driven feature areas (DSPD SOW catalog) ─────────────────────────
 //

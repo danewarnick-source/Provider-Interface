@@ -10,9 +10,9 @@ import {
   Target,
   User,
 } from "lucide-react";
-import type { CaseloadClient } from "@/hooks/use-caseload";
+import type { CaseloadClient } from "@/hooks/clients/use-caseload";
 import { ClientPhotoCard } from "@/components/clients/client-photo-card";
-import { useClientCareData } from "@/hooks/use-client-care-data";
+import { useClientCareData } from "@/hooks/clients/use-client-care-data";
 import type { CustomFieldWithValue } from "@/lib/clients/client-care-data.functions";
 
 function formatCustomValue(f: CustomFieldWithValue): string {

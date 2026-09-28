@@ -1,8 +1,8 @@
 import { useCallback, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./use-auth";
-import { useCurrentOrg } from "./use-org";
+import { useAuth } from "@/hooks/use-auth";
+import { useCurrentOrg } from "@/hooks/use-org";
 
 // Free-form so it accepts both built-in (Training/Admin/Travel/Meeting/Other)
 // and any custom categories an admin adds in Time & Pay settings.

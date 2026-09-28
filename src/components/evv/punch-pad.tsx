@@ -59,7 +59,7 @@ import {
 import { OriginalSpeechAudit } from "@/components/staff-mobile/original-speech-audit";
 import { answerProceduralQuestion, type ProceduralResult } from "@/lib/nectar/ai-coach.functions";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";
-import { useNectarInfusion } from "@/hooks/use-nectar-infusion";
+import { useNectarInfusion } from "@/hooks/nectar/use-nectar-infusion";
 import {
   BehaviorObservationsBlock,
   emptyBehaviorAnswers,
@@ -67,17 +67,17 @@ import {
   type BehaviorAnswers,
 } from "@/components/evv/behavior-observations-block";
 import { BehaviorObservationsBoundary } from "@/components/evv/behavior-observations-boundary";
-import { useShiftBehaviorSetting } from "@/hooks/use-shift-behavior-setting";
+import { useShiftBehaviorSetting } from "@/hooks/scheduling/use-shift-behavior-setting";
 import { listClientTargetBehaviors } from "@/lib/clients/client-target-behaviors.functions";
 import { getPendingTrackingForms } from "@/lib/documents/forms.functions";
 import { PendingTrackingFormsDialog, type PendingForm } from "@/components/evv/pending-tracking-forms-dialog";
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";
 import { IncidentReportDialog } from "@/components/incidents/incident-report-dialog";
 import { AlertTriangle as AlertTriangleIcon } from "lucide-react";
-import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
-import { useClientCareData } from "@/hooks/use-client-care-data";
+import { useClientBillingCodes } from "@/hooks/clients/use-client-billing-codes";
+import { useClientCareData } from "@/hooks/clients/use-client-care-data";
 import { ShiftMedDueCheck, type PendingMedDose } from "@/components/medications/shift-med-due-check";
-import { useComplianceGate } from "@/hooks/use-compliance-gate";
+import { useComplianceGate } from "@/hooks/compliance/use-compliance-gate";
 import { useAccess } from "@/hooks/use-access";
 import { useServerFn } from "@tanstack/react-start";
 import { checkBillingEntry, checkStaffPrerequisite, raiseComplianceFlag } from "@/lib/nectar/nectar-compliance.functions";

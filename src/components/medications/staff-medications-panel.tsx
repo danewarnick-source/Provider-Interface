@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useShiftMedDueStatus } from "@/hooks/use-shift-med-due-status";
+import { useShiftMedDueStatus } from "@/hooks/scheduling/use-shift-med-due-status";
 import { logMedicationPass } from "@/lib/documents/emar-pass.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

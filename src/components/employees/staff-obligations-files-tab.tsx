@@ -46,7 +46,7 @@ import { loadInHiveCourseCertificate } from "@/lib/training/in-hive-training.fun
 import { InHiveCertificate } from "@/components/training/in-hive-certificate";
 import type { ThirtyDayCertificateRecord } from "@/lib/training/in-hive-training";
 import { RecordOverrideDialog } from "@/components/compliance/record-override-dialog";
-import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
+import { useStaffOverrides } from "@/hooks/compliance/use-obligation-overrides";
 import {
   OVERRIDE_STATE_LABEL,
   OVERRIDE_STILL_REQUIRED,

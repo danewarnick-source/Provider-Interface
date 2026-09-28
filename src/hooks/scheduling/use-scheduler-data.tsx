@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentOrg } from "./use-org";
+import { useCurrentOrg } from "@/hooks/use-org";
 
 export type SchedClient = {
   id: string;

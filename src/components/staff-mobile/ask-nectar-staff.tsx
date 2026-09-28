@@ -17,7 +17,7 @@ import {
 } from "@/components/nectar/nectar-brand";
 import { NectarAnswer } from "@/components/nectar/nectar-answer";
 import { useMobileShellContainer } from "./mobile-shell-context";
-import { useActiveShiftBarVisible } from "@/hooks/use-active-shift-bar";
+import { useActiveShiftBarVisible } from "@/hooks/scheduling/use-active-shift-bar";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { staffNectarFailureMessage } from "@/lib/nectar/nectar-staff-errors";
 import {

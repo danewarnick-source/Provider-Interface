@@ -14,17 +14,17 @@ export default defineConfig({
     alias: [
       { find: "@/hooks/use-auth", replacement: path.join(here, "mocks/use-auth.ts") },
       { find: "@/hooks/use-org", replacement: path.join(here, "mocks/use-org.ts") },
-      { find: "@/hooks/use-caseload", replacement: path.join(here, "mocks/use-caseload.ts") },
+      { find: "@/hooks/clients/use-caseload", replacement: path.join(here, "mocks/use-caseload.ts") },
       {
-        find: "@/hooks/use-active-shift",
+        find: "@/hooks/scheduling/use-active-shift",
         replacement: path.join(here, "mocks/use-active-shift.ts"),
       },
       {
-        find: "@/hooks/use-client-care-data",
+        find: "@/hooks/clients/use-client-care-data",
         replacement: path.join(here, "mocks/use-client-care-data.ts"),
       },
       {
-        find: "@/hooks/use-shift-behavior-setting",
+        find: "@/hooks/scheduling/use-shift-behavior-setting",
         replacement: path.join(here, "mocks/use-shift-behavior-setting.ts"),
       },
       {

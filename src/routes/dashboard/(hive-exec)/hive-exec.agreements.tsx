@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { FileSignature, Settings2, AlertTriangle } from "lucide-react";
-import { RequireCapability } from "@/hooks/use-exec-capability";
+import { RequireCapability } from "@/hooks/org/use-exec-capability";
 import { listAgreementsMatrix, type AgreementStatus, type MatrixCell } from "@/lib/agency/agreements.functions";
 import { Button } from "@/components/ui/button";
 

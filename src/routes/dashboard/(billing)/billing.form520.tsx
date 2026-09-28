@@ -6,7 +6,7 @@ import writeXlsxFile from "write-excel-file/browser";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
-import { useAllClientBillingCodes } from "@/hooks/use-client-billing-codes";
+import { useAllClientBillingCodes } from "@/hooks/clients/use-client-billing-codes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

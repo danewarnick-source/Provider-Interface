@@ -5,7 +5,7 @@ import { StaffBottomTabs } from "./staff-bottom-tabs";
 import { ActiveShiftBar } from "./active-shift-bar";
 import { CapThresholdModal } from "./cap-threshold-modal";
 import { MobileShellProvider, useMobileShellContainer } from "./mobile-shell-context";
-import { useActiveShiftBarVisible } from "@/hooks/use-active-shift-bar";
+import { useActiveShiftBarVisible } from "@/hooks/scheduling/use-active-shift-bar";
 import { resetStaffPhoneScroll, staffMainBottomPadCss } from "@/lib/staff/staff-phone-chrome";
 
 /**

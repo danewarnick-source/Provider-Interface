@@ -3,7 +3,7 @@ import { Lock, Sparkles } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/shared/utils";
-import { useEntitlements } from "@/hooks/use-entitlements";
+import { useEntitlements } from "@/hooks/org/use-entitlements";
 import { ADDON_CATALOG, type AddonId } from "@/lib/hive-exec/hive-tiers";
 
 /**

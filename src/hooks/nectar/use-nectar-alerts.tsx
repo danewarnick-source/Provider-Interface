@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentOrg } from "./use-org";
-import { useAllClientBillingCodes, type ClientBillingCode } from "./use-client-billing-codes";
+import { useCurrentOrg } from "@/hooks/use-org";
+import { useAllClientBillingCodes, type ClientBillingCode } from "@/hooks/clients/use-client-billing-codes";
 import { computeEntryUnits, unitsToHours } from "@/lib/billing/billing-units";
 import { isDailyServiceCode } from "@/lib/billing/service-billing";
 

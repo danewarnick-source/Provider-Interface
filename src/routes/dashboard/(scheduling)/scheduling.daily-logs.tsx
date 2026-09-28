@@ -6,7 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { useCaseload } from "@/hooks/use-caseload";
+import { useCaseload } from "@/hooks/clients/use-caseload";
 import { useEffectiveView } from "@/hooks/use-effective-view";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

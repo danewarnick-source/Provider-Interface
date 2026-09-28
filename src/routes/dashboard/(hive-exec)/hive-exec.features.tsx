@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
-import { RequireCapability } from "@/hooks/use-exec-capability";
+import { RequireCapability } from "@/hooks/org/use-exec-capability";
 import {
   listFeatureRegistry,
   upsertFeatureRegistryEntry,

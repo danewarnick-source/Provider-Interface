@@ -8,7 +8,7 @@ import { LicenseRiskPlanDialog } from "@/components/compliance/license-risk-plan
 import { OverdueObligationPlanDialog } from "@/components/compliance/overdue-obligation-plan-dialog";
 import { StandingRecordPlanDialog } from "@/components/compliance/standing-record-plan-dialog";
 import { RecordOverrideDialog } from "@/components/compliance/record-override-dialog";
-import { useOrgOverrides } from "@/hooks/use-obligation-overrides";
+import { useOrgOverrides } from "@/hooks/compliance/use-obligation-overrides";
 import {
   activeOverrideForTarget,
   isWaivableObligationKey,

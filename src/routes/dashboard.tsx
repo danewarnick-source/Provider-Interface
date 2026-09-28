@@ -59,9 +59,9 @@ import {
   Archive,
   ClipboardList,
 } from "lucide-react";
-import { useIsHiveExecutive } from "@/hooks/use-hive-executive";
+import { useIsHiveExecutive } from "@/hooks/org/use-hive-executive";
 import { EXEC_NAV, EXEC_DOMAINS, COMMAND_CENTER_ITEM } from "@/lib/hive-exec/exec-nav";
-import { useExecCapabilities } from "@/hooks/use-exec-capability";
+import { useExecCapabilities } from "@/hooks/org/use-exec-capability";
 import { getPendingUpgradeRequestCount } from "@/lib/agency/org-features.functions";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
@@ -82,7 +82,7 @@ import { OrgSwitcher, DemoBadge, DemoOrgBanner } from "@/components/org-switcher
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getInboxUnreadCount } from "@/lib/messaging/inbox-messages.functions";
-import { useOrgFeatures } from "@/hooks/use-feature-enabled";
+import { useOrgFeatures } from "@/hooks/org/use-feature-enabled";
 import {
   DASHBOARD_BOOT_TIMEOUT_MS,
   dashboardShouldRedirectToLogin,

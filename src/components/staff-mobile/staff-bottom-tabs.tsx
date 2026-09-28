@@ -2,8 +2,8 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, CalendarDays, ClipboardCheck, Sparkles, Lock, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { UpgradeGate } from "@/components/upgrade-gate";
-import { useOrgFeatures } from "@/hooks/use-feature-enabled";
-import { useMyOpenObligationCount } from "@/hooks/use-my-open-obligation-count";
+import { useOrgFeatures } from "@/hooks/org/use-feature-enabled";
+import { useMyOpenObligationCount } from "@/hooks/staff/use-my-open-obligation-count";
 
 type StaffTab = {
   to: string;

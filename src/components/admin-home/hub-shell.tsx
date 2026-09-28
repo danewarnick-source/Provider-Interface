@@ -2,7 +2,7 @@ import { type ReactNode, useState } from "react";
 import { Link, useSearch } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { UpgradeGate, FeatureLockedRoute } from "@/components/upgrade-gate";
-import { useOrgFeatures } from "@/hooks/use-feature-enabled";
+import { useOrgFeatures } from "@/hooks/org/use-feature-enabled";
 
 export type HubTab = {
   key: string;

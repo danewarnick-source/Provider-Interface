@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { denverWallToIso, denverYmd } from "@/lib/shared/denver-date";
 import type { CompletedPunch } from "@/lib/clients/caseload-open-work";
 
