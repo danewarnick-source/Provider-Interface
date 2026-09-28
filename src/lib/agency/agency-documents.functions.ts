@@ -14,7 +14,7 @@ import {
   type AgencyDocCard,
   type AgencyDocCounts,
   type AgencyDocInstance,
-} from "@/lib/agency-documents";
+} from "@/lib/agency/agency-documents";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

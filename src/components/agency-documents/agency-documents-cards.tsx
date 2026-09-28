@@ -7,7 +7,7 @@ import { ClipboardCheck, Eye, FileDown, Loader2, Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { listAgencyDocuments } from "@/lib/agency-documents.functions";
+import { listAgencyDocuments } from "@/lib/agency/agency-documents.functions";
 import {
   agencyDocPackHtml,
   agencyDocStatusLabel,
@@ -15,7 +15,7 @@ import {
   tallyAgencyDocCards,
   type AgencyDocCard,
   type AgencyDocStatus,
-} from "@/lib/agency-documents";
+} from "@/lib/agency/agency-documents";
 import { ManualCompletionDrawer } from "@/components/company-obligations/manual-completion-drawer";
 
 function statusBadgeClass(status: AgencyDocStatus): string {

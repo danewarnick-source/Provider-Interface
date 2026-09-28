@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { Sparkles, Check, X, Clock, Building2 } from "lucide-react";
-import { listUpgradeRequests, resolveUpgradeRequest, type UpgradeRequestRow } from "@/lib/org-features.functions";
+import { listUpgradeRequests, resolveUpgradeRequest, type UpgradeRequestRow } from "@/lib/agency/org-features.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/hive-exec/upgrade-requests")({

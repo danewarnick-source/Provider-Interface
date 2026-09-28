@@ -210,21 +210,21 @@ describe("Agency documents lock", () => {
 
 describe("Agency file surface lock", () => {
   it("folds Agency file under Admin Compliance and keeps Company policies", () => {
-    const nav = readFileSync(new URL("../routes/dashboard.tsx", import.meta.url), "utf8");
+    const nav = readFileSync(new URL("../../routes/dashboard.tsx", import.meta.url), "utf8");
     assert.match(nav, /to: "\/dashboard\/evidence", label: "Evidence"/);
     assert.doesNotMatch(nav, /label: "State Audit"/);
     assert.doesNotMatch(nav, /to: "\/dashboard\/agency-documents", label: "/);
     assert.doesNotMatch(nav, /label: "Agency documents"/);
     assert.doesNotMatch(nav, /to: "\/dashboard\/company-obligations", label: "Compliance"/);
     const route = readFileSync(
-      new URL("../routes/dashboard.agency-documents.tsx", import.meta.url),
+      new URL("../../routes/dashboard.agency-documents.tsx", import.meta.url),
       "utf8",
     );
     assert.match(route, /createFileRoute\("\/dashboard\/agency-documents"\)/);
     assert.match(route, /redirect/);
     assert.match(route, /\/dashboard\/compliance/);
     const panel = readFileSync(
-      new URL("../components/compliance/agency-file-panel.tsx", import.meta.url),
+      new URL("../../components/compliance/agency-file-panel.tsx", import.meta.url),
       "utf8",
     );
     assert.match(panel, /Agency file/);
@@ -236,7 +236,7 @@ describe("Agency file surface lock", () => {
 
   it("replaces the company-obligations product path with a redirect", () => {
     const src = readFileSync(
-      new URL("../routes/dashboard.company-obligations.tsx", import.meta.url),
+      new URL("../../routes/dashboard.company-obligations.tsx", import.meta.url),
       "utf8",
     );
     assert.match(src, /redirect/);
@@ -261,7 +261,7 @@ describe("Agency file surface lock", () => {
       assert.equal(existsSync(new URL(rel, import.meta.url)), false, rel);
     }
     const kept = readFileSync(
-      new URL("../components/company-obligations/manual-completion-drawer.tsx", import.meta.url),
+      new URL("../../components/company-obligations/manual-completion-drawer.tsx", import.meta.url),
       "utf8",
     );
     assert.match(kept, /ManualCompletionDrawer/);

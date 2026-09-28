@@ -5,13 +5,13 @@ import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import {
   computeAgencySetupStatus,
   EMPTY_AGENCY_SETUP_FACTS,
-} from "@/lib/agency-setup-gate";
+} from "@/lib/agency/agency-setup-gate";
 import {
   assertAgencySetupCompleteForOrg,
   loadAgencySetupFacts,
   loadAgencySetupStatus,
   persistAgencySetupFactsInternal,
-} from "@/lib/agency-setup-persist";
+} from "@/lib/agency/agency-setup-persist";
 
 export {
   assertAgencySetupCompleteForOrg,
@@ -19,7 +19,7 @@ export {
   loadAgencySetupStatus,
   persistAgencySetupFactsInternal,
   type PersistAgencySetupInput,
-} from "@/lib/agency-setup-persist";
+} from "@/lib/agency/agency-setup-persist";
 
 const OrgId = z.object({ organizationId: z.string().uuid() });
 

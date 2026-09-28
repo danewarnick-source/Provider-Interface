@@ -6,7 +6,7 @@ import {
   isSetupGatedPath,
   setupRedirectForPath,
   shouldBlockStaffClientCreate,
-} from "@/lib/agency-setup-gate";
+} from "@/lib/agency/agency-setup-gate";
 import { AgencySetupIncompleteCard } from "@/components/onboarding/agency-setup-incomplete";
 
 export function AgencySetupCreateGate({ children }: { children: React.ReactNode }) {

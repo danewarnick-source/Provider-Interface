@@ -5,8 +5,8 @@ import {
   computeObligationApplicability,
   persistApplicabilityRows,
   type PersistOrgFactsInput,
-} from "./obligations/applicability.ts";
-import { canActivate } from "./obligations/draft-rules/publication.ts";
+} from "../obligations/applicability.ts";
+import { canActivate } from "../obligations/draft-rules/publication.ts";
 import {
   AGENCY_SETUP_INCOMPLETE_MESSAGE,
   computeAgencySetupStatus,

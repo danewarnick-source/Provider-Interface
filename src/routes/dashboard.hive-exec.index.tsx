@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { Building2, Search, AlertTriangle, Lock, Users, Contact2, DollarSign, Sparkles, ArrowRight } from "lucide-react";
 import { getExecKpis, listCompanies, type CompanyRow } from "@/lib/hive-exec.functions";
-import { getPendingUpgradeRequestCount } from "@/lib/org-features.functions";
+import { getPendingUpgradeRequestCount } from "@/lib/agency/org-features.functions";
 import { listRecentTrainingClassAlerts } from "@/lib/training-class.functions";
 import { formatRosterContactLine, trainingClassLabel } from "@/lib/training-class";
 import { listTrainingOnlyOrdersForExec } from "@/lib/training-only-exec.functions";

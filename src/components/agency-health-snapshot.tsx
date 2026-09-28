@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { getAgencyHealthSnapshot, type HealthMetric } from "@/lib/agency-health.functions";
+import { getAgencyHealthSnapshot, type HealthMetric } from "@/lib/agency/agency-health.functions";
 import { CheckCircle2, AlertTriangle, ShieldAlert, ArrowRight } from "lucide-react";
 
 type Tier = {

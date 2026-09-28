@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { AGENCY_POLICY_SOURCE_SECTION } from "./agency-policies.ts";
+import { AGENCY_POLICY_SOURCE_SECTION } from "./agency/agency-policies.ts";
 import {
   ABI_OBLIGATION_TITLE,
   THIRTY_DAY_OBLIGATION_TITLE,

@@ -15,9 +15,9 @@ import { shouldKeepPrepaidAccess, syncPiListQuantityForOrg } from "@/lib/pi-list
 import { fulfillTrainingOrder } from "@/lib/training-fulfillment.server";
 import { fulfillTrainingClass } from "@/lib/training-class-fulfillment.server";
 import { fulfillTrainingOnlyOrder } from "@/lib/training-only-fulfillment.server";
-import { activateSubscriptionFromCheckout } from "@/lib/org-subscription-activate";
+import { activateSubscriptionFromCheckout } from "@/lib/agency/org-subscription-activate";
 
-export { activateSubscriptionFromCheckout } from "@/lib/org-subscription-activate";
+export { activateSubscriptionFromCheckout } from "@/lib/agency/org-subscription-activate";
 
 export type StripeLikeEvent = {
   id: string;

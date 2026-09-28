@@ -5,7 +5,7 @@ import {
   AGENCY_SETUP_INCOMPLETE_MESSAGE,
   AGENCY_SETUP_PATH,
   type AgencySetupStatus,
-} from "@/lib/agency-setup-gate";
+} from "@/lib/agency/agency-setup-gate";
 
 export function AgencySetupIncompleteCard({
   status,

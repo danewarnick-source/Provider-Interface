@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { getMyOrgFeatures, type FeatureRegistryRow } from "@/lib/org-features.functions";
+import { getMyOrgFeatures, type FeatureRegistryRow } from "@/lib/agency/org-features.functions";
 
 const KNOWN_GATED_FEATURES = new Set([
   "hive_training",

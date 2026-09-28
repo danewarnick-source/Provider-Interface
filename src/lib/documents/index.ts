@@ -1,7 +1,7 @@
 // Domain Lib: Documents, Forms & Imports
 
-export * from '../agency-documents.functions';
-export * from '../agency-policies.functions';
+export * from '../agency/agency-documents.functions';
+export * from '../agency/agency-policies.functions';
 export * from '../document-effective-dating.functions';
 export * from '../document-extraction';
 export * from '../effective-document.functions';

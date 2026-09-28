@@ -18,13 +18,13 @@ import {
   AGENCY_POLICY_MAX_BYTES,
   isAllowedPolicyFile,
   type PolicyAudienceKind,
-} from "@/lib/agency-policies";
+} from "@/lib/agency/agency-policies";
 import {
   createAgencyPolicy,
   createAgencyPolicyUploadUrl,
   listAgencyPolicies,
   listPolicyJobCodeOptions,
-} from "@/lib/agency-policies.functions";
+} from "@/lib/agency/agency-policies.functions";
 
 /** Agency policy binder — same capability as the old Policies tab. */
 export function InternalTrainingsPanel({ orgId }: { orgId: string }) {

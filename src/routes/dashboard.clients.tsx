@@ -39,8 +39,8 @@ import { ClientCompliancePanel } from "@/components/clients/client-compliance-pa
 import { backfillOrgHomePinsFromAddresses } from "@/lib/home-pin.functions";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { useAgencySetup } from "@/hooks/use-agency-setup";
-import { getAgencySetupStatus } from "@/lib/agency-setup-gate.functions";
-import { assertAgencySetupComplete, shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
+import { getAgencySetupStatus } from "@/lib/agency/agency-setup-gate.functions";
+import { assertAgencySetupComplete, shouldBlockStaffClientCreate } from "@/lib/agency/agency-setup-gate";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

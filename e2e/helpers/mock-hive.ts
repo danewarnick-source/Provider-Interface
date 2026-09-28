@@ -22,8 +22,8 @@ import {
   STAFF_LIST,
   TEAMS,
 } from "../fixtures/tns-roster";
-import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
-import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
+import { computeAgencySetupStatus } from "../../src/lib/agency/agency-setup-gate";
+import type { AgencySetupFacts } from "../../src/lib/agency/agency-setup-completion";
 import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
 import { withAccessLevel } from "./access-level";
 

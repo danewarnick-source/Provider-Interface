@@ -7,7 +7,7 @@
  * additive migration is applied). No parallel obligation system.
  */
 
-import { AGENCY_POLICY_SOURCE_SECTION } from "./agency-policies.ts";
+import { AGENCY_POLICY_SOURCE_SECTION } from "./agency/agency-policies.ts";
 import {
   CLIENT_SPECIFIC_OBLIGATION_TITLE,
   PCT_HIRE_COURSE_TITLE,

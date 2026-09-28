@@ -62,7 +62,7 @@ import {
 import { useIsHiveExecutive } from "@/hooks/use-hive-executive";
 import { EXEC_NAV, EXEC_DOMAINS, COMMAND_CENTER_ITEM } from "@/lib/exec-nav";
 import { useExecCapabilities } from "@/hooks/use-exec-capability";
-import { getPendingUpgradeRequestCount } from "@/lib/org-features.functions";
+import { getPendingUpgradeRequestCount } from "@/lib/agency/org-features.functions";
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { ImpersonationBanner } from "@/components/impersonation-banner";

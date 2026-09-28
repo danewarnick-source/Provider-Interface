@@ -4,12 +4,12 @@
  * One card per duty; renew uses the same card. Company policies stay off this pack.
  */
 
-import { neutralizeCsvFormula } from "./csv-safe.ts";
+import { neutralizeCsvFormula } from "../csv-safe.ts";
 import {
   obligationFileStatusLabel,
   statusForObligationInstance,
   type ObligationFileStatus,
-} from "./staff/staff-obligation-files.ts";
+} from "../staff/staff-obligation-files.ts";
 
 export const AGENCY_DOC_STATUS_LABEL = {
   on_file: "On file",

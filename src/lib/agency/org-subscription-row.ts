@@ -3,8 +3,8 @@
  * Confirm and webhook apply this patch after Stripe says paid.
  */
 
-import { normalizeTierId } from "./hive-tiers.ts";
-import { mrrCentsForPlan } from "./financial/stripe-config.ts";
+import { normalizeTierId } from "../hive-tiers.ts";
+import { mrrCentsForPlan } from "../financial/stripe-config.ts";
 
 export type ActivatePaidSubscriptionInput = {
   orgId: string;

@@ -4,27 +4,27 @@
  * question has a recorded answer. Banner math is display-only.
  */
 
-import { AWARDED_SERVICE_CODES_FACT_KEY } from "./obligations/setup-facts.ts";
+import { AWARDED_SERVICE_CODES_FACT_KEY } from "../obligations/setup-facts.ts";
 import {
   ORG_FACT_DEFINITIONS,
   computeObligationApplicability,
   type ObligationApplicability,
   type OrgFacts,
-} from "./obligations/applicability.ts";
+} from "../obligations/applicability.ts";
 import {
   CORE_RULE_LOGIC_SLICE,
   canActivate,
   simulateDraftRules,
   type SimulationResult,
   type SyntheticStaff,
-} from "./obligations/draft-rules/index.ts";
+} from "../obligations/draft-rules/index.ts";
 import {
   AGENCY_SETUP_COMPLETION_SPEC,
   factsAreComplete,
   isRequiredSetupFactAnswered,
   type AgencySetupFacts,
 } from "./agency-setup-completion.ts";
-import { isAdminLevel } from "./access/levels.ts";
+import { isAdminLevel } from "../access/levels.ts";
 
 export {
   AGENCY_SETUP_COMPLETION_SPEC,

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { getOrgFeatureBundle, setOrgFeature, type FeatureRegistryRow } from "@/lib/org-features.functions";
+import { getOrgFeatureBundle, setOrgFeature, type FeatureRegistryRow } from "@/lib/agency/org-features.functions";
 
 /**
  * Organization Master Controller.

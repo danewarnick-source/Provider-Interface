@@ -22,7 +22,7 @@ import { buildInvitationEmail } from "@/lib/auth/invitation-email";
 import { inviteJoinUrl } from "@/lib/auth/join-invite";
 import { pickReplyTo, stripFakeDisplayLabel } from "@/lib/managed-from";
 import { canSendImportInvite } from "@/lib/import-invite";
-import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
+import { assertAgencySetupCompleteForOrg } from "@/lib/agency/agency-setup-gate.functions";
 import {
   findMemberAccessByEmail,
   resolveResendAccess,

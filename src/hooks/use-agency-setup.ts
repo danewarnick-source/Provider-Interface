@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { getAgencySetupStatus } from "@/lib/agency-setup-gate.functions";
+import { getAgencySetupStatus } from "@/lib/agency/agency-setup-gate.functions";
 import {
   computeAgencySetupStatus,
   EMPTY_AGENCY_SETUP_FACTS,
   type AgencySetupFacts,
   type AgencySetupStatus,
-} from "@/lib/agency-setup-gate";
+} from "@/lib/agency/agency-setup-gate";
 
 export function agencySetupQueryKey(orgId: string | null | undefined) {
   return ["agency-setup-status", orgId] as const;

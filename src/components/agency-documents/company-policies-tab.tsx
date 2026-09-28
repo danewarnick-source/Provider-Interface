@@ -18,14 +18,14 @@ import {
   AGENCY_POLICY_MAX_BYTES,
   isAllowedPolicyFile,
   type PolicyAudienceKind,
-} from "@/lib/agency-policies";
+} from "@/lib/agency/agency-policies";
 import {
   createAgencyPolicy,
   createAgencyPolicyUploadUrl,
   listAgencyPolicies,
   listPolicyJobCodeOptions,
-} from "@/lib/agency-policies.functions";
-import { COMPANY_POLICY_TEMPLATES } from "@/lib/agency-documents";
+} from "@/lib/agency/agency-policies.functions";
+import { COMPANY_POLICY_TEMPLATES } from "@/lib/agency/agency-documents";
 
 export function CompanyPoliciesTab({ orgId }: { orgId: string }) {
   const qc = useQueryClient();

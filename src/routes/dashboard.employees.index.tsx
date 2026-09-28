@@ -81,7 +81,7 @@ import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-gui
 import { RequirePermission } from "@/components/rbac-guard";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { useAgencySetup } from "@/hooks/use-agency-setup";
-import { shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
+import { shouldBlockStaffClientCreate } from "@/lib/agency/agency-setup-gate";
 import { PersonAvatar } from "@/components/person/person-avatar";
 
 function rosterAccessLabel(level: string | null | undefined): string {

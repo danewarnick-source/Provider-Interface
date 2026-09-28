@@ -5,7 +5,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { generateNextInstanceInternal } from "../company-obligations.functions";
-import { assignMatchingPoliciesForStaffInternal } from "../agency-policies.functions";
+import { assignMatchingPoliciesForStaffInternal } from "../agency/agency-policies.functions";
 import {
   ensureOpenStaffObligationByKeyInternal,
   loadStaffForEnsure,

@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
 import { onStaffHiredInternal } from "@/lib/staff/staff-assignment-hooks.functions";
 import { resolveAccountUsername } from "@/lib/account-username";
-import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
+import { assertAgencySetupCompleteForOrg } from "@/lib/agency/agency-setup-gate.functions";
 import { generateTempPassword } from "@/lib/temp-password";
 import { requireCategory, requireLevel } from "@/lib/access/require";
 import type { AccessLevel } from "@/lib/access/levels";

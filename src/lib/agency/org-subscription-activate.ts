@@ -16,7 +16,7 @@ import {
   paidOrgSubscriptionCore,
   paidOrgSubscriptionPatch,
   type ActivatePaidSubscriptionInput,
-} from "@/lib/org-subscription-row";
+} from "@/lib/agency/org-subscription-row";
 
 export const PAID_SUBSCRIPTION_WRITE_FAILED =
   "Payment went through. This host could not save the paid subscription row. Stay on this page.";
@@ -29,7 +29,7 @@ export {
   paidOrgSubscriptionCore,
   paidOrgSubscriptionPatch,
   type ActivatePaidSubscriptionInput,
-} from "@/lib/org-subscription-row";
+} from "@/lib/agency/org-subscription-row";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function readOrgForExempt(db: any, orgId: string): Promise<boolean | null> {

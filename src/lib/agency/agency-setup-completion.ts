@@ -13,8 +13,8 @@
 import {
   AWARDED_SERVICE_CODES_FACT_KEY,
   awardedCodesUnanswered,
-} from "./obligations/setup-facts.ts";
-import { parseFactAnswer, type FactAnswer, type OrgFacts } from "./obligations/applicability.ts";
+} from "../obligations/setup-facts.ts";
+import { parseFactAnswer, type FactAnswer, type OrgFacts } from "../obligations/applicability.ts";
 
 export const AGENCY_SETUP_COMPLETION_SPEC = {
   version: 1,

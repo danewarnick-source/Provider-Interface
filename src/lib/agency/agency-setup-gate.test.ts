@@ -27,8 +27,8 @@ import {
   type AgencySetupFacts,
   type OrgAccessActor,
 } from "./agency-setup-gate.ts";
-import { CORE_RULE_LOGIC_SLICE } from "./obligations/draft-rules/fixtures.ts";
-import { canActivate } from "./obligations/draft-rules/publication.ts";
+import { CORE_RULE_LOGIC_SLICE } from "../obligations/draft-rules/fixtures.ts";
+import { canActivate } from "../obligations/draft-rules/publication.ts";
 
 function read(rel: string) {
   return readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8");
@@ -250,10 +250,10 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
     assert.equal(shouldBlockStaffClientCreate(incomplete), true);
     assert.throws(() => assertAgencySetupComplete(incomplete), /Agency setup is incomplete/);
 
-    const hire = read("./employees.functions.ts");
+    const hire = read("../staff/employees.functions.ts");
     const invites = read("./invitations.functions.ts");
-    const clients = read("../routes/dashboard.clients.tsx");
-    const importCommit = read("./smart-import-commit.functions.ts");
+    const clients = read("../../routes/dashboard.clients.tsx");
+    const importCommit = read("../smart-import-commit.functions.ts");
     assert.match(hire, /assertAgencySetupCompleteForOrg/);
     assert.match(invites, /assertAgencySetupCompleteForOrg/);
     assert.match(clients, /assertAgencySetupCompleteForOrg|shouldBlockStaffClientCreate/);
@@ -285,14 +285,14 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
   });
 
   it("setup page previews applicability from useAgencySetup facts, not a leftover factsQuery", () => {
-    const setupPage = read("../routes/dashboard.settings.compliance-setup.tsx");
+    const setupPage = read("../../routes/dashboard.settings.compliance-setup.tsx");
     assert.match(setupPage, /const \{ facts, status, isLoading \} = useAgencySetup\(\)/);
     assert.match(setupPage, /\.\.\.facts,/);
     assert.doesNotMatch(setupPage, /factsQuery/);
   });
 
   it("does not mount the agency-setup wizard on Home", () => {
-    const home = read("../components/admin-home/admin-home-dashboard.tsx");
+    const home = read("../../components/admin-home/admin-home-dashboard.tsx");
     assert.doesNotMatch(home, /NectarOnboardingPanel/);
     assert.doesNotMatch(home, /nectar-onboarding-panel/);
     assert.doesNotMatch(home, /agency-setup-panel/);
@@ -383,7 +383,7 @@ describe("unit: agency setup helpers on in-memory arrays (not database isolation
   });
 
   it("does not publish or activate draft catalog rules after re-evaluation", () => {
-    const persist = read("./obligations/applicability.ts");
+    const persist = read("../obligations/applicability.ts");
     const gate = read("./agency-setup-persist.ts");
     assert.match(persist, /persistApplicabilityRows/);
     assert.match(gate, /reevaluateAgencyRequirements/);
@@ -395,7 +395,7 @@ describe("unit: agency setup helpers on in-memory arrays (not database isolation
 
 describe("unit: SQL source review (not a live database)", () => {
   it("correlates first-owner EXISTS to the inserted organization_members row", () => {
-    const sql = read("../../supabase/migrations/20260914120000_agency_setup_gate.sql");
+    const sql = read("../../../supabase/migrations/20260914120000_agency_setup_gate.sql");
     assert.match(sql, /om\.organization_id = NEW\.organization_id/);
     assert.match(
       sql,
@@ -429,7 +429,7 @@ describe("unit: SQL source review (not a live database)", () => {
 
   it("does not write service area into specializations", () => {
     const fns = read("./agency-setup-persist.ts");
-    const profile = read("../routes/dashboard.nectar-company-profile.tsx");
+    const profile = read("../../routes/dashboard.nectar-company-profile.tsx");
     assert.doesNotMatch(fns, /Service area:/);
     assert.doesNotMatch(fns, /mergeServiceAreaIntoSpecializations/);
     assert.match(fns, /service_area: nextArea/);

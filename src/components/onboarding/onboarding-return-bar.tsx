@@ -1,7 +1,7 @@
 import { Link, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import { useAgencySetup } from "@/hooks/use-agency-setup";
-import { AGENCY_SETUP_PATH } from "@/lib/agency-setup-gate";
+import { AGENCY_SETUP_PATH } from "@/lib/agency/agency-setup-gate";
 
 /**
  * Persistent slim bar on destination pages while server setup is incomplete.

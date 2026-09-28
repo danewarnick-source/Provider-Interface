@@ -6,8 +6,8 @@ import {
   paidOrgSubscriptionCore,
   paidOrgSubscriptionPatch,
 } from "./org-subscription-row.ts";
-import { TNS_ORGANIZATION_ID } from "./current-org.ts";
-import { isBillingExempt } from "./billing-access.ts";
+import { TNS_ORGANIZATION_ID } from "../current-org.ts";
+import { isBillingExempt } from "../billing-access.ts";
 
 describe("paidOrgSubscriptionPatch", () => {
   it("writes status=active with locked_at null and Stripe ids", () => {
@@ -85,7 +85,7 @@ describe("privileged writer does not invent env names", () => {
 
 describe("confirm and webhook share the upsert", () => {
   it("confirmCheckout upserts via activateSubscriptionFromCheckout", () => {
-    const checkout = readFileSync(new URL("./stripe-checkout.functions.ts", import.meta.url), "utf8");
+    const checkout = readFileSync(new URL("../financial/stripe-checkout.functions.ts", import.meta.url), "utf8");
     const start = checkout.indexOf("export const confirmCheckoutSessionFn");
     const end = checkout.indexOf("type TrainingCheckoutInput");
     assert.ok(start >= 0 && end > start);
@@ -96,7 +96,7 @@ describe("confirm and webhook share the upsert", () => {
   });
 
   it("webhook uses the same activate helper", () => {
-    const webhook = readFileSync(new URL("./stripe-webhook.ts", import.meta.url), "utf8");
+    const webhook = readFileSync(new URL("../financial/stripe-webhook.ts", import.meta.url), "utf8");
     assert.match(webhook, /activateSubscriptionFromCheckout/);
     const activate = readFileSync(new URL("./org-subscription-activate.ts", import.meta.url), "utf8");
     assert.match(activate, /\.upsert\(/);
@@ -109,7 +109,7 @@ describe("confirm and webhook share the upsert", () => {
   });
 
   it("billing-locked leaves on confirm ok without waiting for webhook", () => {
-    const page = readFileSync(new URL("../routes/billing-locked.tsx", import.meta.url), "utf8");
+    const page = readFileSync(new URL("../../routes/billing-locked.tsx", import.meta.url), "utf8");
     const confirmAt = page.indexOf("confirmFn");
     const navAt = page.indexOf('navigate({ to: "/dashboard", replace: true })');
     assert.ok(confirmAt > 0 && navAt > confirmAt);
