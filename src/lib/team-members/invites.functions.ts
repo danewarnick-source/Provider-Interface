@@ -10,7 +10,7 @@
 // rather than invoking the `sendEmail` server fn from inside another server
 // fn's handler, since createServerFn calls aren't meant to be nested.
 
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -57,6 +57,13 @@ const INVITE_SELECT = "id, token, email, access_level, access_preset_id, expires
 /** Per inviter. Reuses nectar_check_rate (service role). 0 daily cap = requests only. */
 const INVITE_MAX_PER_MIN = 20;
 
+// Server-only so sendTeamMemberInvitesInternal (a plain export that stays in
+// the client module graph) doesn't pull @tanstack/react-start/server into it.
+const setTooManyRequests = createServerOnlyFn(async () => {
+  const { setResponseStatus } = await import("@tanstack/react-start/server");
+  setResponseStatus(429);
+});
+
 async function assertInviteRate(userId: string): Promise<void> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,8 +80,7 @@ async function assertInviteRate(userId: string): Promise<void> {
   const waitMs = Number(row?.wait_ms ?? 0);
   if (waitMs > 0 || row?.day_full) {
     try {
-      const { setResponseStatus } = await import("@tanstack/react-start/server");
-      setResponseStatus(429);
+      await setTooManyRequests();
     } catch {
       /* The thrown error still stops the invite when no response object is bound. */
     }
