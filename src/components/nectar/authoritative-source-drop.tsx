@@ -10,7 +10,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

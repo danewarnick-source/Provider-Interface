@@ -17,7 +17,7 @@ import {
   ClipboardList,
   Plus,
 } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 import { toast } from "sonner";
 import { listCompanies } from "@/lib/hive-exec/hive-exec.functions";
 import {

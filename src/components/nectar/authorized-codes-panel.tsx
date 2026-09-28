@@ -11,7 +11,7 @@ import {
   CheckCircle2,
   Info,
 } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 import {
   listAuthorizedCodes,
   upsertAuthorizedCode,

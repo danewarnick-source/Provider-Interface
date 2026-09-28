@@ -1,4 +1,4 @@
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 import { PI_ACTION, PI_CREAM, PI_GOLD, PI_NAVY } from "@/lib/public-site/pi-landing";
 
 type PersonRow = {

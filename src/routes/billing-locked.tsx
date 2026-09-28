@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Building2, CreditCard, Loader2, LogOut, Mail } from "lucide-react";
-import { PiBrand } from "@/components/brand/pi-brand";
+import { PiBrand } from "@/components/branding/pi-brand";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {

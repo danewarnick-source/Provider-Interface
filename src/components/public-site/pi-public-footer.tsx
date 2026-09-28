@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { PiHomeLockup } from "@/components/pi-landing/pi-mark";
+import { PiHomeLockup } from "@/components/public-site/pi-mark";
 import { PI_HOME_FOOTER_HCBS, PI_HOME_FOOTER_LINKS } from "@/lib/public-site/pi-homepage";
 import { PI_COPYRIGHT } from "@/lib/public-site/pi-landing";
 

@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Search, MapPin, Users, Contact2, ArrowRight } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 import { searchOrgEntities } from "@/lib/nectar/nectar-search.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 

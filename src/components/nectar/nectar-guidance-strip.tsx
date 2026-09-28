@@ -1,5 +1,5 @@
 import { Sparkles } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 import { cn } from "@/lib/shared/utils";
 import type { ReactNode } from "react";
 

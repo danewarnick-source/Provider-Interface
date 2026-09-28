@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
+import { PiPublicPage } from "@/components/public-site/pi-public-page";
 
 import { supabase } from "@/integrations/supabase/client";
 import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";

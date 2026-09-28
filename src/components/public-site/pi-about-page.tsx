@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { PiMark } from "@/components/pi-landing/pi-mark";
-import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
+import { PiMark } from "@/components/public-site/pi-mark";
+import { PiPublicPage } from "@/components/public-site/pi-public-page";
 import {
   PI_ABOUT_PAGE_BODY,
   PI_ABOUT_PAGE_HEADLINE,

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 import { PI_ACTION, PI_CREAM, PI_NAVY, PI_PRODUCT_SHOTS } from "@/lib/public-site/pi-landing";
-import { DuskPeopleScreen } from "@/components/pi-landing/dusk-people-screen";
+import { DuskPeopleScreen } from "@/components/public-site/dusk-people-screen";
 
 function NavGlyph({ d }: { d: string }) {
   return (

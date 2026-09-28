@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
+import { PiPublicPage } from "@/components/public-site/pi-public-page";
 import {
   PI_LEGAL_NAME,
   PI_TERMS_BILLING_HEADING,

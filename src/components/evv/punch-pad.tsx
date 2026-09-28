@@ -32,7 +32,7 @@ import {
   ShieldCheck,
   ExternalLink,
 } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode, maskMemberId, padMemberId } from "@/lib/scheduling/evv-codes";

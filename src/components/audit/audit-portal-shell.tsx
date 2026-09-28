@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut, AlertTriangle, Eye, EyeOff } from "lucide-react";
-import { PiBrand } from "@/components/brand/pi-brand";
+import { PiBrand } from "@/components/branding/pi-brand";
 import { PageShell } from "@/components/layout/page-shell";
 import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
 import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth/auth-captcha";

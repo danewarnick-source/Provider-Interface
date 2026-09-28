@@ -98,10 +98,10 @@ describe("public homepage tokens stay off the in-app cream theme", () => {
   });
 
   it("wires real routes and never uses an empty hash", () => {
-    const landing = read("../../components/pi-landing/pi-marketing-page.tsx");
-    const header = read("../../components/pi-landing/pi-public-header.tsx");
-    const footer = read("../../components/pi-landing/pi-public-footer.tsx");
-    const css = read("../../components/pi-landing/pi-homepage.css");
+    const landing = read("../../components/public-site/pi-marketing-page.tsx");
+    const header = read("../../components/public-site/pi-public-header.tsx");
+    const footer = read("../../components/public-site/pi-public-footer.tsx");
+    const css = read("../../components/public-site/pi-homepage.css");
     const theme = read("../public-site/pi-theme.ts");
     assert.match(landing, /to="\/contact"/);
     assert.match(landing, /to="\/signup"/);
@@ -126,8 +126,8 @@ describe("public homepage tokens stay off the in-app cream theme", () => {
   });
 
   it("softens gold CTAs and keeps mid-page sections inset on mobile", () => {
-    const css = read("../../components/pi-landing/pi-homepage.css");
-    const landing = read("../../components/pi-landing/pi-landing.css");
+    const css = read("../../components/public-site/pi-homepage.css");
+    const landing = read("../../components/public-site/pi-landing.css");
     assert.match(css, /--home-inset: max\(24px/);
     assert.match(css, /\.pi-home\.pi-landing-root \.pi-home-feature/);
     assert.match(css, /padding-left: var\(--home-inset\)/);

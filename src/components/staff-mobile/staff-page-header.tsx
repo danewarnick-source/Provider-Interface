@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from "react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 
 /**
  * Crisp page header for staff app pages — eyebrow + title + subhead.

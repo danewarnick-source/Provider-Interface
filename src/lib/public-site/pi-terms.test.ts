@@ -52,7 +52,7 @@ describe("Provider Interface terms draft", () => {
   it("renders the locked copy on /terms and the signup checkbox", () => {
     const page = readFileSync(new URL("../../routes/terms.tsx", import.meta.url), "utf8");
     const signup = readFileSync(new URL("../../routes/signup.tsx", import.meta.url), "utf8");
-    const footer = readFileSync(new URL("../../components/pi-landing/pi-public-footer.tsx", import.meta.url), "utf8");
+    const footer = readFileSync(new URL("../../components/public-site/pi-public-footer.tsx", import.meta.url), "utf8");
     assert.match(page, /PI_LEGAL_NAME/);
     assert.match(page, /PI_TERMS_CONTRACTS_HEADING/);
     assert.match(page, /createFileRoute\("\/terms"\)/);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
+import { PiPublicPage } from "@/components/public-site/pi-public-page";
 import { PI_LEGAL_NAME } from "@/lib/public-site/pi-terms";
 import { PI_BAA_AGREE_COPY, PI_BAA_INTRO, PI_BAA_SECTIONS, PI_BAA_TITLE, PI_BAA_VERSION } from "@/lib/public-site/pi-baa";
 

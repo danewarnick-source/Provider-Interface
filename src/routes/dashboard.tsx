@@ -91,8 +91,8 @@ import {
   writeSessionHint,
 } from "@/lib/auth/auth-session-boot";
 import { PortalViewSwitcher } from "@/components/portal-view-switcher";
-import { PiBrand } from "@/components/brand/pi-brand";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiBrand } from "@/components/branding/pi-brand";
+import { PiMark } from "@/components/public-site/pi-mark";
 
 import { BillingBanner } from "@/components/billing/billing-banner";
 import { orgDashboardIsLocked, pathBypassesBillingLock } from "@/lib/billing/billing-lock-client";

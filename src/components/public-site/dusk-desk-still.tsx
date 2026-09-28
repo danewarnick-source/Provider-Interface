@@ -1,4 +1,4 @@
-import { DuskPeopleScreen } from "@/components/pi-landing/dusk-people-screen";
+import { DuskPeopleScreen } from "@/components/public-site/dusk-people-screen";
 
 /**
  * Composed dusk room: photographic desk plate + laptop still. Not an app iframe.

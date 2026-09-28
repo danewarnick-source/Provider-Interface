@@ -16,7 +16,7 @@ import {
   type AgencyDocCard,
   type AgencyDocStatus,
 } from "@/lib/agency/agency-documents";
-import { ManualCompletionDrawer } from "@/components/company-obligations/manual-completion-drawer";
+import { ManualCompletionDrawer } from "@/components/obligations/manual-completion-drawer";
 
 function statusBadgeClass(status: AgencyDocStatus): string {
   if (status === "on_file") return "border-emerald-300 bg-emerald-50 text-emerald-800";

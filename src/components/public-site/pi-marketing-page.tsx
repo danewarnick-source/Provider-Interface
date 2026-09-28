@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
-import { PiHeroPhone } from "@/components/pi-landing/pi-hero-phone";
-import { PiHomepageMark } from "@/components/pi-landing/pi-mark";
+import { PiPublicPage } from "@/components/public-site/pi-public-page";
+import { PiHeroPhone } from "@/components/public-site/pi-hero-phone";
+import { PiHomepageMark } from "@/components/public-site/pi-mark";
 import {
   PI_HOME_ASK,
   PI_HOME_DSP_CAPTION,

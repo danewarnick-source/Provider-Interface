@@ -10,7 +10,7 @@ import {
   Loader2,
   ShieldCheck,
 } from "lucide-react";
-import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
+import { PiPublicPage } from "@/components/public-site/pi-public-page";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";

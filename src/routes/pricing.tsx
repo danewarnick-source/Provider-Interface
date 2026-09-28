@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
-import { PiPricingSection } from "@/components/pi-landing/pi-pricing";
+import { PiPublicPage } from "@/components/public-site/pi-public-page";
+import { PiPricingSection } from "@/components/public-site/pi-pricing";
 import {
   PI_DIFFERENCE_HEADLINE,
   PI_PRICING_HERO_LEDE,

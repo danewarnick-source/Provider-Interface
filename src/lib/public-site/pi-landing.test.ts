@@ -54,16 +54,16 @@ const PUBLIC_FILES = [
   new URL("../../routes/privacy.tsx", import.meta.url),
   new URL("../../routes/contact.tsx", import.meta.url),
   new URL("../../routes/login.tsx", import.meta.url),
-  new URL("../../components/pi-landing/pi-marketing-page.tsx", import.meta.url),
+  new URL("../../components/public-site/pi-marketing-page.tsx", import.meta.url),
   new URL("./pi-homepage.ts", import.meta.url),
-  new URL("../../components/pi-landing/pi-hero-glass.tsx", import.meta.url),
-  new URL("../../components/pi-landing/pi-pricing.tsx", import.meta.url),
-  new URL("../../components/pi-landing/pi-product-shots.tsx", import.meta.url),
-  new URL("../../components/pi-landing/pi-public-header.tsx", import.meta.url),
-  new URL("../../components/pi-landing/pi-public-footer.tsx", import.meta.url),
-  new URL("../../components/pi-landing/pi-feature-scroll.tsx", import.meta.url),
-  new URL("../../components/pi-landing/pi-nectar-page.tsx", import.meta.url),
-  new URL("../../components/pi-landing/pi-about-page.tsx", import.meta.url),
+  new URL("../../components/public-site/pi-hero-glass.tsx", import.meta.url),
+  new URL("../../components/public-site/pi-pricing.tsx", import.meta.url),
+  new URL("../../components/public-site/pi-product-shots.tsx", import.meta.url),
+  new URL("../../components/public-site/pi-public-header.tsx", import.meta.url),
+  new URL("../../components/public-site/pi-public-footer.tsx", import.meta.url),
+  new URL("../../components/public-site/pi-feature-scroll.tsx", import.meta.url),
+  new URL("../../components/public-site/pi-nectar-page.tsx", import.meta.url),
+  new URL("../../components/public-site/pi-about-page.tsx", import.meta.url),
 ];
 
 function read(url: URL) {
@@ -115,10 +115,10 @@ describe("Provider Interface marketing homepage", () => {
 
   it("scrolls through real sections and does not reuse Hive marketing chrome", () => {
     const page = read(new URL("../../routes/index.tsx", import.meta.url));
-    const landing = read(new URL("../../components/pi-landing/pi-marketing-page.tsx", import.meta.url));
-    const pricing = read(new URL("../../components/pi-landing/pi-pricing.tsx", import.meta.url));
-    const shots = read(new URL("../../components/pi-landing/pi-product-shots.tsx", import.meta.url));
-    const header = read(new URL("../../components/pi-landing/pi-public-header.tsx", import.meta.url));
+    const landing = read(new URL("../../components/public-site/pi-marketing-page.tsx", import.meta.url));
+    const pricing = read(new URL("../../components/public-site/pi-pricing.tsx", import.meta.url));
+    const shots = read(new URL("../../components/public-site/pi-product-shots.tsx", import.meta.url));
+    const header = read(new URL("../../components/public-site/pi-public-header.tsx", import.meta.url));
     const root = read(new URL("../../routes/__root.tsx", import.meta.url));
     assert.match(root, /family=Newsreader/);
     assert.match(root, /0,6\.\.72,300/);
@@ -178,15 +178,15 @@ describe("Provider Interface marketing homepage", () => {
   });
 
   it("does not mount the old dusk laptop mock on the public landing", () => {
-    const landing = read(new URL("../../components/pi-landing/pi-marketing-page.tsx", import.meta.url));
+    const landing = read(new URL("../../components/public-site/pi-marketing-page.tsx", import.meta.url));
     assert.doesNotMatch(landing, /DuskDeskStill|DuskPeopleScreen|PI_DIFFERENCE_HEADLINE/);
     assert.match(landing, /PI_NECTAR_BEFORE_QUOTE/);
     assert.match(landing, /PiHeroPhone/);
   });
 
   it("uses Demo B glass hero chrome without the mock's wrong copy", () => {
-    const glass = read(new URL("../../components/pi-landing/pi-hero-glass.tsx", import.meta.url));
-    const css = read(new URL("../../components/pi-landing/pi-landing.css", import.meta.url));
+    const glass = read(new URL("../../components/public-site/pi-hero-glass.tsx", import.meta.url));
+    const css = read(new URL("../../components/public-site/pi-landing.css", import.meta.url));
     assert.match(glass, /aria-hidden/);
     assert.match(glass, /PI_LIST_PRICE_DISPLAY/);
     assert.match(glass, /PI_LIST_PRICE_UNIT/);
@@ -262,7 +262,7 @@ describe("Provider Interface marketing homepage", () => {
   });
 
   it("keeps the π mark geometric: three squared rects in a 36 viewBox", () => {
-    const mark = read(new URL("../../components/pi-landing/pi-mark.tsx", import.meta.url));
+    const mark = read(new URL("../../components/public-site/pi-mark.tsx", import.meta.url));
     assert.match(mark, /viewBox="0 0 36 36"/);
     assert.match(mark, /x="4"/);
     assert.match(mark, /y="4"/);
@@ -302,22 +302,22 @@ describe("Provider Interface marketing homepage", () => {
     assert.equal(PI_FEATURE_HIGHLIGHTS.length <= 6, true);
     const nectar = read(new URL("../../routes/nectar.tsx", import.meta.url));
     const about = read(new URL("../../routes/about.tsx", import.meta.url));
-    const scroll = read(new URL("../../components/pi-landing/pi-feature-scroll.tsx", import.meta.url));
+    const scroll = read(new URL("../../components/public-site/pi-feature-scroll.tsx", import.meta.url));
     assert.match(nectar, /createFileRoute\("\/nectar"\)/);
     assert.match(about, /createFileRoute\("\/about"\)/);
     assert.match(scroll, /pi-highlights/);
     assert.match(scroll, /PI_LEARN_MORE/);
     assert.doesNotMatch(nectar, /Hive Certify/);
     assert.doesNotMatch(about, /Hive Certify/);
-    const nectarPage = read(new URL("../../components/pi-landing/pi-nectar-page.tsx", import.meta.url));
-    const aboutPage = read(new URL("../../components/pi-landing/pi-about-page.tsx", import.meta.url));
+    const nectarPage = read(new URL("../../components/public-site/pi-nectar-page.tsx", import.meta.url));
+    const aboutPage = read(new URL("../../components/public-site/pi-about-page.tsx", import.meta.url));
     assert.doesNotMatch(nectarPage, /DSPD|compliance|audit/i);
     assert.doesNotMatch(aboutPage, /Hive Certify/);
     assert.match(aboutPage, /PI_ABOUT_PAGE_BODY/);
   });
 
   it("keeps the PI mark and list-price card from clipping or drifting on mobile", () => {
-    const css = read(new URL("../../components/pi-landing/pi-landing.css", import.meta.url));
+    const css = read(new URL("../../components/public-site/pi-landing.css", import.meta.url));
     assert.match(css, /overflow-x:\s*clip/);
     assert.match(css, /\.pi-mark-well/);
     assert.match(css, /\.pi-big[\s\S]*line-height:\s*1\.08/);
@@ -334,8 +334,8 @@ describe("Provider Interface marketing homepage", () => {
 
   it("keeps /pricing on one centered column with a readable Sign in", () => {
     const page = read(new URL("../../routes/pricing.tsx", import.meta.url));
-    const section = read(new URL("../../components/pi-landing/pi-pricing.tsx", import.meta.url));
-    const css = read(new URL("../../components/pi-landing/pi-landing.css", import.meta.url));
+    const section = read(new URL("../../components/public-site/pi-pricing.tsx", import.meta.url));
+    const css = read(new URL("../../components/public-site/pi-landing.css", import.meta.url));
     assert.match(page, /pi-pricing-page/);
     assert.match(page, /PI_DIFFERENCE_HEADLINE/);
     assert.match(page, /PI_PRICING_HERO_LEDE/);

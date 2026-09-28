@@ -1,6 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 
 /**
  * Single source of truth for the NECTAR visual signature.

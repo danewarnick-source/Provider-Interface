@@ -18,7 +18,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { useAccess } from "@/hooks/use-access";
 import { usePortalView } from "@/hooks/use-portal-view";
 import { toast } from "sonner";
-import { PiBrand } from "@/components/brand/pi-brand";
+import { PiBrand } from "@/components/branding/pi-brand";
 import {
   preventSheetDismissForPortalViewMenu,
   resolvePortalSwitcherPath,

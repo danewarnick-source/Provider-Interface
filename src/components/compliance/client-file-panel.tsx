@@ -1,6 +1,6 @@
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useCompliancePacket } from "@/hooks/use-compliance-packet";
-import { OrgClientFileMatrix } from "@/components/client-file/org-client-file-matrix";
+import { OrgClientFileMatrix } from "@/components/clients/org-client-file-matrix";
 import { PacketNextActionCard } from "@/components/compliance/packet-next-action";
 import { isAdminLevel } from "@/lib/access/levels";
 

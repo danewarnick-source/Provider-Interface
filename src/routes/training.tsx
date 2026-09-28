@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
+import { PiPublicPage } from "@/components/public-site/pi-public-page";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SIGNUP_TRAINING_ADDONS } from "@/lib/public-site/pi-signup-pricing";

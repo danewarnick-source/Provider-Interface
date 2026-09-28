@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Send, Loader2, ArrowRight, BarChart3, Sparkles, RotateCcw, LifeBuoy, CheckCircle2, ListChecks } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { askNectarHelp, escalateHelpToHive, getHelpTicketStatus, type NectarHelpReply } from "@/lib/nectar/nectar-help.functions";
 import { NectarBadge, NectarMark, NectarButton } from "@/components/nectar/nectar-brand";

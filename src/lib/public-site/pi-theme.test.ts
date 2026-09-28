@@ -52,7 +52,7 @@ describe("PI theme tokens", () => {
     assert.match(PI_GRAIN_SVG, /feTurbulence/);
     assert.match(PI_GRAIN_SVG, /baseFrequency='\.9'/);
     assert.match(PI_GRAIN_SVG, /numOctaves='2'/);
-    const css = read("../../components/pi-landing/pi-landing.css");
+    const css = read("../../components/public-site/pi-landing.css");
     assert.match(css, /feTurbulence type='fractalNoise' baseFrequency='\.9' numOctaves='2'/);
     assert.match(css, /opacity: 0\.045/);
     assert.match(css, /mix-blend-mode: overlay/);

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PiAboutPage } from "@/components/pi-landing/pi-about-page";
+import { PiAboutPage } from "@/components/public-site/pi-about-page";
 import { PI_ABOUT_PAGE_DESCRIPTION, PI_ABOUT_PAGE_TITLE } from "@/lib/public-site/pi-landing";
 
 const NEWSREADER =

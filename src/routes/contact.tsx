@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
-import { Contact } from "@/components/landing/contact";
+import { PiPublicPage } from "@/components/public-site/pi-public-page";
+import { Contact } from "@/components/public-site/contact";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({

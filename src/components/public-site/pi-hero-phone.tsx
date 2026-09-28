@@ -1,4 +1,4 @@
-import { PiHomepageMark } from "@/components/pi-landing/pi-mark";
+import { PiHomepageMark } from "@/components/public-site/pi-mark";
 import { PI_HOME_CHIPS, PI_HOME_PHONE_ROWS } from "@/lib/public-site/pi-homepage";
 import { PI_PRODUCT_SHORT, PI_WORDMARK } from "@/lib/public-site/pi-landing";
 

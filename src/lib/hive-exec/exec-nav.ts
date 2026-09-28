@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 import {
   Building2,
   Plus,

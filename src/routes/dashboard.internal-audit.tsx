@@ -24,7 +24,7 @@ import {
   Sparkles,
   CheckCircle2,
 } from "lucide-react";
-import { PiMark } from "@/components/pi-landing/pi-mark";
+import { PiMark } from "@/components/public-site/pi-mark";
 
 import { AddonLock } from "@/components/nectar/addon-lock";
 import { useEntitlements } from "@/hooks/use-entitlements";

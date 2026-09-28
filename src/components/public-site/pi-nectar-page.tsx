@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
+import { PiPublicPage } from "@/components/public-site/pi-public-page";
 import {
   PI_GET_STARTED,
   PI_LEARN_MORE,

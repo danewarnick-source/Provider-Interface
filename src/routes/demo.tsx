@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowRight, Calendar, CheckCircle2 } from "lucide-react";
-import { PiBrand } from "@/components/brand/pi-brand";
+import { PiBrand } from "@/components/branding/pi-brand";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 

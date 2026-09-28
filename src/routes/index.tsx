@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PiMarketingPage } from "@/components/pi-landing/pi-marketing-page";
+import { PiMarketingPage } from "@/components/public-site/pi-marketing-page";
 import { PI_PAGE_DESCRIPTION, PI_PAGE_TITLE } from "@/lib/public-site/pi-landing";
 
 const INTER =

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PiNectarPage } from "@/components/pi-landing/pi-nectar-page";
+import { PiNectarPage } from "@/components/public-site/pi-nectar-page";
 import { PI_NECTAR_PAGE_DESCRIPTION, PI_NECTAR_PAGE_TITLE } from "@/lib/public-site/pi-landing";
 
 const NEWSREADER =
