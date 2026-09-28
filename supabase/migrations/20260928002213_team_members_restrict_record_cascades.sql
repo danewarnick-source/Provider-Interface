@@ -133,6 +133,8 @@ ALTER TABLE public.training_topic_progress
 -- with deliberately, finish with:
 --   ALTER TABLE public.user_training_progress
 --     VALIDATE CONSTRAINT user_training_progress_user_id_fkey;
+-- Done: see user_training_progress_drop_fixture_rows_validate_fk (the next
+-- migration), which removes those 13 fixture rows and validates this FK.
 ALTER TABLE public.user_training_progress
   DROP CONSTRAINT user_training_progress_user_id_fkey,
   ADD CONSTRAINT user_training_progress_user_id_fkey
