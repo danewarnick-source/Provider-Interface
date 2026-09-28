@@ -12,13 +12,13 @@ import {
   isSignupTrainingAddonId,
   quoteSignupTrainingAddon,
   type SignupTrainingAddonId,
-} from "./pi-signup-pricing.ts";
+} from "../pi-signup-pricing.ts";
 import {
   stripePriceIdForTrainingSku,
   type StripeLineItem,
   type StripePriceEnv,
-} from "./financial/stripe-config.ts";
-import { formatUsdFromCents } from "./hive-pricing.ts";
+} from "../financial/stripe-config.ts";
+import { formatUsdFromCents } from "../hive-pricing.ts";
 
 export const TRAINING_ONLY_SKUS = SIGNUP_TRAINING_ADDON_IDS;
 export type TrainingOnlySku = SignupTrainingAddonId;

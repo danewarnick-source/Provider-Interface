@@ -38,8 +38,8 @@ import {
 import { formatUsdFromCents, trainingPriceCentsForSku } from "@/lib/hive-pricing";
 import { isBillingExempt } from "@/lib/billing-access";
 import { getBillingStatusFn } from "@/lib/financial/stripe-checkout.functions";
-import { getOrgTrainingClasses } from "@/lib/training-class.functions";
-import { trainingClassLabel, trainingClassSku, type TrainingClassType } from "@/lib/training-class";
+import { getOrgTrainingClasses } from "@/lib/training/training-class.functions";
+import { trainingClassLabel, trainingClassSku, type TrainingClassType } from "@/lib/training/training-class";
 import { ClassCardUploadButtons } from "@/components/training/class-card-upload";
 import { InternalTrainingsPanel } from "@/components/training/internal-trainings-panel";
 import { FeatureLocked } from "@/components/feature-locked";

@@ -4,7 +4,7 @@
  * from the upload date.
  */
 
-import { addMonthsUTC } from "./obligation-due-dates.ts";
+import { addMonthsUTC } from "../obligation-due-dates.ts";
 
 export type CertReviewStatus = "awaiting_review" | "accepted" | "correction_requested";
 

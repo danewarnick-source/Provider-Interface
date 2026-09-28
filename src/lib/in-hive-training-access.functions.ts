@@ -7,7 +7,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { isTrainingOnlySku, trainingOnlyIncludesThirtyDay } from "@/lib/training-only";
+import { isTrainingOnlySku, trainingOnlyIncludesThirtyDay } from "@/lib/training/training-only";
 import {
   orgSelectMissingBillingExempt,
   resolveThirtyDayAccess,

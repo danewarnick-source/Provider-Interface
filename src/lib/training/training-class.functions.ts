@@ -13,8 +13,8 @@ import {
   trainingClassIsExternal,
   validateRosterRows,
   type TrainingClassType,
-} from "@/lib/training-class";
-import { classCardSummary, rosterCardStatus, type RosterCardStatus } from "@/lib/training-class-cards";
+} from "@/lib/training/training-class";
+import { classCardSummary, rosterCardStatus, type RosterCardStatus } from "@/lib/training/training-class-cards";
 import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

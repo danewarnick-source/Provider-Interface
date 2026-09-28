@@ -18,7 +18,7 @@ import {
   trainingOnlyIncludesThirtyDay,
   trainingOnlySkuLabel,
   type TrainingOnlySku,
-} from "@/lib/training-only";
+} from "@/lib/training/training-only";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

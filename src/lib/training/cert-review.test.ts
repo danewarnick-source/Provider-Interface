@@ -76,10 +76,10 @@ describe("cert review rules", () => {
   });
 
   it("never treats upload date as an expiration", () => {
-    const fn = readFileSync(new URL("./company-obligations.functions.ts", import.meta.url), "utf8");
-    const due = readFileSync(new URL("./obligation-due-dates.ts", import.meta.url), "utf8");
+    const fn = readFileSync(new URL("../company-obligations.functions.ts", import.meta.url), "utf8");
+    const due = readFileSync(new URL("../obligation-due-dates.ts", import.meta.url), "utf8");
     const baseline = readFileSync(
-      new URL("./staff-training-requirements.functions.ts", import.meta.url),
+      new URL("../staff/staff-training-requirements.functions.ts", import.meta.url),
       "utf8",
     );
     assert.doesNotMatch(fn, /renewal defaulted to/);
@@ -404,16 +404,16 @@ describe("cert review rules", () => {
 describe("cert review surface lock", () => {
   it("keeps preview + accept/correction on the existing completion row", () => {
     const page = readFileSync(
-      new URL("../routes/dashboard.compliance_.cert-review.$completionId.tsx", import.meta.url),
+      new URL("../../routes/dashboard.compliance_.cert-review.$completionId.tsx", import.meta.url),
       "utf8",
     );
     const panel = readFileSync(
-      new URL("../components/compliance/cert-review-panel.tsx", import.meta.url),
+      new URL("../../components/compliance/cert-review-panel.tsx", import.meta.url),
       "utf8",
     );
     const engine = readFileSync(new URL("./cert-review.ts", import.meta.url), "utf8");
     const staffFile = readFileSync(
-      new URL("../components/compliance/staff-file-panel.tsx", import.meta.url),
+      new URL("../../components/compliance/staff-file-panel.tsx", import.meta.url),
       "utf8",
     );
     assert.match(page, /CertReviewPanel/);
@@ -427,7 +427,7 @@ describe("cert review surface lock", () => {
     assert.match(engine, /pickStaffCompletionForSurface/);
     assert.match(engine, /Waiting for the staff member to re-upload/);
     const fns = readFileSync(
-      new URL("./company-obligations.functions.ts", import.meta.url),
+      new URL("../company-obligations.functions.ts", import.meta.url),
       "utf8",
     );
     assert.match(fns, /shouldReplaceCompletionForResubmit/);
@@ -447,7 +447,7 @@ describe("cert review surface lock", () => {
     assert.match(staffFile, /cert-review/);
     assert.doesNotMatch(panel, /from\("certificate_reviews"\)/);
     const personFile = readFileSync(
-      new URL("../components/employees/staff-obligations-files-tab.tsx", import.meta.url),
+      new URL("../../components/employees/staff-obligations-files-tab.tsx", import.meta.url),
       "utf8",
     );
     assert.doesNotMatch(personFile, /Replace evidence/);

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { TRAINING_PRICE_CENTS } from "./hive-pricing.ts";
+import { TRAINING_PRICE_CENTS } from "../hive-pricing.ts";
 import {
   cleanRosterRows,
   mergeSelectedMembersIntoRoster,

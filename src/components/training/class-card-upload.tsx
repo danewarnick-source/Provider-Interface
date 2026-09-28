@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import {
   attachTrainingClassCard,
   createTrainingClassCardUploadUrl,
-} from "@/lib/training-class-cards.functions";
-import { classCardLabel } from "@/lib/training-class-cards";
-import type { TrainingClassRow } from "@/lib/training-class.functions";
+} from "@/lib/training/training-class-cards.functions";
+import { classCardLabel } from "@/lib/training/training-class-cards";
+import type { TrainingClassRow } from "@/lib/training/training-class.functions";
 
 export function ClassCardStatus({ row }: { row: TrainingClassRow }) {
   return (

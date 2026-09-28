@@ -12,7 +12,7 @@ import {
   trainingClassIsExternal,
   trainingClassLabel,
   type TrainingClassType,
-} from "@/lib/training-class";
+} from "@/lib/training/training-class";
 import { ensureOpenStaffObligationInternal } from "@/lib/ensure-staff-obligation";
 import { hireDueDaysForTitle } from "@/lib/obligation-auto-assign";
 

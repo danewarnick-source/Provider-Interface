@@ -25,7 +25,7 @@ import {
   manuallyVerifyEnrollment,
   type ExecEnrollmentRow,
   type EnrollmentStatus,
-} from "@/lib/training-enrollments.functions";
+} from "@/lib/training/training-enrollments.functions";
 
 export const Route = createFileRoute("/dashboard/hive-exec/training")({
   head: () => ({ meta: [{ title: "Training Fulfillment — Provider Interface Exec" }] }),

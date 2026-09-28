@@ -24,11 +24,11 @@ import {
   validateTrainingOnlyPeople,
   type TrainingOnlyPersonRow,
   type TrainingOnlySku,
-} from "@/lib/training-only";
+} from "@/lib/training/training-only";
 import {
   fulfillTrainingOnlyOrder,
   loadTrainingOnlyOrderBySession,
-} from "@/lib/training-only-fulfillment.server";
+} from "@/lib/training/training-only-fulfillment.server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;

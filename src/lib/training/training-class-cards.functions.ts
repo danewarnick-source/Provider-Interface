@@ -7,7 +7,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { CPR_OBLIGATION_TITLES, MANDT_OBLIGATION_TITLES, type TrainingClassType } from "@/lib/training-class";
+import { CPR_OBLIGATION_TITLES, MANDT_OBLIGATION_TITLES, type TrainingClassType } from "@/lib/training/training-class";
 import {
   ensureOpenStaffObligationInternal,
   loadStaffForEnsure,

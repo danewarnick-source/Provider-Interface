@@ -23,7 +23,7 @@ import {
   validateRosterRows,
   type TrainingClassRosterRow,
   type TrainingClassType,
-} from "@/lib/training-class";
+} from "@/lib/training/training-class";
 import { formatUsdFromCents } from "@/lib/hive-pricing";
 
 export type RosterMemberOption = { id: string; label: string; email?: string | null; phone?: string | null };

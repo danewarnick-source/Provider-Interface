@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { readFileSync } from "node:fs";
-import { TRAINING_PRICE_CENTS } from "./hive-pricing.ts";
-import { STRIPE_SANDBOX_PRICE_IDS, readStripeEnv } from "./financial/stripe-config.ts";
+import { TRAINING_PRICE_CENTS } from "../hive-pricing.ts";
+import { STRIPE_SANDBOX_PRICE_IDS, readStripeEnv } from "../financial/stripe-config.ts";
 import {
   cleanTrainingOnlyPeople,
   quoteTrainingOnlyPeople,
@@ -145,7 +145,7 @@ describe("training-only Stripe lines", () => {
 
 describe("training-only public copy", () => {
   it("does not name Hive Certify or DSPD on the public purchase page", () => {
-    const page = readFileSync(new URL("../routes/training.tsx", import.meta.url), "utf8");
+    const page = readFileSync(new URL("../../routes/training.tsx", import.meta.url), "utf8");
     assert.doesNotMatch(page, /Hive Certify/);
     assert.doesNotMatch(page, /DSPD/);
     assert.doesNotMatch(page, /\$69|\$350/);
@@ -154,8 +154,8 @@ describe("training-only public copy", () => {
   });
 
   it("keeps the quiet cross-links between signup Training and /training", () => {
-    const training = readFileSync(new URL("../routes/training.tsx", import.meta.url), "utf8");
-    const signup = readFileSync(new URL("../routes/signup.tsx", import.meta.url), "utf8");
+    const training = readFileSync(new URL("../../routes/training.tsx", import.meta.url), "utf8");
+    const signup = readFileSync(new URL("../../routes/signup.tsx", import.meta.url), "utf8");
     assert.match(signup, /Just need training\? Buy classes without the office\./);
     assert.match(signup, /data-testid="signup-training-only-link"/);
     assert.match(signup, /to="\/training"/);
