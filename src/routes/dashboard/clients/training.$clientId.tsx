@@ -27,7 +27,7 @@ const searchSchema = z.object({
   obligation_instance: z.string().uuid().optional(),
 });
 
-export const Route = createFileRoute("/dashboard/client-training/$clientId")({
+export const Route = createFileRoute("/dashboard/clients/training/$clientId")({
   validateSearch: searchSchema,
   beforeLoad: ({ params }) => {
     redirectUnlessUuidParam(params.clientId, {

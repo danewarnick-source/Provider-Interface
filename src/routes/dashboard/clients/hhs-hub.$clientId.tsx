@@ -48,7 +48,7 @@ const hhsSearch = z.object({
   tab: z.string().optional(),
   open: z.string().optional(),
 });
-export const Route = createFileRoute("/dashboard/hhs-hub/$clientId")({
+export const Route = createFileRoute("/dashboard/clients/hhs-hub/$clientId")({
   head: () => ({ meta: [{ title: "Host Home Client Hub — Provider Interface" }] }),
   validateSearch: hhsSearch,
   beforeLoad: ({ params }) => {

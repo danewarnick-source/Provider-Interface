@@ -21,7 +21,7 @@ import { listIntakeFormsForClient, seedIntakeForms } from "@/lib/documents/forms
 import { ClientPhotoCard } from "@/components/clients/client-photo-card";
 import { FaceSheetInfoCard } from "@/components/clients/face-sheet-info-card";
 
-export const Route = createFileRoute("/dashboard/client-intake/$clientId")({
+export const Route = createFileRoute("/dashboard/clients/intake/$clientId")({
   head: () => ({ meta: [{ title: "New Client Intake — Provider Interface" }] }),
   beforeLoad: ({ params }) => {
     redirectUnlessUuidParam(params.clientId, {

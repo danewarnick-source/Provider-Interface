@@ -58,7 +58,7 @@ const workspaceSearch = z.object({
   code: z.string().optional(),
   verify: z.string().optional(),
 });
-export const Route = createFileRoute("/dashboard/workspace/$clientId")({
+export const Route = createFileRoute("/dashboard/clients/workspace/$clientId")({
   head: () => ({ meta: [{ title: "Client Workspace — Provider Interface" }] }),
   validateSearch: workspaceSearch,
   beforeLoad: ({ params }) => {

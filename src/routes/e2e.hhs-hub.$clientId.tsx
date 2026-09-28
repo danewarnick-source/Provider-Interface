@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { HhsClientHub } from "./dashboard.hhs-hub.$clientId";
+import { HhsClientHub } from "./dashboard/clients/hhs-hub.$clientId";
 
 /**
  * Local Playwright harness for HHS host-home daily notes + attendance.

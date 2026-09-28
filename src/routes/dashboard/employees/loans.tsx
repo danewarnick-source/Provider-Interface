@@ -21,7 +21,7 @@ import { LoanFeatureGate } from "@/components/employees/loan-feature-gate";
 import { LoanEditor } from "@/components/employees/loan-editor";
 import { listOrgLoans } from "@/lib/clients/client-loans.functions";
 
-export const Route = createFileRoute("/dashboard/client-loans")({
+export const Route = createFileRoute("/dashboard/employees/loans")({
   head: () => ({ meta: [{ title: "Client Loan Ledger — Provider Interface" }] }),
   component: () => (
     <RequireLevel min="owner">

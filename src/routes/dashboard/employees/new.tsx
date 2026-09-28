@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
-import { EmployeesPage } from "./dashboard.employees.index";
+import { EmployeesPage } from "./index";
 
 export const Route = createFileRoute("/dashboard/employees/new")({
   head: () => ({ meta: [{ title: "Add team member — Provider Interface" }] }),

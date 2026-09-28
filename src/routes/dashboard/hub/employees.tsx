@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
-import { EmployeesPage } from "./dashboard.employees.index";
+import { EmployeesPage } from "../employees/index";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 
 const search = z.object({

@@ -15,7 +15,7 @@ import { Trash2, Plus } from "lucide-react";
 
 import { RequireLevel } from "@/components/rbac-guard";
 
-export const Route = createFileRoute("/dashboard/client-billing-codes")({
+export const Route = createFileRoute("/dashboard/clients/billing-codes")({
   head: () => ({ meta: [{ title: "Client Billing Codes — Provider Interface" }] }),
   component: () => (
     <RequireLevel min="admin">

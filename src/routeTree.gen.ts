@@ -45,14 +45,14 @@ import { Route as TrainingConfirmRouteImport } from './routes/training.confirm'
 import { Route as SignPolicyDocumentIdRouteImport } from './routes/sign-policy.$documentId'
 import { Route as EmployeesNewRouteImport } from './routes/employees.new'
 import { Route as E2eComplianceDeskRouteImport } from './routes/e2e.compliance-desk'
-import { Route as DashboardTracksRouteImport } from './routes/dashboard.tracks'
+import { Route as DashboardTracksRouteImport } from './routes/dashboard/tracks'
 import { Route as DashboardTimeclockRouteImport } from './routes/dashboard.timeclock'
 import { Route as DashboardTeamsRouteImport } from './routes/dashboard.teams'
 import { Route as DashboardTeamRouteImport } from './routes/dashboard.team'
 import { Route as DashboardSummariesRouteImport } from './routes/dashboard.summaries'
 import { Route as DashboardStateAuditRouteImport } from './routes/dashboard.state-audit'
-import { Route as DashboardSmartImportRouteImport } from './routes/dashboard.smart-import'
-import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
+import { Route as DashboardSmartImportRouteImport } from './routes/dashboard/smart-import'
+import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
 import { Route as DashboardSchedulingRouteImport } from './routes/dashboard.scheduling'
 import { Route as DashboardSchedulerRouteImport } from './routes/dashboard.scheduler'
 import { Route as DashboardSchedulePreviewRouteImport } from './routes/dashboard.schedule-preview'
@@ -61,14 +61,14 @@ import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports
 import { Route as DashboardReimbursementsRouteImport } from './routes/dashboard.reimbursements'
 import { Route as DashboardRecordsDeskRouteImport } from './routes/dashboard.records-desk'
 import { Route as DashboardProgramsAdminRouteImport } from './routes/dashboard.programs-admin'
-import { Route as DashboardProgramsRouteImport } from './routes/dashboard.programs'
+import { Route as DashboardProgramsRouteImport } from './routes/dashboard/programs'
 import { Route as DashboardPoliciesRouteImport } from './routes/dashboard.policies'
 import { Route as DashboardPersonnelFileRouteImport } from './routes/dashboard.personnel-file'
 import { Route as DashboardPbaLedgerRouteImport } from './routes/dashboard.pba-ledger'
 import { Route as DashboardNectarDocsRouteImport } from './routes/dashboard.nectar-docs'
 import { Route as DashboardNectarCompanyProfileRouteImport } from './routes/dashboard.nectar-company-profile'
 import { Route as DashboardMyTimeCorrectionsRouteImport } from './routes/dashboard.my-time-corrections'
-import { Route as DashboardMyObligationsRouteImport } from './routes/dashboard.my-obligations'
+import { Route as DashboardMyObligationsRouteImport } from './routes/dashboard/my-obligations'
 import { Route as DashboardMyHistoricalTimesheetsRouteImport } from './routes/dashboard.my-historical-timesheets'
 import { Route as DashboardMyHistoricalRecordsRouteImport } from './routes/dashboard.my-historical-records'
 import { Route as DashboardMyHistoricalDailyNotesRouteImport } from './routes/dashboard.my-historical-daily-notes'
@@ -78,14 +78,14 @@ import { Route as DashboardInvitationsRouteImport } from './routes/dashboard.inv
 import { Route as DashboardInternalAuditRouteImport } from './routes/dashboard.internal-audit'
 import { Route as DashboardInboxRouteImport } from './routes/dashboard.inbox'
 import { Route as DashboardHrcRouteImport } from './routes/dashboard.hrc'
-import { Route as DashboardHrAdminRouteImport } from './routes/dashboard.hr-admin'
+import { Route as DashboardHrAdminRouteImport } from './routes/dashboard/hr-admin'
 import { Route as DashboardHostHomeControlRouteImport } from './routes/dashboard.host-home-control'
-import { Route as DashboardHomesRouteImport } from './routes/dashboard.homes'
-import { Route as DashboardHiveExecRouteImport } from './routes/dashboard.hive-exec'
+import { Route as DashboardHomesRouteImport } from './routes/dashboard/homes'
+import { Route as DashboardHiveExecRouteImport } from './routes/dashboard/hive-exec'
 import { Route as DashboardHistoricalDailyNotesFormerStaffRouteImport } from './routes/dashboard.historical-daily-notes-former-staff'
 import { Route as DashboardHelpRouteImport } from './routes/dashboard.help'
-import { Route as DashboardFormsRouteImport } from './routes/dashboard.forms'
-import { Route as DashboardFinancialRouteImport } from './routes/dashboard.financial'
+import { Route as DashboardFormsRouteImport } from './routes/dashboard/forms'
+import { Route as DashboardFinancialRouteImport } from './routes/dashboard/financial'
 import { Route as DashboardExternalComplianceRouteImport } from './routes/dashboard.external-compliance'
 import { Route as DashboardExternalCertificationsRouteImport } from './routes/dashboard.external-certifications'
 import { Route as DashboardEvvArchiveRouteImport } from './routes/dashboard.evv-archive'
@@ -99,9 +99,6 @@ import { Route as DashboardComplianceRouteImport } from './routes/dashboard.comp
 import { Route as DashboardCompanyObligationsRouteImport } from './routes/dashboard.company-obligations'
 import { Route as DashboardCommandCenterRouteImport } from './routes/dashboard.command-center'
 import { Route as DashboardClientsRouteImport } from './routes/dashboard/clients'
-import { Route as DashboardClientLoansRouteImport } from './routes/dashboard.client-loans'
-import { Route as DashboardClientFileRouteImport } from './routes/dashboard.client-file'
-import { Route as DashboardClientBillingCodesRouteImport } from './routes/dashboard.client-billing-codes'
 import { Route as DashboardCertificationsRouteImport } from './routes/dashboard.certifications'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard/billing'
 import { Route as DashboardBehavioristRouteImport } from './routes/dashboard.behaviorist'
@@ -114,123 +111,126 @@ import { Route as ClientsNewRouteImport } from './routes/clients.new'
 import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 import { Route as AuditPortalSetPasswordRouteImport } from './routes/audit-portal.set-password'
 import { Route as AuditPortalPackageIdRouteImport } from './routes/audit-portal.$packageId'
-import { Route as DashboardTrainingIndexRouteImport } from './routes/dashboard.training.index'
-import { Route as DashboardSmartImportIndexRouteImport } from './routes/dashboard.smart-import.index'
-import { Route as DashboardHiveTrainingIndexRouteImport } from './routes/dashboard.hive-training.index'
-import { Route as DashboardHiveExecIndexRouteImport } from './routes/dashboard.hive-exec.index'
-import { Route as DashboardFormsIndexRouteImport } from './routes/dashboard.forms.index'
-import { Route as DashboardFinancialIndexRouteImport } from './routes/dashboard.financial.index'
-import { Route as DashboardEmployeesIndexRouteImport } from './routes/dashboard.employees.index'
-import { Route as DashboardCoursesIndexRouteImport } from './routes/dashboard.courses.index'
+import { Route as DashboardTrainingIndexRouteImport } from './routes/dashboard/training/index'
+import { Route as DashboardSmartImportIndexRouteImport } from './routes/dashboard/smart-import/index'
+import { Route as DashboardHiveTrainingIndexRouteImport } from './routes/dashboard/hive-training/index'
+import { Route as DashboardHiveExecIndexRouteImport } from './routes/dashboard/hive-exec/index'
+import { Route as DashboardFormsIndexRouteImport } from './routes/dashboard/forms/index'
+import { Route as DashboardFinancialIndexRouteImport } from './routes/dashboard/financial/index'
+import { Route as DashboardEmployeesIndexRouteImport } from './routes/dashboard/employees/index'
+import { Route as DashboardCoursesIndexRouteImport } from './routes/dashboard/courses/index'
 import { Route as DashboardClientsIndexRouteImport } from './routes/dashboard/clients/index'
 import { Route as DashboardBillingIndexRouteImport } from './routes/dashboard/billing/index'
 import { Route as E2eHhsHubClientIdRouteImport } from './routes/e2e.hhs-hub.$clientId'
-import { Route as DashboardWorkspaceClientIdRouteImport } from './routes/dashboard.workspace.$clientId'
-import { Route as DashboardTrainingCatalogRouteImport } from './routes/dashboard.training.catalog'
-import { Route as DashboardTrainingIdRouteImport } from './routes/dashboard.training.$id'
-import { Route as DashboardTracksTrackSlugRouteImport } from './routes/dashboard.tracks.$trackSlug'
-import { Route as DashboardSmartImportHistoryRouteImport } from './routes/dashboard.smart-import.history'
+import { Route as DashboardTrainingCatalogRouteImport } from './routes/dashboard/training/catalog'
+import { Route as DashboardTrainingIdRouteImport } from './routes/dashboard/training/$id'
+import { Route as DashboardTracksTrackSlugRouteImport } from './routes/dashboard/tracks/$trackSlug'
+import { Route as DashboardSmartImportHistoryRouteImport } from './routes/dashboard/smart-import/history'
 import { Route as DashboardShiftShiftIdRouteImport } from './routes/dashboard.shift.$shiftId'
-import { Route as DashboardSettingsTeamAccessRouteImport } from './routes/dashboard.settings.team-access'
-import { Route as DashboardSettingsSubscriptionRouteImport } from './routes/dashboard.settings.subscription'
-import { Route as DashboardSettingsServiceCodesRouteImport } from './routes/dashboard.settings.service-codes'
-import { Route as DashboardSettingsServiceCatalogRouteImport } from './routes/dashboard.settings.service-catalog'
-import { Route as DashboardSettingsRetentionRouteImport } from './routes/dashboard.settings.retention'
-import { Route as DashboardSettingsPhiAccessAuditRouteImport } from './routes/dashboard.settings.phi-access-audit'
-import { Route as DashboardSettingsLicensingRouteImport } from './routes/dashboard.settings.licensing'
-import { Route as DashboardSettingsGmailRouteImport } from './routes/dashboard.settings.gmail'
-import { Route as DashboardSettingsEmailRouteImport } from './routes/dashboard.settings.email'
-import { Route as DashboardSettingsDraftRulesRouteImport } from './routes/dashboard.settings.draft-rules'
-import { Route as DashboardSettingsComplianceSetupRouteImport } from './routes/dashboard.settings.compliance-setup'
-import { Route as DashboardSettingsBankMappingRouteImport } from './routes/dashboard.settings.bank-mapping'
-import { Route as DashboardSettingsAutomationRulesRouteImport } from './routes/dashboard.settings.automation-rules'
-import { Route as DashboardProgramsProgramIdRouteImport } from './routes/dashboard.programs.$programId'
-import { Route as DashboardHubKnowledgeRouteImport } from './routes/dashboard.hub.knowledge'
-import { Route as DashboardHubFinancesRouteImport } from './routes/dashboard.hub.finances'
-import { Route as DashboardHubEmployeesRouteImport } from './routes/dashboard.hub.employees'
-import { Route as DashboardHubDocumentationRouteImport } from './routes/dashboard.hub.documentation'
-import { Route as DashboardHubClientsRouteImport } from './routes/dashboard.hub.clients'
-import { Route as DashboardHrAdminSettingsRouteImport } from './routes/dashboard.hr-admin.settings'
-import { Route as DashboardHomesTeamIdRouteImport } from './routes/dashboard.homes.$teamId'
-import { Route as DashboardHiveExecUpgradeRequestsRouteImport } from './routes/dashboard.hive-exec.upgrade-requests'
-import { Route as DashboardHiveExecTrainingRouteImport } from './routes/dashboard.hive-exec.training'
-import { Route as DashboardHiveExecTicketsRouteImport } from './routes/dashboard.hive-exec.tickets'
-import { Route as DashboardHiveExecStatesRouteImport } from './routes/dashboard.hive-exec.states'
-import { Route as DashboardHiveExecPlansRouteImport } from './routes/dashboard.hive-exec.plans'
-import { Route as DashboardHiveExecPermissionsRouteImport } from './routes/dashboard.hive-exec.permissions'
-import { Route as DashboardHiveExecNewCompanyRouteImport } from './routes/dashboard.hive-exec.new-company'
-import { Route as DashboardHiveExecNectarRouteImport } from './routes/dashboard.hive-exec.nectar'
-import { Route as DashboardHiveExecMessagesRouteImport } from './routes/dashboard.hive-exec.messages'
-import { Route as DashboardHiveExecKnowledgeRouteImport } from './routes/dashboard.hive-exec.knowledge'
-import { Route as DashboardHiveExecHealthRouteImport } from './routes/dashboard.hive-exec.health'
-import { Route as DashboardHiveExecFunctionalityRouteImport } from './routes/dashboard.hive-exec.functionality'
-import { Route as DashboardHiveExecFeaturesRouteImport } from './routes/dashboard.hive-exec.features'
-import { Route as DashboardHiveExecCompanyMigrationRouteImport } from './routes/dashboard.hive-exec.company-migration'
-import { Route as DashboardHiveExecCommandRouteImport } from './routes/dashboard.hive-exec.command'
-import { Route as DashboardHiveExecClassesRouteImport } from './routes/dashboard.hive-exec.classes'
-import { Route as DashboardHiveExecBillingApprovalsRouteImport } from './routes/dashboard.hive-exec.billing-approvals'
-import { Route as DashboardHiveExecBaseTemplateRouteImport } from './routes/dashboard.hive-exec.base-template'
-import { Route as DashboardHiveExecApprovalsRouteImport } from './routes/dashboard.hive-exec.approvals'
-import { Route as DashboardHiveExecAgreementsRouteImport } from './routes/dashboard.hive-exec.agreements'
-import { Route as DashboardHiveExecOrgIdRouteImport } from './routes/dashboard.hive-exec.$orgId'
-import { Route as DashboardHhsHubClientIdRouteImport } from './routes/dashboard.hhs-hub.$clientId'
-import { Route as DashboardFinancialTotalsRouteImport } from './routes/dashboard.financial.totals'
-import { Route as DashboardFinancialRhsRouteImport } from './routes/dashboard.financial.rhs'
-import { Route as DashboardFinancialRevenueRouteImport } from './routes/dashboard.financial.revenue'
-import { Route as DashboardFinancialNectarRouteImport } from './routes/dashboard.financial.nectar'
-import { Route as DashboardFinancialMonthlyGridRouteImport } from './routes/dashboard.financial.monthly-grid'
-import { Route as DashboardFinancialHostHomeRouteImport } from './routes/dashboard.financial.host-home'
-import { Route as DashboardFinancialGrossRouteImport } from './routes/dashboard.financial.gross'
-import { Route as DashboardFinancialEmployeesRouteImport } from './routes/dashboard.financial.employees'
-import { Route as DashboardFinancialDistributionsRouteImport } from './routes/dashboard.financial.distributions'
-import { Route as DashboardFinancialContractorsRouteImport } from './routes/dashboard.financial.contractors'
-import { Route as DashboardEmployeesNewRouteImport } from './routes/dashboard.employees.new'
-import { Route as DashboardEmployeesHireDatesRouteImport } from './routes/dashboard.employees.hire-dates'
-import { Route as DashboardEmployeesStaffIdRouteImport } from './routes/dashboard.employees.$staffId'
-import { Route as DashboardCoursesPersonRouteImport } from './routes/dashboard.courses.person'
-import { Route as DashboardCoursesOtherRouteImport } from './routes/dashboard.courses.other'
-import { Route as DashboardCoursesMindsmithRouteImport } from './routes/dashboard.courses.mindsmith'
-import { Route as DashboardCoursesCoreRouteImport } from './routes/dashboard.courses.core'
-import { Route as DashboardCoursesCourseIdRouteImport } from './routes/dashboard.courses.$courseId'
+import { Route as DashboardSettingsTeamAccessRouteImport } from './routes/dashboard/settings/team-access'
+import { Route as DashboardSettingsSubscriptionRouteImport } from './routes/dashboard/settings/subscription'
+import { Route as DashboardSettingsServiceCodesRouteImport } from './routes/dashboard/settings/service-codes'
+import { Route as DashboardSettingsServiceCatalogRouteImport } from './routes/dashboard/settings/service-catalog'
+import { Route as DashboardSettingsRetentionRouteImport } from './routes/dashboard/settings/retention'
+import { Route as DashboardSettingsPhiAccessAuditRouteImport } from './routes/dashboard/settings/phi-access-audit'
+import { Route as DashboardSettingsLicensingRouteImport } from './routes/dashboard/settings/licensing'
+import { Route as DashboardSettingsGmailRouteImport } from './routes/dashboard/settings/gmail'
+import { Route as DashboardSettingsEmailRouteImport } from './routes/dashboard/settings/email'
+import { Route as DashboardSettingsDraftRulesRouteImport } from './routes/dashboard/settings/draft-rules'
+import { Route as DashboardSettingsComplianceSetupRouteImport } from './routes/dashboard/settings/compliance-setup'
+import { Route as DashboardSettingsBankMappingRouteImport } from './routes/dashboard/settings/bank-mapping'
+import { Route as DashboardSettingsAutomationRulesRouteImport } from './routes/dashboard/settings/automation-rules'
+import { Route as DashboardProgramsProgramIdRouteImport } from './routes/dashboard/programs/$programId'
+import { Route as DashboardHubKnowledgeRouteImport } from './routes/dashboard/hub/knowledge'
+import { Route as DashboardHubFinancesRouteImport } from './routes/dashboard/hub/finances'
+import { Route as DashboardHubEmployeesRouteImport } from './routes/dashboard/hub/employees'
+import { Route as DashboardHubDocumentationRouteImport } from './routes/dashboard/hub/documentation'
+import { Route as DashboardHubClientsRouteImport } from './routes/dashboard/hub/clients'
+import { Route as DashboardHrAdminSettingsRouteImport } from './routes/dashboard/hr-admin/settings'
+import { Route as DashboardHomesTeamIdRouteImport } from './routes/dashboard/homes/$teamId'
+import { Route as DashboardHiveExecUpgradeRequestsRouteImport } from './routes/dashboard/hive-exec/upgrade-requests'
+import { Route as DashboardHiveExecTrainingRouteImport } from './routes/dashboard/hive-exec/training'
+import { Route as DashboardHiveExecTicketsRouteImport } from './routes/dashboard/hive-exec/tickets'
+import { Route as DashboardHiveExecStatesRouteImport } from './routes/dashboard/hive-exec/states'
+import { Route as DashboardHiveExecPlansRouteImport } from './routes/dashboard/hive-exec/plans'
+import { Route as DashboardHiveExecPermissionsRouteImport } from './routes/dashboard/hive-exec/permissions'
+import { Route as DashboardHiveExecNewCompanyRouteImport } from './routes/dashboard/hive-exec/new-company'
+import { Route as DashboardHiveExecNectarRouteImport } from './routes/dashboard/hive-exec/nectar'
+import { Route as DashboardHiveExecMessagesRouteImport } from './routes/dashboard/hive-exec/messages'
+import { Route as DashboardHiveExecKnowledgeRouteImport } from './routes/dashboard/hive-exec/knowledge'
+import { Route as DashboardHiveExecHealthRouteImport } from './routes/dashboard/hive-exec/health'
+import { Route as DashboardHiveExecFunctionalityRouteImport } from './routes/dashboard/hive-exec/functionality'
+import { Route as DashboardHiveExecFeaturesRouteImport } from './routes/dashboard/hive-exec/features'
+import { Route as DashboardHiveExecCompanyMigrationRouteImport } from './routes/dashboard/hive-exec/company-migration'
+import { Route as DashboardHiveExecCommandRouteImport } from './routes/dashboard/hive-exec/command'
+import { Route as DashboardHiveExecClassesRouteImport } from './routes/dashboard/hive-exec/classes'
+import { Route as DashboardHiveExecBillingApprovalsRouteImport } from './routes/dashboard/hive-exec/billing-approvals'
+import { Route as DashboardHiveExecBaseTemplateRouteImport } from './routes/dashboard/hive-exec/base-template'
+import { Route as DashboardHiveExecApprovalsRouteImport } from './routes/dashboard/hive-exec/approvals'
+import { Route as DashboardHiveExecAgreementsRouteImport } from './routes/dashboard/hive-exec/agreements'
+import { Route as DashboardHiveExecOrgIdRouteImport } from './routes/dashboard/hive-exec/$orgId'
+import { Route as DashboardFinancialTotalsRouteImport } from './routes/dashboard/financial/totals'
+import { Route as DashboardFinancialRhsRouteImport } from './routes/dashboard/financial/rhs'
+import { Route as DashboardFinancialRevenueRouteImport } from './routes/dashboard/financial/revenue'
+import { Route as DashboardFinancialNectarRouteImport } from './routes/dashboard/financial/nectar'
+import { Route as DashboardFinancialMonthlyGridRouteImport } from './routes/dashboard/financial/monthly-grid'
+import { Route as DashboardFinancialHostHomeRouteImport } from './routes/dashboard/financial/host-home'
+import { Route as DashboardFinancialGrossRouteImport } from './routes/dashboard/financial/gross'
+import { Route as DashboardFinancialEmployeesRouteImport } from './routes/dashboard/financial/employees'
+import { Route as DashboardFinancialDistributionsRouteImport } from './routes/dashboard/financial/distributions'
+import { Route as DashboardFinancialContractorsRouteImport } from './routes/dashboard/financial/contractors'
+import { Route as DashboardEmployeesNewRouteImport } from './routes/dashboard/employees/new'
+import { Route as DashboardEmployeesLoansRouteImport } from './routes/dashboard/employees/loans'
+import { Route as DashboardEmployeesHireDatesRouteImport } from './routes/dashboard/employees/hire-dates'
+import { Route as DashboardEmployeesStaffIdRouteImport } from './routes/dashboard/employees/$staffId'
+import { Route as DashboardCoursesPersonRouteImport } from './routes/dashboard/courses/person'
+import { Route as DashboardCoursesOtherRouteImport } from './routes/dashboard/courses/other'
+import { Route as DashboardCoursesMindsmithRouteImport } from './routes/dashboard/courses/mindsmith'
+import { Route as DashboardCoursesCoreRouteImport } from './routes/dashboard/courses/core'
+import { Route as DashboardCoursesCourseIdRouteImport } from './routes/dashboard/courses/$courseId'
 import { Route as DashboardClientsRhsBoardRouteImport } from './routes/dashboard/clients/rhs-board'
 import { Route as DashboardClientsPendingRouteImport } from './routes/dashboard/clients/pending'
 import { Route as DashboardClientsNewRouteImport } from './routes/dashboard/clients/new'
+import { Route as DashboardClientsFileRouteImport } from './routes/dashboard/clients/file'
+import { Route as DashboardClientsBillingCodesRouteImport } from './routes/dashboard/clients/billing-codes'
 import { Route as DashboardClientsClientIdRouteImport } from './routes/dashboard/clients/$clientId'
-import { Route as DashboardClientTrainingClientIdRouteImport } from './routes/dashboard.client-training.$clientId'
-import { Route as DashboardClientIntakeClientIdRouteImport } from './routes/dashboard.client-intake.$clientId'
 import { Route as DashboardBillingSubscriptionRouteImport } from './routes/dashboard/billing/subscription'
 import { Route as DashboardBillingNectarRouteImport } from './routes/dashboard/billing/nectar'
 import { Route as DashboardBillingImportsRouteImport } from './routes/dashboard/billing/imports'
 import { Route as DashboardBillingForm520RouteImport } from './routes/dashboard/billing/form520'
 import { Route as DashboardBillingClientIdRouteImport } from './routes/dashboard/billing/$clientId'
-import { Route as DashboardBehaviorSupportClientIdRouteImport } from './routes/dashboard.behavior-support.$clientId'
-import { Route as DashboardAdminEmarAuditRouteImport } from './routes/dashboard.admin.emar-audit'
+import { Route as DashboardBehaviorSupportClientIdRouteImport } from './routes/dashboard/behavior-support/$clientId'
+import { Route as DashboardAdminEmarAuditRouteImport } from './routes/dashboard/admin/emar-audit'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as ApiPublicRuntimeConfigRouteImport } from './routes/api/public/runtime-config'
 import { Route as ApiComplianceUrgentRouteImport } from './routes/api/compliance/urgent'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
-import { Route as DashboardSmartImportJobIdReviewRouteImport } from './routes/dashboard.smart-import.$jobId.review'
-import { Route as DashboardSmartImportJobIdDoneRouteImport } from './routes/dashboard.smart-import.$jobId.done'
+import { Route as DashboardSmartImportJobIdReviewRouteImport } from './routes/dashboard/smart-import/$jobId.review'
+import { Route as DashboardSmartImportJobIdDoneRouteImport } from './routes/dashboard/smart-import/$jobId.done'
 import { Route as DashboardMyObligationsCourseInstanceIdRouteImport } from './routes/dashboard.my-obligations_.course.$instanceId'
-import { Route as DashboardHiveTrainingCourseAssignmentIdRouteImport } from './routes/dashboard.hive-training.course.$assignmentId'
-import { Route as DashboardHiveExecStatesStateCodeRouteImport } from './routes/dashboard.hive-exec.states.$stateCode'
-import { Route as DashboardHiveExecAgreementsRequirementsRouteImport } from './routes/dashboard.hive-exec.agreements.requirements'
-import { Route as DashboardHiveExecAgreementsOrgIdRouteImport } from './routes/dashboard.hive-exec.agreements.$orgId'
-import { Route as DashboardFormsFormIdSubmissionsRouteImport } from './routes/dashboard.forms.$formId.submissions'
-import { Route as DashboardFormsFormIdFillRouteImport } from './routes/dashboard.forms.$formId.fill'
-import { Route as DashboardFormsFormIdEditRouteImport } from './routes/dashboard.forms.$formId.edit'
-import { Route as DashboardCoursesTopicTopicIdRouteImport } from './routes/dashboard.courses.topic.$topicId'
-import { Route as DashboardCoursesPolicyDocumentIdRouteImport } from './routes/dashboard.courses.policy.$documentId'
-import { Route as DashboardCoursesPersonModuleAssignmentIdRouteImport } from './routes/dashboard.courses.person-module.$assignmentId'
-import { Route as DashboardCoursesCourseIdEditRouteImport } from './routes/dashboard.courses.$courseId.edit'
+import { Route as DashboardHiveTrainingCourseAssignmentIdRouteImport } from './routes/dashboard/hive-training/course.$assignmentId'
+import { Route as DashboardHiveExecStatesStateCodeRouteImport } from './routes/dashboard/hive-exec/states.$stateCode'
+import { Route as DashboardHiveExecAgreementsRequirementsRouteImport } from './routes/dashboard/hive-exec/agreements.requirements'
+import { Route as DashboardHiveExecAgreementsOrgIdRouteImport } from './routes/dashboard/hive-exec/agreements.$orgId'
+import { Route as DashboardFormsFormIdSubmissionsRouteImport } from './routes/dashboard/forms/$formId.submissions'
+import { Route as DashboardFormsFormIdFillRouteImport } from './routes/dashboard/forms/$formId.fill'
+import { Route as DashboardFormsFormIdEditRouteImport } from './routes/dashboard/forms/$formId.edit'
+import { Route as DashboardCoursesTopicTopicIdRouteImport } from './routes/dashboard/courses/topic.$topicId'
+import { Route as DashboardCoursesPolicyDocumentIdRouteImport } from './routes/dashboard/courses/policy.$documentId'
+import { Route as DashboardCoursesPersonModuleAssignmentIdRouteImport } from './routes/dashboard/courses/person-module.$assignmentId'
+import { Route as DashboardCoursesCourseIdEditRouteImport } from './routes/dashboard/courses/$courseId.edit'
 import { Route as DashboardComplianceCertReviewCompletionIdRouteImport } from './routes/dashboard.compliance_.cert-review.$completionId'
+import { Route as DashboardClientsWorkspaceClientIdRouteImport } from './routes/dashboard/clients/workspace.$clientId'
+import { Route as DashboardClientsTrainingClientIdRouteImport } from './routes/dashboard/clients/training.$clientId'
+import { Route as DashboardClientsIntakeClientIdRouteImport } from './routes/dashboard/clients/intake.$clientId'
+import { Route as DashboardClientsHhsHubClientIdRouteImport } from './routes/dashboard/clients/hhs-hub.$clientId'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as ApiPublicHooksSmartImportRemindersRouteImport } from './routes/api/public/hooks/smart-import-reminders'
 import { Route as ApiPublicHooksNectarSchedulesRouteImport } from './routes/api/public/hooks/nectar-schedules'
 import { Route as ApiPublicHooksNectarDraftTickRouteImport } from './routes/api/public/hooks/nectar-draft-tick'
 import { Route as ApiPublicHooksGmailIngestRouteImport } from './routes/api/public/hooks/gmail-ingest'
 import { Route as ApiPublicHooksBillingDailyCheckRouteImport } from './routes/api/public/hooks/billing-daily-check'
-import { Route as DashboardHiveExecStatesStateCodeOnboardingRouteImport } from './routes/dashboard.hive-exec.states.$stateCode.onboarding'
+import { Route as DashboardHiveExecStatesStateCodeOnboardingRouteImport } from './routes/dashboard/hive-exec/states.$stateCode.onboarding'
 import { Route as ApiPublicOauthGmailCallbackRouteImport } from './routes/api/public/oauth/gmail/callback'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
@@ -695,22 +695,6 @@ const DashboardClientsRoute = DashboardClientsRouteImport.update({
   path: '/clients',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardClientLoansRoute = DashboardClientLoansRouteImport.update({
-  id: '/client-loans',
-  path: '/client-loans',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardClientFileRoute = DashboardClientFileRouteImport.update({
-  id: '/client-file',
-  path: '/client-file',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardClientBillingCodesRoute =
-  DashboardClientBillingCodesRouteImport.update({
-    id: '/client-billing-codes',
-    path: '/client-billing-codes',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardCertificationsRoute = DashboardCertificationsRouteImport.update({
   id: '/certifications',
   path: '/certifications',
@@ -830,12 +814,6 @@ const E2eHhsHubClientIdRoute = E2eHhsHubClientIdRouteImport.update({
   path: '/e2e/hhs-hub/$clientId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardWorkspaceClientIdRoute =
-  DashboardWorkspaceClientIdRouteImport.update({
-    id: '/workspace/$clientId',
-    path: '/workspace/$clientId',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardTrainingCatalogRoute =
   DashboardTrainingCatalogRouteImport.update({
     id: '/training/catalog',
@@ -1104,11 +1082,6 @@ const DashboardHiveExecOrgIdRoute = DashboardHiveExecOrgIdRouteImport.update({
   path: '/$orgId',
   getParentRoute: () => DashboardHiveExecRoute,
 } as any)
-const DashboardHhsHubClientIdRoute = DashboardHhsHubClientIdRouteImport.update({
-  id: '/hhs-hub/$clientId',
-  path: '/hhs-hub/$clientId',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardFinancialTotalsRoute =
   DashboardFinancialTotalsRouteImport.update({
     id: '/totals',
@@ -1172,6 +1145,11 @@ const DashboardEmployeesNewRoute = DashboardEmployeesNewRouteImport.update({
   path: '/employees/new',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardEmployeesLoansRoute = DashboardEmployeesLoansRouteImport.update({
+  id: '/employees/loans',
+  path: '/employees/loans',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardEmployeesHireDatesRoute =
   DashboardEmployeesHireDatesRouteImport.update({
     id: '/employees/hire-dates',
@@ -1227,23 +1205,22 @@ const DashboardClientsNewRoute = DashboardClientsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => DashboardClientsRoute,
 } as any)
+const DashboardClientsFileRoute = DashboardClientsFileRouteImport.update({
+  id: '/file',
+  path: '/file',
+  getParentRoute: () => DashboardClientsRoute,
+} as any)
+const DashboardClientsBillingCodesRoute =
+  DashboardClientsBillingCodesRouteImport.update({
+    id: '/billing-codes',
+    path: '/billing-codes',
+    getParentRoute: () => DashboardClientsRoute,
+  } as any)
 const DashboardClientsClientIdRoute =
   DashboardClientsClientIdRouteImport.update({
     id: '/$clientId',
     path: '/$clientId',
     getParentRoute: () => DashboardClientsRoute,
-  } as any)
-const DashboardClientTrainingClientIdRoute =
-  DashboardClientTrainingClientIdRouteImport.update({
-    id: '/client-training/$clientId',
-    path: '/client-training/$clientId',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardClientIntakeClientIdRoute =
-  DashboardClientIntakeClientIdRouteImport.update({
-    id: '/client-intake/$clientId',
-    path: '/client-intake/$clientId',
-    getParentRoute: () => DashboardRoute,
   } as any)
 const DashboardBillingSubscriptionRoute =
   DashboardBillingSubscriptionRouteImport.update({
@@ -1393,6 +1370,30 @@ const DashboardComplianceCertReviewCompletionIdRoute =
     path: '/compliance/cert-review/$completionId',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardClientsWorkspaceClientIdRoute =
+  DashboardClientsWorkspaceClientIdRouteImport.update({
+    id: '/workspace/$clientId',
+    path: '/workspace/$clientId',
+    getParentRoute: () => DashboardClientsRoute,
+  } as any)
+const DashboardClientsTrainingClientIdRoute =
+  DashboardClientsTrainingClientIdRouteImport.update({
+    id: '/training/$clientId',
+    path: '/training/$clientId',
+    getParentRoute: () => DashboardClientsRoute,
+  } as any)
+const DashboardClientsIntakeClientIdRoute =
+  DashboardClientsIntakeClientIdRouteImport.update({
+    id: '/intake/$clientId',
+    path: '/intake/$clientId',
+    getParentRoute: () => DashboardClientsRoute,
+  } as any)
+const DashboardClientsHhsHubClientIdRoute =
+  DashboardClientsHhsHubClientIdRouteImport.update({
+    id: '/hhs-hub/$clientId',
+    path: '/hhs-hub/$clientId',
+    getParentRoute: () => DashboardClientsRoute,
+  } as any)
 const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
   id: '/api/public/webhooks/stripe',
   path: '/api/public/webhooks/stripe',
@@ -1480,9 +1481,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/behaviorist': typeof DashboardBehavioristRoute
   '/dashboard/billing': typeof DashboardBillingRouteWithChildren
   '/dashboard/certifications': typeof DashboardCertificationsRoute
-  '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
-  '/dashboard/client-file': typeof DashboardClientFileRoute
-  '/dashboard/client-loans': typeof DashboardClientLoansRoute
   '/dashboard/clients': typeof DashboardClientsRouteWithChildren
   '/dashboard/command-center': typeof DashboardCommandCenterRoute
   '/dashboard/company-obligations': typeof DashboardCompanyObligationsRoute
@@ -1558,9 +1556,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/billing/imports': typeof DashboardBillingImportsRoute
   '/dashboard/billing/nectar': typeof DashboardBillingNectarRoute
   '/dashboard/billing/subscription': typeof DashboardBillingSubscriptionRoute
-  '/dashboard/client-intake/$clientId': typeof DashboardClientIntakeClientIdRoute
-  '/dashboard/client-training/$clientId': typeof DashboardClientTrainingClientIdRoute
   '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
+  '/dashboard/clients/billing-codes': typeof DashboardClientsBillingCodesRoute
+  '/dashboard/clients/file': typeof DashboardClientsFileRoute
   '/dashboard/clients/new': typeof DashboardClientsNewRoute
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
   '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
@@ -1571,6 +1569,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
   '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
+  '/dashboard/employees/loans': typeof DashboardEmployeesLoansRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
   '/dashboard/financial/distributions': typeof DashboardFinancialDistributionsRoute
@@ -1582,7 +1581,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/financial/revenue': typeof DashboardFinancialRevenueRoute
   '/dashboard/financial/rhs': typeof DashboardFinancialRhsRoute
   '/dashboard/financial/totals': typeof DashboardFinancialTotalsRoute
-  '/dashboard/hhs-hub/$clientId': typeof DashboardHhsHubClientIdRoute
   '/dashboard/hive-exec/$orgId': typeof DashboardHiveExecOrgIdRoute
   '/dashboard/hive-exec/agreements': typeof DashboardHiveExecAgreementsRouteWithChildren
   '/dashboard/hive-exec/approvals': typeof DashboardHiveExecApprovalsRoute
@@ -1630,7 +1628,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/tracks/$trackSlug': typeof DashboardTracksTrackSlugRoute
   '/dashboard/training/$id': typeof DashboardTrainingIdRoute
   '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
-  '/dashboard/workspace/$clientId': typeof DashboardWorkspaceClientIdRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
   '/dashboard/billing/': typeof DashboardBillingIndexRoute
   '/dashboard/clients/': typeof DashboardClientsIndexRoute
@@ -1648,6 +1645,10 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
+  '/dashboard/clients/hhs-hub/$clientId': typeof DashboardClientsHhsHubClientIdRoute
+  '/dashboard/clients/intake/$clientId': typeof DashboardClientsIntakeClientIdRoute
+  '/dashboard/clients/training/$clientId': typeof DashboardClientsTrainingClientIdRoute
+  '/dashboard/clients/workspace/$clientId': typeof DashboardClientsWorkspaceClientIdRoute
   '/dashboard/compliance/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/$courseId/edit': typeof DashboardCoursesCourseIdEditRoute
   '/dashboard/courses/person-module/$assignmentId': typeof DashboardCoursesPersonModuleAssignmentIdRoute
@@ -1701,9 +1702,6 @@ export interface FileRoutesByTo {
   '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
   '/dashboard/behaviorist': typeof DashboardBehavioristRoute
   '/dashboard/certifications': typeof DashboardCertificationsRoute
-  '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
-  '/dashboard/client-file': typeof DashboardClientFileRoute
-  '/dashboard/client-loans': typeof DashboardClientLoansRoute
   '/dashboard/command-center': typeof DashboardCommandCenterRoute
   '/dashboard/company-obligations': typeof DashboardCompanyObligationsRoute
   '/dashboard/compliance': typeof DashboardComplianceRoute
@@ -1774,9 +1772,9 @@ export interface FileRoutesByTo {
   '/dashboard/billing/imports': typeof DashboardBillingImportsRoute
   '/dashboard/billing/nectar': typeof DashboardBillingNectarRoute
   '/dashboard/billing/subscription': typeof DashboardBillingSubscriptionRoute
-  '/dashboard/client-intake/$clientId': typeof DashboardClientIntakeClientIdRoute
-  '/dashboard/client-training/$clientId': typeof DashboardClientTrainingClientIdRoute
   '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
+  '/dashboard/clients/billing-codes': typeof DashboardClientsBillingCodesRoute
+  '/dashboard/clients/file': typeof DashboardClientsFileRoute
   '/dashboard/clients/new': typeof DashboardClientsNewRoute
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
   '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
@@ -1787,6 +1785,7 @@ export interface FileRoutesByTo {
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
   '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
+  '/dashboard/employees/loans': typeof DashboardEmployeesLoansRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
   '/dashboard/financial/distributions': typeof DashboardFinancialDistributionsRoute
@@ -1798,7 +1797,6 @@ export interface FileRoutesByTo {
   '/dashboard/financial/revenue': typeof DashboardFinancialRevenueRoute
   '/dashboard/financial/rhs': typeof DashboardFinancialRhsRoute
   '/dashboard/financial/totals': typeof DashboardFinancialTotalsRoute
-  '/dashboard/hhs-hub/$clientId': typeof DashboardHhsHubClientIdRoute
   '/dashboard/hive-exec/$orgId': typeof DashboardHiveExecOrgIdRoute
   '/dashboard/hive-exec/agreements': typeof DashboardHiveExecAgreementsRouteWithChildren
   '/dashboard/hive-exec/approvals': typeof DashboardHiveExecApprovalsRoute
@@ -1846,7 +1844,6 @@ export interface FileRoutesByTo {
   '/dashboard/tracks/$trackSlug': typeof DashboardTracksTrackSlugRoute
   '/dashboard/training/$id': typeof DashboardTrainingIdRoute
   '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
-  '/dashboard/workspace/$clientId': typeof DashboardWorkspaceClientIdRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
   '/dashboard/billing': typeof DashboardBillingIndexRoute
   '/dashboard/clients': typeof DashboardClientsIndexRoute
@@ -1864,6 +1861,10 @@ export interface FileRoutesByTo {
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
+  '/dashboard/clients/hhs-hub/$clientId': typeof DashboardClientsHhsHubClientIdRoute
+  '/dashboard/clients/intake/$clientId': typeof DashboardClientsIntakeClientIdRoute
+  '/dashboard/clients/training/$clientId': typeof DashboardClientsTrainingClientIdRoute
+  '/dashboard/clients/workspace/$clientId': typeof DashboardClientsWorkspaceClientIdRoute
   '/dashboard/compliance/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/$courseId/edit': typeof DashboardCoursesCourseIdEditRoute
   '/dashboard/courses/person-module/$assignmentId': typeof DashboardCoursesPersonModuleAssignmentIdRoute
@@ -1922,9 +1923,6 @@ export interface FileRoutesById {
   '/dashboard/behaviorist': typeof DashboardBehavioristRoute
   '/dashboard/billing': typeof DashboardBillingRouteWithChildren
   '/dashboard/certifications': typeof DashboardCertificationsRoute
-  '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
-  '/dashboard/client-file': typeof DashboardClientFileRoute
-  '/dashboard/client-loans': typeof DashboardClientLoansRoute
   '/dashboard/clients': typeof DashboardClientsRouteWithChildren
   '/dashboard/command-center': typeof DashboardCommandCenterRoute
   '/dashboard/company-obligations': typeof DashboardCompanyObligationsRoute
@@ -2000,9 +1998,9 @@ export interface FileRoutesById {
   '/dashboard/billing/imports': typeof DashboardBillingImportsRoute
   '/dashboard/billing/nectar': typeof DashboardBillingNectarRoute
   '/dashboard/billing/subscription': typeof DashboardBillingSubscriptionRoute
-  '/dashboard/client-intake/$clientId': typeof DashboardClientIntakeClientIdRoute
-  '/dashboard/client-training/$clientId': typeof DashboardClientTrainingClientIdRoute
   '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
+  '/dashboard/clients/billing-codes': typeof DashboardClientsBillingCodesRoute
+  '/dashboard/clients/file': typeof DashboardClientsFileRoute
   '/dashboard/clients/new': typeof DashboardClientsNewRoute
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
   '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
@@ -2013,6 +2011,7 @@ export interface FileRoutesById {
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
   '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
+  '/dashboard/employees/loans': typeof DashboardEmployeesLoansRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
   '/dashboard/financial/distributions': typeof DashboardFinancialDistributionsRoute
@@ -2024,7 +2023,6 @@ export interface FileRoutesById {
   '/dashboard/financial/revenue': typeof DashboardFinancialRevenueRoute
   '/dashboard/financial/rhs': typeof DashboardFinancialRhsRoute
   '/dashboard/financial/totals': typeof DashboardFinancialTotalsRoute
-  '/dashboard/hhs-hub/$clientId': typeof DashboardHhsHubClientIdRoute
   '/dashboard/hive-exec/$orgId': typeof DashboardHiveExecOrgIdRoute
   '/dashboard/hive-exec/agreements': typeof DashboardHiveExecAgreementsRouteWithChildren
   '/dashboard/hive-exec/approvals': typeof DashboardHiveExecApprovalsRoute
@@ -2072,7 +2070,6 @@ export interface FileRoutesById {
   '/dashboard/tracks/$trackSlug': typeof DashboardTracksTrackSlugRoute
   '/dashboard/training/$id': typeof DashboardTrainingIdRoute
   '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
-  '/dashboard/workspace/$clientId': typeof DashboardWorkspaceClientIdRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
   '/dashboard/billing/': typeof DashboardBillingIndexRoute
   '/dashboard/clients/': typeof DashboardClientsIndexRoute
@@ -2090,6 +2087,10 @@ export interface FileRoutesById {
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
+  '/dashboard/clients/hhs-hub/$clientId': typeof DashboardClientsHhsHubClientIdRoute
+  '/dashboard/clients/intake/$clientId': typeof DashboardClientsIntakeClientIdRoute
+  '/dashboard/clients/training/$clientId': typeof DashboardClientsTrainingClientIdRoute
+  '/dashboard/clients/workspace/$clientId': typeof DashboardClientsWorkspaceClientIdRoute
   '/dashboard/compliance_/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/$courseId/edit': typeof DashboardCoursesCourseIdEditRoute
   '/dashboard/courses/person-module/$assignmentId': typeof DashboardCoursesPersonModuleAssignmentIdRoute
@@ -2149,9 +2150,6 @@ export interface FileRouteTypes {
     | '/dashboard/behaviorist'
     | '/dashboard/billing'
     | '/dashboard/certifications'
-    | '/dashboard/client-billing-codes'
-    | '/dashboard/client-file'
-    | '/dashboard/client-loans'
     | '/dashboard/clients'
     | '/dashboard/command-center'
     | '/dashboard/company-obligations'
@@ -2227,9 +2225,9 @@ export interface FileRouteTypes {
     | '/dashboard/billing/imports'
     | '/dashboard/billing/nectar'
     | '/dashboard/billing/subscription'
-    | '/dashboard/client-intake/$clientId'
-    | '/dashboard/client-training/$clientId'
     | '/dashboard/clients/$clientId'
+    | '/dashboard/clients/billing-codes'
+    | '/dashboard/clients/file'
     | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
@@ -2240,6 +2238,7 @@ export interface FileRouteTypes {
     | '/dashboard/courses/person'
     | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
+    | '/dashboard/employees/loans'
     | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
     | '/dashboard/financial/distributions'
@@ -2251,7 +2250,6 @@ export interface FileRouteTypes {
     | '/dashboard/financial/revenue'
     | '/dashboard/financial/rhs'
     | '/dashboard/financial/totals'
-    | '/dashboard/hhs-hub/$clientId'
     | '/dashboard/hive-exec/$orgId'
     | '/dashboard/hive-exec/agreements'
     | '/dashboard/hive-exec/approvals'
@@ -2299,7 +2297,6 @@ export interface FileRouteTypes {
     | '/dashboard/tracks/$trackSlug'
     | '/dashboard/training/$id'
     | '/dashboard/training/catalog'
-    | '/dashboard/workspace/$clientId'
     | '/e2e/hhs-hub/$clientId'
     | '/dashboard/billing/'
     | '/dashboard/clients/'
@@ -2317,6 +2314,10 @@ export interface FileRouteTypes {
     | '/api/public/hooks/nectar-schedules'
     | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
+    | '/dashboard/clients/hhs-hub/$clientId'
+    | '/dashboard/clients/intake/$clientId'
+    | '/dashboard/clients/training/$clientId'
+    | '/dashboard/clients/workspace/$clientId'
     | '/dashboard/compliance/cert-review/$completionId'
     | '/dashboard/courses/$courseId/edit'
     | '/dashboard/courses/person-module/$assignmentId'
@@ -2370,9 +2371,6 @@ export interface FileRouteTypes {
     | '/dashboard/authoritative-sources'
     | '/dashboard/behaviorist'
     | '/dashboard/certifications'
-    | '/dashboard/client-billing-codes'
-    | '/dashboard/client-file'
-    | '/dashboard/client-loans'
     | '/dashboard/command-center'
     | '/dashboard/company-obligations'
     | '/dashboard/compliance'
@@ -2443,9 +2441,9 @@ export interface FileRouteTypes {
     | '/dashboard/billing/imports'
     | '/dashboard/billing/nectar'
     | '/dashboard/billing/subscription'
-    | '/dashboard/client-intake/$clientId'
-    | '/dashboard/client-training/$clientId'
     | '/dashboard/clients/$clientId'
+    | '/dashboard/clients/billing-codes'
+    | '/dashboard/clients/file'
     | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
@@ -2456,6 +2454,7 @@ export interface FileRouteTypes {
     | '/dashboard/courses/person'
     | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
+    | '/dashboard/employees/loans'
     | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
     | '/dashboard/financial/distributions'
@@ -2467,7 +2466,6 @@ export interface FileRouteTypes {
     | '/dashboard/financial/revenue'
     | '/dashboard/financial/rhs'
     | '/dashboard/financial/totals'
-    | '/dashboard/hhs-hub/$clientId'
     | '/dashboard/hive-exec/$orgId'
     | '/dashboard/hive-exec/agreements'
     | '/dashboard/hive-exec/approvals'
@@ -2515,7 +2513,6 @@ export interface FileRouteTypes {
     | '/dashboard/tracks/$trackSlug'
     | '/dashboard/training/$id'
     | '/dashboard/training/catalog'
-    | '/dashboard/workspace/$clientId'
     | '/e2e/hhs-hub/$clientId'
     | '/dashboard/billing'
     | '/dashboard/clients'
@@ -2533,6 +2530,10 @@ export interface FileRouteTypes {
     | '/api/public/hooks/nectar-schedules'
     | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
+    | '/dashboard/clients/hhs-hub/$clientId'
+    | '/dashboard/clients/intake/$clientId'
+    | '/dashboard/clients/training/$clientId'
+    | '/dashboard/clients/workspace/$clientId'
     | '/dashboard/compliance/cert-review/$completionId'
     | '/dashboard/courses/$courseId/edit'
     | '/dashboard/courses/person-module/$assignmentId'
@@ -2590,9 +2591,6 @@ export interface FileRouteTypes {
     | '/dashboard/behaviorist'
     | '/dashboard/billing'
     | '/dashboard/certifications'
-    | '/dashboard/client-billing-codes'
-    | '/dashboard/client-file'
-    | '/dashboard/client-loans'
     | '/dashboard/clients'
     | '/dashboard/command-center'
     | '/dashboard/company-obligations'
@@ -2668,9 +2666,9 @@ export interface FileRouteTypes {
     | '/dashboard/billing/imports'
     | '/dashboard/billing/nectar'
     | '/dashboard/billing/subscription'
-    | '/dashboard/client-intake/$clientId'
-    | '/dashboard/client-training/$clientId'
     | '/dashboard/clients/$clientId'
+    | '/dashboard/clients/billing-codes'
+    | '/dashboard/clients/file'
     | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
@@ -2681,6 +2679,7 @@ export interface FileRouteTypes {
     | '/dashboard/courses/person'
     | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
+    | '/dashboard/employees/loans'
     | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
     | '/dashboard/financial/distributions'
@@ -2692,7 +2691,6 @@ export interface FileRouteTypes {
     | '/dashboard/financial/revenue'
     | '/dashboard/financial/rhs'
     | '/dashboard/financial/totals'
-    | '/dashboard/hhs-hub/$clientId'
     | '/dashboard/hive-exec/$orgId'
     | '/dashboard/hive-exec/agreements'
     | '/dashboard/hive-exec/approvals'
@@ -2740,7 +2738,6 @@ export interface FileRouteTypes {
     | '/dashboard/tracks/$trackSlug'
     | '/dashboard/training/$id'
     | '/dashboard/training/catalog'
-    | '/dashboard/workspace/$clientId'
     | '/e2e/hhs-hub/$clientId'
     | '/dashboard/billing/'
     | '/dashboard/clients/'
@@ -2758,6 +2755,10 @@ export interface FileRouteTypes {
     | '/api/public/hooks/nectar-schedules'
     | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
+    | '/dashboard/clients/hhs-hub/$clientId'
+    | '/dashboard/clients/intake/$clientId'
+    | '/dashboard/clients/training/$clientId'
+    | '/dashboard/clients/workspace/$clientId'
     | '/dashboard/compliance_/cert-review/$completionId'
     | '/dashboard/courses/$courseId/edit'
     | '/dashboard/courses/person-module/$assignmentId'
@@ -3457,27 +3458,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardClientsRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/client-loans': {
-      id: '/dashboard/client-loans'
-      path: '/client-loans'
-      fullPath: '/dashboard/client-loans'
-      preLoaderRoute: typeof DashboardClientLoansRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/client-file': {
-      id: '/dashboard/client-file'
-      path: '/client-file'
-      fullPath: '/dashboard/client-file'
-      preLoaderRoute: typeof DashboardClientFileRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/client-billing-codes': {
-      id: '/dashboard/client-billing-codes'
-      path: '/client-billing-codes'
-      fullPath: '/dashboard/client-billing-codes'
-      preLoaderRoute: typeof DashboardClientBillingCodesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/certifications': {
       id: '/dashboard/certifications'
       path: '/certifications'
@@ -3638,13 +3618,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/e2e/hhs-hub/$clientId'
       preLoaderRoute: typeof E2eHhsHubClientIdRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/workspace/$clientId': {
-      id: '/dashboard/workspace/$clientId'
-      path: '/workspace/$clientId'
-      fullPath: '/dashboard/workspace/$clientId'
-      preLoaderRoute: typeof DashboardWorkspaceClientIdRouteImport
-      parentRoute: typeof DashboardRoute
     }
     '/dashboard/training/catalog': {
       id: '/dashboard/training/catalog'
@@ -3975,13 +3948,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardHiveExecOrgIdRouteImport
       parentRoute: typeof DashboardHiveExecRoute
     }
-    '/dashboard/hhs-hub/$clientId': {
-      id: '/dashboard/hhs-hub/$clientId'
-      path: '/hhs-hub/$clientId'
-      fullPath: '/dashboard/hhs-hub/$clientId'
-      preLoaderRoute: typeof DashboardHhsHubClientIdRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/financial/totals': {
       id: '/dashboard/financial/totals'
       path: '/totals'
@@ -4059,6 +4025,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardEmployeesNewRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/employees/loans': {
+      id: '/dashboard/employees/loans'
+      path: '/employees/loans'
+      fullPath: '/dashboard/employees/loans'
+      preLoaderRoute: typeof DashboardEmployeesLoansRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/employees/hire-dates': {
       id: '/dashboard/employees/hire-dates'
       path: '/employees/hire-dates'
@@ -4129,26 +4102,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardClientsNewRouteImport
       parentRoute: typeof DashboardClientsRoute
     }
+    '/dashboard/clients/file': {
+      id: '/dashboard/clients/file'
+      path: '/file'
+      fullPath: '/dashboard/clients/file'
+      preLoaderRoute: typeof DashboardClientsFileRouteImport
+      parentRoute: typeof DashboardClientsRoute
+    }
+    '/dashboard/clients/billing-codes': {
+      id: '/dashboard/clients/billing-codes'
+      path: '/billing-codes'
+      fullPath: '/dashboard/clients/billing-codes'
+      preLoaderRoute: typeof DashboardClientsBillingCodesRouteImport
+      parentRoute: typeof DashboardClientsRoute
+    }
     '/dashboard/clients/$clientId': {
       id: '/dashboard/clients/$clientId'
       path: '/$clientId'
       fullPath: '/dashboard/clients/$clientId'
       preLoaderRoute: typeof DashboardClientsClientIdRouteImport
       parentRoute: typeof DashboardClientsRoute
-    }
-    '/dashboard/client-training/$clientId': {
-      id: '/dashboard/client-training/$clientId'
-      path: '/client-training/$clientId'
-      fullPath: '/dashboard/client-training/$clientId'
-      preLoaderRoute: typeof DashboardClientTrainingClientIdRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/client-intake/$clientId': {
-      id: '/dashboard/client-intake/$clientId'
-      path: '/client-intake/$clientId'
-      fullPath: '/dashboard/client-intake/$clientId'
-      preLoaderRoute: typeof DashboardClientIntakeClientIdRouteImport
-      parentRoute: typeof DashboardRoute
     }
     '/dashboard/billing/subscription': {
       id: '/dashboard/billing/subscription'
@@ -4332,6 +4305,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardComplianceCertReviewCompletionIdRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/clients/workspace/$clientId': {
+      id: '/dashboard/clients/workspace/$clientId'
+      path: '/workspace/$clientId'
+      fullPath: '/dashboard/clients/workspace/$clientId'
+      preLoaderRoute: typeof DashboardClientsWorkspaceClientIdRouteImport
+      parentRoute: typeof DashboardClientsRoute
+    }
+    '/dashboard/clients/training/$clientId': {
+      id: '/dashboard/clients/training/$clientId'
+      path: '/training/$clientId'
+      fullPath: '/dashboard/clients/training/$clientId'
+      preLoaderRoute: typeof DashboardClientsTrainingClientIdRouteImport
+      parentRoute: typeof DashboardClientsRoute
+    }
+    '/dashboard/clients/intake/$clientId': {
+      id: '/dashboard/clients/intake/$clientId'
+      path: '/intake/$clientId'
+      fullPath: '/dashboard/clients/intake/$clientId'
+      preLoaderRoute: typeof DashboardClientsIntakeClientIdRouteImport
+      parentRoute: typeof DashboardClientsRoute
+    }
+    '/dashboard/clients/hhs-hub/$clientId': {
+      id: '/dashboard/clients/hhs-hub/$clientId'
+      path: '/hhs-hub/$clientId'
+      fullPath: '/dashboard/clients/hhs-hub/$clientId'
+      preLoaderRoute: typeof DashboardClientsHhsHubClientIdRouteImport
+      parentRoute: typeof DashboardClientsRoute
+    }
     '/api/public/webhooks/stripe': {
       id: '/api/public/webhooks/stripe'
       path: '/api/public/webhooks/stripe'
@@ -4427,18 +4428,31 @@ const DashboardBillingRouteWithChildren =
 
 interface DashboardClientsRouteChildren {
   DashboardClientsClientIdRoute: typeof DashboardClientsClientIdRoute
+  DashboardClientsBillingCodesRoute: typeof DashboardClientsBillingCodesRoute
+  DashboardClientsFileRoute: typeof DashboardClientsFileRoute
   DashboardClientsNewRoute: typeof DashboardClientsNewRoute
   DashboardClientsPendingRoute: typeof DashboardClientsPendingRoute
   DashboardClientsRhsBoardRoute: typeof DashboardClientsRhsBoardRoute
   DashboardClientsIndexRoute: typeof DashboardClientsIndexRoute
+  DashboardClientsHhsHubClientIdRoute: typeof DashboardClientsHhsHubClientIdRoute
+  DashboardClientsIntakeClientIdRoute: typeof DashboardClientsIntakeClientIdRoute
+  DashboardClientsTrainingClientIdRoute: typeof DashboardClientsTrainingClientIdRoute
+  DashboardClientsWorkspaceClientIdRoute: typeof DashboardClientsWorkspaceClientIdRoute
 }
 
 const DashboardClientsRouteChildren: DashboardClientsRouteChildren = {
   DashboardClientsClientIdRoute: DashboardClientsClientIdRoute,
+  DashboardClientsBillingCodesRoute: DashboardClientsBillingCodesRoute,
+  DashboardClientsFileRoute: DashboardClientsFileRoute,
   DashboardClientsNewRoute: DashboardClientsNewRoute,
   DashboardClientsPendingRoute: DashboardClientsPendingRoute,
   DashboardClientsRhsBoardRoute: DashboardClientsRhsBoardRoute,
   DashboardClientsIndexRoute: DashboardClientsIndexRoute,
+  DashboardClientsHhsHubClientIdRoute: DashboardClientsHhsHubClientIdRoute,
+  DashboardClientsIntakeClientIdRoute: DashboardClientsIntakeClientIdRoute,
+  DashboardClientsTrainingClientIdRoute: DashboardClientsTrainingClientIdRoute,
+  DashboardClientsWorkspaceClientIdRoute:
+    DashboardClientsWorkspaceClientIdRoute,
 }
 
 const DashboardClientsRouteWithChildren =
@@ -4718,9 +4732,6 @@ interface DashboardRouteChildren {
   DashboardBehavioristRoute: typeof DashboardBehavioristRoute
   DashboardBillingRoute: typeof DashboardBillingRouteWithChildren
   DashboardCertificationsRoute: typeof DashboardCertificationsRoute
-  DashboardClientBillingCodesRoute: typeof DashboardClientBillingCodesRoute
-  DashboardClientFileRoute: typeof DashboardClientFileRoute
-  DashboardClientLoansRoute: typeof DashboardClientLoansRoute
   DashboardClientsRoute: typeof DashboardClientsRouteWithChildren
   DashboardCommandCenterRoute: typeof DashboardCommandCenterRoute
   DashboardCompanyObligationsRoute: typeof DashboardCompanyObligationsRoute
@@ -4778,8 +4789,6 @@ interface DashboardRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardAdminEmarAuditRoute: typeof DashboardAdminEmarAuditRoute
   DashboardBehaviorSupportClientIdRoute: typeof DashboardBehaviorSupportClientIdRoute
-  DashboardClientIntakeClientIdRoute: typeof DashboardClientIntakeClientIdRoute
-  DashboardClientTrainingClientIdRoute: typeof DashboardClientTrainingClientIdRoute
   DashboardCoursesCourseIdRoute: typeof DashboardCoursesCourseIdRouteWithChildren
   DashboardCoursesCoreRoute: typeof DashboardCoursesCoreRoute
   DashboardCoursesMindsmithRoute: typeof DashboardCoursesMindsmithRoute
@@ -4787,8 +4796,8 @@ interface DashboardRouteChildren {
   DashboardCoursesPersonRoute: typeof DashboardCoursesPersonRoute
   DashboardEmployeesStaffIdRoute: typeof DashboardEmployeesStaffIdRoute
   DashboardEmployeesHireDatesRoute: typeof DashboardEmployeesHireDatesRoute
+  DashboardEmployeesLoansRoute: typeof DashboardEmployeesLoansRoute
   DashboardEmployeesNewRoute: typeof DashboardEmployeesNewRoute
-  DashboardHhsHubClientIdRoute: typeof DashboardHhsHubClientIdRoute
   DashboardHubClientsRoute: typeof DashboardHubClientsRoute
   DashboardHubDocumentationRoute: typeof DashboardHubDocumentationRoute
   DashboardHubEmployeesRoute: typeof DashboardHubEmployeesRoute
@@ -4797,7 +4806,6 @@ interface DashboardRouteChildren {
   DashboardShiftShiftIdRoute: typeof DashboardShiftShiftIdRoute
   DashboardTrainingIdRoute: typeof DashboardTrainingIdRoute
   DashboardTrainingCatalogRoute: typeof DashboardTrainingCatalogRoute
-  DashboardWorkspaceClientIdRoute: typeof DashboardWorkspaceClientIdRoute
   DashboardCoursesIndexRoute: typeof DashboardCoursesIndexRoute
   DashboardEmployeesIndexRoute: typeof DashboardEmployeesIndexRoute
   DashboardHiveTrainingIndexRoute: typeof DashboardHiveTrainingIndexRoute
@@ -4819,9 +4827,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardBehavioristRoute: DashboardBehavioristRoute,
   DashboardBillingRoute: DashboardBillingRouteWithChildren,
   DashboardCertificationsRoute: DashboardCertificationsRoute,
-  DashboardClientBillingCodesRoute: DashboardClientBillingCodesRoute,
-  DashboardClientFileRoute: DashboardClientFileRoute,
-  DashboardClientLoansRoute: DashboardClientLoansRoute,
   DashboardClientsRoute: DashboardClientsRouteWithChildren,
   DashboardCommandCenterRoute: DashboardCommandCenterRoute,
   DashboardCompanyObligationsRoute: DashboardCompanyObligationsRoute,
@@ -4880,8 +4885,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardAdminEmarAuditRoute: DashboardAdminEmarAuditRoute,
   DashboardBehaviorSupportClientIdRoute: DashboardBehaviorSupportClientIdRoute,
-  DashboardClientIntakeClientIdRoute: DashboardClientIntakeClientIdRoute,
-  DashboardClientTrainingClientIdRoute: DashboardClientTrainingClientIdRoute,
   DashboardCoursesCourseIdRoute: DashboardCoursesCourseIdRouteWithChildren,
   DashboardCoursesCoreRoute: DashboardCoursesCoreRoute,
   DashboardCoursesMindsmithRoute: DashboardCoursesMindsmithRoute,
@@ -4889,8 +4892,8 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardCoursesPersonRoute: DashboardCoursesPersonRoute,
   DashboardEmployeesStaffIdRoute: DashboardEmployeesStaffIdRoute,
   DashboardEmployeesHireDatesRoute: DashboardEmployeesHireDatesRoute,
+  DashboardEmployeesLoansRoute: DashboardEmployeesLoansRoute,
   DashboardEmployeesNewRoute: DashboardEmployeesNewRoute,
-  DashboardHhsHubClientIdRoute: DashboardHhsHubClientIdRoute,
   DashboardHubClientsRoute: DashboardHubClientsRoute,
   DashboardHubDocumentationRoute: DashboardHubDocumentationRoute,
   DashboardHubEmployeesRoute: DashboardHubEmployeesRoute,
@@ -4899,7 +4902,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardShiftShiftIdRoute: DashboardShiftShiftIdRoute,
   DashboardTrainingIdRoute: DashboardTrainingIdRoute,
   DashboardTrainingCatalogRoute: DashboardTrainingCatalogRoute,
-  DashboardWorkspaceClientIdRoute: DashboardWorkspaceClientIdRoute,
   DashboardCoursesIndexRoute: DashboardCoursesIndexRoute,
   DashboardEmployeesIndexRoute: DashboardEmployeesIndexRoute,
   DashboardHiveTrainingIndexRoute: DashboardHiveTrainingIndexRoute,
