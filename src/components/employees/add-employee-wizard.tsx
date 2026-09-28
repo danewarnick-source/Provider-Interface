@@ -35,7 +35,7 @@ import {
   normalizeConfig,
   WORKER_TYPE_OPTIONS,
   type StaffIntakeFieldsConfig,
-} from "@/components/hr/staff-fields-panel";
+} from "@/components/employees/staff-fields-panel";
 
 export type HireDraft = {
   id: string;

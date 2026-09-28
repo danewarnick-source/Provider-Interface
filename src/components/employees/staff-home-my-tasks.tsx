@@ -24,7 +24,7 @@ import {
   dedupeOpenTasksByInstance,
   staffTaskOpensUpload,
 } from "@/lib/staff/staff-my-tasks";
-import { MyTasksQueue } from "@/components/staff-tasks/my-tasks-queue";
+import { MyTasksQueue } from "@/components/employees/my-tasks-queue";
 import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
 import {
   activeOverrideForTarget,

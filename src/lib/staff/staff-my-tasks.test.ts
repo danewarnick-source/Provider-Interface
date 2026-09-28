@@ -235,11 +235,11 @@ describe("Staff My tasks surface lock", () => {
     );
     const home = readFileSync(new URL("../../routes/dashboard.index.tsx", import.meta.url), "utf8");
     const homeTasks = readFileSync(
-      new URL("../../components/staff-tasks/staff-home-my-tasks.tsx", import.meta.url),
+      new URL("../../components/employees/staff-home-my-tasks.tsx", import.meta.url),
       "utf8",
     );
     const queue = readFileSync(
-      new URL("../../components/staff-tasks/my-tasks-queue.tsx", import.meta.url),
+      new URL("../../components/employees/my-tasks-queue.tsx", import.meta.url),
       "utf8",
     );
     const nav = readFileSync(new URL("../../routes/dashboard.tsx", import.meta.url), "utf8");

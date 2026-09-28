@@ -51,7 +51,7 @@ import { isPackSentinel, obligationIsRequired } from "@/lib/obligations/obligati
 import { PacketNextActionCard } from "@/components/compliance/packet-next-action";
 import { useCompliancePacket } from "@/hooks/use-compliance-packet";
 import { AttentionStrip } from "@/components/staff-mobile/attention-strip";
-import { MyTasksQueue } from "@/components/staff-tasks/my-tasks-queue";
+import { MyTasksQueue } from "@/components/employees/my-tasks-queue";
 import {
   correctionNoteFromAdminNotes,
   indexCompletionsByInstance,

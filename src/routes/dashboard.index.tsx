@@ -21,7 +21,7 @@ import { NectarPayPeriodCard } from "@/components/staff-mobile/nectar-pay-period
 import { AdminHomeDashboard } from "@/components/admin-home/admin-home-dashboard";
 import { staffClockOutSearch } from "@/lib/staff/staff-clock-out";
 import { parseCheckoutReturnSearch } from "@/lib/billing/billing-access";
-import { StaffHomeMyTasks } from "@/components/staff-tasks/staff-home-my-tasks";
+import { StaffHomeMyTasks } from "@/components/employees/staff-home-my-tasks";
 import { isAdminLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/")({

@@ -9,7 +9,7 @@ import {
   type StaffIdentityMember,
   type StaffIdentityProfile,
 } from "@/lib/staff/staff-profile-identity";
-import { StaffPhotoCard } from "@/components/staff/staff-photo-card";
+import { StaffPhotoCard } from "@/components/employees/staff-photo-card";
 
 export type { StaffIdentityDraft, StaffIdentityMember, StaffIdentityProfile };
 

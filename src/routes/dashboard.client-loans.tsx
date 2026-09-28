@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus } from "lucide-react";
-import { LoanFeatureGate } from "@/components/loans/loan-feature-gate";
-import { LoanEditor } from "@/components/loans/loan-editor";
+import { LoanFeatureGate } from "@/components/employees/loan-feature-gate";
+import { LoanEditor } from "@/components/employees/loan-editor";
 import { listOrgLoans } from "@/lib/clients/client-loans.functions";
 
 export const Route = createFileRoute("/dashboard/client-loans")({

@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useCompliancePacket } from "@/hooks/use-compliance-packet";
-import { OrgPersonnelFileMatrix } from "@/components/personnel-file/org-personnel-file-matrix";
+import { OrgPersonnelFileMatrix } from "@/components/employees/org-personnel-file-matrix";
 import { AdminExamExportButton } from "@/components/compliance/admin-exam-export-button";
 import { PacketNextActionCard, PacketScopeNote } from "@/components/compliance/packet-next-action";
 import { listPendingCertReviews, type CertReviewRow } from "@/lib/obligations/company-obligations.functions";

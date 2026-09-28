@@ -24,7 +24,7 @@ import {
   type HireDraft,
 } from "@/components/employees/add-employee-wizard";
 import type { AccessLevel } from "@/lib/access/levels";
-import { normalizeConfig, type StaffIntakeFieldsConfig } from "@/components/hr/staff-fields-panel";
+import { normalizeConfig, type StaffIntakeFieldsConfig } from "@/components/employees/staff-fields-panel";
 
 export type NeedsSetupPerson = {
   userId: string;
