@@ -799,7 +799,7 @@ function serverFnPayload(url: string, body: string): unknown {
       ],
     };
   }
-  if (/archiveEntity|restoreEntity|deleteEntity/i.test(fn)) {
+  if (/archiveEntity|restoreEntity/i.test(fn)) {
     return { ok: true };
   }
   if (/createInvitation/i.test(fn)) {
