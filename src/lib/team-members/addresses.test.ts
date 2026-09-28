@@ -154,7 +154,7 @@ describe("Team Members addresses", () => {
       ["lib/employees.functions.ts", "lib/team-members/members.functions.ts"],
       ["lib/invitations.functions.ts", "lib/team-members/invites.functions.ts"],
       ["lib/lifecycle.functions.ts", "lib/team-members/lifecycle.functions.ts"],
-      ["lib/staff-profile-identity.ts", "lib/team-members/identity.ts"],
+      ["lib/staff-profile-identity.ts", "lib/team-members/profile.ts"],
       ["lib/staff-obligation-files.ts", "lib/team-members/file.ts"],
       ["lib/employee-face-sheet.ts", "lib/team-members/staff-record-pdf.ts"],
       ["lib/employee-face-sheet.functions.ts", "lib/team-members/staff-record-pdf.functions.ts"],
@@ -172,7 +172,7 @@ describe("Team Members addresses", () => {
       ],
       [
         "components/employees/staff-profile-identity.tsx",
-        "components/team-members/profile/identity-fields.tsx",
+        "components/team-members/profile/profile-tab.tsx",
       ],
       [
         "components/employees/staff-obligations-files-tab.tsx",

@@ -13,7 +13,7 @@ import {
   listTeamMemberFormOptions,
   type CreateTeamMemberResult,
 } from "@/lib/team-members/members.functions";
-import { restoreEntity } from "@/lib/team-members/lifecycle.functions";
+import { reactivateMember } from "@/lib/team-members/lifecycle.functions";
 import {
   WORKER_TYPES,
   WORKER_TYPE_LABEL,
@@ -120,7 +120,7 @@ export function AddTeamMemberDialog({
   const qc = useQueryClient();
   const navigate = useNavigate();
   const createFn = useServerFn(createTeamMember);
-  const restoreFn = useServerFn(restoreEntity);
+  const reactivateFn = useServerFn(reactivateMember);
   const { presets, isOwner } = useAgencyPresets(organizationId);
   const optionsQ = useTeamMemberFormOptions(organizationId, open);
   const options = optionsQ.data;
@@ -186,7 +186,7 @@ export function AddTeamMemberDialog({
   const reactivateM = useMutation({
     mutationFn: async (userId: string) => {
       if (!organizationId) throw new Error("No organization selected.");
-      return restoreFn({ data: { kind: "employee", id: userId, organizationId } });
+      return reactivateFn({ data: { userId, organizationId } });
     },
     onSuccess: (_res, userId) => {
       toast.success("Reactivated.");

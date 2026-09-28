@@ -20,6 +20,9 @@ import {
   ORG_ID,
   ORG_NAME,
   PENDING_INVITE,
+  PROFILE_ACCOUNT_ACTIVITY,
+  PROFILE_EVIDENCE,
+  PROFILE_NOTES,
   ROSTER_EVIDENCE,
   ROSTER_POSITIONS,
   STAFF,
@@ -783,6 +786,78 @@ function teamRosterRows(): Row[] {
   });
 }
 
+/** getTeamMemberProfile — the TeamMemberProfileData shape from src/lib/team-members/profile.ts. */
+function teamMemberProfile(body: string): Row | null {
+  const staff = STAFF_LIST.find((st) => body.includes(st.id));
+  if (!staff) return null;
+  const roster = teamRosterRows().find((r) => r.userId === staff.id)!;
+  const saved = savedMemberAccess.get(staff.id);
+  const level = saved?.access_level ?? roster.accessLevel;
+  const supervisor = roster.supervisorId
+    ? STAFF_LIST.find((st) => st.id === roster.supervisorId)
+    : null;
+  const lastSignInAt = LAST_SIGN_IN[staff.id] ?? null;
+  return {
+    member: {
+      id: `mem-${staff.id.slice(-8)}`,
+      userId: staff.id,
+      active: true,
+      accessLevel: level,
+      presetId: null,
+      presetName: level === "owner" ? "Owner" : level === "admin" ? "Program Manager" : "DSP",
+      jobTitle: staff.jobTitle,
+      supervisorMemberId: supervisor ? `mem-${supervisor.id.slice(-8)}` : null,
+      supervisorName: supervisor?.name ?? null,
+      endDate: null,
+      separationReason: null,
+      rehireEligible: null,
+    },
+    profile: {
+      firstName: roster.firstName,
+      lastName: roster.lastName,
+      displayName: staff.name,
+      email: staff.email,
+      username: staff.email,
+      phone: "801-555-0100",
+      photoPath: null,
+      homeAddress: "123 Maple St, Ogden, UT",
+      emergencyContactName: "Pat Probert",
+      emergencyContactRelationship: "Parent",
+      emergencyContactPhone: "801-555-0199",
+      dateOfBirth: "1990-04-02",
+      hireDate: "2025-01-15",
+      workerType: "w2",
+      transportsClients: staff.id === STAFF.jake.id,
+      staffTypeKeys: (ROSTER_POSITIONS[staff.id] ?? []).map((p) => p.key),
+      employeeId: roster.employeeId,
+      homeId: roster.homeId,
+      homeName: roster.homeName,
+    },
+    status: lastSignInAt ? "active" : "not_invited",
+    pendingInviteId: null,
+    lastSignInAt,
+    lastSignInKnown: true,
+    pay: { hourlyRate: 18.5, dailyRate: null },
+    timeOff: [],
+    evidence: PROFILE_EVIDENCE[staff.id] ?? { items: [], files: [] },
+    names: Object.fromEntries(STAFF_LIST.map((st) => [st.id, st.name])),
+    options: {
+      homes: TEAMS.map((t) => ({ id: t.id, name: t.team_name })),
+      supervisors: STAFF_LIST.filter((st) => st.id !== staff.id).map((st) => ({
+        memberId: `mem-${st.id.slice(-8)}`,
+        name: st.name,
+      })),
+      staffTypes: TNS_POSITIONS.map((p) => ({ ...p })),
+    },
+    viewer: {
+      canSeeDateOfBirth: true,
+      canEditDateOfBirth: true,
+      canSeePay: true,
+      canEditPay: true,
+    },
+  };
+}
+
 /** listTeamInvites — the one pending invite (expired on the fixture date) first. */
 function teamInviteRows(): Row[] {
   return [
@@ -933,7 +1008,14 @@ function serverFnPayload(url: string, body: string): unknown {
       ],
     };
   }
-  if (/archiveEntity|restoreEntity/i.test(fn)) {
+  if (/getTeamMemberProfile/i.test(fn)) return teamMemberProfile(body);
+  if (/updateTeamMember/i.test(fn)) return { ok: true };
+  if (/listStaffNotes/i.test(fn)) return PROFILE_NOTES;
+  if (/addStaffNote/i.test(fn)) return { id: "00000000-0000-4000-a000-000000000702" };
+  if (/getMemberActivity/i.test(fn)) {
+    return { shifts: [], forms: [], incidents: [], account: PROFILE_ACCOUNT_ACTIVITY };
+  }
+  if (/deactivateMember|reactivateMember/i.test(fn)) {
     return { ok: true };
   }
   if (/createInvitation/i.test(fn)) {

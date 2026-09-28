@@ -620,7 +620,7 @@ function serverFnPayload(url: string, body: string): unknown {
       results: [{ email: "sep1.tester@example.test", user_id: "00000000-0000-4000-a000-000000000499", status: "sent", reason: null }],
     };
   }
-  if (/archiveEntity|restoreEntity/i.test(fn)) {
+  if (/deactivateMember|reactivateMember/i.test(fn)) {
     return { ok: true };
   }
   if (/createInvitation/i.test(fn)) {

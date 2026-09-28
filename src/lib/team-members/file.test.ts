@@ -210,51 +210,104 @@ describe("dueLabel", () => {
 });
 
 describe("Admin team member profile lock", () => {
-  it("keeps Profile / Team member file / Activity and drops junk surfaces", () => {
-    const src = readFileSync(
-      new URL("../../components/team-members/profile/profile-page.tsx", import.meta.url),
-      "utf8",
-    );
-    assert.match(src, /Team member file/);
-    assert.doesNotMatch(src, />Staff file</);
-    assert.match(src, /resolveProfileTab\(tab\)/);
-    assert.doesNotMatch(src, /Personnel file/);
-    assert.match(src, /value="profile"/);
-    assert.match(src, /value="file"/);
-    assert.doesNotMatch(src, /value="personnel"/);
-    assert.match(src, /value="activity"/);
+  const read = (f: string) =>
+    readFileSync(new URL(`../../components/team-members/profile/${f}`, import.meta.url), "utf8");
+
+  it("draws Profile | File | Caseload | Notes | Activity and drops junk surfaces", () => {
+    const src = read("profile-page.tsx");
+    assert.match(src, /visibleProfileTabs\(\{ canSeeNotes \}\)/);
+    assert.match(src, /resolveProfileTab\(tab, \{ canSeeNotes \}\)/);
+    for (const v of ["profile", "file", "caseload", "notes", "activity"]) {
+      assert.match(src, new RegExp(`value="${v}"`));
+    }
     assert.match(src, /StaffProfilePanel/);
+    assert.match(src, /data-testid="profile-load-error"/);
+    assert.match(src, /data-testid="profile-not-found"/);
+    assert.doesNotMatch(src, />Staff file</);
+    assert.doesNotMatch(src, /Personnel file/);
+    assert.doesNotMatch(src, /value="personnel"/);
     assert.doesNotMatch(src, /<TabsTrigger value="permissions">/);
     assert.doesNotMatch(src, /Obligations & files/);
     assert.doesNotMatch(src, /Document Vault/);
-    assert.doesNotMatch(src, /Staff record/);
     assert.doesNotMatch(src, /Suggested CE/);
     assert.doesNotMatch(src, /Custom attributes/);
-    assert.doesNotMatch(src, /Training requirement settings/);
-    assert.doesNotMatch(src, /Behavior-related training/);
     assert.doesNotMatch(src, /StaffDeadlinesList/);
     assert.doesNotMatch(src, /EmployeeDocumentsCard/);
-    assert.doesNotMatch(src, /Have/);
-    assert.doesNotMatch(src, /CustomAttributesSection/);
     assert.doesNotMatch(src, /LifecyclePanel/);
+    assert.doesNotMatch(src, /Back to list/);
+    assert.doesNotMatch(src, /profile-access-badge/);
   });
 
-  it("keeps Department off the edit Profile person block", () => {
-    const identity = readFileSync(
-      new URL("../../components/team-members/profile/identity-fields.tsx", import.meta.url),
-      "utf8",
-    );
-    const panel = readFileSync(
-      new URL("../../components/team-members/profile/profile-tab.tsx", import.meta.url),
-      "utf8",
-    );
-    assert.match(identity, /Team member ID/);
-    assert.match(identity, /Job title/);
-    assert.match(identity, /Access level/);
-    assert.doesNotMatch(identity, /Department/);
+  it("Profile tab: Contact, Employment and Access; one Edit / Save / Cancel; no Access level field", () => {
+    const panel = read("profile-tab.tsx");
+    for (const label of [
+      "Contact",
+      "Employment",
+      "Home address",
+      "Emergency contact",
+      "Date of birth",
+      "Job title",
+      "Change in Access",
+      "Supervisor",
+      "Hire date",
+      "Worker type",
+      "Transports clients",
+      "Staff type",
+      "Team member ID",
+      "Hourly rate",
+      "Daily rate",
+      "Upcoming time off",
+      "New suggestion: transport items",
+    ]) {
+      assert.ok(panel.includes(label), label);
+    }
     assert.match(panel, /AccessSection/);
-    assert.match(panel, /Edit profile/);
-    assert.match(panel, /Save profile/);
+    assert.match(panel, /isAdminLevel \?/);
+    assert.match(panel, /updateTeamMember/);
+    assert.equal((panel.match(/>\s*Edit\s*</g) ?? []).length, 1);
+    assert.doesNotMatch(panel, /Access level/);
+    assert.doesNotMatch(panel, /memberBelongsToRouteStaff/);
+    assert.doesNotMatch(panel, /Department/);
+    assert.doesNotMatch(panel, /\bemployee\b/i);
+  });
+
+  it("no browser-side writes to profiles or organization_members in the profile components", () => {
+    for (const f of [
+      "profile-page.tsx",
+      "profile-header.tsx",
+      "profile-tab.tsx",
+      "photo-card.tsx",
+      "notes-tab.tsx",
+      "activity-tab.tsx",
+    ]) {
+      const src = read(f);
+      assert.doesNotMatch(src, /from\("profiles"\)|from\("organization_members"\)/, f);
+      assert.doesNotMatch(src, /integrations\/supabase\/client"/, f);
+    }
+    assert.match(read("photo-card.tsx"), /imageTypes=\{\["image\/png", "image\/jpeg"\]\}/);
+  });
+
+  it("header: back link, status chip, Evidence badges and the ⋯ menu", () => {
+    const header = read("profile-header.tsx");
+    assert.match(header, /← Team Members|ArrowLeft[\s\S]*Team Members/);
+    assert.match(header, /profileBadges\(/);
+    assert.match(header, /MEMBER_STATUS_LABEL/);
+    for (const label of [
+      "Review evidence pack",
+      "Staff record",
+      "Download",
+      "Print",
+      "Save to documents",
+      "Reset password…",
+      "Send invite",
+      "Resend invite",
+      "Deactivate…",
+      "Reactivate",
+    ]) {
+      assert.ok(header.includes(label), label);
+    }
+    assert.match(header, /tab: "file"/);
+    assert.doesNotMatch(header, /company_obligation/);
   });
 });
 

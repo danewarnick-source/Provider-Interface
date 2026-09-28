@@ -2,190 +2,158 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requireOrgMembershipAdmin } from "@/integrations/supabase/require-org";
+import { logChange } from "@/lib/access/change-log.server";
 import { assertCanManageMember } from "@/lib/team-members/guards.server";
+import { SEPARATION_REASONS } from "@/lib/team-members/profile";
 
-const Kind = z.enum(["employee", "client"]);
+// Deactivate / Reactivate a team member in ONE agency. Nothing is ever
+// deleted: people and their work records stay; only this agency's membership
+// turns off. assertCanManageMember runs first and proves the target has a
+// membership row in this organization (any `active` flag, so Reactivate works
+// on someone already deactivated) — that is the cross-org guard for every
+// service-role write below.
 
-// Cross-org guard for every service-role write in this file. Verifies, BEFORE
-// any write happens, that
-//   (a) the CALLER has an ACTIVE membership in the organization they claim to
-//       act for, and
-//   (b) the TARGET actually belongs to that same organization (staff via
-//       organization_members; clients via clients.organization_id).
-// Without (b), the service-role writes below (which bypass RLS) could touch a
-// profile/user/client in a DIFFERENT org just by passing that record's id — a
-// cross-organization IDOR. The target-staff check accepts a membership row
-// regardless of its `active` flag on purpose: archiveEntity sets active=false,
-// and restoreEntity then runs on that already-deactivated team member, so an
-// active-only check would break that legitimate flow. Existence of any row
-// still proves same-org ownership. (There is no hard delete: people and their
-// work records are never removed, only deactivated.)
-async function assertCallerAndTargetInOrg(
-  actorId: string,
-  kind: "employee" | "client",
-  targetId: string,
-  orgId: string,
-) {
-  const { data: myOrgs } = await supabaseAdmin
+const YMD = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+const MemberTarget = z.object({
+  organizationId: z.string().uuid(),
+  userId: z.string().uuid(),
+});
+
+/** Other agencies where this person is still active. */
+async function otherActiveMemberships(userId: string, organizationId: string): Promise<number> {
+  const { count, error } = await supabaseAdmin
     .from("organization_members")
-    .select("organization_id")
-    .eq("user_id", actorId)
-    .eq("active", true);
-  const mine = new Set((myOrgs ?? []).map((r) => r.organization_id));
-  if (!mine.has(orgId)) {
-    throw new Error("Not authorized for this organization");
-  }
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("active", true)
+    .neq("organization_id", organizationId);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
 
-  if (kind === "employee") {
-    const { data } = await supabaseAdmin
+export const deactivateMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    MemberTarget.extend({
+      lastDay: YMD,
+      reason: z.enum(SEPARATION_REASONS),
+      rehireEligible: z.boolean(),
+      note: z.string().trim().max(5000).optional().or(z.literal("")),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    if (!context.userId) throw new Error("Not signed in.");
+    const actorId = context.userId;
+    await assertCanManageMember({
+      supabase: supabaseAdmin,
+      actorId,
+      organizationId: data.organizationId,
+      targetUserId: data.userId,
+      action: "deactivate",
+    });
+
+    const { data: rows, error: mErr } = await supabaseAdmin
       .from("organization_members")
-      .select("organization_id")
-      .eq("user_id", targetId)
-      .eq("organization_id", orgId)
-      .maybeSingle();
-    if (!data) throw new Error("Not authorized for this organization");
-  } else {
-    const { data } = await supabaseAdmin
-      .from("clients")
-      .select("organization_id")
-      .eq("id", targetId)
-      .maybeSingle();
-    if (!data || data.organization_id !== orgId) {
-      throw new Error("Not authorized for this organization");
-    }
-  }
-}
+      .update({
+        active: false,
+        end_date: data.lastDay,
+        separation_reason: data.reason,
+        rehire_eligible: data.rehireEligible,
+      })
+      .eq("user_id", data.userId)
+      .eq("organization_id", data.organizationId)
+      .select("id");
+    if (mErr) throw new Error(mErr.message);
+    if (!rows?.length) throw new Error("Team member not found in this organization");
 
-async function staffActiveBlockers(_staffId: string, _orgId: string) {
-  // Time-clock module removed; no active-shift blockers to check.
-  return null;
-}
-
-async function clientActiveBlockers(clientId: string, orgId: string) {
-  // Unsubmitted (pending_approval) daily logs serve as billable claims pending
-  const { data: pending } = await supabaseAdmin
-    .from("daily_logs")
-    .select("id")
-    .eq("organization_id", orgId)
-    .eq("client_id", clientId)
-    .eq("status", "pending_approval")
-    .limit(1);
-  if (pending && pending.length) {
-    return "Action Blocked: This client has unsubmitted billable claims pending. Please finalize the billing export before removal.";
-  }
-  return null;
-}
-
-export const archiveEntity = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({
-      kind: Kind,
-      id: z.string().uuid(),
-      organizationId: z.string().uuid(),
-    }).parse(d)
-  )
-  .handler(async ({ data, context }) => {
-    if (!context.userId) return { ok: false };
-    await assertCallerAndTargetInOrg(context.userId, data.kind, data.id, data.organizationId);
-
-    if (data.kind === "employee") {
-      await assertCanManageMember({
-        supabase: supabaseAdmin,
-        actorId: context.userId,
-        organizationId: data.organizationId,
-        targetUserId: data.id,
-        action: "deactivate",
+    if (data.note) {
+      const { error: noteErr } = await supabaseAdmin.from("staff_notes").insert({
+        organization_id: data.organizationId,
+        staff_id: data.userId,
+        author_id: actorId,
+        kind: "note",
+        body: data.note,
       });
-      const blocker = await staffActiveBlockers(data.id, data.organizationId);
-      if (blocker) throw new Error(blocker);
+      if (noteErr) throw new Error(noteErr.message);
+    }
 
+    // The profile is shared across agencies: only mark it inactive, and only
+    // end their sessions, when no other agency still has them active.
+    // profiles.team_id is never touched.
+    const stillActiveElsewhere =
+      (await otherActiveMemberships(data.userId, data.organizationId)) > 0;
+    if (!stillActiveElsewhere) {
       const { error: pErr } = await supabaseAdmin
         .from("profiles")
-        .update({ account_status: "archived", team_id: null, is_active: false })
-        .eq("id", data.id);
+        .update({ account_status: "archived", is_active: false })
+        .eq("id", data.userId);
       if (pErr) throw new Error(pErr.message);
+    }
 
-      await supabaseAdmin
-        .from("organization_members")
-        .update({ active: false })
-        .eq("user_id", data.id)
-        .eq("organization_id", data.organizationId);
+    const { error: flagErr } = await supabaseAdmin.rpc("flag_member_deactivated", {
+      _org_id: data.organizationId,
+      _user_id: data.userId,
+      _changed_by_user_id: actorId,
+    });
+    if (flagErr) console.error("flag_member_deactivated failed:", flagErr.message);
 
-      // Log the deactivation, then kill any still-live JWT sessions so the
-      // deactivated staffer can't keep hitting server functions that check
-      // membership via the admin client (which runs before RLS).
-      await supabaseAdmin.rpc("flag_member_deactivated", {
-        _org_id: data.organizationId,
-        _user_id: data.id,
-        _changed_by_user_id: context.userId,
-      }).then(({ error }) => {
-        if (error) console.error("flag_member_deactivated failed:", error.message);
-      });
-      await supabaseAdmin.auth.admin.signOut(data.id, "global").catch((e) =>
-        console.error("Failed to sign out deactivated user's sessions:", e),
-      );
-    } else {
-      // Clients aren't team members, so the member guard doesn't apply; keep the
-      // gate this branch always had: Owner or agency-wide Admin.
-      await requireOrgMembershipAdmin(supabaseAdmin, context.userId, data.organizationId, "admin");
-      const blocker = await clientActiveBlockers(data.id, data.organizationId);
-      if (blocker) throw new Error(blocker);
-
-      const { error } = await supabaseAdmin
-        .from("clients")
-        .update({ account_status: "archived", team_id: null })
-        .eq("id", data.id)
-        .eq("organization_id", data.organizationId);
-      if (error) throw new Error(error.message);
+    if (!stillActiveElsewhere) {
+      await supabaseAdmin.auth.admin
+        .signOut(data.userId, "global")
+        .catch((e) => console.error("Failed to sign out deactivated user's sessions:", e));
     }
     return { ok: true };
   });
 
-/** Reverse of archiveEntity — puts a deactivated employee back on the Active roster. */
-export const restoreEntity = createServerFn({ method: "POST" })
+/** Reverse of deactivateMember — back on this agency's Active roster. */
+export const reactivateMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({
-      kind: Kind,
-      id: z.string().uuid(),
-      organizationId: z.string().uuid(),
-    }).parse(d)
-  )
+  .inputValidator((d: unknown) => MemberTarget.parse(d))
   .handler(async ({ data, context }) => {
-    if (!context.userId) return { ok: false };
-    await assertCallerAndTargetInOrg(context.userId, data.kind, data.id, data.organizationId);
+    if (!context.userId) throw new Error("Not signed in.");
+    await assertCanManageMember({
+      supabase: supabaseAdmin,
+      actorId: context.userId,
+      organizationId: data.organizationId,
+      targetUserId: data.userId,
+      action: "reactivate",
+    });
 
-    if (data.kind === "employee") {
-      await assertCanManageMember({
-        supabase: supabaseAdmin,
-        actorId: context.userId,
-        organizationId: data.organizationId,
-        targetUserId: data.id,
-        action: "reactivate",
-      });
-      const { error: pErr } = await supabaseAdmin
-        .from("profiles")
-        .update({ account_status: "active", is_active: true })
-        .eq("id", data.id);
-      if (pErr) throw new Error(pErr.message);
+    const { data: before, error: readErr } = await supabaseAdmin
+      .from("organization_members")
+      .select("id, end_date, separation_reason, rehire_eligible")
+      .eq("user_id", data.userId)
+      .eq("organization_id", data.organizationId)
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+    if (!before) throw new Error("Team member not found in this organization");
 
-      const { error: mErr } = await supabaseAdmin
-        .from("organization_members")
-        .update({ active: true })
-        .eq("user_id", data.id)
-        .eq("organization_id", data.organizationId);
-      if (mErr) throw new Error(mErr.message);
-    } else {
-      await requireOrgMembershipAdmin(supabaseAdmin, context.userId, data.organizationId, "admin");
-      const { error } = await supabaseAdmin
-        .from("clients")
-        .update({ account_status: "active" })
-        .eq("id", data.id)
-        .eq("organization_id", data.organizationId);
-      if (error) throw new Error(error.message);
-    }
+    const { data: rows, error: mErr } = await supabaseAdmin
+      .from("organization_members")
+      .update({ active: true, end_date: null, separation_reason: null, rehire_eligible: null })
+      .eq("id", before.id)
+      .eq("organization_id", data.organizationId)
+      .select("id");
+    if (mErr) throw new Error(mErr.message);
+    if (!rows?.length) throw new Error("Team member not found in this organization");
+
+    const { error: pErr } = await supabaseAdmin
+      .from("profiles")
+      .update({ account_status: "active", is_active: true })
+      .eq("id", data.userId);
+    if (pErr) throw new Error(pErr.message);
+
+    await logChange(
+      data.organizationId,
+      context.userId,
+      "reactivated",
+      { userId: data.userId },
+      {
+        end_date: before.end_date,
+        separation_reason: before.separation_reason,
+        rehire_eligible: before.rehire_eligible,
+      },
+    );
     return { ok: true };
   });
-

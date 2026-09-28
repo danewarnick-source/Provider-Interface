@@ -3,7 +3,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
-import { onStaffHiredInternal } from "@/lib/staff-assignment-hooks.functions";
+import {
+  onStaffHiredInternal,
+  reevaluateStaffDutiesInternal,
+} from "@/lib/staff-assignment-hooks.functions";
 import { resolveAccountUsername } from "@/lib/account-username";
 import { assertAgencySetupCompleteForOrg } from "@/lib/agency-setup-gate.functions";
 import { generateTempPassword } from "@/lib/temp-password";
@@ -12,6 +15,7 @@ import type { AccessLevel } from "@/lib/access/levels";
 import { resolvePresetId } from "@/lib/access/preset-resolve";
 import { logChange } from "@/lib/access/change-log.server";
 import { assertCanManageMember } from "@/lib/team-members/guards.server";
+import { usernameAfterEmailChange } from "@/lib/team-members/profile";
 import { sendTeamMemberInvitesInternal } from "@/lib/team-members/invites.functions";
 import { loadStaffDutyFactsInternal } from "@/lib/obligations/load-staff-duty-facts.functions";
 import {
@@ -381,7 +385,7 @@ export type CreateTeamMemberResult =
       status: "inactive_match";
       userId: string;
       name: string;
-      /** No rehire-eligibility column exists yet, so this is null (unknown) until one does. */
+      /** From the last deactivation here; null when it was never recorded. */
       rehireEligible: boolean | null;
     };
 
@@ -434,11 +438,17 @@ export const createTeamMember = createServerFn({ method: "POST" })
     const email = normalizeEmail(data.email);
     const found = (await lookupEmails(data.organizationId, [email])).get(email);
     if (found?.match === "inactive_here" && found.userId) {
+      const { data: prior } = await supabaseAdmin
+        .from("organization_members")
+        .select("rehire_eligible")
+        .eq("organization_id", data.organizationId)
+        .eq("user_id", found.userId)
+        .maybeSingle();
       return {
         status: "inactive_match",
         userId: found.userId,
         name: found.name ?? email,
-        rehireEligible: null,
+        rehireEligible: prior?.rehire_eligible ?? null,
       };
     }
     if (found?.match === "already_here") throw new Error(`${email} is already on the roster.`);
@@ -788,6 +798,226 @@ export const loadTeamMemberEvidenceFacts = createServerFn({ method: "POST" })
       })),
       caseload,
     };
+  });
+
+/* ------------------------------------------------------------------ */
+/* Edit profile                                                        */
+/* ------------------------------------------------------------------ */
+
+const nullableText = (max: number) => z.string().trim().max(max).nullable().optional();
+
+const UpdateTeamMemberInput = z.object({
+  organizationId: z.string().uuid(),
+  userId: z.string().uuid(),
+  // Omitted = unchanged; null = clear. Built by buildTeamMemberPatch (profile.ts).
+  firstName: z.string().trim().min(1).max(80).optional(),
+  lastName: z.string().trim().min(1).max(80).optional(),
+  email: z.string().trim().toLowerCase().email().max(255).optional(),
+  phone: nullableText(30),
+  homeAddress: nullableText(300),
+  emergencyContactName: nullableText(120),
+  emergencyContactRelationship: nullableText(60),
+  emergencyContactPhone: nullableText(30),
+  dateOfBirth: YMD.nullable().optional(),
+  jobTitle: nullableText(120),
+  homeId: z.string().uuid().nullable().optional(),
+  /** organization_members.id of the supervisor (manager_id references organization_members). */
+  supervisorMemberId: z.string().uuid().nullable().optional(),
+  hireDate: YMD.nullable().optional(),
+  workerType: z.enum(WORKER_TYPES).optional(),
+  transportsClients: z.boolean().optional(),
+  staffTypeKeys: z.array(z.string().trim().min(1).max(80)).max(20).optional(),
+  employeeId: nullableText(60),
+  hourlyRate: z.number().min(0).max(100000).nullable().optional(),
+  dailyRate: z.number().min(0).max(100000).nullable().optional(),
+  /** staff-photos path; must sit under {org}/{user}/. */
+  photoPath: z.string().max(500).nullable().optional(),
+});
+
+export type UpdateTeamMemberInputValue = z.input<typeof UpdateTeamMemberInput>;
+
+/**
+ * The one write path for the profile's Contact and Employment cards. Checks
+ * edit_profile on the target, payroll Edit for pay, Hire & deactivate Edit for
+ * date of birth; confirms every reference is this agency's; throws when a write
+ * touched no row.
+ */
+export const updateTeamMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => UpdateTeamMemberInput.parse(d))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    if (!context.userId) throw new Error("Not signed in.");
+    const actorId = context.userId;
+    const orgId = data.organizationId;
+    await assertCanManageMember({
+      supabase: supabaseAdmin,
+      actorId,
+      organizationId: orgId,
+      targetUserId: data.userId,
+      action: "edit_profile",
+    });
+    if (data.hourlyRate !== undefined || data.dailyRate !== undefined) {
+      await requireCategory(supabaseAdmin, actorId, orgId, "payroll", "edit");
+    }
+    if (data.dateOfBirth !== undefined) {
+      await requireCategory(supabaseAdmin, actorId, orgId, "staff_hiring", "edit");
+    }
+
+    const { data: member, error: memErr } = await supabaseAdmin
+      .from("organization_members")
+      .select("id")
+      .eq("organization_id", orgId)
+      .eq("user_id", data.userId)
+      .maybeSingle();
+    if (memErr) throw new Error(memErr.message);
+    if (!member) throw new Error("Team member not found in this organization");
+
+    if (data.homeId) {
+      const { data: team, error } = await supabaseAdmin
+        .from("teams")
+        .select("id")
+        .eq("organization_id", orgId)
+        .eq("id", data.homeId)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      if (!team) throw new Error("That home isn't in this agency.");
+    }
+    if (data.supervisorMemberId) {
+      if (data.supervisorMemberId === member.id) {
+        throw new Error("A team member can't be their own supervisor.");
+      }
+      const { data: sup, error } = await supabaseAdmin
+        .from("organization_members")
+        .select("id")
+        .eq("organization_id", orgId)
+        .eq("id", data.supervisorMemberId)
+        .eq("active", true)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      if (!sup) throw new Error("The supervisor must be an active team member here.");
+    }
+    if (data.staffTypeKeys?.length) {
+      const { data: types, error } = await supabaseAdmin
+        .from("staff_types")
+        .select("key")
+        .eq("organization_id", orgId);
+      if (error) throw new Error(error.message);
+      const known = new Set((types ?? []).map((t) => t.key));
+      const unknown = data.staffTypeKeys.filter((k) => !known.has(k));
+      if (unknown.length) throw new Error(`Unknown staff type: ${unknown.join(", ")}.`);
+    }
+    if (data.photoPath && !data.photoPath.startsWith(`${orgId}/${data.userId}/`)) {
+      throw new Error("That photo doesn't belong to this team member.");
+    }
+
+    const { data: before, error: beforeErr } = await supabaseAdmin
+      .from("profiles")
+      .select("email, username, first_name, last_name, full_name, hire_date, transports_clients")
+      .eq("id", data.userId)
+      .maybeSingle();
+    if (beforeErr) throw new Error(beforeErr.message);
+    if (!before) throw new Error("Team member not found in this organization");
+
+    const profilePatch: Record<string, unknown> = {};
+    const set = (col: string, v: unknown) => {
+      if (v !== undefined) profilePatch[col] = v;
+    };
+    set("first_name", data.firstName);
+    set("last_name", data.lastName);
+    if (data.firstName !== undefined || data.lastName !== undefined) {
+      const first = data.firstName ?? before.first_name ?? "";
+      const last = data.lastName ?? before.last_name ?? "";
+      profilePatch.full_name = `${first} ${last}`.trim() || null;
+    }
+    set("phone", data.phone);
+    set("home_address", data.homeAddress);
+    set("emergency_contact_name", data.emergencyContactName);
+    set("emergency_contact_relationship", data.emergencyContactRelationship);
+    set("emergency_contact_phone", data.emergencyContactPhone);
+    set("date_of_birth", data.dateOfBirth);
+    set("team_id", data.homeId);
+    if (data.hireDate !== undefined) {
+      profilePatch.hire_date = data.hireDate;
+      profilePatch.start_date = data.hireDate;
+    }
+    set("worker_type", data.workerType);
+    set("transports_clients", data.transportsClients);
+    set("staff_type_keys", data.staffTypeKeys);
+    set("employee_id", data.employeeId);
+    set("hourly_rate", data.hourlyRate);
+    set("daily_rate", data.dailyRate);
+    if (data.photoPath !== undefined) {
+      profilePatch.photo_path = data.photoPath;
+      profilePatch.photo_updated_at = data.photoPath ? new Date().toISOString() : null;
+    }
+
+    const oldEmail = normalizeEmail(String(before.email ?? ""));
+    const emailChanged = data.email !== undefined && data.email !== oldEmail;
+    if (emailChanged) {
+      const newEmail = data.email!;
+      const { data: taken, error: takenErr } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("email", newEmail)
+        .neq("id", data.userId)
+        .limit(1);
+      if (takenErr) throw new Error(takenErr.message);
+      if (taken?.length) throw new Error(EMAIL_TAKEN_MESSAGE);
+      const { error: authErr } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+        email: newEmail,
+        email_confirm: true,
+      });
+      if (authErr) throw new Error(authErr.message);
+      profilePatch.email = newEmail;
+      profilePatch.username = resolveAccountUsername({
+        username: usernameAfterEmailChange({
+          currentUsername: before.username ?? null,
+          oldEmail,
+          newEmail,
+        }),
+        email: newEmail,
+      });
+    }
+
+    if (Object.keys(profilePatch).length) {
+      const { data: rows, error } = await supabaseAdmin
+        .from("profiles")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .update(profilePatch as any)
+        .eq("id", data.userId)
+        .select("id");
+      if (error) throw new Error(error.message);
+      if (!rows?.length) throw new Error("Nothing was saved. Try again.");
+    }
+
+    const memberPatch: Database["public"]["Tables"]["organization_members"]["Update"] = {};
+    if (data.jobTitle !== undefined) memberPatch.job_title = data.jobTitle;
+    if (data.supervisorMemberId !== undefined) memberPatch.manager_id = data.supervisorMemberId;
+    if (Object.keys(memberPatch).length) {
+      const { data: rows, error } = await supabaseAdmin
+        .from("organization_members")
+        .update(memberPatch)
+        .eq("id", member.id)
+        .eq("organization_id", orgId)
+        .select("id");
+      if (error) throw new Error(error.message);
+      if (!rows?.length) throw new Error("Nothing was saved. Try again.");
+    }
+
+    const hireChanged = data.hireDate !== undefined && data.hireDate !== (before.hire_date ?? null);
+    const transportChanged =
+      data.transportsClients !== undefined &&
+      data.transportsClients !== (before.transports_clients === true);
+    const supervisorChanged = data.supervisorMemberId !== undefined;
+    if (hireChanged || transportChanged || supervisorChanged) {
+      // Keeps the older duty system consistent until the compliance rebuild.
+      try {
+        await reevaluateStaffDutiesInternal(supabaseAdmin, orgId, data.userId);
+      } catch (e) {
+        console.warn("[obligations] duty re-evaluation after profile edit failed:", e);
+      }
+    }
+    return { ok: true };
   });
 
 /* ------------------------------------------------------------------ */

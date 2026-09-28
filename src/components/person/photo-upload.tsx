@@ -69,6 +69,8 @@ export function PhotoUpload({
   avatarClassName = "h-16 w-16",
   readOnly = false,
   className = "flex items-center gap-3",
+  imageTypes = ["image/jpeg", "image/png", "image/webp"],
+  deferSave = false,
 }: {
   bucket: Bucket;
   organizationId: string;
@@ -81,6 +83,13 @@ export function PhotoUpload({
   avatarClassName?: string;
   readOnly?: boolean;
   className?: string;
+  /** Accepted formats. Default JPEG, PNG and WebP. */
+  imageTypes?: ImageType[];
+  /**
+   * The caller persists the path on its own Save: Remove leaves the stored file
+   * in place, and the toasts say the change still needs saving.
+   */
+  deferSave?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -95,8 +104,12 @@ export function PhotoUpload({
       return;
     }
     const imageType = await sniffImageType(file);
-    if (!imageType) {
-      toast.error("Photo must be a JPEG, PNG, or WebP file");
+    if (!imageType || !imageTypes.includes(imageType)) {
+      toast.error(
+        imageTypes.includes("image/webp")
+          ? "Photo must be a JPEG, PNG, or WebP file"
+          : "Photo must be a PNG or JPEG file",
+      );
       return;
     }
     setBusy(true);
@@ -107,7 +120,7 @@ export function PhotoUpload({
         .upload(path, file, { upsert: true, contentType: imageType });
       if (error) throw error;
       await onUploaded(path);
-      toast.success("Photo saved");
+      toast.success(deferSave ? "Photo added. Save to keep it." : "Photo saved");
     } catch (e) {
       toast.error(safeErrorMessage(e, "Upload failed"));
     } finally {
@@ -131,7 +144,7 @@ export function PhotoUpload({
           <input
             ref={inputRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp"
+            accept={imageTypes.join(",")}
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0];
@@ -157,9 +170,11 @@ export function PhotoUpload({
               onClick={async () => {
                 setBusy(true);
                 try {
-                  await supabase.storage.from(bucket).remove([currentPath]);
+                  if (!deferSave) await supabase.storage.from(bucket).remove([currentPath]);
                   await onCleared();
-                  toast.success("Photo removed");
+                  toast.success(
+                    deferSave ? "Photo removed. Save to keep the change." : "Photo removed",
+                  );
                 } catch (e) {
                   toast.error(safeErrorMessage(e, "Remove failed"));
                 } finally {
