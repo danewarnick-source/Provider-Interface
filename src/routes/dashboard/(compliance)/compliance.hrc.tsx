@@ -1,0 +1,809 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useCurrentOrg } from "@/hooks/use-org";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Scale, CalendarDays, ClipboardList, Users, ShieldAlert, CheckCircle2, Circle } from "lucide-react";
+import { toast } from "sonner";
+import {
+  RESTRICTION_ELEMENTS,
+  computeRestrictionCompletion,
+  type RestrictionRecord,
+} from "@/lib/clients/hrc-restrictions";
+import { useAccess } from "@/hooks/use-access";
+
+export const Route = createFileRoute("/dashboard/(compliance)/compliance/hrc")({
+  head: () => ({ meta: [{ title: "Human Rights Committee (HRC) — Provider Interface" }] }),
+  component: HrcPage,
+});
+
+function ScaffoldNotice() {
+  return (
+    <div className="rounded-md border border-dashed border-amber-300 bg-amber-50 px-3 py-2 text-[11px] font-medium uppercase tracking-wider text-amber-800">
+      Scaffold — workflow to be built
+    </div>
+  );
+}
+
+export function HrcPage() {
+  const { data: org } = useCurrentOrg();
+  const { canCategory, isOwner, isCommitteeOnly: isCommittee } = useAccess();
+  const canManage = canCategory("hrc", "edit");
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="rounded-lg border border-border bg-background p-5">
+        <div className="flex items-start gap-3">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/15 text-amber-700">
+            <Scale className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-xl font-semibold tracking-tight">
+              Human Rights Committee (HRC)
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Client-rights body that reviews and approves restrictions on a person's
+              rights (restrictive interventions, limitations). This is <strong>not</strong>{" "}
+              Human Resources / staff HR.
+            </p>
+            {isCommittee && (
+              <p className="mt-2 text-xs text-amber-800">
+                You are signed in as a Committee Member. You can only view this page —
+                nothing else in the app is accessible with your preset.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ShieldAlert className="h-4 w-4 text-amber-700" /> Clients with rights restrictions
+              </CardTitle>
+              <CardDescription>
+                Each active restriction must document all 8 required elements (SOW §1.20 / HCBS
+                Settings Rule) before it counts as fully documented.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <RestrictionsPanel canManage={canManage} orgId={org?.organization_id ?? null} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CalendarDays className="h-4 w-4 text-amber-700" /> Committee meetings
+              </CardTitle>
+              <CardDescription>
+                Meeting records: date, attendees, minutes, decisions.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <MeetingsStub canManage={canManage} orgId={org?.organization_id ?? null} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ClipboardList className="h-4 w-4 text-amber-700" /> Reviews &amp; approvals
+              </CardTitle>
+              <CardDescription>
+                The committee reviews and updates a client's rights restriction
+                (status: pending review / approved / needs update).
+              </CardDescription>
+            </div>
+            <ScaffoldNotice />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ReviewsStub canManage={canManage} orgId={org?.organization_id ?? null} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Users className="h-4 w-4 text-amber-700" /> Committee members
+              </CardTitle>
+              <CardDescription>
+                Everyone on the HRC Committee preset.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <CommitteeRoster canEditAccess={isOwner} orgId={org?.organization_id ?? null} />
+        </CardContent>
+      </Card>
+
+    </div>
+  );
+}
+
+/* ---------- Rights restrictions (8-element documentation) ---------- */
+
+type ClientLite = { id: string; first_name: string; last_name: string };
+
+function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: string | null }) {
+  const qc = useQueryClient();
+  const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<RestrictionRecord | null>(null);
+  const [newClientId, setNewClientId] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+
+  const { data: clients } = useQuery({
+    enabled: !!orgId,
+    queryKey: ["hrc-clients", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("clients")
+        .select("id, first_name, last_name")
+        .eq("organization_id", orgId!)
+        .order("first_name", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as ClientLite[];
+    },
+  });
+
+  const clientIds = (clients ?? []).map((c) => c.id);
+
+  const { data: restrictions, isLoading } = useQuery({
+    // Scope by the org's client roster (like the client-profile panel does)
+    // rather than trusting restriction_records.organization_id alone — older
+    // rows can carry a stale/incorrect org id and would otherwise vanish here
+    // while still showing up on the client's own profile page.
+    enabled: !!orgId && !!clients,
+    queryKey: ["hrc-restrictions", orgId, clientIds.join(",")],
+    queryFn: async () => {
+      if (!clientIds.length) return [];
+      const { data, error } = await supabase
+        .from("hrc_restriction_records" as never)
+        .select("*")
+        .in("client_id", clientIds)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as RestrictionRecord[];
+    },
+  });
+
+  const nameOf = (clientId: string) => {
+    const c = (clients ?? []).find((x) => x.id === clientId);
+    return c ? `${c.first_name} ${c.last_name}` : "Unknown client";
+  };
+
+  const create = useMutation({
+    mutationFn: async (values: { client_id: string; restriction_title: string }) => {
+      if (!values.client_id) throw new Error("Pick a client first.");
+      if (!values.restriction_title.trim()) throw new Error("Restriction title is required.");
+      const { error } = await supabase.from("hrc_restriction_records" as never).insert({
+        organization_id: orgId!,
+        client_id: values.client_id,
+        restriction_title: values.restriction_title.trim(),
+        active: true,
+      } as never);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Restriction added");
+      qc.invalidateQueries({ queryKey: ["hrc-restrictions", orgId] });
+      setAddOpen(false);
+      setNewClientId("");
+      setNewTitle("");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const active = (restrictions ?? []).filter((r) => r.active);
+
+  return (
+    <div className="space-y-3">
+      {isLoading ? (
+        <div className="text-sm text-muted-foreground">Loading…</div>
+      ) : !active.length ? (
+        <div className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
+          No clients currently flagged for review.
+        </div>
+      ) : (
+        <ul className="divide-y divide-border rounded-md border border-border">
+          {active.map((r) => {
+            const completion = computeRestrictionCompletion(r);
+            return (
+              <li key={r.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                <div className="min-w-0">
+                  <div className="font-medium truncate">{nameOf(r.client_id)}</div>
+                  <div className="text-xs text-muted-foreground truncate">{r.restriction_title}</div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Badge
+                    variant={completion.isComplete ? "default" : "outline"}
+                    className={completion.isComplete ? "bg-emerald-600 hover:bg-emerald-600" : "border-amber-400 text-amber-800"}
+                  >
+                    {completion.completedCount}/{completion.total} documented
+                  </Badge>
+                  <Button size="sm" variant="ghost" onClick={() => setEditing(r)}>
+                    {canManage ? "Edit" : "View"}
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {canManage && (
+        <>
+          <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
+            Add restriction
+          </Button>
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Flag a new rights restriction</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label>Client</Label>
+                  <Select value={newClientId} onValueChange={setNewClientId}>
+                    <SelectTrigger><SelectValue placeholder="Select a client" /></SelectTrigger>
+                    <SelectContent>
+                      {(clients ?? []).map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label>Restriction</Label>
+                  <Input
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    placeholder="e.g. Restricted access to kitchen after 9pm"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
+                <Button
+                  disabled={create.isPending}
+                  onClick={() => create.mutate({ client_id: newClientId, restriction_title: newTitle })}
+                >
+                  Add restriction
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+      {editing && (
+        <RestrictionEditDialog
+          record={editing}
+          clientName={nameOf(editing.client_id)}
+          canManage={canManage}
+          orgId={orgId}
+          onClose={() => setEditing(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function RestrictionEditDialog({
+  record,
+  clientName,
+  canManage,
+  orgId,
+  onClose,
+}: {
+  record: RestrictionRecord;
+  clientName: string;
+  canManage: boolean;
+  orgId: string | null;
+  onClose: () => void;
+}) {
+  const qc = useQueryClient();
+  const [fields, setFields] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    for (const def of RESTRICTION_ELEMENTS) {
+      init[def.textField as string] = (record[def.textField] as string | null) ?? "";
+      if (def.dateField) init[def.dateField as string] = (record[def.dateField] as string | null) ?? "";
+    }
+    return init;
+  });
+  const [active, setActive] = useState(record.active);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const patch: Record<string, string | boolean | null> = { active };
+      for (const def of RESTRICTION_ELEMENTS) {
+        patch[def.textField as string] = fields[def.textField as string]?.trim() || null;
+        if (def.dateField) patch[def.dateField as string] = fields[def.dateField as string] || null;
+      }
+      const { error } = await supabase
+        .from("hrc_restriction_records" as never)
+        .update(patch as never)
+        .eq("id", record.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Restriction updated");
+      qc.invalidateQueries({ queryKey: ["hrc-restrictions", orgId] });
+      qc.invalidateQueries({ queryKey: ["client-restrictions", record.client_id] });
+      onClose();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const previewRecord: RestrictionRecord = { ...record, active };
+  for (const def of RESTRICTION_ELEMENTS) {
+    (previewRecord as unknown as Record<string, string | null>)[def.textField as string] =
+      fields[def.textField as string] || null;
+    if (def.dateField) {
+      (previewRecord as unknown as Record<string, string | null>)[def.dateField as string] =
+        fields[def.dateField as string] || null;
+    }
+  }
+  const completion = computeRestrictionCompletion(previewRecord);
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {record.restriction_title} — {clientName}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2">
+          <span className="text-sm font-medium">
+            {completion.isComplete ? "Fully documented" : "Incomplete documentation"}
+          </span>
+          <Badge
+            variant={completion.isComplete ? "default" : "outline"}
+            className={completion.isComplete ? "bg-emerald-600 hover:bg-emerald-600" : "border-amber-400 text-amber-800"}
+          >
+            {completion.completedCount}/{completion.total}
+          </Badge>
+        </div>
+        <div className="space-y-4">
+          {RESTRICTION_ELEMENTS.map((def) => {
+            const isComplete = completion.elements.find((e) => e.def.key === def.key)?.complete ?? false;
+            return (
+              <div key={def.key} className="space-y-2 rounded-md border border-border p-3">
+                <div className="flex items-start gap-2">
+                  {isComplete ? (
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                  ) : (
+                    <Circle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                  )}
+                  <div>
+                    <div className="text-sm font-medium">
+                      ({def.letter}) {def.label}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{def.description}</div>
+                  </div>
+                </div>
+                <Textarea
+                  disabled={!canManage}
+                  rows={2}
+                  value={fields[def.textField as string] ?? ""}
+                  onChange={(e) =>
+                    setFields((f) => ({ ...f, [def.textField as string]: e.target.value }))
+                  }
+                  placeholder={`Describe ${def.label.toLowerCase()}…`}
+                />
+                {def.dateField && (
+                  <div className="max-w-[220px] space-y-1">
+                    <Label className="text-xs">{def.dateLabel}</Label>
+                    <Input
+                      disabled={!canManage}
+                      type="date"
+                      value={fields[def.dateField as string] ?? ""}
+                      onChange={(e) =>
+                        setFields((f) => ({ ...f, [def.dateField as string]: e.target.value }))
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {canManage && (
+            <div className="flex items-center gap-2">
+              <Label htmlFor="restriction-active" className="text-sm">Restriction still active</Label>
+              <input
+                id="restriction-active"
+                type="checkbox"
+                checked={active}
+                onChange={(e) => setActive(e.target.checked)}
+              />
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Close</Button>
+          {canManage && (
+            <Button disabled={save.isPending} onClick={() => save.mutate()}>
+              Save
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ---------- Sub-stubs (minimal, real reads/writes against scaffold tables) ---------- */
+
+type HrcMeetingRow = {
+  id: string;
+  meeting_date: string | null;
+  attendees: string | null;
+  minutes: string | null;
+  decisions: string | null;
+  minutes_document_path: string | null;
+  minutes_document_name: string | null;
+};
+
+function MeetingsStub({ canManage, orgId }: { canManage: boolean; orgId: string | null }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [meetingDate, setMeetingDate] = useState(new Date().toISOString().slice(0, 10));
+  const [attendees, setAttendees] = useState("");
+  const [minutes, setMinutes] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const { data, isLoading } = useQuery({
+    enabled: !!orgId,
+    queryKey: ["hrc-meetings", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hrc_meetings")
+        .select("id, meeting_date, attendees, minutes, decisions, minutes_document_path, minutes_document_name")
+        .eq("organization_id", orgId!)
+        .order("meeting_date", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data ?? []) as unknown as HrcMeetingRow[];
+    },
+  });
+
+  const add = useMutation({
+    mutationFn: async (values: { meeting_date: string; attendees: string; minutes: string; file: File | null }) => {
+      if (!values.meeting_date) throw new Error("Meeting date is required.");
+      if (!values.attendees.trim()) throw new Error("Attendees are required.");
+      let minutes_document_path: string | null = null;
+      let minutes_document_name: string | null = null;
+      if (values.file) {
+        setUploading(true);
+        const path = `${orgId}/${Date.now()}-${values.file.name}`;
+        const { error: upErr } = await supabase.storage.from("hrc-documents").upload(path, values.file);
+        setUploading(false);
+        if (upErr) throw upErr;
+        minutes_document_path = path;
+        minutes_document_name = values.file.name;
+      }
+      const { error } = await supabase.from("hrc_meetings").insert({
+        organization_id: orgId!,
+        meeting_date: values.meeting_date,
+        attendees: values.attendees.trim(),
+        minutes: values.minutes.trim() || null,
+        minutes_document_path,
+        minutes_document_name,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Meeting recorded");
+      qc.invalidateQueries({ queryKey: ["hrc-meetings", orgId] });
+      setOpen(false);
+      setMeetingDate(new Date().toISOString().slice(0, 10));
+      setAttendees("");
+      setMinutes("");
+      setFile(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const openMinutesDoc = async (m: HrcMeetingRow) => {
+    if (!m.minutes_document_path) return;
+    const { data, error } = await supabase.storage.from("hrc-documents").createSignedUrl(m.minutes_document_path, 60);
+    if (error || !data?.signedUrl) { toast.error("Could not open document"); return; }
+    window.open(data.signedUrl, "_blank");
+  };
+
+  const exportCsv = () => {
+    const rows = data ?? [];
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const csv = [
+      ["Meeting date", "Attendees", "Minutes", "Minutes document"].join(","),
+      ...rows.map((m) => [m.meeting_date ?? "", m.attendees ?? "", m.minutes ?? m.decisions ?? "", m.minutes_document_name ?? ""].map(esc).join(",")),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `hrc-committee-meetings-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-end gap-2">
+        <Button size="sm" variant="outline" onClick={exportCsv} disabled={!data?.length}>Export CSV</Button>
+        <Button size="sm" variant="outline" onClick={() => window.print()} disabled={!data?.length}>Print</Button>
+      </div>
+      {isLoading ? (
+        <div className="text-sm text-muted-foreground">Loading…</div>
+      ) : !data?.length ? (
+        <div className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
+          No meetings recorded yet.
+        </div>
+      ) : (
+        <ul className="divide-y divide-border rounded-md border border-border">
+          {data.map((m) => (
+            <li key={m.id} className="flex flex-col gap-1 px-3 py-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">{m.meeting_date ?? "(no date)"}</span>
+                <span className="text-xs text-muted-foreground truncate ml-3">
+                  {m.attendees ?? ""}
+                </span>
+              </div>
+              {(m.minutes ?? m.decisions) && (
+                <p className="text-xs text-muted-foreground whitespace-pre-wrap">{m.minutes ?? m.decisions}</p>
+              )}
+              {m.minutes_document_path && (
+                <button type="button" onClick={() => openMinutesDoc(m)} className="w-fit text-xs text-primary underline">
+                  📎 {m.minutes_document_name ?? "Minutes document"}
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {canManage && (
+        <>
+          <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+            Add meeting
+          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Record HRC meeting</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label>Meeting date</Label>
+                  <Input type="date" value={meetingDate} onChange={(e) => setMeetingDate(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Attendees</Label>
+                  <Input
+                    value={attendees}
+                    onChange={(e) => setAttendees(e.target.value)}
+                    placeholder="Names of committee members present"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Notes / minutes</Label>
+                  <Textarea
+                    value={minutes}
+                    onChange={(e) => setMinutes(e.target.value)}
+                    placeholder="Discussion, decisions made, and action items"
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Formal minutes document (optional)</Label>
+                  <Input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button
+                  disabled={add.isPending || uploading}
+                  onClick={() => add.mutate({ meeting_date: meetingDate, attendees, minutes, file })}
+                >
+                  {add.isPending || uploading ? "Saving…" : "Save meeting"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ReviewsStub({ canManage, orgId }: { canManage: boolean; orgId: string | null }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [restrictionSummary, setRestrictionSummary] = useState("");
+  const [status, setStatus] = useState("pending_review");
+
+  const { data, isLoading } = useQuery({
+    enabled: !!orgId,
+    queryKey: ["hrc-reviews", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hrc_reviews")
+        .select("id, restriction_summary, status, created_at")
+        .eq("organization_id", orgId!)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const add = useMutation({
+    mutationFn: async (values: { restriction_summary: string; status: string }) => {
+      if (!values.restriction_summary.trim()) throw new Error("Restriction summary is required.");
+      const { error } = await supabase.from("hrc_reviews").insert({
+        organization_id: orgId!,
+        restriction_summary: values.restriction_summary.trim(),
+        status: values.status,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Review recorded");
+      qc.invalidateQueries({ queryKey: ["hrc-reviews", orgId] });
+      setOpen(false);
+      setRestrictionSummary("");
+      setStatus("pending_review");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-3">
+      {isLoading ? (
+        <div className="text-sm text-muted-foreground">Loading…</div>
+      ) : !data?.length ? (
+        <div className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
+          No reviews recorded yet.
+        </div>
+      ) : (
+        <ul className="divide-y divide-border rounded-md border border-border">
+          {data.map((r) => (
+            <li key={r.id} className="flex items-center justify-between px-3 py-2 text-sm">
+              <span className="truncate">{r.restriction_summary ?? "(no summary)"}</span>
+              <Badge variant="outline" className="ml-3 text-[10px] uppercase tracking-wider">
+                {r.status?.replace(/_/g, " ")}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      )}
+      {canManage && (
+        <>
+          <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+            Add review
+          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Record rights restriction review</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label>Restriction summary</Label>
+                  <Textarea
+                    value={restrictionSummary}
+                    onChange={(e) => setRestrictionSummary(e.target.value)}
+                    placeholder="Describe the rights restriction being reviewed"
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Status</Label>
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending_review">Pending review</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="denied">Denied</SelectItem>
+                      <SelectItem value="needs_revision">Needs revision</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button
+                  disabled={add.isPending}
+                  onClick={() => add.mutate({ restriction_summary: restrictionSummary, status })}
+                >
+                  Save review
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+    </div>
+  );
+}
+
+function CommitteeRoster({ canEditAccess, orgId }: { canEditAccess: boolean; orgId: string | null }) {
+  const { data, isLoading } = useQuery({
+    enabled: !!orgId,
+    queryKey: ["hrc-roster", orgId],
+    queryFn: async () => {
+      const { data: members, error } = await supabase
+        .from("organization_members")
+        .select("user_id, access_presets!inner(seed_key)")
+        .eq("organization_id", orgId!)
+        .eq("active", true)
+        .eq("access_presets.seed_key", "hrc_committee");
+      if (error) throw error;
+      const ids = (members ?? []).map((m) => m.user_id);
+      if (!ids.length) return [];
+      const { data: people, error: pErr } = await supabase
+        .from("org_member_directory")
+        .select("id, full_name, email")
+        .in("id", ids);
+      if (pErr) throw pErr;
+      return (people ?? []).sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""));
+    },
+  });
+
+  return (
+    <div className="space-y-3">
+      {isLoading ? (
+        <div className="text-sm text-muted-foreground">Loading…</div>
+      ) : !data?.length ? (
+        <div className="rounded-md border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
+          No one is on the HRC Committee preset yet.
+        </div>
+      ) : (
+        <ul className="divide-y divide-border rounded-md border border-border">
+          {data.map((m) => (
+            <li key={m.id} className="flex items-center justify-between px-3 py-2 text-sm">
+              <span className="truncate">{m.full_name ?? m.email ?? "Member"}</span>
+              <span className="text-xs text-muted-foreground">{m.email}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {canEditAccess && (
+        <p className="text-xs text-muted-foreground">
+          To add or remove someone, set their preset to HRC Committee in{" "}
+          <Link to="/dashboard/settings/team-access" className="underline">
+            Settings → Access &amp; presets
+          </Link>
+          .
+        </p>
+      )}
+    </div>
+  );
+}

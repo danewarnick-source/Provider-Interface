@@ -804,7 +804,7 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(nav, /Hive Certify/);
 
     const evidence = readFileSync(
-      new URL("../../routes/dashboard.evidence.tsx", import.meta.url),
+      new URL("../../routes/dashboard/evidence.tsx", import.meta.url),
       "utf8",
     );
     assert.match(evidence, /createFileRoute\("\/dashboard\/evidence"\)/);
@@ -813,20 +813,20 @@ describe("Evidence nav + product lock", () => {
     assert.doesNotMatch(evidence, /compliance scoreboard/i);
 
     const company = readFileSync(
-      new URL("../../routes/dashboard.company-obligations.tsx", import.meta.url),
+      new URL("../../routes/dashboard/compliance/company-obligations.tsx", import.meta.url),
       "utf8",
     );
     assert.match(company, /\/dashboard\/evidence/);
 
     const compliance = readFileSync(
-      new URL("../../routes/dashboard.compliance.tsx", import.meta.url),
+      new URL("../../routes/dashboard/compliance.tsx", import.meta.url),
       "utf8",
     );
     assert.match(compliance, /StaffFilePanel/);
     assert.doesNotMatch(compliance, /EvidencePage/);
 
     const staffPhone = readFileSync(
-      new URL("../../routes/dashboard.my-evidence.tsx", import.meta.url),
+      new URL("../../routes/dashboard/evidence/my.tsx", import.meta.url),
       "utf8",
     );
     assert.match(staffPhone, /createFileRoute\("\/dashboard\/my-evidence"\)/);

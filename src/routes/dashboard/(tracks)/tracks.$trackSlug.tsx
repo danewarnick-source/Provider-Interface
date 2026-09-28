@@ -1,0 +1,8 @@
+import { createFileRoute, redirect } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/dashboard/(tracks)/tracks/$trackSlug")({
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard/my-obligations" });
+  },
+  component: () => null,
+});

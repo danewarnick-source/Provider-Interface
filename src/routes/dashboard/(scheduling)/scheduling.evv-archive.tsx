@@ -1,0 +1,7 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { EvvArchivePage } from "@/components/evv/approved-evv-archive";
+
+export const Route = createFileRoute("/dashboard/(scheduling)/scheduling/evv-archive")({
+  head: () => ({ meta: [{ title: "Approved EVV Archive — Provider Interface" }] }),
+  component: EvvArchivePage,
+});

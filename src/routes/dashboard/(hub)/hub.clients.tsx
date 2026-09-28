@@ -1,0 +1,96 @@
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { z } from "zod";
+import { HubShell, type HubTab } from "@/components/admin-home/hub-shell";
+import { RequireLevel, RequirePermission } from "@/components/rbac-guard";
+import { useAccess } from "@/hooks/use-access";
+import { ClientsPage } from "../clients";
+import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
+import { TeamsPage } from "../(homes)/homes.teams";
+import { PbaLedgerPage } from "../(financial)/financial.pba-ledger";
+import { ClientLoansPage } from "../(employees)/employees.client-loans";
+import { ReferralsPage } from "@/components/referrals/referrals-page";
+import { HostsPage } from "@/components/hosts/hosts-page";
+
+const search = z.object({
+  tab: z.enum(["directory", "referrals", "placements", "hosts", "teams", "funds"]).optional(),
+});
+
+function ClientsHub() {
+  const { can } = useAccess();
+  const tabs: HubTab[] = [{ key: "directory", label: "Directory", render: () => <ClientsPage /> }];
+  if (can("view_referrals") || can("manage_referrals")) {
+    tabs.push({
+      key: "referrals",
+      label: "Referrals",
+      render: () => (
+        <RequirePermission perm="view_referrals">
+          <ReferralsPage />
+        </RequirePermission>
+      ),
+    });
+    tabs.push({
+      key: "placements",
+      label: "Placements",
+      render: () => (
+        <RequirePermission perm="view_referrals">
+          <HostsPage />
+        </RequirePermission>
+      ),
+    });
+  }
+  tabs.push(
+    {
+      key: "teams",
+      label: "Teams & homes",
+      render: () => (
+        <RequirePermission perm="view_clients">
+          <TeamsPage />
+        </RequirePermission>
+      ),
+    },
+    {
+      key: "funds",
+      label: "Funds",
+      render: () => (
+        <div className="space-y-10">
+          <section>
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              PBA Trust Ledger
+            </h3>
+            <RequirePermission perm="view_clients">
+              <PbaLedgerPage />
+            </RequirePermission>
+          </section>
+          <section>
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Client Loan Ledger
+            </h3>
+            <RequireLevel min="owner">
+              <ClientLoansPage />
+            </RequireLevel>
+          </section>
+        </div>
+      ),
+    },
+  );
+  return (
+    <AgencySetupCreateGate>
+      <HubShell title="Clients" basePath="/dashboard/hub/clients" tabs={tabs} />
+    </AgencySetupCreateGate>
+  );
+}
+
+export const Route = createFileRoute("/dashboard/(hub)/hub/clients")({
+  head: () => ({ meta: [{ title: "Clients — Provider Interface" }] }),
+  validateSearch: (s) => search.parse(s),
+  beforeLoad: ({ search: s }) => {
+    if (s.tab === "hosts") {
+      throw redirect({
+        to: "/dashboard/hub/clients",
+        search: { tab: "placements" },
+        replace: true,
+      });
+    }
+  },
+  component: ClientsHub,
+});

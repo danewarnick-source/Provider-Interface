@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ComplianceDeskPage } from "./dashboard.compliance-desk";
+import { ComplianceDeskPage } from "./dashboard/(compliance)/compliance.compliance-desk";
 
 /**
  * Local Playwright harness for EVV & Timesheet Control.

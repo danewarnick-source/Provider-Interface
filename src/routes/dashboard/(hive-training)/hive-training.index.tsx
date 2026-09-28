@@ -1,0 +1,1391 @@
+import { createFileRoute, Link, useSearch, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+import { useCurrentOrg } from "@/hooks/use-org";
+import { usePortalView } from "@/hooks/use-portal-view";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { GraduationCap, Users, Loader2, AlertTriangle, Sparkles, Clock } from "lucide-react";
+import { z } from "zod";
+import { useEntitlements } from "@/hooks/use-entitlements";
+import {
+  createTrainingCheckoutFn,
+  confirmCheckoutSessionFn,
+} from "@/lib/financial/stripe-checkout.functions";
+import {
+  ClassRosterDialog,
+  type RosterMemberOption,
+} from "@/components/training/class-roster-form";
+import { formatUsdFromCents, trainingPriceCentsForSku } from "@/lib/hive-exec/hive-pricing";
+import { isBillingExempt } from "@/lib/billing/billing-access";
+import { getBillingStatusFn } from "@/lib/financial/stripe-checkout.functions";
+import { getOrgTrainingClasses } from "@/lib/training/training-class.functions";
+import { trainingClassLabel, trainingClassSku, type TrainingClassType } from "@/lib/training/training-class";
+import { ClassCardUploadButtons } from "@/components/training/class-card-upload";
+import { InternalTrainingsPanel } from "@/components/training/internal-trainings-panel";
+import { FeatureLocked } from "@/components/feature-locked";
+import { useFeatureEnabled } from "@/hooks/use-feature-enabled";
+import { FeatureLockedRoute } from "@/components/upgrade-gate";
+import { isAdminLevel } from "@/lib/access/levels";
+
+const searchSchema = z
+  .object({
+    checkout: z.enum(["success", "cancelled"]).optional(),
+    session_id: z.string().optional(),
+    tab: z.enum(["classes", "internal"]).optional(),
+  })
+  .partial();
+
+export const Route = createFileRoute("/dashboard/(hive-training)/hive-training/")({
+  component: HiveTrainingHub,
+  validateSearch: searchSchema,
+});
+
+type CatalogRow = {
+  id: string;
+  sku: string;
+  name: string;
+  kind: string;
+  price_cents: number;
+  currency: string;
+  active: boolean;
+  fulfills_course_ids: string[] | null;
+};
+
+type AssignmentRow = {
+  id: string;
+  organization_id: string | null;
+  user_id: string;
+  course_id: string;
+  status: string;
+  progress_pct: number | null;
+  completed_at: string | null;
+  expires_at: string | null;
+  payment_model: string | null;
+  course: { title: string; slug: string; cert_validity_months: number | null } | null;
+};
+
+type Member = { id: string; label: string; email?: string | null; phone?: string | null };
+
+function HiveTrainingHub() {
+  const { data: org } = useCurrentOrg();
+  const search = useSearch({ from: Route.id });
+  const navigate = useNavigate({ from: Route.id });
+  const { view, hydrated } = usePortalView();
+  const { hasAddon, loading: entLoading } = useEntitlements();
+  const featureOn = useFeatureEnabled("hive_training");
+  const tab = search.tab === "internal" ? "internal" : "classes";
+
+  const confirmFn = useServerFn(confirmCheckoutSessionFn);
+  useEffect(() => {
+    if (search.checkout === "success") {
+      toast.success("Payment received. Seats/assignments will appear shortly.");
+      const sessionId = search.session_id;
+      if (sessionId) {
+        confirmFn({ data: { sessionId } }).catch(() => undefined);
+      }
+    } else if (search.checkout === "cancelled") toast.info("Checkout cancelled.");
+  }, [search.checkout]);
+
+  if (!org || !hydrated || entLoading) {
+    return (
+      <div className="p-6 flex justify-center">
+        <Loader2 className="h-5 w-5 animate-spin" />
+      </div>
+    );
+  }
+
+  const realIsAdmin = isAdminLevel(org.access.level);
+  const isAdmin = realIsAdmin && view !== "staff" && view !== "staff_mobile";
+
+  const setTab = (next: "classes" | "internal") => {
+    void navigate({
+      search: (prev) => ({ ...prev, tab: next === "classes" ? undefined : next }),
+    });
+  };
+
+  const classRosterLocked = !featureOn ? (
+    <FeatureLockedRoute featureKey="hive_training" />
+  ) : !hasAddon("hive_training") ? (
+    <FeatureLocked featureName="Training" />
+  ) : null;
+
+  return (
+    <div className="mx-auto max-w-6xl p-4 md:p-6 space-y-6" data-testid="hive-training-hub">
+      <header className="flex items-center gap-3">
+        <div className="rounded-lg p-2 bg-[#1A2B47] text-white">
+          <GraduationCap className="h-6 w-6" />
+        </div>
+        <div className="flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl md:text-2xl font-semibold text-[#1A2B47]">Training</h1>
+            {realIsAdmin && !isAdmin && (
+              <span className="inline-flex items-center rounded-full bg-muted text-muted-foreground text-xs px-2 py-0.5">
+                Previewing as staff
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {isAdmin
+              ? "Class roster, locked seat prices, and internal agency trainings in one place."
+              : "Your assigned trainings and certificates."}
+          </p>
+        </div>
+      </header>
+
+      {isAdmin ? (
+        <>
+          <div
+            className="inline-flex rounded-lg border bg-card p-1 text-sm"
+            data-testid="training-subnav"
+          >
+            <button
+              type="button"
+              data-testid="training-subtab-classes"
+              className={`rounded-md px-3 py-1.5 ${tab === "classes" ? "bg-[#1A2B47] text-white" : "text-muted-foreground"}`}
+              onClick={() => setTab("classes")}
+            >
+              Class roster
+            </button>
+            <button
+              type="button"
+              data-testid="training-subtab-internal"
+              className={`rounded-md px-3 py-1.5 ${tab === "internal" ? "bg-[#1A2B47] text-white" : "text-muted-foreground"}`}
+              onClick={() => setTab("internal")}
+            >
+              Internal trainings
+            </button>
+          </div>
+          {tab === "internal" ? (
+            <InternalTrainingsPanel orgId={org.organization_id} />
+          ) : (
+            (classRosterLocked ?? <AdminView orgId={org.organization_id} />)
+          )}
+        </>
+      ) : (
+        <StaffView />
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// STAFF VIEW — mobile-first, no buying surface
+// ============================================================
+
+function StaffView() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    void navigate({ to: "/dashboard/my-obligations" });
+  }, [navigate]);
+  return (
+    <p className="text-sm text-muted-foreground">
+      Assigned training is on your staff file. You cannot shop a catalog.
+    </p>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    not_started: { label: "Not started", cls: "bg-muted text-muted-foreground" },
+    in_progress: { label: "In progress", cls: "bg-[#C8881E]/15 text-[#C8881E]" },
+    completed: { label: "Completed", cls: "bg-green-100 text-green-700" },
+    expired: { label: "Expired", cls: "bg-red-100 text-red-700" },
+  };
+  const cfg = map[status] ?? { label: status, cls: "bg-muted text-muted-foreground" };
+  return <Badge className={cfg.cls}>{cfg.label}</Badge>;
+}
+
+// ============================================================
+// ADMIN VIEW — readiness banner → storefront → roster
+// ============================================================
+
+function AdminView({ orgId }: { orgId: string }) {
+  const qc = useQueryClient();
+
+  const { data: catalog } = useQuery({
+    queryKey: ["ht-catalog"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hive_training_catalog")
+        .select("id, sku, name, kind, price_cents, currency, active, fulfills_course_ids")
+        .eq("active", true)
+        .order("sort", { ascending: true, nullsFirst: false });
+      if (error) throw error;
+      return (data ?? []) as CatalogRow[];
+    },
+  });
+
+  const { data: members } = useQuery({
+    queryKey: ["ht-members", orgId],
+    queryFn: async () => {
+      // Types lag organization_members; the row is narrowed below.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: mems } = await (supabase as any)
+        .from("organization_members")
+        .select("user_id")
+        .eq("organization_id", orgId)
+        .eq("active", true);
+      const ids = ((mems ?? []) as Array<{ user_id: string }>).map((m) => m.user_id);
+      if (!ids.length) return [] as Member[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: profs } = await (supabase as any)
+        .from("org_member_directory")
+        .select("id, full_name, email, username")
+        .in("id", ids);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: phones } = await (supabase as any)
+        .from("profiles")
+        .select("id, phone")
+        .in("id", ids);
+      const phoneById = new Map(
+        ((phones ?? []) as Array<{ id: string; phone?: string | null }>).map((p) => [
+          p.id,
+          p.phone ?? null,
+        ]),
+      );
+      return (
+        (profs ?? []) as Array<{
+          id: string | null;
+          full_name: string | null;
+          email: string | null;
+          username: string | null;
+        }>
+      )
+        .filter((p): p is typeof p & { id: string } => !!p.id)
+        .map((p) => ({
+          id: p.id,
+          label: p.full_name || p.email || p.username || "—",
+          email: p.email,
+          phone: phoneById.get(p.id) ?? null,
+        }));
+    },
+  });
+
+  const { data: assignments } = useQuery({
+    queryKey: ["ht-org-assignments", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hive_training_assignments")
+        .select(
+          "id, organization_id, user_id, course_id, status, progress_pct, completed_at, expires_at, payment_model, course:hive_training_courses(title, slug, cert_validity_months)",
+        )
+        .eq("organization_id", orgId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as AssignmentRow[];
+    },
+  });
+
+  const { data: seats } = useQuery({
+    queryKey: ["ht-org-seats", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hive_training_seats")
+        .select(
+          "id, catalog_id, status, assigned_to_user_id, catalog:hive_training_catalog(name, sku, fulfills_course_ids)",
+        )
+        .eq("organization_id", orgId)
+        .eq("status", "available");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: launchpadFlags } = useQuery({
+    enabled: (members ?? []).length > 0,
+    queryKey: ["ht-launchpad-flags", orgId, (members ?? []).map((m) => m.id).join(",")],
+    queryFn: async () => {
+      const ids = (members ?? []).map((m) => m.id);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, has_passed_launchpad")
+        .in("id", ids);
+      if (error) throw error;
+      return (data ?? []) as Array<{ id: string; has_passed_launchpad: boolean | null }>;
+    },
+  });
+
+  return (
+    <div className="space-y-6">
+      <ReadinessBanner members={members ?? []} assignments={assignments ?? []} />
+
+      <LaunchpadRoster members={members ?? []} flags={launchpadFlags ?? []} />
+
+      <div id="ht-renewals" tabIndex={-1} className="scroll-mt-6 rounded-xl outline-none">
+        <RenewalsSection
+          orgId={orgId}
+          assignments={assignments ?? []}
+          members={members ?? []}
+          catalog={catalog ?? []}
+        />
+      </div>
+
+      <Storefront
+        orgId={orgId}
+        catalog={catalog ?? []}
+        members={members ?? []}
+        onPurchased={() => {
+          qc.invalidateQueries({ queryKey: ["ht-org-seats", orgId] });
+          qc.invalidateQueries({ queryKey: ["ht-org-classes", orgId] });
+          qc.invalidateQueries({ queryKey: ["thirty-day-course-access"] });
+        }}
+      />
+
+      <SubmittedClasses orgId={orgId} />
+
+      <RosterSection
+        orgId={orgId}
+        assignments={assignments ?? []}
+        seats={seats ?? []}
+        members={members ?? []}
+      />
+    </div>
+  );
+}
+
+// ---- Readiness banner (trimmed — expirations handled by RenewalsSection) ----
+
+function ReadinessBanner({
+  members,
+  assignments,
+}: {
+  members: Member[];
+  assignments: AssignmentRow[];
+}) {
+  const usersWithAnyAssign = new Set(assignments.map((a) => a.user_id));
+  const unassignedCount = members.filter((m) => !usersWithAnyAssign.has(m.id)).length;
+  const inProgressCount = assignments.filter((a) => a.status === "in_progress").length;
+
+  const items: React.ReactNode[] = [];
+
+  if (unassignedCount > 0) {
+    items.push(
+      <BannerLine
+        key="unassigned"
+        icon={<AlertTriangle className="h-4 w-4 text-[#C8881E]" />}
+        text={
+          <>
+            <b>{unassignedCount} staff</b> have no training assigned yet.
+          </>
+        }
+        cta="Review renewals"
+        onClick={() => scrollToRenewals()}
+      />,
+    );
+  }
+
+  if (inProgressCount > 0) {
+    items.push(
+      <BannerLine
+        key="in-progress"
+        icon={<Clock className="h-4 w-4 text-[#1A2B47]" />}
+        text={
+          <>
+            <b>{inProgressCount} trainings</b> started but not completed.
+          </>
+        }
+        cta="See team"
+        onClick={() => scrollToRoster()}
+      />,
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="rounded-xl border border-[#1A2B47]/15 bg-gradient-to-br from-[#1A2B47] to-[#243b62] text-white p-5 md:p-6">
+        <div className="flex items-start gap-3">
+          <Sparkles className="h-5 w-5 text-[#C8881E] mt-0.5" />
+          <div>
+            <div className="text-base font-semibold">Your team is current. Keep it that way.</div>
+            <p className="text-sm text-white/80 mt-1 max-w-2xl">
+              CPR/First Aid, Mandt, and the 30-day orientation live here — with sign-off and a
+              certificate when each one is done. We track expirations so nothing lapses on your
+              watch.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-[#C8881E]/30 bg-[#FFF9EE] p-4 md:p-5 space-y-2">
+      <div className="text-sm font-semibold text-[#1A2B47] flex items-center gap-2">
+        <AlertTriangle className="h-4 w-4 text-[#C8881E]" />
+        Your team, right now
+      </div>
+      <div className="space-y-1.5">{items}</div>
+    </div>
+  );
+}
+
+function LaunchpadRoster({
+  members,
+  flags,
+}: {
+  members: Member[];
+  flags: Array<{ id: string; has_passed_launchpad: boolean | null }>;
+}) {
+  const passedIds = new Set(flags.filter((f) => f.has_passed_launchpad).map((f) => f.id));
+  const passed = members.filter((m) => passedIds.has(m.id));
+  const notPassed = members.filter((m) => !passedIds.has(m.id));
+
+  return (
+    <section
+      data-testid="launchpad-roster"
+      className="rounded-xl border border-border bg-white p-4 md:p-5 space-y-3"
+    >
+      <div>
+        <h2 className="text-lg font-semibold text-[#1A2B47]">Launchpad clock-in gate</h2>
+        <p className="text-sm text-muted-foreground">
+          Staff must pass Launchpad before the punch pad will clock them in. This list reads the
+          live pass flag — it is not a test override.
+        </p>
+      </div>
+      <p className="text-sm text-[#1A2B47]">
+        <b>{passed.length}</b> passed · <b>{notPassed.length}</b> have not passed
+      </p>
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+            Passed
+          </h3>
+          {passed.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No staff have passed Launchpad yet.</p>
+          ) : (
+            <ul className="text-sm space-y-0.5">
+              {passed.map((m) => (
+                <li key={m.id}>{m.label}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+            Not passed
+          </h3>
+          {notPassed.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Everyone on this roster has passed.</p>
+          ) : (
+            <ul className="text-sm space-y-0.5">
+              {notPassed.map((m) => (
+                <li key={m.id}>{m.label}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BannerLine({
+  icon,
+  text,
+  cta,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  text: React.ReactNode;
+  cta: string | null;
+  onClick?: () => void;
+}) {
+  return (
+    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 text-sm">
+      <div className="flex items-center gap-2 flex-1">
+        {icon}
+        <span>{text}</span>
+      </div>
+      {cta && (
+        <Button
+          size="sm"
+          onClick={onClick}
+          className="bg-[#C8881E] hover:bg-[#C8881E]/90 text-white self-start md:self-auto"
+        >
+          {cta}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function scrollToRenewals() {
+  scrollToTrainingTarget(["ht-renewals", "ht-storefront", "ht-roster"]);
+}
+function scrollToRoster() {
+  scrollToTrainingTarget(["ht-roster"]);
+}
+function scrollToStorefront() {
+  scrollToTrainingTarget(["ht-storefront", "ht-roster"]);
+}
+
+function scrollToTrainingTarget(ids: string[]) {
+  const el = ids
+    .map((id) => document.getElementById(id))
+    .find((node): node is HTMLElement => {
+      if (!node) return false;
+      const rect = node.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 1;
+    });
+
+  if (!el) return;
+
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  window.setTimeout(() => {
+    el.focus({ preventScroll: true });
+    el.animate(
+      [
+        { boxShadow: "0 0 0 0 rgba(200, 136, 30, 0)" },
+        { boxShadow: "0 0 0 4px rgba(200, 136, 30, 0.35)" },
+        { boxShadow: "0 0 0 0 rgba(200, 136, 30, 0)" },
+      ],
+      { duration: 900, easing: "ease-out" },
+    );
+  }, 250);
+}
+
+// ---- Renewals section (staff-level, checkbox-driven) ----
+
+type RenewalRow = {
+  key: string; // `${user_id}:${course_id}`
+  user_id: string;
+  user_label: string;
+  course_id: string;
+  course_title: string;
+  expires_at: string | null; // null = never assigned
+  days_left: number | null;
+  status: "due_soon" | "upcoming" | "missing";
+  catalog_id: string | null; // best-fit single SKU
+};
+
+function RenewalsSection({
+  orgId,
+  assignments,
+  members,
+  catalog,
+}: {
+  orgId: string;
+  assignments: AssignmentRow[];
+  members: Member[];
+  catalog: CatalogRow[];
+}) {
+  // Required courses = courses referenced by any à-la-carte SKU (source of truth).
+  const requiredCourses = useMemo(() => {
+    const map = new Map<string, { id: string; title: string; catalog_id: string }>();
+    for (const c of catalog) {
+      if (c.kind === "full_program") continue;
+      const ids = (c.fulfills_course_ids ?? []) as string[];
+      for (const cid of ids) {
+        if (!map.has(cid)) {
+          // Try to find title from an assignment; fallback to SKU name.
+          const fromAssign = assignments.find((a) => a.course_id === cid)?.course?.title;
+          map.set(cid, { id: cid, title: fromAssign ?? c.name, catalog_id: c.id });
+        }
+      }
+    }
+    return map;
+  }, [catalog, assignments]);
+
+  const rows = useMemo<RenewalRow[]>(() => {
+    const out: RenewalRow[] = [];
+    const now = Date.now();
+    const in120 = now + 120 * 24 * 3600 * 1000;
+    const seen = new Set<string>();
+
+    // Expiring assignments
+    for (const a of assignments) {
+      if (!a.expires_at) continue;
+      const t = new Date(a.expires_at).getTime();
+      if (t > in120) continue;
+      const days = Math.round((t - now) / (24 * 3600 * 1000));
+      const req = requiredCourses.get(a.course_id);
+      const key = `${a.user_id}:${a.course_id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        key,
+        user_id: a.user_id,
+        user_label: members.find((m) => m.id === a.user_id)?.label ?? a.user_id.slice(0, 8),
+        course_id: a.course_id,
+        course_title: a.course?.title ?? "Training",
+        expires_at: a.expires_at,
+        days_left: days,
+        status: days <= 60 ? "due_soon" : "upcoming",
+        catalog_id: req?.catalog_id ?? null,
+      });
+    }
+
+    // Missing: staff × required course with no assignment at all.
+    for (const m of members) {
+      for (const [cid, req] of requiredCourses) {
+        const hasAny = assignments.some((a) => a.user_id === m.id && a.course_id === cid);
+        if (hasAny) continue;
+        const key = `${m.id}:${cid}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push({
+          key,
+          user_id: m.id,
+          user_label: m.label,
+          course_id: cid,
+          course_title: req.title,
+          expires_at: null,
+          days_left: null,
+          status: "missing",
+          catalog_id: req.catalog_id,
+        });
+      }
+    }
+
+    // Sort: due_soon → upcoming → missing; within each, soonest first.
+    const rank = { due_soon: 0, upcoming: 1, missing: 2 } as const;
+    out.sort((a, b) => {
+      if (rank[a.status] !== rank[b.status]) return rank[a.status] - rank[b.status];
+      const da = a.days_left ?? 99999;
+      const db = b.days_left ?? 99999;
+      return da - db;
+    });
+    return out;
+  }, [assignments, members, requiredCourses]);
+
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const toggle = (key: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const selectDueSoon = () => {
+    setSelected(new Set(rows.filter((r) => r.status === "due_soon").map((r) => r.key)));
+  };
+  const clearAll = () => setSelected(new Set());
+
+  const selectedRows = rows.filter((r) => selected.has(r.key));
+
+  if (rows.length === 0) return null;
+
+  return (
+    <section className="rounded-xl border border-border bg-white p-4 md:p-5 space-y-3">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+        <div>
+          <h2 className="text-lg font-semibold text-[#1A2B47]">Renewals coming up</h2>
+          <p className="text-sm text-muted-foreground">
+            Keep your team current. Check the ones you want covered — we'll handle the rest.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={selectDueSoon}>
+            Select all due within 60 days
+          </Button>
+          {selected.size > 0 && (
+            <Button variant="ghost" size="sm" onClick={clearAll}>
+              Clear
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="overflow-x-auto -mx-4 md:mx-0">
+        <table className="w-full text-sm">
+          <tbody>
+            {rows.map((r) => {
+              const checked = selected.has(r.key);
+              return (
+                <tr
+                  key={r.key}
+                  className={`border-t hover:bg-muted/30 cursor-pointer ${checked ? "bg-[#FFF9EE]" : ""}`}
+                  onClick={() => toggle(r.key)}
+                >
+                  <td className="p-2 pl-3 w-8">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggle(r.key)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-4 w-4 accent-[#C8881E]"
+                    />
+                  </td>
+                  <td className="p-2 font-medium text-[#1A2B47] whitespace-nowrap">
+                    {r.user_label}
+                  </td>
+                  <td className="p-2">{r.course_title}</td>
+                  <td className="p-2 text-muted-foreground whitespace-nowrap">
+                    {r.status === "missing"
+                      ? "Never assigned"
+                      : `expires ${new Date(r.expires_at!).toLocaleDateString(undefined, { month: "short", day: "numeric" })}${r.days_left != null ? ` · ${r.days_left}d` : ""}`}
+                  </td>
+                  <td className="p-2 pr-3 text-right">
+                    {r.status === "due_soon" && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#C8881E]/15 text-[#C8881E] text-xs px-2 py-0.5">
+                        Due soon
+                      </span>
+                    )}
+                    {r.status === "missing" && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-700 text-xs px-2 py-0.5">
+                        Missing
+                      </span>
+                    )}
+                    {r.status === "upcoming" && (
+                      <span className="text-xs text-muted-foreground">Upcoming</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex flex-col md:flex-row md:items-center gap-2 md:justify-between pt-2 border-t">
+        <div className="text-sm text-muted-foreground">
+          {selected.size === 0 ? (
+            "Select trainings above to set up renewals."
+          ) : (
+            <>
+              <b>{selected.size} selected</b> · certificates auto-issued on completion, expirations
+              tracked.
+            </>
+          )}
+        </div>
+        <Button
+          disabled={selected.size === 0}
+          onClick={() => setDialogOpen(true)}
+          className="bg-[#1A2B47] hover:bg-[#1A2B47]/90 text-white"
+        >
+          Set up renewals
+        </Button>
+      </div>
+
+      <SetupRenewalsDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        selection={selectedRows}
+        catalog={catalog}
+        orgId={orgId}
+      />
+    </section>
+  );
+}
+
+// ---- Setup renewals dialog ----
+
+function SetupRenewalsDialog({
+  open,
+  onOpenChange,
+  selection,
+  catalog,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  selection: RenewalRow[];
+  catalog: CatalogRow[];
+  orgId: string;
+}) {
+  const checkoutFn = useServerFn(createTrainingCheckoutFn);
+  const [busy, setBusy] = useState(false);
+
+  const fullProgram = catalog.find((c) => c.kind === "full_program");
+
+  // Detect bundling opportunity: a single staff needs all courses in the full program.
+  const bundle = useMemo(() => {
+    if (!fullProgram) return null;
+    const fpCourses = new Set((fullProgram.fulfills_course_ids ?? []) as string[]);
+    if (fpCourses.size === 0) return null;
+
+    const byUser = new Map<string, Set<string>>();
+    for (const r of selection) {
+      if (!byUser.has(r.user_id)) byUser.set(r.user_id, new Set());
+      byUser.get(r.user_id)!.add(r.course_id);
+    }
+    const bundledUsers: string[] = [];
+    for (const [uid, courses] of byUser) {
+      let covers = true;
+      for (const cid of fpCourses)
+        if (!courses.has(cid)) {
+          covers = false;
+          break;
+        }
+      if (covers) bundledUsers.push(uid);
+    }
+    if (bundledUsers.length === 0) return null;
+
+    // Cost with full program vs à la carte for those users.
+    const perUserAlaCarte = Array.from(fpCourses).reduce((sum, cid) => {
+      const cat = catalog.find(
+        (c) =>
+          c.kind !== "full_program" && ((c.fulfills_course_ids ?? []) as string[]).includes(cid),
+      );
+      return sum + trainingPriceCentsForSku(cat?.sku ?? "", cat?.price_cents);
+    }, 0);
+    const savingsPerUser = Math.max(
+      0,
+      perUserAlaCarte - trainingPriceCentsForSku(fullProgram.sku, fullProgram.price_cents),
+    );
+    return { users: bundledUsers, savingsPerUser, fpCourses };
+  }, [selection, fullProgram, catalog]);
+
+  // Build purchase groups: catalog_id → renewal_intents[].
+  const purchases = useMemo(() => {
+    const bundledUserSet = new Set(bundle?.users ?? []);
+    const groups = new Map<
+      string,
+      { catalog: CatalogRow; intents: { user_id: string; course_id: string }[] }
+    >();
+
+    // Bundled users → full program (one seat per user; intents cover all courses).
+    if (bundle && fullProgram) {
+      for (const uid of bundle.users) {
+        // Full program intents: one intent per fulfilled course for this user.
+        // The webhook consumes one seat per intent, so we count qty by intents.
+        for (const cid of bundle.fpCourses) {
+          if (!groups.has(fullProgram.id))
+            groups.set(fullProgram.id, { catalog: fullProgram, intents: [] });
+          groups.get(fullProgram.id)!.intents.push({ user_id: uid, course_id: cid });
+        }
+      }
+    }
+
+    // À la carte for the rest.
+    for (const r of selection) {
+      if (bundledUserSet.has(r.user_id)) continue;
+      if (!r.catalog_id) continue;
+      const cat = catalog.find((c) => c.id === r.catalog_id);
+      if (!cat) continue;
+      if (!groups.has(cat.id)) groups.set(cat.id, { catalog: cat, intents: [] });
+      groups.get(cat.id)!.intents.push({ user_id: r.user_id, course_id: r.course_id });
+    }
+    return Array.from(groups.values());
+  }, [selection, bundle, fullProgram, catalog]);
+
+  const totalCents = useMemo(
+    () =>
+      purchases.reduce(
+        (s, p) =>
+          s + trainingPriceCentsForSku(p.catalog.sku, p.catalog.price_cents) * p.intents.length,
+        0,
+      ),
+    [purchases],
+  );
+  const totalFmt = (totalCents / 100).toLocaleString(undefined, {
+    style: "currency",
+    currency: "USD",
+  });
+
+  const staffCount = new Set(selection.map((r) => r.user_id)).size;
+
+  const startCheckout = async () => {
+    if (purchases.length === 0) return;
+    setBusy(true);
+    try {
+      // Multi-SKU: run each purchase group as its own Stripe session.
+      // If more than one group, we open the first now; the rest are done sequentially
+      // by returning to the page (webhook resolves each on its own). Keep it simple:
+      // fire the first one now — the vast majority of selections resolve to a single group.
+      const first = purchases[0];
+      const r = await checkoutFn({
+        data: {
+          organizationId: orgId,
+          catalogId: first.catalog.id,
+          modeContext: "bulk_seats",
+          quantity: first.intents.length,
+          renewalIntents: first.intents,
+        },
+      });
+      if (r.granted) {
+        toast.success("Included in your plan — no charge.");
+        onOpenChange(false);
+        setBusy(false);
+        return;
+      }
+      if (r.error || !r.url) throw new Error(r.error ?? "Checkout URL missing");
+      window.location.href = r.url;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Checkout failed";
+      if (msg.includes("payments_not_configured")) {
+        toast.error("Payments are not configured yet. Add STRIPE_SECRET_KEY to enable checkout.");
+      } else {
+        toast.error(msg);
+      }
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            Set up {selection.length} renewal{selection.length === 1 ? "" : "s"}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 text-sm">
+          <p>
+            Covers <b>{selection.length}</b> training{selection.length === 1 ? "" : "s"} for{" "}
+            <b>{staffCount}</b> staff. Certificates are auto-issued on completion, and we'll track
+            every expiration for you.
+          </p>
+
+          {bundle && fullProgram && bundle.users.length > 0 && (
+            <div className="rounded-md bg-[#FFF9EE] border border-[#C8881E]/30 p-2.5 text-xs">
+              <div className="font-medium text-[#1A2B47]">
+                Bundled as Full Program for {bundle.users.length} staff.
+              </div>
+              <div className="text-muted-foreground mt-0.5">
+                Saves ${(bundle.savingsPerUser / 100).toFixed(0)} per staff and covers everything
+                they need.
+              </div>
+            </div>
+          )}
+
+          <ul className="text-xs text-muted-foreground space-y-1 border-t pt-2">
+            {purchases.map((p) => (
+              <li key={p.catalog.id} className="flex justify-between">
+                <span>
+                  {p.catalog.name} × {p.intents.length}
+                </span>
+                <span>
+                  {formatUsdFromCents(
+                    trainingPriceCentsForSku(p.catalog.sku, p.catalog.price_cents) *
+                      p.intents.length,
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex justify-between items-baseline border-t pt-2">
+            <span className="text-xs text-muted-foreground">Total · one-time</span>
+            <span className="text-base font-semibold text-[#1A2B47]">{totalFmt}</span>
+          </div>
+
+          {purchases.length > 1 && (
+            <p className="text-xs text-muted-foreground">
+              Note: your selection spans multiple programs. You'll be walked through the first
+              checkout now; the next opens right after.
+            </p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={startCheckout}
+            disabled={busy || purchases.length === 0}
+            className="bg-[#C8881E] hover:bg-[#C8881E]/90 text-white"
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Set up renewals"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---- Storefront ----
+
+function Storefront({
+  orgId,
+  catalog,
+  members,
+  onPurchased,
+}: {
+  orgId: string;
+  catalog: CatalogRow[];
+  members: Member[];
+  onPurchased: () => void;
+}) {
+  const { data: org } = useCurrentOrg();
+  const billingFn = useServerFn(getBillingStatusFn);
+  const billingQ = useQuery({
+    queryKey: ["ht-billing-status", orgId],
+    queryFn: () => billingFn({ data: { organizationId: orgId } }),
+  });
+  const billingExempt =
+    billingQ.data?.billingExempt === true ||
+    isBillingExempt({
+      billingExempt: false,
+      orgName: org?.organization_name,
+      legalName: org?.legal_name,
+      dbaName: org?.dba_name,
+      organizationId: orgId,
+      displayAcronym: org?.display_acronym,
+    });
+
+  const rosterMembers: RosterMemberOption[] = members.map((m) => ({
+    id: m.id,
+    label: m.label,
+    email: m.email,
+    phone: m.phone,
+  }));
+
+  const cards: Array<{
+    type: TrainingClassType;
+    title: string;
+    blurb: string;
+    priceCents: number;
+    featured?: boolean;
+    sku: string;
+  }> = (
+    [
+      {
+        type: "package" as const,
+        title: "Training package",
+        blurb:
+          "CPR, Mandt, and the in-platform orientation seat (30-day, Person-Centered Thinking, ABI, and 12-hour CE) for the same roster. Saves $75 versus buying each seat.",
+        featured: true,
+      },
+      {
+        type: "cpr_first_aid" as const,
+        title: "CPR / First Aid",
+        blurb:
+          "External class. After pay, Exec gets one alert. Staff see an obligation until you upload the card.",
+      },
+      {
+        type: "mandt" as const,
+        title: "Mandt",
+        blurb:
+          "External class. After pay, Exec gets one alert. Staff see an obligation until you upload the card.",
+      },
+      {
+        type: "thirty_day" as const,
+        title: "30-day orientation",
+        blurb:
+          "In-platform Essential Training from the staff file. A purchased 30-day or pack seat unlocks 30-day orientation, Person-Centered Thinking, ABI, and the 12-hour CE placeholder for that staff. True North Supports is never charged. Not an external class.",
+      },
+    ] as const
+  ).map((card) => {
+    const sku = trainingClassSku(card.type);
+    const catalogRow = catalog.find((c) => c.sku === sku);
+    return {
+      ...card,
+      sku,
+      priceCents: trainingPriceCentsForSku(sku, catalogRow?.price_cents),
+    };
+  });
+
+  return (
+    <section id="ht-storefront" className="space-y-3">
+      <div>
+        <h2 className="text-lg font-semibold text-[#1A2B47]">Submit a class roster</h2>
+        <p className="text-sm text-muted-foreground">
+          Only an admin submits. One submit is one class. Staff never buy seats.
+          {billingExempt ? " True North Supports is always $0." : ""}
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {cards.map((card) => (
+          <Card
+            key={card.type}
+            className={
+              card.featured
+                ? "relative border-2 border-[#C8881E] shadow-[0_0_0_4px_rgba(200,136,30,0.15)]"
+                : undefined
+            }
+          >
+            {card.featured && (
+              <div className="absolute -top-3 left-4 rounded bg-[#C8881E] px-2 py-0.5 text-xs font-semibold text-white">
+                Best value · save $75
+              </div>
+            )}
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base text-[#1A2B47]">{card.title}</CardTitle>
+              <CardDescription className="text-xs">{card.blurb}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div data-testid={`training-price-${card.sku}`}>
+                <div className="text-2xl font-bold text-[#1A2B47]">
+                  {formatUsdFromCents(card.priceCents)}
+                  <span className="text-sm font-normal text-muted-foreground"> / seat</span>
+                </div>
+                {billingExempt ? (
+                  <p className="text-sm text-[#1A2B47]">True North $0 — never charged</p>
+                ) : null}
+              </div>
+              {orgId ? (
+                <ClassRosterDialog
+                  organizationId={orgId}
+                  trainingType={card.type}
+                  billingExempt={billingExempt}
+                  members={rosterMembers}
+                  triggerLabel={
+                    card.type === "thirty_day" ? "Assign 30-day course" : "Submit class roster"
+                  }
+                  testId={`training-buy-${card.sku}`}
+                  onSubmitted={onPurchased}
+                />
+              ) : null}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      {catalog.length === 0 && (
+        <p className="text-xs text-muted-foreground">
+          Locked prices are used even if the leftover catalog has not been updated yet.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function SubmittedClasses({ orgId }: { orgId: string }) {
+  const listFn = useServerFn(getOrgTrainingClasses);
+  const { data: classes } = useQuery({
+    queryKey: ["ht-org-classes", orgId],
+    queryFn: () => listFn({ data: { organizationId: orgId } }),
+  });
+  if (!classes?.length) return null;
+  return (
+    <section className="space-y-2">
+      <h2 className="text-lg font-semibold text-[#1A2B47]">Submitted classes</h2>
+      <div className="space-y-2">
+        {classes.map((c) => (
+          <Card key={c.id}>
+            <CardContent className="p-4 text-sm">
+              <div className="font-medium text-[#1A2B47]">
+                {trainingClassLabel(c.trainingType)} · {c.seatCount} staff ·{" "}
+                {formatUsdFromCents(
+                  c.unitPriceCents || trainingPriceCentsForSku(trainingClassSku(c.trainingType)),
+                )}{" "}
+                / seat
+                {" · "}
+                {c.paymentStatus === "waived" || c.amountCents === 0
+                  ? "$0"
+                  : formatUsdFromCents(c.amountCents)}
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {c.status} · submitted{" "}
+                {c.submittedAt ? new Date(c.submittedAt).toLocaleDateString() : "—"}
+              </div>
+              <ul className="mt-2 space-y-0.5 text-xs">
+                {c.roster.map((r) => (
+                  <li key={r.rosterId || `${r.email}-${r.name}`}>
+                    {r.name} · {r.email} · {r.phone}
+                  </li>
+                ))}
+              </ul>
+              {(c.trainingType === "cpr_first_aid" ||
+                c.trainingType === "mandt" ||
+                c.trainingType === "package") && <ClassCardUploadButtons orgId={orgId} row={c} />}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// Leftover LMS buy-seats dialogs were replaced by the class roster above.
+// /dashboard/training/catalog now redirects here.
+
+// ---- Roster ----
+
+type SeatLite = {
+  id: string;
+  catalog_id: string;
+  status: string;
+  assigned_to_user_id: string | null;
+  catalog: { name: string; sku: string; fulfills_course_ids: string[] | null } | null;
+};
+
+function RosterSection({
+  orgId,
+  assignments,
+  seats,
+  members,
+}: {
+  orgId: string;
+  assignments: AssignmentRow[];
+  seats: unknown[];
+  members: Member[];
+}) {
+  const qc = useQueryClient();
+  const nameById = useMemo(() => {
+    const m = new Map<string, string>();
+    members.forEach((mem) => m.set(mem.id, mem.label));
+    return m;
+  }, [members]);
+
+  const assignSeat = useMutation({
+    mutationFn: async ({
+      seatId,
+      userId,
+      catalogId,
+    }: {
+      seatId: string;
+      userId: string;
+      catalogId: string;
+    }) => {
+      const { data: cat } = await supabase
+        .from("hive_training_catalog")
+        .select("fulfills_course_ids")
+        .eq("id", catalogId)
+        .maybeSingle();
+      const courseIds: string[] = (cat?.fulfills_course_ids as string[] | null) ?? [];
+      if (courseIds.length === 0) throw new Error("This SKU has no course mapping yet.");
+
+      const { error: sErr } = await supabase
+        .from("hive_training_seats")
+        .update({
+          status: "consumed",
+          assigned_to_user_id: userId,
+          consumed_at: new Date().toISOString(),
+        })
+        .eq("id", seatId)
+        .eq("status", "available");
+      if (sErr) throw sErr;
+
+      const rows = courseIds.map((courseId) => ({
+        organization_id: orgId,
+        user_id: userId,
+        course_id: courseId,
+        payment_model: "bulk_seats" as const,
+        seat_id: seatId,
+        status: "not_started" as const,
+      }));
+      const { error: aErr } = await supabase.from("hive_training_assignments").insert(rows);
+      if (aErr) throw aErr;
+    },
+    onSuccess: () => {
+      toast.success("Seat assigned");
+      qc.invalidateQueries({ queryKey: ["ht-org-assignments", orgId] });
+      qc.invalidateQueries({ queryKey: ["ht-org-seats", orgId] });
+    },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Assign failed"),
+  });
+
+  return (
+    <section id="ht-roster" className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-[#1A2B47]">Your team</h2>
+        <p className="text-sm text-muted-foreground">
+          Available seats, current assignments, and expirations.
+        </p>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold mb-2 text-[#1A2B47]">
+          Available seats ({seats.length})
+        </h3>
+        {seats.length > 0 ? (
+          <div className="grid gap-2">
+            {(seats as SeatLite[]).map((s) => (
+              <SeatRow
+                key={s.id}
+                seat={s}
+                members={members}
+                onAssign={(userId) =>
+                  assignSeat.mutate({ seatId: s.id, userId, catalogId: s.catalog_id })
+                }
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No unassigned seats. Buy more above.</p>
+        )}
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold mb-2 text-[#1A2B47]">
+          Team assignments ({assignments.length})
+        </h3>
+        <div className="overflow-x-auto rounded-md border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left">
+              <tr>
+                <th className="p-2">Staff</th>
+                <th className="p-2">Course</th>
+                <th className="p-2">Status</th>
+                <th className="p-2">Progress</th>
+                <th className="p-2">Cert expires</th>
+              </tr>
+            </thead>
+            <tbody>
+              {assignments.map((a) => (
+                <tr key={a.id} className="border-t">
+                  <td className="p-2">{nameById.get(a.user_id) ?? a.user_id.slice(0, 8)}</td>
+                  <td className="p-2">{a.course?.title ?? "—"}</td>
+                  <td className="p-2">
+                    <StatusBadge status={a.status} />
+                  </td>
+                  <td className="p-2">{a.progress_pct ?? 0}%</td>
+                  <td className="p-2">
+                    {a.expires_at ? new Date(a.expires_at).toLocaleDateString() : "—"}
+                  </td>
+                </tr>
+              ))}
+              {assignments.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-4 text-center text-muted-foreground">
+                    No assignments yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SeatRow({
+  seat,
+  members,
+  onAssign,
+}: {
+  seat: SeatLite;
+  members: Member[];
+  onAssign: (userId: string) => void;
+}) {
+  const [user, setUser] = useState("");
+  return (
+    <div className="flex flex-col md:flex-row md:items-center gap-2 border rounded-md p-2 bg-white">
+      <div className="flex items-center gap-2 flex-1">
+        <Users className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm">{seat.catalog?.name ?? "Seat"}</span>
+      </div>
+      <Select value={user} onValueChange={setUser}>
+        <SelectTrigger className="w-full md:w-48">
+          <SelectValue placeholder="Assign to…" />
+        </SelectTrigger>
+        <SelectContent>
+          {members.map((m) => (
+            <SelectItem key={m.id} value={m.id}>
+              {m.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button size="sm" disabled={!user} onClick={() => user && onAssign(user)}>
+        Assign
+      </Button>
+    </div>
+  );
+}

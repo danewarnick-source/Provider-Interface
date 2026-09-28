@@ -1,0 +1,252 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useMemo, useState } from "react";
+import { Building2, Search, AlertTriangle, Lock, Users, Contact2, DollarSign, Sparkles, ArrowRight } from "lucide-react";
+import { getExecKpis, listCompanies, type CompanyRow } from "@/lib/hive-exec/hive-exec.functions";
+import { getPendingUpgradeRequestCount } from "@/lib/agency/org-features.functions";
+import { listRecentTrainingClassAlerts } from "@/lib/training/training-class.functions";
+import { formatRosterContactLine, trainingClassLabel } from "@/lib/training/training-class";
+import { listTrainingOnlyOrdersForExec } from "@/lib/training/training-only-exec.functions";
+
+export const Route = createFileRoute("/dashboard/(hive-exec)/hive-exec/")({
+  component: CompaniesPage,
+});
+
+
+function fmtMoney(cents: number): string {
+  return `$${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+}
+
+function CompaniesPage() {
+  const kpisFn = useServerFn(getExecKpis);
+  const listFn = useServerFn(listCompanies);
+  const pendingFn = useServerFn(getPendingUpgradeRequestCount);
+  const classAlertsFn = useServerFn(listRecentTrainingClassAlerts);
+  const publicTrainingFn = useServerFn(listTrainingOnlyOrdersForExec);
+  const kpisQ = useQuery({ queryKey: ["hive-exec-kpis"], queryFn: () => kpisFn(), refetchInterval: 30_000 });
+  const listQ = useQuery({ queryKey: ["hive-exec-companies"], queryFn: () => listFn(), refetchInterval: 30_000 });
+  const pendingQ = useQuery({ queryKey: ["hive-exec-upgrade-pending-count"], queryFn: () => pendingFn(), refetchInterval: 30_000 });
+  const classAlertsQ = useQuery({ queryKey: ["hive-exec-class-alerts"], queryFn: () => classAlertsFn(), refetchInterval: 30_000 });
+  const publicTrainingQ = useQuery({ queryKey: ["hive-exec-training-only"], queryFn: () => publicTrainingFn(), refetchInterval: 30_000 });
+  const publicAwaiting = (publicTrainingQ.data ?? []).filter(
+    (s) => s.paymentStatus === "paid" && s.fulfillmentStatus !== "sent" && s.fulfillmentStatus !== "completed",
+  ).slice(0, 3);
+
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("active");
+
+  const rows = useMemo<CompanyRow[]>(() => {
+    const data = listQ.data ?? [];
+    return data.filter((r) => {
+      if (statusFilter === "active") {
+        if (r.status !== "active" && r.status !== "trial") return false;
+      } else if (statusFilter !== "all" && r.status !== statusFilter) return false;
+      if (search && !r.name.toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    });
+  }, [listQ.data, search, statusFilter]);
+
+  const k = kpisQ.data;
+
+  const pendingCount = pendingQ.data?.count ?? 0;
+
+  return (
+    <div className="space-y-4">
+      {publicAwaiting.map((seat) => (
+        <Link
+          key={seat.seatId}
+          to="/dashboard/hive-exec/classes"
+          className="flex items-start justify-between gap-3 rounded-xl border-2 border-[var(--hive-gold)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm"
+        >
+          <div>
+            <div className="font-display text-base font-bold text-[var(--hive-text)]">
+              Public training · {seat.personName} · {seat.skuLabel}
+            </div>
+            <div className="mt-1 text-xs text-[#9a3412]">
+              Payer {seat.buyerEmail} · {seat.paymentStatus === "paid" ? "Paid" : "Unpaid"}
+              {seat.buyerAgencyName ? ` · ${seat.buyerAgencyName}` : ""}
+            </div>
+          </div>
+          <span className="inline-flex items-center rounded-md bg-[var(--hive-text)] px-3 py-2 text-sm font-semibold text-white">
+            Set up / send
+          </span>
+        </Link>
+      ))}
+
+      {(classAlertsQ.data ?? []).slice(0, 3).map((cls) => (
+        <Link
+          key={cls.id}
+          to="/dashboard/hive-exec/classes"
+          className="flex items-start justify-between gap-3 rounded-xl border-2 border-[var(--hive-gold)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm"
+        >
+          <div>
+            <div className="font-display text-base font-bold text-[var(--hive-text)]">
+              {cls.providerName} submitted a {trainingClassLabel(cls.trainingType)} class
+            </div>
+            <div className="mt-1 text-xs text-[#9a3412]">
+              {cls.roster.map((r) => formatRosterContactLine(r)).join(" · ")}
+            </div>
+          </div>
+          <span className="inline-flex items-center rounded-md bg-[var(--hive-text)] px-3 py-2 text-sm font-semibold text-white">
+            Open Training
+          </span>
+        </Link>
+      ))}
+
+      {pendingCount > 0 && (
+        <Link
+          to="/dashboard/hive-exec/upgrade-requests"
+          className="group flex items-center justify-between gap-3 rounded-xl border-2 border-[var(--hive-gold)] bg-gradient-to-r from-[#fff7ed] to-[#ffedd5] p-4 shadow-sm transition-all hover:shadow-md"
+        >
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--hive-gold)] text-white shadow-sm">
+              <Sparkles className="h-5 w-5" />
+            </span>
+            <div>
+              <div className="font-display text-base font-bold text-[var(--hive-text)]">
+                {pendingCount} {pendingCount === 1 ? "organization is" : "organizations are"} requesting upgrades
+              </div>
+              <div className="text-xs text-[#9a3412]">
+                Pending feature access requests — grant or dismiss from the queue.
+              </div>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--hive-text)] px-3 py-2 text-sm font-semibold text-white group-hover:bg-[#1a2a5a]">
+            Review queue <ArrowRight className="h-4 w-4" />
+          </span>
+        </Link>
+      )}
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Kpi icon={Building2} label="Active companies" value={k?.active_companies ?? "—"} />
+        <Kpi icon={DollarSign} label="MRR" value={k ? fmtMoney(k.mrr_cents) : "—"} />
+        <Kpi icon={AlertTriangle} label="Past due" value={k?.past_due_companies ?? "—"} tone="warn" />
+        <Kpi icon={Lock} label="Locked" value={k?.locked_companies ?? "—"} tone="warn" />
+      </div>
+
+      <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <h2 className="font-display text-lg font-semibold">Customer companies</h2>
+          <div className="flex flex-col gap-2 md:flex-row">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search company…"
+                className="min-h-[44px] w-full rounded-md border border-border bg-background pl-7 pr-3 text-sm md:w-64"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="min-h-[44px] rounded-md border border-border bg-background px-2 text-sm"
+            >
+              <option value="active">Active (incl. trial)</option>
+              <option value="all">All statuses</option>
+              <option value="trial">Trial only</option>
+              <option value="past_due">Past due</option>
+              <option value="locked">Locked</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <table className="w-full min-w-[800px] text-sm">
+            <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2">Company</th>
+                <th className="px-3 py-2">Plan</th>
+                <th className="px-3 py-2">Status</th>
+                <th className="px-3 py-2 text-right">MRR</th>
+                <th className="px-3 py-2">Renewal</th>
+                <th className="px-3 py-2 text-right"><Users className="ml-auto inline h-3 w-3" /> Staff</th>
+                <th className="px-3 py-2 text-right"><Contact2 className="ml-auto inline h-3 w-3" /> Clients</th>
+                <th className="px-3 py-2 text-right">Tickets</th>
+                <th className="px-3 py-2">Health</th>
+              </tr>
+            </thead>
+            <tbody>
+              {listQ.isLoading ? (
+                <tr><td colSpan={9} className="p-6 text-center text-muted-foreground">Loading companies…</td></tr>
+              ) : rows.length === 0 ? (
+                <tr><td colSpan={9} className="p-6 text-center text-muted-foreground">No companies match.</td></tr>
+              ) : rows.map((r) => (
+                <tr key={r.organization_id} className="border-t border-border hover:bg-muted/30">
+                  <td className="px-3 py-2">
+                    <Link
+                      to="/dashboard/hive-exec/$orgId"
+                      params={{ orgId: r.organization_id }}
+                      className="font-medium text-[var(--hive-text)] hover:underline"
+                    >
+                      {r.name}
+                    </Link>
+                  </td>
+                  <td className="px-3 py-2"><PlanBadge plan={r.plan} /></td>
+                  <td className="px-3 py-2"><StatusBadge status={r.status} /></td>
+                  <td className="px-3 py-2 text-right tabular-nums">{fmtMoney(r.mrr_cents)}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{r.renewal_date ?? "—"}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{r.staff_count}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{r.client_count}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{r.open_tickets}</td>
+                  <td className="px-3 py-2"><HealthDot health={r.health} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function Kpi({
+  icon: Icon, label, value, tone,
+}: { icon: typeof Building2; label: string; value: string | number; tone?: "warn" }) {
+  return (
+    <div className={`rounded-xl border p-4 shadow-sm ${tone === "warn" ? "border-[#fecaca] bg-[#fef2f2]" : "border-border bg-card"}`}>
+      <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+        <Icon className="h-3.5 w-3.5" /> {label}
+      </div>
+      <div className="mt-1 font-display text-2xl font-bold tabular-nums text-[var(--hive-text)]">{value}</div>
+    </div>
+  );
+}
+
+function PlanBadge({ plan }: { plan: string }) {
+  const map: Record<string, string> = {
+    hive_standard: "bg-[#fff7ed] text-[#9a3412]",
+    enterprise: "bg-[var(--hive-text)] text-white",
+  };
+  const label = plan === "hive_standard" ? "Standard" : plan === "enterprise" ? "Enterprise" : plan;
+  return <span className={`rounded px-2 py-0.5 text-xs font-medium ${map[plan] ?? "bg-muted"}`}>{label}</span>;
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, string> = {
+    active: "bg-emerald-100 text-emerald-700",
+    past_due: "bg-amber-100 text-amber-700",
+    locked: "bg-red-100 text-red-700",
+    cancelled: "bg-gray-100 text-gray-600",
+    canceled: "bg-gray-100 text-gray-600",
+    inactive: "bg-slate-100 text-slate-600",
+  };
+  return <span className={`rounded px-2 py-0.5 text-xs ${map[status] ?? "bg-muted"}`}>{status.replace("_", " ")}</span>;
+}
+
+function HealthDot({ health }: { health: "good" | "warn" | "risk" }) {
+  const map = {
+    good: { dot: "bg-emerald-500", label: "Good" },
+    warn: { dot: "bg-amber-500", label: "Watch" },
+    risk: { dot: "bg-red-500", label: "Risk" },
+  }[health];
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs">
+      <span className={`h-2 w-2 rounded-full ${map.dot}`} /> {map.label}
+    </span>
+  );
+}

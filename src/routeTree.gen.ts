@@ -46,191 +46,191 @@ import { Route as SignPolicyDocumentIdRouteImport } from './routes/sign-policy.$
 import { Route as EmployeesNewRouteImport } from './routes/employees.new'
 import { Route as E2eComplianceDeskRouteImport } from './routes/e2e.compliance-desk'
 import { Route as DashboardTracksRouteImport } from './routes/dashboard/tracks'
-import { Route as DashboardTimeclockRouteImport } from './routes/dashboard.timeclock'
-import { Route as DashboardTeamsRouteImport } from './routes/dashboard.teams'
-import { Route as DashboardTeamRouteImport } from './routes/dashboard.team'
-import { Route as DashboardSummariesRouteImport } from './routes/dashboard.summaries'
-import { Route as DashboardStateAuditRouteImport } from './routes/dashboard.state-audit'
 import { Route as DashboardSmartImportRouteImport } from './routes/dashboard/smart-import'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
-import { Route as DashboardSchedulingRouteImport } from './routes/dashboard.scheduling'
-import { Route as DashboardSchedulerRouteImport } from './routes/dashboard.scheduler'
-import { Route as DashboardSchedulePreviewRouteImport } from './routes/dashboard.schedule-preview'
-import { Route as DashboardScheduleRouteImport } from './routes/dashboard.schedule'
-import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
-import { Route as DashboardReimbursementsRouteImport } from './routes/dashboard.reimbursements'
-import { Route as DashboardRecordsDeskRouteImport } from './routes/dashboard.records-desk'
-import { Route as DashboardProgramsAdminRouteImport } from './routes/dashboard.programs-admin'
+import { Route as DashboardSchedulingRouteImport } from './routes/dashboard/scheduling'
 import { Route as DashboardProgramsRouteImport } from './routes/dashboard/programs'
-import { Route as DashboardPoliciesRouteImport } from './routes/dashboard.policies'
-import { Route as DashboardPersonnelFileRouteImport } from './routes/dashboard.personnel-file'
-import { Route as DashboardPbaLedgerRouteImport } from './routes/dashboard.pba-ledger'
-import { Route as DashboardNectarDocsRouteImport } from './routes/dashboard.nectar-docs'
-import { Route as DashboardNectarCompanyProfileRouteImport } from './routes/dashboard.nectar-company-profile'
-import { Route as DashboardMyTimeCorrectionsRouteImport } from './routes/dashboard.my-time-corrections'
 import { Route as DashboardMyObligationsRouteImport } from './routes/dashboard/my-obligations'
-import { Route as DashboardMyHistoricalTimesheetsRouteImport } from './routes/dashboard.my-historical-timesheets'
-import { Route as DashboardMyHistoricalRecordsRouteImport } from './routes/dashboard.my-historical-records'
-import { Route as DashboardMyHistoricalDailyNotesRouteImport } from './routes/dashboard.my-historical-daily-notes'
-import { Route as DashboardMyEvidenceRouteImport } from './routes/dashboard.my-evidence'
-import { Route as DashboardMyClientTrainingsRouteImport } from './routes/dashboard.my-client-trainings'
-import { Route as DashboardInvitationsRouteImport } from './routes/dashboard.invitations'
-import { Route as DashboardInternalAuditRouteImport } from './routes/dashboard.internal-audit'
-import { Route as DashboardInboxRouteImport } from './routes/dashboard.inbox'
-import { Route as DashboardHrcRouteImport } from './routes/dashboard.hrc'
 import { Route as DashboardHrAdminRouteImport } from './routes/dashboard/hr-admin'
-import { Route as DashboardHostHomeControlRouteImport } from './routes/dashboard.host-home-control'
 import { Route as DashboardHomesRouteImport } from './routes/dashboard/homes'
 import { Route as DashboardHiveExecRouteImport } from './routes/dashboard/hive-exec'
-import { Route as DashboardHistoricalDailyNotesFormerStaffRouteImport } from './routes/dashboard.historical-daily-notes-former-staff'
-import { Route as DashboardHelpRouteImport } from './routes/dashboard.help'
 import { Route as DashboardFormsRouteImport } from './routes/dashboard/forms'
 import { Route as DashboardFinancialRouteImport } from './routes/dashboard/financial'
-import { Route as DashboardExternalComplianceRouteImport } from './routes/dashboard.external-compliance'
-import { Route as DashboardExternalCertificationsRouteImport } from './routes/dashboard.external-certifications'
-import { Route as DashboardEvvArchiveRouteImport } from './routes/dashboard.evv-archive'
-import { Route as DashboardEvidenceRouteImport } from './routes/dashboard.evidence'
-import { Route as DashboardEmarRouteImport } from './routes/dashboard.emar'
-import { Route as DashboardDeadlinesRouteImport } from './routes/dashboard.deadlines'
-import { Route as DashboardDayProgramRouteImport } from './routes/dashboard.day-program'
-import { Route as DashboardDailyLogsRouteImport } from './routes/dashboard.daily-logs'
-import { Route as DashboardComplianceDeskRouteImport } from './routes/dashboard.compliance-desk'
-import { Route as DashboardComplianceRouteImport } from './routes/dashboard.compliance'
-import { Route as DashboardCompanyObligationsRouteImport } from './routes/dashboard.company-obligations'
-import { Route as DashboardCommandCenterRouteImport } from './routes/dashboard.command-center'
+import { Route as DashboardEvidenceRouteImport } from './routes/dashboard/evidence'
+import { Route as DashboardComplianceRouteImport } from './routes/dashboard/compliance'
 import { Route as DashboardClientsRouteImport } from './routes/dashboard/clients'
-import { Route as DashboardCertificationsRouteImport } from './routes/dashboard.certifications'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard/billing'
-import { Route as DashboardBehavioristRouteImport } from './routes/dashboard.behaviorist'
-import { Route as DashboardAuthoritativeSourcesRouteImport } from './routes/dashboard.authoritative-sources'
-import { Route as DashboardAuditRouteImport } from './routes/dashboard.audit'
-import { Route as DashboardAssignmentsRouteImport } from './routes/dashboard.assignments'
-import { Route as DashboardAskNectarRouteImport } from './routes/dashboard.ask-nectar'
-import { Route as DashboardAgencyDocumentsRouteImport } from './routes/dashboard.agency-documents'
+import { Route as DashboardAuditRouteImport } from './routes/dashboard/audit'
 import { Route as ClientsNewRouteImport } from './routes/clients.new'
 import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 import { Route as AuditPortalSetPasswordRouteImport } from './routes/audit-portal.set-password'
 import { Route as AuditPortalPackageIdRouteImport } from './routes/audit-portal.$packageId'
-import { Route as DashboardTrainingIndexRouteImport } from './routes/dashboard/training/index'
-import { Route as DashboardSmartImportIndexRouteImport } from './routes/dashboard/smart-import/index'
-import { Route as DashboardHiveTrainingIndexRouteImport } from './routes/dashboard/hive-training/index'
-import { Route as DashboardHiveExecIndexRouteImport } from './routes/dashboard/hive-exec/index'
-import { Route as DashboardFormsIndexRouteImport } from './routes/dashboard/forms/index'
-import { Route as DashboardFinancialIndexRouteImport } from './routes/dashboard/financial/index'
-import { Route as DashboardEmployeesIndexRouteImport } from './routes/dashboard/employees/index'
-import { Route as DashboardCoursesIndexRouteImport } from './routes/dashboard/courses/index'
-import { Route as DashboardClientsIndexRouteImport } from './routes/dashboard/clients/index'
-import { Route as DashboardBillingIndexRouteImport } from './routes/dashboard/billing/index'
 import { Route as E2eHhsHubClientIdRouteImport } from './routes/e2e.hhs-hub.$clientId'
-import { Route as DashboardTrainingCatalogRouteImport } from './routes/dashboard/training/catalog'
-import { Route as DashboardTrainingIdRouteImport } from './routes/dashboard/training/$id'
-import { Route as DashboardTracksTrackSlugRouteImport } from './routes/dashboard/tracks/$trackSlug'
-import { Route as DashboardSmartImportHistoryRouteImport } from './routes/dashboard/smart-import/history'
-import { Route as DashboardShiftShiftIdRouteImport } from './routes/dashboard.shift.$shiftId'
-import { Route as DashboardSettingsTeamAccessRouteImport } from './routes/dashboard/settings/team-access'
-import { Route as DashboardSettingsSubscriptionRouteImport } from './routes/dashboard/settings/subscription'
-import { Route as DashboardSettingsServiceCodesRouteImport } from './routes/dashboard/settings/service-codes'
-import { Route as DashboardSettingsServiceCatalogRouteImport } from './routes/dashboard/settings/service-catalog'
-import { Route as DashboardSettingsRetentionRouteImport } from './routes/dashboard/settings/retention'
-import { Route as DashboardSettingsPhiAccessAuditRouteImport } from './routes/dashboard/settings/phi-access-audit'
-import { Route as DashboardSettingsLicensingRouteImport } from './routes/dashboard/settings/licensing'
-import { Route as DashboardSettingsGmailRouteImport } from './routes/dashboard/settings/gmail'
-import { Route as DashboardSettingsEmailRouteImport } from './routes/dashboard/settings/email'
-import { Route as DashboardSettingsDraftRulesRouteImport } from './routes/dashboard/settings/draft-rules'
-import { Route as DashboardSettingsComplianceSetupRouteImport } from './routes/dashboard/settings/compliance-setup'
-import { Route as DashboardSettingsBankMappingRouteImport } from './routes/dashboard/settings/bank-mapping'
-import { Route as DashboardSettingsAutomationRulesRouteImport } from './routes/dashboard/settings/automation-rules'
-import { Route as DashboardProgramsProgramIdRouteImport } from './routes/dashboard/programs/$programId'
-import { Route as DashboardHubKnowledgeRouteImport } from './routes/dashboard/hub/knowledge'
-import { Route as DashboardHubFinancesRouteImport } from './routes/dashboard/hub/finances'
-import { Route as DashboardHubEmployeesRouteImport } from './routes/dashboard/hub/employees'
-import { Route as DashboardHubDocumentationRouteImport } from './routes/dashboard/hub/documentation'
-import { Route as DashboardHubClientsRouteImport } from './routes/dashboard/hub/clients'
-import { Route as DashboardHrAdminSettingsRouteImport } from './routes/dashboard/hr-admin/settings'
-import { Route as DashboardHomesTeamIdRouteImport } from './routes/dashboard/homes/$teamId'
-import { Route as DashboardHiveExecUpgradeRequestsRouteImport } from './routes/dashboard/hive-exec/upgrade-requests'
-import { Route as DashboardHiveExecTrainingRouteImport } from './routes/dashboard/hive-exec/training'
-import { Route as DashboardHiveExecTicketsRouteImport } from './routes/dashboard/hive-exec/tickets'
-import { Route as DashboardHiveExecStatesRouteImport } from './routes/dashboard/hive-exec/states'
-import { Route as DashboardHiveExecPlansRouteImport } from './routes/dashboard/hive-exec/plans'
-import { Route as DashboardHiveExecPermissionsRouteImport } from './routes/dashboard/hive-exec/permissions'
-import { Route as DashboardHiveExecNewCompanyRouteImport } from './routes/dashboard/hive-exec/new-company'
-import { Route as DashboardHiveExecNectarRouteImport } from './routes/dashboard/hive-exec/nectar'
-import { Route as DashboardHiveExecMessagesRouteImport } from './routes/dashboard/hive-exec/messages'
-import { Route as DashboardHiveExecKnowledgeRouteImport } from './routes/dashboard/hive-exec/knowledge'
-import { Route as DashboardHiveExecHealthRouteImport } from './routes/dashboard/hive-exec/health'
-import { Route as DashboardHiveExecFunctionalityRouteImport } from './routes/dashboard/hive-exec/functionality'
-import { Route as DashboardHiveExecFeaturesRouteImport } from './routes/dashboard/hive-exec/features'
-import { Route as DashboardHiveExecCompanyMigrationRouteImport } from './routes/dashboard/hive-exec/company-migration'
-import { Route as DashboardHiveExecCommandRouteImport } from './routes/dashboard/hive-exec/command'
-import { Route as DashboardHiveExecClassesRouteImport } from './routes/dashboard/hive-exec/classes'
-import { Route as DashboardHiveExecBillingApprovalsRouteImport } from './routes/dashboard/hive-exec/billing-approvals'
-import { Route as DashboardHiveExecBaseTemplateRouteImport } from './routes/dashboard/hive-exec/base-template'
-import { Route as DashboardHiveExecApprovalsRouteImport } from './routes/dashboard/hive-exec/approvals'
-import { Route as DashboardHiveExecAgreementsRouteImport } from './routes/dashboard/hive-exec/agreements'
-import { Route as DashboardHiveExecOrgIdRouteImport } from './routes/dashboard/hive-exec/$orgId'
-import { Route as DashboardFinancialTotalsRouteImport } from './routes/dashboard/financial/totals'
-import { Route as DashboardFinancialRhsRouteImport } from './routes/dashboard/financial/rhs'
-import { Route as DashboardFinancialRevenueRouteImport } from './routes/dashboard/financial/revenue'
-import { Route as DashboardFinancialNectarRouteImport } from './routes/dashboard/financial/nectar'
-import { Route as DashboardFinancialMonthlyGridRouteImport } from './routes/dashboard/financial/monthly-grid'
-import { Route as DashboardFinancialHostHomeRouteImport } from './routes/dashboard/financial/host-home'
-import { Route as DashboardFinancialGrossRouteImport } from './routes/dashboard/financial/gross'
-import { Route as DashboardFinancialEmployeesRouteImport } from './routes/dashboard/financial/employees'
-import { Route as DashboardFinancialDistributionsRouteImport } from './routes/dashboard/financial/distributions'
-import { Route as DashboardFinancialContractorsRouteImport } from './routes/dashboard/financial/contractors'
-import { Route as DashboardEmployeesNewRouteImport } from './routes/dashboard/employees/new'
-import { Route as DashboardEmployeesLoansRouteImport } from './routes/dashboard/employees/loans'
-import { Route as DashboardEmployeesHireDatesRouteImport } from './routes/dashboard/employees/hire-dates'
-import { Route as DashboardEmployeesStaffIdRouteImport } from './routes/dashboard/employees/$staffId'
-import { Route as DashboardCoursesPersonRouteImport } from './routes/dashboard/courses/person'
-import { Route as DashboardCoursesOtherRouteImport } from './routes/dashboard/courses/other'
-import { Route as DashboardCoursesMindsmithRouteImport } from './routes/dashboard/courses/mindsmith'
-import { Route as DashboardCoursesCoreRouteImport } from './routes/dashboard/courses/core'
-import { Route as DashboardCoursesCourseIdRouteImport } from './routes/dashboard/courses/$courseId'
-import { Route as DashboardClientsRhsBoardRouteImport } from './routes/dashboard/clients/rhs-board'
-import { Route as DashboardClientsPendingRouteImport } from './routes/dashboard/clients/pending'
-import { Route as DashboardClientsNewRouteImport } from './routes/dashboard/clients/new'
-import { Route as DashboardClientsFileRouteImport } from './routes/dashboard/clients/file'
-import { Route as DashboardClientsBillingCodesRouteImport } from './routes/dashboard/clients/billing-codes'
-import { Route as DashboardClientsClientIdRouteImport } from './routes/dashboard/clients/$clientId'
-import { Route as DashboardBillingSubscriptionRouteImport } from './routes/dashboard/billing/subscription'
-import { Route as DashboardBillingNectarRouteImport } from './routes/dashboard/billing/nectar'
-import { Route as DashboardBillingImportsRouteImport } from './routes/dashboard/billing/imports'
-import { Route as DashboardBillingForm520RouteImport } from './routes/dashboard/billing/form520'
-import { Route as DashboardBillingClientIdRouteImport } from './routes/dashboard/billing/$clientId'
-import { Route as DashboardBehaviorSupportClientIdRouteImport } from './routes/dashboard/behavior-support/$clientId'
-import { Route as DashboardAdminEmarAuditRouteImport } from './routes/dashboard/admin/emar-audit'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as ApiPublicRuntimeConfigRouteImport } from './routes/api/public/runtime-config'
 import { Route as ApiComplianceUrgentRouteImport } from './routes/api/compliance/urgent'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
-import { Route as DashboardSmartImportJobIdReviewRouteImport } from './routes/dashboard/smart-import/$jobId.review'
-import { Route as DashboardSmartImportJobIdDoneRouteImport } from './routes/dashboard/smart-import/$jobId.done'
-import { Route as DashboardMyObligationsCourseInstanceIdRouteImport } from './routes/dashboard.my-obligations_.course.$instanceId'
-import { Route as DashboardHiveTrainingCourseAssignmentIdRouteImport } from './routes/dashboard/hive-training/course.$assignmentId'
-import { Route as DashboardHiveExecStatesStateCodeRouteImport } from './routes/dashboard/hive-exec/states.$stateCode'
-import { Route as DashboardHiveExecAgreementsRequirementsRouteImport } from './routes/dashboard/hive-exec/agreements.requirements'
-import { Route as DashboardHiveExecAgreementsOrgIdRouteImport } from './routes/dashboard/hive-exec/agreements.$orgId'
-import { Route as DashboardFormsFormIdSubmissionsRouteImport } from './routes/dashboard/forms/$formId.submissions'
-import { Route as DashboardFormsFormIdFillRouteImport } from './routes/dashboard/forms/$formId.fill'
-import { Route as DashboardFormsFormIdEditRouteImport } from './routes/dashboard/forms/$formId.edit'
-import { Route as DashboardCoursesTopicTopicIdRouteImport } from './routes/dashboard/courses/topic.$topicId'
-import { Route as DashboardCoursesPolicyDocumentIdRouteImport } from './routes/dashboard/courses/policy.$documentId'
-import { Route as DashboardCoursesPersonModuleAssignmentIdRouteImport } from './routes/dashboard/courses/person-module.$assignmentId'
-import { Route as DashboardCoursesCourseIdEditRouteImport } from './routes/dashboard/courses/$courseId.edit'
-import { Route as DashboardComplianceCertReviewCompletionIdRouteImport } from './routes/dashboard.compliance_.cert-review.$completionId'
-import { Route as DashboardClientsWorkspaceClientIdRouteImport } from './routes/dashboard/clients/workspace.$clientId'
-import { Route as DashboardClientsTrainingClientIdRouteImport } from './routes/dashboard/clients/training.$clientId'
-import { Route as DashboardClientsIntakeClientIdRouteImport } from './routes/dashboard/clients/intake.$clientId'
-import { Route as DashboardClientsHhsHubClientIdRouteImport } from './routes/dashboard/clients/hhs-hub.$clientId'
+import { Route as DashboardtrainingTrainingIndexRouteImport } from './routes/dashboard/(training)/training.index'
+import { Route as DashboardsmartImportSmartImportIndexRouteImport } from './routes/dashboard/(smart-import)/smart-import.index'
+import { Route as DashboardhiveTrainingHiveTrainingIndexRouteImport } from './routes/dashboard/(hive-training)/hive-training.index'
+import { Route as DashboardhiveExecHiveExecIndexRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.index'
+import { Route as DashboardformsFormsIndexRouteImport } from './routes/dashboard/(forms)/forms.index'
+import { Route as DashboardfinancialFinancialIndexRouteImport } from './routes/dashboard/(financial)/financial.index'
+import { Route as DashboardemployeesEmployeesIndexRouteImport } from './routes/dashboard/(employees)/employees.index'
+import { Route as DashboardcoursesCoursesIndexRouteImport } from './routes/dashboard/(courses)/courses.index'
+import { Route as DashboardclientsClientsIndexRouteImport } from './routes/dashboard/(clients)/clients.index'
+import { Route as DashboardbillingBillingIndexRouteImport } from './routes/dashboard/(billing)/billing.index'
+import { Route as DashboardtrainingTrainingMyClientTrainingsRouteImport } from './routes/dashboard/(training)/training.my-client-trainings'
+import { Route as DashboardtrainingTrainingCatalogRouteImport } from './routes/dashboard/(training)/training.catalog'
+import { Route as DashboardtrainingTrainingIdRouteImport } from './routes/dashboard/(training)/training.$id'
+import { Route as DashboardtracksTracksTrackSlugRouteImport } from './routes/dashboard/(tracks)/tracks.$trackSlug'
+import { Route as DashboardsmartImportSmartImportHistoryRouteImport } from './routes/dashboard/(smart-import)/smart-import.history'
+import { Route as DashboardsmartImportJobIdReviewRouteImport } from './routes/dashboard/(smart-import)/$jobId.review'
+import { Route as DashboardsmartImportJobIdDoneRouteImport } from './routes/dashboard/(smart-import)/$jobId.done'
+import { Route as DashboardsettingsSettingsTeamAccessRouteImport } from './routes/dashboard/(settings)/settings.team-access'
+import { Route as DashboardsettingsSettingsSubscriptionRouteImport } from './routes/dashboard/(settings)/settings.subscription'
+import { Route as DashboardsettingsSettingsServiceCodesRouteImport } from './routes/dashboard/(settings)/settings.service-codes'
+import { Route as DashboardsettingsSettingsServiceCatalogRouteImport } from './routes/dashboard/(settings)/settings.service-catalog'
+import { Route as DashboardsettingsSettingsRetentionRouteImport } from './routes/dashboard/(settings)/settings.retention'
+import { Route as DashboardsettingsSettingsPhiAccessAuditRouteImport } from './routes/dashboard/(settings)/settings.phi-access-audit'
+import { Route as DashboardsettingsSettingsLicensingRouteImport } from './routes/dashboard/(settings)/settings.licensing'
+import { Route as DashboardsettingsSettingsGmailRouteImport } from './routes/dashboard/(settings)/settings.gmail'
+import { Route as DashboardsettingsSettingsEmailRouteImport } from './routes/dashboard/(settings)/settings.email'
+import { Route as DashboardsettingsSettingsDraftRulesRouteImport } from './routes/dashboard/(settings)/settings.draft-rules'
+import { Route as DashboardsettingsSettingsComplianceSetupRouteImport } from './routes/dashboard/(settings)/settings.compliance-setup'
+import { Route as DashboardsettingsSettingsBankMappingRouteImport } from './routes/dashboard/(settings)/settings.bank-mapping'
+import { Route as DashboardsettingsSettingsAutomationRulesRouteImport } from './routes/dashboard/(settings)/settings.automation-rules'
+import { Route as DashboardschedulingShiftShiftIdRouteImport } from './routes/dashboard/(scheduling)/shift.$shiftId'
+import { Route as DashboardschedulingSchedulingTimeclockRouteImport } from './routes/dashboard/(scheduling)/scheduling.timeclock'
+import { Route as DashboardschedulingSchedulingSchedulerRouteImport } from './routes/dashboard/(scheduling)/scheduling.scheduler'
+import { Route as DashboardschedulingSchedulingSchedulePreviewRouteImport } from './routes/dashboard/(scheduling)/scheduling.schedule-preview'
+import { Route as DashboardschedulingSchedulingScheduleRouteImport } from './routes/dashboard/(scheduling)/scheduling.schedule'
+import { Route as DashboardschedulingSchedulingMyTimeCorrectionsRouteImport } from './routes/dashboard/(scheduling)/scheduling.my-time-corrections'
+import { Route as DashboardschedulingSchedulingEvvArchiveRouteImport } from './routes/dashboard/(scheduling)/scheduling.evv-archive'
+import { Route as DashboardschedulingSchedulingDayProgramRouteImport } from './routes/dashboard/(scheduling)/scheduling.day-program'
+import { Route as DashboardschedulingSchedulingDailyLogsRouteImport } from './routes/dashboard/(scheduling)/scheduling.daily-logs'
+import { Route as DashboardschedulingSchedulingAssignmentsRouteImport } from './routes/dashboard/(scheduling)/scheduling.assignments'
+import { Route as DashboardrecordsRecordsSummariesRouteImport } from './routes/dashboard/(records)/records.summaries'
+import { Route as DashboardrecordsRecordsReportsRouteImport } from './routes/dashboard/(records)/records.reports'
+import { Route as DashboardrecordsRecordsRecordsDeskRouteImport } from './routes/dashboard/(records)/records.records-desk'
+import { Route as DashboardrecordsRecordsMyHistoricalTimesheetsRouteImport } from './routes/dashboard/(records)/records.my-historical-timesheets'
+import { Route as DashboardrecordsRecordsMyHistoricalRecordsRouteImport } from './routes/dashboard/(records)/records.my-historical-records'
+import { Route as DashboardrecordsRecordsMyHistoricalDailyNotesRouteImport } from './routes/dashboard/(records)/records.my-historical-daily-notes'
+import { Route as DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRouteImport } from './routes/dashboard/(records)/records.historical-daily-notes-former-staff'
+import { Route as DashboardprogramsProgramsProgramIdRouteImport } from './routes/dashboard/(programs)/programs.$programId'
+import { Route as DashboardnectarNectarNectarDocsRouteImport } from './routes/dashboard/(nectar)/nectar.nectar-docs'
+import { Route as DashboardnectarNectarNectarCompanyProfileRouteImport } from './routes/dashboard/(nectar)/nectar.nectar-company-profile'
+import { Route as DashboardnectarNectarInboxRouteImport } from './routes/dashboard/(nectar)/nectar.inbox'
+import { Route as DashboardnectarNectarHelpRouteImport } from './routes/dashboard/(nectar)/nectar.help'
+import { Route as DashboardnectarNectarAskNectarRouteImport } from './routes/dashboard/(nectar)/nectar.ask-nectar'
+import { Route as DashboardmyObligations_CourseInstanceIdRouteImport } from './routes/dashboard/(my-obligations_)/course.$instanceId'
+import { Route as DashboardhubHubKnowledgeRouteImport } from './routes/dashboard/(hub)/hub.knowledge'
+import { Route as DashboardhubHubFinancesRouteImport } from './routes/dashboard/(hub)/hub.finances'
+import { Route as DashboardhubHubEmployeesRouteImport } from './routes/dashboard/(hub)/hub.employees'
+import { Route as DashboardhubHubDocumentationRouteImport } from './routes/dashboard/(hub)/hub.documentation'
+import { Route as DashboardhubHubClientsRouteImport } from './routes/dashboard/(hub)/hub.clients'
+import { Route as DashboardhrAdminHrAdminSettingsRouteImport } from './routes/dashboard/(hr-admin)/hr-admin.settings'
+import { Route as DashboardhomesHomesTeamsRouteImport } from './routes/dashboard/(homes)/homes.teams'
+import { Route as DashboardhomesHomesHostHomeControlRouteImport } from './routes/dashboard/(homes)/homes.host-home-control'
+import { Route as DashboardhomesHomesTeamIdRouteImport } from './routes/dashboard/(homes)/homes.$teamId'
+import { Route as DashboardhiveTrainingCourseAssignmentIdRouteImport } from './routes/dashboard/(hive-training)/course.$assignmentId'
+import { Route as DashboardhiveExecStatesStateCodeRouteImport } from './routes/dashboard/(hive-exec)/states.$stateCode'
+import { Route as DashboardhiveExecHiveExecUpgradeRequestsRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.upgrade-requests'
+import { Route as DashboardhiveExecHiveExecTrainingRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.training'
+import { Route as DashboardhiveExecHiveExecTicketsRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.tickets'
+import { Route as DashboardhiveExecHiveExecStatesRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.states'
+import { Route as DashboardhiveExecHiveExecPlansRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.plans'
+import { Route as DashboardhiveExecHiveExecPermissionsRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.permissions'
+import { Route as DashboardhiveExecHiveExecNewCompanyRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.new-company'
+import { Route as DashboardhiveExecHiveExecNectarRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.nectar'
+import { Route as DashboardhiveExecHiveExecMessagesRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.messages'
+import { Route as DashboardhiveExecHiveExecKnowledgeRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.knowledge'
+import { Route as DashboardhiveExecHiveExecHealthRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.health'
+import { Route as DashboardhiveExecHiveExecFunctionalityRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.functionality'
+import { Route as DashboardhiveExecHiveExecFeaturesRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.features'
+import { Route as DashboardhiveExecHiveExecCompanyMigrationRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.company-migration'
+import { Route as DashboardhiveExecHiveExecCommandRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.command'
+import { Route as DashboardhiveExecHiveExecClassesRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.classes'
+import { Route as DashboardhiveExecHiveExecBillingApprovalsRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.billing-approvals'
+import { Route as DashboardhiveExecHiveExecBaseTemplateRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.base-template'
+import { Route as DashboardhiveExecHiveExecApprovalsRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.approvals'
+import { Route as DashboardhiveExecHiveExecAgreementsRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.agreements'
+import { Route as DashboardhiveExecHiveExecOrgIdRouteImport } from './routes/dashboard/(hive-exec)/hive-exec.$orgId'
+import { Route as DashboardhiveExecAgreementsRequirementsRouteImport } from './routes/dashboard/(hive-exec)/agreements.requirements'
+import { Route as DashboardhiveExecAgreementsOrgIdRouteImport } from './routes/dashboard/(hive-exec)/agreements.$orgId'
+import { Route as DashboardformsFormIdSubmissionsRouteImport } from './routes/dashboard/(forms)/$formId.submissions'
+import { Route as DashboardformsFormIdFillRouteImport } from './routes/dashboard/(forms)/$formId.fill'
+import { Route as DashboardformsFormIdEditRouteImport } from './routes/dashboard/(forms)/$formId.edit'
+import { Route as DashboardfinancialFinancialTotalsRouteImport } from './routes/dashboard/(financial)/financial.totals'
+import { Route as DashboardfinancialFinancialRhsRouteImport } from './routes/dashboard/(financial)/financial.rhs'
+import { Route as DashboardfinancialFinancialRevenueRouteImport } from './routes/dashboard/(financial)/financial.revenue'
+import { Route as DashboardfinancialFinancialReimbursementsRouteImport } from './routes/dashboard/(financial)/financial.reimbursements'
+import { Route as DashboardfinancialFinancialPbaLedgerRouteImport } from './routes/dashboard/(financial)/financial.pba-ledger'
+import { Route as DashboardfinancialFinancialNectarRouteImport } from './routes/dashboard/(financial)/financial.nectar'
+import { Route as DashboardfinancialFinancialMonthlyGridRouteImport } from './routes/dashboard/(financial)/financial.monthly-grid'
+import { Route as DashboardfinancialFinancialHostHomeRouteImport } from './routes/dashboard/(financial)/financial.host-home'
+import { Route as DashboardfinancialFinancialGrossRouteImport } from './routes/dashboard/(financial)/financial.gross'
+import { Route as DashboardfinancialFinancialEmployeesRouteImport } from './routes/dashboard/(financial)/financial.employees'
+import { Route as DashboardfinancialFinancialDistributionsRouteImport } from './routes/dashboard/(financial)/financial.distributions'
+import { Route as DashboardfinancialFinancialContractorsRouteImport } from './routes/dashboard/(financial)/financial.contractors'
+import { Route as DashboardevidenceEvidenceMyEvidenceRouteImport } from './routes/dashboard/(evidence)/evidence.my-evidence'
+import { Route as DashboardemployeesEmployeesTeamRouteImport } from './routes/dashboard/(employees)/employees.team'
+import { Route as DashboardemployeesEmployeesPersonnelFileRouteImport } from './routes/dashboard/(employees)/employees.personnel-file'
+import { Route as DashboardemployeesEmployeesNewRouteImport } from './routes/dashboard/(employees)/employees.new'
+import { Route as DashboardemployeesEmployeesInvitationsRouteImport } from './routes/dashboard/(employees)/employees.invitations'
+import { Route as DashboardemployeesEmployeesHireDatesRouteImport } from './routes/dashboard/(employees)/employees.hire-dates'
+import { Route as DashboardemployeesEmployeesClientLoansRouteImport } from './routes/dashboard/(employees)/employees.client-loans'
+import { Route as DashboardemployeesEmployeesStaffIdRouteImport } from './routes/dashboard/(employees)/employees.$staffId'
+import { Route as DashboarddocumentsDocumentsEmarRouteImport } from './routes/dashboard/(documents)/documents.emar'
+import { Route as DashboarddocumentsDocumentsAgencyDocumentsRouteImport } from './routes/dashboard/(documents)/documents.agency-documents'
+import { Route as DashboardcoursesTopicTopicIdRouteImport } from './routes/dashboard/(courses)/topic.$topicId'
+import { Route as DashboardcoursesPolicyDocumentIdRouteImport } from './routes/dashboard/(courses)/policy.$documentId'
+import { Route as DashboardcoursesPersonModuleAssignmentIdRouteImport } from './routes/dashboard/(courses)/person-module.$assignmentId'
+import { Route as DashboardcoursesCoursesPersonRouteImport } from './routes/dashboard/(courses)/courses.person'
+import { Route as DashboardcoursesCoursesOtherRouteImport } from './routes/dashboard/(courses)/courses.other'
+import { Route as DashboardcoursesCoursesMindsmithRouteImport } from './routes/dashboard/(courses)/courses.mindsmith'
+import { Route as DashboardcoursesCoursesCoreRouteImport } from './routes/dashboard/(courses)/courses.core'
+import { Route as DashboardcoursesCoursesCourseIdRouteImport } from './routes/dashboard/(courses)/courses.$courseId'
+import { Route as DashboardcoursesCourseIdEditRouteImport } from './routes/dashboard/(courses)/$courseId.edit'
+import { Route as Dashboardcompliance_CertReviewCompletionIdRouteImport } from './routes/dashboard/(compliance_)/cert-review.$completionId'
+import { Route as DashboardcomplianceCompliancePoliciesRouteImport } from './routes/dashboard/(compliance)/compliance.policies'
+import { Route as DashboardcomplianceComplianceHrcRouteImport } from './routes/dashboard/(compliance)/compliance.hrc'
+import { Route as DashboardcomplianceComplianceExternalComplianceRouteImport } from './routes/dashboard/(compliance)/compliance.external-compliance'
+import { Route as DashboardcomplianceComplianceExternalCertificationsRouteImport } from './routes/dashboard/(compliance)/compliance.external-certifications'
+import { Route as DashboardcomplianceComplianceDeadlinesRouteImport } from './routes/dashboard/(compliance)/compliance.deadlines'
+import { Route as DashboardcomplianceComplianceComplianceDeskRouteImport } from './routes/dashboard/(compliance)/compliance.compliance-desk'
+import { Route as DashboardcomplianceComplianceCompanyObligationsRouteImport } from './routes/dashboard/(compliance)/compliance.company-obligations'
+import { Route as DashboardcomplianceComplianceCertificationsRouteImport } from './routes/dashboard/(compliance)/compliance.certifications'
+import { Route as DashboardcomplianceComplianceAuthoritativeSourcesRouteImport } from './routes/dashboard/(compliance)/compliance.authoritative-sources'
+import { Route as DashboardclientsWorkspaceClientIdRouteImport } from './routes/dashboard/(clients)/workspace.$clientId'
+import { Route as DashboardclientsTrainingClientIdRouteImport } from './routes/dashboard/(clients)/training.$clientId'
+import { Route as DashboardclientsIntakeClientIdRouteImport } from './routes/dashboard/(clients)/intake.$clientId'
+import { Route as DashboardclientsHhsHubClientIdRouteImport } from './routes/dashboard/(clients)/hhs-hub.$clientId'
+import { Route as DashboardclientsClientsRhsBoardRouteImport } from './routes/dashboard/(clients)/clients.rhs-board'
+import { Route as DashboardclientsClientsPendingRouteImport } from './routes/dashboard/(clients)/clients.pending'
+import { Route as DashboardclientsClientsNewRouteImport } from './routes/dashboard/(clients)/clients.new'
+import { Route as DashboardclientsClientsClientFileRouteImport } from './routes/dashboard/(clients)/clients.client-file'
+import { Route as DashboardclientsClientsClientBillingCodesRouteImport } from './routes/dashboard/(clients)/clients.client-billing-codes'
+import { Route as DashboardclientsClientsBehavioristRouteImport } from './routes/dashboard/(clients)/clients.behaviorist'
+import { Route as DashboardclientsClientsClientIdRouteImport } from './routes/dashboard/(clients)/clients.$clientId'
+import { Route as DashboardbillingBillingSubscriptionRouteImport } from './routes/dashboard/(billing)/billing.subscription'
+import { Route as DashboardbillingBillingNectarRouteImport } from './routes/dashboard/(billing)/billing.nectar'
+import { Route as DashboardbillingBillingImportsRouteImport } from './routes/dashboard/(billing)/billing.imports'
+import { Route as DashboardbillingBillingForm520RouteImport } from './routes/dashboard/(billing)/billing.form520'
+import { Route as DashboardbillingBillingClientIdRouteImport } from './routes/dashboard/(billing)/billing.$clientId'
+import { Route as DashboardbehaviorSupportBehaviorSupportClientIdRouteImport } from './routes/dashboard/(behavior-support)/behavior-support.$clientId'
+import { Route as DashboardauditAuditStateAuditRouteImport } from './routes/dashboard/(audit)/audit.state-audit'
+import { Route as DashboardauditAuditInternalAuditRouteImport } from './routes/dashboard/(audit)/audit.internal-audit'
+import { Route as DashboardadminAdminProgramsAdminRouteImport } from './routes/dashboard/(admin)/admin.programs-admin'
+import { Route as DashboardadminAdminEmarAuditRouteImport } from './routes/dashboard/(admin)/admin.emar-audit'
+import { Route as DashboardadminAdminCommandCenterRouteImport } from './routes/dashboard/(admin)/admin.command-center'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 import { Route as ApiPublicHooksSmartImportRemindersRouteImport } from './routes/api/public/hooks/smart-import-reminders'
 import { Route as ApiPublicHooksNectarSchedulesRouteImport } from './routes/api/public/hooks/nectar-schedules'
 import { Route as ApiPublicHooksNectarDraftTickRouteImport } from './routes/api/public/hooks/nectar-draft-tick'
 import { Route as ApiPublicHooksGmailIngestRouteImport } from './routes/api/public/hooks/gmail-ingest'
 import { Route as ApiPublicHooksBillingDailyCheckRouteImport } from './routes/api/public/hooks/billing-daily-check'
-import { Route as DashboardHiveExecStatesStateCodeOnboardingRouteImport } from './routes/dashboard/hive-exec/states.$stateCode.onboarding'
+import { Route as DashboardhiveExecStatesStateCodeOnboardingRouteImport } from './routes/dashboard/(hive-exec)/states.$stateCode.onboarding'
 import { Route as ApiPublicOauthGmailCallbackRouteImport } from './routes/api/public/oauth/gmail/callback'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
@@ -418,31 +418,6 @@ const DashboardTracksRoute = DashboardTracksRouteImport.update({
   path: '/tracks',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardTimeclockRoute = DashboardTimeclockRouteImport.update({
-  id: '/timeclock',
-  path: '/timeclock',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardTeamsRoute = DashboardTeamsRouteImport.update({
-  id: '/teams',
-  path: '/teams',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardTeamRoute = DashboardTeamRouteImport.update({
-  id: '/team',
-  path: '/team',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardSummariesRoute = DashboardSummariesRouteImport.update({
-  id: '/summaries',
-  path: '/summaries',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardStateAuditRoute = DashboardStateAuditRouteImport.update({
-  id: '/state-audit',
-  path: '/state-audit',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardSmartImportRoute = DashboardSmartImportRouteImport.update({
   id: '/smart-import',
   path: '/smart-import',
@@ -458,131 +433,14 @@ const DashboardSchedulingRoute = DashboardSchedulingRouteImport.update({
   path: '/scheduling',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardSchedulerRoute = DashboardSchedulerRouteImport.update({
-  id: '/scheduler',
-  path: '/scheduler',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardSchedulePreviewRoute =
-  DashboardSchedulePreviewRouteImport.update({
-    id: '/schedule-preview',
-    path: '/schedule-preview',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardScheduleRoute = DashboardScheduleRouteImport.update({
-  id: '/schedule',
-  path: '/schedule',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardReportsRoute = DashboardReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardReimbursementsRoute = DashboardReimbursementsRouteImport.update({
-  id: '/reimbursements',
-  path: '/reimbursements',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardRecordsDeskRoute = DashboardRecordsDeskRouteImport.update({
-  id: '/records-desk',
-  path: '/records-desk',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardProgramsAdminRoute = DashboardProgramsAdminRouteImport.update({
-  id: '/programs-admin',
-  path: '/programs-admin',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardProgramsRoute = DashboardProgramsRouteImport.update({
   id: '/programs',
   path: '/programs',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardPoliciesRoute = DashboardPoliciesRouteImport.update({
-  id: '/policies',
-  path: '/policies',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardPersonnelFileRoute = DashboardPersonnelFileRouteImport.update({
-  id: '/personnel-file',
-  path: '/personnel-file',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardPbaLedgerRoute = DashboardPbaLedgerRouteImport.update({
-  id: '/pba-ledger',
-  path: '/pba-ledger',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardNectarDocsRoute = DashboardNectarDocsRouteImport.update({
-  id: '/nectar-docs',
-  path: '/nectar-docs',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardNectarCompanyProfileRoute =
-  DashboardNectarCompanyProfileRouteImport.update({
-    id: '/nectar-company-profile',
-    path: '/nectar-company-profile',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardMyTimeCorrectionsRoute =
-  DashboardMyTimeCorrectionsRouteImport.update({
-    id: '/my-time-corrections',
-    path: '/my-time-corrections',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardMyObligationsRoute = DashboardMyObligationsRouteImport.update({
   id: '/my-obligations',
   path: '/my-obligations',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardMyHistoricalTimesheetsRoute =
-  DashboardMyHistoricalTimesheetsRouteImport.update({
-    id: '/my-historical-timesheets',
-    path: '/my-historical-timesheets',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardMyHistoricalRecordsRoute =
-  DashboardMyHistoricalRecordsRouteImport.update({
-    id: '/my-historical-records',
-    path: '/my-historical-records',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardMyHistoricalDailyNotesRoute =
-  DashboardMyHistoricalDailyNotesRouteImport.update({
-    id: '/my-historical-daily-notes',
-    path: '/my-historical-daily-notes',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardMyEvidenceRoute = DashboardMyEvidenceRouteImport.update({
-  id: '/my-evidence',
-  path: '/my-evidence',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardMyClientTrainingsRoute =
-  DashboardMyClientTrainingsRouteImport.update({
-    id: '/my-client-trainings',
-    path: '/my-client-trainings',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardInvitationsRoute = DashboardInvitationsRouteImport.update({
-  id: '/invitations',
-  path: '/invitations',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardInternalAuditRoute = DashboardInternalAuditRouteImport.update({
-  id: '/internal-audit',
-  path: '/internal-audit',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardInboxRoute = DashboardInboxRouteImport.update({
-  id: '/inbox',
-  path: '/inbox',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardHrcRoute = DashboardHrcRouteImport.update({
-  id: '/hrc',
-  path: '/hrc',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardHrAdminRoute = DashboardHrAdminRouteImport.update({
@@ -590,12 +448,6 @@ const DashboardHrAdminRoute = DashboardHrAdminRouteImport.update({
   path: '/hr-admin',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardHostHomeControlRoute =
-  DashboardHostHomeControlRouteImport.update({
-    id: '/host-home-control',
-    path: '/host-home-control',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardHomesRoute = DashboardHomesRouteImport.update({
   id: '/homes',
   path: '/homes',
@@ -604,17 +456,6 @@ const DashboardHomesRoute = DashboardHomesRouteImport.update({
 const DashboardHiveExecRoute = DashboardHiveExecRouteImport.update({
   id: '/hive-exec',
   path: '/hive-exec',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardHistoricalDailyNotesFormerStaffRoute =
-  DashboardHistoricalDailyNotesFormerStaffRouteImport.update({
-    id: '/historical-daily-notes-former-staff',
-    path: '/historical-daily-notes-former-staff',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardHelpRoute = DashboardHelpRouteImport.update({
-  id: '/help',
-  path: '/help',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardFormsRoute = DashboardFormsRouteImport.update({
@@ -627,51 +468,9 @@ const DashboardFinancialRoute = DashboardFinancialRouteImport.update({
   path: '/financial',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardExternalComplianceRoute =
-  DashboardExternalComplianceRouteImport.update({
-    id: '/external-compliance',
-    path: '/external-compliance',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardExternalCertificationsRoute =
-  DashboardExternalCertificationsRouteImport.update({
-    id: '/external-certifications',
-    path: '/external-certifications',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardEvvArchiveRoute = DashboardEvvArchiveRouteImport.update({
-  id: '/evv-archive',
-  path: '/evv-archive',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardEvidenceRoute = DashboardEvidenceRouteImport.update({
   id: '/evidence',
   path: '/evidence',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardEmarRoute = DashboardEmarRouteImport.update({
-  id: '/emar',
-  path: '/emar',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardDeadlinesRoute = DashboardDeadlinesRouteImport.update({
-  id: '/deadlines',
-  path: '/deadlines',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardDayProgramRoute = DashboardDayProgramRouteImport.update({
-  id: '/day-program',
-  path: '/day-program',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardDailyLogsRoute = DashboardDailyLogsRouteImport.update({
-  id: '/daily-logs',
-  path: '/daily-logs',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardComplianceDeskRoute = DashboardComplianceDeskRouteImport.update({
-  id: '/compliance-desk',
-  path: '/compliance-desk',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardComplianceRoute = DashboardComplianceRouteImport.update({
@@ -679,25 +478,9 @@ const DashboardComplianceRoute = DashboardComplianceRouteImport.update({
   path: '/compliance',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardCompanyObligationsRoute =
-  DashboardCompanyObligationsRouteImport.update({
-    id: '/company-obligations',
-    path: '/company-obligations',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardCommandCenterRoute = DashboardCommandCenterRouteImport.update({
-  id: '/command-center',
-  path: '/command-center',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardClientsRoute = DashboardClientsRouteImport.update({
   id: '/clients',
   path: '/clients',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardCertificationsRoute = DashboardCertificationsRouteImport.update({
-  id: '/certifications',
-  path: '/certifications',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardBillingRoute = DashboardBillingRouteImport.update({
@@ -705,38 +488,11 @@ const DashboardBillingRoute = DashboardBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardBehavioristRoute = DashboardBehavioristRouteImport.update({
-  id: '/behaviorist',
-  path: '/behaviorist',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardAuthoritativeSourcesRoute =
-  DashboardAuthoritativeSourcesRouteImport.update({
-    id: '/authoritative-sources',
-    path: '/authoritative-sources',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardAuditRoute = DashboardAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardAssignmentsRoute = DashboardAssignmentsRouteImport.update({
-  id: '/assignments',
-  path: '/assignments',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardAskNectarRoute = DashboardAskNectarRouteImport.update({
-  id: '/ask-nectar',
-  path: '/ask-nectar',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardAgencyDocumentsRoute =
-  DashboardAgencyDocumentsRouteImport.update({
-    id: '/agency-documents',
-    path: '/agency-documents',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const ClientsNewRoute = ClientsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -757,508 +513,10 @@ const AuditPortalPackageIdRoute = AuditPortalPackageIdRouteImport.update({
   path: '/audit-portal/$packageId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardTrainingIndexRoute = DashboardTrainingIndexRouteImport.update({
-  id: '/training/',
-  path: '/training/',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardSmartImportIndexRoute =
-  DashboardSmartImportIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => DashboardSmartImportRoute,
-  } as any)
-const DashboardHiveTrainingIndexRoute =
-  DashboardHiveTrainingIndexRouteImport.update({
-    id: '/hive-training/',
-    path: '/hive-training/',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardHiveExecIndexRoute = DashboardHiveExecIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardHiveExecRoute,
-} as any)
-const DashboardFormsIndexRoute = DashboardFormsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardFormsRoute,
-} as any)
-const DashboardFinancialIndexRoute = DashboardFinancialIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardFinancialRoute,
-} as any)
-const DashboardEmployeesIndexRoute = DashboardEmployeesIndexRouteImport.update({
-  id: '/employees/',
-  path: '/employees/',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardCoursesIndexRoute = DashboardCoursesIndexRouteImport.update({
-  id: '/courses/',
-  path: '/courses/',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardClientsIndexRoute = DashboardClientsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardClientsRoute,
-} as any)
-const DashboardBillingIndexRoute = DashboardBillingIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardBillingRoute,
-} as any)
 const E2eHhsHubClientIdRoute = E2eHhsHubClientIdRouteImport.update({
   id: '/e2e/hhs-hub/$clientId',
   path: '/e2e/hhs-hub/$clientId',
   getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardTrainingCatalogRoute =
-  DashboardTrainingCatalogRouteImport.update({
-    id: '/training/catalog',
-    path: '/training/catalog',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardTrainingIdRoute = DashboardTrainingIdRouteImport.update({
-  id: '/training/$id',
-  path: '/training/$id',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardTracksTrackSlugRoute =
-  DashboardTracksTrackSlugRouteImport.update({
-    id: '/$trackSlug',
-    path: '/$trackSlug',
-    getParentRoute: () => DashboardTracksRoute,
-  } as any)
-const DashboardSmartImportHistoryRoute =
-  DashboardSmartImportHistoryRouteImport.update({
-    id: '/history',
-    path: '/history',
-    getParentRoute: () => DashboardSmartImportRoute,
-  } as any)
-const DashboardShiftShiftIdRoute = DashboardShiftShiftIdRouteImport.update({
-  id: '/shift/$shiftId',
-  path: '/shift/$shiftId',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardSettingsTeamAccessRoute =
-  DashboardSettingsTeamAccessRouteImport.update({
-    id: '/team-access',
-    path: '/team-access',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsSubscriptionRoute =
-  DashboardSettingsSubscriptionRouteImport.update({
-    id: '/subscription',
-    path: '/subscription',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsServiceCodesRoute =
-  DashboardSettingsServiceCodesRouteImport.update({
-    id: '/service-codes',
-    path: '/service-codes',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsServiceCatalogRoute =
-  DashboardSettingsServiceCatalogRouteImport.update({
-    id: '/service-catalog',
-    path: '/service-catalog',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsRetentionRoute =
-  DashboardSettingsRetentionRouteImport.update({
-    id: '/retention',
-    path: '/retention',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsPhiAccessAuditRoute =
-  DashboardSettingsPhiAccessAuditRouteImport.update({
-    id: '/phi-access-audit',
-    path: '/phi-access-audit',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsLicensingRoute =
-  DashboardSettingsLicensingRouteImport.update({
-    id: '/licensing',
-    path: '/licensing',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsGmailRoute = DashboardSettingsGmailRouteImport.update({
-  id: '/gmail',
-  path: '/gmail',
-  getParentRoute: () => DashboardSettingsRoute,
-} as any)
-const DashboardSettingsEmailRoute = DashboardSettingsEmailRouteImport.update({
-  id: '/email',
-  path: '/email',
-  getParentRoute: () => DashboardSettingsRoute,
-} as any)
-const DashboardSettingsDraftRulesRoute =
-  DashboardSettingsDraftRulesRouteImport.update({
-    id: '/draft-rules',
-    path: '/draft-rules',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsComplianceSetupRoute =
-  DashboardSettingsComplianceSetupRouteImport.update({
-    id: '/compliance-setup',
-    path: '/compliance-setup',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsBankMappingRoute =
-  DashboardSettingsBankMappingRouteImport.update({
-    id: '/bank-mapping',
-    path: '/bank-mapping',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsAutomationRulesRoute =
-  DashboardSettingsAutomationRulesRouteImport.update({
-    id: '/automation-rules',
-    path: '/automation-rules',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardProgramsProgramIdRoute =
-  DashboardProgramsProgramIdRouteImport.update({
-    id: '/$programId',
-    path: '/$programId',
-    getParentRoute: () => DashboardProgramsRoute,
-  } as any)
-const DashboardHubKnowledgeRoute = DashboardHubKnowledgeRouteImport.update({
-  id: '/hub/knowledge',
-  path: '/hub/knowledge',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardHubFinancesRoute = DashboardHubFinancesRouteImport.update({
-  id: '/hub/finances',
-  path: '/hub/finances',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardHubEmployeesRoute = DashboardHubEmployeesRouteImport.update({
-  id: '/hub/employees',
-  path: '/hub/employees',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardHubDocumentationRoute =
-  DashboardHubDocumentationRouteImport.update({
-    id: '/hub/documentation',
-    path: '/hub/documentation',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardHubClientsRoute = DashboardHubClientsRouteImport.update({
-  id: '/hub/clients',
-  path: '/hub/clients',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardHrAdminSettingsRoute =
-  DashboardHrAdminSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => DashboardHrAdminRoute,
-  } as any)
-const DashboardHomesTeamIdRoute = DashboardHomesTeamIdRouteImport.update({
-  id: '/$teamId',
-  path: '/$teamId',
-  getParentRoute: () => DashboardHomesRoute,
-} as any)
-const DashboardHiveExecUpgradeRequestsRoute =
-  DashboardHiveExecUpgradeRequestsRouteImport.update({
-    id: '/upgrade-requests',
-    path: '/upgrade-requests',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecTrainingRoute =
-  DashboardHiveExecTrainingRouteImport.update({
-    id: '/training',
-    path: '/training',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecTicketsRoute =
-  DashboardHiveExecTicketsRouteImport.update({
-    id: '/tickets',
-    path: '/tickets',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecStatesRoute = DashboardHiveExecStatesRouteImport.update({
-  id: '/states',
-  path: '/states',
-  getParentRoute: () => DashboardHiveExecRoute,
-} as any)
-const DashboardHiveExecPlansRoute = DashboardHiveExecPlansRouteImport.update({
-  id: '/plans',
-  path: '/plans',
-  getParentRoute: () => DashboardHiveExecRoute,
-} as any)
-const DashboardHiveExecPermissionsRoute =
-  DashboardHiveExecPermissionsRouteImport.update({
-    id: '/permissions',
-    path: '/permissions',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecNewCompanyRoute =
-  DashboardHiveExecNewCompanyRouteImport.update({
-    id: '/new-company',
-    path: '/new-company',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecNectarRoute = DashboardHiveExecNectarRouteImport.update({
-  id: '/nectar',
-  path: '/nectar',
-  getParentRoute: () => DashboardHiveExecRoute,
-} as any)
-const DashboardHiveExecMessagesRoute =
-  DashboardHiveExecMessagesRouteImport.update({
-    id: '/messages',
-    path: '/messages',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecKnowledgeRoute =
-  DashboardHiveExecKnowledgeRouteImport.update({
-    id: '/knowledge',
-    path: '/knowledge',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecHealthRoute = DashboardHiveExecHealthRouteImport.update({
-  id: '/health',
-  path: '/health',
-  getParentRoute: () => DashboardHiveExecRoute,
-} as any)
-const DashboardHiveExecFunctionalityRoute =
-  DashboardHiveExecFunctionalityRouteImport.update({
-    id: '/functionality',
-    path: '/functionality',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecFeaturesRoute =
-  DashboardHiveExecFeaturesRouteImport.update({
-    id: '/features',
-    path: '/features',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecCompanyMigrationRoute =
-  DashboardHiveExecCompanyMigrationRouteImport.update({
-    id: '/company-migration',
-    path: '/company-migration',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecCommandRoute =
-  DashboardHiveExecCommandRouteImport.update({
-    id: '/command',
-    path: '/command',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecClassesRoute =
-  DashboardHiveExecClassesRouteImport.update({
-    id: '/classes',
-    path: '/classes',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecBillingApprovalsRoute =
-  DashboardHiveExecBillingApprovalsRouteImport.update({
-    id: '/billing-approvals',
-    path: '/billing-approvals',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecBaseTemplateRoute =
-  DashboardHiveExecBaseTemplateRouteImport.update({
-    id: '/base-template',
-    path: '/base-template',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecApprovalsRoute =
-  DashboardHiveExecApprovalsRouteImport.update({
-    id: '/approvals',
-    path: '/approvals',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecAgreementsRoute =
-  DashboardHiveExecAgreementsRouteImport.update({
-    id: '/agreements',
-    path: '/agreements',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecOrgIdRoute = DashboardHiveExecOrgIdRouteImport.update({
-  id: '/$orgId',
-  path: '/$orgId',
-  getParentRoute: () => DashboardHiveExecRoute,
-} as any)
-const DashboardFinancialTotalsRoute =
-  DashboardFinancialTotalsRouteImport.update({
-    id: '/totals',
-    path: '/totals',
-    getParentRoute: () => DashboardFinancialRoute,
-  } as any)
-const DashboardFinancialRhsRoute = DashboardFinancialRhsRouteImport.update({
-  id: '/rhs',
-  path: '/rhs',
-  getParentRoute: () => DashboardFinancialRoute,
-} as any)
-const DashboardFinancialRevenueRoute =
-  DashboardFinancialRevenueRouteImport.update({
-    id: '/revenue',
-    path: '/revenue',
-    getParentRoute: () => DashboardFinancialRoute,
-  } as any)
-const DashboardFinancialNectarRoute =
-  DashboardFinancialNectarRouteImport.update({
-    id: '/nectar',
-    path: '/nectar',
-    getParentRoute: () => DashboardFinancialRoute,
-  } as any)
-const DashboardFinancialMonthlyGridRoute =
-  DashboardFinancialMonthlyGridRouteImport.update({
-    id: '/monthly-grid',
-    path: '/monthly-grid',
-    getParentRoute: () => DashboardFinancialRoute,
-  } as any)
-const DashboardFinancialHostHomeRoute =
-  DashboardFinancialHostHomeRouteImport.update({
-    id: '/host-home',
-    path: '/host-home',
-    getParentRoute: () => DashboardFinancialRoute,
-  } as any)
-const DashboardFinancialGrossRoute = DashboardFinancialGrossRouteImport.update({
-  id: '/gross',
-  path: '/gross',
-  getParentRoute: () => DashboardFinancialRoute,
-} as any)
-const DashboardFinancialEmployeesRoute =
-  DashboardFinancialEmployeesRouteImport.update({
-    id: '/employees',
-    path: '/employees',
-    getParentRoute: () => DashboardFinancialRoute,
-  } as any)
-const DashboardFinancialDistributionsRoute =
-  DashboardFinancialDistributionsRouteImport.update({
-    id: '/distributions',
-    path: '/distributions',
-    getParentRoute: () => DashboardFinancialRoute,
-  } as any)
-const DashboardFinancialContractorsRoute =
-  DashboardFinancialContractorsRouteImport.update({
-    id: '/contractors',
-    path: '/contractors',
-    getParentRoute: () => DashboardFinancialRoute,
-  } as any)
-const DashboardEmployeesNewRoute = DashboardEmployeesNewRouteImport.update({
-  id: '/employees/new',
-  path: '/employees/new',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardEmployeesLoansRoute = DashboardEmployeesLoansRouteImport.update({
-  id: '/employees/loans',
-  path: '/employees/loans',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardEmployeesHireDatesRoute =
-  DashboardEmployeesHireDatesRouteImport.update({
-    id: '/employees/hire-dates',
-    path: '/employees/hire-dates',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardEmployeesStaffIdRoute =
-  DashboardEmployeesStaffIdRouteImport.update({
-    id: '/employees/$staffId',
-    path: '/employees/$staffId',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardCoursesPersonRoute = DashboardCoursesPersonRouteImport.update({
-  id: '/courses/person',
-  path: '/courses/person',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardCoursesOtherRoute = DashboardCoursesOtherRouteImport.update({
-  id: '/courses/other',
-  path: '/courses/other',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardCoursesMindsmithRoute =
-  DashboardCoursesMindsmithRouteImport.update({
-    id: '/courses/mindsmith',
-    path: '/courses/mindsmith',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardCoursesCoreRoute = DashboardCoursesCoreRouteImport.update({
-  id: '/courses/core',
-  path: '/courses/core',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardCoursesCourseIdRoute =
-  DashboardCoursesCourseIdRouteImport.update({
-    id: '/courses/$courseId',
-    path: '/courses/$courseId',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardClientsRhsBoardRoute =
-  DashboardClientsRhsBoardRouteImport.update({
-    id: '/rhs-board',
-    path: '/rhs-board',
-    getParentRoute: () => DashboardClientsRoute,
-  } as any)
-const DashboardClientsPendingRoute = DashboardClientsPendingRouteImport.update({
-  id: '/pending',
-  path: '/pending',
-  getParentRoute: () => DashboardClientsRoute,
-} as any)
-const DashboardClientsNewRoute = DashboardClientsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => DashboardClientsRoute,
-} as any)
-const DashboardClientsFileRoute = DashboardClientsFileRouteImport.update({
-  id: '/file',
-  path: '/file',
-  getParentRoute: () => DashboardClientsRoute,
-} as any)
-const DashboardClientsBillingCodesRoute =
-  DashboardClientsBillingCodesRouteImport.update({
-    id: '/billing-codes',
-    path: '/billing-codes',
-    getParentRoute: () => DashboardClientsRoute,
-  } as any)
-const DashboardClientsClientIdRoute =
-  DashboardClientsClientIdRouteImport.update({
-    id: '/$clientId',
-    path: '/$clientId',
-    getParentRoute: () => DashboardClientsRoute,
-  } as any)
-const DashboardBillingSubscriptionRoute =
-  DashboardBillingSubscriptionRouteImport.update({
-    id: '/subscription',
-    path: '/subscription',
-    getParentRoute: () => DashboardBillingRoute,
-  } as any)
-const DashboardBillingNectarRoute = DashboardBillingNectarRouteImport.update({
-  id: '/nectar',
-  path: '/nectar',
-  getParentRoute: () => DashboardBillingRoute,
-} as any)
-const DashboardBillingImportsRoute = DashboardBillingImportsRouteImport.update({
-  id: '/imports',
-  path: '/imports',
-  getParentRoute: () => DashboardBillingRoute,
-} as any)
-const DashboardBillingForm520Route = DashboardBillingForm520RouteImport.update({
-  id: '/form520',
-  path: '/form520',
-  getParentRoute: () => DashboardBillingRoute,
-} as any)
-const DashboardBillingClientIdRoute =
-  DashboardBillingClientIdRouteImport.update({
-    id: '/$clientId',
-    path: '/$clientId',
-    getParentRoute: () => DashboardBillingRoute,
-  } as any)
-const DashboardBehaviorSupportClientIdRoute =
-  DashboardBehaviorSupportClientIdRouteImport.update({
-    id: '/behavior-support/$clientId',
-    path: '/behavior-support/$clientId',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardAdminEmarAuditRoute = DashboardAdminEmarAuditRouteImport.update({
-  id: '/admin/emar-audit',
-  path: '/admin/emar-audit',
-  getParentRoute: () => DashboardRoute,
 } as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   id: '/api/stripe/webhook',
@@ -1280,119 +538,927 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardSmartImportJobIdReviewRoute =
-  DashboardSmartImportJobIdReviewRouteImport.update({
-    id: '/$jobId/review',
+const DashboardtrainingTrainingIndexRoute =
+  DashboardtrainingTrainingIndexRouteImport.update({
+    id: '/(training)/training/',
+    path: '/training/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsmartImportSmartImportIndexRoute =
+  DashboardsmartImportSmartImportIndexRouteImport.update({
+    id: '/(smart-import)/smart-import/',
+    path: '/smart-import/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveTrainingHiveTrainingIndexRoute =
+  DashboardhiveTrainingHiveTrainingIndexRouteImport.update({
+    id: '/(hive-training)/hive-training/',
+    path: '/hive-training/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecIndexRoute =
+  DashboardhiveExecHiveExecIndexRouteImport.update({
+    id: '/(hive-exec)/hive-exec/',
+    path: '/hive-exec/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardformsFormsIndexRoute =
+  DashboardformsFormsIndexRouteImport.update({
+    id: '/(forms)/forms/',
+    path: '/forms/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardfinancialFinancialIndexRoute =
+  DashboardfinancialFinancialIndexRouteImport.update({
+    id: '/(financial)/financial/',
+    path: '/financial/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardemployeesEmployeesIndexRoute =
+  DashboardemployeesEmployeesIndexRouteImport.update({
+    id: '/(employees)/employees/',
+    path: '/employees/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcoursesCoursesIndexRoute =
+  DashboardcoursesCoursesIndexRouteImport.update({
+    id: '/(courses)/courses/',
+    path: '/courses/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardclientsClientsIndexRoute =
+  DashboardclientsClientsIndexRouteImport.update({
+    id: '/(clients)/clients/',
+    path: '/clients/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardbillingBillingIndexRoute =
+  DashboardbillingBillingIndexRouteImport.update({
+    id: '/(billing)/billing/',
+    path: '/billing/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardtrainingTrainingMyClientTrainingsRoute =
+  DashboardtrainingTrainingMyClientTrainingsRouteImport.update({
+    id: '/(training)/training/my-client-trainings',
+    path: '/training/my-client-trainings',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardtrainingTrainingCatalogRoute =
+  DashboardtrainingTrainingCatalogRouteImport.update({
+    id: '/(training)/training/catalog',
+    path: '/training/catalog',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardtrainingTrainingIdRoute =
+  DashboardtrainingTrainingIdRouteImport.update({
+    id: '/(training)/training/$id',
+    path: '/training/$id',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardtracksTracksTrackSlugRoute =
+  DashboardtracksTracksTrackSlugRouteImport.update({
+    id: '/(tracks)/tracks/$trackSlug',
+    path: '/tracks/$trackSlug',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsmartImportSmartImportHistoryRoute =
+  DashboardsmartImportSmartImportHistoryRouteImport.update({
+    id: '/(smart-import)/smart-import/history',
+    path: '/smart-import/history',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsmartImportJobIdReviewRoute =
+  DashboardsmartImportJobIdReviewRouteImport.update({
+    id: '/(smart-import)/$jobId/review',
     path: '/$jobId/review',
-    getParentRoute: () => DashboardSmartImportRoute,
+    getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardSmartImportJobIdDoneRoute =
-  DashboardSmartImportJobIdDoneRouteImport.update({
-    id: '/$jobId/done',
+const DashboardsmartImportJobIdDoneRoute =
+  DashboardsmartImportJobIdDoneRouteImport.update({
+    id: '/(smart-import)/$jobId/done',
     path: '/$jobId/done',
-    getParentRoute: () => DashboardSmartImportRoute,
-  } as any)
-const DashboardMyObligationsCourseInstanceIdRoute =
-  DashboardMyObligationsCourseInstanceIdRouteImport.update({
-    id: '/my-obligations_/course/$instanceId',
-    path: '/my-obligations/course/$instanceId',
     getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardHiveTrainingCourseAssignmentIdRoute =
-  DashboardHiveTrainingCourseAssignmentIdRouteImport.update({
-    id: '/hive-training/course/$assignmentId',
-    path: '/hive-training/course/$assignmentId',
+const DashboardsettingsSettingsTeamAccessRoute =
+  DashboardsettingsSettingsTeamAccessRouteImport.update({
+    id: '/(settings)/settings/team-access',
+    path: '/settings/team-access',
     getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardHiveExecStatesStateCodeRoute =
-  DashboardHiveExecStatesStateCodeRouteImport.update({
-    id: '/$stateCode',
-    path: '/$stateCode',
-    getParentRoute: () => DashboardHiveExecStatesRoute,
+const DashboardsettingsSettingsSubscriptionRoute =
+  DashboardsettingsSettingsSubscriptionRouteImport.update({
+    id: '/(settings)/settings/subscription',
+    path: '/settings/subscription',
+    getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardHiveExecAgreementsRequirementsRoute =
-  DashboardHiveExecAgreementsRequirementsRouteImport.update({
-    id: '/requirements',
-    path: '/requirements',
-    getParentRoute: () => DashboardHiveExecAgreementsRoute,
+const DashboardsettingsSettingsServiceCodesRoute =
+  DashboardsettingsSettingsServiceCodesRouteImport.update({
+    id: '/(settings)/settings/service-codes',
+    path: '/settings/service-codes',
+    getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardHiveExecAgreementsOrgIdRoute =
-  DashboardHiveExecAgreementsOrgIdRouteImport.update({
-    id: '/$orgId',
-    path: '/$orgId',
-    getParentRoute: () => DashboardHiveExecAgreementsRoute,
+const DashboardsettingsSettingsServiceCatalogRoute =
+  DashboardsettingsSettingsServiceCatalogRouteImport.update({
+    id: '/(settings)/settings/service-catalog',
+    path: '/settings/service-catalog',
+    getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardFormsFormIdSubmissionsRoute =
-  DashboardFormsFormIdSubmissionsRouteImport.update({
-    id: '/$formId/submissions',
+const DashboardsettingsSettingsRetentionRoute =
+  DashboardsettingsSettingsRetentionRouteImport.update({
+    id: '/(settings)/settings/retention',
+    path: '/settings/retention',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsettingsSettingsPhiAccessAuditRoute =
+  DashboardsettingsSettingsPhiAccessAuditRouteImport.update({
+    id: '/(settings)/settings/phi-access-audit',
+    path: '/settings/phi-access-audit',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsettingsSettingsLicensingRoute =
+  DashboardsettingsSettingsLicensingRouteImport.update({
+    id: '/(settings)/settings/licensing',
+    path: '/settings/licensing',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsettingsSettingsGmailRoute =
+  DashboardsettingsSettingsGmailRouteImport.update({
+    id: '/(settings)/settings/gmail',
+    path: '/settings/gmail',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsettingsSettingsEmailRoute =
+  DashboardsettingsSettingsEmailRouteImport.update({
+    id: '/(settings)/settings/email',
+    path: '/settings/email',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsettingsSettingsDraftRulesRoute =
+  DashboardsettingsSettingsDraftRulesRouteImport.update({
+    id: '/(settings)/settings/draft-rules',
+    path: '/settings/draft-rules',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsettingsSettingsComplianceSetupRoute =
+  DashboardsettingsSettingsComplianceSetupRouteImport.update({
+    id: '/(settings)/settings/compliance-setup',
+    path: '/settings/compliance-setup',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsettingsSettingsBankMappingRoute =
+  DashboardsettingsSettingsBankMappingRouteImport.update({
+    id: '/(settings)/settings/bank-mapping',
+    path: '/settings/bank-mapping',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardsettingsSettingsAutomationRulesRoute =
+  DashboardsettingsSettingsAutomationRulesRouteImport.update({
+    id: '/(settings)/settings/automation-rules',
+    path: '/settings/automation-rules',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardschedulingShiftShiftIdRoute =
+  DashboardschedulingShiftShiftIdRouteImport.update({
+    id: '/(scheduling)/shift/$shiftId',
+    path: '/shift/$shiftId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardschedulingSchedulingTimeclockRoute =
+  DashboardschedulingSchedulingTimeclockRouteImport.update({
+    id: '/(scheduling)/scheduling/timeclock',
+    path: '/scheduling/timeclock',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardschedulingSchedulingSchedulerRoute =
+  DashboardschedulingSchedulingSchedulerRouteImport.update({
+    id: '/(scheduling)/scheduling/scheduler',
+    path: '/scheduling/scheduler',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardschedulingSchedulingSchedulePreviewRoute =
+  DashboardschedulingSchedulingSchedulePreviewRouteImport.update({
+    id: '/(scheduling)/scheduling/schedule-preview',
+    path: '/scheduling/schedule-preview',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardschedulingSchedulingScheduleRoute =
+  DashboardschedulingSchedulingScheduleRouteImport.update({
+    id: '/(scheduling)/scheduling/schedule',
+    path: '/scheduling/schedule',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardschedulingSchedulingMyTimeCorrectionsRoute =
+  DashboardschedulingSchedulingMyTimeCorrectionsRouteImport.update({
+    id: '/(scheduling)/scheduling/my-time-corrections',
+    path: '/scheduling/my-time-corrections',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardschedulingSchedulingEvvArchiveRoute =
+  DashboardschedulingSchedulingEvvArchiveRouteImport.update({
+    id: '/(scheduling)/scheduling/evv-archive',
+    path: '/scheduling/evv-archive',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardschedulingSchedulingDayProgramRoute =
+  DashboardschedulingSchedulingDayProgramRouteImport.update({
+    id: '/(scheduling)/scheduling/day-program',
+    path: '/scheduling/day-program',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardschedulingSchedulingDailyLogsRoute =
+  DashboardschedulingSchedulingDailyLogsRouteImport.update({
+    id: '/(scheduling)/scheduling/daily-logs',
+    path: '/scheduling/daily-logs',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardschedulingSchedulingAssignmentsRoute =
+  DashboardschedulingSchedulingAssignmentsRouteImport.update({
+    id: '/(scheduling)/scheduling/assignments',
+    path: '/scheduling/assignments',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardrecordsRecordsSummariesRoute =
+  DashboardrecordsRecordsSummariesRouteImport.update({
+    id: '/(records)/records/summaries',
+    path: '/records/summaries',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardrecordsRecordsReportsRoute =
+  DashboardrecordsRecordsReportsRouteImport.update({
+    id: '/(records)/records/reports',
+    path: '/records/reports',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardrecordsRecordsRecordsDeskRoute =
+  DashboardrecordsRecordsRecordsDeskRouteImport.update({
+    id: '/(records)/records/records-desk',
+    path: '/records/records-desk',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardrecordsRecordsMyHistoricalTimesheetsRoute =
+  DashboardrecordsRecordsMyHistoricalTimesheetsRouteImport.update({
+    id: '/(records)/records/my-historical-timesheets',
+    path: '/records/my-historical-timesheets',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardrecordsRecordsMyHistoricalRecordsRoute =
+  DashboardrecordsRecordsMyHistoricalRecordsRouteImport.update({
+    id: '/(records)/records/my-historical-records',
+    path: '/records/my-historical-records',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardrecordsRecordsMyHistoricalDailyNotesRoute =
+  DashboardrecordsRecordsMyHistoricalDailyNotesRouteImport.update({
+    id: '/(records)/records/my-historical-daily-notes',
+    path: '/records/my-historical-daily-notes',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRoute =
+  DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRouteImport.update({
+    id: '/(records)/records/historical-daily-notes-former-staff',
+    path: '/records/historical-daily-notes-former-staff',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardprogramsProgramsProgramIdRoute =
+  DashboardprogramsProgramsProgramIdRouteImport.update({
+    id: '/(programs)/programs/$programId',
+    path: '/programs/$programId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardnectarNectarNectarDocsRoute =
+  DashboardnectarNectarNectarDocsRouteImport.update({
+    id: '/(nectar)/nectar/nectar-docs',
+    path: '/nectar/nectar-docs',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardnectarNectarNectarCompanyProfileRoute =
+  DashboardnectarNectarNectarCompanyProfileRouteImport.update({
+    id: '/(nectar)/nectar/nectar-company-profile',
+    path: '/nectar/nectar-company-profile',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardnectarNectarInboxRoute =
+  DashboardnectarNectarInboxRouteImport.update({
+    id: '/(nectar)/nectar/inbox',
+    path: '/nectar/inbox',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardnectarNectarHelpRoute =
+  DashboardnectarNectarHelpRouteImport.update({
+    id: '/(nectar)/nectar/help',
+    path: '/nectar/help',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardnectarNectarAskNectarRoute =
+  DashboardnectarNectarAskNectarRouteImport.update({
+    id: '/(nectar)/nectar/ask-nectar',
+    path: '/nectar/ask-nectar',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardmyObligations_CourseInstanceIdRoute =
+  DashboardmyObligations_CourseInstanceIdRouteImport.update({
+    id: '/(my-obligations_)/course/$instanceId',
+    path: '/course/$instanceId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhubHubKnowledgeRoute =
+  DashboardhubHubKnowledgeRouteImport.update({
+    id: '/(hub)/hub/knowledge',
+    path: '/hub/knowledge',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhubHubFinancesRoute = DashboardhubHubFinancesRouteImport.update({
+  id: '/(hub)/hub/finances',
+  path: '/hub/finances',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardhubHubEmployeesRoute =
+  DashboardhubHubEmployeesRouteImport.update({
+    id: '/(hub)/hub/employees',
+    path: '/hub/employees',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhubHubDocumentationRoute =
+  DashboardhubHubDocumentationRouteImport.update({
+    id: '/(hub)/hub/documentation',
+    path: '/hub/documentation',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhubHubClientsRoute = DashboardhubHubClientsRouteImport.update({
+  id: '/(hub)/hub/clients',
+  path: '/hub/clients',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardhrAdminHrAdminSettingsRoute =
+  DashboardhrAdminHrAdminSettingsRouteImport.update({
+    id: '/(hr-admin)/hr-admin/settings',
+    path: '/hr-admin/settings',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhomesHomesTeamsRoute =
+  DashboardhomesHomesTeamsRouteImport.update({
+    id: '/(homes)/homes/teams',
+    path: '/homes/teams',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhomesHomesHostHomeControlRoute =
+  DashboardhomesHomesHostHomeControlRouteImport.update({
+    id: '/(homes)/homes/host-home-control',
+    path: '/homes/host-home-control',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhomesHomesTeamIdRoute =
+  DashboardhomesHomesTeamIdRouteImport.update({
+    id: '/(homes)/homes/$teamId',
+    path: '/homes/$teamId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveTrainingCourseAssignmentIdRoute =
+  DashboardhiveTrainingCourseAssignmentIdRouteImport.update({
+    id: '/(hive-training)/course/$assignmentId',
+    path: '/course/$assignmentId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecStatesStateCodeRoute =
+  DashboardhiveExecStatesStateCodeRouteImport.update({
+    id: '/(hive-exec)/states/$stateCode',
+    path: '/states/$stateCode',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecUpgradeRequestsRoute =
+  DashboardhiveExecHiveExecUpgradeRequestsRouteImport.update({
+    id: '/(hive-exec)/hive-exec/upgrade-requests',
+    path: '/hive-exec/upgrade-requests',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecTrainingRoute =
+  DashboardhiveExecHiveExecTrainingRouteImport.update({
+    id: '/(hive-exec)/hive-exec/training',
+    path: '/hive-exec/training',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecTicketsRoute =
+  DashboardhiveExecHiveExecTicketsRouteImport.update({
+    id: '/(hive-exec)/hive-exec/tickets',
+    path: '/hive-exec/tickets',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecStatesRoute =
+  DashboardhiveExecHiveExecStatesRouteImport.update({
+    id: '/(hive-exec)/hive-exec/states',
+    path: '/hive-exec/states',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecPlansRoute =
+  DashboardhiveExecHiveExecPlansRouteImport.update({
+    id: '/(hive-exec)/hive-exec/plans',
+    path: '/hive-exec/plans',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecPermissionsRoute =
+  DashboardhiveExecHiveExecPermissionsRouteImport.update({
+    id: '/(hive-exec)/hive-exec/permissions',
+    path: '/hive-exec/permissions',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecNewCompanyRoute =
+  DashboardhiveExecHiveExecNewCompanyRouteImport.update({
+    id: '/(hive-exec)/hive-exec/new-company',
+    path: '/hive-exec/new-company',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecNectarRoute =
+  DashboardhiveExecHiveExecNectarRouteImport.update({
+    id: '/(hive-exec)/hive-exec/nectar',
+    path: '/hive-exec/nectar',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecMessagesRoute =
+  DashboardhiveExecHiveExecMessagesRouteImport.update({
+    id: '/(hive-exec)/hive-exec/messages',
+    path: '/hive-exec/messages',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecKnowledgeRoute =
+  DashboardhiveExecHiveExecKnowledgeRouteImport.update({
+    id: '/(hive-exec)/hive-exec/knowledge',
+    path: '/hive-exec/knowledge',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecHealthRoute =
+  DashboardhiveExecHiveExecHealthRouteImport.update({
+    id: '/(hive-exec)/hive-exec/health',
+    path: '/hive-exec/health',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecFunctionalityRoute =
+  DashboardhiveExecHiveExecFunctionalityRouteImport.update({
+    id: '/(hive-exec)/hive-exec/functionality',
+    path: '/hive-exec/functionality',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecFeaturesRoute =
+  DashboardhiveExecHiveExecFeaturesRouteImport.update({
+    id: '/(hive-exec)/hive-exec/features',
+    path: '/hive-exec/features',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecCompanyMigrationRoute =
+  DashboardhiveExecHiveExecCompanyMigrationRouteImport.update({
+    id: '/(hive-exec)/hive-exec/company-migration',
+    path: '/hive-exec/company-migration',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecCommandRoute =
+  DashboardhiveExecHiveExecCommandRouteImport.update({
+    id: '/(hive-exec)/hive-exec/command',
+    path: '/hive-exec/command',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecClassesRoute =
+  DashboardhiveExecHiveExecClassesRouteImport.update({
+    id: '/(hive-exec)/hive-exec/classes',
+    path: '/hive-exec/classes',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecBillingApprovalsRoute =
+  DashboardhiveExecHiveExecBillingApprovalsRouteImport.update({
+    id: '/(hive-exec)/hive-exec/billing-approvals',
+    path: '/hive-exec/billing-approvals',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecBaseTemplateRoute =
+  DashboardhiveExecHiveExecBaseTemplateRouteImport.update({
+    id: '/(hive-exec)/hive-exec/base-template',
+    path: '/hive-exec/base-template',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecApprovalsRoute =
+  DashboardhiveExecHiveExecApprovalsRouteImport.update({
+    id: '/(hive-exec)/hive-exec/approvals',
+    path: '/hive-exec/approvals',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecAgreementsRoute =
+  DashboardhiveExecHiveExecAgreementsRouteImport.update({
+    id: '/(hive-exec)/hive-exec/agreements',
+    path: '/hive-exec/agreements',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecHiveExecOrgIdRoute =
+  DashboardhiveExecHiveExecOrgIdRouteImport.update({
+    id: '/(hive-exec)/hive-exec/$orgId',
+    path: '/hive-exec/$orgId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecAgreementsRequirementsRoute =
+  DashboardhiveExecAgreementsRequirementsRouteImport.update({
+    id: '/(hive-exec)/agreements/requirements',
+    path: '/agreements/requirements',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardhiveExecAgreementsOrgIdRoute =
+  DashboardhiveExecAgreementsOrgIdRouteImport.update({
+    id: '/(hive-exec)/agreements/$orgId',
+    path: '/agreements/$orgId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardformsFormIdSubmissionsRoute =
+  DashboardformsFormIdSubmissionsRouteImport.update({
+    id: '/(forms)/$formId/submissions',
     path: '/$formId/submissions',
-    getParentRoute: () => DashboardFormsRoute,
+    getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardFormsFormIdFillRoute =
-  DashboardFormsFormIdFillRouteImport.update({
-    id: '/$formId/fill',
+const DashboardformsFormIdFillRoute =
+  DashboardformsFormIdFillRouteImport.update({
+    id: '/(forms)/$formId/fill',
     path: '/$formId/fill',
-    getParentRoute: () => DashboardFormsRoute,
+    getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardFormsFormIdEditRoute =
-  DashboardFormsFormIdEditRouteImport.update({
-    id: '/$formId/edit',
+const DashboardformsFormIdEditRoute =
+  DashboardformsFormIdEditRouteImport.update({
+    id: '/(forms)/$formId/edit',
     path: '/$formId/edit',
-    getParentRoute: () => DashboardFormsRoute,
-  } as any)
-const DashboardCoursesTopicTopicIdRoute =
-  DashboardCoursesTopicTopicIdRouteImport.update({
-    id: '/courses/topic/$topicId',
-    path: '/courses/topic/$topicId',
     getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardCoursesPolicyDocumentIdRoute =
-  DashboardCoursesPolicyDocumentIdRouteImport.update({
-    id: '/courses/policy/$documentId',
-    path: '/courses/policy/$documentId',
+const DashboardfinancialFinancialTotalsRoute =
+  DashboardfinancialFinancialTotalsRouteImport.update({
+    id: '/(financial)/financial/totals',
+    path: '/financial/totals',
     getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardCoursesPersonModuleAssignmentIdRoute =
-  DashboardCoursesPersonModuleAssignmentIdRouteImport.update({
-    id: '/courses/person-module/$assignmentId',
-    path: '/courses/person-module/$assignmentId',
+const DashboardfinancialFinancialRhsRoute =
+  DashboardfinancialFinancialRhsRouteImport.update({
+    id: '/(financial)/financial/rhs',
+    path: '/financial/rhs',
     getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardCoursesCourseIdEditRoute =
-  DashboardCoursesCourseIdEditRouteImport.update({
-    id: '/edit',
-    path: '/edit',
-    getParentRoute: () => DashboardCoursesCourseIdRoute,
-  } as any)
-const DashboardComplianceCertReviewCompletionIdRoute =
-  DashboardComplianceCertReviewCompletionIdRouteImport.update({
-    id: '/compliance_/cert-review/$completionId',
-    path: '/compliance/cert-review/$completionId',
+const DashboardfinancialFinancialRevenueRoute =
+  DashboardfinancialFinancialRevenueRouteImport.update({
+    id: '/(financial)/financial/revenue',
+    path: '/financial/revenue',
     getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardClientsWorkspaceClientIdRoute =
-  DashboardClientsWorkspaceClientIdRouteImport.update({
-    id: '/workspace/$clientId',
+const DashboardfinancialFinancialReimbursementsRoute =
+  DashboardfinancialFinancialReimbursementsRouteImport.update({
+    id: '/(financial)/financial/reimbursements',
+    path: '/financial/reimbursements',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardfinancialFinancialPbaLedgerRoute =
+  DashboardfinancialFinancialPbaLedgerRouteImport.update({
+    id: '/(financial)/financial/pba-ledger',
+    path: '/financial/pba-ledger',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardfinancialFinancialNectarRoute =
+  DashboardfinancialFinancialNectarRouteImport.update({
+    id: '/(financial)/financial/nectar',
+    path: '/financial/nectar',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardfinancialFinancialMonthlyGridRoute =
+  DashboardfinancialFinancialMonthlyGridRouteImport.update({
+    id: '/(financial)/financial/monthly-grid',
+    path: '/financial/monthly-grid',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardfinancialFinancialHostHomeRoute =
+  DashboardfinancialFinancialHostHomeRouteImport.update({
+    id: '/(financial)/financial/host-home',
+    path: '/financial/host-home',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardfinancialFinancialGrossRoute =
+  DashboardfinancialFinancialGrossRouteImport.update({
+    id: '/(financial)/financial/gross',
+    path: '/financial/gross',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardfinancialFinancialEmployeesRoute =
+  DashboardfinancialFinancialEmployeesRouteImport.update({
+    id: '/(financial)/financial/employees',
+    path: '/financial/employees',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardfinancialFinancialDistributionsRoute =
+  DashboardfinancialFinancialDistributionsRouteImport.update({
+    id: '/(financial)/financial/distributions',
+    path: '/financial/distributions',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardfinancialFinancialContractorsRoute =
+  DashboardfinancialFinancialContractorsRouteImport.update({
+    id: '/(financial)/financial/contractors',
+    path: '/financial/contractors',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardevidenceEvidenceMyEvidenceRoute =
+  DashboardevidenceEvidenceMyEvidenceRouteImport.update({
+    id: '/(evidence)/evidence/my-evidence',
+    path: '/evidence/my-evidence',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardemployeesEmployeesTeamRoute =
+  DashboardemployeesEmployeesTeamRouteImport.update({
+    id: '/(employees)/employees/team',
+    path: '/employees/team',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardemployeesEmployeesPersonnelFileRoute =
+  DashboardemployeesEmployeesPersonnelFileRouteImport.update({
+    id: '/(employees)/employees/personnel-file',
+    path: '/employees/personnel-file',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardemployeesEmployeesNewRoute =
+  DashboardemployeesEmployeesNewRouteImport.update({
+    id: '/(employees)/employees/new',
+    path: '/employees/new',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardemployeesEmployeesInvitationsRoute =
+  DashboardemployeesEmployeesInvitationsRouteImport.update({
+    id: '/(employees)/employees/invitations',
+    path: '/employees/invitations',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardemployeesEmployeesHireDatesRoute =
+  DashboardemployeesEmployeesHireDatesRouteImport.update({
+    id: '/(employees)/employees/hire-dates',
+    path: '/employees/hire-dates',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardemployeesEmployeesClientLoansRoute =
+  DashboardemployeesEmployeesClientLoansRouteImport.update({
+    id: '/(employees)/employees/client-loans',
+    path: '/employees/client-loans',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardemployeesEmployeesStaffIdRoute =
+  DashboardemployeesEmployeesStaffIdRouteImport.update({
+    id: '/(employees)/employees/$staffId',
+    path: '/employees/$staffId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboarddocumentsDocumentsEmarRoute =
+  DashboarddocumentsDocumentsEmarRouteImport.update({
+    id: '/(documents)/documents/emar',
+    path: '/documents/emar',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboarddocumentsDocumentsAgencyDocumentsRoute =
+  DashboarddocumentsDocumentsAgencyDocumentsRouteImport.update({
+    id: '/(documents)/documents/agency-documents',
+    path: '/documents/agency-documents',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcoursesTopicTopicIdRoute =
+  DashboardcoursesTopicTopicIdRouteImport.update({
+    id: '/(courses)/topic/$topicId',
+    path: '/topic/$topicId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcoursesPolicyDocumentIdRoute =
+  DashboardcoursesPolicyDocumentIdRouteImport.update({
+    id: '/(courses)/policy/$documentId',
+    path: '/policy/$documentId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcoursesPersonModuleAssignmentIdRoute =
+  DashboardcoursesPersonModuleAssignmentIdRouteImport.update({
+    id: '/(courses)/person-module/$assignmentId',
+    path: '/person-module/$assignmentId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcoursesCoursesPersonRoute =
+  DashboardcoursesCoursesPersonRouteImport.update({
+    id: '/(courses)/courses/person',
+    path: '/courses/person',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcoursesCoursesOtherRoute =
+  DashboardcoursesCoursesOtherRouteImport.update({
+    id: '/(courses)/courses/other',
+    path: '/courses/other',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcoursesCoursesMindsmithRoute =
+  DashboardcoursesCoursesMindsmithRouteImport.update({
+    id: '/(courses)/courses/mindsmith',
+    path: '/courses/mindsmith',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcoursesCoursesCoreRoute =
+  DashboardcoursesCoursesCoreRouteImport.update({
+    id: '/(courses)/courses/core',
+    path: '/courses/core',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcoursesCoursesCourseIdRoute =
+  DashboardcoursesCoursesCourseIdRouteImport.update({
+    id: '/(courses)/courses/$courseId',
+    path: '/courses/$courseId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcoursesCourseIdEditRoute =
+  DashboardcoursesCourseIdEditRouteImport.update({
+    id: '/(courses)/$courseId/edit',
+    path: '/$courseId/edit',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const Dashboardcompliance_CertReviewCompletionIdRoute =
+  Dashboardcompliance_CertReviewCompletionIdRouteImport.update({
+    id: '/(compliance_)/cert-review/$completionId',
+    path: '/cert-review/$completionId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcomplianceCompliancePoliciesRoute =
+  DashboardcomplianceCompliancePoliciesRouteImport.update({
+    id: '/(compliance)/compliance/policies',
+    path: '/compliance/policies',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcomplianceComplianceHrcRoute =
+  DashboardcomplianceComplianceHrcRouteImport.update({
+    id: '/(compliance)/compliance/hrc',
+    path: '/compliance/hrc',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcomplianceComplianceExternalComplianceRoute =
+  DashboardcomplianceComplianceExternalComplianceRouteImport.update({
+    id: '/(compliance)/compliance/external-compliance',
+    path: '/compliance/external-compliance',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcomplianceComplianceExternalCertificationsRoute =
+  DashboardcomplianceComplianceExternalCertificationsRouteImport.update({
+    id: '/(compliance)/compliance/external-certifications',
+    path: '/compliance/external-certifications',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcomplianceComplianceDeadlinesRoute =
+  DashboardcomplianceComplianceDeadlinesRouteImport.update({
+    id: '/(compliance)/compliance/deadlines',
+    path: '/compliance/deadlines',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcomplianceComplianceComplianceDeskRoute =
+  DashboardcomplianceComplianceComplianceDeskRouteImport.update({
+    id: '/(compliance)/compliance/compliance-desk',
+    path: '/compliance/compliance-desk',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcomplianceComplianceCompanyObligationsRoute =
+  DashboardcomplianceComplianceCompanyObligationsRouteImport.update({
+    id: '/(compliance)/compliance/company-obligations',
+    path: '/compliance/company-obligations',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcomplianceComplianceCertificationsRoute =
+  DashboardcomplianceComplianceCertificationsRouteImport.update({
+    id: '/(compliance)/compliance/certifications',
+    path: '/compliance/certifications',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardcomplianceComplianceAuthoritativeSourcesRoute =
+  DashboardcomplianceComplianceAuthoritativeSourcesRouteImport.update({
+    id: '/(compliance)/compliance/authoritative-sources',
+    path: '/compliance/authoritative-sources',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardclientsWorkspaceClientIdRoute =
+  DashboardclientsWorkspaceClientIdRouteImport.update({
+    id: '/(clients)/workspace/$clientId',
     path: '/workspace/$clientId',
-    getParentRoute: () => DashboardClientsRoute,
+    getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardClientsTrainingClientIdRoute =
-  DashboardClientsTrainingClientIdRouteImport.update({
-    id: '/training/$clientId',
+const DashboardclientsTrainingClientIdRoute =
+  DashboardclientsTrainingClientIdRouteImport.update({
+    id: '/(clients)/training/$clientId',
     path: '/training/$clientId',
-    getParentRoute: () => DashboardClientsRoute,
+    getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardClientsIntakeClientIdRoute =
-  DashboardClientsIntakeClientIdRouteImport.update({
-    id: '/intake/$clientId',
+const DashboardclientsIntakeClientIdRoute =
+  DashboardclientsIntakeClientIdRouteImport.update({
+    id: '/(clients)/intake/$clientId',
     path: '/intake/$clientId',
-    getParentRoute: () => DashboardClientsRoute,
+    getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardClientsHhsHubClientIdRoute =
-  DashboardClientsHhsHubClientIdRouteImport.update({
-    id: '/hhs-hub/$clientId',
+const DashboardclientsHhsHubClientIdRoute =
+  DashboardclientsHhsHubClientIdRouteImport.update({
+    id: '/(clients)/hhs-hub/$clientId',
     path: '/hhs-hub/$clientId',
-    getParentRoute: () => DashboardClientsRoute,
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardclientsClientsRhsBoardRoute =
+  DashboardclientsClientsRhsBoardRouteImport.update({
+    id: '/(clients)/clients/rhs-board',
+    path: '/clients/rhs-board',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardclientsClientsPendingRoute =
+  DashboardclientsClientsPendingRouteImport.update({
+    id: '/(clients)/clients/pending',
+    path: '/clients/pending',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardclientsClientsNewRoute =
+  DashboardclientsClientsNewRouteImport.update({
+    id: '/(clients)/clients/new',
+    path: '/clients/new',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardclientsClientsClientFileRoute =
+  DashboardclientsClientsClientFileRouteImport.update({
+    id: '/(clients)/clients/client-file',
+    path: '/clients/client-file',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardclientsClientsClientBillingCodesRoute =
+  DashboardclientsClientsClientBillingCodesRouteImport.update({
+    id: '/(clients)/clients/client-billing-codes',
+    path: '/clients/client-billing-codes',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardclientsClientsBehavioristRoute =
+  DashboardclientsClientsBehavioristRouteImport.update({
+    id: '/(clients)/clients/behaviorist',
+    path: '/clients/behaviorist',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardclientsClientsClientIdRoute =
+  DashboardclientsClientsClientIdRouteImport.update({
+    id: '/(clients)/clients/$clientId',
+    path: '/clients/$clientId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardbillingBillingSubscriptionRoute =
+  DashboardbillingBillingSubscriptionRouteImport.update({
+    id: '/(billing)/billing/subscription',
+    path: '/billing/subscription',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardbillingBillingNectarRoute =
+  DashboardbillingBillingNectarRouteImport.update({
+    id: '/(billing)/billing/nectar',
+    path: '/billing/nectar',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardbillingBillingImportsRoute =
+  DashboardbillingBillingImportsRouteImport.update({
+    id: '/(billing)/billing/imports',
+    path: '/billing/imports',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardbillingBillingForm520Route =
+  DashboardbillingBillingForm520RouteImport.update({
+    id: '/(billing)/billing/form520',
+    path: '/billing/form520',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardbillingBillingClientIdRoute =
+  DashboardbillingBillingClientIdRouteImport.update({
+    id: '/(billing)/billing/$clientId',
+    path: '/billing/$clientId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardbehaviorSupportBehaviorSupportClientIdRoute =
+  DashboardbehaviorSupportBehaviorSupportClientIdRouteImport.update({
+    id: '/(behavior-support)/behavior-support/$clientId',
+    path: '/behavior-support/$clientId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardauditAuditStateAuditRoute =
+  DashboardauditAuditStateAuditRouteImport.update({
+    id: '/(audit)/audit/state-audit',
+    path: '/audit/state-audit',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardauditAuditInternalAuditRoute =
+  DashboardauditAuditInternalAuditRouteImport.update({
+    id: '/(audit)/audit/internal-audit',
+    path: '/audit/internal-audit',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardadminAdminProgramsAdminRoute =
+  DashboardadminAdminProgramsAdminRouteImport.update({
+    id: '/(admin)/admin/programs-admin',
+    path: '/admin/programs-admin',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardadminAdminEmarAuditRoute =
+  DashboardadminAdminEmarAuditRouteImport.update({
+    id: '/(admin)/admin/emar-audit',
+    path: '/admin/emar-audit',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardadminAdminCommandCenterRoute =
+  DashboardadminAdminCommandCenterRouteImport.update({
+    id: '/(admin)/admin/command-center',
+    path: '/admin/command-center',
+    getParentRoute: () => DashboardRoute,
   } as any)
 const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
   id: '/api/public/webhooks/stripe',
@@ -1429,11 +1495,11 @@ const ApiPublicHooksBillingDailyCheckRoute =
     path: '/api/public/hooks/billing-daily-check',
     getParentRoute: () => rootRouteImport,
   } as any)
-const DashboardHiveExecStatesStateCodeOnboardingRoute =
-  DashboardHiveExecStatesStateCodeOnboardingRouteImport.update({
+const DashboardhiveExecStatesStateCodeOnboardingRoute =
+  DashboardhiveExecStatesStateCodeOnboardingRouteImport.update({
     id: '/onboarding',
     path: '/onboarding',
-    getParentRoute: () => DashboardHiveExecStatesStateCodeRoute,
+    getParentRoute: () => DashboardhiveExecStatesStateCodeRoute,
   } as any)
 const ApiPublicOauthGmailCallbackRoute =
   ApiPublicOauthGmailCallbackRouteImport.update({
@@ -1473,68 +1539,22 @@ export interface FileRoutesByFullPath {
   '/audit-portal/set-password': typeof AuditPortalSetPasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/clients/new': typeof ClientsNewRoute
-  '/dashboard/agency-documents': typeof DashboardAgencyDocumentsRoute
-  '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
-  '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/audit': typeof DashboardAuditRoute
-  '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
-  '/dashboard/behaviorist': typeof DashboardBehavioristRoute
-  '/dashboard/billing': typeof DashboardBillingRouteWithChildren
-  '/dashboard/certifications': typeof DashboardCertificationsRoute
-  '/dashboard/clients': typeof DashboardClientsRouteWithChildren
-  '/dashboard/command-center': typeof DashboardCommandCenterRoute
-  '/dashboard/company-obligations': typeof DashboardCompanyObligationsRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/clients': typeof DashboardClientsRoute
   '/dashboard/compliance': typeof DashboardComplianceRoute
-  '/dashboard/compliance-desk': typeof DashboardComplianceDeskRoute
-  '/dashboard/daily-logs': typeof DashboardDailyLogsRoute
-  '/dashboard/day-program': typeof DashboardDayProgramRoute
-  '/dashboard/deadlines': typeof DashboardDeadlinesRoute
-  '/dashboard/emar': typeof DashboardEmarRoute
   '/dashboard/evidence': typeof DashboardEvidenceRoute
-  '/dashboard/evv-archive': typeof DashboardEvvArchiveRoute
-  '/dashboard/external-certifications': typeof DashboardExternalCertificationsRoute
-  '/dashboard/external-compliance': typeof DashboardExternalComplianceRoute
-  '/dashboard/financial': typeof DashboardFinancialRouteWithChildren
-  '/dashboard/forms': typeof DashboardFormsRouteWithChildren
-  '/dashboard/help': typeof DashboardHelpRoute
-  '/dashboard/historical-daily-notes-former-staff': typeof DashboardHistoricalDailyNotesFormerStaffRoute
-  '/dashboard/hive-exec': typeof DashboardHiveExecRouteWithChildren
-  '/dashboard/homes': typeof DashboardHomesRouteWithChildren
-  '/dashboard/host-home-control': typeof DashboardHostHomeControlRoute
-  '/dashboard/hr-admin': typeof DashboardHrAdminRouteWithChildren
-  '/dashboard/hrc': typeof DashboardHrcRoute
-  '/dashboard/inbox': typeof DashboardInboxRoute
-  '/dashboard/internal-audit': typeof DashboardInternalAuditRoute
-  '/dashboard/invitations': typeof DashboardInvitationsRoute
-  '/dashboard/my-client-trainings': typeof DashboardMyClientTrainingsRoute
-  '/dashboard/my-evidence': typeof DashboardMyEvidenceRoute
-  '/dashboard/my-historical-daily-notes': typeof DashboardMyHistoricalDailyNotesRoute
-  '/dashboard/my-historical-records': typeof DashboardMyHistoricalRecordsRoute
-  '/dashboard/my-historical-timesheets': typeof DashboardMyHistoricalTimesheetsRoute
+  '/dashboard/financial': typeof DashboardFinancialRoute
+  '/dashboard/forms': typeof DashboardFormsRoute
+  '/dashboard/hive-exec': typeof DashboardHiveExecRoute
+  '/dashboard/homes': typeof DashboardHomesRoute
+  '/dashboard/hr-admin': typeof DashboardHrAdminRoute
   '/dashboard/my-obligations': typeof DashboardMyObligationsRoute
-  '/dashboard/my-time-corrections': typeof DashboardMyTimeCorrectionsRoute
-  '/dashboard/nectar-company-profile': typeof DashboardNectarCompanyProfileRoute
-  '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
-  '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
-  '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
-  '/dashboard/policies': typeof DashboardPoliciesRoute
-  '/dashboard/programs': typeof DashboardProgramsRouteWithChildren
-  '/dashboard/programs-admin': typeof DashboardProgramsAdminRoute
-  '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
-  '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
-  '/dashboard/reports': typeof DashboardReportsRoute
-  '/dashboard/schedule': typeof DashboardScheduleRoute
-  '/dashboard/schedule-preview': typeof DashboardSchedulePreviewRoute
-  '/dashboard/scheduler': typeof DashboardSchedulerRoute
+  '/dashboard/programs': typeof DashboardProgramsRoute
   '/dashboard/scheduling': typeof DashboardSchedulingRoute
-  '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
-  '/dashboard/smart-import': typeof DashboardSmartImportRouteWithChildren
-  '/dashboard/state-audit': typeof DashboardStateAuditRoute
-  '/dashboard/summaries': typeof DashboardSummariesRoute
-  '/dashboard/team': typeof DashboardTeamRoute
-  '/dashboard/teams': typeof DashboardTeamsRoute
-  '/dashboard/timeclock': typeof DashboardTimeclockRoute
-  '/dashboard/tracks': typeof DashboardTracksRouteWithChildren
+  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/smart-import': typeof DashboardSmartImportRoute
+  '/dashboard/tracks': typeof DashboardTracksRoute
   '/e2e/compliance-desk': typeof E2eComplianceDeskRoute
   '/employees/new': typeof EmployeesNewRoute
   '/sign-policy/$documentId': typeof SignPolicyDocumentIdRoute
@@ -1549,123 +1569,169 @@ export interface FileRoutesByFullPath {
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
-  '/dashboard/admin/emar-audit': typeof DashboardAdminEmarAuditRoute
-  '/dashboard/behavior-support/$clientId': typeof DashboardBehaviorSupportClientIdRoute
-  '/dashboard/billing/$clientId': typeof DashboardBillingClientIdRoute
-  '/dashboard/billing/form520': typeof DashboardBillingForm520Route
-  '/dashboard/billing/imports': typeof DashboardBillingImportsRoute
-  '/dashboard/billing/nectar': typeof DashboardBillingNectarRoute
-  '/dashboard/billing/subscription': typeof DashboardBillingSubscriptionRoute
-  '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
-  '/dashboard/clients/billing-codes': typeof DashboardClientsBillingCodesRoute
-  '/dashboard/clients/file': typeof DashboardClientsFileRoute
-  '/dashboard/clients/new': typeof DashboardClientsNewRoute
-  '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
-  '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
-  '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRouteWithChildren
-  '/dashboard/courses/core': typeof DashboardCoursesCoreRoute
-  '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
-  '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
-  '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
-  '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
-  '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
-  '/dashboard/employees/loans': typeof DashboardEmployeesLoansRoute
-  '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
-  '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
-  '/dashboard/financial/distributions': typeof DashboardFinancialDistributionsRoute
-  '/dashboard/financial/employees': typeof DashboardFinancialEmployeesRoute
-  '/dashboard/financial/gross': typeof DashboardFinancialGrossRoute
-  '/dashboard/financial/host-home': typeof DashboardFinancialHostHomeRoute
-  '/dashboard/financial/monthly-grid': typeof DashboardFinancialMonthlyGridRoute
-  '/dashboard/financial/nectar': typeof DashboardFinancialNectarRoute
-  '/dashboard/financial/revenue': typeof DashboardFinancialRevenueRoute
-  '/dashboard/financial/rhs': typeof DashboardFinancialRhsRoute
-  '/dashboard/financial/totals': typeof DashboardFinancialTotalsRoute
-  '/dashboard/hive-exec/$orgId': typeof DashboardHiveExecOrgIdRoute
-  '/dashboard/hive-exec/agreements': typeof DashboardHiveExecAgreementsRouteWithChildren
-  '/dashboard/hive-exec/approvals': typeof DashboardHiveExecApprovalsRoute
-  '/dashboard/hive-exec/base-template': typeof DashboardHiveExecBaseTemplateRoute
-  '/dashboard/hive-exec/billing-approvals': typeof DashboardHiveExecBillingApprovalsRoute
-  '/dashboard/hive-exec/classes': typeof DashboardHiveExecClassesRoute
-  '/dashboard/hive-exec/command': typeof DashboardHiveExecCommandRoute
-  '/dashboard/hive-exec/company-migration': typeof DashboardHiveExecCompanyMigrationRoute
-  '/dashboard/hive-exec/features': typeof DashboardHiveExecFeaturesRoute
-  '/dashboard/hive-exec/functionality': typeof DashboardHiveExecFunctionalityRoute
-  '/dashboard/hive-exec/health': typeof DashboardHiveExecHealthRoute
-  '/dashboard/hive-exec/knowledge': typeof DashboardHiveExecKnowledgeRoute
-  '/dashboard/hive-exec/messages': typeof DashboardHiveExecMessagesRoute
-  '/dashboard/hive-exec/nectar': typeof DashboardHiveExecNectarRoute
-  '/dashboard/hive-exec/new-company': typeof DashboardHiveExecNewCompanyRoute
-  '/dashboard/hive-exec/permissions': typeof DashboardHiveExecPermissionsRoute
-  '/dashboard/hive-exec/plans': typeof DashboardHiveExecPlansRoute
-  '/dashboard/hive-exec/states': typeof DashboardHiveExecStatesRouteWithChildren
-  '/dashboard/hive-exec/tickets': typeof DashboardHiveExecTicketsRoute
-  '/dashboard/hive-exec/training': typeof DashboardHiveExecTrainingRoute
-  '/dashboard/hive-exec/upgrade-requests': typeof DashboardHiveExecUpgradeRequestsRoute
-  '/dashboard/homes/$teamId': typeof DashboardHomesTeamIdRoute
-  '/dashboard/hr-admin/settings': typeof DashboardHrAdminSettingsRoute
-  '/dashboard/hub/clients': typeof DashboardHubClientsRoute
-  '/dashboard/hub/documentation': typeof DashboardHubDocumentationRoute
-  '/dashboard/hub/employees': typeof DashboardHubEmployeesRoute
-  '/dashboard/hub/finances': typeof DashboardHubFinancesRoute
-  '/dashboard/hub/knowledge': typeof DashboardHubKnowledgeRoute
-  '/dashboard/programs/$programId': typeof DashboardProgramsProgramIdRoute
-  '/dashboard/settings/automation-rules': typeof DashboardSettingsAutomationRulesRoute
-  '/dashboard/settings/bank-mapping': typeof DashboardSettingsBankMappingRoute
-  '/dashboard/settings/compliance-setup': typeof DashboardSettingsComplianceSetupRoute
-  '/dashboard/settings/draft-rules': typeof DashboardSettingsDraftRulesRoute
-  '/dashboard/settings/email': typeof DashboardSettingsEmailRoute
-  '/dashboard/settings/gmail': typeof DashboardSettingsGmailRoute
-  '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
-  '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
-  '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
-  '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
-  '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
-  '/dashboard/settings/subscription': typeof DashboardSettingsSubscriptionRoute
-  '/dashboard/settings/team-access': typeof DashboardSettingsTeamAccessRoute
-  '/dashboard/shift/$shiftId': typeof DashboardShiftShiftIdRoute
-  '/dashboard/smart-import/history': typeof DashboardSmartImportHistoryRoute
-  '/dashboard/tracks/$trackSlug': typeof DashboardTracksTrackSlugRoute
-  '/dashboard/training/$id': typeof DashboardTrainingIdRoute
-  '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
-  '/dashboard/billing/': typeof DashboardBillingIndexRoute
-  '/dashboard/clients/': typeof DashboardClientsIndexRoute
-  '/dashboard/courses/': typeof DashboardCoursesIndexRoute
-  '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
-  '/dashboard/financial/': typeof DashboardFinancialIndexRoute
-  '/dashboard/forms/': typeof DashboardFormsIndexRoute
-  '/dashboard/hive-exec/': typeof DashboardHiveExecIndexRoute
-  '/dashboard/hive-training/': typeof DashboardHiveTrainingIndexRoute
-  '/dashboard/smart-import/': typeof DashboardSmartImportIndexRoute
-  '/dashboard/training/': typeof DashboardTrainingIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
-  '/dashboard/clients/hhs-hub/$clientId': typeof DashboardClientsHhsHubClientIdRoute
-  '/dashboard/clients/intake/$clientId': typeof DashboardClientsIntakeClientIdRoute
-  '/dashboard/clients/training/$clientId': typeof DashboardClientsTrainingClientIdRoute
-  '/dashboard/clients/workspace/$clientId': typeof DashboardClientsWorkspaceClientIdRoute
-  '/dashboard/compliance/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
-  '/dashboard/courses/$courseId/edit': typeof DashboardCoursesCourseIdEditRoute
-  '/dashboard/courses/person-module/$assignmentId': typeof DashboardCoursesPersonModuleAssignmentIdRoute
-  '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
-  '/dashboard/courses/topic/$topicId': typeof DashboardCoursesTopicTopicIdRoute
-  '/dashboard/forms/$formId/edit': typeof DashboardFormsFormIdEditRoute
-  '/dashboard/forms/$formId/fill': typeof DashboardFormsFormIdFillRoute
-  '/dashboard/forms/$formId/submissions': typeof DashboardFormsFormIdSubmissionsRoute
-  '/dashboard/hive-exec/agreements/$orgId': typeof DashboardHiveExecAgreementsOrgIdRoute
-  '/dashboard/hive-exec/agreements/requirements': typeof DashboardHiveExecAgreementsRequirementsRoute
-  '/dashboard/hive-exec/states/$stateCode': typeof DashboardHiveExecStatesStateCodeRouteWithChildren
-  '/dashboard/hive-training/course/$assignmentId': typeof DashboardHiveTrainingCourseAssignmentIdRoute
-  '/dashboard/my-obligations/course/$instanceId': typeof DashboardMyObligationsCourseInstanceIdRoute
-  '/dashboard/smart-import/$jobId/done': typeof DashboardSmartImportJobIdDoneRoute
-  '/dashboard/smart-import/$jobId/review': typeof DashboardSmartImportJobIdReviewRoute
+  '/dashboard/admin/command-center': typeof DashboardadminAdminCommandCenterRoute
+  '/dashboard/admin/emar-audit': typeof DashboardadminAdminEmarAuditRoute
+  '/dashboard/admin/programs-admin': typeof DashboardadminAdminProgramsAdminRoute
+  '/dashboard/audit/internal-audit': typeof DashboardauditAuditInternalAuditRoute
+  '/dashboard/audit/state-audit': typeof DashboardauditAuditStateAuditRoute
+  '/dashboard/behavior-support/$clientId': typeof DashboardbehaviorSupportBehaviorSupportClientIdRoute
+  '/dashboard/billing/$clientId': typeof DashboardbillingBillingClientIdRoute
+  '/dashboard/billing/form520': typeof DashboardbillingBillingForm520Route
+  '/dashboard/billing/imports': typeof DashboardbillingBillingImportsRoute
+  '/dashboard/billing/nectar': typeof DashboardbillingBillingNectarRoute
+  '/dashboard/billing/subscription': typeof DashboardbillingBillingSubscriptionRoute
+  '/dashboard/clients/$clientId': typeof DashboardclientsClientsClientIdRoute
+  '/dashboard/clients/behaviorist': typeof DashboardclientsClientsBehavioristRoute
+  '/dashboard/clients/client-billing-codes': typeof DashboardclientsClientsClientBillingCodesRoute
+  '/dashboard/clients/client-file': typeof DashboardclientsClientsClientFileRoute
+  '/dashboard/clients/new': typeof DashboardclientsClientsNewRoute
+  '/dashboard/clients/pending': typeof DashboardclientsClientsPendingRoute
+  '/dashboard/clients/rhs-board': typeof DashboardclientsClientsRhsBoardRoute
+  '/dashboard/hhs-hub/$clientId': typeof DashboardclientsHhsHubClientIdRoute
+  '/dashboard/intake/$clientId': typeof DashboardclientsIntakeClientIdRoute
+  '/dashboard/training/$clientId': typeof DashboardclientsTrainingClientIdRoute
+  '/dashboard/workspace/$clientId': typeof DashboardclientsWorkspaceClientIdRoute
+  '/dashboard/compliance/authoritative-sources': typeof DashboardcomplianceComplianceAuthoritativeSourcesRoute
+  '/dashboard/compliance/certifications': typeof DashboardcomplianceComplianceCertificationsRoute
+  '/dashboard/compliance/company-obligations': typeof DashboardcomplianceComplianceCompanyObligationsRoute
+  '/dashboard/compliance/compliance-desk': typeof DashboardcomplianceComplianceComplianceDeskRoute
+  '/dashboard/compliance/deadlines': typeof DashboardcomplianceComplianceDeadlinesRoute
+  '/dashboard/compliance/external-certifications': typeof DashboardcomplianceComplianceExternalCertificationsRoute
+  '/dashboard/compliance/external-compliance': typeof DashboardcomplianceComplianceExternalComplianceRoute
+  '/dashboard/compliance/hrc': typeof DashboardcomplianceComplianceHrcRoute
+  '/dashboard/compliance/policies': typeof DashboardcomplianceCompliancePoliciesRoute
+  '/dashboard/cert-review/$completionId': typeof Dashboardcompliance_CertReviewCompletionIdRoute
+  '/dashboard/$courseId/edit': typeof DashboardcoursesCourseIdEditRoute
+  '/dashboard/courses/$courseId': typeof DashboardcoursesCoursesCourseIdRoute
+  '/dashboard/courses/core': typeof DashboardcoursesCoursesCoreRoute
+  '/dashboard/courses/mindsmith': typeof DashboardcoursesCoursesMindsmithRoute
+  '/dashboard/courses/other': typeof DashboardcoursesCoursesOtherRoute
+  '/dashboard/courses/person': typeof DashboardcoursesCoursesPersonRoute
+  '/dashboard/person-module/$assignmentId': typeof DashboardcoursesPersonModuleAssignmentIdRoute
+  '/dashboard/policy/$documentId': typeof DashboardcoursesPolicyDocumentIdRoute
+  '/dashboard/topic/$topicId': typeof DashboardcoursesTopicTopicIdRoute
+  '/dashboard/documents/agency-documents': typeof DashboarddocumentsDocumentsAgencyDocumentsRoute
+  '/dashboard/documents/emar': typeof DashboarddocumentsDocumentsEmarRoute
+  '/dashboard/employees/$staffId': typeof DashboardemployeesEmployeesStaffIdRoute
+  '/dashboard/employees/client-loans': typeof DashboardemployeesEmployeesClientLoansRoute
+  '/dashboard/employees/hire-dates': typeof DashboardemployeesEmployeesHireDatesRoute
+  '/dashboard/employees/invitations': typeof DashboardemployeesEmployeesInvitationsRoute
+  '/dashboard/employees/new': typeof DashboardemployeesEmployeesNewRoute
+  '/dashboard/employees/personnel-file': typeof DashboardemployeesEmployeesPersonnelFileRoute
+  '/dashboard/employees/team': typeof DashboardemployeesEmployeesTeamRoute
+  '/dashboard/evidence/my-evidence': typeof DashboardevidenceEvidenceMyEvidenceRoute
+  '/dashboard/financial/contractors': typeof DashboardfinancialFinancialContractorsRoute
+  '/dashboard/financial/distributions': typeof DashboardfinancialFinancialDistributionsRoute
+  '/dashboard/financial/employees': typeof DashboardfinancialFinancialEmployeesRoute
+  '/dashboard/financial/gross': typeof DashboardfinancialFinancialGrossRoute
+  '/dashboard/financial/host-home': typeof DashboardfinancialFinancialHostHomeRoute
+  '/dashboard/financial/monthly-grid': typeof DashboardfinancialFinancialMonthlyGridRoute
+  '/dashboard/financial/nectar': typeof DashboardfinancialFinancialNectarRoute
+  '/dashboard/financial/pba-ledger': typeof DashboardfinancialFinancialPbaLedgerRoute
+  '/dashboard/financial/reimbursements': typeof DashboardfinancialFinancialReimbursementsRoute
+  '/dashboard/financial/revenue': typeof DashboardfinancialFinancialRevenueRoute
+  '/dashboard/financial/rhs': typeof DashboardfinancialFinancialRhsRoute
+  '/dashboard/financial/totals': typeof DashboardfinancialFinancialTotalsRoute
+  '/dashboard/$formId/edit': typeof DashboardformsFormIdEditRoute
+  '/dashboard/$formId/fill': typeof DashboardformsFormIdFillRoute
+  '/dashboard/$formId/submissions': typeof DashboardformsFormIdSubmissionsRoute
+  '/dashboard/agreements/$orgId': typeof DashboardhiveExecAgreementsOrgIdRoute
+  '/dashboard/agreements/requirements': typeof DashboardhiveExecAgreementsRequirementsRoute
+  '/dashboard/hive-exec/$orgId': typeof DashboardhiveExecHiveExecOrgIdRoute
+  '/dashboard/hive-exec/agreements': typeof DashboardhiveExecHiveExecAgreementsRoute
+  '/dashboard/hive-exec/approvals': typeof DashboardhiveExecHiveExecApprovalsRoute
+  '/dashboard/hive-exec/base-template': typeof DashboardhiveExecHiveExecBaseTemplateRoute
+  '/dashboard/hive-exec/billing-approvals': typeof DashboardhiveExecHiveExecBillingApprovalsRoute
+  '/dashboard/hive-exec/classes': typeof DashboardhiveExecHiveExecClassesRoute
+  '/dashboard/hive-exec/command': typeof DashboardhiveExecHiveExecCommandRoute
+  '/dashboard/hive-exec/company-migration': typeof DashboardhiveExecHiveExecCompanyMigrationRoute
+  '/dashboard/hive-exec/features': typeof DashboardhiveExecHiveExecFeaturesRoute
+  '/dashboard/hive-exec/functionality': typeof DashboardhiveExecHiveExecFunctionalityRoute
+  '/dashboard/hive-exec/health': typeof DashboardhiveExecHiveExecHealthRoute
+  '/dashboard/hive-exec/knowledge': typeof DashboardhiveExecHiveExecKnowledgeRoute
+  '/dashboard/hive-exec/messages': typeof DashboardhiveExecHiveExecMessagesRoute
+  '/dashboard/hive-exec/nectar': typeof DashboardhiveExecHiveExecNectarRoute
+  '/dashboard/hive-exec/new-company': typeof DashboardhiveExecHiveExecNewCompanyRoute
+  '/dashboard/hive-exec/permissions': typeof DashboardhiveExecHiveExecPermissionsRoute
+  '/dashboard/hive-exec/plans': typeof DashboardhiveExecHiveExecPlansRoute
+  '/dashboard/hive-exec/states': typeof DashboardhiveExecHiveExecStatesRoute
+  '/dashboard/hive-exec/tickets': typeof DashboardhiveExecHiveExecTicketsRoute
+  '/dashboard/hive-exec/training': typeof DashboardhiveExecHiveExecTrainingRoute
+  '/dashboard/hive-exec/upgrade-requests': typeof DashboardhiveExecHiveExecUpgradeRequestsRoute
+  '/dashboard/states/$stateCode': typeof DashboardhiveExecStatesStateCodeRouteWithChildren
+  '/dashboard/course/$assignmentId': typeof DashboardhiveTrainingCourseAssignmentIdRoute
+  '/dashboard/homes/$teamId': typeof DashboardhomesHomesTeamIdRoute
+  '/dashboard/homes/host-home-control': typeof DashboardhomesHomesHostHomeControlRoute
+  '/dashboard/homes/teams': typeof DashboardhomesHomesTeamsRoute
+  '/dashboard/hr-admin/settings': typeof DashboardhrAdminHrAdminSettingsRoute
+  '/dashboard/hub/clients': typeof DashboardhubHubClientsRoute
+  '/dashboard/hub/documentation': typeof DashboardhubHubDocumentationRoute
+  '/dashboard/hub/employees': typeof DashboardhubHubEmployeesRoute
+  '/dashboard/hub/finances': typeof DashboardhubHubFinancesRoute
+  '/dashboard/hub/knowledge': typeof DashboardhubHubKnowledgeRoute
+  '/dashboard/course/$instanceId': typeof DashboardmyObligations_CourseInstanceIdRoute
+  '/dashboard/nectar/ask-nectar': typeof DashboardnectarNectarAskNectarRoute
+  '/dashboard/nectar/help': typeof DashboardnectarNectarHelpRoute
+  '/dashboard/nectar/inbox': typeof DashboardnectarNectarInboxRoute
+  '/dashboard/nectar/nectar-company-profile': typeof DashboardnectarNectarNectarCompanyProfileRoute
+  '/dashboard/nectar/nectar-docs': typeof DashboardnectarNectarNectarDocsRoute
+  '/dashboard/programs/$programId': typeof DashboardprogramsProgramsProgramIdRoute
+  '/dashboard/records/historical-daily-notes-former-staff': typeof DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRoute
+  '/dashboard/records/my-historical-daily-notes': typeof DashboardrecordsRecordsMyHistoricalDailyNotesRoute
+  '/dashboard/records/my-historical-records': typeof DashboardrecordsRecordsMyHistoricalRecordsRoute
+  '/dashboard/records/my-historical-timesheets': typeof DashboardrecordsRecordsMyHistoricalTimesheetsRoute
+  '/dashboard/records/records-desk': typeof DashboardrecordsRecordsRecordsDeskRoute
+  '/dashboard/records/reports': typeof DashboardrecordsRecordsReportsRoute
+  '/dashboard/records/summaries': typeof DashboardrecordsRecordsSummariesRoute
+  '/dashboard/scheduling/assignments': typeof DashboardschedulingSchedulingAssignmentsRoute
+  '/dashboard/scheduling/daily-logs': typeof DashboardschedulingSchedulingDailyLogsRoute
+  '/dashboard/scheduling/day-program': typeof DashboardschedulingSchedulingDayProgramRoute
+  '/dashboard/scheduling/evv-archive': typeof DashboardschedulingSchedulingEvvArchiveRoute
+  '/dashboard/scheduling/my-time-corrections': typeof DashboardschedulingSchedulingMyTimeCorrectionsRoute
+  '/dashboard/scheduling/schedule': typeof DashboardschedulingSchedulingScheduleRoute
+  '/dashboard/scheduling/schedule-preview': typeof DashboardschedulingSchedulingSchedulePreviewRoute
+  '/dashboard/scheduling/scheduler': typeof DashboardschedulingSchedulingSchedulerRoute
+  '/dashboard/scheduling/timeclock': typeof DashboardschedulingSchedulingTimeclockRoute
+  '/dashboard/shift/$shiftId': typeof DashboardschedulingShiftShiftIdRoute
+  '/dashboard/settings/automation-rules': typeof DashboardsettingsSettingsAutomationRulesRoute
+  '/dashboard/settings/bank-mapping': typeof DashboardsettingsSettingsBankMappingRoute
+  '/dashboard/settings/compliance-setup': typeof DashboardsettingsSettingsComplianceSetupRoute
+  '/dashboard/settings/draft-rules': typeof DashboardsettingsSettingsDraftRulesRoute
+  '/dashboard/settings/email': typeof DashboardsettingsSettingsEmailRoute
+  '/dashboard/settings/gmail': typeof DashboardsettingsSettingsGmailRoute
+  '/dashboard/settings/licensing': typeof DashboardsettingsSettingsLicensingRoute
+  '/dashboard/settings/phi-access-audit': typeof DashboardsettingsSettingsPhiAccessAuditRoute
+  '/dashboard/settings/retention': typeof DashboardsettingsSettingsRetentionRoute
+  '/dashboard/settings/service-catalog': typeof DashboardsettingsSettingsServiceCatalogRoute
+  '/dashboard/settings/service-codes': typeof DashboardsettingsSettingsServiceCodesRoute
+  '/dashboard/settings/subscription': typeof DashboardsettingsSettingsSubscriptionRoute
+  '/dashboard/settings/team-access': typeof DashboardsettingsSettingsTeamAccessRoute
+  '/dashboard/$jobId/done': typeof DashboardsmartImportJobIdDoneRoute
+  '/dashboard/$jobId/review': typeof DashboardsmartImportJobIdReviewRoute
+  '/dashboard/smart-import/history': typeof DashboardsmartImportSmartImportHistoryRoute
+  '/dashboard/tracks/$trackSlug': typeof DashboardtracksTracksTrackSlugRoute
+  '/dashboard/training/$id': typeof DashboardtrainingTrainingIdRoute
+  '/dashboard/training/catalog': typeof DashboardtrainingTrainingCatalogRoute
+  '/dashboard/training/my-client-trainings': typeof DashboardtrainingTrainingMyClientTrainingsRoute
+  '/dashboard/billing/': typeof DashboardbillingBillingIndexRoute
+  '/dashboard/clients/': typeof DashboardclientsClientsIndexRoute
+  '/dashboard/courses/': typeof DashboardcoursesCoursesIndexRoute
+  '/dashboard/employees/': typeof DashboardemployeesEmployeesIndexRoute
+  '/dashboard/financial/': typeof DashboardfinancialFinancialIndexRoute
+  '/dashboard/forms/': typeof DashboardformsFormsIndexRoute
+  '/dashboard/hive-exec/': typeof DashboardhiveExecHiveExecIndexRoute
+  '/dashboard/hive-training/': typeof DashboardhiveTrainingHiveTrainingIndexRoute
+  '/dashboard/smart-import/': typeof DashboardsmartImportSmartImportIndexRoute
+  '/dashboard/training/': typeof DashboardtrainingTrainingIndexRoute
   '/api/public/oauth/gmail/callback': typeof ApiPublicOauthGmailCallbackRoute
-  '/dashboard/hive-exec/states/$stateCode/onboarding': typeof DashboardHiveExecStatesStateCodeOnboardingRoute
+  '/dashboard/states/$stateCode/onboarding': typeof DashboardhiveExecStatesStateCodeOnboardingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1695,62 +1761,22 @@ export interface FileRoutesByTo {
   '/audit-portal/set-password': typeof AuditPortalSetPasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/clients/new': typeof ClientsNewRoute
-  '/dashboard/agency-documents': typeof DashboardAgencyDocumentsRoute
-  '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
-  '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/audit': typeof DashboardAuditRoute
-  '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
-  '/dashboard/behaviorist': typeof DashboardBehavioristRoute
-  '/dashboard/certifications': typeof DashboardCertificationsRoute
-  '/dashboard/command-center': typeof DashboardCommandCenterRoute
-  '/dashboard/company-obligations': typeof DashboardCompanyObligationsRoute
+  '/dashboard/billing': typeof DashboardbillingBillingIndexRoute
+  '/dashboard/clients': typeof DashboardclientsClientsIndexRoute
   '/dashboard/compliance': typeof DashboardComplianceRoute
-  '/dashboard/compliance-desk': typeof DashboardComplianceDeskRoute
-  '/dashboard/daily-logs': typeof DashboardDailyLogsRoute
-  '/dashboard/day-program': typeof DashboardDayProgramRoute
-  '/dashboard/deadlines': typeof DashboardDeadlinesRoute
-  '/dashboard/emar': typeof DashboardEmarRoute
   '/dashboard/evidence': typeof DashboardEvidenceRoute
-  '/dashboard/evv-archive': typeof DashboardEvvArchiveRoute
-  '/dashboard/external-certifications': typeof DashboardExternalCertificationsRoute
-  '/dashboard/external-compliance': typeof DashboardExternalComplianceRoute
-  '/dashboard/help': typeof DashboardHelpRoute
-  '/dashboard/historical-daily-notes-former-staff': typeof DashboardHistoricalDailyNotesFormerStaffRoute
-  '/dashboard/homes': typeof DashboardHomesRouteWithChildren
-  '/dashboard/host-home-control': typeof DashboardHostHomeControlRoute
-  '/dashboard/hr-admin': typeof DashboardHrAdminRouteWithChildren
-  '/dashboard/hrc': typeof DashboardHrcRoute
-  '/dashboard/inbox': typeof DashboardInboxRoute
-  '/dashboard/internal-audit': typeof DashboardInternalAuditRoute
-  '/dashboard/invitations': typeof DashboardInvitationsRoute
-  '/dashboard/my-client-trainings': typeof DashboardMyClientTrainingsRoute
-  '/dashboard/my-evidence': typeof DashboardMyEvidenceRoute
-  '/dashboard/my-historical-daily-notes': typeof DashboardMyHistoricalDailyNotesRoute
-  '/dashboard/my-historical-records': typeof DashboardMyHistoricalRecordsRoute
-  '/dashboard/my-historical-timesheets': typeof DashboardMyHistoricalTimesheetsRoute
+  '/dashboard/financial': typeof DashboardfinancialFinancialIndexRoute
+  '/dashboard/forms': typeof DashboardformsFormsIndexRoute
+  '/dashboard/hive-exec': typeof DashboardhiveExecHiveExecIndexRoute
+  '/dashboard/homes': typeof DashboardHomesRoute
+  '/dashboard/hr-admin': typeof DashboardHrAdminRoute
   '/dashboard/my-obligations': typeof DashboardMyObligationsRoute
-  '/dashboard/my-time-corrections': typeof DashboardMyTimeCorrectionsRoute
-  '/dashboard/nectar-company-profile': typeof DashboardNectarCompanyProfileRoute
-  '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
-  '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
-  '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
-  '/dashboard/policies': typeof DashboardPoliciesRoute
-  '/dashboard/programs': typeof DashboardProgramsRouteWithChildren
-  '/dashboard/programs-admin': typeof DashboardProgramsAdminRoute
-  '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
-  '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
-  '/dashboard/reports': typeof DashboardReportsRoute
-  '/dashboard/schedule': typeof DashboardScheduleRoute
-  '/dashboard/schedule-preview': typeof DashboardSchedulePreviewRoute
-  '/dashboard/scheduler': typeof DashboardSchedulerRoute
+  '/dashboard/programs': typeof DashboardProgramsRoute
   '/dashboard/scheduling': typeof DashboardSchedulingRoute
-  '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
-  '/dashboard/state-audit': typeof DashboardStateAuditRoute
-  '/dashboard/summaries': typeof DashboardSummariesRoute
-  '/dashboard/team': typeof DashboardTeamRoute
-  '/dashboard/teams': typeof DashboardTeamsRoute
-  '/dashboard/timeclock': typeof DashboardTimeclockRoute
-  '/dashboard/tracks': typeof DashboardTracksRouteWithChildren
+  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/smart-import': typeof DashboardsmartImportSmartImportIndexRoute
+  '/dashboard/tracks': typeof DashboardTracksRoute
   '/e2e/compliance-desk': typeof E2eComplianceDeskRoute
   '/employees/new': typeof EmployeesNewRoute
   '/sign-policy/$documentId': typeof SignPolicyDocumentIdRoute
@@ -1765,123 +1791,163 @@ export interface FileRoutesByTo {
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
-  '/dashboard/admin/emar-audit': typeof DashboardAdminEmarAuditRoute
-  '/dashboard/behavior-support/$clientId': typeof DashboardBehaviorSupportClientIdRoute
-  '/dashboard/billing/$clientId': typeof DashboardBillingClientIdRoute
-  '/dashboard/billing/form520': typeof DashboardBillingForm520Route
-  '/dashboard/billing/imports': typeof DashboardBillingImportsRoute
-  '/dashboard/billing/nectar': typeof DashboardBillingNectarRoute
-  '/dashboard/billing/subscription': typeof DashboardBillingSubscriptionRoute
-  '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
-  '/dashboard/clients/billing-codes': typeof DashboardClientsBillingCodesRoute
-  '/dashboard/clients/file': typeof DashboardClientsFileRoute
-  '/dashboard/clients/new': typeof DashboardClientsNewRoute
-  '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
-  '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
-  '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRouteWithChildren
-  '/dashboard/courses/core': typeof DashboardCoursesCoreRoute
-  '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
-  '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
-  '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
-  '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
-  '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
-  '/dashboard/employees/loans': typeof DashboardEmployeesLoansRoute
-  '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
-  '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
-  '/dashboard/financial/distributions': typeof DashboardFinancialDistributionsRoute
-  '/dashboard/financial/employees': typeof DashboardFinancialEmployeesRoute
-  '/dashboard/financial/gross': typeof DashboardFinancialGrossRoute
-  '/dashboard/financial/host-home': typeof DashboardFinancialHostHomeRoute
-  '/dashboard/financial/monthly-grid': typeof DashboardFinancialMonthlyGridRoute
-  '/dashboard/financial/nectar': typeof DashboardFinancialNectarRoute
-  '/dashboard/financial/revenue': typeof DashboardFinancialRevenueRoute
-  '/dashboard/financial/rhs': typeof DashboardFinancialRhsRoute
-  '/dashboard/financial/totals': typeof DashboardFinancialTotalsRoute
-  '/dashboard/hive-exec/$orgId': typeof DashboardHiveExecOrgIdRoute
-  '/dashboard/hive-exec/agreements': typeof DashboardHiveExecAgreementsRouteWithChildren
-  '/dashboard/hive-exec/approvals': typeof DashboardHiveExecApprovalsRoute
-  '/dashboard/hive-exec/base-template': typeof DashboardHiveExecBaseTemplateRoute
-  '/dashboard/hive-exec/billing-approvals': typeof DashboardHiveExecBillingApprovalsRoute
-  '/dashboard/hive-exec/classes': typeof DashboardHiveExecClassesRoute
-  '/dashboard/hive-exec/command': typeof DashboardHiveExecCommandRoute
-  '/dashboard/hive-exec/company-migration': typeof DashboardHiveExecCompanyMigrationRoute
-  '/dashboard/hive-exec/features': typeof DashboardHiveExecFeaturesRoute
-  '/dashboard/hive-exec/functionality': typeof DashboardHiveExecFunctionalityRoute
-  '/dashboard/hive-exec/health': typeof DashboardHiveExecHealthRoute
-  '/dashboard/hive-exec/knowledge': typeof DashboardHiveExecKnowledgeRoute
-  '/dashboard/hive-exec/messages': typeof DashboardHiveExecMessagesRoute
-  '/dashboard/hive-exec/nectar': typeof DashboardHiveExecNectarRoute
-  '/dashboard/hive-exec/new-company': typeof DashboardHiveExecNewCompanyRoute
-  '/dashboard/hive-exec/permissions': typeof DashboardHiveExecPermissionsRoute
-  '/dashboard/hive-exec/plans': typeof DashboardHiveExecPlansRoute
-  '/dashboard/hive-exec/states': typeof DashboardHiveExecStatesRouteWithChildren
-  '/dashboard/hive-exec/tickets': typeof DashboardHiveExecTicketsRoute
-  '/dashboard/hive-exec/training': typeof DashboardHiveExecTrainingRoute
-  '/dashboard/hive-exec/upgrade-requests': typeof DashboardHiveExecUpgradeRequestsRoute
-  '/dashboard/homes/$teamId': typeof DashboardHomesTeamIdRoute
-  '/dashboard/hr-admin/settings': typeof DashboardHrAdminSettingsRoute
-  '/dashboard/hub/clients': typeof DashboardHubClientsRoute
-  '/dashboard/hub/documentation': typeof DashboardHubDocumentationRoute
-  '/dashboard/hub/employees': typeof DashboardHubEmployeesRoute
-  '/dashboard/hub/finances': typeof DashboardHubFinancesRoute
-  '/dashboard/hub/knowledge': typeof DashboardHubKnowledgeRoute
-  '/dashboard/programs/$programId': typeof DashboardProgramsProgramIdRoute
-  '/dashboard/settings/automation-rules': typeof DashboardSettingsAutomationRulesRoute
-  '/dashboard/settings/bank-mapping': typeof DashboardSettingsBankMappingRoute
-  '/dashboard/settings/compliance-setup': typeof DashboardSettingsComplianceSetupRoute
-  '/dashboard/settings/draft-rules': typeof DashboardSettingsDraftRulesRoute
-  '/dashboard/settings/email': typeof DashboardSettingsEmailRoute
-  '/dashboard/settings/gmail': typeof DashboardSettingsGmailRoute
-  '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
-  '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
-  '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
-  '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
-  '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
-  '/dashboard/settings/subscription': typeof DashboardSettingsSubscriptionRoute
-  '/dashboard/settings/team-access': typeof DashboardSettingsTeamAccessRoute
-  '/dashboard/shift/$shiftId': typeof DashboardShiftShiftIdRoute
-  '/dashboard/smart-import/history': typeof DashboardSmartImportHistoryRoute
-  '/dashboard/tracks/$trackSlug': typeof DashboardTracksTrackSlugRoute
-  '/dashboard/training/$id': typeof DashboardTrainingIdRoute
-  '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
-  '/dashboard/billing': typeof DashboardBillingIndexRoute
-  '/dashboard/clients': typeof DashboardClientsIndexRoute
-  '/dashboard/courses': typeof DashboardCoursesIndexRoute
-  '/dashboard/employees': typeof DashboardEmployeesIndexRoute
-  '/dashboard/financial': typeof DashboardFinancialIndexRoute
-  '/dashboard/forms': typeof DashboardFormsIndexRoute
-  '/dashboard/hive-exec': typeof DashboardHiveExecIndexRoute
-  '/dashboard/hive-training': typeof DashboardHiveTrainingIndexRoute
-  '/dashboard/smart-import': typeof DashboardSmartImportIndexRoute
-  '/dashboard/training': typeof DashboardTrainingIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
-  '/dashboard/clients/hhs-hub/$clientId': typeof DashboardClientsHhsHubClientIdRoute
-  '/dashboard/clients/intake/$clientId': typeof DashboardClientsIntakeClientIdRoute
-  '/dashboard/clients/training/$clientId': typeof DashboardClientsTrainingClientIdRoute
-  '/dashboard/clients/workspace/$clientId': typeof DashboardClientsWorkspaceClientIdRoute
-  '/dashboard/compliance/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
-  '/dashboard/courses/$courseId/edit': typeof DashboardCoursesCourseIdEditRoute
-  '/dashboard/courses/person-module/$assignmentId': typeof DashboardCoursesPersonModuleAssignmentIdRoute
-  '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
-  '/dashboard/courses/topic/$topicId': typeof DashboardCoursesTopicTopicIdRoute
-  '/dashboard/forms/$formId/edit': typeof DashboardFormsFormIdEditRoute
-  '/dashboard/forms/$formId/fill': typeof DashboardFormsFormIdFillRoute
-  '/dashboard/forms/$formId/submissions': typeof DashboardFormsFormIdSubmissionsRoute
-  '/dashboard/hive-exec/agreements/$orgId': typeof DashboardHiveExecAgreementsOrgIdRoute
-  '/dashboard/hive-exec/agreements/requirements': typeof DashboardHiveExecAgreementsRequirementsRoute
-  '/dashboard/hive-exec/states/$stateCode': typeof DashboardHiveExecStatesStateCodeRouteWithChildren
-  '/dashboard/hive-training/course/$assignmentId': typeof DashboardHiveTrainingCourseAssignmentIdRoute
-  '/dashboard/my-obligations/course/$instanceId': typeof DashboardMyObligationsCourseInstanceIdRoute
-  '/dashboard/smart-import/$jobId/done': typeof DashboardSmartImportJobIdDoneRoute
-  '/dashboard/smart-import/$jobId/review': typeof DashboardSmartImportJobIdReviewRoute
+  '/dashboard/admin/command-center': typeof DashboardadminAdminCommandCenterRoute
+  '/dashboard/admin/emar-audit': typeof DashboardadminAdminEmarAuditRoute
+  '/dashboard/admin/programs-admin': typeof DashboardadminAdminProgramsAdminRoute
+  '/dashboard/audit/internal-audit': typeof DashboardauditAuditInternalAuditRoute
+  '/dashboard/audit/state-audit': typeof DashboardauditAuditStateAuditRoute
+  '/dashboard/behavior-support/$clientId': typeof DashboardbehaviorSupportBehaviorSupportClientIdRoute
+  '/dashboard/billing/$clientId': typeof DashboardbillingBillingClientIdRoute
+  '/dashboard/billing/form520': typeof DashboardbillingBillingForm520Route
+  '/dashboard/billing/imports': typeof DashboardbillingBillingImportsRoute
+  '/dashboard/billing/nectar': typeof DashboardbillingBillingNectarRoute
+  '/dashboard/billing/subscription': typeof DashboardbillingBillingSubscriptionRoute
+  '/dashboard/clients/$clientId': typeof DashboardclientsClientsClientIdRoute
+  '/dashboard/clients/behaviorist': typeof DashboardclientsClientsBehavioristRoute
+  '/dashboard/clients/client-billing-codes': typeof DashboardclientsClientsClientBillingCodesRoute
+  '/dashboard/clients/client-file': typeof DashboardclientsClientsClientFileRoute
+  '/dashboard/clients/new': typeof DashboardclientsClientsNewRoute
+  '/dashboard/clients/pending': typeof DashboardclientsClientsPendingRoute
+  '/dashboard/clients/rhs-board': typeof DashboardclientsClientsRhsBoardRoute
+  '/dashboard/hhs-hub/$clientId': typeof DashboardclientsHhsHubClientIdRoute
+  '/dashboard/intake/$clientId': typeof DashboardclientsIntakeClientIdRoute
+  '/dashboard/training/$clientId': typeof DashboardclientsTrainingClientIdRoute
+  '/dashboard/workspace/$clientId': typeof DashboardclientsWorkspaceClientIdRoute
+  '/dashboard/compliance/authoritative-sources': typeof DashboardcomplianceComplianceAuthoritativeSourcesRoute
+  '/dashboard/compliance/certifications': typeof DashboardcomplianceComplianceCertificationsRoute
+  '/dashboard/compliance/company-obligations': typeof DashboardcomplianceComplianceCompanyObligationsRoute
+  '/dashboard/compliance/compliance-desk': typeof DashboardcomplianceComplianceComplianceDeskRoute
+  '/dashboard/compliance/deadlines': typeof DashboardcomplianceComplianceDeadlinesRoute
+  '/dashboard/compliance/external-certifications': typeof DashboardcomplianceComplianceExternalCertificationsRoute
+  '/dashboard/compliance/external-compliance': typeof DashboardcomplianceComplianceExternalComplianceRoute
+  '/dashboard/compliance/hrc': typeof DashboardcomplianceComplianceHrcRoute
+  '/dashboard/compliance/policies': typeof DashboardcomplianceCompliancePoliciesRoute
+  '/dashboard/cert-review/$completionId': typeof Dashboardcompliance_CertReviewCompletionIdRoute
+  '/dashboard/$courseId/edit': typeof DashboardcoursesCourseIdEditRoute
+  '/dashboard/courses/$courseId': typeof DashboardcoursesCoursesCourseIdRoute
+  '/dashboard/courses/core': typeof DashboardcoursesCoursesCoreRoute
+  '/dashboard/courses/mindsmith': typeof DashboardcoursesCoursesMindsmithRoute
+  '/dashboard/courses/other': typeof DashboardcoursesCoursesOtherRoute
+  '/dashboard/courses/person': typeof DashboardcoursesCoursesPersonRoute
+  '/dashboard/person-module/$assignmentId': typeof DashboardcoursesPersonModuleAssignmentIdRoute
+  '/dashboard/policy/$documentId': typeof DashboardcoursesPolicyDocumentIdRoute
+  '/dashboard/topic/$topicId': typeof DashboardcoursesTopicTopicIdRoute
+  '/dashboard/documents/agency-documents': typeof DashboarddocumentsDocumentsAgencyDocumentsRoute
+  '/dashboard/documents/emar': typeof DashboarddocumentsDocumentsEmarRoute
+  '/dashboard/employees/$staffId': typeof DashboardemployeesEmployeesStaffIdRoute
+  '/dashboard/employees/client-loans': typeof DashboardemployeesEmployeesClientLoansRoute
+  '/dashboard/employees/hire-dates': typeof DashboardemployeesEmployeesHireDatesRoute
+  '/dashboard/employees/invitations': typeof DashboardemployeesEmployeesInvitationsRoute
+  '/dashboard/employees/new': typeof DashboardemployeesEmployeesNewRoute
+  '/dashboard/employees/personnel-file': typeof DashboardemployeesEmployeesPersonnelFileRoute
+  '/dashboard/employees/team': typeof DashboardemployeesEmployeesTeamRoute
+  '/dashboard/evidence/my-evidence': typeof DashboardevidenceEvidenceMyEvidenceRoute
+  '/dashboard/financial/contractors': typeof DashboardfinancialFinancialContractorsRoute
+  '/dashboard/financial/distributions': typeof DashboardfinancialFinancialDistributionsRoute
+  '/dashboard/financial/employees': typeof DashboardfinancialFinancialEmployeesRoute
+  '/dashboard/financial/gross': typeof DashboardfinancialFinancialGrossRoute
+  '/dashboard/financial/host-home': typeof DashboardfinancialFinancialHostHomeRoute
+  '/dashboard/financial/monthly-grid': typeof DashboardfinancialFinancialMonthlyGridRoute
+  '/dashboard/financial/nectar': typeof DashboardfinancialFinancialNectarRoute
+  '/dashboard/financial/pba-ledger': typeof DashboardfinancialFinancialPbaLedgerRoute
+  '/dashboard/financial/reimbursements': typeof DashboardfinancialFinancialReimbursementsRoute
+  '/dashboard/financial/revenue': typeof DashboardfinancialFinancialRevenueRoute
+  '/dashboard/financial/rhs': typeof DashboardfinancialFinancialRhsRoute
+  '/dashboard/financial/totals': typeof DashboardfinancialFinancialTotalsRoute
+  '/dashboard/$formId/edit': typeof DashboardformsFormIdEditRoute
+  '/dashboard/$formId/fill': typeof DashboardformsFormIdFillRoute
+  '/dashboard/$formId/submissions': typeof DashboardformsFormIdSubmissionsRoute
+  '/dashboard/agreements/$orgId': typeof DashboardhiveExecAgreementsOrgIdRoute
+  '/dashboard/agreements/requirements': typeof DashboardhiveExecAgreementsRequirementsRoute
+  '/dashboard/hive-exec/$orgId': typeof DashboardhiveExecHiveExecOrgIdRoute
+  '/dashboard/hive-exec/agreements': typeof DashboardhiveExecHiveExecAgreementsRoute
+  '/dashboard/hive-exec/approvals': typeof DashboardhiveExecHiveExecApprovalsRoute
+  '/dashboard/hive-exec/base-template': typeof DashboardhiveExecHiveExecBaseTemplateRoute
+  '/dashboard/hive-exec/billing-approvals': typeof DashboardhiveExecHiveExecBillingApprovalsRoute
+  '/dashboard/hive-exec/classes': typeof DashboardhiveExecHiveExecClassesRoute
+  '/dashboard/hive-exec/command': typeof DashboardhiveExecHiveExecCommandRoute
+  '/dashboard/hive-exec/company-migration': typeof DashboardhiveExecHiveExecCompanyMigrationRoute
+  '/dashboard/hive-exec/features': typeof DashboardhiveExecHiveExecFeaturesRoute
+  '/dashboard/hive-exec/functionality': typeof DashboardhiveExecHiveExecFunctionalityRoute
+  '/dashboard/hive-exec/health': typeof DashboardhiveExecHiveExecHealthRoute
+  '/dashboard/hive-exec/knowledge': typeof DashboardhiveExecHiveExecKnowledgeRoute
+  '/dashboard/hive-exec/messages': typeof DashboardhiveExecHiveExecMessagesRoute
+  '/dashboard/hive-exec/nectar': typeof DashboardhiveExecHiveExecNectarRoute
+  '/dashboard/hive-exec/new-company': typeof DashboardhiveExecHiveExecNewCompanyRoute
+  '/dashboard/hive-exec/permissions': typeof DashboardhiveExecHiveExecPermissionsRoute
+  '/dashboard/hive-exec/plans': typeof DashboardhiveExecHiveExecPlansRoute
+  '/dashboard/hive-exec/states': typeof DashboardhiveExecHiveExecStatesRoute
+  '/dashboard/hive-exec/tickets': typeof DashboardhiveExecHiveExecTicketsRoute
+  '/dashboard/hive-exec/training': typeof DashboardhiveExecHiveExecTrainingRoute
+  '/dashboard/hive-exec/upgrade-requests': typeof DashboardhiveExecHiveExecUpgradeRequestsRoute
+  '/dashboard/states/$stateCode': typeof DashboardhiveExecStatesStateCodeRouteWithChildren
+  '/dashboard/course/$assignmentId': typeof DashboardhiveTrainingCourseAssignmentIdRoute
+  '/dashboard/homes/$teamId': typeof DashboardhomesHomesTeamIdRoute
+  '/dashboard/homes/host-home-control': typeof DashboardhomesHomesHostHomeControlRoute
+  '/dashboard/homes/teams': typeof DashboardhomesHomesTeamsRoute
+  '/dashboard/hr-admin/settings': typeof DashboardhrAdminHrAdminSettingsRoute
+  '/dashboard/hub/clients': typeof DashboardhubHubClientsRoute
+  '/dashboard/hub/documentation': typeof DashboardhubHubDocumentationRoute
+  '/dashboard/hub/employees': typeof DashboardhubHubEmployeesRoute
+  '/dashboard/hub/finances': typeof DashboardhubHubFinancesRoute
+  '/dashboard/hub/knowledge': typeof DashboardhubHubKnowledgeRoute
+  '/dashboard/course/$instanceId': typeof DashboardmyObligations_CourseInstanceIdRoute
+  '/dashboard/nectar/ask-nectar': typeof DashboardnectarNectarAskNectarRoute
+  '/dashboard/nectar/help': typeof DashboardnectarNectarHelpRoute
+  '/dashboard/nectar/inbox': typeof DashboardnectarNectarInboxRoute
+  '/dashboard/nectar/nectar-company-profile': typeof DashboardnectarNectarNectarCompanyProfileRoute
+  '/dashboard/nectar/nectar-docs': typeof DashboardnectarNectarNectarDocsRoute
+  '/dashboard/programs/$programId': typeof DashboardprogramsProgramsProgramIdRoute
+  '/dashboard/records/historical-daily-notes-former-staff': typeof DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRoute
+  '/dashboard/records/my-historical-daily-notes': typeof DashboardrecordsRecordsMyHistoricalDailyNotesRoute
+  '/dashboard/records/my-historical-records': typeof DashboardrecordsRecordsMyHistoricalRecordsRoute
+  '/dashboard/records/my-historical-timesheets': typeof DashboardrecordsRecordsMyHistoricalTimesheetsRoute
+  '/dashboard/records/records-desk': typeof DashboardrecordsRecordsRecordsDeskRoute
+  '/dashboard/records/reports': typeof DashboardrecordsRecordsReportsRoute
+  '/dashboard/records/summaries': typeof DashboardrecordsRecordsSummariesRoute
+  '/dashboard/scheduling/assignments': typeof DashboardschedulingSchedulingAssignmentsRoute
+  '/dashboard/scheduling/daily-logs': typeof DashboardschedulingSchedulingDailyLogsRoute
+  '/dashboard/scheduling/day-program': typeof DashboardschedulingSchedulingDayProgramRoute
+  '/dashboard/scheduling/evv-archive': typeof DashboardschedulingSchedulingEvvArchiveRoute
+  '/dashboard/scheduling/my-time-corrections': typeof DashboardschedulingSchedulingMyTimeCorrectionsRoute
+  '/dashboard/scheduling/schedule': typeof DashboardschedulingSchedulingScheduleRoute
+  '/dashboard/scheduling/schedule-preview': typeof DashboardschedulingSchedulingSchedulePreviewRoute
+  '/dashboard/scheduling/scheduler': typeof DashboardschedulingSchedulingSchedulerRoute
+  '/dashboard/scheduling/timeclock': typeof DashboardschedulingSchedulingTimeclockRoute
+  '/dashboard/shift/$shiftId': typeof DashboardschedulingShiftShiftIdRoute
+  '/dashboard/settings/automation-rules': typeof DashboardsettingsSettingsAutomationRulesRoute
+  '/dashboard/settings/bank-mapping': typeof DashboardsettingsSettingsBankMappingRoute
+  '/dashboard/settings/compliance-setup': typeof DashboardsettingsSettingsComplianceSetupRoute
+  '/dashboard/settings/draft-rules': typeof DashboardsettingsSettingsDraftRulesRoute
+  '/dashboard/settings/email': typeof DashboardsettingsSettingsEmailRoute
+  '/dashboard/settings/gmail': typeof DashboardsettingsSettingsGmailRoute
+  '/dashboard/settings/licensing': typeof DashboardsettingsSettingsLicensingRoute
+  '/dashboard/settings/phi-access-audit': typeof DashboardsettingsSettingsPhiAccessAuditRoute
+  '/dashboard/settings/retention': typeof DashboardsettingsSettingsRetentionRoute
+  '/dashboard/settings/service-catalog': typeof DashboardsettingsSettingsServiceCatalogRoute
+  '/dashboard/settings/service-codes': typeof DashboardsettingsSettingsServiceCodesRoute
+  '/dashboard/settings/subscription': typeof DashboardsettingsSettingsSubscriptionRoute
+  '/dashboard/settings/team-access': typeof DashboardsettingsSettingsTeamAccessRoute
+  '/dashboard/$jobId/done': typeof DashboardsmartImportJobIdDoneRoute
+  '/dashboard/$jobId/review': typeof DashboardsmartImportJobIdReviewRoute
+  '/dashboard/smart-import/history': typeof DashboardsmartImportSmartImportHistoryRoute
+  '/dashboard/tracks/$trackSlug': typeof DashboardtracksTracksTrackSlugRoute
+  '/dashboard/training/$id': typeof DashboardtrainingTrainingIdRoute
+  '/dashboard/training/catalog': typeof DashboardtrainingTrainingCatalogRoute
+  '/dashboard/training/my-client-trainings': typeof DashboardtrainingTrainingMyClientTrainingsRoute
+  '/dashboard/courses': typeof DashboardcoursesCoursesIndexRoute
+  '/dashboard/employees': typeof DashboardemployeesEmployeesIndexRoute
+  '/dashboard/hive-training': typeof DashboardhiveTrainingHiveTrainingIndexRoute
+  '/dashboard/training': typeof DashboardtrainingTrainingIndexRoute
   '/api/public/oauth/gmail/callback': typeof ApiPublicOauthGmailCallbackRoute
-  '/dashboard/hive-exec/states/$stateCode/onboarding': typeof DashboardHiveExecStatesStateCodeOnboardingRoute
+  '/dashboard/states/$stateCode/onboarding': typeof DashboardhiveExecStatesStateCodeOnboardingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1915,68 +1981,22 @@ export interface FileRoutesById {
   '/audit-portal/set-password': typeof AuditPortalSetPasswordRoute
   '/certificate/$code': typeof CertificateCodeRoute
   '/clients/new': typeof ClientsNewRoute
-  '/dashboard/agency-documents': typeof DashboardAgencyDocumentsRoute
-  '/dashboard/ask-nectar': typeof DashboardAskNectarRoute
-  '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/audit': typeof DashboardAuditRoute
-  '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
-  '/dashboard/behaviorist': typeof DashboardBehavioristRoute
-  '/dashboard/billing': typeof DashboardBillingRouteWithChildren
-  '/dashboard/certifications': typeof DashboardCertificationsRoute
-  '/dashboard/clients': typeof DashboardClientsRouteWithChildren
-  '/dashboard/command-center': typeof DashboardCommandCenterRoute
-  '/dashboard/company-obligations': typeof DashboardCompanyObligationsRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/clients': typeof DashboardClientsRoute
   '/dashboard/compliance': typeof DashboardComplianceRoute
-  '/dashboard/compliance-desk': typeof DashboardComplianceDeskRoute
-  '/dashboard/daily-logs': typeof DashboardDailyLogsRoute
-  '/dashboard/day-program': typeof DashboardDayProgramRoute
-  '/dashboard/deadlines': typeof DashboardDeadlinesRoute
-  '/dashboard/emar': typeof DashboardEmarRoute
   '/dashboard/evidence': typeof DashboardEvidenceRoute
-  '/dashboard/evv-archive': typeof DashboardEvvArchiveRoute
-  '/dashboard/external-certifications': typeof DashboardExternalCertificationsRoute
-  '/dashboard/external-compliance': typeof DashboardExternalComplianceRoute
-  '/dashboard/financial': typeof DashboardFinancialRouteWithChildren
-  '/dashboard/forms': typeof DashboardFormsRouteWithChildren
-  '/dashboard/help': typeof DashboardHelpRoute
-  '/dashboard/historical-daily-notes-former-staff': typeof DashboardHistoricalDailyNotesFormerStaffRoute
-  '/dashboard/hive-exec': typeof DashboardHiveExecRouteWithChildren
-  '/dashboard/homes': typeof DashboardHomesRouteWithChildren
-  '/dashboard/host-home-control': typeof DashboardHostHomeControlRoute
-  '/dashboard/hr-admin': typeof DashboardHrAdminRouteWithChildren
-  '/dashboard/hrc': typeof DashboardHrcRoute
-  '/dashboard/inbox': typeof DashboardInboxRoute
-  '/dashboard/internal-audit': typeof DashboardInternalAuditRoute
-  '/dashboard/invitations': typeof DashboardInvitationsRoute
-  '/dashboard/my-client-trainings': typeof DashboardMyClientTrainingsRoute
-  '/dashboard/my-evidence': typeof DashboardMyEvidenceRoute
-  '/dashboard/my-historical-daily-notes': typeof DashboardMyHistoricalDailyNotesRoute
-  '/dashboard/my-historical-records': typeof DashboardMyHistoricalRecordsRoute
-  '/dashboard/my-historical-timesheets': typeof DashboardMyHistoricalTimesheetsRoute
+  '/dashboard/financial': typeof DashboardFinancialRoute
+  '/dashboard/forms': typeof DashboardFormsRoute
+  '/dashboard/hive-exec': typeof DashboardHiveExecRoute
+  '/dashboard/homes': typeof DashboardHomesRoute
+  '/dashboard/hr-admin': typeof DashboardHrAdminRoute
   '/dashboard/my-obligations': typeof DashboardMyObligationsRoute
-  '/dashboard/my-time-corrections': typeof DashboardMyTimeCorrectionsRoute
-  '/dashboard/nectar-company-profile': typeof DashboardNectarCompanyProfileRoute
-  '/dashboard/nectar-docs': typeof DashboardNectarDocsRoute
-  '/dashboard/pba-ledger': typeof DashboardPbaLedgerRoute
-  '/dashboard/personnel-file': typeof DashboardPersonnelFileRoute
-  '/dashboard/policies': typeof DashboardPoliciesRoute
-  '/dashboard/programs': typeof DashboardProgramsRouteWithChildren
-  '/dashboard/programs-admin': typeof DashboardProgramsAdminRoute
-  '/dashboard/records-desk': typeof DashboardRecordsDeskRoute
-  '/dashboard/reimbursements': typeof DashboardReimbursementsRoute
-  '/dashboard/reports': typeof DashboardReportsRoute
-  '/dashboard/schedule': typeof DashboardScheduleRoute
-  '/dashboard/schedule-preview': typeof DashboardSchedulePreviewRoute
-  '/dashboard/scheduler': typeof DashboardSchedulerRoute
+  '/dashboard/programs': typeof DashboardProgramsRoute
   '/dashboard/scheduling': typeof DashboardSchedulingRoute
-  '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
-  '/dashboard/smart-import': typeof DashboardSmartImportRouteWithChildren
-  '/dashboard/state-audit': typeof DashboardStateAuditRoute
-  '/dashboard/summaries': typeof DashboardSummariesRoute
-  '/dashboard/team': typeof DashboardTeamRoute
-  '/dashboard/teams': typeof DashboardTeamsRoute
-  '/dashboard/timeclock': typeof DashboardTimeclockRoute
-  '/dashboard/tracks': typeof DashboardTracksRouteWithChildren
+  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/smart-import': typeof DashboardSmartImportRoute
+  '/dashboard/tracks': typeof DashboardTracksRoute
   '/e2e/compliance-desk': typeof E2eComplianceDeskRoute
   '/employees/new': typeof EmployeesNewRoute
   '/sign-policy/$documentId': typeof SignPolicyDocumentIdRoute
@@ -1991,123 +2011,169 @@ export interface FileRoutesById {
   '/api/compliance/urgent': typeof ApiComplianceUrgentRoute
   '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
-  '/dashboard/admin/emar-audit': typeof DashboardAdminEmarAuditRoute
-  '/dashboard/behavior-support/$clientId': typeof DashboardBehaviorSupportClientIdRoute
-  '/dashboard/billing/$clientId': typeof DashboardBillingClientIdRoute
-  '/dashboard/billing/form520': typeof DashboardBillingForm520Route
-  '/dashboard/billing/imports': typeof DashboardBillingImportsRoute
-  '/dashboard/billing/nectar': typeof DashboardBillingNectarRoute
-  '/dashboard/billing/subscription': typeof DashboardBillingSubscriptionRoute
-  '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
-  '/dashboard/clients/billing-codes': typeof DashboardClientsBillingCodesRoute
-  '/dashboard/clients/file': typeof DashboardClientsFileRoute
-  '/dashboard/clients/new': typeof DashboardClientsNewRoute
-  '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
-  '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
-  '/dashboard/courses/$courseId': typeof DashboardCoursesCourseIdRouteWithChildren
-  '/dashboard/courses/core': typeof DashboardCoursesCoreRoute
-  '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
-  '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
-  '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
-  '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
-  '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
-  '/dashboard/employees/loans': typeof DashboardEmployeesLoansRoute
-  '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
-  '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
-  '/dashboard/financial/distributions': typeof DashboardFinancialDistributionsRoute
-  '/dashboard/financial/employees': typeof DashboardFinancialEmployeesRoute
-  '/dashboard/financial/gross': typeof DashboardFinancialGrossRoute
-  '/dashboard/financial/host-home': typeof DashboardFinancialHostHomeRoute
-  '/dashboard/financial/monthly-grid': typeof DashboardFinancialMonthlyGridRoute
-  '/dashboard/financial/nectar': typeof DashboardFinancialNectarRoute
-  '/dashboard/financial/revenue': typeof DashboardFinancialRevenueRoute
-  '/dashboard/financial/rhs': typeof DashboardFinancialRhsRoute
-  '/dashboard/financial/totals': typeof DashboardFinancialTotalsRoute
-  '/dashboard/hive-exec/$orgId': typeof DashboardHiveExecOrgIdRoute
-  '/dashboard/hive-exec/agreements': typeof DashboardHiveExecAgreementsRouteWithChildren
-  '/dashboard/hive-exec/approvals': typeof DashboardHiveExecApprovalsRoute
-  '/dashboard/hive-exec/base-template': typeof DashboardHiveExecBaseTemplateRoute
-  '/dashboard/hive-exec/billing-approvals': typeof DashboardHiveExecBillingApprovalsRoute
-  '/dashboard/hive-exec/classes': typeof DashboardHiveExecClassesRoute
-  '/dashboard/hive-exec/command': typeof DashboardHiveExecCommandRoute
-  '/dashboard/hive-exec/company-migration': typeof DashboardHiveExecCompanyMigrationRoute
-  '/dashboard/hive-exec/features': typeof DashboardHiveExecFeaturesRoute
-  '/dashboard/hive-exec/functionality': typeof DashboardHiveExecFunctionalityRoute
-  '/dashboard/hive-exec/health': typeof DashboardHiveExecHealthRoute
-  '/dashboard/hive-exec/knowledge': typeof DashboardHiveExecKnowledgeRoute
-  '/dashboard/hive-exec/messages': typeof DashboardHiveExecMessagesRoute
-  '/dashboard/hive-exec/nectar': typeof DashboardHiveExecNectarRoute
-  '/dashboard/hive-exec/new-company': typeof DashboardHiveExecNewCompanyRoute
-  '/dashboard/hive-exec/permissions': typeof DashboardHiveExecPermissionsRoute
-  '/dashboard/hive-exec/plans': typeof DashboardHiveExecPlansRoute
-  '/dashboard/hive-exec/states': typeof DashboardHiveExecStatesRouteWithChildren
-  '/dashboard/hive-exec/tickets': typeof DashboardHiveExecTicketsRoute
-  '/dashboard/hive-exec/training': typeof DashboardHiveExecTrainingRoute
-  '/dashboard/hive-exec/upgrade-requests': typeof DashboardHiveExecUpgradeRequestsRoute
-  '/dashboard/homes/$teamId': typeof DashboardHomesTeamIdRoute
-  '/dashboard/hr-admin/settings': typeof DashboardHrAdminSettingsRoute
-  '/dashboard/hub/clients': typeof DashboardHubClientsRoute
-  '/dashboard/hub/documentation': typeof DashboardHubDocumentationRoute
-  '/dashboard/hub/employees': typeof DashboardHubEmployeesRoute
-  '/dashboard/hub/finances': typeof DashboardHubFinancesRoute
-  '/dashboard/hub/knowledge': typeof DashboardHubKnowledgeRoute
-  '/dashboard/programs/$programId': typeof DashboardProgramsProgramIdRoute
-  '/dashboard/settings/automation-rules': typeof DashboardSettingsAutomationRulesRoute
-  '/dashboard/settings/bank-mapping': typeof DashboardSettingsBankMappingRoute
-  '/dashboard/settings/compliance-setup': typeof DashboardSettingsComplianceSetupRoute
-  '/dashboard/settings/draft-rules': typeof DashboardSettingsDraftRulesRoute
-  '/dashboard/settings/email': typeof DashboardSettingsEmailRoute
-  '/dashboard/settings/gmail': typeof DashboardSettingsGmailRoute
-  '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
-  '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
-  '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
-  '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
-  '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
-  '/dashboard/settings/subscription': typeof DashboardSettingsSubscriptionRoute
-  '/dashboard/settings/team-access': typeof DashboardSettingsTeamAccessRoute
-  '/dashboard/shift/$shiftId': typeof DashboardShiftShiftIdRoute
-  '/dashboard/smart-import/history': typeof DashboardSmartImportHistoryRoute
-  '/dashboard/tracks/$trackSlug': typeof DashboardTracksTrackSlugRoute
-  '/dashboard/training/$id': typeof DashboardTrainingIdRoute
-  '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
-  '/dashboard/billing/': typeof DashboardBillingIndexRoute
-  '/dashboard/clients/': typeof DashboardClientsIndexRoute
-  '/dashboard/courses/': typeof DashboardCoursesIndexRoute
-  '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
-  '/dashboard/financial/': typeof DashboardFinancialIndexRoute
-  '/dashboard/forms/': typeof DashboardFormsIndexRoute
-  '/dashboard/hive-exec/': typeof DashboardHiveExecIndexRoute
-  '/dashboard/hive-training/': typeof DashboardHiveTrainingIndexRoute
-  '/dashboard/smart-import/': typeof DashboardSmartImportIndexRoute
-  '/dashboard/training/': typeof DashboardTrainingIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
   '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
-  '/dashboard/clients/hhs-hub/$clientId': typeof DashboardClientsHhsHubClientIdRoute
-  '/dashboard/clients/intake/$clientId': typeof DashboardClientsIntakeClientIdRoute
-  '/dashboard/clients/training/$clientId': typeof DashboardClientsTrainingClientIdRoute
-  '/dashboard/clients/workspace/$clientId': typeof DashboardClientsWorkspaceClientIdRoute
-  '/dashboard/compliance_/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
-  '/dashboard/courses/$courseId/edit': typeof DashboardCoursesCourseIdEditRoute
-  '/dashboard/courses/person-module/$assignmentId': typeof DashboardCoursesPersonModuleAssignmentIdRoute
-  '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
-  '/dashboard/courses/topic/$topicId': typeof DashboardCoursesTopicTopicIdRoute
-  '/dashboard/forms/$formId/edit': typeof DashboardFormsFormIdEditRoute
-  '/dashboard/forms/$formId/fill': typeof DashboardFormsFormIdFillRoute
-  '/dashboard/forms/$formId/submissions': typeof DashboardFormsFormIdSubmissionsRoute
-  '/dashboard/hive-exec/agreements/$orgId': typeof DashboardHiveExecAgreementsOrgIdRoute
-  '/dashboard/hive-exec/agreements/requirements': typeof DashboardHiveExecAgreementsRequirementsRoute
-  '/dashboard/hive-exec/states/$stateCode': typeof DashboardHiveExecStatesStateCodeRouteWithChildren
-  '/dashboard/hive-training/course/$assignmentId': typeof DashboardHiveTrainingCourseAssignmentIdRoute
-  '/dashboard/my-obligations_/course/$instanceId': typeof DashboardMyObligationsCourseInstanceIdRoute
-  '/dashboard/smart-import/$jobId/done': typeof DashboardSmartImportJobIdDoneRoute
-  '/dashboard/smart-import/$jobId/review': typeof DashboardSmartImportJobIdReviewRoute
+  '/dashboard/(admin)/admin/command-center': typeof DashboardadminAdminCommandCenterRoute
+  '/dashboard/(admin)/admin/emar-audit': typeof DashboardadminAdminEmarAuditRoute
+  '/dashboard/(admin)/admin/programs-admin': typeof DashboardadminAdminProgramsAdminRoute
+  '/dashboard/(audit)/audit/internal-audit': typeof DashboardauditAuditInternalAuditRoute
+  '/dashboard/(audit)/audit/state-audit': typeof DashboardauditAuditStateAuditRoute
+  '/dashboard/(behavior-support)/behavior-support/$clientId': typeof DashboardbehaviorSupportBehaviorSupportClientIdRoute
+  '/dashboard/(billing)/billing/$clientId': typeof DashboardbillingBillingClientIdRoute
+  '/dashboard/(billing)/billing/form520': typeof DashboardbillingBillingForm520Route
+  '/dashboard/(billing)/billing/imports': typeof DashboardbillingBillingImportsRoute
+  '/dashboard/(billing)/billing/nectar': typeof DashboardbillingBillingNectarRoute
+  '/dashboard/(billing)/billing/subscription': typeof DashboardbillingBillingSubscriptionRoute
+  '/dashboard/(clients)/clients/$clientId': typeof DashboardclientsClientsClientIdRoute
+  '/dashboard/(clients)/clients/behaviorist': typeof DashboardclientsClientsBehavioristRoute
+  '/dashboard/(clients)/clients/client-billing-codes': typeof DashboardclientsClientsClientBillingCodesRoute
+  '/dashboard/(clients)/clients/client-file': typeof DashboardclientsClientsClientFileRoute
+  '/dashboard/(clients)/clients/new': typeof DashboardclientsClientsNewRoute
+  '/dashboard/(clients)/clients/pending': typeof DashboardclientsClientsPendingRoute
+  '/dashboard/(clients)/clients/rhs-board': typeof DashboardclientsClientsRhsBoardRoute
+  '/dashboard/(clients)/hhs-hub/$clientId': typeof DashboardclientsHhsHubClientIdRoute
+  '/dashboard/(clients)/intake/$clientId': typeof DashboardclientsIntakeClientIdRoute
+  '/dashboard/(clients)/training/$clientId': typeof DashboardclientsTrainingClientIdRoute
+  '/dashboard/(clients)/workspace/$clientId': typeof DashboardclientsWorkspaceClientIdRoute
+  '/dashboard/(compliance)/compliance/authoritative-sources': typeof DashboardcomplianceComplianceAuthoritativeSourcesRoute
+  '/dashboard/(compliance)/compliance/certifications': typeof DashboardcomplianceComplianceCertificationsRoute
+  '/dashboard/(compliance)/compliance/company-obligations': typeof DashboardcomplianceComplianceCompanyObligationsRoute
+  '/dashboard/(compliance)/compliance/compliance-desk': typeof DashboardcomplianceComplianceComplianceDeskRoute
+  '/dashboard/(compliance)/compliance/deadlines': typeof DashboardcomplianceComplianceDeadlinesRoute
+  '/dashboard/(compliance)/compliance/external-certifications': typeof DashboardcomplianceComplianceExternalCertificationsRoute
+  '/dashboard/(compliance)/compliance/external-compliance': typeof DashboardcomplianceComplianceExternalComplianceRoute
+  '/dashboard/(compliance)/compliance/hrc': typeof DashboardcomplianceComplianceHrcRoute
+  '/dashboard/(compliance)/compliance/policies': typeof DashboardcomplianceCompliancePoliciesRoute
+  '/dashboard/(compliance_)/cert-review/$completionId': typeof Dashboardcompliance_CertReviewCompletionIdRoute
+  '/dashboard/(courses)/$courseId/edit': typeof DashboardcoursesCourseIdEditRoute
+  '/dashboard/(courses)/courses/$courseId': typeof DashboardcoursesCoursesCourseIdRoute
+  '/dashboard/(courses)/courses/core': typeof DashboardcoursesCoursesCoreRoute
+  '/dashboard/(courses)/courses/mindsmith': typeof DashboardcoursesCoursesMindsmithRoute
+  '/dashboard/(courses)/courses/other': typeof DashboardcoursesCoursesOtherRoute
+  '/dashboard/(courses)/courses/person': typeof DashboardcoursesCoursesPersonRoute
+  '/dashboard/(courses)/person-module/$assignmentId': typeof DashboardcoursesPersonModuleAssignmentIdRoute
+  '/dashboard/(courses)/policy/$documentId': typeof DashboardcoursesPolicyDocumentIdRoute
+  '/dashboard/(courses)/topic/$topicId': typeof DashboardcoursesTopicTopicIdRoute
+  '/dashboard/(documents)/documents/agency-documents': typeof DashboarddocumentsDocumentsAgencyDocumentsRoute
+  '/dashboard/(documents)/documents/emar': typeof DashboarddocumentsDocumentsEmarRoute
+  '/dashboard/(employees)/employees/$staffId': typeof DashboardemployeesEmployeesStaffIdRoute
+  '/dashboard/(employees)/employees/client-loans': typeof DashboardemployeesEmployeesClientLoansRoute
+  '/dashboard/(employees)/employees/hire-dates': typeof DashboardemployeesEmployeesHireDatesRoute
+  '/dashboard/(employees)/employees/invitations': typeof DashboardemployeesEmployeesInvitationsRoute
+  '/dashboard/(employees)/employees/new': typeof DashboardemployeesEmployeesNewRoute
+  '/dashboard/(employees)/employees/personnel-file': typeof DashboardemployeesEmployeesPersonnelFileRoute
+  '/dashboard/(employees)/employees/team': typeof DashboardemployeesEmployeesTeamRoute
+  '/dashboard/(evidence)/evidence/my-evidence': typeof DashboardevidenceEvidenceMyEvidenceRoute
+  '/dashboard/(financial)/financial/contractors': typeof DashboardfinancialFinancialContractorsRoute
+  '/dashboard/(financial)/financial/distributions': typeof DashboardfinancialFinancialDistributionsRoute
+  '/dashboard/(financial)/financial/employees': typeof DashboardfinancialFinancialEmployeesRoute
+  '/dashboard/(financial)/financial/gross': typeof DashboardfinancialFinancialGrossRoute
+  '/dashboard/(financial)/financial/host-home': typeof DashboardfinancialFinancialHostHomeRoute
+  '/dashboard/(financial)/financial/monthly-grid': typeof DashboardfinancialFinancialMonthlyGridRoute
+  '/dashboard/(financial)/financial/nectar': typeof DashboardfinancialFinancialNectarRoute
+  '/dashboard/(financial)/financial/pba-ledger': typeof DashboardfinancialFinancialPbaLedgerRoute
+  '/dashboard/(financial)/financial/reimbursements': typeof DashboardfinancialFinancialReimbursementsRoute
+  '/dashboard/(financial)/financial/revenue': typeof DashboardfinancialFinancialRevenueRoute
+  '/dashboard/(financial)/financial/rhs': typeof DashboardfinancialFinancialRhsRoute
+  '/dashboard/(financial)/financial/totals': typeof DashboardfinancialFinancialTotalsRoute
+  '/dashboard/(forms)/$formId/edit': typeof DashboardformsFormIdEditRoute
+  '/dashboard/(forms)/$formId/fill': typeof DashboardformsFormIdFillRoute
+  '/dashboard/(forms)/$formId/submissions': typeof DashboardformsFormIdSubmissionsRoute
+  '/dashboard/(hive-exec)/agreements/$orgId': typeof DashboardhiveExecAgreementsOrgIdRoute
+  '/dashboard/(hive-exec)/agreements/requirements': typeof DashboardhiveExecAgreementsRequirementsRoute
+  '/dashboard/(hive-exec)/hive-exec/$orgId': typeof DashboardhiveExecHiveExecOrgIdRoute
+  '/dashboard/(hive-exec)/hive-exec/agreements': typeof DashboardhiveExecHiveExecAgreementsRoute
+  '/dashboard/(hive-exec)/hive-exec/approvals': typeof DashboardhiveExecHiveExecApprovalsRoute
+  '/dashboard/(hive-exec)/hive-exec/base-template': typeof DashboardhiveExecHiveExecBaseTemplateRoute
+  '/dashboard/(hive-exec)/hive-exec/billing-approvals': typeof DashboardhiveExecHiveExecBillingApprovalsRoute
+  '/dashboard/(hive-exec)/hive-exec/classes': typeof DashboardhiveExecHiveExecClassesRoute
+  '/dashboard/(hive-exec)/hive-exec/command': typeof DashboardhiveExecHiveExecCommandRoute
+  '/dashboard/(hive-exec)/hive-exec/company-migration': typeof DashboardhiveExecHiveExecCompanyMigrationRoute
+  '/dashboard/(hive-exec)/hive-exec/features': typeof DashboardhiveExecHiveExecFeaturesRoute
+  '/dashboard/(hive-exec)/hive-exec/functionality': typeof DashboardhiveExecHiveExecFunctionalityRoute
+  '/dashboard/(hive-exec)/hive-exec/health': typeof DashboardhiveExecHiveExecHealthRoute
+  '/dashboard/(hive-exec)/hive-exec/knowledge': typeof DashboardhiveExecHiveExecKnowledgeRoute
+  '/dashboard/(hive-exec)/hive-exec/messages': typeof DashboardhiveExecHiveExecMessagesRoute
+  '/dashboard/(hive-exec)/hive-exec/nectar': typeof DashboardhiveExecHiveExecNectarRoute
+  '/dashboard/(hive-exec)/hive-exec/new-company': typeof DashboardhiveExecHiveExecNewCompanyRoute
+  '/dashboard/(hive-exec)/hive-exec/permissions': typeof DashboardhiveExecHiveExecPermissionsRoute
+  '/dashboard/(hive-exec)/hive-exec/plans': typeof DashboardhiveExecHiveExecPlansRoute
+  '/dashboard/(hive-exec)/hive-exec/states': typeof DashboardhiveExecHiveExecStatesRoute
+  '/dashboard/(hive-exec)/hive-exec/tickets': typeof DashboardhiveExecHiveExecTicketsRoute
+  '/dashboard/(hive-exec)/hive-exec/training': typeof DashboardhiveExecHiveExecTrainingRoute
+  '/dashboard/(hive-exec)/hive-exec/upgrade-requests': typeof DashboardhiveExecHiveExecUpgradeRequestsRoute
+  '/dashboard/(hive-exec)/states/$stateCode': typeof DashboardhiveExecStatesStateCodeRouteWithChildren
+  '/dashboard/(hive-training)/course/$assignmentId': typeof DashboardhiveTrainingCourseAssignmentIdRoute
+  '/dashboard/(homes)/homes/$teamId': typeof DashboardhomesHomesTeamIdRoute
+  '/dashboard/(homes)/homes/host-home-control': typeof DashboardhomesHomesHostHomeControlRoute
+  '/dashboard/(homes)/homes/teams': typeof DashboardhomesHomesTeamsRoute
+  '/dashboard/(hr-admin)/hr-admin/settings': typeof DashboardhrAdminHrAdminSettingsRoute
+  '/dashboard/(hub)/hub/clients': typeof DashboardhubHubClientsRoute
+  '/dashboard/(hub)/hub/documentation': typeof DashboardhubHubDocumentationRoute
+  '/dashboard/(hub)/hub/employees': typeof DashboardhubHubEmployeesRoute
+  '/dashboard/(hub)/hub/finances': typeof DashboardhubHubFinancesRoute
+  '/dashboard/(hub)/hub/knowledge': typeof DashboardhubHubKnowledgeRoute
+  '/dashboard/(my-obligations_)/course/$instanceId': typeof DashboardmyObligations_CourseInstanceIdRoute
+  '/dashboard/(nectar)/nectar/ask-nectar': typeof DashboardnectarNectarAskNectarRoute
+  '/dashboard/(nectar)/nectar/help': typeof DashboardnectarNectarHelpRoute
+  '/dashboard/(nectar)/nectar/inbox': typeof DashboardnectarNectarInboxRoute
+  '/dashboard/(nectar)/nectar/nectar-company-profile': typeof DashboardnectarNectarNectarCompanyProfileRoute
+  '/dashboard/(nectar)/nectar/nectar-docs': typeof DashboardnectarNectarNectarDocsRoute
+  '/dashboard/(programs)/programs/$programId': typeof DashboardprogramsProgramsProgramIdRoute
+  '/dashboard/(records)/records/historical-daily-notes-former-staff': typeof DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRoute
+  '/dashboard/(records)/records/my-historical-daily-notes': typeof DashboardrecordsRecordsMyHistoricalDailyNotesRoute
+  '/dashboard/(records)/records/my-historical-records': typeof DashboardrecordsRecordsMyHistoricalRecordsRoute
+  '/dashboard/(records)/records/my-historical-timesheets': typeof DashboardrecordsRecordsMyHistoricalTimesheetsRoute
+  '/dashboard/(records)/records/records-desk': typeof DashboardrecordsRecordsRecordsDeskRoute
+  '/dashboard/(records)/records/reports': typeof DashboardrecordsRecordsReportsRoute
+  '/dashboard/(records)/records/summaries': typeof DashboardrecordsRecordsSummariesRoute
+  '/dashboard/(scheduling)/scheduling/assignments': typeof DashboardschedulingSchedulingAssignmentsRoute
+  '/dashboard/(scheduling)/scheduling/daily-logs': typeof DashboardschedulingSchedulingDailyLogsRoute
+  '/dashboard/(scheduling)/scheduling/day-program': typeof DashboardschedulingSchedulingDayProgramRoute
+  '/dashboard/(scheduling)/scheduling/evv-archive': typeof DashboardschedulingSchedulingEvvArchiveRoute
+  '/dashboard/(scheduling)/scheduling/my-time-corrections': typeof DashboardschedulingSchedulingMyTimeCorrectionsRoute
+  '/dashboard/(scheduling)/scheduling/schedule': typeof DashboardschedulingSchedulingScheduleRoute
+  '/dashboard/(scheduling)/scheduling/schedule-preview': typeof DashboardschedulingSchedulingSchedulePreviewRoute
+  '/dashboard/(scheduling)/scheduling/scheduler': typeof DashboardschedulingSchedulingSchedulerRoute
+  '/dashboard/(scheduling)/scheduling/timeclock': typeof DashboardschedulingSchedulingTimeclockRoute
+  '/dashboard/(scheduling)/shift/$shiftId': typeof DashboardschedulingShiftShiftIdRoute
+  '/dashboard/(settings)/settings/automation-rules': typeof DashboardsettingsSettingsAutomationRulesRoute
+  '/dashboard/(settings)/settings/bank-mapping': typeof DashboardsettingsSettingsBankMappingRoute
+  '/dashboard/(settings)/settings/compliance-setup': typeof DashboardsettingsSettingsComplianceSetupRoute
+  '/dashboard/(settings)/settings/draft-rules': typeof DashboardsettingsSettingsDraftRulesRoute
+  '/dashboard/(settings)/settings/email': typeof DashboardsettingsSettingsEmailRoute
+  '/dashboard/(settings)/settings/gmail': typeof DashboardsettingsSettingsGmailRoute
+  '/dashboard/(settings)/settings/licensing': typeof DashboardsettingsSettingsLicensingRoute
+  '/dashboard/(settings)/settings/phi-access-audit': typeof DashboardsettingsSettingsPhiAccessAuditRoute
+  '/dashboard/(settings)/settings/retention': typeof DashboardsettingsSettingsRetentionRoute
+  '/dashboard/(settings)/settings/service-catalog': typeof DashboardsettingsSettingsServiceCatalogRoute
+  '/dashboard/(settings)/settings/service-codes': typeof DashboardsettingsSettingsServiceCodesRoute
+  '/dashboard/(settings)/settings/subscription': typeof DashboardsettingsSettingsSubscriptionRoute
+  '/dashboard/(settings)/settings/team-access': typeof DashboardsettingsSettingsTeamAccessRoute
+  '/dashboard/(smart-import)/$jobId/done': typeof DashboardsmartImportJobIdDoneRoute
+  '/dashboard/(smart-import)/$jobId/review': typeof DashboardsmartImportJobIdReviewRoute
+  '/dashboard/(smart-import)/smart-import/history': typeof DashboardsmartImportSmartImportHistoryRoute
+  '/dashboard/(tracks)/tracks/$trackSlug': typeof DashboardtracksTracksTrackSlugRoute
+  '/dashboard/(training)/training/$id': typeof DashboardtrainingTrainingIdRoute
+  '/dashboard/(training)/training/catalog': typeof DashboardtrainingTrainingCatalogRoute
+  '/dashboard/(training)/training/my-client-trainings': typeof DashboardtrainingTrainingMyClientTrainingsRoute
+  '/dashboard/(billing)/billing/': typeof DashboardbillingBillingIndexRoute
+  '/dashboard/(clients)/clients/': typeof DashboardclientsClientsIndexRoute
+  '/dashboard/(courses)/courses/': typeof DashboardcoursesCoursesIndexRoute
+  '/dashboard/(employees)/employees/': typeof DashboardemployeesEmployeesIndexRoute
+  '/dashboard/(financial)/financial/': typeof DashboardfinancialFinancialIndexRoute
+  '/dashboard/(forms)/forms/': typeof DashboardformsFormsIndexRoute
+  '/dashboard/(hive-exec)/hive-exec/': typeof DashboardhiveExecHiveExecIndexRoute
+  '/dashboard/(hive-training)/hive-training/': typeof DashboardhiveTrainingHiveTrainingIndexRoute
+  '/dashboard/(smart-import)/smart-import/': typeof DashboardsmartImportSmartImportIndexRoute
+  '/dashboard/(training)/training/': typeof DashboardtrainingTrainingIndexRoute
   '/api/public/oauth/gmail/callback': typeof ApiPublicOauthGmailCallbackRoute
-  '/dashboard/hive-exec/states/$stateCode/onboarding': typeof DashboardHiveExecStatesStateCodeOnboardingRoute
+  '/dashboard/(hive-exec)/states/$stateCode/onboarding': typeof DashboardhiveExecStatesStateCodeOnboardingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -2142,67 +2208,21 @@ export interface FileRouteTypes {
     | '/audit-portal/set-password'
     | '/certificate/$code'
     | '/clients/new'
-    | '/dashboard/agency-documents'
-    | '/dashboard/ask-nectar'
-    | '/dashboard/assignments'
     | '/dashboard/audit'
-    | '/dashboard/authoritative-sources'
-    | '/dashboard/behaviorist'
     | '/dashboard/billing'
-    | '/dashboard/certifications'
     | '/dashboard/clients'
-    | '/dashboard/command-center'
-    | '/dashboard/company-obligations'
     | '/dashboard/compliance'
-    | '/dashboard/compliance-desk'
-    | '/dashboard/daily-logs'
-    | '/dashboard/day-program'
-    | '/dashboard/deadlines'
-    | '/dashboard/emar'
     | '/dashboard/evidence'
-    | '/dashboard/evv-archive'
-    | '/dashboard/external-certifications'
-    | '/dashboard/external-compliance'
     | '/dashboard/financial'
     | '/dashboard/forms'
-    | '/dashboard/help'
-    | '/dashboard/historical-daily-notes-former-staff'
     | '/dashboard/hive-exec'
     | '/dashboard/homes'
-    | '/dashboard/host-home-control'
     | '/dashboard/hr-admin'
-    | '/dashboard/hrc'
-    | '/dashboard/inbox'
-    | '/dashboard/internal-audit'
-    | '/dashboard/invitations'
-    | '/dashboard/my-client-trainings'
-    | '/dashboard/my-evidence'
-    | '/dashboard/my-historical-daily-notes'
-    | '/dashboard/my-historical-records'
-    | '/dashboard/my-historical-timesheets'
     | '/dashboard/my-obligations'
-    | '/dashboard/my-time-corrections'
-    | '/dashboard/nectar-company-profile'
-    | '/dashboard/nectar-docs'
-    | '/dashboard/pba-ledger'
-    | '/dashboard/personnel-file'
-    | '/dashboard/policies'
     | '/dashboard/programs'
-    | '/dashboard/programs-admin'
-    | '/dashboard/records-desk'
-    | '/dashboard/reimbursements'
-    | '/dashboard/reports'
-    | '/dashboard/schedule'
-    | '/dashboard/schedule-preview'
-    | '/dashboard/scheduler'
     | '/dashboard/scheduling'
     | '/dashboard/settings'
     | '/dashboard/smart-import'
-    | '/dashboard/state-audit'
-    | '/dashboard/summaries'
-    | '/dashboard/team'
-    | '/dashboard/teams'
-    | '/dashboard/timeclock'
     | '/dashboard/tracks'
     | '/e2e/compliance-desk'
     | '/employees/new'
@@ -2218,7 +2238,18 @@ export interface FileRouteTypes {
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
+    | '/e2e/hhs-hub/$clientId'
+    | '/api/public/hooks/billing-daily-check'
+    | '/api/public/hooks/gmail-ingest'
+    | '/api/public/hooks/nectar-draft-tick'
+    | '/api/public/hooks/nectar-schedules'
+    | '/api/public/hooks/smart-import-reminders'
+    | '/api/public/webhooks/stripe'
+    | '/dashboard/admin/command-center'
     | '/dashboard/admin/emar-audit'
+    | '/dashboard/admin/programs-admin'
+    | '/dashboard/audit/internal-audit'
+    | '/dashboard/audit/state-audit'
     | '/dashboard/behavior-support/$clientId'
     | '/dashboard/billing/$clientId'
     | '/dashboard/billing/form520'
@@ -2226,20 +2257,45 @@ export interface FileRouteTypes {
     | '/dashboard/billing/nectar'
     | '/dashboard/billing/subscription'
     | '/dashboard/clients/$clientId'
-    | '/dashboard/clients/billing-codes'
-    | '/dashboard/clients/file'
+    | '/dashboard/clients/behaviorist'
+    | '/dashboard/clients/client-billing-codes'
+    | '/dashboard/clients/client-file'
     | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
+    | '/dashboard/hhs-hub/$clientId'
+    | '/dashboard/intake/$clientId'
+    | '/dashboard/training/$clientId'
+    | '/dashboard/workspace/$clientId'
+    | '/dashboard/compliance/authoritative-sources'
+    | '/dashboard/compliance/certifications'
+    | '/dashboard/compliance/company-obligations'
+    | '/dashboard/compliance/compliance-desk'
+    | '/dashboard/compliance/deadlines'
+    | '/dashboard/compliance/external-certifications'
+    | '/dashboard/compliance/external-compliance'
+    | '/dashboard/compliance/hrc'
+    | '/dashboard/compliance/policies'
+    | '/dashboard/cert-review/$completionId'
+    | '/dashboard/$courseId/edit'
     | '/dashboard/courses/$courseId'
     | '/dashboard/courses/core'
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
     | '/dashboard/courses/person'
+    | '/dashboard/person-module/$assignmentId'
+    | '/dashboard/policy/$documentId'
+    | '/dashboard/topic/$topicId'
+    | '/dashboard/documents/agency-documents'
+    | '/dashboard/documents/emar'
     | '/dashboard/employees/$staffId'
+    | '/dashboard/employees/client-loans'
     | '/dashboard/employees/hire-dates'
-    | '/dashboard/employees/loans'
+    | '/dashboard/employees/invitations'
     | '/dashboard/employees/new'
+    | '/dashboard/employees/personnel-file'
+    | '/dashboard/employees/team'
+    | '/dashboard/evidence/my-evidence'
     | '/dashboard/financial/contractors'
     | '/dashboard/financial/distributions'
     | '/dashboard/financial/employees'
@@ -2247,9 +2303,16 @@ export interface FileRouteTypes {
     | '/dashboard/financial/host-home'
     | '/dashboard/financial/monthly-grid'
     | '/dashboard/financial/nectar'
+    | '/dashboard/financial/pba-ledger'
+    | '/dashboard/financial/reimbursements'
     | '/dashboard/financial/revenue'
     | '/dashboard/financial/rhs'
     | '/dashboard/financial/totals'
+    | '/dashboard/$formId/edit'
+    | '/dashboard/$formId/fill'
+    | '/dashboard/$formId/submissions'
+    | '/dashboard/agreements/$orgId'
+    | '/dashboard/agreements/requirements'
     | '/dashboard/hive-exec/$orgId'
     | '/dashboard/hive-exec/agreements'
     | '/dashboard/hive-exec/approvals'
@@ -2271,14 +2334,41 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/tickets'
     | '/dashboard/hive-exec/training'
     | '/dashboard/hive-exec/upgrade-requests'
+    | '/dashboard/states/$stateCode'
+    | '/dashboard/course/$assignmentId'
     | '/dashboard/homes/$teamId'
+    | '/dashboard/homes/host-home-control'
+    | '/dashboard/homes/teams'
     | '/dashboard/hr-admin/settings'
     | '/dashboard/hub/clients'
     | '/dashboard/hub/documentation'
     | '/dashboard/hub/employees'
     | '/dashboard/hub/finances'
     | '/dashboard/hub/knowledge'
+    | '/dashboard/course/$instanceId'
+    | '/dashboard/nectar/ask-nectar'
+    | '/dashboard/nectar/help'
+    | '/dashboard/nectar/inbox'
+    | '/dashboard/nectar/nectar-company-profile'
+    | '/dashboard/nectar/nectar-docs'
     | '/dashboard/programs/$programId'
+    | '/dashboard/records/historical-daily-notes-former-staff'
+    | '/dashboard/records/my-historical-daily-notes'
+    | '/dashboard/records/my-historical-records'
+    | '/dashboard/records/my-historical-timesheets'
+    | '/dashboard/records/records-desk'
+    | '/dashboard/records/reports'
+    | '/dashboard/records/summaries'
+    | '/dashboard/scheduling/assignments'
+    | '/dashboard/scheduling/daily-logs'
+    | '/dashboard/scheduling/day-program'
+    | '/dashboard/scheduling/evv-archive'
+    | '/dashboard/scheduling/my-time-corrections'
+    | '/dashboard/scheduling/schedule'
+    | '/dashboard/scheduling/schedule-preview'
+    | '/dashboard/scheduling/scheduler'
+    | '/dashboard/scheduling/timeclock'
+    | '/dashboard/shift/$shiftId'
     | '/dashboard/settings/automation-rules'
     | '/dashboard/settings/bank-mapping'
     | '/dashboard/settings/compliance-setup'
@@ -2292,12 +2382,13 @@ export interface FileRouteTypes {
     | '/dashboard/settings/service-codes'
     | '/dashboard/settings/subscription'
     | '/dashboard/settings/team-access'
-    | '/dashboard/shift/$shiftId'
+    | '/dashboard/$jobId/done'
+    | '/dashboard/$jobId/review'
     | '/dashboard/smart-import/history'
     | '/dashboard/tracks/$trackSlug'
     | '/dashboard/training/$id'
     | '/dashboard/training/catalog'
-    | '/e2e/hhs-hub/$clientId'
+    | '/dashboard/training/my-client-trainings'
     | '/dashboard/billing/'
     | '/dashboard/clients/'
     | '/dashboard/courses/'
@@ -2308,33 +2399,8 @@ export interface FileRouteTypes {
     | '/dashboard/hive-training/'
     | '/dashboard/smart-import/'
     | '/dashboard/training/'
-    | '/api/public/hooks/billing-daily-check'
-    | '/api/public/hooks/gmail-ingest'
-    | '/api/public/hooks/nectar-draft-tick'
-    | '/api/public/hooks/nectar-schedules'
-    | '/api/public/hooks/smart-import-reminders'
-    | '/api/public/webhooks/stripe'
-    | '/dashboard/clients/hhs-hub/$clientId'
-    | '/dashboard/clients/intake/$clientId'
-    | '/dashboard/clients/training/$clientId'
-    | '/dashboard/clients/workspace/$clientId'
-    | '/dashboard/compliance/cert-review/$completionId'
-    | '/dashboard/courses/$courseId/edit'
-    | '/dashboard/courses/person-module/$assignmentId'
-    | '/dashboard/courses/policy/$documentId'
-    | '/dashboard/courses/topic/$topicId'
-    | '/dashboard/forms/$formId/edit'
-    | '/dashboard/forms/$formId/fill'
-    | '/dashboard/forms/$formId/submissions'
-    | '/dashboard/hive-exec/agreements/$orgId'
-    | '/dashboard/hive-exec/agreements/requirements'
-    | '/dashboard/hive-exec/states/$stateCode'
-    | '/dashboard/hive-training/course/$assignmentId'
-    | '/dashboard/my-obligations/course/$instanceId'
-    | '/dashboard/smart-import/$jobId/done'
-    | '/dashboard/smart-import/$jobId/review'
     | '/api/public/oauth/gmail/callback'
-    | '/dashboard/hive-exec/states/$stateCode/onboarding'
+    | '/dashboard/states/$stateCode/onboarding'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -2364,61 +2430,21 @@ export interface FileRouteTypes {
     | '/audit-portal/set-password'
     | '/certificate/$code'
     | '/clients/new'
-    | '/dashboard/agency-documents'
-    | '/dashboard/ask-nectar'
-    | '/dashboard/assignments'
     | '/dashboard/audit'
-    | '/dashboard/authoritative-sources'
-    | '/dashboard/behaviorist'
-    | '/dashboard/certifications'
-    | '/dashboard/command-center'
-    | '/dashboard/company-obligations'
+    | '/dashboard/billing'
+    | '/dashboard/clients'
     | '/dashboard/compliance'
-    | '/dashboard/compliance-desk'
-    | '/dashboard/daily-logs'
-    | '/dashboard/day-program'
-    | '/dashboard/deadlines'
-    | '/dashboard/emar'
     | '/dashboard/evidence'
-    | '/dashboard/evv-archive'
-    | '/dashboard/external-certifications'
-    | '/dashboard/external-compliance'
-    | '/dashboard/help'
-    | '/dashboard/historical-daily-notes-former-staff'
+    | '/dashboard/financial'
+    | '/dashboard/forms'
+    | '/dashboard/hive-exec'
     | '/dashboard/homes'
-    | '/dashboard/host-home-control'
     | '/dashboard/hr-admin'
-    | '/dashboard/hrc'
-    | '/dashboard/inbox'
-    | '/dashboard/internal-audit'
-    | '/dashboard/invitations'
-    | '/dashboard/my-client-trainings'
-    | '/dashboard/my-evidence'
-    | '/dashboard/my-historical-daily-notes'
-    | '/dashboard/my-historical-records'
-    | '/dashboard/my-historical-timesheets'
     | '/dashboard/my-obligations'
-    | '/dashboard/my-time-corrections'
-    | '/dashboard/nectar-company-profile'
-    | '/dashboard/nectar-docs'
-    | '/dashboard/pba-ledger'
-    | '/dashboard/personnel-file'
-    | '/dashboard/policies'
     | '/dashboard/programs'
-    | '/dashboard/programs-admin'
-    | '/dashboard/records-desk'
-    | '/dashboard/reimbursements'
-    | '/dashboard/reports'
-    | '/dashboard/schedule'
-    | '/dashboard/schedule-preview'
-    | '/dashboard/scheduler'
     | '/dashboard/scheduling'
     | '/dashboard/settings'
-    | '/dashboard/state-audit'
-    | '/dashboard/summaries'
-    | '/dashboard/team'
-    | '/dashboard/teams'
-    | '/dashboard/timeclock'
+    | '/dashboard/smart-import'
     | '/dashboard/tracks'
     | '/e2e/compliance-desk'
     | '/employees/new'
@@ -2434,7 +2460,18 @@ export interface FileRouteTypes {
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
+    | '/e2e/hhs-hub/$clientId'
+    | '/api/public/hooks/billing-daily-check'
+    | '/api/public/hooks/gmail-ingest'
+    | '/api/public/hooks/nectar-draft-tick'
+    | '/api/public/hooks/nectar-schedules'
+    | '/api/public/hooks/smart-import-reminders'
+    | '/api/public/webhooks/stripe'
+    | '/dashboard/admin/command-center'
     | '/dashboard/admin/emar-audit'
+    | '/dashboard/admin/programs-admin'
+    | '/dashboard/audit/internal-audit'
+    | '/dashboard/audit/state-audit'
     | '/dashboard/behavior-support/$clientId'
     | '/dashboard/billing/$clientId'
     | '/dashboard/billing/form520'
@@ -2442,20 +2479,45 @@ export interface FileRouteTypes {
     | '/dashboard/billing/nectar'
     | '/dashboard/billing/subscription'
     | '/dashboard/clients/$clientId'
-    | '/dashboard/clients/billing-codes'
-    | '/dashboard/clients/file'
+    | '/dashboard/clients/behaviorist'
+    | '/dashboard/clients/client-billing-codes'
+    | '/dashboard/clients/client-file'
     | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
     | '/dashboard/clients/rhs-board'
+    | '/dashboard/hhs-hub/$clientId'
+    | '/dashboard/intake/$clientId'
+    | '/dashboard/training/$clientId'
+    | '/dashboard/workspace/$clientId'
+    | '/dashboard/compliance/authoritative-sources'
+    | '/dashboard/compliance/certifications'
+    | '/dashboard/compliance/company-obligations'
+    | '/dashboard/compliance/compliance-desk'
+    | '/dashboard/compliance/deadlines'
+    | '/dashboard/compliance/external-certifications'
+    | '/dashboard/compliance/external-compliance'
+    | '/dashboard/compliance/hrc'
+    | '/dashboard/compliance/policies'
+    | '/dashboard/cert-review/$completionId'
+    | '/dashboard/$courseId/edit'
     | '/dashboard/courses/$courseId'
     | '/dashboard/courses/core'
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
     | '/dashboard/courses/person'
+    | '/dashboard/person-module/$assignmentId'
+    | '/dashboard/policy/$documentId'
+    | '/dashboard/topic/$topicId'
+    | '/dashboard/documents/agency-documents'
+    | '/dashboard/documents/emar'
     | '/dashboard/employees/$staffId'
+    | '/dashboard/employees/client-loans'
     | '/dashboard/employees/hire-dates'
-    | '/dashboard/employees/loans'
+    | '/dashboard/employees/invitations'
     | '/dashboard/employees/new'
+    | '/dashboard/employees/personnel-file'
+    | '/dashboard/employees/team'
+    | '/dashboard/evidence/my-evidence'
     | '/dashboard/financial/contractors'
     | '/dashboard/financial/distributions'
     | '/dashboard/financial/employees'
@@ -2463,9 +2525,16 @@ export interface FileRouteTypes {
     | '/dashboard/financial/host-home'
     | '/dashboard/financial/monthly-grid'
     | '/dashboard/financial/nectar'
+    | '/dashboard/financial/pba-ledger'
+    | '/dashboard/financial/reimbursements'
     | '/dashboard/financial/revenue'
     | '/dashboard/financial/rhs'
     | '/dashboard/financial/totals'
+    | '/dashboard/$formId/edit'
+    | '/dashboard/$formId/fill'
+    | '/dashboard/$formId/submissions'
+    | '/dashboard/agreements/$orgId'
+    | '/dashboard/agreements/requirements'
     | '/dashboard/hive-exec/$orgId'
     | '/dashboard/hive-exec/agreements'
     | '/dashboard/hive-exec/approvals'
@@ -2487,14 +2556,41 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/tickets'
     | '/dashboard/hive-exec/training'
     | '/dashboard/hive-exec/upgrade-requests'
+    | '/dashboard/states/$stateCode'
+    | '/dashboard/course/$assignmentId'
     | '/dashboard/homes/$teamId'
+    | '/dashboard/homes/host-home-control'
+    | '/dashboard/homes/teams'
     | '/dashboard/hr-admin/settings'
     | '/dashboard/hub/clients'
     | '/dashboard/hub/documentation'
     | '/dashboard/hub/employees'
     | '/dashboard/hub/finances'
     | '/dashboard/hub/knowledge'
+    | '/dashboard/course/$instanceId'
+    | '/dashboard/nectar/ask-nectar'
+    | '/dashboard/nectar/help'
+    | '/dashboard/nectar/inbox'
+    | '/dashboard/nectar/nectar-company-profile'
+    | '/dashboard/nectar/nectar-docs'
     | '/dashboard/programs/$programId'
+    | '/dashboard/records/historical-daily-notes-former-staff'
+    | '/dashboard/records/my-historical-daily-notes'
+    | '/dashboard/records/my-historical-records'
+    | '/dashboard/records/my-historical-timesheets'
+    | '/dashboard/records/records-desk'
+    | '/dashboard/records/reports'
+    | '/dashboard/records/summaries'
+    | '/dashboard/scheduling/assignments'
+    | '/dashboard/scheduling/daily-logs'
+    | '/dashboard/scheduling/day-program'
+    | '/dashboard/scheduling/evv-archive'
+    | '/dashboard/scheduling/my-time-corrections'
+    | '/dashboard/scheduling/schedule'
+    | '/dashboard/scheduling/schedule-preview'
+    | '/dashboard/scheduling/scheduler'
+    | '/dashboard/scheduling/timeclock'
+    | '/dashboard/shift/$shiftId'
     | '/dashboard/settings/automation-rules'
     | '/dashboard/settings/bank-mapping'
     | '/dashboard/settings/compliance-setup'
@@ -2508,49 +2604,19 @@ export interface FileRouteTypes {
     | '/dashboard/settings/service-codes'
     | '/dashboard/settings/subscription'
     | '/dashboard/settings/team-access'
-    | '/dashboard/shift/$shiftId'
+    | '/dashboard/$jobId/done'
+    | '/dashboard/$jobId/review'
     | '/dashboard/smart-import/history'
     | '/dashboard/tracks/$trackSlug'
     | '/dashboard/training/$id'
     | '/dashboard/training/catalog'
-    | '/e2e/hhs-hub/$clientId'
-    | '/dashboard/billing'
-    | '/dashboard/clients'
+    | '/dashboard/training/my-client-trainings'
     | '/dashboard/courses'
     | '/dashboard/employees'
-    | '/dashboard/financial'
-    | '/dashboard/forms'
-    | '/dashboard/hive-exec'
     | '/dashboard/hive-training'
-    | '/dashboard/smart-import'
     | '/dashboard/training'
-    | '/api/public/hooks/billing-daily-check'
-    | '/api/public/hooks/gmail-ingest'
-    | '/api/public/hooks/nectar-draft-tick'
-    | '/api/public/hooks/nectar-schedules'
-    | '/api/public/hooks/smart-import-reminders'
-    | '/api/public/webhooks/stripe'
-    | '/dashboard/clients/hhs-hub/$clientId'
-    | '/dashboard/clients/intake/$clientId'
-    | '/dashboard/clients/training/$clientId'
-    | '/dashboard/clients/workspace/$clientId'
-    | '/dashboard/compliance/cert-review/$completionId'
-    | '/dashboard/courses/$courseId/edit'
-    | '/dashboard/courses/person-module/$assignmentId'
-    | '/dashboard/courses/policy/$documentId'
-    | '/dashboard/courses/topic/$topicId'
-    | '/dashboard/forms/$formId/edit'
-    | '/dashboard/forms/$formId/fill'
-    | '/dashboard/forms/$formId/submissions'
-    | '/dashboard/hive-exec/agreements/$orgId'
-    | '/dashboard/hive-exec/agreements/requirements'
-    | '/dashboard/hive-exec/states/$stateCode'
-    | '/dashboard/hive-training/course/$assignmentId'
-    | '/dashboard/my-obligations/course/$instanceId'
-    | '/dashboard/smart-import/$jobId/done'
-    | '/dashboard/smart-import/$jobId/review'
     | '/api/public/oauth/gmail/callback'
-    | '/dashboard/hive-exec/states/$stateCode/onboarding'
+    | '/dashboard/states/$stateCode/onboarding'
   id:
     | '__root__'
     | '/'
@@ -2583,67 +2649,21 @@ export interface FileRouteTypes {
     | '/audit-portal/set-password'
     | '/certificate/$code'
     | '/clients/new'
-    | '/dashboard/agency-documents'
-    | '/dashboard/ask-nectar'
-    | '/dashboard/assignments'
     | '/dashboard/audit'
-    | '/dashboard/authoritative-sources'
-    | '/dashboard/behaviorist'
     | '/dashboard/billing'
-    | '/dashboard/certifications'
     | '/dashboard/clients'
-    | '/dashboard/command-center'
-    | '/dashboard/company-obligations'
     | '/dashboard/compliance'
-    | '/dashboard/compliance-desk'
-    | '/dashboard/daily-logs'
-    | '/dashboard/day-program'
-    | '/dashboard/deadlines'
-    | '/dashboard/emar'
     | '/dashboard/evidence'
-    | '/dashboard/evv-archive'
-    | '/dashboard/external-certifications'
-    | '/dashboard/external-compliance'
     | '/dashboard/financial'
     | '/dashboard/forms'
-    | '/dashboard/help'
-    | '/dashboard/historical-daily-notes-former-staff'
     | '/dashboard/hive-exec'
     | '/dashboard/homes'
-    | '/dashboard/host-home-control'
     | '/dashboard/hr-admin'
-    | '/dashboard/hrc'
-    | '/dashboard/inbox'
-    | '/dashboard/internal-audit'
-    | '/dashboard/invitations'
-    | '/dashboard/my-client-trainings'
-    | '/dashboard/my-evidence'
-    | '/dashboard/my-historical-daily-notes'
-    | '/dashboard/my-historical-records'
-    | '/dashboard/my-historical-timesheets'
     | '/dashboard/my-obligations'
-    | '/dashboard/my-time-corrections'
-    | '/dashboard/nectar-company-profile'
-    | '/dashboard/nectar-docs'
-    | '/dashboard/pba-ledger'
-    | '/dashboard/personnel-file'
-    | '/dashboard/policies'
     | '/dashboard/programs'
-    | '/dashboard/programs-admin'
-    | '/dashboard/records-desk'
-    | '/dashboard/reimbursements'
-    | '/dashboard/reports'
-    | '/dashboard/schedule'
-    | '/dashboard/schedule-preview'
-    | '/dashboard/scheduler'
     | '/dashboard/scheduling'
     | '/dashboard/settings'
     | '/dashboard/smart-import'
-    | '/dashboard/state-audit'
-    | '/dashboard/summaries'
-    | '/dashboard/team'
-    | '/dashboard/teams'
-    | '/dashboard/timeclock'
     | '/dashboard/tracks'
     | '/e2e/compliance-desk'
     | '/employees/new'
@@ -2659,123 +2679,169 @@ export interface FileRouteTypes {
     | '/api/compliance/urgent'
     | '/api/public/runtime-config'
     | '/api/stripe/webhook'
-    | '/dashboard/admin/emar-audit'
-    | '/dashboard/behavior-support/$clientId'
-    | '/dashboard/billing/$clientId'
-    | '/dashboard/billing/form520'
-    | '/dashboard/billing/imports'
-    | '/dashboard/billing/nectar'
-    | '/dashboard/billing/subscription'
-    | '/dashboard/clients/$clientId'
-    | '/dashboard/clients/billing-codes'
-    | '/dashboard/clients/file'
-    | '/dashboard/clients/new'
-    | '/dashboard/clients/pending'
-    | '/dashboard/clients/rhs-board'
-    | '/dashboard/courses/$courseId'
-    | '/dashboard/courses/core'
-    | '/dashboard/courses/mindsmith'
-    | '/dashboard/courses/other'
-    | '/dashboard/courses/person'
-    | '/dashboard/employees/$staffId'
-    | '/dashboard/employees/hire-dates'
-    | '/dashboard/employees/loans'
-    | '/dashboard/employees/new'
-    | '/dashboard/financial/contractors'
-    | '/dashboard/financial/distributions'
-    | '/dashboard/financial/employees'
-    | '/dashboard/financial/gross'
-    | '/dashboard/financial/host-home'
-    | '/dashboard/financial/monthly-grid'
-    | '/dashboard/financial/nectar'
-    | '/dashboard/financial/revenue'
-    | '/dashboard/financial/rhs'
-    | '/dashboard/financial/totals'
-    | '/dashboard/hive-exec/$orgId'
-    | '/dashboard/hive-exec/agreements'
-    | '/dashboard/hive-exec/approvals'
-    | '/dashboard/hive-exec/base-template'
-    | '/dashboard/hive-exec/billing-approvals'
-    | '/dashboard/hive-exec/classes'
-    | '/dashboard/hive-exec/command'
-    | '/dashboard/hive-exec/company-migration'
-    | '/dashboard/hive-exec/features'
-    | '/dashboard/hive-exec/functionality'
-    | '/dashboard/hive-exec/health'
-    | '/dashboard/hive-exec/knowledge'
-    | '/dashboard/hive-exec/messages'
-    | '/dashboard/hive-exec/nectar'
-    | '/dashboard/hive-exec/new-company'
-    | '/dashboard/hive-exec/permissions'
-    | '/dashboard/hive-exec/plans'
-    | '/dashboard/hive-exec/states'
-    | '/dashboard/hive-exec/tickets'
-    | '/dashboard/hive-exec/training'
-    | '/dashboard/hive-exec/upgrade-requests'
-    | '/dashboard/homes/$teamId'
-    | '/dashboard/hr-admin/settings'
-    | '/dashboard/hub/clients'
-    | '/dashboard/hub/documentation'
-    | '/dashboard/hub/employees'
-    | '/dashboard/hub/finances'
-    | '/dashboard/hub/knowledge'
-    | '/dashboard/programs/$programId'
-    | '/dashboard/settings/automation-rules'
-    | '/dashboard/settings/bank-mapping'
-    | '/dashboard/settings/compliance-setup'
-    | '/dashboard/settings/draft-rules'
-    | '/dashboard/settings/email'
-    | '/dashboard/settings/gmail'
-    | '/dashboard/settings/licensing'
-    | '/dashboard/settings/phi-access-audit'
-    | '/dashboard/settings/retention'
-    | '/dashboard/settings/service-catalog'
-    | '/dashboard/settings/service-codes'
-    | '/dashboard/settings/subscription'
-    | '/dashboard/settings/team-access'
-    | '/dashboard/shift/$shiftId'
-    | '/dashboard/smart-import/history'
-    | '/dashboard/tracks/$trackSlug'
-    | '/dashboard/training/$id'
-    | '/dashboard/training/catalog'
     | '/e2e/hhs-hub/$clientId'
-    | '/dashboard/billing/'
-    | '/dashboard/clients/'
-    | '/dashboard/courses/'
-    | '/dashboard/employees/'
-    | '/dashboard/financial/'
-    | '/dashboard/forms/'
-    | '/dashboard/hive-exec/'
-    | '/dashboard/hive-training/'
-    | '/dashboard/smart-import/'
-    | '/dashboard/training/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
     | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
     | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
-    | '/dashboard/clients/hhs-hub/$clientId'
-    | '/dashboard/clients/intake/$clientId'
-    | '/dashboard/clients/training/$clientId'
-    | '/dashboard/clients/workspace/$clientId'
-    | '/dashboard/compliance_/cert-review/$completionId'
-    | '/dashboard/courses/$courseId/edit'
-    | '/dashboard/courses/person-module/$assignmentId'
-    | '/dashboard/courses/policy/$documentId'
-    | '/dashboard/courses/topic/$topicId'
-    | '/dashboard/forms/$formId/edit'
-    | '/dashboard/forms/$formId/fill'
-    | '/dashboard/forms/$formId/submissions'
-    | '/dashboard/hive-exec/agreements/$orgId'
-    | '/dashboard/hive-exec/agreements/requirements'
-    | '/dashboard/hive-exec/states/$stateCode'
-    | '/dashboard/hive-training/course/$assignmentId'
-    | '/dashboard/my-obligations_/course/$instanceId'
-    | '/dashboard/smart-import/$jobId/done'
-    | '/dashboard/smart-import/$jobId/review'
+    | '/dashboard/(admin)/admin/command-center'
+    | '/dashboard/(admin)/admin/emar-audit'
+    | '/dashboard/(admin)/admin/programs-admin'
+    | '/dashboard/(audit)/audit/internal-audit'
+    | '/dashboard/(audit)/audit/state-audit'
+    | '/dashboard/(behavior-support)/behavior-support/$clientId'
+    | '/dashboard/(billing)/billing/$clientId'
+    | '/dashboard/(billing)/billing/form520'
+    | '/dashboard/(billing)/billing/imports'
+    | '/dashboard/(billing)/billing/nectar'
+    | '/dashboard/(billing)/billing/subscription'
+    | '/dashboard/(clients)/clients/$clientId'
+    | '/dashboard/(clients)/clients/behaviorist'
+    | '/dashboard/(clients)/clients/client-billing-codes'
+    | '/dashboard/(clients)/clients/client-file'
+    | '/dashboard/(clients)/clients/new'
+    | '/dashboard/(clients)/clients/pending'
+    | '/dashboard/(clients)/clients/rhs-board'
+    | '/dashboard/(clients)/hhs-hub/$clientId'
+    | '/dashboard/(clients)/intake/$clientId'
+    | '/dashboard/(clients)/training/$clientId'
+    | '/dashboard/(clients)/workspace/$clientId'
+    | '/dashboard/(compliance)/compliance/authoritative-sources'
+    | '/dashboard/(compliance)/compliance/certifications'
+    | '/dashboard/(compliance)/compliance/company-obligations'
+    | '/dashboard/(compliance)/compliance/compliance-desk'
+    | '/dashboard/(compliance)/compliance/deadlines'
+    | '/dashboard/(compliance)/compliance/external-certifications'
+    | '/dashboard/(compliance)/compliance/external-compliance'
+    | '/dashboard/(compliance)/compliance/hrc'
+    | '/dashboard/(compliance)/compliance/policies'
+    | '/dashboard/(compliance_)/cert-review/$completionId'
+    | '/dashboard/(courses)/$courseId/edit'
+    | '/dashboard/(courses)/courses/$courseId'
+    | '/dashboard/(courses)/courses/core'
+    | '/dashboard/(courses)/courses/mindsmith'
+    | '/dashboard/(courses)/courses/other'
+    | '/dashboard/(courses)/courses/person'
+    | '/dashboard/(courses)/person-module/$assignmentId'
+    | '/dashboard/(courses)/policy/$documentId'
+    | '/dashboard/(courses)/topic/$topicId'
+    | '/dashboard/(documents)/documents/agency-documents'
+    | '/dashboard/(documents)/documents/emar'
+    | '/dashboard/(employees)/employees/$staffId'
+    | '/dashboard/(employees)/employees/client-loans'
+    | '/dashboard/(employees)/employees/hire-dates'
+    | '/dashboard/(employees)/employees/invitations'
+    | '/dashboard/(employees)/employees/new'
+    | '/dashboard/(employees)/employees/personnel-file'
+    | '/dashboard/(employees)/employees/team'
+    | '/dashboard/(evidence)/evidence/my-evidence'
+    | '/dashboard/(financial)/financial/contractors'
+    | '/dashboard/(financial)/financial/distributions'
+    | '/dashboard/(financial)/financial/employees'
+    | '/dashboard/(financial)/financial/gross'
+    | '/dashboard/(financial)/financial/host-home'
+    | '/dashboard/(financial)/financial/monthly-grid'
+    | '/dashboard/(financial)/financial/nectar'
+    | '/dashboard/(financial)/financial/pba-ledger'
+    | '/dashboard/(financial)/financial/reimbursements'
+    | '/dashboard/(financial)/financial/revenue'
+    | '/dashboard/(financial)/financial/rhs'
+    | '/dashboard/(financial)/financial/totals'
+    | '/dashboard/(forms)/$formId/edit'
+    | '/dashboard/(forms)/$formId/fill'
+    | '/dashboard/(forms)/$formId/submissions'
+    | '/dashboard/(hive-exec)/agreements/$orgId'
+    | '/dashboard/(hive-exec)/agreements/requirements'
+    | '/dashboard/(hive-exec)/hive-exec/$orgId'
+    | '/dashboard/(hive-exec)/hive-exec/agreements'
+    | '/dashboard/(hive-exec)/hive-exec/approvals'
+    | '/dashboard/(hive-exec)/hive-exec/base-template'
+    | '/dashboard/(hive-exec)/hive-exec/billing-approvals'
+    | '/dashboard/(hive-exec)/hive-exec/classes'
+    | '/dashboard/(hive-exec)/hive-exec/command'
+    | '/dashboard/(hive-exec)/hive-exec/company-migration'
+    | '/dashboard/(hive-exec)/hive-exec/features'
+    | '/dashboard/(hive-exec)/hive-exec/functionality'
+    | '/dashboard/(hive-exec)/hive-exec/health'
+    | '/dashboard/(hive-exec)/hive-exec/knowledge'
+    | '/dashboard/(hive-exec)/hive-exec/messages'
+    | '/dashboard/(hive-exec)/hive-exec/nectar'
+    | '/dashboard/(hive-exec)/hive-exec/new-company'
+    | '/dashboard/(hive-exec)/hive-exec/permissions'
+    | '/dashboard/(hive-exec)/hive-exec/plans'
+    | '/dashboard/(hive-exec)/hive-exec/states'
+    | '/dashboard/(hive-exec)/hive-exec/tickets'
+    | '/dashboard/(hive-exec)/hive-exec/training'
+    | '/dashboard/(hive-exec)/hive-exec/upgrade-requests'
+    | '/dashboard/(hive-exec)/states/$stateCode'
+    | '/dashboard/(hive-training)/course/$assignmentId'
+    | '/dashboard/(homes)/homes/$teamId'
+    | '/dashboard/(homes)/homes/host-home-control'
+    | '/dashboard/(homes)/homes/teams'
+    | '/dashboard/(hr-admin)/hr-admin/settings'
+    | '/dashboard/(hub)/hub/clients'
+    | '/dashboard/(hub)/hub/documentation'
+    | '/dashboard/(hub)/hub/employees'
+    | '/dashboard/(hub)/hub/finances'
+    | '/dashboard/(hub)/hub/knowledge'
+    | '/dashboard/(my-obligations_)/course/$instanceId'
+    | '/dashboard/(nectar)/nectar/ask-nectar'
+    | '/dashboard/(nectar)/nectar/help'
+    | '/dashboard/(nectar)/nectar/inbox'
+    | '/dashboard/(nectar)/nectar/nectar-company-profile'
+    | '/dashboard/(nectar)/nectar/nectar-docs'
+    | '/dashboard/(programs)/programs/$programId'
+    | '/dashboard/(records)/records/historical-daily-notes-former-staff'
+    | '/dashboard/(records)/records/my-historical-daily-notes'
+    | '/dashboard/(records)/records/my-historical-records'
+    | '/dashboard/(records)/records/my-historical-timesheets'
+    | '/dashboard/(records)/records/records-desk'
+    | '/dashboard/(records)/records/reports'
+    | '/dashboard/(records)/records/summaries'
+    | '/dashboard/(scheduling)/scheduling/assignments'
+    | '/dashboard/(scheduling)/scheduling/daily-logs'
+    | '/dashboard/(scheduling)/scheduling/day-program'
+    | '/dashboard/(scheduling)/scheduling/evv-archive'
+    | '/dashboard/(scheduling)/scheduling/my-time-corrections'
+    | '/dashboard/(scheduling)/scheduling/schedule'
+    | '/dashboard/(scheduling)/scheduling/schedule-preview'
+    | '/dashboard/(scheduling)/scheduling/scheduler'
+    | '/dashboard/(scheduling)/scheduling/timeclock'
+    | '/dashboard/(scheduling)/shift/$shiftId'
+    | '/dashboard/(settings)/settings/automation-rules'
+    | '/dashboard/(settings)/settings/bank-mapping'
+    | '/dashboard/(settings)/settings/compliance-setup'
+    | '/dashboard/(settings)/settings/draft-rules'
+    | '/dashboard/(settings)/settings/email'
+    | '/dashboard/(settings)/settings/gmail'
+    | '/dashboard/(settings)/settings/licensing'
+    | '/dashboard/(settings)/settings/phi-access-audit'
+    | '/dashboard/(settings)/settings/retention'
+    | '/dashboard/(settings)/settings/service-catalog'
+    | '/dashboard/(settings)/settings/service-codes'
+    | '/dashboard/(settings)/settings/subscription'
+    | '/dashboard/(settings)/settings/team-access'
+    | '/dashboard/(smart-import)/$jobId/done'
+    | '/dashboard/(smart-import)/$jobId/review'
+    | '/dashboard/(smart-import)/smart-import/history'
+    | '/dashboard/(tracks)/tracks/$trackSlug'
+    | '/dashboard/(training)/training/$id'
+    | '/dashboard/(training)/training/catalog'
+    | '/dashboard/(training)/training/my-client-trainings'
+    | '/dashboard/(billing)/billing/'
+    | '/dashboard/(clients)/clients/'
+    | '/dashboard/(courses)/courses/'
+    | '/dashboard/(employees)/employees/'
+    | '/dashboard/(financial)/financial/'
+    | '/dashboard/(forms)/forms/'
+    | '/dashboard/(hive-exec)/hive-exec/'
+    | '/dashboard/(hive-training)/hive-training/'
+    | '/dashboard/(smart-import)/smart-import/'
+    | '/dashboard/(training)/training/'
     | '/api/public/oauth/gmail/callback'
-    | '/dashboard/hive-exec/states/$stateCode/onboarding'
+    | '/dashboard/(hive-exec)/states/$stateCode/onboarding'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -3087,41 +3153,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardTracksRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/timeclock': {
-      id: '/dashboard/timeclock'
-      path: '/timeclock'
-      fullPath: '/dashboard/timeclock'
-      preLoaderRoute: typeof DashboardTimeclockRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/teams': {
-      id: '/dashboard/teams'
-      path: '/teams'
-      fullPath: '/dashboard/teams'
-      preLoaderRoute: typeof DashboardTeamsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/team': {
-      id: '/dashboard/team'
-      path: '/team'
-      fullPath: '/dashboard/team'
-      preLoaderRoute: typeof DashboardTeamRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/summaries': {
-      id: '/dashboard/summaries'
-      path: '/summaries'
-      fullPath: '/dashboard/summaries'
-      preLoaderRoute: typeof DashboardSummariesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/state-audit': {
-      id: '/dashboard/state-audit'
-      path: '/state-audit'
-      fullPath: '/dashboard/state-audit'
-      preLoaderRoute: typeof DashboardStateAuditRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/smart-import': {
       id: '/dashboard/smart-import'
       path: '/smart-import'
@@ -3143,102 +3174,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSchedulingRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/scheduler': {
-      id: '/dashboard/scheduler'
-      path: '/scheduler'
-      fullPath: '/dashboard/scheduler'
-      preLoaderRoute: typeof DashboardSchedulerRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/schedule-preview': {
-      id: '/dashboard/schedule-preview'
-      path: '/schedule-preview'
-      fullPath: '/dashboard/schedule-preview'
-      preLoaderRoute: typeof DashboardSchedulePreviewRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/schedule': {
-      id: '/dashboard/schedule'
-      path: '/schedule'
-      fullPath: '/dashboard/schedule'
-      preLoaderRoute: typeof DashboardScheduleRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/reports': {
-      id: '/dashboard/reports'
-      path: '/reports'
-      fullPath: '/dashboard/reports'
-      preLoaderRoute: typeof DashboardReportsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/reimbursements': {
-      id: '/dashboard/reimbursements'
-      path: '/reimbursements'
-      fullPath: '/dashboard/reimbursements'
-      preLoaderRoute: typeof DashboardReimbursementsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/records-desk': {
-      id: '/dashboard/records-desk'
-      path: '/records-desk'
-      fullPath: '/dashboard/records-desk'
-      preLoaderRoute: typeof DashboardRecordsDeskRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/programs-admin': {
-      id: '/dashboard/programs-admin'
-      path: '/programs-admin'
-      fullPath: '/dashboard/programs-admin'
-      preLoaderRoute: typeof DashboardProgramsAdminRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/programs': {
       id: '/dashboard/programs'
       path: '/programs'
       fullPath: '/dashboard/programs'
       preLoaderRoute: typeof DashboardProgramsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/policies': {
-      id: '/dashboard/policies'
-      path: '/policies'
-      fullPath: '/dashboard/policies'
-      preLoaderRoute: typeof DashboardPoliciesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/personnel-file': {
-      id: '/dashboard/personnel-file'
-      path: '/personnel-file'
-      fullPath: '/dashboard/personnel-file'
-      preLoaderRoute: typeof DashboardPersonnelFileRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/pba-ledger': {
-      id: '/dashboard/pba-ledger'
-      path: '/pba-ledger'
-      fullPath: '/dashboard/pba-ledger'
-      preLoaderRoute: typeof DashboardPbaLedgerRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/nectar-docs': {
-      id: '/dashboard/nectar-docs'
-      path: '/nectar-docs'
-      fullPath: '/dashboard/nectar-docs'
-      preLoaderRoute: typeof DashboardNectarDocsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/nectar-company-profile': {
-      id: '/dashboard/nectar-company-profile'
-      path: '/nectar-company-profile'
-      fullPath: '/dashboard/nectar-company-profile'
-      preLoaderRoute: typeof DashboardNectarCompanyProfileRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/my-time-corrections': {
-      id: '/dashboard/my-time-corrections'
-      path: '/my-time-corrections'
-      fullPath: '/dashboard/my-time-corrections'
-      preLoaderRoute: typeof DashboardMyTimeCorrectionsRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/my-obligations': {
@@ -3248,81 +3188,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardMyObligationsRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/my-historical-timesheets': {
-      id: '/dashboard/my-historical-timesheets'
-      path: '/my-historical-timesheets'
-      fullPath: '/dashboard/my-historical-timesheets'
-      preLoaderRoute: typeof DashboardMyHistoricalTimesheetsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/my-historical-records': {
-      id: '/dashboard/my-historical-records'
-      path: '/my-historical-records'
-      fullPath: '/dashboard/my-historical-records'
-      preLoaderRoute: typeof DashboardMyHistoricalRecordsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/my-historical-daily-notes': {
-      id: '/dashboard/my-historical-daily-notes'
-      path: '/my-historical-daily-notes'
-      fullPath: '/dashboard/my-historical-daily-notes'
-      preLoaderRoute: typeof DashboardMyHistoricalDailyNotesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/my-evidence': {
-      id: '/dashboard/my-evidence'
-      path: '/my-evidence'
-      fullPath: '/dashboard/my-evidence'
-      preLoaderRoute: typeof DashboardMyEvidenceRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/my-client-trainings': {
-      id: '/dashboard/my-client-trainings'
-      path: '/my-client-trainings'
-      fullPath: '/dashboard/my-client-trainings'
-      preLoaderRoute: typeof DashboardMyClientTrainingsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/invitations': {
-      id: '/dashboard/invitations'
-      path: '/invitations'
-      fullPath: '/dashboard/invitations'
-      preLoaderRoute: typeof DashboardInvitationsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/internal-audit': {
-      id: '/dashboard/internal-audit'
-      path: '/internal-audit'
-      fullPath: '/dashboard/internal-audit'
-      preLoaderRoute: typeof DashboardInternalAuditRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/inbox': {
-      id: '/dashboard/inbox'
-      path: '/inbox'
-      fullPath: '/dashboard/inbox'
-      preLoaderRoute: typeof DashboardInboxRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/hrc': {
-      id: '/dashboard/hrc'
-      path: '/hrc'
-      fullPath: '/dashboard/hrc'
-      preLoaderRoute: typeof DashboardHrcRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/hr-admin': {
       id: '/dashboard/hr-admin'
       path: '/hr-admin'
       fullPath: '/dashboard/hr-admin'
       preLoaderRoute: typeof DashboardHrAdminRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/host-home-control': {
-      id: '/dashboard/host-home-control'
-      path: '/host-home-control'
-      fullPath: '/dashboard/host-home-control'
-      preLoaderRoute: typeof DashboardHostHomeControlRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/homes': {
@@ -3339,20 +3209,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardHiveExecRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/historical-daily-notes-former-staff': {
-      id: '/dashboard/historical-daily-notes-former-staff'
-      path: '/historical-daily-notes-former-staff'
-      fullPath: '/dashboard/historical-daily-notes-former-staff'
-      preLoaderRoute: typeof DashboardHistoricalDailyNotesFormerStaffRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/help': {
-      id: '/dashboard/help'
-      path: '/help'
-      fullPath: '/dashboard/help'
-      preLoaderRoute: typeof DashboardHelpRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/forms': {
       id: '/dashboard/forms'
       path: '/forms'
@@ -3367,67 +3223,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFinancialRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/external-compliance': {
-      id: '/dashboard/external-compliance'
-      path: '/external-compliance'
-      fullPath: '/dashboard/external-compliance'
-      preLoaderRoute: typeof DashboardExternalComplianceRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/external-certifications': {
-      id: '/dashboard/external-certifications'
-      path: '/external-certifications'
-      fullPath: '/dashboard/external-certifications'
-      preLoaderRoute: typeof DashboardExternalCertificationsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/evv-archive': {
-      id: '/dashboard/evv-archive'
-      path: '/evv-archive'
-      fullPath: '/dashboard/evv-archive'
-      preLoaderRoute: typeof DashboardEvvArchiveRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/evidence': {
       id: '/dashboard/evidence'
       path: '/evidence'
       fullPath: '/dashboard/evidence'
       preLoaderRoute: typeof DashboardEvidenceRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/emar': {
-      id: '/dashboard/emar'
-      path: '/emar'
-      fullPath: '/dashboard/emar'
-      preLoaderRoute: typeof DashboardEmarRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/deadlines': {
-      id: '/dashboard/deadlines'
-      path: '/deadlines'
-      fullPath: '/dashboard/deadlines'
-      preLoaderRoute: typeof DashboardDeadlinesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/day-program': {
-      id: '/dashboard/day-program'
-      path: '/day-program'
-      fullPath: '/dashboard/day-program'
-      preLoaderRoute: typeof DashboardDayProgramRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/daily-logs': {
-      id: '/dashboard/daily-logs'
-      path: '/daily-logs'
-      fullPath: '/dashboard/daily-logs'
-      preLoaderRoute: typeof DashboardDailyLogsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/compliance-desk': {
-      id: '/dashboard/compliance-desk'
-      path: '/compliance-desk'
-      fullPath: '/dashboard/compliance-desk'
-      preLoaderRoute: typeof DashboardComplianceDeskRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/compliance': {
@@ -3437,32 +3237,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardComplianceRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/company-obligations': {
-      id: '/dashboard/company-obligations'
-      path: '/company-obligations'
-      fullPath: '/dashboard/company-obligations'
-      preLoaderRoute: typeof DashboardCompanyObligationsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/command-center': {
-      id: '/dashboard/command-center'
-      path: '/command-center'
-      fullPath: '/dashboard/command-center'
-      preLoaderRoute: typeof DashboardCommandCenterRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/clients': {
       id: '/dashboard/clients'
       path: '/clients'
       fullPath: '/dashboard/clients'
       preLoaderRoute: typeof DashboardClientsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/certifications': {
-      id: '/dashboard/certifications'
-      path: '/certifications'
-      fullPath: '/dashboard/certifications'
-      preLoaderRoute: typeof DashboardCertificationsRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/billing': {
@@ -3472,46 +3251,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBillingRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/behaviorist': {
-      id: '/dashboard/behaviorist'
-      path: '/behaviorist'
-      fullPath: '/dashboard/behaviorist'
-      preLoaderRoute: typeof DashboardBehavioristRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/authoritative-sources': {
-      id: '/dashboard/authoritative-sources'
-      path: '/authoritative-sources'
-      fullPath: '/dashboard/authoritative-sources'
-      preLoaderRoute: typeof DashboardAuthoritativeSourcesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/audit': {
       id: '/dashboard/audit'
       path: '/audit'
       fullPath: '/dashboard/audit'
       preLoaderRoute: typeof DashboardAuditRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/assignments': {
-      id: '/dashboard/assignments'
-      path: '/assignments'
-      fullPath: '/dashboard/assignments'
-      preLoaderRoute: typeof DashboardAssignmentsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/ask-nectar': {
-      id: '/dashboard/ask-nectar'
-      path: '/ask-nectar'
-      fullPath: '/dashboard/ask-nectar'
-      preLoaderRoute: typeof DashboardAskNectarRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/agency-documents': {
-      id: '/dashboard/agency-documents'
-      path: '/agency-documents'
-      fullPath: '/dashboard/agency-documents'
-      preLoaderRoute: typeof DashboardAgencyDocumentsRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/clients/new': {
@@ -3542,635 +3286,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuditPortalPackageIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/training/': {
-      id: '/dashboard/training/'
-      path: '/training'
-      fullPath: '/dashboard/training/'
-      preLoaderRoute: typeof DashboardTrainingIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/smart-import/': {
-      id: '/dashboard/smart-import/'
-      path: '/'
-      fullPath: '/dashboard/smart-import/'
-      preLoaderRoute: typeof DashboardSmartImportIndexRouteImport
-      parentRoute: typeof DashboardSmartImportRoute
-    }
-    '/dashboard/hive-training/': {
-      id: '/dashboard/hive-training/'
-      path: '/hive-training'
-      fullPath: '/dashboard/hive-training/'
-      preLoaderRoute: typeof DashboardHiveTrainingIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/hive-exec/': {
-      id: '/dashboard/hive-exec/'
-      path: '/'
-      fullPath: '/dashboard/hive-exec/'
-      preLoaderRoute: typeof DashboardHiveExecIndexRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/forms/': {
-      id: '/dashboard/forms/'
-      path: '/'
-      fullPath: '/dashboard/forms/'
-      preLoaderRoute: typeof DashboardFormsIndexRouteImport
-      parentRoute: typeof DashboardFormsRoute
-    }
-    '/dashboard/financial/': {
-      id: '/dashboard/financial/'
-      path: '/'
-      fullPath: '/dashboard/financial/'
-      preLoaderRoute: typeof DashboardFinancialIndexRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/employees/': {
-      id: '/dashboard/employees/'
-      path: '/employees'
-      fullPath: '/dashboard/employees/'
-      preLoaderRoute: typeof DashboardEmployeesIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/courses/': {
-      id: '/dashboard/courses/'
-      path: '/courses'
-      fullPath: '/dashboard/courses/'
-      preLoaderRoute: typeof DashboardCoursesIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/clients/': {
-      id: '/dashboard/clients/'
-      path: '/'
-      fullPath: '/dashboard/clients/'
-      preLoaderRoute: typeof DashboardClientsIndexRouteImport
-      parentRoute: typeof DashboardClientsRoute
-    }
-    '/dashboard/billing/': {
-      id: '/dashboard/billing/'
-      path: '/'
-      fullPath: '/dashboard/billing/'
-      preLoaderRoute: typeof DashboardBillingIndexRouteImport
-      parentRoute: typeof DashboardBillingRoute
-    }
     '/e2e/hhs-hub/$clientId': {
       id: '/e2e/hhs-hub/$clientId'
       path: '/e2e/hhs-hub/$clientId'
       fullPath: '/e2e/hhs-hub/$clientId'
       preLoaderRoute: typeof E2eHhsHubClientIdRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/training/catalog': {
-      id: '/dashboard/training/catalog'
-      path: '/training/catalog'
-      fullPath: '/dashboard/training/catalog'
-      preLoaderRoute: typeof DashboardTrainingCatalogRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/training/$id': {
-      id: '/dashboard/training/$id'
-      path: '/training/$id'
-      fullPath: '/dashboard/training/$id'
-      preLoaderRoute: typeof DashboardTrainingIdRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/tracks/$trackSlug': {
-      id: '/dashboard/tracks/$trackSlug'
-      path: '/$trackSlug'
-      fullPath: '/dashboard/tracks/$trackSlug'
-      preLoaderRoute: typeof DashboardTracksTrackSlugRouteImport
-      parentRoute: typeof DashboardTracksRoute
-    }
-    '/dashboard/smart-import/history': {
-      id: '/dashboard/smart-import/history'
-      path: '/history'
-      fullPath: '/dashboard/smart-import/history'
-      preLoaderRoute: typeof DashboardSmartImportHistoryRouteImport
-      parentRoute: typeof DashboardSmartImportRoute
-    }
-    '/dashboard/shift/$shiftId': {
-      id: '/dashboard/shift/$shiftId'
-      path: '/shift/$shiftId'
-      fullPath: '/dashboard/shift/$shiftId'
-      preLoaderRoute: typeof DashboardShiftShiftIdRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/settings/team-access': {
-      id: '/dashboard/settings/team-access'
-      path: '/team-access'
-      fullPath: '/dashboard/settings/team-access'
-      preLoaderRoute: typeof DashboardSettingsTeamAccessRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/subscription': {
-      id: '/dashboard/settings/subscription'
-      path: '/subscription'
-      fullPath: '/dashboard/settings/subscription'
-      preLoaderRoute: typeof DashboardSettingsSubscriptionRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/service-codes': {
-      id: '/dashboard/settings/service-codes'
-      path: '/service-codes'
-      fullPath: '/dashboard/settings/service-codes'
-      preLoaderRoute: typeof DashboardSettingsServiceCodesRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/service-catalog': {
-      id: '/dashboard/settings/service-catalog'
-      path: '/service-catalog'
-      fullPath: '/dashboard/settings/service-catalog'
-      preLoaderRoute: typeof DashboardSettingsServiceCatalogRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/retention': {
-      id: '/dashboard/settings/retention'
-      path: '/retention'
-      fullPath: '/dashboard/settings/retention'
-      preLoaderRoute: typeof DashboardSettingsRetentionRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/phi-access-audit': {
-      id: '/dashboard/settings/phi-access-audit'
-      path: '/phi-access-audit'
-      fullPath: '/dashboard/settings/phi-access-audit'
-      preLoaderRoute: typeof DashboardSettingsPhiAccessAuditRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/licensing': {
-      id: '/dashboard/settings/licensing'
-      path: '/licensing'
-      fullPath: '/dashboard/settings/licensing'
-      preLoaderRoute: typeof DashboardSettingsLicensingRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/gmail': {
-      id: '/dashboard/settings/gmail'
-      path: '/gmail'
-      fullPath: '/dashboard/settings/gmail'
-      preLoaderRoute: typeof DashboardSettingsGmailRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/email': {
-      id: '/dashboard/settings/email'
-      path: '/email'
-      fullPath: '/dashboard/settings/email'
-      preLoaderRoute: typeof DashboardSettingsEmailRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/draft-rules': {
-      id: '/dashboard/settings/draft-rules'
-      path: '/draft-rules'
-      fullPath: '/dashboard/settings/draft-rules'
-      preLoaderRoute: typeof DashboardSettingsDraftRulesRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/compliance-setup': {
-      id: '/dashboard/settings/compliance-setup'
-      path: '/compliance-setup'
-      fullPath: '/dashboard/settings/compliance-setup'
-      preLoaderRoute: typeof DashboardSettingsComplianceSetupRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/bank-mapping': {
-      id: '/dashboard/settings/bank-mapping'
-      path: '/bank-mapping'
-      fullPath: '/dashboard/settings/bank-mapping'
-      preLoaderRoute: typeof DashboardSettingsBankMappingRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/automation-rules': {
-      id: '/dashboard/settings/automation-rules'
-      path: '/automation-rules'
-      fullPath: '/dashboard/settings/automation-rules'
-      preLoaderRoute: typeof DashboardSettingsAutomationRulesRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/programs/$programId': {
-      id: '/dashboard/programs/$programId'
-      path: '/$programId'
-      fullPath: '/dashboard/programs/$programId'
-      preLoaderRoute: typeof DashboardProgramsProgramIdRouteImport
-      parentRoute: typeof DashboardProgramsRoute
-    }
-    '/dashboard/hub/knowledge': {
-      id: '/dashboard/hub/knowledge'
-      path: '/hub/knowledge'
-      fullPath: '/dashboard/hub/knowledge'
-      preLoaderRoute: typeof DashboardHubKnowledgeRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/hub/finances': {
-      id: '/dashboard/hub/finances'
-      path: '/hub/finances'
-      fullPath: '/dashboard/hub/finances'
-      preLoaderRoute: typeof DashboardHubFinancesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/hub/employees': {
-      id: '/dashboard/hub/employees'
-      path: '/hub/employees'
-      fullPath: '/dashboard/hub/employees'
-      preLoaderRoute: typeof DashboardHubEmployeesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/hub/documentation': {
-      id: '/dashboard/hub/documentation'
-      path: '/hub/documentation'
-      fullPath: '/dashboard/hub/documentation'
-      preLoaderRoute: typeof DashboardHubDocumentationRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/hub/clients': {
-      id: '/dashboard/hub/clients'
-      path: '/hub/clients'
-      fullPath: '/dashboard/hub/clients'
-      preLoaderRoute: typeof DashboardHubClientsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/hr-admin/settings': {
-      id: '/dashboard/hr-admin/settings'
-      path: '/settings'
-      fullPath: '/dashboard/hr-admin/settings'
-      preLoaderRoute: typeof DashboardHrAdminSettingsRouteImport
-      parentRoute: typeof DashboardHrAdminRoute
-    }
-    '/dashboard/homes/$teamId': {
-      id: '/dashboard/homes/$teamId'
-      path: '/$teamId'
-      fullPath: '/dashboard/homes/$teamId'
-      preLoaderRoute: typeof DashboardHomesTeamIdRouteImport
-      parentRoute: typeof DashboardHomesRoute
-    }
-    '/dashboard/hive-exec/upgrade-requests': {
-      id: '/dashboard/hive-exec/upgrade-requests'
-      path: '/upgrade-requests'
-      fullPath: '/dashboard/hive-exec/upgrade-requests'
-      preLoaderRoute: typeof DashboardHiveExecUpgradeRequestsRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/training': {
-      id: '/dashboard/hive-exec/training'
-      path: '/training'
-      fullPath: '/dashboard/hive-exec/training'
-      preLoaderRoute: typeof DashboardHiveExecTrainingRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/tickets': {
-      id: '/dashboard/hive-exec/tickets'
-      path: '/tickets'
-      fullPath: '/dashboard/hive-exec/tickets'
-      preLoaderRoute: typeof DashboardHiveExecTicketsRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/states': {
-      id: '/dashboard/hive-exec/states'
-      path: '/states'
-      fullPath: '/dashboard/hive-exec/states'
-      preLoaderRoute: typeof DashboardHiveExecStatesRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/plans': {
-      id: '/dashboard/hive-exec/plans'
-      path: '/plans'
-      fullPath: '/dashboard/hive-exec/plans'
-      preLoaderRoute: typeof DashboardHiveExecPlansRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/permissions': {
-      id: '/dashboard/hive-exec/permissions'
-      path: '/permissions'
-      fullPath: '/dashboard/hive-exec/permissions'
-      preLoaderRoute: typeof DashboardHiveExecPermissionsRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/new-company': {
-      id: '/dashboard/hive-exec/new-company'
-      path: '/new-company'
-      fullPath: '/dashboard/hive-exec/new-company'
-      preLoaderRoute: typeof DashboardHiveExecNewCompanyRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/nectar': {
-      id: '/dashboard/hive-exec/nectar'
-      path: '/nectar'
-      fullPath: '/dashboard/hive-exec/nectar'
-      preLoaderRoute: typeof DashboardHiveExecNectarRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/messages': {
-      id: '/dashboard/hive-exec/messages'
-      path: '/messages'
-      fullPath: '/dashboard/hive-exec/messages'
-      preLoaderRoute: typeof DashboardHiveExecMessagesRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/knowledge': {
-      id: '/dashboard/hive-exec/knowledge'
-      path: '/knowledge'
-      fullPath: '/dashboard/hive-exec/knowledge'
-      preLoaderRoute: typeof DashboardHiveExecKnowledgeRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/health': {
-      id: '/dashboard/hive-exec/health'
-      path: '/health'
-      fullPath: '/dashboard/hive-exec/health'
-      preLoaderRoute: typeof DashboardHiveExecHealthRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/functionality': {
-      id: '/dashboard/hive-exec/functionality'
-      path: '/functionality'
-      fullPath: '/dashboard/hive-exec/functionality'
-      preLoaderRoute: typeof DashboardHiveExecFunctionalityRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/features': {
-      id: '/dashboard/hive-exec/features'
-      path: '/features'
-      fullPath: '/dashboard/hive-exec/features'
-      preLoaderRoute: typeof DashboardHiveExecFeaturesRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/company-migration': {
-      id: '/dashboard/hive-exec/company-migration'
-      path: '/company-migration'
-      fullPath: '/dashboard/hive-exec/company-migration'
-      preLoaderRoute: typeof DashboardHiveExecCompanyMigrationRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/command': {
-      id: '/dashboard/hive-exec/command'
-      path: '/command'
-      fullPath: '/dashboard/hive-exec/command'
-      preLoaderRoute: typeof DashboardHiveExecCommandRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/classes': {
-      id: '/dashboard/hive-exec/classes'
-      path: '/classes'
-      fullPath: '/dashboard/hive-exec/classes'
-      preLoaderRoute: typeof DashboardHiveExecClassesRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/billing-approvals': {
-      id: '/dashboard/hive-exec/billing-approvals'
-      path: '/billing-approvals'
-      fullPath: '/dashboard/hive-exec/billing-approvals'
-      preLoaderRoute: typeof DashboardHiveExecBillingApprovalsRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/base-template': {
-      id: '/dashboard/hive-exec/base-template'
-      path: '/base-template'
-      fullPath: '/dashboard/hive-exec/base-template'
-      preLoaderRoute: typeof DashboardHiveExecBaseTemplateRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/approvals': {
-      id: '/dashboard/hive-exec/approvals'
-      path: '/approvals'
-      fullPath: '/dashboard/hive-exec/approvals'
-      preLoaderRoute: typeof DashboardHiveExecApprovalsRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/agreements': {
-      id: '/dashboard/hive-exec/agreements'
-      path: '/agreements'
-      fullPath: '/dashboard/hive-exec/agreements'
-      preLoaderRoute: typeof DashboardHiveExecAgreementsRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/$orgId': {
-      id: '/dashboard/hive-exec/$orgId'
-      path: '/$orgId'
-      fullPath: '/dashboard/hive-exec/$orgId'
-      preLoaderRoute: typeof DashboardHiveExecOrgIdRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/financial/totals': {
-      id: '/dashboard/financial/totals'
-      path: '/totals'
-      fullPath: '/dashboard/financial/totals'
-      preLoaderRoute: typeof DashboardFinancialTotalsRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/financial/rhs': {
-      id: '/dashboard/financial/rhs'
-      path: '/rhs'
-      fullPath: '/dashboard/financial/rhs'
-      preLoaderRoute: typeof DashboardFinancialRhsRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/financial/revenue': {
-      id: '/dashboard/financial/revenue'
-      path: '/revenue'
-      fullPath: '/dashboard/financial/revenue'
-      preLoaderRoute: typeof DashboardFinancialRevenueRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/financial/nectar': {
-      id: '/dashboard/financial/nectar'
-      path: '/nectar'
-      fullPath: '/dashboard/financial/nectar'
-      preLoaderRoute: typeof DashboardFinancialNectarRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/financial/monthly-grid': {
-      id: '/dashboard/financial/monthly-grid'
-      path: '/monthly-grid'
-      fullPath: '/dashboard/financial/monthly-grid'
-      preLoaderRoute: typeof DashboardFinancialMonthlyGridRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/financial/host-home': {
-      id: '/dashboard/financial/host-home'
-      path: '/host-home'
-      fullPath: '/dashboard/financial/host-home'
-      preLoaderRoute: typeof DashboardFinancialHostHomeRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/financial/gross': {
-      id: '/dashboard/financial/gross'
-      path: '/gross'
-      fullPath: '/dashboard/financial/gross'
-      preLoaderRoute: typeof DashboardFinancialGrossRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/financial/employees': {
-      id: '/dashboard/financial/employees'
-      path: '/employees'
-      fullPath: '/dashboard/financial/employees'
-      preLoaderRoute: typeof DashboardFinancialEmployeesRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/financial/distributions': {
-      id: '/dashboard/financial/distributions'
-      path: '/distributions'
-      fullPath: '/dashboard/financial/distributions'
-      preLoaderRoute: typeof DashboardFinancialDistributionsRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/financial/contractors': {
-      id: '/dashboard/financial/contractors'
-      path: '/contractors'
-      fullPath: '/dashboard/financial/contractors'
-      preLoaderRoute: typeof DashboardFinancialContractorsRouteImport
-      parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/employees/new': {
-      id: '/dashboard/employees/new'
-      path: '/employees/new'
-      fullPath: '/dashboard/employees/new'
-      preLoaderRoute: typeof DashboardEmployeesNewRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/employees/loans': {
-      id: '/dashboard/employees/loans'
-      path: '/employees/loans'
-      fullPath: '/dashboard/employees/loans'
-      preLoaderRoute: typeof DashboardEmployeesLoansRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/employees/hire-dates': {
-      id: '/dashboard/employees/hire-dates'
-      path: '/employees/hire-dates'
-      fullPath: '/dashboard/employees/hire-dates'
-      preLoaderRoute: typeof DashboardEmployeesHireDatesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/employees/$staffId': {
-      id: '/dashboard/employees/$staffId'
-      path: '/employees/$staffId'
-      fullPath: '/dashboard/employees/$staffId'
-      preLoaderRoute: typeof DashboardEmployeesStaffIdRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/courses/person': {
-      id: '/dashboard/courses/person'
-      path: '/courses/person'
-      fullPath: '/dashboard/courses/person'
-      preLoaderRoute: typeof DashboardCoursesPersonRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/courses/other': {
-      id: '/dashboard/courses/other'
-      path: '/courses/other'
-      fullPath: '/dashboard/courses/other'
-      preLoaderRoute: typeof DashboardCoursesOtherRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/courses/mindsmith': {
-      id: '/dashboard/courses/mindsmith'
-      path: '/courses/mindsmith'
-      fullPath: '/dashboard/courses/mindsmith'
-      preLoaderRoute: typeof DashboardCoursesMindsmithRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/courses/core': {
-      id: '/dashboard/courses/core'
-      path: '/courses/core'
-      fullPath: '/dashboard/courses/core'
-      preLoaderRoute: typeof DashboardCoursesCoreRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/courses/$courseId': {
-      id: '/dashboard/courses/$courseId'
-      path: '/courses/$courseId'
-      fullPath: '/dashboard/courses/$courseId'
-      preLoaderRoute: typeof DashboardCoursesCourseIdRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/clients/rhs-board': {
-      id: '/dashboard/clients/rhs-board'
-      path: '/rhs-board'
-      fullPath: '/dashboard/clients/rhs-board'
-      preLoaderRoute: typeof DashboardClientsRhsBoardRouteImport
-      parentRoute: typeof DashboardClientsRoute
-    }
-    '/dashboard/clients/pending': {
-      id: '/dashboard/clients/pending'
-      path: '/pending'
-      fullPath: '/dashboard/clients/pending'
-      preLoaderRoute: typeof DashboardClientsPendingRouteImport
-      parentRoute: typeof DashboardClientsRoute
-    }
-    '/dashboard/clients/new': {
-      id: '/dashboard/clients/new'
-      path: '/new'
-      fullPath: '/dashboard/clients/new'
-      preLoaderRoute: typeof DashboardClientsNewRouteImport
-      parentRoute: typeof DashboardClientsRoute
-    }
-    '/dashboard/clients/file': {
-      id: '/dashboard/clients/file'
-      path: '/file'
-      fullPath: '/dashboard/clients/file'
-      preLoaderRoute: typeof DashboardClientsFileRouteImport
-      parentRoute: typeof DashboardClientsRoute
-    }
-    '/dashboard/clients/billing-codes': {
-      id: '/dashboard/clients/billing-codes'
-      path: '/billing-codes'
-      fullPath: '/dashboard/clients/billing-codes'
-      preLoaderRoute: typeof DashboardClientsBillingCodesRouteImport
-      parentRoute: typeof DashboardClientsRoute
-    }
-    '/dashboard/clients/$clientId': {
-      id: '/dashboard/clients/$clientId'
-      path: '/$clientId'
-      fullPath: '/dashboard/clients/$clientId'
-      preLoaderRoute: typeof DashboardClientsClientIdRouteImport
-      parentRoute: typeof DashboardClientsRoute
-    }
-    '/dashboard/billing/subscription': {
-      id: '/dashboard/billing/subscription'
-      path: '/subscription'
-      fullPath: '/dashboard/billing/subscription'
-      preLoaderRoute: typeof DashboardBillingSubscriptionRouteImport
-      parentRoute: typeof DashboardBillingRoute
-    }
-    '/dashboard/billing/nectar': {
-      id: '/dashboard/billing/nectar'
-      path: '/nectar'
-      fullPath: '/dashboard/billing/nectar'
-      preLoaderRoute: typeof DashboardBillingNectarRouteImport
-      parentRoute: typeof DashboardBillingRoute
-    }
-    '/dashboard/billing/imports': {
-      id: '/dashboard/billing/imports'
-      path: '/imports'
-      fullPath: '/dashboard/billing/imports'
-      preLoaderRoute: typeof DashboardBillingImportsRouteImport
-      parentRoute: typeof DashboardBillingRoute
-    }
-    '/dashboard/billing/form520': {
-      id: '/dashboard/billing/form520'
-      path: '/form520'
-      fullPath: '/dashboard/billing/form520'
-      preLoaderRoute: typeof DashboardBillingForm520RouteImport
-      parentRoute: typeof DashboardBillingRoute
-    }
-    '/dashboard/billing/$clientId': {
-      id: '/dashboard/billing/$clientId'
-      path: '/$clientId'
-      fullPath: '/dashboard/billing/$clientId'
-      preLoaderRoute: typeof DashboardBillingClientIdRouteImport
-      parentRoute: typeof DashboardBillingRoute
-    }
-    '/dashboard/behavior-support/$clientId': {
-      id: '/dashboard/behavior-support/$clientId'
-      path: '/behavior-support/$clientId'
-      fullPath: '/dashboard/behavior-support/$clientId'
-      preLoaderRoute: typeof DashboardBehaviorSupportClientIdRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/admin/emar-audit': {
-      id: '/dashboard/admin/emar-audit'
-      path: '/admin/emar-audit'
-      fullPath: '/dashboard/admin/emar-audit'
-      preLoaderRoute: typeof DashboardAdminEmarAuditRouteImport
-      parentRoute: typeof DashboardRoute
     }
     '/api/stripe/webhook': {
       id: '/api/stripe/webhook'
@@ -4200,138 +3321,1083 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/smart-import/$jobId/review': {
-      id: '/dashboard/smart-import/$jobId/review'
+    '/dashboard/(training)/training/': {
+      id: '/dashboard/(training)/training/'
+      path: '/training'
+      fullPath: '/dashboard/training/'
+      preLoaderRoute: typeof DashboardtrainingTrainingIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(smart-import)/smart-import/': {
+      id: '/dashboard/(smart-import)/smart-import/'
+      path: '/smart-import'
+      fullPath: '/dashboard/smart-import/'
+      preLoaderRoute: typeof DashboardsmartImportSmartImportIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-training)/hive-training/': {
+      id: '/dashboard/(hive-training)/hive-training/'
+      path: '/hive-training'
+      fullPath: '/dashboard/hive-training/'
+      preLoaderRoute: typeof DashboardhiveTrainingHiveTrainingIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/': {
+      id: '/dashboard/(hive-exec)/hive-exec/'
+      path: '/hive-exec'
+      fullPath: '/dashboard/hive-exec/'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(forms)/forms/': {
+      id: '/dashboard/(forms)/forms/'
+      path: '/forms'
+      fullPath: '/dashboard/forms/'
+      preLoaderRoute: typeof DashboardformsFormsIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(financial)/financial/': {
+      id: '/dashboard/(financial)/financial/'
+      path: '/financial'
+      fullPath: '/dashboard/financial/'
+      preLoaderRoute: typeof DashboardfinancialFinancialIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(employees)/employees/': {
+      id: '/dashboard/(employees)/employees/'
+      path: '/employees'
+      fullPath: '/dashboard/employees/'
+      preLoaderRoute: typeof DashboardemployeesEmployeesIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(courses)/courses/': {
+      id: '/dashboard/(courses)/courses/'
+      path: '/courses'
+      fullPath: '/dashboard/courses/'
+      preLoaderRoute: typeof DashboardcoursesCoursesIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(clients)/clients/': {
+      id: '/dashboard/(clients)/clients/'
+      path: '/clients'
+      fullPath: '/dashboard/clients/'
+      preLoaderRoute: typeof DashboardclientsClientsIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(billing)/billing/': {
+      id: '/dashboard/(billing)/billing/'
+      path: '/billing'
+      fullPath: '/dashboard/billing/'
+      preLoaderRoute: typeof DashboardbillingBillingIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(training)/training/my-client-trainings': {
+      id: '/dashboard/(training)/training/my-client-trainings'
+      path: '/training/my-client-trainings'
+      fullPath: '/dashboard/training/my-client-trainings'
+      preLoaderRoute: typeof DashboardtrainingTrainingMyClientTrainingsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(training)/training/catalog': {
+      id: '/dashboard/(training)/training/catalog'
+      path: '/training/catalog'
+      fullPath: '/dashboard/training/catalog'
+      preLoaderRoute: typeof DashboardtrainingTrainingCatalogRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(training)/training/$id': {
+      id: '/dashboard/(training)/training/$id'
+      path: '/training/$id'
+      fullPath: '/dashboard/training/$id'
+      preLoaderRoute: typeof DashboardtrainingTrainingIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(tracks)/tracks/$trackSlug': {
+      id: '/dashboard/(tracks)/tracks/$trackSlug'
+      path: '/tracks/$trackSlug'
+      fullPath: '/dashboard/tracks/$trackSlug'
+      preLoaderRoute: typeof DashboardtracksTracksTrackSlugRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(smart-import)/smart-import/history': {
+      id: '/dashboard/(smart-import)/smart-import/history'
+      path: '/smart-import/history'
+      fullPath: '/dashboard/smart-import/history'
+      preLoaderRoute: typeof DashboardsmartImportSmartImportHistoryRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(smart-import)/$jobId/review': {
+      id: '/dashboard/(smart-import)/$jobId/review'
       path: '/$jobId/review'
-      fullPath: '/dashboard/smart-import/$jobId/review'
-      preLoaderRoute: typeof DashboardSmartImportJobIdReviewRouteImport
-      parentRoute: typeof DashboardSmartImportRoute
+      fullPath: '/dashboard/$jobId/review'
+      preLoaderRoute: typeof DashboardsmartImportJobIdReviewRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/dashboard/smart-import/$jobId/done': {
-      id: '/dashboard/smart-import/$jobId/done'
+    '/dashboard/(smart-import)/$jobId/done': {
+      id: '/dashboard/(smart-import)/$jobId/done'
       path: '/$jobId/done'
-      fullPath: '/dashboard/smart-import/$jobId/done'
-      preLoaderRoute: typeof DashboardSmartImportJobIdDoneRouteImport
-      parentRoute: typeof DashboardSmartImportRoute
-    }
-    '/dashboard/my-obligations_/course/$instanceId': {
-      id: '/dashboard/my-obligations_/course/$instanceId'
-      path: '/my-obligations/course/$instanceId'
-      fullPath: '/dashboard/my-obligations/course/$instanceId'
-      preLoaderRoute: typeof DashboardMyObligationsCourseInstanceIdRouteImport
+      fullPath: '/dashboard/$jobId/done'
+      preLoaderRoute: typeof DashboardsmartImportJobIdDoneRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/hive-training/course/$assignmentId': {
-      id: '/dashboard/hive-training/course/$assignmentId'
-      path: '/hive-training/course/$assignmentId'
-      fullPath: '/dashboard/hive-training/course/$assignmentId'
-      preLoaderRoute: typeof DashboardHiveTrainingCourseAssignmentIdRouteImport
+    '/dashboard/(settings)/settings/team-access': {
+      id: '/dashboard/(settings)/settings/team-access'
+      path: '/settings/team-access'
+      fullPath: '/dashboard/settings/team-access'
+      preLoaderRoute: typeof DashboardsettingsSettingsTeamAccessRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/hive-exec/states/$stateCode': {
-      id: '/dashboard/hive-exec/states/$stateCode'
-      path: '/$stateCode'
-      fullPath: '/dashboard/hive-exec/states/$stateCode'
-      preLoaderRoute: typeof DashboardHiveExecStatesStateCodeRouteImport
-      parentRoute: typeof DashboardHiveExecStatesRoute
+    '/dashboard/(settings)/settings/subscription': {
+      id: '/dashboard/(settings)/settings/subscription'
+      path: '/settings/subscription'
+      fullPath: '/dashboard/settings/subscription'
+      preLoaderRoute: typeof DashboardsettingsSettingsSubscriptionRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/dashboard/hive-exec/agreements/requirements': {
-      id: '/dashboard/hive-exec/agreements/requirements'
-      path: '/requirements'
-      fullPath: '/dashboard/hive-exec/agreements/requirements'
-      preLoaderRoute: typeof DashboardHiveExecAgreementsRequirementsRouteImport
-      parentRoute: typeof DashboardHiveExecAgreementsRoute
+    '/dashboard/(settings)/settings/service-codes': {
+      id: '/dashboard/(settings)/settings/service-codes'
+      path: '/settings/service-codes'
+      fullPath: '/dashboard/settings/service-codes'
+      preLoaderRoute: typeof DashboardsettingsSettingsServiceCodesRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/dashboard/hive-exec/agreements/$orgId': {
-      id: '/dashboard/hive-exec/agreements/$orgId'
-      path: '/$orgId'
-      fullPath: '/dashboard/hive-exec/agreements/$orgId'
-      preLoaderRoute: typeof DashboardHiveExecAgreementsOrgIdRouteImport
-      parentRoute: typeof DashboardHiveExecAgreementsRoute
+    '/dashboard/(settings)/settings/service-catalog': {
+      id: '/dashboard/(settings)/settings/service-catalog'
+      path: '/settings/service-catalog'
+      fullPath: '/dashboard/settings/service-catalog'
+      preLoaderRoute: typeof DashboardsettingsSettingsServiceCatalogRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/dashboard/forms/$formId/submissions': {
-      id: '/dashboard/forms/$formId/submissions'
+    '/dashboard/(settings)/settings/retention': {
+      id: '/dashboard/(settings)/settings/retention'
+      path: '/settings/retention'
+      fullPath: '/dashboard/settings/retention'
+      preLoaderRoute: typeof DashboardsettingsSettingsRetentionRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(settings)/settings/phi-access-audit': {
+      id: '/dashboard/(settings)/settings/phi-access-audit'
+      path: '/settings/phi-access-audit'
+      fullPath: '/dashboard/settings/phi-access-audit'
+      preLoaderRoute: typeof DashboardsettingsSettingsPhiAccessAuditRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(settings)/settings/licensing': {
+      id: '/dashboard/(settings)/settings/licensing'
+      path: '/settings/licensing'
+      fullPath: '/dashboard/settings/licensing'
+      preLoaderRoute: typeof DashboardsettingsSettingsLicensingRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(settings)/settings/gmail': {
+      id: '/dashboard/(settings)/settings/gmail'
+      path: '/settings/gmail'
+      fullPath: '/dashboard/settings/gmail'
+      preLoaderRoute: typeof DashboardsettingsSettingsGmailRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(settings)/settings/email': {
+      id: '/dashboard/(settings)/settings/email'
+      path: '/settings/email'
+      fullPath: '/dashboard/settings/email'
+      preLoaderRoute: typeof DashboardsettingsSettingsEmailRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(settings)/settings/draft-rules': {
+      id: '/dashboard/(settings)/settings/draft-rules'
+      path: '/settings/draft-rules'
+      fullPath: '/dashboard/settings/draft-rules'
+      preLoaderRoute: typeof DashboardsettingsSettingsDraftRulesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(settings)/settings/compliance-setup': {
+      id: '/dashboard/(settings)/settings/compliance-setup'
+      path: '/settings/compliance-setup'
+      fullPath: '/dashboard/settings/compliance-setup'
+      preLoaderRoute: typeof DashboardsettingsSettingsComplianceSetupRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(settings)/settings/bank-mapping': {
+      id: '/dashboard/(settings)/settings/bank-mapping'
+      path: '/settings/bank-mapping'
+      fullPath: '/dashboard/settings/bank-mapping'
+      preLoaderRoute: typeof DashboardsettingsSettingsBankMappingRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(settings)/settings/automation-rules': {
+      id: '/dashboard/(settings)/settings/automation-rules'
+      path: '/settings/automation-rules'
+      fullPath: '/dashboard/settings/automation-rules'
+      preLoaderRoute: typeof DashboardsettingsSettingsAutomationRulesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(scheduling)/shift/$shiftId': {
+      id: '/dashboard/(scheduling)/shift/$shiftId'
+      path: '/shift/$shiftId'
+      fullPath: '/dashboard/shift/$shiftId'
+      preLoaderRoute: typeof DashboardschedulingShiftShiftIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(scheduling)/scheduling/timeclock': {
+      id: '/dashboard/(scheduling)/scheduling/timeclock'
+      path: '/scheduling/timeclock'
+      fullPath: '/dashboard/scheduling/timeclock'
+      preLoaderRoute: typeof DashboardschedulingSchedulingTimeclockRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(scheduling)/scheduling/scheduler': {
+      id: '/dashboard/(scheduling)/scheduling/scheduler'
+      path: '/scheduling/scheduler'
+      fullPath: '/dashboard/scheduling/scheduler'
+      preLoaderRoute: typeof DashboardschedulingSchedulingSchedulerRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(scheduling)/scheduling/schedule-preview': {
+      id: '/dashboard/(scheduling)/scheduling/schedule-preview'
+      path: '/scheduling/schedule-preview'
+      fullPath: '/dashboard/scheduling/schedule-preview'
+      preLoaderRoute: typeof DashboardschedulingSchedulingSchedulePreviewRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(scheduling)/scheduling/schedule': {
+      id: '/dashboard/(scheduling)/scheduling/schedule'
+      path: '/scheduling/schedule'
+      fullPath: '/dashboard/scheduling/schedule'
+      preLoaderRoute: typeof DashboardschedulingSchedulingScheduleRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(scheduling)/scheduling/my-time-corrections': {
+      id: '/dashboard/(scheduling)/scheduling/my-time-corrections'
+      path: '/scheduling/my-time-corrections'
+      fullPath: '/dashboard/scheduling/my-time-corrections'
+      preLoaderRoute: typeof DashboardschedulingSchedulingMyTimeCorrectionsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(scheduling)/scheduling/evv-archive': {
+      id: '/dashboard/(scheduling)/scheduling/evv-archive'
+      path: '/scheduling/evv-archive'
+      fullPath: '/dashboard/scheduling/evv-archive'
+      preLoaderRoute: typeof DashboardschedulingSchedulingEvvArchiveRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(scheduling)/scheduling/day-program': {
+      id: '/dashboard/(scheduling)/scheduling/day-program'
+      path: '/scheduling/day-program'
+      fullPath: '/dashboard/scheduling/day-program'
+      preLoaderRoute: typeof DashboardschedulingSchedulingDayProgramRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(scheduling)/scheduling/daily-logs': {
+      id: '/dashboard/(scheduling)/scheduling/daily-logs'
+      path: '/scheduling/daily-logs'
+      fullPath: '/dashboard/scheduling/daily-logs'
+      preLoaderRoute: typeof DashboardschedulingSchedulingDailyLogsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(scheduling)/scheduling/assignments': {
+      id: '/dashboard/(scheduling)/scheduling/assignments'
+      path: '/scheduling/assignments'
+      fullPath: '/dashboard/scheduling/assignments'
+      preLoaderRoute: typeof DashboardschedulingSchedulingAssignmentsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(records)/records/summaries': {
+      id: '/dashboard/(records)/records/summaries'
+      path: '/records/summaries'
+      fullPath: '/dashboard/records/summaries'
+      preLoaderRoute: typeof DashboardrecordsRecordsSummariesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(records)/records/reports': {
+      id: '/dashboard/(records)/records/reports'
+      path: '/records/reports'
+      fullPath: '/dashboard/records/reports'
+      preLoaderRoute: typeof DashboardrecordsRecordsReportsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(records)/records/records-desk': {
+      id: '/dashboard/(records)/records/records-desk'
+      path: '/records/records-desk'
+      fullPath: '/dashboard/records/records-desk'
+      preLoaderRoute: typeof DashboardrecordsRecordsRecordsDeskRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(records)/records/my-historical-timesheets': {
+      id: '/dashboard/(records)/records/my-historical-timesheets'
+      path: '/records/my-historical-timesheets'
+      fullPath: '/dashboard/records/my-historical-timesheets'
+      preLoaderRoute: typeof DashboardrecordsRecordsMyHistoricalTimesheetsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(records)/records/my-historical-records': {
+      id: '/dashboard/(records)/records/my-historical-records'
+      path: '/records/my-historical-records'
+      fullPath: '/dashboard/records/my-historical-records'
+      preLoaderRoute: typeof DashboardrecordsRecordsMyHistoricalRecordsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(records)/records/my-historical-daily-notes': {
+      id: '/dashboard/(records)/records/my-historical-daily-notes'
+      path: '/records/my-historical-daily-notes'
+      fullPath: '/dashboard/records/my-historical-daily-notes'
+      preLoaderRoute: typeof DashboardrecordsRecordsMyHistoricalDailyNotesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(records)/records/historical-daily-notes-former-staff': {
+      id: '/dashboard/(records)/records/historical-daily-notes-former-staff'
+      path: '/records/historical-daily-notes-former-staff'
+      fullPath: '/dashboard/records/historical-daily-notes-former-staff'
+      preLoaderRoute: typeof DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(programs)/programs/$programId': {
+      id: '/dashboard/(programs)/programs/$programId'
+      path: '/programs/$programId'
+      fullPath: '/dashboard/programs/$programId'
+      preLoaderRoute: typeof DashboardprogramsProgramsProgramIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(nectar)/nectar/nectar-docs': {
+      id: '/dashboard/(nectar)/nectar/nectar-docs'
+      path: '/nectar/nectar-docs'
+      fullPath: '/dashboard/nectar/nectar-docs'
+      preLoaderRoute: typeof DashboardnectarNectarNectarDocsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(nectar)/nectar/nectar-company-profile': {
+      id: '/dashboard/(nectar)/nectar/nectar-company-profile'
+      path: '/nectar/nectar-company-profile'
+      fullPath: '/dashboard/nectar/nectar-company-profile'
+      preLoaderRoute: typeof DashboardnectarNectarNectarCompanyProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(nectar)/nectar/inbox': {
+      id: '/dashboard/(nectar)/nectar/inbox'
+      path: '/nectar/inbox'
+      fullPath: '/dashboard/nectar/inbox'
+      preLoaderRoute: typeof DashboardnectarNectarInboxRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(nectar)/nectar/help': {
+      id: '/dashboard/(nectar)/nectar/help'
+      path: '/nectar/help'
+      fullPath: '/dashboard/nectar/help'
+      preLoaderRoute: typeof DashboardnectarNectarHelpRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(nectar)/nectar/ask-nectar': {
+      id: '/dashboard/(nectar)/nectar/ask-nectar'
+      path: '/nectar/ask-nectar'
+      fullPath: '/dashboard/nectar/ask-nectar'
+      preLoaderRoute: typeof DashboardnectarNectarAskNectarRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(my-obligations_)/course/$instanceId': {
+      id: '/dashboard/(my-obligations_)/course/$instanceId'
+      path: '/course/$instanceId'
+      fullPath: '/dashboard/course/$instanceId'
+      preLoaderRoute: typeof DashboardmyObligations_CourseInstanceIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hub)/hub/knowledge': {
+      id: '/dashboard/(hub)/hub/knowledge'
+      path: '/hub/knowledge'
+      fullPath: '/dashboard/hub/knowledge'
+      preLoaderRoute: typeof DashboardhubHubKnowledgeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hub)/hub/finances': {
+      id: '/dashboard/(hub)/hub/finances'
+      path: '/hub/finances'
+      fullPath: '/dashboard/hub/finances'
+      preLoaderRoute: typeof DashboardhubHubFinancesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hub)/hub/employees': {
+      id: '/dashboard/(hub)/hub/employees'
+      path: '/hub/employees'
+      fullPath: '/dashboard/hub/employees'
+      preLoaderRoute: typeof DashboardhubHubEmployeesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hub)/hub/documentation': {
+      id: '/dashboard/(hub)/hub/documentation'
+      path: '/hub/documentation'
+      fullPath: '/dashboard/hub/documentation'
+      preLoaderRoute: typeof DashboardhubHubDocumentationRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hub)/hub/clients': {
+      id: '/dashboard/(hub)/hub/clients'
+      path: '/hub/clients'
+      fullPath: '/dashboard/hub/clients'
+      preLoaderRoute: typeof DashboardhubHubClientsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hr-admin)/hr-admin/settings': {
+      id: '/dashboard/(hr-admin)/hr-admin/settings'
+      path: '/hr-admin/settings'
+      fullPath: '/dashboard/hr-admin/settings'
+      preLoaderRoute: typeof DashboardhrAdminHrAdminSettingsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(homes)/homes/teams': {
+      id: '/dashboard/(homes)/homes/teams'
+      path: '/homes/teams'
+      fullPath: '/dashboard/homes/teams'
+      preLoaderRoute: typeof DashboardhomesHomesTeamsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(homes)/homes/host-home-control': {
+      id: '/dashboard/(homes)/homes/host-home-control'
+      path: '/homes/host-home-control'
+      fullPath: '/dashboard/homes/host-home-control'
+      preLoaderRoute: typeof DashboardhomesHomesHostHomeControlRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(homes)/homes/$teamId': {
+      id: '/dashboard/(homes)/homes/$teamId'
+      path: '/homes/$teamId'
+      fullPath: '/dashboard/homes/$teamId'
+      preLoaderRoute: typeof DashboardhomesHomesTeamIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-training)/course/$assignmentId': {
+      id: '/dashboard/(hive-training)/course/$assignmentId'
+      path: '/course/$assignmentId'
+      fullPath: '/dashboard/course/$assignmentId'
+      preLoaderRoute: typeof DashboardhiveTrainingCourseAssignmentIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/states/$stateCode': {
+      id: '/dashboard/(hive-exec)/states/$stateCode'
+      path: '/states/$stateCode'
+      fullPath: '/dashboard/states/$stateCode'
+      preLoaderRoute: typeof DashboardhiveExecStatesStateCodeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/upgrade-requests': {
+      id: '/dashboard/(hive-exec)/hive-exec/upgrade-requests'
+      path: '/hive-exec/upgrade-requests'
+      fullPath: '/dashboard/hive-exec/upgrade-requests'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecUpgradeRequestsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/training': {
+      id: '/dashboard/(hive-exec)/hive-exec/training'
+      path: '/hive-exec/training'
+      fullPath: '/dashboard/hive-exec/training'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecTrainingRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/tickets': {
+      id: '/dashboard/(hive-exec)/hive-exec/tickets'
+      path: '/hive-exec/tickets'
+      fullPath: '/dashboard/hive-exec/tickets'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecTicketsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/states': {
+      id: '/dashboard/(hive-exec)/hive-exec/states'
+      path: '/hive-exec/states'
+      fullPath: '/dashboard/hive-exec/states'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecStatesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/plans': {
+      id: '/dashboard/(hive-exec)/hive-exec/plans'
+      path: '/hive-exec/plans'
+      fullPath: '/dashboard/hive-exec/plans'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecPlansRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/permissions': {
+      id: '/dashboard/(hive-exec)/hive-exec/permissions'
+      path: '/hive-exec/permissions'
+      fullPath: '/dashboard/hive-exec/permissions'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecPermissionsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/new-company': {
+      id: '/dashboard/(hive-exec)/hive-exec/new-company'
+      path: '/hive-exec/new-company'
+      fullPath: '/dashboard/hive-exec/new-company'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecNewCompanyRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/nectar': {
+      id: '/dashboard/(hive-exec)/hive-exec/nectar'
+      path: '/hive-exec/nectar'
+      fullPath: '/dashboard/hive-exec/nectar'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecNectarRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/messages': {
+      id: '/dashboard/(hive-exec)/hive-exec/messages'
+      path: '/hive-exec/messages'
+      fullPath: '/dashboard/hive-exec/messages'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecMessagesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/knowledge': {
+      id: '/dashboard/(hive-exec)/hive-exec/knowledge'
+      path: '/hive-exec/knowledge'
+      fullPath: '/dashboard/hive-exec/knowledge'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecKnowledgeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/health': {
+      id: '/dashboard/(hive-exec)/hive-exec/health'
+      path: '/hive-exec/health'
+      fullPath: '/dashboard/hive-exec/health'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecHealthRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/functionality': {
+      id: '/dashboard/(hive-exec)/hive-exec/functionality'
+      path: '/hive-exec/functionality'
+      fullPath: '/dashboard/hive-exec/functionality'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecFunctionalityRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/features': {
+      id: '/dashboard/(hive-exec)/hive-exec/features'
+      path: '/hive-exec/features'
+      fullPath: '/dashboard/hive-exec/features'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecFeaturesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/company-migration': {
+      id: '/dashboard/(hive-exec)/hive-exec/company-migration'
+      path: '/hive-exec/company-migration'
+      fullPath: '/dashboard/hive-exec/company-migration'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecCompanyMigrationRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/command': {
+      id: '/dashboard/(hive-exec)/hive-exec/command'
+      path: '/hive-exec/command'
+      fullPath: '/dashboard/hive-exec/command'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecCommandRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/classes': {
+      id: '/dashboard/(hive-exec)/hive-exec/classes'
+      path: '/hive-exec/classes'
+      fullPath: '/dashboard/hive-exec/classes'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecClassesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/billing-approvals': {
+      id: '/dashboard/(hive-exec)/hive-exec/billing-approvals'
+      path: '/hive-exec/billing-approvals'
+      fullPath: '/dashboard/hive-exec/billing-approvals'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecBillingApprovalsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/base-template': {
+      id: '/dashboard/(hive-exec)/hive-exec/base-template'
+      path: '/hive-exec/base-template'
+      fullPath: '/dashboard/hive-exec/base-template'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecBaseTemplateRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/approvals': {
+      id: '/dashboard/(hive-exec)/hive-exec/approvals'
+      path: '/hive-exec/approvals'
+      fullPath: '/dashboard/hive-exec/approvals'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecApprovalsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/agreements': {
+      id: '/dashboard/(hive-exec)/hive-exec/agreements'
+      path: '/hive-exec/agreements'
+      fullPath: '/dashboard/hive-exec/agreements'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecAgreementsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/hive-exec/$orgId': {
+      id: '/dashboard/(hive-exec)/hive-exec/$orgId'
+      path: '/hive-exec/$orgId'
+      fullPath: '/dashboard/hive-exec/$orgId'
+      preLoaderRoute: typeof DashboardhiveExecHiveExecOrgIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/agreements/requirements': {
+      id: '/dashboard/(hive-exec)/agreements/requirements'
+      path: '/agreements/requirements'
+      fullPath: '/dashboard/agreements/requirements'
+      preLoaderRoute: typeof DashboardhiveExecAgreementsRequirementsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(hive-exec)/agreements/$orgId': {
+      id: '/dashboard/(hive-exec)/agreements/$orgId'
+      path: '/agreements/$orgId'
+      fullPath: '/dashboard/agreements/$orgId'
+      preLoaderRoute: typeof DashboardhiveExecAgreementsOrgIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(forms)/$formId/submissions': {
+      id: '/dashboard/(forms)/$formId/submissions'
       path: '/$formId/submissions'
-      fullPath: '/dashboard/forms/$formId/submissions'
-      preLoaderRoute: typeof DashboardFormsFormIdSubmissionsRouteImport
-      parentRoute: typeof DashboardFormsRoute
+      fullPath: '/dashboard/$formId/submissions'
+      preLoaderRoute: typeof DashboardformsFormIdSubmissionsRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/dashboard/forms/$formId/fill': {
-      id: '/dashboard/forms/$formId/fill'
+    '/dashboard/(forms)/$formId/fill': {
+      id: '/dashboard/(forms)/$formId/fill'
       path: '/$formId/fill'
-      fullPath: '/dashboard/forms/$formId/fill'
-      preLoaderRoute: typeof DashboardFormsFormIdFillRouteImport
-      parentRoute: typeof DashboardFormsRoute
+      fullPath: '/dashboard/$formId/fill'
+      preLoaderRoute: typeof DashboardformsFormIdFillRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/dashboard/forms/$formId/edit': {
-      id: '/dashboard/forms/$formId/edit'
+    '/dashboard/(forms)/$formId/edit': {
+      id: '/dashboard/(forms)/$formId/edit'
       path: '/$formId/edit'
-      fullPath: '/dashboard/forms/$formId/edit'
-      preLoaderRoute: typeof DashboardFormsFormIdEditRouteImport
-      parentRoute: typeof DashboardFormsRoute
-    }
-    '/dashboard/courses/topic/$topicId': {
-      id: '/dashboard/courses/topic/$topicId'
-      path: '/courses/topic/$topicId'
-      fullPath: '/dashboard/courses/topic/$topicId'
-      preLoaderRoute: typeof DashboardCoursesTopicTopicIdRouteImport
+      fullPath: '/dashboard/$formId/edit'
+      preLoaderRoute: typeof DashboardformsFormIdEditRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/courses/policy/$documentId': {
-      id: '/dashboard/courses/policy/$documentId'
-      path: '/courses/policy/$documentId'
-      fullPath: '/dashboard/courses/policy/$documentId'
-      preLoaderRoute: typeof DashboardCoursesPolicyDocumentIdRouteImport
+    '/dashboard/(financial)/financial/totals': {
+      id: '/dashboard/(financial)/financial/totals'
+      path: '/financial/totals'
+      fullPath: '/dashboard/financial/totals'
+      preLoaderRoute: typeof DashboardfinancialFinancialTotalsRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/courses/person-module/$assignmentId': {
-      id: '/dashboard/courses/person-module/$assignmentId'
-      path: '/courses/person-module/$assignmentId'
-      fullPath: '/dashboard/courses/person-module/$assignmentId'
-      preLoaderRoute: typeof DashboardCoursesPersonModuleAssignmentIdRouteImport
+    '/dashboard/(financial)/financial/rhs': {
+      id: '/dashboard/(financial)/financial/rhs'
+      path: '/financial/rhs'
+      fullPath: '/dashboard/financial/rhs'
+      preLoaderRoute: typeof DashboardfinancialFinancialRhsRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/courses/$courseId/edit': {
-      id: '/dashboard/courses/$courseId/edit'
-      path: '/edit'
-      fullPath: '/dashboard/courses/$courseId/edit'
-      preLoaderRoute: typeof DashboardCoursesCourseIdEditRouteImport
-      parentRoute: typeof DashboardCoursesCourseIdRoute
-    }
-    '/dashboard/compliance_/cert-review/$completionId': {
-      id: '/dashboard/compliance_/cert-review/$completionId'
-      path: '/compliance/cert-review/$completionId'
-      fullPath: '/dashboard/compliance/cert-review/$completionId'
-      preLoaderRoute: typeof DashboardComplianceCertReviewCompletionIdRouteImport
+    '/dashboard/(financial)/financial/revenue': {
+      id: '/dashboard/(financial)/financial/revenue'
+      path: '/financial/revenue'
+      fullPath: '/dashboard/financial/revenue'
+      preLoaderRoute: typeof DashboardfinancialFinancialRevenueRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/clients/workspace/$clientId': {
-      id: '/dashboard/clients/workspace/$clientId'
+    '/dashboard/(financial)/financial/reimbursements': {
+      id: '/dashboard/(financial)/financial/reimbursements'
+      path: '/financial/reimbursements'
+      fullPath: '/dashboard/financial/reimbursements'
+      preLoaderRoute: typeof DashboardfinancialFinancialReimbursementsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(financial)/financial/pba-ledger': {
+      id: '/dashboard/(financial)/financial/pba-ledger'
+      path: '/financial/pba-ledger'
+      fullPath: '/dashboard/financial/pba-ledger'
+      preLoaderRoute: typeof DashboardfinancialFinancialPbaLedgerRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(financial)/financial/nectar': {
+      id: '/dashboard/(financial)/financial/nectar'
+      path: '/financial/nectar'
+      fullPath: '/dashboard/financial/nectar'
+      preLoaderRoute: typeof DashboardfinancialFinancialNectarRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(financial)/financial/monthly-grid': {
+      id: '/dashboard/(financial)/financial/monthly-grid'
+      path: '/financial/monthly-grid'
+      fullPath: '/dashboard/financial/monthly-grid'
+      preLoaderRoute: typeof DashboardfinancialFinancialMonthlyGridRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(financial)/financial/host-home': {
+      id: '/dashboard/(financial)/financial/host-home'
+      path: '/financial/host-home'
+      fullPath: '/dashboard/financial/host-home'
+      preLoaderRoute: typeof DashboardfinancialFinancialHostHomeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(financial)/financial/gross': {
+      id: '/dashboard/(financial)/financial/gross'
+      path: '/financial/gross'
+      fullPath: '/dashboard/financial/gross'
+      preLoaderRoute: typeof DashboardfinancialFinancialGrossRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(financial)/financial/employees': {
+      id: '/dashboard/(financial)/financial/employees'
+      path: '/financial/employees'
+      fullPath: '/dashboard/financial/employees'
+      preLoaderRoute: typeof DashboardfinancialFinancialEmployeesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(financial)/financial/distributions': {
+      id: '/dashboard/(financial)/financial/distributions'
+      path: '/financial/distributions'
+      fullPath: '/dashboard/financial/distributions'
+      preLoaderRoute: typeof DashboardfinancialFinancialDistributionsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(financial)/financial/contractors': {
+      id: '/dashboard/(financial)/financial/contractors'
+      path: '/financial/contractors'
+      fullPath: '/dashboard/financial/contractors'
+      preLoaderRoute: typeof DashboardfinancialFinancialContractorsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(evidence)/evidence/my-evidence': {
+      id: '/dashboard/(evidence)/evidence/my-evidence'
+      path: '/evidence/my-evidence'
+      fullPath: '/dashboard/evidence/my-evidence'
+      preLoaderRoute: typeof DashboardevidenceEvidenceMyEvidenceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(employees)/employees/team': {
+      id: '/dashboard/(employees)/employees/team'
+      path: '/employees/team'
+      fullPath: '/dashboard/employees/team'
+      preLoaderRoute: typeof DashboardemployeesEmployeesTeamRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(employees)/employees/personnel-file': {
+      id: '/dashboard/(employees)/employees/personnel-file'
+      path: '/employees/personnel-file'
+      fullPath: '/dashboard/employees/personnel-file'
+      preLoaderRoute: typeof DashboardemployeesEmployeesPersonnelFileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(employees)/employees/new': {
+      id: '/dashboard/(employees)/employees/new'
+      path: '/employees/new'
+      fullPath: '/dashboard/employees/new'
+      preLoaderRoute: typeof DashboardemployeesEmployeesNewRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(employees)/employees/invitations': {
+      id: '/dashboard/(employees)/employees/invitations'
+      path: '/employees/invitations'
+      fullPath: '/dashboard/employees/invitations'
+      preLoaderRoute: typeof DashboardemployeesEmployeesInvitationsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(employees)/employees/hire-dates': {
+      id: '/dashboard/(employees)/employees/hire-dates'
+      path: '/employees/hire-dates'
+      fullPath: '/dashboard/employees/hire-dates'
+      preLoaderRoute: typeof DashboardemployeesEmployeesHireDatesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(employees)/employees/client-loans': {
+      id: '/dashboard/(employees)/employees/client-loans'
+      path: '/employees/client-loans'
+      fullPath: '/dashboard/employees/client-loans'
+      preLoaderRoute: typeof DashboardemployeesEmployeesClientLoansRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(employees)/employees/$staffId': {
+      id: '/dashboard/(employees)/employees/$staffId'
+      path: '/employees/$staffId'
+      fullPath: '/dashboard/employees/$staffId'
+      preLoaderRoute: typeof DashboardemployeesEmployeesStaffIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(documents)/documents/emar': {
+      id: '/dashboard/(documents)/documents/emar'
+      path: '/documents/emar'
+      fullPath: '/dashboard/documents/emar'
+      preLoaderRoute: typeof DashboarddocumentsDocumentsEmarRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(documents)/documents/agency-documents': {
+      id: '/dashboard/(documents)/documents/agency-documents'
+      path: '/documents/agency-documents'
+      fullPath: '/dashboard/documents/agency-documents'
+      preLoaderRoute: typeof DashboarddocumentsDocumentsAgencyDocumentsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(courses)/topic/$topicId': {
+      id: '/dashboard/(courses)/topic/$topicId'
+      path: '/topic/$topicId'
+      fullPath: '/dashboard/topic/$topicId'
+      preLoaderRoute: typeof DashboardcoursesTopicTopicIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(courses)/policy/$documentId': {
+      id: '/dashboard/(courses)/policy/$documentId'
+      path: '/policy/$documentId'
+      fullPath: '/dashboard/policy/$documentId'
+      preLoaderRoute: typeof DashboardcoursesPolicyDocumentIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(courses)/person-module/$assignmentId': {
+      id: '/dashboard/(courses)/person-module/$assignmentId'
+      path: '/person-module/$assignmentId'
+      fullPath: '/dashboard/person-module/$assignmentId'
+      preLoaderRoute: typeof DashboardcoursesPersonModuleAssignmentIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(courses)/courses/person': {
+      id: '/dashboard/(courses)/courses/person'
+      path: '/courses/person'
+      fullPath: '/dashboard/courses/person'
+      preLoaderRoute: typeof DashboardcoursesCoursesPersonRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(courses)/courses/other': {
+      id: '/dashboard/(courses)/courses/other'
+      path: '/courses/other'
+      fullPath: '/dashboard/courses/other'
+      preLoaderRoute: typeof DashboardcoursesCoursesOtherRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(courses)/courses/mindsmith': {
+      id: '/dashboard/(courses)/courses/mindsmith'
+      path: '/courses/mindsmith'
+      fullPath: '/dashboard/courses/mindsmith'
+      preLoaderRoute: typeof DashboardcoursesCoursesMindsmithRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(courses)/courses/core': {
+      id: '/dashboard/(courses)/courses/core'
+      path: '/courses/core'
+      fullPath: '/dashboard/courses/core'
+      preLoaderRoute: typeof DashboardcoursesCoursesCoreRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(courses)/courses/$courseId': {
+      id: '/dashboard/(courses)/courses/$courseId'
+      path: '/courses/$courseId'
+      fullPath: '/dashboard/courses/$courseId'
+      preLoaderRoute: typeof DashboardcoursesCoursesCourseIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(courses)/$courseId/edit': {
+      id: '/dashboard/(courses)/$courseId/edit'
+      path: '/$courseId/edit'
+      fullPath: '/dashboard/$courseId/edit'
+      preLoaderRoute: typeof DashboardcoursesCourseIdEditRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(compliance_)/cert-review/$completionId': {
+      id: '/dashboard/(compliance_)/cert-review/$completionId'
+      path: '/cert-review/$completionId'
+      fullPath: '/dashboard/cert-review/$completionId'
+      preLoaderRoute: typeof Dashboardcompliance_CertReviewCompletionIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(compliance)/compliance/policies': {
+      id: '/dashboard/(compliance)/compliance/policies'
+      path: '/compliance/policies'
+      fullPath: '/dashboard/compliance/policies'
+      preLoaderRoute: typeof DashboardcomplianceCompliancePoliciesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(compliance)/compliance/hrc': {
+      id: '/dashboard/(compliance)/compliance/hrc'
+      path: '/compliance/hrc'
+      fullPath: '/dashboard/compliance/hrc'
+      preLoaderRoute: typeof DashboardcomplianceComplianceHrcRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(compliance)/compliance/external-compliance': {
+      id: '/dashboard/(compliance)/compliance/external-compliance'
+      path: '/compliance/external-compliance'
+      fullPath: '/dashboard/compliance/external-compliance'
+      preLoaderRoute: typeof DashboardcomplianceComplianceExternalComplianceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(compliance)/compliance/external-certifications': {
+      id: '/dashboard/(compliance)/compliance/external-certifications'
+      path: '/compliance/external-certifications'
+      fullPath: '/dashboard/compliance/external-certifications'
+      preLoaderRoute: typeof DashboardcomplianceComplianceExternalCertificationsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(compliance)/compliance/deadlines': {
+      id: '/dashboard/(compliance)/compliance/deadlines'
+      path: '/compliance/deadlines'
+      fullPath: '/dashboard/compliance/deadlines'
+      preLoaderRoute: typeof DashboardcomplianceComplianceDeadlinesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(compliance)/compliance/compliance-desk': {
+      id: '/dashboard/(compliance)/compliance/compliance-desk'
+      path: '/compliance/compliance-desk'
+      fullPath: '/dashboard/compliance/compliance-desk'
+      preLoaderRoute: typeof DashboardcomplianceComplianceComplianceDeskRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(compliance)/compliance/company-obligations': {
+      id: '/dashboard/(compliance)/compliance/company-obligations'
+      path: '/compliance/company-obligations'
+      fullPath: '/dashboard/compliance/company-obligations'
+      preLoaderRoute: typeof DashboardcomplianceComplianceCompanyObligationsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(compliance)/compliance/certifications': {
+      id: '/dashboard/(compliance)/compliance/certifications'
+      path: '/compliance/certifications'
+      fullPath: '/dashboard/compliance/certifications'
+      preLoaderRoute: typeof DashboardcomplianceComplianceCertificationsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(compliance)/compliance/authoritative-sources': {
+      id: '/dashboard/(compliance)/compliance/authoritative-sources'
+      path: '/compliance/authoritative-sources'
+      fullPath: '/dashboard/compliance/authoritative-sources'
+      preLoaderRoute: typeof DashboardcomplianceComplianceAuthoritativeSourcesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(clients)/workspace/$clientId': {
+      id: '/dashboard/(clients)/workspace/$clientId'
       path: '/workspace/$clientId'
-      fullPath: '/dashboard/clients/workspace/$clientId'
-      preLoaderRoute: typeof DashboardClientsWorkspaceClientIdRouteImport
-      parentRoute: typeof DashboardClientsRoute
+      fullPath: '/dashboard/workspace/$clientId'
+      preLoaderRoute: typeof DashboardclientsWorkspaceClientIdRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/dashboard/clients/training/$clientId': {
-      id: '/dashboard/clients/training/$clientId'
+    '/dashboard/(clients)/training/$clientId': {
+      id: '/dashboard/(clients)/training/$clientId'
       path: '/training/$clientId'
-      fullPath: '/dashboard/clients/training/$clientId'
-      preLoaderRoute: typeof DashboardClientsTrainingClientIdRouteImport
-      parentRoute: typeof DashboardClientsRoute
+      fullPath: '/dashboard/training/$clientId'
+      preLoaderRoute: typeof DashboardclientsTrainingClientIdRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/dashboard/clients/intake/$clientId': {
-      id: '/dashboard/clients/intake/$clientId'
+    '/dashboard/(clients)/intake/$clientId': {
+      id: '/dashboard/(clients)/intake/$clientId'
       path: '/intake/$clientId'
-      fullPath: '/dashboard/clients/intake/$clientId'
-      preLoaderRoute: typeof DashboardClientsIntakeClientIdRouteImport
-      parentRoute: typeof DashboardClientsRoute
+      fullPath: '/dashboard/intake/$clientId'
+      preLoaderRoute: typeof DashboardclientsIntakeClientIdRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/dashboard/clients/hhs-hub/$clientId': {
-      id: '/dashboard/clients/hhs-hub/$clientId'
+    '/dashboard/(clients)/hhs-hub/$clientId': {
+      id: '/dashboard/(clients)/hhs-hub/$clientId'
       path: '/hhs-hub/$clientId'
-      fullPath: '/dashboard/clients/hhs-hub/$clientId'
-      preLoaderRoute: typeof DashboardClientsHhsHubClientIdRouteImport
-      parentRoute: typeof DashboardClientsRoute
+      fullPath: '/dashboard/hhs-hub/$clientId'
+      preLoaderRoute: typeof DashboardclientsHhsHubClientIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(clients)/clients/rhs-board': {
+      id: '/dashboard/(clients)/clients/rhs-board'
+      path: '/clients/rhs-board'
+      fullPath: '/dashboard/clients/rhs-board'
+      preLoaderRoute: typeof DashboardclientsClientsRhsBoardRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(clients)/clients/pending': {
+      id: '/dashboard/(clients)/clients/pending'
+      path: '/clients/pending'
+      fullPath: '/dashboard/clients/pending'
+      preLoaderRoute: typeof DashboardclientsClientsPendingRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(clients)/clients/new': {
+      id: '/dashboard/(clients)/clients/new'
+      path: '/clients/new'
+      fullPath: '/dashboard/clients/new'
+      preLoaderRoute: typeof DashboardclientsClientsNewRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(clients)/clients/client-file': {
+      id: '/dashboard/(clients)/clients/client-file'
+      path: '/clients/client-file'
+      fullPath: '/dashboard/clients/client-file'
+      preLoaderRoute: typeof DashboardclientsClientsClientFileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(clients)/clients/client-billing-codes': {
+      id: '/dashboard/(clients)/clients/client-billing-codes'
+      path: '/clients/client-billing-codes'
+      fullPath: '/dashboard/clients/client-billing-codes'
+      preLoaderRoute: typeof DashboardclientsClientsClientBillingCodesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(clients)/clients/behaviorist': {
+      id: '/dashboard/(clients)/clients/behaviorist'
+      path: '/clients/behaviorist'
+      fullPath: '/dashboard/clients/behaviorist'
+      preLoaderRoute: typeof DashboardclientsClientsBehavioristRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(clients)/clients/$clientId': {
+      id: '/dashboard/(clients)/clients/$clientId'
+      path: '/clients/$clientId'
+      fullPath: '/dashboard/clients/$clientId'
+      preLoaderRoute: typeof DashboardclientsClientsClientIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(billing)/billing/subscription': {
+      id: '/dashboard/(billing)/billing/subscription'
+      path: '/billing/subscription'
+      fullPath: '/dashboard/billing/subscription'
+      preLoaderRoute: typeof DashboardbillingBillingSubscriptionRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(billing)/billing/nectar': {
+      id: '/dashboard/(billing)/billing/nectar'
+      path: '/billing/nectar'
+      fullPath: '/dashboard/billing/nectar'
+      preLoaderRoute: typeof DashboardbillingBillingNectarRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(billing)/billing/imports': {
+      id: '/dashboard/(billing)/billing/imports'
+      path: '/billing/imports'
+      fullPath: '/dashboard/billing/imports'
+      preLoaderRoute: typeof DashboardbillingBillingImportsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(billing)/billing/form520': {
+      id: '/dashboard/(billing)/billing/form520'
+      path: '/billing/form520'
+      fullPath: '/dashboard/billing/form520'
+      preLoaderRoute: typeof DashboardbillingBillingForm520RouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(billing)/billing/$clientId': {
+      id: '/dashboard/(billing)/billing/$clientId'
+      path: '/billing/$clientId'
+      fullPath: '/dashboard/billing/$clientId'
+      preLoaderRoute: typeof DashboardbillingBillingClientIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(behavior-support)/behavior-support/$clientId': {
+      id: '/dashboard/(behavior-support)/behavior-support/$clientId'
+      path: '/behavior-support/$clientId'
+      fullPath: '/dashboard/behavior-support/$clientId'
+      preLoaderRoute: typeof DashboardbehaviorSupportBehaviorSupportClientIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(audit)/audit/state-audit': {
+      id: '/dashboard/(audit)/audit/state-audit'
+      path: '/audit/state-audit'
+      fullPath: '/dashboard/audit/state-audit'
+      preLoaderRoute: typeof DashboardauditAuditStateAuditRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(audit)/audit/internal-audit': {
+      id: '/dashboard/(audit)/audit/internal-audit'
+      path: '/audit/internal-audit'
+      fullPath: '/dashboard/audit/internal-audit'
+      preLoaderRoute: typeof DashboardauditAuditInternalAuditRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(admin)/admin/programs-admin': {
+      id: '/dashboard/(admin)/admin/programs-admin'
+      path: '/admin/programs-admin'
+      fullPath: '/dashboard/admin/programs-admin'
+      preLoaderRoute: typeof DashboardadminAdminProgramsAdminRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(admin)/admin/emar-audit': {
+      id: '/dashboard/(admin)/admin/emar-audit'
+      path: '/admin/emar-audit'
+      fullPath: '/dashboard/admin/emar-audit'
+      preLoaderRoute: typeof DashboardadminAdminEmarAuditRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/(admin)/admin/command-center': {
+      id: '/dashboard/(admin)/admin/command-center'
+      path: '/admin/command-center'
+      fullPath: '/dashboard/admin/command-center'
+      preLoaderRoute: typeof DashboardadminAdminCommandCenterRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/api/public/webhooks/stripe': {
       id: '/api/public/webhooks/stripe'
@@ -4375,12 +4441,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksBillingDailyCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/hive-exec/states/$stateCode/onboarding': {
-      id: '/dashboard/hive-exec/states/$stateCode/onboarding'
+    '/dashboard/(hive-exec)/states/$stateCode/onboarding': {
+      id: '/dashboard/(hive-exec)/states/$stateCode/onboarding'
       path: '/onboarding'
-      fullPath: '/dashboard/hive-exec/states/$stateCode/onboarding'
-      preLoaderRoute: typeof DashboardHiveExecStatesStateCodeOnboardingRouteImport
-      parentRoute: typeof DashboardHiveExecStatesStateCodeRoute
+      fullPath: '/dashboard/states/$stateCode/onboarding'
+      preLoaderRoute: typeof DashboardhiveExecStatesStateCodeOnboardingRouteImport
+      parentRoute: typeof DashboardhiveExecStatesStateCodeRoute
     }
     '/api/public/oauth/gmail/callback': {
       id: '/api/public/oauth/gmail/callback'
@@ -4405,517 +4471,449 @@ const ClientsRouteChildren: ClientsRouteChildren = {
 const ClientsRouteWithChildren =
   ClientsRoute._addFileChildren(ClientsRouteChildren)
 
-interface DashboardBillingRouteChildren {
-  DashboardBillingClientIdRoute: typeof DashboardBillingClientIdRoute
-  DashboardBillingForm520Route: typeof DashboardBillingForm520Route
-  DashboardBillingImportsRoute: typeof DashboardBillingImportsRoute
-  DashboardBillingNectarRoute: typeof DashboardBillingNectarRoute
-  DashboardBillingSubscriptionRoute: typeof DashboardBillingSubscriptionRoute
-  DashboardBillingIndexRoute: typeof DashboardBillingIndexRoute
+interface DashboardhiveExecStatesStateCodeRouteChildren {
+  DashboardhiveExecStatesStateCodeOnboardingRoute: typeof DashboardhiveExecStatesStateCodeOnboardingRoute
 }
 
-const DashboardBillingRouteChildren: DashboardBillingRouteChildren = {
-  DashboardBillingClientIdRoute: DashboardBillingClientIdRoute,
-  DashboardBillingForm520Route: DashboardBillingForm520Route,
-  DashboardBillingImportsRoute: DashboardBillingImportsRoute,
-  DashboardBillingNectarRoute: DashboardBillingNectarRoute,
-  DashboardBillingSubscriptionRoute: DashboardBillingSubscriptionRoute,
-  DashboardBillingIndexRoute: DashboardBillingIndexRoute,
-}
-
-const DashboardBillingRouteWithChildren =
-  DashboardBillingRoute._addFileChildren(DashboardBillingRouteChildren)
-
-interface DashboardClientsRouteChildren {
-  DashboardClientsClientIdRoute: typeof DashboardClientsClientIdRoute
-  DashboardClientsBillingCodesRoute: typeof DashboardClientsBillingCodesRoute
-  DashboardClientsFileRoute: typeof DashboardClientsFileRoute
-  DashboardClientsNewRoute: typeof DashboardClientsNewRoute
-  DashboardClientsPendingRoute: typeof DashboardClientsPendingRoute
-  DashboardClientsRhsBoardRoute: typeof DashboardClientsRhsBoardRoute
-  DashboardClientsIndexRoute: typeof DashboardClientsIndexRoute
-  DashboardClientsHhsHubClientIdRoute: typeof DashboardClientsHhsHubClientIdRoute
-  DashboardClientsIntakeClientIdRoute: typeof DashboardClientsIntakeClientIdRoute
-  DashboardClientsTrainingClientIdRoute: typeof DashboardClientsTrainingClientIdRoute
-  DashboardClientsWorkspaceClientIdRoute: typeof DashboardClientsWorkspaceClientIdRoute
-}
-
-const DashboardClientsRouteChildren: DashboardClientsRouteChildren = {
-  DashboardClientsClientIdRoute: DashboardClientsClientIdRoute,
-  DashboardClientsBillingCodesRoute: DashboardClientsBillingCodesRoute,
-  DashboardClientsFileRoute: DashboardClientsFileRoute,
-  DashboardClientsNewRoute: DashboardClientsNewRoute,
-  DashboardClientsPendingRoute: DashboardClientsPendingRoute,
-  DashboardClientsRhsBoardRoute: DashboardClientsRhsBoardRoute,
-  DashboardClientsIndexRoute: DashboardClientsIndexRoute,
-  DashboardClientsHhsHubClientIdRoute: DashboardClientsHhsHubClientIdRoute,
-  DashboardClientsIntakeClientIdRoute: DashboardClientsIntakeClientIdRoute,
-  DashboardClientsTrainingClientIdRoute: DashboardClientsTrainingClientIdRoute,
-  DashboardClientsWorkspaceClientIdRoute:
-    DashboardClientsWorkspaceClientIdRoute,
-}
-
-const DashboardClientsRouteWithChildren =
-  DashboardClientsRoute._addFileChildren(DashboardClientsRouteChildren)
-
-interface DashboardFinancialRouteChildren {
-  DashboardFinancialContractorsRoute: typeof DashboardFinancialContractorsRoute
-  DashboardFinancialDistributionsRoute: typeof DashboardFinancialDistributionsRoute
-  DashboardFinancialEmployeesRoute: typeof DashboardFinancialEmployeesRoute
-  DashboardFinancialGrossRoute: typeof DashboardFinancialGrossRoute
-  DashboardFinancialHostHomeRoute: typeof DashboardFinancialHostHomeRoute
-  DashboardFinancialMonthlyGridRoute: typeof DashboardFinancialMonthlyGridRoute
-  DashboardFinancialNectarRoute: typeof DashboardFinancialNectarRoute
-  DashboardFinancialRevenueRoute: typeof DashboardFinancialRevenueRoute
-  DashboardFinancialRhsRoute: typeof DashboardFinancialRhsRoute
-  DashboardFinancialTotalsRoute: typeof DashboardFinancialTotalsRoute
-  DashboardFinancialIndexRoute: typeof DashboardFinancialIndexRoute
-}
-
-const DashboardFinancialRouteChildren: DashboardFinancialRouteChildren = {
-  DashboardFinancialContractorsRoute: DashboardFinancialContractorsRoute,
-  DashboardFinancialDistributionsRoute: DashboardFinancialDistributionsRoute,
-  DashboardFinancialEmployeesRoute: DashboardFinancialEmployeesRoute,
-  DashboardFinancialGrossRoute: DashboardFinancialGrossRoute,
-  DashboardFinancialHostHomeRoute: DashboardFinancialHostHomeRoute,
-  DashboardFinancialMonthlyGridRoute: DashboardFinancialMonthlyGridRoute,
-  DashboardFinancialNectarRoute: DashboardFinancialNectarRoute,
-  DashboardFinancialRevenueRoute: DashboardFinancialRevenueRoute,
-  DashboardFinancialRhsRoute: DashboardFinancialRhsRoute,
-  DashboardFinancialTotalsRoute: DashboardFinancialTotalsRoute,
-  DashboardFinancialIndexRoute: DashboardFinancialIndexRoute,
-}
-
-const DashboardFinancialRouteWithChildren =
-  DashboardFinancialRoute._addFileChildren(DashboardFinancialRouteChildren)
-
-interface DashboardFormsRouteChildren {
-  DashboardFormsIndexRoute: typeof DashboardFormsIndexRoute
-  DashboardFormsFormIdEditRoute: typeof DashboardFormsFormIdEditRoute
-  DashboardFormsFormIdFillRoute: typeof DashboardFormsFormIdFillRoute
-  DashboardFormsFormIdSubmissionsRoute: typeof DashboardFormsFormIdSubmissionsRoute
-}
-
-const DashboardFormsRouteChildren: DashboardFormsRouteChildren = {
-  DashboardFormsIndexRoute: DashboardFormsIndexRoute,
-  DashboardFormsFormIdEditRoute: DashboardFormsFormIdEditRoute,
-  DashboardFormsFormIdFillRoute: DashboardFormsFormIdFillRoute,
-  DashboardFormsFormIdSubmissionsRoute: DashboardFormsFormIdSubmissionsRoute,
-}
-
-const DashboardFormsRouteWithChildren = DashboardFormsRoute._addFileChildren(
-  DashboardFormsRouteChildren,
-)
-
-interface DashboardHiveExecAgreementsRouteChildren {
-  DashboardHiveExecAgreementsOrgIdRoute: typeof DashboardHiveExecAgreementsOrgIdRoute
-  DashboardHiveExecAgreementsRequirementsRoute: typeof DashboardHiveExecAgreementsRequirementsRoute
-}
-
-const DashboardHiveExecAgreementsRouteChildren: DashboardHiveExecAgreementsRouteChildren =
+const DashboardhiveExecStatesStateCodeRouteChildren: DashboardhiveExecStatesStateCodeRouteChildren =
   {
-    DashboardHiveExecAgreementsOrgIdRoute:
-      DashboardHiveExecAgreementsOrgIdRoute,
-    DashboardHiveExecAgreementsRequirementsRoute:
-      DashboardHiveExecAgreementsRequirementsRoute,
+    DashboardhiveExecStatesStateCodeOnboardingRoute:
+      DashboardhiveExecStatesStateCodeOnboardingRoute,
   }
 
-const DashboardHiveExecAgreementsRouteWithChildren =
-  DashboardHiveExecAgreementsRoute._addFileChildren(
-    DashboardHiveExecAgreementsRouteChildren,
-  )
-
-interface DashboardHiveExecStatesStateCodeRouteChildren {
-  DashboardHiveExecStatesStateCodeOnboardingRoute: typeof DashboardHiveExecStatesStateCodeOnboardingRoute
-}
-
-const DashboardHiveExecStatesStateCodeRouteChildren: DashboardHiveExecStatesStateCodeRouteChildren =
-  {
-    DashboardHiveExecStatesStateCodeOnboardingRoute:
-      DashboardHiveExecStatesStateCodeOnboardingRoute,
-  }
-
-const DashboardHiveExecStatesStateCodeRouteWithChildren =
-  DashboardHiveExecStatesStateCodeRoute._addFileChildren(
-    DashboardHiveExecStatesStateCodeRouteChildren,
-  )
-
-interface DashboardHiveExecStatesRouteChildren {
-  DashboardHiveExecStatesStateCodeRoute: typeof DashboardHiveExecStatesStateCodeRouteWithChildren
-}
-
-const DashboardHiveExecStatesRouteChildren: DashboardHiveExecStatesRouteChildren =
-  {
-    DashboardHiveExecStatesStateCodeRoute:
-      DashboardHiveExecStatesStateCodeRouteWithChildren,
-  }
-
-const DashboardHiveExecStatesRouteWithChildren =
-  DashboardHiveExecStatesRoute._addFileChildren(
-    DashboardHiveExecStatesRouteChildren,
-  )
-
-interface DashboardHiveExecRouteChildren {
-  DashboardHiveExecOrgIdRoute: typeof DashboardHiveExecOrgIdRoute
-  DashboardHiveExecAgreementsRoute: typeof DashboardHiveExecAgreementsRouteWithChildren
-  DashboardHiveExecApprovalsRoute: typeof DashboardHiveExecApprovalsRoute
-  DashboardHiveExecBaseTemplateRoute: typeof DashboardHiveExecBaseTemplateRoute
-  DashboardHiveExecBillingApprovalsRoute: typeof DashboardHiveExecBillingApprovalsRoute
-  DashboardHiveExecClassesRoute: typeof DashboardHiveExecClassesRoute
-  DashboardHiveExecCommandRoute: typeof DashboardHiveExecCommandRoute
-  DashboardHiveExecCompanyMigrationRoute: typeof DashboardHiveExecCompanyMigrationRoute
-  DashboardHiveExecFeaturesRoute: typeof DashboardHiveExecFeaturesRoute
-  DashboardHiveExecFunctionalityRoute: typeof DashboardHiveExecFunctionalityRoute
-  DashboardHiveExecHealthRoute: typeof DashboardHiveExecHealthRoute
-  DashboardHiveExecKnowledgeRoute: typeof DashboardHiveExecKnowledgeRoute
-  DashboardHiveExecMessagesRoute: typeof DashboardHiveExecMessagesRoute
-  DashboardHiveExecNectarRoute: typeof DashboardHiveExecNectarRoute
-  DashboardHiveExecNewCompanyRoute: typeof DashboardHiveExecNewCompanyRoute
-  DashboardHiveExecPermissionsRoute: typeof DashboardHiveExecPermissionsRoute
-  DashboardHiveExecPlansRoute: typeof DashboardHiveExecPlansRoute
-  DashboardHiveExecStatesRoute: typeof DashboardHiveExecStatesRouteWithChildren
-  DashboardHiveExecTicketsRoute: typeof DashboardHiveExecTicketsRoute
-  DashboardHiveExecTrainingRoute: typeof DashboardHiveExecTrainingRoute
-  DashboardHiveExecUpgradeRequestsRoute: typeof DashboardHiveExecUpgradeRequestsRoute
-  DashboardHiveExecIndexRoute: typeof DashboardHiveExecIndexRoute
-}
-
-const DashboardHiveExecRouteChildren: DashboardHiveExecRouteChildren = {
-  DashboardHiveExecOrgIdRoute: DashboardHiveExecOrgIdRoute,
-  DashboardHiveExecAgreementsRoute:
-    DashboardHiveExecAgreementsRouteWithChildren,
-  DashboardHiveExecApprovalsRoute: DashboardHiveExecApprovalsRoute,
-  DashboardHiveExecBaseTemplateRoute: DashboardHiveExecBaseTemplateRoute,
-  DashboardHiveExecBillingApprovalsRoute:
-    DashboardHiveExecBillingApprovalsRoute,
-  DashboardHiveExecClassesRoute: DashboardHiveExecClassesRoute,
-  DashboardHiveExecCommandRoute: DashboardHiveExecCommandRoute,
-  DashboardHiveExecCompanyMigrationRoute:
-    DashboardHiveExecCompanyMigrationRoute,
-  DashboardHiveExecFeaturesRoute: DashboardHiveExecFeaturesRoute,
-  DashboardHiveExecFunctionalityRoute: DashboardHiveExecFunctionalityRoute,
-  DashboardHiveExecHealthRoute: DashboardHiveExecHealthRoute,
-  DashboardHiveExecKnowledgeRoute: DashboardHiveExecKnowledgeRoute,
-  DashboardHiveExecMessagesRoute: DashboardHiveExecMessagesRoute,
-  DashboardHiveExecNectarRoute: DashboardHiveExecNectarRoute,
-  DashboardHiveExecNewCompanyRoute: DashboardHiveExecNewCompanyRoute,
-  DashboardHiveExecPermissionsRoute: DashboardHiveExecPermissionsRoute,
-  DashboardHiveExecPlansRoute: DashboardHiveExecPlansRoute,
-  DashboardHiveExecStatesRoute: DashboardHiveExecStatesRouteWithChildren,
-  DashboardHiveExecTicketsRoute: DashboardHiveExecTicketsRoute,
-  DashboardHiveExecTrainingRoute: DashboardHiveExecTrainingRoute,
-  DashboardHiveExecUpgradeRequestsRoute: DashboardHiveExecUpgradeRequestsRoute,
-  DashboardHiveExecIndexRoute: DashboardHiveExecIndexRoute,
-}
-
-const DashboardHiveExecRouteWithChildren =
-  DashboardHiveExecRoute._addFileChildren(DashboardHiveExecRouteChildren)
-
-interface DashboardHomesRouteChildren {
-  DashboardHomesTeamIdRoute: typeof DashboardHomesTeamIdRoute
-}
-
-const DashboardHomesRouteChildren: DashboardHomesRouteChildren = {
-  DashboardHomesTeamIdRoute: DashboardHomesTeamIdRoute,
-}
-
-const DashboardHomesRouteWithChildren = DashboardHomesRoute._addFileChildren(
-  DashboardHomesRouteChildren,
-)
-
-interface DashboardHrAdminRouteChildren {
-  DashboardHrAdminSettingsRoute: typeof DashboardHrAdminSettingsRoute
-}
-
-const DashboardHrAdminRouteChildren: DashboardHrAdminRouteChildren = {
-  DashboardHrAdminSettingsRoute: DashboardHrAdminSettingsRoute,
-}
-
-const DashboardHrAdminRouteWithChildren =
-  DashboardHrAdminRoute._addFileChildren(DashboardHrAdminRouteChildren)
-
-interface DashboardProgramsRouteChildren {
-  DashboardProgramsProgramIdRoute: typeof DashboardProgramsProgramIdRoute
-}
-
-const DashboardProgramsRouteChildren: DashboardProgramsRouteChildren = {
-  DashboardProgramsProgramIdRoute: DashboardProgramsProgramIdRoute,
-}
-
-const DashboardProgramsRouteWithChildren =
-  DashboardProgramsRoute._addFileChildren(DashboardProgramsRouteChildren)
-
-interface DashboardSettingsRouteChildren {
-  DashboardSettingsAutomationRulesRoute: typeof DashboardSettingsAutomationRulesRoute
-  DashboardSettingsBankMappingRoute: typeof DashboardSettingsBankMappingRoute
-  DashboardSettingsComplianceSetupRoute: typeof DashboardSettingsComplianceSetupRoute
-  DashboardSettingsDraftRulesRoute: typeof DashboardSettingsDraftRulesRoute
-  DashboardSettingsEmailRoute: typeof DashboardSettingsEmailRoute
-  DashboardSettingsGmailRoute: typeof DashboardSettingsGmailRoute
-  DashboardSettingsLicensingRoute: typeof DashboardSettingsLicensingRoute
-  DashboardSettingsPhiAccessAuditRoute: typeof DashboardSettingsPhiAccessAuditRoute
-  DashboardSettingsRetentionRoute: typeof DashboardSettingsRetentionRoute
-  DashboardSettingsServiceCatalogRoute: typeof DashboardSettingsServiceCatalogRoute
-  DashboardSettingsServiceCodesRoute: typeof DashboardSettingsServiceCodesRoute
-  DashboardSettingsSubscriptionRoute: typeof DashboardSettingsSubscriptionRoute
-  DashboardSettingsTeamAccessRoute: typeof DashboardSettingsTeamAccessRoute
-}
-
-const DashboardSettingsRouteChildren: DashboardSettingsRouteChildren = {
-  DashboardSettingsAutomationRulesRoute: DashboardSettingsAutomationRulesRoute,
-  DashboardSettingsBankMappingRoute: DashboardSettingsBankMappingRoute,
-  DashboardSettingsComplianceSetupRoute: DashboardSettingsComplianceSetupRoute,
-  DashboardSettingsDraftRulesRoute: DashboardSettingsDraftRulesRoute,
-  DashboardSettingsEmailRoute: DashboardSettingsEmailRoute,
-  DashboardSettingsGmailRoute: DashboardSettingsGmailRoute,
-  DashboardSettingsLicensingRoute: DashboardSettingsLicensingRoute,
-  DashboardSettingsPhiAccessAuditRoute: DashboardSettingsPhiAccessAuditRoute,
-  DashboardSettingsRetentionRoute: DashboardSettingsRetentionRoute,
-  DashboardSettingsServiceCatalogRoute: DashboardSettingsServiceCatalogRoute,
-  DashboardSettingsServiceCodesRoute: DashboardSettingsServiceCodesRoute,
-  DashboardSettingsSubscriptionRoute: DashboardSettingsSubscriptionRoute,
-  DashboardSettingsTeamAccessRoute: DashboardSettingsTeamAccessRoute,
-}
-
-const DashboardSettingsRouteWithChildren =
-  DashboardSettingsRoute._addFileChildren(DashboardSettingsRouteChildren)
-
-interface DashboardSmartImportRouteChildren {
-  DashboardSmartImportHistoryRoute: typeof DashboardSmartImportHistoryRoute
-  DashboardSmartImportIndexRoute: typeof DashboardSmartImportIndexRoute
-  DashboardSmartImportJobIdDoneRoute: typeof DashboardSmartImportJobIdDoneRoute
-  DashboardSmartImportJobIdReviewRoute: typeof DashboardSmartImportJobIdReviewRoute
-}
-
-const DashboardSmartImportRouteChildren: DashboardSmartImportRouteChildren = {
-  DashboardSmartImportHistoryRoute: DashboardSmartImportHistoryRoute,
-  DashboardSmartImportIndexRoute: DashboardSmartImportIndexRoute,
-  DashboardSmartImportJobIdDoneRoute: DashboardSmartImportJobIdDoneRoute,
-  DashboardSmartImportJobIdReviewRoute: DashboardSmartImportJobIdReviewRoute,
-}
-
-const DashboardSmartImportRouteWithChildren =
-  DashboardSmartImportRoute._addFileChildren(DashboardSmartImportRouteChildren)
-
-interface DashboardTracksRouteChildren {
-  DashboardTracksTrackSlugRoute: typeof DashboardTracksTrackSlugRoute
-}
-
-const DashboardTracksRouteChildren: DashboardTracksRouteChildren = {
-  DashboardTracksTrackSlugRoute: DashboardTracksTrackSlugRoute,
-}
-
-const DashboardTracksRouteWithChildren = DashboardTracksRoute._addFileChildren(
-  DashboardTracksRouteChildren,
-)
-
-interface DashboardCoursesCourseIdRouteChildren {
-  DashboardCoursesCourseIdEditRoute: typeof DashboardCoursesCourseIdEditRoute
-}
-
-const DashboardCoursesCourseIdRouteChildren: DashboardCoursesCourseIdRouteChildren =
-  {
-    DashboardCoursesCourseIdEditRoute: DashboardCoursesCourseIdEditRoute,
-  }
-
-const DashboardCoursesCourseIdRouteWithChildren =
-  DashboardCoursesCourseIdRoute._addFileChildren(
-    DashboardCoursesCourseIdRouteChildren,
+const DashboardhiveExecStatesStateCodeRouteWithChildren =
+  DashboardhiveExecStatesStateCodeRoute._addFileChildren(
+    DashboardhiveExecStatesStateCodeRouteChildren,
   )
 
 interface DashboardRouteChildren {
-  DashboardAgencyDocumentsRoute: typeof DashboardAgencyDocumentsRoute
-  DashboardAskNectarRoute: typeof DashboardAskNectarRoute
-  DashboardAssignmentsRoute: typeof DashboardAssignmentsRoute
   DashboardAuditRoute: typeof DashboardAuditRoute
-  DashboardAuthoritativeSourcesRoute: typeof DashboardAuthoritativeSourcesRoute
-  DashboardBehavioristRoute: typeof DashboardBehavioristRoute
-  DashboardBillingRoute: typeof DashboardBillingRouteWithChildren
-  DashboardCertificationsRoute: typeof DashboardCertificationsRoute
-  DashboardClientsRoute: typeof DashboardClientsRouteWithChildren
-  DashboardCommandCenterRoute: typeof DashboardCommandCenterRoute
-  DashboardCompanyObligationsRoute: typeof DashboardCompanyObligationsRoute
+  DashboardBillingRoute: typeof DashboardBillingRoute
+  DashboardClientsRoute: typeof DashboardClientsRoute
   DashboardComplianceRoute: typeof DashboardComplianceRoute
-  DashboardComplianceDeskRoute: typeof DashboardComplianceDeskRoute
-  DashboardDailyLogsRoute: typeof DashboardDailyLogsRoute
-  DashboardDayProgramRoute: typeof DashboardDayProgramRoute
-  DashboardDeadlinesRoute: typeof DashboardDeadlinesRoute
-  DashboardEmarRoute: typeof DashboardEmarRoute
   DashboardEvidenceRoute: typeof DashboardEvidenceRoute
-  DashboardEvvArchiveRoute: typeof DashboardEvvArchiveRoute
-  DashboardExternalCertificationsRoute: typeof DashboardExternalCertificationsRoute
-  DashboardExternalComplianceRoute: typeof DashboardExternalComplianceRoute
-  DashboardFinancialRoute: typeof DashboardFinancialRouteWithChildren
-  DashboardFormsRoute: typeof DashboardFormsRouteWithChildren
-  DashboardHelpRoute: typeof DashboardHelpRoute
-  DashboardHistoricalDailyNotesFormerStaffRoute: typeof DashboardHistoricalDailyNotesFormerStaffRoute
-  DashboardHiveExecRoute: typeof DashboardHiveExecRouteWithChildren
-  DashboardHomesRoute: typeof DashboardHomesRouteWithChildren
-  DashboardHostHomeControlRoute: typeof DashboardHostHomeControlRoute
-  DashboardHrAdminRoute: typeof DashboardHrAdminRouteWithChildren
-  DashboardHrcRoute: typeof DashboardHrcRoute
-  DashboardInboxRoute: typeof DashboardInboxRoute
-  DashboardInternalAuditRoute: typeof DashboardInternalAuditRoute
-  DashboardInvitationsRoute: typeof DashboardInvitationsRoute
-  DashboardMyClientTrainingsRoute: typeof DashboardMyClientTrainingsRoute
-  DashboardMyEvidenceRoute: typeof DashboardMyEvidenceRoute
-  DashboardMyHistoricalDailyNotesRoute: typeof DashboardMyHistoricalDailyNotesRoute
-  DashboardMyHistoricalRecordsRoute: typeof DashboardMyHistoricalRecordsRoute
-  DashboardMyHistoricalTimesheetsRoute: typeof DashboardMyHistoricalTimesheetsRoute
+  DashboardFinancialRoute: typeof DashboardFinancialRoute
+  DashboardFormsRoute: typeof DashboardFormsRoute
+  DashboardHiveExecRoute: typeof DashboardHiveExecRoute
+  DashboardHomesRoute: typeof DashboardHomesRoute
+  DashboardHrAdminRoute: typeof DashboardHrAdminRoute
   DashboardMyObligationsRoute: typeof DashboardMyObligationsRoute
-  DashboardMyTimeCorrectionsRoute: typeof DashboardMyTimeCorrectionsRoute
-  DashboardNectarCompanyProfileRoute: typeof DashboardNectarCompanyProfileRoute
-  DashboardNectarDocsRoute: typeof DashboardNectarDocsRoute
-  DashboardPbaLedgerRoute: typeof DashboardPbaLedgerRoute
-  DashboardPersonnelFileRoute: typeof DashboardPersonnelFileRoute
-  DashboardPoliciesRoute: typeof DashboardPoliciesRoute
-  DashboardProgramsRoute: typeof DashboardProgramsRouteWithChildren
-  DashboardProgramsAdminRoute: typeof DashboardProgramsAdminRoute
-  DashboardRecordsDeskRoute: typeof DashboardRecordsDeskRoute
-  DashboardReimbursementsRoute: typeof DashboardReimbursementsRoute
-  DashboardReportsRoute: typeof DashboardReportsRoute
-  DashboardScheduleRoute: typeof DashboardScheduleRoute
-  DashboardSchedulePreviewRoute: typeof DashboardSchedulePreviewRoute
-  DashboardSchedulerRoute: typeof DashboardSchedulerRoute
+  DashboardProgramsRoute: typeof DashboardProgramsRoute
   DashboardSchedulingRoute: typeof DashboardSchedulingRoute
-  DashboardSettingsRoute: typeof DashboardSettingsRouteWithChildren
-  DashboardSmartImportRoute: typeof DashboardSmartImportRouteWithChildren
-  DashboardStateAuditRoute: typeof DashboardStateAuditRoute
-  DashboardSummariesRoute: typeof DashboardSummariesRoute
-  DashboardTeamRoute: typeof DashboardTeamRoute
-  DashboardTeamsRoute: typeof DashboardTeamsRoute
-  DashboardTimeclockRoute: typeof DashboardTimeclockRoute
-  DashboardTracksRoute: typeof DashboardTracksRouteWithChildren
+  DashboardSettingsRoute: typeof DashboardSettingsRoute
+  DashboardSmartImportRoute: typeof DashboardSmartImportRoute
+  DashboardTracksRoute: typeof DashboardTracksRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardAdminEmarAuditRoute: typeof DashboardAdminEmarAuditRoute
-  DashboardBehaviorSupportClientIdRoute: typeof DashboardBehaviorSupportClientIdRoute
-  DashboardCoursesCourseIdRoute: typeof DashboardCoursesCourseIdRouteWithChildren
-  DashboardCoursesCoreRoute: typeof DashboardCoursesCoreRoute
-  DashboardCoursesMindsmithRoute: typeof DashboardCoursesMindsmithRoute
-  DashboardCoursesOtherRoute: typeof DashboardCoursesOtherRoute
-  DashboardCoursesPersonRoute: typeof DashboardCoursesPersonRoute
-  DashboardEmployeesStaffIdRoute: typeof DashboardEmployeesStaffIdRoute
-  DashboardEmployeesHireDatesRoute: typeof DashboardEmployeesHireDatesRoute
-  DashboardEmployeesLoansRoute: typeof DashboardEmployeesLoansRoute
-  DashboardEmployeesNewRoute: typeof DashboardEmployeesNewRoute
-  DashboardHubClientsRoute: typeof DashboardHubClientsRoute
-  DashboardHubDocumentationRoute: typeof DashboardHubDocumentationRoute
-  DashboardHubEmployeesRoute: typeof DashboardHubEmployeesRoute
-  DashboardHubFinancesRoute: typeof DashboardHubFinancesRoute
-  DashboardHubKnowledgeRoute: typeof DashboardHubKnowledgeRoute
-  DashboardShiftShiftIdRoute: typeof DashboardShiftShiftIdRoute
-  DashboardTrainingIdRoute: typeof DashboardTrainingIdRoute
-  DashboardTrainingCatalogRoute: typeof DashboardTrainingCatalogRoute
-  DashboardCoursesIndexRoute: typeof DashboardCoursesIndexRoute
-  DashboardEmployeesIndexRoute: typeof DashboardEmployeesIndexRoute
-  DashboardHiveTrainingIndexRoute: typeof DashboardHiveTrainingIndexRoute
-  DashboardTrainingIndexRoute: typeof DashboardTrainingIndexRoute
-  DashboardComplianceCertReviewCompletionIdRoute: typeof DashboardComplianceCertReviewCompletionIdRoute
-  DashboardCoursesPersonModuleAssignmentIdRoute: typeof DashboardCoursesPersonModuleAssignmentIdRoute
-  DashboardCoursesPolicyDocumentIdRoute: typeof DashboardCoursesPolicyDocumentIdRoute
-  DashboardCoursesTopicTopicIdRoute: typeof DashboardCoursesTopicTopicIdRoute
-  DashboardHiveTrainingCourseAssignmentIdRoute: typeof DashboardHiveTrainingCourseAssignmentIdRoute
-  DashboardMyObligationsCourseInstanceIdRoute: typeof DashboardMyObligationsCourseInstanceIdRoute
+  DashboardadminAdminCommandCenterRoute: typeof DashboardadminAdminCommandCenterRoute
+  DashboardadminAdminEmarAuditRoute: typeof DashboardadminAdminEmarAuditRoute
+  DashboardadminAdminProgramsAdminRoute: typeof DashboardadminAdminProgramsAdminRoute
+  DashboardauditAuditInternalAuditRoute: typeof DashboardauditAuditInternalAuditRoute
+  DashboardauditAuditStateAuditRoute: typeof DashboardauditAuditStateAuditRoute
+  DashboardbehaviorSupportBehaviorSupportClientIdRoute: typeof DashboardbehaviorSupportBehaviorSupportClientIdRoute
+  DashboardbillingBillingClientIdRoute: typeof DashboardbillingBillingClientIdRoute
+  DashboardbillingBillingForm520Route: typeof DashboardbillingBillingForm520Route
+  DashboardbillingBillingImportsRoute: typeof DashboardbillingBillingImportsRoute
+  DashboardbillingBillingNectarRoute: typeof DashboardbillingBillingNectarRoute
+  DashboardbillingBillingSubscriptionRoute: typeof DashboardbillingBillingSubscriptionRoute
+  DashboardclientsClientsClientIdRoute: typeof DashboardclientsClientsClientIdRoute
+  DashboardclientsClientsBehavioristRoute: typeof DashboardclientsClientsBehavioristRoute
+  DashboardclientsClientsClientBillingCodesRoute: typeof DashboardclientsClientsClientBillingCodesRoute
+  DashboardclientsClientsClientFileRoute: typeof DashboardclientsClientsClientFileRoute
+  DashboardclientsClientsNewRoute: typeof DashboardclientsClientsNewRoute
+  DashboardclientsClientsPendingRoute: typeof DashboardclientsClientsPendingRoute
+  DashboardclientsClientsRhsBoardRoute: typeof DashboardclientsClientsRhsBoardRoute
+  DashboardclientsHhsHubClientIdRoute: typeof DashboardclientsHhsHubClientIdRoute
+  DashboardclientsIntakeClientIdRoute: typeof DashboardclientsIntakeClientIdRoute
+  DashboardclientsTrainingClientIdRoute: typeof DashboardclientsTrainingClientIdRoute
+  DashboardclientsWorkspaceClientIdRoute: typeof DashboardclientsWorkspaceClientIdRoute
+  DashboardcomplianceComplianceAuthoritativeSourcesRoute: typeof DashboardcomplianceComplianceAuthoritativeSourcesRoute
+  DashboardcomplianceComplianceCertificationsRoute: typeof DashboardcomplianceComplianceCertificationsRoute
+  DashboardcomplianceComplianceCompanyObligationsRoute: typeof DashboardcomplianceComplianceCompanyObligationsRoute
+  DashboardcomplianceComplianceComplianceDeskRoute: typeof DashboardcomplianceComplianceComplianceDeskRoute
+  DashboardcomplianceComplianceDeadlinesRoute: typeof DashboardcomplianceComplianceDeadlinesRoute
+  DashboardcomplianceComplianceExternalCertificationsRoute: typeof DashboardcomplianceComplianceExternalCertificationsRoute
+  DashboardcomplianceComplianceExternalComplianceRoute: typeof DashboardcomplianceComplianceExternalComplianceRoute
+  DashboardcomplianceComplianceHrcRoute: typeof DashboardcomplianceComplianceHrcRoute
+  DashboardcomplianceCompliancePoliciesRoute: typeof DashboardcomplianceCompliancePoliciesRoute
+  Dashboardcompliance_CertReviewCompletionIdRoute: typeof Dashboardcompliance_CertReviewCompletionIdRoute
+  DashboardcoursesCourseIdEditRoute: typeof DashboardcoursesCourseIdEditRoute
+  DashboardcoursesCoursesCourseIdRoute: typeof DashboardcoursesCoursesCourseIdRoute
+  DashboardcoursesCoursesCoreRoute: typeof DashboardcoursesCoursesCoreRoute
+  DashboardcoursesCoursesMindsmithRoute: typeof DashboardcoursesCoursesMindsmithRoute
+  DashboardcoursesCoursesOtherRoute: typeof DashboardcoursesCoursesOtherRoute
+  DashboardcoursesCoursesPersonRoute: typeof DashboardcoursesCoursesPersonRoute
+  DashboardcoursesPersonModuleAssignmentIdRoute: typeof DashboardcoursesPersonModuleAssignmentIdRoute
+  DashboardcoursesPolicyDocumentIdRoute: typeof DashboardcoursesPolicyDocumentIdRoute
+  DashboardcoursesTopicTopicIdRoute: typeof DashboardcoursesTopicTopicIdRoute
+  DashboarddocumentsDocumentsAgencyDocumentsRoute: typeof DashboarddocumentsDocumentsAgencyDocumentsRoute
+  DashboarddocumentsDocumentsEmarRoute: typeof DashboarddocumentsDocumentsEmarRoute
+  DashboardemployeesEmployeesStaffIdRoute: typeof DashboardemployeesEmployeesStaffIdRoute
+  DashboardemployeesEmployeesClientLoansRoute: typeof DashboardemployeesEmployeesClientLoansRoute
+  DashboardemployeesEmployeesHireDatesRoute: typeof DashboardemployeesEmployeesHireDatesRoute
+  DashboardemployeesEmployeesInvitationsRoute: typeof DashboardemployeesEmployeesInvitationsRoute
+  DashboardemployeesEmployeesNewRoute: typeof DashboardemployeesEmployeesNewRoute
+  DashboardemployeesEmployeesPersonnelFileRoute: typeof DashboardemployeesEmployeesPersonnelFileRoute
+  DashboardemployeesEmployeesTeamRoute: typeof DashboardemployeesEmployeesTeamRoute
+  DashboardevidenceEvidenceMyEvidenceRoute: typeof DashboardevidenceEvidenceMyEvidenceRoute
+  DashboardfinancialFinancialContractorsRoute: typeof DashboardfinancialFinancialContractorsRoute
+  DashboardfinancialFinancialDistributionsRoute: typeof DashboardfinancialFinancialDistributionsRoute
+  DashboardfinancialFinancialEmployeesRoute: typeof DashboardfinancialFinancialEmployeesRoute
+  DashboardfinancialFinancialGrossRoute: typeof DashboardfinancialFinancialGrossRoute
+  DashboardfinancialFinancialHostHomeRoute: typeof DashboardfinancialFinancialHostHomeRoute
+  DashboardfinancialFinancialMonthlyGridRoute: typeof DashboardfinancialFinancialMonthlyGridRoute
+  DashboardfinancialFinancialNectarRoute: typeof DashboardfinancialFinancialNectarRoute
+  DashboardfinancialFinancialPbaLedgerRoute: typeof DashboardfinancialFinancialPbaLedgerRoute
+  DashboardfinancialFinancialReimbursementsRoute: typeof DashboardfinancialFinancialReimbursementsRoute
+  DashboardfinancialFinancialRevenueRoute: typeof DashboardfinancialFinancialRevenueRoute
+  DashboardfinancialFinancialRhsRoute: typeof DashboardfinancialFinancialRhsRoute
+  DashboardfinancialFinancialTotalsRoute: typeof DashboardfinancialFinancialTotalsRoute
+  DashboardformsFormIdEditRoute: typeof DashboardformsFormIdEditRoute
+  DashboardformsFormIdFillRoute: typeof DashboardformsFormIdFillRoute
+  DashboardformsFormIdSubmissionsRoute: typeof DashboardformsFormIdSubmissionsRoute
+  DashboardhiveExecAgreementsOrgIdRoute: typeof DashboardhiveExecAgreementsOrgIdRoute
+  DashboardhiveExecAgreementsRequirementsRoute: typeof DashboardhiveExecAgreementsRequirementsRoute
+  DashboardhiveExecHiveExecOrgIdRoute: typeof DashboardhiveExecHiveExecOrgIdRoute
+  DashboardhiveExecHiveExecAgreementsRoute: typeof DashboardhiveExecHiveExecAgreementsRoute
+  DashboardhiveExecHiveExecApprovalsRoute: typeof DashboardhiveExecHiveExecApprovalsRoute
+  DashboardhiveExecHiveExecBaseTemplateRoute: typeof DashboardhiveExecHiveExecBaseTemplateRoute
+  DashboardhiveExecHiveExecBillingApprovalsRoute: typeof DashboardhiveExecHiveExecBillingApprovalsRoute
+  DashboardhiveExecHiveExecClassesRoute: typeof DashboardhiveExecHiveExecClassesRoute
+  DashboardhiveExecHiveExecCommandRoute: typeof DashboardhiveExecHiveExecCommandRoute
+  DashboardhiveExecHiveExecCompanyMigrationRoute: typeof DashboardhiveExecHiveExecCompanyMigrationRoute
+  DashboardhiveExecHiveExecFeaturesRoute: typeof DashboardhiveExecHiveExecFeaturesRoute
+  DashboardhiveExecHiveExecFunctionalityRoute: typeof DashboardhiveExecHiveExecFunctionalityRoute
+  DashboardhiveExecHiveExecHealthRoute: typeof DashboardhiveExecHiveExecHealthRoute
+  DashboardhiveExecHiveExecKnowledgeRoute: typeof DashboardhiveExecHiveExecKnowledgeRoute
+  DashboardhiveExecHiveExecMessagesRoute: typeof DashboardhiveExecHiveExecMessagesRoute
+  DashboardhiveExecHiveExecNectarRoute: typeof DashboardhiveExecHiveExecNectarRoute
+  DashboardhiveExecHiveExecNewCompanyRoute: typeof DashboardhiveExecHiveExecNewCompanyRoute
+  DashboardhiveExecHiveExecPermissionsRoute: typeof DashboardhiveExecHiveExecPermissionsRoute
+  DashboardhiveExecHiveExecPlansRoute: typeof DashboardhiveExecHiveExecPlansRoute
+  DashboardhiveExecHiveExecStatesRoute: typeof DashboardhiveExecHiveExecStatesRoute
+  DashboardhiveExecHiveExecTicketsRoute: typeof DashboardhiveExecHiveExecTicketsRoute
+  DashboardhiveExecHiveExecTrainingRoute: typeof DashboardhiveExecHiveExecTrainingRoute
+  DashboardhiveExecHiveExecUpgradeRequestsRoute: typeof DashboardhiveExecHiveExecUpgradeRequestsRoute
+  DashboardhiveExecStatesStateCodeRoute: typeof DashboardhiveExecStatesStateCodeRouteWithChildren
+  DashboardhiveTrainingCourseAssignmentIdRoute: typeof DashboardhiveTrainingCourseAssignmentIdRoute
+  DashboardhomesHomesTeamIdRoute: typeof DashboardhomesHomesTeamIdRoute
+  DashboardhomesHomesHostHomeControlRoute: typeof DashboardhomesHomesHostHomeControlRoute
+  DashboardhomesHomesTeamsRoute: typeof DashboardhomesHomesTeamsRoute
+  DashboardhrAdminHrAdminSettingsRoute: typeof DashboardhrAdminHrAdminSettingsRoute
+  DashboardhubHubClientsRoute: typeof DashboardhubHubClientsRoute
+  DashboardhubHubDocumentationRoute: typeof DashboardhubHubDocumentationRoute
+  DashboardhubHubEmployeesRoute: typeof DashboardhubHubEmployeesRoute
+  DashboardhubHubFinancesRoute: typeof DashboardhubHubFinancesRoute
+  DashboardhubHubKnowledgeRoute: typeof DashboardhubHubKnowledgeRoute
+  DashboardmyObligations_CourseInstanceIdRoute: typeof DashboardmyObligations_CourseInstanceIdRoute
+  DashboardnectarNectarAskNectarRoute: typeof DashboardnectarNectarAskNectarRoute
+  DashboardnectarNectarHelpRoute: typeof DashboardnectarNectarHelpRoute
+  DashboardnectarNectarInboxRoute: typeof DashboardnectarNectarInboxRoute
+  DashboardnectarNectarNectarCompanyProfileRoute: typeof DashboardnectarNectarNectarCompanyProfileRoute
+  DashboardnectarNectarNectarDocsRoute: typeof DashboardnectarNectarNectarDocsRoute
+  DashboardprogramsProgramsProgramIdRoute: typeof DashboardprogramsProgramsProgramIdRoute
+  DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRoute: typeof DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRoute
+  DashboardrecordsRecordsMyHistoricalDailyNotesRoute: typeof DashboardrecordsRecordsMyHistoricalDailyNotesRoute
+  DashboardrecordsRecordsMyHistoricalRecordsRoute: typeof DashboardrecordsRecordsMyHistoricalRecordsRoute
+  DashboardrecordsRecordsMyHistoricalTimesheetsRoute: typeof DashboardrecordsRecordsMyHistoricalTimesheetsRoute
+  DashboardrecordsRecordsRecordsDeskRoute: typeof DashboardrecordsRecordsRecordsDeskRoute
+  DashboardrecordsRecordsReportsRoute: typeof DashboardrecordsRecordsReportsRoute
+  DashboardrecordsRecordsSummariesRoute: typeof DashboardrecordsRecordsSummariesRoute
+  DashboardschedulingSchedulingAssignmentsRoute: typeof DashboardschedulingSchedulingAssignmentsRoute
+  DashboardschedulingSchedulingDailyLogsRoute: typeof DashboardschedulingSchedulingDailyLogsRoute
+  DashboardschedulingSchedulingDayProgramRoute: typeof DashboardschedulingSchedulingDayProgramRoute
+  DashboardschedulingSchedulingEvvArchiveRoute: typeof DashboardschedulingSchedulingEvvArchiveRoute
+  DashboardschedulingSchedulingMyTimeCorrectionsRoute: typeof DashboardschedulingSchedulingMyTimeCorrectionsRoute
+  DashboardschedulingSchedulingScheduleRoute: typeof DashboardschedulingSchedulingScheduleRoute
+  DashboardschedulingSchedulingSchedulePreviewRoute: typeof DashboardschedulingSchedulingSchedulePreviewRoute
+  DashboardschedulingSchedulingSchedulerRoute: typeof DashboardschedulingSchedulingSchedulerRoute
+  DashboardschedulingSchedulingTimeclockRoute: typeof DashboardschedulingSchedulingTimeclockRoute
+  DashboardschedulingShiftShiftIdRoute: typeof DashboardschedulingShiftShiftIdRoute
+  DashboardsettingsSettingsAutomationRulesRoute: typeof DashboardsettingsSettingsAutomationRulesRoute
+  DashboardsettingsSettingsBankMappingRoute: typeof DashboardsettingsSettingsBankMappingRoute
+  DashboardsettingsSettingsComplianceSetupRoute: typeof DashboardsettingsSettingsComplianceSetupRoute
+  DashboardsettingsSettingsDraftRulesRoute: typeof DashboardsettingsSettingsDraftRulesRoute
+  DashboardsettingsSettingsEmailRoute: typeof DashboardsettingsSettingsEmailRoute
+  DashboardsettingsSettingsGmailRoute: typeof DashboardsettingsSettingsGmailRoute
+  DashboardsettingsSettingsLicensingRoute: typeof DashboardsettingsSettingsLicensingRoute
+  DashboardsettingsSettingsPhiAccessAuditRoute: typeof DashboardsettingsSettingsPhiAccessAuditRoute
+  DashboardsettingsSettingsRetentionRoute: typeof DashboardsettingsSettingsRetentionRoute
+  DashboardsettingsSettingsServiceCatalogRoute: typeof DashboardsettingsSettingsServiceCatalogRoute
+  DashboardsettingsSettingsServiceCodesRoute: typeof DashboardsettingsSettingsServiceCodesRoute
+  DashboardsettingsSettingsSubscriptionRoute: typeof DashboardsettingsSettingsSubscriptionRoute
+  DashboardsettingsSettingsTeamAccessRoute: typeof DashboardsettingsSettingsTeamAccessRoute
+  DashboardsmartImportJobIdDoneRoute: typeof DashboardsmartImportJobIdDoneRoute
+  DashboardsmartImportJobIdReviewRoute: typeof DashboardsmartImportJobIdReviewRoute
+  DashboardsmartImportSmartImportHistoryRoute: typeof DashboardsmartImportSmartImportHistoryRoute
+  DashboardtracksTracksTrackSlugRoute: typeof DashboardtracksTracksTrackSlugRoute
+  DashboardtrainingTrainingIdRoute: typeof DashboardtrainingTrainingIdRoute
+  DashboardtrainingTrainingCatalogRoute: typeof DashboardtrainingTrainingCatalogRoute
+  DashboardtrainingTrainingMyClientTrainingsRoute: typeof DashboardtrainingTrainingMyClientTrainingsRoute
+  DashboardbillingBillingIndexRoute: typeof DashboardbillingBillingIndexRoute
+  DashboardclientsClientsIndexRoute: typeof DashboardclientsClientsIndexRoute
+  DashboardcoursesCoursesIndexRoute: typeof DashboardcoursesCoursesIndexRoute
+  DashboardemployeesEmployeesIndexRoute: typeof DashboardemployeesEmployeesIndexRoute
+  DashboardfinancialFinancialIndexRoute: typeof DashboardfinancialFinancialIndexRoute
+  DashboardformsFormsIndexRoute: typeof DashboardformsFormsIndexRoute
+  DashboardhiveExecHiveExecIndexRoute: typeof DashboardhiveExecHiveExecIndexRoute
+  DashboardhiveTrainingHiveTrainingIndexRoute: typeof DashboardhiveTrainingHiveTrainingIndexRoute
+  DashboardsmartImportSmartImportIndexRoute: typeof DashboardsmartImportSmartImportIndexRoute
+  DashboardtrainingTrainingIndexRoute: typeof DashboardtrainingTrainingIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardAgencyDocumentsRoute: DashboardAgencyDocumentsRoute,
-  DashboardAskNectarRoute: DashboardAskNectarRoute,
-  DashboardAssignmentsRoute: DashboardAssignmentsRoute,
   DashboardAuditRoute: DashboardAuditRoute,
-  DashboardAuthoritativeSourcesRoute: DashboardAuthoritativeSourcesRoute,
-  DashboardBehavioristRoute: DashboardBehavioristRoute,
-  DashboardBillingRoute: DashboardBillingRouteWithChildren,
-  DashboardCertificationsRoute: DashboardCertificationsRoute,
-  DashboardClientsRoute: DashboardClientsRouteWithChildren,
-  DashboardCommandCenterRoute: DashboardCommandCenterRoute,
-  DashboardCompanyObligationsRoute: DashboardCompanyObligationsRoute,
+  DashboardBillingRoute: DashboardBillingRoute,
+  DashboardClientsRoute: DashboardClientsRoute,
   DashboardComplianceRoute: DashboardComplianceRoute,
-  DashboardComplianceDeskRoute: DashboardComplianceDeskRoute,
-  DashboardDailyLogsRoute: DashboardDailyLogsRoute,
-  DashboardDayProgramRoute: DashboardDayProgramRoute,
-  DashboardDeadlinesRoute: DashboardDeadlinesRoute,
-  DashboardEmarRoute: DashboardEmarRoute,
   DashboardEvidenceRoute: DashboardEvidenceRoute,
-  DashboardEvvArchiveRoute: DashboardEvvArchiveRoute,
-  DashboardExternalCertificationsRoute: DashboardExternalCertificationsRoute,
-  DashboardExternalComplianceRoute: DashboardExternalComplianceRoute,
-  DashboardFinancialRoute: DashboardFinancialRouteWithChildren,
-  DashboardFormsRoute: DashboardFormsRouteWithChildren,
-  DashboardHelpRoute: DashboardHelpRoute,
-  DashboardHistoricalDailyNotesFormerStaffRoute:
-    DashboardHistoricalDailyNotesFormerStaffRoute,
-  DashboardHiveExecRoute: DashboardHiveExecRouteWithChildren,
-  DashboardHomesRoute: DashboardHomesRouteWithChildren,
-  DashboardHostHomeControlRoute: DashboardHostHomeControlRoute,
-  DashboardHrAdminRoute: DashboardHrAdminRouteWithChildren,
-  DashboardHrcRoute: DashboardHrcRoute,
-  DashboardInboxRoute: DashboardInboxRoute,
-  DashboardInternalAuditRoute: DashboardInternalAuditRoute,
-  DashboardInvitationsRoute: DashboardInvitationsRoute,
-  DashboardMyClientTrainingsRoute: DashboardMyClientTrainingsRoute,
-  DashboardMyEvidenceRoute: DashboardMyEvidenceRoute,
-  DashboardMyHistoricalDailyNotesRoute: DashboardMyHistoricalDailyNotesRoute,
-  DashboardMyHistoricalRecordsRoute: DashboardMyHistoricalRecordsRoute,
-  DashboardMyHistoricalTimesheetsRoute: DashboardMyHistoricalTimesheetsRoute,
+  DashboardFinancialRoute: DashboardFinancialRoute,
+  DashboardFormsRoute: DashboardFormsRoute,
+  DashboardHiveExecRoute: DashboardHiveExecRoute,
+  DashboardHomesRoute: DashboardHomesRoute,
+  DashboardHrAdminRoute: DashboardHrAdminRoute,
   DashboardMyObligationsRoute: DashboardMyObligationsRoute,
-  DashboardMyTimeCorrectionsRoute: DashboardMyTimeCorrectionsRoute,
-  DashboardNectarCompanyProfileRoute: DashboardNectarCompanyProfileRoute,
-  DashboardNectarDocsRoute: DashboardNectarDocsRoute,
-  DashboardPbaLedgerRoute: DashboardPbaLedgerRoute,
-  DashboardPersonnelFileRoute: DashboardPersonnelFileRoute,
-  DashboardPoliciesRoute: DashboardPoliciesRoute,
-  DashboardProgramsRoute: DashboardProgramsRouteWithChildren,
-  DashboardProgramsAdminRoute: DashboardProgramsAdminRoute,
-  DashboardRecordsDeskRoute: DashboardRecordsDeskRoute,
-  DashboardReimbursementsRoute: DashboardReimbursementsRoute,
-  DashboardReportsRoute: DashboardReportsRoute,
-  DashboardScheduleRoute: DashboardScheduleRoute,
-  DashboardSchedulePreviewRoute: DashboardSchedulePreviewRoute,
-  DashboardSchedulerRoute: DashboardSchedulerRoute,
+  DashboardProgramsRoute: DashboardProgramsRoute,
   DashboardSchedulingRoute: DashboardSchedulingRoute,
-  DashboardSettingsRoute: DashboardSettingsRouteWithChildren,
-  DashboardSmartImportRoute: DashboardSmartImportRouteWithChildren,
-  DashboardStateAuditRoute: DashboardStateAuditRoute,
-  DashboardSummariesRoute: DashboardSummariesRoute,
-  DashboardTeamRoute: DashboardTeamRoute,
-  DashboardTeamsRoute: DashboardTeamsRoute,
-  DashboardTimeclockRoute: DashboardTimeclockRoute,
-  DashboardTracksRoute: DashboardTracksRouteWithChildren,
+  DashboardSettingsRoute: DashboardSettingsRoute,
+  DashboardSmartImportRoute: DashboardSmartImportRoute,
+  DashboardTracksRoute: DashboardTracksRoute,
   DashboardIndexRoute: DashboardIndexRoute,
-  DashboardAdminEmarAuditRoute: DashboardAdminEmarAuditRoute,
-  DashboardBehaviorSupportClientIdRoute: DashboardBehaviorSupportClientIdRoute,
-  DashboardCoursesCourseIdRoute: DashboardCoursesCourseIdRouteWithChildren,
-  DashboardCoursesCoreRoute: DashboardCoursesCoreRoute,
-  DashboardCoursesMindsmithRoute: DashboardCoursesMindsmithRoute,
-  DashboardCoursesOtherRoute: DashboardCoursesOtherRoute,
-  DashboardCoursesPersonRoute: DashboardCoursesPersonRoute,
-  DashboardEmployeesStaffIdRoute: DashboardEmployeesStaffIdRoute,
-  DashboardEmployeesHireDatesRoute: DashboardEmployeesHireDatesRoute,
-  DashboardEmployeesLoansRoute: DashboardEmployeesLoansRoute,
-  DashboardEmployeesNewRoute: DashboardEmployeesNewRoute,
-  DashboardHubClientsRoute: DashboardHubClientsRoute,
-  DashboardHubDocumentationRoute: DashboardHubDocumentationRoute,
-  DashboardHubEmployeesRoute: DashboardHubEmployeesRoute,
-  DashboardHubFinancesRoute: DashboardHubFinancesRoute,
-  DashboardHubKnowledgeRoute: DashboardHubKnowledgeRoute,
-  DashboardShiftShiftIdRoute: DashboardShiftShiftIdRoute,
-  DashboardTrainingIdRoute: DashboardTrainingIdRoute,
-  DashboardTrainingCatalogRoute: DashboardTrainingCatalogRoute,
-  DashboardCoursesIndexRoute: DashboardCoursesIndexRoute,
-  DashboardEmployeesIndexRoute: DashboardEmployeesIndexRoute,
-  DashboardHiveTrainingIndexRoute: DashboardHiveTrainingIndexRoute,
-  DashboardTrainingIndexRoute: DashboardTrainingIndexRoute,
-  DashboardComplianceCertReviewCompletionIdRoute:
-    DashboardComplianceCertReviewCompletionIdRoute,
-  DashboardCoursesPersonModuleAssignmentIdRoute:
-    DashboardCoursesPersonModuleAssignmentIdRoute,
-  DashboardCoursesPolicyDocumentIdRoute: DashboardCoursesPolicyDocumentIdRoute,
-  DashboardCoursesTopicTopicIdRoute: DashboardCoursesTopicTopicIdRoute,
-  DashboardHiveTrainingCourseAssignmentIdRoute:
-    DashboardHiveTrainingCourseAssignmentIdRoute,
-  DashboardMyObligationsCourseInstanceIdRoute:
-    DashboardMyObligationsCourseInstanceIdRoute,
+  DashboardadminAdminCommandCenterRoute: DashboardadminAdminCommandCenterRoute,
+  DashboardadminAdminEmarAuditRoute: DashboardadminAdminEmarAuditRoute,
+  DashboardadminAdminProgramsAdminRoute: DashboardadminAdminProgramsAdminRoute,
+  DashboardauditAuditInternalAuditRoute: DashboardauditAuditInternalAuditRoute,
+  DashboardauditAuditStateAuditRoute: DashboardauditAuditStateAuditRoute,
+  DashboardbehaviorSupportBehaviorSupportClientIdRoute:
+    DashboardbehaviorSupportBehaviorSupportClientIdRoute,
+  DashboardbillingBillingClientIdRoute: DashboardbillingBillingClientIdRoute,
+  DashboardbillingBillingForm520Route: DashboardbillingBillingForm520Route,
+  DashboardbillingBillingImportsRoute: DashboardbillingBillingImportsRoute,
+  DashboardbillingBillingNectarRoute: DashboardbillingBillingNectarRoute,
+  DashboardbillingBillingSubscriptionRoute:
+    DashboardbillingBillingSubscriptionRoute,
+  DashboardclientsClientsClientIdRoute: DashboardclientsClientsClientIdRoute,
+  DashboardclientsClientsBehavioristRoute:
+    DashboardclientsClientsBehavioristRoute,
+  DashboardclientsClientsClientBillingCodesRoute:
+    DashboardclientsClientsClientBillingCodesRoute,
+  DashboardclientsClientsClientFileRoute:
+    DashboardclientsClientsClientFileRoute,
+  DashboardclientsClientsNewRoute: DashboardclientsClientsNewRoute,
+  DashboardclientsClientsPendingRoute: DashboardclientsClientsPendingRoute,
+  DashboardclientsClientsRhsBoardRoute: DashboardclientsClientsRhsBoardRoute,
+  DashboardclientsHhsHubClientIdRoute: DashboardclientsHhsHubClientIdRoute,
+  DashboardclientsIntakeClientIdRoute: DashboardclientsIntakeClientIdRoute,
+  DashboardclientsTrainingClientIdRoute: DashboardclientsTrainingClientIdRoute,
+  DashboardclientsWorkspaceClientIdRoute:
+    DashboardclientsWorkspaceClientIdRoute,
+  DashboardcomplianceComplianceAuthoritativeSourcesRoute:
+    DashboardcomplianceComplianceAuthoritativeSourcesRoute,
+  DashboardcomplianceComplianceCertificationsRoute:
+    DashboardcomplianceComplianceCertificationsRoute,
+  DashboardcomplianceComplianceCompanyObligationsRoute:
+    DashboardcomplianceComplianceCompanyObligationsRoute,
+  DashboardcomplianceComplianceComplianceDeskRoute:
+    DashboardcomplianceComplianceComplianceDeskRoute,
+  DashboardcomplianceComplianceDeadlinesRoute:
+    DashboardcomplianceComplianceDeadlinesRoute,
+  DashboardcomplianceComplianceExternalCertificationsRoute:
+    DashboardcomplianceComplianceExternalCertificationsRoute,
+  DashboardcomplianceComplianceExternalComplianceRoute:
+    DashboardcomplianceComplianceExternalComplianceRoute,
+  DashboardcomplianceComplianceHrcRoute: DashboardcomplianceComplianceHrcRoute,
+  DashboardcomplianceCompliancePoliciesRoute:
+    DashboardcomplianceCompliancePoliciesRoute,
+  Dashboardcompliance_CertReviewCompletionIdRoute:
+    Dashboardcompliance_CertReviewCompletionIdRoute,
+  DashboardcoursesCourseIdEditRoute: DashboardcoursesCourseIdEditRoute,
+  DashboardcoursesCoursesCourseIdRoute: DashboardcoursesCoursesCourseIdRoute,
+  DashboardcoursesCoursesCoreRoute: DashboardcoursesCoursesCoreRoute,
+  DashboardcoursesCoursesMindsmithRoute: DashboardcoursesCoursesMindsmithRoute,
+  DashboardcoursesCoursesOtherRoute: DashboardcoursesCoursesOtherRoute,
+  DashboardcoursesCoursesPersonRoute: DashboardcoursesCoursesPersonRoute,
+  DashboardcoursesPersonModuleAssignmentIdRoute:
+    DashboardcoursesPersonModuleAssignmentIdRoute,
+  DashboardcoursesPolicyDocumentIdRoute: DashboardcoursesPolicyDocumentIdRoute,
+  DashboardcoursesTopicTopicIdRoute: DashboardcoursesTopicTopicIdRoute,
+  DashboarddocumentsDocumentsAgencyDocumentsRoute:
+    DashboarddocumentsDocumentsAgencyDocumentsRoute,
+  DashboarddocumentsDocumentsEmarRoute: DashboarddocumentsDocumentsEmarRoute,
+  DashboardemployeesEmployeesStaffIdRoute:
+    DashboardemployeesEmployeesStaffIdRoute,
+  DashboardemployeesEmployeesClientLoansRoute:
+    DashboardemployeesEmployeesClientLoansRoute,
+  DashboardemployeesEmployeesHireDatesRoute:
+    DashboardemployeesEmployeesHireDatesRoute,
+  DashboardemployeesEmployeesInvitationsRoute:
+    DashboardemployeesEmployeesInvitationsRoute,
+  DashboardemployeesEmployeesNewRoute: DashboardemployeesEmployeesNewRoute,
+  DashboardemployeesEmployeesPersonnelFileRoute:
+    DashboardemployeesEmployeesPersonnelFileRoute,
+  DashboardemployeesEmployeesTeamRoute: DashboardemployeesEmployeesTeamRoute,
+  DashboardevidenceEvidenceMyEvidenceRoute:
+    DashboardevidenceEvidenceMyEvidenceRoute,
+  DashboardfinancialFinancialContractorsRoute:
+    DashboardfinancialFinancialContractorsRoute,
+  DashboardfinancialFinancialDistributionsRoute:
+    DashboardfinancialFinancialDistributionsRoute,
+  DashboardfinancialFinancialEmployeesRoute:
+    DashboardfinancialFinancialEmployeesRoute,
+  DashboardfinancialFinancialGrossRoute: DashboardfinancialFinancialGrossRoute,
+  DashboardfinancialFinancialHostHomeRoute:
+    DashboardfinancialFinancialHostHomeRoute,
+  DashboardfinancialFinancialMonthlyGridRoute:
+    DashboardfinancialFinancialMonthlyGridRoute,
+  DashboardfinancialFinancialNectarRoute:
+    DashboardfinancialFinancialNectarRoute,
+  DashboardfinancialFinancialPbaLedgerRoute:
+    DashboardfinancialFinancialPbaLedgerRoute,
+  DashboardfinancialFinancialReimbursementsRoute:
+    DashboardfinancialFinancialReimbursementsRoute,
+  DashboardfinancialFinancialRevenueRoute:
+    DashboardfinancialFinancialRevenueRoute,
+  DashboardfinancialFinancialRhsRoute: DashboardfinancialFinancialRhsRoute,
+  DashboardfinancialFinancialTotalsRoute:
+    DashboardfinancialFinancialTotalsRoute,
+  DashboardformsFormIdEditRoute: DashboardformsFormIdEditRoute,
+  DashboardformsFormIdFillRoute: DashboardformsFormIdFillRoute,
+  DashboardformsFormIdSubmissionsRoute: DashboardformsFormIdSubmissionsRoute,
+  DashboardhiveExecAgreementsOrgIdRoute: DashboardhiveExecAgreementsOrgIdRoute,
+  DashboardhiveExecAgreementsRequirementsRoute:
+    DashboardhiveExecAgreementsRequirementsRoute,
+  DashboardhiveExecHiveExecOrgIdRoute: DashboardhiveExecHiveExecOrgIdRoute,
+  DashboardhiveExecHiveExecAgreementsRoute:
+    DashboardhiveExecHiveExecAgreementsRoute,
+  DashboardhiveExecHiveExecApprovalsRoute:
+    DashboardhiveExecHiveExecApprovalsRoute,
+  DashboardhiveExecHiveExecBaseTemplateRoute:
+    DashboardhiveExecHiveExecBaseTemplateRoute,
+  DashboardhiveExecHiveExecBillingApprovalsRoute:
+    DashboardhiveExecHiveExecBillingApprovalsRoute,
+  DashboardhiveExecHiveExecClassesRoute: DashboardhiveExecHiveExecClassesRoute,
+  DashboardhiveExecHiveExecCommandRoute: DashboardhiveExecHiveExecCommandRoute,
+  DashboardhiveExecHiveExecCompanyMigrationRoute:
+    DashboardhiveExecHiveExecCompanyMigrationRoute,
+  DashboardhiveExecHiveExecFeaturesRoute:
+    DashboardhiveExecHiveExecFeaturesRoute,
+  DashboardhiveExecHiveExecFunctionalityRoute:
+    DashboardhiveExecHiveExecFunctionalityRoute,
+  DashboardhiveExecHiveExecHealthRoute: DashboardhiveExecHiveExecHealthRoute,
+  DashboardhiveExecHiveExecKnowledgeRoute:
+    DashboardhiveExecHiveExecKnowledgeRoute,
+  DashboardhiveExecHiveExecMessagesRoute:
+    DashboardhiveExecHiveExecMessagesRoute,
+  DashboardhiveExecHiveExecNectarRoute: DashboardhiveExecHiveExecNectarRoute,
+  DashboardhiveExecHiveExecNewCompanyRoute:
+    DashboardhiveExecHiveExecNewCompanyRoute,
+  DashboardhiveExecHiveExecPermissionsRoute:
+    DashboardhiveExecHiveExecPermissionsRoute,
+  DashboardhiveExecHiveExecPlansRoute: DashboardhiveExecHiveExecPlansRoute,
+  DashboardhiveExecHiveExecStatesRoute: DashboardhiveExecHiveExecStatesRoute,
+  DashboardhiveExecHiveExecTicketsRoute: DashboardhiveExecHiveExecTicketsRoute,
+  DashboardhiveExecHiveExecTrainingRoute:
+    DashboardhiveExecHiveExecTrainingRoute,
+  DashboardhiveExecHiveExecUpgradeRequestsRoute:
+    DashboardhiveExecHiveExecUpgradeRequestsRoute,
+  DashboardhiveExecStatesStateCodeRoute:
+    DashboardhiveExecStatesStateCodeRouteWithChildren,
+  DashboardhiveTrainingCourseAssignmentIdRoute:
+    DashboardhiveTrainingCourseAssignmentIdRoute,
+  DashboardhomesHomesTeamIdRoute: DashboardhomesHomesTeamIdRoute,
+  DashboardhomesHomesHostHomeControlRoute:
+    DashboardhomesHomesHostHomeControlRoute,
+  DashboardhomesHomesTeamsRoute: DashboardhomesHomesTeamsRoute,
+  DashboardhrAdminHrAdminSettingsRoute: DashboardhrAdminHrAdminSettingsRoute,
+  DashboardhubHubClientsRoute: DashboardhubHubClientsRoute,
+  DashboardhubHubDocumentationRoute: DashboardhubHubDocumentationRoute,
+  DashboardhubHubEmployeesRoute: DashboardhubHubEmployeesRoute,
+  DashboardhubHubFinancesRoute: DashboardhubHubFinancesRoute,
+  DashboardhubHubKnowledgeRoute: DashboardhubHubKnowledgeRoute,
+  DashboardmyObligations_CourseInstanceIdRoute:
+    DashboardmyObligations_CourseInstanceIdRoute,
+  DashboardnectarNectarAskNectarRoute: DashboardnectarNectarAskNectarRoute,
+  DashboardnectarNectarHelpRoute: DashboardnectarNectarHelpRoute,
+  DashboardnectarNectarInboxRoute: DashboardnectarNectarInboxRoute,
+  DashboardnectarNectarNectarCompanyProfileRoute:
+    DashboardnectarNectarNectarCompanyProfileRoute,
+  DashboardnectarNectarNectarDocsRoute: DashboardnectarNectarNectarDocsRoute,
+  DashboardprogramsProgramsProgramIdRoute:
+    DashboardprogramsProgramsProgramIdRoute,
+  DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRoute:
+    DashboardrecordsRecordsHistoricalDailyNotesFormerStaffRoute,
+  DashboardrecordsRecordsMyHistoricalDailyNotesRoute:
+    DashboardrecordsRecordsMyHistoricalDailyNotesRoute,
+  DashboardrecordsRecordsMyHistoricalRecordsRoute:
+    DashboardrecordsRecordsMyHistoricalRecordsRoute,
+  DashboardrecordsRecordsMyHistoricalTimesheetsRoute:
+    DashboardrecordsRecordsMyHistoricalTimesheetsRoute,
+  DashboardrecordsRecordsRecordsDeskRoute:
+    DashboardrecordsRecordsRecordsDeskRoute,
+  DashboardrecordsRecordsReportsRoute: DashboardrecordsRecordsReportsRoute,
+  DashboardrecordsRecordsSummariesRoute: DashboardrecordsRecordsSummariesRoute,
+  DashboardschedulingSchedulingAssignmentsRoute:
+    DashboardschedulingSchedulingAssignmentsRoute,
+  DashboardschedulingSchedulingDailyLogsRoute:
+    DashboardschedulingSchedulingDailyLogsRoute,
+  DashboardschedulingSchedulingDayProgramRoute:
+    DashboardschedulingSchedulingDayProgramRoute,
+  DashboardschedulingSchedulingEvvArchiveRoute:
+    DashboardschedulingSchedulingEvvArchiveRoute,
+  DashboardschedulingSchedulingMyTimeCorrectionsRoute:
+    DashboardschedulingSchedulingMyTimeCorrectionsRoute,
+  DashboardschedulingSchedulingScheduleRoute:
+    DashboardschedulingSchedulingScheduleRoute,
+  DashboardschedulingSchedulingSchedulePreviewRoute:
+    DashboardschedulingSchedulingSchedulePreviewRoute,
+  DashboardschedulingSchedulingSchedulerRoute:
+    DashboardschedulingSchedulingSchedulerRoute,
+  DashboardschedulingSchedulingTimeclockRoute:
+    DashboardschedulingSchedulingTimeclockRoute,
+  DashboardschedulingShiftShiftIdRoute: DashboardschedulingShiftShiftIdRoute,
+  DashboardsettingsSettingsAutomationRulesRoute:
+    DashboardsettingsSettingsAutomationRulesRoute,
+  DashboardsettingsSettingsBankMappingRoute:
+    DashboardsettingsSettingsBankMappingRoute,
+  DashboardsettingsSettingsComplianceSetupRoute:
+    DashboardsettingsSettingsComplianceSetupRoute,
+  DashboardsettingsSettingsDraftRulesRoute:
+    DashboardsettingsSettingsDraftRulesRoute,
+  DashboardsettingsSettingsEmailRoute: DashboardsettingsSettingsEmailRoute,
+  DashboardsettingsSettingsGmailRoute: DashboardsettingsSettingsGmailRoute,
+  DashboardsettingsSettingsLicensingRoute:
+    DashboardsettingsSettingsLicensingRoute,
+  DashboardsettingsSettingsPhiAccessAuditRoute:
+    DashboardsettingsSettingsPhiAccessAuditRoute,
+  DashboardsettingsSettingsRetentionRoute:
+    DashboardsettingsSettingsRetentionRoute,
+  DashboardsettingsSettingsServiceCatalogRoute:
+    DashboardsettingsSettingsServiceCatalogRoute,
+  DashboardsettingsSettingsServiceCodesRoute:
+    DashboardsettingsSettingsServiceCodesRoute,
+  DashboardsettingsSettingsSubscriptionRoute:
+    DashboardsettingsSettingsSubscriptionRoute,
+  DashboardsettingsSettingsTeamAccessRoute:
+    DashboardsettingsSettingsTeamAccessRoute,
+  DashboardsmartImportJobIdDoneRoute: DashboardsmartImportJobIdDoneRoute,
+  DashboardsmartImportJobIdReviewRoute: DashboardsmartImportJobIdReviewRoute,
+  DashboardsmartImportSmartImportHistoryRoute:
+    DashboardsmartImportSmartImportHistoryRoute,
+  DashboardtracksTracksTrackSlugRoute: DashboardtracksTracksTrackSlugRoute,
+  DashboardtrainingTrainingIdRoute: DashboardtrainingTrainingIdRoute,
+  DashboardtrainingTrainingCatalogRoute: DashboardtrainingTrainingCatalogRoute,
+  DashboardtrainingTrainingMyClientTrainingsRoute:
+    DashboardtrainingTrainingMyClientTrainingsRoute,
+  DashboardbillingBillingIndexRoute: DashboardbillingBillingIndexRoute,
+  DashboardclientsClientsIndexRoute: DashboardclientsClientsIndexRoute,
+  DashboardcoursesCoursesIndexRoute: DashboardcoursesCoursesIndexRoute,
+  DashboardemployeesEmployeesIndexRoute: DashboardemployeesEmployeesIndexRoute,
+  DashboardfinancialFinancialIndexRoute: DashboardfinancialFinancialIndexRoute,
+  DashboardformsFormsIndexRoute: DashboardformsFormsIndexRoute,
+  DashboardhiveExecHiveExecIndexRoute: DashboardhiveExecHiveExecIndexRoute,
+  DashboardhiveTrainingHiveTrainingIndexRoute:
+    DashboardhiveTrainingHiveTrainingIndexRoute,
+  DashboardsmartImportSmartImportIndexRoute:
+    DashboardsmartImportSmartImportIndexRoute,
+  DashboardtrainingTrainingIndexRoute: DashboardtrainingTrainingIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
