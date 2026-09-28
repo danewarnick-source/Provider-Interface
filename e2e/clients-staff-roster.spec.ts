@@ -206,15 +206,10 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByText(/Team member ID/i).first()).toBeVisible();
     await expect(page.getByRole("button", { name: /Team Member Face Sheet/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Edit profile/i })).toBeVisible();
-    await expect(
-      page
-        .getByText(
-          /people & files|Staff phone permissions|Invite team members|View team member records/i,
-        )
-        .first(),
-    ).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Access", exact: true })).toBeVisible({
       timeout: 10_000,
     });
+    await expect(page.getByTestId("profile-access-level")).toBeVisible();
     await shot(page, "team_member_face_sheet_desktop");
     await page.setViewportSize({ width: 390, height: 844 });
     await shot(page, "team_member_face_sheet_mobile");
