@@ -367,7 +367,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
       await expect(dialog.getByText(label, { exact: true })).toBeVisible();
     }
     await expect(page.getByLabel(/Hire date/i)).toBeVisible();
-    await expect(page.getByLabel(/Date of birth/i)).toBeVisible();
+    await expect(dialog.getByLabel(/Date of birth/i)).toBeVisible();
     await expect(page.getByRole("switch", { name: /Transports clients/i })).toBeVisible();
     await expect(dialog.getByText(/What they can see and do in PI/i)).toBeVisible();
     await expect(dialog.getByRole("checkbox", { name: /Email an invite now/i })).toBeChecked();
@@ -412,7 +412,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(quiz).toBeVisible({ timeout: 15_000 });
     await expect(quiz.getByText(/Team member packs · Sep Tester/)).toBeVisible();
     await quiz.getByRole("button", { name: /See team member suggestions/i }).click();
-    await expect(quiz.getByText("Host Home Certification")).toBeVisible();
+    await expect(quiz.getByText("Host Home Certification", { exact: true })).toBeVisible();
     await expect(quiz.getByRole("button", { name: /Apply packs/i })).toBeDisabled();
     await shot(page, "add_team_member_review_evidence");
     await quiz.getByRole("button", { name: /^Back$/ }).click();

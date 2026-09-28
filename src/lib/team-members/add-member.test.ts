@@ -136,12 +136,14 @@ describe("createTeamMember source lock", () => {
   const handler = src.slice(src.indexOf("export const createTeamMember"));
 
   it("checks hiring edit, Owner for Owner/Admin, setup, then the exact email", () => {
+    // Whitespace-free so Prettier line wrapping can't move the needles.
+    const compact = handler.replace(/\s+/g, "").replace(/,\)/g, ")");
     const order = [
-      'requireCategory(supabaseAdmin, context.userId, data.organizationId, "staff_hiring", "edit")',
+      'requireCategory(supabaseAdmin,context.userId,data.organizationId,"staff_hiring","edit")',
       "accessNeedsOwner(access.level)",
       "assertAgencySetupCompleteForOrg",
       "lookupEmails",
-    ].map((s) => handler.indexOf(s));
+    ].map((s) => compact.indexOf(s));
     assert.ok(
       order.every((i) => i >= 0),
       String(order),
