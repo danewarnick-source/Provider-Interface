@@ -207,4 +207,62 @@ describe("Team Members addresses", () => {
     assert.equal(existsSync(join(SRC, "lib/team-members/index.ts")), false);
     assert.equal(existsSync(join(SRC, "components/team-members/index.ts")), false);
   });
+
+  it("the old addresses are permanent redirect-only routes that keep the hash", () => {
+    const expectations: Array<[string, string, RegExp[]]> = [
+      [
+        "routes/dashboard.employees.index.tsx",
+        "/dashboard/employees/",
+        [/legacyRosterSearch\(search\)/, /to: "\/dashboard\/team-members"/],
+      ],
+      [
+        "routes/dashboard.employees.$staffId.tsx",
+        "/dashboard/employees/$staffId",
+        [
+          /legacyProfileSearch\(search\)/,
+          /"\/dashboard\/team-members\/\$staffId"/,
+          /params: \{ staffId \}/,
+        ],
+      ],
+      [
+        "routes/dashboard.employees.new.tsx",
+        "/dashboard/employees/new",
+        [/to: "\/dashboard\/team-members", search: \{ add: 1 \}/],
+      ],
+      [
+        "routes/dashboard.employees.hire-dates.tsx",
+        "/dashboard/employees/hire-dates",
+        [/filter: "missing_info"/, /to: "\/dashboard\/team-members"/],
+      ],
+      [
+        "routes/dashboard.hub.employees.tsx",
+        "/dashboard/hub/employees",
+        [
+          /tab === "hosts"/,
+          /to: "\/dashboard\/hub\/clients"/,
+          /tab: "placements"/,
+          /to: "\/dashboard\/team-members"/,
+        ],
+      ],
+      ["routes/employees.tsx", "/employees", [/to: "\/dashboard\/team-members"/, /<Outlet \/>/]],
+      ["routes/employees.index.tsx", "/employees/", [/to: "\/dashboard\/team-members"/]],
+      [
+        "routes/employees.new.tsx",
+        "/employees/new",
+        [/to: "\/dashboard\/team-members", search: \{ add: 1 \}/],
+      ],
+    ];
+    for (const [rel, path, patterns] of expectations) {
+      const src = read(rel);
+      const lines = src.trimEnd().split("\n").length;
+      assert.ok(lines <= 12, `${rel} must stay at most 12 lines (has ${lines})`);
+      assert.match(src, new RegExp(`createFileRoute\\("${path.replace(/[$/]/g, "\\$&")}"\\)`), rel);
+      assert.match(src, /beforeLoad/, rel);
+      assert.match(src, /throw redirect\(/, rel);
+      assert.match(src, /hash/, rel);
+      assert.match(src, /replace: true/, rel);
+      assert.doesNotMatch(src, /useQuery|supabase|RequirePermission|EmployeesPage/, rel);
+      for (const pattern of patterns) assert.match(src, pattern, `${rel} ${pattern}`);
+    }
+  });
 });

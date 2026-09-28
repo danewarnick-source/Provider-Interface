@@ -120,6 +120,7 @@ import { Route as DashboardHiveTrainingIndexRouteImport } from './routes/dashboa
 import { Route as DashboardHiveExecIndexRouteImport } from './routes/dashboard.hive-exec.index'
 import { Route as DashboardFormsIndexRouteImport } from './routes/dashboard.forms.index'
 import { Route as DashboardFinancialIndexRouteImport } from './routes/dashboard.financial.index'
+import { Route as DashboardEmployeesIndexRouteImport } from './routes/dashboard.employees.index'
 import { Route as DashboardCoursesIndexRouteImport } from './routes/dashboard.courses.index'
 import { Route as DashboardClientsIndexRouteImport } from './routes/dashboard.clients.index'
 import { Route as DashboardBillingIndexRouteImport } from './routes/dashboard.billing.index'
@@ -186,6 +187,7 @@ import { Route as DashboardFinancialDistributionsRouteImport } from './routes/da
 import { Route as DashboardFinancialContractorsRouteImport } from './routes/dashboard.financial.contractors'
 import { Route as DashboardEmployeesNewRouteImport } from './routes/dashboard.employees.new'
 import { Route as DashboardEmployeesHireDatesRouteImport } from './routes/dashboard.employees.hire-dates'
+import { Route as DashboardEmployeesStaffIdRouteImport } from './routes/dashboard.employees.$staffId'
 import { Route as DashboardCoursesPersonRouteImport } from './routes/dashboard.courses.person'
 import { Route as DashboardCoursesOtherRouteImport } from './routes/dashboard.courses.other'
 import { Route as DashboardCoursesMindsmithRouteImport } from './routes/dashboard.courses.mindsmith'
@@ -805,6 +807,11 @@ const DashboardFinancialIndexRoute = DashboardFinancialIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardFinancialRoute,
 } as any)
+const DashboardEmployeesIndexRoute = DashboardEmployeesIndexRouteImport.update({
+  id: '/employees/',
+  path: '/employees/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardCoursesIndexRoute = DashboardCoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
@@ -1177,6 +1184,12 @@ const DashboardEmployeesHireDatesRoute =
   DashboardEmployeesHireDatesRouteImport.update({
     id: '/employees/hire-dates',
     path: '/employees/hire-dates',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardEmployeesStaffIdRoute =
+  DashboardEmployeesStaffIdRouteImport.update({
+    id: '/employees/$staffId',
+    path: '/employees/$staffId',
     getParentRoute: () => DashboardRoute,
   } as any)
 const DashboardCoursesPersonRoute = DashboardCoursesPersonRouteImport.update({
@@ -1563,6 +1576,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
   '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
+  '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
@@ -1629,6 +1643,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/billing/': typeof DashboardBillingIndexRoute
   '/dashboard/clients/': typeof DashboardClientsIndexRoute
   '/dashboard/courses/': typeof DashboardCoursesIndexRoute
+  '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
   '/dashboard/financial/': typeof DashboardFinancialIndexRoute
   '/dashboard/forms/': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec/': typeof DashboardHiveExecIndexRoute
@@ -1778,6 +1793,7 @@ export interface FileRoutesByTo {
   '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
   '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
+  '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
@@ -1844,6 +1860,7 @@ export interface FileRoutesByTo {
   '/dashboard/billing': typeof DashboardBillingIndexRoute
   '/dashboard/clients': typeof DashboardClientsIndexRoute
   '/dashboard/courses': typeof DashboardCoursesIndexRoute
+  '/dashboard/employees': typeof DashboardEmployeesIndexRoute
   '/dashboard/financial': typeof DashboardFinancialIndexRoute
   '/dashboard/forms': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec': typeof DashboardHiveExecIndexRoute
@@ -2003,6 +2020,7 @@ export interface FileRoutesById {
   '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
   '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
+  '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
@@ -2069,6 +2087,7 @@ export interface FileRoutesById {
   '/dashboard/billing/': typeof DashboardBillingIndexRoute
   '/dashboard/clients/': typeof DashboardClientsIndexRoute
   '/dashboard/courses/': typeof DashboardCoursesIndexRoute
+  '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
   '/dashboard/financial/': typeof DashboardFinancialIndexRoute
   '/dashboard/forms/': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec/': typeof DashboardHiveExecIndexRoute
@@ -2229,6 +2248,7 @@ export interface FileRouteTypes {
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
     | '/dashboard/courses/person'
+    | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
     | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
@@ -2295,6 +2315,7 @@ export interface FileRouteTypes {
     | '/dashboard/billing/'
     | '/dashboard/clients/'
     | '/dashboard/courses/'
+    | '/dashboard/employees/'
     | '/dashboard/financial/'
     | '/dashboard/forms/'
     | '/dashboard/hive-exec/'
@@ -2444,6 +2465,7 @@ export interface FileRouteTypes {
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
     | '/dashboard/courses/person'
+    | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
     | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
@@ -2510,6 +2532,7 @@ export interface FileRouteTypes {
     | '/dashboard/billing'
     | '/dashboard/clients'
     | '/dashboard/courses'
+    | '/dashboard/employees'
     | '/dashboard/financial'
     | '/dashboard/forms'
     | '/dashboard/hive-exec'
@@ -2668,6 +2691,7 @@ export interface FileRouteTypes {
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
     | '/dashboard/courses/person'
+    | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
     | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
@@ -2734,6 +2758,7 @@ export interface FileRouteTypes {
     | '/dashboard/billing/'
     | '/dashboard/clients/'
     | '/dashboard/courses/'
+    | '/dashboard/employees/'
     | '/dashboard/financial/'
     | '/dashboard/forms/'
     | '/dashboard/hive-exec/'
@@ -3593,6 +3618,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFinancialIndexRouteImport
       parentRoute: typeof DashboardFinancialRoute
     }
+    '/dashboard/employees/': {
+      id: '/dashboard/employees/'
+      path: '/employees'
+      fullPath: '/dashboard/employees/'
+      preLoaderRoute: typeof DashboardEmployeesIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/courses/': {
       id: '/dashboard/courses/'
       path: '/courses'
@@ -4053,6 +4085,13 @@ declare module '@tanstack/react-router' {
       path: '/employees/hire-dates'
       fullPath: '/dashboard/employees/hire-dates'
       preLoaderRoute: typeof DashboardEmployeesHireDatesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/employees/$staffId': {
+      id: '/dashboard/employees/$staffId'
+      path: '/employees/$staffId'
+      fullPath: '/dashboard/employees/$staffId'
+      preLoaderRoute: typeof DashboardEmployeesStaffIdRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/courses/person': {
@@ -4766,6 +4805,7 @@ interface DashboardRouteChildren {
   DashboardCoursesMindsmithRoute: typeof DashboardCoursesMindsmithRoute
   DashboardCoursesOtherRoute: typeof DashboardCoursesOtherRoute
   DashboardCoursesPersonRoute: typeof DashboardCoursesPersonRoute
+  DashboardEmployeesStaffIdRoute: typeof DashboardEmployeesStaffIdRoute
   DashboardEmployeesHireDatesRoute: typeof DashboardEmployeesHireDatesRoute
   DashboardEmployeesNewRoute: typeof DashboardEmployeesNewRoute
   DashboardHhsHubClientIdRoute: typeof DashboardHhsHubClientIdRoute
@@ -4780,6 +4820,7 @@ interface DashboardRouteChildren {
   DashboardTrainingCatalogRoute: typeof DashboardTrainingCatalogRoute
   DashboardWorkspaceClientIdRoute: typeof DashboardWorkspaceClientIdRoute
   DashboardCoursesIndexRoute: typeof DashboardCoursesIndexRoute
+  DashboardEmployeesIndexRoute: typeof DashboardEmployeesIndexRoute
   DashboardHiveTrainingIndexRoute: typeof DashboardHiveTrainingIndexRoute
   DashboardTeamMembersIndexRoute: typeof DashboardTeamMembersIndexRoute
   DashboardTrainingIndexRoute: typeof DashboardTrainingIndexRoute
@@ -4867,6 +4908,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardCoursesMindsmithRoute: DashboardCoursesMindsmithRoute,
   DashboardCoursesOtherRoute: DashboardCoursesOtherRoute,
   DashboardCoursesPersonRoute: DashboardCoursesPersonRoute,
+  DashboardEmployeesStaffIdRoute: DashboardEmployeesStaffIdRoute,
   DashboardEmployeesHireDatesRoute: DashboardEmployeesHireDatesRoute,
   DashboardEmployeesNewRoute: DashboardEmployeesNewRoute,
   DashboardHhsHubClientIdRoute: DashboardHhsHubClientIdRoute,
@@ -4881,6 +4923,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardTrainingCatalogRoute: DashboardTrainingCatalogRoute,
   DashboardWorkspaceClientIdRoute: DashboardWorkspaceClientIdRoute,
   DashboardCoursesIndexRoute: DashboardCoursesIndexRoute,
+  DashboardEmployeesIndexRoute: DashboardEmployeesIndexRoute,
   DashboardHiveTrainingIndexRoute: DashboardHiveTrainingIndexRoute,
   DashboardTeamMembersIndexRoute: DashboardTeamMembersIndexRoute,
   DashboardTrainingIndexRoute: DashboardTrainingIndexRoute,
