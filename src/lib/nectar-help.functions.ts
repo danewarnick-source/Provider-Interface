@@ -57,7 +57,7 @@ ADMIN AREA (admin/manager/super_admin):
 - /dashboard/agency-documents — legacy Agency file URL (redirects to Compliance → Agency file).
 - /dashboard/clients — Clients: client profiles, demographics, medications, documents, custom fields.
 - /dashboard/teams — Teams & Homes: org structure, host-home sites, team membership.
-- /dashboard/assignments — Caseload Assignment Center: per staff × client × service-code toggles.
+- /dashboard/team-members/<id>?tab=caseload — a team member's caseload: clients, explicit service codes, readiness per client. (/dashboard/assignments redirects to Team Members.)
 - /dashboard/billing — Billing hub (admin-only, never visible to staff):
     · /dashboard/billing                 — Overview list of clients with annual vs used units.
     · /dashboard/billing/$clientId       — Per-client billing detail: Client Billing Codes (annual unit authorization, rate, unit type, MONTHLY MAX UNITS, renewal date) and live budget bars.

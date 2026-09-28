@@ -553,6 +553,44 @@ test.describe("Employees flatten and Clients placements", () => {
     });
   });
 
+  test("Caseload lives on the profile; /dashboard/assignments redirects", async ({ page }) => {
+    await gotoAdmin(page, "/dashboard/assignments");
+    await expect(page).toHaveURL(/\/dashboard\/team-members\/?$/);
+
+    await gotoAdmin(page, `/dashboard/team-members/${STAFF.jake.id}?tab=caseload`);
+    await expect(page.getByTestId("caseload-tab")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("profile-badge-ready_alone")).toHaveText(
+      "Ready alone: 0 of 1 client",
+    );
+    const tommy = page.getByTestId("caseload-row").filter({ hasText: "Tommy Jones" });
+    await expect(tommy.getByTestId("caseload-readiness")).toHaveText(
+      "Not ready: 30-day orientation, CPR",
+    );
+    await expect(tommy.getByRole("button", { name: "DSI" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(tommy.getByRole("button", { name: "HHS" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    await expect(page.getByTestId("caseload-save-bar")).toHaveCount(0);
+
+    await page.getByTestId("caseload-add-client").click();
+    await page.getByRole("option", { name: "Blake Stevens" }).click();
+    const blake = page.getByTestId("caseload-row").filter({ hasText: "Blake Stevens" });
+    for (const code of ["DSI", "HHS"]) {
+      await expect(blake.getByRole("button", { name: code })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    }
+    await expect(page.getByTestId("caseload-save-bar")).toContainText("1 unsaved change");
+    await shot(page, "team_member_caseload_tab");
+    await page.getByTestId("caseload-save").click();
+    await expect(page.getByText("Caseload saved")).toBeVisible();
+  });
+
   test("Clients Placements is the host pipeline; old hosts tab redirects", async ({ page }) => {
     await gotoAdmin(page, "/dashboard/hub/clients?tab=placements");
     await expect(
