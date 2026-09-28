@@ -1131,7 +1131,7 @@ export const recordStaffMandateOverride = createServerFn({ method: "POST" })
         urgency: "urgent",
         title,
         body,
-        link_to: `/dashboard/employees/${data.staffId}`,
+        link_to: `/dashboard/team-members/${data.staffId}`,
         related_id: data.staffId,
         related_type: isBlockOverride ? "staff_mandate_block_override" : "staff_mandate_override",
       })

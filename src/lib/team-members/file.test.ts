@@ -209,18 +209,19 @@ describe("dueLabel", () => {
   });
 });
 
-describe("Admin employee profile lock", () => {
+describe("Admin team member profile lock", () => {
   it("keeps Profile / Team member file / Activity and drops junk surfaces", () => {
     const src = readFileSync(
-      new URL("../../routes/dashboard.employees.$staffId.tsx", import.meta.url),
+      new URL("../../components/team-members/profile/profile-page.tsx", import.meta.url),
       "utf8",
     );
     assert.match(src, /Team member file/);
     assert.doesNotMatch(src, />Staff file</);
-    assert.match(src, /s\.tab === "staff"/);
+    assert.match(src, /resolveProfileTab\(tab\)/);
     assert.doesNotMatch(src, /Personnel file/);
     assert.match(src, /value="profile"/);
-    assert.match(src, /value="personnel"/);
+    assert.match(src, /value="file"/);
+    assert.doesNotMatch(src, /value="personnel"/);
     assert.match(src, /value="activity"/);
     assert.match(src, /StaffProfilePanel/);
     assert.doesNotMatch(src, /<TabsTrigger value="permissions">/);
@@ -376,7 +377,7 @@ describe("Org-wide Staff file lock", () => {
     assert.doesNotMatch(hrAdmin, /getHrAdminRollup/);
     assert.doesNotMatch(hrAdmin, /OtherAssignmentsRollup/);
     assert.match(hrAdmin, /redirect/);
-    assert.match(hrAdmin, /\/dashboard\/hub\/employees/);
+    assert.match(hrAdmin, /\/dashboard\/team-members/);
     assert.equal(existsSync(new URL("../hr-staff.functions.ts", import.meta.url)), false);
   });
 

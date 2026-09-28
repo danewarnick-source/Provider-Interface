@@ -395,7 +395,7 @@ export const requestAccess = createServerFn({ method: "POST" })
       urgency: "normal",
       title: `${who} is requesting access`,
       body: `${who} needs "${data.needed}".${data.page ? ` They were blocked on ${data.page}.` : ""} Reason: ${data.reason}`,
-      link_to: `/dashboard/employees/${context.userId}#access`,
+      link_to: `/dashboard/team-members/${context.userId}#access`,
       related_id: context.userId,
       related_type: "permission_request",
     });

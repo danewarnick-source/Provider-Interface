@@ -1556,7 +1556,7 @@ function ShiftDetailPanel({
                           <Button size="sm" variant="outline" onClick={async () => { await addCl.mutateAsync(s.id); await tryAssign(s.id); }}>
                             Add to caseload
                           </Button>
-                          <Link to="/dashboard/employees/$staffId" params={{ staffId: s.id }} aria-label="Open profile">
+                          <Link to="/dashboard/team-members/$staffId" params={{ staffId: s.id }} aria-label="Open profile">
                             <ArrowRight className="h-4 w-4" />
                           </Link>
                         </>

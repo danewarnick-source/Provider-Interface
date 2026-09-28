@@ -143,7 +143,7 @@ export function MembersPanel({ orgId, isHiveExec }: { orgId: string; isHiveExec:
                   <tr key={m.membership_id} className="border-t border-border">
                     <td className="px-4 py-3">
                       <Link
-                        to="/dashboard/employees/$staffId"
+                        to="/dashboard/team-members/$staffId"
                         params={{ staffId: m.user_id }}
                         hash="access"
                         className="font-medium hover:underline"

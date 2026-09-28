@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
+import { getRouteApi, Link, useRouter } from "@tanstack/react-router";
+import { isRouteUuid } from "@/lib/route-uuid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { PersonAvatar } from "@/components/person/person-avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SectionPanel, SectionGroup } from "@/components/clients/section-panel";
-import { RequirePermission } from "@/components/rbac-guard";
 import { EmployeeFaceSheetButton } from "@/components/team-members/profile/staff-record-button";
 import { StaffProfilePanel } from "@/components/team-members/profile/profile-tab";
 import { StaffObligationsFilesTab } from "@/components/team-members/profile/file-tab";
@@ -30,54 +29,19 @@ import {
   staffProfileDisplayName,
   staffProfileIdentityQueryKey,
 } from "@/lib/team-members/identity";
+import { resolveProfileTab, type RenderedProfileTab } from "@/lib/team-members/profile-tabs";
 
-const PROFILE_TABS = ["profile", "personnel", "activity"] as const;
-type ProfileTab = (typeof PROFILE_TABS)[number];
-type SearchTab = ProfileTab | "record" | "obligations" | "permissions" | "staff";
+const profileRoute = getRouteApi("/dashboard/team-members/$staffId");
 
-function resolveTab(tab: SearchTab | undefined): ProfileTab {
-  if (tab === "record" || tab === "obligations" || tab === "staff") return "personnel";
-  if (tab === "permissions") return "profile";
-  if (tab && (PROFILE_TABS as readonly string[]).includes(tab)) return tab;
-  return "profile";
-}
-
-export const Route = createFileRoute("/dashboard/employees/$staffId")({
-  beforeLoad: ({ params }) => {
-    redirectUnlessUuidParam(params.staffId, {
-      createTo: "/dashboard/employees/new",
-      fallbackTo: "/dashboard/employees",
-    });
-  },
-  validateSearch: (s: Record<string, unknown>): { tab?: SearchTab } => {
-    const out: { tab?: SearchTab } = {};
-    if (
-      typeof s.tab === "string" &&
-      (s.tab === "record" ||
-        s.tab === "obligations" ||
-        s.tab === "permissions" ||
-        s.tab === "staff" ||
-        (PROFILE_TABS as readonly string[]).includes(s.tab))
-    ) {
-      out.tab = s.tab as SearchTab;
-    }
-    return out;
-  },
-  component: () => (
-    <RequirePermission perm="view_staff_records">
-      <StaffProfilePage />
-    </RequirePermission>
-  ),
-});
-
-function StaffProfilePage() {
-  const { staffId } = Route.useParams();
-  const { tab } = Route.useSearch();
+/** Team member profile — the page body behind /dashboard/team-members/$staffId. */
+export function ProfilePage() {
+  const { staffId } = profileRoute.useParams();
+  const { tab } = profileRoute.useSearch();
   const { data: org } = useCurrentOrg();
   const router = useRouter();
   const qc = useQueryClient();
-  const navigate = Route.useNavigate();
-  const activeTab = resolveTab(tab);
+  const navigate = profileRoute.useNavigate();
+  const activeTab = resolveProfileTab(tab);
 
   const orgId = org?.organization_id;
 
@@ -132,7 +96,7 @@ function StaffProfilePage() {
             onClick={() =>
               window.history.length > 1
                 ? router.history.back()
-                : router.navigate({ to: "/dashboard/hub/employees" })
+                : router.navigate({ to: "/dashboard/team-members" })
             }
           >
             <ArrowLeft className="mr-1 h-4 w-4" /> Team Members
@@ -181,7 +145,7 @@ function StaffProfilePage() {
           onClick={() =>
             window.history.length > 1
               ? router.history.back()
-              : router.navigate({ to: "/dashboard/hub/employees" })
+              : router.navigate({ to: "/dashboard/team-members" })
           }
         >
           Back to list
@@ -192,14 +156,17 @@ function StaffProfilePage() {
         value={activeTab}
         onValueChange={(v) =>
           navigate({
-            search: (prev) => ({ ...prev, tab: v === "profile" ? undefined : (v as ProfileTab) }),
+            search: (prev) => ({
+              ...prev,
+              tab: v === "profile" ? undefined : (v as RenderedProfileTab),
+            }),
           })
         }
         className="w-full"
       >
         <TabsList className="flex h-auto w-full min-w-0 max-w-full flex-wrap justify-start overflow-x-auto">
           <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="personnel">Team member file</TabsTrigger>
+          <TabsTrigger value="file">Team member file</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
 
@@ -215,7 +182,7 @@ function StaffProfilePage() {
           />
         </TabsContent>
 
-        <TabsContent value="personnel" className="mt-4 space-y-6">
+        <TabsContent value="file" className="mt-4 space-y-6">
           <StaffObligationsFilesTab organizationId={orgId} staffId={staffId} staffName={name} />
         </TabsContent>
 

@@ -2,7 +2,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
-import { isReservedCreateId, isRouteUuid, ROUTE_UUID_RE } from "./route-uuid.ts";
+import { isRedirect } from "@tanstack/react-router";
+import {
+  isReservedCreateId,
+  isRouteUuid,
+  redirectUnlessUuidParam,
+  ROUTE_UUID_RE,
+} from "./route-uuid.ts";
 
 const SAMPLE_UUID = "7fabcf5d-f826-487f-8730-8b0c3f1969bb";
 
@@ -28,7 +34,7 @@ describe("route UUID params", () => {
       "../routes/dashboard.billing.$clientId.tsx",
       "../routes/dashboard.client-training.$clientId.tsx",
       "../routes/dashboard.behavior-support.$clientId.tsx",
-      "../routes/dashboard.employees.$staffId.tsx",
+      "../routes/dashboard.team-members.$staffId.tsx",
       "../routes/dashboard.hive-exec.$orgId.tsx",
     ];
     for (const rel of files) {
@@ -62,5 +68,31 @@ describe("route UUID params", () => {
     assert.match(clientsNew, /createFileRoute\("\/dashboard\/clients\/new"\)/);
     assert.match(clientsNew, /startWithAddOpen/);
     assert.match(staffNew, /createFileRoute\("\/dashboard\/employees\/new"\)/);
+    assert.match(staffNew, /to: "\/dashboard\/team-members"/);
+    assert.match(staffNew, /add: 1/);
+    const staffProfile = readFileSync(
+      fileURLToPath(new URL("../routes/dashboard.team-members.$staffId.tsx", import.meta.url)),
+      "utf8",
+    );
+    assert.match(staffProfile, /createSearch: \{ add: 1 \}/);
+  });
+
+  it("sends the create placeholder to the roster with the add flag", () => {
+    let thrown: unknown;
+    try {
+      redirectUnlessUuidParam("new", {
+        createTo: "/dashboard/team-members",
+        createSearch: { add: 1 },
+        fallbackTo: "/dashboard/team-members",
+      });
+    } catch (e) {
+      thrown = e;
+    }
+    assert.ok(isRedirect(thrown));
+    assert.equal((thrown as { options: { to: string } }).options.to, "/dashboard/team-members");
+    assert.deepEqual((thrown as { options: { search: unknown } }).options.search, { add: 1 });
+    assert.doesNotThrow(() =>
+      redirectUnlessUuidParam(SAMPLE_UUID, { createTo: "/x", fallbackTo: "/y" }),
+    );
   });
 });

@@ -109,7 +109,7 @@ function InvitationsPage() {
           </div>
         </div>
         <Button asChild className="bg-[var(--hive-primary)] text-[var(--hive-primary-fg)]">
-          <Link to="/dashboard/hub/employees">
+          <Link to="/dashboard/team-members">
             <UserPlus className="mr-2 h-4 w-4" /> Add team member
           </Link>
         </Button>

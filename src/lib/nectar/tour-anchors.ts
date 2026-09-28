@@ -60,7 +60,7 @@ export const TOUR_ANCHORS: TourAnchor[] = [
   {
     id: "nav.employees",
     label: "Team Members",
-    route: "/dashboard/employees",
+    route: "/dashboard/team-members",
     description: "Staff roster and profiles.",
     surface: "admin",
   },

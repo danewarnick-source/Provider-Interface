@@ -88,12 +88,17 @@ describe("Add employee wizard source lock", () => {
   });
 });
 
-describe("Employees list source lock", () => {
+describe("Team roster page source lock", () => {
   it("splits Active / Inactive and uses existing archive/restore/delete RPCs", () => {
     const src = readFileSync(
-      new URL("../../routes/dashboard.employees.index.tsx", import.meta.url),
+      new URL("../../components/team-members/roster/team-roster-page.tsx", import.meta.url),
       "utf8",
     );
+    assert.match(src, /export function TeamRosterPage/);
+    assert.match(src, /getRouteApi\("\/dashboard\/team-members\/"\)/);
+    assert.doesNotMatch(src, /createFileRoute|RequirePermission/);
+    assert.doesNotMatch(src, /\/dashboard\/employees/);
+    assert.match(src, /\/dashboard\/team-members\/\$staffId/);
     assert.match(src, /filterEmployeesByRosterTab/);
     assert.match(src, /archiveEntity/);
     assert.match(src, /restoreEntity/);
@@ -109,7 +114,9 @@ describe("Employees list source lock", () => {
     assert.match(src, /Finish setup/);
     assert.match(src, /Team Members/);
     assert.doesNotMatch(src, /StaffFieldsPanel/);
-    assert.match(src, /upload/);
+    assert.match(src, /search\.import === "1"/);
+    assert.match(src, /search\.add === "1"/);
+    assert.doesNotMatch(src, /search\.upload/);
     assert.match(src, /Last Login/);
     assert.match(src, /org_member_last_sign_ins/);
     assert.match(src, /Caseload/);

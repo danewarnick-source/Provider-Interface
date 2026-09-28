@@ -17,7 +17,7 @@ export const ADMIN_HOME_CARDS = [
     key: "staff",
     title: "Staff ready",
     body: "See who's in, who's up next, and what needs attention.",
-    to: "/dashboard/hub/employees",
+    to: "/dashboard/team-members",
     cta: "Add team member",
   },
   {

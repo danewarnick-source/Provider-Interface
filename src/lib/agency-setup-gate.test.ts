@@ -232,7 +232,7 @@ describe("unit: agency setup gate — required operating facts", () => {
     assert.equal(incomplete.createAllowed, true);
     assert.equal(canSkipAgencySetup(incomplete), false);
     assert.equal(shouldBlockStaffClientCreate(incomplete), false);
-    assert.equal(setupRedirectForPath("/dashboard/employees", incomplete), null);
+    assert.equal(setupRedirectForPath("/dashboard/team-members", incomplete), null);
   });
 });
 
@@ -507,3 +507,18 @@ describe("unit: persist rollback when a later step fails", () => {
   });
 });
 
+
+describe("unit: agency setup gate — Team Members address", () => {
+  it("gates the roster and profile addresses and no longer needs the old employees paths", () => {
+    assert.equal(isSetupGatedPath("/dashboard/team-members"), true);
+    assert.equal(isSetupGatedPath("/dashboard/team-members/"), true);
+    assert.equal(isSetupGatedPath("/dashboard/team-members/7fabcf5d-f826-487f-8730-8b0c3f1969bb"), true);
+    assert.equal(isSetupGatedPath("/dashboard/team-members-archive"), false);
+    assert.equal(isSetupGatedPath("/dashboard/employees"), false);
+    const blocked = computeAgencySetupStatus(EMPTY_AGENCY_SETUP_FACTS);
+    assert.deepEqual(setupRedirectForPath("/dashboard/team-members", blocked), {
+      to: AGENCY_SETUP_PATH,
+      search: { reason: "setup_incomplete" },
+    });
+  });
+});

@@ -147,7 +147,7 @@ export function NectarSearchBar({
           onSelect: () => {
             setOpen(false);
             setQuery("");
-            navigate({ to: "/dashboard/employees/$staffId", params: { staffId: s.id } });
+            navigate({ to: "/dashboard/team-members/$staffId", params: { staffId: s.id } });
           },
         });
       }

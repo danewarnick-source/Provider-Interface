@@ -277,9 +277,10 @@ const STAFF_NAV: NavItem[] = [
 const ADMIN_NAV: NavItem[] = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard, exact: true },
   {
-    to: "/dashboard/hub/employees",
+    to: "/dashboard/team-members",
     label: "Team Members",
     icon: Users,
+    perm: "view_staff_records",
     feature: "staff_onboarding",
   },
   { to: "/dashboard/hub/clients", label: "Clients", icon: Contact2, feature: "client_intake" },

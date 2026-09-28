@@ -48,7 +48,6 @@ import { Route as E2eComplianceDeskRouteImport } from './routes/e2e.compliance-d
 import { Route as DashboardTracksRouteImport } from './routes/dashboard.tracks'
 import { Route as DashboardTimeclockRouteImport } from './routes/dashboard.timeclock'
 import { Route as DashboardTeamsRouteImport } from './routes/dashboard.teams'
-import { Route as DashboardTeamRouteImport } from './routes/dashboard.team'
 import { Route as DashboardSummariesRouteImport } from './routes/dashboard.summaries'
 import { Route as DashboardStateAuditRouteImport } from './routes/dashboard.state-audit'
 import { Route as DashboardSmartImportRouteImport } from './routes/dashboard.smart-import'
@@ -115,12 +114,12 @@ import { Route as CertificateCodeRouteImport } from './routes/certificate.$code'
 import { Route as AuditPortalSetPasswordRouteImport } from './routes/audit-portal.set-password'
 import { Route as AuditPortalPackageIdRouteImport } from './routes/audit-portal.$packageId'
 import { Route as DashboardTrainingIndexRouteImport } from './routes/dashboard.training.index'
+import { Route as DashboardTeamMembersIndexRouteImport } from './routes/dashboard.team-members.index'
 import { Route as DashboardSmartImportIndexRouteImport } from './routes/dashboard.smart-import.index'
 import { Route as DashboardHiveTrainingIndexRouteImport } from './routes/dashboard.hive-training.index'
 import { Route as DashboardHiveExecIndexRouteImport } from './routes/dashboard.hive-exec.index'
 import { Route as DashboardFormsIndexRouteImport } from './routes/dashboard.forms.index'
 import { Route as DashboardFinancialIndexRouteImport } from './routes/dashboard.financial.index'
-import { Route as DashboardEmployeesIndexRouteImport } from './routes/dashboard.employees.index'
 import { Route as DashboardCoursesIndexRouteImport } from './routes/dashboard.courses.index'
 import { Route as DashboardClientsIndexRouteImport } from './routes/dashboard.clients.index'
 import { Route as DashboardBillingIndexRouteImport } from './routes/dashboard.billing.index'
@@ -129,6 +128,7 @@ import { Route as DashboardWorkspaceClientIdRouteImport } from './routes/dashboa
 import { Route as DashboardTrainingCatalogRouteImport } from './routes/dashboard.training.catalog'
 import { Route as DashboardTrainingIdRouteImport } from './routes/dashboard.training.$id'
 import { Route as DashboardTracksTrackSlugRouteImport } from './routes/dashboard.tracks.$trackSlug'
+import { Route as DashboardTeamMembersStaffIdRouteImport } from './routes/dashboard.team-members.$staffId'
 import { Route as DashboardSmartImportHistoryRouteImport } from './routes/dashboard.smart-import.history'
 import { Route as DashboardShiftShiftIdRouteImport } from './routes/dashboard.shift.$shiftId'
 import { Route as DashboardSettingsTeamAccessRouteImport } from './routes/dashboard.settings.team-access'
@@ -186,7 +186,6 @@ import { Route as DashboardFinancialDistributionsRouteImport } from './routes/da
 import { Route as DashboardFinancialContractorsRouteImport } from './routes/dashboard.financial.contractors'
 import { Route as DashboardEmployeesNewRouteImport } from './routes/dashboard.employees.new'
 import { Route as DashboardEmployeesHireDatesRouteImport } from './routes/dashboard.employees.hire-dates'
-import { Route as DashboardEmployeesStaffIdRouteImport } from './routes/dashboard.employees.$staffId'
 import { Route as DashboardCoursesPersonRouteImport } from './routes/dashboard.courses.person'
 import { Route as DashboardCoursesOtherRouteImport } from './routes/dashboard.courses.other'
 import { Route as DashboardCoursesMindsmithRouteImport } from './routes/dashboard.courses.mindsmith'
@@ -426,11 +425,6 @@ const DashboardTimeclockRoute = DashboardTimeclockRouteImport.update({
 const DashboardTeamsRoute = DashboardTeamsRouteImport.update({
   id: '/teams',
   path: '/teams',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardTeamRoute = DashboardTeamRouteImport.update({
-  id: '/team',
-  path: '/team',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardSummariesRoute = DashboardSummariesRouteImport.update({
@@ -778,6 +772,12 @@ const DashboardTrainingIndexRoute = DashboardTrainingIndexRouteImport.update({
   path: '/training/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardTeamMembersIndexRoute =
+  DashboardTeamMembersIndexRouteImport.update({
+    id: '/team-members/',
+    path: '/team-members/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardSmartImportIndexRoute =
   DashboardSmartImportIndexRouteImport.update({
     id: '/',
@@ -804,11 +804,6 @@ const DashboardFinancialIndexRoute = DashboardFinancialIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardFinancialRoute,
-} as any)
-const DashboardEmployeesIndexRoute = DashboardEmployeesIndexRouteImport.update({
-  id: '/employees/',
-  path: '/employees/',
-  getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardCoursesIndexRoute = DashboardCoursesIndexRouteImport.update({
   id: '/courses/',
@@ -852,6 +847,12 @@ const DashboardTracksTrackSlugRoute =
     id: '/$trackSlug',
     path: '/$trackSlug',
     getParentRoute: () => DashboardTracksRoute,
+  } as any)
+const DashboardTeamMembersStaffIdRoute =
+  DashboardTeamMembersStaffIdRouteImport.update({
+    id: '/team-members/$staffId',
+    path: '/team-members/$staffId',
+    getParentRoute: () => DashboardRoute,
   } as any)
 const DashboardSmartImportHistoryRoute =
   DashboardSmartImportHistoryRouteImport.update({
@@ -1176,12 +1177,6 @@ const DashboardEmployeesHireDatesRoute =
   DashboardEmployeesHireDatesRouteImport.update({
     id: '/employees/hire-dates',
     path: '/employees/hire-dates',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardEmployeesStaffIdRoute =
-  DashboardEmployeesStaffIdRouteImport.update({
-    id: '/employees/$staffId',
-    path: '/employees/$staffId',
     getParentRoute: () => DashboardRoute,
   } as any)
 const DashboardCoursesPersonRoute = DashboardCoursesPersonRouteImport.update({
@@ -1533,7 +1528,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/smart-import': typeof DashboardSmartImportRouteWithChildren
   '/dashboard/state-audit': typeof DashboardStateAuditRoute
   '/dashboard/summaries': typeof DashboardSummariesRoute
-  '/dashboard/team': typeof DashboardTeamRoute
   '/dashboard/teams': typeof DashboardTeamsRoute
   '/dashboard/timeclock': typeof DashboardTimeclockRoute
   '/dashboard/tracks': typeof DashboardTracksRouteWithChildren
@@ -1569,7 +1563,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
   '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
-  '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
@@ -1627,6 +1620,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/team-access': typeof DashboardSettingsTeamAccessRoute
   '/dashboard/shift/$shiftId': typeof DashboardShiftShiftIdRoute
   '/dashboard/smart-import/history': typeof DashboardSmartImportHistoryRoute
+  '/dashboard/team-members/$staffId': typeof DashboardTeamMembersStaffIdRoute
   '/dashboard/tracks/$trackSlug': typeof DashboardTracksTrackSlugRoute
   '/dashboard/training/$id': typeof DashboardTrainingIdRoute
   '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
@@ -1635,12 +1629,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/billing/': typeof DashboardBillingIndexRoute
   '/dashboard/clients/': typeof DashboardClientsIndexRoute
   '/dashboard/courses/': typeof DashboardCoursesIndexRoute
-  '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
   '/dashboard/financial/': typeof DashboardFinancialIndexRoute
   '/dashboard/forms/': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec/': typeof DashboardHiveExecIndexRoute
   '/dashboard/hive-training/': typeof DashboardHiveTrainingIndexRoute
   '/dashboard/smart-import/': typeof DashboardSmartImportIndexRoute
+  '/dashboard/team-members/': typeof DashboardTeamMembersIndexRoute
   '/dashboard/training/': typeof DashboardTrainingIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
@@ -1749,7 +1743,6 @@ export interface FileRoutesByTo {
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
   '/dashboard/state-audit': typeof DashboardStateAuditRoute
   '/dashboard/summaries': typeof DashboardSummariesRoute
-  '/dashboard/team': typeof DashboardTeamRoute
   '/dashboard/teams': typeof DashboardTeamsRoute
   '/dashboard/timeclock': typeof DashboardTimeclockRoute
   '/dashboard/tracks': typeof DashboardTracksRouteWithChildren
@@ -1785,7 +1778,6 @@ export interface FileRoutesByTo {
   '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
   '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
-  '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
@@ -1843,6 +1835,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings/team-access': typeof DashboardSettingsTeamAccessRoute
   '/dashboard/shift/$shiftId': typeof DashboardShiftShiftIdRoute
   '/dashboard/smart-import/history': typeof DashboardSmartImportHistoryRoute
+  '/dashboard/team-members/$staffId': typeof DashboardTeamMembersStaffIdRoute
   '/dashboard/tracks/$trackSlug': typeof DashboardTracksTrackSlugRoute
   '/dashboard/training/$id': typeof DashboardTrainingIdRoute
   '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
@@ -1851,12 +1844,12 @@ export interface FileRoutesByTo {
   '/dashboard/billing': typeof DashboardBillingIndexRoute
   '/dashboard/clients': typeof DashboardClientsIndexRoute
   '/dashboard/courses': typeof DashboardCoursesIndexRoute
-  '/dashboard/employees': typeof DashboardEmployeesIndexRoute
   '/dashboard/financial': typeof DashboardFinancialIndexRoute
   '/dashboard/forms': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec': typeof DashboardHiveExecIndexRoute
   '/dashboard/hive-training': typeof DashboardHiveTrainingIndexRoute
   '/dashboard/smart-import': typeof DashboardSmartImportIndexRoute
+  '/dashboard/team-members': typeof DashboardTeamMembersIndexRoute
   '/dashboard/training': typeof DashboardTrainingIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
@@ -1975,7 +1968,6 @@ export interface FileRoutesById {
   '/dashboard/smart-import': typeof DashboardSmartImportRouteWithChildren
   '/dashboard/state-audit': typeof DashboardStateAuditRoute
   '/dashboard/summaries': typeof DashboardSummariesRoute
-  '/dashboard/team': typeof DashboardTeamRoute
   '/dashboard/teams': typeof DashboardTeamsRoute
   '/dashboard/timeclock': typeof DashboardTimeclockRoute
   '/dashboard/tracks': typeof DashboardTracksRouteWithChildren
@@ -2011,7 +2003,6 @@ export interface FileRoutesById {
   '/dashboard/courses/mindsmith': typeof DashboardCoursesMindsmithRoute
   '/dashboard/courses/other': typeof DashboardCoursesOtherRoute
   '/dashboard/courses/person': typeof DashboardCoursesPersonRoute
-  '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
   '/dashboard/financial/contractors': typeof DashboardFinancialContractorsRoute
@@ -2069,6 +2060,7 @@ export interface FileRoutesById {
   '/dashboard/settings/team-access': typeof DashboardSettingsTeamAccessRoute
   '/dashboard/shift/$shiftId': typeof DashboardShiftShiftIdRoute
   '/dashboard/smart-import/history': typeof DashboardSmartImportHistoryRoute
+  '/dashboard/team-members/$staffId': typeof DashboardTeamMembersStaffIdRoute
   '/dashboard/tracks/$trackSlug': typeof DashboardTracksTrackSlugRoute
   '/dashboard/training/$id': typeof DashboardTrainingIdRoute
   '/dashboard/training/catalog': typeof DashboardTrainingCatalogRoute
@@ -2077,12 +2069,12 @@ export interface FileRoutesById {
   '/dashboard/billing/': typeof DashboardBillingIndexRoute
   '/dashboard/clients/': typeof DashboardClientsIndexRoute
   '/dashboard/courses/': typeof DashboardCoursesIndexRoute
-  '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
   '/dashboard/financial/': typeof DashboardFinancialIndexRoute
   '/dashboard/forms/': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec/': typeof DashboardHiveExecIndexRoute
   '/dashboard/hive-training/': typeof DashboardHiveTrainingIndexRoute
   '/dashboard/smart-import/': typeof DashboardSmartImportIndexRoute
+  '/dashboard/team-members/': typeof DashboardTeamMembersIndexRoute
   '/dashboard/training/': typeof DashboardTrainingIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
@@ -2202,7 +2194,6 @@ export interface FileRouteTypes {
     | '/dashboard/smart-import'
     | '/dashboard/state-audit'
     | '/dashboard/summaries'
-    | '/dashboard/team'
     | '/dashboard/teams'
     | '/dashboard/timeclock'
     | '/dashboard/tracks'
@@ -2238,7 +2229,6 @@ export interface FileRouteTypes {
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
     | '/dashboard/courses/person'
-    | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
     | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
@@ -2296,6 +2286,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/team-access'
     | '/dashboard/shift/$shiftId'
     | '/dashboard/smart-import/history'
+    | '/dashboard/team-members/$staffId'
     | '/dashboard/tracks/$trackSlug'
     | '/dashboard/training/$id'
     | '/dashboard/training/catalog'
@@ -2304,12 +2295,12 @@ export interface FileRouteTypes {
     | '/dashboard/billing/'
     | '/dashboard/clients/'
     | '/dashboard/courses/'
-    | '/dashboard/employees/'
     | '/dashboard/financial/'
     | '/dashboard/forms/'
     | '/dashboard/hive-exec/'
     | '/dashboard/hive-training/'
     | '/dashboard/smart-import/'
+    | '/dashboard/team-members/'
     | '/dashboard/training/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
@@ -2418,7 +2409,6 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/state-audit'
     | '/dashboard/summaries'
-    | '/dashboard/team'
     | '/dashboard/teams'
     | '/dashboard/timeclock'
     | '/dashboard/tracks'
@@ -2454,7 +2444,6 @@ export interface FileRouteTypes {
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
     | '/dashboard/courses/person'
-    | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
     | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
@@ -2512,6 +2501,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/team-access'
     | '/dashboard/shift/$shiftId'
     | '/dashboard/smart-import/history'
+    | '/dashboard/team-members/$staffId'
     | '/dashboard/tracks/$trackSlug'
     | '/dashboard/training/$id'
     | '/dashboard/training/catalog'
@@ -2520,12 +2510,12 @@ export interface FileRouteTypes {
     | '/dashboard/billing'
     | '/dashboard/clients'
     | '/dashboard/courses'
-    | '/dashboard/employees'
     | '/dashboard/financial'
     | '/dashboard/forms'
     | '/dashboard/hive-exec'
     | '/dashboard/hive-training'
     | '/dashboard/smart-import'
+    | '/dashboard/team-members'
     | '/dashboard/training'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
@@ -2643,7 +2633,6 @@ export interface FileRouteTypes {
     | '/dashboard/smart-import'
     | '/dashboard/state-audit'
     | '/dashboard/summaries'
-    | '/dashboard/team'
     | '/dashboard/teams'
     | '/dashboard/timeclock'
     | '/dashboard/tracks'
@@ -2679,7 +2668,6 @@ export interface FileRouteTypes {
     | '/dashboard/courses/mindsmith'
     | '/dashboard/courses/other'
     | '/dashboard/courses/person'
-    | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
     | '/dashboard/employees/new'
     | '/dashboard/financial/contractors'
@@ -2737,6 +2725,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/team-access'
     | '/dashboard/shift/$shiftId'
     | '/dashboard/smart-import/history'
+    | '/dashboard/team-members/$staffId'
     | '/dashboard/tracks/$trackSlug'
     | '/dashboard/training/$id'
     | '/dashboard/training/catalog'
@@ -2745,12 +2734,12 @@ export interface FileRouteTypes {
     | '/dashboard/billing/'
     | '/dashboard/clients/'
     | '/dashboard/courses/'
-    | '/dashboard/employees/'
     | '/dashboard/financial/'
     | '/dashboard/forms/'
     | '/dashboard/hive-exec/'
     | '/dashboard/hive-training/'
     | '/dashboard/smart-import/'
+    | '/dashboard/team-members/'
     | '/dashboard/training/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
@@ -3098,13 +3087,6 @@ declare module '@tanstack/react-router' {
       path: '/teams'
       fullPath: '/dashboard/teams'
       preLoaderRoute: typeof DashboardTeamsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/team': {
-      id: '/dashboard/team'
-      path: '/team'
-      fullPath: '/dashboard/team'
-      preLoaderRoute: typeof DashboardTeamRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/summaries': {
@@ -3569,6 +3551,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardTrainingIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/team-members/': {
+      id: '/dashboard/team-members/'
+      path: '/team-members'
+      fullPath: '/dashboard/team-members/'
+      preLoaderRoute: typeof DashboardTeamMembersIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/smart-import/': {
       id: '/dashboard/smart-import/'
       path: '/'
@@ -3603,13 +3592,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/financial/'
       preLoaderRoute: typeof DashboardFinancialIndexRouteImport
       parentRoute: typeof DashboardFinancialRoute
-    }
-    '/dashboard/employees/': {
-      id: '/dashboard/employees/'
-      path: '/employees'
-      fullPath: '/dashboard/employees/'
-      preLoaderRoute: typeof DashboardEmployeesIndexRouteImport
-      parentRoute: typeof DashboardRoute
     }
     '/dashboard/courses/': {
       id: '/dashboard/courses/'
@@ -3666,6 +3648,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/tracks/$trackSlug'
       preLoaderRoute: typeof DashboardTracksTrackSlugRouteImport
       parentRoute: typeof DashboardTracksRoute
+    }
+    '/dashboard/team-members/$staffId': {
+      id: '/dashboard/team-members/$staffId'
+      path: '/team-members/$staffId'
+      fullPath: '/dashboard/team-members/$staffId'
+      preLoaderRoute: typeof DashboardTeamMembersStaffIdRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/dashboard/smart-import/history': {
       id: '/dashboard/smart-import/history'
@@ -4064,13 +4053,6 @@ declare module '@tanstack/react-router' {
       path: '/employees/hire-dates'
       fullPath: '/dashboard/employees/hire-dates'
       preLoaderRoute: typeof DashboardEmployeesHireDatesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/employees/$staffId': {
-      id: '/dashboard/employees/$staffId'
-      path: '/employees/$staffId'
-      fullPath: '/dashboard/employees/$staffId'
-      preLoaderRoute: typeof DashboardEmployeesStaffIdRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/courses/person': {
@@ -4771,7 +4753,6 @@ interface DashboardRouteChildren {
   DashboardSmartImportRoute: typeof DashboardSmartImportRouteWithChildren
   DashboardStateAuditRoute: typeof DashboardStateAuditRoute
   DashboardSummariesRoute: typeof DashboardSummariesRoute
-  DashboardTeamRoute: typeof DashboardTeamRoute
   DashboardTeamsRoute: typeof DashboardTeamsRoute
   DashboardTimeclockRoute: typeof DashboardTimeclockRoute
   DashboardTracksRoute: typeof DashboardTracksRouteWithChildren
@@ -4785,7 +4766,6 @@ interface DashboardRouteChildren {
   DashboardCoursesMindsmithRoute: typeof DashboardCoursesMindsmithRoute
   DashboardCoursesOtherRoute: typeof DashboardCoursesOtherRoute
   DashboardCoursesPersonRoute: typeof DashboardCoursesPersonRoute
-  DashboardEmployeesStaffIdRoute: typeof DashboardEmployeesStaffIdRoute
   DashboardEmployeesHireDatesRoute: typeof DashboardEmployeesHireDatesRoute
   DashboardEmployeesNewRoute: typeof DashboardEmployeesNewRoute
   DashboardHhsHubClientIdRoute: typeof DashboardHhsHubClientIdRoute
@@ -4795,12 +4775,13 @@ interface DashboardRouteChildren {
   DashboardHubFinancesRoute: typeof DashboardHubFinancesRoute
   DashboardHubKnowledgeRoute: typeof DashboardHubKnowledgeRoute
   DashboardShiftShiftIdRoute: typeof DashboardShiftShiftIdRoute
+  DashboardTeamMembersStaffIdRoute: typeof DashboardTeamMembersStaffIdRoute
   DashboardTrainingIdRoute: typeof DashboardTrainingIdRoute
   DashboardTrainingCatalogRoute: typeof DashboardTrainingCatalogRoute
   DashboardWorkspaceClientIdRoute: typeof DashboardWorkspaceClientIdRoute
   DashboardCoursesIndexRoute: typeof DashboardCoursesIndexRoute
-  DashboardEmployeesIndexRoute: typeof DashboardEmployeesIndexRoute
   DashboardHiveTrainingIndexRoute: typeof DashboardHiveTrainingIndexRoute
+  DashboardTeamMembersIndexRoute: typeof DashboardTeamMembersIndexRoute
   DashboardTrainingIndexRoute: typeof DashboardTrainingIndexRoute
   DashboardComplianceCertReviewCompletionIdRoute: typeof DashboardComplianceCertReviewCompletionIdRoute
   DashboardCoursesPersonModuleAssignmentIdRoute: typeof DashboardCoursesPersonModuleAssignmentIdRoute
@@ -4873,7 +4854,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardSmartImportRoute: DashboardSmartImportRouteWithChildren,
   DashboardStateAuditRoute: DashboardStateAuditRoute,
   DashboardSummariesRoute: DashboardSummariesRoute,
-  DashboardTeamRoute: DashboardTeamRoute,
   DashboardTeamsRoute: DashboardTeamsRoute,
   DashboardTimeclockRoute: DashboardTimeclockRoute,
   DashboardTracksRoute: DashboardTracksRouteWithChildren,
@@ -4887,7 +4867,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardCoursesMindsmithRoute: DashboardCoursesMindsmithRoute,
   DashboardCoursesOtherRoute: DashboardCoursesOtherRoute,
   DashboardCoursesPersonRoute: DashboardCoursesPersonRoute,
-  DashboardEmployeesStaffIdRoute: DashboardEmployeesStaffIdRoute,
   DashboardEmployeesHireDatesRoute: DashboardEmployeesHireDatesRoute,
   DashboardEmployeesNewRoute: DashboardEmployeesNewRoute,
   DashboardHhsHubClientIdRoute: DashboardHhsHubClientIdRoute,
@@ -4897,12 +4876,13 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHubFinancesRoute: DashboardHubFinancesRoute,
   DashboardHubKnowledgeRoute: DashboardHubKnowledgeRoute,
   DashboardShiftShiftIdRoute: DashboardShiftShiftIdRoute,
+  DashboardTeamMembersStaffIdRoute: DashboardTeamMembersStaffIdRoute,
   DashboardTrainingIdRoute: DashboardTrainingIdRoute,
   DashboardTrainingCatalogRoute: DashboardTrainingCatalogRoute,
   DashboardWorkspaceClientIdRoute: DashboardWorkspaceClientIdRoute,
   DashboardCoursesIndexRoute: DashboardCoursesIndexRoute,
-  DashboardEmployeesIndexRoute: DashboardEmployeesIndexRoute,
   DashboardHiveTrainingIndexRoute: DashboardHiveTrainingIndexRoute,
+  DashboardTeamMembersIndexRoute: DashboardTeamMembersIndexRoute,
   DashboardTrainingIndexRoute: DashboardTrainingIndexRoute,
   DashboardComplianceCertReviewCompletionIdRoute:
     DashboardComplianceCertReviewCompletionIdRoute,

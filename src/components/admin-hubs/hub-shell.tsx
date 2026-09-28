@@ -15,7 +15,7 @@ type Props = {
   title: string;
   subtitle?: string;
   tabs: HubTab[];
-  /** Route path the tabs link to (e.g. "/dashboard/hub/employees"). */
+  /** Route path the tabs link to (e.g. "/dashboard/hub/clients"). */
   basePath: string;
 };
 

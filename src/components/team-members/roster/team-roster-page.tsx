@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +27,10 @@ import {
 } from "@/lib/team-members/roster";
 import { splitPersonName } from "@/lib/team-members/import";
 import { LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
-import { AddEmployeeButton, AddEmployeeWizard } from "@/components/team-members/add/add-member-dialog";
+import {
+  AddEmployeeButton,
+  AddEmployeeWizard,
+} from "@/components/team-members/add/add-member-dialog";
 import {
   EmployeeRosterUploadButton,
   EmployeeRosterUploadWizard,
@@ -79,8 +82,6 @@ import {
 import { toast } from "sonner";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
 import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
-
-import { RequirePermission } from "@/components/rbac-guard";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { useAgencySetup } from "@/hooks/use-agency-setup";
 import { shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
@@ -120,32 +121,33 @@ function asAccessLevel(raw: string | null | undefined): AccessLevel {
   return "staff";
 }
 
-export const Route = createFileRoute("/dashboard/employees/")({
-  validateSearch: (s: Record<string, unknown>): { upload?: boolean } => ({
-    upload: s.upload === true || s.upload === 1 || s.upload === "1" || s.upload === "true",
-  }),
-  component: () => (
-    <RequirePermission perm="view_staff_records">
-      <EmployeesPage />
-    </RequirePermission>
-  ),
-});
+const rosterRoute = getRouteApi("/dashboard/team-members/");
 
-export function EmployeesPage() {
+/**
+ * Team Members roster — the page body behind /dashboard/team-members.
+ * The route validates the search params; ?add=1 and ?import=1 open the
+ * matching dialog, ?view=inactive starts on the Inactive tab.
+ */
+export function TeamRosterPage() {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
   const { status: setupStatus } = useAgencySetup();
   const createBlocked = shouldBlockStaffClientCreate(setupStatus);
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [addOpen, setAddOpen] = useState(false);
-  const search = useSearch({ strict: false }) as { upload?: boolean };
-  const [uploadOpen, setUploadOpen] = useState(() => search.upload === true);
+  const search = rosterRoute.useSearch();
+  const [addOpen, setAddOpen] = useState(() => search.add === "1");
+  const [uploadOpen, setUploadOpen] = useState(() => search.import === "1");
   const [finishOpen, setFinishOpen] = useState(false);
   useEffect(() => {
-    if (search.upload) setUploadOpen(true);
-  }, [search.upload]);
-  const [rosterTab, setRosterTab] = useState<EmployeeRosterTab>("active");
+    if (search.add === "1") setAddOpen(true);
+  }, [search.add]);
+  useEffect(() => {
+    if (search.import === "1") setUploadOpen(true);
+  }, [search.import]);
+  const [rosterTab, setRosterTab] = useState<EmployeeRosterTab>(() =>
+    search.view === "inactive" ? "inactive" : "active",
+  );
   const [deleteTarget, setDeleteTarget] = useState<{ userId: string; name: string } | null>(null);
   const [confirmDeleteName, setConfirmDeleteName] = useState("");
   const [resetUser, setResetUser] = useState<{ id: string; name: string } | null>(null);
@@ -528,7 +530,7 @@ export function EmployeesPage() {
                   const codes = serviceCodesByStaff.get(m.user_id) ?? [];
                   const openProfile = () => {
                     void navigate({
-                      to: "/dashboard/employees/$staffId",
+                      to: "/dashboard/team-members/$staffId",
                       params: { staffId: m.user_id },
                     });
                   };
@@ -550,7 +552,7 @@ export function EmployeesPage() {
                             className="h-9 w-9 text-xs"
                           />
                           <Link
-                            to="/dashboard/employees/$staffId"
+                            to="/dashboard/team-members/$staffId"
                             params={{ staffId: m.user_id }}
                             className="truncate font-bold hover:underline"
                             onClick={(e) => e.stopPropagation()}
@@ -649,7 +651,7 @@ export function EmployeesPage() {
                       // initials fallback itself when photo_path is null.
                       const openProfile = () => {
                         void navigate({
-                          to: "/dashboard/employees/$staffId",
+                          to: "/dashboard/team-members/$staffId",
                           params: { staffId: m.user_id },
                         });
                       };
@@ -673,7 +675,7 @@ export function EmployeesPage() {
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 truncate">
                                   <Link
-                                    to="/dashboard/employees/$staffId"
+                                    to="/dashboard/team-members/$staffId"
                                     params={{ staffId: m.user_id }}
                                     className="truncate hover:underline"
                                     onClick={(e) => e.stopPropagation()}
@@ -704,7 +706,7 @@ export function EmployeesPage() {
                           </td>
                           <td className="px-4 py-2 text-muted-foreground whitespace-nowrap max-w-[220px]">
                             <Link
-                              to="/dashboard/employees/$staffId"
+                              to="/dashboard/team-members/$staffId"
                               params={{ staffId: m.user_id }}
                               className="block truncate hover:underline"
                               title={login}
@@ -1002,9 +1004,9 @@ export function EmployeesPage() {
                   setCredentialsShown(null);
                   if (newStaffId) {
                     void navigate({
-                      to: "/dashboard/employees/$staffId",
+                      to: "/dashboard/team-members/$staffId",
                       params: { staffId: newStaffId },
-                      search: { tab: "record" },
+                      search: { tab: "file" },
                     });
                   }
                 }}

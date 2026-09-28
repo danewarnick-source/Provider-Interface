@@ -79,7 +79,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/scheduler",
   "/dashboard/scheduling",
   "/dashboard/summaries",
-  "/dashboard/team",
   "/dashboard/teams",
   "/dashboard/timeclock",
   "/dashboard/tracks",
@@ -106,8 +105,8 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/courses/other",
   "/dashboard/courses/person",
 
-  // Employees
-  "/dashboard/employees",
+  // Team Members
+  "/dashboard/team-members",
 
   // Financial
   "/dashboard/financial",
@@ -176,7 +175,7 @@ const PARAM_ROUTES: Array<{ url: string; isDetail: boolean }> = [
   { url: `/dashboard/courses/${ID.courseId}/edit`, isDetail: true },
   { url: `/dashboard/courses/person-module/${ID.assignmentId}`, isDetail: true },
   { url: `/dashboard/courses/topic/${ID.topicId}`, isDetail: true },
-  { url: `/dashboard/employees/${ID.staffId}`, isDetail: true },
+  { url: `/dashboard/team-members/${ID.staffId}`, isDetail: true },
   { url: `/dashboard/forms/${ID.formId}/edit`, isDetail: true },
   { url: `/dashboard/forms/${ID.formId}/fill`, isDetail: true },
   { url: `/dashboard/hive-exec/states/${ID.stateCode}`, isDetail: false },

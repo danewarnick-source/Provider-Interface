@@ -493,7 +493,7 @@ function useCompleteSetup({
         } else if (mode === "client") {
           navigate({ to: "/dashboard/clients" });
         } else {
-          navigate({ to: "/dashboard/employees" });
+          navigate({ to: "/dashboard/team-members" });
         }
         return;
       }

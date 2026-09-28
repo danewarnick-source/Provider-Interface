@@ -112,14 +112,10 @@ export type ComputeAgencySetupStatusOptions = {
 };
 
 export const SETUP_GATED_PATHS = [
-  "/dashboard/employees",
-  "/dashboard/employees/new",
-  "/dashboard/hub/employees",
+  "/dashboard/team-members",
   "/dashboard/clients",
   "/dashboard/clients/new",
   "/dashboard/hub/clients",
-  "/employees/new",
-  "/employees",
   "/clients/new",
   "/clients",
 ] as const;

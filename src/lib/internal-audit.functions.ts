@@ -318,7 +318,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
           subjectKind: "staff",
           subjectId: row.staff_id,
           subjectName: row.full_name,
-          fixHref: `/dashboard/employees/${row.staff_id}?tab=personnel`,
+          fixHref: `/dashboard/team-members/${row.staff_id}?tab=file`,
           fixLabel: "Open staff file",
           asOf: todayIso(),
         });

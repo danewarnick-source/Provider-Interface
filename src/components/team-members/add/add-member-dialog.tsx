@@ -271,7 +271,7 @@ export function AddEmployeeWizard({
     const id = created.length === 1 ? created[0]?.userId : "";
     onOpenChange(false);
     resetAll();
-    if (goToProfile && id) window.location.href = `/dashboard/employees/${id}?tab=record`;
+    if (goToProfile && id) window.location.href = `/dashboard/team-members/${id}?tab=file`;
   };
 
   const submitDetails = () => {
