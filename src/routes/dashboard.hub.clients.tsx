@@ -3,7 +3,7 @@ import { z } from "zod";
 import { HubShell, type HubTab } from "@/components/admin-home/hub-shell";
 import { RequireLevel, RequirePermission } from "@/components/rbac-guard";
 import { useAccess } from "@/hooks/use-access";
-import { ClientsPage } from "./dashboard.clients";
+import { ClientsPage } from "./dashboard/clients";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { TeamsPage } from "./dashboard.teams";
 import { PbaLedgerPage } from "./dashboard.pba-ledger";
