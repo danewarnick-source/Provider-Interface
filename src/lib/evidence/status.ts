@@ -1,5 +1,10 @@
 import { effectiveAttentionDate, parseIsoDate } from "./due.ts";
-import type { EvidenceCellStatus, EvidenceFileRow, EvidenceItemRow } from "./types.ts";
+import type {
+  EvidenceCellStatus,
+  EvidenceFileRow,
+  EvidenceItemRow,
+  EvidenceReviewStatus,
+} from "./types.ts";
 
 export type { EvidenceCellStatus };
 
@@ -12,6 +17,9 @@ export const EVIDENCE_MATRIX_CHIP_KINDS = [
   "add",
   "open",
   "na",
+  "awaiting_review",
+  "sent_back",
+  "skipped",
 ] as const;
 export type EvidenceMatrixChipKind = (typeof EVIDENCE_MATRIX_CHIP_KINDS)[number];
 
@@ -41,12 +49,27 @@ export function latestFileForItem(
   });
 }
 
-/** True when the item's latest file satisfies it (attested, or an upload on file). */
+/** Review state of a file. Rows from before review existed (or slim selects) are accepted. */
+export function fileReviewStatus(file: EvidenceFileRow | null): EvidenceReviewStatus | null {
+  if (!file) return null;
+  return file.review_status ?? "accepted";
+}
+
+/** True when the item was skipped (opted out). */
+export function isEvidenceSkipped(item: EvidenceItemRow | null): boolean {
+  return !!item?.opted_out_at;
+}
+
+/**
+ * True when the item's latest file satisfies it (attested, or an upload on file)
+ * AND an admin has accepted it. A pending or sent-back upload is not done.
+ */
 export function itemHasCompletedEvidence(
   item: EvidenceItemRow,
   file: EvidenceFileRow | null,
 ): boolean {
   if (!file) return false;
+  if (fileReviewStatus(file) !== "accepted") return false;
   if (item.evidence_type === "attestation") return !!file.attested_at;
   return !!(file.storage_path || file.filename);
 }
@@ -57,6 +80,10 @@ export function cellStatus(args: {
   today: string;
 }): EvidenceCellStatus {
   const { item, file, today } = args;
+  if (isEvidenceSkipped(item)) return "skipped";
+  const review = fileReviewStatus(file);
+  if (item && review === "pending") return "awaiting_review";
+  if (item && review === "sent_back") return "sent_back";
   const onFile = !!item && itemHasCompletedEvidence(item, file);
   if (!item || !onFile) return "missing";
   const due = effectiveAttentionDate({
@@ -89,7 +116,8 @@ export function dueChipLabel(days: number): string {
  * Chip for one assigned evidence item (or N/A when the person has no row).
  * Does not invent new due rules: N/A = not on this pack; Add = assigned, empty, no date;
  * Review = sent to the employee and still empty; Due in Nd = upcoming first/attention date
- * before anything is on file; Complete / Missing follow cellStatus().
+ * before anything is on file; Skipped / Awaiting review / Sent back mirror cellStatus();
+ * Complete / Missing follow cellStatus().
  */
 export function matrixChip(args: {
   item: EvidenceItemRow | null;
@@ -98,6 +126,12 @@ export function matrixChip(args: {
 }): EvidenceMatrixChip {
   const { item, file, today } = args;
   if (!item) return { kind: "na", label: "N/A", itemId: null };
+  if (isEvidenceSkipped(item)) return { kind: "skipped", label: "Skipped", itemId: item.id };
+  const review = fileReviewStatus(file);
+  if (review === "pending") {
+    return { kind: "awaiting_review", label: "Awaiting review", itemId: item.id };
+  }
+  if (review === "sent_back") return { kind: "sent_back", label: "Sent back", itemId: item.id };
 
   const onFile = itemHasCompletedEvidence(item, file);
   const due = effectiveAttentionDate({
@@ -126,8 +160,16 @@ export function matrixChip(args: {
   return { kind: "missing", label: "Missing", itemId: item.id };
 }
 
+export const EVIDENCE_CELL_STATUS_LABEL: Record<EvidenceCellStatus, string> = {
+  done: "On file",
+  missing: "Needs attention",
+  awaiting_review: "Awaiting review",
+  sent_back: "Sent back",
+  skipped: "Skipped",
+};
+
 export function statusLabel(status: EvidenceCellStatus): string {
-  return status === "done" ? "On file" : "Needs attention";
+  return EVIDENCE_CELL_STATUS_LABEL[status];
 }
 
 export function formatExpiresOn(iso: string | null): string | null {

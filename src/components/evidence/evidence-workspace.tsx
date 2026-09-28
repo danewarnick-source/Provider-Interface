@@ -22,6 +22,7 @@ import {
   recordEvidenceAttestation,
   recordEvidenceUpload,
   removeEvidenceRequirement,
+  restoreEvidenceRequirement,
   sendEvidenceToStaff,
   updateEvidenceDue,
   upsertEvidenceRequirement,
@@ -45,6 +46,7 @@ import {
 } from "@/lib/evidence/types.ts";
 import { EvidenceQuestionnaire } from "./evidence-questionnaire";
 import { SendEvidenceDialog, type SendEvidenceDraft } from "./send-evidence-dialog";
+import { SkipEvidenceDialog } from "./skip-evidence-dialog";
 
 type Props = {
   tab: EvidenceSubject;
@@ -68,6 +70,8 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
   const customFn = useServerFn(upsertEvidenceRequirement);
   const formFn = useServerFn(createEvidenceChecklist);
   const removeFn = useServerFn(removeEvidenceRequirement);
+  const restoreFn = useServerFn(restoreEvidenceRequirement);
+  const [skipItemId, setSkipItemId] = useState<string | null>(null);
   const sendFn = useServerFn(sendEvidenceToStaff);
   const uploadFn = useServerFn(recordEvidenceUpload);
   const attestFn = useServerFn(recordEvidenceAttestation);
@@ -190,9 +194,19 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
       toast.error(/feature_config/i.test(e.message) ? EVIDENCE_STORAGE_UNAVAILABLE : e.message),
   });
   const removeM = useMutation({
-    mutationFn: (id: string) => removeFn({ data: { organizationId: orgId!, itemId: id } }),
+    mutationFn: (args: { itemId: string; reason: string }) =>
+      removeFn({ data: { organizationId: orgId!, ...args } }),
     onSuccess: () => {
-      toast.success("Row removed.");
+      toast.success("Item skipped. It stays on record and can be restored.");
+      setSkipItemId(null);
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const restoreM = useMutation({
+    mutationFn: (itemId: string) => restoreFn({ data: { organizationId: orgId!, itemId } }),
+    onSuccess: () => {
+      toast.success("Item restored.");
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -361,7 +375,8 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
           }}
           onSaveDue={(args) => dueM.mutate(args)}
           onSend={(draft) => setSendDraft(draft)}
-          onRemove={(id) => removeM.mutate(id)}
+          onRemove={(id) => setSkipItemId(id)}
+          onRestore={(id) => restoreM.mutate(id)}
           onLink={(item, peer) => linkM.mutate({ itemId: item, peerSubjectId: peer })}
           pending={
             uploadM.isPending ||
@@ -369,6 +384,7 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
             dueM.isPending ||
             sendM.isPending ||
             removeM.isPending ||
+            restoreM.isPending ||
             linkM.isPending
           }
         />
@@ -440,6 +456,15 @@ export function EvidenceWorkspace({ tab, step, personId, itemId, onSearchChange 
         pending={sendM.isPending}
         onClose={() => setSendDraft(null)}
         onSend={(args) => sendM.mutate(args)}
+      />
+
+      <SkipEvidenceDialog
+        item={board?.items.find((i) => i.id === skipItemId) ?? null}
+        pending={removeM.isPending}
+        onCancel={() => setSkipItemId(null)}
+        onConfirm={(reason) => {
+          if (skipItemId) removeM.mutate({ itemId: skipItemId, reason });
+        }}
       />
     </div>
   );
@@ -526,6 +551,7 @@ function ReviewPanel({
   onSaveDue,
   onSend,
   onRemove,
+  onRestore,
   onLink,
   pending,
 }: {
@@ -556,6 +582,7 @@ function ReviewPanel({
   }) => void;
   onSend: (draft: SendEvidenceDraft) => void;
   onRemove: (itemId: string) => void;
+  onRestore: (itemId: string) => void;
   onLink: (itemId: string, peerSubjectId: string) => void;
   pending: boolean;
 }) {
@@ -718,14 +745,25 @@ function ReviewPanel({
           >
             Send to team member
           </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={pending}
-            onClick={() => onRemove(item.id)}
-          >
-            Remove
-          </Button>
+          {item.opted_out_at ? (
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={pending}
+              onClick={() => onRestore(item.id)}
+            >
+              Restore
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={pending}
+              onClick={() => onRemove(item.id)}
+            >
+              Skip
+            </Button>
+          )}
           {item.dual_link_key === "host_home_cert" && !item.dual_link_peer_id ? (
             <div className="grid gap-2 pt-1">
               <Input

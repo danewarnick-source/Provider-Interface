@@ -415,10 +415,17 @@ describe("Org-wide Staff file lock", () => {
       new URL("../../components/team-members/profile/file-tab.tsx", import.meta.url),
       "utf8",
     );
-    assert.match(filesTab, /Record override/);
-    assert.match(filesTab, /Correction requested/);
-    assert.match(filesTab, /override-state/);
-    assert.match(filesTab, /OVERRIDE_STILL_REQUIRED/);
+    // Team member file = Evidence only. No obligation reads, no overrides.
+    assert.doesNotMatch(filesTab, /Record override/);
+    assert.doesNotMatch(filesTab, /company_obligation|company-obligations/);
+    assert.doesNotMatch(filesTab, /@\/lib\/team-members\/file/);
+    assert.match(filesTab, /cellStatus/);
+    assert.match(filesTab, /No evidence pack yet/);
+    assert.match(filesTab, /Review evidence pack/);
+    assert.match(filesTab, /Skipped \(/);
+    assert.match(filesTab, /Restore/);
+    assert.match(filesTab, /Send back/);
+    assert.match(filesTab, /OlderRecords/);
   });
 
   it("deletes the leftover open-every-profile HR matrix", () => {

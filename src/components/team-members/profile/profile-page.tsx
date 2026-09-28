@@ -143,6 +143,11 @@ export function ProfilePage() {
             organizationId={orgId}
             staffId={staffId}
             staffName={data.profile.displayName}
+            items={data.evidence.items}
+            files={data.evidence.files}
+            names={data.names}
+            onChanged={refresh}
+            onReviewEvidence={() => setReviewing(true)}
           />
         </TabsContent>
 

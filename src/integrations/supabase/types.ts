@@ -6182,6 +6182,10 @@ export type Database = {
           item_id: string
           notes: string | null
           organization_id: string
+          review_note: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
           storage_path: string | null
           uploaded_at: string | null
           uploaded_by: string | null
@@ -6196,6 +6200,10 @@ export type Database = {
           item_id: string
           notes?: string | null
           organization_id: string
+          review_note?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           storage_path?: string | null
           uploaded_at?: string | null
           uploaded_by?: string | null
@@ -6210,6 +6218,10 @@ export type Database = {
           item_id?: string
           notes?: string | null
           organization_id?: string
+          review_note?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           storage_path?: string | null
           uploaded_at?: string | null
           uploaded_by?: string | null
@@ -6244,8 +6256,12 @@ export type Database = {
           expires_on: string | null
           first_due_on: string | null
           first_due_rule: string | null
+          history: Json
           id: string
           next_due_on: string | null
+          opt_out_reason: string | null
+          opted_out_at: string | null
+          opted_out_by: string | null
           organization_id: string
           renew_years: number | null
           requirement_key: string
@@ -6271,8 +6287,12 @@ export type Database = {
           expires_on?: string | null
           first_due_on?: string | null
           first_due_rule?: string | null
+          history?: Json
           id?: string
           next_due_on?: string | null
+          opt_out_reason?: string | null
+          opted_out_at?: string | null
+          opted_out_by?: string | null
           organization_id: string
           renew_years?: number | null
           requirement_key: string
@@ -6298,8 +6318,12 @@ export type Database = {
           expires_on?: string | null
           first_due_on?: string | null
           first_due_rule?: string | null
+          history?: Json
           id?: string
           next_due_on?: string | null
+          opt_out_reason?: string | null
+          opted_out_at?: string | null
+          opted_out_by?: string | null
           organization_id?: string
           renew_years?: number | null
           requirement_key?: string

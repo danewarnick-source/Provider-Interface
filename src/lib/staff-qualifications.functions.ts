@@ -50,6 +50,7 @@ type EvidenceQualRow = {
   expires_on: string | null;
   first_due_on: string | null;
   next_due_on: string | null;
+  opted_out_at: string | null;
 };
 
 function evidenceOnFile(item: EvidenceQualRow, file: EvidenceFileRow | null): boolean {
@@ -70,7 +71,9 @@ export async function addEvidenceQualifications(
   if (!staffIds.length) return;
   const { data: items } = await supabase
     .from("evidence_items")
-    .select("id, subject_id, requirement_key, evidence_type, expires_on, first_due_on, next_due_on")
+    .select(
+      "id, subject_id, requirement_key, evidence_type, expires_on, first_due_on, next_due_on, opted_out_at",
+    )
     .eq("organization_id", organizationId)
     .eq("subject_type", "staff")
     .in("subject_id", staffIds);
@@ -78,7 +81,7 @@ export async function addEvidenceQualifications(
   if (!rows.length) return;
   const { data: files } = await supabase
     .from("evidence_files")
-    .select("id, item_id, storage_path, filename, attested_at, uploaded_at")
+    .select("id, item_id, storage_path, filename, attested_at, uploaded_at, review_status")
     .in(
       "item_id",
       rows.map((r) => r.id),
@@ -99,10 +102,11 @@ export async function addEvidenceQualifications(
         uploaded_by: null,
         uploaded_at: f.uploaded_at ?? null,
         notes: null,
+        review_status: f.review_status ?? null,
       }) satisfies EvidenceFileRow,
   );
   for (const item of rows) {
-    if (!item.requirement_key || !item.subject_id) continue;
+    if (!item.requirement_key || !item.subject_id || item.opted_out_at) continue;
     const file = latestFileForItem(fileRows, item.id);
     if (!evidenceOnFile(item, file)) continue;
     const active =

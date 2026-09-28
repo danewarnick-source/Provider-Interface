@@ -1,14 +1,20 @@
+// Team member file — reads Evidence only (evidence_items / evidence_files for
+// subject 'staff'), through the same status helpers the Evidence page and the
+// roster use. Skips are kept on record (who / when / why) and can be restored;
+// the team member's own uploads wait here for Accept / Send back.
+// The old obligations file lives read-only in <OlderRecords> at the bottom.
+
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Eye, Printer, Upload } from "lucide-react";
+import { ChevronDown, ChevronRight, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAccess } from "@/hooks/use-access";
+import { denverYmd } from "@/lib/denver-date";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -17,149 +23,37 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { EvidenceStatusChip } from "@/components/evidence/evidence-status-chip";
+import { SkipEvidenceDialog } from "@/components/evidence/skip-evidence-dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  recordEvidenceUpload,
+  removeEvidenceRequirement,
+  restoreEvidenceRequirement,
+  reviewEvidenceFile,
+} from "@/lib/evidence.functions";
+import { effectiveAttentionDate } from "@/lib/evidence/due";
 import {
-  listStaffObligationInstances,
-  recordCompletion,
-  type StaffObligationFileRow,
-} from "@/lib/company-obligations.functions";
-import {
-  hasValidObligationEvidence,
-  isAwaitingEvidenceReview,
-  isCorrectionRequestedEvidence,
-  liveObligationTitle,
-  obligationFileStatus,
-  obligationFileStatusLabel,
-  personnelPackHtml,
-  staffFileCycleKind,
-  type ObligationFileStatus,
-} from "@/lib/team-members/file";
-import { isNativePlatformEvidence } from "@/lib/cert-review";
-import { inHiveCourseIdForTitle } from "@/lib/in-hive-training";
-import { loadInHiveCourseCertificate } from "@/lib/in-hive-training.functions";
-import { InHiveCertificate } from "@/components/training/in-hive-certificate";
-import type { ThirtyDayCertificateRecord } from "@/lib/in-hive-training";
-import { RecordOverrideDialog } from "@/components/compliance/record-override-dialog";
-import { useStaffOverrides } from "@/hooks/use-obligation-overrides";
-import {
-  OVERRIDE_STATE_LABEL,
-  OVERRIDE_STILL_REQUIRED,
-  activeOverrideForTarget,
-  auditOverrideHistory,
-  dutyKeyFromObligation,
-  isWaivableObligationKey,
-  overrideUntilLabel,
-} from "@/lib/obligations/overrides";
+  cellStatus,
+  itemHasCompletedEvidence,
+  latestFileForItem,
+  matrixChip,
+} from "@/lib/evidence/status";
+import type { EvidenceFileRow, EvidenceItemRow } from "@/lib/evidence/types";
+import { formatLocalDate } from "@/lib/team-members/badges";
+import { OlderRecords } from "@/components/team-members/profile/older-records";
 
-type FileRow = {
-  instance: StaffObligationFileRow;
-  title: string;
-  status: ObligationFileStatus;
-  evidencePath: string | null;
-  evidenceFilename: string | null;
-  cycle: "current" | "previous";
-  awaitingReview: boolean;
-  correctionRequested: boolean;
-  evidenceTypeUsed: string | null;
-  canUpload: boolean;
-  overridden: boolean;
-  overrideUntil: string | null;
-  waivable: boolean;
-  dutyKey: string | null;
+type Row = {
+  item: EvidenceItemRow;
+  file: EvidenceFileRow | null;
+  status: ReturnType<typeof cellStatus>;
+  chip: ReturnType<typeof matrixChip>;
+  due: string | null;
 };
 
-function buildRows(
-  raw: StaffObligationFileRow[],
-  overrides: Parameters<typeof activeOverrideForTarget>[0] = [],
-  staffId?: string,
-): FileRow[] {
-  return raw.map((instance) => {
-    const completion = instance.completion;
-    const hasCompletion = !!(
-      completion ||
-      instance.upload_path ||
-      instance.status === "completed" ||
-      instance.status === "waived"
-    );
-    const hasValidEvidence = hasValidObligationEvidence({
-      instanceStatus: instance.status,
-      hasCompletion,
-      nectarValidationStatus: completion?.nectar_validation_status ?? null,
-    });
-    const peers = raw
-      .filter((r) => r.obligation.id === instance.obligation.id)
-      .map((r) => ({
-        instanceId: r.id,
-        instanceStatus: r.status,
-        dueAt: r.due_at,
-      }));
-    const cycle = staffFileCycleKind({
-      instanceId: instance.id,
-      instanceStatus: instance.status,
-      dueAt: instance.due_at,
-      peers,
-    });
-    const awaitingReview = isAwaitingEvidenceReview({
-      instanceStatus: instance.status,
-      nectarValidationStatus: completion?.nectar_validation_status ?? null,
-      adminNotes: completion?.admin_notes ?? null,
-    });
-    const correctionRequested = isCorrectionRequestedEvidence({
-      adminNotes: completion?.admin_notes ?? null,
-    });
-    const evidenceTypeUsed = completion?.evidence_type_used ?? null;
-    const dutyKey = dutyKeyFromObligation(instance.obligation);
-    const override = activeOverrideForTarget(overrides, {
-      instanceId: instance.id,
-      obligationId: instance.obligation_id,
-      obligationKey: dutyKey,
-      staffId: staffId ?? instance.assignee_staff_id,
-    });
-    return {
-      instance,
-      title: liveObligationTitle(
-        instance.obligation.title,
-        instance.obligation.scope,
-        instance.client_name,
-      ),
-      status: obligationFileStatus({
-        instanceStatus: instance.status,
-        dueAt: instance.due_at,
-        hasValidEvidence,
-      }),
-      evidencePath: completion?.upload_path ?? instance.upload_path,
-      evidenceFilename: completion?.upload_filename ?? instance.upload_filename,
-      cycle,
-      awaitingReview,
-      correctionRequested,
-      evidenceTypeUsed,
-      canUpload:
-        cycle === "current" &&
-        (instance.status === "pending" || instance.status === "overdue") &&
-        instance.obligation.evidence_type !== "attestation",
-      overridden: !!override,
-      overrideUntil: overrideUntilLabel(override?.expires_at),
-      waivable: isWaivableObligationKey(dutyKey),
-      dutyKey,
-    };
-  });
-}
-
-function statusBadgeClass(status: ObligationFileStatus): string {
-  if (status === "on_file") return "border-emerald-300 bg-emerald-50 text-emerald-800";
-  if (status === "due_soon") return "border-amber-300 bg-amber-50 text-amber-900";
-  return "border-rose-200 bg-rose-50 text-rose-800";
-}
-
-function formatDue(iso: string): string {
+function formatStamp(iso: string | null | undefined): string {
+  if (!iso) return "";
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
@@ -168,9 +62,7 @@ function guessIsImage(filename: string | null): boolean {
 }
 
 async function signedEvidenceUrl(path: string): Promise<string> {
-  const { data, error } = await supabase.storage
-    .from("obligation-evidence")
-    .createSignedUrl(path, 300);
+  const { data, error } = await supabase.storage.from("evidence-files").createSignedUrl(path, 300);
   if (error || !data?.signedUrl) throw new Error(error?.message ?? "Could not open file");
   return data.signedUrl;
 }
@@ -179,253 +71,214 @@ export function StaffObligationsFilesTab({
   organizationId,
   staffId,
   staffName,
+  items,
+  files,
+  names,
+  onChanged,
+  onReviewEvidence,
 }: {
   organizationId: string;
   staffId: string;
   staffName: string;
+  items: EvidenceItemRow[];
+  files: EvidenceFileRow[];
+  /** user id → display name (from the profile loader). */
+  names: Record<string, string>;
+  onChanged: () => void;
+  onReviewEvidence: () => void;
 }) {
   const qc = useQueryClient();
-  const listFn = useServerFn(listStaffObligationInstances);
-  const recordFn = useServerFn(recordCompletion);
+  const { canCategory, isAdminLevel } = useAccess();
+  const canEdit = canCategory("staff_compliance", "edit");
+  // Skip / Restore run as Admin-level server calls.
+  const canSkip = canEdit && isAdminLevel;
+  const canReviewPack = canCategory("staff_hiring", "edit");
 
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [uploadOpen, setUploadOpen] = useState(false);
-  const [uploadInstanceId, setUploadInstanceId] = useState<string | null>(null);
+  const uploadFn = useServerFn(recordEvidenceUpload);
+  const skipFn = useServerFn(removeEvidenceRequirement);
+  const restoreFn = useServerFn(restoreEvidenceRequirement);
+  const reviewFn = useServerFn(reviewEvidenceFile);
+
+  const [uploadItem, setUploadItem] = useState<EvidenceItemRow | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [viewIds, setViewIds] = useState<string[]>([]);
-  const [viewIndex, setViewIndex] = useState(0);
+  const [viewRow, setViewRow] = useState<Row | null>(null);
   const [viewUrl, setViewUrl] = useState<string | null>(null);
-  const [nativeCert, setNativeCert] = useState<ThirtyDayCertificateRecord | null>(null);
-  const [overrideRow, setOverrideRow] = useState<FileRow | null>(null);
-  const overridesQ = useStaffOverrides(organizationId, staffId);
-
-  const listQ = useQuery({
-    queryKey: ["staff-obligation-files", organizationId, staffId],
-    enabled: !!organizationId && !!staffId,
-    queryFn: () => listFn({ data: { organizationId, staffId } }),
-  });
-
-  const rows = useMemo(() => {
-    const built = buildRows(listQ.data ?? [], overridesQ.data ?? [], staffId);
-    return built.sort((a, b) => {
-      if (a.title !== b.title) return a.title.localeCompare(b.title);
-      if (a.cycle !== b.cycle) return a.cycle === "current" ? -1 : 1;
-      return b.instance.due_at.localeCompare(a.instance.due_at);
-    });
-  }, [listQ.data, overridesQ.data, staffId]);
-  const uploadableRows = rows.filter((r) => r.canUpload);
-  const selectedRows = rows.filter((r) => selected.has(r.instance.id));
-  const viewQueue = useMemo(
-    () =>
-      viewIds.map((id) => rows.find((r) => r.instance.id === id)).filter((r): r is FileRow => !!r),
-    [viewIds, rows],
+  const [skipItem, setSkipItem] = useState<EvidenceItemRow | null>(null);
+  const [sendBackFile, setSendBackFile] = useState<{ file: EvidenceFileRow; title: string } | null>(
+    null,
   );
-  const viewing = viewQueue[viewIndex] ?? null;
-  const viewerOpen = viewIds.length > 0;
+  const [sendBackNote, setSendBackNote] = useState("");
+  const [showSkipped, setShowSkipped] = useState(false);
+
+  const nameOf = (id: string | null | undefined): string => {
+    if (!id) return "Someone";
+    if (id === staffId) return staffName;
+    return names[id] ?? "Someone";
+  };
+
+  const today = denverYmd();
+  const { active, skipped } = useMemo(() => {
+    const act: Row[] = [];
+    const skip: EvidenceItemRow[] = [];
+    for (const item of items) {
+      const file = latestFileForItem(files, item.id);
+      const status = cellStatus({ item, file, today });
+      if (status === "skipped") {
+        skip.push(item);
+        continue;
+      }
+      act.push({
+        item,
+        file,
+        status,
+        chip: matrixChip({ item, file, today }),
+        due: effectiveAttentionDate({
+          hasFile: itemHasCompletedEvidence(item, file),
+          firstDueOn: item.first_due_on,
+          nextDueOn: item.next_due_on,
+          expiresOn: item.expires_on,
+        }),
+      });
+    }
+    act.sort((a, b) => a.item.title.localeCompare(b.item.title));
+    skip.sort((a, b) => (b.opted_out_at ?? "").localeCompare(a.opted_out_at ?? ""));
+    return { active: act, skipped: skip };
+  }, [items, files, today]);
+
+  const awaiting = active.filter((r) => r.status === "awaiting_review").length;
 
   useEffect(() => {
-    if (!viewing) {
+    const path = viewRow?.file?.storage_path;
+    if (!path) {
       setViewUrl(null);
-      setNativeCert(null);
       return;
     }
-    const courseId =
-      inHiveCourseIdForTitle(viewing.instance.obligation.title) ??
-      (isNativePlatformEvidence(viewing.evidenceTypeUsed)
-        ? inHiveCourseIdForTitle(viewing.instance.obligation.title)
-        : null);
     let cancelled = false;
-    if (courseId) {
-      setViewUrl(null);
-      loadInHiveCourseCertificate(staffId, courseId)
-        .then((cert) => {
-          if (!cancelled) setNativeCert(cert);
-        })
-        .catch((e) => {
-          if (!cancelled)
-            toast.error(e instanceof Error ? e.message : "Could not open certificate");
-        });
-    } else {
-      setNativeCert(null);
-    }
-    if (viewing.evidencePath) {
-      signedEvidenceUrl(viewing.evidencePath)
-        .then((url) => {
-          if (!cancelled) setViewUrl(url);
-        })
-        .catch((e) => {
-          if (!cancelled) toast.error(e instanceof Error ? e.message : "Could not open file");
-        });
-    } else {
-      setViewUrl(null);
-    }
+    setViewUrl(null);
+    signedEvidenceUrl(path)
+      .then((url) => {
+        if (!cancelled) setViewUrl(url);
+      })
+      .catch((e) => {
+        if (!cancelled) toast.error(e instanceof Error ? e.message : "Could not open file");
+      });
     return () => {
       cancelled = true;
     };
-  }, [viewing, staffId]);
+  }, [viewRow]);
 
-  const toggle = (id: string, on: boolean) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (on) next.add(id);
-      else next.delete(id);
-      return next;
-    });
+  const refresh = () => {
+    onChanged();
+    void qc.invalidateQueries({ queryKey: ["evidence-board", organizationId] });
   };
+  const onError = (e: Error) => toast.error(e.message);
 
-  const toggleAll = (on: boolean) => {
-    setSelected(on ? new Set(rows.map((r) => r.instance.id)) : new Set());
-  };
-
-  const openUpload = () => {
-    const selectedUploadable = selectedRows.filter((r) => r.canUpload);
-    const only = selectedUploadable.length === 1 ? selectedUploadable[0]!.instance.id : null;
-    setUploadInstanceId(only);
-    setUploadFile(null);
-    setUploadOpen(true);
-  };
-
-  const openView = (row: FileRow) => {
-    if (
-      !row.evidencePath &&
-      !isNativePlatformEvidence(row.evidenceTypeUsed) &&
-      !inHiveCourseIdForTitle(row.instance.obligation.title)
-    ) {
-      toast.error("No file on this item yet.");
-      return;
-    }
-    setViewIds([row.instance.id]);
-    setViewIndex(0);
-  };
-
-  const viewSelected = () => {
-    const withFiles = selectedRows.filter((r) => r.evidencePath);
-    if (!withFiles.length) {
-      toast.error("Select items that have a file on record.");
-      return;
-    }
-    setViewIds(withFiles.map((r) => r.instance.id));
-    setViewIndex(0);
-  };
-
-  const printPack = async () => {
-    const pack = (selectedRows.length ? selectedRows : rows).filter((r) => r.evidencePath);
-    if (!pack.length) {
-      toast.error("Select items that have a file on record.");
-      return;
-    }
-    try {
-      const files = await Promise.all(
-        pack.map(async (r) => ({
-          staffName: staffName,
-          title: r.title,
-          filename: r.evidenceFilename ?? "evidence",
-          url: await signedEvidenceUrl(r.evidencePath!),
-        })),
-      );
-      const win = window.open("", "_blank");
-      if (!win) throw new Error("Pop-up blocked — allow pop-ups to print the pack.");
-      win.document.write(personnelPackHtml(files));
-      win.document.close();
-      win.focus();
-      win.print();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not build the print pack");
-    }
-  };
-
-  const targetInstance = rows.find((r) => r.instance.id === uploadInstanceId) ?? null;
-  const attestationBlocked = targetInstance?.instance.obligation.evidence_type === "attestation";
-
-  const uploadMut = useMutation({
+  const uploadM = useMutation({
     mutationFn: async () => {
-      if (!targetInstance) throw new Error("Choose a team member file item.");
-      if (attestationBlocked) {
-        throw new Error("This item requires the team member to attest themselves.");
-      }
+      if (!uploadItem) throw new Error("Choose an item.");
       if (!uploadFile) throw new Error("Choose a file to upload.");
-      const safeName = uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const path = `${organizationId}/manual/${targetInstance.instance.id}/${crypto.randomUUID()}-${safeName}`;
-      const { error: upErr } = await supabase.storage
-        .from("obligation-evidence")
-        .upload(path, uploadFile);
-      if (upErr) throw new Error(upErr.message);
-      await recordFn({
+      const safe = uploadFile.name.replace(/[^\w.-]+/g, "_");
+      const path = `${organizationId}/${uploadItem.id}/${Date.now()}-${safe}`;
+      const up = await supabase.storage
+        .from("evidence-files")
+        .upload(path, uploadFile, { upsert: true });
+      if (up.error) throw new Error(up.error.message);
+      await uploadFn({
         data: {
           organizationId,
-          instanceId: targetInstance.instance.id,
-          evidenceTypeUsed: "upload",
-          uploadPath: path,
-          uploadFilename: uploadFile.name,
-          staffId,
-          staffName,
+          itemId: uploadItem.id,
+          storagePath: path,
+          filename: uploadFile.name,
         },
       });
     },
     onSuccess: () => {
-      toast.success("Upload saved. It stays awaiting review until accepted.");
-      setUploadOpen(false);
+      toast.success("Upload saved.");
+      setUploadItem(null);
       setUploadFile(null);
-      qc.invalidateQueries({ queryKey: ["staff-obligation-files", organizationId, staffId] });
-      qc.invalidateQueries({ queryKey: ["company-obligations", organizationId] });
-      qc.invalidateQueries({ queryKey: ["pending-cert-reviews", organizationId] });
-      qc.invalidateQueries({ queryKey: ["deadlines"] });
+      refresh();
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Upload failed"),
+    onError,
   });
 
-  if (listQ.isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading team member file…</p>;
-  }
-  if (listQ.error) {
+  const skipM = useMutation({
+    mutationFn: (args: { itemId: string; reason: string }) =>
+      skipFn({ data: { organizationId, ...args } }),
+    onSuccess: () => {
+      toast.success("Item skipped. It stays on record and can be restored.");
+      setSkipItem(null);
+      refresh();
+    },
+    onError,
+  });
+
+  const restoreM = useMutation({
+    mutationFn: (itemId: string) => restoreFn({ data: { organizationId, itemId } }),
+    onSuccess: () => {
+      toast.success("Item restored.");
+      refresh();
+    },
+    onError,
+  });
+
+  const reviewM = useMutation({
+    mutationFn: (args: { fileId: string; decision: "accepted" | "sent_back"; note?: string }) =>
+      reviewFn({ data: { organizationId, ...args } }),
+    onSuccess: (_res, args) => {
+      toast.success(args.decision === "accepted" ? "Accepted." : "Sent back to the team member.");
+      setSendBackFile(null);
+      setSendBackNote("");
+      refresh();
+    },
+    onError,
+  });
+
+  const busy = uploadM.isPending || skipM.isPending || restoreM.isPending || reviewM.isPending;
+
+  if (items.length === 0) {
     return (
-      <p className="text-sm text-rose-700">
-        {listQ.error instanceof Error ? listQ.error.message : "Could not load this team member file."}
-      </p>
+      <div className="space-y-4">
+        <section
+          className="rounded-2xl border border-dashed border-border bg-card p-6 text-center"
+          data-testid="no-evidence-pack"
+        >
+          <p className="font-medium">No evidence pack yet</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Review the evidence pack to choose which records this team member needs.
+          </p>
+          {canReviewPack ? (
+            <Button className="mt-3" size="sm" onClick={onReviewEvidence}>
+              Review evidence pack
+            </Button>
+          ) : null}
+        </section>
+        <OlderRecords organizationId={organizationId} staffId={staffId} />
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={viewSelected}
-          disabled={!selectedRows.some((r) => r.evidencePath)}
-        >
-          <Eye className="mr-1.5 h-3.5 w-3.5" />
-          View selected
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => void printPack()}
-          disabled={!rows.some((r) => r.evidencePath)}
-        >
-          <Printer className="mr-1.5 h-3.5 w-3.5" />
-          Print / PDF pack
-        </Button>
-        <Button size="sm" onClick={openUpload}>
-          <Upload className="mr-1.5 h-3.5 w-3.5" />
-          Upload evidence…
-        </Button>
-      </div>
+    <div className="space-y-4" data-testid="team-member-file">
+      {awaiting > 0 ? (
+        <p className="text-sm text-sky-800">
+          {awaiting} upload{awaiting === 1 ? "" : "s"} awaiting review.
+        </p>
+      ) : null}
 
-      {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nothing on this team member file yet.</p>
+      {active.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Every item on this file is skipped.{" "}
+          {canReviewPack ? (
+            <Button variant="link" className="h-auto p-0" onClick={onReviewEvidence}>
+              Review evidence pack
+            </Button>
+          ) : null}
+        </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th className="w-10 px-3 py-2 text-left">
-                  <Checkbox
-                    checked={rows.length > 0 && selected.size === rows.length}
-                    onCheckedChange={(v) => toggleAll(!!v)}
-                    aria-label="Select all team member file items"
-                  />
-                </th>
                 <th className="px-3 py-2 text-left">Item</th>
                 <th className="px-3 py-2 text-left">Status</th>
                 <th className="px-3 py-2 text-left">Due</th>
@@ -433,245 +286,282 @@ export function StaffObligationsFilesTab({
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
-                <tr key={row.instance.id} className="border-t">
-                  <td className="px-3 py-2">
-                    <Checkbox
-                      checked={selected.has(row.instance.id)}
-                      onCheckedChange={(v) => toggle(row.instance.id, !!v)}
-                      aria-label={`Select ${row.title}`}
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <p className="font-medium">{row.title}</p>
-                    {row.cycle === "previous" ? (
-                      <p className="text-xs text-muted-foreground">Previous cycle</p>
-                    ) : null}
-                    {row.evidenceFilename && (
-                      <p className="text-xs text-muted-foreground">{row.evidenceFilename}</p>
-                    )}
-                    {isNativePlatformEvidence(row.evidenceTypeUsed) ||
-                    inHiveCourseIdForTitle(row.instance.obligation.title) ? (
-                      <p className="text-xs text-muted-foreground">In-platform certificate</p>
-                    ) : null}
-                  </td>
-                  <td className="px-3 py-2">
-                    <Badge variant="outline" className={statusBadgeClass(row.status)}>
-                      {obligationFileStatusLabel(row.status)}
-                    </Badge>
-                    {row.correctionRequested ? (
-                      <p className="mt-1 text-xs text-amber-900">Correction requested</p>
-                    ) : row.awaitingReview ? (
-                      <p className="mt-1 text-xs text-amber-900">Awaiting review</p>
-                    ) : null}
-                    {row.overridden ? (
-                      <p
-                        data-testid="override-state"
-                        className="mt-1 text-xs font-medium text-amber-900"
-                      >
-                        {OVERRIDE_STATE_LABEL}
-                        {row.overrideUntil ? ` until ${row.overrideUntil}` : ""}.{" "}
-                        {OVERRIDE_STILL_REQUIRED}
-                      </p>
-                    ) : null}
-                  </td>
-                  <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
-                    {formatDue(row.instance.due_at)}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    {row.waivable && row.cycle === "current" && row.dutyKey ? (
-                      <Button size="sm" variant="outline" onClick={() => setOverrideRow(row)}>
-                        Record override
-                      </Button>
-                    ) : null}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={
-                        !row.evidencePath &&
-                        !isNativePlatformEvidence(row.evidenceTypeUsed) &&
-                        !inHiveCourseIdForTitle(row.instance.obligation.title)
-                      }
-                      onClick={() => openView(row)}
-                    >
-                      View
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {active.map((row) => {
+                const { item, file, status } = row;
+                const chip =
+                  row.chip.kind === "review"
+                    ? { ...row.chip, label: "Sent to team member" }
+                    : row.chip;
+                const isUpload = item.evidence_type === "upload";
+                return (
+                  <tr key={item.id} className="border-t align-top">
+                    <td className="px-3 py-2">
+                      <p className="font-medium">{item.title}</p>
+                      {file?.filename ? (
+                        <p className="text-xs text-muted-foreground">{file.filename}</p>
+                      ) : null}
+                      {!isUpload ? (
+                        <p className="text-xs text-muted-foreground">
+                          Team member attests themselves
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-3 py-2">
+                      <EvidenceStatusChip chip={chip} ariaLabel={`${item.title}: ${chip.label}`} />
+                      {status === "awaiting_review" && file ? (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Uploaded by {nameOf(file.uploaded_by)}
+                          {file.uploaded_at ? ` on ${formatStamp(file.uploaded_at)}` : ""}
+                        </p>
+                      ) : null}
+                      {status === "sent_back" && file ? (
+                        <p className="mt-1 max-w-xs text-xs text-amber-900">
+                          Sent back by {nameOf(file.reviewed_by)}
+                          {file.reviewed_at ? ` on ${formatStamp(file.reviewed_at)}` : ""}
+                          {file.review_note ? `: ${file.review_note}` : ""}
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
+                      {formatLocalDate(row.due) || "—"}
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex flex-wrap justify-end gap-1">
+                        {canEdit && isUpload ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={busy}
+                            onClick={() => {
+                              setUploadFile(null);
+                              setUploadItem(item);
+                            }}
+                          >
+                            <Upload className="mr-1 h-3.5 w-3.5" />
+                            Upload
+                          </Button>
+                        ) : null}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={!file || (!file.storage_path && !file.attested_at)}
+                          onClick={() => setViewRow(row)}
+                        >
+                          View
+                        </Button>
+                        {canEdit && status === "awaiting_review" && file ? (
+                          <>
+                            <Button
+                              size="sm"
+                              disabled={busy}
+                              onClick={() =>
+                                reviewM.mutate({ fileId: file.id, decision: "accepted" })
+                              }
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={busy}
+                              onClick={() => {
+                                setSendBackNote("");
+                                setSendBackFile({ file, title: item.title });
+                              }}
+                            >
+                              Send back
+                            </Button>
+                          </>
+                        ) : null}
+                        {canSkip ? (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={busy}
+                            onClick={() => setSkipItem(item)}
+                          >
+                            Skip
+                          </Button>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
 
-      <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
+      {skipped.length > 0 ? (
+        <section className="rounded-lg border border-border" data-testid="skipped-items">
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium"
+            aria-expanded={showSkipped}
+            onClick={() => setShowSkipped((v) => !v)}
+          >
+            {showSkipped ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+            Skipped ({skipped.length})
+          </button>
+          {showSkipped ? (
+            <ul className="divide-y border-t">
+              {skipped.map((item) => (
+                <li key={item.id} className="flex items-start justify-between gap-3 px-3 py-2">
+                  <div className="min-w-0 text-sm">
+                    <p className="font-medium">{item.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Skipped by {nameOf(item.opted_out_by)}
+                      {item.opted_out_at ? ` on ${formatStamp(item.opted_out_at)}` : ""}
+                    </p>
+                    {item.opt_out_reason ? (
+                      <p className="mt-0.5 whitespace-pre-wrap text-xs">
+                        Reason: {item.opt_out_reason}
+                      </p>
+                    ) : null}
+                  </div>
+                  {canSkip ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() => restoreM.mutate(item.id)}
+                    >
+                      Restore
+                    </Button>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
+
+      <OlderRecords organizationId={organizationId} staffId={staffId} />
+
+      <Dialog
+        open={!!uploadItem}
+        onOpenChange={(open) => {
+          if (!open) setUploadItem(null);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Upload evidence</DialogTitle>
+            <DialogTitle>Upload — {uploadItem?.title}</DialogTitle>
             <DialogDescription>
-              File attaches to the open cycle of this team member file item. Accepted certificates stay on
-              file when a renewal is uploaded.
+              Files you add for a team member are accepted right away (your own wait for review).
+              Earlier files stay on record.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label>Team member file item</Label>
-              <Select
-                value={uploadInstanceId ?? ""}
-                onValueChange={(v) => setUploadInstanceId(v || null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose an item…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {uploadableRows.map((r) => (
-                    <SelectItem key={r.instance.id} value={r.instance.id}>
-                      {r.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {uploadableRows.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No open cycle to attach a new file. Previous certificates stay on file.
-              </p>
-            ) : attestationBlocked ? (
-              <p className="text-sm text-amber-900">
-                This item requires the team member to attest themselves. Evidence cannot be filed
-                here.
-              </p>
-            ) : (
-              <div className="space-y-1.5">
-                <Label htmlFor="obligation-evidence-file">File</Label>
-                <Input
-                  id="obligation-evidence-file"
-                  type="file"
-                  onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
-                />
-              </div>
-            )}
+          <div className="space-y-1.5">
+            <Label htmlFor="evidence-file">File</Label>
+            <input
+              id="evidence-file"
+              type="file"
+              className="block w-full text-sm"
+              onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+            />
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setUploadOpen(false)}>
+            <Button variant="ghost" onClick={() => setUploadItem(null)}>
               Cancel
             </Button>
-            <Button
-              disabled={
-                attestationBlocked || !uploadInstanceId || !uploadFile || uploadMut.isPending
-              }
-              onClick={() => uploadMut.mutate()}
-            >
-              {uploadMut.isPending ? "Saving…" : "Save evidence"}
+            <Button disabled={!uploadFile || uploadM.isPending} onClick={() => uploadM.mutate()}>
+              {uploadM.isPending ? "Saving…" : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog
-        open={viewerOpen}
+        open={!!viewRow}
         onOpenChange={(open) => {
-          if (!open) setViewIds([]);
+          if (!open) setViewRow(null);
         }}
       >
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{viewing?.title ?? "Evidence"}</DialogTitle>
+            <DialogTitle>{viewRow?.item.title ?? "Evidence"}</DialogTitle>
             <DialogDescription>
-              {viewing?.evidenceFilename ?? "Print from this viewer."}
+              {viewRow?.file?.filename ??
+                (viewRow?.file?.attested_at
+                  ? `Attested by ${nameOf(viewRow.file.attested_by)} on ${formatStamp(viewRow.file.attested_at)}`
+                  : "")}
             </DialogDescription>
           </DialogHeader>
-          <div className="min-h-[50vh] rounded-md border border-border bg-muted/20">
-            {nativeCert ? (
-              <div className="p-4">
-                <InHiveCertificate record={nativeCert} issued />
-              </div>
-            ) : !viewUrl ? (
-              <p className="p-6 text-sm text-muted-foreground">
-                {viewing &&
-                (isNativePlatformEvidence(viewing.evidenceTypeUsed) ||
-                  inHiveCourseIdForTitle(viewing.instance.obligation.title))
-                  ? "Loading certificate…"
-                  : "Loading file…"}
+          <div className="min-h-[40vh] rounded-md border border-border bg-muted/20">
+            {viewRow?.file && !viewRow.file.storage_path ? (
+              <p className="whitespace-pre-wrap p-4 text-sm">
+                {viewRow.file.attestation_text_snapshot ?? "Attested."}
               </p>
-            ) : guessIsImage(viewing?.evidenceFilename ?? null) ? (
+            ) : !viewUrl ? (
+              <p className="p-6 text-sm text-muted-foreground">Loading file…</p>
+            ) : guessIsImage(viewRow?.file?.filename ?? null) ? (
               <img src={viewUrl} alt="" className="max-h-[70vh] w-full object-contain" />
             ) : (
-              <iframe
-                title="Team member file evidence"
-                src={viewUrl}
-                className="h-[70vh] w-full border-0"
-              />
+              <iframe title="Evidence file" src={viewUrl} className="h-[70vh] w-full border-0" />
             )}
           </div>
-          <DialogFooter className="gap-2 sm:justify-between">
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={viewIndex <= 0}
-                onClick={() => setViewIndex((i) => Math.max(0, i - 1))}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={viewIndex >= viewQueue.length - 1}
-                onClick={() => setViewIndex((i) => Math.min(viewQueue.length - 1, i + 1))}
-              >
-                Next
-              </Button>
-            </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!sendBackFile}
+        onOpenChange={(open) => {
+          if (!open) setSendBackFile(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send back — {sendBackFile?.title}</DialogTitle>
+            <DialogDescription>
+              Tell the team member what to fix. They'll see this note with the item.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="send-back-note">Note</Label>
+            <Textarea
+              id="send-back-note"
+              rows={3}
+              maxLength={2000}
+              value={sendBackNote}
+              onChange={(e) => setSendBackNote(e.target.value)}
+              placeholder="e.g. The card is expired — please upload the renewed one."
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setSendBackFile(null)}>
+              Cancel
+            </Button>
             <Button
-              size="sm"
-              variant="outline"
-              disabled={!viewUrl}
-              onClick={() => {
-                if (!viewUrl) return;
-                const w = window.open(viewUrl, "_blank");
-                w?.focus();
-                w?.print();
-              }}
+              disabled={!sendBackNote.trim() || reviewM.isPending}
+              onClick={() =>
+                sendBackFile &&
+                reviewM.mutate({
+                  fileId: sendBackFile.file.id,
+                  decision: "sent_back",
+                  note: sendBackNote.trim(),
+                })
+              }
             >
-              <Printer className="mr-1.5 h-3.5 w-3.5" />
-              Print
+              {reviewM.isPending ? "Sending…" : "Send back"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {overridesQ.data && overridesQ.data.length > 0 ? (
-        <div data-testid="override-audit" className="rounded-lg border border-border p-3">
-          <p className="text-sm font-medium">Override history</p>
-          <ul className="mt-2 space-y-1.5 text-xs text-muted-foreground">
-            {auditOverrideHistory(overridesQ.data).map((entry) => (
-              <li key={entry.id}>
-                {entry.created_at ? new Date(entry.created_at).toLocaleDateString() : "—"} ·{" "}
-                {entry.authorized_by ?? "Manager"} · {entry.reason}
-                {entry.expires_at ? ` · expires ${overrideUntilLabel(entry.expires_at)}` : ""}
-                {entry.active ? "" : " · expired"}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {overrideRow?.dutyKey ? (
-        <RecordOverrideDialog
-          open={!!overrideRow}
-          organizationId={organizationId}
-          staffId={staffId}
-          title={overrideRow.title}
-          obligationKey={overrideRow.dutyKey}
-          obligationId={overrideRow.instance.obligation_id}
-          instanceId={overrideRow.instance.id}
-          scope="instance"
-          onOpenChange={(open) => {
-            if (!open) setOverrideRow(null);
-          }}
-        />
-      ) : null}
+      <SkipEvidenceDialog
+        item={skipItem}
+        pending={skipM.isPending}
+        onCancel={() => setSkipItem(null)}
+        onConfirm={(reason) => {
+          if (skipItem) skipM.mutate({ itemId: skipItem.id, reason });
+        }}
+      />
     </div>
   );
 }

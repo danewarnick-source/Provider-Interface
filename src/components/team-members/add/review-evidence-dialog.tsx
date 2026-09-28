@@ -71,7 +71,13 @@ export function ReviewEvidencePackDialog({
           dueOverrides: args.dueOverrides,
         },
       }),
-    onSuccess: (res) => done(`Applied ${res.count} evidence row${res.count === 1 ? "" : "s"}.`),
+    onSuccess: (res) =>
+      done(
+        `Applied ${res.count} evidence row${res.count === 1 ? "" : "s"}.` +
+          ("skipped" in res && res.skipped
+            ? ` ${res.skipped} unchecked row(s) saved as skipped.`
+            : ""),
+      ),
     onError,
   });
   const customM = useMutation({

@@ -226,7 +226,7 @@ export const listTeamRoster = createServerFn({ method: "POST" })
             .in("email", ids),
         emails,
       ),
-      // select("*") so review_status / opted_out_at are read once they exist.
+      // select("*") so review_status / opted_out_at reach cellStatus.
       selectIn<RosterEvidenceItem>(
         (ids) =>
           admin

@@ -445,9 +445,10 @@ describe("cert review surface lock", () => {
       new URL("../components/team-members/profile/file-tab.tsx", import.meta.url),
       "utf8",
     );
+    // The profile's Team member file reads Evidence only; uploads are reviewed there.
     assert.doesNotMatch(personFile, /Replace evidence/);
-    assert.match(personFile, /Previous cycle/);
-    assert.match(personFile, /InHiveCertificate|loadInHiveCourseCertificate/);
+    assert.doesNotMatch(personFile, /company_obligation|company-obligations/);
+    assert.match(personFile, /reviewEvidenceFile/);
     assert.doesNotMatch(personFile, /isManualEntry: true/);
   });
 });

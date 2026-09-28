@@ -1,6 +1,8 @@
 /**
  * Evidence Phase 1 persistence.
  * Writes only evidence_items and evidence_files.
+ * Items are never deleted from here: "remove" is a Skip (opted_out_* + history),
+ * and Restore clears it. Team members' own uploads wait for admin review.
  * Does not read or write organizations.feature_config.
  * Does not write requirement_defs or company_obligations.
  */
@@ -8,6 +10,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { hasCategory } from "@/lib/access/can";
+import { requireCategory } from "@/lib/access/require";
 import { hostHomeDualLinkPeerKey, requirementByKey } from "./evidence/catalog.ts";
 import {
   companyEvidencePerson,
@@ -30,8 +34,10 @@ import {
   EVIDENCE_PUSH_TITLE,
   EVIDENCE_SEND_MESSAGE_UNAVAILABLE,
   EVIDENCE_STORAGE_UNAVAILABLE,
+  EVIDENCE_UNCHECKED_REASON,
   FIRST_DUE_RULES,
   type EvidenceFileRow,
+  type EvidenceHistoryEntry,
   type EvidenceItemRow,
   type EvidencePerson,
   type EvidenceSubject,
@@ -56,9 +62,7 @@ function emptyStore(): StoreV1 {
 }
 
 function tableMissing(message: string | undefined): boolean {
-  return /does not exist|schema cache|evidence_items|evidence_files/i.test(
-    message ?? "",
-  );
+  return /does not exist|schema cache|evidence_items|evidence_files/i.test(message ?? "");
 }
 
 function sendMessageColumnMissing(message: string | undefined): boolean {
@@ -79,7 +83,10 @@ const ITEM_SELECT_BASE =
 
 const ITEM_SELECT_WITH_MESSAGE = `${ITEM_SELECT_BASE.replace(", created_at, updated_at", "")}, send_message, created_at, updated_at`;
 
-const ITEM_SELECT_WITH_DUE = `${ITEM_SELECT_BASE.replace(", created_at, updated_at", "")}, send_message, first_due_rule, first_due_on, document_date, next_due_on, renew_years, created_at, updated_at`;
+const ITEM_SELECT_WITH_DUE = `${ITEM_SELECT_BASE.replace(", created_at, updated_at", "")}, send_message, first_due_rule, first_due_on, document_date, next_due_on, renew_years, opted_out_at, opted_out_by, opt_out_reason, history, created_at, updated_at`;
+
+const FILE_SELECT =
+  "id, organization_id, item_id, storage_path, filename, attested_at, attested_by, attestation_text_snapshot, uploaded_by, uploaded_at, notes, review_status, reviewed_by, reviewed_at, review_note";
 
 const FirstDueEnum = z.enum(FIRST_DUE_RULES);
 const DueDraftSchema = z.object({
@@ -115,6 +122,45 @@ function normalizeItem(row: EvidenceItemRow | Record<string, unknown>): Evidence
     document_date: parseIsoDate(typeof raw.document_date === "string" ? raw.document_date : null),
     next_due_on: parseIsoDate(typeof raw.next_due_on === "string" ? raw.next_due_on : null),
     renew_years: asRenewYears(raw.renew_years),
+    history: Array.isArray(raw.history) ? raw.history : [],
+  };
+}
+
+/** Skip fields for an item row (only when the row carries them). */
+function skipItemPayload(row: EvidenceItemRow): Record<string, unknown> {
+  if (!row.opted_out_at) return {};
+  return {
+    opted_out_at: row.opted_out_at,
+    opted_out_by: row.opted_out_by ?? null,
+    opt_out_reason: row.opt_out_reason ?? null,
+    history: row.history ?? [],
+  };
+}
+
+function withHistory(item: EvidenceItemRow, entry: EvidenceHistoryEntry): EvidenceHistoryEntry[] {
+  return [...(Array.isArray(item.history) ? item.history : []), entry];
+}
+
+function skipPatch(
+  item: EvidenceItemRow,
+  userId: string,
+  reason: string,
+): Partial<EvidenceItemRow> {
+  const at = nowIso();
+  return {
+    opted_out_at: at,
+    opted_out_by: userId,
+    opt_out_reason: reason,
+    history: withHistory(item, { action: "skipped", by: userId, at, reason }),
+  };
+}
+
+function restorePatch(item: EvidenceItemRow, userId: string): Partial<EvidenceItemRow> {
+  return {
+    opted_out_at: null,
+    opted_out_by: null,
+    opt_out_reason: null,
+    history: withHistory(item, { action: "restored", by: userId, at: nowIso() }),
   };
 }
 
@@ -231,9 +277,7 @@ async function loadAll(
   }
   const { data: files, error: fileErr } = await sb
     .from("evidence_files")
-    .select(
-      "id, organization_id, item_id, storage_path, filename, attested_at, attested_by, attestation_text_snapshot, uploaded_by, uploaded_at, notes",
-    )
+    .select(FILE_SELECT)
     .eq("organization_id", organizationId);
   if (fileErr) {
     if (tableMissing(fileErr.message)) {
@@ -260,7 +304,7 @@ async function insertItem(
 ): Promise<void> {
   requireTables(viaTables);
   {
-    const full = { ...coreItemPayload(row), ...dueItemPayload(row) };
+    const full = { ...coreItemPayload(row), ...dueItemPayload(row), ...skipItemPayload(row) };
     const first = await sb.from("evidence_items").upsert(full, {
       onConflict: "organization_id,subject_type,subject_id,requirement_key",
     });
@@ -312,21 +356,6 @@ async function patchItem(
     .maybeSingle();
   if (retry.error) throw new Error(mapEvidenceDbError(retry.error.message));
   return retry.data ? normalizeItem(retry.data as EvidenceItemRow) : null;
-}
-
-async function deleteItem(
-  sb: AnySupabase,
-  viaTables: boolean,
-  organizationId: string,
-  itemId: string,
-): Promise<void> {
-  requireTables(viaTables);
-  const { error } = await sb
-    .from("evidence_items")
-    .delete()
-    .eq("organization_id", organizationId)
-    .eq("id", itemId);
-  if (error) throw new Error(mapEvidenceDbError(error.message));
 }
 
 async function insertFileRow(
@@ -618,7 +647,7 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
         requirementKeys: z.array(z.string().min(1)).min(1),
         suggestedKeys: z.array(z.string()).optional(),
         packKeys: z.array(z.string()).optional(),
-        /** Suggested SOW rows the admin unchecked. Accepted now; stored in a later step. */
+        /** Suggested SOW rows the admin unchecked. Saved as skipped items so the decision is on record. */
         optedOutKeys: z.array(z.string()).optional(),
         typeOverrides: z.record(z.string(), TypeEnum).optional(),
         dueOverrides: z.record(z.string(), DueDraftSchema).optional(),
@@ -637,6 +666,7 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
     const staff =
       data.subjectType === "staff" ? (await listStaffPeople(sb, data.organizationId)).people : [];
     const suggested = new Set(data.suggestedKeys ?? []);
+    const checked = new Set(data.requirementKeys);
     let count = 0;
     const created: EvidenceItemRow[] = [];
 
@@ -648,7 +678,19 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
             i.subject_id === subjectId &&
             i.requirement_key === key,
         );
-        if (exists) continue;
+        if (exists) {
+          // Checked again in a later pack review: bring a skipped item back.
+          if (exists.opted_out_at) {
+            await patchItem(
+              sb,
+              viaTables,
+              data.organizationId,
+              exists.id,
+              restorePatch(exists, userId),
+            );
+          }
+          continue;
+        }
         const overrideType = data.typeOverrides?.[key];
         const def = requirementByKey(key);
         const evidenceType = overrideType ?? def?.evidenceType ?? "upload";
@@ -732,9 +774,49 @@ export const applyEvidenceRequirements = createServerFn({ method: "POST" })
       });
     }
 
+    // Unchecked SOW rows: record the skip (who / when / why) instead of dropping it.
+    let skipped = 0;
+    const optedOut = [...new Set(data.optedOutKeys ?? [])].filter((k) => !checked.has(k));
+    for (const subjectId of data.subjectIds) {
+      for (const key of optedOut) {
+        const exists = store.items.find(
+          (i) =>
+            i.subject_type === data.subjectType &&
+            i.subject_id === subjectId &&
+            i.requirement_key === key,
+        );
+        if (exists) {
+          if (exists.opted_out_at) continue;
+          await patchItem(
+            sb,
+            viaTables,
+            data.organizationId,
+            exists.id,
+            skipPatch(exists, userId, EVIDENCE_UNCHECKED_REASON),
+          );
+          skipped += 1;
+          continue;
+        }
+        const person = staff.find((p) => p.id === subjectId);
+        const row = buildItemFromKey({
+          organizationId: data.organizationId,
+          subjectType: data.subjectType,
+          subjectId,
+          requirementKey: key,
+          suggested: true,
+          custom: {
+            due: data.dueOverrides?.[key],
+            hireDate: data.subjectType === "staff" ? (person?.hire_date ?? null) : null,
+          },
+        });
+        Object.assign(row, skipPatch(row, userId, EVIDENCE_UNCHECKED_REASON));
+        await insertItem(sb, viaTables, data.organizationId, row);
+        skipped += 1;
+      }
+    }
+
     void data.packKeys;
-    void data.optedOutKeys;
-    return { ok: true as const, count };
+    return { ok: true as const, count, skipped };
   });
 
 export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
@@ -794,7 +876,43 @@ export const upsertEvidenceRequirement = createServerFn({ method: "POST" })
     return { ok: true as const, requirementKey: key };
   });
 
+/**
+ * Skip an evidence item. Never deletes the item or its files: sets
+ * opted_out_at / opted_out_by / opt_out_reason and appends to history.
+ */
 export const removeEvidenceRequirement = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        organizationId: z.string().uuid(),
+        itemId: z.string().uuid(),
+        reason: z.string().trim().min(1, "Give a reason for skipping.").max(1000),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: false as const };
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    const sb = supabase as AnySupabase;
+    const { store, viaTables } = await loadAll(sb, data.organizationId);
+    const found = store.items.find((i) => i.id === data.itemId);
+    if (!found) throw new Error("Evidence item not found");
+    if (found.opted_out_at) return { ok: true as const };
+    const saved = await patchItem(
+      sb,
+      viaTables,
+      data.organizationId,
+      data.itemId,
+      skipPatch(found, userId, data.reason),
+    );
+    if (!saved) throw new Error("You don't have access to skip this item.");
+    return { ok: true as const };
+  });
+
+/** Undo a Skip: clears the opt-out fields and appends {action:"restored"} to history. */
+export const restoreEvidenceRequirement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) =>
     z
@@ -809,8 +927,18 @@ export const removeEvidenceRequirement = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: false as const };
     await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const sb = supabase as AnySupabase;
-    const { viaTables } = await loadAll(sb, data.organizationId);
-    await deleteItem(sb, viaTables, data.organizationId, data.itemId);
+    const { store, viaTables } = await loadAll(sb, data.organizationId);
+    const found = store.items.find((i) => i.id === data.itemId);
+    if (!found) throw new Error("Evidence item not found");
+    if (!found.opted_out_at) return { ok: true as const };
+    const saved = await patchItem(
+      sb,
+      viaTables,
+      data.organizationId,
+      data.itemId,
+      restorePatch(found, userId),
+    );
+    if (!saved) throw new Error("You don't have access to restore this item.");
     return { ok: true as const };
   });
 
@@ -897,13 +1025,18 @@ export const recordEvidenceUpload = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false as const };
-    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
+    const access = await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const sb = supabase as AnySupabase;
     const { store, viaTables } = await loadAll(sb, data.organizationId);
     const found = store.items.find((i) => i.id === data.itemId);
     if (!found) throw new Error("Evidence item not found");
-    const isAdmin = true;
-    void isAdmin;
+    // The team member's own upload waits for an admin. An admin filing it for
+    // them is accepted on the spot (and recorded as their review).
+    const ownUpload =
+      (found.subject_type === "staff" && found.subject_id === userId) ||
+      found.visible_to_staff_id === userId;
+    const accepts = !ownUpload && hasCategory(access.categories, "staff_compliance", "edit");
+    const uploadedAt = nowIso();
     const row: EvidenceFileRow = {
       id: newId(),
       organization_id: data.organizationId,
@@ -914,8 +1047,12 @@ export const recordEvidenceUpload = createServerFn({ method: "POST" })
       attested_by: null,
       attestation_text_snapshot: null,
       uploaded_by: userId,
-      uploaded_at: nowIso(),
+      uploaded_at: uploadedAt,
       notes: data.notes ?? null,
+      review_status: accepts ? "accepted" : "pending",
+      reviewed_by: accepts ? userId : null,
+      reviewed_at: accepts ? uploadedAt : null,
+      review_note: null,
     };
     await insertFileRow(sb, viaTables, data.organizationId, row);
     const documentDate = parseIsoDate(data.documentDate) ?? found.document_date;
@@ -1028,7 +1165,9 @@ export const listMySentEvidence = createServerFn({ method: "POST" })
     await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const sb = supabase as AnySupabase;
     const { store } = await loadAll(sb, data.organizationId);
-    const items = store.items.filter((i) => i.sent_to_staff && i.visible_to_staff_id === userId);
+    const items = store.items.filter(
+      (i) => i.sent_to_staff && i.visible_to_staff_id === userId && !i.opted_out_at,
+    );
     const files = store.files.filter((f) => items.some((i) => i.id === f.item_id));
     return { items, files };
   });
@@ -1193,5 +1332,65 @@ export const updateEvidenceDue = createServerFn({ method: "POST" })
       expires_on: computed.expires_on,
       cadence: cadenceFromDue(computed.renew_years),
     });
+    return { ok: true as const };
+  });
+
+/**
+ * Admin review of an uploaded file: accept it, or send it back with a note.
+ * Needs Team member file & training (staff_compliance) Edit. A dual-linked copy
+ * of the same upload is reviewed with it.
+ */
+export const reviewEvidenceFile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        organizationId: z.string().uuid(),
+        fileId: z.string().uuid(),
+        decision: z.enum(["accepted", "sent_back"]),
+        note: z.string().trim().max(2000).nullable().optional(),
+      })
+      .refine((v) => v.decision !== "sent_back" || !!v.note?.trim(), {
+        message: "Add a note so the team member knows what to fix.",
+        path: ["note"],
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: false as const };
+    await requireCategory(supabase, userId, data.organizationId, "staff_compliance", "edit");
+    const sb = supabase as AnySupabase;
+    const { store, viaTables } = await loadAll(sb, data.organizationId);
+    requireTables(viaTables);
+    const file = store.files.find((f) => f.id === data.fileId);
+    if (!file) throw new Error("Evidence file not found");
+    const item = store.items.find((i) => i.id === file.item_id);
+    const patch = {
+      review_status: data.decision,
+      reviewed_by: userId,
+      reviewed_at: nowIso(),
+      review_note: data.note?.trim() || null,
+    };
+    const { data: updated, error } = await sb
+      .from("evidence_files")
+      .update(patch)
+      .eq("organization_id", data.organizationId)
+      .eq("id", file.id)
+      .select("id");
+    if (error) throw new Error(mapEvidenceDbError(error.message));
+    if (!updated || updated.length === 0) {
+      throw new Error("You don't have access to review this file.");
+    }
+    if (item?.dual_link_peer_id && file.storage_path) {
+      const peer = await sb
+        .from("evidence_files")
+        .update(patch)
+        .eq("organization_id", data.organizationId)
+        .eq("item_id", item.dual_link_peer_id)
+        .eq("storage_path", file.storage_path)
+        .eq("review_status", "pending");
+      if (peer.error) throw new Error(mapEvidenceDbError(peer.error.message));
+    }
     return { ok: true as const };
   });
