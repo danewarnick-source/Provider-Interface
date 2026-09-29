@@ -21,6 +21,7 @@ import {
   ORG_NAME,
   PENDING_INVITE,
   PROFILE_ACCOUNT_ACTIVITY,
+  PROFILE_CASELOAD,
   PROFILE_EVIDENCE,
   PROFILE_NOTES,
   ROSTER_EVIDENCE,
@@ -34,6 +35,7 @@ import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
 import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
 import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
 import { levelForRole, withAccessLevel } from "./access-level";
+import { staffClientReadiness } from "../../src/lib/team-members/readiness";
 
 export type MockPersona = "admin" | "dsp" | "manager";
 
@@ -856,6 +858,58 @@ function teamMemberProfile(body: string): Row | null {
   };
 }
 
+/** getMemberCaseload — the MemberCaseloadData shape from src/lib/team-members/caseload.functions.ts. */
+function memberCaseload(body: string): Row | null {
+  const staff = STAFF_LIST.find((st) => body.includes(st.id));
+  if (!staff) return null;
+  const today = "2026-09-28";
+  const hireDate = "2025-01-15";
+  const evidence = PROFILE_EVIDENCE[staff.id] ?? { items: [], files: [] };
+  const toClient = (c: (typeof CLIENT_LIST)[number]) => ({
+    clientId: c.id,
+    name: `${c.first_name} ${c.last_name}`,
+    authorizedCodes: [...c.codes],
+    hasAbi: false,
+    behaviorSupport: false,
+    personTrainingIds: [] as string[],
+  });
+  const rows = PROFILE_CASELOAD[staff.id] ?? [];
+  const assigned = rows.flatMap((r) => {
+    const c = CLIENT_LIST.find((x) => x.id === r.clientId);
+    if (!c) return [];
+    const base = toClient(c);
+    return [
+      {
+        ...base,
+        codes: [...r.codes],
+        readiness: staffClientReadiness({
+          today,
+          hireDate,
+          evidence: evidence as never,
+          client: { hasAbi: false, behaviorSupport: false },
+          personTraining: { requiredIds: [], completedIds: [] },
+        }),
+      },
+    ];
+  });
+  const assignedIds = new Set(rows.map((r) => r.clientId));
+  return {
+    assigned,
+    addable: CLIENT_LIST.filter((c) => !assignedIds.has(c.id)).map(toClient),
+    unmetMandates: [],
+    readinessInputs: { today, hireDate, evidence, completedTrainingIds: [] },
+    person: {
+      userId: staff.id,
+      transportsClients: staff.id === STAFF.jake.id,
+      positions: ROSTER_POSITIONS[staff.id] ?? [],
+    },
+    existingEvidenceKeys: evidence.items.map((i) => i.requirement_key),
+    names: Object.fromEntries(STAFF_LIST.map((st) => [st.id, st.name])),
+    canEdit: true,
+    canReviewEvidence: true,
+  };
+}
+
 /** listTeamInvites — the one pending invite (expired on the fixture date) first. */
 function teamInviteRows(): Row[] {
   return [
@@ -1007,6 +1061,8 @@ function serverFnPayload(url: string, body: string): unknown {
     };
   }
   if (/getTeamMemberProfile/i.test(fn)) return teamMemberProfile(body);
+  if (/getMemberCaseload/i.test(fn)) return memberCaseload(body);
+  if (/setStaffClientCodes/i.test(fn)) return { status: "updated" };
   if (/updateTeamMember/i.test(fn)) return { ok: true };
   if (/listStaffNotes/i.test(fn)) return PROFILE_NOTES;
   if (/addStaffNote/i.test(fn)) return { id: "00000000-0000-4000-a000-000000000702" };

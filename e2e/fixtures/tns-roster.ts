@@ -351,6 +351,11 @@ export const PROFILE_EVIDENCE: Record<
   },
 };
 
+/** Caseload tab (getMemberCaseload): explicit codes per client. */
+export const PROFILE_CASELOAD: Record<string, Array<{ clientId: string; codes: string[] }>> = {
+  [STAFF.jake.id]: [{ clientId: CLIENTS.tommy.id, codes: ["DSI", "SLH"] }],
+};
+
 /** Notes tab (listStaffNotes), newest first. */
 export const PROFILE_NOTES = [
   {

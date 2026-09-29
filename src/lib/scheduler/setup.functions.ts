@@ -10,6 +10,7 @@ import {
 } from "@/lib/staff-assignment-hooks.functions";
 import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
 import { assertCanManageMember } from "@/lib/team-members/guards.server";
+import { waiveRemovedClientItemsInternal } from "@/lib/team-members/caseload.functions";
 import {
   assignmentCodes,
   clientAuthorizedCodes,
@@ -25,10 +26,11 @@ import {
 // Every staff_assignments row lists its codes explicitly. NULL / [] is never
 // "all codes". Codes must be a subset of the client's currently authorized
 // codes (clientAuthorizedCodes). An empty list deletes the assignment row —
-// assignments are settings, not records.
+// assignments are settings, not records — and waives that client's open
+// staff_per_client items ("Removed from caseload"); those are never deleted.
 //
 // setStaffClientCodes is what the client profile (caseload editor +
-// Authorized Codes section), Caseloads page and Team Members call.
+// Authorized Codes section) and the Team Members Caseload tab call.
 // addStaffToClientCode / removeStaffFromClientCode are one-code wrappers
 // over the same writer.
 //
@@ -99,6 +101,10 @@ async function writeStaffClientCodes(
     if (!existing) return { status: "unchanged" };
     const { error } = await supabase.from("staff_assignments").delete().eq("id", existing.id);
     if (error) throw new Error(error.message);
+    // The client's open staff_per_client items are waived, never deleted.
+    await runAssignmentHook("removed", async () => {
+      await waiveRemovedClientItemsInternal(supabase, { organizationId, staffId, clientId });
+    });
     await runAssignmentHook("removed", () =>
       onStaffAssignmentRemovedInternal(supabase, organizationId, staffId),
     );

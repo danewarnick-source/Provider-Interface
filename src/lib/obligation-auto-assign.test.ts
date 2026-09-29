@@ -49,19 +49,23 @@ describe("hire auto-assign", () => {
       "utf8",
     );
     assert.match(roleWriter, /reevaluateStaffDutiesInternal/);
-    // The roster caseload drawer is gone (caseload moves into the profile); the
-    // Assignments page removes assignments through setStaffClientCodes, whose
-    // server-side writer runs the removal hook.
+    // The caseload lives on the team member profile (Caseload tab), which
+    // saves through setStaffClientCodes; the server-side writer runs the
+    // removal hook and waives the removed client's open staff_per_client items.
     const caseloadEditor = readFileSync(
-      fileURLToPath(new URL("../routes/dashboard.assignments.tsx", import.meta.url)),
+      fileURLToPath(
+        new URL("../components/team-members/profile/caseload-tab.tsx", import.meta.url),
+      ),
       "utf8",
     );
     assert.match(caseloadEditor, /setStaffClientCodes/);
+    assert.doesNotMatch(caseloadEditor, /from\("staff_assignments"\)/);
     const writer = readFileSync(
       fileURLToPath(new URL("./scheduler/setup.functions.ts", import.meta.url)),
       "utf8",
     );
     assert.match(writer, /onStaffAssignmentRemovedInternal/);
+    assert.match(writer, /waiveRemovedClientItemsInternal/);
     const nightly = readFileSync(
       fileURLToPath(new URL("./obligations/remediation.ts", import.meta.url)),
       "utf8",

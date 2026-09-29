@@ -39,6 +39,8 @@ import {
   type ResetPasswordTarget,
 } from "@/components/team-members/dialogs/reset-password-dialog";
 import { useStaffRecord } from "@/components/team-members/profile/staff-record-button";
+import { useMemberCaseload } from "@/components/team-members/profile/use-member-caseload";
+import { isReadyAlone, readyAloneLabel } from "@/lib/team-members/readiness";
 
 const profileRoute = getRouteApi("/dashboard/team-members/$staffId");
 
@@ -118,6 +120,15 @@ export function ProfileHeader({
       }),
     [data, p.transportsClients, p.dateOfBirth],
   );
+
+  // "Ready alone: x of y clients" — per-client readiness from Evidence (Caseload tab).
+  const caseloadQ = useMemberCaseload(orgId, m.userId);
+  const readyAlone = useMemo(() => {
+    const readiness = (caseloadQ.data?.assigned ?? []).map((c) => c.readiness);
+    const label = readyAloneLabel(readiness);
+    if (!label) return null;
+    return { label, allReady: readiness.every(isReadyAlone) };
+  }, [caseloadQ.data]);
 
   const menu = headerMenuKeys(
     {
@@ -236,6 +247,21 @@ export function ProfileHeader({
                   </Chip>
                 ),
               )}
+              {readyAlone ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate({ replace: true, search: (prev) => ({ ...prev, tab: "caseload" }) })
+                  }
+                  className={cn(
+                    "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium hover:underline",
+                    readyAlone.allReady ? TONE.ok : TONE.warn,
+                  )}
+                  data-testid="profile-badge-ready_alone"
+                >
+                  {readyAlone.label}
+                </button>
+              ) : null}
             </div>
           </div>
         </div>

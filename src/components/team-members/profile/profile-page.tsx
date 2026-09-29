@@ -15,9 +15,11 @@ import { StaffProfilePanel } from "@/components/team-members/profile/profile-tab
 import { StaffObligationsFilesTab } from "@/components/team-members/profile/file-tab";
 import { NotesTab } from "@/components/team-members/profile/notes-tab";
 import { ActivityTab } from "@/components/team-members/profile/activity-tab";
+import { CaseloadTab } from "@/components/team-members/profile/caseload-tab";
 import { ReviewEvidencePackDialog } from "@/components/team-members/add/review-evidence-dialog";
 import { getTeamMemberProfile } from "@/lib/team-members/profile.functions";
 import { teamMemberProfileQueryKey } from "@/lib/team-members/profile";
+import { teamMemberCaseloadQueryKey } from "@/lib/team-members/caseload";
 import {
   PROFILE_TAB_LABEL,
   resolveProfileTab,
@@ -90,6 +92,7 @@ export function ProfilePage() {
   const data = profileQ.data;
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: teamMemberProfileQueryKey(orgId, staffId) });
+    void qc.invalidateQueries({ queryKey: teamMemberCaseloadQueryKey(orgId, staffId) });
     void qc.invalidateQueries({ queryKey: rosterQueryKey(orgId) });
   };
 
@@ -152,16 +155,12 @@ export function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="caseload" className="mt-4">
-          <section
-            className="rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground"
-            data-testid="caseload-tab"
-          >
-            Clients and service codes for this team member are managed on{" "}
-            <Link to="/dashboard/assignments" className="text-primary hover:underline">
-              Assignments
-            </Link>
-            .
-          </section>
+          <CaseloadTab
+            orgId={orgId}
+            staffId={staffId}
+            onSaved={refresh}
+            onReviewEvidence={() => setReviewing(true)}
+          />
         </TabsContent>
 
         {canSeeNotes ? (
