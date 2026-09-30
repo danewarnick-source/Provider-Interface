@@ -43,6 +43,7 @@ import {
 import { OriginalSpeechAudit } from "@/components/staff-mobile/original-speech-audit";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { dailyLogProgram, missingDailyLogEntries } from "@/lib/daily-log-missing";
 
 export const Route = createFileRoute("/dashboard/daily-logs")({
   head: () => ({ meta: [{ title: "Daily Logs — Provider Interface" }] }),
@@ -110,16 +111,6 @@ function DailyLogsPage() {
 // STAFF VIEW
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** HHS is host-home daily-note billing; RP5 (Exceptional Care Respite With
- *  Room and Board) uses the identical daily-summary-note model. Same form,
- *  different service code on the stored record. */
-function dailyLogProgram(c: { job_code?: string[] | null }): "HHS" | "RP5" | null {
-  if (!Array.isArray(c.job_code)) return null;
-  if (c.job_code.includes("HHS")) return "HHS";
-  if (c.job_code.includes("RP5")) return "RP5";
-  return null;
-}
-
 function StaffDailyJournal() {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
@@ -177,18 +168,11 @@ function StaffDailyJournal() {
 
   // Build missing entries map: client → missing dates
   const missingEntries = useMemo(() => {
-    const allDates = pastDates(LOOKBACK_DAYS);
-    const submitted = new Set(
-      submittedDates.map((r) => `${r.client_id}::${r.log_date}`)
-    );
-    const missing: { client: CaseloadClient; date: string }[] = [];
-    for (const client of hhsClients) {
-      for (const date of allDates) {
-        if (!submitted.has(`${client.id}::${date}`)) {
-          missing.push({ client, date });
-        }
-      }
-    }
+    const missing = missingDailyLogEntries({
+      clients: hhsClients,
+      dates: pastDates(LOOKBACK_DAYS),
+      submitted: submittedDates,
+    });
     return missing.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 60);
   }, [hhsClients, submittedDates]);
 
