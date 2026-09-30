@@ -25,7 +25,6 @@ import { formatLocalDate, profileBadges, type BadgeTone } from "@/lib/team-membe
 import {
   MEMBER_STATUS_LABEL,
   headerMenuKeys,
-  headerSubline,
   type MemberStatus,
   type TeamMemberProfileData,
 } from "@/lib/team-members/profile";
@@ -83,7 +82,17 @@ function Chip({
   );
 }
 
-/** Header: back link, photo, name, preset · home · supervisor, hire date, status, badges, ⋯. */
+function formatStamp(iso: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime())
+    ? ""
+    : d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+/**
+ * Header: back link, photo, name, status, then a status line (positions,
+ * access preset, home, supervisor, hire date, last login), badges, ⋯.
+ */
 export function ProfileHeader({
   orgId,
   data,
@@ -182,8 +191,21 @@ export function ProfileHeader({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const subline = headerSubline([m.presetName, p.homeName, m.supervisorName]);
   const hire = formatLocalDate(p.hireDate);
+  const positionLabel = new Map(data.options.staffTypes.map((t) => [t.key, t.label] as const));
+  const positions = p.staffTypeKeys.map((k) => positionLabel.get(k) ?? k);
+  const lastLogin = !data.lastSignInKnown
+    ? null
+    : data.lastSignInAt
+      ? `Last login ${formatStamp(data.lastSignInAt)}`
+      : "Never logged in";
+  // Home · Supervisor · Hire date · Last login — each only when known.
+  const statusParts = [
+    p.homeName,
+    m.supervisorName ? `Supervisor ${m.supervisorName}` : null,
+    hire ? `Hired ${hire}` : null,
+    lastLogin,
+  ].filter((x): x is string => !!x && x.trim() !== "");
   const busy = invite.isPending || reactivate.isPending || staffRecord.busy !== null;
 
   return (
@@ -213,12 +235,26 @@ export function ProfileHeader({
                 {MEMBER_STATUS_LABEL[data.status]}
               </Chip>
             </div>
-            {subline ? (
-              <p className="mt-0.5 text-sm text-muted-foreground" data-testid="profile-subline">
-                {subline}
-              </p>
-            ) : null}
-            {hire ? <p className="text-xs text-muted-foreground">Hire date {hire}</p> : null}
+            <div
+              className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground"
+              data-testid="profile-subline"
+            >
+              {positions.map((label) => (
+                <Chip key={label} className={TONE.muted} testId="profile-position">
+                  {label}
+                </Chip>
+              ))}
+              {m.presetName ? (
+                <Chip
+                  className="border-primary/30 bg-primary/5 text-foreground"
+                  title="Access preset"
+                  testId="profile-preset"
+                >
+                  {m.presetName}
+                </Chip>
+              ) : null}
+              {statusParts.length ? <span>{statusParts.join(" · ")}</span> : null}
+            </div>
             <div className="mt-2 flex flex-wrap gap-1.5" data-testid="profile-badges">
               {badges.map((b) =>
                 b.key === "no_pack" ? (
