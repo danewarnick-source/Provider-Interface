@@ -285,10 +285,16 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page).toHaveURL(/filter=missing/);
     await nameLink(page, "Harvey Alisa").click();
     await page.waitForURL(new RegExp(`/dashboard/team-members/${STAFF.harvey.id}`));
-    // Tabs replace history; both back buttons and browser Back return to the same list.
-    await page.getByRole("tab", { name: /^File$/i }).click();
+    // Lands on Overview; sections replace history, so both back buttons and
+    // browser Back return to the same list.
+    await expect(page.getByTestId("staff-profile-page")).toHaveAttribute(
+      "data-active-section",
+      "overview",
+    );
+    await expect(page.getByTestId("overview-ready")).toContainText(/No evidence pack yet/);
+    await page.getByTestId("profile-section-file").click();
     await expect(page).toHaveURL(/tab=file/);
-    await page.getByRole("tab", { name: /^Activity$/i }).click();
+    await page.getByTestId("profile-section-activity").click();
     await expect(page).toHaveURL(/tab=activity/);
     await page.goBack();
     await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
@@ -307,6 +313,60 @@ test.describe("Clients + Staff roster — mocked admin", () => {
       STAFF.jake.id,
     );
     await expect(page.getByTestId("staff-profile-heading")).toHaveText(/Jake Probert/);
+
+    // Overview: every number from getMemberOverview / the caseload loader.
+    const menu = page.getByTestId("profile-section-menu");
+    for (const label of [
+      "Overview",
+      "Profile",
+      "Team member file",
+      "Training",
+      "Caseload",
+      "Notes",
+      "Activity",
+    ]) {
+      await expect(menu.getByRole("button", { name: new RegExp(`^${label}`) })).toBeVisible();
+    }
+    await expect(page.getByRole("tab")).toHaveCount(0);
+    await expect(page.getByTestId("profile-section-overview")).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    await expect(page.getByTestId("profile-attention")).toContainText("1 thing needs attention");
+    await expect(page.getByTestId("profile-attention")).toContainText(
+      "Missing/short note — Tommy Jones",
+    );
+    await expect(page.getByTestId("overview-hours")).toContainText("7.5 h");
+    await expect(page.getByTestId("overview-notes")).toContainText("1 of 2");
+    await expect(page.getByTestId("overview-overtime")).toContainText("0 h");
+    await expect(page.getByTestId("overview-caseload")).toContainText("Tommy Jones");
+    await expect(page.getByTestId("overview-caseload")).toContainText("DSI · SLH");
+    await expect(page.getByTestId("overview-training")).toContainText(
+      "Hour tracking comes with the training update",
+    );
+    await expect(
+      page.getByTestId("profile-section-file").getByTestId("profile-section-badge"),
+    ).toHaveText("1");
+    await expect(
+      page.getByTestId("profile-section-notes").getByTestId("profile-section-badge"),
+    ).toHaveText("1");
+    await expect(page.getByTestId("profile-position").first()).toBeVisible();
+    await expect(page.getByTestId("profile-preset")).toHaveText("DSP");
+    await shot(page, "team_member_overview_desktop");
+    // Manage → opens Caseload; the pill jumps back to Overview.
+    await page.getByTestId("overview-manage-caseload").click();
+    await expect(page).toHaveURL(/tab=caseload/);
+    await expect(page.getByTestId("caseload-tab")).toBeVisible();
+    await expect(page.getByTestId("profile-attention")).toHaveCount(0);
+    await page.getByTestId("profile-attention-pill").click();
+    await expect(page).not.toHaveURL(/tab=/);
+    await expect(page.getByTestId("profile-attention")).toBeVisible();
+    await page.getByTestId("profile-section-training").click();
+    await expect(page).toHaveURL(/tab=training/);
+    await expect(page.getByText("No HIVE Training courses assigned.")).toBeVisible();
+    await page.getByTestId("profile-section-profile").click();
+    await expect(page).toHaveURL(/tab=profile/);
+
     await expect(page.getByTestId("staff-profile-identity")).toHaveAttribute(
       "data-staff-id",
       STAFF.jake.id,
@@ -318,13 +378,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByTestId("staff-profile-identity")).not.toContainText("Dane");
     await expect(page.getByTestId("staff-profile-identity")).not.toContainText("Owner");
     await expect(page.getByTestId("staff-profile-heading")).not.toHaveText(/Dane|Roster Admin/);
-    await expect(page.getByRole("tab", { name: /^Profile$/i })).toBeVisible({
-      timeout: 15_000,
-    });
-    for (const name of [/^File$/i, /^Caseload$/i, /^Notes$/i, /^Activity$/i]) {
-      await expect(page.getByRole("tab", { name })).toBeVisible();
-    }
-    await expect(page.getByRole("tab", { name: /^Permissions$/i })).toHaveCount(0);
+    await expect(menu.getByRole("button", { name: /^Permissions/i })).toHaveCount(0);
     await expect(page.getByTestId("profile-status")).toHaveText("Active");
     await expect(page.getByTestId("profile-badge-background")).toContainText("Background on file");
     await expect(page.getByTestId("profile-badge-oig")).toHaveText("OIG due");
@@ -349,17 +403,30 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     }
     await page.keyboard.press("Escape");
     await expect(page.getByRole("button", { name: /^Edit$/ })).toBeVisible();
-    await page.getByRole("tab", { name: /^Notes$/i }).click();
+    await page.getByTestId("profile-section-notes").click();
     await expect(page.getByText("Stayed late to cover the Maple overnight.")).toBeVisible();
-    await page.getByRole("tab", { name: /^Activity$/i }).click();
+    await page.getByTestId("profile-section-activity").click();
     await page.getByRole("button", { name: "Account", exact: true }).click();
     await expect(page.getByText("Invite sent")).toBeVisible();
-    await page.getByRole("tab", { name: /^Profile$/i }).click();
+    await page.getByTestId("profile-section-profile").click();
     await expect(page.getByRole("heading", { name: "Access", exact: true })).toBeVisible({
       timeout: 10_000,
     });
     await shot(page, "team_member_face_sheet_desktop");
     await page.setViewportSize({ width: 390, height: 844 });
+    // Phone: the section menu is one horizontal scroll row above the content.
+    const menuList = page.getByTestId("profile-section-menu").locator("ul");
+    await expect(menuList).toHaveCSS("flex-direction", "row");
+    await expect(menuList).toHaveCSS("overflow-x", "auto");
+    const menuBox = await page.getByTestId("profile-section-menu").boundingBox();
+    const contentBox = await page.getByTestId("profile-section-content").boundingBox();
+    expect(menuBox && contentBox && menuBox.y + menuBox.height <= contentBox.y + 1).toBeTruthy();
+    const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(pageWidth).toBeLessThanOrEqual(390);
+    await page.getByTestId("profile-section-overview").click();
+    await expect(page.getByTestId("profile-overview")).toBeVisible();
+    await shot(page, "team_member_overview_mobile");
+    await page.getByTestId("profile-section-profile").click();
     await shot(page, "team_member_face_sheet_mobile");
     await page.setViewportSize({ width: 1280, height: 720 });
     await shot(page, "employees_list_and_profile");
@@ -556,6 +623,19 @@ test.describe("Employees flatten and Clients placements", () => {
   test("Caseload lives on the profile; /dashboard/assignments redirects", async ({ page }) => {
     await gotoAdmin(page, "/dashboard/assignments");
     await expect(page).toHaveURL(/\/dashboard\/team-members\/?$/);
+
+    // Old ?tab= links still land on their section.
+    await gotoAdmin(page, `/dashboard/team-members/${STAFF.jake.id}?tab=file`);
+    await expect(page.getByTestId("profile-section-file")).toHaveAttribute("aria-current", "page", {
+      timeout: 20_000,
+    });
+    await expect(page.getByTestId("team-member-file")).toBeVisible();
+    await gotoAdmin(page, `/dashboard/team-members/${STAFF.jake.id}?tab=bogus`);
+    await expect(page.getByTestId("profile-section-overview")).toHaveAttribute(
+      "aria-current",
+      "page",
+      { timeout: 20_000 },
+    );
 
     await gotoAdmin(page, `/dashboard/team-members/${STAFF.jake.id}?tab=caseload`);
     await expect(page.getByTestId("caseload-tab")).toBeVisible({ timeout: 20_000 });
