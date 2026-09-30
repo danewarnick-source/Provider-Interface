@@ -14,6 +14,7 @@ import { requireCategory } from "@/lib/access/require";
 import { hasCategory } from "@/lib/access/can";
 import { denverYmd } from "@/lib/denver-date";
 import { dailyLogProgram } from "@/lib/daily-log-missing";
+import { loadDailyNoteFacts } from "@/lib/daily-log-missing.functions";
 import type { EvidenceFileRow } from "@/lib/evidence/types";
 import { inHiveRefUuid } from "@/lib/in-hive-training";
 import { isTrainingClassType, trainingClassLabel } from "@/lib/training-class";
@@ -135,7 +136,7 @@ export const getMemberOverview = createServerFn({ method: "POST" })
     // One day of slack so a Denver-evening punch isn't cut at UTC midnight.
     const sinceIso = `${addDaysYmd(since, -1)}T00:00:00Z`;
 
-    const [items, orgTimesheet, orgDailyLog, timesheets, dailyLogs, clients] = await Promise.all([
+    const [items, orgTimesheet, orgDailyLog, timesheets, clients] = await Promise.all([
       admin
         .from("evidence_items")
         .select("*")
@@ -150,16 +151,9 @@ export const getMemberOverview = createServerFn({ method: "POST" })
         .eq("organization_id", orgId)
         .eq("staff_id", staffId)
         .or(`clock_in_timestamp.gte.${sinceIso},clock_out_timestamp.is.null`),
-      admin
-        .from("daily_logs")
-        .select("client_id, log_date")
-        .eq("organization_id", orgId)
-        .eq("user_id", staffId)
-        .gte("log_date", addDaysYmd(since, -1))
-        .neq("status", "rejected"),
       caseloadClients(supabase as Sb, admin, orgId, staffId),
     ]);
-    for (const r of [items, orgTimesheet, orgDailyLog, timesheets, dailyLogs]) {
+    for (const r of [items, orgTimesheet, orgDailyLog, timesheets]) {
       if (r.error) throw new Error(r.error.message);
     }
 
@@ -189,6 +183,13 @@ export const getMemberOverview = createServerFn({ method: "POST" })
     const dailyClients: OverviewDailyClient[] = clients
       .filter((c) => dailyLogProgram(c) !== null)
       .map((c) => ({ id: c.id, name: clientName(c) }));
+    // Any assigned staff's note meets the day; the host home provider owes it.
+    const dailyFacts = await loadDailyNoteFacts(
+      admin,
+      orgId,
+      dailyClients.map((c) => c.id),
+      addDaysYmd(since, -1),
+    );
 
     const usesTimesheets = (orgTimesheet.data ?? []).length > 0;
     return buildMemberOverview({
@@ -199,7 +200,8 @@ export const getMemberOverview = createServerFn({ method: "POST" })
       files,
       timesheets: tsRows,
       dailyClients,
-      dailyLogs: (dailyLogs.data ?? []) as Array<{ client_id: string; log_date: string }>,
+      dailyAssignments: dailyFacts.assignments,
+      dailyNotes: dailyFacts.notes,
       clientNames,
       usesTimesheets,
       usesNotes: usesTimesheets || (orgDailyLog.data ?? []).length > 0,

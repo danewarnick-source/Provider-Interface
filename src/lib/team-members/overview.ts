@@ -8,8 +8,9 @@
 //   Timed-shift notes  → reviewExceptions() "missing_note" (records review
 //                        queue), skipping historical imports still awaiting
 //                        the staff member's confirmation, as the queue does.
-//   Host-home notes    → missingDailyLogEntries() (the Daily Logs page's
-//                        missing-entries rule, HHS / RP5 clients).
+//   Host-home notes    → missingDailyNotes() (the Daily Logs page's rule,
+//                        HHS / RP5 clients): once per client per day, met by
+//                        any assigned staff, owed by the host home provider.
 //   Hours              → durationMs(punchPair()) — the Records Duration math.
 // A stat the agency has no data source for is null, never 0.
 
@@ -26,7 +27,13 @@ import type { EvidenceCellStatus, EvidenceFileRow, EvidenceItemRow } from "../ev
 import { denverYmdFromInstant, weekdaySunday0 } from "../denver-date.ts";
 import { durationMs, punchPair } from "../record-duration.ts";
 import { reviewExceptions } from "../records-review-rules.ts";
-import { missingDailyLogEntries } from "../daily-log-missing.ts";
+import {
+  dailyNoteGapsFor,
+  hostedDailyNoteDays,
+  missingDailyNotes,
+  type DailyNoteAssignment,
+  type DailyNoteRow,
+} from "../daily-log-missing.ts";
 import { addDaysYmd } from "./profile.ts";
 
 /* -------------------------------- windows -------------------------------- */
@@ -406,13 +413,30 @@ function judgedTimesheets(timesheets: readonly OverviewTimesheet[]): OverviewTim
 }
 
 export type NoteInputs = {
+  /** The team member the Overview is for. */
+  staffId: string;
   timesheets: readonly OverviewTimesheet[];
   /** HHS / RP5 clients on the person's caseload (dailyLogProgram). */
   dailyClients: readonly OverviewDailyClient[];
-  /** The person's daily_logs rows, status <> 'rejected'. */
-  dailyLogs: readonly { client_id: string; log_date: string }[];
+  /** Every staff assignment on those clients (not only this person's). */
+  dailyAssignments: readonly DailyNoteAssignment[];
+  /** daily_logs rows on those clients from any author, status <> 'rejected'. */
+  dailyNotes: readonly DailyNoteRow[];
   clientNames: Readonly<Record<string, string>>;
 };
+
+/** This person's missing host-home notes: only the days they're the host for. */
+function myDailyGaps(args: NoteInputs, dates: readonly string[]) {
+  return dailyNoteGapsFor(
+    missingDailyNotes({
+      clients: args.dailyClients,
+      assignments: args.dailyAssignments,
+      notes: args.dailyNotes,
+      dates,
+    }),
+    args.staffId,
+  );
+}
 
 /** Past dates (yesterday back) — the Daily Logs page never asks for today yet. */
 function pastDays(today: string, count: number): string[] {
@@ -439,11 +463,7 @@ export function noteAttention(args: NoteInputs & { today: string; now: Date }): 
       date: day,
     });
   }
-  const missing = missingDailyLogEntries({
-    clients: args.dailyClients,
-    dates: pastDays(args.today, NOTE_LOOKBACK_DAYS),
-    submitted: args.dailyLogs,
-  });
+  const missing = myDailyGaps(args, pastDays(args.today, NOTE_LOOKBACK_DAYS));
   const byClient = new Map<string, { client: OverviewDailyClient; dates: string[] }>();
   for (const m of missing) {
     const g = byClient.get(m.client.id) ?? { client: m.client, dates: [] };
@@ -514,12 +534,13 @@ export function thisWeek(
     const timed = judgedTimesheets(args.timesheets).filter((t) => inWeek(punchDay(t)));
     const timedMissing = timed.filter((t) => timesheetNoteProblem(t, args.now) !== null).length;
     const dates = week.days.filter((d) => d < args.today);
-    const dailyNeeded = args.dailyClients.length * dates.length;
-    const dailyMissing = missingDailyLogEntries({
+    const dailyNeeded = hostedDailyNoteDays({
       clients: args.dailyClients,
+      assignments: args.dailyAssignments,
       dates,
-      submitted: args.dailyLogs,
+      staffId: args.staffId,
     }).length;
+    const dailyMissing = myDailyGaps(args, dates).length;
     const needed = timed.length + dailyNeeded;
     notes = { needed, submitted: needed - timedMissing - dailyMissing };
   }
@@ -543,7 +564,6 @@ const TONE_RANK: Record<OverviewTone, number> = { bad: 0, warn: 1 };
 
 export function buildMemberOverview(
   args: NoteInputs & {
-    staffId: string;
     today: string;
     now: Date;
     items: readonly OverviewEvidenceItem[];

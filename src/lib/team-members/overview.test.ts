@@ -90,11 +90,16 @@ function ts(id: string, over: Partial<OverviewTimesheet> = {}): OverviewTimeshee
   };
 }
 
-const NO_NOTES = { dailyClients: [], dailyLogs: [], clientNames: { "client-1": "Tommy Jones" } };
+const NO_NOTES = {
+  staffId: STAFF,
+  dailyClients: [],
+  dailyAssignments: [],
+  dailyNotes: [],
+  clientNames: { "client-1": "Tommy Jones" },
+};
 
 function overview(over: Partial<Parameters<typeof buildMemberOverview>[0]> = {}) {
   return buildMemberOverview({
-    staffId: STAFF,
     today: TODAY,
     now: NOW,
     items: [],
@@ -332,46 +337,78 @@ describe("overview — notes", () => {
     assert.deepEqual(w.notes, { needed: 2, submitted: 1 });
   });
 
-  it("HHS day with a note is submitted; without one it is missing", () => {
+  it("HHS day with a note is submitted; without one it is missing (for the host)", () => {
     const dailyClients = [{ id: "hhs-1", name: "Blake Stevens" }];
+    const dailyAssignments = [
+      { clientId: "hhs-1", staffId: STAFF, startDate: "2026-01-01", isHost: true },
+    ];
     // This week before today: Mon 9/28, Tue 9/29. Note on Monday only.
-    const dailyLogs = [{ client_id: "hhs-1", log_date: "2026-09-28" }];
-    const w = thisWeek({
-      timesheets: [],
+    const dailyNotes = [{ client_id: "hhs-1", log_date: "2026-09-28", user_id: STAFF }];
+    const base = {
+      ...NO_NOTES,
       dailyClients,
-      dailyLogs,
+      dailyAssignments,
+      dailyNotes,
       clientNames: {},
-      today: TODAY,
-      now: NOW,
-      usesTimesheets: false,
-      usesNotes: true,
-    });
+      timesheets: [],
+    };
+    const w = thisWeek({ ...base, today: TODAY, now: NOW, usesTimesheets: false, usesNotes: true });
     assert.deepEqual(w.notes, { needed: 2, submitted: 1 });
-    const att = noteAttention({
-      timesheets: [],
-      dailyClients,
-      dailyLogs,
-      clientNames: {},
-      today: TODAY,
-      now: NOW,
-    });
+    const att = noteAttention({ ...base, timesheets: [], today: TODAY, now: NOW });
     // 14 past days, one with a note → 13 missing, grouped per client.
     assert.equal(att.length, 1);
     assert.equal(att[0]!.kind, "daily_note_missing");
     assert.match(att[0]!.title, /^13 daily notes missing — Blake Stevens/);
     assert.equal(att[0]!.date, "2026-09-29");
     const full = noteAttention({
+      ...base,
       timesheets: [],
-      dailyClients,
-      dailyLogs: Array.from({ length: 14 }, (_, i) => ({
+      dailyNotes: Array.from({ length: 14 }, (_, i) => ({
         client_id: "hhs-1",
         log_date: `2026-09-${String(29 - i).padStart(2, "0")}`,
+        user_id: STAFF,
       })),
-      clientNames: {},
       today: TODAY,
       now: NOW,
     });
     assert.deepEqual(full, []);
+  });
+
+  it("a respite worker on an HHS client owes no daily notes; the host does", () => {
+    const dailyClients = [{ id: "hhs-1", name: "Blake Stevens" }];
+    const dailyAssignments = [
+      { clientId: "hhs-1", staffId: "host-1", startDate: "2026-01-01", isHost: true },
+      { clientId: "hhs-1", staffId: STAFF, startDate: "2026-01-01", isHost: false },
+    ];
+    const base = { ...NO_NOTES, dailyClients, dailyAssignments, clientNames: {}, timesheets: [] };
+    const respite = thisWeek({
+      ...base,
+      today: TODAY,
+      now: NOW,
+      usesTimesheets: false,
+      usesNotes: true,
+    });
+    assert.deepEqual(respite.notes, { needed: 0, submitted: 0 });
+    assert.deepEqual(noteAttention({ ...base, timesheets: [], today: TODAY, now: NOW }), []);
+    const host = noteAttention({
+      ...base,
+      staffId: "host-1",
+      timesheets: [],
+      today: TODAY,
+      now: NOW,
+    });
+    assert.match(host[0]!.title, /^14 daily notes missing — Blake Stevens/);
+    // The respite worker's note covers the host's day too.
+    const covered = noteAttention({
+      ...base,
+      staffId: "host-1",
+      dailyNotes: [{ client_id: "hhs-1", log_date: "2026-09-29", user_id: STAFF }],
+      timesheets: [],
+      today: TODAY,
+      now: NOW,
+    });
+    assert.match(covered[0]!.title, /^13 daily notes missing/);
+    assert.equal(covered[0]!.date, "2026-09-28");
   });
 
   it("attention lists bad before warn", () => {
