@@ -356,6 +356,58 @@ export const PROFILE_CASELOAD: Record<string, Array<{ clientId: string; codes: s
   [STAFF.jake.id]: [{ clientId: CLIENTS.tommy.id, codes: ["DSI", "SLH"] }],
 };
 
+/** Overview (getMemberOverview): Jake's punches this week (Mon 9/28 – Sun 10/4, Denver). */
+export const PROFILE_OVERVIEW_TODAY = "2026-09-30";
+export const PROFILE_TIMESHEETS: Record<
+  string,
+  Array<{
+    id: string;
+    client_id: string;
+    service_type_code: string;
+    clock_in_timestamp: string;
+    clock_out_timestamp: string | null;
+    shift_note_text: string | null;
+    goals_completed: string[];
+    import_source: null;
+    staff_confirmed_at: null;
+    status: string;
+    is_out_of_bounds: boolean;
+    outside_geofence_reason: null;
+  }>
+> = {
+  [STAFF.jake.id]: [
+    {
+      id: "00000000-0000-4000-a000-000000000901",
+      client_id: CLIENTS.tommy.id,
+      service_type_code: "DSI",
+      clock_in_timestamp: "2026-09-28T15:00:00.000Z",
+      clock_out_timestamp: "2026-09-28T19:00:00.000Z",
+      shift_note_text:
+        "Tommy planned lunch, shopped from his list and paid at the register with light prompting.",
+      goals_completed: ["goal-1"],
+      import_source: null,
+      staff_confirmed_at: null,
+      status: "Pending",
+      is_out_of_bounds: false,
+      outside_geofence_reason: null,
+    },
+    {
+      id: "00000000-0000-4000-a000-000000000902",
+      client_id: CLIENTS.tommy.id,
+      service_type_code: "DSI",
+      clock_in_timestamp: "2026-09-29T15:00:00.000Z",
+      clock_out_timestamp: "2026-09-29T18:30:00.000Z",
+      shift_note_text: "",
+      goals_completed: [],
+      import_source: null,
+      staff_confirmed_at: null,
+      status: "Pending",
+      is_out_of_bounds: false,
+      outside_geofence_reason: null,
+    },
+  ],
+};
+
 /** Notes tab (listStaffNotes), newest first. */
 export const PROFILE_NOTES = [
   {
