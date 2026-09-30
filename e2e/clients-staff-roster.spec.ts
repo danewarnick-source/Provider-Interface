@@ -837,7 +837,7 @@ test.describe("Access levels screenshots", () => {
     await shot(page, "bulk-upload-access-level");
     await page.keyboard.press("Escape");
 
-    await gotoAdmin(page, `/dashboard/team-members/${STAFF.jake.id}`);
+    await gotoAdmin(page, `/dashboard/team-members/${STAFF.jake.id}?tab=profile`);
     await expect(page.getByRole("heading", { name: "Access", exact: true })).toBeVisible({
       timeout: 20_000,
     });
