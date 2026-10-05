@@ -5,8 +5,9 @@ HIVE is a multi-tenant compliance platform for Utah DSPD (disability services) p
 - TanStack Start + React + Supabase. Live project: "Provider-Interface" `dhrrukdcigiiqksibdfb` (Lovable is no longer used). Schema changes are migration files in supabase/migrations/, applied to the live DB directly (Supabase MCP/CLI) — one file per logical step, named for what it does. Small atomic commits, build green before push.
 - Branches & deploys: `staging` = Vercel sandbox (agency-peace-of-mind.vercel.app); `main` = production on AWS (providerinterface.com, via .github/workflows/deploy-aws.yml). Nothing reaches `main` until the user says that change is ready.
   - Branch new work from `main` (never from `staging`, or unrelated staging work rides along to production). Open the PR against `staging`.
-  - Fixes found while testing go on the same feature branch (another PR into `staging`). Keep the branch after it merges to staging.
-  - When the user says a change is ready, open a PR from that same feature branch into `main`. One feature per PR; the user may ship one or several. Only open `staging` → `main` if the user asks to ship everything on staging.
+  - Merging the PR into `staging` puts it on the sandbox, and .github/workflows/sandbox-to-production.yml opens a matching "Production: …" PR from the same branch into `main` (label `production`). Merging that PR is the only way the change reaches production; the user decides when.
+  - Fixes found while testing: push them to the same feature branch. The workflow merges them into `staging` and they show up in the production PR. Never delete the branch or merge `staging` into it.
+  - Only open `staging` → `main` if the user asks to ship everything on staging at once.
   - Hotfixes may target `main` directly. .github/workflows/staging-sync.yml merges `main` back into `staging` on every push.
 - The live DB is shared by production (main), staging, and PR previews: a migration applied before release must stay compatible with main. Anything that would break main (drops/renames) goes in a separate "Phase B" migration applied right after that change merges to main (not when it merges to staging).
 - Older migrations may not match the live DB. Confirm schema against the live DB before relying on them.
