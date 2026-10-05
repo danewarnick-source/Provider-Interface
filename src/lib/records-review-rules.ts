@@ -1,7 +1,7 @@
 // Records review exception engine — pure, deterministic.
 // A shift lands in the "Needs review" queue iff at least one rule trips.
 // Inputs are only existing evv_timesheets columns; no new schema, no AI.
-import { isNonAnswer } from "@/lib/nectar-quality";
+import { isNonAnswer } from "./nectar-quality.ts";
 
 export type ReviewExceptionCode =
   | "out_of_geofence"

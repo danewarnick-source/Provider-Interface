@@ -4,6 +4,7 @@
  * the facts, this only decides the starting answers. Every answer stays
  * editable and nothing is created until the admin clicks Apply.
  */
+import { isHostHomeProviderPosition } from "../daily-log-missing.ts";
 import { defaultQuestionnaireAnswers } from "../evidence/catalog.ts";
 import {
   STAFF_QUIZ_CODES,
@@ -39,7 +40,7 @@ export type CaseloadFactsByUser =
 /** Positions that imply a service code's pack. Host Home Provider → HHS (the host home pack). */
 const POSITION_CODES: Array<{ match: (p: EvidencePosition) => boolean; code: ServiceCodeFlag }> = [
   {
-    match: (p) => p.key.trim().toLowerCase() === "hhp" || /host\s*home/i.test(p.label),
+    match: isHostHomeProviderPosition,
     code: "HHS",
   },
 ];

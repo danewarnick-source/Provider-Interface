@@ -43,6 +43,8 @@ import {
 import { OriginalSpeechAudit } from "@/components/staff-mobile/original-speech-audit";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { dailyLogProgram } from "@/lib/daily-log-missing";
+import { listMyMissingDailyNotes } from "@/lib/daily-log-missing.functions";
 
 export const Route = createFileRoute("/dashboard/daily-logs")({
   head: () => ({ meta: [{ title: "Daily Logs — Provider Interface" }] }),
@@ -110,16 +112,6 @@ function DailyLogsPage() {
 // STAFF VIEW
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** HHS is host-home daily-note billing; RP5 (Exceptional Care Respite With
- *  Room and Board) uses the identical daily-summary-note model. Same form,
- *  different service code on the stored record. */
-function dailyLogProgram(c: { job_code?: string[] | null }): "HHS" | "RP5" | null {
-  if (!Array.isArray(c.job_code)) return null;
-  if (c.job_code.includes("HHS")) return "HHS";
-  if (c.job_code.includes("RP5")) return "RP5";
-  return null;
-}
-
 function StaffDailyJournal() {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
@@ -141,6 +133,9 @@ function StaffDailyJournal() {
   );
 
   // ── Missing entries — past 30 days ──────────────────────────────────────────
+  // Server-side: a day is met when any assigned staff wrote the note, and it's
+  // only listed for the client's host home provider (see daily-log-missing.ts).
+  const missingFn = useServerFn(listMyMissingDailyNotes);
   const { data: submittedDates = [] } = useQuery({
     enabled: !!user?.id && !!org?.organization_id && hhsClients.length > 0,
     queryKey: ["dl-submitted-dates", user?.id, org?.organization_id],
@@ -156,6 +151,12 @@ function StaffDailyJournal() {
         .neq("status", "rejected");
       return (data ?? []) as unknown as { log_date: string; client_id: string }[];
     },
+  });
+  const { data: missingGaps = [] } = useQuery({
+    enabled: !!user?.id && !!org?.organization_id && hhsClients.length > 0,
+    queryKey: ["dl-missing-notes", user?.id, org?.organization_id],
+    queryFn: () =>
+      missingFn({ data: { organizationId: org!.organization_id, dates: pastDates(LOOKBACK_DAYS) } }),
   });
 
   // ── Rejected logs — need resubmission ──────────────────────────────────────
@@ -177,20 +178,15 @@ function StaffDailyJournal() {
 
   // Build missing entries map: client → missing dates
   const missingEntries = useMemo(() => {
-    const allDates = pastDates(LOOKBACK_DAYS);
-    const submitted = new Set(
-      submittedDates.map((r) => `${r.client_id}::${r.log_date}`)
-    );
-    const missing: { client: CaseloadClient; date: string }[] = [];
-    for (const client of hhsClients) {
-      for (const date of allDates) {
-        if (!submitted.has(`${client.id}::${date}`)) {
-          missing.push({ client, date });
-        }
-      }
-    }
-    return missing.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 60);
-  }, [hhsClients, submittedDates]);
+    const byId = new Map(hhsClients.map((c) => [c.id, c] as const));
+    return missingGaps
+      .flatMap((g) => {
+        const client = byId.get(g.clientId);
+        return client ? [{ client, date: g.date }] : [];
+      })
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 60);
+  }, [hhsClients, missingGaps]);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -594,6 +590,7 @@ function DailyLogDialog({
     if (error) throw error;
 
     qc.invalidateQueries({ queryKey: ["dl-submitted-dates"] });
+    qc.invalidateQueries({ queryKey: ["dl-missing-notes"] });
     qc.invalidateQueries({ queryKey: ["dl-rejected"] });
     qc.invalidateQueries({ queryKey: ["daily-logs-admin"] });
     qc.invalidateQueries({ queryKey: ["cmd-logs-pending"] });
