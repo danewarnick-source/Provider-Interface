@@ -61,7 +61,7 @@ function describeUndo(r: unknown): string {
   };
   switch (x.kind) {
     case "client_record":
-      return `Delete client profile: ${x.display_name}`;
+      return `Archive client profile: ${x.display_name}`;
     case "feature_flag":
       return `Disable ${x.module} on ${x.display_name}`;
     case "custom_field":
@@ -455,8 +455,8 @@ function DonePage() {
               <Undo2 className="h-5 w-5 text-destructive" /> Undo this import&apos;s setup?
             </DialogTitle>
             <DialogDescription>
-              Removes only what the import created, via existing delete paths. Fields edited by a
-              person after the import are preserved.
+              Reverts only what the import created. Client profiles it created are archived, not
+              deleted. Fields edited by a person after the import are preserved.
             </DialogDescription>
           </DialogHeader>
 

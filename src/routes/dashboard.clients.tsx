@@ -25,7 +25,7 @@ import {
 import {
   UserPlus, Contact2, MapPin, Loader2,
   ChevronRight, AlertTriangle, Search,
-  ArrowLeft, Sparkles, Trash2, FileSpreadsheet,
+  ArrowLeft, Sparkles, FileSpreadsheet,
 } from "lucide-react";
 import { toast } from "sonner";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
@@ -34,7 +34,6 @@ import { jobCodeLabel } from "@/lib/job-codes";
 import { DspdCodesMultiSelect } from "@/components/clients/dspd-codes-multiselect";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { useClientIntakeProgress } from "@/hooks/use-client-intake-progress";
-import { DeleteClientDialog } from "@/components/clients/delete-client-dialog";
 import { ClientCompliancePanel } from "@/components/clients/client-compliance-panel";
 import { backfillOrgHomePinsFromAddresses } from "@/lib/home-pin.functions";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
@@ -172,7 +171,6 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(startWithAddOpen);
   const [rosterTab, setRosterTab] = useState<"active" | "archived">("active");
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [compliancePanelClient, setCompliancePanelClient] = useState<{ id: string; name: string } | null>(null);
 
   const { data: allClients = [], isLoading } = useQuery({
@@ -523,17 +521,6 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
                             : null}
                           Reactivate
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 text-xs text-destructive hover:text-destructive"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteTarget({ id: c.id, name: `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() });
-                          }}
-                        >
-                          <Trash2 className="mr-1 h-3 w-3" /> Delete
-                        </Button>
                       </div>
                     ) : (
                       <IntakeAction
@@ -654,17 +641,6 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
                                   : null}
                                 Reactivate
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 text-xs text-destructive hover:text-destructive"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setDeleteTarget({ id: c.id, name: `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() });
-                                }}
-                              >
-                                <Trash2 className="mr-1 h-3 w-3" /> Delete
-                              </Button>
                             </>
                           ) : (
                             <>
@@ -701,17 +677,6 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
           </>
         )}
       </div>
-
-      <DeleteClientDialog
-        open={!!deleteTarget}
-        onOpenChange={(v) => !v && setDeleteTarget(null)}
-        clientId={deleteTarget?.id ?? null}
-        clientName={deleteTarget?.name ?? ""}
-        onDeleted={() => {
-          setDeleteTarget(null);
-          qc.invalidateQueries({ queryKey: ["clients"] });
-        }}
-      />
 
       {org && compliancePanelClient && (
         <ClientCompliancePanel
