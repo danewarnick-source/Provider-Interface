@@ -111,26 +111,12 @@ import { geocodeAddress } from "@/lib/geocode";
 
 
 
-function getBrowserPosition(): Promise<{ lat: number; lng: number }> {
-  return new Promise((resolve, reject) => {
-    if (!("geolocation" in navigator)) return reject(new Error("Geolocation not supported"));
-    navigator.geolocation.getCurrentPosition(
-      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      (e) => reject(e),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-    );
-  });
-}
-
+// The home pin anchors the EVV geofence, so it only ever comes from the
+// client's street address — never from the admin's own device location.
 async function resolveCoords(addr: string): Promise<{ lat: number | null; lng: number | null }> {
-  if (addr && addr.trim().toLowerCase() !== "testing headquarters") {
-    const geo = await geocodeAddress(addr);
-    if (geo) return { lat: geo.lat, lng: geo.lng };
-  }
-  try {
-    const pos = await getBrowserPosition();
-    return { lat: pos.lat, lng: pos.lng };
-  } catch { return { lat: null, lng: null }; }
+  if (!addr?.trim()) return { lat: null, lng: null };
+  const geo = await geocodeAddress(addr);
+  return geo ? { lat: geo.lat, lng: geo.lng } : { lat: null, lng: null };
 }
 
 // ─── Route ────────────────────────────────────────────────────────────────────
@@ -785,7 +771,6 @@ function AddClientDialog({
   const [jobCodes, setJobCodes]   = useState<string[]>([]);
   const [codesMenuOpen, setCodesMenuOpen] = useState(false);
   const [radius, setRadius]       = useState(1000);
-  const [pinning, setPinning]     = useState(false);
   const [isOwnGuardian, setIsOwnGuardian] = useState(true);
   const [gName, setGName]         = useState("");
   const [gPhone, setGPhone]       = useState("");
@@ -907,22 +892,7 @@ function AddClientDialog({
           <Input value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={30} />
         </div>
         <div className="grid gap-1.5">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs font-semibold">Service Address *</Label>
-            <Button type="button" variant="outline" size="sm" disabled={pinning} className="h-7 text-xs gap-1"
-              onClick={async () => {
-                setPinning(true);
-                try {
-                  const pos = await getBrowserPosition();
-                  setAddr("Testing Headquarters");
-                  toast.success(`Pinned (${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)})`);
-                } catch { toast.error("Location access denied"); }
-                finally { setPinning(false); }
-              }}>
-              {pinning ? <Loader2 className="h-3 w-3 animate-spin" /> : <MapPin className="h-3 w-3" />}
-              Pin Location
-            </Button>
-          </div>
+          <Label className="text-xs font-semibold">Service Address *</Label>
           <Input value={addr} onChange={(e) => setAddr(e.target.value)} maxLength={255} />
         </div>
         <div className="grid gap-1.5">
