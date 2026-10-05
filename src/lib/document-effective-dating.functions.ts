@@ -316,6 +316,62 @@ export const replaceDocument = createServerFn({ method: "POST" })
   });
 
 // ---------------------------------------------------------------------------
+// RETIRE DOCUMENT — "Remove" on a client's files. Records are kept for audit,
+// so the row and its stored file stay; the document moves to the Outdated /
+// Superseded list and archived_at/archived_by record who removed it.
+// ---------------------------------------------------------------------------
+export const retireDocument = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        organization_id: z.string().uuid(),
+        kind: z.enum(["client", "nectar"]),
+        document_id: z.string().uuid(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return { ok: false as const };
+    await requireOrgMembership(
+      supabase,
+      userId,
+      data.organization_id,
+      data.kind === "nectar" ? "admin" : undefined,
+    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const nowIso = new Date().toISOString();
+    const patch: Record<string, unknown> = {
+      status: "outdated",
+      archived_at: nowIso,
+      archived_by: userId,
+    };
+    if (data.kind === "nectar") patch.is_current = false;
+    const { data: rows, error } = await sb
+      .from(TABLE[data.kind])
+      .update(patch)
+      .eq("id", data.document_id)
+      .eq("organization_id", data.organization_id)
+      .select("id");
+    if (error) throw new Error(error.message);
+    if (!rows?.length) throw new Error("Document not found.");
+
+    if (data.kind === "nectar") {
+      // Unconfirmed requirements drafted from a retired source stop showing in
+      // "needs attention"; confirmed ones are human-attested and stay.
+      const { error: reqErr } = await sb
+        .from("nectar_requirements")
+        .update({ review_status: "removed", updated_at: nowIso })
+        .eq("source_document_id", data.document_id)
+        .neq("review_status", "confirmed");
+      if (reqErr) throw new Error(reqErr.message);
+    }
+    return { ok: true as const };
+  });
+
+// ---------------------------------------------------------------------------
 // LIST OUTDATED — retained versions for a subject (client / employee) or org
 // (nectar). Used by the "Outdated / Superseded" sections in three places.
 // ---------------------------------------------------------------------------

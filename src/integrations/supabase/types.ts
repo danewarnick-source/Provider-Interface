@@ -2450,6 +2450,8 @@ export type Database = {
       }
       client_documents: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           client_id: string
           date_source: Database["public"]["Enums"]["doc_date_source"] | null
           document_type: string
@@ -2472,6 +2474,8 @@ export type Database = {
           uploaded_by_name: string | null
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           client_id: string
           date_source?: Database["public"]["Enums"]["doc_date_source"] | null
           document_type: string
@@ -2494,6 +2498,8 @@ export type Database = {
           uploaded_by_name?: string | null
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           client_id?: string
           date_source?: Database["public"]["Enums"]["doc_date_source"] | null
           document_type?: string
@@ -2534,6 +2540,8 @@ export type Database = {
       }
       client_emergency_contacts: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           client_id: string
           created_at: string
           id: string
@@ -2543,6 +2551,8 @@ export type Database = {
           relationship: string | null
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           client_id: string
           created_at?: string
           id?: string
@@ -2552,6 +2562,8 @@ export type Database = {
           relationship?: string | null
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           client_id?: string
           created_at?: string
           id?: string
@@ -10314,6 +10326,8 @@ export type Database = {
       }
       nectar_documents: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           assisted_setup_requested: boolean
           authoritative_kind: string | null
           category: string | null
@@ -10366,6 +10380,8 @@ export type Database = {
           version: number
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           assisted_setup_requested?: boolean
           authoritative_kind?: string | null
           category?: string | null
@@ -10418,6 +10434,8 @@ export type Database = {
           version?: number
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           assisted_setup_requested?: boolean
           authoritative_kind?: string | null
           category?: string | null
