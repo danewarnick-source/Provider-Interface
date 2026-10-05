@@ -721,11 +721,15 @@ function CodeRow({
   const rateVal = editing ? (draft?.rate ?? String(rateNum)) : String(rateNum);
   const endDateVal = editing ? (draft?.endDate ?? (code.service_end_date ?? "")) : (code.service_end_date ?? "");
 
-  async function handleSaveEndDate() {
-    if (!org?.organization_id) return;
-    if (!endDateDraft) return toast.error("Pick an end date");
+  async function handleSaveEndDate(): Promise<boolean> {
+    if (!org?.organization_id) return false;
+    if (!endDateDraft) {
+      toast.error("Pick an end date");
+      return false;
+    }
     if (code.service_start_date && new Date(endDateDraft) <= new Date(code.service_start_date)) {
-      return toast.error("End date must be after the start date");
+      toast.error("End date must be after the start date");
+      return false;
     }
     setSavingEnd(true);
     const { error } = await supabase
@@ -735,11 +739,15 @@ function CodeRow({
       .eq("id", code.id)
       .eq("organization_id", org.organization_id);
     setSavingEnd(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return false;
+    }
     toast.success(`${code.service_code} end date set`);
     qc.invalidateQueries({ queryKey: ["all-client-billing-codes"] });
     qc.invalidateQueries({ queryKey: ["client-billing-codes"] });
     qc.invalidateQueries({ queryKey: ["client-budget"] });
+    return true;
   }
 
   async function handleDelete() {
@@ -826,7 +834,11 @@ function CodeRow({
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => setConfirmDelete(true)}
+            onClick={() => {
+              if (usedUnits > 0 && !endDateDraft)
+                setEndDateDraft(code.service_end_date ?? new Date().toISOString().slice(0, 10));
+              setConfirmDelete(true);
+            }}
             className="h-7 gap-1 px-2 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
             title={`Remove ${code.service_code}`}
             aria-label={`Remove ${code.service_code}`}
@@ -965,33 +977,75 @@ function CodeRow({
         </div>
       )}
 
-      <AlertDialog open={confirmDelete} onOpenChange={(o) => !deleting && setConfirmDelete(o)}>
+      <AlertDialog
+        open={confirmDelete}
+        onOpenChange={(o) => !deleting && !savingEnd && setConfirmDelete(o)}
+      >
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove {code.service_code}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This removes the authorization for <span className="font-mono">{code.service_code}</span>. Past billing entries are not deleted.
-              {usedUnits > 0 && (
-                <span className="mt-2 block rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-amber-800 dark:text-amber-200">
-                  <AlertTriangle className="mr-1 inline h-3 w-3" />
-                  {usedUnits.toLocaleString()} {unitLabel} have already been billed against this authorization.
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                void handleDelete();
-              }}
-              disabled={deleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleting ? "Removing…" : usedUnits > 0 ? "Remove anyway" : "Remove"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
+          {usedUnits > 0 ? (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>End {code.service_code} instead</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <span className="block rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-amber-800 dark:text-amber-200">
+                    <AlertTriangle className="mr-1 inline h-3 w-3" />
+                    {usedUnits.toLocaleString()} {unitLabel} have already been billed against this
+                    authorization, so it can&apos;t be removed — it&apos;s part of the billing
+                    record.
+                  </span>
+                  <span className="mt-2 block">
+                    Set an end date. The code stays on file for audits, and no new shifts can be
+                    scheduled after that date.
+                  </span>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <Input
+                type="date"
+                value={endDateDraft}
+                min={code.service_start_date ?? undefined}
+                onChange={(e) => setEndDateDraft(e.target.value)}
+                className="h-8 w-48 text-sm"
+                aria-label="Service end date"
+              />
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={savingEnd}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    if (await handleSaveEndDate()) setConfirmDelete(false);
+                  }}
+                  disabled={savingEnd || !endDateDraft}
+                >
+                  {savingEnd ? "Saving…" : "Set end date"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </>
+          ) : (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Remove {code.service_code}?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This removes the authorization for{" "}
+                  <span className="font-mono">{code.service_code}</span>. Nothing has been billed
+                  against it yet. If shifts or timesheets already use it, you&apos;ll be asked to
+                  set an end date instead.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={(e) => {
+                    e.preventDefault();
+                    void handleDelete();
+                  }}
+                  disabled={deleting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {deleting ? "Removing…" : "Remove"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </>
+          )}
         </AlertDialogContent>
       </AlertDialog>
     </div>
