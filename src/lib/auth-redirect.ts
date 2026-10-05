@@ -15,9 +15,10 @@
  * that host (and www) plus https://agency-peace-of-mind.vercel.app.
  */
 
-export const CANONICAL_SITE_ORIGIN = "https://hivecertify.com";
 /** Public site for links people click in email. Not the auth-redirect host. */
 export const PROVIDER_INTERFACE_ORIGIN = "https://providerinterface.com";
+/** Production (AWS). hivecertify.com only 301-redirects here. */
+export const CANONICAL_SITE_ORIGIN = PROVIDER_INTERFACE_ORIGIN;
 export const RESET_PASSWORD_PATH = "/reset-password";
 export const VERCEL_PREVIEW_ORIGIN = "https://agency-peace-of-mind.vercel.app";
 

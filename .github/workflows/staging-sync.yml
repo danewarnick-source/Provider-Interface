@@ -1,0 +1,54 @@
+name: Sync main into staging
+
+# Keeps the staging sandbox (Vercel) up to date with production (main),
+# including hotfixes merged straight to main. Never force-pushes. If the
+# merge conflicts the job fails and staging is left as it was; merge main
+# into staging by hand (or ask an agent to).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# A newer main push replacing a pending one is fine: it merges all of main.
+concurrency:
+  group: staging-sync-main
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Merge main into staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+
+      - name: Merge
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch --quiet origin main staging
+            git reset --quiet --hard origin/staging
+            if git merge-base --is-ancestor origin/main HEAD; then
+              echo "staging already contains main." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            if ! git merge --no-ff --no-edit -m "Sync main into staging" origin/main; then
+              git merge --abort
+              echo "main conflicts with staging; merge it by hand." >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+            if git push origin HEAD:staging; then
+              echo "Merged main into staging." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep $((attempt * 5))
+          done
+          echo "staging kept moving; push failed 5 times." >> "$GITHUB_STEP_SUMMARY"
+          exit 1
