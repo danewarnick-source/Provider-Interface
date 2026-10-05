@@ -123,6 +123,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
         .from("client_emergency_contacts")
         .select("id, name, phone, relationship")
         .eq("client_id", clientId)
+        .is("archived_at", null)
         .order("created_at", { ascending: true });
       if (error) throw error;
       return (data ?? []) as { id: string; name: string; phone: string | null; relationship: string | null }[];
@@ -1185,10 +1186,14 @@ function ContactsCard({
       if (!isRouteUuid(clientId)) {
         throw new Error("Save the client before adding emergency contacts.");
       }
+      const uid = (await supabase.auth.getUser()).data.user?.id ?? null;
       for (const c of draft) {
         const rowId = isRouteUuid(c.id) ? c.id : undefined;
         if (c._deleted && rowId) {
-          const { error } = await supabase.from("client_emergency_contacts").delete().eq("id", rowId);
+          const { error } = await supabase
+            .from("client_emergency_contacts")
+            .update({ archived_at: new Date().toISOString(), archived_by: uid })
+            .eq("id", rowId);
           if (error) throw error;
         } else if (!c._deleted) {
           const name = c.name.trim();
