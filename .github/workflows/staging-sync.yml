@@ -13,8 +13,9 @@ on:
 permissions:
   contents: write
 
+# A newer main push replacing a pending one is fine: it merges all of main.
 concurrency:
-  group: staging-sync
+  group: staging-sync-main
   cancel-in-progress: false
 
 jobs:
@@ -31,15 +32,23 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch --quiet origin main
-          if git merge-base --is-ancestor origin/main HEAD; then
-            echo "staging already contains main." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          if ! git merge --no-ff --no-edit -m "Sync main into staging" origin/main; then
-            git merge --abort
-            echo "main conflicts with staging; merge it by hand." >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-          fi
-          git push origin HEAD:staging
-          echo "Merged main into staging." >> "$GITHUB_STEP_SUMMARY"
+          for attempt in 1 2 3 4 5; do
+            git fetch --quiet origin main staging
+            git reset --quiet --hard origin/staging
+            if git merge-base --is-ancestor origin/main HEAD; then
+              echo "staging already contains main." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            if ! git merge --no-ff --no-edit -m "Sync main into staging" origin/main; then
+              git merge --abort
+              echo "main conflicts with staging; merge it by hand." >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+            if git push origin HEAD:staging; then
+              echo "Merged main into staging." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep $((attempt * 5))
+          done
+          echo "staging kept moving; push failed 5 times." >> "$GITHUB_STEP_SUMMARY"
+          exit 1

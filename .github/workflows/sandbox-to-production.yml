@@ -7,6 +7,10 @@ name: Sandbox to production
 #    show up on the sandbox and in the production PR at the same time.
 #
 # Shell steps read PR fields from env vars, never ${{ }} inline.
+#
+# No workflow-level concurrency group: GitHub keeps only one pending run per
+# group and cancels the rest, which silently dropped production PRs. Pushes
+# to staging retry instead, since several runs can race for it.
 
 on:
   pull_request:
@@ -19,10 +23,6 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
-
-concurrency:
-  group: staging-sync
-  cancel-in-progress: false
 
 jobs:
   open-production-pr:
@@ -66,6 +66,9 @@ jobs:
     name: Send edits to the sandbox
     if: github.event_name == 'push' && github.event.deleted == false
     runs-on: ubuntu-latest
+    concurrency:
+      group: sandbox-sync-${{ github.ref_name }}
+      cancel-in-progress: false
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       REPO: ${{ github.repository }}
@@ -75,7 +78,8 @@ jobs:
         id: pr
         run: |
           n=$(gh pr list --repo "$REPO" --head "$BRANCH" --base main --state open \
-            --label production --json number -q '.[0].number')
+            --json number,title,labels \
+            -q '[.[] | select((.title | startswith("Production:")) or any(.labels[]; .name == "production"))][0].number // empty')
           echo "number=$n" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v4
@@ -92,15 +96,24 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch --quiet origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
-          if git merge-base --is-ancestor "origin/$BRANCH" HEAD; then
-            echo "staging already has $BRANCH." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          if ! git merge --no-ff --no-edit -m "Sandbox: update from $BRANCH (#$PR_NUMBER)" "origin/$BRANCH"; then
-            git merge --abort
-            gh pr comment "$PR_NUMBER" --repo "$REPO" --body \
-              "These edits conflict with staging, so the sandbox wasn't updated. Resolve it on a separate branch cut from \`staging\` (merge \`$BRANCH\` into it, fix, PR into \`staging\`). Don't merge \`staging\` into \`$BRANCH\` or use GitHub's conflict editor here — that would carry other sandbox work into production."
-            exit 1
-          fi
-          git push origin HEAD:staging
-          echo "Merged $BRANCH into staging." >> "$GITHUB_STEP_SUMMARY"
+          for attempt in 1 2 3 4 5; do
+            git fetch --quiet origin staging
+            git reset --quiet --hard origin/staging
+            if git merge-base --is-ancestor "origin/$BRANCH" HEAD; then
+              echo "staging already has $BRANCH." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            if ! git merge --no-ff --no-edit -m "Sandbox: update from $BRANCH (#$PR_NUMBER)" "origin/$BRANCH"; then
+              git merge --abort
+              gh pr comment "$PR_NUMBER" --repo "$REPO" --body \
+                "These edits conflict with staging, so the sandbox wasn't updated. Resolve it on a separate branch cut from \`staging\` (merge \`$BRANCH\` into it, fix, PR into \`staging\`). Don't merge \`staging\` into \`$BRANCH\` or use GitHub's conflict editor here — that would carry other sandbox work into production."
+              exit 1
+            fi
+            if git push origin HEAD:staging; then
+              echo "Merged $BRANCH into staging." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep $((attempt * 5))
+          done
+          echo "staging kept moving; push failed 5 times." >> "$GITHUB_STEP_SUMMARY"
+          exit 1
