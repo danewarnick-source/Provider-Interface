@@ -3323,39 +3323,6 @@ export type Database = {
           },
         ]
       }
-      client_target_behaviors_backup_20260928c: {
-        Row: {
-          behavior_name: string | null
-          client_id: string | null
-          created_at: string | null
-          description: string | null
-          id: string | null
-          organization_id: string | null
-          sort_order: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          behavior_name?: string | null
-          client_id?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string | null
-          organization_id?: string | null
-          sort_order?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          behavior_name?: string | null
-          client_id?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string | null
-          organization_id?: string | null
-          sort_order?: number | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       client_weekly_targets: {
         Row: {
           client_id: string
@@ -11029,33 +10996,6 @@ export type Database = {
           },
         ]
       }
-      org_shift_behavior_settings_backup_20260928c: {
-        Row: {
-          enabled: boolean | null
-          organization_id: string | null
-          ot_threshold_hours: number | null
-          rule_settings: Json | null
-          updated_at: string | null
-          updated_by: string | null
-        }
-        Insert: {
-          enabled?: boolean | null
-          organization_id?: string | null
-          ot_threshold_hours?: number | null
-          rule_settings?: Json | null
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Update: {
-          enabled?: boolean | null
-          organization_id?: string | null
-          ot_threshold_hours?: number | null
-          rule_settings?: Json | null
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Relationships: []
-      }
       org_subscriptions: {
         Row: {
           billing_interval: string | null
@@ -13097,66 +13037,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      shift_behavior_observations_backup_20260928c: {
-        Row: {
-          antecedent_context: string | null
-          behavior_counts: Json | null
-          behaviors_observed: boolean | null
-          client_id: string | null
-          created_at: string | null
-          id: string | null
-          intervention_response: string | null
-          objective_description: string | null
-          observed_at: string | null
-          organization_id: string | null
-          positives: string | null
-          reportable_incident: boolean | null
-          shift_id: string | null
-          staff_id: string | null
-          target_behaviors: Json | null
-          trend_vs_recent: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          antecedent_context?: string | null
-          behavior_counts?: Json | null
-          behaviors_observed?: boolean | null
-          client_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          intervention_response?: string | null
-          objective_description?: string | null
-          observed_at?: string | null
-          organization_id?: string | null
-          positives?: string | null
-          reportable_incident?: boolean | null
-          shift_id?: string | null
-          staff_id?: string | null
-          target_behaviors?: Json | null
-          trend_vs_recent?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          antecedent_context?: string | null
-          behavior_counts?: Json | null
-          behaviors_observed?: boolean | null
-          client_id?: string | null
-          created_at?: string | null
-          id?: string | null
-          intervention_response?: string | null
-          objective_description?: string | null
-          observed_at?: string | null
-          organization_id?: string | null
-          positives?: string | null
-          reportable_incident?: boolean | null
-          shift_id?: string | null
-          staff_id?: string | null
-          target_behaviors?: Json | null
-          trend_vs_recent?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
       }
       shift_callouts: {
         Row: {
