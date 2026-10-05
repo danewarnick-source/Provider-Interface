@@ -1,0 +1,106 @@
+name: Sandbox to production
+
+# 1. A PR merged into staging (the Vercel sandbox) gets a matching
+#    "Production: …" PR from the same branch into main. Merging that PR
+#    is what ships it to providerinterface.com.
+# 2. Later pushes to that branch are merged into staging too, so edits
+#    show up on the sandbox and in the production PR at the same time.
+#
+# Shell steps read PR fields from env vars, never ${{ }} inline.
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [staging]
+  push:
+    branches-ignore: [main, staging]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: staging-sync
+  cancel-in-progress: false
+
+jobs:
+  open-production-pr:
+    name: Open production PR
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref != 'main'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_TITLE: ${{ github.event.pull_request.title }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Open or update the production PR
+        run: |
+          gh label create production --repo "$REPO" --color 0E8A16 \
+            --description "Ships to providerinterface.com when merged" 2>/dev/null || true
+          existing=$(gh pr list --repo "$REPO" --head "$HEAD_BRANCH" --base main --state open \
+            --json number -q '.[0].number')
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --repo "$REPO" --add-label production
+            gh pr comment "$existing" --repo "$REPO" --body "Merged into staging again via #$PR_NUMBER."
+            echo "Production PR #$existing already open." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          body=$(printf '%s\n\n%s\n\n%s' \
+            "Tested on the sandbox via #$PR_NUMBER. **Merging this PR ships it to production (providerinterface.com).**" \
+            "Edits pushed to \`$HEAD_BRANCH\` update the sandbox and this PR together." \
+            "Check the Files tab: it should contain only this change. If it shows unrelated work, the branch was started from staging instead of main.")
+          url=$(gh pr create --repo "$REPO" --base main --head "$HEAD_BRANCH" \
+            --title "Production: $PR_TITLE" --label production --body "$body")
+          echo "Opened $url" >> "$GITHUB_STEP_SUMMARY"
+
+  sync-edits-to-staging:
+    name: Send edits to the sandbox
+    if: github.event_name == 'push' && github.event.deleted == false
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      BRANCH: ${{ github.ref_name }}
+    steps:
+      - name: Find the production PR for this branch
+        id: pr
+        run: |
+          n=$(gh pr list --repo "$REPO" --head "$BRANCH" --base main --state open \
+            --label production --json number -q '.[0].number')
+          echo "number=$n" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.pr.outputs.number != ''
+        with:
+          ref: staging
+          fetch-depth: 0
+
+      - name: Merge the branch into staging
+        if: steps.pr.outputs.number != ''
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --quiet origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          if git merge-base --is-ancestor "origin/$BRANCH" HEAD; then
+            echo "staging already has $BRANCH." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if ! git merge --no-ff --no-edit -m "Sandbox: update from $BRANCH (#$PR_NUMBER)" "origin/$BRANCH"; then
+            git merge --abort
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body \
+              "These edits conflict with staging, so the sandbox wasn't updated. Resolve it on a separate branch cut from \`staging\` (merge \`$BRANCH\` into it, fix, PR into \`staging\`). Don't merge \`staging\` into \`$BRANCH\` or use GitHub's conflict editor here — that would carry other sandbox work into production."
+            exit 1
+          fi
+          git push origin HEAD:staging
+          echo "Merged $BRANCH into staging." >> "$GITHUB_STEP_SUMMARY"
