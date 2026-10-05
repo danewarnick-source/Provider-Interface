@@ -328,6 +328,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
         .from("client_emergency_contacts")
         .select("id, name, phone, relationship")
         .eq("client_id", clientId)
+        .is("archived_at", null)
         .order("created_at", { ascending: true }),
       supabase
         .from("staff_assignments")

@@ -17,7 +17,17 @@ const search = z.object({
 
 function ClientsHub() {
   const { can } = useAccess();
-  const tabs: HubTab[] = [{ key: "directory", label: "Directory", render: () => <ClientsPage /> }];
+  const tabs: HubTab[] = [
+    {
+      key: "directory",
+      label: "Directory",
+      render: () => (
+        <RequirePermission perm="view_clients">
+          <ClientsPage />
+        </RequirePermission>
+      ),
+    },
+  ];
   if (can("view_referrals") || can("manage_referrals")) {
     tabs.push({
       key: "referrals",

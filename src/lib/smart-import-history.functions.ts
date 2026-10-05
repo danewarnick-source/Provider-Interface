@@ -143,7 +143,7 @@ async function buildUndoPlan(
         // Still try to undo BSP draft and feature flags individually (each checks own state).
       } else {
         removes.push({ kind: "client_record", record_id: c.id, display_name: s.display_name, reason: "Created by this import" });
-        continue; // FK cascade will sweep custom_field_values and provenance
+        continue; // client is archived, not deleted; its imported fields stay with the record
       }
     }
 
@@ -227,10 +227,13 @@ export const undoCommittedImport = createServerFn({ method: "POST" })
     for (const item of plan.removes) {
       try {
         if (item.kind === "client_record") {
-          // Cascade clears feature_config, custom values, and provenance via FKs.
-          const { error } = await sb.from("clients").delete().eq("id", item.record_id);
+          // Clients are never deleted (trg_clients_prevent_delete); undo archives.
+          const { error } = await sb
+            .from("clients")
+            .update({ account_status: "archived" })
+            .eq("id", item.record_id);
           if (error) throw new Error(error.message);
-          removed.push(`Removed client ${item.display_name}`);
+          removed.push(`Archived client ${item.display_name}`);
         } else if (item.kind === "feature_flag") {
           const { data: c } = await sb.from("clients").select("feature_config").eq("id", item.client_id).maybeSingle();
           if (c) {

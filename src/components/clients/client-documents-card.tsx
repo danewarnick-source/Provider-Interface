@@ -28,9 +28,9 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   ingestDocument,
   queryDocuments,
-  deleteDocument,
   getDocument,
 } from "@/lib/nectar-documents.functions";
+import { retireDocument } from "@/lib/document-effective-dating.functions";
 import { attachClientDocument } from "@/lib/import-checklist.functions";
 import { NectarDocumentActionsDialog } from "@/components/nectar/document-actions-dialog";
 import { DocumentPreviewDialog } from "./document-preview-dialog";
@@ -91,7 +91,7 @@ export function ClientDocumentsCard({
   const orgId = org?.organization_id;
   const qc = useQueryClient();
   const queryFn = useServerFn(queryDocuments);
-  const delFn = useServerFn(deleteDocument);
+  const retireFn = useServerFn(retireDocument);
   const getDocFn = useServerFn(getDocument);
   const recordAccessFn = useServerFn(recordPhiAccess);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -149,6 +149,7 @@ export function ClientDocumentsCard({
           .from("client_documents")
           .select("id, document_type, file_name, storage_path, file_url, uploaded_at")
           .eq("client_id", clientId)
+          .is("archived_at", null)
           .order("uploaded_at", { ascending: false }),
       ]);
       const nectarDocs: DocRow[] = (nectarRes?.documents ?? []).map(
@@ -193,21 +194,13 @@ export function ClientDocumentsCard({
 
   const del = useMutation({
     mutationFn: async (row: DocRow) => {
-      if (row.source === "client") {
-        if (row.storage_path) {
-          await supabase.storage
-            .from("client-documents")
-            .remove([row.storage_path])
-            .catch(() => null);
-        }
-        const { error } = await supabase.from("client_documents").delete().eq("id", row.id);
-        if (error) throw error;
-        return;
-      }
-      await delFn({ data: { documentId: row.id } });
+      if (!orgId) throw new Error("No organization selected.");
+      await retireFn({
+        data: { organization_id: orgId, kind: row.source, document_id: row.id },
+      });
     },
     onSuccess: () => {
-      toast.success("Document removed");
+      toast.success("Document moved to Outdated — the file is kept for audits.");
       invalidateAll();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -360,7 +353,8 @@ export function ClientDocumentsCard({
                 variant="ghost"
                 className="h-7 text-destructive"
                 onClick={() => {
-                  if (confirm(`Remove "${d.title}"?`)) del.mutate(d);
+                  if (confirm(`Move "${d.title}" to Outdated? The file is kept for audits.`))
+                    del.mutate(d);
                 }}
               >
                 <X className="h-3 w-3" />
