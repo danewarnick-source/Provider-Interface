@@ -20,7 +20,6 @@ import {
   User,
   AlertTriangle,
   Info,
-  Utensils,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +36,6 @@ import { useTodayShifts } from "@/hooks/use-today-shifts";
 import { ClientPhoto } from "@/components/client-photo";
 import { FaceSheetButton } from "@/components/clients/face-sheet-button";
 import { useClientFeature, clientFeatureVisible } from "@/lib/client-features";
-import { ClientMealPlannerMount } from "@/components/clients/client-meal-planner-mount";
 
 function ActiveShiftReimbursementSlot({ clientId }: { clientId: string }) {
   const { data: active } = useActiveShift();
@@ -281,7 +279,6 @@ function ClientWorkspace() {
               { v: "clock-in", label: "Clock In", Icon: Clock, show: true },
               { v: "emar", label: "MAR", Icon: Pill, show: emarEnabled },
               { v: "forms", label: "Forms", Icon: FileText, show: true },
-              { v: "meals", label: "Meals", Icon: Utensils, show: true },
             ].filter((t) => t.show);
             const gridCls =
               tabDefs.length <= 4
@@ -353,10 +350,6 @@ function ClientWorkspace() {
               clientId={client.id}
               clientName={`${client.first_name} ${client.last_name}`}
             />
-          </TabsContent>
-
-          <TabsContent value="meals" className="mt-5">
-            <ClientMealPlannerMount clientId={client.id} readOnly />
           </TabsContent>
         </Tabs>
       </div>

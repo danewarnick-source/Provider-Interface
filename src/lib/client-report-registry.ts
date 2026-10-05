@@ -1,13 +1,12 @@
 // Unified "client document report" registry.
 //
-// Every client-facing PDF report (Client Budget, Meal Plan Weekly Menu,
-// Meal Plan vs. Actual, Employee Face Sheet) registers here so callers —
+// Every client-facing PDF report (Client Budget, Employee Face Sheet)
+// registers here so callers —
 // the manager UI buttons AND the NECTAR/assistant path — can generate or
 // ship any of them through one common surface.
 //
 // This is only a registry: PDF rendering + data fetching live in each
-// report module (`client-budget-report`, `meal-plan-menu-report`,
-// `meal-plan-vs-actual-report`). Nothing is re-implemented here.
+// report module (`client-budget-report`, `staff-record-pdf`). Nothing is re-implemented here.
 //
 // No fabrication anywhere in the chain: missing data renders "—" in the
 // PDF, never invented values.
@@ -22,21 +21,6 @@ import {
   type ShippedBudgetReport,
 } from "./client-budget-report";
 import {
-  generateMealMenuReport,
-  shipMealMenuReport,
-  type MealMenuReportArgs,
-  type MealMenuReportResult,
-  type ShippedMealMenuReport,
-} from "./meal-plan-menu-report";
-import {
-  generatePlanVsActualReport,
-  shipPlanVsActualReport,
-  mondayOf,
-  type GenerateArgs as PlanVsActualArgs,
-  type GenerateResult as PlanVsActualResult,
-  type ShipResult as ShippedPlanVsActual,
-} from "./meal-plan-vs-actual-report";
-import {
   generateEmployeeFaceSheet,
   shipEmployeeFaceSheet,
   type EmployeeFaceSheetArgs,
@@ -48,14 +32,10 @@ import {
 
 export type ReportType =
   | "client_budget"
-  | "meal_plan_menu"
-  | "meal_plan_vs_actual"
   | "employee_face_sheet";
 
 export const REPORT_TYPES: ReadonlyArray<ReportType> = [
   "client_budget",
-  "meal_plan_menu",
-  "meal_plan_vs_actual",
   "employee_face_sheet",
 ];
 
@@ -69,10 +49,6 @@ export type ReportParams = {
   organizationId?: string;
   /** "YYYY-MM" or "YYYY-MM-DD" for budget. */
   periodMonth?: string;
-  /** Any date within the target week for meal reports. */
-  weekStart?: string | Date;
-  /** Number of consecutive weeks for plan-vs-actual (1..12). */
-  weeksCount?: number;
   supabaseClient?: SupabaseClient;
 };
 
@@ -96,11 +72,11 @@ export interface CommonReportOutput {
   staffId?: string | null;
   staffName?: string | null;
   /** Client IDs the report is / would be attached to on ship.
-   *  - client_budget / meal_plan_menu / meal_plan_vs_actual: [clientId]
+   *  - client_budget: [clientId]
    *  - employee_face_sheet: [] (ships to employee_documents, not client files) */
   attachClientIds: string[];
   /** Underlying generator payload, for callers that need the specifics. */
-  raw: BudgetReportResult | MealMenuReportResult | PlanVsActualResult | EmployeeFaceSheetResult;
+  raw: BudgetReportResult | EmployeeFaceSheetResult;
 }
 
 export interface CommonShipOutput extends CommonReportOutput {
@@ -126,8 +102,8 @@ export interface ReportTypeMeta {
   key: ReportType;
   label: string;
   scope: "client" | "staff";
-  requiredParams: Array<"clientId" | "staffId" | "periodMonth" | "weekStart">;
-  optionalParams: Array<"weeksCount">;
+  requiredParams: Array<"clientId" | "staffId" | "periodMonth">;
+  optionalParams: never[];
   /** For client-scoped reports this matches `client_documents.document_type`.
    *  For employee-scoped reports it matches `employee_documents.kind`. */
   documentType: string;
@@ -143,24 +119,6 @@ export const REPORT_META: Record<ReportType, ReportTypeMeta> = {
     optionalParams: [],
     documentType: "financial_support_budget",
     description: "Monthly income & spending plan for a client.",
-  },
-  meal_plan_menu: {
-    key: "meal_plan_menu",
-    label: "Meal Plan — Weekly Menu",
-    scope: "client",
-    requiredParams: ["clientId", "weekStart"],
-    optionalParams: [],
-    documentType: "meal_plan_menu",
-    description: "Weekly meal plan grid with shopping list, nutrition, and preferences.",
-  },
-  meal_plan_vs_actual: {
-    key: "meal_plan_vs_actual",
-    label: "Meal Plan — Plan vs. Actual",
-    scope: "client",
-    requiredParams: ["clientId", "weekStart"],
-    optionalParams: ["weeksCount"],
-    documentType: "meal_plan_plan_vs_actual",
-    description: "Per-day per-slot planned meal vs. staff-recorded actual for audits.",
   },
   employee_face_sheet: {
     key: "employee_face_sheet",
@@ -181,12 +139,6 @@ function requireField<T>(v: T | undefined | null, name: string): T {
     throw new Error(`Missing required param: ${name}`);
   }
   return v;
-}
-
-function coerceWeekStart(v: string | Date): Date {
-  const d = v instanceof Date ? v : new Date(v);
-  if (Number.isNaN(d.getTime())) throw new Error("Invalid weekStart");
-  return d;
 }
 
 // ── Unified generate ────────────────────────────────────────────────────────
@@ -213,47 +165,6 @@ export async function generateClientReport(
         clientId: r.clientId,
         clientName: r.clientName,
         attachClientIds: [r.clientId],
-        raw: r,
-      };
-    }
-    case "meal_plan_menu": {
-      const args: MealMenuReportArgs = {
-        clientId: requireField(params.clientId, "clientId"),
-        weekStart: coerceWeekStart(requireField(params.weekStart, "weekStart")),
-        supabaseClient: params.supabaseClient,
-      };
-      const r = await generateMealMenuReport(args);
-      return {
-        reportType,
-        bytes: r.bytes,
-        filename: r.filename,
-        periodLabel: r.weekLabel,
-        organizationId: r.organizationId,
-        orgName: r.orgName,
-        clientId: r.clientId,
-        clientName: r.clientName,
-        attachClientIds: [r.clientId],
-        raw: r,
-      };
-    }
-    case "meal_plan_vs_actual": {
-      const args: PlanVsActualArgs = {
-        clientId: requireField(params.clientId, "clientId"),
-        weekStart: mondayOf(coerceWeekStart(requireField(params.weekStart, "weekStart"))),
-        weeksCount: params.weeksCount,
-        supabaseClient: params.supabaseClient,
-      };
-      const r = await generatePlanVsActualReport(args);
-      return {
-        reportType,
-        bytes: r.bytes,
-        filename: r.filename,
-        periodLabel: r.rangeLabel,
-        organizationId: r.organizationId,
-        orgName: r.orgName,
-        clientId: args.clientId,
-        clientName: r.clientName,
-        attachClientIds: [args.clientId],
         raw: r,
       };
     }
@@ -308,51 +219,6 @@ export async function shipClientReport(
         attachClientIds: [r.clientId],
         raw: r,
         snapshots: [{ clientId: r.clientId, documentId: r.documentId, storagePath: r.storagePath }],
-      };
-    }
-    case "meal_plan_menu": {
-      const args: MealMenuReportArgs = {
-        clientId: requireField(params.clientId, "clientId"),
-        weekStart: coerceWeekStart(requireField(params.weekStart, "weekStart")),
-        supabaseClient: params.supabaseClient,
-      };
-      const r: ShippedMealMenuReport = await shipMealMenuReport(args);
-      return {
-        reportType,
-        bytes: r.bytes,
-        filename: r.filename,
-        periodLabel: r.weekLabel,
-        organizationId: r.organizationId,
-        orgName: r.orgName,
-        clientId: r.clientId,
-        clientName: r.clientName,
-        attachClientIds: [r.clientId],
-        raw: r,
-        snapshots: [{ clientId: r.clientId, documentId: r.documentId, storagePath: r.storagePath }],
-      };
-    }
-    case "meal_plan_vs_actual": {
-      const args: PlanVsActualArgs = {
-        clientId: requireField(params.clientId, "clientId"),
-        weekStart: mondayOf(coerceWeekStart(requireField(params.weekStart, "weekStart"))),
-        weeksCount: params.weeksCount,
-        supabaseClient: params.supabaseClient,
-      };
-      const r: ShippedPlanVsActual = await shipPlanVsActualReport(args);
-      return {
-        reportType,
-        bytes: r.bytes,
-        filename: r.filename,
-        periodLabel: r.rangeLabel,
-        organizationId: r.organizationId,
-        orgName: r.orgName,
-        clientId: args.clientId,
-        clientName: r.clientName,
-        attachClientIds: [args.clientId],
-        raw: r,
-        snapshots: [
-          { clientId: args.clientId, documentId: r.documentId, storagePath: r.storagePath },
-        ],
       };
     }
     case "employee_face_sheet": {
