@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { useAccess } from "@/hooks/use-access";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +83,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   const navigate = useNavigate();
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
+  const canHrc = useAccess().canCategory("hrc");
 
   const clientQ = useQuery({
     enabled: !!orgId && isRouteUuid(clientId),
@@ -213,7 +215,9 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
           <ContactsCard clientId={clientId} orgId={orgId!} contacts={contacts} />
           <AtGlanceCard clientId={clientId} client={client} />
           <HealthcareProvidersCard clientId={clientId} orgId={orgId!} />
-          <HrcCard clientId={clientId} orgId={orgId!} client={client} docs={docs} restriction={primaryRestriction} />
+          {canHrc && (
+            <HrcCard clientId={clientId} orgId={orgId!} client={client} docs={docs} restriction={primaryRestriction} />
+          )}
           {isHhs && <RoomBoardAgreementCard clientId={clientId} docs={docs} onOpenFiles={onOpenFiles} />}
           {showElsSchoolDocs && <ElsSchoolDocumentationCard clientId={clientId} docs={docs} />}
           {isEpr && <EprInformedChoiceCard clientId={clientId} docs={docs} serviceStart={eprServiceStart} />}
