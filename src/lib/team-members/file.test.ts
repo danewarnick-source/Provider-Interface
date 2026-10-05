@@ -213,12 +213,14 @@ describe("Admin team member profile lock", () => {
   const read = (f: string) =>
     readFileSync(new URL(`../../components/team-members/profile/${f}`, import.meta.url), "utf8");
 
-  it("draws Profile | File | Caseload | Notes | Activity and drops junk surfaces", () => {
+  it("draws Overview · Profile · Team member file · Training · Caseload · Notes · Activity and drops junk surfaces", () => {
     const src = read("profile-page.tsx");
     assert.match(src, /visibleProfileTabs\(\{ canSeeNotes \}\)/);
     assert.match(src, /resolveProfileTab\(tab, \{ canSeeNotes \}\)/);
-    for (const v of ["profile", "file", "caseload", "notes", "activity"]) {
-      assert.match(src, new RegExp(`value="${v}"`));
+    assert.match(src, /<ProfileShell/);
+    assert.doesNotMatch(src, /TabsList|TabsTrigger/);
+    for (const v of ["overview", "profile", "file", "training", "caseload", "notes", "activity"]) {
+      assert.match(src, new RegExp(`activeTab === "${v}"`));
     }
     assert.match(src, /StaffProfilePanel/);
     assert.match(src, /data-testid="profile-load-error"/);

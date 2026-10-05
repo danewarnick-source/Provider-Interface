@@ -24,6 +24,8 @@ import {
   PROFILE_CASELOAD,
   PROFILE_EVIDENCE,
   PROFILE_NOTES,
+  PROFILE_OVERVIEW_TODAY,
+  PROFILE_TIMESHEETS,
   ROSTER_EVIDENCE,
   ROSTER_POSITIONS,
   STAFF,
@@ -36,6 +38,7 @@ import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
 import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
 import { levelForRole, withAccessLevel } from "./access-level";
 import { staffClientReadiness } from "../../src/lib/team-members/readiness";
+import { buildMemberOverview } from "../../src/lib/team-members/overview";
 
 export type MockPersona = "admin" | "dsp" | "manager";
 
@@ -910,6 +913,29 @@ function memberCaseload(body: string): Row | null {
   };
 }
 
+/** getMemberOverview — built with the real pure helpers (src/lib/team-members/overview.ts). */
+function memberOverview(body: string): Row | null {
+  const staff = STAFF_LIST.find((st) => body.includes(st.id));
+  if (!staff) return null;
+  const evidence = PROFILE_EVIDENCE[staff.id] ?? { items: [], files: [] };
+  const clientNames = Object.fromEntries(
+    CLIENT_LIST.map((c) => [c.id, `${c.first_name} ${c.last_name}`]),
+  );
+  return buildMemberOverview({
+    staffId: staff.id,
+    today: PROFILE_OVERVIEW_TODAY,
+    now: new Date(`${PROFILE_OVERVIEW_TODAY}T22:00:00.000Z`),
+    items: evidence.items as never,
+    files: evidence.files as never,
+    timesheets: PROFILE_TIMESHEETS[staff.id] ?? [],
+    dailyClients: [],
+    dailyLogs: [],
+    clientNames,
+    usesTimesheets: true,
+    usesNotes: true,
+  }) as unknown as Row;
+}
+
 /** listTeamInvites — the one pending invite (expired on the fixture date) first. */
 function teamInviteRows(): Row[] {
   return [
@@ -1062,6 +1088,8 @@ function serverFnPayload(url: string, body: string): unknown {
   }
   if (/getTeamMemberProfile/i.test(fn)) return teamMemberProfile(body);
   if (/getMemberCaseload/i.test(fn)) return memberCaseload(body);
+  if (/getMemberOverview/i.test(fn)) return memberOverview(body);
+  if (/getMemberTraining/i.test(fn)) return { courses: [], certificates: [] };
   if (/setStaffClientCodes/i.test(fn)) return { status: "updated" };
   if (/updateTeamMember/i.test(fn)) return { ok: true };
   if (/listStaffNotes/i.test(fn)) return PROFILE_NOTES;

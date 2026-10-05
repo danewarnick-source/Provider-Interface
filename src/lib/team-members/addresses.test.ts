@@ -127,7 +127,7 @@ describe("Team Members addresses", () => {
     assert.match(profile, /<ProfilePage \/>/);
     assert.match(
       read("lib/team-members/profile-tabs.ts"),
-      /TEAM_MEMBER_PROFILE_TABS = \[\s*"profile",\s*"file",\s*"caseload",\s*"notes",\s*"activity",?\s*\] as const/,
+      /TEAM_MEMBER_PROFILE_TABS = \[\s*"overview",\s*"profile",\s*"file",\s*"training",\s*"caseload",\s*"notes",\s*"activity",?\s*\] as const/,
     );
   });
 
