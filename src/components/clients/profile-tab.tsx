@@ -213,7 +213,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
           <ContactsCard clientId={clientId} orgId={orgId!} contacts={contacts} />
           <AtGlanceCard clientId={clientId} client={client} />
           <HealthcareProvidersCard clientId={clientId} orgId={orgId!} />
-          <HrcCard clientId={clientId} client={client} docs={docs} restriction={primaryRestriction} />
+          <HrcCard clientId={clientId} orgId={orgId!} client={client} docs={docs} restriction={primaryRestriction} />
           {isHhs && <RoomBoardAgreementCard clientId={clientId} docs={docs} onOpenFiles={onOpenFiles} />}
           {showElsSchoolDocs && <ElsSchoolDocumentationCard clientId={clientId} docs={docs} />}
           {isEpr && <EprInformedChoiceCard clientId={clientId} docs={docs} serviceStart={eprServiceStart} />}
@@ -1359,8 +1359,8 @@ function AtGlanceCard({ clientId, client }: { clientId: string; client: ClientRo
 // ── Human Rights / HRC ──────────────────────────────────────────────────────
 
 function HrcCard({
-  clientId, client, docs, restriction,
-}: { clientId: string; client: ClientRow; docs: DocRow[]; restriction: RestrictionRecord | null }) {
+  clientId, orgId, client, docs, restriction,
+}: { clientId: string; orgId: string; client: ClientRow; docs: DocRow[]; restriction: RestrictionRecord | null }) {
   const qc = useQueryClient();
   const hasRestrictions = client.hr_applicable === true;
   const hrrDoc = docs.find(
@@ -1415,7 +1415,7 @@ function HrcCard({
         if (error) throw error;
       } else {
         const { error } = await supabase.from("hrc_restriction_records" as never).insert({
-          organization_id: (client as unknown as { organization_id?: string }).organization_id,
+          organization_id: orgId,
           client_id: clientId,
           restriction_title: "Rights restriction",
           ...patch,
