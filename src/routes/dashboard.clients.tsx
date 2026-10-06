@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link, Outlet } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, Outlet, type ErrorComponentProps } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -25,7 +25,7 @@ import {
 import {
   UserPlus, Contact2, MapPin, Loader2,
   ChevronRight, AlertTriangle, Search,
-  ArrowLeft, Sparkles, FileSpreadsheet,
+  ArrowLeft, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
@@ -121,7 +121,7 @@ async function resolveCoords(addr: string): Promise<{ lat: number | null; lng: n
 
 // ─── Route ────────────────────────────────────────────────────────────────────
 
-function ClientsError({ error }: { error: Error; reset: () => void }) {
+function ClientsError({ error }: ErrorComponentProps) {
   return (
     <div className="flex items-start justify-center p-8">
       <div className="max-w-md rounded-lg border border-destructive/40 bg-destructive/5 p-6 text-center">
@@ -354,14 +354,9 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline">
-            <Link to="/dashboard/smart-import" search={{ mode: "client" }}>
-              <FileSpreadsheet className="mr-2 h-4 w-4" /> Import CSV
-            </Link>
-          </Button>
           <Button asChild variant="outline" className="border-primary/40 text-primary hover:bg-primary/5">
             <Link to="/dashboard/smart-import" search={{ mode: "client" }}>
-              <Sparkles className="mr-2 h-4 w-4" /> Smart Import
+              <Sparkles className="mr-2 h-4 w-4" /> Import clients
             </Link>
           </Button>
           <Button
@@ -841,7 +836,7 @@ function AddClientDialog({
           >
             <div className="font-semibold">Create as draft — finish later</div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Saves an incomplete client profile (intake not started). It will show as <strong>Needs review</strong> in the directory until you finalize it.
+              Saves an incomplete client profile (intake not started). It will show as <strong>Intake incomplete</strong> in the directory until intake is finished.
             </p>
           </button>
         </div>

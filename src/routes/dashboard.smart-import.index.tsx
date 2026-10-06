@@ -38,12 +38,17 @@ export const Route = createFileRoute("/dashboard/smart-import/")({
       throw redirect(employeeSmartImportRedirect());
     }
   },
-  component: () => (
-    <RequirePermission perm="view_staff_records">
+  component: SmartImportRoute,
+});
+
+function SmartImportRoute() {
+  const { mode } = Route.useSearch();
+  return (
+    <RequirePermission perm={mode === "client" ? "edit_client_records" : "view_staff_records"}>
       <SmartImportPage />
     </RequirePermission>
-  ),
-});
+  );
+}
 
 type Mode = "employee" | "client" | "timesheets" | "daily_notes";
 type FileChip = {
