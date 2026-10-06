@@ -481,8 +481,7 @@ export const skipOnboardingItem = createServerFn({ method: "POST" })
 // Add one or more DSPD service codes to a client. Used by the inline "Add
 // billing code" control on the readiness card + onboarding wizard — no
 // navigation: upsert client_billing_codes (default rate 0, default annual
-// auth 0) and merge codes into clients.authorized_dspd_codes + job_code
-// (billing codes mirror — job_code kept in sync for scheduler reads).
+// auth 0). client_billing_codes is the one source for a client's codes.
 // ---------------------------------------------------------------------------
 export const addClientBillingCodes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

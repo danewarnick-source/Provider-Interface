@@ -491,7 +491,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
 
     // goalsForStaff — clock-out checklist. Same on-file PCSP goals the
     // client profile shows (plus the flat pcsp_goals fallback above).
-    // Intentionally does NOT require a matching job_code / service code.
+    // Intentionally does NOT require a matching service code.
     // Per-goal field visibility switches are still honored.
     const codeUpper = shiftServiceCode ? shiftServiceCode.toUpperCase() : null;
     const goalsForStaff = selectGoalsForStaffClockOut(goals, (goalId) =>
