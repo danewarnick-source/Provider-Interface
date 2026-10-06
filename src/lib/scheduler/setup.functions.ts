@@ -2,6 +2,7 @@
 // All writes go through requireSupabaseAuth so RLS enforces tenant scope.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { activeMemberProfiles, memberDisplayName } from "@/lib/org-member-profiles";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import {
@@ -276,12 +277,8 @@ export const nectarDraftShifts = createServerFn({ method: "POST" })
     await requireOrgMembership(supabase, userId, data.organization_id, "staff");
     assertBedrockConfigured();
 
-    const [staffRes, clientsRes, authsRes] = await Promise.all([
-      supabase
-        .from("organization_members")
-        .select("user_id, profiles:profiles!inner(id, first_name, last_name, full_name)")
-        .eq("organization_id", data.organization_id)
-        .eq("active", true),
+    const [staffProfiles, clientsRes, authsRes] = await Promise.all([
+      activeMemberProfiles(supabase, data.organization_id),
       supabase
         .from("clients")
         .select("id, first_name, last_name")
@@ -293,24 +290,7 @@ export const nectarDraftShifts = createServerFn({ method: "POST" })
         .eq("organization_id", data.organization_id),
     ]);
 
-    type StaffRow = {
-      profiles: {
-        id: string;
-        first_name: string | null;
-        last_name: string | null;
-        full_name: string | null;
-      };
-    };
-    const staffList = ((staffRes.data ?? []) as unknown as StaffRow[])
-      .map((m) => m.profiles)
-      .filter(Boolean)
-      .map((p) => ({
-        id: p.id,
-        name:
-          p.full_name?.trim() ||
-          [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
-          "Staff",
-      }));
+    const staffList = staffProfiles.map((p) => ({ id: p.id, name: memberDisplayName(p) }));
     const clientList = (
       (clientsRes.data ?? []) as Array<{
         id: string;

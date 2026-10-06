@@ -4,6 +4,7 @@
 // confidently match comes back with staff_id/client_id null + a flag.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { activeMemberProfiles, memberDisplayName } from "@/lib/org-member-profiles";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { gatewayFetch, assertBedrockConfigured } from "@/lib/ai-bedrock.server";
@@ -51,12 +52,8 @@ export const nectarImportSchedule = createServerFn({ method: "POST" })
       throw new Error("File is larger than 10 MB. Please upload a smaller file.");
     }
 
-    const [staffRes, clientsRes, authsRes] = await Promise.all([
-      supabase
-        .from("organization_members")
-        .select("user_id, profiles:profiles!inner(id, first_name, last_name, full_name)")
-        .eq("organization_id", data.organization_id)
-        .eq("active", true),
+    const [staffProfiles, clientsRes, authsRes] = await Promise.all([
+      activeMemberProfiles(supabase, data.organization_id),
       supabase
         .from("clients")
         .select("id, first_name, last_name")
@@ -68,17 +65,7 @@ export const nectarImportSchedule = createServerFn({ method: "POST" })
         .eq("organization_id", data.organization_id),
     ]);
 
-    type StaffRow = { profiles: { id: string; first_name: string | null; last_name: string | null; full_name: string | null } };
-    const staffList = ((staffRes.data ?? []) as unknown as StaffRow[])
-      .map((m) => m.profiles)
-      .filter(Boolean)
-      .map((p) => ({
-        id: p.id,
-        name:
-          (p.full_name?.trim()) ||
-          [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
-          "Staff",
-      }));
+    const staffList = staffProfiles.map((p) => ({ id: p.id, name: memberDisplayName(p) }));
     const clientList = ((clientsRes.data ?? []) as Array<{
       id: string; first_name: string; last_name: string;
     }>).map((c) => ({
