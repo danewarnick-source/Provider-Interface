@@ -233,3 +233,52 @@ One short report per prompt. A new session continues from the first prompt not m
   - The demo canvas couldn't be read in this session; the layout follows the runbook and Team Members.
   - The `no-restricted-syntax` lint rule ("use useClientCareData") flags direct client reads in `use-client-profile.ts` and a few moved panels, as the old route did.
   - The `client-overview` query key replaced `client-readiness` in invalidations.
+
+## P8
+- **Status:** merged. PR #453 (https://github.com/danewarnick-source/Provider-Interface/pull/453) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p8-health-plans`.
+- **What was done:**
+  - **Health section** (`profile/health/`): must-knows; allergies, diagnoses and chronic conditions; swallowing; advance directive; emergency treatment authorization; ABI; medication support level.
+    - The advance directive is a None/DNR/POLST status plus where it's kept, palliative care, hospice and notes. `dnr_applicable` follows the status.
+    - A Medications and eMAR toggle opens `MarEmarTab`.
+    - The health events log and absences (RHS only) are written through `writeClientRecord` and archived, never deleted.
+  - **Plans section:**
+    - Plan years: current, upcoming, ended (waiting, with the day count) and past, with a dates editor (`updateClientPlanDates`).
+    - Goals with a "View as" code filter.
+    - Support strategies due = `activated_on` + 30 days.
+    - Summaries owed per code.
+    - The HRC restrictions card is the single editor. `/dashboard/hrc` is read-only and links to the client.
+    - BSP upload only for BC1–BC3 (`lib/clients/bsp.ts`).
+  - **Reminders:**
+    - `plan-dates.ts` holds the 60/30-day reminders and the day-10 office follow-up. There is no task table that fits, so readiness turns these into needs-attention items.
+  - **Summary cadence:**
+    - `progress-summaries.ts` adds `summaryCadenceForCode` and `summariesOwed`.
+    - Monthly: SEI, SJD, CMP, CMS, PN1, PN2. PBA: financial statement. No summary: respite, ELS, MTP, PM1/PM2. Quarterly: every other code.
+    - `QUARTERLY_SUMMARY_CODES` was removed.
+  - **Client file:**
+    - The photo expires 5 years after it was taken.
+    - Exams are required only for RHS, PPS, HHS and SLH.
+    - Belongings apply to HHS, PPS, RHS and SLH, with no yearly renewal.
+    - The plan end date comes from `client_plans`.
+    - `file.ts` was split into `file-csv`, `file-docs` and `file-summary`.
+  - **Old plan columns:** the profile, client file, face sheet ("Plan year") and staff care data (`plan_end_date`) now read `client_plans`. Smart Import adds a `client_plans` row (`importPlanYear`).
+  - **Deleted:** `at-glance-card`, `hrc-card`, `hrc-section-card`, `rights-restrictions-panel`, `authorized-codes-card`, and the unused `face-sheet-info-card` and `face-sheet-info-fields`.
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1763 of 1768 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 17 pass / 3 fail. The 3 were already failing; the profile smoke now checks the Health and Plans cards.
+  - e2e staff-go-live: 6/6.
+  - e2e daily-logs: 2 pass / 4 fail, the same as before.
+  - e2e 1056: 12 fail, the same as before.
+- **Migrations:**
+  - Applied to live through `execute_sql`, because `apply_migration` timed out, and recorded in `schema_migrations`:
+    - `20261006180000_clients_health_events_absences`
+    - `20261006180100_clients_advance_directive_notes`
+  - No Phase B migration.
+- **Files:** 28 added, 7 deleted.
+- **Notes for later prompts:**
+  - P12: Smart Import still writes `clients.plan_year` and `pcsp_expiration_date`. Drop them with `pcsp_signed_date`; see `legacy-plans.ts`.
+  - Summary generation now creates quarterly rows for every code that owes a summary (for example COM, CHA, PPS, DSG).
+  - Committee-only users can view restrictions on `/dashboard/hrc` but can't open the client profile.
+  - The file-section cards in `profile/cards/` (code documents, SJD) are left for P9.
