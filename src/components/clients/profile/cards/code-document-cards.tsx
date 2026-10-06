@@ -1,6 +1,6 @@
-// Documents some codes require: Room and Board Agreement (HHS), ELS school
-// documentation (under 22) and the EPR informed-choice conversation
-// (60 days from EPR start). Shown in the Client file section.
+// Documents some codes require: ELS school documentation (under 22) and the
+// EPR informed-choice conversation (60 days from EPR start). Shown in the
+// Client file section.
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,56 +17,6 @@ export type DocRow = {
   storage_path: string | null;
   uploaded_at: string | null;
 };
-
-// ── Room and Board Agreement (HHS only) ─────────────────────────────────────
-
-export function RoomBoardAgreementCard({
-  clientId,
-  docs,
-  onOpenFiles,
-}: {
-  clientId: string;
-  docs: DocRow[];
-  onOpenFiles: () => void;
-}) {
-  const doc = docs.find((d) => d.document_type === "room_board_agreement");
-  return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-0">
-        <div className="flex items-start gap-2.5 px-5 py-4 border-b border-border/60">
-          <HexMarker />
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold leading-tight">Room and Board Agreement</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Signed legal doc — no expiration</p>
-          </div>
-        </div>
-        <div className="p-5">
-          {doc ? (
-            <NectarAsk
-              question="Room and Board Agreement"
-              kind="data_rich_gap"
-              clientId={clientId}
-              uploadDocumentType="room_board_agreement"
-              answeredSummary={`On file since ${fmtDate(doc.uploaded_at)} — ${doc.file_name ?? "signed document"}`}
-              manualForm={
-                <Button size="sm" variant="outline" onClick={onOpenFiles}>
-                  View in Files
-                </Button>
-              }
-            />
-          ) : (
-            <NectarAsk
-              question="Upload the signed Room and Board Agreement"
-              kind="data_rich_gap"
-              clientId={clientId}
-              uploadDocumentType="room_board_agreement"
-            />
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 // ── ELS — Extended Living Supports school documentation (under 22) ─────────
 
