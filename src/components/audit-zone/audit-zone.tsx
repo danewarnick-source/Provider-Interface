@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { supabase } from "@/integrations/supabase/client";
+import { activeMemberProfiles, memberDisplayName } from "@/lib/org-member-profiles";
 import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
 import { askNectarHelp, type NectarHelpReply } from "@/lib/nectar-help.functions";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";
@@ -286,16 +287,8 @@ function DocumentPull({ orgId }: { orgId?: string }) {
     enabled: !!orgId,
     queryKey: ["audit-pull-staff", orgId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("organization_members")
-        .select("user_id, profiles(id, full_name, email)")
-        .eq("organization_id", orgId!)
-        .eq("active", true)
-        .limit(500);
-      const out = (data ?? []).map((m: any) => ({
-        id: m.user_id as string,
-        name: (m.profiles?.full_name as string) || (m.profiles?.email as string) || "Staff",
-      }));
+      const profiles = await activeMemberProfiles(supabase, orgId!);
+      const out = profiles.map((p) => ({ id: p.id, name: memberDisplayName(p) }));
       return out.sort((a, b) => a.name.localeCompare(b.name));
     },
   });

@@ -8,6 +8,7 @@ import { z } from "zod";
 import { format, parseISO } from "date-fns";
 import { Download, MapPin, AlertTriangle, CheckCircle2, Circle, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { activeMemberProfiles, memberDisplayName } from "@/lib/org-member-profiles";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -130,19 +131,9 @@ export function EvvArchivePage() {
     enabled: !!orgId,
     queryKey: ["evv-archive-staff", orgId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("organization_members")
-        .select("user_id, profiles:user_id(first_name, last_name)")
-        .eq("organization_id", orgId!)
-        .eq("active", true);
-      type R = { user_id: string; profiles: { first_name: string; last_name: string } | null };
-      return ((data as unknown as R[]) ?? [])
-        .map((r) => ({
-          value: r.user_id,
-          label: r.profiles
-            ? `${r.profiles.first_name ?? ""} ${r.profiles.last_name ?? ""}`.trim() || r.user_id.slice(0, 8)
-            : r.user_id.slice(0, 8),
-        }))
+      const profiles = await activeMemberProfiles(supabase, orgId!);
+      return profiles
+        .map((p) => ({ value: p.id, label: memberDisplayName(p, p.id.slice(0, 8)) }))
         .sort((a, b) => a.label.localeCompare(b.label));
     },
   });
