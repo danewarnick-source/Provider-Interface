@@ -5,6 +5,7 @@ import {
   cleanContactFields,
   contactLine,
   contactsByClient,
+  contactsForFilter,
   contactsWithRole,
   guardianSatisfied,
   primaryContact,
@@ -55,6 +56,18 @@ describe("contactsWithRole / primaryContact", () => {
   it("falls back to the first contact and returns null when none", () => {
     assert.equal(primaryContact(list, "guardian", NOW)?.name, "Guard");
     assert.equal(primaryContact(list, "psychiatrist", NOW), null);
+  });
+});
+
+describe("contactsForFilter", () => {
+  it("filters by role group and keeps role order, primary first", () => {
+    const ids = (f: Parameters<typeof contactsForFilter>[1]) =>
+      contactsForFilter(list, f, NOW).map((x) => x.id);
+    assert.deepEqual(ids("all"), ["4", "2", "1", "5"]);
+    assert.deepEqual(ids("emergency"), ["2", "1"]);
+    assert.deepEqual(ids("family"), ["4"]);
+    assert.deepEqual(ids("medical"), ["5"]);
+    assert.deepEqual(ids("coordinator"), []);
   });
 });
 
