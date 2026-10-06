@@ -10,7 +10,7 @@ import {
   visibleClientSections,
 } from "./profile-sections.ts";
 
-const ALL = { canMedical: true, canBilling: true };
+const ALL = { canMedical: true, canBilling: true, hasMoney: true };
 const NONE = { canMedical: false, canBilling: false };
 
 describe("client profile sections", () => {
@@ -27,6 +27,14 @@ describe("client profile sections", () => {
     assert.ok(shown.includes("contacts"));
   });
 
+  it("shows Money only with Billing and money on file", () => {
+    assert.ok(visibleClientSections(ALL).includes("money"));
+    assert.ok(!visibleClientSections({ ...ALL, hasMoney: false }).includes("money"));
+    assert.ok(!visibleClientSections({ canMedical: true, canBilling: true }).includes("money"));
+    assert.ok(!visibleClientSections({ ...NONE, hasMoney: true }).includes("money"));
+    assert.equal(resolveClientSection("money", { ...ALL, hasMoney: false }), "overview");
+  });
+
   it("falls back to Overview for unknown or hidden sections", () => {
     assert.equal(resolveClientSection("contacts", ALL), "contacts");
     assert.equal(resolveClientSection("services", NONE), "overview");
@@ -38,6 +46,7 @@ describe("client profile sections", () => {
     assert.equal(sectionForLegacyTab("identity"), "profile");
     assert.equal(sectionForLegacyTab("care-plan"), "plans");
     assert.equal(sectionForLegacyTab("billing"), "services");
+    assert.equal(sectionForLegacyTab("funds"), "money");
     assert.equal(sectionForLegacyTab("client-file"), "file");
     assert.equal(sectionForLegacyTab("operations"), "team");
     assert.equal(sectionForLegacyTab("logs"), "activity");
