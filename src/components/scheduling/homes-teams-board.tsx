@@ -28,8 +28,6 @@ import {
   HeartHandshake,
   Plus,
   Star,
-  Trash2,
-  UserRound,
   Users,
   CalendarDays,
   ShieldCheck,
@@ -319,35 +317,6 @@ export function HomesTeamsBoard() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const updateHome = useMutation({
-    mutationFn: async (v: {
-      id: string;
-      team_name?: string;
-      setting?: string;
-    }) => {
-      // Capture the pre-update name so a rename can find its locations row.
-      const previousName = teamsQ.data?.find((t) => t.id === v.id)?.team_name;
-      const patch: Record<string, string> = {};
-      if (v.team_name != null) patch.team_name = v.team_name;
-      if (v.setting != null) patch.setting = v.setting;
-      const { error } = await supabase
-        .from("teams")
-        .update(patch as never)
-        .eq("id", v.id);
-      if (error) throw error;
-      if (orgId) {
-        await syncLocationCall({
-          data: { organizationId: orgId, teamId: v.id, previousName },
-        }).catch(() => {});
-      }
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["ht-teams", orgId] });
-      qc.invalidateQueries({ queryKey: ["locations", orgId] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   const setRatio = useMutation({
     mutationFn: async (v: {
       client_id: string;
@@ -377,20 +346,6 @@ export function HomesTeamsBoard() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ht-ratios", orgId] });
       toast.success("Staffing ratio updated");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const deleteHome = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("teams").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["ht-teams", orgId] });
-      qc.invalidateQueries({ queryKey: ["ht-clients", orgId] });
-      qc.invalidateQueries({ queryKey: ["ht-hsd", orgId] });
-      toast.success("Home deleted");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -437,7 +392,6 @@ export function HomesTeamsBoard() {
   const [newHomeOpen, setNewHomeOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newSetting, setNewSetting] = useState("residential");
-  const [editing, setEditing] = useState<TeamRow | null>(null);
   const [moveClient, setMoveClient] = useState<ClientRow | null>(null);
   const [openStaff, setOpenStaff] = useState<{
     staff: StaffRow;
@@ -821,76 +775,6 @@ export function HomesTeamsBoard() {
               Add home
             </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={!!editing}
-        onOpenChange={(o) => !o && setEditing(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit home</DialogTitle>
-          </DialogHeader>
-          {editing && (
-            <div className="space-y-3">
-              <div>
-                <Label>Home name</Label>
-                <Input
-                  defaultValue={editing.team_name}
-                  onBlur={(e) =>
-                    e.target.value !== editing.team_name &&
-                    updateHome.mutate({
-                      id: editing.id,
-                      team_name: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <Label>Setting</Label>
-                <Select
-                  defaultValue={editing.setting ?? "residential"}
-                  onValueChange={(v) =>
-                    updateHome.mutate({ id: editing.id, setting: v })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SETTINGS.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>
-                        {s.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-between pt-2">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="gap-1"
-                  onClick={() => {
-                    if (
-                      confirm(
-                        `Delete ${editing.team_name}? Residents will become unassigned.`,
-                      )
-                    ) {
-                      deleteHome.mutate(editing.id);
-                      setEditing(null);
-                    }
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5" /> Delete home
-                </Button>
-                <Button variant="outline" onClick={() => setEditing(null)}>
-                  Done
-                </Button>
-              </div>
-            </div>
-          )}
         </DialogContent>
       </Dialog>
 
