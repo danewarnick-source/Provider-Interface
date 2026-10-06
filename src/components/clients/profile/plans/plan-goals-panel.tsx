@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2, Pencil, Plus, Sparkles, X } from "lucide-react";
+import { FileUp, Loader2, Pencil, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FieldVisibilityToggle } from "@/components/clients/profile/visibility-toggles";
@@ -14,7 +14,8 @@ import { currentPlan, goalView, waitingDays, type GoalView } from "@/lib/clients
 import { addClientPlan, endClientGoal, endGoalSupport } from "@/lib/clients/plans.functions";
 import { GoalTree } from "./goal-tree";
 import { GoalDialog, SupportDialog } from "./goal-dialogs";
-import { usePcspGoalExtract } from "./use-pcsp-goal-extract";
+import { usePcspImport } from "./use-pcsp-import";
+import { PcspReview } from "./pcsp-review";
 
 type Support = GoalView["supports"][number];
 
@@ -24,7 +25,7 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
   const addPlanFn = useServerFn(addClientPlan);
   const endGoalFn = useServerFn(endClientGoal);
   const endSupportFn = useServerFn(endGoalSupport);
-  const pcsp = usePcspGoalExtract(clientId, orgId);
+  const pcsp = usePcspImport(clientId, orgId);
   const fileRef = useRef<HTMLInputElement>(null);
   const [goalDlg, setGoalDlg] = useState<{ goal: GoalView | null; planId: string } | null>(null);
   const [supportDlg, setSupportDlg] = useState<{ goal: GoalView; support: Support | null } | null>(null);
@@ -70,24 +71,21 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
           ref={fileRef}
           type="file"
           className="hidden"
-          accept=".pdf,.docx,.txt,.doc"
+          accept=".pdf,application/pdf"
+          data-testid="pcsp-upload-input"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) void pcsp.uploadAndExtract(f);
+            if (f) void pcsp.upload(f);
             e.target.value = "";
           }}
         />
         <div className="flex flex-wrap gap-2">
           <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className="gap-1.5"
-            disabled={pcsp.busy || !orgId}
-            onClick={() => (pcsp.hasPcsp ? void pcsp.runExtract() : fileRef.current?.click())}
+            type="button" size="sm" variant="outline" className="gap-1.5"
+            disabled={pcsp.reading || !orgId} onClick={() => fileRef.current?.click()}
           >
-            {pcsp.busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-            {pcsp.hasPcsp ? "Pull goals from the PCSP (NECTAR)" : "Upload PCSP & pull goals (NECTAR)"}
+            {pcsp.reading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5" />}
+            {pcsp.reading ? "Reading the PCSP…" : "Upload new PCSP"}
           </Button>
           <Button type="button" size="sm" className="gap-1.5" disabled={!scope} onClick={act(async () => {
             const planId = await ensurePlanId();
@@ -96,15 +94,12 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
             <Plus className="h-3.5 w-3.5" /> Add goal
           </Button>
         </div>
-        {pcsp.hasPcsp && goals.length > 0 && (
-          <p className="text-[11px] text-muted-foreground">Pulling goals again ends the current goals (kept in history) and adds the PCSP's.</p>
-        )}
         {plansQ.isLoading ? (
           <p className="text-muted-foreground"><Loader2 className="mr-1 inline h-3.5 w-3.5 animate-spin" />Loading…</p>
         ) : (
           <GoalTree
             goals={goals}
-            empty="No goals yet — pull them from the PCSP or add them."
+            empty="No goals yet — upload the PCSP or add them."
             goalActions={(g) => (
               <div className="flex shrink-0 items-center gap-0.5">
                 <FieldVisibilityToggle clientId={clientId} section="care_plan" kind="goal" id={g.id} label="this goal" />
@@ -138,6 +133,12 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
           />
         )}
       </CardContent>
+      {pcsp.read && pcsp.review && (
+        <PcspReview
+          read={pcsp.read} review={pcsp.review} onChange={pcsp.setReview}
+          saving={pcsp.saving} onConfirm={() => void pcsp.confirm()} onClose={pcsp.close}
+        />
+      )}
       {scope && (
         <>
           {goalDlg && (

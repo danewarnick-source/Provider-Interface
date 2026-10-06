@@ -9,7 +9,6 @@ import {
   attachClientSpecificTrainingDocument,
   updateClientSpecificTraining,
   publishClientSpecificTraining,
-  extractPcspGoalsForTraining,
   saveReviewQuestions,
   type CSTContent,
   type CSTSection,
@@ -24,14 +23,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, Loader2, CheckCircle2, RefreshCw, Pencil, Trash2, Plus, ArrowUp, ArrowDown, Shield, BookOpen, Upload } from "lucide-react";
+import { Sparkles, Loader2, CheckCircle2, RefreshCw, Pencil, Trash2, Plus, ArrowUp, ArrowDown, Shield, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
 import { loadActiveCodes } from "@/lib/clients/codes";
 import { todayYmd } from "@/lib/clients/dates";
 import { activeGoalViewsOn } from "@/lib/clients/plans";
 import { GoalTree } from "@/components/clients/profile/plans/goal-tree";
-import { clientPlansKey, useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
+import { useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
 
 type Training = {
   id: string;
@@ -56,7 +55,6 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
   const attachDocFn = useServerFn(attachClientSpecificTrainingDocument);
   const updateFn = useServerFn(updateClientSpecificTraining);
   const publishFn = useServerFn(publishClientSpecificTraining);
-  const extractGoalsFn = useServerFn(extractPcspGoalsForTraining);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -139,20 +137,6 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
   const updateMut = useMutation({
     mutationFn: (payload: { id: string; title?: string; content?: CSTContent }) => updateFn({ data: payload }),
     onSuccess: () => { qc.invalidateQueries({ queryKey }); toast.success("Saved."); setEditing(false); setDraftContent(null); },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const extractGoalsMut = useMutation({
-    mutationFn: () => extractGoalsFn({ data: { clientId } }),
-    onSuccess: (res) => {
-      if (!res.ok) {
-        toast.error(res.reason);
-        return;
-      }
-      qc.invalidateQueries({ queryKey });
-      qc.invalidateQueries({ queryKey: clientPlansKey(clientId) });
-      toast.success(`Extracted ${res.goalCount} goal${res.goalCount === 1 ? "" : "s"} into the current plan — review below.`);
-    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -315,23 +299,10 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
           <span className="text-xs text-muted-foreground">
             {planGoals.length} goal{planGoals.length === 1 ? "" : "s"}
           </span>
-          <div className="ml-auto flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => extractGoalsMut.mutate()}
-              disabled={extractGoalsMut.isPending}
-            >
-              {extractGoalsMut.isPending
-                ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                : <BookOpen className="mr-1.5 h-3.5 w-3.5" />}
-              Extract goals from PCSP (NECTAR)
-            </Button>
-          </div>
         </div>
         <GoalTree
           goals={planGoals}
-          empty={'No goals on the current plan yet. Extract them from the uploaded PCSP, or add them in the client\'s care plan.'}
+          empty={'No goals on the current plan yet. Upload the PCSP or add goals in the client\'s care plan.'}
         />
         <p className="text-xs text-muted-foreground">Goals and supports are edited in the client's care plan.</p>
       </div>
