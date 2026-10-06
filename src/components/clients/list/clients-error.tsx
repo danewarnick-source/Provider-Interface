@@ -8,15 +8,8 @@ export function ClientsError({ error }: { error: Error; reset: () => void }) {
           <button
             onClick={() => window.location.reload()}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-          >
-            Reload
-          </button>
-          <a
-            href="/dashboard"
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground"
-          >
-            Dashboard home
-          </a>
+          >Reload</button>
+          <a href="/dashboard" className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground">Dashboard home</a>
         </div>
       </div>
     </div>

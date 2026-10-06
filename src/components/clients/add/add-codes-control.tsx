@@ -93,13 +93,15 @@ export function AddCodesControl({
             options={options}
             placeholder="Pick DSPD service codes…"
             searchPlaceholder="Filter codes…"
-            emptyLabel={
-              options.length === 0 ? "Client already has every known code." : "No matches"
-            }
+            emptyLabel={options.length === 0 ? "Client already has every known code." : "No matches"}
             chipMonospace
           />
         </div>
-        <Button size="sm" onClick={() => m.mutate()} disabled={m.isPending || picked.length === 0}>
+        <Button
+          size="sm"
+          onClick={() => m.mutate()}
+          disabled={m.isPending || picked.length === 0}
+        >
           {m.isPending ? "Adding…" : `Add${picked.length ? ` ${picked.length}` : ""}`}
         </Button>
       </div>
@@ -110,9 +112,7 @@ export function AddCodesControl({
           </div>
           {justAdded.map((code) => (
             <div key={code} className="flex flex-wrap items-center gap-2">
-              <code className="rounded bg-background px-1.5 py-0.5 font-mono text-[11px]">
-                {code}
-              </code>
+              <code className="rounded bg-background px-1.5 py-0.5 font-mono text-[11px]">{code}</code>
               <CodeAssignedStaff clientId={clientId} code={code} />
             </div>
           ))}
