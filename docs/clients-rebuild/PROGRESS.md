@@ -194,3 +194,42 @@ One short report per prompt. A new session continues from the first prompt not m
   - The staff-go-live config's webServer path only resolves from `e2e/configs/`. Start `npx vite --config e2e/harness/vite.config.ts` (port 4177) yourself before running it.
   - Running e2e rewrites the tracked `e2e/artifacts/*.png` screenshots. Don't commit them.
   - Legacy oversized files with small edits are listed in the PR body.
+
+## P7
+- **Status:** merged. PR #452 (https://github.com/danewarnick-source/Provider-Interface/pull/452) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p7-profile-shell`.
+- **What was done:**
+  - **Profile shell:** the client profile now has a side menu like Team Members (`components/clients/profile/client-profile-page.tsx`, `profile-shell.tsx`, `profile-header.tsx`, `header-menu.tsx`, `section-body.tsx`). The section is in the URL as `?section=` (`lib/clients/profile-sections.ts`). Old `?tab=` links redirect. The route file is 46 lines.
+  - **Header ⋯ menu:** Face sheet PDF, Update from a document (`dialogs/update-from-document-dialog.tsx`), Discharge, Reactivate.
+  - **Needs attention:** `lib/clients/readiness.ts` is the one calculation (units pace, documents, photo over 5 years, PCSP waiting, strategies due at plan start + 30 days, summaries, HRC, finish setup).
+    - `getClientOverview` (`overview.functions.ts`, `overview-load.ts`, `overview-team.ts`) feeds the Overview, the menu badges and the Smart Import done page (`shared/client-needs-attention.tsx`).
+  - **Overview:** attention cards, units left with a pace marker, must-knows, coming up, team (ready alone, using the Team Members rules), last notes.
+  - **Profile:** identity, photo with the date taken and a 5-year warning, service address with pin and geofence, extra service locations (`client_approved_locations` through `locations.functions.ts`; ended, never deleted), mailing address, About me, More details (all custom fields in one panel).
+  - **Contacts:** role filters (`CONTACT_FILTERS`), an own-guardian note and toggle, add / edit / end.
+  - **Interim sections:** Health, Plans, Services & billing, Client file, Team and Activity are in `profile/sections/*`. They reuse the moved panels in `profile/{cards,plans,activity,file}/`, each file 250 lines or fewer.
+  - **Deleted:**
+    - the 7-tab route body, `profile-tab`, `section-panel`, the per-tab custom field panels
+    - `TrainingSetupBadge`, the "Action required" panel
+    - `client-readiness-card`, `setup-checklist(-groups)`, `finish-onboarding-card`
+    - `readiness.functions.ts`, `field-confirmations.functions.ts`
+    - all of `finish-onboarding.functions.ts` except `addClientBillingCodes`, which moved to `lib/clients/codes-add.functions.ts` and is now guarded by `edit_billing`.
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1732 pass, 5 fail; the 5 are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 16 pass / 4 fail, including the new `clients-profile-sections.spec.ts`. The same 4 failed before.
+  - e2e staff-go-live: 6/6.
+  - e2e daily-logs: 2 pass / 4 fail, the same as before.
+  - e2e 1056: 12 fail, the same as before.
+- **Migrations:**
+  - `20261006161857_client_approved_locations_archived_at` applied to live. `types.ts` was updated for its two columns.
+  - No Phase B migration.
+- **Files:** 64 added, 11 deleted (4 of the deleted were git-moved and rewritten).
+- **Notes for later prompts:**
+  - Discharge in the ⋯ menu sets `account_status='archived'` and `discharge_date`; P11 replaces it with the guided flow. Reactivate clears both.
+  - The ABI and DNR-applicable switches now live on the Health "At a glance" card (`cards/at-glance-card.tsx`) until P8.
+  - Writes to `client_approved_locations` still use the RLS policy `is_org_admin_or_manager`, so scoped managers are refused.
+  - The punch pad filters `archived_at IS NULL`; production main doesn't until this ships.
+  - The demo canvas couldn't be read in this session; the layout follows the runbook and Team Members.
+  - The `no-restricted-syntax` lint rule ("use useClientCareData") flags direct client reads in `use-client-profile.ts` and a few moved panels, as the old route did.
+  - The `client-overview` query key replaced `client-readiness` in invalidations.
