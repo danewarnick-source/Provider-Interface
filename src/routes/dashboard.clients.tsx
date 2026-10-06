@@ -127,7 +127,7 @@ function ClientsError({ error }: ErrorComponentProps) {
     <div className="flex items-start justify-center p-8">
       <div className="max-w-md rounded-lg border border-destructive/40 bg-destructive/5 p-6 text-center">
         <h2 className="text-base font-semibold">Something went wrong in Client Directory</h2>
-        <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
         <div className="mt-4 flex justify-center gap-3">
           <button
             onClick={() => window.location.reload()}
