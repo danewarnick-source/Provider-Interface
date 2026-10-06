@@ -27,6 +27,7 @@ import { ClientProfileShell } from "./profile-shell";
 import { ClientProfileHeader } from "./profile-header";
 import { SectionBody } from "./section-body";
 import { useClientProfile } from "./use-client-profile";
+import { useClientMoneyPresence } from "./money/use-client-money";
 
 const profileRoute = getRouteApi("/dashboard/clients/$clientId");
 
@@ -77,7 +78,13 @@ export function ClientProfilePage() {
     });
   }, [qc, orgId, clientId]);
 
-  const viewer = { canMedical: canCategory("client_medical"), canBilling: canCategory("billing") };
+  const canBilling = canCategory("billing");
+  const moneyQ = useClientMoneyPresence(orgId, clientId, profileQ.data?.codes ?? [], canBilling);
+  const viewer = {
+    canMedical: canCategory("client_medical"),
+    canBilling,
+    hasMoney: moneyQ.data === true,
+  };
   const visible = visibleClientSections(viewer);
   const active = resolveClientSection(section, viewer);
 

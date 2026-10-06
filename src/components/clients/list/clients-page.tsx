@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Contact2, Loader2, Sparkles, UserPlus, Wallet } from "lucide-react";
+import { Contact2, Loader2, Sparkles, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
@@ -90,13 +90,6 @@ export function ClientsPage({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {can("view_billing") && (
-              <Button asChild variant="ghost" size="sm">
-                <Link to="/dashboard/pba-ledger">
-                  <Wallet className="mr-2 h-4 w-4" /> Funds
-                </Link>
-              </Button>
-            )}
             {canEditClients && (
               <>
                 <Button

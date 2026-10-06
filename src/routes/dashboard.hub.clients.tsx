@@ -8,7 +8,7 @@ import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-crea
 import { HostsPage } from "@/components/hosts/hosts-page";
 
 // Old tabs: hosts → placements; referrals → the client list's Referrals view;
-// teams → Homes; funds → the PBA ledger (moves to the profile's Money later).
+// teams → Homes; funds → the client list (each client's PBA ledger is under Money).
 const search = z.object({
   tab: z.enum(["directory", "referrals", "placements", "hosts", "teams", "funds"]).optional(),
 });
@@ -49,7 +49,7 @@ export const Route = createFileRoute("/dashboard/hub/clients")({
     if (s.tab === "referrals")
       throw redirect({ to: "/dashboard/clients", search: { view: "referrals" }, replace: true });
     if (s.tab === "teams") throw redirect({ to: "/dashboard/homes", replace: true });
-    if (s.tab === "funds") throw redirect({ to: "/dashboard/pba-ledger", replace: true });
+    if (s.tab === "funds") throw redirect({ to: "/dashboard/clients", replace: true });
   },
   component: ClientsHub,
 });

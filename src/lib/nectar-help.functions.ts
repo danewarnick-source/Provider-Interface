@@ -46,7 +46,7 @@ const HIVE_NAV_GUIDE = `PI NAVIGATION MAP (use these paths verbatim — never in
 
 ADMIN AREA (admin/manager/super_admin):
 - /dashboard/compliance-desk — Records review: review submitted timesheets, daily logs, EVV punches, incidents.
-- /dashboard/pba-ledger — PBA Trust Ledger: client personal-budget accounts, deposits, withdrawals, audit samples.
+- PBA Trust Ledger: open a client's profile → Money (only for clients with PBA, loans or spending): PBA account, deposits, withdrawals, quarterly audit sample.
 - /dashboard/scheduling — Scheduling: publish/edit staff shifts on a calendar.
 - /dashboard/team-members — Team Members: staff roster, profiles, pay rates, certifications, role assignments.
 - /dashboard/evidence — Evidence: Staff / Client / Company people × requirements grid. Suggestions only. Not a scoreboard.

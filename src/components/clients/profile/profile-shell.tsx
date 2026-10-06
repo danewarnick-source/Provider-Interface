@@ -13,6 +13,7 @@ import {
   User,
   Users,
   UsersRound,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { ProfileShell, type ProfileShellSection } from "@/components/profile-shell/profile-shell";
@@ -29,6 +30,7 @@ const SECTION_ICON: Record<ClientProfileSection, LucideIcon> = {
   health: HeartPulse,
   plans: ClipboardList,
   services: Receipt,
+  money: Wallet,
   file: FolderOpen,
   team: Users,
   activity: Activity,

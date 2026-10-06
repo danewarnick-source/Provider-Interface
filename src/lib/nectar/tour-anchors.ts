@@ -114,13 +114,6 @@ export const TOUR_ANCHORS: TourAnchor[] = [
     surface: "admin",
   },
   {
-    id: "nav.pba-ledger",
-    label: "PBA Trust Ledger",
-    route: "/dashboard/pba-ledger",
-    description: "Client personal-budget accounts and audit samples.",
-    surface: "admin",
-  },
-  {
     id: "nav.help",
     label: "Ask NECTAR",
     route: "/dashboard/help",

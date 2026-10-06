@@ -1,5 +1,6 @@
 // Small read-only pieces shared by the profile sections that list records
-// (activity, summaries, host-home certifications): a loading card and a table.
+// (activity, summaries, host-home certifications): a loading card and a table
+// whose rows can open their record.
 
 import type { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,11 +29,14 @@ export function ReadOnlyTable<R extends Record<string, unknown>>({
   columns,
   loading,
   empty,
+  onOpen,
 }: {
   rows: R[];
   columns: Col<R>[];
   loading?: boolean;
   empty: string;
+  /** Makes each row open its record (click or Enter). */
+  onOpen?: (row: R) => void;
 }) {
   if (loading) {
     return <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>;
@@ -52,7 +56,19 @@ export function ReadOnlyTable<R extends Record<string, unknown>>({
         </TableHeader>
         <TableBody>
           {rows.map((r, i) => (
-            <TableRow key={(r.id as string) ?? i}>
+            <TableRow
+              key={(r.id as string) ?? i}
+              className={onOpen ? "cursor-pointer" : undefined}
+              tabIndex={onOpen ? 0 : undefined}
+              onClick={onOpen ? () => onOpen(r) : undefined}
+              onKeyDown={
+                onOpen
+                  ? (e) => {
+                      if (e.key === "Enter") onOpen(r);
+                    }
+                  : undefined
+              }
+            >
               {columns.map((c) => (
                 <TableCell key={c.header}>{c.cell(r)}</TableCell>
               ))}
