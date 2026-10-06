@@ -44,7 +44,7 @@ describe("customFieldDeleteCopy", () => {
 
 describe("client custom field delete wiring", () => {
   const panel = readFileSync(
-    new URL("../components/clients/custom-fields-panel.tsx", import.meta.url),
+    new URL("../features/clients/shared/components/custom-fields-panel.tsx", import.meta.url),
     "utf8",
   );
   const fns = readFileSync(new URL("./custom-fields.functions.ts", import.meta.url), "utf8");

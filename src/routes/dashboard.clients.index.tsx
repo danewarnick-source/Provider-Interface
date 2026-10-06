@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RequirePermission } from "@/components/rbac-guard";
-import { ClientsPage } from "./dashboard.clients";
+import { ClientsPage } from "@/features/clients/directory";
 
 export const Route = createFileRoute("/dashboard/clients/")({
   head: () => ({ meta: [{ title: "Client Directory — Provider Interface" }] }),

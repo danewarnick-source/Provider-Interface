@@ -19,7 +19,7 @@ import {
   listPendingClientSubjects,
   discardImportSubject,
 } from "@/lib/smart-import-review.functions";
-import { FinalizeClientEditor } from "@/components/clients/finalize-client-editor";
+import { FinalizeClientEditor } from "@/features/clients/onboarding";
 import { clientPendingStatusLabel } from "@/lib/smart-import-status";
 
 

@@ -161,7 +161,7 @@ describe("missingClientFileCsv", () => {
 describe("Client file surface lock", () => {
   it("renames the client profile tab and adds an Admin sidebar route", () => {
     const profile = readFileSync(
-      new URL("../routes/dashboard.clients.$clientId.tsx", import.meta.url),
+      new URL("../features/clients/profile/components/client-profile-page.tsx", import.meta.url),
       "utf8",
     );
     assert.match(profile, /Client file/);

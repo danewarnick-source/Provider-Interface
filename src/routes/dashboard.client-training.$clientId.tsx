@@ -12,7 +12,7 @@ import {
   type CSTReviewQuestion,
   type CSTGoal,
 } from "@/lib/client-specific-training.functions";
-import { SectionsView, GoalsView } from "@/components/clients/client-specific-training-card";
+import { SectionsView, GoalsView } from "@/features/clients/support";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

@@ -108,7 +108,7 @@ describe("Compliance nav lock", () => {
 
   it("does not rename the client profile Compliance tab", () => {
     const profile = readFileSync(
-      new URL("../routes/dashboard.clients.$clientId.tsx", import.meta.url),
+      new URL("../features/clients/profile/components/client-profile-page.tsx", import.meta.url),
       "utf8",
     );
     assert.match(profile, /<TabsTrigger value="compliance">Compliance<\/TabsTrigger>/);

@@ -45,7 +45,7 @@ describe("route UUID params", () => {
 
   it("emergency-contact queries and saves skip the literal new", () => {
     const src = readFileSync(
-      fileURLToPath(new URL("../components/clients/profile-tab.tsx", import.meta.url)),
+      fileURLToPath(new URL("../features/clients/general/components/profile-tab.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(src, /enabled: !!orgId && isRouteUuid\(clientId\)/);
