@@ -47,6 +47,15 @@ test("client profile opens every section from the side menu", async ({ page }) =
       await expect(page.getByTestId("plan-view-as")).toBeVisible();
       await expect(page.getByTestId("client-summaries-owed")).toBeVisible();
     }
+    if (key === "services") {
+      await expect(page.getByTestId("client-authorization-row")).toHaveCount(1);
+      await expect(page.getByText("600 left")).toBeVisible();
+      await expect(page.getByTestId("client-monthly-budget")).toBeVisible();
+    }
+    if (key === "file") {
+      await expect(page.getByTestId("client-required-document")).toHaveCount(3);
+      await expect(page.getByText("sample-1056.pdf")).toBeVisible();
+    }
     if (key === "overview") await expect(page).not.toHaveURL(/section=/);
     else await expect(page).toHaveURL(new RegExp(`section=${key}`));
   }
