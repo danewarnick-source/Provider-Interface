@@ -14,6 +14,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { summarizeIntake, type IntakeProgress } from "@/lib/intake-progress";
 
 const orgClient = z.object({
   organization_id: z.string().uuid(),
@@ -108,6 +109,70 @@ export const getClientIntakeChecklist = createServerFn({ method: "GET" })
         },
       };
     });
+  });
+
+/**
+ * Intake progress for many clients in one call (the directory chip). Clients
+ * the viewer can't open the checklist for are left out of the result.
+ */
+export const getClientsIntakeProgress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        organization_id: z.string().uuid(),
+        client_ids: z.array(z.string().uuid()).max(1000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<Record<string, IntakeProgress>> => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId || data.client_ids.length === 0) return {};
+    await requireOrgMembership(supabase, userId, data.organization_id);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const ids = [...new Set(data.client_ids)];
+
+    const gates = await Promise.all(
+      ids.map(async (id) => {
+        const { data: ok, error } = await sb.rpc("can_view_client_intake", {
+          _org: data.organization_id,
+          _client: id,
+          _viewer: userId,
+        });
+        if (error) throw new Error(error.message);
+        return ok ? id : null;
+      }),
+    );
+    const visible = gates.filter((id): id is string => !!id);
+    if (visible.length === 0) return {};
+
+    const [{ data: base, error: baseErr }, { data: comp, error: compErr }] = await Promise.all([
+      sb.rpc("get_hr_client_intake_base", { _org: data.organization_id }),
+      sb
+        .from("client_intake_completion")
+        .select("client_id, requirement_id, status")
+        .eq("organization_id", data.organization_id)
+        .in("client_id", visible),
+    ]);
+    if (baseErr) throw new Error(baseErr.message);
+    if (compErr) throw new Error(compErr.message);
+
+    const requirements = ((base ?? []) as Array<Record<string, unknown>>).map((r) => ({
+      id: r.id as string,
+      conditional: (((r.metadata ?? {}) as Record<string, unknown>).conditional as string) ?? null,
+    }));
+    const byClient = new Map<string, Map<string, string>>();
+    for (const c of (comp ?? []) as Array<{ client_id: string; requirement_id: string; status: string }>) {
+      let m = byClient.get(c.client_id);
+      if (!m) byClient.set(c.client_id, (m = new Map()));
+      m.set(c.requirement_id, c.status);
+    }
+
+    const out: Record<string, IntakeProgress> = {};
+    for (const id of visible) out[id] = summarizeIntake(requirements, byClient.get(id) ?? new Map());
+    return out;
   });
 
 export const upsertClientIntakeCompletion = createServerFn({ method: "POST" })

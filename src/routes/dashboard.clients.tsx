@@ -33,7 +33,8 @@ import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-gui
 import { jobCodeLabel } from "@/lib/job-codes";
 import { DspdCodesMultiSelect } from "@/components/clients/dspd-codes-multiselect";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { useClientIntakeProgress } from "@/hooks/use-client-intake-progress";
+import { useClientsIntakeProgress } from "@/hooks/use-client-intake-progress";
+import { intakeState, type IntakeProgress, type IntakeState } from "@/lib/intake-progress";
 import { ClientCompliancePanel } from "@/components/clients/client-compliance-panel";
 import { backfillOrgHomePinsFromAddresses } from "@/lib/home-pin.functions";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
@@ -322,6 +323,14 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
     );
   }, [clients, search]);
 
+  const intakeQ = useClientsIntakeProgress(
+    org?.organization_id,
+    rosterTab === "archived" ? [] : clients.map((c) => c.id),
+  );
+  const intakeFor = (id: string): IntakeChipState =>
+    intakeQ.isLoading ? "loading" : intakeQ.error ? "error" : intakeState(intakeQ.data?.[id]);
+  const progressFor = (id: string) => intakeQ.data?.[id];
+
 
   // ── Directory view ────────────────────────────────────────────────────────
 
@@ -465,10 +474,8 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
                     </div>
                     {rosterTab !== "archived" && (
                       <IntakeChip
-                        organizationId={org?.organization_id}
-                        clientId={c.id}
-                        clientName={`${c.first_name} ${c.last_name}`.trim()}
-                        intakeStatus={c.intake_status}
+                        state={intakeFor(c.id)}
+                        progress={progressFor(c.id)}
                         onClick={() => setCompliancePanelClient({ id: c.id, name: `${c.first_name} ${c.last_name}`.trim() })}
                       />
                     )}
@@ -505,9 +512,8 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
                       </div>
                     ) : (
                       <IntakeAction
-                        organizationId={org?.organization_id}
                         clientId={c.id}
-                        intakeStatus={c.intake_status}
+                        state={intakeFor(c.id)}
                       />
                     )}
                     <Link
@@ -599,10 +605,8 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
                       </TableCell>
                       <TableCell className="py-2 w-[110px]" data-no-row-nav onClick={(e) => e.stopPropagation()}>
                         <IntakeChip
-                          organizationId={org?.organization_id}
-                          clientId={c.id}
-                          clientName={`${c.first_name} ${c.last_name}`.trim()}
-                          intakeStatus={c.intake_status}
+                          state={intakeFor(c.id)}
+                          progress={progressFor(c.id)}
                           onClick={() => setCompliancePanelClient({ id: c.id, name: `${c.first_name} ${c.last_name}`.trim() })}
                         />
                       </TableCell>
@@ -626,9 +630,8 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
                           ) : (
                             <>
                               <IntakeAction
-                                organizationId={org?.organization_id}
                                 clientId={c.id}
-                                intakeStatus={c.intake_status}
+                                state={intakeFor(c.id)}
                               />
                               <Button
                                 size="sm"
@@ -675,68 +678,52 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
 
 // ─── Compact Intake Chip + Action (list view) ────────────────────────────────
 
+type IntakeChipState = IntakeState | "loading" | "error";
+
 function IntakeChip({
-  organizationId,
-  clientId,
-  clientName,
-  intakeStatus,
+  state,
+  progress,
   onClick,
 }: {
-  organizationId: string | undefined;
-  clientId: string;
-  clientName: string;
-  intakeStatus: string | null | undefined;
+  state: IntakeChipState;
+  progress: IntakeProgress | undefined;
   onClick: () => void;
 }) {
-  const { isLoading, error, hasItems, required, satisfied, isComplete } =
-    useClientIntakeProgress(organizationId, clientId);
-  if (error) return null;
-  if (isLoading) {
+  if (state === "error") return null;
+  if (state === "loading") {
     return <span className="text-[11px] text-muted-foreground">…</span>;
   }
-  if (!hasItems) {
+  if (state === "none") {
     return (
       <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
         Intake —
       </span>
     );
   }
-  const done = isComplete && intakeStatus === "complete";
-  const noneStarted = satisfied === 0;
   return (
     <button
       type="button"
       onClick={onClick}
       className={
         "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums cursor-pointer transition-opacity hover:opacity-80 " +
-        (done
+        (state === "complete"
           ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-          : noneStarted
+          : state === "not_started"
             ? "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300"
             : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300")
       }
     >
-      {done ? "Intake complete" : noneStarted ? "Intake incomplete" : `${satisfied} of ${required} complete`}
+      {state === "complete"
+        ? "Intake complete"
+        : state === "not_started"
+          ? "Intake incomplete"
+          : `${progress?.satisfied ?? 0} of ${progress?.required ?? 0} complete`}
     </button>
   );
 }
 
-function IntakeAction({
-  organizationId,
-  clientId,
-  intakeStatus,
-}: {
-  organizationId: string | undefined;
-  clientId: string;
-  intakeStatus: string | null | undefined;
-}) {
-  const { isLoading, error, hasItems, isComplete } = useClientIntakeProgress(
-    organizationId,
-    clientId,
-  );
-  if (isLoading || error) return null;
-  const done = hasItems && isComplete && intakeStatus === "complete";
-  if (done) return null;
+function IntakeAction({ clientId, state }: { clientId: string; state: IntakeChipState }) {
+  if (state === "loading" || state === "error" || state === "complete") return null;
   return (
     <Button
       asChild

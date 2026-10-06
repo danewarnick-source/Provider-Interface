@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getClientIntakeChecklist } from "@/lib/client-hr.functions";
+import { getClientIntakeChecklist, getClientsIntakeProgress } from "@/lib/client-hr.functions";
+import { summarizeIntake } from "@/lib/intake-progress";
 
 /**
  * Read-only intake progress derived from the existing client intake checklist.
@@ -29,14 +30,10 @@ export function useClientIntakeProgress(
   });
 
   const rows = q.data ?? [];
-  let required = 0;
-  let satisfied = 0;
-  for (const r of rows) {
-    if (r.conditional) continue;
-    required += 1;
-    const s = r.completion.status;
-    if (s === "complete" || s === "waived") satisfied += 1;
-  }
+  const { required, satisfied } = summarizeIntake(
+    rows.map((r) => ({ id: r.requirement_id, conditional: r.conditional })),
+    new Map(rows.map((r) => [r.requirement_id, r.completion.status])),
+  );
   const hasItems = rows.length > 0;
   const isComplete = hasItems && required > 0 && satisfied >= required;
   const pct = required > 0 ? Math.round((satisfied / required) * 100) : 0;
@@ -50,4 +47,17 @@ export function useClientIntakeProgress(
     isComplete,
     pct,
   };
+}
+
+/** Intake progress for a whole list in one request, keyed by client id. */
+export function useClientsIntakeProgress(organizationId: string | undefined, clientIds: string[]) {
+  const fetchProgress = useServerFn(getClientsIntakeProgress);
+  const ids = [...clientIds].sort();
+  return useQuery({
+    enabled: !!organizationId && ids.length > 0,
+    queryKey: ["clients-intake-progress", organizationId, ids],
+    queryFn: () => fetchProgress({ data: { organization_id: organizationId!, client_ids: ids } }),
+    retry: false,
+    staleTime: 30_000,
+  });
 }
