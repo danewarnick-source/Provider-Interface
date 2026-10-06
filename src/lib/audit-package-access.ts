@@ -10,12 +10,12 @@ export async function assertOrgAdmin(
 ): Promise<void> {
   const { data } = await supabase
     .from("organization_members")
-    .select("role")
+    .select("access_level")
     .eq("organization_id", organizationId)
     .eq("user_id", userId)
-    .in("role", ["admin", "program_manager", "manager"])
+    .in("access_level", ["owner", "admin"])
     .maybeSingle();
-  if (!data) throw new Error("Forbidden — org admin/manager only");
+  if (!data) throw new Error("Forbidden — Owners and Admins only");
 }
 
 /**
@@ -44,10 +44,10 @@ export async function assertPackageAccess(
 
   const { data: adminRow } = await supabase
     .from("organization_members")
-    .select("role")
+    .select("access_level")
     .eq("organization_id", p.organization_id)
     .eq("user_id", userId)
-    .in("role", ["admin", "program_manager", "manager"])
+    .in("access_level", ["owner", "admin"])
     .maybeSingle();
   if (adminRow) return { organizationId: p.organization_id };
 

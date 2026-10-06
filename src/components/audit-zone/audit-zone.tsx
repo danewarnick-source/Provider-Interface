@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { supabase } from "@/integrations/supabase/client";
+import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
 import { askNectarHelp, type NectarHelpReply } from "@/lib/nectar-help.functions";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -182,7 +183,7 @@ async function pullByType(args: {
         .limit(200);
       if (fromTs) q = q.gte("submitted_at", fromTs);
       if (toTs) q = q.lte("submitted_at", toTs);
-      if (clientId) q = q.eq("client_id", clientId);
+      if (clientId) q = q.or(incidentInvolvesClientOr(clientId));
       const { data } = await q;
       return (data ?? []).map((r: any) => ({
         id: `incident:${r.id}`,

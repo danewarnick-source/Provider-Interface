@@ -1,5 +1,5 @@
 // Shared helpers used by every client-tool report generator
-// (budget, meal menu, plan-vs-actual, chore chart). Keeps org-logo fetch,
+// (budget, meal menu, plan-vs-actual). Keeps org-logo fetch,
 // org name lookup, and org membership types in one place.
 //
 // PDFs never fabricate — empty fields render as "—".

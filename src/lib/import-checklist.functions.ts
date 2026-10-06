@@ -7,6 +7,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = any;
@@ -24,14 +25,14 @@ async function requireAdminForClient(
   if (!client) throw new Error("Client not found");
   const { data: membership } = await sb
     .from("organization_members")
-    .select("role")
+    .select("access_level")
     .eq("organization_id", client.organization_id)
     .eq("user_id", userId)
     .eq("active", true)
     .maybeSingle();
   if (!membership) throw new Error("Forbidden");
-  const role = String((membership as { role: string }).role ?? "").toLowerCase();
-  if (!["admin", "program_manager", "manager", "owner"].includes(role)) {
+  const level = (membership as { access_level: string | null }).access_level;
+  if (!isAdminLevel(level)) {
     throw new Error("Forbidden");
   }
   return client.organization_id as string;
@@ -238,7 +239,7 @@ export const extractAndApplyClientUpload = createServerFn({ method: "POST" })
 
     // 3) Extract via the shared NECTAR extractor with a category hint
     const { parseDocumentWithAI } = await import("@/lib/document-extraction");
-    const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`);
+    const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`, orgId);
     const fields = (parsed.fields ?? []).map((f) => ({
       field_key: f.field_key,
       value_text: f.value_text ?? null,
@@ -407,7 +408,7 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
   .handler(async ({ data, context }) => {
     const sb = context.supabase as Sb;
     if (!sb || !context.userId) return { ok: false as const, reason: "Not authenticated." };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
+    const orgId = await requireAdminForClient(sb, context.userId as string, data.clientId);
 
     const { data: file, error: dlErr } = await sb.storage
       .from(data.bucket)
@@ -427,7 +428,7 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
     }
 
     const { parseDocumentWithAI } = await import("@/lib/document-extraction");
-    const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`);
+    const parsed = await parseDocumentWithAI(text, `documentType=${data.documentType}`, orgId);
     const rawFields = (parsed.fields ?? []).map((f) => ({
       field_key: f.field_key,
       value_text: f.value_text ?? null,

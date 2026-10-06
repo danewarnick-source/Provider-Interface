@@ -6,28 +6,23 @@ import { Button } from "@/components/ui/button";
 const COPY: Record<number, { title: string; body: string }> = {
   1: {
     title: "Tell me about your operations",
-    body:
-      "Tell me about your operations — the services you provide, how many clients and staff you have, and any specializations. This calibrates how I guide your scheduling, documentation, and compliance.",
+    body: "Tell me about your operations — the services you provide, how many clients and staff you have, and any specializations. This calibrates how I guide your scheduling, documentation, and compliance.",
   },
   2: {
     title: "Add your staff members",
-    body:
-      "Add your staff members here. Add employee collects the full file first, then you can send a join email or copy a temporary password. Once they're in the system, I can help you schedule them and track their credentials.",
+    body: "Add your team members here. Add team member collects the full file first, then you can send a join email or copy a temporary password. Once they're in the system, I can help you schedule them and track their credentials.",
   },
   3: {
     title: "Add your clients",
-    body:
-      "Add your clients here. Their profiles, PCSPs, and service authorizations are what I use to make sure every shift and medication pass is documented correctly.",
+    body: "Add your clients here. Their profiles, PCSPs, and service authorizations are what I use to make sure every shift and medication pass is documented correctly.",
   },
   4: {
     title: "Configure your service codes",
-    body:
-      "Set up the billing codes for the services you provide. This connects your shifts to Medicaid billing and EVV, and lets me flag mismatches automatically.",
+    body: "Set up the billing codes for the services you provide. This connects your shifts to Medicaid billing and EVV, and lets me flag mismatches automatically.",
   },
   5: {
     title: "Your company documents hub",
-    body:
-      "This is optional evidence storage for agency files — contracts, policies, certifications. You do not need to upload a Scope of Work to finish setup.",
+    body: "This is optional evidence storage for agency files — contracts, policies, certifications. You do not need to upload a Scope of Work to finish setup.",
   },
 };
 
@@ -70,9 +65,7 @@ export function OnboardingGuidanceBanner({ step }: { step: number }) {
           <h3 className="mt-0.5 font-display text-base font-semibold text-amber-50">
             {copy.title}
           </h3>
-          <p className="mt-1 text-sm leading-relaxed text-amber-100/90">
-            {copy.body}
-          </p>
+          <p className="mt-1 text-sm leading-relaxed text-amber-100/90">{copy.body}</p>
         </div>
         <Button
           variant="ghost"

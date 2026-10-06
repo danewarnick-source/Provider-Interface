@@ -93,7 +93,7 @@ function SetPasswordPage() {
     const password = String(fd.get("password"));
     const confirm = String(fd.get("confirm"));
     if (password !== confirm) return toast.error("Passwords don't match");
-    if (password.length < 8) return toast.error("Password must be at least 8 characters");
+    if (password.length < 12) return toast.error("Password must be at least 12 characters");
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
@@ -148,7 +148,7 @@ function SetPasswordPage() {
               <div className="relative mt-1">
                 <input
                   type={showPassword ? "text" : "password"}
-                  name="password" required minLength={8} autoComplete="new-password"
+                  name="password" required minLength={12} autoComplete="new-password"
                   className="min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
                 />
                 <button
@@ -167,7 +167,7 @@ function SetPasswordPage() {
               <div className="relative mt-1">
                 <input
                   type={showConfirm ? "text" : "password"}
-                  name="confirm" required minLength={8} autoComplete="new-password"
+                  name="confirm" required minLength={12} autoComplete="new-password"
                   className="min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 pr-10 text-sm focus:border-[var(--hive-text)] focus:outline-none"
                 />
                 <button

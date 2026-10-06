@@ -60,13 +60,6 @@ import {
 import { freezeOriginalTranscript } from "@/lib/original-transcript";
 import { NectarInfusionLock } from "@/components/nectar/nectar-infusion-lock";
 import { useNectarInfusion } from "@/hooks/use-nectar-infusion";
-import {
-  emptyBehaviorAnswers,
-  validateBehaviorAnswers,
-  type BehaviorAnswers,
-} from "@/components/evv/behavior-observations-block";
-import { useShiftBehaviorSetting } from "@/hooks/use-shift-behavior-setting";
-import { listClientTargetBehaviors } from "@/lib/client-target-behaviors.functions";
 import { getPendingTrackingForms } from "@/lib/forms.functions";
 import {
   PendingTrackingFormsDialog,
@@ -76,7 +69,7 @@ import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import type { PendingMedDose } from "@/components/medications/shift-med-due-check";
 import { useComplianceGate } from "@/hooks/use-compliance-gate";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { useServerFn } from "@tanstack/react-start";
 import {
   checkBillingEntry,
@@ -134,6 +127,7 @@ import {
   MAX_GPS_ACCURACY_METERS,
 } from "@/lib/geo";
 import { selectedPill, unselectedPill } from "@/components/evv/toggle-styles";
+import { isAdminLevel } from "@/lib/access/levels";
 
 function fmtElapsed(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -294,12 +288,6 @@ export function PunchPad({
   const [dismissReasonDraft, setDismissReasonDraft] = useState("");
   const navigate = useNavigate();
 
-  // ── Post-shift Behavior Observations ───────────────────────────────────────
-  const { data: behaviorSetting } = useShiftBehaviorSetting();
-  const behaviorEnabled = behaviorSetting?.enabled ?? true;
-  const [behaviorAnswers, setBehaviorAnswers] = useState<BehaviorAnswers>(emptyBehaviorAnswers);
-  // Target behaviors query lives below, after `active` is in scope.
-
   // ── Pre-submit medication check (reads real emar_logs, no shadow store) ───
   const [medDosesResolved, setMedDosesResolved] = useState(true);
   const [pendingMedDoses, setPendingMedDoses] = useState<PendingMedDose[]>([]);
@@ -349,22 +337,6 @@ export function PunchPad({
 
   const active = activeQuery.data ?? null;
   const activeMatchesThisPad = active && (!lockedClient || active.client_id === lockedClient.id);
-
-  // ── Target Behaviors (must come after `active` is declared) ────────────────
-  const listTargetBehaviorsFn = useServerFn(listClientTargetBehaviors);
-  const { data: targetBehaviorRows = [] } = useQuery({
-    queryKey: ["client-target-behaviors", active?.client_id],
-    queryFn: () =>
-      listTargetBehaviorsFn({
-        data: {
-          organization_id: org!.organization_id,
-          client_id: active!.client_id,
-        },
-      }),
-    enabled: behaviorEnabled && !!active?.client_id && !!org?.organization_id,
-    staleTime: 5 * 60_000,
-  });
-  const targetBehaviorOptions = targetBehaviorRows.map((b) => b.behavior_name);
 
   // ── Approved locations (per-client allowlist for variance flagging) ─────────
   // EVV still records actual GPS for every clock-in; this only suppresses the
@@ -918,8 +890,6 @@ export function PunchPad({
 
   const hasGoalSelected = baselineChecked || Object.values(checkedGoals).some(Boolean);
   const narrativeOk = wordCount >= NECTAR_DRAFT_MIN_WORDS;
-  const behaviorError = behaviorEnabled ? validateBehaviorAnswers(behaviorAnswers) : null;
-  const behaviorOk = behaviorError === null;
   const liveDurationMs = active
     ? Math.max(0, now - new Date(active.clock_in_timestamp).getTime())
     : 0;
@@ -953,7 +923,6 @@ export function PunchPad({
   const canSubmitCompliance =
     hasGoalSelected &&
     narrativeOk &&
-    behaviorOk &&
     longShiftOk &&
     triggersResolved &&
     medDosesResolved &&
@@ -969,7 +938,6 @@ export function PunchPad({
     setOriginalTranscript("");
     setCheckedGoals({});
     setBaselineChecked(false);
-    setBehaviorAnswers(emptyBehaviorAnswers);
     setIncidentFlag(false);
     setIncidentAnswer(null);
 
@@ -1159,9 +1127,8 @@ export function PunchPad({
   // Growth-adaptive: one useComplianceGate call, its own buildInput/buildSubject,
   // plus a restrict-vs-override branch. Engine (dialog, rules, flags, history,
   // freeze trigger, raise/resolve fns) and detector registry are UNTOUCHED.
-  const { role } = usePermissions();
-  const canOverrideCompliance =
-    role === "admin" || role === "program_manager" || role === "manager";
+  const { level: role } = useAccess();
+  const canOverrideCompliance = isAdminLevel(role);
   const detectBillingConflict = useServerFn(checkBillingEntry);
   const detectStaffPrereq = useServerFn(checkStaffPrerequisite);
   const raiseComplianceFlagFn = useServerFn(raiseComplianceFlag);
@@ -1549,36 +1516,6 @@ export function PunchPad({
       }
     }
 
-    // Persist post-shift Behavior Observations when the provider has the feature on.
-    if (behaviorEnabled && org?.organization_id) {
-      const b = behaviorAnswers;
-      const obs = {
-        organization_id: org.organization_id,
-        shift_id: active.id,
-        client_id: active.client_id,
-        staff_id: user.id,
-        observed_at: clockOut,
-        behaviors_observed: b.behaviorsObserved === true,
-        target_behaviors: b.behaviorsObserved ? b.targetBehaviors : [],
-        behavior_counts: b.behaviorsObserved ? b.counts : {},
-        objective_description: b.behaviorsObserved ? b.objectiveDescription.trim() || null : null,
-        antecedent_context: b.behaviorsObserved ? b.antecedentContext.trim() || null : null,
-        intervention_response: b.behaviorsObserved ? b.interventionResponse.trim() || null : null,
-        reportable_incident: b.behaviorsObserved ? b.reportableIncident : false,
-        positives: b.positives.trim() || null,
-        trend_vs_recent: b.trendVsRecent || null,
-      };
-      const { error: behErr } = await supabase
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .from("shift_behavior_observations" as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .upsert(obs as any, { onConflict: "shift_id" });
-      if (behErr) {
-        // Non-blocking: shift is already saved. Surface a soft toast.
-        toast.error(`Behavior observations not saved: ${behErr.message}`);
-      }
-    }
-
     // Medication compliance is now recorded in the real MAR (`emar_logs`) via
     // the eMAR tab — no shadow attestation write here.
 
@@ -1608,10 +1545,6 @@ export function PunchPad({
     if (!narrativeOk) {
       setShowNarrativeError(true);
       setCompletenessErrors([localWordCountCheck(narrative)]);
-      return;
-    }
-    if (behaviorEnabled && behaviorError) {
-      toast.error(`Behavior observations: ${behaviorError}`);
       return;
     }
     if (!triggersResolved) {
@@ -2591,9 +2524,6 @@ export function PunchPad({
                     incidentReportIds={incidentReportIds}
                     incidentDialogOpen={incidentDialogOpen}
                     incidentTriggerOpen={incidentTriggerOpen}
-                    behaviorEnabled={behaviorEnabled}
-                    behaviorAnswers={behaviorAnswers}
-                    targetBehaviorOptions={targetBehaviorOptions}
                     onIncidentAnswer={(answer) => {
                       setIncidentAnswer(answer);
                       setIncidentFlag(answer === "yes");
@@ -2621,7 +2551,6 @@ export function PunchPad({
                       toast.message("Opened client workspace — log the appointment, then return.");
                     }}
                     onTriggersResolved={setTriggersResolved}
-                    onBehaviorChange={setBehaviorAnswers}
                     onMedResolvedChange={setMedDosesResolved}
                     onPendingDosesChange={setPendingMedDoses}
                   />

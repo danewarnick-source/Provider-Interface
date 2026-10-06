@@ -235,9 +235,9 @@ export const getCompliancePacket = createServerFn({ method: "POST" })
     const subjectId = data.subjectId ?? null;
     const ownStaffPacket = data.subject === "staff" && subjectId === userId;
     if (ownStaffPacket) {
-      await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+      await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     } else {
-      await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+      await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     }
 
     const packet = await assembleCompliancePacket({

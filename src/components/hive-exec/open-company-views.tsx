@@ -4,7 +4,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { usePortalView } from "@/hooks/use-portal-view";
 import {
   companyAdminSwitchAccessibleName,
-  isCompanyAdminRole,
+  isCompanyAdminLevel,
   resolvePortalSwitcherPath,
   STAFF_VIEW_ACCESSIBLE_NAME,
 } from "@/lib/portal-view-landing";
@@ -28,7 +28,7 @@ export function OpenCompanyViews({
 
   if (!org?.organization_id) return null;
 
-  const isAdminCapable = isCompanyAdminRole(org.role);
+  const isAdminCapable = isCompanyAdminLevel(org.access.level);
   const adminName = companyAdminSwitchAccessibleName(org.organization_name);
 
   const go = (view: "admin" | "staff") => {

@@ -75,12 +75,15 @@ type Props = {
   obligationTitle: string;
   alreadyComplete: boolean;
   examResetAfterIso: string | null;
-  /** Public training-only seats have no office obligation to close. */
+  /** Billing-exempt orgs have no office obligation to close. */
   skipObligation?: boolean;
   organizationName?: string;
 };
 
-function topicsForCourse(courseId: InHiveCourseId, pctLessons: PctPublicLesson[] | undefined): Topic[] {
+function topicsForCourse(
+  courseId: InHiveCourseId,
+  pctLessons: PctPublicLesson[] | undefined,
+): Topic[] {
   if (courseId === "thirty-day") return thirtyDayTopicsInSowOrder();
   if (courseId === "abi") return ABI_TOPICS;
   if (courseId === PCT_COURSE_ID) return pctTopicsFromPublic(pctLessons ?? []);
@@ -152,7 +155,15 @@ export function InHiveCoursePlayer({
     if (!progressQ.isSuccess) return;
     if (isPct && !pctCourseQ.isSuccess) return;
     setActiveCode(alreadyComplete || passed ? "exam" : firstOpen);
-  }, [activeCode, alreadyComplete, firstOpen, isPct, passed, pctCourseQ.isSuccess, progressQ.isSuccess]);
+  }, [
+    activeCode,
+    alreadyComplete,
+    firstOpen,
+    isPct,
+    passed,
+    pctCourseQ.isSuccess,
+    progressQ.isSuccess,
+  ]);
 
   useEffect(() => {
     setPctCheckOpen(false);
@@ -168,7 +179,12 @@ export function InHiveCoursePlayer({
   });
 
   const persistCertificateIfReady = useCallback(
-    async (codes: ReadonlySet<string>, examPassed: boolean, examScorePct: number | null, completedAt: string) => {
+    async (
+      codes: ReadonlySet<string>,
+      examPassed: boolean,
+      examScorePct: number | null,
+      completedAt: string,
+    ) => {
       if (courseId !== "thirty-day") return;
       const plan = planThirtyDayWrites({
         examPassed,
@@ -198,53 +214,58 @@ export function InHiveCoursePlayer({
     [courseId, organizationName, signedName, signerEmail, topicCodes, topics, userId],
   );
 
-  const markObligation = useCallback(async (freshCodes?: ReadonlySet<string>) => {
-    const codes = freshCodes ?? completedCodesFromProgress(
-      topicCodes,
-      await loadInHiveCourseProgress(userId, courseId, topicCodes),
-    );
-    const examAttempts = await loadInHiveExamAttempts(userId, courseId, examResetAfterIso);
-    const passedExam = examAttempts.some((a) => a.passed);
-    const lastPass = [...examAttempts].reverse().find((a) => a.passed);
-    const plan = planThirtyDayWrites({
-      examPassed: passedExam,
-      topicCodes,
-      completedCodes: codes,
-      skipObligation: skipObligation || !inHiveCourseFulfillsObligation(courseId),
+  const markObligation = useCallback(
+    async (freshCodes?: ReadonlySet<string>) => {
+      const codes =
+        freshCodes ??
+        completedCodesFromProgress(
+          topicCodes,
+          await loadInHiveCourseProgress(userId, courseId, topicCodes),
+        );
+      const examAttempts = await loadInHiveExamAttempts(userId, courseId, examResetAfterIso);
+      const passedExam = examAttempts.some((a) => a.passed);
+      const lastPass = [...examAttempts].reverse().find((a) => a.passed);
+      const plan = planThirtyDayWrites({
+        examPassed: passedExam,
+        topicCodes,
+        completedCodes: codes,
+        skipObligation: skipObligation || !inHiveCourseFulfillsObligation(courseId),
+        alreadyComplete,
+        segmentPassed: false,
+      });
+      if (plan.writeCertificate) {
+        await persistCertificateIfReady(
+          codes,
+          passedExam,
+          lastPass?.scorePct ?? null,
+          lastPass?.completedAt ?? new Date().toISOString(),
+        );
+      }
+      if (!plan.writeObligation || !organizationId) return;
+      await recordFn({
+        data: {
+          organizationId,
+          instanceId,
+          evidenceTypeUsed: IN_HIVE_COURSE_EVIDENCE,
+          attestationSignedAt: new Date().toISOString(),
+          attestationTextSnapshot: `${obligationTitle} completed in Provider Interface.`,
+        },
+      });
+    },
+    [
+      courseId,
+      examResetAfterIso,
+      instanceId,
+      obligationTitle,
+      organizationId,
       alreadyComplete,
-      segmentPassed: false,
-    });
-    if (plan.writeCertificate) {
-      await persistCertificateIfReady(
-        codes,
-        passedExam,
-        lastPass?.scorePct ?? null,
-        lastPass?.completedAt ?? new Date().toISOString(),
-      );
-    }
-    if (!plan.writeObligation || !organizationId) return;
-    await recordFn({
-      data: {
-        organizationId,
-        instanceId,
-        evidenceTypeUsed: IN_HIVE_COURSE_EVIDENCE,
-        attestationSignedAt: new Date().toISOString(),
-        attestationTextSnapshot: `${obligationTitle} completed in Provider Interface.`,
-      },
-    });
-  }, [
-    courseId,
-    examResetAfterIso,
-    instanceId,
-    obligationTitle,
-    organizationId,
-    alreadyComplete,
-    persistCertificateIfReady,
-    recordFn,
-    skipObligation,
-    topicCodes,
-    userId,
-  ]);
+      persistCertificateIfReady,
+      recordFn,
+      skipObligation,
+      topicCodes,
+      userId,
+    ],
+  );
 
   const finishCourse = useMutation({
     mutationFn: markObligation,
@@ -286,12 +307,7 @@ export function InHiveCoursePlayer({
         if (!alreadyComplete) {
           await markObligation(fresh);
         } else {
-          await persistCertificateIfReady(
-            fresh,
-            true,
-            snapshot.scorePct,
-            snapshot.completedAt,
-          );
+          await persistCertificateIfReady(fresh, true, snapshot.scorePct, snapshot.completedAt);
         }
       }
       return snapshot;
@@ -407,8 +423,8 @@ export function InHiveCoursePlayer({
         <p className="font-medium">Coming soon</p>
         <p className="text-muted-foreground">
           The 12-hour continuing education course is not built yet. Upload certificates on this
-          staff-file card, or log hours in the CE ledger. This placeholder does not mark the card
-          On file.
+          staff-file card, or log hours in the CE ledger. This placeholder does not mark the card On
+          file.
         </p>
         <Button variant="outline" asChild>
           <Link to="/dashboard/my-obligations">Back to staff file</Link>
@@ -426,7 +442,11 @@ export function InHiveCoursePlayer({
     return <p className="text-sm text-muted-foreground p-4">Loading course…</p>;
   }
   if (isPct && pctCourseQ.isError) {
-    return <p className="text-sm text-muted-foreground p-4">Could not load this course. Refresh and try again.</p>;
+    return (
+      <p className="text-sm text-muted-foreground p-4">
+        Could not load this course. Refresh and try again.
+      </p>
+    );
   }
 
   const activeTopic = topics.find((t) => t.code === activeCode) ?? null;
@@ -448,7 +468,9 @@ export function InHiveCoursePlayer({
           </Button>
         )}
         <div>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">In-platform course</p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            In-platform course
+          </p>
           <h1 className="text-lg font-semibold leading-tight">{courseTitle(courseId)}</h1>
           <p className="text-xs text-muted-foreground mt-1">
             {completedCodes.size} of {topics.length} topics done
@@ -493,7 +515,8 @@ export function InHiveCoursePlayer({
                 )}
                 <span className="leading-snug">
                   <span className="font-medium">
-                    {topicChecklistLabel(done ? "completed" : progressQ.data?.[t.code]?.status)} · {t.code}. {t.title}
+                    {topicChecklistLabel(done ? "completed" : progressQ.data?.[t.code]?.status)} ·{" "}
+                    {t.code}. {t.title}
                   </span>
                 </span>
               </button>
@@ -690,8 +713,8 @@ function ExamPane({
             before you can try again.
           </p>
           <p className="text-xs text-muted-foreground">
-            Your attempts are saved on your staff file. An administrator can download the
-            auditor export if one is needed.
+            Your attempts are saved on your staff file. An administrator can download the auditor
+            export if one is needed.
           </p>
         </CardContent>
       </Card>
@@ -713,13 +736,11 @@ function ExamPane({
                 ? " This card is On file when the course is recorded."
                 : " Finish every topic on the checklist, then record it on your staff file."}
           </p>
-          {certificate && (
-            <InHiveCertificate record={certificate} issued={certificateIssued} />
-          )}
+          {certificate && <InHiveCertificate record={certificate} issued={certificateIssued} />}
           <div className="rounded-lg border bg-muted/40 p-3 text-sm">
-            Completion is submitted and saved on your staff file. An administrator can
-            download the auditor export if one is needed. You can reopen any topic above to
-            review the material anytime.
+            Completion is submitted and saved on your staff file. An administrator can download the
+            auditor export if one is needed. You can reopen any topic above to review the material
+            anytime.
           </div>
           {!alreadyComplete && !hideObligation && certificateIssued && (
             <Button variant="outline" disabled={finishPending} onClick={onMarkObligation}>
@@ -750,24 +771,24 @@ function ExamPane({
               {q.options.map((c, oi) => {
                 const label = String.fromCharCode(65 + oi);
                 return (
-                <label
-                  key={c.k}
-                  className={cn(
-                    "flex items-start gap-2 rounded-lg border p-2.5 text-sm cursor-pointer",
-                    answers[q.id] === c.k && "border-primary bg-primary/5",
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name={q.id}
-                    className="mt-1"
-                    checked={answers[q.id] === c.k}
-                    onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: c.k }))}
-                  />
-                  <span>
-                    <span className="font-medium">{label}.</span> {c.t}
-                  </span>
-                </label>
+                  <label
+                    key={c.k}
+                    className={cn(
+                      "flex items-start gap-2 rounded-lg border p-2.5 text-sm cursor-pointer",
+                      answers[q.id] === c.k && "border-primary bg-primary/5",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name={q.id}
+                      className="mt-1"
+                      checked={answers[q.id] === c.k}
+                      onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: c.k }))}
+                    />
+                    <span>
+                      <span className="font-medium">{label}.</span> {c.t}
+                    </span>
+                  </label>
                 );
               })}
             </div>
@@ -1029,7 +1050,8 @@ function PctExamPane({
             </legend>
             <div className="space-y-1.5">
               {q.options.map((text, oi) => {
-                const originalIndex = quizQ.data.find((item) => item.id === q.id)?.options.indexOf(text) ?? oi;
+                const originalIndex =
+                  quizQ.data.find((item) => item.id === q.id)?.options.indexOf(text) ?? oi;
                 return (
                   <label
                     key={`${q.id}-${originalIndex}`}
@@ -1043,9 +1065,7 @@ function PctExamPane({
                       name={q.id}
                       className="mt-1"
                       checked={answers[q.id] === originalIndex}
-                      onChange={() =>
-                        setAnswers((prev) => ({ ...prev, [q.id]: originalIndex }))
-                      }
+                      onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: originalIndex }))}
                     />
                     <span>
                       <span className="font-medium">{String.fromCharCode(65 + oi)}.</span> {text}

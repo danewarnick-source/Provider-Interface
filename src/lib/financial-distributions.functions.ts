@@ -2,14 +2,14 @@
 //
 // Distributions is HARD-LOCKED to admin / super_admin — it is NEVER a
 // manager-toggleable permission. Every read and write here therefore gates
-// on requireRoleAtLeast("admin") (admin OR super_admin) using the
+// on requireLevel("owner") (admin OR super_admin) using the
 // USER-SCOPED context.supabase from requireSupabaseAuth. RLS still applies
 // as the user. No supabaseAdmin. No RLS changes.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { requireRoleAtLeast } from "@/lib/require-permission";
+import { requireLevel } from "@/lib/access/require";
 
 const OrgInput = z.object({ organizationId: z.string().uuid() });
 const OrgYearInput = OrgInput.extend({ year: z.number().int().min(2000).max(2100) });
@@ -21,7 +21,7 @@ async function gate(
 ) {
   // admin or super_admin only — managers and below MUST 403.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await requireRoleAtLeast(context.supabase as any, context.userId, organizationId, "admin");
+  await requireLevel(context.supabase as any, context.userId, organizationId, "owner");
 }
 
 // ---------------- Reads ----------------

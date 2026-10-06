@@ -37,10 +37,11 @@ import {
 import { EmarOpsPanel } from "./emar-ops-panel";
 import { EmarNectarPanel } from "./emar-nectar-panel";
 import { MedicationsManager } from "@/components/medications-manager";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { logMedicationPass, addEmarAddendum } from "@/lib/emar-pass.functions";
 import { type EmarStatus, normalizeEmarStatus, EMAR_STATUS_LABELS } from "@/lib/emar-status";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { isAdminLevel } from "@/lib/access/levels";
 
 
 
@@ -1309,8 +1310,8 @@ export function MarEmarTab({
   const orgId = org?.organization_id;
   const recordAccessFn = useServerFn(recordPhiAccess);
   const emarAuditLogged = useRef(false);
-  const { role } = usePermissions();
-  const canManageMeds = role === "admin" || role === "program_manager" || role === "manager";
+  const { level: role } = useAccess();
+  const canManageMeds = isAdminLevel(role);
   const [safetyEditorOpen, setSafetyEditorOpen] = useState(false);
   const [disableConfirmOpen, setDisableConfirmOpen] = useState(false);
   const [disabling, setDisabling] = useState(false);

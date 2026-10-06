@@ -134,7 +134,7 @@ export const openApprovalRequest = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ requestId: string }> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { requestId: "" };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     // If a pending / approved request already exists for this exact
     // extracted-field row, return it instead of creating a duplicate.
@@ -206,7 +206,7 @@ export const postApprovalMessage = createServerFn({ method: "POST" })
     let side: SenderRole;
     if (hive) side = "hive_admin";
     else {
-      await requireOrgMembership(supabase, userId, req.organization_id as string, "manager");
+      await requireOrgMembership(supabase, userId, req.organization_id as string, "admin");
       side = "provider";
     }
 
@@ -273,7 +273,7 @@ export const withdrawApprovalRequest = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!req) throw new Error("Request not found");
     if (req.status !== "pending") throw new Error(`Request is already ${req.status}`);
-    await requireOrgMembership(supabase, userId, req.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, req.organization_id as string, "admin");
 
     await supabase
       .from("billing_code_approval_requests")
@@ -300,7 +300,7 @@ export const listMyApprovalRequests = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<ApprovalRequestRow[]> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return [];
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     return listRequestsInternal(supabase, { organizationId: data.organizationId, viewerSide: "provider", viewerUserId: userId });
   });
 
@@ -450,7 +450,7 @@ export const getApprovalThread = createServerFn({ method: "POST" })
     let viewer: SenderRole;
     if (hive) viewer = "hive_admin";
     else {
-      await requireOrgMembership(supabase, userId, req.organization_id as string, "manager");
+      await requireOrgMembership(supabase, userId, req.organization_id as string, "admin");
       viewer = "provider";
     }
 
@@ -542,7 +542,7 @@ export const markApprovalThreadRead = createServerFn({ method: "POST" })
     let otherSide: SenderRole;
     if (hive) { column = "read_by_hive_at"; otherSide = "provider"; }
     else {
-      await requireOrgMembership(supabase, userId, req.organization_id as string, "manager");
+      await requireOrgMembership(supabase, userId, req.organization_id as string, "admin");
       column = "read_by_provider_at"; otherSide = "hive_admin";
     }
 
@@ -569,7 +569,7 @@ export const getApprovalUnreadCount = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ count: number }> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { count: 0 };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: reqs } = await supabase
       .from("billing_code_approval_requests")
@@ -629,7 +629,7 @@ export const lookupApprovalRequestsForFields = createServerFn({ method: "POST" }
   .handler(async ({ data, context }): Promise<Record<string, ApprovalRequestRow | null>> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return {};
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     if (data.extractedFieldIds.length === 0) return {};
 
     const all = await listRequestsInternal(supabase, {

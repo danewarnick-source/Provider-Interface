@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { incidentInvolvesAnyClientOr } from "@/lib/incident-visibility";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
 import { isDailyServiceCode } from "@/lib/service-billing";
@@ -317,13 +318,20 @@ export function ResidentialDailyTab({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
         .from("incident_reports")
-        .select("id, client_id, discovered_at, status, is_fatality")
+        .select("id, client_id, additional_client_ids, discovered_at, status, is_fatality")
         .eq("organization_id", orgId)
         .gte("discovered_at", `${start}T00:00:00Z`)
         .lte("discovered_at", `${end}T23:59:59Z`)
-        .in("client_id", clientIds);
+        .or(incidentInvolvesAnyClientOr(clientIds));
       if (error) throw error;
-      return (data ?? []) as Array<{ id: string; client_id: string; discovered_at: string; status: string | null; is_fatality: boolean | null }>;
+      return (data ?? []) as Array<{
+        id: string;
+        client_id: string;
+        additional_client_ids: string[] | null;
+        discovered_at: string;
+        status: string | null;
+        is_fatality: boolean | null;
+      }>;
     },
   });
 
@@ -413,11 +421,16 @@ export function ResidentialDailyTab({
       if (row) row.supervisionContacts += 1;
     }
     for (const ir of incidentsQ.data ?? []) {
-      const row = map.get(ir.client_id);
-      if (!row) continue;
-      if (ir.status === "State_Confirmed") row.incidentsClosed += 1;
-      else row.incidentsOpen += 1;
-      if (ir.is_fatality) row.fatalityThisMonth = true;
+      const involved = new Set<string>();
+      if (ir.client_id) involved.add(ir.client_id);
+      for (const id of ir.additional_client_ids ?? []) involved.add(id);
+      for (const id of involved) {
+        const row = map.get(id);
+        if (!row) continue;
+        if (ir.status === "State_Confirmed") row.incidentsClosed += 1;
+        else row.incidentsOpen += 1;
+        if (ir.is_fatality) row.fatalityThisMonth = true;
+      }
     }
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
   }, [clients, dailyRows, historicalLogsQ.data, punchQ.data, supervisionQ.data, incidentsQ.data, orgGoLive]);

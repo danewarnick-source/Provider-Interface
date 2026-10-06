@@ -107,6 +107,7 @@ type DraftItem = {
 
 type JobRow = {
   id: string;
+  organization_id: string;
   document_id: string;
   status: string;
   total_chunks: number;
@@ -122,13 +123,14 @@ async function loadJob(jobId: string): Promise<JobRow | null> {
   const { data, error } = await supabaseAdmin
     .from("nectar_draft_jobs")
     .select(
-      "id, document_id, status, total_chunks, processed_chunks, processed_indices, chunk_ranges, extracted_items, chunk_failures, chunk_durations_ms",
+      "id, organization_id, document_id, status, total_chunks, processed_chunks, processed_indices, chunk_ranges, extracted_items, chunk_failures, chunk_durations_ms",
     )
     .eq("id", jobId)
     .single();
   if (error || !data) return null;
   return {
     id: data.id as string,
+    organization_id: data.organization_id as string,
     document_id: data.document_id as string,
     status: data.status as string,
     total_chunks: (data.total_chunks as number) ?? 0,
@@ -155,6 +157,7 @@ async function processOneChunk(
   chunkIndex: number,
   windowText: string,
   totalChunks: number,
+  orgId: string,
 ): Promise<{ items: DraftItem[]; failures: string[]; durationMs: number; transient: boolean }> {
   const t0 = Date.now();
   let items: DraftItem[] = [];
@@ -179,6 +182,7 @@ async function processOneChunk(
     const got = await extractChunkOnce(
       windowText,
       `PART ${chunkIndex + 1} OF ${totalChunks}`,
+      orgId,
     );
     items = got.items;
     failures = got.failures;
@@ -295,7 +299,13 @@ export async function runDraftTick(jobId: string): Promise<{
 
       const [s, e] = initial.chunk_ranges[chunkIndex];
       const windowText = rawText.slice(s, e);
-      const result = await processOneChunk(jobId, chunkIndex, windowText, total);
+      const result = await processOneChunk(
+        jobId,
+        chunkIndex,
+        windowText,
+        total,
+        initial.organization_id,
+      );
       if (result.transient) return;
       await persistChunkResult(jobId, chunkIndex, result);
       chunksThisTick += 1;

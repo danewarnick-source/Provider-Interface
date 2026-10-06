@@ -24,6 +24,7 @@ import {
   isRequiredSetupFactAnswered,
   type AgencySetupFacts,
 } from "./agency-setup-completion.ts";
+import { isAdminLevel } from "./access/levels.ts";
 
 export {
   AGENCY_SETUP_COMPLETION_SPEC,
@@ -111,22 +112,18 @@ export type ComputeAgencySetupStatusOptions = {
 };
 
 export const SETUP_GATED_PATHS = [
-  "/dashboard/employees",
-  "/dashboard/employees/new",
-  "/dashboard/hub/employees",
+  "/dashboard/team-members",
   "/dashboard/clients",
   "/dashboard/clients/new",
   "/dashboard/hub/clients",
-  "/employees/new",
-  "/employees",
   "/clients/new",
   "/clients",
 ] as const;
 
 export const SETUP_CREATE_APIS = [
-  "createEmployeeManually",
-  "hireEmployeeInternal",
-  "applyEmployeeRosterRow",
+  "createTeamMember",
+  "importTeamMembers",
+  "hireTeamMemberInternal",
   "createInvitation",
   "clients.insert",
   "smartImportCommitClient",
@@ -223,7 +220,7 @@ export function canModifyAgencySetup(input: {
 }): boolean {
   if (!canViewAgencySetup(input)) return false;
   const role = input.actor?.role ?? "";
-  return role === "admin" || role === "program_manager" || role === "manager";
+  return isAdminLevel(role);
 }
 
 export function isolateOrgRecords<T extends { organizationId: string }>(

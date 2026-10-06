@@ -15,7 +15,8 @@ import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, webhook-id, webhook-timestamp, webhook-signature",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, webhook-id, webhook-timestamp, webhook-signature",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -50,7 +51,13 @@ function managedFromHeader(): string {
   return `${DEFAULT_MANAGED_FROM_NAME} <${managedFromAddress()}>`;
 }
 
-type EmailActionType = "signup" | "recovery" | "invite" | "magiclink" | "email_change" | "reauthentication";
+type EmailActionType =
+  | "signup"
+  | "recovery"
+  | "invite"
+  | "magiclink"
+  | "email_change"
+  | "reauthentication";
 
 type HookPayload = {
   user: { email: string };
@@ -99,7 +106,8 @@ function buttonHtml(href: string, label: string): string {
   `;
 }
 
-const CANONICAL_SITE_ORIGIN = "https://hivecertify.com";
+/** Mirrors PROVIDER_INTERFACE_ORIGIN in src/lib/auth-redirect.ts. */
+const PUBLIC_EMAIL_ORIGIN = "https://providerinterface.com";
 
 function isLovableHost(hostname: string): boolean {
   const host = hostname.toLowerCase();
@@ -126,13 +134,35 @@ function defaultRedirectPath(type: EmailActionType): string {
   }
 }
 
-/** Keep hivecertify.com and Vercel; rewrite Lovable (and empty) redirects. */
+function isHivecertifyHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return host === "hivecertify.com" || host.endsWith(".hivecertify.com");
+}
+
+/** Same allowlist as isSafeAuthOrigin in src/lib/auth-redirect.ts. */
+const ALLOWED_AUTH_ORIGINS = new Set([
+  "https://providerinterface.com",
+  "https://www.providerinterface.com",
+  "https://agency-peace-of-mind.vercel.app",
+]);
+
+function isDevHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return host === "localhost" || host === "127.0.0.1";
+}
+
+function isAllowedAuthOrigin(url: URL): boolean {
+  if (isDevHost(url.hostname)) return url.protocol === "http:" || url.protocol === "https:";
+  return ALLOWED_AUTH_ORIGINS.has(url.origin);
+}
+
+/** User-facing auth-email links. Anything off the allowlist, including Lovable and hivecertify.com, becomes providerinterface.com. */
 function sanitizeRedirectTo(redirectTo: string, type: EmailActionType): string {
-  const fallback = `${CANONICAL_SITE_ORIGIN}${defaultRedirectPath(type)}`;
+  const fallback = `${PUBLIC_EMAIL_ORIGIN}${defaultRedirectPath(type)}`;
   try {
     const url = new URL(redirectTo);
-    if (isLovableHost(url.hostname)) {
-      return `${CANONICAL_SITE_ORIGIN}${url.pathname}${url.search}${url.hash}`;
+    if (isLovableHost(url.hostname) || isHivecertifyHost(url.hostname) || !isAllowedAuthOrigin(url)) {
+      return `${PUBLIC_EMAIL_ORIGIN}${url.pathname}${url.search}${url.hash}`;
     }
     return `${url.origin}${url.pathname}${url.search}${url.hash}`;
   } catch {
@@ -149,7 +179,10 @@ function verifyLink(supabaseUrl: string, data: HookPayload["email_data"]): strin
   return `${supabaseUrl.replace(/\/+$/, "")}/auth/v1/verify?${params.toString()}`;
 }
 
-function buildEmail(supabaseUrl: string, data: HookPayload["email_data"]): { subject: string; html: string } {
+function buildEmail(
+  supabaseUrl: string,
+  data: HookPayload["email_data"],
+): { subject: string; html: string } {
   switch (data.email_action_type) {
     case "signup": {
       return {
@@ -229,7 +262,9 @@ Deno.serve(async (req) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 
   if (!hookSecret || !RESEND_API_KEY || !SUPABASE_URL) {
-    console.error("[auth-send-email] not configured: missing SEND_EMAIL_HOOK_SECRET, RESEND_API_KEY, or SUPABASE_URL");
+    console.error(
+      "[auth-send-email] not configured: missing SEND_EMAIL_HOOK_SECRET, RESEND_API_KEY, or SUPABASE_URL",
+    );
     return json({ error: "not configured" }, 500);
   }
 
@@ -290,9 +325,11 @@ Deno.serve(async (req) => {
 // 4. Save. From that point on, Supabase Auth calls this function for every
 //    auth email (signup codes, password reset, invite, email change)
 //    instead of its own mailer.
-// 5. Authentication → URL Configuration: Site URL must be
-//    https://hivecertify.com (not a Lovable domain). Also add
-//    https://hivecertify.com/** and
-//    https://agency-peace-of-mind.vercel.app/** as Additional Redirect URLs.
-//    This is an ops change in the Supabase dashboard — not in this repo.
+// 5. Authentication → URL Configuration: add
+//    https://providerinterface.com/** as an Additional Redirect URL.
+//    Auth emails rewrite hivecertify.com and Lovable hosts to
+//    https://providerinterface.com. Also keep
+//    https://agency-peace-of-mind.vercel.app/** if preview resets
+//    should still land there. This is an ops change in the Supabase
+//    dashboard — not in this repo.
 // ────────────────────────────────────────────────────────────────────────

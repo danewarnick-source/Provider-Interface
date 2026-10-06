@@ -71,7 +71,7 @@ export const recordPhiAccess = createServerFn({ method: "POST" })
       context.supabase,
       context.userId,
       data.organizationId,
-      "employee",
+      "staff",
     );
     const { logPhiAccess, resolveRequestMeta } = await import("@/lib/phi-access-audit.server");
     const { ip, userAgent } = resolveRequestMeta({
@@ -101,7 +101,7 @@ export const listPhiAccessAudit = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { rows: [] as PhiAccessAuditRow[] };
 
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const limit = Math.min(data.limit ?? 50, 200);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

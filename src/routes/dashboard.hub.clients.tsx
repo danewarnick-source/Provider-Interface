@@ -1,25 +1,32 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 import { HubShell, type HubTab } from "@/components/admin-hubs/hub-shell";
-import { RequirePermission } from "@/components/rbac-guard";
-import { RequireRole } from "@/components/rbac-guard";
-import { usePermissions } from "@/hooks/use-permissions";
+import { RequireLevel, RequirePermission } from "@/components/rbac-guard";
+import { useAccess } from "@/hooks/use-access";
 import { ClientsPage } from "./dashboard.clients";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
 import { TeamsPage } from "./dashboard.teams";
 import { PbaLedgerPage } from "./dashboard.pba-ledger";
 import { ClientLoansPage } from "./dashboard.client-loans";
 import { ReferralsPage } from "@/components/referrals/referrals-page";
+import { HostsPage } from "@/components/hosts/hosts-page";
 
 const search = z.object({
-  tab: z.enum(["directory", "referrals", "teams", "funds"]).optional(),
+  tab: z.enum(["directory", "referrals", "placements", "hosts", "teams", "funds"]).optional(),
 });
 
-
 function ClientsHub() {
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const tabs: HubTab[] = [
-    { key: "directory", label: "Directory", render: () => <ClientsPage /> },
+    {
+      key: "directory",
+      label: "Directory",
+      render: () => (
+        <RequirePermission perm="view_clients">
+          <ClientsPage />
+        </RequirePermission>
+      ),
+    },
   ];
   if (can("view_referrals") || can("manage_referrals")) {
     tabs.push({
@@ -31,9 +38,17 @@ function ClientsHub() {
         </RequirePermission>
       ),
     });
+    tabs.push({
+      key: "placements",
+      label: "Placements",
+      render: () => (
+        <RequirePermission perm="view_referrals">
+          <HostsPage />
+        </RequirePermission>
+      ),
+    });
   }
   tabs.push(
-
     {
       key: "teams",
       label: "Teams & homes",
@@ -60,9 +75,9 @@ function ClientsHub() {
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               Client Loan Ledger
             </h3>
-            <RequireRole roles={["admin"]}>
+            <RequireLevel min="owner">
               <ClientLoansPage />
-            </RequireRole>
+            </RequireLevel>
           </section>
         </div>
       ),
@@ -78,5 +93,14 @@ function ClientsHub() {
 export const Route = createFileRoute("/dashboard/hub/clients")({
   head: () => ({ meta: [{ title: "Clients — Provider Interface" }] }),
   validateSearch: (s) => search.parse(s),
+  beforeLoad: ({ search: s }) => {
+    if (s.tab === "hosts") {
+      throw redirect({
+        to: "/dashboard/hub/clients",
+        search: { tab: "placements" },
+        replace: true,
+      });
+    }
+  },
   component: ClientsHub,
 });

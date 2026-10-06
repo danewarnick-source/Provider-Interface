@@ -48,7 +48,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/assignments",
   "/dashboard/audit",
   "/dashboard/authoritative-sources",
-  "/dashboard/certifications",
   "/dashboard/client-billing-codes",
   "/dashboard/client-loans",
   "/dashboard/command-center",
@@ -58,7 +57,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/deadlines",
   "/dashboard/emar",
   "/dashboard/evv-archive",
-  "/dashboard/external-certifications",
   "/dashboard/external-compliance",
   "/dashboard/help",
   "/dashboard/homes",
@@ -68,8 +66,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/nectar-docs",
   "/dashboard/pba-ledger",
   "/dashboard/permissions",
-  "/dashboard/programs",
-  "/dashboard/programs-admin",
   "/dashboard/records-desk",
   "/dashboard/reimbursements",
   "/dashboard/reports",
@@ -79,14 +75,10 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/scheduler",
   "/dashboard/scheduling",
   "/dashboard/summaries",
-  "/dashboard/team",
   "/dashboard/teams",
   "/dashboard/timeclock",
-  "/dashboard/tracks",
-
   // Admin sub-routes
   "/dashboard/admin/emar-audit",
-  "/dashboard/behaviorist",
 
   // Billing
   "/dashboard/billing",
@@ -99,15 +91,8 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/clients",
   "/dashboard/clients/rhs-board",
 
-  // Courses
-  "/dashboard/courses",
-  "/dashboard/courses/core",
-  "/dashboard/courses/mindsmith",
-  "/dashboard/courses/other",
-  "/dashboard/courses/person",
-
-  // Employees
-  "/dashboard/employees",
+  // Team Members
+  "/dashboard/team-members",
 
   // Financial
   "/dashboard/financial",
@@ -159,34 +144,23 @@ const STATIC_ROUTES: string[] = [
   // Smart import
   "/dashboard/smart-import",
   "/dashboard/smart-import/history",
-
-  // Training
-  "/dashboard/training",
 ];
 
 // Parameterised routes — each entry includes the rendered URL and whether it's
 // a "detail page" that must show a Back/Cancel button.
 const PARAM_ROUTES: Array<{ url: string; isDetail: boolean }> = [
-  { url: `/dashboard/behavior-support/${ID.clientId}`, isDetail: true },
   { url: `/dashboard/billing/${ID.clientId}`, isDetail: true },
   { url: `/dashboard/client-intake/${ID.clientId}`, isDetail: true },
   { url: `/dashboard/client-training/${ID.clientId}`, isDetail: true },
   { url: `/dashboard/clients/${ID.clientId}`, isDetail: true },
-  { url: `/dashboard/courses/${ID.courseId}`, isDetail: true },
-  { url: `/dashboard/courses/${ID.courseId}/edit`, isDetail: true },
-  { url: `/dashboard/courses/person-module/${ID.assignmentId}`, isDetail: true },
-  { url: `/dashboard/courses/topic/${ID.topicId}`, isDetail: true },
-  { url: `/dashboard/employees/${ID.staffId}`, isDetail: true },
+  { url: `/dashboard/team-members/${ID.staffId}`, isDetail: true },
   { url: `/dashboard/forms/${ID.formId}/edit`, isDetail: true },
   { url: `/dashboard/forms/${ID.formId}/fill`, isDetail: true },
   { url: `/dashboard/hive-exec/states/${ID.stateCode}`, isDetail: false },
   { url: `/dashboard/hive-exec/states/${ID.stateCode}/onboarding`, isDetail: true },
-  { url: `/dashboard/programs/${ID.programId}`, isDetail: true },
   { url: `/dashboard/shift/${ID.shiftId}`, isDetail: true },
   { url: `/dashboard/smart-import/${ID.jobId}/done`, isDetail: true },
   { url: `/dashboard/smart-import/${ID.jobId}/review`, isDetail: true },
-  { url: `/dashboard/tracks/${ID.trackSlug}`, isDetail: true },
-  { url: `/dashboard/training/${ID.trainingId}`, isDetail: true },
   { url: `/dashboard/workspace/${ID.clientId}`, isDetail: true },
 ];
 
@@ -205,11 +179,7 @@ function isBenign(text: string): boolean {
   return BENIGN_PATTERNS.some((p) => p.test(text));
 }
 
-async function assertPageHealth(
-  page: Page,
-  url: string,
-  isDetail: boolean,
-): Promise<void> {
+async function assertPageHealth(page: Page, url: string, isDetail: boolean): Promise<void> {
   const consoleErrors: string[] = [];
   const onConsoleError = (msg: { type: () => string; text: () => string }) => {
     if (msg.type() === "error" && !isBenign(msg.text())) {
@@ -227,23 +197,20 @@ async function assertPageHealth(
 
   // 1. No 404
   if (response) {
-    expect(
-      response.status(),
-      `HTTP 404 on ${url}`,
-    ).not.toBe(404);
+    expect(response.status(), `HTTP 404 on ${url}`).not.toBe(404);
   }
   await expect(
     page.getByText(/404|not found|page not found/i).first(),
     `404 text visible on ${url}`,
-  ).not.toBeVisible({ timeout: 3_000 }).catch(() => {
-    // If the locator doesn't exist at all, that's fine — no 404
-  });
+  )
+    .not.toBeVisible({ timeout: 3_000 })
+    .catch(() => {
+      // If the locator doesn't exist at all, that's fine — no 404
+    });
 
   // 2. No blank page — wait a moment for hydration
   await page.waitForTimeout(2_000);
-  const bodyText = await page.evaluate(() =>
-    document.body?.innerText?.trim() ?? "",
-  );
+  const bodyText = await page.evaluate(() => document.body?.innerText?.trim() ?? "");
   expect(bodyText.length, `Blank page on ${url}`).toBeGreaterThan(0);
 
   // 3. No infinite spinner after 5 s
@@ -258,10 +225,9 @@ async function assertPageHealth(
   expect(spinnerVisible, `Infinite spinner still visible on ${url}`).toBe(false);
 
   // 4. No console errors
-  expect(
-    consoleErrors,
-    `console.error fired on ${url}: ${consoleErrors.join(" | ")}`,
-  ).toHaveLength(0);
+  expect(consoleErrors, `console.error fired on ${url}: ${consoleErrors.join(" | ")}`).toHaveLength(
+    0,
+  );
 
   page.removeListener("console", onConsoleError);
 
@@ -280,10 +246,7 @@ async function assertPageHealth(
       .first()
       .isVisible()
       .catch(() => false);
-    expect(
-      backButtonVisible,
-      `No Back/Cancel button found on detail page ${url}`,
-    ).toBe(true);
+    expect(backButtonVisible, `No Back/Cancel button found on detail page ${url}`).toBe(true);
   }
 
   // eMAR-specific: status badge must follow self-administration model
@@ -293,18 +256,17 @@ async function assertPageHealth(
     );
     const badgeCount = await badgeLocator.count();
     for (let i = 0; i < badgeCount; i++) {
-      const text = await badgeLocator.nth(i).textContent().catch(() => "");
+      const text = await badgeLocator
+        .nth(i)
+        .textContent()
+        .catch(() => "");
       if (!text) continue;
       // Must NOT contain bare "Administered" (only "Self-administered" is valid)
-      expect(
-        text,
-        `Forbidden eMAR label "Administered" (without "Self-") on ${url}`,
-      ).not.toMatch(/(?<!Self-)Administered/);
+      expect(text, `Forbidden eMAR label "Administered" (without "Self-") on ${url}`).not.toMatch(
+        /(?<!Self-)Administered/,
+      );
       // Must NOT contain "Five Rights"
-      expect(
-        text,
-        `Forbidden eMAR label "Five Rights" on ${url}`,
-      ).not.toMatch(/Five Rights/i);
+      expect(text, `Forbidden eMAR label "Five Rights" on ${url}`).not.toMatch(/Five Rights/i);
     }
   }
 }

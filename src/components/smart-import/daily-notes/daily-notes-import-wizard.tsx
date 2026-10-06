@@ -12,6 +12,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
+import { neutralizeCsvFields } from "@/lib/csv-safe";
 import { toast } from "sonner";
 import {
   Upload, X, Loader2, ArrowRight, ArrowLeft, Download,
@@ -488,7 +489,7 @@ export function DailyNotesImportWizard() {
       const row: Record<string, string> = {};
       for (const h of parsed.headers) row[h] = r.raw[h] ?? "";
       row.skip_reason = r.skipped ? (r.reason ?? "skipped by user") : (r.reason ?? "unresolved");
-      return row;
+      return neutralizeCsvFields(row);
     });
     const csv = Papa.unparse({ fields: headers, data: csvRows });
     const blob = new Blob([csv], { type: "text/csv" });

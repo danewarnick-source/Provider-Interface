@@ -26,13 +26,13 @@ export const getMyEntitlements = createServerFn({ method: "GET" })
 
     const { data: memberships } = await supabase
       .from("organization_members")
-      .select("organization_id, role")
+      .select("organization_id, access_level")
       .eq("user_id", userId)
       .eq("active", true);
 
-    const rank: Record<string, number> = { admin: 0, program_manager: 1, manager: 2, employee: 3 };
-    const sorted = [...((memberships ?? []) as Array<{ organization_id: string; role: string }>)].sort(
-      (a, b) => (rank[a.role] ?? 9) - (rank[b.role] ?? 9),
+    const rank: Record<string, number> = { owner: 0, admin: 1, staff: 2 };
+    const sorted = [...((memberships ?? []) as Array<{ organization_id: string; access_level: string }>)].sort(
+      (a, b) => (rank[a.access_level] ?? 9) - (rank[b.access_level] ?? 9),
     );
     const primary = sorted[0];
     if (!primary) {

@@ -7,13 +7,13 @@ import {
   extractEmailAddress,
   formatFromHeader,
   managedFromAddress,
+  pickReplyTo,
   stripFakeDisplayLabel,
 } from "./managed-from.ts";
 
 const FROM_RAILS = [
   new URL("./email.functions.ts", import.meta.url),
   new URL("./audit-portal.functions.ts", import.meta.url),
-  new URL("./training-only-exec.functions.ts", import.meta.url),
   new URL("../routes/dashboard.settings.email.tsx", import.meta.url),
   new URL("../../supabase/functions/auth-send-email/index.ts", import.meta.url),
   new URL("../../supabase/functions/send-email/index.ts", import.meta.url),
@@ -21,7 +21,10 @@ const FROM_RAILS = [
 
 describe("extractEmailAddress", () => {
   it("accepts a bare mailbox", () => {
-    assert.equal(extractEmailAddress("noreply@providerinterface.com"), "noreply@providerinterface.com");
+    assert.equal(
+      extractEmailAddress("noreply@providerinterface.com"),
+      "noreply@providerinterface.com",
+    );
   });
 
   it("pulls the address out of a Name <addr> header", () => {
@@ -65,7 +68,10 @@ describe("managedFromAddress", () => {
 
   it("never returns @resend.dev, including a leftover sandbox env", () => {
     assert.doesNotMatch(managedFromAddress({}), /@resend\.dev/);
-    assert.equal(managedFromAddress({ RESEND_FROM: "onboarding@resend.dev" }), DEFAULT_MANAGED_FROM_ADDRESS);
+    assert.equal(
+      managedFromAddress({ RESEND_FROM: "onboarding@resend.dev" }),
+      DEFAULT_MANAGED_FROM_ADDRESS,
+    );
   });
 });
 
@@ -90,6 +96,26 @@ describe("formatFromHeader", () => {
       formatFromHeader("True North Supports (FAKE)", DEFAULT_MANAGED_FROM_ADDRESS),
       /\(FAKE\)/i,
     );
+  });
+});
+
+describe("pickReplyTo", () => {
+  it("uses the org setting when it is a real mailbox", () => {
+    assert.equal(
+      pickReplyTo("billing@agency.example", "admin@agency.example"),
+      "billing@agency.example",
+    );
+  });
+
+  it("falls back to the inviting person's email", () => {
+    assert.equal(pickReplyTo("  ", "admin@agency.example"), "admin@agency.example");
+    assert.equal(pickReplyTo(null, " admin@agency.example "), "admin@agency.example");
+  });
+
+  it("returns null when neither address is usable", () => {
+    assert.equal(pickReplyTo(null, null), null);
+    assert.equal(pickReplyTo("", "not-an-email"), null);
+    assert.equal(pickReplyTo("missing-at", undefined), null);
   });
 });
 

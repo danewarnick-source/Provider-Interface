@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Upload, Trash2 } from "lucide-react";
-import { staffPermissionMutationErrorMessage } from "@/lib/staff-permission-toggles";
+import { safeErrorMessage } from "@/lib/safe-error-message";
 import { PersonAvatar } from "./person-avatar";
 
 /**
@@ -17,6 +17,46 @@ import { PersonAvatar } from "./person-avatar";
  */
 type Bucket = "client-photos" | "staff-photos" | "org-branding";
 
+type ImageType = "image/jpeg" | "image/png" | "image/webp";
+
+const IMAGE_EXT: Record<ImageType, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+async function sniffImageType(file: File): Promise<ImageType | null> {
+  const buf = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "image/jpeg";
+  if (
+    buf.length >= 8 &&
+    buf[0] === 0x89 &&
+    buf[1] === 0x50 &&
+    buf[2] === 0x4e &&
+    buf[3] === 0x47 &&
+    buf[4] === 0x0d &&
+    buf[5] === 0x0a &&
+    buf[6] === 0x1a &&
+    buf[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+  if (
+    buf.length >= 12 &&
+    buf[0] === 0x52 &&
+    buf[1] === 0x49 &&
+    buf[2] === 0x46 &&
+    buf[3] === 0x46 &&
+    buf[8] === 0x57 &&
+    buf[9] === 0x45 &&
+    buf[10] === 0x42 &&
+    buf[11] === 0x50
+  ) {
+    return "image/webp";
+  }
+  return null;
+}
+
 export function PhotoUpload({
   bucket,
   organizationId,
@@ -29,6 +69,8 @@ export function PhotoUpload({
   avatarClassName = "h-16 w-16",
   readOnly = false,
   className = "flex items-center gap-3",
+  imageTypes = ["image/jpeg", "image/png", "image/webp"],
+  deferSave = false,
 }: {
   bucket: Bucket;
   organizationId: string;
@@ -41,6 +83,13 @@ export function PhotoUpload({
   avatarClassName?: string;
   readOnly?: boolean;
   className?: string;
+  /** Accepted formats. Default JPEG, PNG and WebP. */
+  imageTypes?: ImageType[];
+  /**
+   * The caller persists the path on its own Save: Remove leaves the stored file
+   * in place, and the toasts say the change still needs saving.
+   */
+  deferSave?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -54,18 +103,26 @@ export function PhotoUpload({
       toast.error("Photo must be under 8 MB");
       return;
     }
+    const imageType = await sniffImageType(file);
+    if (!imageType || !imageTypes.includes(imageType)) {
+      toast.error(
+        imageTypes.includes("image/webp")
+          ? "Photo must be a JPEG, PNG, or WebP file"
+          : "Photo must be a PNG or JPEG file",
+      );
+      return;
+    }
     setBusy(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-      const path = `${organizationId}/${subjectId}/photo-${Date.now()}.${ext}`;
+      const path = `${organizationId}/${subjectId}/photo-${Date.now()}.${IMAGE_EXT[imageType]}`;
       const { error } = await supabase.storage
         .from(bucket)
-        .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
+        .upload(path, file, { upsert: true, contentType: imageType });
       if (error) throw error;
       await onUploaded(path);
-      toast.success("Photo saved");
+      toast.success(deferSave ? "Photo added. Save to keep it." : "Photo saved");
     } catch (e) {
-      toast.error(staffPermissionMutationErrorMessage(e, "Upload failed"));
+      toast.error(safeErrorMessage(e, "Upload failed"));
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -87,7 +144,7 @@ export function PhotoUpload({
           <input
             ref={inputRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp"
+            accept={imageTypes.join(",")}
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0];
@@ -113,11 +170,13 @@ export function PhotoUpload({
               onClick={async () => {
                 setBusy(true);
                 try {
-                  await supabase.storage.from(bucket).remove([currentPath]);
+                  if (!deferSave) await supabase.storage.from(bucket).remove([currentPath]);
                   await onCleared();
-                  toast.success("Photo removed");
+                  toast.success(
+                    deferSave ? "Photo removed. Save to keep the change." : "Photo removed",
+                  );
                 } catch (e) {
-                  toast.error(staffPermissionMutationErrorMessage(e, "Remove failed"));
+                  toast.error(safeErrorMessage(e, "Remove failed"));
                 } finally {
                   setBusy(false);
                 }

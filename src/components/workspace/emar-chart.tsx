@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { toast } from "sonner";
+import { isAdminLevel } from "@/lib/access/levels";
 
 /** Permanent legal/scope banner shown at the top of every eMAR surface.
  *  Deep-navy band with amber warning icon — matches the self-administration
@@ -321,8 +322,8 @@ export function ClientSafetyEditor({
 
 /** Eligibility gate — rendered when the client is NOT flagged for self-admin support. */
 export function EmarEligibilityGate({ client }: { client: ClientSafety }) {
-  const { role } = usePermissions();
-  const isAdmin = role === "admin" || role === "program_manager" || role === "manager";
+  const { level: role } = useAccess();
+  const isAdmin = isAdminLevel(role);
   return (
     <div className="space-y-4">
       <EmarLegalBanner />

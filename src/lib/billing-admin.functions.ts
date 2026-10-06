@@ -12,14 +12,14 @@ const ORG = z.string().uuid();
 async function ensureOrgAdmin(supabase: any, userId: string, orgId: string) {
   const { data, error } = await supabase
     .from("organization_members")
-    .select("role")
+    .select("access_level")
     .eq("organization_id", orgId)
     .eq("user_id", userId)
     .eq("active", true)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data || data.role !== "admin") {
-    throw new Error("Forbidden — admin role required");
+  if (!data || data.access_level !== "owner") {
+    throw new Error("Forbidden — Owner access required");
   }
 }
 

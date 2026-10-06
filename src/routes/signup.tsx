@@ -1,21 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  Eye,
-  EyeOff,
-  Loader2,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AuthCaptcha,
+  authCaptchaBlocked,
+  readAuthCaptchaToken,
+  resetAuthCaptcha,
+} from "@/components/auth-captcha";
+import { AUTH_CAPTCHA_REQUIRED, captchaTokenOption } from "@/lib/auth-captcha";
 import { authRedirectUrl } from "@/lib/auth-redirect";
-import { checkEmailExists, checkPasswordPwnedRange } from "@/lib/signup-checks.functions";
+import { checkPasswordPwnedRange } from "@/lib/signup-checks.functions";
 import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
 import { setBillingSmsPhoneAtSignup } from "@/lib/billing-sms.functions";
 import {
@@ -24,7 +24,9 @@ import {
   SIGNUP_PROVISION_FAILED_MESSAGE,
   isSignupEmailNotConfirmedError,
   signupHasSession,
+  signupSubmissionIsAutomated,
 } from "@/lib/signup-workspace";
+import { persistActiveOrgId } from "@/lib/current-org";
 import {
   AUTH_PWNED_PASSWORD_MESSAGE,
   hibpRangeIncludesSha1,
@@ -40,7 +42,6 @@ import {
   isSignupServerFnFailure,
   orgIdFromCreatedByRow,
   orgIdFromEnsureWorkspaceResult,
-  orgIdFromMembershipRow,
   signupBusinessOrgPatch,
   signupBusinessWriteOk,
 } from "@/lib/signup-business";
@@ -49,7 +50,11 @@ import {
   getSignupPaymentsStatusFn,
 } from "@/lib/stripe-checkout.functions";
 import { formatUsdFromCents, type BillingInterval } from "@/lib/hive-pricing";
-import { PI_LIST_MINIMUM_LINE, PI_LIST_PRICE_DISPLAY, PI_SIGNUP_PRICE_LINE } from "@/lib/pi-landing";
+import {
+  PI_LIST_MINIMUM_LINE,
+  PI_LIST_PRICE_DISPLAY,
+  PI_SIGNUP_PRICE_LINE,
+} from "@/lib/pi-landing";
 import {
   SIGNUP_AGENCY_PLACEHOLDER,
   SIGNUP_TRAINING_ADDONS,
@@ -71,18 +76,18 @@ import {
   SIGNUP_EMAIL_IN_USE_MESSAGE,
   humanizeSignupAccountError,
   isAlreadyUsedEmailError,
-  isMissingLegalAttestationsError,
 } from "@/lib/signup-account-error";
-import {
-  humanizeCheckoutStartError,
-  signupAuthCallbackError,
-} from "@/lib/signup-checkout-error";
+import { humanizeCheckoutStartError, signupAuthCallbackError } from "@/lib/signup-checkout-error";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
       { title: "Get started — Provider Interface" },
-      { name: "description", content: "Create your Provider Interface account and start running your agency from one place." },
+      {
+        name: "description",
+        content:
+          "Create your Provider Interface account and start running your agency from one place.",
+      },
     ],
   }),
   component: SignupPage,
@@ -101,13 +106,7 @@ const inputStyle: React.CSSProperties = {
   fontFamily: JAKARTA,
 };
 
-const STEPS = [
-  "Account",
-  "Your business",
-  "Plan",
-  "Training",
-  "Payment",
-] as const;
+const STEPS = ["Account", "Your business", "Plan", "Training", "Payment"] as const;
 
 /* ──────────────────────────── form state ──────────────────────────── */
 
@@ -282,7 +281,6 @@ function SignupPage() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(initialForm);
   const [authCallbackError, setAuthCallbackError] = useState<string | null>(null);
-  const checkEmail = useServerFn(checkEmailExists);
   const checkPwnedRange = useServerFn(checkPasswordPwnedRange);
   const ensureWorkspace = useServerFn(ensureSignupWorkspace);
   const setSmsPhoneFn = useServerFn(setBillingSmsPhoneAtSignup);
@@ -306,6 +304,16 @@ function SignupPage() {
     const goIfSession = (session: unknown) => {
       if (signupHasSession(session as { access_token?: string; user?: { id?: string } } | null)) {
         setStep((s) => (s === 0 ? 1 : s));
+        // Confirmed session (this tab, or the email link on another device).
+        // Workspace create no longer happens inside signUp once the SQL handoff
+        // is applied, so provision here before they reach the business step.
+        void ensureWorkspace({ data: {} })
+          .then((ensured) => {
+            if (ensured?.orgId) persistActiveOrgId(ensured.orgId);
+          })
+          .catch(() => {
+            /* business step retries */
+          });
       }
     };
     void (async () => {
@@ -320,7 +328,7 @@ function SignupPage() {
     return () => {
       sub?.subscription?.unsubscribe?.();
     };
-  }, []);
+  }, [ensureWorkspace]);
 
   const update = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((s) => ({ ...s, [k]: v }));
@@ -331,50 +339,50 @@ function SignupPage() {
     <PiPublicPage surface="paper">
       <main className="wrap pi-home-signup">
         <p className="pi-home-signup-account">
-          Already have an account?{" "}
-          <Link to="/login">Sign in</Link>
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
         <Stepper step={step} />
-          <div
-            className="rounded-2xl border border-[var(--hive-border)] bg-[var(--hive-surface)] p-6 text-[var(--hive-text)] shadow-[var(--shadow-card)] sm:p-8"
-            data-testid="signup-new-agency"
-          >
-            {step === 0 && (
-              <Step1Account
-                form={form}
-                update={update}
-                checkEmail={checkEmail}
-                checkPwnedRange={checkPwnedRange}
-                onNext={() => setStep(1)}
-                authCallbackError={authCallbackError}
-              />
-            )}
-            {step === 1 && (
-              <Step3Business
-                form={form}
-                update={update}
-                ensureWorkspace={ensureWorkspace}
-                setSmsPhoneFn={setSmsPhoneFn}
-                onBack={goBack}
-                onNext={() => setStep(2)}
-              />
-            )}
-            {step === 2 && (
-              <Step4Pricing form={form} update={update} onBack={goBack} onNext={() => setStep(3)} />
-            )}
-            {step === 3 && (
-              <Step5Training form={form} update={update} onBack={goBack} onNext={() => setStep(4)} />
-            )}
-            {step === 4 && (
-              <Step6Payment
-                form={form}
-                onBack={goBack}
-                onComplete={async () => {
-                  await navigate({ to: "/dashboard", search: { welcome: "1" } as never }).catch(() => navigate({ to: "/dashboard" }));
-                }}
-              />
-            )}
-          </div>
+        <div
+          className="rounded-2xl border border-[var(--hive-border)] bg-[var(--hive-surface)] p-6 text-[var(--hive-text)] shadow-[var(--shadow-card)] sm:p-8"
+          data-testid="signup-new-agency"
+        >
+          {step === 0 && (
+            <Step1Account
+              form={form}
+              update={update}
+              checkPwnedRange={checkPwnedRange}
+              onNext={() => setStep(1)}
+              authCallbackError={authCallbackError}
+            />
+          )}
+          {step === 1 && (
+            <Step3Business
+              form={form}
+              update={update}
+              ensureWorkspace={ensureWorkspace}
+              setSmsPhoneFn={setSmsPhoneFn}
+              onBack={goBack}
+              onNext={() => setStep(2)}
+            />
+          )}
+          {step === 2 && (
+            <Step4Pricing form={form} update={update} onBack={goBack} onNext={() => setStep(3)} />
+          )}
+          {step === 3 && (
+            <Step5Training form={form} update={update} onBack={goBack} onNext={() => setStep(4)} />
+          )}
+          {step === 4 && (
+            <Step6Payment
+              form={form}
+              onBack={goBack}
+              onComplete={async () => {
+                await navigate({ to: "/dashboard", search: { welcome: "1" } as never }).catch(() =>
+                  navigate({ to: "/dashboard" }),
+                );
+              }}
+            />
+          )}
+        </div>
       </main>
     </PiPublicPage>
   );
@@ -382,17 +390,17 @@ function SignupPage() {
 
 /* ──────────────────────────── STEP 1 ──────────────────────────── */
 
+const SIGNUP_PASSWORD_MIN = 12;
+
 function Step1Account({
   form,
   update,
-  checkEmail,
   checkPwnedRange,
   onNext,
   authCallbackError,
 }: {
   form: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
-  checkEmail: (input: { data: { email: string } }) => Promise<{ exists: boolean }>;
   checkPwnedRange: (input: { data: { sha1Prefix: string } }) => Promise<{ range: string }>;
   onNext: () => void;
   authCallbackError?: string | null;
@@ -401,42 +409,46 @@ function Step1Account({
   const [accountErr, setAccountErr] = useState<string | null>(null);
   const [confirmEmailMsg, setConfirmEmailMsg] = useState<string | null>(authCallbackError ?? null);
   const [passwordWeakErr, setPasswordWeakErr] = useState<string | null>(null);
-  const [checking, setChecking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const weakCheckGen = useRef(0);
+  const formMountedAt = useRef(Date.now());
+  const [companyWebsite, setCompanyWebsite] = useState("");
 
   useEffect(() => {
     if (authCallbackError) setConfirmEmailMsg(authCallbackError);
   }, [authCallbackError]);
 
-  const lenOk = form.password.length >= 8;
+  const lenOk = form.password.length >= SIGNUP_PASSWORD_MIN;
   const matchOk = form.password.length > 0 && form.password === form.confirm;
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
 
-  const verifyPasswordPwned = useCallback(async (password: string): Promise<boolean> => {
-    const gen = ++weakCheckGen.current;
-    if (password.length < 8) {
-      setPasswordWeakErr(null);
-      return false;
-    }
-    try {
-      const sha1 = await sha1HexUpper(password);
-      const { range } = await checkPwnedRange({ data: { sha1Prefix: hibpSha1Prefix(sha1) } });
-      if (gen !== weakCheckGen.current) return false;
-      const pwned = hibpRangeIncludesSha1(range, sha1);
-      setPasswordWeakErr(pwned ? AUTH_PWNED_PASSWORD_MESSAGE : null);
-      return pwned;
-    } catch {
-      if (gen !== weakCheckGen.current) return false;
-      // fail-open — Auth still rejects on submit
-      return false;
-    }
-  }, [checkPwnedRange]);
+  const verifyPasswordPwned = useCallback(
+    async (password: string): Promise<boolean> => {
+      const gen = ++weakCheckGen.current;
+      if (password.length < SIGNUP_PASSWORD_MIN) {
+        setPasswordWeakErr(null);
+        return false;
+      }
+      try {
+        const sha1 = await sha1HexUpper(password);
+        const { range } = await checkPwnedRange({ data: { sha1Prefix: hibpSha1Prefix(sha1) } });
+        if (gen !== weakCheckGen.current) return false;
+        const pwned = hibpRangeIncludesSha1(range, sha1);
+        setPasswordWeakErr(pwned ? AUTH_PWNED_PASSWORD_MESSAGE : null);
+        return pwned;
+      } catch {
+        if (gen !== weakCheckGen.current) return false;
+        // fail-open — Auth still rejects on submit
+        return false;
+      }
+    },
+    [checkPwnedRange],
+  );
 
   useEffect(() => {
-    if (form.password.length < 8) {
+    if (form.password.length < SIGNUP_PASSWORD_MIN) {
       setPasswordWeakErr(null);
       return;
     }
@@ -446,54 +458,32 @@ function Step1Account({
     return () => window.clearTimeout(t);
   }, [form.password, verifyPasswordPwned]);
 
-  const verifyEmail = async () => {
-    if (!emailValid) return;
-    setChecking(true);
-    setEmailErr(null);
-    try {
-      const r = await checkEmail({ data: { email: form.email } });
-      if (r.exists) {
-        setEmailErr(SIGNUP_EMAIL_IN_USE_MESSAGE);
-      }
-    } catch {
-      // soft-fail; we'll re-check on submit
-    } finally {
-      setChecking(false);
-    }
-  };
-
   const submit = async () => {
     setEmailErr(null);
     setAccountErr(null);
     if (!form.acceptedTos) return toast.error("Agree to the Terms to continue.");
-    if (!form.acceptedBaa) return toast.error("Agree to the Business Associate Agreement to continue.");
+    if (!form.acceptedBaa)
+      return toast.error("Agree to the Business Associate Agreement to continue.");
     if (!emailValid) return setEmailErr("Please enter a valid email address.");
-    if (!lenOk) return toast.error("Password must be at least 8 characters.");
+    if (!lenOk) return toast.error(`Password must be at least ${SIGNUP_PASSWORD_MIN} characters.`);
     if (!matchOk) return toast.error("Passwords don't match.");
     if (await verifyPasswordPwned(form.password)) return;
+    if (authCaptchaBlocked()) return toast.error(AUTH_CAPTCHA_REQUIRED);
+    const captchaToken = readAuthCaptchaToken();
     setBusy(true);
     try {
-      let exists = false;
-      try {
-        const r = await checkEmail({ data: { email: form.email } });
-        exists = r.exists;
-      } catch (e) {
-        if (isAlreadyUsedEmailError(e)) {
-          setEmailErr(SIGNUP_EMAIL_IN_USE_MESSAGE);
-          setBusy(false);
-          return;
-        }
-        if (isMissingLegalAttestationsError(e)) {
-          const sentence = humanizeSignupAccountError(e);
-          setAccountErr(sentence);
-          toast.error(sentence);
-          setBusy(false);
-          return;
-        }
-        /* empty / unknown server-fn payload — unique-email still runs on signUp */
-      }
-      if (exists) {
-        setEmailErr(SIGNUP_EMAIL_IN_USE_MESSAGE);
+      // Before signUp on either auth path. supabase.auth is supabase-js, or
+      // the Cognito adapter in src/lib/aws/auth-adapter.ts when that flag is on.
+      // A hit shows the same confirm-email state and does not create a user.
+      if (
+        signupSubmissionIsAutomated({
+          honeypot: companyWebsite,
+          mountedAtMs: formMountedAt.current,
+          submittedAtMs: Date.now(),
+        })
+      ) {
+        resetAuthCaptcha();
+        setConfirmEmailMsg(SIGNUP_CONFIRM_EMAIL_MESSAGE);
         setBusy(false);
         return;
       }
@@ -502,6 +492,7 @@ function Step1Account({
         password: form.password,
         options: {
           emailRedirectTo: authRedirectUrl("/signup"),
+          ...captchaTokenOption(captchaToken),
           data: {
             full_name: form.contactName || form.email.split("@")[0],
             agency_name: form.agencyName || `${form.email.split("@")[0]}'s workspace`,
@@ -519,10 +510,12 @@ function Step1Account({
           setAccountErr(sentence);
           toast.error(sentence);
         }
+        resetAuthCaptcha();
         setBusy(false);
         return;
       }
       if (!signupHasSession(signUpData.session)) {
+        resetAuthCaptcha();
         setConfirmEmailMsg(SIGNUP_CONFIRM_EMAIL_MESSAGE);
         setBusy(false);
         return;
@@ -543,12 +536,18 @@ function Step1Account({
   };
 
   const continueAfterConfirm = async () => {
+    if (authCaptchaBlocked()) {
+      toast.error(AUTH_CAPTCHA_REQUIRED);
+      return;
+    }
+    const captchaToken = readAuthCaptchaToken();
     setAccountErr(null);
     setBusy(true);
     try {
       const { data, error } = await (supabase as any).auth.signInWithPassword({
         email: form.email,
         password: form.password,
+        ...(captchaToken ? { options: { captchaToken } } : {}),
       });
       if (error) {
         if (isSignupEmailNotConfirmedError(error)) {
@@ -560,6 +559,7 @@ function Step1Account({
         const sentence = humanizeSignupAccountError(error);
         setAccountErr(sentence);
         toast.error(sentence);
+        resetAuthCaptcha();
         setBusy(false);
         return;
       }
@@ -585,7 +585,10 @@ function Step1Account({
 
   return (
     <>
-      <Header title="Create your account" subtitle="Start with a few quick details to get your workspace ready." />
+      <Header
+        title="Create your account"
+        subtitle="Start with a few quick details to get your workspace ready."
+      />
       {accountErr ? (
         <div
           role="alert"
@@ -605,6 +608,29 @@ function Step1Account({
         </div>
       ) : null}
       <div className="grid gap-4">
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: "-10000px",
+            top: "auto",
+            width: "1px",
+            height: "1px",
+            overflow: "hidden",
+          }}
+        >
+          <label htmlFor="company_website">Company website</label>
+          <input
+            id="company_website"
+            name="company_website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            value={companyWebsite}
+            onChange={(e) => setCompanyWebsite(e.target.value)}
+          />
+        </div>
         <Field
           label="Email address"
           hint="This is also your username — you'll sign in with this email."
@@ -627,13 +653,11 @@ function Step1Account({
               setEmailErr(null);
               update("email", e.target.value);
             }}
-            onBlur={verifyEmail}
             className="flex h-12 w-full rounded-lg px-3 py-2 text-base outline-none focus:border-[var(--hive-gold)]/60 focus:ring-2 focus:ring-[var(--hive-gold)]/40"
             style={inputStyle}
             placeholder="you+agency@gmail.com"
             data-testid="signup-email"
           />
-          {checking && <span className="text-xs text-[var(--hive-text-muted)]">Checking…</span>}
         </Field>
 
         <Field label="Password">
@@ -675,10 +699,13 @@ function Step1Account({
         </Field>
 
         <ul className="-mt-1 grid gap-1 text-xs">
-          <PwRule ok={lenOk}>At least 8 characters</PwRule>
+          <PwRule ok={lenOk}>At least {SIGNUP_PASSWORD_MIN} characters</PwRule>
         </ul>
 
-        <Field label="Confirm password" error={!matchOk && form.confirm ? "Passwords don't match." : null}>
+        <Field
+          label="Confirm password"
+          error={!matchOk && form.confirm ? "Passwords don't match." : null}
+        >
           <div className="relative">
             <input
               type={showConfirm ? "text" : "password"}
@@ -754,13 +781,17 @@ function Step1Account({
         </span>
       </label>
 
+      <div className="mt-4">
+        <AuthCaptcha />
+      </div>
+
       <NavButtons
         showBack={false}
         onNext={confirmEmailMsg ? continueAfterConfirm : submit}
         loading={busy}
         nextDisabled={
           confirmEmailMsg
-            ? !emailValid || form.password.length < 8
+            ? !emailValid || form.password.length < SIGNUP_PASSWORD_MIN
             : !form.acceptedTos ||
               !form.acceptedBaa ||
               !emailValid ||
@@ -809,8 +840,7 @@ function Step3Business({
 }) {
   const [busy, setBusy] = useState(false);
   const phoneOk = isValidUSPhone(form.phone);
-  const canContinue =
-    !!form.agencyName.trim() && !!form.contactName.trim() && phoneOk;
+  const canContinue = !!form.agencyName.trim() && !!form.contactName.trim() && phoneOk;
   const showPhoneError = form.phone.trim().length > 0 && !phoneOk;
 
   const save = async () => {
@@ -835,38 +865,44 @@ function Step3Business({
         return;
       }
 
-      // Best-effort profile update — don't block on failure.
+      // Best-effort profile + auth metadata update — don't block on failure.
+      // agency_name on the auth user is what a later confirm on another
+      // device reads when this form state is gone.
+      const agencyName = form.agencyName.trim();
       try {
-        await (supabase as any).from("profiles").update({
-          full_name: form.contactName,
-          agency_name: form.agencyName,
-        }).eq("id", uid);
+        await supabase.auth.updateUser({
+          data: {
+            full_name: form.contactName.trim(),
+            agency_name: agencyName,
+          },
+        });
+      } catch {
+        /* non-blocking */
+      }
+      try {
+        await (supabase as any)
+          .from("profiles")
+          .update({
+            full_name: form.contactName,
+            agency_name: agencyName,
+          })
+          .eq("id", uid);
       } catch {
         /* non-blocking */
       }
 
       let orgId: string | null = null;
-      const { data: member } = await (supabase as any)
-        .from("organization_members")
-        .select("organization_id")
-        .eq("user_id", uid)
-        .eq("active", true)
+      const { data: created } = await (supabase as any)
+        .from("organizations")
+        .select("id")
+        .eq("created_by", uid)
         .limit(1)
         .maybeSingle();
-      orgId = orgIdFromMembershipRow(member);
-      if (!orgId) {
-        const { data: created } = await (supabase as any)
-          .from("organizations")
-          .select("id")
-          .eq("created_by", uid)
-          .limit(1)
-          .maybeSingle();
-        orgId = orgIdFromCreatedByRow(created);
-      }
+      orgId = orgIdFromCreatedByRow(created);
       if (!orgId) {
         let ensured: unknown;
         try {
-          ensured = await ensureWorkspace({ data: { agencyName: form.agencyName.trim() } });
+          ensured = await ensureWorkspace({ data: { agencyName } });
         } catch (e) {
           console.warn("[signup] ensure workspace failed", e);
           toast.error(SIGNUP_BUSINESS_SAVE_ERROR_MESSAGE);
@@ -879,6 +915,14 @@ function Step3Business({
           return;
         }
         orgId = orgIdFromEnsureWorkspaceResult(ensured);
+      } else {
+        // Org may already exist from the confirm-time provision. Re-run so the
+        // owner row exists and the typed name is stored before the patch.
+        try {
+          await ensureWorkspace({ data: { agencyName } });
+        } catch {
+          /* patch below fails closed if the workspace is not writable */
+        }
       }
       if (!orgId) {
         toast.error(SIGNUP_PROVISION_FAILED_MESSAGE);
@@ -886,9 +930,6 @@ function Step3Business({
         return;
       }
 
-      const isTrainingOnly =
-        typeof window !== "undefined" &&
-        new URLSearchParams(window.location.search).get("flow") === "training";
       const phoneE164 = normalizeUSPhoneToE164(form.phone);
       if (!phoneE164) {
         toast.error("Enter a valid US mobile number to continue.");
@@ -905,7 +946,7 @@ function Step3Business({
             contactEmail: userResp.user?.email ?? null,
             providerNumber: form.providerNumber,
             phoneE164,
-            trainingOnly: isTrainingOnly,
+            trainingOnly: false,
           }),
         )
         .eq("id", orgId)
@@ -957,7 +998,10 @@ function Step3Business({
 
   return (
     <>
-      <Header title="Tell us about your business" subtitle="This becomes your workspace name across Provider Interface." />
+      <Header
+        title="Tell us about your business"
+        subtitle="This becomes your workspace name across Provider Interface."
+      />
       <div className="grid gap-4">
         <Field label="Agency or company name">
           <TextInput
@@ -968,7 +1012,11 @@ function Step3Business({
           />
         </Field>
         <Field label="Primary contact (full name)">
-          <TextInput value={form.contactName} onChange={(v) => update("contactName", v)} placeholder="Jane Doe" />
+          <TextInput
+            value={form.contactName}
+            onChange={(v) => update("contactName", v)}
+            placeholder="Jane Doe"
+          />
         </Field>
         <Field
           label="Mobile number"
@@ -995,7 +1043,11 @@ function Step3Business({
             <TextInput value="Utah" onChange={() => {}} disabled />
           </Field>
           <Field label="Provider number" hint="Optional — you can add this later in settings.">
-            <TextInput value={form.providerNumber} onChange={(v) => update("providerNumber", v)} placeholder="" />
+            <TextInput
+              value={form.providerNumber}
+              onChange={(v) => update("providerNumber", v)}
+              placeholder=""
+            />
           </Field>
         </div>
       </div>
@@ -1099,12 +1151,15 @@ function Step4Pricing({
       >
         <p className="text-lg font-semibold text-[var(--hive-text)]">
           {PI_LIST_PRICE_DISPLAY}{" "}
-          <span className="text-sm font-normal text-[var(--hive-text-muted)]">per active client / month</span>
+          <span className="text-sm font-normal text-[var(--hive-text-muted)]">
+            per active client / month
+          </span>
         </p>
         <p className="mt-1 text-sm text-[var(--hive-text-muted)]">{PI_LIST_MINIMUM_LINE}</p>
         <p className="mt-3 text-sm text-[var(--hive-text)]">This page does not charge you.</p>
         <p className="mt-3 text-sm text-[var(--hive-text)]" data-testid="signup-plan-math">
-          Example: if 12 clients are active, that month is $828. If fewer than 6 are active, you still pay $350.
+          Example: if 12 clients are active, that month is $828. If fewer than 6 are active, you
+          still pay $350.
         </p>
       </div>
       <div className="grid gap-4">
@@ -1194,20 +1249,12 @@ function Step5Training({
               className="rounded-lg border border-[var(--hive-border)] bg-[var(--hive-canvas)] px-3 py-2 text-sm"
             >
               <span className="block font-medium text-[var(--hive-text)]">{addon.name}</span>
-              <span className="text-[var(--hive-text-muted)]">{formatUsdFromCents(addon.priceCents)}</span>
+              <span className="text-[var(--hive-text-muted)]">
+                {formatUsdFromCents(addon.priceCents)}
+              </span>
             </div>
           ))}
         </div>
-
-        <p className="text-sm">
-          <Link
-            to="/training"
-            className="text-[var(--hive-text-muted)] underline-offset-4 hover:text-[var(--hive-text)] hover:underline"
-            data-testid="signup-training-only-link"
-          >
-            Just need training? Buy classes without the office.
-          </Link>
-        </p>
 
         {people.map((person, index) => (
           <div
@@ -1236,7 +1283,9 @@ function Step5Training({
               </Button>
             </div>
             <fieldset className="mt-3 grid grid-cols-2 gap-2">
-              <legend className="sr-only">Training for {person.name || `person ${index + 1}`}</legend>
+              <legend className="sr-only">
+                Training for {person.name || `person ${index + 1}`}
+              </legend>
               {SIGNUP_TRAINING_ADDONS.map((addon) => {
                 const selected = person.sku === addon.id;
                 return (
@@ -1286,8 +1335,8 @@ function Step5Training({
             Training total {formatUsdFromCents(totalCents)}
           </p>
           <p className="mt-1 text-[var(--hive-text-muted)]">
-            {quantities.cpr_first_aid}× CPR · {quantities.pack}× Pack · {quantities.thirty_day}× 30-day ·{" "}
-            {quantities.mandt}× Mandt
+            {quantities.cpr_first_aid}× CPR · {quantities.pack}× Pack · {quantities.thirty_day}×
+            30-day · {quantities.mandt}× Mandt
           </p>
           <p className="mt-2 text-[var(--hive-text)]">This page does not charge you.</p>
         </div>
@@ -1422,12 +1471,10 @@ function Step6Payment({
         >
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
           <span>
-            <strong>TEST MODE</strong> — no real charge. Use card 4242 4242 4242 4242, any future expiry, any CVC, any ZIP.
+            <strong>TEST MODE</strong> — no real charge. Use card 4242 4242 4242 4242, any future
+            expiry, any CVC, any ZIP.
             {payStatus && !payStatus.paymentsConfigured ? (
-              <>
-                {" "}
-                {payStatus.message ?? "Payments are not set up on this host yet."}
-              </>
+              <> {payStatus.message ?? "Payments are not set up on this host yet."}</>
             ) : null}
           </span>
         </div>
@@ -1440,10 +1487,14 @@ function Step6Payment({
         <p className="font-medium text-[var(--hive-text)]">{PI_SIGNUP_PRICE_LINE}</p>
         <p className="mt-2 text-[var(--hive-text)]">{quote.summaryLine}</p>
         {trainingLines.length > 0 ? (
-          <div className="mt-2 space-y-1 text-[var(--hive-text)]" data-testid="signup-payment-training">
+          <div
+            className="mt-2 space-y-1 text-[var(--hive-text)]"
+            data-testid="signup-payment-training"
+          >
             {trainingLines.map((line) => (
               <p key={line.id}>
-                Training · {line.name} × {line.quantity}: {formatUsdFromCents(line.priceCents * line.quantity)} one-time
+                Training · {line.name} × {line.quantity}:{" "}
+                {formatUsdFromCents(line.priceCents * line.quantity)} one-time
               </p>
             ))}
             <p className="font-medium">Training total {formatUsdFromCents(trainingTotalCents)}</p>
@@ -1469,9 +1520,7 @@ function Step6Payment({
 function Header({ title, subtitle }: { title: string; subtitle: React.ReactNode }) {
   return (
     <div className="mb-6">
-      <h1
-        className="text-2xl font-semibold tracking-tight text-[var(--hive-text)] sm:text-3xl"
-      >
+      <h1 className="text-2xl font-semibold tracking-tight text-[var(--hive-text)] sm:text-3xl">
         {title}
       </h1>
       <p className="mt-1.5 text-sm text-[#3a4553]">{subtitle}</p>

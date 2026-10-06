@@ -43,7 +43,7 @@ export const nectarImportSchedule = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { drafts: [] };
-    await requireOrgMembership(supabase, userId, data.organization_id, "employee");
+    await requireOrgMembership(supabase, userId, data.organization_id, "staff");
     assertBedrockConfigured();
 
     const approxBytes = Math.floor((data.file_b64.length * 3) / 4);
@@ -165,7 +165,7 @@ SERVICE CODES: ["SLH","SLN","COM","PAC","RP2","RP4","RP5","HHS","RHS","DSI","DSG
         { role: "user", content: userContent },
       ],
       response_format: { type: "json_object" },
-    });
+    }, { orgId: data.organization_id });
     if (!aiRes.ok) {
       const txt = await aiRes.text().catch(() => "");
       if (aiRes.status === 429)

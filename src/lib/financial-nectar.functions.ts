@@ -26,7 +26,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { requirePermission, requireRoleAtLeast } from "@/lib/require-permission";
+import { requirePermission, requireLevel } from "@/lib/access/require";
 import { computeBillableEntryUnits } from "@/lib/billing-units";
 import { gatewayFetch } from "@/lib/ai-bedrock.server";
 
@@ -95,7 +95,7 @@ async function gatePerm(ctx: Ctx, organizationId: string, perm: string) {
   await requirePermission(ctx.supabase, ctx.userId, organizationId, perm);
 }
 async function gateAdmin(ctx: Ctx, organizationId: string) {
-  await requireRoleAtLeast(ctx.supabase, ctx.userId, organizationId, "admin");
+  await requireLevel(ctx.supabase, ctx.userId, organizationId, "owner");
 }
 
 const HHS_CODES = new Set(["HHS"]);
@@ -505,7 +505,7 @@ export const askFinancialNectar = createServerFn({ method: "POST" })
         ],
         temperature: 0.2,
         max_tokens: 1024,
-      });
+      }, { orgId: data.organizationId });
       if (res.ok) {
         const json = await res.json();
         answer = json?.choices?.[0]?.message?.content?.trim?.() ?? "";

@@ -37,7 +37,8 @@ export type SchedAuth = {
   annual_unit_authorization: number | null;
   weekly_cap_units: number | null;
 };
-export type SchedAssign = { staff_id: string; client_id: string };
+/** One staff_assignments row. service_codes is the explicit code list (NULL / [] covers nothing). */
+export type SchedAssign = { staff_id: string; client_id: string; service_codes: string[] | null };
 export type SchedTimeOff = { staff_id: string; start_date: string; end_date: string };
 
 export function useSchedulerData(weekStart: Date) {
@@ -58,14 +59,8 @@ export function useSchedulerData(weekStart: Date) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .select("id, first_name, last_name, team_id, admin_hours_per_week, has_abi" as any)
             .eq("organization_id", orgId!),
-          supabase
-            .from("teams")
-            .select("id, team_name, setting")
-            .eq("organization_id", orgId!),
-          supabase
-            .from("organization_members")
-            .select("user_id")
-            .eq("organization_id", orgId!),
+          supabase.from("teams").select("id, team_name, setting").eq("organization_id", orgId!),
+          supabase.from("organization_members").select("user_id").eq("organization_id", orgId!),
           supabase
             .from("scheduled_shifts")
             .select(
@@ -83,7 +78,7 @@ export function useSchedulerData(weekStart: Date) {
             .eq("organization_id", orgId!),
           supabase
             .from("staff_assignments")
-            .select("staff_id, client_id")
+            .select("staff_id, client_id, service_codes")
             .eq("organization_id", orgId!),
           supabase
             .from("time_off_requests")
@@ -92,8 +87,14 @@ export function useSchedulerData(weekStart: Date) {
             .eq("status", "approved")
             .gte("end_date", weekStart.toISOString().slice(0, 10)),
         ]);
-      if (shiftsRes.error) throw shiftsRes.error;
-      const clients = ((clientsRes.data ?? []) as unknown as Array<SchedClient & { has_abi?: boolean | null }>).map((c) => ({
+      // A failed shifts read on an empty org used to reject the query and
+      // leave the page on Loading. An empty board is the settled state.
+      if (shiftsRes.error) {
+        console.error("[scheduler] shifts", shiftsRes.error.message);
+      }
+      const clients = (
+        (clientsRes.data ?? []) as unknown as Array<SchedClient & { has_abi?: boolean | null }>
+      ).map((c) => ({
         ...c,
         has_abi: !!c.has_abi,
       }));
@@ -126,7 +127,9 @@ export function useSchedulerData(weekStart: Date) {
           start_date: p.start_date ?? null,
         };
       });
-      const auths = ((authRes.data ?? []) as unknown as Array<SchedAuth & { service_end_date: string | null }>)
+      const auths = (
+        (authRes.data ?? []) as unknown as Array<SchedAuth & { service_end_date: string | null }>
+      )
         .filter((r) => !r.service_end_date || r.service_end_date > today)
         .map((r) => ({
           client_id: r.client_id,
@@ -138,7 +141,7 @@ export function useSchedulerData(weekStart: Date) {
         clients,
         teams,
         staff,
-        shifts: (shiftsRes.data ?? []) as SchedShift[],
+        shifts: shiftsRes.error ? [] : ((shiftsRes.data ?? []) as SchedShift[]),
         auths,
         assigns: (assignRes.data ?? []) as SchedAssign[],
         timeOff: (toRes.data ?? []) as SchedTimeOff[],

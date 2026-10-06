@@ -5,6 +5,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { isClockableServiceCode } from "@/lib/service-billing";
+import { isAdminLevel } from "@/lib/access/levels";
 
 export type ReadinessReport = {
   schedulable: boolean;
@@ -53,14 +54,14 @@ export const clientReadiness = createServerFn({ method: "POST" })
     // Admin guard — must be an active admin/manager for this org.
     const { data: membership } = await sb
       .from("organization_members")
-      .select("role")
+      .select("access_level")
       .eq("organization_id", client.organization_id)
       .eq("user_id", userId)
       .eq("active", true)
       .maybeSingle();
     if (!membership) throw new Error("Forbidden");
-    const role = String((membership as { role: string }).role ?? "").toLowerCase();
-    if (!["admin", "program_manager", "manager", "owner"].includes(role)) {
+    const level = (membership as { access_level: string | null }).access_level;
+    if (!isAdminLevel(level)) {
       throw new Error("Forbidden");
     }
 

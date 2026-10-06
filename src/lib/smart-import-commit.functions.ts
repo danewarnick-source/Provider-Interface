@@ -24,8 +24,8 @@ import {
   reevaluateStaffAssignedToClientInternal,
 } from "@/lib/staff-assignment-hooks.functions";
 import { enrichNamesFromFull } from "@/lib/person-name";
-import { hireEmployeeInternal } from "@/lib/employees.functions";
-import { generateTempPassword } from "@/lib/temp-password";
+import { clientAuthorizedCodes, importAssignmentCodes } from "@/lib/assignment-codes";
+import { hireTeamMemberInternal } from "@/lib/team-members/members.functions";
 import { classifyImportInvite, hasUsableInviteEmail } from "@/lib/import-invite";
 
 const JobId = z.object({ jobId: z.string().uuid() });
@@ -226,7 +226,7 @@ export const recommitSmartImportJob = createServerFn({ method: "POST" })
     if (error || !job) throw new Error("Job not found");
     const orgId = (job.source === "white_glove" ? job.target_org_id : job.org_id) as string;
     if (!orgId) throw new Error("Job has no organization to commit into.");
-    await requireOrgMembership(sb, context.userId, orgId, "admin");
+    await requireOrgMembership(sb, context.userId, orgId, "owner");
     return runJobCommit(sb, context.userId, data.jobId);
   });
 
@@ -254,7 +254,7 @@ export const commitSingleSubject = createServerFn({ method: "POST" })
       .single();
     const orgId = (job?.source === "white_glove" ? job.target_org_id : job?.org_id) as string;
     if (!orgId) throw new Error("Job has no organization to commit into.");
-    await requireOrgMembership(sb, context.userId, orgId, "admin");
+    await requireOrgMembership(sb, context.userId, orgId, "owner");
     return runJobCommit(sb, context.userId, subj.import_job_id, { subjectId: data.subjectId });
   });
 
@@ -286,13 +286,12 @@ export async function runJobCommit(
     if (!job.provider_signoff_at) {
       throw new Error("Provider sign-off required before commit.");
     }
-    const { data: isAdmin } = await sb.rpc("has_org_role", {
+    const { data: isOwner } = await sb.rpc("access_is_owner", {
       _org: job.target_org_id,
       _user: userId,
-      _role: "admin",
     });
-    if (!isAdmin) {
-      throw new Error("Only the receiving company's admin can commit a white-glove migration.");
+    if (!isOwner) {
+      throw new Error("Only the receiving company's Owner can commit a white-glove migration.");
     }
   }
 
@@ -468,7 +467,7 @@ export async function runJobCommit(
             jobId,
             orgId,
             subj.id,
-            "Employee imported without a login (missing email)",
+            "Team member imported without a login (missing email)",
             "admin_override",
             userId,
             "imported_no_email",
@@ -1121,11 +1120,10 @@ function extractedFieldValue(
   return String(hit?.value ?? "").trim();
 }
 
-function importedStaffRole(raw: string): "admin" | "manager" | "employee" {
+/** Imports never create Owners; an Owner promotes people afterward. */
+function importedAccessLevel(raw: string): "admin" | "staff" {
   const n = raw.trim().toLowerCase().replace(/\s+/g, "_");
-  if (n === "admin" || n === "company_admin") return "admin";
-  if (n === "manager" || n === "program_manager") return "manager";
-  return "employee";
+  return ["admin", "company_admin", "manager", "program_manager"].includes(n) ? "admin" : "staff";
 }
 
 async function commitEmployee(
@@ -1162,7 +1160,7 @@ async function commitEmployee(
       jobId,
       orgId,
       subj.id,
-      "Employee imported without email (no login created, no invite sent)",
+      "Team member imported without email (no login created, no invite sent)",
       "admin_override",
       userId,
       "imported_no_email",
@@ -1177,15 +1175,14 @@ async function commitEmployee(
     const names = enrichNamesFromFull(firstRaw, lastRaw, fullRaw);
     const firstName = names.first_name || names.display_name || "Staff";
     const lastName = names.last_name || "Member";
-    const hired = await hireEmployeeInternal(
+    const hired = await hireTeamMemberInternal(
       {
         organizationId: orgId,
         firstName,
         lastName,
         email,
         phone: extractedFieldValue(fields, "phone"),
-        temporaryPassword: generateTempPassword(),
-        role: importedStaffRole(
+        accessLevel: importedAccessLevel(
           extractedFieldValue(fields, "position") || extractedFieldValue(fields, "role"),
         ),
         hireDate: extractedFieldValue(fields, "hire_date"),
@@ -1197,10 +1194,8 @@ async function commitEmployee(
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
-        trackIds: [],
         requiresDeescalation: true,
         requiresAbi: true,
-        customFieldValues: {},
       },
       userId,
       "smart_import",
@@ -1211,7 +1206,7 @@ async function commitEmployee(
       orgId,
       subj.id,
       hired.created
-        ? "Created employee login + roster record (invite not sent during import)"
+        ? "Created team member login + roster record (invite not sent during import)"
         : "Linked existing account and updated roster record (invite not sent during import)",
       "admin_override",
       userId,
@@ -1227,7 +1222,7 @@ async function commitEmployee(
     if (!col) continue;
     mapped[col] = coerceProfileValue(col, f.value);
   }
-  // start_date is the CE source of truth (see createEmployeeManually); mirror
+  // start_date is the CE source of truth (see hireTeamMemberInternal); mirror
   // an imported hire_date onto it so the same profile reads consistently.
   if (mapped.hire_date && !mapped.start_date) mapped.start_date = mapped.hire_date;
   const recordId = subj.matched_record_id;
@@ -1240,7 +1235,7 @@ async function commitEmployee(
     jobId,
     orgId,
     subj.id,
-    `Updated existing employee (${Object.keys(mapped).length} fields)`,
+    `Updated existing team member (${Object.keys(mapped).length} fields)`,
     "admin_override",
     userId,
     "update_employee",
@@ -1362,20 +1357,6 @@ async function commitCerts(
     .select("*")
     .eq("import_subject_id", subj.id);
   for (const c of certs ?? []) {
-    if (subj.subject_type === "employee") {
-      // external_certifications expects user_id; record_id IS the user_id for employees
-      await sb
-        .from("external_certifications")
-        .insert({
-          user_id: recordId,
-          organization_id: orgId,
-          cert_type: c.cert_key,
-          // verification_status / expires would map per existing schema if those columns exist; keep minimal
-        })
-        .select("id")
-        .maybeSingle()
-        .catch(() => null);
-    }
     if (c.state === "provisional") {
       gaps.push(`Cert "${c.cert_key}" provisional — reminder queued`);
     }
@@ -1478,22 +1459,6 @@ async function applyProvisioning(
         const fc = (c?.feature_config ?? {}) as Record<string, boolean>;
         fc[p.target_module] = true;
         await sb.from("clients").update({ feature_config: fc }).eq("id", recordId);
-      } else if (
-        p.planned_action === "create_draft" &&
-        p.target_module === "behavior_plan" &&
-        subj.subject_type === "client"
-      ) {
-        // BSP as draft (features_enabled=false). bc_code required — guess Tier 1 default.
-        const { error } = await sb.from("behavior_support_clients").upsert(
-          {
-            organization_id: orgId,
-            client_id: recordId,
-            bc_code: "BC1",
-            features_enabled: false,
-          },
-          { onConflict: "client_id" },
-        );
-        if (error) throw new Error(`BSP draft: ${error.message}`);
       } else if (p.planned_action === "activate_requirements") {
         // Reuses existing nectar_requirements / staff_checklist_completion — no row to write here;
         // existing matrix surfaces this automatically once the person record exists.
@@ -1558,11 +1523,41 @@ async function applyAssignmentMap(
     if (!staffId || !clientId) continue;
 
     const isGroupHome = r.relation_type === "home";
-    // Per assignment_map.service_codes: NULL = all of the client's authorized
-    // codes (default); a populated array scopes to those codes; an empty array
-    // is invalid (treat as NULL).
-    const codes: string[] | null =
-      Array.isArray(r.service_codes) && r.service_codes.length > 0 ? r.service_codes : null;
+    // Every staff_assignments row lists its codes explicitly. The source's
+    // codes (∩ the client's authorized codes) when it has some; otherwise the
+    // client's currently authorized codes. Never NULL / "all codes".
+    const { data: clientRow } = await sb
+      .from("clients")
+      .select("authorized_dspd_codes, job_code")
+      .eq("organization_id", orgId)
+      .eq("id", clientId)
+      .maybeSingle();
+    const codes = importAssignmentCodes(
+      r.service_codes,
+      clientAuthorizedCodes(
+        (clientRow ?? {}) as {
+          authorized_dspd_codes?: string[] | null;
+          job_code?: string[] | null;
+        },
+      ),
+    );
+    if (codes.length === 0) {
+      await audit(
+        sb,
+        jobId,
+        orgId,
+        null,
+        `Skipped assignment ${r.relation_type}: the client has no authorized codes${
+          Array.isArray(r.service_codes) && r.service_codes.length
+            ? ` matching ${r.service_codes.join(", ")}`
+            : ""
+        } — assign on the client's Caseload after adding codes`,
+        "rule",
+        userId,
+        "wire_assignment",
+      );
+      continue;
+    }
     // Existing row? Update service_codes (don't error on the unique pair).
     const { data: prior } = await sb
       .from("staff_assignments")
@@ -1591,7 +1586,7 @@ async function applyAssignmentMap(
     }
     if (!writeError) {
       try {
-        await onStaffAssignmentCreatedInternal(sb, orgId, staffId, clientId, codes ?? []);
+        await onStaffAssignmentCreatedInternal(sb, orgId, staffId, clientId, codes);
       } catch (e) {
         console.warn("[obligations] import assignment auto-assign failed:", e);
       }
@@ -1604,7 +1599,7 @@ async function applyAssignmentMap(
         jobId,
         orgId,
         null,
-        `Wired assignment ${r.relation_type}${codes ? ` (codes: ${codes.join(", ")})` : ""}`,
+        `Wired assignment ${r.relation_type} (codes: ${codes.join(", ")})`,
         "admin_override",
         userId,
         "wire_assignment",

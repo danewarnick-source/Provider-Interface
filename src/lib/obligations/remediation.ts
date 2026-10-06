@@ -2,9 +2,9 @@
 // Nightly path is called from the Step 2 evaluator. getThisWeek source 1
 // maps awaiting_approval rows. No second escalation writer.
 
+import { isAdminLevel } from "../access/levels.ts";
 import {
   evaluateOrgEscalations,
-  isAdminLevelRole,
   listActiveOrganizationIds,
   persistAutomationHeartbeat,
   pickAdminLevelRecipient,
@@ -146,7 +146,7 @@ export function pickPlanOwner(
   }
   const managers = members.filter((m) => {
     if (m.active === false) return false;
-    return m.role === "manager" || m.role === "program_manager" || isAdminLevelRole(m.role);
+    return isAdminLevel(m.access_level);
   });
   if (!managers.length) return pickAdminLevelRecipient(members);
   return [...managers].sort((a, b) => a.user_id.localeCompare(b.user_id))[0]!.user_id;

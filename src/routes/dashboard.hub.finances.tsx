@@ -14,10 +14,11 @@ import {
   CalendarClock,
 } from "lucide-react";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { getBilledRevenueByYear } from "@/lib/financial-revenue.functions";
 import { getTotalsLedger } from "@/lib/financial-totals.functions";
 import { getBillingSnapshot } from "@/lib/financial-hub.functions";
+import { isAdminLevel } from "@/lib/access/levels";
 
 /**
  * Finances hub landing. Billing and Financial each own their own nested
@@ -41,17 +42,17 @@ const MONTH_NAMES = [
 
 function FinancesHub() {
   const { data: org } = useCurrentOrg();
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const orgId = org?.organization_id;
-  const role = org?.role;
+  const role = org?.access.level;
 
   // Billing card is admin/manager (matches Billing section RequireRole).
-  const canSeeBilling = role === "admin" || role === "program_manager" || role === "manager";
+  const canSeeBilling = isAdminLevel(role);
   // Financial card snapshot mirrors the Financial tab gates.
   const canSeeFinancialNumbers = can("view_financial_tns_gross");
 
   // The billed-revenue server-fn requires admin org membership.
-  const canReadBilledRevenue = role === "admin";
+  const canReadBilledRevenue = role === "owner";
 
   const now = new Date();
   const year = now.getFullYear();

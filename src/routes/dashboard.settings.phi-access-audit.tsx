@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, ScrollText } from "lucide-react";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,16 +25,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ROLE_LABEL, type Role } from "@/lib/rbac";
 import { listPhiAccessAudit } from "@/lib/phi-access-audit.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/dashboard/settings/phi-access-audit")({
   head: () => ({ meta: [{ title: "PHI access log — Provider Interface" }] }),
   component: () => (
-    <RequireRole roles={["admin", "program_manager", "manager"]}>
+    <RequireLevel min="admin">
       <PhiAccessAuditPage />
-    </RequireRole>
+    </RequireLevel>
   ),
 });
 
@@ -63,11 +62,21 @@ const ACTION_LABEL: Record<string, string> = Object.fromEntries(
   ACTIONS.map((a) => [a.value, a.label]),
 );
 
+/** New rows store the access level; rows written before access levels hold the old role name. */
+const ACTOR_LABEL: Record<string, string> = {
+  owner: "Owner",
+  admin: "Admin",
+  staff: "Staff",
+  program_manager: "Program manager",
+  manager: "Manager",
+  employee: "Employee",
+  committee_member: "Committee member",
+  super_admin: "Platform admin",
+};
+
 function formatActorRole(role: string | null): string {
   if (!role) return "—";
-  if (role in ROLE_LABEL) return ROLE_LABEL[role as Role];
-  if (role === "super_admin") return "Platform admin";
-  return role;
+  return ACTOR_LABEL[role] ?? role;
 }
 
 function PhiAccessAuditPage() {

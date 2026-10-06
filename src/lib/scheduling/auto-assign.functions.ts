@@ -100,7 +100,7 @@ export const autoAssignRange = createServerFn({ method: "POST" })
       byStaffShifts.set(s.staff_id, arr);
     }
 
-    // 4) client metadata for names + assignments + trainings
+    // 4) client metadata for names + assignments
     const clientIds = Array.from(new Set(openShifts.map((s: any) => s.client_id)));
     const { data: clients } = await sb
       .from("clients").select("id, first_name, last_name").in("id", clientIds);
@@ -114,15 +114,6 @@ export const autoAssignRange = createServerFn({ method: "POST" })
     for (const a of (assigns ?? [])) {
       const set = assignedByClient.get(a.client_id) ?? new Set();
       set.add(a.staff_id); assignedByClient.set(a.client_id, set);
-    }
-
-    const { data: ctrain } = await sb
-      .from("client_specific_trainings").select("id, client_id")
-      .eq("organization_id", orgId).in("client_id", clientIds);
-    const trainingsByClient = new Map<string, string[]>();
-    for (const t of (ctrain ?? [])) {
-      const arr = trainingsByClient.get(t.client_id) ?? [];
-      arr.push(t.id); trainingsByClient.set(t.client_id, arr);
     }
 
     // 5) approved PTO blocks — time_off_requests uses start_date/end_date (date columns)
@@ -160,13 +151,11 @@ export const autoAssignRange = createServerFn({ method: "POST" })
           ...r,
           weeklyShifts: byStaffShifts.get(r.id) ?? [],
           activeCertKeys: new Set<string>(),
-          completedClientTrainings: new Set<string>(),
           assignedToClient: assignedByClient.get(shift.client_id)?.has(r.id) ?? false,
           isHostForLocation: false,
         })),
         clientId: shift.client_id,
         requiredCertKeys: [],
-        requiredClientTrainings: trainingsByClient.get(shift.client_id) ?? [],
         overtimeThresholdHours: 40,
       });
 

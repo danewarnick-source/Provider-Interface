@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import { MONTHLY_SUMMARY_REQUIRED_FIELDS } from "@/lib/progress-summaries";
+import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
 
 /**
  * Nectar drafter for periodic progress summaries.
@@ -19,7 +20,7 @@ import { MONTHLY_SUMMARY_REQUIRED_FIELDS } from "@/lib/progress-summaries";
  * are listed separately for human review — Nectar must not invent a job code.
  */
 
-async function callAI(system: string, user: string): Promise<string> {
+async function callAI(system: string, user: string, orgId?: string | null): Promise<string> {
   assertBedrockConfigured();
   const res = await gatewayFetch({
     model: "bedrock",
@@ -28,7 +29,7 @@ async function callAI(system: string, user: string): Promise<string> {
       { role: "user", content: user },
     ],
     response_format: { type: "json_object" },
-  });
+  }, { orgId });
   if (res.status === 429) throw new Error("AI rate limit reached. Please retry in a moment.");
   if (res.status === 402) throw new Error("AI workspace credits exhausted. Please add credits.");
   if (!res.ok) throw new Error(`AI error (${res.status}).`);
@@ -59,7 +60,7 @@ export const draftProgressSummary = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { status: "no_source" as const, draft: null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     // 1. Load the summary row.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,7 +167,7 @@ export const draftProgressSummary = createServerFn({ method: "POST" })
       .from("incident_reports")
       .select("incident_date, report_number, incident_types, narrative_during")
       .eq("organization_id", data.organizationId)
-      .eq("client_id", row.client_id)
+      .or(incidentInvolvesClientOr(row.client_id))
       .gte("incident_date", row.period_start)
       .lte("incident_date", row.period_end)
       .order("incident_date", { ascending: true });
@@ -358,7 +359,7 @@ ${formatReports(untaggedReports, "(none)")}
 INCIDENTS IN PERIOD (${incidentList.length}):
 ${incidentsBlock}`;
 
-    const raw = await callAI(system, user);
+    const raw = await callAI(system, user, data.organizationId);
     let parsed: { draft?: unknown } = {};
     try { parsed = JSON.parse(raw); } catch {
       const m = raw.match(/\{[\s\S]*\}/);

@@ -29,7 +29,11 @@ type SignInResult = {
 
 export type PublishableAuthClient = {
   auth: {
-    signInWithPassword: (creds: { email: string; password: string }) => Promise<SignInResult>;
+    signInWithPassword: (creds: {
+      email: string;
+      password: string;
+      options?: { captchaToken?: string };
+    }) => Promise<SignInResult>;
     signOut: () => Promise<unknown>;
   };
   from: (table: string) => {
@@ -50,6 +54,7 @@ export type PasswordSignInServerDeps = {
   createPublishableClient: () => PublishableAuthClient;
   /** Optional privileged username→email lookup. Must not throw if service role is unset. */
   lookupUsernameEmailWithServiceRole?: (username: string) => Promise<string | null>;
+  captchaToken?: string | null;
 };
 
 export function readPublishableAuthEnv(
@@ -108,7 +113,10 @@ export async function performPasswordSignInWithClient(
   const client = deps.createPublishableClient();
   const email = await resolveEmail(identifier, client, deps);
 
-  const { data: signIn, error } = await client.auth.signInWithPassword({ email, password });
+  const captchaToken = deps.captchaToken?.trim();
+  const { data: signIn, error } = await client.auth.signInWithPassword(
+    captchaToken ? { email, password, options: { captchaToken } } : { email, password },
+  );
   if (error || !signIn?.session || !signIn.user) {
     throw new Error(GENERIC_PASSWORD_ERROR);
   }

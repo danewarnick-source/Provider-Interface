@@ -15,6 +15,7 @@ import {
   type TrainingClassType,
 } from "@/lib/training-class";
 import { classCardSummary, rosterCardStatus, type RosterCardStatus } from "@/lib/training-class-cards";
+import { isAdminLevel } from "@/lib/access/levels";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -217,13 +218,13 @@ export const getOrgTrainingClasses = createServerFn({ method: "POST" })
     const sb = supabase as AnySupabase;
     const { data: mem, error: memErr } = await sb
       .from("organization_members")
-      .select("role")
+      .select("access_level")
       .eq("organization_id", data.organizationId)
       .eq("user_id", userId)
       .eq("active", true)
       .maybeSingle();
     if (memErr) throw new Error(memErr.message);
-    if (!mem || !["admin", "program_manager", "manager"].includes(String(mem.role))) {
+    if (!isAdminLevel(mem?.access_level)) {
       throw new Error("Only an admin can view class rosters.");
     }
 

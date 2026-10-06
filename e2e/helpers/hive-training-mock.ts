@@ -7,6 +7,7 @@
  * product feature.
  */
 import type { Page, Request, Route } from "@playwright/test";
+import { withAccessLevel } from "./access-level";
 
 export const IDS = {
   org: "11111111-1111-4111-8111-111111111111",
@@ -18,7 +19,6 @@ export const IDS = {
   course: "66666666-6666-4666-8666-666666666666",
   topicReady: "77777777-7777-4777-8777-777777777777",
   topicSoon: "88888888-8888-4888-8888-888888888888",
-  htModule: "99999999-9999-4999-8999-999999999999",
   trainingModule: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
   membership: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
   catalogFull: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
@@ -486,8 +486,9 @@ function restRows(world: HiveE2EWorld, table: string, url: string): unknown[] {
       },
     ];
     const userEq = paramEq(url, "user_id");
-    if (userEq) return allMembers.filter((m) => m.user_id === userEq);
-    return allMembers;
+    const rows = allMembers.map(withAccessLevel);
+    if (userEq) return rows.filter((m) => m.user_id === userEq);
+    return rows;
   }
 
   if (table === "organizations") {
@@ -513,12 +514,6 @@ function restRows(world: HiveE2EWorld, table: string, url: string): unknown[] {
       email: `${m.id}@hive.test`,
       username: m.label.toLowerCase().replace(/\s+/g, "."),
     }));
-  }
-
-  if (table === "role_permissions") {
-    return [
-      { organization_id: IDS.org, role: "admin", permission: "view_staff_records", enabled: true },
-    ];
   }
 
   if (table === "clients") {
@@ -603,29 +598,6 @@ function restRows(world: HiveE2EWorld, table: string, url: string): unknown[] {
       return [assignmentRow(IDS.assignment, "in_progress", uid)];
     }
     return rows;
-  }
-
-  if (table === "hive_training_course_modules") {
-    return [
-      {
-        id: IDS.htModule,
-        course_id: IDS.course,
-        sort: 1,
-        title: "Welcome to Launchpad",
-        body_md: "This is the first Launchpad module. It is available.",
-        video_url: null,
-        quiz_json: null,
-      },
-      {
-        id: "99999999-9999-4999-8999-999999999998",
-        course_id: IDS.course,
-        sort: 2,
-        title: "Competency check",
-        body_md: "Second module — still locked until the first is marked complete in a real session.",
-        video_url: null,
-        quiz_json: null,
-      },
-    ];
   }
 
   if (table === "hive_training_module_progress" || table === "hive_training_certificates" || table === "hive_training_seats") {
@@ -718,7 +690,7 @@ function restRows(world: HiveE2EWorld, table: string, url: string): unknown[] {
     return [{ feature_key: "hive_training", enabled: true, updated_by: null, updated_at: null }];
   }
 
-  if (table === "platform_states" || table === "behavior_support_clients" || table === "bc_behaviors") {
+  if (table === "platform_states") {
     return [];
   }
 

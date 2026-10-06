@@ -24,7 +24,7 @@ import {
   dueLabel,
   obligationFileStatus,
   obligationFileStatusLabel,
-} from "@/lib/staff-obligation-files";
+} from "@/lib/team-members/file";
 import {
   IN_HIVE_COURSE_EVIDENCE,
   inHiveCourseIdForTitle,
@@ -982,6 +982,18 @@ function MyObligationsPage() {
       </div>
 
       <AttentionStrip />
+      <div className="rounded-2xl border border-border bg-card px-4 py-3">
+        <p className="text-sm font-medium">Evidence sent to you</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Admin-owned packs stay off this list until someone clicks Send to staff.
+        </p>
+        <Link
+          to="/dashboard/my-evidence"
+          className="mt-2 inline-block text-sm underline underline-offset-2"
+        >
+          Open Evidence
+        </Link>
+      </div>
 
       <PacketNextActionCard
         nextAction={packetQ.data?.packet?.nextAction}
@@ -1013,7 +1025,7 @@ function MyObligationsPage() {
               }),
             ),
           )}
-          staffLabel={user.email ? `${user.email} · Staff` : "Staff"}
+          staffLabel={user.email ? `${user.email} · Team member` : "Team member"}
           emptyLabel="Nothing needs you on this list."
           onAction={(task) => {
             const inst = open.find((row) => row.id === task.instanceId);

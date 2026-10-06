@@ -149,7 +149,7 @@ export function StaffHomeMyTasks() {
     <MyTasksQueue
       variant="home"
       tasks={tasks}
-      staffLabel="Staff"
+      staffLabel="Team member"
       onAction={(task) => {
         const inst = instances.find((row) => row.id === task.instanceId);
         if (!inst) return;

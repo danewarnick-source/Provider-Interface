@@ -6,6 +6,7 @@
  * Progress uses existing training_topic_progress / training_completions.
  */
 
+import { neutralizeCsvFormula } from "./csv-safe.ts";
 import {
   ANNUAL_CE_COURSE_FULFILLS_OBLIGATION,
   ANNUAL_CE_COURSE_ID,
@@ -356,7 +357,7 @@ export type ThirtyDayWritePlan = {
 /**
  * What the course player writes after a segment or exam.
  * Certificate + obligation require every required topic completed and a passing exam.
- * TNS / training-only seats skip the office obligation write.
+ * Billing-exempt orgs skip the office obligation write.
  */
 export function planThirtyDayWrites(args: {
   examPassed: boolean;
@@ -562,7 +563,7 @@ export function formatExamExportCsv(args: {
 }
 
 function csvCell(value: string): string {
-  const s = value.replace(/\r?\n/g, " ").replace(/"/g, '""');
+  const s = neutralizeCsvFormula(value.replace(/\r?\n/g, " ")).replace(/"/g, '""');
   return `"${s}"`;
 }
 

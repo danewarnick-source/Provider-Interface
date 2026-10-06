@@ -78,10 +78,6 @@ describe("cert review rules", () => {
   it("never treats upload date as an expiration", () => {
     const fn = readFileSync(new URL("./company-obligations.functions.ts", import.meta.url), "utf8");
     const due = readFileSync(new URL("./obligation-due-dates.ts", import.meta.url), "utf8");
-    const baseline = readFileSync(
-      new URL("./staff-training-requirements.functions.ts", import.meta.url),
-      "utf8",
-    );
     assert.doesNotMatch(fn, /renewal defaulted to/);
     assert.doesNotMatch(fn, /months from upload date/);
     assert.doesNotMatch(fn, /addMonthsUTC\(new Date\(completedAt\)/);
@@ -91,7 +87,6 @@ describe("cert review rules", () => {
     assert.match(fn, /nectar_validation_status: "failed"/);
     assert.doesNotMatch(due, /months from the last verified upload/);
     assert.match(due, /never taken from the upload date/);
-    assert.doesNotMatch(baseline, /default_validity_months &&/);
   });
 
   it("routes uncertain uploads to review and accepts native platform completions", () => {
@@ -447,12 +442,13 @@ describe("cert review surface lock", () => {
     assert.match(staffFile, /cert-review/);
     assert.doesNotMatch(panel, /from\("certificate_reviews"\)/);
     const personFile = readFileSync(
-      new URL("../components/employees/staff-obligations-files-tab.tsx", import.meta.url),
+      new URL("../components/team-members/profile/file-tab.tsx", import.meta.url),
       "utf8",
     );
+    // The profile's Team member file reads Evidence only; uploads are reviewed there.
     assert.doesNotMatch(personFile, /Replace evidence/);
-    assert.match(personFile, /Previous cycle/);
-    assert.match(personFile, /InHiveCertificate|loadInHiveCourseCertificate/);
+    assert.doesNotMatch(personFile, /company_obligation|company-obligations/);
+    assert.match(personFile, /reviewEvidenceFile/);
     assert.doesNotMatch(personFile, /isManualEntry: true/);
   });
 });

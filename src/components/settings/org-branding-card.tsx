@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ImageIcon } from "lucide-react";
+import { isAdminLevel } from "@/lib/access/levels";
 
 /**
  * Org logo + face-sheet contact block (address, phone).
@@ -32,7 +33,7 @@ export function OrgBrandingCard() {
   }, [branding?.org_address, branding?.org_phone]);
 
   if (!orgId) return null;
-  const isAdmin = org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+  const isAdmin = isAdminLevel(org?.access.level);
   if (!isAdmin) return null;
 
   const save = async (patch: Record<string, unknown>) => {

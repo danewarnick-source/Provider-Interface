@@ -9,7 +9,7 @@ import {
 import { unansweredDutyQuietSummary } from "./duty-applicability.ts";
 import {
   evaluateEscalations,
-  isAdminLevelRole,
+  isOwnerLevel,
   loadEvaluateInput,
   pickAdminLevelRecipient,
   type EscalationHit,
@@ -30,6 +30,7 @@ import {
   buildQuietLine,
   decisionFromQuietSummary,
   decorateDecision,
+  emptyQuietLine,
   lastSundayLabel,
   rollupDecisions,
   sortThisWeekItems,
@@ -311,17 +312,41 @@ export async function getThisWeek(
   userId: string,
   now: Date = new Date(),
 ): Promise<ThisWeekResult> {
+  try {
+    return await loadThisWeek(supabase, orgId, userId, now);
+  } catch (err) {
+    // A fresh org has no obligation rows. A failed read used to reject the
+    // server function, and Home turned that into "Could not load this week."
+    console.error(
+      "[this-week] read failed; showing an empty week",
+      err instanceof Error ? err.message : err,
+    );
+    return {
+      items: [],
+      quiet: emptyQuietLine(),
+      alreadyAssigned: emptyAlreadyAssigned(),
+      automation: emptyAutomationHeartbeat(),
+    };
+  }
+}
+
+async function loadThisWeek(
+  supabase: AnySupabase,
+  orgId: string,
+  userId: string,
+  now: Date,
+): Promise<ThisWeekResult> {
   const raw: Decision[] = [];
 
   const { data: membership, error: memErr } = await supabase
     .from("organization_members")
-    .select("id, user_id, role, manager_id, active")
+    .select("id, user_id, access_level, manager_id, active")
     .eq("organization_id", orgId)
     .eq("user_id", userId)
     .maybeSingle();
   if (memErr) throw new Error(memErr.message);
 
-  const adminLevel = membership ? isAdminLevelRole(membership.role) : false;
+  const adminLevel = isOwnerLevel(membership?.access_level);
 
   const input = await loadEvaluateInput(supabase, orgId, now);
   const hits = evaluateEscalations(input);

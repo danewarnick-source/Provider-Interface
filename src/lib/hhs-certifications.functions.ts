@@ -45,7 +45,7 @@ export const getHhsMonthData = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ attendance: AttendanceRow[]; blocked: BlockedDay[] }> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { attendance: [], blocked: [] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const attQ = await supabase
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -135,7 +135,7 @@ export const certifyHhsMonth = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
     // Admin or manager (the closest match to "admin or the assigned program lead").
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = supabase as any;
     const { error } = await sb

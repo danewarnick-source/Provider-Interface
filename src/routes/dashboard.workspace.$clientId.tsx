@@ -20,13 +20,9 @@ import {
   User,
   AlertTriangle,
   Info,
-  Brain,
-  Utensils,
-  Sparkles,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { StaffBehaviorDataTab } from "@/components/behavior-support/staff-data-tab";
 import { ClientQuickInfoSheet } from "@/components/staff-mobile/client-quick-info-sheet";
 
 import { toast } from "sonner";
@@ -40,9 +36,6 @@ import { useTodayShifts } from "@/hooks/use-today-shifts";
 import { ClientPhoto } from "@/components/client-photo";
 import { FaceSheetButton } from "@/components/clients/face-sheet-button";
 import { useClientFeature, clientFeatureVisible } from "@/lib/client-features";
-import { ClientMealPlannerMount } from "@/components/clients/client-meal-planner-mount";
-import { ChoreDailyChecklist } from "@/components/chores/chore-daily-checklist";
-import { ChoreChartForClient } from "@/components/chores/chore-chart-mount";
 
 function ActiveShiftReimbursementSlot({ clientId }: { clientId: string }) {
   const { data: active } = useActiveShift();
@@ -110,10 +103,11 @@ function ClientWorkspace() {
     { first_name: displayFirst, last_name: displayLast },
   );
 
-  const [tab, setTab] = useState(tabParam ?? "about");
+  const requestedTab = tabParam === "behavior-data" ? "about" : tabParam;
+  const [tab, setTab] = useState(requestedTab ?? "about");
   useEffect(() => {
-    if (tabParam) setTab(tabParam);
-  }, [tabParam]);
+    if (requestedTab) setTab(requestedTab);
+  }, [requestedTab]);
 
   const clientCodes = useMemo(
     () => (client ? clientAuthorizedCodes(client) : []),
@@ -170,7 +164,6 @@ function ClientWorkspace() {
       }
     : null;
   const hasMedMonitoringCode = clientFeatureVisible(planFeatureClient, "med_monitoring");
-  const hasBehaviorCode = clientFeatureVisible(planFeatureClient, "behavior");
 
   // Does the client have any active medications? A client w/ meds still
   // needs MAR for self-admin support even without a nursing code.
@@ -188,62 +181,6 @@ function ClientWorkspace() {
 
   // MAR tab: tier+per-client toggle AND (nursing code OR client actually has meds).
   const emarEnabled = emarFeatureEnabled && (hasMedMonitoringCode || !!hasMedications);
-
-  // Behavior Support visibility: bc_code set, features_enabled true, ≥1 published behavior,
-  // AND the client's plan includes a Behavior Consultation code (or feature_config override).
-  const { data: bsTab } = useQuery({
-    queryKey: ["workspace-bs-tab", client?.id ?? null],
-    enabled: !!client?.id,
-    queryFn: async () => {
-      const cid = client!.id;
-      const { data: bsc } = await supabase
-        .from("behavior_support_clients")
-        .select("organization_id, bc_code, features_enabled")
-        .eq("client_id", cid)
-        .maybeSingle();
-      if (!bsc?.features_enabled || !bsc?.bc_code) return { show: false as const };
-      const { count } = await supabase
-        .from("bc_behaviors")
-        .select("id", { count: "exact", head: true })
-        .eq("client_id", cid)
-        .eq("status", "published");
-      return {
-        show: (count ?? 0) > 0,
-        organizationId: bsc.organization_id,
-      };
-    },
-  });
-  const showBehaviorTab = hasBehaviorCode && !!bsTab?.show;
-
-  // Chore-chart space IDs for this client: any chore_space linked directly
-  // (chore_space_clients) plus any chart attached to the client's home team.
-  const { data: choreSpaceIds } = useQuery({
-    queryKey: ["workspace-chore-spaces", client?.id ?? null],
-    enabled: !!client?.id,
-    queryFn: async () => {
-      const ids = new Set<string>();
-      const { data: links } = await supabase
-        .from("chore_space_clients")
-        .select("space_id")
-        .eq("client_id", client!.id);
-      (links ?? []).forEach((l) => ids.add(l.space_id));
-      const { data: c } = await supabase
-        .from("clients")
-        .select("team_id")
-        .eq("id", client!.id)
-        .maybeSingle();
-      const teamId = (c as { team_id: string | null } | null)?.team_id ?? null;
-      if (teamId) {
-        const { data: teamSpaces } = await supabase
-          .from("chore_spaces")
-          .select("id")
-          .eq("team_id", teamId);
-        (teamSpaces ?? []).forEach((s) => ids.add(s.id));
-      }
-      return Array.from(ids);
-    },
-  });
-  const hasChores = (choreSpaceIds?.length ?? 0) > 0;
 
   if (isLoading || !client) {
     return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
@@ -342,9 +279,6 @@ function ClientWorkspace() {
               { v: "clock-in", label: "Clock In", Icon: Clock, show: true },
               { v: "emar", label: "MAR", Icon: Pill, show: emarEnabled },
               { v: "forms", label: "Forms", Icon: FileText, show: true },
-              { v: "meals", label: "Meals", Icon: Utensils, show: true },
-              { v: "chores", label: "Chores", Icon: Sparkles, show: hasChores },
-              { v: "behavior-data", label: "Behavior Data", Icon: Brain, show: showBehaviorTab },
             ].filter((t) => t.show);
             const gridCls =
               tabDefs.length <= 4
@@ -417,23 +351,6 @@ function ClientWorkspace() {
               clientName={`${client.first_name} ${client.last_name}`}
             />
           </TabsContent>
-
-          <TabsContent value="meals" className="mt-5">
-            <ClientMealPlannerMount clientId={client.id} readOnly />
-          </TabsContent>
-
-          {hasChores && (
-            <TabsContent value="chores" className="mt-5 space-y-5">
-              <ChoreDailyChecklist spaceIds={choreSpaceIds ?? []} />
-              <ChoreChartForClient clientId={client.id} readOnly />
-            </TabsContent>
-          )}
-
-          {showBehaviorTab && bsTab?.organizationId && (
-            <TabsContent value="behavior-data" className="mt-5">
-              <StaffBehaviorDataTab clientId={client.id} organizationId={bsTab.organizationId} />
-            </TabsContent>
-          )}
         </Tabs>
       </div>
 

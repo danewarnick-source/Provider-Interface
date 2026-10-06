@@ -22,7 +22,7 @@ export async function assertAddonForOrg(
   addon: AddonId,
   organizationId: string,
 ): Promise<void> {
-  await requireOrgMembership(supabase, userId, organizationId, "employee");
+  await requireOrgMembership(supabase, userId, organizationId, "staff");
 
   const { data: sub } = await supabase
     .from("org_subscriptions")
@@ -52,6 +52,54 @@ export async function assertAddonForOrg(
         orgName: org.name,
         legalName: org.legal_name,
         dbaName: org.dba_name,
+      })
+    : false;
+  const { addons } = entitlementsForOrg({
+    billingExempt,
+    plan: (sub?.plan as string | null) ?? null,
+  });
+  if (!addons.includes(addon)) {
+    throw new Error(
+      `Forbidden: this capability requires the "${addon}" add-on. Upgrade your plan to enable it.`,
+    );
+  }
+}
+
+/**
+ * Team-member Nectar access. Membership is checked on the user client.
+ * The org plan is read with the service role, scoped to that organization,
+ * so caseload RLS cannot hide the plan or grant access from a client flag.
+ */
+export async function assertMemberPlanAddon(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  userId: string,
+  addon: AddonId,
+  organizationId: string,
+): Promise<void> {
+  await requireOrgMembership(supabase, userId, organizationId, "staff");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const admin = supabaseAdmin as any;
+  const { data: sub, error: subErr } = await admin
+    .from("org_subscriptions")
+    .select("plan")
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (subErr) throw new Error("Could not verify this workspace's plan.");
+  const { data: org, error: orgErr } = await admin
+    .from("organizations")
+    .select("name, legal_name, dba_name, billing_exempt, id")
+    .eq("id", organizationId)
+    .maybeSingle();
+  if (orgErr) throw new Error("Could not verify this workspace's plan.");
+  const billingExempt = org
+    ? isBillingExempt({
+        billingExempt: org.billing_exempt === true,
+        orgName: org.name,
+        legalName: org.legal_name,
+        dbaName: org.dba_name,
+        organizationId,
       })
     : false;
   const { addons } = entitlementsForOrg({

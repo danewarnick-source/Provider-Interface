@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AlertTriangle, CreditCard, Lock, X } from "lucide-react";
@@ -105,14 +105,18 @@ export function BillingBanner({ organizationId, isAdmin }: Props) {
         daysPastDue={banner.daysPastDue}
         daysToExpiry={banner.daysToExpiry}
         expiryDate={banner.expiryDate}
-        onAction={() => setModalOpen(true)}
+        onAction={() => {
+          if (banner.kind !== "locked") setModalOpen(true);
+        }}
       />
-      <UpdatePaymentMethodModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        organizationId={organizationId}
-        onSaved={onSaved}
-      />
+      {banner.kind !== "locked" ? (
+        <UpdatePaymentMethodModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          organizationId={organizationId}
+          onSaved={onSaved}
+        />
+      ) : null}
     </>
   );
 }
@@ -126,15 +130,21 @@ function BannerView({
   expiryDate: string | null;
   onAction: () => void;
 }) {
-  const cfg = (() => {
+  const cfg: {
+    tone: string;
+    icon: ReactNode;
+    title: string;
+    body: string;
+    cta: string | null;
+  } = (() => {
     switch (kind) {
       case "locked":
         return {
           tone: "bg-red-600 text-white border-red-700",
           icon: <Lock className="h-5 w-5 shrink-0" />,
-          title: "Your account is locked due to non-payment.",
-          body: "Update your payment method immediately to restore access for you and your staff.",
-          cta: "Update payment method",
+          title: "Your account is locked.",
+          body: "Contact us to reactivate.",
+          cta: null,
         };
       case "past_due_critical": {
         const daysLeft = Math.max(1, 30 - daysPastDue);
@@ -142,7 +152,7 @@ function BannerView({
           tone: "bg-red-600 text-white border-red-700",
           icon: <AlertTriangle className="h-5 w-5 shrink-0" />,
           title: `Urgent — your account locks in ${daysLeft} ${daysLeft === 1 ? "day" : "days"} due to a failed payment.`,
-          body: "Your staff will lose all access if not resolved.",
+          body: "Your team members will lose all access if not resolved.",
           cta: "Update payment method now",
         };
       }
@@ -188,14 +198,16 @@ function BannerView({
         <div className="text-sm font-semibold">{cfg.title}</div>
         <div className="text-xs opacity-90">{cfg.body}</div>
       </div>
-      <Button
-        type="button"
-        onClick={onAction}
-        size="sm"
-        className="shrink-0 bg-white text-[#0F1A2E] hover:bg-white/90 border border-white/40"
-      >
-        {cfg.cta}
-      </Button>
+      {cfg.cta ? (
+        <Button
+          type="button"
+          onClick={onAction}
+          size="sm"
+          className="shrink-0 bg-white text-[#0F1A2E] hover:bg-white/90 border border-white/40"
+        >
+          {cfg.cta}
+        </Button>
+      ) : null}
     </div>
   );
 }
@@ -294,7 +306,7 @@ function UpdatePaymentMethodModal({
             Update payment method
           </DialogTitle>
           <DialogDescription>
-            Your service is restored as soon as your card is updated. Card details are sent securely and never stored.
+            Card details are sent securely and never stored. This does not restore a locked account.
           </DialogDescription>
         </DialogHeader>
 

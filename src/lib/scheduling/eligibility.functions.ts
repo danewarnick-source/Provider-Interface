@@ -6,6 +6,15 @@ import {
   resolveRequiredQualsForCodes,
   loadStaffQualsBulk,
 } from "./required-qualifications.functions";
+import { denverYmd } from "@/lib/denver-date";
+import { parseIsoDate, resolveHireDate } from "@/lib/evidence/due";
+import type { EvidenceFileRow } from "@/lib/evidence/types";
+import type { BadgeEvidenceItem } from "@/lib/team-members/badges";
+import {
+  isCprQualificationKey,
+  readinessWarnings,
+  staffClientReadiness,
+} from "@/lib/team-members/readiness";
 
 /**
  * Rank candidate staff for a (client + service code + time window) slot.
@@ -55,11 +64,17 @@ export const rankStaffForShift = createServerFn({ method: "POST" })
       .eq("active", true);
     if (mErr) throw mErr;
     const userIds = (members ?? []).map((m: any) => m.user_id).filter(Boolean);
-    let profilesById = new Map<string, { id: string; full_name: string | null; date_of_birth: string | null }>();
+    let profilesById = new Map<string, {
+      id: string;
+      full_name: string | null;
+      date_of_birth: string | null;
+      hire_date: string | null;
+      start_date: string | null;
+    }>();
     if (userIds.length) {
       const { data: profs, error: pErr } = await supabase
         .from("profiles")
-        .select("id, full_name, date_of_birth")
+        .select("id, full_name, date_of_birth, hire_date, start_date")
         .in("id", userIds);
       if (pErr) throw pErr;
       profilesById = new Map((profs ?? []).map((p: any) => [p.id, p]));
@@ -70,6 +85,7 @@ export const rankStaffForShift = createServerFn({ method: "POST" })
         id: m.user_id as string,
         full_name: (p?.full_name as string | null) ?? null,
         date_of_birth: (p?.date_of_birth as string | null) ?? null,
+        hire_date: parseIsoDate(resolveHireDate(p?.hire_date ?? null, p?.start_date ?? null)),
         active: !!m.active,
       };
     }).filter((r) => r.id);
@@ -131,6 +147,7 @@ export const rankStaffForShift = createServerFn({ method: "POST" })
       }
     }
 
+    let clientHasAbi = false;
     // 4b) Client-scoped host exclusion (HHS conflict-of-interest).
     // The location-based block only fires when a host_home locationId is passed.
     // Admin-hours and other clockable shifts for an HHS client don't pass one, so
@@ -140,9 +157,10 @@ export const rankStaffForShift = createServerFn({ method: "POST" })
     {
       const { data: clientRow } = await supabase
         .from("clients")
-        .select("team_id")
+        .select("team_id, has_abi")
         .eq("id", data.clientId)
         .maybeSingle();
+      clientHasAbi = (clientRow as { has_abi: boolean | null } | null)?.has_abi === true;
       const clientTeamId = (clientRow as { team_id: string | null } | null)?.team_id ?? null;
       if (clientTeamId) {
         const { data: t } = await supabase
@@ -192,7 +210,10 @@ export const rankStaffForShift = createServerFn({ method: "POST" })
       [data.serviceCode],
     );
     const requiredQuals = requiredByCode.get(data.serviceCode.toUpperCase()) ?? [];
-    const requiredCertKeys = requiredQuals.map((q) => q.nsKey);
+    // CPR is a readiness rule (Evidence, with the 90-day hire grace) — not re-checked as a cert.
+    const requiredCertKeys = requiredQuals
+      .map((q) => q.nsKey)
+      .filter((k) => !isCprQualificationKey(k));
 
     // Bulk-load namespaced qualifications (external_cert / baseline_training /
     // hive_course / client_specific_training) per staff — matches rule kinds.
@@ -217,20 +238,63 @@ export const rankStaffForShift = createServerFn({ method: "POST" })
       }
     }
 
+    // 7) Readiness inputs: each person's Evidence rows (subject 'staff').
+    const { data: evItems, error: evErr } = await supabase
+      .from("evidence_items")
+      .select("*")
+      .eq("organization_id", orgId)
+      .eq("subject_type", "staff")
+      .in("subject_id", staffIds);
+    if (evErr) throw evErr;
+    const itemsByStaff = new Map<string, BadgeEvidenceItem[]>();
+    for (const it of (evItems ?? []) as BadgeEvidenceItem[]) {
+      const arr = itemsByStaff.get(it.subject_id) ?? [];
+      arr.push(it);
+      itemsByStaff.set(it.subject_id, arr);
+    }
+    const itemIds = ((evItems ?? []) as BadgeEvidenceItem[]).map((i) => i.id);
+    const filesByItem = new Map<string, EvidenceFileRow[]>();
+    for (let i = 0; i < itemIds.length; i += 200) {
+      const { data: evFiles, error: fErr } = await supabase
+        .from("evidence_files")
+        .select("*")
+        .eq("organization_id", orgId)
+        .in("item_id", itemIds.slice(i, i + 200));
+      if (fErr) throw fErr;
+      for (const f of (evFiles ?? []) as EvidenceFileRow[]) {
+        const arr = filesByItem.get(f.item_id) ?? [];
+        arr.push(f);
+        filesByItem.set(f.item_id, arr);
+      }
+    }
+    const today = denverYmd();
+
     const result = rankEligibility({
       serviceCode: data.serviceCode,
       shiftStart, shiftEnd,
-      staff: memberRows.map((r) => ({
-        ...r,
-        weeklyShifts: byStaffShifts.get(r.id) ?? [],
-        activeCertKeys: qualsByStaff.get(r.id) ?? new Set<string>(),
-        completedClientTrainings: completedTrainingsByStaff.get(r.id) ?? new Set<string>(),
-        assignedToClient: assignedSet.has(r.id),
-        isHostForLocation: hostSet.has(r.id),
-      })),
+      staff: memberRows.map((r) => {
+        const items = itemsByStaff.get(r.id) ?? [];
+        const readiness = staffClientReadiness({
+          today,
+          hireDate: r.hire_date,
+          evidence: { items, files: items.flatMap((it) => filesByItem.get(it.id) ?? []) },
+          client: { hasAbi: clientHasAbi, behaviorSupport: false },
+          personTraining: {
+            requiredIds: requiredClientTrainings,
+            completedIds: completedTrainingsByStaff.get(r.id) ?? new Set<string>(),
+          },
+        });
+        return {
+          ...r,
+          weeklyShifts: byStaffShifts.get(r.id) ?? [],
+          activeCertKeys: qualsByStaff.get(r.id) ?? new Set<string>(),
+          readinessWarnings: readinessWarnings(readiness),
+          assignedToClient: assignedSet.has(r.id),
+          isHostForLocation: hostSet.has(r.id),
+        };
+      }),
       clientId: data.clientId,
       requiredCertKeys,
-      requiredClientTrainings,
       overtimeThresholdHours: data.overtimeThresholdHours ?? 40,
     });
     const nameById = new Map(memberRows.map((r) => [r.id, r.full_name ?? "Staff"]));

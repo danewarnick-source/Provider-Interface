@@ -21,7 +21,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   requirePermission,
   requireAnyPermission,
-} from "@/lib/require-permission";
+} from "@/lib/access/require";
 import { DEFAULT_MATCH_WEIGHTS } from "@/lib/provider-interest-outline.functions";
 
 // ────────── Types ──────────

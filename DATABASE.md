@@ -76,7 +76,6 @@ compliance-flag tables can be safely dropped, if they ever should be.
 
 ## Clinical / HRC
 - `hrc_committee_members` + `hrc_meetings` + `hrc_restriction_records` + `hrc_reviews` — Human Rights Committee.
-- `bc_behaviors` + `bc_data_entries` + `bc_documents` + `bc_flags` + `bc_review_notes` — Behavior support (BC2 service code).
 
 ## Financial / Billing
 - `billing_submissions` + `billing_submission_audit_log` + `billing_submission_warnings` — EVV billing exports.

@@ -102,7 +102,6 @@ export const discardImportJob = createServerFn({ method: "POST" })
 type UndoItem =
   | { kind: "client_record"; record_id: string; display_name: string; reason: string }
   | { kind: "feature_flag"; client_id: string; module: string; display_name: string }
-  | { kind: "bsp_draft"; client_id: string; display_name: string }
   | { kind: "custom_field"; entity_id: string; entity_kind: string; field_key: string; display_name: string }
   | { kind: "filed_scrap"; client_id: string; tag: string; text: string; display_name: string }
   | { kind: "assignment"; staff_id: string; client_id: string }
@@ -144,20 +143,13 @@ async function buildUndoPlan(
         // Still try to undo BSP draft and feature flags individually (each checks own state).
       } else {
         removes.push({ kind: "client_record", record_id: c.id, display_name: s.display_name, reason: "Created by this import" });
-        continue; // FK cascade will sweep custom_field_values, bsp, provenance
+        continue; // client is archived, not deleted; its imported fields stay with the record
       }
     }
 
     // ---- Existing client updated — never delete the client record, but revert
-    // feature toggles + BSP drafts + custom attrs + filed scraps if untouched.
+    // feature toggles + custom attrs + filed scraps if untouched.
     if (s.subject_type === "client") {
-      const { data: bsp } = await sb.from("behavior_support_clients")
-        .select("client_id, features_enabled, updated_at").eq("client_id", s.committed_record_id).maybeSingle();
-      if (bsp && bsp.features_enabled === false &&
-          new Date(bsp.updated_at).getTime() <= committedMs + GRACE_MS) {
-        removes.push({ kind: "bsp_draft", client_id: s.committed_record_id, display_name: s.display_name });
-      }
-
       const { data: plan } = await sb.from("provisioning_plan")
         .select("target_module, planned_action, state").eq("subject_id", s.id).not("committed_at", "is", null);
       for (const p of plan ?? []) {
@@ -235,10 +227,13 @@ export const undoCommittedImport = createServerFn({ method: "POST" })
     for (const item of plan.removes) {
       try {
         if (item.kind === "client_record") {
-          // Cascade clears feature_config, custom values, BSP, provenance via FKs.
-          const { error } = await sb.from("clients").delete().eq("id", item.record_id);
+          // Clients are never deleted (trg_clients_prevent_delete); undo archives.
+          const { error } = await sb
+            .from("clients")
+            .update({ account_status: "archived" })
+            .eq("id", item.record_id);
           if (error) throw new Error(error.message);
-          removed.push(`Removed client ${item.display_name}`);
+          removed.push(`Archived client ${item.display_name}`);
         } else if (item.kind === "feature_flag") {
           const { data: c } = await sb.from("clients").select("feature_config").eq("id", item.client_id).maybeSingle();
           if (c) {
@@ -249,11 +244,6 @@ export const undoCommittedImport = createServerFn({ method: "POST" })
               removed.push(`Disabled ${item.module} on ${item.display_name}`);
             }
           }
-        } else if (item.kind === "bsp_draft") {
-          const { error } = await sb.from("behavior_support_clients")
-            .delete().eq("client_id", item.client_id).eq("features_enabled", false);
-          if (error) throw new Error(error.message);
-          removed.push(`Removed draft BSP for ${item.display_name}`);
         } else if (item.kind === "custom_field") {
           const { data: def } = await sb.from("custom_field_definitions")
             .select("id").eq("field_key", item.field_key).eq("entity_kind", item.entity_kind).maybeSingle();

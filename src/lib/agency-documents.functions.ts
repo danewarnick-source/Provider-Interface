@@ -162,6 +162,6 @@ export const listAgencyDocuments = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { cards: [], counts: { missing: 0, due_soon: 0, on_file: 0 }, codes: [] };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     return loadAgencyDocumentsIndex(supabase, data.organizationId);
   });

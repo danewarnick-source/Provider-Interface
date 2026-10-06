@@ -5,11 +5,13 @@ import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { AuthCaptcha, authCaptchaBlocked, readAuthCaptchaToken, resetAuthCaptcha } from "@/components/auth-captcha";
+import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth-captcha";
 import { supabase } from "@/integrations/supabase/client";
 import { completeClientSignOut } from "@/lib/client-sign-out";
 import { toast } from "sonner";
 import { AuthShell } from "./login";
-import { ROLE_LABEL, type Role } from "@/lib/rbac";
+import { levelInvitePhrase } from "@/lib/access/levels";
 import {
   extractInviteToken,
   humanizeInviteError,
@@ -18,11 +20,12 @@ import {
   isValidJoinPassword,
   isValidJoinUsername,
   JOIN_PASSWORD_HINT,
+  JOIN_PASSWORD_MIN_LENGTH,
   JOIN_PASSWORD_TOO_SHORT,
   JOIN_USERNAME_HINT,
   JOIN_USERNAME_INVALID,
   joinConfirmLiveMessage,
-  joinHomeForRole,
+  joinHomeForLevel,
   joinPasswordLiveMessage,
   joinSetsAuthPassword,
   joinUsernameLiveMessage,
@@ -36,7 +39,10 @@ import {
 
 export const Route = createFileRoute("/join")({
   head: () => ({
-    meta: [{ title: "Join your provider — Provider Interface" }, { name: "robots", content: "noindex,nofollow" }],
+    meta: [
+      { title: "Join your provider — Provider Interface" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
   }),
   validateSearch: (s: Record<string, unknown>): { invite?: string; token?: string } => {
     const invite = typeof s.invite === "string" && s.invite.trim() ? s.invite : undefined;
@@ -116,6 +122,8 @@ function JoinPage() {
       return toast.error("Enter the password you already use to sign in.");
     }
     if (password !== confirm) return toast.error("Passwords don't match.");
+    if (authCaptchaBlocked()) return toast.error(AUTH_CAPTCHA_REQUIRED);
+    const captchaToken = readAuthCaptchaToken();
 
     setBusy(true);
     try {
@@ -137,6 +145,7 @@ function JoinPage() {
       const { error: signErr } = await supabase.auth.signInWithPassword({
         email: prepared.email,
         password,
+        ...(captchaToken ? { options: { captchaToken } } : {}),
       });
       if (signErr) throw new Error(humanizeInviteError(signErr.message));
 
@@ -144,8 +153,9 @@ function JoinPage() {
       if (rpcErr) throw new Error(humanizeInviteError(rpcErr.message));
 
       toast.success(`You're in — welcome to ${prepared.org_name}.`);
-      window.location.replace(joinHomeForRole(prepared.role));
+      window.location.replace(joinHomeForLevel(prepared.level, prepared.home));
     } catch (err) {
+      resetAuthCaptcha();
       toast.error(humanizeInviteError(err));
     } finally {
       setBusy(false);
@@ -185,7 +195,7 @@ function JoinPage() {
     );
   }
 
-  const roleLabel = ROLE_LABEL[preview.role as Role] ?? preview.role;
+  const rolePhrase = levelInvitePhrase(preview.level);
   const setsNewPassword = joinSetsAuthPassword(preview.account_exists, {
     mustChangePassword: preview.must_change_password,
   });
@@ -210,8 +220,8 @@ function JoinPage() {
       title={`Join ${preview.org_name}`}
       subtitle={
         setsNewPassword
-          ? `You've been invited as ${roleLabel}. Set how you'll sign in — this is not a new company.`
-          : `You've been invited as ${roleLabel}. Use the password you already sign in with — this is not a new company.`
+          ? `You've been invited as ${rolePhrase}. Set how you'll sign in — this is not a new company.`
+          : `You've been invited as ${rolePhrase}. Use the password you already sign in with — this is not a new company.`
       }
     >
       <form onSubmit={onSubmit} className="grid gap-4" data-testid="join-form">
@@ -266,7 +276,11 @@ function JoinPage() {
               className={fieldClass}
               aria-describedby="join-username-hint join-username-live"
             />
-            <p id="join-username-hint" className="text-xs text-[#0a0f1c]/55" data-testid="join-username-hint">
+            <p
+              id="join-username-hint"
+              className="text-xs text-[#0a0f1c]/55"
+              data-testid="join-username-hint"
+            >
               {JOIN_USERNAME_HINT}
             </p>
             {suggestedUsername && suggestedUsername !== username.trim().toLowerCase() && (
@@ -295,24 +309,36 @@ function JoinPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={setsNewPassword ? 8 : undefined}
+            minLength={setsNewPassword ? JOIN_PASSWORD_MIN_LENGTH : undefined}
             autoComplete={setsNewPassword ? "new-password" : "current-password"}
             className={fieldClass}
             aria-describedby="join-password-hint join-password-live"
           />
           {setsNewPassword ? (
-            <p id="join-password-hint" className="text-xs text-[#0a0f1c]/55" data-testid="join-password-hint">
+            <p
+              id="join-password-hint"
+              className="text-xs text-[#0a0f1c]/55"
+              data-testid="join-password-hint"
+            >
               {JOIN_PASSWORD_HINT}
             </p>
           ) : (
-            <p id="join-password-hint" className="text-xs text-[#0a0f1c]/55" data-testid="join-password-hint">
+            <p
+              id="join-password-hint"
+              className="text-xs text-[#0a0f1c]/55"
+              data-testid="join-password-hint"
+            >
               This does not change your password. Use the same one you use on the sign-in page.
             </p>
           )}
           {setsNewPassword && (
-            <ul className="grid gap-1" data-testid="join-password-rules" aria-label="Password requirements">
+            <ul
+              className="grid gap-1"
+              data-testid="join-password-rules"
+              aria-label="Password requirements"
+            >
               <JoinRule ok={isValidJoinPassword(password)} idle={password.length === 0}>
-                At least 8 characters
+                At least {JOIN_PASSWORD_MIN_LENGTH} characters
               </JoinRule>
             </ul>
           )}
@@ -337,6 +363,7 @@ function JoinPage() {
           </p>
           <LiveLine id="join-confirm-live" testId="join-confirm-live" status={confirmLive} />
         </div>
+        <AuthCaptcha />
         <Button
           type="submit"
           disabled={!canJoin}
@@ -378,15 +405,7 @@ function LiveLine({
   );
 }
 
-function JoinRule({
-  ok,
-  idle,
-  children,
-}: {
-  ok: boolean;
-  idle: boolean;
-  children: ReactNode;
-}) {
+function JoinRule({ ok, idle, children }: { ok: boolean; idle: boolean; children: ReactNode }) {
   const color = idle ? "#3a4553" : ok ? "#1e3a30" : "#8a3228";
   return (
     <li className="flex items-center gap-2 text-xs" style={{ color }}>

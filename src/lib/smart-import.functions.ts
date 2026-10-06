@@ -13,6 +13,7 @@ import { gatewayFetch, assertBedrockConfigured, friendlyAiErrorMessage } from "@
 import { parseDocumentWithAI, extractGoalsOnly, documentLikelyHasGoals, CORE_CLIENT_FIELD_KEYS } from "@/lib/document-extraction";
 import { enrichNamesFromFull, firstNameWithMiddle, formatPersonName } from "@/lib/person-name";
 import { smartImportNeedsAi } from "@/lib/smart-import-ai-gate";
+import { findDuplicateClientInOrg, mayRunOrgWideClientDedup, type DedupClientRow } from "@/lib/smart-import-dedup";
 
 function digitsOnly(v: string | null | undefined): string {
   return (v ?? "").replace(/\D/g, "");
@@ -600,7 +601,7 @@ export const runSmartExtraction = createServerFn({ method: "POST" })
           extracted: Awaited<ReturnType<typeof aiExtractFieldsFromText>>;
         }> = [];
         for (const blob of blobs) {
-          const extracted = await aiExtractFieldsFromText(blob.text, mode);
+          const extracted = await aiExtractFieldsFromText(blob.text, mode, data.organizationId);
           extractions.push({ blob, extracted });
         }
         const hasAnyFields = extractions.some((e) => e.extracted.fields.length > 0);
@@ -703,6 +704,36 @@ export const runSmartExtraction = createServerFn({ method: "POST" })
       }
 
       // ---- Dedup / match (read-only against real tables) ----
+      let orgClients: DedupClientRow[] = [];
+      if (mode === "client") {
+        const { data: isExec, error: execErr } = await sb.rpc("is_hive_executive", {
+          _user: context.userId,
+        });
+        const adminCheck =
+          isExec === true && !execErr
+            ? { data: false, error: null }
+            : await sb.rpc("is_org_admin_or_manager", {
+                _org: data.organizationId,
+                _user: context.userId,
+              });
+        if (
+          !mayRunOrgWideClientDedup({
+            isExec: isExec === true,
+            execRpcFailed: !!execErr,
+            isOrgAdmin: adminCheck.data === true,
+            adminRpcFailed: !!adminCheck.error,
+          })
+        ) {
+          throw new Error("Forbidden — executive or organization admin required to match clients.");
+        }
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: clientRows, error: clientErr } = await (supabaseAdmin as typeof sb)
+          .from("clients")
+          .select("id, organization_id, medicaid_id, first_name, last_name")
+          .eq("organization_id", data.organizationId);
+        if (clientErr) throw new Error(clientErr.message);
+        orgClients = (clientRows ?? []) as DedupClientRow[];
+      }
       let matchedCount = 0;
       let ambiguousCount = 0;
       for (const s of allSubjects) {
@@ -718,33 +749,14 @@ export const runSmartExtraction = createServerFn({ method: "POST" })
         let ambiguous = false;
 
         if (mode === "client") {
-          const mid = map.get("medicaid_id");
-          if (mid) {
-            const { data: rows } = await sb
-              .from("clients")
-              .select("id")
-              .eq("organization_id", data.organizationId)
-              .eq("medicaid_id", mid)
-              .limit(2);
-            if (rows && rows.length === 1) matchedId = rows[0].id;
-            else if (rows && rows.length > 1) ambiguous = true;
-          }
-          if (!matchedId && !ambiguous) {
-            const fn = map.get("first_name");
-            const ln = map.get("last_name");
-            const dob = map.get("date_of_birth");
-            if (fn && ln && dob) {
-              const { data: rows } = await sb
-                .from("clients")
-                .select("id")
-                .eq("organization_id", data.organizationId)
-                .ilike("first_name", fn)
-                .ilike("last_name", ln)
-                .limit(2);
-              if (rows && rows.length === 1) matchedId = rows[0].id;
-              else if (rows && rows.length > 1) ambiguous = true;
-            }
-          }
+          const match = findDuplicateClientInOrg(orgClients, data.organizationId, {
+            medicaid_id: map.get("medicaid_id"),
+            first_name: map.get("first_name"),
+            last_name: map.get("last_name"),
+            date_of_birth: map.get("date_of_birth"),
+          });
+          matchedId = match.matchedId;
+          ambiguous = match.ambiguous;
         } else {
           const email = map.get("email");
           if (email) {
@@ -886,12 +898,13 @@ async function extractDocxText(buf: Buffer): Promise<string> {
 async function aiExtractFieldsFromText(
   text: string,
   mode: "employee" | "client",
+  orgId?: string | null,
 ): Promise<{ display_name: string; fields: ExtractedFieldOut[]; unfiled: string[] }> {
   if (mode === "employee") {
-    return aiExtractEmployeeFieldsFromText(text);
+    return aiExtractEmployeeFieldsFromText(text, orgId);
   }
 
-  const parsed = await parseDocumentWithAI(text, `subject=client`);
+  const parsed = await parseDocumentWithAI(text, `subject=client`, orgId);
 
   const out: ExtractedFieldOut[] = [];
   const unfiled: string[] = [];
@@ -992,7 +1005,7 @@ async function aiExtractFieldsFromText(
   const goalCount = out.filter((r) => r.target_field === "pcsp_goal").length;
   if (goalCount === 0 && documentLikelyHasGoals(text)) {
     try {
-      const retry = await extractGoalsOnly(text);
+      const retry = await extractGoalsOnly(text, orgId);
       for (const f of retry.fields ?? []) {
         if (f.field_key !== "pcsp_goal") continue;
         const conf = typeof f.confidence === "number" ? Math.max(0, Math.min(1, f.confidence)) : 0.7;
@@ -1102,6 +1115,7 @@ async function aiExtractFieldsFromText(
 // can reuse the same prompt/parse logic instead of duplicating it.
 export async function aiExtractEmployeeFieldsFromText(
   text: string,
+  orgId?: string | null,
 ): Promise<{ display_name: string; fields: ExtractedFieldOut[]; unfiled: string[] }> {
 
   const targetFields = [
@@ -1119,7 +1133,7 @@ Rules: dates ISO YYYY-MM-DD; never invent data; return ONLY JSON.`;
       { role: "user", content: `Extract from this document text:\n\n${truncated}` },
     ],
     response_format: { type: "json_object" },
-  });
+  }, { orgId });
   if (res.status === 429) throw new Error("AI is busy (rate limit). Try again in a moment.");
   if (res.status === 401) throw new Error("AWS Bedrock credentials are not configured.");
   if (!res.ok) {

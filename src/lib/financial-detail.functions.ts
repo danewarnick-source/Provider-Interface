@@ -107,7 +107,7 @@ export const getRevenueClientPills = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { year: data.year, month: data.month, pills: [] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, userId, data.organizationId, "owner");
 
     const { clients, codes, timesheets, daily } = await loadMonthData(
       supabase,
@@ -223,7 +223,7 @@ export const getRevenueClientDetail = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { client: null, lines: [] as CodeLine[], total: 0 };
-    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, userId, data.organizationId, "owner");
     const { clients, codes, timesheets, daily } = await loadMonthData(
       supabase,
       data.organizationId,
@@ -342,7 +342,7 @@ export const getMonthlyGridShiftDetail = createServerFn({ method: "POST" })
         days: [] as DailyDetailRow[],
       };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, userId, data.organizationId, "owner");
     const { clients, codes, timesheets, daily } = await loadMonthData(
       supabase,
       data.organizationId,

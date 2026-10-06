@@ -17,15 +17,15 @@ export type EligibilityInputs = {
     weeklyShifts: Array<{ starts_at: string; ends_at: string; id: string }>;
     // certifications mapped to required cert keys
     activeCertKeys: Set<string>;
-    // client-specific training keys
-    completedClientTrainings: Set<string>; // values: `${clientId}:${trainingId}` etc.
+    // staffClientReadiness warnings for this client (src/lib/team-members/readiness.ts):
+    // orientation, person-specific training, ABI, CPR, behavior. Never re-checked here.
+    readinessWarnings?: string[];
     // assignments to this client or shared team membership with the client
     assignedToClient: boolean;
     isHostForLocation: boolean;
   }>;
   clientId: string | null;
   requiredCertKeys: string[];          // certs required for this service code
-  requiredClientTrainings: string[];   // client-specific training keys required
   overtimeThresholdHours: number;      // configurable, default 40
 };
 
@@ -59,7 +59,7 @@ function ageYears(dob: string | null, asOf: Date): number | null {
 
 export function rankEligibility(inputs: EligibilityInputs): EligibilityResult[] {
   const { serviceCode, shiftStart, shiftEnd, staff,
-    requiredCertKeys, requiredClientTrainings, overtimeThresholdHours, clientId } = inputs;
+    requiredCertKeys, overtimeThresholdHours } = inputs;
   const shiftDuration = hoursBetween(shiftStart, shiftEnd);
   const minAge = minStaffAgeForCode(serviceCode);
 
@@ -101,15 +101,8 @@ export function rankEligibility(inputs: EligibilityInputs): EligibilityResult[] 
       }
     }
 
-    // Client-specific training
-    if (clientId) {
-      for (const key of requiredClientTrainings) {
-        if (!s.completedClientTrainings.has(key)) {
-          warnings.push("No client-specific training");
-          break;
-        }
-      }
-    }
+    // Readiness for this client (one rule set, shared with the caseload tab)
+    for (const w of s.readinessWarnings ?? []) warnings.push(w);
 
     // Hours / OT
     const currentWeeklyHours = s.weeklyShifts

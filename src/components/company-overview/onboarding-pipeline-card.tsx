@@ -6,16 +6,32 @@ export type PipelineCounts = { invited: number; inProgress: number; complete: nu
 export function OnboardingPipelineCard({ counts }: { counts: PipelineCounts }) {
   const total = counts.invited + counts.inProgress + counts.complete;
   const stages = [
-    { key: "invited", label: "Invited", value: counts.invited, icon: UserPlus, to: "/dashboard/invitations" },
-    { key: "in_progress", label: "In progress", value: counts.inProgress, icon: Activity, to: "/dashboard/employees" },
-    { key: "complete", label: "Complete", value: counts.complete, icon: CheckCircle2, to: "/dashboard/employees" },
+    { key: "invited", label: "Invited", value: counts.invited, icon: UserPlus, view: "invited" },
+    {
+      key: "in_progress",
+      label: "In progress",
+      value: counts.inProgress,
+      icon: Activity,
+      view: undefined,
+    },
+    {
+      key: "complete",
+      label: "Complete",
+      value: counts.complete,
+      icon: CheckCircle2,
+      view: undefined,
+    },
   ] as const;
+  // Every stage opens the roster; Invited lands on its Invited view.
 
   return (
     <section className="rounded-2xl border border-border bg-card/80 p-5 shadow-card backdrop-blur">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="font-display text-base font-semibold tracking-tight">Onboarding pipeline</h2>
-        <Link to="/dashboard/employees" className="inline-flex items-center gap-1 text-xs font-medium text-[#7a4a0a] hover:underline">
+        <Link
+          to="/dashboard/team-members"
+          className="inline-flex items-center gap-1 text-xs font-medium text-[#7a4a0a] hover:underline"
+        >
           View all <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
@@ -31,15 +47,20 @@ export function OnboardingPipelineCard({ counts }: { counts: PipelineCounts }) {
             return (
               <li key={s.key}>
                 <Link
-                  to={s.to}
+                  to="/dashboard/team-members"
+                  search={s.view ? { view: s.view } : {}}
                   className="flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-3 transition hover:border-[var(--hive-gold)]/40"
                 >
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--hive-text)] text-[var(--hive-gold)]">
                     <Icon className="h-4 w-4" strokeWidth={2} />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{s.label}</p>
-                    <p className="font-display text-xl font-bold tabular-nums text-[var(--hive-text)]">{s.value}</p>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {s.label}
+                    </p>
+                    <p className="font-display text-xl font-bold tabular-nums text-[var(--hive-text)]">
+                      {s.value}
+                    </p>
                   </div>
                 </Link>
               </li>

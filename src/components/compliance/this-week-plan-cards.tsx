@@ -16,7 +16,7 @@ import {
 } from "@/lib/obligations/overrides";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { isAdminLevelRole } from "@/lib/obligations/escalation";
+import { isAdminLevel } from "@/lib/access/levels";
 import { kindFromEscalationTrigger } from "@/lib/obligations/remediation";
 import { getThisWeekForUser, reviewRemediationPlan } from "@/lib/obligations/remediation.functions";
 import {
@@ -38,9 +38,6 @@ import {
   type ThisWeekResult,
 } from "@/lib/obligations/this-week.functions";
 import "./decision-card.css";
-
-/** PlanCard shim — keep 30 days while callers move to DecisionCard. */
-export { DecisionCard as PlanCard } from "@/components/compliance/decision-card";
 
 type PlanDialogKind = "license" | "standing" | "overdue";
 
@@ -130,7 +127,7 @@ export function ThisWeekPlanCards() {
 
   const orgId = org?.organization_id ?? null;
   const canManage = org
-    ? isAdminLevelRole(org.role) || org.role === "manager" || org.role === "program_manager"
+    ? isAdminLevel(org.access.level)
     : false;
   const viewerId = user?.id ?? null;
   const overridesQ = useOrgOverrides(orgId, canManage);

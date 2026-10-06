@@ -1,7 +1,7 @@
 /**
  * Agency audit-readiness health — DSPD SOW documentation posture.
  *
- * Returns up to 14 gated metrics with a weight-redistributed overall score.
+ * Returns up to 13 gated metrics with a weight-redistributed overall score.
  * Does NOT query external_certifications (retired / empty).
  */
 import { createServerFn } from "@tanstack/react-start";
@@ -19,7 +19,6 @@ export type HealthMetricKey =
   | "incident_documentation"
   | "upi_attestations"
   | "hrc_documentation"
-  | "behavior_support"
   | "client_record_completeness"
   | "client_specific_training"
   | "policy_acknowledgments"
@@ -56,7 +55,6 @@ const BASE_WEIGHTS: Record<HealthMetricKey, number> = {
   upi_attestations: 8,
   client_specific_training: 7,
   hrc_documentation: 6,
-  behavior_support: 6,
   client_record_completeness: 5,
   hhs_host_home: 5,
   policy_acknowledgments: 4,
@@ -72,13 +70,12 @@ const LINKS: Record<HealthMetricKey, string> = {
   incident_documentation: "/dashboard/hub/documentation?tab=incidents",
   upi_attestations: "/dashboard/summaries",
   hrc_documentation: "/dashboard/hub/documentation?tab=hrc",
-  behavior_support: "/dashboard/hub/documentation?tab=behavior",
   client_record_completeness: "/dashboard/hub/clients",
   client_specific_training: "/dashboard/compliance?tab=staff",
   policy_acknowledgments: "/dashboard/settings",
   hhs_host_home: "/dashboard/hub/documentation?tab=hhs",
   billing_accuracy: "/dashboard/hub/documentation?tab=billing",
-  hr_document_currency: "/dashboard/hub/employees",
+  hr_document_currency: "/dashboard/team-members",
 };
 
 const LABELS: Record<HealthMetricKey, string> = {
@@ -89,7 +86,6 @@ const LABELS: Record<HealthMetricKey, string> = {
   incident_documentation: "Incident Report Documentation",
   upi_attestations: "UPI Attestations Current",
   hrc_documentation: "Human Rights Committee Documentation",
-  behavior_support: "Behavior Support Documentation",
   client_record_completeness: "Client Record Completeness",
   client_specific_training: "Client-Specific Training Completion",
   policy_acknowledgments: "Policy Acknowledgments",
@@ -197,7 +193,7 @@ export const getAgencyHealthSnapshot = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return emptySnapshot();
 
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = supabase as any;
     const orgId = data.organizationId;
@@ -240,7 +236,6 @@ export const getAgencyHealthSnapshot = createServerFn({ method: "POST" })
       return Array.from(set).sort();
     }, [] as string[]);
 
-    const hasBehavior = ["BC1", "BC2", "BC3"].some((c) => activeCodes.includes(c));
     const hasHhs = activeCodes.includes("HHS");
     const hasUpi = ["SEI", "SJD", "CMP", "CMS"].some((c) => activeCodes.includes(c));
 
@@ -512,38 +507,7 @@ export const getAgencyHealthSnapshot = createServerFn({ method: "POST" })
       };
     }, { passing: 0, total: 0, score: 0, applicable: true });
 
-    // ── 8. Behavior Support (BC1/BC2/BC3) ───────────────────────────────────
-    const behavior = await safe(async () => {
-      if (!hasBehavior) return { passing: 0, total: 0, applicable: false };
-      const { data: entries } = await sb
-        .from("bc_data_entries")
-        .select("note, staff_user_id, occurred_at")
-        .eq("organization_id", orgId)
-        .gte("occurred_at", since30);
-      const entryRows = (entries ?? []) as Array<{
-        note: string | null;
-        staff_user_id: string | null;
-      }>;
-      const entryPass = entryRows.filter(
-        (r) => (r.note ?? "").trim().length >= 20 && !!r.staff_user_id,
-      ).length;
-
-      const { data: reviews } = await sb
-        .from("bc_review_notes")
-        .select("body, created_at")
-        .eq("organization_id", orgId)
-        .gte("created_at", since30);
-      const reviewRows = (reviews ?? []) as Array<{ body: string | null }>;
-      const reviewPass = reviewRows.filter((r) => (r.body ?? "").trim().length >= 50).length;
-
-      return {
-        passing: entryPass + reviewPass,
-        total: entryRows.length + reviewRows.length,
-        applicable: true,
-      };
-    }, { passing: 0, total: 0, applicable: hasBehavior });
-
-    // ── 9. Client Record Completeness ───────────────────────────────────────
+    // ── 8. Client Record Completeness ───────────────────────────────────────
     const clientRecords = await safe(async () => {
       const { data: rows } = await sb
         .from("clients")
@@ -765,7 +729,6 @@ export const getAgencyHealthSnapshot = createServerFn({ method: "POST" })
       metric("incident_documentation", incidents.passing, incidents.total, true),
       metric("upi_attestations", upi.passing, upi.total, upi.applicable),
       metric("hrc_documentation", hrc.passing, hrc.total, hrc.applicable, hrc.score),
-      metric("behavior_support", behavior.passing, behavior.total, behavior.applicable),
       metric("client_record_completeness", clientRecords.passing, clientRecords.total, true),
       metric("client_specific_training", cst.passing, cst.total, true),
       metric("policy_acknowledgments", policies.passing, policies.total, true),

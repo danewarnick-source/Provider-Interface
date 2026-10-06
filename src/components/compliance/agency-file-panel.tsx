@@ -5,7 +5,7 @@ import { AgencyDocumentsCards } from "@/components/agency-documents/agency-docum
 import { CompanyPoliciesTab } from "@/components/agency-documents/company-policies-tab";
 import { PacketNextActionCard } from "@/components/compliance/packet-next-action";
 import { SowIndexPanel } from "@/components/compliance/sow-index-panel";
-import { ROLE_RANK } from "@/lib/rbac";
+import { isAdminLevel } from "@/lib/access/levels";
 import type { AgencyFileSubTab } from "@/lib/compliance-nav";
 
 export function AgencyFilePanel({
@@ -29,7 +29,7 @@ export function AgencyFilePanel({
     );
   }
 
-  const canAccess = ROLE_RANK[org.role] >= ROLE_RANK.manager;
+  const canAccess = isAdminLevel(org.access.level);
   if (!canAccess) {
     return (
       <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">

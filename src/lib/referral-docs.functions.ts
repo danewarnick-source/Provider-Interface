@@ -5,11 +5,9 @@
  * and saves through the existing createReferral path. We NEVER auto-create.
  */
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { requirePermission, requireAnyPermission } from "@/lib/require-permission";
-
+import { requirePermission, requireAnyPermission } from "@/lib/access/require";
 
 const orgOnly = z.object({ organization_id: z.string().uuid() });
 
@@ -93,8 +91,12 @@ export const parseReferralDocument = createServerFn({ method: "POST" })
         fields: {} as ReferralPrefill,
       };
     }
+    await requireAnyPermission(supabase, userId, data.organization_id, [
+      "view_referrals",
+      "manage_referrals",
+    ]);
 
-    let storagePath: string | null = data.storage_path ?? null;
+    let storagePath: string | null = null;
     if (data.document_id) {
       const { data: doc, error } = await supabase
         .from("referral_documents")
@@ -104,34 +106,43 @@ export const parseReferralDocument = createServerFn({ method: "POST" })
       if (error || !doc) throw new Error("Document not found");
       if (doc.organization_id !== data.organization_id) throw new Error("Forbidden");
       storagePath = doc.storage_path;
+    } else if (data.storage_path) {
+      const { data: doc, error } = await supabase
+        .from("referral_documents")
+        .select("id, storage_path")
+        .eq("organization_id", data.organization_id)
+        .eq("storage_path", data.storage_path)
+        .maybeSingle();
+      if (error || !doc) throw new Error("Document not found");
+      storagePath = doc.storage_path;
     }
 
-    if (!storagePath && !data.text) {
+    if (storagePath) {
+      const orgPrefix = `${data.organization_id}/`;
+      if (!storagePath.startsWith(orgPrefix) || storagePath.includes("..")) {
+        throw new Error("Forbidden");
+      }
+    } else if (!data.text) {
       throw new Error("Provide a document or pasted text to parse");
     }
 
-    const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
-    if (!SUPABASE_URL) throw new Error("Server misconfigured");
-
-    // Forward the caller's bearer so the edge function's verify_jwt passes.
-    const req = getRequest();
-    const bearer = req?.headers?.get("authorization") ?? "";
-    if (!bearer) throw new Error("Unauthorized");
+    const { readSupabasePublicUrl, readSupabaseServiceRoleKey } =
+      await import("@/lib/supabase-public-env");
+    const SUPABASE_URL = readSupabasePublicUrl();
+    const serviceRole = readSupabaseServiceRoleKey();
+    if (!SUPABASE_URL || !serviceRole) throw new Error("Server misconfigured");
 
     const res = await fetch(`${SUPABASE_URL}/functions/v1/parse-referral-doc`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: bearer,
-        apikey: process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? "",
+        Authorization: `Bearer ${serviceRole}`,
+        apikey: serviceRole,
       },
       body: JSON.stringify(
-        storagePath
-          ? { bucket: "referral-documents", path: storagePath }
-          : { text: data.text },
+        storagePath ? { bucket: "referral-documents", path: storagePath } : { text: data.text },
       ),
     });
-
 
     const payload = (await res.json().catch(() => ({}))) as {
       fields?: ReferralPrefill;
@@ -154,9 +165,7 @@ export const parseReferralDocument = createServerFn({ method: "POST" })
         ok: false as const,
         status: res.status,
         message:
-          payload.message ||
-          payload.error ||
-          "Parser unavailable — fill the referral manually.",
+          payload.message || payload.error || "Parser unavailable — fill the referral manually.",
         fields: {} as ReferralPrefill,
       };
     }
@@ -175,9 +184,7 @@ export const parseReferralDocument = createServerFn({ method: "POST" })
 
 export const listReferralDocuments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    orgOnly.extend({ referral_id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d) => orgOnly.extend({ referral_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return [];
@@ -226,9 +233,7 @@ export const attachDraftDocumentsToReferral = createServerFn({ method: "POST" })
 
 export const getReferralDocumentUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    orgOnly.extend({ document_id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d) => orgOnly.extend({ document_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { url: "" };

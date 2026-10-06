@@ -24,14 +24,7 @@ import {
 
 function CheckMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 16 16"
-      width="12"
-      height="12"
-      className={className}
-      aria-hidden
-      fill="none"
-    >
+    <svg viewBox="0 0 16 16" width="12" height="12" className={className} aria-hidden fill="none">
       <path
         d="M3.2 8.3 6.1 11.2 12.8 4.4"
         stroke="currentColor"
@@ -54,7 +47,11 @@ function ProgressChip({ done, label }: { done: boolean; label: string }) {
           : "border-[var(--hive-border)] bg-[var(--hive-muted-surface)] text-[var(--hive-text-muted)]",
       )}
     >
-      {done ? <CheckMark /> : <span className="h-2 w-2 rounded-full bg-[var(--hive-steel)]" aria-hidden />}
+      {done ? (
+        <CheckMark />
+      ) : (
+        <span className="h-2 w-2 rounded-full bg-[var(--hive-steel)]" aria-hidden />
+      )}
       {label}
     </span>
   );
@@ -146,7 +143,7 @@ export function AdminHomeWelcome({ welcomeFlag = false }: { welcomeFlag?: boolea
         ) : (
           <div className="space-y-2.5">
             <div className="flex flex-wrap gap-1.5">
-              <ProgressChip done={progress.inviteStaff} label="Invite staff" />
+              <ProgressChip done={progress.inviteStaff} label="Invite team members" />
               <ProgressChip done={progress.addClient} label="Add a client" />
               <ProgressChip done={progress.documentShift} label="Document a shift" />
             </div>
@@ -158,7 +155,9 @@ export function AdminHomeWelcome({ welcomeFlag = false }: { welcomeFlag?: boolea
                   aria-label={`${card.title} — ${card.cta}`}
                   className="rounded-xl border border-[var(--hive-border)] bg-[var(--hive-canvas)] px-3 py-2.5 transition-colors hover:bg-[var(--hive-muted-surface)]"
                 >
-                  <div className="text-[13px] font-medium text-[var(--hive-text)]">{card.title}</div>
+                  <div className="text-[13px] font-medium text-[var(--hive-text)]">
+                    {card.title}
+                  </div>
                   <div className="mt-0.5 text-[12px] text-[var(--hive-text-muted)]">{card.cta}</div>
                 </Link>
               ))}

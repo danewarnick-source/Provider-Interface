@@ -93,7 +93,7 @@ function fullName(p?: ProfileRow): string {
 
 // ───── AI plan extraction ───────────────────────────────────────────────────
 
-async function planFromPrompt(prompt: string): Promise<NectarReportPlan> {
+async function planFromPrompt(prompt: string, orgId?: string | null): Promise<NectarReportPlan> {
   assertBedrockConfigured();
 
   const today = new Date().toISOString().slice(0, 10);
@@ -144,7 +144,7 @@ Examples:
         { role: "user", content: prompt.slice(0, 2000) },
       ],
       response_format: { type: "json_object" },
-    });
+    }, { orgId });
   if (res.status === 429) throw new Error("AI rate limit reached. Please retry shortly.");
   if (res.status === 402) throw new Error("AI workspace credits exhausted. Add credits to continue.");
   if (!res.ok) throw new Error(`AI error (${res.status}).`);
@@ -198,10 +198,10 @@ export const askNectarReport = createServerFn({ method: "POST" })
 
     // Verify manager+ membership on the PASSED org (not first-membership).
     const { requireOrgMembership } = await import("@/integrations/supabase/require-org");
-    await requireOrgMembership(supabase, userId, orgId, "manager");
+    await requireOrgMembership(supabase, userId, orgId, "admin");
 
 
-    const plan = await planFromPrompt(data.prompt);
+    const plan = await planFromPrompt(data.prompt, orgId);
 
     // Default to "this month" when intent needs dates and none provided.
     const now = new Date();

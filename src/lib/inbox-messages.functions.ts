@@ -46,7 +46,7 @@ export const getInboxUnreadCount = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ count: number }> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { count: 0 };
-    await requireOrgMembership(supabase, userId, data.organization_id, "manager");
+    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
 
     const { count, error } = await supabase
       .from("exec_message_recipients")
@@ -65,7 +65,7 @@ export const listInboxMessages = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<InboxMessageRow[]> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return [];
-    await requireOrgMembership(supabase, userId, data.organization_id, "manager");
+    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
 
     const { data: recs, error } = await supabase
       .from("exec_message_recipients")
@@ -141,7 +141,7 @@ export const openInboxMessage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<InboxMessageDetail | null> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organization_id, "manager");
+    await requireOrgMembership(supabase, userId, data.organization_id, "admin");
 
     // Verify a recipient row exists for THIS org. If not → reject.
     const { data: rec, error: recErr } = await supabase

@@ -6,25 +6,15 @@ function read(rel: string) {
   return readFileSync(new URL(rel, import.meta.url), "utf8");
 }
 
-describe("NECTAR onboarding — agency setup gate, no SOW upload", () => {
+describe("NECTAR onboarding — agency setup gate, no Home wizard", () => {
   it("does not require SOW upload or document_upload attestation to finish setup", () => {
     const hook = read("../hooks/use-onboarding-progress.tsx");
-    const panel = read("../components/onboarding/nectar-onboarding-panel.tsx");
     const banner = read("../components/onboarding/onboarding-guidance-banner.tsx");
 
     assert.doesNotMatch(hook, /sowCount/);
     assert.doesNotMatch(hook, /attestationCount/);
     assert.doesNotMatch(hook, /document_upload/);
     assert.doesNotMatch(hook, /authoritative_kind/);
-
-    assert.doesNotMatch(panel, /AuthoritativeSourceDrop/);
-    assert.doesNotMatch(panel, /AttestationBanner/);
-    assert.doesNotMatch(panel, /state_sow/);
-    assert.match(panel, /you do not upload a Scope of Work to finish setup/);
-    assert.doesNotMatch(panel, /Hive Certify|Hive Platform/);
-    assert.doesNotMatch(panel, /[\u{1F300}-\u{1FAFF}]/u);
-    assert.match(panel, /canSkipAgencySetup/);
-    assert.match(panel, /disabled=\{!canSkip\}/);
 
     assert.doesNotMatch(banner, /Once your SOW is uploaded/);
     assert.doesNotMatch(banner, /State Scope of Work/);
@@ -47,10 +37,11 @@ describe("NECTAR onboarding — agency setup gate, no SOW upload", () => {
     assert.match(docs, /when you have files to store/);
   });
 
-  it("mounts the wizard on Admin Home when an org is loaded, without RequirePermission", () => {
+  it("does not mount the agency-setup wizard on Admin Home", () => {
     const dash = read("../components/admin-home/admin-home-dashboard.tsx");
-    assert.match(dash, /NectarOnboardingPanel/);
-    assert.match(dash, /orgId \? <NectarOnboardingPanel/);
+    assert.doesNotMatch(dash, /NectarOnboardingPanel/);
+    assert.doesNotMatch(dash, /nectar-onboarding-panel/);
+    assert.doesNotMatch(dash, /agency-setup-panel/);
     assert.doesNotMatch(dash, /RequirePermission/);
   });
 });

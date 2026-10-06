@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
 import { cn } from "@/lib/utils";
@@ -25,9 +25,9 @@ export const Route = createFileRoute("/dashboard/nectar-company-profile")({
     return out;
   },
   component: () => (
-    <RequireRole roles={["admin", "program_manager", "manager"]}>
+    <RequireLevel min="admin">
       <NectarCompanyProfilePage />
-    </RequireRole>
+    </RequireLevel>
   ),
 });
 

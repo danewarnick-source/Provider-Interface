@@ -12,9 +12,7 @@ import {
 } from "@/lib/billing-lockout.server";
 import { isBillingExempt, UNPAID_LOCK_REASON } from "@/lib/billing-access";
 import { shouldKeepPrepaidAccess, syncPiListQuantityForOrg } from "@/lib/pi-list-billing.server";
-import { fulfillTrainingOrder } from "@/lib/training-fulfillment.server";
 import { fulfillTrainingClass } from "@/lib/training-class-fulfillment.server";
-import { fulfillTrainingOnlyOrder } from "@/lib/training-only-fulfillment.server";
 import { activateSubscriptionFromCheckout } from "@/lib/org-subscription-activate";
 
 export { activateSubscriptionFromCheckout } from "@/lib/org-subscription-activate";
@@ -93,7 +91,6 @@ async function alreadyProcessed(eventId: string): Promise<boolean> {
   return !!data;
 }
 
-
 export async function handleVerifiedStripeEvent(event: StripeLikeEvent): Promise<{ ok: true }> {
   const obj = (event.data?.object ?? {}) as Record<string, unknown>;
   const meta = metadataOf(obj);
@@ -104,19 +101,8 @@ export async function handleVerifiedStripeEvent(event: StripeLikeEvent): Promise
 
   switch (event.type) {
     case "checkout.session.completed": {
-      const hiveKind = meta.hive_kind ?? (obj.mode === "payment" && meta.catalog_id ? "training" : "subscription");
+      const hiveKind = meta.hive_kind ?? "subscription";
       const orgId = meta.organization_id || (await orgIdFromCustomer(customerId));
-      if (hiveKind === "training_only") {
-        const orderId = meta.training_only_order_id || asString(obj.client_reference_id);
-        if (!orderId) break;
-        await fulfillTrainingOnlyOrder({
-          orderId,
-          stripeSessionId: asString(obj.id),
-          stripePaymentIntentId: asString(obj.payment_intent),
-          amountCents: typeof obj.amount_total === "number" ? obj.amount_total : 0,
-        });
-        break;
-      }
       if (hiveKind === "training_class") {
         if (!meta.class_id || !orgId) break;
         await fulfillTrainingClass({
@@ -136,44 +122,22 @@ export async function handleVerifiedStripeEvent(event: StripeLikeEvent): Promise
         });
         break;
       }
-      if (hiveKind === "training") {
-        if (!meta.hive_order_id || !meta.catalog_id || !orgId) break;
-        await fulfillTrainingOrder({
-          orderId: meta.hive_order_id,
-          catalogId: meta.catalog_id,
-          organizationId: orgId,
-          modeContext: meta.mode_context === "individual" ? "individual" : "bulk_seats",
-          quantity: Number(meta.quantity ?? "1") || 1,
-          assigneeUserId: meta.assignee_user_id || null,
-          stripeSessionId: asString(obj.id),
-          stripePaymentIntentId: asString(obj.payment_intent),
-          stripeCustomerId: customerId,
-          amountCents: typeof obj.amount_total === "number" ? obj.amount_total : 0,
-        });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabaseAdmin as any).from("payment_events").insert({
-          org_id: orgId,
-          event_type: "payment_succeeded",
-          amount_cents: typeof obj.amount_total === "number" ? obj.amount_total : 0,
-          stripe_event_id: eventId,
-          metadata: { hive_kind: "training", hive_order_id: meta.hive_order_id },
-        });
-        break;
-      }
 
       if (!orgId) break;
       if (await loadExempt(orgId)) {
         await unlockAccount(orgId).catch(() => undefined);
         break;
       }
-      const periodEndUnix = typeof obj.current_period_end === "number" ? obj.current_period_end : null;
+      const periodEndUnix =
+        typeof obj.current_period_end === "number" ? obj.current_period_end : null;
       await activateSubscriptionFromCheckout({
         orgId,
         plan: meta.plan || "hive_standard",
         customerId,
         subscriptionId: asString(obj.subscription),
         paymentIntentId: asString(obj.payment_intent),
-        amountCents: typeof obj.amount_total === "number" ? obj.amount_total : Number(meta.monthly_cents ?? 0),
+        amountCents:
+          typeof obj.amount_total === "number" ? obj.amount_total : Number(meta.monthly_cents ?? 0),
         periodEndIso: periodEndUnix ? new Date(periodEndUnix * 1000).toISOString() : null,
         eventId,
         staffCount: Number(meta.staff_count ?? 0) || null,
@@ -201,9 +165,14 @@ export async function handleVerifiedStripeEvent(event: StripeLikeEvent): Promise
       const keepPrepaid = shouldKeepPrepaidAccess({
         billing_interval:
           meta.interval ??
-          asString(obj.metadata && typeof obj.metadata === "object" ? (obj.metadata as { interval?: string }).interval : null) ??
+          asString(
+            obj.metadata && typeof obj.metadata === "object"
+              ? (obj.metadata as { interval?: string }).interval
+              : null,
+          ) ??
           (row as { billing_interval?: string | null } | null)?.billing_interval,
-        current_period_end: periodEnd ?? (row as { current_period_end?: string | null } | null)?.current_period_end,
+        current_period_end:
+          periodEnd ?? (row as { current_period_end?: string | null } | null)?.current_period_end,
       });
       if (row) {
         const mapped =
@@ -253,11 +222,13 @@ export async function handleVerifiedStripeEvent(event: StripeLikeEvent): Promise
       const periodEnd =
         typeof obj.current_period_end === "number"
           ? new Date(obj.current_period_end * 1000).toISOString()
-          : (existing as { current_period_end?: string | null } | null)?.current_period_end ?? null;
+          : ((existing as { current_period_end?: string | null } | null)?.current_period_end ??
+            null);
       if (
         shouldKeepPrepaidAccess({
           billing_interval:
-            meta.interval ?? (existing as { billing_interval?: string | null } | null)?.billing_interval,
+            meta.interval ??
+            (existing as { billing_interval?: string | null } | null)?.billing_interval,
           current_period_end: periodEnd,
         })
       ) {
@@ -278,10 +249,12 @@ export async function handleVerifiedStripeEvent(event: StripeLikeEvent): Promise
       if (!orgId) break;
       if (await loadExempt(orgId)) break;
       const invoiceId = asString(obj.id);
-      await syncPiListQuantityForOrg(orgId, { invoiceId, allowLeftoverInvoice: false }).catch((err) => {
-        const msg = err instanceof Error ? err.message : "sync_failed";
-        console.error("[stripe-webhook] pi list quantity sync failed", { error: msg });
-      });
+      await syncPiListQuantityForOrg(orgId, { invoiceId, allowLeftoverInvoice: false }).catch(
+        (err) => {
+          const msg = err instanceof Error ? err.message : "sync_failed";
+          console.error("[stripe-webhook] pi list quantity sync failed", { error: msg });
+        },
+      );
       break;
     }
 

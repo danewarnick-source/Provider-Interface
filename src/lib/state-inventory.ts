@@ -374,9 +374,9 @@ export const STATE_INVENTORY: InventoryItem[] = [
     id: "term.house_manager",
     area: "terminology",
     kind: "config",
-    label: "House Manager role label",
-    utah_value: "House Manager",
-    source: "src/lib/rbac.ts (ROLE_LABEL)",
+    label: "Home manager access preset name",
+    utah_value: "Group Home Manager",
+    source: "access_seed_presets() (home_manager preset)",
     extracted: false,
   },
 

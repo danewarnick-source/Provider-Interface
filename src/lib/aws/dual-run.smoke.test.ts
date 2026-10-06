@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { afterEach, describe, it } from "node:test";
 import { createClient } from "@supabase/supabase-js";
 import {
@@ -332,10 +332,13 @@ describe("/api/aws/db never emits HTTP 500", () => {
     assert.equal(isAwsDbLogical5xx({ status: 500, error: { message: "x" } }), true);
     assert.equal(isAwsDbLogical5xx({ unhandled: true, error: { message: "HTTPError" } }), true);
     assert.equal(isAwsDbLogical5xx({ status: 200, error: null }), false);
-    const routeSrc = readFileSync(new URL("../../routes/api/aws/db.ts", import.meta.url), "utf8");
-    assert.match(routeSrc, /httpStatusForAwsDbResult/);
-    assert.match(routeSrc, /status: 200/);
-    assert.doesNotMatch(routeSrc, /result\.status >= 400 \? result\.status : 200/);
+    for (const name of ["db", "session", "storage"]) {
+      assert.equal(
+        existsSync(new URL(`../../routes/api/aws/${name}.ts`, import.meta.url)),
+        false,
+        `${name} route should stay deleted; Supabase is the data path`,
+      );
+    }
   });
 });
 

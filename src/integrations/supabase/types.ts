@@ -14,6 +14,716 @@ export type Database = {
   }
   public: {
     Tables: {
+      _backup_20260928_certifications: {
+        Row: {
+          certification_type_code: string | null
+          course_id: string | null
+          course_title: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string | null
+          issued_at: string | null
+          organization_id: string | null
+          origin: string | null
+          recipient_name: string | null
+          requirement_id: string | null
+          user_id: string | null
+          verification_code: string | null
+        }
+        Insert: {
+          certification_type_code?: string | null
+          course_id?: string | null
+          course_title?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          issued_at?: string | null
+          organization_id?: string | null
+          origin?: string | null
+          recipient_name?: string | null
+          requirement_id?: string | null
+          user_id?: string | null
+          verification_code?: string | null
+        }
+        Update: {
+          certification_type_code?: string | null
+          course_id?: string | null
+          course_title?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          issued_at?: string | null
+          organization_id?: string | null
+          origin?: string | null
+          recipient_name?: string | null
+          requirement_id?: string | null
+          user_id?: string | null
+          verification_code?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_course_assignments: {
+        Row: {
+          assigned_by: string | null
+          completed_at: string | null
+          course_id: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string | null
+          organization_id: string | null
+          progress: number | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assigned_by?: string | null
+          completed_at?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string | null
+          organization_id?: string | null
+          progress?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assigned_by?: string | null
+          completed_at?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string | null
+          organization_id?: string | null
+          progress?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_course_modules: {
+        Row: {
+          body: string | null
+          course_id: string | null
+          created_at: string | null
+          id: string | null
+          order_index: number | null
+          pdf_url: string | null
+          quiz: Json | null
+          title: string | null
+          video_url: string | null
+        }
+        Insert: {
+          body?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_index?: number | null
+          pdf_url?: string | null
+          quiz?: Json | null
+          title?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          body?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_index?: number | null
+          pdf_url?: string | null
+          quiz?: Json | null
+          title?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_courses: {
+        Row: {
+          category: string | null
+          certificate_validity_months: number | null
+          cover_url: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string | null
+          is_global: boolean | null
+          is_published: boolean | null
+          organization_id: string | null
+          title: string | null
+        }
+        Insert: {
+          category?: string | null
+          certificate_validity_months?: number | null
+          cover_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string | null
+          is_global?: boolean | null
+          is_published?: boolean | null
+          organization_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          category?: string | null
+          certificate_validity_months?: number | null
+          cover_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string | null
+          is_global?: boolean | null
+          is_published?: boolean | null
+          organization_id?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_hive_training_auto_renew_settings: {
+        Row: {
+          created_at: string | null
+          enabled: boolean | null
+          last_run_at: string | null
+          lead_days: number | null
+          organization_id: string | null
+          paused_reason: string | null
+          payment_method_brand: string | null
+          payment_method_last4: string | null
+          scope: string | null
+          selected_catalog_ids: string[] | null
+          stripe_customer_id: string | null
+          stripe_payment_method_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          enabled?: boolean | null
+          last_run_at?: string | null
+          lead_days?: number | null
+          organization_id?: string | null
+          paused_reason?: string | null
+          payment_method_brand?: string | null
+          payment_method_last4?: string | null
+          scope?: string | null
+          selected_catalog_ids?: string[] | null
+          stripe_customer_id?: string | null
+          stripe_payment_method_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          enabled?: boolean | null
+          last_run_at?: string | null
+          lead_days?: number | null
+          organization_id?: string | null
+          paused_reason?: string | null
+          payment_method_brand?: string | null
+          payment_method_last4?: string | null
+          scope?: string | null
+          selected_catalog_ids?: string[] | null
+          stripe_customer_id?: string | null
+          stripe_payment_method_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_lesson_progress: {
+        Row: {
+          assignment_id: string | null
+          completed: boolean | null
+          completed_at: string | null
+          id: string | null
+          lesson_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assignment_id?: string | null
+          completed?: boolean | null
+          completed_at?: string | null
+          id?: string | null
+          lesson_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assignment_id?: string | null
+          completed?: boolean | null
+          completed_at?: string | null
+          id?: string | null
+          lesson_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_lesson_quiz_attempts: {
+        Row: {
+          answers: Json | null
+          created_at: string | null
+          id: string | null
+          lesson_id: string | null
+          passed: boolean | null
+          score: number | null
+          total: number | null
+          user_id: string | null
+        }
+        Insert: {
+          answers?: Json | null
+          created_at?: string | null
+          id?: string | null
+          lesson_id?: string | null
+          passed?: boolean | null
+          score?: number | null
+          total?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          answers?: Json | null
+          created_at?: string | null
+          id?: string | null
+          lesson_id?: string | null
+          passed?: boolean | null
+          score?: number | null
+          total?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_lessons: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          data: Json | null
+          duration_minutes: number | null
+          id: string | null
+          lesson_type: string | null
+          module_id: string | null
+          order_index: number | null
+          pdf_url: string | null
+          required: boolean | null
+          title: string | null
+          video_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          data?: Json | null
+          duration_minutes?: number | null
+          id?: string | null
+          lesson_type?: string | null
+          module_id?: string | null
+          order_index?: number | null
+          pdf_url?: string | null
+          required?: boolean | null
+          title?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          data?: Json | null
+          duration_minutes?: number | null
+          id?: string | null
+          lesson_type?: string | null
+          module_id?: string | null
+          order_index?: number | null
+          pdf_url?: string | null
+          required?: boolean | null
+          title?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_program_courses: {
+        Row: {
+          course_id: string | null
+          created_at: string | null
+          id: string | null
+          order_index: number | null
+          program_id: string | null
+          required: boolean | null
+          unlock_after: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_index?: number | null
+          program_id?: string | null
+          required?: boolean | null
+          unlock_after?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_index?: number | null
+          program_id?: string | null
+          required?: boolean | null
+          unlock_after?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_training_assets_objects: {
+        Row: {
+          archived_at: string | null
+          bucket_id: string | null
+          created_at: string | null
+          id: string | null
+          is_delete_marker: boolean | null
+          is_versioned: boolean | null
+          last_accessed_at: string | null
+          metadata: Json | null
+          name: string | null
+          owner: string | null
+          owner_id: string | null
+          path_tokens: string[] | null
+          updated_at: string | null
+          user_metadata: Json | null
+          version: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          bucket_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_delete_marker?: boolean | null
+          is_versioned?: boolean | null
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          name?: string | null
+          owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
+          updated_at?: string | null
+          user_metadata?: Json | null
+          version?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          bucket_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_delete_marker?: boolean | null
+          is_versioned?: boolean | null
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          name?: string | null
+          owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
+          updated_at?: string | null
+          user_metadata?: Json | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_training_checklist_mappings: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_active: boolean | null
+          notes: string | null
+          requirement_key: string | null
+          training_topic_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          notes?: string | null
+          requirement_key?: string | null
+          training_topic_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          notes?: string | null
+          requirement_key?: string | null
+          training_topic_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_training_modules: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          mindsmith_url: string | null
+          sequence_order: number | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          mindsmith_url?: string | null
+          sequence_order?: number | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          mindsmith_url?: string | null
+          sequence_order?: number | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_training_programs: {
+        Row: {
+          annual_renewal: boolean | null
+          category: string | null
+          cover_url: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_global: boolean | null
+          is_published: boolean | null
+          name: string | null
+          organization_id: string | null
+          slug: string | null
+          validity_months: number | null
+        }
+        Insert: {
+          annual_renewal?: boolean | null
+          category?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_global?: boolean | null
+          is_published?: boolean | null
+          name?: string | null
+          organization_id?: string | null
+          slug?: string | null
+          validity_months?: number | null
+        }
+        Update: {
+          annual_renewal?: boolean | null
+          category?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_global?: boolean | null
+          is_published?: boolean | null
+          name?: string | null
+          organization_id?: string | null
+          slug?: string | null
+          validity_months?: number | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_training_topics: {
+        Row: {
+          attestation_statement: string | null
+          category: string | null
+          code: string | null
+          created_at: string | null
+          default_hours: number | null
+          description: string | null
+          dspd_letter: string | null
+          id: string | null
+          mindsmith_url: string | null
+          sort_order: number | null
+          title: string | null
+        }
+        Insert: {
+          attestation_statement?: string | null
+          category?: string | null
+          code?: string | null
+          created_at?: string | null
+          default_hours?: number | null
+          description?: string | null
+          dspd_letter?: string | null
+          id?: string | null
+          mindsmith_url?: string | null
+          sort_order?: number | null
+          title?: string | null
+        }
+        Update: {
+          attestation_statement?: string | null
+          category?: string | null
+          code?: string | null
+          created_at?: string | null
+          default_hours?: number | null
+          description?: string | null
+          dspd_letter?: string | null
+          id?: string | null
+          mindsmith_url?: string | null
+          sort_order?: number | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      _backup_20260928_user_training_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          id: string | null
+          is_completed: boolean | null
+          module_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_completed?: boolean | null
+          module_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_completed?: boolean | null
+          module_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      access_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          organization_id: string
+          target_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          organization_id: string
+          target_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          organization_id?: string
+          target_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      access_change_log: {
+        Row: {
+          change_type: string
+          changed_by_name: string | null
+          changed_by_user_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          new_value: boolean | null
+          organization_id: string
+          permission: string | null
+          previous_value: boolean | null
+          reason: string | null
+          role: string | null
+          target_user_id: string | null
+          target_user_name: string | null
+        }
+        Insert: {
+          change_type: string
+          changed_by_name?: string | null
+          changed_by_user_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          new_value?: boolean | null
+          organization_id: string
+          permission?: string | null
+          previous_value?: boolean | null
+          reason?: string | null
+          role?: string | null
+          target_user_id?: string | null
+          target_user_name?: string | null
+        }
+        Update: {
+          change_type?: string
+          changed_by_name?: string | null
+          changed_by_user_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          new_value?: boolean | null
+          organization_id?: string
+          permission?: string | null
+          previous_value?: boolean | null
+          reason?: string | null
+          role?: string | null
+          target_user_id?: string | null
+          target_user_name?: string | null
+        }
+        Relationships: []
+      }
+      access_presets: {
+        Row: {
+          access_level: Database["public"]["Enums"]["access_level"]
+          access_scope: string
+          categories: Json
+          created_at: string
+          home_page: string | null
+          id: string
+          name: string
+          organization_id: string
+          seed_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_level: Database["public"]["Enums"]["access_level"]
+          access_scope: string
+          categories?: Json
+          created_at?: string
+          home_page?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          seed_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_level?: Database["public"]["Enums"]["access_level"]
+          access_scope?: string
+          categories?: Json
+          created_at?: string
+          home_page?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          seed_key?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "access_presets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_reimbursement_requests: {
         Row: {
           activity_description: string
@@ -149,6 +859,75 @@ export type Database = {
             columns: ["bank_account_id"]
             isOneToOne: true
             referencedRelation: "agency_bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_policies: {
+        Row: {
+          active: boolean
+          audience_job_code: string | null
+          audience_kind: string
+          body_text: string | null
+          created_at: string
+          created_by: string | null
+          file_mime: string | null
+          file_name: string | null
+          file_path: string | null
+          file_size_bytes: number | null
+          id: string
+          obligation_id: string | null
+          organization_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audience_job_code?: string | null
+          audience_kind?: string
+          body_text?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_mime?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          obligation_id?: string | null
+          organization_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audience_job_code?: string | null
+          audience_kind?: string
+          body_text?: string | null
+          created_at?: string
+          created_by?: string | null
+          file_mime?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          obligation_id?: string | null
+          organization_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_policies_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "company_obligations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -915,370 +1694,6 @@ export type Database = {
           },
         ]
       }
-      bc_behaviors: {
-        Row: {
-          approved_at: string | null
-          approved_by_user_id: string | null
-          bsp_citation: string
-          client_id: string
-          created_at: string
-          data_method: string
-          drafted_by_user_id: string | null
-          expected_cadence: string
-          id: string
-          last_logged_at: string | null
-          name: string
-          operational_definition: string
-          organization_id: string
-          published_at: string | null
-          published_by_user_id: string | null
-          source: Database["public"]["Enums"]["bc_behavior_source"]
-          status: Database["public"]["Enums"]["bc_behavior_status"]
-          updated_at: string
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by_user_id?: string | null
-          bsp_citation?: string
-          client_id: string
-          created_at?: string
-          data_method?: string
-          drafted_by_user_id?: string | null
-          expected_cadence?: string
-          id?: string
-          last_logged_at?: string | null
-          name: string
-          operational_definition?: string
-          organization_id: string
-          published_at?: string | null
-          published_by_user_id?: string | null
-          source?: Database["public"]["Enums"]["bc_behavior_source"]
-          status?: Database["public"]["Enums"]["bc_behavior_status"]
-          updated_at?: string
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by_user_id?: string | null
-          bsp_citation?: string
-          client_id?: string
-          created_at?: string
-          data_method?: string
-          drafted_by_user_id?: string | null
-          expected_cadence?: string
-          id?: string
-          last_logged_at?: string | null
-          name?: string
-          operational_definition?: string
-          organization_id?: string
-          published_at?: string | null
-          published_by_user_id?: string | null
-          source?: Database["public"]["Enums"]["bc_behavior_source"]
-          status?: Database["public"]["Enums"]["bc_behavior_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bc_behaviors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_behaviors_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bc_data_entries: {
-        Row: {
-          abc_antecedent: string
-          abc_behavior: string
-          abc_consequence: string
-          behavior_id: string
-          client_id: string
-          count: number | null
-          created_at: string
-          duration_seconds: number | null
-          id: string
-          intensity: number | null
-          note: string
-          occurred_at: string
-          organization_id: string
-          staff_user_id: string
-          updated_at: string
-        }
-        Insert: {
-          abc_antecedent?: string
-          abc_behavior?: string
-          abc_consequence?: string
-          behavior_id: string
-          client_id: string
-          count?: number | null
-          created_at?: string
-          duration_seconds?: number | null
-          id?: string
-          intensity?: number | null
-          note?: string
-          occurred_at?: string
-          organization_id: string
-          staff_user_id: string
-          updated_at?: string
-        }
-        Update: {
-          abc_antecedent?: string
-          abc_behavior?: string
-          abc_consequence?: string
-          behavior_id?: string
-          client_id?: string
-          count?: number | null
-          created_at?: string
-          duration_seconds?: number | null
-          id?: string
-          intensity?: number | null
-          note?: string
-          occurred_at?: string
-          organization_id?: string
-          staff_user_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bc_data_entries_behavior_id_fkey"
-            columns: ["behavior_id"]
-            isOneToOne: false
-            referencedRelation: "bc_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_data_entries_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_data_entries_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bc_documents: {
-        Row: {
-          client_id: string
-          created_at: string
-          doc_type: Database["public"]["Enums"]["bc_doc_type"]
-          id: string
-          is_current: boolean
-          organization_id: string
-          storage_path: string
-          updated_at: string
-          uploaded_at: string
-          uploaded_by_user_id: string
-          version: number
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          doc_type: Database["public"]["Enums"]["bc_doc_type"]
-          id?: string
-          is_current?: boolean
-          organization_id: string
-          storage_path: string
-          updated_at?: string
-          uploaded_at?: string
-          uploaded_by_user_id: string
-          version?: number
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          doc_type?: Database["public"]["Enums"]["bc_doc_type"]
-          id?: string
-          is_current?: boolean
-          organization_id?: string
-          storage_path?: string
-          updated_at?: string
-          uploaded_at?: string
-          uploaded_by_user_id?: string
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bc_documents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_documents_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bc_flags: {
-        Row: {
-          acknowledged_at: string | null
-          acknowledged_by_user_id: string | null
-          client_id: string
-          created_at: string
-          detail: string
-          flag_type: Database["public"]["Enums"]["bc_flag_type"]
-          id: string
-          organization_id: string
-          updated_at: string
-        }
-        Insert: {
-          acknowledged_at?: string | null
-          acknowledged_by_user_id?: string | null
-          client_id: string
-          created_at?: string
-          detail?: string
-          flag_type: Database["public"]["Enums"]["bc_flag_type"]
-          id?: string
-          organization_id: string
-          updated_at?: string
-        }
-        Update: {
-          acknowledged_at?: string | null
-          acknowledged_by_user_id?: string | null
-          client_id?: string
-          created_at?: string
-          detail?: string
-          flag_type?: Database["public"]["Enums"]["bc_flag_type"]
-          id?: string
-          organization_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bc_flags_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_flags_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      bc_review_notes: {
-        Row: {
-          author_user_id: string
-          body: string
-          client_id: string
-          created_at: string
-          id: string
-          note_type: Database["public"]["Enums"]["bc_review_note_type"]
-          organization_id: string
-          period_end: string | null
-          period_start: string | null
-          updated_at: string
-        }
-        Insert: {
-          author_user_id: string
-          body?: string
-          client_id: string
-          created_at?: string
-          id?: string
-          note_type?: Database["public"]["Enums"]["bc_review_note_type"]
-          organization_id: string
-          period_end?: string | null
-          period_start?: string | null
-          updated_at?: string
-        }
-        Update: {
-          author_user_id?: string
-          body?: string
-          client_id?: string
-          created_at?: string
-          id?: string
-          note_type?: Database["public"]["Enums"]["bc_review_note_type"]
-          organization_id?: string
-          period_end?: string | null
-          period_start?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bc_review_notes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bc_review_notes_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      behavior_support_clients: {
-        Row: {
-          assigned_behaviorist_user_id: string | null
-          bc_code: Database["public"]["Enums"]["bc_code"]
-          client_id: string
-          created_at: string
-          features_enabled: boolean
-          id: string
-          organization_id: string
-          updated_at: string
-        }
-        Insert: {
-          assigned_behaviorist_user_id?: string | null
-          bc_code: Database["public"]["Enums"]["bc_code"]
-          client_id: string
-          created_at?: string
-          features_enabled?: boolean
-          id?: string
-          organization_id: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_behaviorist_user_id?: string | null
-          bc_code?: Database["public"]["Enums"]["bc_code"]
-          client_id?: string
-          created_at?: string
-          features_enabled?: boolean
-          id?: string
-          organization_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "behavior_support_clients_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: true
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "behavior_support_clients_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       billing_code_approval_messages: {
         Row: {
           action: string | null
@@ -1610,619 +2025,61 @@ export type Database = {
             foreignKeyName: "callout_escalation_events_target_user_id_fkey"
             columns: ["target_user_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "callout_escalation_events_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      ce_ledger: {
+      celebration_acknowledgements_backup_20260928b: {
         Row: {
-          active_minutes: number
-          attestation_text: string
-          ce_year_start: string
-          completed_at: string
-          content_hash: string
-          created_at: string
-          hours: number
-          id: string
-          module_id: string | null
-          organization_id: string
-          signature_name: string
-          source: string | null
-          staff_id: string
-          title: string
-          type: string
+          acknowledged_at: string | null
+          event_id: string | null
+          id: string | null
+          user_id: string | null
         }
         Insert: {
-          active_minutes: number
-          attestation_text: string
-          ce_year_start: string
-          completed_at?: string
-          content_hash: string
-          created_at?: string
-          hours: number
-          id?: string
-          module_id?: string | null
-          organization_id: string
-          signature_name: string
-          source?: string | null
-          staff_id: string
-          title: string
-          type: string
+          acknowledged_at?: string | null
+          event_id?: string | null
+          id?: string | null
+          user_id?: string | null
         }
         Update: {
-          active_minutes?: number
-          attestation_text?: string
-          ce_year_start?: string
-          completed_at?: string
-          content_hash?: string
-          created_at?: string
-          hours?: number
-          id?: string
-          module_id?: string | null
-          organization_id?: string
-          signature_name?: string
-          source?: string | null
-          staff_id?: string
-          title?: string
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ce_ledger_module_id_fkey"
-            columns: ["module_id"]
-            isOneToOne: false
-            referencedRelation: "ce_modules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ce_ledger_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ce_modules: {
-        Row: {
-          active_seconds: number
-          completed_at: string | null
-          created_at: string
-          current_step: number
-          generated_at: string | null
-          id: string
-          organization_id: string
-          period: string
-          reflections: Json
-          source_summary: string | null
-          staff_id: string
-          status: string
-          steps: Json
-          updated_at: string
-        }
-        Insert: {
-          active_seconds?: number
-          completed_at?: string | null
-          created_at?: string
-          current_step?: number
-          generated_at?: string | null
-          id?: string
-          organization_id: string
-          period: string
-          reflections?: Json
-          source_summary?: string | null
-          staff_id: string
-          status?: string
-          steps?: Json
-          updated_at?: string
-        }
-        Update: {
-          active_seconds?: number
-          completed_at?: string | null
-          created_at?: string
-          current_step?: number
-          generated_at?: string | null
-          id?: string
-          organization_id?: string
-          period?: string
-          reflections?: Json
-          source_summary?: string | null
-          staff_id?: string
-          status?: string
-          steps?: Json
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ce_modules_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ce_settings: {
-        Row: {
-          annual_goal_hours: number
-          created_at: string
-          demo_mode: boolean
-          min_active_minutes: number
-          organization_id: string
-          updated_at: string
-        }
-        Insert: {
-          annual_goal_hours?: number
-          created_at?: string
-          demo_mode?: boolean
-          min_active_minutes?: number
-          organization_id: string
-          updated_at?: string
-        }
-        Update: {
-          annual_goal_hours?: number
-          created_at?: string
-          demo_mode?: boolean
-          min_active_minutes?: number
-          organization_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ce_settings_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: true
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      celebration_acknowledgements: {
-        Row: {
-          acknowledged_at: string
-          event_id: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          acknowledged_at?: string
-          event_id: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          acknowledged_at?: string
-          event_id?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "celebration_acknowledgements_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "celebration_events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      celebration_events: {
-        Row: {
-          created_at: string
-          event_key: string
-          id: string
-          organization_id: string
-          payload: Json
-          scope_user_id: string | null
-          tier: number
-        }
-        Insert: {
-          created_at?: string
-          event_key: string
-          id?: string
-          organization_id: string
-          payload?: Json
-          scope_user_id?: string | null
-          tier: number
-        }
-        Update: {
-          created_at?: string
-          event_key?: string
-          id?: string
-          organization_id?: string
-          payload?: Json
-          scope_user_id?: string | null
-          tier?: number
+          acknowledged_at?: string | null
+          event_id?: string | null
+          id?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
-      certification_types: {
+      celebration_events_backup_20260928b: {
         Row: {
-          code: string
-          created_at: string
-          description: string | null
-          id: string
-          is_global: boolean
-          name: string
+          created_at: string | null
+          event_key: string | null
+          id: string | null
           organization_id: string | null
-          requires_upload: boolean
-          track_id: string | null
-          validity_months: number | null
+          payload: Json | null
+          scope_user_id: string | null
+          tier: number | null
         }
         Insert: {
-          code: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_global?: boolean
-          name: string
+          created_at?: string | null
+          event_key?: string | null
+          id?: string | null
           organization_id?: string | null
-          requires_upload?: boolean
-          track_id?: string | null
-          validity_months?: number | null
+          payload?: Json | null
+          scope_user_id?: string | null
+          tier?: number | null
         }
         Update: {
-          code?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_global?: boolean
-          name?: string
+          created_at?: string | null
+          event_key?: string | null
+          id?: string | null
           organization_id?: string | null
-          requires_upload?: boolean
-          track_id?: string | null
-          validity_months?: number | null
+          payload?: Json | null
+          scope_user_id?: string | null
+          tier?: number | null
         }
         Relationships: []
-      }
-      certifications: {
-        Row: {
-          certification_type_code: string | null
-          course_id: string
-          course_title: string | null
-          created_at: string
-          expires_at: string | null
-          id: string
-          issued_at: string
-          organization_id: string
-          origin: string | null
-          recipient_name: string | null
-          requirement_id: string | null
-          user_id: string
-          verification_code: string
-        }
-        Insert: {
-          certification_type_code?: string | null
-          course_id: string
-          course_title?: string | null
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          issued_at?: string
-          organization_id: string
-          origin?: string | null
-          recipient_name?: string | null
-          requirement_id?: string | null
-          user_id: string
-          verification_code?: string
-        }
-        Update: {
-          certification_type_code?: string | null
-          course_id?: string
-          course_title?: string | null
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          issued_at?: string
-          organization_id?: string
-          origin?: string | null
-          recipient_name?: string | null
-          requirement_id?: string | null
-          user_id?: string
-          verification_code?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "certifications_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "certifications_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "certifications_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chore_client_rotation: {
-        Row: {
-          client_id: string
-          created_at: string
-          day_of_week: number
-          definition_id: string | null
-          id: string
-          is_free_day: boolean
-          note: string | null
-          space_id: string
-          updated_at: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          day_of_week: number
-          definition_id?: string | null
-          id?: string
-          is_free_day?: boolean
-          note?: string | null
-          space_id: string
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          day_of_week?: number
-          definition_id?: string | null
-          id?: string
-          is_free_day?: boolean
-          note?: string | null
-          space_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chore_client_rotation_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chore_client_rotation_definition_id_fkey"
-            columns: ["definition_id"]
-            isOneToOne: false
-            referencedRelation: "chore_definitions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chore_client_rotation_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "chore_spaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chore_completions: {
-        Row: {
-          client_id: string | null
-          completed_at: string
-          completed_by: string | null
-          completion_date: string
-          id: string
-          note: string | null
-          outcome: string
-          source: string
-          source_id: string
-          space_id: string
-        }
-        Insert: {
-          client_id?: string | null
-          completed_at?: string
-          completed_by?: string | null
-          completion_date: string
-          id?: string
-          note?: string | null
-          outcome?: string
-          source: string
-          source_id: string
-          space_id: string
-        }
-        Update: {
-          client_id?: string | null
-          completed_at?: string
-          completed_by?: string | null
-          completion_date?: string
-          id?: string
-          note?: string | null
-          outcome?: string
-          source?: string
-          source_id?: string
-          space_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chore_completions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chore_completions_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "chore_spaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chore_daily_items: {
-        Row: {
-          created_at: string
-          detail: string | null
-          id: string
-          label: string
-          sort_order: number
-          space_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          detail?: string | null
-          id?: string
-          label: string
-          sort_order?: number
-          space_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          detail?: string | null
-          id?: string
-          label?: string
-          sort_order?: number
-          space_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chore_daily_items_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "chore_spaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chore_definitions: {
-        Row: {
-          chore_name: string
-          created_at: string
-          id: string
-          organization_id: string
-          sort_order: number
-          space_id: string | null
-          task_list: string
-          updated_at: string
-        }
-        Insert: {
-          chore_name: string
-          created_at?: string
-          id?: string
-          organization_id: string
-          sort_order?: number
-          space_id?: string | null
-          task_list?: string
-          updated_at?: string
-        }
-        Update: {
-          chore_name?: string
-          created_at?: string
-          id?: string
-          organization_id?: string
-          sort_order?: number
-          space_id?: string | null
-          task_list?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chore_definitions_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "chore_spaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chore_space_clients: {
-        Row: {
-          client_id: string
-          created_at: string
-          id: string
-          space_id: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          id?: string
-          space_id: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          id?: string
-          space_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chore_space_clients_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chore_space_clients_space_id_fkey"
-            columns: ["space_id"]
-            isOneToOne: false
-            referencedRelation: "chore_spaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chore_spaces: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          id: string
-          name: string
-          notes: string | null
-          organization_id: string
-          space_type: string
-          team_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name: string
-          notes?: string | null
-          organization_id: string
-          space_type?: string
-          team_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name?: string
-          notes?: string | null
-          organization_id?: string
-          space_type?: string
-          team_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chore_spaces_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       client_approved_locations: {
         Row: {
@@ -2591,142 +2448,10 @@ export type Database = {
           },
         ]
       }
-      client_chore_support: {
-        Row: {
-          activated_at: string | null
-          activated_by: string | null
-          client_id: string
-          created_at: string
-          goal_note: string | null
-          id: string
-          organization_id: string
-          reason: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          activated_at?: string | null
-          activated_by?: string | null
-          client_id: string
-          created_at?: string
-          goal_note?: string | null
-          id?: string
-          organization_id: string
-          reason?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          activated_at?: string | null
-          activated_by?: string | null
-          client_id?: string
-          created_at?: string
-          goal_note?: string | null
-          id?: string
-          organization_id?: string
-          reason?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_chore_support_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: true
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_chore_support_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      client_discharges: {
-        Row: {
-          additional_notes: string | null
-          attested_items: Json
-          client_id: string
-          discharge_date: string
-          discharge_reason: string
-          id: string
-          initiated_by: string
-          organization_id: string
-          prior_team_id: string | null
-          recorded_at: string
-          recorded_by: string
-          source_citation: string
-          source_document_id: string | null
-          source_excerpt: string
-        }
-        Insert: {
-          additional_notes?: string | null
-          attested_items?: Json
-          client_id: string
-          discharge_date: string
-          discharge_reason: string
-          id?: string
-          initiated_by: string
-          organization_id: string
-          prior_team_id?: string | null
-          recorded_at?: string
-          recorded_by: string
-          source_citation: string
-          source_document_id?: string | null
-          source_excerpt: string
-        }
-        Update: {
-          additional_notes?: string | null
-          attested_items?: Json
-          client_id?: string
-          discharge_date?: string
-          discharge_reason?: string
-          id?: string
-          initiated_by?: string
-          organization_id?: string
-          prior_team_id?: string | null
-          recorded_at?: string
-          recorded_by?: string
-          source_citation?: string
-          source_document_id?: string | null
-          source_excerpt?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_discharges_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_discharges_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_discharges_prior_team_id_fkey"
-            columns: ["prior_team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_discharges_source_document_id_fkey"
-            columns: ["source_document_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_documents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       client_documents: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           client_id: string
           date_source: Database["public"]["Enums"]["doc_date_source"] | null
           document_type: string
@@ -2749,6 +2474,8 @@ export type Database = {
           uploaded_by_name: string | null
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           client_id: string
           date_source?: Database["public"]["Enums"]["doc_date_source"] | null
           document_type: string
@@ -2771,6 +2498,8 @@ export type Database = {
           uploaded_by_name?: string | null
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           client_id?: string
           date_source?: Database["public"]["Enums"]["doc_date_source"] | null
           document_type?: string
@@ -2811,6 +2540,8 @@ export type Database = {
       }
       client_emergency_contacts: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           client_id: string
           created_at: string
           id: string
@@ -2820,6 +2551,8 @@ export type Database = {
           relationship: string | null
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           client_id: string
           created_at?: string
           id?: string
@@ -2829,6 +2562,8 @@ export type Database = {
           relationship?: string | null
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           client_id?: string
           created_at?: string
           id?: string
@@ -3128,242 +2863,6 @@ export type Database = {
           },
         ]
       }
-      client_meal_actuals: {
-        Row: {
-          actual_date: string
-          confirmed_at: string
-          confirmed_by: string | null
-          created_at: string
-          id: string
-          meal_plan_id: string
-          meal_slot: string
-          note: string | null
-          outcome: string
-          updated_at: string
-        }
-        Insert: {
-          actual_date: string
-          confirmed_at?: string
-          confirmed_by?: string | null
-          created_at?: string
-          id?: string
-          meal_plan_id: string
-          meal_slot: string
-          note?: string | null
-          outcome: string
-          updated_at?: string
-        }
-        Update: {
-          actual_date?: string
-          confirmed_at?: string
-          confirmed_by?: string | null
-          created_at?: string
-          id?: string
-          meal_plan_id?: string
-          meal_slot?: string
-          note?: string | null
-          outcome?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_meal_actuals_meal_plan_id_fkey"
-            columns: ["meal_plan_id"]
-            isOneToOne: false
-            referencedRelation: "client_meal_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      client_meal_plans: {
-        Row: {
-          client_id: string
-          created_at: string
-          created_by: string | null
-          food_likes: string | null
-          foods_to_avoid: string | null
-          id: string
-          notes: string | null
-          organization_id: string
-          updated_at: string
-          week_start_date: string
-        }
-        Insert: {
-          client_id: string
-          created_at?: string
-          created_by?: string | null
-          food_likes?: string | null
-          foods_to_avoid?: string | null
-          id?: string
-          notes?: string | null
-          organization_id: string
-          updated_at?: string
-          week_start_date: string
-        }
-        Update: {
-          client_id?: string
-          created_at?: string
-          created_by?: string | null
-          food_likes?: string | null
-          foods_to_avoid?: string | null
-          id?: string
-          notes?: string | null
-          organization_id?: string
-          updated_at?: string
-          week_start_date?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_meal_plans_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_meal_plans_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      client_meal_support: {
-        Row: {
-          activated_at: string | null
-          activated_by: string | null
-          client_id: string
-          created_at: string
-          goal_note: string | null
-          id: string
-          organization_id: string
-          reason: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          activated_at?: string | null
-          activated_by?: string | null
-          client_id: string
-          created_at?: string
-          goal_note?: string | null
-          id?: string
-          organization_id: string
-          reason?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          activated_at?: string | null
-          activated_by?: string | null
-          client_id?: string
-          created_at?: string
-          goal_note?: string | null
-          id?: string
-          organization_id?: string
-          reason?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_meal_support_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: true
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_meal_support_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      client_meals: {
-        Row: {
-          calories: number | null
-          carbs_g: number | null
-          created_at: string
-          day_of_week: number
-          description: string | null
-          estimated_cost: number | null
-          extra_value: number | null
-          fat_g: number | null
-          id: string
-          label: string
-          meal_plan_id: string
-          meal_slot: string
-          notes: string | null
-          nutrition_estimated: Json
-          nutrition_value: number | null
-          protein_g: number | null
-          recipe_id: string | null
-          sort_order: number
-          updated_at: string
-        }
-        Insert: {
-          calories?: number | null
-          carbs_g?: number | null
-          created_at?: string
-          day_of_week: number
-          description?: string | null
-          estimated_cost?: number | null
-          extra_value?: number | null
-          fat_g?: number | null
-          id?: string
-          label?: string
-          meal_plan_id: string
-          meal_slot: string
-          notes?: string | null
-          nutrition_estimated?: Json
-          nutrition_value?: number | null
-          protein_g?: number | null
-          recipe_id?: string | null
-          sort_order?: number
-          updated_at?: string
-        }
-        Update: {
-          calories?: number | null
-          carbs_g?: number | null
-          created_at?: string
-          day_of_week?: number
-          description?: string | null
-          estimated_cost?: number | null
-          extra_value?: number | null
-          fat_g?: number | null
-          id?: string
-          label?: string
-          meal_plan_id?: string
-          meal_slot?: string
-          notes?: string | null
-          nutrition_estimated?: Json
-          nutrition_value?: number | null
-          protein_g?: number | null
-          recipe_id?: string | null
-          sort_order?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_meals_meal_plan_id_fkey"
-            columns: ["meal_plan_id"]
-            isOneToOne: false
-            referencedRelation: "client_meal_plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_meals_recipe_id_fkey"
-            columns: ["recipe_id"]
-            isOneToOne: false
-            referencedRelation: "client_recipes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       client_medications: {
         Row: {
           adverse_effects: string | null
@@ -3505,77 +3004,10 @@ export type Database = {
         }
         Relationships: []
       }
-      client_nutrition_config: {
-        Row: {
-          calorie_target: number | null
-          carbs_target_g: number | null
-          client_id: string
-          created_at: string
-          extra_label: string | null
-          extra_target: number | null
-          extra_unit: string | null
-          fat_target_g: number | null
-          id: string
-          nutrition_label: string
-          nutrition_unit: string
-          organization_id: string
-          protein_target_g: number | null
-          updated_at: string
-          use_extra_field: boolean
-        }
-        Insert: {
-          calorie_target?: number | null
-          carbs_target_g?: number | null
-          client_id: string
-          created_at?: string
-          extra_label?: string | null
-          extra_target?: number | null
-          extra_unit?: string | null
-          fat_target_g?: number | null
-          id?: string
-          nutrition_label?: string
-          nutrition_unit?: string
-          organization_id: string
-          protein_target_g?: number | null
-          updated_at?: string
-          use_extra_field?: boolean
-        }
-        Update: {
-          calorie_target?: number | null
-          carbs_target_g?: number | null
-          client_id?: string
-          created_at?: string
-          extra_label?: string | null
-          extra_target?: number | null
-          extra_unit?: string | null
-          fat_target_g?: number | null
-          id?: string
-          nutrition_label?: string
-          nutrition_unit?: string
-          organization_id?: string
-          protein_target_g?: number | null
-          updated_at?: string
-          use_extra_field?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_nutrition_config_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: true
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_nutrition_config_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       client_progress_summaries: {
         Row: {
+          ai_review_attested_at: string | null
+          ai_review_attested_by: string | null
           client_id: string
           completed_at: string | null
           completed_by: string | null
@@ -3599,8 +3031,6 @@ export type Database = {
           requires_upi_attestation: boolean
           sc_sent_at: string | null
           sc_sent_by: string | null
-          ai_review_attested_at: string | null
-          ai_review_attested_by: string | null
           service_codes: string[]
           status: string
           summary_kind: string
@@ -3609,6 +3039,8 @@ export type Database = {
           upi_entered_by: string | null
         }
         Insert: {
+          ai_review_attested_at?: string | null
+          ai_review_attested_by?: string | null
           client_id: string
           completed_at?: string | null
           completed_by?: string | null
@@ -3632,8 +3064,6 @@ export type Database = {
           requires_upi_attestation?: boolean
           sc_sent_at?: string | null
           sc_sent_by?: string | null
-          ai_review_attested_at?: string | null
-          ai_review_attested_by?: string | null
           service_codes?: string[]
           status?: string
           summary_kind?: string
@@ -3642,6 +3072,8 @@ export type Database = {
           upi_entered_by?: string | null
         }
         Update: {
+          ai_review_attested_at?: string | null
+          ai_review_attested_by?: string | null
           client_id?: string
           completed_at?: string | null
           completed_by?: string | null
@@ -3665,8 +3097,6 @@ export type Database = {
           requires_upi_attestation?: boolean
           sc_sent_at?: string | null
           sc_sent_by?: string | null
-          ai_review_attested_at?: string | null
-          ai_review_attested_by?: string | null
           service_codes?: string[]
           status?: string
           summary_kind?: string
@@ -3744,136 +3174,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      client_recipe_ingredients: {
-        Row: {
-          created_at: string
-          estimated_cost: number | null
-          id: string
-          item: string
-          quantity: string | null
-          recipe_id: string
-          sort_order: number
-        }
-        Insert: {
-          created_at?: string
-          estimated_cost?: number | null
-          id?: string
-          item: string
-          quantity?: string | null
-          recipe_id: string
-          sort_order?: number
-        }
-        Update: {
-          created_at?: string
-          estimated_cost?: number | null
-          id?: string
-          item?: string
-          quantity?: string | null
-          recipe_id?: string
-          sort_order?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_recipe_ingredients_recipe_id_fkey"
-            columns: ["recipe_id"]
-            isOneToOne: false
-            referencedRelation: "client_recipes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      client_recipes: {
-        Row: {
-          client_id: string | null
-          created_at: string
-          created_by: string | null
-          id: string
-          name: string
-          notes: string | null
-          organization_id: string
-          source_text: string | null
-          updated_at: string
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name: string
-          notes?: string | null
-          organization_id: string
-          source_text?: string | null
-          updated_at?: string
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name?: string
-          notes?: string | null
-          organization_id?: string
-          source_text?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_recipes_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_recipes_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      client_shopping_items: {
-        Row: {
-          checked: boolean
-          created_at: string
-          id: string
-          item: string
-          meal_plan_id: string
-          quantity: string | null
-          sort_order: number
-          updated_at: string
-        }
-        Insert: {
-          checked?: boolean
-          created_at?: string
-          id?: string
-          item?: string
-          meal_plan_id: string
-          quantity?: string | null
-          sort_order?: number
-          updated_at?: string
-        }
-        Update: {
-          checked?: boolean
-          created_at?: string
-          id?: string
-          item?: string
-          meal_plan_id?: string
-          quantity?: string | null
-          sort_order?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_shopping_items_meal_plan_id_fkey"
-            columns: ["meal_plan_id"]
-            isOneToOne: false
-            referencedRelation: "client_meal_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -4035,54 +3335,6 @@ export type Database = {
           },
         ]
       }
-      client_target_behaviors: {
-        Row: {
-          behavior_name: string
-          client_id: string
-          created_at: string
-          description: string
-          id: string
-          organization_id: string
-          sort_order: number
-          updated_at: string
-        }
-        Insert: {
-          behavior_name: string
-          client_id: string
-          created_at?: string
-          description?: string
-          id?: string
-          organization_id: string
-          sort_order?: number
-          updated_at?: string
-        }
-        Update: {
-          behavior_name?: string
-          client_id?: string
-          created_at?: string
-          description?: string
-          id?: string
-          organization_id?: string
-          sort_order?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_target_behaviors_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_target_behaviors_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       client_weekly_targets: {
         Row: {
           client_id: string
@@ -4190,11 +3442,11 @@ export type Database = {
           has_abi: boolean
           height_inches: number | null
           hhs_monthly_support_hours: number | null
+          hive_start_date: string | null
           home_latitude: number | null
           home_longitude: number | null
           hospice_status: string | null
           housing_voucher: string | null
-          hive_start_date: string | null
           hr_applicable: boolean
           id: string
           identifying_marks: string | null
@@ -4324,11 +3576,11 @@ export type Database = {
           has_abi?: boolean
           height_inches?: number | null
           hhs_monthly_support_hours?: number | null
+          hive_start_date?: string | null
           home_latitude?: number | null
           home_longitude?: number | null
           hospice_status?: string | null
           housing_voucher?: string | null
-          hive_start_date?: string | null
           hr_applicable?: boolean
           id?: string
           identifying_marks?: string | null
@@ -4458,11 +3710,11 @@ export type Database = {
           has_abi?: boolean
           height_inches?: number | null
           hhs_monthly_support_hours?: number | null
+          hive_start_date?: string | null
           home_latitude?: number | null
           home_longitude?: number | null
           hospice_status?: string | null
           housing_voucher?: string | null
-          hive_start_date?: string | null
           hr_applicable?: boolean
           id?: string
           identifying_marks?: string | null
@@ -4652,21 +3904,7 @@ export type Database = {
             foreignKeyName: "company_obligation_completions_manual_entry_by_fkey"
             columns: ["manual_entry_by"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_obligation_completions_manual_entry_by_fkey"
-            columns: ["manual_entry_by"]
-            isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_obligation_completions_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -4722,13 +3960,6 @@ export type Database = {
             columns: ["instance_id"]
             isOneToOne: false
             referencedRelation: "company_obligation_instances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_obligation_instance_assignees_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -4830,21 +4061,7 @@ export type Database = {
             foreignKeyName: "company_obligation_instances_assignee_staff_id_fkey"
             columns: ["assignee_staff_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_obligation_instances_assignee_staff_id_fkey"
-            columns: ["assignee_staff_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_obligation_instances_attestation_signed_by_id_fkey"
-            columns: ["attestation_signed_by_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -4859,13 +4076,6 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_obligation_instances_completed_by_id_fkey"
-            columns: ["completed_by_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -4901,6 +4111,7 @@ export type Database = {
       company_obligations: {
         Row: {
           active: boolean
+          agency_policy_id: string | null
           assigned_to_groups: string[]
           assigned_to_users: string[]
           assignee_role: string
@@ -4933,6 +4144,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          agency_policy_id?: string | null
           assigned_to_groups?: string[]
           assigned_to_users?: string[]
           assignee_role?: string
@@ -4965,6 +4177,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          agency_policy_id?: string | null
           assigned_to_groups?: string[]
           assigned_to_users?: string[]
           assignee_role?: string
@@ -4997,10 +4210,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "company_obligations_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "company_obligations_agency_policy_id_fkey"
+            columns: ["agency_policy_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
+            referencedRelation: "agency_policies"
             referencedColumns: ["id"]
           },
           {
@@ -5216,157 +4429,6 @@ export type Database = {
           },
         ]
       }
-      course_assignments: {
-        Row: {
-          assigned_by: string | null
-          completed_at: string | null
-          course_id: string
-          created_at: string
-          due_date: string | null
-          id: string
-          organization_id: string
-          progress: number
-          status: Database["public"]["Enums"]["assignment_status"]
-          user_id: string
-        }
-        Insert: {
-          assigned_by?: string | null
-          completed_at?: string | null
-          course_id: string
-          created_at?: string
-          due_date?: string | null
-          id?: string
-          organization_id: string
-          progress?: number
-          status?: Database["public"]["Enums"]["assignment_status"]
-          user_id: string
-        }
-        Update: {
-          assigned_by?: string | null
-          completed_at?: string | null
-          course_id?: string
-          created_at?: string
-          due_date?: string | null
-          id?: string
-          organization_id?: string
-          progress?: number
-          status?: Database["public"]["Enums"]["assignment_status"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_assignments_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_assignments_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      course_modules: {
-        Row: {
-          body: string | null
-          course_id: string
-          created_at: string
-          id: string
-          order_index: number
-          pdf_url: string | null
-          quiz: Json | null
-          title: string
-          video_url: string | null
-        }
-        Insert: {
-          body?: string | null
-          course_id: string
-          created_at?: string
-          id?: string
-          order_index?: number
-          pdf_url?: string | null
-          quiz?: Json | null
-          title: string
-          video_url?: string | null
-        }
-        Update: {
-          body?: string | null
-          course_id?: string
-          created_at?: string
-          id?: string
-          order_index?: number
-          pdf_url?: string | null
-          quiz?: Json | null
-          title?: string
-          video_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_modules_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courses: {
-        Row: {
-          category: string | null
-          certificate_validity_months: number | null
-          cover_url: string | null
-          created_at: string
-          created_by: string | null
-          description: string | null
-          duration_minutes: number | null
-          id: string
-          is_global: boolean
-          is_published: boolean
-          organization_id: string | null
-          title: string
-        }
-        Insert: {
-          category?: string | null
-          certificate_validity_months?: number | null
-          cover_url?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          duration_minutes?: number | null
-          id?: string
-          is_global?: boolean
-          is_published?: boolean
-          organization_id?: string | null
-          title: string
-        }
-        Update: {
-          category?: string | null
-          certificate_validity_months?: number | null
-          cover_url?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          duration_minutes?: number | null
-          id?: string
-          is_global?: boolean
-          is_published?: boolean
-          organization_id?: string | null
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       custom_field_definitions: {
         Row: {
           created_at: string
@@ -5484,8 +4546,8 @@ export type Database = {
           log_date: string
           narrative: string
           organization_id: string
-          original_transcript: string | null
           original_due_date: string | null
+          original_transcript: string | null
           pcsp_goals_addressed: string[]
           requires_followup_form: boolean
           signature_data_url: string | null
@@ -5524,8 +4586,8 @@ export type Database = {
           log_date?: string
           narrative: string
           organization_id: string
-          original_transcript?: string | null
           original_due_date?: string | null
+          original_transcript?: string | null
           pcsp_goals_addressed?: string[]
           requires_followup_form?: boolean
           signature_data_url?: string | null
@@ -5564,8 +4626,8 @@ export type Database = {
           log_date?: string
           narrative?: string
           organization_id?: string
-          original_transcript?: string | null
           original_due_date?: string | null
+          original_transcript?: string | null
           pcsp_goals_addressed?: string[]
           requires_followup_form?: boolean
           signature_data_url?: string | null
@@ -5590,13 +4652,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "daily_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -5934,56 +4989,6 @@ export type Database = {
           },
         ]
       }
-      document_attestations: {
-        Row: {
-          attestation_text: string
-          attested_at: string
-          attested_by: string
-          attested_by_name: string | null
-          created_at: string
-          hr_document_id: string | null
-          id: string
-          organization_id: string
-          staff_id: string
-          subject_kind: string
-          subject_ref: string
-        }
-        Insert: {
-          attestation_text: string
-          attested_at?: string
-          attested_by: string
-          attested_by_name?: string | null
-          created_at?: string
-          hr_document_id?: string | null
-          id?: string
-          organization_id: string
-          staff_id: string
-          subject_kind: string
-          subject_ref: string
-        }
-        Update: {
-          attestation_text?: string
-          attested_at?: string
-          attested_by?: string
-          attested_by_name?: string | null
-          created_at?: string
-          hr_document_id?: string | null
-          id?: string
-          organization_id?: string
-          staff_id?: string
-          subject_kind?: string
-          subject_ref?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "document_attestations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       emar_log_addenda: {
         Row: {
           created_at: string
@@ -6194,13 +5199,6 @@ export type Database = {
             foreignKeyName: "emar_logs_second_witness_id_fkey"
             columns: ["second_witness_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "emar_logs_second_witness_id_fkey"
-            columns: ["second_witness_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -6308,295 +5306,208 @@ export type Database = {
           },
         ]
       }
-      employee_loan_entries: {
+      escalation_rules: {
         Row: {
-          amount: number
-          created_at: string
-          created_by: string | null
-          entry_date: string
+          archived_at: string | null
+          climbs_to: string
           id: string
-          kind: string
-          loan_id: string
-          note: string | null
-          organization_id: string
+          message_template: string
+          state_code: string
+          trigger: string
+          urgency: string
         }
         Insert: {
-          amount: number
-          created_at?: string
-          created_by?: string | null
-          entry_date: string
+          archived_at?: string | null
+          climbs_to: string
           id?: string
-          kind: string
-          loan_id: string
-          note?: string | null
-          organization_id: string
+          message_template: string
+          state_code?: string
+          trigger: string
+          urgency: string
         }
         Update: {
-          amount?: number
-          created_at?: string
-          created_by?: string | null
-          entry_date?: string
+          archived_at?: string | null
+          climbs_to?: string
           id?: string
-          kind?: string
-          loan_id?: string
-          note?: string | null
-          organization_id?: string
+          message_template?: string
+          state_code?: string
+          trigger?: string
+          urgency?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "employee_loan_entries_loan_id_fkey"
-            columns: ["loan_id"]
-            isOneToOne: false
-            referencedRelation: "employee_loans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_loan_entries_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      employee_loan_signature_tokens: {
+      evidence_files: {
         Row: {
-          agreement_snapshot: Json
+          attestation_text_snapshot: string | null
+          attested_at: string | null
+          attested_by: string | null
           created_at: string
-          created_by: string | null
-          expires_at: string
+          filename: string | null
           id: string
-          loan_id: string
-          organization_id: string
-          signer_email: string
-          signer_name: string
-          token_hash: string
-          used_at: string | null
-        }
-        Insert: {
-          agreement_snapshot: Json
-          created_at?: string
-          created_by?: string | null
-          expires_at: string
-          id?: string
-          loan_id: string
-          organization_id: string
-          signer_email: string
-          signer_name: string
-          token_hash: string
-          used_at?: string | null
-        }
-        Update: {
-          agreement_snapshot?: Json
-          created_at?: string
-          created_by?: string | null
-          expires_at?: string
-          id?: string
-          loan_id?: string
-          organization_id?: string
-          signer_email?: string
-          signer_name?: string
-          token_hash?: string
-          used_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employee_loan_signature_tokens_loan_id_fkey"
-            columns: ["loan_id"]
-            isOneToOne: false
-            referencedRelation: "employee_loans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_loan_signature_tokens_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      employee_loan_signatures: {
-        Row: {
-          agreement_sha256: string
-          agreement_snapshot: Json
-          id: string
-          loan_id: string
-          organization_id: string
-          signature_image: string
-          signature_method: string
-          signed_at: string
-          signer_email: string | null
-          signer_ip: string | null
-          signer_name: string
-          signer_type: string
-          signer_user_agent: string | null
-          token_id: string | null
-        }
-        Insert: {
-          agreement_sha256: string
-          agreement_snapshot: Json
-          id?: string
-          loan_id: string
-          organization_id: string
-          signature_image: string
-          signature_method: string
-          signed_at?: string
-          signer_email?: string | null
-          signer_ip?: string | null
-          signer_name: string
-          signer_type: string
-          signer_user_agent?: string | null
-          token_id?: string | null
-        }
-        Update: {
-          agreement_sha256?: string
-          agreement_snapshot?: Json
-          id?: string
-          loan_id?: string
-          organization_id?: string
-          signature_image?: string
-          signature_method?: string
-          signed_at?: string
-          signer_email?: string | null
-          signer_ip?: string | null
-          signer_name?: string
-          signer_type?: string
-          signer_user_agent?: string | null
-          token_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "employee_loan_signatures_loan_id_fkey"
-            columns: ["loan_id"]
-            isOneToOne: false
-            referencedRelation: "employee_loans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_loan_signatures_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_loan_signatures_token_id_fkey"
-            columns: ["token_id"]
-            isOneToOne: false
-            referencedRelation: "employee_loan_signature_tokens"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      employee_loans: {
-        Row: {
-          advance_amount: number | null
-          advance_cadence: string | null
-          agreement_date: string
-          borrower_email: string | null
-          borrower_name: string
-          created_at: string
-          created_by: string | null
-          direct_payment_amount: number | null
-          direct_payment_cadence: string | null
-          direct_payment_description: string | null
-          direct_payment_due_day: string | null
-          direct_payment_start_date: string | null
-          id: string
-          interest_notes: string | null
-          interest_rate: number
-          lender_name: string
-          maturity_date: string | null
+          item_id: string
           notes: string | null
           organization_id: string
-          purpose: string | null
-          repayment_conditions: Json
-          repayment_method: string | null
-          signature_parties: Json
-          staff_id: string
-          status: string
-          updated_at: string
-          voluntary_ack: boolean
+          review_note: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          storage_path: string | null
+          uploaded_at: string | null
+          uploaded_by: string | null
         }
         Insert: {
-          advance_amount?: number | null
-          advance_cadence?: string | null
-          agreement_date: string
-          borrower_email?: string | null
-          borrower_name: string
+          attestation_text_snapshot?: string | null
+          attested_at?: string | null
+          attested_by?: string | null
           created_at?: string
-          created_by?: string | null
-          direct_payment_amount?: number | null
-          direct_payment_cadence?: string | null
-          direct_payment_description?: string | null
-          direct_payment_due_day?: string | null
-          direct_payment_start_date?: string | null
+          filename?: string | null
           id?: string
-          interest_notes?: string | null
-          interest_rate?: number
-          lender_name: string
-          maturity_date?: string | null
+          item_id: string
           notes?: string | null
           organization_id: string
-          purpose?: string | null
-          repayment_conditions?: Json
-          repayment_method?: string | null
-          signature_parties?: Json
-          staff_id: string
-          status?: string
-          updated_at?: string
-          voluntary_ack?: boolean
+          review_note?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          storage_path?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
         }
         Update: {
-          advance_amount?: number | null
-          advance_cadence?: string | null
-          agreement_date?: string
-          borrower_email?: string | null
-          borrower_name?: string
+          attestation_text_snapshot?: string | null
+          attested_at?: string | null
+          attested_by?: string | null
           created_at?: string
-          created_by?: string | null
-          direct_payment_amount?: number | null
-          direct_payment_cadence?: string | null
-          direct_payment_description?: string | null
-          direct_payment_due_day?: string | null
-          direct_payment_start_date?: string | null
+          filename?: string | null
           id?: string
-          interest_notes?: string | null
-          interest_rate?: number
-          lender_name?: string
-          maturity_date?: string | null
+          item_id?: string
           notes?: string | null
           organization_id?: string
-          purpose?: string | null
-          repayment_conditions?: Json
-          repayment_method?: string | null
-          signature_parties?: Json
-          staff_id?: string
-          status?: string
-          updated_at?: string
-          voluntary_ack?: boolean
+          review_note?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          storage_path?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "employee_loans_organization_id_fkey"
+            foreignKeyName: "evidence_files_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_files_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      evidence_items: {
+        Row: {
+          attestation_text: string | null
+          cadence: string
+          created_at: string
+          created_by: string | null
+          document_date: string | null
+          dual_link_key: string | null
+          dual_link_peer_id: string | null
+          evidence_type: string
+          expires_on: string | null
+          first_due_on: string | null
+          first_due_rule: string | null
+          history: Json
+          id: string
+          next_due_on: string | null
+          opt_out_reason: string | null
+          opted_out_at: string | null
+          opted_out_by: string | null
+          organization_id: string
+          renew_years: number | null
+          requirement_key: string
+          send_message: string | null
+          sent_to_staff: boolean
+          sow_cite: string | null
+          subject_id: string
+          subject_type: string
+          suggested: boolean
+          title: string
+          updated_at: string
+          visible_to_staff_id: string | null
+        }
+        Insert: {
+          attestation_text?: string | null
+          cadence?: string
+          created_at?: string
+          created_by?: string | null
+          document_date?: string | null
+          dual_link_key?: string | null
+          dual_link_peer_id?: string | null
+          evidence_type: string
+          expires_on?: string | null
+          first_due_on?: string | null
+          first_due_rule?: string | null
+          history?: Json
+          id?: string
+          next_due_on?: string | null
+          opt_out_reason?: string | null
+          opted_out_at?: string | null
+          opted_out_by?: string | null
+          organization_id: string
+          renew_years?: number | null
+          requirement_key: string
+          send_message?: string | null
+          sent_to_staff?: boolean
+          sow_cite?: string | null
+          subject_id: string
+          subject_type: string
+          suggested?: boolean
+          title: string
+          updated_at?: string
+          visible_to_staff_id?: string | null
+        }
+        Update: {
+          attestation_text?: string | null
+          cadence?: string
+          created_at?: string
+          created_by?: string | null
+          document_date?: string | null
+          dual_link_key?: string | null
+          dual_link_peer_id?: string | null
+          evidence_type?: string
+          expires_on?: string | null
+          first_due_on?: string | null
+          first_due_rule?: string | null
+          history?: Json
+          id?: string
+          next_due_on?: string | null
+          opt_out_reason?: string | null
+          opted_out_at?: string | null
+          opted_out_by?: string | null
+          organization_id?: string
+          renew_years?: number | null
+          requirement_key?: string
+          send_message?: string | null
+          sent_to_staff?: boolean
+          sow_cite?: string | null
+          subject_id?: string
+          subject_type?: string
+          suggested?: boolean
+          title?: string
+          updated_at?: string
+          visible_to_staff_id?: string | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "employee_loans_staff_id_fkey"
-            columns: ["staff_id"]
+            foreignKeyName: "evidence_items_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_loans_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -6712,6 +5623,7 @@ export type Database = {
           corrected_clock_in: string | null
           corrected_clock_out: string | null
           created_at: string
+          created_from: string | null
           day_program_session_id: string | null
           denial_reason: string | null
           denied_at: string | null
@@ -6749,6 +5661,7 @@ export type Database = {
           nectar_drafted_confirmed_by: string | null
           nectar_review_service_code: string | null
           organization_id: string
+          original_transcript: string | null
           outside_geofence_reason: string | null
           raw_clock_in: string | null
           raw_clock_out: string | null
@@ -6767,7 +5680,6 @@ export type Database = {
           service_type_code: string
           shift_entry_type: string
           shift_note_text: string | null
-          original_transcript: string | null
           staff_confirmed_at: string | null
           staff_confirmed_by: string | null
           staff_flag_reason: string | null
@@ -6798,6 +5710,7 @@ export type Database = {
           corrected_clock_in?: string | null
           corrected_clock_out?: string | null
           created_at?: string
+          created_from?: string | null
           day_program_session_id?: string | null
           denial_reason?: string | null
           denied_at?: string | null
@@ -6835,6 +5748,7 @@ export type Database = {
           nectar_drafted_confirmed_by?: string | null
           nectar_review_service_code?: string | null
           organization_id: string
+          original_transcript?: string | null
           outside_geofence_reason?: string | null
           raw_clock_in?: string | null
           raw_clock_out?: string | null
@@ -6853,7 +5767,6 @@ export type Database = {
           service_type_code: string
           shift_entry_type: string
           shift_note_text?: string | null
-          original_transcript?: string | null
           staff_confirmed_at?: string | null
           staff_confirmed_by?: string | null
           staff_flag_reason?: string | null
@@ -6884,6 +5797,7 @@ export type Database = {
           corrected_clock_in?: string | null
           corrected_clock_out?: string | null
           created_at?: string
+          created_from?: string | null
           day_program_session_id?: string | null
           denial_reason?: string | null
           denied_at?: string | null
@@ -6921,6 +5835,7 @@ export type Database = {
           nectar_drafted_confirmed_by?: string | null
           nectar_review_service_code?: string | null
           organization_id?: string
+          original_transcript?: string | null
           outside_geofence_reason?: string | null
           raw_clock_in?: string | null
           raw_clock_out?: string | null
@@ -6939,7 +5854,6 @@ export type Database = {
           service_type_code?: string
           shift_entry_type?: string
           shift_note_text?: string | null
-          original_transcript?: string | null
           staff_confirmed_at?: string | null
           staff_confirmed_by?: string | null
           staff_flag_reason?: string | null
@@ -6983,44 +5897,7 @@ export type Database = {
             referencedRelation: "client_approved_locations"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "evv_timesheets_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "provider_tenants"
-            referencedColumns: ["id"]
-          },
         ]
-      }
-      escalation_rules: {
-        Row: {
-          archived_at: string | null
-          climbs_to: string
-          id: string
-          message_template: string
-          state_code: string
-          trigger: string
-          urgency: string
-        }
-        Insert: {
-          archived_at?: string | null
-          climbs_to: string
-          id?: string
-          message_template: string
-          state_code?: string
-          trigger: string
-          urgency: string
-        }
-        Update: {
-          archived_at?: string | null
-          climbs_to?: string
-          id?: string
-          message_template?: string
-          state_code?: string
-          trigger?: string
-          urgency?: string
-        }
-        Relationships: []
       }
       exec_message_attachments: {
         Row: {
@@ -7123,63 +6000,6 @@ export type Database = {
           id?: string
           sender_user_id?: string
           subject?: string
-        }
-        Relationships: []
-      }
-      external_certifications: {
-        Row: {
-          cert_name: string | null
-          cert_type: string
-          certification_type_id: string | null
-          created_at: string
-          expires_at: string | null
-          file_url: string | null
-          id: string
-          issued_date: string | null
-          issuer: string | null
-          organization_id: string
-          renewal_reminder_sent_at: string | null
-          reviewed_at: string | null
-          reviewer_id: string | null
-          reviewer_notes: string | null
-          status: Database["public"]["Enums"]["external_cert_status"]
-          user_id: string
-        }
-        Insert: {
-          cert_name?: string | null
-          cert_type: string
-          certification_type_id?: string | null
-          created_at?: string
-          expires_at?: string | null
-          file_url?: string | null
-          id?: string
-          issued_date?: string | null
-          issuer?: string | null
-          organization_id: string
-          renewal_reminder_sent_at?: string | null
-          reviewed_at?: string | null
-          reviewer_id?: string | null
-          reviewer_notes?: string | null
-          status?: Database["public"]["Enums"]["external_cert_status"]
-          user_id: string
-        }
-        Update: {
-          cert_name?: string | null
-          cert_type?: string
-          certification_type_id?: string | null
-          created_at?: string
-          expires_at?: string | null
-          file_url?: string | null
-          id?: string
-          issued_date?: string | null
-          issuer?: string | null
-          organization_id?: string
-          renewal_reminder_sent_at?: string | null
-          reviewed_at?: string | null
-          reviewer_id?: string | null
-          reviewer_notes?: string | null
-          status?: Database["public"]["Enums"]["external_cert_status"]
-          user_id?: string
         }
         Relationships: []
       }
@@ -7690,13 +6510,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "general_shifts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -8804,62 +7617,6 @@ export type Database = {
           },
         ]
       }
-      hive_training_auto_renew_settings: {
-        Row: {
-          created_at: string
-          enabled: boolean
-          last_run_at: string | null
-          lead_days: number
-          organization_id: string
-          paused_reason: string | null
-          payment_method_brand: string | null
-          payment_method_last4: string | null
-          scope: Database["public"]["Enums"]["hive_training_auto_renew_scope"]
-          selected_catalog_ids: string[]
-          stripe_customer_id: string | null
-          stripe_payment_method_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          enabled?: boolean
-          last_run_at?: string | null
-          lead_days?: number
-          organization_id: string
-          paused_reason?: string | null
-          payment_method_brand?: string | null
-          payment_method_last4?: string | null
-          scope?: Database["public"]["Enums"]["hive_training_auto_renew_scope"]
-          selected_catalog_ids?: string[]
-          stripe_customer_id?: string | null
-          stripe_payment_method_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          enabled?: boolean
-          last_run_at?: string | null
-          lead_days?: number
-          organization_id?: string
-          paused_reason?: string | null
-          payment_method_brand?: string | null
-          payment_method_last4?: string | null
-          scope?: Database["public"]["Enums"]["hive_training_auto_renew_scope"]
-          selected_catalog_ids?: string[]
-          stripe_customer_id?: string | null
-          stripe_payment_method_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hive_training_auto_renew_settings_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: true
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       hive_training_catalog: {
         Row: {
           active: boolean
@@ -8908,87 +7665,41 @@ export type Database = {
         }
         Relationships: []
       }
-      hive_training_certificates: {
-        Row: {
-          assignment_id: string
-          code: string
-          created_at: string
-          expires_at: string | null
-          id: string
-          issued_at: string
-          pdf_url: string | null
-        }
-        Insert: {
-          assignment_id: string
-          code: string
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          issued_at?: string
-          pdf_url?: string | null
-        }
-        Update: {
-          assignment_id?: string
-          code?: string
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          issued_at?: string
-          pdf_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hive_training_certificates_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "hive_training_assignments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hive_training_course_modules: {
+      hive_training_course_modules_backup_20260928b: {
         Row: {
           body_md: string | null
-          course_id: string
-          created_at: string
-          id: string
+          course_id: string | null
+          created_at: string | null
+          id: string | null
           quiz_json: Json | null
-          sort: number
-          title: string
-          updated_at: string
+          sort: number | null
+          title: string | null
+          updated_at: string | null
           video_url: string | null
         }
         Insert: {
           body_md?: string | null
-          course_id: string
-          created_at?: string
-          id?: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
           quiz_json?: Json | null
-          sort?: number
-          title: string
-          updated_at?: string
+          sort?: number | null
+          title?: string | null
+          updated_at?: string | null
           video_url?: string | null
         }
         Update: {
           body_md?: string | null
-          course_id?: string
-          created_at?: string
-          id?: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string | null
           quiz_json?: Json | null
-          sort?: number
-          title?: string
-          updated_at?: string
+          sort?: number | null
+          title?: string | null
+          updated_at?: string | null
           video_url?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "hive_training_course_modules_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "hive_training_courses"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       hive_training_courses: {
         Row: {
@@ -9039,51 +7750,6 @@ export type Database = {
             columns: ["catalog_id"]
             isOneToOne: false
             referencedRelation: "hive_training_catalog"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hive_training_module_progress: {
-        Row: {
-          assignment_id: string
-          completed_at: string | null
-          created_at: string
-          id: string
-          module_id: string
-          quiz_score: number | null
-          updated_at: string
-        }
-        Insert: {
-          assignment_id: string
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          module_id: string
-          quiz_score?: number | null
-          updated_at?: string
-        }
-        Update: {
-          assignment_id?: string
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          module_id?: string
-          quiz_score?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hive_training_module_progress_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "hive_training_assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hive_training_module_progress_module_id_fkey"
-            columns: ["module_id"]
-            isOneToOne: false
-            referencedRelation: "hive_training_course_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -9227,13 +7893,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "home_staff_designations_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -9439,82 +8098,6 @@ export type Database = {
           },
         ]
       }
-      hr_document_access_log: {
-        Row: {
-          action: string
-          at: string
-          hr_document_id: string | null
-          id: string
-          object_path: string | null
-          organization_id: string
-          staff_id: string
-          viewer_id: string
-        }
-        Insert: {
-          action: string
-          at?: string
-          hr_document_id?: string | null
-          id?: string
-          object_path?: string | null
-          organization_id: string
-          staff_id: string
-          viewer_id: string
-        }
-        Update: {
-          action?: string
-          at?: string
-          hr_document_id?: string | null
-          id?: string
-          object_path?: string | null
-          organization_id?: string
-          staff_id?: string
-          viewer_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hr_document_access_log_hr_document_id_fkey"
-            columns: ["hr_document_id"]
-            isOneToOne: false
-            referencedRelation: "hr_documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hr_document_access_log_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hr_document_access_log_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hr_document_access_log_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hr_document_access_log_viewer_id_fkey"
-            columns: ["viewer_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hr_document_access_log_viewer_id_fkey"
-            columns: ["viewer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       hr_documents: {
         Row: {
           created_at: string
@@ -9574,13 +8157,6 @@ export type Database = {
             foreignKeyName: "hr_documents_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hr_documents_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -9588,52 +8164,7 @@ export type Database = {
             foreignKeyName: "hr_documents_uploaded_by_fkey"
             columns: ["uploaded_by"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hr_documents_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      hrc_committee_members: {
-        Row: {
-          active: boolean
-          created_at: string
-          id: string
-          organization_id: string
-          title: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          id?: string
-          organization_id: string
-          title?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          id?: string
-          organization_id?: string
-          title?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hrc_committee_members_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -10720,13 +9251,6 @@ export type Database = {
             foreignKeyName: "incident_reports_reported_by_fkey"
             columns: ["reported_by"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incident_reports_reported_by_fkey"
-            columns: ["reported_by"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -10736,176 +9260,58 @@ export type Database = {
         Row: {
           accepted_at: string | null
           accepted_by: string | null
+          access_level: Database["public"]["Enums"]["access_level"]
+          access_preset_id: string | null
           created_at: string
           email: string
           expires_at: string
           id: string
           invited_by: string | null
           organization_id: string
-          role: Database["public"]["Enums"]["app_role"]
           status: Database["public"]["Enums"]["invitation_status"]
           token: string
         }
         Insert: {
           accepted_at?: string | null
           accepted_by?: string | null
+          access_level?: Database["public"]["Enums"]["access_level"]
+          access_preset_id?: string | null
           created_at?: string
           email: string
           expires_at?: string
           id?: string
           invited_by?: string | null
           organization_id: string
-          role?: Database["public"]["Enums"]["app_role"]
           status?: Database["public"]["Enums"]["invitation_status"]
           token?: string
         }
         Update: {
           accepted_at?: string | null
           accepted_by?: string | null
+          access_level?: Database["public"]["Enums"]["access_level"]
+          access_preset_id?: string | null
           created_at?: string
           email?: string
           expires_at?: string
           id?: string
           invited_by?: string | null
           organization_id?: string
-          role?: Database["public"]["Enums"]["app_role"]
           status?: Database["public"]["Enums"]["invitation_status"]
           token?: string
         }
         Relationships: [
           {
+            foreignKeyName: "invitations_access_preset_id_fkey"
+            columns: ["access_preset_id"]
+            isOneToOne: false
+            referencedRelation: "access_presets"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "invitations_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lesson_progress: {
-        Row: {
-          assignment_id: string | null
-          completed: boolean
-          completed_at: string
-          id: string
-          lesson_id: string
-          user_id: string
-        }
-        Insert: {
-          assignment_id?: string | null
-          completed?: boolean
-          completed_at?: string
-          id?: string
-          lesson_id: string
-          user_id: string
-        }
-        Update: {
-          assignment_id?: string | null
-          completed?: boolean
-          completed_at?: string
-          id?: string
-          lesson_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_progress_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "course_assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_progress_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lesson_quiz_attempts: {
-        Row: {
-          answers: Json
-          created_at: string
-          id: string
-          lesson_id: string
-          passed: boolean
-          score: number
-          total: number
-          user_id: string
-        }
-        Insert: {
-          answers?: Json
-          created_at?: string
-          id?: string
-          lesson_id: string
-          passed?: boolean
-          score?: number
-          total?: number
-          user_id: string
-        }
-        Update: {
-          answers?: Json
-          created_at?: string
-          id?: string
-          lesson_id?: string
-          passed?: boolean
-          score?: number
-          total?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
-      lessons: {
-        Row: {
-          content: string | null
-          created_at: string
-          data: Json
-          duration_minutes: number | null
-          id: string
-          lesson_type: string
-          module_id: string
-          order_index: number
-          pdf_url: string | null
-          required: boolean
-          title: string
-          video_url: string | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string
-          data?: Json
-          duration_minutes?: number | null
-          id?: string
-          lesson_type?: string
-          module_id: string
-          order_index?: number
-          pdf_url?: string | null
-          required?: boolean
-          title: string
-          video_url?: string | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string
-          data?: Json
-          duration_minutes?: number | null
-          id?: string
-          lesson_type?: string
-          module_id?: string
-          order_index?: number
-          pdf_url?: string | null
-          required?: boolean
-          title?: string
-          video_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lessons_module_id_fkey"
-            columns: ["module_id"]
-            isOneToOne: false
-            referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -11219,20 +9625,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "nectar_attestations_covers_instance_id_fkey"
-            columns: ["covers_instance_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_compliance_instances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_attestations_covers_staff_id_fkey"
-            columns: ["covers_staff_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "nectar_attestations_covers_staff_id_fkey"
             columns: ["covers_staff_id"]
             isOneToOne: false
@@ -11241,49 +9633,41 @@ export type Database = {
           },
         ]
       }
-      nectar_code_activations: {
+      nectar_code_activations_backup_20260928b: {
         Row: {
-          confirmed_at: string
-          confirmed_by: string
-          created_at: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string | null
           deactivated_at: string | null
           deactivated_by: string | null
-          id: string
-          organization_id: string
-          requirement_count_at_confirm: number
-          service_code: string
+          id: string | null
+          organization_id: string | null
+          requirement_count_at_confirm: number | null
+          service_code: string | null
         }
         Insert: {
-          confirmed_at?: string
-          confirmed_by: string
-          created_at?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string | null
           deactivated_at?: string | null
           deactivated_by?: string | null
-          id?: string
-          organization_id: string
-          requirement_count_at_confirm?: number
-          service_code: string
+          id?: string | null
+          organization_id?: string | null
+          requirement_count_at_confirm?: number | null
+          service_code?: string | null
         }
         Update: {
-          confirmed_at?: string
-          confirmed_by?: string
-          created_at?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string | null
           deactivated_at?: string | null
           deactivated_by?: string | null
-          id?: string
-          organization_id?: string
-          requirement_count_at_confirm?: number
-          service_code?: string
+          id?: string | null
+          organization_id?: string | null
+          requirement_count_at_confirm?: number | null
+          service_code?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "nectar_code_activations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       nectar_compliance_flags: {
         Row: {
@@ -11351,99 +9735,6 @@ export type Database = {
             columns: ["rule_id"]
             isOneToOne: false
             referencedRelation: "nectar_compliance_rules"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      nectar_compliance_instances: {
-        Row: {
-          attestation_id: string | null
-          created_at: string
-          deadline_at: string
-          document_url: string | null
-          external_reference: string | null
-          id: string
-          organization_id: string
-          requirement_id: string
-          resolution_note: string | null
-          resolved_at: string | null
-          resolved_by: string | null
-          resolved_via: string | null
-          status: string
-          triggered_at: string
-          triggered_by_id: string | null
-          triggered_by_kind: string | null
-        }
-        Insert: {
-          attestation_id?: string | null
-          created_at?: string
-          deadline_at: string
-          document_url?: string | null
-          external_reference?: string | null
-          id?: string
-          organization_id: string
-          requirement_id: string
-          resolution_note?: string | null
-          resolved_at?: string | null
-          resolved_by?: string | null
-          resolved_via?: string | null
-          status?: string
-          triggered_at?: string
-          triggered_by_id?: string | null
-          triggered_by_kind?: string | null
-        }
-        Update: {
-          attestation_id?: string | null
-          created_at?: string
-          deadline_at?: string
-          document_url?: string | null
-          external_reference?: string | null
-          id?: string
-          organization_id?: string
-          requirement_id?: string
-          resolution_note?: string | null
-          resolved_at?: string | null
-          resolved_by?: string | null
-          resolved_via?: string | null
-          status?: string
-          triggered_at?: string
-          triggered_by_id?: string | null
-          triggered_by_kind?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nectar_compliance_instances_attestation_id_fkey"
-            columns: ["attestation_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_attestations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_compliance_instances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_compliance_instances_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_compliance_instances_resolved_by_fkey"
-            columns: ["resolved_by"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_compliance_instances_resolved_by_fkey"
-            columns: ["resolved_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -11567,6 +9858,8 @@ export type Database = {
       }
       nectar_documents: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           assisted_setup_requested: boolean
           authoritative_kind: string | null
           category: string | null
@@ -11619,6 +9912,8 @@ export type Database = {
           version: number
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           assisted_setup_requested?: boolean
           authoritative_kind?: string | null
           category?: string | null
@@ -11671,6 +9966,8 @@ export type Database = {
           version?: number
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           assisted_setup_requested?: boolean
           authoritative_kind?: string | null
           category?: string | null
@@ -12146,54 +10443,6 @@ export type Database = {
           },
         ]
       }
-      nectar_requirement_category_history: {
-        Row: {
-          change_source: string
-          changed_at: string
-          changed_by: string | null
-          from_category: string | null
-          id: string
-          organization_id: string
-          requirement_id: string
-          to_category: string
-        }
-        Insert: {
-          change_source: string
-          changed_at?: string
-          changed_by?: string | null
-          from_category?: string | null
-          id?: string
-          organization_id: string
-          requirement_id: string
-          to_category: string
-        }
-        Update: {
-          change_source?: string
-          changed_at?: string
-          changed_by?: string | null
-          from_category?: string | null
-          id?: string
-          organization_id?: string
-          requirement_id?: string
-          to_category?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nectar_requirement_category_history_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_requirement_category_history_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       nectar_requirement_mappings: {
         Row: {
           cadence: string | null
@@ -12256,71 +10505,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "nectar_requirements"
             referencedColumns: ["id"]
-          },
-        ]
-      }
-      nectar_requirement_usage: {
-        Row: {
-          created_at: string
-          edit_reason: string | null
-          edited_at: string
-          edited_by: string
-          id: string
-          organization_id: string
-          requirement_id: string
-          supersedes_id: string | null
-          usage_note: string
-        }
-        Insert: {
-          created_at?: string
-          edit_reason?: string | null
-          edited_at?: string
-          edited_by: string
-          id?: string
-          organization_id: string
-          requirement_id: string
-          supersedes_id?: string | null
-          usage_note: string
-        }
-        Update: {
-          created_at?: string
-          edit_reason?: string | null
-          edited_at?: string
-          edited_by?: string
-          id?: string
-          organization_id?: string
-          requirement_id?: string
-          supersedes_id?: string | null
-          usage_note?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nectar_requirement_usage_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_requirement_usage_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_requirement_usage_supersedes_id_fkey"
-            columns: ["supersedes_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirement_usage"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_requirement_usage_supersedes_id_fkey"
-            columns: ["supersedes_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirement_usage_current_v"
-            referencedColumns: ["usage_id"]
           },
         ]
       }
@@ -12583,32 +10767,55 @@ export type Database = {
         }
         Relationships: []
       }
-      org_celebration_settings: {
+      obligation_applicability: {
         Row: {
-          enabled: boolean
+          applies: boolean
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          fact_key: string
+          id: string
+          obligation_key: string
           organization_id: string
-          tier1_enabled: boolean
-          tier2_enabled: boolean
-          tier3_enabled: boolean
+          source: string
+          unanswered: boolean
           updated_at: string
         }
         Insert: {
-          enabled?: boolean
+          applies: boolean
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          fact_key: string
+          id?: string
+          obligation_key: string
           organization_id: string
-          tier1_enabled?: boolean
-          tier2_enabled?: boolean
-          tier3_enabled?: boolean
+          source?: string
+          unanswered?: boolean
           updated_at?: string
         }
         Update: {
-          enabled?: boolean
+          applies?: boolean
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          fact_key?: string
+          id?: string
+          obligation_key?: string
           organization_id?: string
-          tier1_enabled?: boolean
-          tier2_enabled?: boolean
-          tier3_enabled?: boolean
+          source?: string
+          unanswered?: boolean
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "obligation_applicability_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       org_email_settings: {
         Row: {
@@ -12777,7 +10984,6 @@ export type Database = {
       }
       org_shift_behavior_settings: {
         Row: {
-          enabled: boolean
           organization_id: string
           ot_threshold_hours: number
           rule_settings: Json
@@ -12785,7 +10991,6 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
-          enabled?: boolean
           organization_id: string
           ot_threshold_hours?: number
           rule_settings?: Json
@@ -12793,7 +10998,6 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
-          enabled?: boolean
           organization_id?: string
           ot_threshold_hours?: number
           rule_settings?: Json
@@ -12810,43 +11014,8 @@ export type Database = {
           },
         ]
       }
-      org_shopping_library: {
-        Row: {
-          created_at: string
-          id: string
-          item: string
-          last_used_at: string
-          organization_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          item: string
-          last_used_at?: string
-          organization_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          item?: string
-          last_used_at?: string
-          organization_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_shopping_library_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       org_subscriptions: {
         Row: {
-          billed_client_count: number | null
-          billed_period_end: string | null
-          billed_period_start: string | null
           billing_interval: string | null
           cancel_at_period_end: boolean
           canceled_at: string | null
@@ -12866,7 +11035,6 @@ export type Database = {
           organization_id: string
           past_due_since: string | null
           plan: Database["public"]["Enums"]["sub_plan"]
-          renewal_credit_cents: number
           renewal_date: string | null
           staff_count: number | null
           started_at: string
@@ -12878,9 +11046,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          billed_client_count?: number | null
-          billed_period_end?: string | null
-          billed_period_start?: string | null
           billing_interval?: string | null
           cancel_at_period_end?: boolean
           canceled_at?: string | null
@@ -12900,7 +11065,6 @@ export type Database = {
           organization_id: string
           past_due_since?: string | null
           plan?: Database["public"]["Enums"]["sub_plan"]
-          renewal_credit_cents?: number
           renewal_date?: string | null
           staff_count?: number | null
           started_at?: string
@@ -12912,9 +11076,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          billed_client_count?: number | null
-          billed_period_end?: string | null
-          billed_period_start?: string | null
           billing_interval?: string | null
           cancel_at_period_end?: boolean
           canceled_at?: string | null
@@ -12934,7 +11095,6 @@ export type Database = {
           organization_id?: string
           past_due_since?: string | null
           plan?: Database["public"]["Enums"]["sub_plan"]
-          renewal_credit_cents?: number
           renewal_date?: string | null
           staff_count?: number | null
           started_at?: string
@@ -13004,53 +11164,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "org_support_tickets_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      org_training_orders: {
-        Row: {
-          amount_cents: number
-          created_at: string
-          id: string
-          organization_id: string
-          selected_modules: Json
-          staff_count: number
-          status: string
-          stripe_payment_intent_id: string | null
-          training_type: string
-          updated_at: string
-        }
-        Insert: {
-          amount_cents?: number
-          created_at?: string
-          id?: string
-          organization_id: string
-          selected_modules?: Json
-          staff_count?: number
-          status?: string
-          stripe_payment_intent_id?: string | null
-          training_type: string
-          updated_at?: string
-        }
-        Update: {
-          amount_cents?: number
-          created_at?: string
-          id?: string
-          organization_id?: string
-          selected_modules?: Json
-          staff_count?: number
-          status?: string
-          stripe_payment_intent_id?: string | null
-          training_type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_training_orders_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -13203,42 +11316,64 @@ export type Database = {
       }
       organization_members: {
         Row: {
+          access_level: Database["public"]["Enums"]["access_level"]
+          access_overrides: Json
+          access_preset_id: string | null
+          access_scope: string
           active: boolean
           created_at: string
-          custom_role_id: string | null
+          end_date: string | null
           id: string
           is_company_executive: boolean
           job_title: string | null
           manager_id: string | null
           organization_id: string
-          role: Database["public"]["Enums"]["app_role"]
+          rehire_eligible: boolean | null
+          separation_reason: string | null
           user_id: string
         }
         Insert: {
+          access_level?: Database["public"]["Enums"]["access_level"]
+          access_overrides?: Json
+          access_preset_id?: string | null
+          access_scope: string
           active?: boolean
           created_at?: string
-          custom_role_id?: string | null
+          end_date?: string | null
           id?: string
           is_company_executive?: boolean
           job_title?: string | null
           manager_id?: string | null
           organization_id: string
-          role?: Database["public"]["Enums"]["app_role"]
+          rehire_eligible?: boolean | null
+          separation_reason?: string | null
           user_id: string
         }
         Update: {
+          access_level?: Database["public"]["Enums"]["access_level"]
+          access_overrides?: Json
+          access_preset_id?: string | null
+          access_scope?: string
           active?: boolean
           created_at?: string
-          custom_role_id?: string | null
+          end_date?: string | null
           id?: string
           is_company_executive?: boolean
           job_title?: string | null
           manager_id?: string | null
           organization_id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          rehire_eligible?: boolean | null
+          separation_reason?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "organization_members_access_preset_id_fkey"
+            columns: ["access_preset_id"]
+            isOneToOne: false
+            referencedRelation: "access_presets"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "organization_members_manager_id_fkey"
             columns: ["manager_id"]
@@ -13263,11 +11398,6 @@ export type Database = {
           aliases: string[]
           applied_pack_version: string | null
           approx_client_count: number | null
-          fact_has_governing_board: boolean | null
-          fact_operates_ol_site: boolean | null
-          fact_uses_volunteers: boolean | null
-          service_area: string | null
-          setup_create_gate_exempt: boolean | null
           billing_exempt: boolean
           billing_sms_phone: string | null
           created_at: string
@@ -13276,7 +11406,11 @@ export type Database = {
           dhhs_provider_id: string | null
           display_acronym: string | null
           evv_vendor_name: string
-          founding_ends_at: string | null
+          fact_answers_updated_at: string | null
+          fact_answers_updated_by: string | null
+          fact_has_governing_board: boolean | null
+          fact_operates_ol_site: boolean | null
+          fact_uses_volunteers: boolean | null
           go_live_date: string | null
           id: string
           incident_ai_review_enabled: boolean
@@ -13286,8 +11420,9 @@ export type Database = {
           name: string
           nectar_profile_saved_at: string | null
           predates_go_live_note: string | null
-          pricing_schedule: string | null
+          service_area: string | null
           services_offered: string[] | null
+          setup_create_gate_exempt: boolean | null
           slug: string
           specializations: string | null
           state_code: string | null
@@ -13302,11 +11437,6 @@ export type Database = {
           aliases?: string[]
           applied_pack_version?: string | null
           approx_client_count?: number | null
-          fact_has_governing_board?: boolean | null
-          fact_operates_ol_site?: boolean | null
-          fact_uses_volunteers?: boolean | null
-          service_area?: string | null
-          setup_create_gate_exempt?: boolean | null
           billing_exempt?: boolean
           billing_sms_phone?: string | null
           created_at?: string
@@ -13315,7 +11445,11 @@ export type Database = {
           dhhs_provider_id?: string | null
           display_acronym?: string | null
           evv_vendor_name?: string
-          founding_ends_at?: string | null
+          fact_answers_updated_at?: string | null
+          fact_answers_updated_by?: string | null
+          fact_has_governing_board?: boolean | null
+          fact_operates_ol_site?: boolean | null
+          fact_uses_volunteers?: boolean | null
           go_live_date?: string | null
           id?: string
           incident_ai_review_enabled?: boolean
@@ -13325,8 +11459,9 @@ export type Database = {
           name: string
           nectar_profile_saved_at?: string | null
           predates_go_live_note?: string | null
-          pricing_schedule?: string | null
+          service_area?: string | null
           services_offered?: string[] | null
+          setup_create_gate_exempt?: boolean | null
           slug: string
           specializations?: string | null
           state_code?: string | null
@@ -13341,11 +11476,6 @@ export type Database = {
           aliases?: string[]
           applied_pack_version?: string | null
           approx_client_count?: number | null
-          fact_has_governing_board?: boolean | null
-          fact_operates_ol_site?: boolean | null
-          fact_uses_volunteers?: boolean | null
-          service_area?: string | null
-          setup_create_gate_exempt?: boolean | null
           billing_exempt?: boolean
           billing_sms_phone?: string | null
           created_at?: string
@@ -13354,7 +11484,11 @@ export type Database = {
           dhhs_provider_id?: string | null
           display_acronym?: string | null
           evv_vendor_name?: string
-          founding_ends_at?: string | null
+          fact_answers_updated_at?: string | null
+          fact_answers_updated_by?: string | null
+          fact_has_governing_board?: boolean | null
+          fact_operates_ol_site?: boolean | null
+          fact_uses_volunteers?: boolean | null
           go_live_date?: string | null
           id?: string
           incident_ai_review_enabled?: boolean
@@ -13364,8 +11498,9 @@ export type Database = {
           name?: string
           nectar_profile_saved_at?: string | null
           predates_go_live_note?: string | null
-          pricing_schedule?: string | null
+          service_area?: string | null
           services_offered?: string[] | null
+          setup_create_gate_exempt?: boolean | null
           slug?: string
           specializations?: string | null
           state_code?: string | null
@@ -13593,53 +11728,61 @@ export type Database = {
           },
         ]
       }
-      permission_audit_log: {
+      phi_access_audit_log: {
         Row: {
-          change_type: string
-          changed_by_name: string | null
-          changed_by_user_id: string | null
+          action: string
+          actor_role: string | null
+          actor_user_id: string
+          break_glass: boolean
+          client_id: string | null
           created_at: string
+          detail: string | null
           id: string
-          new_value: boolean | null
+          ip: string | null
           organization_id: string
-          permission: string
-          previous_value: boolean | null
-          reason: string | null
-          role: string | null
-          target_user_id: string | null
-          target_user_name: string | null
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
         }
         Insert: {
-          change_type: string
-          changed_by_name?: string | null
-          changed_by_user_id?: string | null
+          action?: string
+          actor_role?: string | null
+          actor_user_id: string
+          break_glass?: boolean
+          client_id?: string | null
           created_at?: string
+          detail?: string | null
           id?: string
-          new_value?: boolean | null
+          ip?: string | null
           organization_id: string
-          permission: string
-          previous_value?: boolean | null
-          reason?: string | null
-          role?: string | null
-          target_user_id?: string | null
-          target_user_name?: string | null
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
         }
         Update: {
-          change_type?: string
-          changed_by_name?: string | null
-          changed_by_user_id?: string | null
+          action?: string
+          actor_role?: string | null
+          actor_user_id?: string
+          break_glass?: boolean
+          client_id?: string | null
           created_at?: string
+          detail?: string | null
           id?: string
-          new_value?: boolean | null
+          ip?: string | null
           organization_id?: string
-          permission?: string
-          previous_value?: boolean | null
-          reason?: string | null
-          role?: string | null
-          target_user_id?: string | null
-          target_user_name?: string | null
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "phi_access_audit_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_states: {
         Row: {
@@ -13792,15 +11935,16 @@ export type Database = {
           photo_updated_at: string | null
           position: string | null
           positions: string[]
-          requires_abi: boolean
-          requires_deescalation: boolean
-          ssn_last4: string | null
+          requires_abi: boolean | null
+          requires_deescalation: boolean | null
           scope_group_id: string | null
+          ssn_last4: string | null
           staff_type_keys: string[]
           start_date: string | null
           system_role: string
           team_id: string | null
           tenant_id: string | null
+          transports_clients: boolean
           username: string | null
           worker_type: string
         }
@@ -13837,15 +11981,16 @@ export type Database = {
           photo_updated_at?: string | null
           position?: string | null
           positions?: string[]
-          requires_abi?: boolean
-          requires_deescalation?: boolean
-          ssn_last4?: string | null
+          requires_abi?: boolean | null
+          requires_deescalation?: boolean | null
           scope_group_id?: string | null
+          ssn_last4?: string | null
           staff_type_keys?: string[]
           start_date?: string | null
           system_role?: string
           team_id?: string | null
           tenant_id?: string | null
+          transports_clients?: boolean
           username?: string | null
           worker_type?: string
         }
@@ -13882,15 +12027,16 @@ export type Database = {
           photo_updated_at?: string | null
           position?: string | null
           positions?: string[]
-          requires_abi?: boolean
-          requires_deescalation?: boolean
-          ssn_last4?: string | null
+          requires_abi?: boolean | null
+          requires_deescalation?: boolean | null
           scope_group_id?: string | null
+          ssn_last4?: string | null
           staff_type_keys?: string[]
           start_date?: string | null
           system_role?: string
           team_id?: string | null
           tenant_id?: string | null
+          transports_clients?: boolean
           username?: string | null
           worker_type?: string
         }
@@ -13907,154 +12053,6 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "provider_tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      program_acknowledgements: {
-        Row: {
-          acknowledged_at: string
-          course_id: string
-          id: string
-          program_assignment_id: string
-          user_id: string
-        }
-        Insert: {
-          acknowledged_at?: string
-          course_id: string
-          id?: string
-          program_assignment_id: string
-          user_id: string
-        }
-        Update: {
-          acknowledged_at?: string
-          course_id?: string
-          id?: string
-          program_assignment_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "program_acknowledgements_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "program_acknowledgements_program_assignment_id_fkey"
-            columns: ["program_assignment_id"]
-            isOneToOne: false
-            referencedRelation: "program_assignments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      program_assignments: {
-        Row: {
-          assigned_by: string | null
-          completed_at: string | null
-          created_at: string
-          due_date: string | null
-          expires_at: string | null
-          id: string
-          organization_id: string
-          program_id: string
-          progress: number
-          status: Database["public"]["Enums"]["assignment_status"]
-          user_id: string
-        }
-        Insert: {
-          assigned_by?: string | null
-          completed_at?: string | null
-          created_at?: string
-          due_date?: string | null
-          expires_at?: string | null
-          id?: string
-          organization_id: string
-          program_id: string
-          progress?: number
-          status?: Database["public"]["Enums"]["assignment_status"]
-          user_id: string
-        }
-        Update: {
-          assigned_by?: string | null
-          completed_at?: string | null
-          created_at?: string
-          due_date?: string | null
-          expires_at?: string | null
-          id?: string
-          organization_id?: string
-          program_id?: string
-          progress?: number
-          status?: Database["public"]["Enums"]["assignment_status"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "program_assignments_program_id_fkey"
-            columns: ["program_id"]
-            isOneToOne: false
-            referencedRelation: "training_programs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      program_courses: {
-        Row: {
-          course_id: string
-          created_at: string
-          id: string
-          order_index: number
-          program_id: string
-          required: boolean
-          unlock_after: string | null
-        }
-        Insert: {
-          course_id: string
-          created_at?: string
-          id?: string
-          order_index?: number
-          program_id: string
-          required?: boolean
-          unlock_after?: string | null
-        }
-        Update: {
-          course_id?: string
-          created_at?: string
-          id?: string
-          order_index?: number
-          program_id?: string
-          required?: boolean
-          unlock_after?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "program_courses_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "program_courses_program_id_fkey"
-            columns: ["program_id"]
-            isOneToOne: false
-            referencedRelation: "training_programs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "program_courses_unlock_after_fkey"
-            columns: ["unlock_after"]
-            isOneToOne: false
-            referencedRelation: "program_courses"
             referencedColumns: ["id"]
           },
         ]
@@ -14246,120 +12244,6 @@ export type Database = {
           },
         ]
       }
-      provider_tenants: {
-        Row: {
-          agency_name: string
-          client_tier_limit: number
-          created_at: string
-          feature_ai_receipt_ocr: boolean
-          feature_lms_training: boolean
-          feature_pba_bank_feed: boolean
-          feature_quickbooks_sync: boolean
-          id: string
-          is_active: boolean
-          owner_email: string
-          updated_at: string
-        }
-        Insert: {
-          agency_name: string
-          client_tier_limit?: number
-          created_at?: string
-          feature_ai_receipt_ocr?: boolean
-          feature_lms_training?: boolean
-          feature_pba_bank_feed?: boolean
-          feature_quickbooks_sync?: boolean
-          id?: string
-          is_active?: boolean
-          owner_email: string
-          updated_at?: string
-        }
-        Update: {
-          agency_name?: string
-          client_tier_limit?: number
-          created_at?: string
-          feature_ai_receipt_ocr?: boolean
-          feature_lms_training?: boolean
-          feature_pba_bank_feed?: boolean
-          feature_quickbooks_sync?: boolean
-          id?: string
-          is_active?: boolean
-          owner_email?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      provider_training_modules: {
-        Row: {
-          attestation_statement: string
-          client_id: string | null
-          created_at: string
-          created_by: string | null
-          est_min: number
-          id: string
-          intro: string | null
-          kind: Database["public"]["Enums"]["provider_training_kind"]
-          organization_id: string
-          person_label: string | null
-          source_doc_name: string | null
-          status: Database["public"]["Enums"]["provider_training_status"]
-          steps: Json
-          title: string
-          updated_at: string
-          version: number
-        }
-        Insert: {
-          attestation_statement: string
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          est_min?: number
-          id?: string
-          intro?: string | null
-          kind: Database["public"]["Enums"]["provider_training_kind"]
-          organization_id: string
-          person_label?: string | null
-          source_doc_name?: string | null
-          status?: Database["public"]["Enums"]["provider_training_status"]
-          steps?: Json
-          title: string
-          updated_at?: string
-          version?: number
-        }
-        Update: {
-          attestation_statement?: string
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          est_min?: number
-          id?: string
-          intro?: string | null
-          kind?: Database["public"]["Enums"]["provider_training_kind"]
-          organization_id?: string
-          person_label?: string | null
-          source_doc_name?: string | null
-          status?: Database["public"]["Enums"]["provider_training_status"]
-          steps?: Json
-          title?: string
-          updated_at?: string
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "provider_training_modules_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "provider_training_modules_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       provisioning_plan: {
         Row: {
           approved_at: string | null
@@ -14508,7 +12392,6 @@ export type Database = {
           name: string | null
           notes: string | null
           organization_id: string
-          rotation_group_id: string | null
           service_code_id: string | null
           staff_id: string | null
           start_time_local: string
@@ -14529,7 +12412,6 @@ export type Database = {
           name?: string | null
           notes?: string | null
           organization_id: string
-          rotation_group_id?: string | null
           service_code_id?: string | null
           staff_id?: string | null
           start_time_local: string
@@ -14550,7 +12432,6 @@ export type Database = {
           name?: string | null
           notes?: string | null
           organization_id?: string
-          rotation_group_id?: string | null
           service_code_id?: string | null
           staff_id?: string | null
           start_time_local?: string
@@ -14911,20 +12792,20 @@ export type Database = {
           due_at?: string | null
           id?: string
           instance_id?: string | null
-          kind: string
+          kind?: string
           obligation_id?: string | null
           obligation_key?: string | null
           organization_id: string
           outcome?: string | null
           outcome_at?: string | null
           outcome_note?: string | null
-          plan_text: string
+          plan_text?: string
           proposed_by?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           staff_id?: string | null
           status?: string
-          title: string
+          title?: string
           updated_at?: string
         }
         Update: {
@@ -14951,80 +12832,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "remediation_plans_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      role_change_audit_log: {
-        Row: {
-          change_method: string | null
-          changed_by_name: string | null
-          changed_by_user_id: string | null
-          created_at: string
-          id: string
-          new_role: string | null
-          organization_id: string
-          previous_role: string | null
-          target_user_id: string | null
-          target_user_name: string | null
-        }
-        Insert: {
-          change_method?: string | null
-          changed_by_name?: string | null
-          changed_by_user_id?: string | null
-          created_at?: string
-          id?: string
-          new_role?: string | null
-          organization_id: string
-          previous_role?: string | null
-          target_user_id?: string | null
-          target_user_name?: string | null
-        }
-        Update: {
-          change_method?: string | null
-          changed_by_name?: string | null
-          changed_by_user_id?: string | null
-          created_at?: string
-          id?: string
-          new_role?: string | null
-          organization_id?: string
-          previous_role?: string | null
-          target_user_id?: string | null
-          target_user_name?: string | null
-        }
-        Relationships: []
-      }
-      role_permissions: {
-        Row: {
-          enabled: boolean
-          id: string
-          organization_id: string
-          permission: string
-          role: Database["public"]["Enums"]["app_role"]
-          updated_at: string
-        }
-        Insert: {
-          enabled?: boolean
-          id?: string
-          organization_id: string
-          permission: string
-          role: Database["public"]["Enums"]["app_role"]
-          updated_at?: string
-        }
-        Update: {
-          enabled?: boolean
-          id?: string
-          organization_id?: string
-          permission?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "role_permissions_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -15122,13 +12929,6 @@ export type Database = {
             foreignKeyName: "scheduled_shifts_claim_requested_by_fkey"
             columns: ["claim_requested_by"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "scheduled_shifts_claim_requested_by_fkey"
-            columns: ["claim_requested_by"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -15171,47 +12971,10 @@ export type Database = {
             foreignKeyName: "scheduled_shifts_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "scheduled_shifts_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
-      }
-      scope_assignments: {
-        Row: {
-          created_at: string
-          id: string
-          organization_id: string
-          scope_ref_id: string | null
-          scope_type: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          organization_id: string
-          scope_ref_id?: string | null
-          scope_type: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          organization_id?: string
-          scope_ref_id?: string | null
-          scope_type?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       service_codes: {
         Row: {
@@ -15293,88 +13056,6 @@ export type Database = {
           },
         ]
       }
-      shift_behavior_observations: {
-        Row: {
-          antecedent_context: string | null
-          behavior_counts: Json
-          behaviors_observed: boolean
-          client_id: string
-          created_at: string
-          id: string
-          intervention_response: string | null
-          objective_description: string | null
-          observed_at: string
-          organization_id: string
-          positives: string | null
-          reportable_incident: boolean
-          shift_id: string
-          staff_id: string
-          target_behaviors: Json
-          trend_vs_recent: string | null
-          updated_at: string
-        }
-        Insert: {
-          antecedent_context?: string | null
-          behavior_counts?: Json
-          behaviors_observed: boolean
-          client_id: string
-          created_at?: string
-          id?: string
-          intervention_response?: string | null
-          objective_description?: string | null
-          observed_at?: string
-          organization_id: string
-          positives?: string | null
-          reportable_incident?: boolean
-          shift_id: string
-          staff_id: string
-          target_behaviors?: Json
-          trend_vs_recent?: string | null
-          updated_at?: string
-        }
-        Update: {
-          antecedent_context?: string | null
-          behavior_counts?: Json
-          behaviors_observed?: boolean
-          client_id?: string
-          created_at?: string
-          id?: string
-          intervention_response?: string | null
-          objective_description?: string | null
-          observed_at?: string
-          organization_id?: string
-          positives?: string | null
-          reportable_incident?: boolean
-          shift_id?: string
-          staff_id?: string
-          target_behaviors?: Json
-          trend_vs_recent?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shift_behavior_observations_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_behavior_observations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_behavior_observations_shift_id_fkey"
-            columns: ["shift_id"]
-            isOneToOne: true
-            referencedRelation: "evv_timesheets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       shift_callouts: {
         Row: {
           coverage_locked_at: string | null
@@ -15429,21 +13110,7 @@ export type Database = {
             foreignKeyName: "shift_callouts_coverage_staff_id_fkey"
             columns: ["coverage_staff_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_callouts_coverage_staff_id_fkey"
-            columns: ["coverage_staff_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_callouts_manager_acknowledged_by_fkey"
-            columns: ["manager_acknowledged_by"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -15465,13 +13132,6 @@ export type Database = {
             columns: ["scheduled_shift_id"]
             isOneToOne: false
             referencedRelation: "scheduled_shifts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_callouts_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -15631,13 +13291,6 @@ export type Database = {
             foreignKeyName: "shift_reports_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_reports_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -15688,21 +13341,7 @@ export type Database = {
             foreignKeyName: "shift_swap_requests_decided_by_fkey"
             columns: ["decided_by"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_swap_requests_decided_by_fkey"
-            columns: ["decided_by"]
-            isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_swap_requests_from_staff_id_fkey"
-            columns: ["from_staff_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -15730,74 +13369,52 @@ export type Database = {
             foreignKeyName: "shift_swap_requests_to_staff_id_fkey"
             columns: ["to_staff_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_swap_requests_to_staff_id_fkey"
-            columns: ["to_staff_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      shift_templates: {
+      shift_templates_backup_20260928b: {
         Row: {
-          active: boolean
+          active: boolean | null
           color: string | null
-          created_at: string
-          end_time: string
-          id: string
-          name: string
-          organization_id: string
-          sort: number
-          start_time: string
+          created_at: string | null
+          end_time: string | null
+          id: string | null
+          name: string | null
+          organization_id: string | null
+          sort: number | null
+          start_time: string | null
           team_id: string | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
-          active?: boolean
+          active?: boolean | null
           color?: string | null
-          created_at?: string
-          end_time: string
-          id?: string
-          name: string
-          organization_id: string
-          sort?: number
-          start_time: string
+          created_at?: string | null
+          end_time?: string | null
+          id?: string | null
+          name?: string | null
+          organization_id?: string | null
+          sort?: number | null
+          start_time?: string | null
           team_id?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
-          active?: boolean
+          active?: boolean | null
           color?: string | null
-          created_at?: string
-          end_time?: string
-          id?: string
-          name?: string
-          organization_id?: string
-          sort?: number
-          start_time?: string
+          created_at?: string | null
+          end_time?: string | null
+          id?: string | null
+          name?: string | null
+          organization_id?: string | null
+          sort?: number | null
+          start_time?: string | null
           team_id?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "shift_templates_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shift_templates_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       sjd_assessment_selections: {
         Row: {
@@ -15880,89 +13497,6 @@ export type Database = {
         }
         Relationships: []
       }
-      staff_baseline_training_completions: {
-        Row: {
-          admin_signed_off_at: string | null
-          admin_signed_off_by: string | null
-          completed_by: string | null
-          completed_date: string | null
-          created_at: string
-          evidence_document_id: string | null
-          expires_at: string | null
-          id: string
-          nectar_extracted_cert_type: string | null
-          nectar_extracted_completed_date: string | null
-          nectar_extracted_name: string | null
-          nectar_extracted_summary: string | null
-          nectar_name_match: string | null
-          nectar_reviewed_at: string | null
-          nectar_suggested_expires: boolean
-          nectar_validation_reasons: Json | null
-          nectar_validation_status: string | null
-          notes: string | null
-          organization_id: string
-          staff_id: string
-          training_key: string
-          updated_at: string
-        }
-        Insert: {
-          admin_signed_off_at?: string | null
-          admin_signed_off_by?: string | null
-          completed_by?: string | null
-          completed_date?: string | null
-          created_at?: string
-          evidence_document_id?: string | null
-          expires_at?: string | null
-          id?: string
-          nectar_extracted_cert_type?: string | null
-          nectar_extracted_completed_date?: string | null
-          nectar_extracted_name?: string | null
-          nectar_extracted_summary?: string | null
-          nectar_name_match?: string | null
-          nectar_reviewed_at?: string | null
-          nectar_suggested_expires?: boolean
-          nectar_validation_reasons?: Json | null
-          nectar_validation_status?: string | null
-          notes?: string | null
-          organization_id: string
-          staff_id: string
-          training_key: string
-          updated_at?: string
-        }
-        Update: {
-          admin_signed_off_at?: string | null
-          admin_signed_off_by?: string | null
-          completed_by?: string | null
-          completed_date?: string | null
-          created_at?: string
-          evidence_document_id?: string | null
-          expires_at?: string | null
-          id?: string
-          nectar_extracted_cert_type?: string | null
-          nectar_extracted_completed_date?: string | null
-          nectar_extracted_name?: string | null
-          nectar_extracted_summary?: string | null
-          nectar_name_match?: string | null
-          nectar_reviewed_at?: string | null
-          nectar_suggested_expires?: boolean
-          nectar_validation_reasons?: Json | null
-          nectar_validation_status?: string | null
-          notes?: string | null
-          organization_id?: string
-          staff_id?: string
-          training_key?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "staff_baseline_training_completions_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       staff_checklist_completion: {
         Row: {
           auto_checked_at: string | null
@@ -16034,13 +13568,6 @@ export type Database = {
             foreignKeyName: "staff_checklist_completion_completed_by_fkey"
             columns: ["completed_by"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_checklist_completion_completed_by_fkey"
-            columns: ["completed_by"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -16056,13 +13583,6 @@ export type Database = {
             columns: ["requirement_id"]
             isOneToOne: false
             referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_checklist_completion_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -16115,13 +13635,6 @@ export type Database = {
             foreignKeyName: "staff_group_members_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_group_members_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -16168,6 +13681,44 @@ export type Database = {
           },
           {
             foreignKeyName: "staff_groups_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_notes: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          organization_id: string
+          staff_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          kind: string
+          organization_id: string
+          staff_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          organization_id?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_notes_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -16260,147 +13811,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      staff_rotation_group_members: {
-        Row: {
-          created_at: string
-          group_id: string
-          id: string
-          sort_order: number
-          staff_id: string
-        }
-        Insert: {
-          created_at?: string
-          group_id: string
-          id?: string
-          sort_order?: number
-          staff_id: string
-        }
-        Update: {
-          created_at?: string
-          group_id?: string
-          id?: string
-          sort_order?: number
-          staff_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "staff_rotation_group_members_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
-            referencedRelation: "staff_rotation_groups"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      staff_rotation_groups: {
-        Row: {
-          created_at: string
-          id: string
-          last_assigned_staff_id: string | null
-          name: string
-          organization_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          last_assigned_staff_id?: string | null
-          name: string
-          organization_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          last_assigned_staff_id?: string | null
-          name?: string
-          organization_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      staff_training_hours_entries: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          entry_date: string
-          hours: number
-          id: string
-          note: string | null
-          organization_id: string
-          requirement_id: string | null
-          staff_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          entry_date: string
-          hours: number
-          id?: string
-          note?: string | null
-          organization_id: string
-          requirement_id?: string | null
-          staff_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          entry_date?: string
-          hours?: number
-          id?: string
-          note?: string | null
-          organization_id?: string
-          requirement_id?: string | null
-          staff_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "staff_training_hours_entries_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_training_hours_entries_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_training_hours_entries_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_training_hours_entries_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_training_hours_entries_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_training_hours_entries_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -16820,33 +14230,6 @@ export type Database = {
           },
         ]
       }
-      system_features: {
-        Row: {
-          category: string
-          created_at: string
-          feature_key: string
-          feature_name: string
-          id: string
-          sort_order: number
-        }
-        Insert: {
-          category?: string
-          created_at?: string
-          feature_key: string
-          feature_name: string
-          id?: string
-          sort_order?: number
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          feature_key?: string
-          feature_name?: string
-          id?: string
-          sort_order?: number
-        }
-        Relationships: []
-      }
       teams: {
         Row: {
           active: boolean
@@ -16898,13 +14281,6 @@ export type Database = {
             foreignKeyName: "teams_manager_id_fkey"
             columns: ["manager_id"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "teams_manager_id_fkey"
-            columns: ["manager_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -16913,52 +14289,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "teams_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "provider_tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tenant_features: {
-        Row: {
-          feature_key: string
-          id: string
-          is_enabled: boolean
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          feature_key: string
-          id?: string
-          is_enabled?: boolean
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          feature_key?: string
-          id?: string
-          is_enabled?: boolean
-          tenant_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tenant_features_feature_key_fkey"
-            columns: ["feature_key"]
-            isOneToOne: false
-            referencedRelation: "system_features"
-            referencedColumns: ["feature_key"]
-          },
-          {
-            foreignKeyName: "tenant_features_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "provider_tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -16988,7 +14318,22 @@ export type Database = {
           thread_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "thread_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thread_members_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       thread_messages: {
         Row: {
@@ -17018,7 +14363,22 @@ export type Database = {
           organization_id?: string
           thread_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "thread_messages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thread_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       threads: {
         Row: {
@@ -17057,7 +14417,15 @@ export type Database = {
           timesheet_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "threads_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       time_off_requests: {
         Row: {
@@ -17107,13 +14475,6 @@ export type Database = {
             foreignKeyName: "time_off_requests_decided_by_fkey"
             columns: ["decided_by"]
             isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "time_off_requests_decided_by_fkey"
-            columns: ["decided_by"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -17122,13 +14483,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "time_off_requests_staff_id_fkey"
-            columns: ["staff_id"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
             referencedColumns: ["id"]
           },
           {
@@ -17224,112 +14578,151 @@ export type Database = {
         }
         Relationships: []
       }
-      track_assignments: {
+      training_class_roster: {
         Row: {
-          assigned_by: string | null
+          card_filename: string | null
+          card_path: string | null
+          card_uploaded_at: string | null
+          card_uploaded_by: string | null
+          class_id: string
+          created_at: string
+          id: string
+          obligation_instance_id: string | null
+          organization_id: string
+          sort_order: number
+          staff_email: string
+          staff_name: string
+          staff_phone: string | null
+          staff_user_id: string | null
+        }
+        Insert: {
+          card_filename?: string | null
+          card_path?: string | null
+          card_uploaded_at?: string | null
+          card_uploaded_by?: string | null
+          class_id: string
+          created_at?: string
+          id?: string
+          obligation_instance_id?: string | null
+          organization_id: string
+          sort_order?: number
+          staff_email: string
+          staff_name: string
+          staff_phone?: string | null
+          staff_user_id?: string | null
+        }
+        Update: {
+          card_filename?: string | null
+          card_path?: string | null
+          card_uploaded_at?: string | null
+          card_uploaded_by?: string | null
+          class_id?: string
+          created_at?: string
+          id?: string
+          obligation_instance_id?: string | null
+          organization_id?: string
+          sort_order?: number
+          staff_email?: string
+          staff_name?: string
+          staff_phone?: string | null
+          staff_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_class_roster_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "training_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_class_roster_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_classes: {
+        Row: {
+          amount_cents: number
+          class_card_filename: string | null
+          class_card_path: string | null
+          class_card_uploaded_at: string | null
           completed_at: string | null
           created_at: string
-          due_date: string | null
-          expires_at: string | null
+          currency: string
+          exec_alerted_at: string | null
           id: string
+          is_external: boolean
           organization_id: string
-          progress: number
-          recurs_at: string | null
-          status: Database["public"]["Enums"]["assignment_status"]
-          track_id: string
-          user_id: string
-        }
-        Insert: {
-          assigned_by?: string | null
-          completed_at?: string | null
-          created_at?: string
-          due_date?: string | null
-          expires_at?: string | null
-          id?: string
-          organization_id: string
-          progress?: number
-          recurs_at?: string | null
-          status?: Database["public"]["Enums"]["assignment_status"]
-          track_id: string
-          user_id: string
-        }
-        Update: {
-          assigned_by?: string | null
-          completed_at?: string | null
-          created_at?: string
-          due_date?: string | null
-          expires_at?: string | null
-          id?: string
-          organization_id?: string
-          progress?: number
-          recurs_at?: string | null
-          status?: Database["public"]["Enums"]["assignment_status"]
-          track_id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      track_programs: {
-        Row: {
-          created_at: string
-          id: string
-          order_index: number
-          program_id: string
-          required: boolean
-          track_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          order_index?: number
-          program_id: string
-          required?: boolean
-          track_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          order_index?: number
-          program_id?: string
-          required?: boolean
-          track_id?: string
-        }
-        Relationships: []
-      }
-      training_checklist_mappings: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean
-          notes: string | null
-          requirement_key: string
-          training_topic_id: string
+          payment_status: string
+          provider_name: string | null
+          seat_count: number
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          submitted_at: string
+          submitted_by: string | null
+          training_type: string
+          unit_price_cents: number
           updated_at: string
         }
         Insert: {
+          amount_cents?: number
+          class_card_filename?: string | null
+          class_card_path?: string | null
+          class_card_uploaded_at?: string | null
+          completed_at?: string | null
           created_at?: string
+          currency?: string
+          exec_alerted_at?: string | null
           id?: string
-          is_active?: boolean
-          notes?: string | null
-          requirement_key: string
-          training_topic_id: string
+          is_external?: boolean
+          organization_id: string
+          payment_status?: string
+          provider_name?: string | null
+          seat_count?: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          submitted_at?: string
+          submitted_by?: string | null
+          training_type: string
+          unit_price_cents?: number
           updated_at?: string
         }
         Update: {
+          amount_cents?: number
+          class_card_filename?: string | null
+          class_card_path?: string | null
+          class_card_uploaded_at?: string | null
+          completed_at?: string | null
           created_at?: string
+          currency?: string
+          exec_alerted_at?: string | null
           id?: string
-          is_active?: boolean
-          notes?: string | null
-          requirement_key?: string
-          training_topic_id?: string
+          is_external?: boolean
+          organization_id?: string
+          payment_status?: string
+          provider_name?: string | null
+          seat_count?: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          submitted_at?: string
+          submitted_by?: string | null
+          training_type?: string
+          unit_price_cents?: number
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "training_checklist_mappings_training_topic_id_fkey"
-            columns: ["training_topic_id"]
+            foreignKeyName: "training_classes_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: "training_topics"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -17409,128 +14802,6 @@ export type Database = {
         }
         Relationships: []
       }
-      training_modules: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          mindsmith_url: string | null
-          sequence_order: number
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          sequence_order: number
-          title: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          sequence_order?: number
-          title?: string
-        }
-        Relationships: []
-      }
-      training_person_modules: {
-        Row: {
-          attestation_statement: string
-          client_id: string | null
-          created_at: string
-          description: string | null
-          id: string
-          mindsmith_url: string | null
-          organization_id: string
-          title: string
-          user_id: string
-        }
-        Insert: {
-          attestation_statement?: string
-          client_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          organization_id: string
-          title: string
-          user_id: string
-        }
-        Update: {
-          attestation_statement?: string
-          client_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          organization_id?: string
-          title?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_person_modules_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      training_programs: {
-        Row: {
-          annual_renewal: boolean
-          category: string | null
-          cover_url: string | null
-          created_at: string
-          created_by: string | null
-          description: string | null
-          estimated_minutes: number | null
-          id: string
-          is_global: boolean
-          is_published: boolean
-          name: string
-          organization_id: string | null
-          slug: string
-          validity_months: number | null
-        }
-        Insert: {
-          annual_renewal?: boolean
-          category?: string | null
-          cover_url?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          estimated_minutes?: number | null
-          id?: string
-          is_global?: boolean
-          is_published?: boolean
-          name: string
-          organization_id?: string | null
-          slug: string
-          validity_months?: number | null
-        }
-        Update: {
-          annual_renewal?: boolean
-          category?: string | null
-          cover_url?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          estimated_minutes?: number | null
-          id?: string
-          is_global?: boolean
-          is_published?: boolean
-          name?: string
-          organization_id?: string | null
-          slug?: string
-          validity_months?: number | null
-        }
-        Relationships: []
-      }
       training_topic_progress: {
         Row: {
           id: string
@@ -17558,99 +14829,6 @@ export type Database = {
           topic_kind?: Database["public"]["Enums"]["training_topic_kind"]
           updated_at?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      training_topics: {
-        Row: {
-          attestation_statement: string
-          category: string
-          code: string
-          created_at: string
-          default_hours: number | null
-          description: string | null
-          dspd_letter: string | null
-          id: string
-          mindsmith_url: string | null
-          sort_order: number
-          title: string
-        }
-        Insert: {
-          attestation_statement?: string
-          category: string
-          code: string
-          created_at?: string
-          default_hours?: number | null
-          description?: string | null
-          dspd_letter?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          sort_order?: number
-          title: string
-        }
-        Update: {
-          attestation_statement?: string
-          category?: string
-          code?: string
-          created_at?: string
-          default_hours?: number | null
-          description?: string | null
-          dspd_letter?: string | null
-          id?: string
-          mindsmith_url?: string | null
-          sort_order?: number
-          title?: string
-        }
-        Relationships: []
-      }
-      training_tracks: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
-          due_within_days: number | null
-          id: string
-          is_global: boolean
-          is_published: boolean
-          min_annual_hours: number | null
-          name: string
-          organization_id: string | null
-          recurrence_months: number | null
-          slug: string
-          track_type: Database["public"]["Enums"]["track_type"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          due_within_days?: number | null
-          id?: string
-          is_global?: boolean
-          is_published?: boolean
-          min_annual_hours?: number | null
-          name: string
-          organization_id?: string | null
-          recurrence_months?: number | null
-          slug: string
-          track_type?: Database["public"]["Enums"]["track_type"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          due_within_days?: number | null
-          id?: string
-          is_global?: boolean
-          is_published?: boolean
-          min_annual_hours?: number | null
-          name?: string
-          organization_id?: string | null
-          recurrence_months?: number | null
-          slug?: string
-          track_type?: Database["public"]["Enums"]["track_type"]
-          updated_at?: string
         }
         Relationships: []
       }
@@ -17701,101 +14879,6 @@ export type Database = {
           },
         ]
       }
-      user_celebration_mute: {
-        Row: {
-          muted: boolean
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          muted?: boolean
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          muted?: boolean
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_permission_overrides: {
-        Row: {
-          created_at: string
-          expires_at: string | null
-          granted: boolean
-          granted_by: string | null
-          granted_by_name: string | null
-          id: string
-          organization_id: string
-          permission: string
-          reason: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          expires_at?: string | null
-          granted?: boolean
-          granted_by?: string | null
-          granted_by_name?: string | null
-          id?: string
-          organization_id: string
-          permission: string
-          reason?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          expires_at?: string | null
-          granted?: boolean
-          granted_by?: string | null
-          granted_by_name?: string | null
-          id?: string
-          organization_id?: string
-          permission?: string
-          reason?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_training_progress: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          id: string
-          is_completed: boolean
-          module_id: string
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          is_completed?: boolean
-          module_id: string
-          user_id: string
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          id?: string
-          is_completed?: boolean
-          module_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_training_progress_module_id_fkey"
-            columns: ["module_id"]
-            isOneToOne: false
-            referencedRelation: "training_modules"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_ui_dismissals: {
         Row: {
           dismissed_at: string
@@ -17817,98 +14900,38 @@ export type Database = {
         }
         Relationships: []
       }
-      week_templates: {
+      whiteboard_notes_backup_20260928b: {
         Row: {
-          created_at: string
+          created_at: string | null
           created_by: string | null
-          id: string
-          name: string
-          organization_id: string
-          payload: Json
-          updated_at: string
+          id: string | null
+          note_text: string | null
+          organization_id: string | null
+          subject_id: string | null
+          subject_type: string | null
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           created_by?: string | null
-          id?: string
-          name: string
-          organization_id: string
-          payload: Json
-          updated_at?: string
+          id?: string | null
+          note_text?: string | null
+          organization_id?: string | null
+          subject_id?: string | null
+          subject_type?: string | null
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           created_by?: string | null
-          id?: string
-          name?: string
-          organization_id?: string
-          payload?: Json
-          updated_at?: string
+          id?: string | null
+          note_text?: string | null
+          organization_id?: string | null
+          subject_id?: string | null
+          subject_type?: string | null
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "week_templates_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "org_member_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "week_templates_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "week_templates_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      whiteboard_notes: {
-        Row: {
-          created_at: string
-          created_by: string
-          id: string
-          note_text: string
-          organization_id: string
-          subject_id: string
-          subject_type: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          id?: string
-          note_text: string
-          organization_id: string
-          subject_id: string
-          subject_type: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          id?: string
-          note_text?: string
-          organization_id?: string
-          subject_id?: string
-          subject_type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "whiteboard_notes_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -17991,32 +15014,6 @@ export type Database = {
         }
         Relationships: []
       }
-      nectar_requirement_usage_current_v: {
-        Row: {
-          edited_at: string | null
-          edited_by: string | null
-          organization_id: string | null
-          requirement_id: string | null
-          usage_id: string | null
-          usage_note: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nectar_requirement_usage_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nectar_requirement_usage_requirement_id_fkey"
-            columns: ["requirement_id"]
-            isOneToOne: false
-            referencedRelation: "nectar_requirements"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       org_member_directory: {
         Row: {
           account_status: string | null
@@ -18030,43 +15027,32 @@ export type Database = {
           team_id: string | null
           username: string | null
         }
-        Insert: {
-          account_status?: string | null
-          email?: string | null
-          first_name?: string | null
-          full_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_name?: string | null
-          position?: string | null
-          team_id?: string | null
-          username?: string | null
-        }
-        Update: {
-          account_status?: string | null
-          email?: string | null
-          first_name?: string | null
-          full_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_name?: string | null
-          position?: string | null
-          team_id?: string | null
-          username?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {
       accept_invitation: { Args: { _token: string }; Returns: string }
+      access_can_see_client: {
+        Args: { _client: string; _user: string }
+        Returns: boolean
+      }
+      access_can_see_staff: {
+        Args: { _org: string; _staff: string; _viewer: string }
+        Returns: boolean
+      }
+      access_categories: {
+        Args: { _org: string; _user: string }
+        Returns: Json
+      }
+      access_has_category: {
+        Args: { _category: string; _min?: string; _org: string; _user: string }
+        Returns: boolean
+      }
+      access_is_owner: {
+        Args: { _org: string; _user: string }
+        Returns: boolean
+      }
+      access_seed_presets: { Args: { _org: string }; Returns: undefined }
       apply_med_change_proposal: {
         Args: { _proposal_id: string }
         Returns: string
@@ -18075,6 +15061,8 @@ export type Database = {
         Args: { _organization_id: string }
         Returns: number
       }
+      audit_package_org_id: { Args: { _pkg: string }; Returns: string }
+      can_access_client_phi: { Args: { _client_id: string }; Returns: boolean }
       can_access_import_job: { Args: { _job_id: string }; Returns: boolean }
       can_view_client_intake: {
         Args: { _client: string; _org: string; _viewer: string }
@@ -18149,6 +15137,7 @@ export type Database = {
           has_abi: boolean
           height_inches: number | null
           hhs_monthly_support_hours: number | null
+          hive_start_date: string | null
           home_latitude: number | null
           home_longitude: number | null
           hospice_status: string | null
@@ -18233,10 +15222,6 @@ export type Database = {
       }
       delete_client_hard: { Args: { _client_id: string }; Returns: Json }
       discard_import_job_hard: { Args: { _job_id: string }; Returns: Json }
-      effective_capabilities: {
-        Args: { _org_id: string; _user_id: string }
-        Returns: string[]
-      }
       find_possible_duplicate_referral: {
         Args: {
           _age: number
@@ -18277,6 +15262,11 @@ export type Database = {
           activation_state: string
           applies_to: string | null
           approval_state: string | null
+          catalog_key: string | null
+          catalog_overlay: Json | null
+          catalog_relation: string | null
+          catalog_relation_rationale: string | null
+          catalog_relation_status: string | null
           category: string | null
           compliance_pattern: string | null
           confirmed_optional: boolean
@@ -18327,6 +15317,11 @@ export type Database = {
           activation_state: string
           applies_to: string | null
           approval_state: string | null
+          catalog_key: string | null
+          catalog_overlay: Json | null
+          catalog_relation: string | null
+          catalog_relation_rationale: string | null
+          catalog_relation_status: string | null
           category: string | null
           compliance_pattern: string | null
           confirmed_optional: boolean
@@ -18395,22 +15390,6 @@ export type Database = {
           ssn_last4: string
           staff_id: string
         }[]
-      }
-      has_capability: {
-        Args: { _cap: string; _org_id: string; _user_id: string }
-        Returns: boolean
-      }
-      has_org_role: {
-        Args: {
-          _org: string
-          _role: Database["public"]["Enums"]["app_role"]
-          _user: string
-        }
-        Returns: boolean
-      }
-      has_permission: {
-        Args: { _org_id: string; _perm: string; _user_id: string }
-        Returns: boolean
       }
       hive_training_seat_available: {
         Args: { _seat_id: string }
@@ -18495,7 +15474,6 @@ export type Database = {
           similarity: number
         }[]
       }
-      mcp_exec_read_sql: { Args: { query: string }; Returns: Json }
       med_admin_role_permitted: {
         Args: {
           _client_id: string
@@ -18551,23 +15529,46 @@ export type Database = {
         }
         Returns: undefined
       }
+      org_member_directory_rows: {
+        Args: never
+        Returns: {
+          account_status: string
+          email: string
+          first_name: string
+          full_name: string
+          id: string
+          is_active: boolean
+          last_name: string
+          position: string
+          team_id: string
+          username: string
+        }[]
+      }
+      org_member_last_sign_ins: {
+        Args: { _org: string }
+        Returns: {
+          last_sign_in_at: string
+          user_id: string
+        }[]
+      }
+      org_setup_allows_create: { Args: { p_org_id: string }; Returns: boolean }
+      org_setup_is_complete: { Args: { p_org_id: string }; Returns: boolean }
       purge_aged_referrals: {
         Args: { _organization_id: string }
         Returns: number
       }
-      rebuild_wipe_requirements_tns_fake:
-        | { Args: never; Returns: number }
-        | { Args: { p_keep_pending?: boolean }; Returns: number }
+      purge_phi_access_audit_log: {
+        Args: { retention?: string }
+        Returns: number
+      }
       reject_med_change_proposal: {
         Args: { _notes: string; _proposal_id: string }
         Returns: undefined
       }
-      restore_my_admin_role: { Args: never; Returns: undefined }
       seed_standard_service_codes: {
         Args: { _org: string }
         Returns: undefined
       }
-      seed_system_rbac_roles: { Args: { _org: string }; Returns: undefined }
       set_company_executive: {
         Args: { _grant: boolean; _membership_id: string }
         Returns: undefined
@@ -18576,42 +15577,19 @@ export type Database = {
         Args: { _grant: boolean; _user_id: string }
         Returns: undefined
       }
+      staff_assigned_to_client: {
+        Args: { _client_id: string; _staff: string }
+        Returns: boolean
+      }
       user_has_active_credential: {
         Args: { _cert_type: string; _org_id: string; _user_id: string }
         Returns: boolean
       }
       user_org_ids: { Args: { _user: string }; Returns: string[] }
-      verify_certificate: {
-        Args: { p_code: string }
-        Returns: {
-          course_title: string
-          expires_at: string
-          issued_at: string
-          recipient_name: string
-          verification_code: string
-        }[]
-      }
-      verify_certification: {
-        Args: { _code: string }
-        Returns: {
-          course_title: string
-          expires_at: string
-          issued_at: string
-          recipient_name: string
-          verification_code: string
-        }[]
-      }
     }
     Enums: {
+      access_level: "owner" | "admin" | "staff"
       agreement_status: "not_started" | "sent" | "signed" | "expired"
-      app_role:
-        | "admin"
-        | "manager"
-        | "program_manager"
-        | "employee"
-        | "super_admin"
-        | "committee_member"
-      assignment_status: "not_started" | "in_progress" | "completed" | "overdue"
       bc_behavior_source: "nectar" | "manual"
       bc_behavior_status: "draft" | "approved" | "published" | "archived"
       bc_code: "BC1" | "BC2" | "BC3"
@@ -18642,16 +15620,8 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "expired"
-      hive_training_auto_renew_scope: "all" | "full_program" | "selected"
-      hive_training_auto_renew_status:
-        | "succeeded"
-        | "card_failed"
-        | "no_eligible"
-        | "partial"
-        | "error"
       hive_training_catalog_kind: "full_program" | "ala_carte"
       hive_training_order_model: "bulk_seats" | "individual"
-      hive_training_order_status: "pending" | "paid" | "refunded" | "failed"
       hive_training_seat_status: "available" | "assigned" | "consumed"
       home_position: "manager" | "supervisor" | "staff"
       invitation_status: "pending" | "accepted" | "revoked"
@@ -18677,13 +15647,6 @@ export type Database = {
         | "waiting_customer"
         | "resolved"
         | "closed"
-      track_type:
-        | "onboarding_30"
-        | "certification_90"
-        | "behavioral"
-        | "abi_specialty"
-        | "annual"
-        | "custom"
       training_progress_status: "not_started" | "in_progress" | "completed"
       training_topic_kind: "core" | "person"
     }
@@ -18701,12 +15664,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -18730,11 +15693,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -18755,11 +15718,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -18780,11 +15743,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -18797,11 +15760,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -18813,16 +15776,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      access_level: ["owner", "admin", "staff"],
       agreement_status: ["not_started", "sent", "signed", "expired"],
-      app_role: [
-        "admin",
-        "manager",
-        "program_manager",
-        "employee",
-        "super_admin",
-        "committee_member",
-      ],
-      assignment_status: ["not_started", "in_progress", "completed", "overdue"],
       bc_behavior_source: ["nectar", "manual"],
       bc_behavior_status: ["draft", "approved", "published", "archived"],
       bc_code: ["BC1", "BC2", "BC3"],
@@ -18855,17 +15810,8 @@ export const Constants = {
         "completed",
         "expired",
       ],
-      hive_training_auto_renew_scope: ["all", "full_program", "selected"],
-      hive_training_auto_renew_status: [
-        "succeeded",
-        "card_failed",
-        "no_eligible",
-        "partial",
-        "error",
-      ],
       hive_training_catalog_kind: ["full_program", "ala_carte"],
       hive_training_order_model: ["bulk_seats", "individual"],
-      hive_training_order_status: ["pending", "paid", "refunded", "failed"],
       hive_training_seat_status: ["available", "assigned", "consumed"],
       home_position: ["manager", "supervisor", "staff"],
       invitation_status: ["pending", "accepted", "revoked"],
@@ -18892,14 +15838,6 @@ export const Constants = {
         "waiting_customer",
         "resolved",
         "closed",
-      ],
-      track_type: [
-        "onboarding_30",
-        "certification_90",
-        "behavioral",
-        "abi_specialty",
-        "annual",
-        "custom",
       ],
       training_progress_status: ["not_started", "in_progress", "completed"],
       training_topic_kind: ["core", "person"],

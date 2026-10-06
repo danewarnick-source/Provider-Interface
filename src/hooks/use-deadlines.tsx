@@ -14,6 +14,7 @@ import {
   listDeadlineObligationInstances,
   type DeadlineObligationItem,
 } from "@/lib/company-obligations.functions";
+import { isAdminLevel } from "@/lib/access/levels";
 
 /**
  * Deadlines is the calendar of open clocks. The compliance register
@@ -102,10 +103,7 @@ export function useDeadlines(opts?: { enabled?: boolean }) {
   const orgId = org?.organization_id ?? null;
   const allow = opts?.enabled ?? true;
   const isAdminRole =
-    org?.role === "admin" ||
-    org?.role === "program_manager" ||
-    org?.role === "manager" ||
-    org?.role === "super_admin";
+    isAdminLevel(org?.access.level);
   const ensureFn = useServerFn(ensureCurrentSummaryPeriods);
   const listSummariesFn = useServerFn(listOpenSummaries);
   const listObligationDeadlinesFn = useServerFn(listDeadlineObligationInstances);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -89,7 +90,6 @@ const auditInput = z.object({
   dateTo: z.string().optional().nullable(),
 });
 
-
 const DAILY_CODE_HINTS = ["HOST", "HHS", "T2033", "DAILY"];
 
 function todayIso() {
@@ -134,55 +134,71 @@ export const runInternalAudit = createServerFn({ method: "POST" })
     const include = (area: FindingArea) => !wantArea || wantArea === area;
 
     // ------- Lookups --------
-    const [clientsRes, staffRes, bcodesRes, dailyRes, evvRes, extCertsRes, docsRes, mapsRes, reqsRes] =
-      await Promise.all([
-        supabase
-          .from("clients")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .select("id, first_name, last_name, authorized_dspd_codes, job_code, support_coordinator_name, support_coordinator_email, support_coordinator_phone" as any)
-          .eq("organization_id", orgId),
-        supabase
-          .from("organization_members")
-          .select("user_id, role, job_title")
-          .eq("organization_id", orgId)
-          .eq("active", true),
-        supabase
-          .from("client_billing_codes")
-          .select(
-            "id, client_id, service_code, service_start_date, service_end_date, annual_unit_authorization",
-          )
-          .eq("organization_id", orgId),
-        // Daily/HHS records now live in daily_logs (record_date -> log_date,
-        // provider_id -> user_id). hhs_daily_records is orphaned. Aliases keep the
-        // audit checks below (recency, missing signature, thin narrative) unchanged
-        // (same mapping as the billing surfaces in PR #5).
-        supabase
-          .from("daily_logs")
-          .select("id, client_id, record_date:log_date, provider_id:user_id, narrative, signature_data_url")
-          .eq("organization_id", orgId)
-          .gte("log_date", new Date(now.getTime() - 30 * 86_400_000).toISOString().slice(0, 10)),
-        supabase
-          .from("evv_timesheets")
-          .select("id, staff_id, client_id, service_type_code, clock_in_timestamp, clock_out_timestamp, status")
-          .eq("organization_id", orgId)
-          .gte("clock_in_timestamp", new Date(now.getTime() - 60 * 86_400_000).toISOString()),
-        supabase
-          .from("external_certifications")
-          .select("id, user_id, cert_name, cert_type, expires_at, status")
-          .eq("organization_id", orgId),
-        supabase
-          .from("client_documents")
-          .select("id, client_id, document_type, uploaded_at")
-          .eq("organization_id", orgId),
-        supabase
-          .from("nectar_requirement_mappings")
-          .select("requirement_id, scope_kind, scope_value, confirmed")
-          .eq("organization_id", orgId),
-        supabase
-          .from("nectar_requirements")
-          .select("id, title, source_citation, review_status, category, metadata, approval_state")
-          .eq("organization_id", orgId),
-      ]);
+    const [
+      clientsRes,
+      staffRes,
+      bcodesRes,
+      dailyRes,
+      evvRes,
+      extCertsRes,
+      docsRes,
+      mapsRes,
+      reqsRes,
+    ] = await Promise.all([
+      supabase
+        .from("clients")
+
+        .select(
+          "id, first_name, last_name, authorized_dspd_codes, job_code, support_coordinator_name, support_coordinator_email, support_coordinator_phone" as any,
+        )
+        .eq("organization_id", orgId),
+      supabase
+        .from("organization_members")
+        .select("user_id, role:access_level, job_title")
+        .eq("organization_id", orgId)
+        .eq("active", true),
+      supabase
+        .from("client_billing_codes")
+        .select(
+          "id, client_id, service_code, service_start_date, service_end_date, annual_unit_authorization",
+        )
+        .eq("organization_id", orgId),
+      // Daily/HHS records now live in daily_logs (record_date -> log_date,
+      // provider_id -> user_id). hhs_daily_records is orphaned. Aliases keep the
+      // audit checks below (recency, missing signature, thin narrative) unchanged
+      // (same mapping as the billing surfaces in PR #5).
+      supabase
+        .from("daily_logs")
+        .select(
+          "id, client_id, record_date:log_date, provider_id:user_id, narrative, signature_data_url",
+        )
+        .eq("organization_id", orgId)
+        .gte("log_date", new Date(now.getTime() - 30 * 86_400_000).toISOString().slice(0, 10)),
+      supabase
+        .from("evv_timesheets")
+        .select(
+          "id, staff_id, client_id, service_type_code, clock_in_timestamp, clock_out_timestamp, status",
+        )
+        .eq("organization_id", orgId)
+        .gte("clock_in_timestamp", new Date(now.getTime() - 60 * 86_400_000).toISOString()),
+      supabase
+        .from("evidence_items")
+        .select("id, subject_id, title, requirement_key, expires_on")
+        .eq("organization_id", orgId)
+        .eq("subject_type", "staff"),
+      supabase
+        .from("client_documents")
+        .select("id, client_id, document_type, uploaded_at")
+        .eq("organization_id", orgId),
+      supabase
+        .from("nectar_requirement_mappings")
+        .select("requirement_id, scope_kind, scope_value, confirmed")
+        .eq("organization_id", orgId),
+      supabase
+        .from("nectar_requirements")
+        .select("id, title, source_citation, review_status, category, metadata, approval_state")
+        .eq("organization_id", orgId),
+    ]);
 
     type ClientRow = {
       id: string;
@@ -203,8 +219,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
     };
     const clientSampleSet =
       data.clientIds && data.clientIds.length ? new Set(data.clientIds) : null;
-    const staffSampleSet =
-      data.staffIds && data.staffIds.length ? new Set(data.staffIds) : null;
+    const staffSampleSet = data.staffIds && data.staffIds.length ? new Set(data.staffIds) : null;
     const inScopeClient = (id: string | null | undefined) => {
       if (clientSampleSet) return !!id && clientSampleSet.has(id);
       return !data.clientId || data.clientId === id;
@@ -216,7 +231,6 @@ export const runInternalAudit = createServerFn({ method: "POST" })
     const inScopeCode = (code: string | null | undefined) =>
       !data.serviceCode || (code ?? "").toUpperCase() === data.serviceCode.toUpperCase();
 
-
     // Staff names: best-effort from profiles
     const staffIds = Array.from(
       new Set(((staffRes.data ?? []) as Array<{ user_id: string }>).map((s) => s.user_id)),
@@ -225,9 +239,13 @@ export const runInternalAudit = createServerFn({ method: "POST" })
       ? await supabase.from("profiles").select("id, full_name, email").in("id", staffIds)
       : { data: [] as Array<{ id: string; full_name: string | null; email: string | null }> };
     const profileById = new Map(
-      ((profilesRes.data ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>).map(
-        (p) => [p.id, p.full_name || p.email || "Staff"],
-      ),
+      (
+        (profilesRes.data ?? []) as Array<{
+          id: string;
+          full_name: string | null;
+          email: string | null;
+        }>
+      ).map((p) => [p.id, p.full_name || p.email || "Staff"]),
     );
 
     // Citation index for engine-backed findings.
@@ -247,18 +265,17 @@ export const runInternalAudit = createServerFn({ method: "POST" })
     if (include("staff_certifications")) {
       for (const c of (extCertsRes.data ?? []) as Array<{
         id: string;
-        user_id: string;
-        cert_name: string | null;
-        cert_type: string;
-        expires_at: string | null;
-        status: string;
+        subject_id: string;
+        title: string | null;
+        requirement_key: string;
+        expires_on: string | null;
       }>) {
-        if (!inScopeStaff(c.user_id)) continue;
-        if (!c.expires_at) continue;
-        const exp = new Date(c.expires_at);
+        if (!inScopeStaff(c.subject_id)) continue;
+        if (!c.expires_on) continue;
+        const exp = new Date(c.expires_on);
         const days = daysBetween(exp, now);
-        const name = profileById.get(c.user_id) ?? "Staff";
-        const certLabel = c.cert_name || c.cert_type;
+        const name = profileById.get(c.subject_id) ?? "Team member";
+        const certLabel = c.title || c.requirement_key;
         if (days < 0) {
           findings.push({
             id: `cert-exp-${c.id}`,
@@ -267,10 +284,10 @@ export const runInternalAudit = createServerFn({ method: "POST" })
             title: `${certLabel} expired`,
             detail: `${name}'s ${certLabel} expired ${Math.abs(days)} days ago.`,
             subjectKind: "staff",
-            subjectId: c.user_id,
+            subjectId: c.subject_id,
             subjectName: name,
-            fixHref: "/dashboard/external-compliance",
-            fixLabel: "Open external compliance",
+            fixHref: "/dashboard/my-evidence",
+            fixLabel: "Open Evidence",
             asOf: todayIso(),
           });
         } else if (days <= 30) {
@@ -279,12 +296,12 @@ export const runInternalAudit = createServerFn({ method: "POST" })
             area: "staff_certifications",
             severity: days <= 7 ? "attention" : "minor",
             title: `${certLabel} expires in ${days}d`,
-            detail: `${name}'s ${certLabel} expires ${c.expires_at}.`,
+            detail: `${name}'s ${certLabel} expires ${c.expires_on}.`,
             subjectKind: "staff",
-            subjectId: c.user_id,
+            subjectId: c.subject_id,
             subjectName: name,
-            fixHref: "/dashboard/external-compliance",
-            fixLabel: "Renew",
+            fixHref: "/dashboard/my-evidence",
+            fixLabel: "Open Evidence",
             asOf: todayIso(),
           });
         }
@@ -318,7 +335,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
           subjectKind: "staff",
           subjectId: row.staff_id,
           subjectName: row.full_name,
-          fixHref: `/dashboard/employees/${row.staff_id}?tab=personnel`,
+          fixHref: `/dashboard/team-members/${row.staff_id}?tab=file`,
           fixLabel: "Open staff file",
           asOf: todayIso(),
         });
@@ -338,7 +355,11 @@ export const runInternalAudit = createServerFn({ method: "POST" })
     const evv = (evvRes.data ?? []) as EvvRow[];
     if (include("evv_timesheets")) {
       for (const t of evv) {
-        if (!inScopeClient(t.client_id) || !inScopeStaff(t.staff_id) || !inScopeCode(t.service_type_code))
+        if (
+          !inScopeClient(t.client_id) ||
+          !inScopeStaff(t.staff_id) ||
+          !inScopeCode(t.service_type_code)
+        )
           continue;
         if (!t.clock_out_timestamp) {
           const hoursOpen = (now.getTime() - new Date(t.clock_in_timestamp).getTime()) / 3_600_000;
@@ -518,7 +539,9 @@ export const runInternalAudit = createServerFn({ method: "POST" })
       for (const c of clients) {
         if (!inScopeClient(c.id)) continue;
         const types = docTypesByClient.get(c.id) ?? new Set();
-        const hasPcsp = Array.from(types).some((t) => t.includes("pcsp") || t.includes("person-centered"));
+        const hasPcsp = Array.from(types).some(
+          (t) => t.includes("pcsp") || t.includes("person-centered"),
+        );
         if (!hasPcsp) {
           findings.push({
             id: `doc-pcsp-${c.id}`,
@@ -578,7 +601,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
             detail: `"${r.title}" is confirmed but isn't mapped to any code/role/client/provider scope.`,
             sourceCitation: r.source_citation ?? null,
             subjectKind: "provider",
-            fixHref: "/dashboard/authoritative-sources",
+            fixHref: "/dashboard/hub/knowledge",
             fixLabel: "Map requirement",
             asOf: todayIso(),
           });
@@ -593,7 +616,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
           title: `${unknownUnconfirmed.length} unconfirmed engine proposal(s)`,
           detail: "NECTAR proposed mappings that an admin hasn't reviewed.",
           subjectKind: "provider",
-          fixHref: "/dashboard/authoritative-sources",
+          fixHref: "/dashboard/hub/knowledge",
           fixLabel: "Review",
           asOf: todayIso(),
         });
@@ -603,15 +626,12 @@ export const runInternalAudit = createServerFn({ method: "POST" })
       // NECTAR refuses to invent a cadence: only flag when the PROVIDER set a
       // frequency on a confirmed requirement AND it's due/overdue per their
       // own last-checked date.
-      const { computeRequirementDueState, frequencyLabel } = await import(
-        "@/lib/requirement-tracking"
-      );
+      const { computeRequirementDueState, frequencyLabel } =
+        await import("@/lib/requirement-tracking");
       for (const r of reqRows) {
-        if (r.approval_state !== "provider_confirmed" && r.review_status !== "confirmed")
-          continue;
+        if (r.approval_state !== "provider_confirmed" && r.review_status !== "confirmed") continue;
         const s = computeRequirementDueState(r.metadata ?? {});
-        if (s.state !== "overdue" && s.state !== "due" && s.state !== "never_checked")
-          continue;
+        if (s.state !== "overdue" && s.state !== "due" && s.state !== "never_checked") continue;
         const freq = frequencyLabel(s.frequency);
         const last = s.lastCheckedAt ? `last checked ${s.lastCheckedAt}` : "never checked";
         findings.push({
@@ -632,36 +652,39 @@ export const runInternalAudit = createServerFn({ method: "POST" })
                 }.`,
           sourceCitation: r.source_citation ?? null,
           subjectKind: "provider",
-          fixHref: "/dashboard/authoritative-sources",
+          fixHref: "/dashboard/hub/knowledge",
           fixLabel: "Update tracking",
           asOf: todayIso(),
         });
       }
     }
 
-    // ---------- 7. External attestations (provider-level) ----------
-    // Cheap heuristic: flag if zero external_certifications exist for any active staff in a known
-    // role bucket. (Placeholder until provider-level attestation table is wired.)
+    // ---------- 7. Evidence on file ----------
+    // Flag active team members with no Evidence rows.
     if (include("external_attestations")) {
       const certsByUser = new Map<string, number>();
-      for (const c of (extCertsRes.data ?? []) as Array<{ user_id: string }>) {
-        certsByUser.set(c.user_id, (certsByUser.get(c.user_id) ?? 0) + 1);
+      for (const c of (extCertsRes.data ?? []) as Array<{ subject_id: string }>) {
+        certsByUser.set(c.subject_id, (certsByUser.get(c.subject_id) ?? 0) + 1);
       }
-      for (const s of (staffRes.data ?? []) as Array<{ user_id: string; role: string; job_title: string | null }>) {
+      for (const s of (staffRes.data ?? []) as Array<{
+        user_id: string;
+        role: string;
+        job_title: string | null;
+      }>) {
         if (!inScopeStaff(s.user_id)) continue;
         if ((certsByUser.get(s.user_id) ?? 0) === 0) {
-          const name = profileById.get(s.user_id) ?? "Staff";
+          const name = profileById.get(s.user_id) ?? "Team member";
           findings.push({
             id: `attest-none-${s.user_id}`,
             area: "external_attestations",
             severity: "attention",
-            title: "Staff has no external attestations on file",
-            detail: `${name} has no external certifications or attestations uploaded yet.`,
+            title: "Team member has no Evidence on file",
+            detail: `${name} has no Evidence items yet.`,
             subjectKind: "staff",
             subjectId: s.user_id,
             subjectName: name,
-            fixHref: "/dashboard/external-compliance",
-            fixLabel: "Upload",
+            fixHref: "/dashboard/my-evidence",
+            fixLabel: "Open Evidence",
             asOf: todayIso(),
           });
         }
@@ -732,7 +755,6 @@ export const runInternalAudit = createServerFn({ method: "POST" })
       byArea,
       findings: filtered,
     };
-
   });
 
 export interface AuditableStaff {
@@ -756,7 +778,7 @@ export const listAuditableStaff = createServerFn({ method: "GET" })
     await assertAddonForOrg(supabase, userId, "internal_audit", data.organizationId);
     const { data: members, error } = await supabase
       .from("organization_members")
-      .select("user_id, role, job_title, active")
+      .select("user_id, role:access_level, job_title, active")
       .eq("organization_id", data.organizationId)
       .eq("active", true);
     if (error) throw error;
@@ -767,9 +789,9 @@ export const listAuditableStaff = createServerFn({ method: "GET" })
       .select("id, full_name, email")
       .in("id", ids);
     const pMap = new Map(
-      ((profiles ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>).map(
-        (p) => [p.id, p],
-      ),
+      (
+        (profiles ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>
+      ).map((p) => [p.id, p]),
     );
     return (members ?? []).map((m) => {
       const p = pMap.get(m.user_id);
@@ -791,7 +813,7 @@ export interface ServiceCodeReconciliationEntry {
   legacyJobCodes: string[];
   billingCodes: string[];
   missingFromBilling: string[] | null; // codes in job_code but not in billing
-  missingFromLegacy: string[] | null;  // codes in billing but not in job_code
+  missingFromLegacy: string[] | null; // codes in billing but not in job_code
   inSync: boolean;
 }
 

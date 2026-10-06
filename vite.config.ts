@@ -7,7 +7,6 @@
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
-import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 import { NITRO_AWS_LAMBDA_PRESET } from "./src/lib/nitro-lambda-preset";
 
 /**
@@ -184,7 +183,6 @@ export default defineConfig({
     plugins: [
       hiveStubAwsServerModules(),
       ...(process.env.VITE_E2E_HARNESS === "1" ? [e2eSupabaseMockPlugin()] : []),
-      mcpPlugin(),
     ],
     // Vercel production after #233 died SIGKILL during Nitro "rendering
     // chunks" on an 8 GB Hobby builder. Gzip size reporting and wide

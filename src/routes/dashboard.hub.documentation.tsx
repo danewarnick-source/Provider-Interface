@@ -48,9 +48,22 @@ function DocumentationHub() {
         {
           key: "audit",
           label: "Audit",
-          feature: "state_audit",
           render: () => (
-            <div className="space-y-6">
+            <div className="space-y-10">
+              <section>
+                <header className="mb-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--hive-text)]">
+                    Evidence pull
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Build audit packets, share with auditors, and assemble monthly file cabinets.
+                  </p>
+                </header>
+                <div className="space-y-8">
+                  <AuditPage />
+                  <AuditZone />
+                </div>
+              </section>
               <section>
                 <header className="mb-3">
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--hive-text)]">
@@ -62,17 +75,6 @@ function DocumentationHub() {
                 </header>
                 <InternalAuditPage />
               </section>
-              <details className="group rounded-lg border border-border bg-card">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-[var(--hive-text)]">
-                  <span>Evidence pull — packets &amp; auditor sharing</span>
-                  <span className="text-xs font-normal text-muted-foreground group-open:hidden">Show</span>
-                  <span className="hidden text-xs font-normal text-muted-foreground group-open:inline">Hide</span>
-                </summary>
-                <div className="space-y-8 border-t border-border px-4 py-4">
-                  <AuditPage />
-                  <AuditZone />
-                </div>
-              </details>
             </div>
           ),
         },

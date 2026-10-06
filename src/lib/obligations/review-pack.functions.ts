@@ -25,7 +25,7 @@ export const listPackWhatChanged = createServerFn({ method: "POST" })
     }): Promise<{ appliedPackVersion: string | null; changes: PackChangeRow[] }> => {
       const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
       if (!supabase || !userId) return { appliedPackVersion: null, changes: [] };
-      await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+      await requireOrgMembership(supabase, userId, data.organizationId, "staff");
       return loadPackChangelog(supabase, data.organizationId);
     },
   );
@@ -38,7 +38,7 @@ export const getReviewDayMeta = createServerFn({ method: "POST" })
     if (!supabase || !userId) {
       return { period: null, sites: null, samplePeople: null, sampleStaff: null };
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     return loadReviewDayMeta(supabase, data.organizationId);
   });
 
@@ -48,7 +48,7 @@ export const generateMyReview = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<ReviewPack | null> => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     const [week, pack] = await Promise.all([
       getThisWeek(supabase, data.organizationId, userId),
       loadPackChangelog(supabase, data.organizationId),

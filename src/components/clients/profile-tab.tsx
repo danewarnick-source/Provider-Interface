@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { useAccess } from "@/hooks/use-access";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,7 @@ import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestation
 import { formatPeriodMonthYear } from "@/lib/progress-summaries";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { onClientDutyFactsChanged } from "@/lib/staff-assignment-hooks.functions";
+import { isAdminLevel } from "@/lib/access/levels";
 
 type ClientRow = Record<string, unknown>;
 type DocRow = { id: string; document_type: string | null; file_name: string | null; storage_path: string | null; uploaded_at: string | null };
@@ -81,6 +83,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   const navigate = useNavigate();
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
+  const canHrc = useAccess().canCategory("hrc");
 
   const clientQ = useQuery({
     enabled: !!orgId && isRouteUuid(clientId),
@@ -122,6 +125,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
         .from("client_emergency_contacts")
         .select("id, name, phone, relationship")
         .eq("client_id", clientId)
+        .is("archived_at", null)
         .order("created_at", { ascending: true });
       if (error) throw error;
       return (data ?? []) as { id: string; name: string; phone: string | null; relationship: string | null }[];
@@ -183,7 +187,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
     .map((r) => r.service_start_date)
     .filter((d): d is string => !!d)
     .sort()[0] ?? null;
-  const isOrgAdmin = org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+  const isOrgAdmin = isAdminLevel(org?.access.level);
 
   if (clientQ.isLoading || !client) {
     return <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">Loading…</CardContent></Card>;
@@ -211,7 +215,9 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
           <ContactsCard clientId={clientId} orgId={orgId!} contacts={contacts} />
           <AtGlanceCard clientId={clientId} client={client} />
           <HealthcareProvidersCard clientId={clientId} orgId={orgId!} />
-          <HrcCard clientId={clientId} client={client} docs={docs} restriction={primaryRestriction} />
+          {canHrc && (
+            <HrcCard clientId={clientId} orgId={orgId!} client={client} docs={docs} restriction={primaryRestriction} />
+          )}
           {isHhs && <RoomBoardAgreementCard clientId={clientId} docs={docs} onOpenFiles={onOpenFiles} />}
           {showElsSchoolDocs && <ElsSchoolDocumentationCard clientId={clientId} docs={docs} />}
           {isEpr && <EprInformedChoiceCard clientId={clientId} docs={docs} serviceStart={eprServiceStart} />}
@@ -1184,10 +1190,14 @@ function ContactsCard({
       if (!isRouteUuid(clientId)) {
         throw new Error("Save the client before adding emergency contacts.");
       }
+      const uid = (await supabase.auth.getUser()).data.user?.id ?? null;
       for (const c of draft) {
         const rowId = isRouteUuid(c.id) ? c.id : undefined;
         if (c._deleted && rowId) {
-          const { error } = await supabase.from("client_emergency_contacts").delete().eq("id", rowId);
+          const { error } = await supabase
+            .from("client_emergency_contacts")
+            .update({ archived_at: new Date().toISOString(), archived_by: uid })
+            .eq("id", rowId);
           if (error) throw error;
         } else if (!c._deleted) {
           const name = c.name.trim();
@@ -1353,8 +1363,8 @@ function AtGlanceCard({ clientId, client }: { clientId: string; client: ClientRo
 // ── Human Rights / HRC ──────────────────────────────────────────────────────
 
 function HrcCard({
-  clientId, client, docs, restriction,
-}: { clientId: string; client: ClientRow; docs: DocRow[]; restriction: RestrictionRecord | null }) {
+  clientId, orgId, client, docs, restriction,
+}: { clientId: string; orgId: string; client: ClientRow; docs: DocRow[]; restriction: RestrictionRecord | null }) {
   const qc = useQueryClient();
   const hasRestrictions = client.hr_applicable === true;
   const hrrDoc = docs.find(
@@ -1409,7 +1419,7 @@ function HrcCard({
         if (error) throw error;
       } else {
         const { error } = await supabase.from("hrc_restriction_records" as never).insert({
-          organization_id: (client as unknown as { organization_id?: string }).organization_id,
+          organization_id: orgId,
           client_id: clientId,
           restriction_title: "Rights restriction",
           ...patch,

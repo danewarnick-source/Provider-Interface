@@ -15,6 +15,11 @@ import {
 } from "@aws-sdk/client-bedrock-runtime";
 import { FetchHttpHandler } from "@smithy/fetch-http-handler";
 import { resolveBedrockModelId } from "@/lib/bedrock-model-id";
+import {
+  acquireBedrockSlot,
+  recordBedrockTokens,
+  RateLimitError,
+} from "@/lib/nectar-rate-limit.server";
 
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
@@ -29,6 +34,8 @@ export type BedrockChatRequest = {
   signal?: AbortSignal;
   /** Optional max tokens; defaults to 4096 which matches NECTAR's prior usage. */
   maxTokens?: number;
+  /** Agency for the per-org Bedrock cap. Omitted → global ceiling only. */
+  orgId?: string | null;
 };
 
 export type BedrockChatResponse = {
@@ -47,6 +54,28 @@ export class BedrockError extends Error {
     this.status = status;
     this.name = "BedrockError";
   }
+}
+
+/** User-facing AI failure. Provider name, model id, region, and raw text stay in logs. */
+export function publicAiMessage(status: number): string {
+  if (status === 429) return "AI is busy. Try again in a moment.";
+  if (status === 401) return "AI is not available right now.";
+  return "AI request failed. Try again in a moment.";
+}
+
+function rememberBedrockTokens(
+  usage: {
+    inputTokens?: number;
+    outputTokens?: number;
+    totalTokens?: number;
+  } | undefined,
+  orgId?: string | null,
+): void {
+  const total =
+    typeof usage?.totalTokens === "number" && usage.totalTokens > 0
+      ? usage.totalTokens
+      : Number(usage?.inputTokens ?? 0) + Number(usage?.outputTokens ?? 0);
+  if (total > 0) void recordBedrockTokens(total, orgId);
 }
 
 function getClient(): BedrockRuntimeClient {
@@ -185,8 +214,10 @@ export async function callBedrockChatCompletions(
 
   let out;
   try {
+    await acquireBedrockSlot(req.orgId);
     out = await client.send(command, { abortSignal: req.signal });
   } catch (e) {
+    if (e instanceof RateLimitError) throw new BedrockError(429, publicAiMessage(429));
     const err = e as { name?: string; $metadata?: { httpStatusCode?: number }; message?: string };
     const status = err.$metadata?.httpStatusCode ?? 500;
     const name = err.name ?? "BedrockError";
@@ -197,9 +228,10 @@ export async function callBedrockChatCompletions(
     let mapped = status || 500;
     if (status === 403 || /AccessDenied|UnrecognizedClient|InvalidSignature/i.test(name)) mapped = 401;
     else if (status === 429 || /Throttl/i.test(name)) mapped = 429;
-    throw new BedrockError(mapped, detail.slice(0, 600));
+    throw new BedrockError(mapped, publicAiMessage(mapped));
   }
 
+  rememberBedrockTokens(out.usage, req.orgId);
 
   const blocks = out.output?.message?.content ?? [];
   const text = blocks
@@ -234,6 +266,17 @@ export interface GatewayFetchResponse {
   // embeddings, tool calls). Narrow inside the caller as needed.
   json(): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   text(): Promise<string>;
+}
+
+function aiFailureResponse(status: number): GatewayFetchResponse {
+  const message = publicAiMessage(status);
+  const payload = { error: { message, type: "ai_error", code: status } };
+  return {
+    ok: false,
+    status,
+    json: async () => payload,
+    text: async () => message,
+  };
 }
 
 type OpenAITextPart = { type: "text"; text: string };
@@ -378,7 +421,7 @@ export async function gatewayFetch(
   // varied content/tool shapes. Validated at runtime by buildBedrockMessages.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body: any,
-  opts?: { signal?: AbortSignal },
+  opts?: { signal?: AbortSignal; orgId?: string | null },
 ): Promise<GatewayFetchResponse> {
   try {
     const client = getClient();
@@ -430,7 +473,9 @@ export async function gatewayFetch(
       },
     });
 
+    await acquireBedrockSlot(opts?.orgId);
     const out = await client.send(cmd, { abortSignal: opts?.signal });
+    rememberBedrockTokens(out.usage, opts?.orgId);
     const blocks = out.output?.message?.content ?? [];
 
     let textOut = "";
@@ -490,6 +535,7 @@ export async function gatewayFetch(
     };
   } catch (e) {
     if ((e as { name?: string })?.name === "AbortError") throw e;
+    if (e instanceof RateLimitError) return aiFailureResponse(429);
     const err = e as { name?: string; $metadata?: { httpStatusCode?: number }; message?: string };
     const rawStatus = err.$metadata?.httpStatusCode ?? 0;
     const name = err.name ?? "BedrockError";
@@ -500,14 +546,7 @@ export async function gatewayFetch(
     let status = rawStatus || 500;
     if (rawStatus === 403 || /AccessDenied|UnrecognizedClient|InvalidSignature/i.test(name)) status = 401;
     else if (rawStatus === 429 || /Throttl/i.test(name)) status = 429;
-    const msg = detail.slice(0, 600);
-    const payload = { error: { message: msg, type: name, code: status } };
-    return {
-      ok: false,
-      status,
-      json: async () => payload,
-      text: async () => msg,
-    };
+    return aiFailureResponse(status);
   }
 
 }
@@ -525,6 +564,7 @@ export interface OpenAIEmbedBody {
 
 export async function gatewayEmbeddingsFetch(
   body: OpenAIEmbedBody,
+  opts?: { orgId?: string | null },
 ): Promise<GatewayFetchResponse> {
   try {
     const client = getClient();
@@ -544,10 +584,14 @@ export async function gatewayEmbeddingsFetch(
         accept: "application/json",
         body: JSON.stringify({ inputText: input, dimensions, normalize: true }),
       });
+      await acquireBedrockSlot(opts?.orgId);
       const out = await client.send(cmd);
       const raw = new TextDecoder().decode(out.body);
-      const parsed = JSON.parse(raw) as { embedding?: number[] };
+      const parsed = JSON.parse(raw) as { embedding?: number[]; inputTextTokenCount?: number };
       const vec = parsed.embedding ?? [];
+      if (typeof parsed.inputTextTokenCount === "number" && parsed.inputTextTokenCount > 0) {
+        void recordBedrockTokens(parsed.inputTextTokenCount, opts?.orgId);
+      }
       data.push({ object: "embedding", index: i, embedding: vec });
     }
 
@@ -559,6 +603,7 @@ export async function gatewayEmbeddingsFetch(
       text: async () => JSON.stringify(payload),
     };
   } catch (e) {
+    if (e instanceof RateLimitError) return aiFailureResponse(429);
     const err = e as { name?: string; $metadata?: { httpStatusCode?: number }; message?: string };
     const rawStatus = err.$metadata?.httpStatusCode ?? 500;
     const name = err.name ?? "BedrockError";
@@ -570,14 +615,7 @@ export async function gatewayEmbeddingsFetch(
     let status = rawStatus;
     if (rawStatus === 403 || /AccessDenied/i.test(name)) status = 401;
     else if (rawStatus === 429 || /Throttl/i.test(name)) status = 429;
-    const msg = detail.slice(0, 600);
-    const payload = { error: { message: msg, type: name, code: status } };
-    return {
-      ok: false,
-      status,
-      json: async () => payload,
-      text: async () => msg,
-    };
+    return aiFailureResponse(status);
   }
 
 }

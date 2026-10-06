@@ -26,7 +26,8 @@ export function parseComplianceSearch(s: Record<string, unknown>): ComplianceSea
 export function resolveComplianceFileTab(tab?: string): ComplianceFileTab {
   const key = (tab ?? "").trim().toLowerCase();
   if (CLIENT_ALIASES.has(key)) return "client";
-  if (AGENCY_ALIASES.has(key) || POLICY_ALIASES.has(key) || CONTRACT_ALIASES.has(key)) return "agency";
+  if (AGENCY_ALIASES.has(key) || POLICY_ALIASES.has(key) || CONTRACT_ALIASES.has(key))
+    return "agency";
   return "staff";
 }
 
@@ -47,9 +48,7 @@ export function complianceSearchForAgencySubTab(sub: AgencyFileSubTab): Complian
   return { tab: "agency" };
 }
 
-export function complianceRedirectSearchFromAgencyDocuments(
-  tab?: string,
-): ComplianceSearch {
+export function complianceRedirectSearchFromAgencyDocuments(tab?: string): ComplianceSearch {
   const sub = resolveAgencyFileSubTab(tab);
   if (sub === "company-policies") return { tab: "company-policies" };
   if (sub === "contract-index") return { tab: "contract-index" };
@@ -59,12 +58,12 @@ export function complianceRedirectSearchFromAgencyDocuments(
 /** Admin primary sidebar — twelve items. State Audit and Reports stay as routes. */
 export const ADMIN_PRIMARY_NAV_LABELS = [
   "Home",
-  "Employees",
+  "Team Members",
   "Clients",
   "Scheduler",
   "Documentation",
   "Daily Logs",
-  "Compliance",
+  "Evidence",
   "Summaries",
   "Finances",
   "Training",
@@ -83,8 +82,8 @@ export const RETIRED_COMPLIANCE_REDIRECTS: RetiredComplianceRedirect[] = [
   { from: "/dashboard/personnel-file", to: "/dashboard/compliance", search: { tab: "staff" } },
   { from: "/dashboard/client-file", to: "/dashboard/compliance", search: { tab: "client" } },
   { from: "/dashboard/agency-documents", to: "/dashboard/compliance", search: { tab: "agency" } },
-  { from: "/dashboard/company-obligations", to: "/dashboard/compliance" },
+  { from: "/dashboard/company-obligations", to: "/dashboard/evidence" },
   { from: "/dashboard/deadlines", to: "/dashboard/compliance", search: { tab: "staff" } },
   { from: "/dashboard/command-center", to: "/dashboard" },
-  { from: "/dashboard/external-compliance", to: "/dashboard/hub/knowledge", search: { tab: "external" } },
+  { from: "/dashboard/external-compliance", to: "/dashboard/hub/knowledge" },
 ];

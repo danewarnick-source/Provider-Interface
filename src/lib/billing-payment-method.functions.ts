@@ -1,9 +1,8 @@
-// Authenticated server function for admins to update their org's payment
-// method from the in-app billing banner. PCI: we do NOT persist card data —
-// we only record the card_updated event and the new card_expires_at, and
-// (if the org is past due / locked) optimistically clear the past-due state
-// so service is restored immediately. A real Stripe integration would attach
-// the new payment method and retry the failed invoice here.
+// Authenticated server function for owners to record a card expiration from
+// the in-app billing banner. PCI: we do NOT persist card data — we only
+// record the card_updated event and the new card_expires_at.
+// Entering card details never unlocks a locked organization. Reactivation
+// waits for a real payment (Stripe customer portal comes later).
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -28,14 +27,14 @@ export const updatePaymentMethodFn = createServerFn({ method: "POST" })
     // Authorize: caller must be an active owner (admin) of this org.
     const { data: membership, error: mErr } = await context.supabase
       .from("organization_members")
-      .select("role")
+      .select("access_level")
       .eq("organization_id", data.organization_id)
       .eq("user_id", context.userId)
       .eq("active", true)
       .maybeSingle();
     if (mErr) throw new Error(mErr.message);
-    if (!membership || membership.role !== "admin") {
-      throw new Error("Forbidden — admin role required to update payment method");
+    if (!membership || membership.access_level !== "owner") {
+      throw new Error("Forbidden — only an Owner can update the payment method");
     }
 
     // expires_at = last day of the expiry month (YYYY-MM-DD)
@@ -54,26 +53,13 @@ export const updatePaymentMethodFn = createServerFn({ method: "POST" })
     if (sErr) throw new Error(sErr.message);
     if (!sub) throw new Error("No subscription found for organization");
 
-    const wasPastDue = !!sub.past_due_since || !!sub.locked_at;
+    if (sub.locked_at) {
+      throw new Error("Contact us to reactivate.");
+    }
 
-    // Update card + (optimistically) clear past-due/lock state. A real
-    // Stripe webhook on the successful retry would do the same thing.
     const { error: updErr } = await supabaseAdmin
       .from("org_subscriptions")
-      .update({
-        card_expires_at: expiresAt,
-        ...(wasPastDue
-          ? {
-              past_due_since: null,
-              locked_at: null,
-              lock_reason: null,
-              last_payment_error: null,
-              failure_count: 0,
-              next_retry_at: null,
-              last_payment_attempt_at: new Date().toISOString(),
-            }
-          : {}),
-      })
+      .update({ card_expires_at: expiresAt })
       .eq("id", sub.id);
     if (updErr) throw new Error(updErr.message);
 
@@ -87,18 +73,8 @@ export const updatePaymentMethodFn = createServerFn({ method: "POST" })
         exp_month: data.exp_month,
         exp_year: data.exp_year,
         postal_code: data.postal_code,
-        was_past_due: wasPastDue,
       },
     });
 
-    if (wasPastDue) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabaseAdmin as any).from("payment_events").insert({
-        org_id: data.organization_id,
-        event_type: "account_unlocked",
-        metadata: { reason: "payment_method_updated" },
-      });
-    }
-
-    return { ok: true, was_past_due: wasPastDue, card_expires_at: expiresAt };
+    return { ok: true, was_past_due: false, card_expires_at: expiresAt };
   });

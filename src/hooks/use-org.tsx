@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./use-auth";
-import { ROLE_RANK, type Role } from "@/lib/rbac";
+import { MEMBER_ACCESS_SELECT, resolveMemberAccess, type MemberAccess, type MemberAccessRow } from "@/lib/access/member";
 import {
   ACTIVE_ORG_STORAGE_KEY,
   persistActiveOrgId,
@@ -12,8 +12,6 @@ import {
 import { isCognitoAuth } from "@/lib/aws/env";
 import { isAwsBootstrapFailure } from "@/lib/cognito-login-gate";
 
-export type { Role };
-
 export interface CurrentMembership {
   membership_id: string;
   organization_id: string;
@@ -21,7 +19,7 @@ export interface CurrentMembership {
   legal_name: string | null;
   dba_name: string | null;
   display_acronym: string | null;
-  role: Role;
+  access: MemberAccess;
   job_title: string | null;
   is_demo: boolean;
 }
@@ -38,7 +36,7 @@ async function fetchMemberships(userId: string): Promise<CurrentMembership[]> {
   const { data, error, status } = await supabase
     .from("organization_members")
     .select(
-      "id, role, job_title, organization_id, organizations(name, is_demo, legal_name, dba_name, display_acronym)",
+      `id, job_title, organization_id, ${MEMBER_ACCESS_SELECT}, organizations(name, is_demo, legal_name, dba_name, display_acronym)`,
     )
     .eq("user_id", userId)
     .eq("active", true);
@@ -58,8 +56,8 @@ async function fetchMemberships(userId: string): Promise<CurrentMembership[]> {
     dba_name: string | null;
     display_acronym: string | null;
   } | null;
-  return [...data]
-    .sort((a, b) => ROLE_RANK[b.role as Role] - ROLE_RANK[a.role as Role])
+  const rank = { owner: 3, admin: 2, staff: 1 } as const;
+  return data
     .map((m) => {
       const o = m.organizations as OrgRow;
       return {
@@ -69,11 +67,12 @@ async function fetchMemberships(userId: string): Promise<CurrentMembership[]> {
         legal_name: o?.legal_name ?? null,
         dba_name: o?.dba_name ?? null,
         display_acronym: o?.display_acronym ?? null,
-        role: m.role as Role,
+        access: resolveMemberAccess(m as unknown as MemberAccessRow),
         job_title: m.job_title,
         is_demo: o?.is_demo ?? false,
       };
-    });
+    })
+    .sort((a, b) => rank[b.access.level] - rank[a.access.level]);
 }
 
 /**

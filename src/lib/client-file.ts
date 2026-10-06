@@ -3,10 +3,11 @@
  * One card per duty; renew keeps the same card. HRC restrictions stay in HRC.
  */
 
+import { neutralizeCsvFormula } from "./csv-safe.ts";
 import {
   obligationFileStatusLabel,
   type ObligationFileStatus,
-} from "./staff-obligation-files.ts";
+} from "./team-members/file.ts";
 import { personNeedsSupportStrategies } from "./audit-evidence.ts";
 import {
   bucketCodes,
@@ -364,7 +365,8 @@ export type ClientFileMissingCsvRow = {
 };
 
 function csvCell(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
+  const safe = neutralizeCsvFormula(value);
+  return `"${safe.replace(/"/g, '""')}"`;
 }
 
 export function missingClientFileCsv(rows: ClientFileMissingCsvRow[]): string {

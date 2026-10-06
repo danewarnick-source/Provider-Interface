@@ -6,8 +6,8 @@
  * (staff-prerequisite detector today; scheduling later) do one lookup.
  *
  * Canonical qualification-key namespaces:
- *   external_cert:<cert_type>            active/approved, unexpired external_certifications
- *   baseline_training:<training_key>     staff_baseline_training_completions, unexpired
+ *   external_cert:<cert_type>            Evidence item whose requirement key matches a legacy cert
+ *   baseline_training:<requirement_key>  current Evidence item (file on record, not past due)
  *   hive_course:<baseline_key|course_id> hive_training_assignments status='completed', unexpired
  *   client_specific_training:<ref_id>    training_completions topic_kind='person', is_current
  *
@@ -18,6 +18,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { cellStatus, latestFileForItem } from "@/lib/evidence/status";
+import type { EvidenceFileRow, EvidenceItemRow } from "@/lib/evidence/types";
 
 export type QualificationKind =
   | "external_cert"
@@ -27,10 +29,97 @@ export type QualificationKind =
 
 export type QualificationsSnapshot = {
   activeOnly: string[]; // unexpired only
-  all: string[];        // held ever (may be expired)
+  all: string[]; // held ever (may be expired)
 };
 
 const qkey = (kind: QualificationKind, key: string) => `${kind}:${key}`;
+
+/** Catalog keys that already stand in for the old hardcoded cert types. */
+const LEGACY_CERT_FOR_EVIDENCE_KEY: Record<string, string> = {
+  cpr_first_aid: "cpr-fa",
+  cpr_first_aid_bbp: "cpr-fa",
+  abuse_neglect: "abuse-neglect",
+  abuse_neglect_exploitation: "abuse-neglect",
+};
+
+type EvidenceQualRow = {
+  id: string;
+  subject_id: string;
+  requirement_key: string;
+  evidence_type: string;
+  expires_on: string | null;
+  first_due_on: string | null;
+  next_due_on: string | null;
+  opted_out_at: string | null;
+};
+
+function evidenceOnFile(item: EvidenceQualRow, file: EvidenceFileRow | null): boolean {
+  if (!file) return false;
+  if (item.evidence_type === "attestation") return !!file.attested_at;
+  return !!(file.storage_path || file.filename);
+}
+
+/** Current Evidence rows become baseline_training keys. Legacy cert aliases stay so scheduling still matches. */
+export async function addEvidenceQualifications(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  organizationId: string,
+  staffIds: string[],
+  today: string,
+  add: (staffId: string, key: string, active: boolean) => void,
+): Promise<void> {
+  if (!staffIds.length) return;
+  const { data: items } = await supabase
+    .from("evidence_items")
+    .select(
+      "id, subject_id, requirement_key, evidence_type, expires_on, first_due_on, next_due_on, opted_out_at",
+    )
+    .eq("organization_id", organizationId)
+    .eq("subject_type", "staff")
+    .in("subject_id", staffIds);
+  const rows = (items ?? []) as EvidenceQualRow[];
+  if (!rows.length) return;
+  const { data: files } = await supabase
+    .from("evidence_files")
+    .select("id, item_id, storage_path, filename, attested_at, uploaded_at, review_status")
+    .in(
+      "item_id",
+      rows.map((r) => r.id),
+    );
+  const fileRows = (
+    (files ?? []) as Array<Partial<EvidenceFileRow> & { id: string; item_id: string }>
+  ).map(
+    (f) =>
+      ({
+        id: f.id,
+        organization_id: organizationId,
+        item_id: f.item_id,
+        storage_path: f.storage_path ?? null,
+        filename: f.filename ?? null,
+        attested_at: f.attested_at ?? null,
+        attested_by: null,
+        attestation_text_snapshot: null,
+        uploaded_by: null,
+        uploaded_at: f.uploaded_at ?? null,
+        notes: null,
+        review_status: f.review_status ?? null,
+      }) satisfies EvidenceFileRow,
+  );
+  for (const item of rows) {
+    if (!item.requirement_key || !item.subject_id || item.opted_out_at) continue;
+    const file = latestFileForItem(fileRows, item.id);
+    if (!evidenceOnFile(item, file)) continue;
+    const active =
+      cellStatus({
+        item: item as EvidenceItemRow,
+        file,
+        today,
+      }) === "done";
+    add(item.subject_id, qkey("baseline_training", item.requirement_key), active);
+    const legacy = LEGACY_CERT_FOR_EVIDENCE_KEY[item.requirement_key];
+    if (legacy) add(item.subject_id, qkey("external_cert", legacy), active);
+  }
+}
 
 async function loadQualifications(args: {
   supabase: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -42,36 +131,19 @@ async function loadQualifications(args: {
   const active = new Set<string>();
   const all = new Set<string>();
 
-  // 1. external_certifications — approved
-  const { data: certs } = await supabase
-    .from("external_certifications")
-    .select("cert_type, expires_at, status")
-    .eq("user_id", staffId)
-    .eq("status", "approved");
-  for (const c of (certs ?? []) as Array<{ cert_type: string; expires_at: string | null }>) {
-    const key = qkey("external_cert", c.cert_type);
-    all.add(key);
-    if (!c.expires_at || c.expires_at > at) active.add(key);
-  }
+  const today = at.slice(0, 10);
+  await addEvidenceQualifications(
+    supabase,
+    organizationId,
+    [staffId],
+    today,
+    (_id, key, isActive) => {
+      all.add(key);
+      if (isActive) active.add(key);
+    },
+  );
 
-  // 2. staff_baseline_training_completions
-  const { data: baseline } = await supabase
-    .from("staff_baseline_training_completions")
-    .select("training_key, expires_at, completed_date")
-    .eq("organization_id", organizationId)
-    .eq("staff_id", staffId);
-  for (const b of (baseline ?? []) as Array<{
-    training_key: string;
-    expires_at: string | null;
-    completed_date: string | null;
-  }>) {
-    if (!b.training_key) continue;
-    const key = qkey("baseline_training", b.training_key);
-    all.add(key);
-    if (b.completed_date && (!b.expires_at || b.expires_at > at)) active.add(key);
-  }
-
-  // 3. hive_training_assignments — completed courses, keyed by baseline_key when present, else course_id
+  // hive_training_assignments — completed courses, keyed by baseline_key when present, else course_id
   const { data: assigns } = await supabase
     .from("hive_training_assignments")
     .select("course_id, status, completed_at, expires_at")

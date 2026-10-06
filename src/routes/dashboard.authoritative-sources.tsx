@@ -1,23 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AuthoritativeSourcesPage } from "@/components/pages/authoritative-sources-page";
-import { FeatureGate } from "@/components/upgrade-gate";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * Retired standalone Authoritative Sources URL.
+ * Knowledge is the product surface for agency document upload.
+ */
 export const Route = createFileRoute("/dashboard/authoritative-sources")({
-  head: () => ({
-    meta: [
-      { title: "Authoritative Sources — Provider Interface" },
-      {
-        name: "description",
-        content:
-          "Upload your State SOW, contracts, and DSPD/DHS requirement documents. NECTAR reads from these as the source of truth.",
-      },
-    ],
-  }),
-  validateSearch: (s: Record<string, unknown>): { focus?: string } =>
-    typeof s.focus === "string" ? { focus: s.focus } : {},
-  component: () => (
-    <FeatureGate featureKey="nectar">
-      <AuthoritativeSourcesPage />
-    </FeatureGate>
-  ),
+  head: () => ({ meta: [{ title: "Knowledge — Provider Interface" }] }),
+  beforeLoad: () => {
+    throw redirect({
+      to: "/dashboard/hub/knowledge",
+      replace: true,
+    });
+  },
 });

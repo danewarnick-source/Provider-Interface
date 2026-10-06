@@ -9,28 +9,48 @@
 import { expect, type Page, type Route } from "@playwright/test";
 import { toCrossJSONAsync } from "seroval";
 import {
-  ALL_PERMISSIONS,
-  DEFAULT_MATRIX,
-  PROVIDER_ROLES,
-  type Permission,
-  type ProviderRole,
-} from "../../src/lib/rbac";
-import {
   ADMIN_EMAIL,
   ADMIN_NAME,
   ADMIN_USER_ID,
   CLIENT_LIST,
   CLIENTS,
   DAILY_LOGS,
+  LAST_SIGN_IN,
+  NEW_TEAM_MEMBER,
   ORG_ID,
   ORG_NAME,
   PENDING_INVITE,
+  PROFILE_ACCOUNT_ACTIVITY,
+  PROFILE_CASELOAD,
+  PROFILE_EVIDENCE,
+  PROFILE_NOTES,
+  PROFILE_OVERVIEW_TODAY,
+  PROFILE_TIMESHEETS,
+  ROSTER_EVIDENCE,
+  ROSTER_POSITIONS,
   STAFF,
   STAFF_LIST,
   TEAMS,
+  TNS_POSITIONS,
 } from "../fixtures/tns-roster";
+import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
+import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
+import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
+import { levelForRole, withAccessLevel } from "./access-level";
+import { staffClientReadiness } from "../../src/lib/team-members/readiness";
+import { buildMemberOverview } from "../../src/lib/team-members/overview";
 
 export type MockPersona = "admin" | "dsp" | "manager";
+
+/** Every required operating fact answered — mirrors a launched TNS. */
+const MOCK_SETUP_FACTS: AgencySetupFacts = {
+  operates_ol_site: true,
+  uses_volunteers: false,
+  has_governing_board: true,
+  servicesOffered: ["HHS", "SLN", "SLH", "SEI", "DSI"],
+  approxClientCount: 12,
+  serviceArea: "Salt Lake, Davis",
+};
 
 export type MockOptions = {
   persona?: MockPersona;
@@ -41,6 +61,10 @@ export type MockOptions = {
   logsError?: boolean;
   /** Skip staff_assignments so the HHS hub bounce path can be asserted. */
   noAssignments?: boolean;
+  /** createTeamMember answers inactive_match (the email used to work here). */
+  inactiveMatch?: boolean;
+  /** rosterOrgHasHomes answers false (the roster hides its Home filter). */
+  noHomes?: boolean;
 };
 
 type Row = Record<string, unknown>;
@@ -108,7 +132,7 @@ function orgRow() {
   };
 }
 
-function profileRow(staff: (typeof STAFF_LIST)[number]): Row {
+function profileRow(staff: (typeof STAFF_LIST)[number], opts: MockOptions): Row {
   const [first, ...rest] = staff.name.split(" ");
   return {
     id: staff.id,
@@ -145,6 +169,8 @@ function profileRow(staff: (typeof STAFF_LIST)[number]): Row {
     requires_abi: true,
     is_active: true,
     bc_role: null,
+    custom_attributes: {},
+    phone: null,
   };
 }
 
@@ -311,22 +337,6 @@ function billingCodeRows(): Row[] {
   return out;
 }
 
-function rolePermissionRows(): Row[] {
-  const rows: Row[] = [];
-  for (const role of PROVIDER_ROLES) {
-    const granted = new Set<Permission>(DEFAULT_MATRIX[role as ProviderRole] ?? []);
-    for (const permission of ALL_PERMISSIONS) {
-      rows.push({
-        organization_id: ORG_ID,
-        role,
-        permission,
-        enabled: granted.has(permission),
-      });
-    }
-  }
-  return rows;
-}
-
 function expandDailyLog(row: (typeof DAILY_LOGS)[number]): Row {
   const staff = STAFF_LIST.find((s) => s.id === row.user_id);
   const client = CLIENT_LIST.find((c) => c.id === row.client_id);
@@ -391,9 +401,9 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
 
   switch (table) {
     case "organization_members":
-      return staff.map((s) => memberRow(s, true));
+      return staff.map((s) => withAccessLevel(memberRow(s, true)));
     case "profiles":
-      return staff.map(profileRow);
+      return staff.map((s) => profileRow(s, opts));
     case "org_member_directory":
       return staff.map((s) => ({
         id: s.id,
@@ -423,7 +433,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "training_tracks":
     case "courses":
     case "course_assignments":
-    case "user_permission_overrides":
     case "import_subjects":
     case "auditor_accounts":
     case "staff_types":
@@ -433,8 +442,6 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
       return [];
     case "daily_logs":
       return opts.emptyLogs ? [] : DAILY_LOGS.map((row) => expandDailyLog(row));
-    case "role_permissions":
-      return rolePermissionRows();
     case "invitations":
       return [{ ...PENDING_INVITE }];
     case "teams":
@@ -721,7 +728,6 @@ function emptyClientCareData(clientId: string) {
     medications: [],
     authorized_codes: [],
     custom_fields: [],
-    target_behaviors: [],
     emergency_contacts: [],
     preferred_activities: [],
     visibilityRow: { sections: {}, fields: {} },
@@ -736,12 +742,230 @@ function emptyClientCareData(clientId: string) {
         medications: [],
         authorized_codes: [],
         custom_fields: [],
-        target_behaviors: [],
         emergency_contacts: [],
         preferred_activities: [],
       },
     },
   };
+}
+
+/** Options of the most recent installHiveMocks call (server fns don't get them otherwise). */
+let activeMockOpts: MockOptions = {};
+
+/** listTeamRoster — the RosterRow shape from src/lib/team-members/roster.ts. */
+function teamRosterRows(): Row[] {
+  return STAFF_LIST.map((s) => {
+    const level = levelForRole(s.role);
+    const [first, ...rest] = s.name.split(" ");
+    const teamId = "teamId" in s ? s.teamId : null;
+    const supervisor =
+      teamId === STAFF.jake.teamId && s.id !== STAFF.harvey.id ? STAFF.harvey : null;
+    return {
+      userId: s.id,
+      memberId: `mem-${s.id.slice(-8)}`,
+      displayName: s.name,
+      firstName: first ?? "",
+      lastName: rest.join(" "),
+      email: s.email,
+      phone: "",
+      employeeId: `TM-${s.id.slice(-3)}`,
+      photoPath: null,
+      jobTitle: s.jobTitle,
+      accessLevel: level,
+      positions: ROSTER_POSITIONS[s.id] ?? [],
+      homeId: teamId,
+      homeName: TEAMS.find((t) => t.id === teamId)?.team_name ?? null,
+      supervisorId: supervisor?.id ?? null,
+      supervisorName: supervisor?.name ?? null,
+      hireDate: "2025-01-15",
+      active: true,
+      mustChangePassword: s.id === STAFF.tom.id,
+      lastSignInAt: LAST_SIGN_IN[s.id] ?? null,
+      lastSignInKnown: true,
+      pendingInviteId: null,
+      evidence: ROSTER_EVIDENCE[s.id],
+      missingInfo: s.id === STAFF.tom.id ? ["date_of_birth", "address"] : [],
+    };
+  });
+}
+
+/** getTeamMemberProfile — the TeamMemberProfileData shape from src/lib/team-members/profile.ts. */
+function teamMemberProfile(body: string): Row | null {
+  const staff = STAFF_LIST.find((st) => body.includes(st.id));
+  if (!staff) return null;
+  const roster = teamRosterRows().find((r) => r.userId === staff.id)!;
+  const saved = savedMemberAccess.get(staff.id);
+  const level = saved?.access_level ?? roster.accessLevel;
+  const supervisor = roster.supervisorId
+    ? STAFF_LIST.find((st) => st.id === roster.supervisorId)
+    : null;
+  const lastSignInAt = LAST_SIGN_IN[staff.id] ?? null;
+  return {
+    member: {
+      id: `mem-${staff.id.slice(-8)}`,
+      userId: staff.id,
+      active: true,
+      accessLevel: level,
+      presetId: null,
+      presetName: level === "owner" ? "Owner" : level === "admin" ? "Program Manager" : "DSP",
+      jobTitle: staff.jobTitle,
+      supervisorMemberId: supervisor ? `mem-${supervisor.id.slice(-8)}` : null,
+      supervisorName: supervisor?.name ?? null,
+      endDate: null,
+      separationReason: null,
+      rehireEligible: null,
+    },
+    profile: {
+      firstName: roster.firstName,
+      lastName: roster.lastName,
+      displayName: staff.name,
+      email: staff.email,
+      username: staff.email,
+      phone: "801-555-0100",
+      photoPath: null,
+      homeAddress: "123 Maple St, Ogden, UT",
+      emergencyContactName: "Pat Probert",
+      emergencyContactRelationship: "Parent",
+      emergencyContactPhone: "801-555-0199",
+      dateOfBirth: "1990-04-02",
+      hireDate: "2025-01-15",
+      workerType: "w2",
+      transportsClients: staff.id === STAFF.jake.id,
+      staffTypeKeys: (ROSTER_POSITIONS[staff.id] ?? []).map((p) => p.key),
+      employeeId: roster.employeeId,
+      homeId: roster.homeId,
+      homeName: roster.homeName,
+    },
+    status: lastSignInAt ? "active" : "not_invited",
+    pendingInviteId: null,
+    lastSignInAt,
+    lastSignInKnown: true,
+    pay: { hourlyRate: 18.5, dailyRate: null },
+    timeOff: [],
+    evidence: PROFILE_EVIDENCE[staff.id] ?? { items: [], files: [] },
+    names: Object.fromEntries(STAFF_LIST.map((st) => [st.id, st.name])),
+    options: {
+      homes: TEAMS.map((t) => ({ id: t.id, name: t.team_name })),
+      supervisors: STAFF_LIST.filter((st) => st.id !== staff.id).map((st) => ({
+        memberId: `mem-${st.id.slice(-8)}`,
+        name: st.name,
+      })),
+      staffTypes: TNS_POSITIONS.map((p) => ({ ...p })),
+    },
+    viewer: {
+      canSeeDateOfBirth: true,
+      canEditDateOfBirth: true,
+      canSeePay: true,
+      canEditPay: true,
+    },
+  };
+}
+
+/** getMemberCaseload — the MemberCaseloadData shape from src/lib/team-members/caseload.functions.ts. */
+function memberCaseload(body: string): Row | null {
+  const staff = STAFF_LIST.find((st) => body.includes(st.id));
+  if (!staff) return null;
+  const today = "2026-09-28";
+  const hireDate = "2025-01-15";
+  const evidence = PROFILE_EVIDENCE[staff.id] ?? { items: [], files: [] };
+  const toClient = (c: (typeof CLIENT_LIST)[number]) => ({
+    clientId: c.id,
+    name: `${c.first_name} ${c.last_name}`,
+    authorizedCodes: [...c.codes],
+    hasAbi: false,
+    behaviorSupport: false,
+    personTrainingIds: [] as string[],
+  });
+  const rows = PROFILE_CASELOAD[staff.id] ?? [];
+  const assigned = rows.flatMap((r) => {
+    const c = CLIENT_LIST.find((x) => x.id === r.clientId);
+    if (!c) return [];
+    const base = toClient(c);
+    return [
+      {
+        ...base,
+        codes: [...r.codes],
+        readiness: staffClientReadiness({
+          today,
+          hireDate,
+          evidence: evidence as never,
+          client: { hasAbi: false, behaviorSupport: false },
+          personTraining: { requiredIds: [], completedIds: [] },
+        }),
+      },
+    ];
+  });
+  const assignedIds = new Set(rows.map((r) => r.clientId));
+  return {
+    assigned,
+    addable: CLIENT_LIST.filter((c) => !assignedIds.has(c.id)).map(toClient),
+    unmetMandates: [],
+    readinessInputs: { today, hireDate, evidence, completedTrainingIds: [] },
+    person: {
+      userId: staff.id,
+      transportsClients: staff.id === STAFF.jake.id,
+      positions: ROSTER_POSITIONS[staff.id] ?? [],
+    },
+    existingEvidenceKeys: evidence.items.map((i) => i.requirement_key),
+    names: Object.fromEntries(STAFF_LIST.map((st) => [st.id, st.name])),
+    canEdit: true,
+    canReviewEvidence: true,
+  };
+}
+
+/** getMemberOverview — built with the real pure helpers (src/lib/team-members/overview.ts). */
+function memberOverview(body: string): Row | null {
+  const staff = STAFF_LIST.find((st) => body.includes(st.id));
+  if (!staff) return null;
+  const evidence = PROFILE_EVIDENCE[staff.id] ?? { items: [], files: [] };
+  const clientNames = Object.fromEntries(
+    CLIENT_LIST.map((c) => [c.id, `${c.first_name} ${c.last_name}`]),
+  );
+  return buildMemberOverview({
+    staffId: staff.id,
+    today: PROFILE_OVERVIEW_TODAY,
+    now: new Date(`${PROFILE_OVERVIEW_TODAY}T22:00:00.000Z`),
+    items: evidence.items as never,
+    files: evidence.files as never,
+    timesheets: PROFILE_TIMESHEETS[staff.id] ?? [],
+    dailyClients: [],
+    dailyLogs: [],
+    clientNames,
+    usesTimesheets: true,
+    usesNotes: true,
+  }) as unknown as Row;
+}
+
+/** listTeamInvites — the one pending invite (expired on the fixture date) first. */
+function teamInviteRows(): Row[] {
+  return [
+    {
+      status: "pending",
+      invitationId: PENDING_INVITE.id,
+      token: PENDING_INVITE.token,
+      userId: null,
+      name: null,
+      email: PENDING_INVITE.email,
+      accessLevel: "staff",
+      presetName: "DSP",
+      createdAt: PENDING_INVITE.created_at,
+      expiresAt: PENDING_INVITE.expires_at,
+      expired: Date.parse(PENDING_INVITE.expires_at) < Date.now(),
+    },
+    {
+      status: "not_invited",
+      invitationId: null,
+      token: null,
+      userId: ADMIN_USER_ID,
+      name: ADMIN_NAME,
+      email: ADMIN_EMAIL,
+      accessLevel: "owner",
+      presetName: null,
+      createdAt: "2025-01-15T00:00:00.000Z",
+      expiresAt: null,
+      expired: false,
+    },
+  ];
 }
 
 function decodeServerFnExport(url: string): string {
@@ -773,8 +997,79 @@ function inferServerFn(url: string, body: string): string {
 
 function serverFnPayload(url: string, body: string): unknown {
   const fn = inferServerFn(url, body);
-  if (/createEmployeeManually/i.test(fn)) {
-    return { userId: "00000000-0000-4000-a000-000000000499", email: "sep1.tester@example.test" };
+  const fnBlob = `${fn}\n${url}\n${body}`;
+  if (/listTeamRoster/i.test(fn)) return teamRosterRows();
+  if (/listTeamInvites/i.test(fn)) return teamInviteRows();
+  if (/rosterOrgHasHomes/i.test(fn)) return !activeMockOpts.noHomes;
+  if (/resetMemberPassword/i.test(fn)) {
+    return { login: "jake.probert@example.test", password: "Mock-Temp-Pass1" };
+  }
+  if (/listTeamMemberFormOptions/i.test(fn)) {
+    return {
+      homes: TEAMS.map((t) => ({ id: t.id, name: t.team_name })),
+      supervisors: STAFF_LIST.map((st) => ({ memberId: `mem-${st.id.slice(-8)}`, name: st.name })),
+      positions: TNS_POSITIONS.map((p) => ({ ...p })),
+    };
+  }
+  if (/createTeamMember/i.test(fn)) {
+    if (activeMockOpts.inactiveMatch) {
+      return {
+        status: "inactive_match",
+        userId: STAFF.tom.id,
+        name: STAFF.tom.name,
+        rehireEligible: null,
+      };
+    }
+    const invite = !/"sendInvite":false|sendInvite[^,}]*false/i.test(body);
+    return invite
+      ? { status: "created", userId: NEW_TEAM_MEMBER.id, invited: true, inviteError: null }
+      : {
+          status: "created",
+          userId: NEW_TEAM_MEMBER.id,
+          invited: false,
+          tempPassword: NEW_TEAM_MEMBER.tempPassword,
+        };
+  }
+  if (/previewTeamImport/i.test(fn)) {
+    const emails = [...new Set(body.match(/[a-z0-9._%+-]+@example\.test/gi) ?? [])].map((e) =>
+      e.toLowerCase(),
+    );
+    const here = new Set(STAFF_LIST.map((st) => st.email.toLowerCase()));
+    return emails.map((email) => ({
+      email,
+      match: here.has(email) ? "already_here" : "new",
+      name: STAFF_LIST.find((st) => st.email.toLowerCase() === email)?.name ?? null,
+    }));
+  }
+  if (/importTeamMembers/i.test(fn)) {
+    const emails = [...new Set(body.match(/[a-z0-9._%+-]+@example\.test/gi) ?? [])];
+    const invite = !/sendInvites[^,}]*false/i.test(body);
+    return emails.map((email, index) => ({
+      index,
+      email: email.toLowerCase(),
+      name: email.split("@")[0],
+      status: "created",
+      userId: `00000000-0000-4000-a000-0000000005${String(index).padStart(2, "0")}`,
+      invited: invite,
+      reason: null,
+    }));
+  }
+  if (/applyEvidenceRequirements/i.test(fn)) return { ok: true, count: 2 };
+  if (/loadTeamMemberEvidenceFacts/i.test(fn)) {
+    const ids = [...new Set(body.match(/00000000-0000-4000-a000-[0-9a-f]{12}/gi) ?? [])].filter(
+      (id) => id !== ORG_ID,
+    );
+    return {
+      people: ids.map((userId, i) => ({
+        userId,
+        name: userId === NEW_TEAM_MEMBER.id ? NEW_TEAM_MEMBER.name : `Imported ${i + 1}`,
+        hireDate: "2026-07-01",
+        transportsClients: false,
+        positions:
+          userId === NEW_TEAM_MEMBER.id ? [{ key: "hhp", label: "Host Home Provider" }] : [],
+      })),
+      caseload: {},
+    };
   }
   if (/inviteStaffMembers/i.test(fn)) {
     return {
@@ -791,7 +1086,18 @@ function serverFnPayload(url: string, body: string): unknown {
       ],
     };
   }
-  if (/archiveEntity|restoreEntity|deleteEntity/i.test(fn)) {
+  if (/getTeamMemberProfile/i.test(fn)) return teamMemberProfile(body);
+  if (/getMemberCaseload/i.test(fn)) return memberCaseload(body);
+  if (/getMemberOverview/i.test(fn)) return memberOverview(body);
+  if (/getMemberTraining/i.test(fn)) return { courses: [], certificates: [] };
+  if (/setStaffClientCodes/i.test(fn)) return { status: "updated" };
+  if (/updateTeamMember/i.test(fn)) return { ok: true };
+  if (/listStaffNotes/i.test(fn)) return PROFILE_NOTES;
+  if (/addStaffNote/i.test(fn)) return { id: "00000000-0000-4000-a000-000000000702" };
+  if (/getMemberActivity/i.test(fn)) {
+    return { shifts: [], forms: [], incidents: [], account: PROFILE_ACCOUNT_ACTIVITY };
+  }
+  if (/deactivateMember|reactivateMember/i.test(fn)) {
     return { ok: true };
   }
   if (/createInvitation/i.test(fn)) {
@@ -810,6 +1116,15 @@ function serverFnPayload(url: string, body: string): unknown {
     };
   }
   if (/checkHiveExecutive/i.test(fn)) return { isExecutive: false };
+  if (/getAgencySetupStatus/i.test(fn)) {
+    // Mocked TNS has finished agency setup, so the Employees/Clients create gate stays open.
+    return {
+      ...computeAgencySetupStatus(MOCK_SETUP_FACTS),
+      organizationId: ORG_ID,
+      facts: MOCK_SETUP_FACTS,
+    };
+  }
+  if (/loadEmployeeScope|loadOrgScopeSnapshot/i.test(fn)) return emptyOrgScopeSnapshot();
   if (/getMyEntitlements/i.test(fn)) {
     return {
       organization_id: ORG_ID,
@@ -877,6 +1192,30 @@ function serverFnPayload(url: string, body: string): unknown {
     };
   }
   if (/listAgencyPolicies|listPolicyJobCodeOptions/i.test(fn)) return [];
+  if (/getAgencySetupStatus/i.test(fn)) {
+    return {
+      complete: true,
+      answeredCount: 6,
+      requiredCount: 6,
+      unanswered: [],
+      answeredKeys: [],
+      progressLabel: "6 of 6",
+      message: null,
+      createGateExempt: true,
+      createAllowed: true,
+      organizationId: ORG_ID,
+      facts: {},
+    };
+  }
+  if (/listAccessPresets/i.test(fn)) return sampleAccessPresets();
+  if (/listTeamAccess/i.test(fn)) return sampleTeamAccess();
+  if (/listAccessTargets/i.test(fn)) return sampleAccessTargets();
+  if (/getMemberAccess/i.test(fn)) return sampleMemberAccess(fnBlob);
+  if (/setMemberAccess/i.test(fn) || /access_scope/.test(fnBlob)) {
+    rememberMemberAccess(fnBlob);
+    return { ok: true };
+  }
+  if (/listAccessChangeLog/i.test(fn)) return { rows: [], total: 0 };
   if (/getStaffPii|getStaffTrainingRiskFlags/i.test(fn)) return null;
   if (/recordPhiAccess|dismissUiPref|requestPermission/i.test(fn)) return { ok: true };
   if (/saveDailyRecord/i.test(fn)) {
@@ -930,9 +1269,6 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/draftShiftNote/i.test(fn)) {
     return "Mocked NECTAR draft — not used in this suite.";
   }
-  if (/listClientTargetBehaviors/i.test(fn)) {
-    return { ok: true };
-  }
   if (/getClientCareData/i.test(fn)) {
     const idMatch = `${url}\n${body}`.match(/00000000-0000-4000-a000-00000000010[1-4]/);
     return emptyClientCareData(idMatch?.[0] ?? CLIENT_LIST[0].id);
@@ -957,6 +1293,196 @@ function serverFnPayload(url: string, body: string): unknown {
     return { ok: true };
   }
   return [];
+}
+
+const PRESET_PROGRAM_MANAGER = "00000000-0000-4000-a000-000000000911";
+const PRESET_DSP = "00000000-0000-4000-a000-000000000912";
+const PRESET_BILLING = "00000000-0000-4000-a000-000000000913";
+const PRESET_HOME = "00000000-0000-4000-a000-000000000914";
+const PRESET_HR = "00000000-0000-4000-a000-000000000915";
+const PRESET_LEAD = "00000000-0000-4000-a000-000000000916";
+const PRESET_HRC = "00000000-0000-4000-a000-000000000917";
+
+type SavedMemberAccess = {
+  membership_id: string;
+  access_level: "owner" | "admin" | "staff";
+  access_scope: "agency" | "assigned" | "self";
+  access_preset_id: string | null;
+  access_overrides: Record<string, string>;
+  assignments: Array<{ kind: "home" | "staff" | "client"; target_id: string }>;
+};
+
+const savedMemberAccess = new Map<string, SavedMemberAccess>();
+
+function sampleAccessPresets() {
+  const row = (
+    id: string,
+    name: string,
+    access_level: "admin" | "staff",
+    access_scope: "agency" | "assigned" | "self",
+    seed_key: string,
+    home_page: string,
+  ) => ({
+    id,
+    name,
+    access_level,
+    access_scope,
+    home_page,
+    categories:
+      access_level === "staff" ? { phone_app: "edit" } : { staff_roster: "edit", clients: "edit" },
+    seed_key,
+    member_count: 1,
+  });
+  return [
+    row(PRESET_BILLING, "Billing", "admin", "agency", "billing", "/dashboard"),
+    row(PRESET_DSP, "DSP", "staff", "self", "dsp", "/employee"),
+    row(PRESET_HOME, "Group Home Manager", "admin", "assigned", "home_manager", "/dashboard"),
+    row(PRESET_HR, "HR / Office", "admin", "agency", "hr_office", "/dashboard"),
+    row(PRESET_HRC, "HRC Committee", "staff", "assigned", "hrc_committee", "/dashboard/hrc"),
+    row(PRESET_LEAD, "Lead DSP", "staff", "assigned", "lead_dsp", "/employee"),
+    row(
+      PRESET_PROGRAM_MANAGER,
+      "Program Manager",
+      "admin",
+      "agency",
+      "program_manager",
+      "/dashboard",
+    ),
+  ];
+}
+
+function sampleTeamAccess() {
+  return [
+    {
+      membership_id: "00000000-0000-4000-a000-000000000921",
+      user_id: "00000000-0000-4000-a000-000000000931",
+      email: "alex.kim@example.test",
+      full_name: "Alex Kim",
+      access_level: "owner",
+      access_scope: "agency",
+      preset_name: null,
+      company_executive: true,
+      hive_executive: false,
+    },
+    {
+      membership_id: "00000000-0000-4000-a000-000000000922",
+      user_id: "00000000-0000-4000-a000-000000000932",
+      email: "sam.rivera@example.test",
+      full_name: "Sam Rivera",
+      access_level: "admin",
+      access_scope: "agency",
+      preset_name: "Program Manager",
+      company_executive: false,
+      hive_executive: false,
+    },
+    {
+      membership_id: "00000000-0000-4000-a000-000000000923",
+      user_id: STAFF.jake.id,
+      email: "pat.lee@example.test",
+      full_name: "Pat Lee",
+      access_level: "staff",
+      access_scope: "self",
+      preset_name: "DSP",
+      company_executive: false,
+      hive_executive: false,
+    },
+  ];
+}
+
+function sampleAccessTargets() {
+  return {
+    home: TEAMS.map((t) => ({ id: t.id, label: t.team_name })),
+    staff: [{ id: STAFF.jake.id, label: "Pat Lee" }],
+    client: [{ id: CLIENTS.tommy.id, label: "Sample Client" }],
+  };
+}
+
+function userIdFromBlob(blob: string): string {
+  const plain = blob.match(/"user_id"\s*:\s*"([^"]+)"/)?.[1];
+  if (plain) return plain;
+  // Seroval keeps keys and string values in separate arrays.
+  const decoded = decodeURIComponent(blob);
+  const packed = decoded.match(
+    /"organization_id","user_id","access_level"[\s\S]*?"v":\[(?:\{"t":1,"s":"([^"]+)"\},)\{"t":1,"s":"([^"]+)"\}/,
+  );
+  if (packed?.[2]) return packed[2];
+  return STAFF.jake.id;
+}
+
+/** Read a setMemberAccess body, whether it is plain JSON or seroval. */
+function parseAccessWrite(blob: string): {
+  userId: string;
+  level: SavedMemberAccess["access_level"];
+  scope: SavedMemberAccess["access_scope"];
+  preset: string | null;
+  assignments: SavedMemberAccess["assignments"];
+} {
+  const decoded = decodeURIComponent(blob);
+  const levelPlain = decoded.match(/"access_level"\s*:\s*"(owner|admin|staff)"/)?.[1];
+  const scopePlain = decoded.match(/"access_scope"\s*:\s*"(agency|assigned|self)"/)?.[1];
+  if (levelPlain && scopePlain) {
+    const assignments: SavedMemberAccess["assignments"] = [];
+    const re = /"kind"\s*:\s*"(home|staff|client)"\s*,\s*"target_id"\s*:\s*"([0-9a-f-]{36})"/gi;
+    for (const match of decoded.matchAll(re)) {
+      assignments.push({
+        kind: match[1] as SavedMemberAccess["assignments"][number]["kind"],
+        target_id: match[2],
+      });
+    }
+    return {
+      userId: userIdFromBlob(decoded),
+      level: levelPlain as SavedMemberAccess["access_level"],
+      scope: scopePlain as SavedMemberAccess["access_scope"],
+      preset: decoded.match(/"access_preset_id"\s*:\s*"([^"]+)"/)?.[1] ?? null,
+      assignments,
+    };
+  }
+  const packed = decoded.match(
+    /"organization_id","user_id","access_level","access_preset_id","access_scope"[\s\S]*?"v":\[\{"t":1,"s":"([^"]+)"\},\{"t":1,"s":"([^"]+)"\},\{"t":1,"s":"(owner|admin|staff)"\},\{"t":1,"s":"([^"]*)"\},\{"t":1,"s":"(agency|assigned|self)"\}/,
+  );
+  const assignments: SavedMemberAccess["assignments"] = [];
+  const assignRe =
+    /"k":\["kind","target_id"\],"v":\[\{"t":1,"s":"(home|staff|client)"\},\{"t":1,"s":"([0-9a-f-]{36})"\}/g;
+  for (const match of decoded.matchAll(assignRe)) {
+    assignments.push({
+      kind: match[1] as SavedMemberAccess["assignments"][number]["kind"],
+      target_id: match[2],
+    });
+  }
+  return {
+    userId: packed?.[2] ?? STAFF.jake.id,
+    level: (packed?.[3] ?? "admin") as SavedMemberAccess["access_level"],
+    preset: packed?.[4] ? packed[4] : null,
+    scope: (packed?.[5] ?? "agency") as SavedMemberAccess["access_scope"],
+    assignments,
+  };
+}
+
+function sampleMemberAccess(blob: string): SavedMemberAccess {
+  const userId = userIdFromBlob(blob);
+  return (
+    savedMemberAccess.get(userId) ?? {
+      membership_id: "00000000-0000-4000-a000-000000000941",
+      access_level: "admin",
+      access_scope: "agency",
+      access_preset_id: PRESET_PROGRAM_MANAGER,
+      access_overrides: {},
+      assignments: [],
+    }
+  );
+}
+
+function rememberMemberAccess(blob: string) {
+  const parsed = parseAccessWrite(blob);
+  const owner = parsed.level === "owner";
+  savedMemberAccess.set(parsed.userId, {
+    membership_id: "00000000-0000-4000-a000-000000000941",
+    access_level: parsed.level,
+    access_scope: owner ? "agency" : parsed.scope,
+    access_preset_id: owner ? null : parsed.preset,
+    access_overrides: {},
+    assignments: owner || parsed.scope !== "assigned" ? [] : parsed.assignments,
+  });
 }
 
 async function handleServerFn(route: Route) {
@@ -996,6 +1522,7 @@ function isServerFnUrl(url: URL): boolean {
 
 export async function installHiveMocks(page: Page, opts: MockOptions = {}): Promise<void> {
   const persona = opts.persona ?? "admin";
+  activeMockOpts = opts;
   const personaStaff =
     persona === "dsp" ? STAFF.jake : persona === "manager" ? STAFF.harvey : STAFF.admin;
   const personaId = personaStaff.id;
@@ -1030,7 +1557,11 @@ export async function installHiveMocks(page: Page, opts: MockOptions = {}): Prom
   await page.addInitScript(
     ({ storageKey, sessionJson, orgId, persona, noAssignments, clientsError }) => {
       try {
+        // The running app's storage key is sb-<project-ref>-auth-token.
+        // .env points at dhrrukdcigiiqksibdfb; older mocks used mmknqtdrefbzwfdtykza.
         window.localStorage.setItem(storageKey, sessionJson);
+        window.localStorage.setItem("sb-dhrrukdcigiiqksibdfb-auth-token", sessionJson);
+        window.localStorage.setItem("sb-mmknqtdrefbzwfdtykza-auth-token", sessionJson);
         window.localStorage.setItem("hive.activeOrgId", orgId);
         window.localStorage.setItem("portal-view", persona === "dsp" ? "staff" : "admin");
         window.localStorage.setItem("hive.e2e.persona", persona);
@@ -1081,6 +1612,10 @@ export async function waitForDashboard(page: Page): Promise<void> {
   if (await loading.isVisible().catch(() => false)) {
     await loading.waitFor({ state: "hidden", timeout: 20_000 }).catch(() => undefined);
   }
+  // The dashboard shell boots behind "Loading workspace…" (cold Vite compile
+  // on the first route can take 20s+); "^Loading…$" never matches it.
+  const workspace = page.getByText(/^Loading workspace…$/);
+  await workspace.waitFor({ state: "hidden", timeout: 45_000 }).catch(() => undefined);
 }
 
 export {

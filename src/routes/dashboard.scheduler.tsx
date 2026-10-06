@@ -27,19 +27,22 @@ import {
 } from "@/components/ui/select";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { getMissingAbiStaffIds, getMissingThirtyDayStaffIds } from "@/lib/sow-perimeters.functions";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import {
   useSchedulerData, startOfWeek, startOfDay, startOfMonth,
   type SchedClient, type SchedStaff, type SchedShift,
 } from "@/hooks/use-scheduler-data";
 import { useDayProgramData } from "@/hooks/use-day-program-data";
 import {
-  saveShift, deleteShift, publishWeek, addToCaseload, setAdminTimeOff,
+  saveShift, deleteShift, publishWeek, setAdminTimeOff,
   saveDayProgramSession, markAttendance, addSessionStaff,
 } from "@/lib/scheduler/scheduler.functions";
 import { isClockableServiceCode } from "@/lib/service-billing";
+import { addStaffToClientCode } from "@/lib/scheduler/setup.functions";
+import { assignmentCoversCode } from "@/lib/assignment-codes";
 import { evvServiceLabel } from "@/lib/evv-codes";
 import { RequestsPanel } from "@/components/schedule-preview/requests-panel";
+import { OpenShiftsPanel } from "@/components/scheduling/open-shifts-panel";
 import { NectarBar } from "@/components/scheduler/nectar-bar";
 import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { createRecurringShifts } from "@/lib/scheduler/repeat.functions";
@@ -118,7 +121,7 @@ function dayStr(d: Date) {
 function SchedulerPage() {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
-  const { can, isLoading: permLoading } = usePermissions();
+  const { can, isLoading: permLoading } = useAccess();
   const canManageSchedule = can("create_shifts");
   const [tab, setTab] = useState<Tab>("schedule");
   const [view, setView] = useState<ViewMode>("day");
@@ -266,7 +269,7 @@ function SchedulerBody({
 }) {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const canManageSchedule = can("create_shifts");
   const [addOpen, setAddOpen] = useState(false);
   const [addPrefill, setAddPrefill] = useState<{ clientId?: string; code?: string; day?: Date } | null>(null);
@@ -285,7 +288,9 @@ function SchedulerBody({
   if (!data && isLoading) {
     return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
   }
-  if (!data) return <div className="p-8 text-sm text-muted-foreground">No data available.</div>;
+  if (!data) {
+    return <div className="p-8 text-sm text-muted-foreground">No shifts scheduled.</div>;
+  }
 
   if (tab === "day-program") {
     return <DayProgramBoard weekStart={startOfWeek(anchor)} sched={data} />;
@@ -314,6 +319,29 @@ function SchedulerBody({
           weekStart={startOfWeek(anchor)}
           staff={data.staff.map((s) => ({ id: s.id, name: s.name }))}
         />
+        {orgId && (
+          <OpenShiftsPanel
+            organizationId={orgId}
+            startIso={(view === "month" ? startOfMonth(anchor) : startOfWeek(anchor)).toISOString()}
+            endIso={(() => {
+              const from = view === "month" ? startOfMonth(anchor) : startOfWeek(anchor);
+              const to = new Date(from);
+              if (view === "month") to.setMonth(to.getMonth() + 1);
+              else to.setDate(to.getDate() + 7);
+              return to.toISOString();
+            })()}
+            mode="admin"
+            clientNames={
+              new Map(
+                data.clients.map((c) => [
+                  c.id,
+                  `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "Client",
+                ]),
+              )
+            }
+            onJumpToShift={(id) => setDetailShiftId(id)}
+          />
+        )}
 
         {/* Legend */}
         <div className="flex items-center gap-3 text-xs text-muted-foreground px-1">
@@ -933,11 +961,23 @@ function AddShiftDialog({
     return Array.from(new Set(sched.auths.filter((a) => a.client_id === clientId).map((a) => a.service_code)));
   }, [sched.auths, clientId]);
 
-  // Staff assignable for selected client (caseload gate)
+  // Staff assignable for selected client + code (caseload gate): only staff
+  // whose assignment lists this exact code. Before a code is picked, anyone
+  // with any code on this client is listed.
   const caseloadStaffIds = useMemo(() => {
     if (!clientId) return new Set<string>();
-    return new Set(sched.assigns.filter((a) => a.client_id === clientId).map((a) => a.staff_id));
-  }, [sched.assigns, clientId]);
+    return new Set(
+      sched.assigns
+        .filter(
+          (a) =>
+            a.client_id === clientId &&
+            (code
+              ? assignmentCoversCode(a.service_codes, code)
+              : (a.service_codes ?? []).length > 0),
+        )
+        .map((a) => a.staff_id),
+    );
+  }, [sched.assigns, clientId, code]);
   const caseloadStaff = useMemo(
     () => sched.staff.filter((s) => caseloadStaffIds.has(s.id)),
     [sched.staff, caseloadStaffIds],
@@ -985,7 +1025,7 @@ function AddShiftDialog({
   const toggleWeekday = (n: number) =>
     setWeekdays((prev) => prev.includes(n) ? prev.filter((x) => x !== n) : [...prev, n].sort());
 
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const canManageSchedule = can("create_shifts");
 
   const saveMut = useMutation({
@@ -1290,7 +1330,7 @@ function ShiftDetailPanel({
   const qc = useQueryClient();
   const save = useServerFn(saveShift);
   const del = useServerFn(deleteShift);
-  const add = useServerFn(addToCaseload);
+  const add = useServerFn(addStaffToClientCode);
   const missingThirtyDayFn = useServerFn(getMissingThirtyDayStaffIds);
   const listSoloLapses = useServerFn(listSoloLapsesForStaff);
   const [lapseOpen, setLapseOpen] = useState(false);
@@ -1313,14 +1353,19 @@ function ShiftDetailPanel({
   const [search, setSearch] = useState("");
   const [openOther, setOpenOther] = useState(false);
 
-  const caseloadStaffIds = new Set(sched.assigns.filter((a) => a.client_id === shift.client_id).map((a) => a.staff_id));
+  // Only staff assigned this shift's exact code (NULL / [] covers nothing).
+  const caseloadStaffIds = new Set(
+    sched.assigns
+      .filter((a) => a.client_id === shift.client_id && assignmentCoversCode(a.service_codes, code))
+      .map((a) => a.staff_id),
+  );
   const caseloadStaff = sched.staff.filter((s) => caseloadStaffIds.has(s.id));
 
   const matchOthers = openOther
     ? sched.staff.filter((s) => s.name.toLowerCase().includes(search.toLowerCase())).slice(0, 8)
     : [];
 
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const canManageSchedule = can("create_shifts");
 
   const clientHasAbi = !!client?.has_abi;
@@ -1416,15 +1461,18 @@ function ShiftDetailPanel({
 
   const addCl = useMutation({
     mutationFn: (staffId: string) =>
+      // Adds this shift's code to the staff member's explicit list (single
+      // write path; the server rejects a code the client isn't authorized for).
       add({
         data: {
           organization_id: org!.organization_id,
           client_id: shift.client_id,
           staff_id: staffId,
+          service_code: code,
         },
       }),
     onSuccess: () => {
-      toast.success("Added to caseload.");
+      toast.success(`Added to caseload for ${code}.`);
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -1527,10 +1575,10 @@ function ShiftDetailPanel({
                         <Button size="sm" variant="outline" onClick={() => void tryAssign(s.id)}>Assign</Button>
                       ) : (
                         <>
-                          <Button size="sm" variant="outline" onClick={async () => { await addCl.mutateAsync(s.id); await tryAssign(s.id); }}>
-                            Add to caseload
+                          <Button size="sm" variant="outline" disabled={!code} onClick={async () => { await addCl.mutateAsync(s.id); await tryAssign(s.id); }}>
+                            Add to caseload{code ? ` (${code})` : ""}
                           </Button>
-                          <Link to="/dashboard/employees/$staffId" params={{ staffId: s.id }} aria-label="Open profile">
+                          <Link to="/dashboard/team-members/$staffId" params={{ staffId: s.id }} aria-label="Open profile">
                             <ArrowRight className="h-4 w-4" />
                           </Link>
                         </>
@@ -1630,7 +1678,10 @@ function DayProgramBoard({
 
   const [createOpen, setCreateOpen] = useState(false);
 
-  if (isLoading || !dp) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (isLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  if (!dp) {
+    return <div className="p-8 text-sm text-muted-foreground">No day program sessions this week.</div>;
+  }
 
   const groups: Record<string, typeof dp.sessions> = { DSG: [], DSP: [], DSI: [], SED: [] };
   for (const s of dp.sessions) (groups[s.service_code] ??= []).push(s);

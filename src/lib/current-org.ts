@@ -1,4 +1,4 @@
-import { ROLE_RANK, type Role } from "./rbac.ts";
+const LEVEL_RANK: Record<string, number> = { owner: 3, admin: 2, staff: 1 };
 
 /** True North Supports — first tenant. Never charged or locked. */
 export const TNS_ORGANIZATION_ID = "7fabcf5d-f826-487f-8730-8b0c3f1969bb";
@@ -8,7 +8,7 @@ export const ACTIVE_ORG_STORAGE_KEY = "hive.activeOrgId";
 export type MembershipPick = {
   organization_id: string;
   is_demo: boolean;
-  role: Role;
+  access: { level: string };
   display_acronym?: string | null;
   organization_name?: string | null;
 };
@@ -38,7 +38,7 @@ export function isComplimentaryMembership(
 
 /**
  * Deterministic default: complimentary / True North first, then non-demo,
- * then non-disposable-test, then role rank, then org id.
+ * then non-disposable-test, then access level, then org id.
  * A blank hive.activeOrgId is not "no organization."
  */
 export function pickDefaultMembership<T extends MembershipPick>(
@@ -53,7 +53,7 @@ export function pickDefaultMembership<T extends MembershipPick>(
     const at = looksLikeDisposableTestOrg(a.organization_name);
     const bt = looksLikeDisposableTestOrg(b.organization_name);
     if (at !== bt) return at ? 1 : -1;
-    const r = ROLE_RANK[b.role] - ROLE_RANK[a.role];
+    const r = (LEVEL_RANK[b.access.level] ?? 0) - (LEVEL_RANK[a.access.level] ?? 0);
     if (r !== 0) return r;
     return a.organization_id.localeCompare(b.organization_id);
   });

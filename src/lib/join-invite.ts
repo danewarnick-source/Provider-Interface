@@ -1,4 +1,4 @@
-import { resolveAuthOrigin } from "./auth-redirect.ts";
+import { PROVIDER_INTERFACE_ORIGIN } from "./auth-redirect.ts";
 import { defaultUsernameFromEmail } from "./account-username.ts";
 
 /** Shown on every failed join so testers are not dumped into new-agency signup. */
@@ -20,9 +20,12 @@ export function inviteTokenFromSearchStr(searchStr: string | null | undefined): 
   return extractInviteToken({ invite: sp.get("invite"), token: sp.get("token") });
 }
 
-export function inviteJoinUrl(origin: string, token: string): string {
-  const base = resolveAuthOrigin(origin);
-  return `${base}/join?invite=${encodeURIComponent(token)}`;
+/**
+ * Team-member join links always open providerinterface.com, whatever origin
+ * (hivecertify.com, Lovable, localhost, a preview) the invite was sent from.
+ */
+export function inviteJoinUrl(token: string): string {
+  return `${PROVIDER_INTERFACE_ORIGIN}/join?invite=${encodeURIComponent(token)}`;
 }
 
 export type InviteFailureReason =
@@ -94,20 +97,20 @@ export function humanizeInviteError(raw: unknown): string {
   return inviteFailureMessage("unknown");
 }
 
-export function joinHomeForRole(role: string | null | undefined): string {
-  if (role === "admin" || role === "manager" || role === "program_manager") {
-    return "/dashboard";
-  }
-  if (role === "committee_member") return "/dashboard/hrc";
-  return "/employee";
+export function joinHomeForLevel(
+  level: string | null | undefined,
+  presetHome?: string | null,
+): string {
+  if (presetHome) return presetHome;
+  return level === "owner" || level === "admin" ? "/dashboard" : "/employee";
 }
 
-/** Staff join: length only. GoTrue default is 6 with no required character classes. */
-export const JOIN_PASSWORD_MIN_LENGTH = 8;
+/** Team-member join: length only. Supabase project minimum is 12. */
+export const JOIN_PASSWORD_MIN_LENGTH = 12;
 export const JOIN_PASSWORD_MAX_LENGTH = 200;
 
 export const JOIN_PASSWORD_HINT =
-  "At least 8 characters. Letters and numbers are fine — no special character required.";
+  "At least 12 characters. Letters and numbers are fine — no special character required.";
 
 export {
   USERNAME_HINT as JOIN_USERNAME_HINT,
@@ -119,17 +122,15 @@ export {
   usernameLiveMessage as joinUsernameLiveMessage,
 } from "./account-username.ts";
 
-export const JOIN_PASSWORD_TOO_SHORT = "Password must be at least 8 characters.";
+export const JOIN_PASSWORD_TOO_SHORT = "Password must be at least 12 characters.";
 
 /**
- * New-invite password rule: 8–200 characters. No digit / symbol / case classes.
- * Matches reset-password and is slightly above GoTrue's default min (6).
+ * New-invite password rule: 12–200 characters. No digit / symbol / case classes.
+ * Matches signup, reset-password, and the Supabase project minimum.
  * Auth may still reject a leaked / HIBP-listed password if that project flag is on.
  */
 export function isValidJoinPassword(password: string): boolean {
-  return (
-    password.length >= JOIN_PASSWORD_MIN_LENGTH && password.length <= JOIN_PASSWORD_MAX_LENGTH
-  );
+  return password.length >= JOIN_PASSWORD_MIN_LENGTH && password.length <= JOIN_PASSWORD_MAX_LENGTH;
 }
 
 /** Live copy for a new password. Empty string means "not typed yet". */

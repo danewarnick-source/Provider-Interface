@@ -29,15 +29,15 @@ import {
 import { fmtHours, computeEntryUnits } from "@/lib/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { aggregateHourlyUnits, aggregateDailyDays } from "@/lib/accrual";
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 
 export const Route = createFileRoute("/dashboard/billing/form520")({
   head: () => ({ meta: [{ title: "520 Billing — Provider Interface" }] }),
   component: () => (
-    <RequireRole roles={["admin", "program_manager", "manager"]}>
+    <RequireLevel min="admin">
       <Billing520Page />
-    </RequireRole>
+    </RequireLevel>
   ),
 });
 

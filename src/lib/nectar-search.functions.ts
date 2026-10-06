@@ -40,8 +40,8 @@ export const searchOrgEntities = createServerFn({ method: "POST" })
     };
     if (!supabase || !userId) return { clients: [], staff: [] };
 
-    // Admin-capable only: manager/admin/super_admin.
-    await requireOrgMembership(supabase as any, userId, data.organizationId, "manager"); // eslint-disable-line @typescript-eslint/no-explicit-any
+    // Owner or Admin level only.
+    await requireOrgMembership(supabase as any, userId, data.organizationId, "admin"); // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const like = `%${data.query}%`;
 
@@ -56,7 +56,7 @@ export const searchOrgEntities = createServerFn({ method: "POST" })
         .limit(8),
       (supabase as any)
         .from("organization_members")
-        .select("user_id, role, active")
+        .select("user_id, role:access_level, active")
         .eq("organization_id", data.organizationId)
         .eq("active", true),
     ]);

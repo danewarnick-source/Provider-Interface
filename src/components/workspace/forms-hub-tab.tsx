@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { FileText, CalendarClock, CheckCircle2, AlertTriangle } from "lucide-react";
 import { IncidentReportDialog } from "@/components/incidents/incident-report-dialog";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
+import { isAdminLevel } from "@/lib/access/levels";
 
 type FormRow = {
   id: string;
@@ -25,9 +26,9 @@ type SubRow = { id: string; form_id: string; period_key: string | null; submitte
 export function FormsHubTab({ clientId, clientName }: { clientId: string; clientName: string }) {
   const fetchList = useServerFn(listClientForms);
   const { data: org } = useCurrentOrg();
-  const role = org?.role;
-  const isManager = role === "admin" || role === "program_manager" || role === "manager";
-  const { can } = usePermissions();
+  const role = org?.access.level;
+  const isManager = isAdminLevel(role);
+  const { can } = useAccess();
   const canManageIncidents = can("manage_incidents");
   const [incidentOpen, setIncidentOpen] = useState(false);
 

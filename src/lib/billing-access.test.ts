@@ -122,6 +122,52 @@ describe("billing-access", () => {
     );
   });
 
+  it("an active trial stays open, including when it has no end date", () => {
+    assert.equal(
+      orgAccessIsLocked({
+        billingExempt: false,
+        orgName: "Trial Agency",
+        subscription: {
+          status: "trial",
+          locked_at: null,
+          trial_ends_at: "2099-01-01T00:00:00.000Z",
+        },
+      }),
+      false,
+    );
+    assert.equal(
+      orgAccessIsLocked({
+        billingExempt: false,
+        orgName: "Trial Agency",
+        subscription: { status: "trial", locked_at: null, trial_ends_at: null },
+      }),
+      false,
+    );
+    assert.equal(
+      orgAccessIsLocked({
+        billingExempt: false,
+        orgName: "Trial Agency",
+        subscription: { status: "trial", locked_at: null },
+      }),
+      false,
+    );
+  });
+
+  it("locks a trial only after the end date has passed", () => {
+    assert.equal(
+      orgAccessIsLocked({
+        billingExempt: false,
+        orgName: "Trial Agency",
+        subscription: {
+          status: "trial",
+          locked_at: null,
+          trial_ends_at: "2000-01-01T00:00:00.000Z",
+        },
+      }),
+      true,
+    );
+  });
+
   it("active paid org is not locked", () => {
     assert.equal(
       orgAccessIsLocked({

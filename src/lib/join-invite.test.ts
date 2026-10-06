@@ -11,7 +11,7 @@ import {
   isValidJoinPassword,
   isValidJoinUsername,
   joinConfirmLiveMessage,
-  joinHomeForRole,
+  joinHomeForLevel,
   joinPasswordLiveMessage,
   joinSetsAuthPassword,
   joinUsernameLiveMessage,
@@ -47,17 +47,10 @@ describe("inviteTokenFromSearchStr", () => {
 });
 
 describe("inviteJoinUrl", () => {
-  it("builds /join?invite= and strips a trailing slash on origin", () => {
-    assert.equal(
-      inviteJoinUrl("https://app.example.com/", "tok+en"),
-      "https://app.example.com/join?invite=tok%2Ben",
-    );
-  });
-  it("rewrites a Lovable origin to hivecertify.com", () => {
-    assert.equal(
-      inviteJoinUrl("https://agency-peace-of-mind.lovable.app", "tok"),
-      "https://hivecertify.com/join?invite=tok",
-    );
+  it("always opens providerinterface.com and takes no caller origin", () => {
+    assert.equal(inviteJoinUrl("tok+en"), "https://providerinterface.com/join?invite=tok%2Ben");
+    assert.equal(inviteJoinUrl("tok"), "https://providerinterface.com/join?invite=tok");
+    assert.equal(inviteJoinUrl.length, 1);
   });
 });
 
@@ -87,20 +80,23 @@ describe("humanizeInviteError", () => {
   });
 });
 
-describe("joinHomeForRole", () => {
+describe("joinHomeForLevel", () => {
   it("sends staff to the employee home and admins to Admin Home", () => {
-    assert.equal(joinHomeForRole("employee"), "/employee");
-    assert.equal(joinHomeForRole("admin"), "/dashboard");
-    assert.equal(joinHomeForRole("manager"), "/dashboard");
-    assert.equal(joinHomeForRole("program_manager"), "/dashboard");
+    assert.equal(joinHomeForLevel("staff"), "/employee");
+    assert.equal(joinHomeForLevel("admin"), "/dashboard");
+    assert.equal(joinHomeForLevel("owner"), "/dashboard");
+  });
+  it("prefers the preset's home page", () => {
+    assert.equal(joinHomeForLevel("staff", "/dashboard/hrc"), "/dashboard/hrc");
   });
 });
 
 describe("join field rules", () => {
-  it("requires 8+ characters and no digit / symbol class", () => {
+  it("requires 12+ characters and no digit / symbol class", () => {
     assert.equal(isValidJoinPassword("short1"), false);
-    assert.equal(isValidJoinPassword("longenough"), true);
-    assert.equal(isValidJoinPassword("goodpass1"), true);
+    assert.equal(isValidJoinPassword("longenough"), false);
+    assert.equal(isValidJoinPassword("longenough12"), true);
+    assert.equal(isValidJoinPassword("goodpassword1"), true);
   });
   it("never overwrites an existing account's password unless first-login is pending", () => {
     assert.equal(joinSetsAuthPassword(true), false);
@@ -132,10 +128,11 @@ describe("join field rules", () => {
   it("live-validates new-password length and confirm match", () => {
     assert.equal(joinPasswordLiveMessage(""), null);
     assert.equal(joinPasswordLiveMessage("short1")?.ok, false);
-    assert.equal(joinPasswordLiveMessage("longenough")?.ok, true);
-    assert.equal(joinConfirmLiveMessage("longenough", ""), null);
-    assert.equal(joinConfirmLiveMessage("longenough", "different")?.ok, false);
-    assert.equal(joinConfirmLiveMessage("longenough", "longenough")?.ok, true);
+    assert.equal(joinPasswordLiveMessage("longenough")?.ok, false);
+    assert.equal(joinPasswordLiveMessage("longenough12")?.ok, true);
+    assert.equal(joinConfirmLiveMessage("longenough12", ""), null);
+    assert.equal(joinConfirmLiveMessage("longenough12", "different")?.ok, false);
+    assert.equal(joinConfirmLiveMessage("longenough12", "longenough12")?.ok, true);
   });
 });
 

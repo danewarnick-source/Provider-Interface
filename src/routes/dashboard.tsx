@@ -10,7 +10,7 @@ import {
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { usePortalView } from "@/hooks/use-portal-view";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { ROLE_LABEL, type Role } from "@/lib/rbac";
+import { isAdminLevel, LEVEL_LABEL, type AccessLevel } from "@/lib/access/levels";
+import { isCommitteeOnly } from "@/lib/access/member";
 import {
   LayoutDashboard,
   GraduationCap,
@@ -77,9 +78,6 @@ import { NectarTaskCenter } from "@/components/nectar/nectar-task-center";
 import { NectarSearchBar } from "@/components/nectar/nectar-search-bar";
 import { Clock } from "lucide-react";
 import { FeatureLockedRoute, UpgradeGate } from "@/components/upgrade-gate";
-import { useActionRequiredQueue } from "@/hooks/use-action-required-queue";
-import { useYieldToAdminHomeQueries } from "@/hooks/use-yield-to-admin-home";
-import { isAdminHomePath } from "@/lib/yield-to-admin-home";
 import { OrgSwitcher, DemoBadge, DemoOrgBanner } from "@/components/org-switcher";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -118,6 +116,7 @@ import {
   shouldLeaveCognitoLoadingOverlay,
   type BootstrapFailureKind,
 } from "@/lib/cognito-login-gate";
+import { createSamePageGate } from "@/lib/route-gate";
 
 function DashboardShellError({ error }: { error: Error; reset: () => void }) {
   return (
@@ -144,6 +143,8 @@ function DashboardShellError({ error }: { error: Error; reset: () => void }) {
   );
 }
 
+const dashboardGate = createSamePageGate();
+
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [{ title: "Dashboard — Provider Interface" }],
@@ -151,8 +152,10 @@ export const Route = createFileRoute("/dashboard")({
   // Lockout gate — runs on every dashboard navigation. Paid+active orgs stay
   // in the app. Unpaid / missing org_subscriptions rows go to /billing-locked.
   // Admins keep access to the billing/subscription page so they can pay.
-  beforeLoad: async ({ location }) => {
+  // Entering a page runs every check; a search-param-only change skips them.
+  beforeLoad: async ({ location, cause }) => {
     if (typeof window === "undefined") return; // SSR has no session
+    if (dashboardGate.skip(cause, location.pathname)) return;
     try {
       const returned = parseCheckoutReturnSearch(window.location.search);
 
@@ -179,38 +182,6 @@ export const Route = createFileRoute("/dashboard")({
         .maybeSingle();
       if (auditor) {
         throw redirect({ to: "/audit-portal" });
-      }
-
-      if (!location.pathname.startsWith("/dashboard/hive-exec")) {
-        try {
-          const { data: memberships } = await supabase
-            .from("organization_members")
-            .select("id")
-            .eq("user_id", session.user.id)
-            .eq("active", true)
-            .limit(1);
-          if (!memberships?.length) {
-            const { data: execRow } = await supabase
-              .from("hive_executives")
-              .select("id")
-              .eq("user_id", session.user.id)
-              .eq("active", true)
-              .maybeSingle();
-            if (!execRow) {
-              const { data: seats } = await (supabase as any)
-                .from("training_only_seats")
-                .select("id")
-                .eq("access_user_id", session.user.id)
-                .limit(1);
-              if (seats?.length) {
-                throw redirect({ to: "/training/course", replace: true });
-              }
-            }
-          }
-        } catch (err) {
-          if (isRedirect(err)) throw err;
-          /* table may not be applied yet */
-        }
       }
 
       let activeOrgId: string | null = null;
@@ -241,7 +212,7 @@ export const Route = createFileRoute("/dashboard")({
   errorComponent: DashboardShellError,
 });
 
-import type { Permission } from "@/lib/rbac";
+import type { Permission } from "@/lib/access/permission-keys";
 type NavItem = {
   to: string;
   label: string;
@@ -276,7 +247,13 @@ const STAFF_NAV: NavItem[] = [
 // redirects to Home. Compliance Desk stays mounted for EVV CSV only.
 const ADMIN_NAV: NavItem[] = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard, exact: true },
-  { to: "/dashboard/hub/employees", label: "Employees", icon: Users, feature: "staff_onboarding" },
+  {
+    to: "/dashboard/team-members",
+    label: "Team Members",
+    icon: Users,
+    perm: "view_staff_records",
+    feature: "staff_onboarding",
+  },
   { to: "/dashboard/hub/clients", label: "Clients", icon: Contact2, feature: "client_intake" },
   { to: "/dashboard/scheduler", label: "Scheduler", icon: CalendarDays, feature: "evv_timesheets" },
   {
@@ -286,7 +263,7 @@ const ADMIN_NAV: NavItem[] = [
     feature: "pcsp",
   },
   { to: "/dashboard/daily-logs", label: "Daily Logs", icon: ClipboardCheck },
-  { to: "/dashboard/compliance", label: "Compliance", icon: FolderCheck, exact: true },
+  { to: "/dashboard/evidence", label: "Evidence", icon: FolderCheck, exact: true },
   { to: "/dashboard/summaries", label: "Summaries", icon: FileText },
   {
     to: "/dashboard/hub/finances",
@@ -315,7 +292,8 @@ type PV = "staff" | "admin" | "staff_mobile" | "hive_exec" | "state_preview";
 
 type SidebarBodyProps = {
   user: ReturnType<typeof useAuth>["user"];
-  role: Role;
+  role: AccessLevel;
+  accessLabel: string;
   isAdminCapable: boolean;
   isExecutive: boolean;
   isHiveExecView: boolean;
@@ -335,8 +313,6 @@ type SidebarBodyProps = {
   signOut: () => Promise<void>;
   onNavigate?: () => void;
   inboxUnread: number;
-  complianceActionCount: number;
-  complianceQueueLoading: boolean;
 };
 
 function DashboardLayout() {
@@ -347,7 +323,7 @@ function DashboardLayout() {
     isError: orgError,
     error: orgQueryError,
   } = useCurrentOrg();
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const {
     view,
     hasStoredView,
@@ -434,38 +410,12 @@ function DashboardLayout() {
 
   // must_change_password is enforced globally at the router root
   // (MustChangePasswordGate in __root.tsx) — no per-layout check needed here.
-  useEffect(() => {
-    const uid = session?.user?.id;
-    if (!uid) return;
-    let cancelled = false;
-    supabase
-      .from("profiles")
-      .select("bc_role")
-      .eq("id", uid)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancelled) return;
-        // Behaviorists (bc_role set) route directly to their caseload — no time clock,
-        // no staff caseload. Only redirect from the dashboard home, not from deep links.
-        if (data?.bc_role && pathname === "/dashboard") {
-          navigate({ to: "/dashboard/behaviorist", replace: true });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [session?.user?.id, pathname, navigate]);
 
-  const role: Role = org?.role ?? "employee";
-  const isCommitteeMember = role === "committee_member";
-  const isAdminCapable =
-    !isCommitteeMember &&
-    (can("view_staff_records") ||
-      role === "admin" ||
-      role === "program_manager" ||
-      role === "manager");
+  const role = org?.access.level ?? "staff";
+  const isCommitteeMember = isCommitteeOnly(org?.access);
+  const isAdminCapable = !isCommitteeMember && (can("view_staff_records") || isAdminLevel(role));
 
-  // Fail-closed gate: a committee_member can ONLY access /dashboard/hrc.
+  // Fail-closed gate: committee-only staff can ONLY access /dashboard/hrc.
   // Redirect away from anything else immediately.
   useEffect(() => {
     if (!loading && session && isCommitteeMember && !pathname.startsWith("/dashboard/hrc")) {
@@ -529,9 +479,9 @@ function DashboardLayout() {
         : STAFF_NAV;
   const { isEnabled: isFeatureOn } = useOrgFeatures();
   const nav: NavItem[] = baseNav
-    .filter((n) => !n.perm || can(n.perm) || role === "admin")
+    .filter((n) => !n.perm || can(n.perm))
     // Master-Controller gating: keep item visible; mark isLocked when feature is OFF.
-    // Training stays visible without hive_training — Internal trainings replaced Policies.
+    // Training stays visible without hive_training — class roster lives on this page.
     .map((n) => ({ ...n, isLocked: n.feature ? !isFeatureOn(n.feature) : false }));
 
   // Load states for the State portal dropdown (executives only).
@@ -594,17 +544,6 @@ function DashboardLayout() {
     queryFn: () => unreadFn({ data: { organization_id: org!.organization_id } }),
     refetchInterval: 60_000,
   });
-
-  // Must stay above any conditional return — Rules of Hooks.
-  // Home greeting no longer starts KPI instance/client queries; yield is a no-wait.
-  const layoutReady = useYieldToAdminHomeQueries(
-    org?.organization_id ?? null,
-    isAdminCapable && isAdminHomePath(pathname),
-  );
-  const { totalCount: complianceActionCount, isLoading: complianceQueueLoading } =
-    useActionRequiredQueue(isAdminCapable ? (org?.organization_id ?? null) : null, {
-      enabled: layoutReady,
-    });
 
   const currentPreviewState = isStatePreview
     ? (states.find((s) => s.code === stateCode) ?? null)
@@ -741,9 +680,11 @@ function DashboardLayout() {
     "Dashboard";
   const inboxUnread = unreadQ.data?.count ?? 0;
 
+  const accessLabel = org?.access.presetName ?? LEVEL_LABEL[role];
   const sidebarProps: Omit<SidebarBodyProps, "onNavigate"> = {
     user,
     role,
+    accessLabel,
     isAdminCapable,
     isExecutive,
     isHiveExecView,
@@ -762,8 +703,6 @@ function DashboardLayout() {
     pathname,
     signOut,
     inboxUnread,
-    complianceActionCount,
-    complianceQueueLoading,
   };
 
   return (
@@ -863,7 +802,7 @@ function DashboardLayout() {
                         <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                           <span>{org?.organization_name ?? "Workspace"}</span>
                           {org?.is_demo && <DemoBadge />}
-                          <span>· {ROLE_LABEL[role]}</span>
+                          <span>· {accessLabel}</span>
                         </span>
                       )}
                     </p>
@@ -876,7 +815,9 @@ function DashboardLayout() {
                       nav={allNav.map((n) => ({ to: n.to, label: n.label }))}
                       isAdminCapable={isAdminCapable && effectiveView === "admin"}
                       variant="desktop"
-                      askRoute={effectiveView === "staff" ? "/dashboard/ask-nectar" : "/dashboard/help"}
+                      askRoute={
+                        effectiveView === "staff" ? "/dashboard/ask-nectar" : "/dashboard/help"
+                      }
                     />
                   )}
                 </div>
@@ -908,9 +849,7 @@ function DashboardLayout() {
                     <span className="hidden md:inline">Nectar</span>
                   </button>
                   {isAdminCapable && effectiveView === "admin" && <DraftJobsHeaderPill />}
-                  {isAdminCapable && effectiveView === "admin" && (
-                    <NotificationBell deadlinesEnabled={layoutReady} />
-                  )}
+                  {isAdminCapable && effectiveView === "admin" && <NotificationBell />}
                   <button
                     type="button"
                     onClick={() => void signOut()}
@@ -929,7 +868,9 @@ function DashboardLayout() {
                     nav={allNav.map((n) => ({ to: n.to, label: n.label }))}
                     isAdminCapable={isAdminCapable && effectiveView === "admin"}
                     variant="mobile"
-                    askRoute={effectiveView === "staff" ? "/dashboard/ask-nectar" : "/dashboard/help"}
+                    askRoute={
+                      effectiveView === "staff" ? "/dashboard/ask-nectar" : "/dashboard/help"
+                    }
                   />
                 </div>
               )}
@@ -1064,11 +1005,7 @@ function DashboardMain({ className, children }: { className: string; children: R
     resetStaffPhoneScroll(mainRef.current);
   }, [pathname]);
   return (
-    <main
-      ref={mainRef}
-      data-dashboard-scroller=""
-      className={className}
-    >
+    <main ref={mainRef} data-dashboard-scroller="" className={className}>
       {children}
     </main>
   );
@@ -1077,6 +1014,7 @@ function DashboardMain({ className, children }: { className: string; children: R
 function SidebarBody({
   user,
   role,
+  accessLabel,
   isAdminCapable,
   isExecutive,
   isHiveExecView,
@@ -1096,8 +1034,6 @@ function SidebarBody({
   signOut,
   onNavigate,
   inboxUnread,
-  complianceActionCount,
-  complianceQueueLoading,
 }: SidebarBodyProps) {
   const [upgradeFeatureKey, setUpgradeFeatureKey] = useState<string | null>(null);
   // Domain sections in the Executive Command Center sidebar are collapsed by
@@ -1366,20 +1302,8 @@ function SidebarBody({
                       : "text-[var(--hive-chrome-text)]/75 hover:bg-[color-mix(in_srgb,white_10%,transparent)] hover:text-[var(--hive-chrome-text)]"
                 }`}
               >
-                <Icon
-                  className="h-4 w-4"
-                />
+                <Icon className="h-4 w-4" />
                 <span className="flex-1">{item.label}</span>
-                {item.to === "/dashboard/compliance" &&
-                  !complianceQueueLoading &&
-                  complianceActionCount > 0 && (
-                    <span
-                      aria-label={`${complianceActionCount} action required`}
-                      className="inline-flex min-w-[20px] items-center justify-center rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold leading-none text-destructive-foreground"
-                    >
-                      {complianceActionCount > 99 ? "99+" : complianceActionCount}
-                    </span>
-                  )}
                 {item.to === "/dashboard/inbox" && inboxUnread > 0 && (
                   <span
                     aria-label={`${inboxUnread} unread`}
@@ -1400,7 +1324,9 @@ function SidebarBody({
                 <PiBrand tone="chrome" size="sm" showText={false} markClassName="h-6 w-6" />
               </span>
               <div className="min-w-0">
-                <span className="text-sm font-bold tracking-wide text-[var(--hive-chrome-text)]">Nectar</span>
+                <span className="text-sm font-bold tracking-wide text-[var(--hive-chrome-text)]">
+                  Nectar
+                </span>
                 <p className="text-[11px] leading-relaxed text-[var(--hive-chrome-text)]/55">
                   The brain. Tabs below feed it the data the rest of Provider Interface reads from.
                 </p>
@@ -1479,7 +1405,7 @@ function SidebarBody({
                 <OrgSwitcher />
                 <div className="mt-1.5 flex justify-end">
                   <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-[10px] uppercase tracking-wider">
-                    {ROLE_LABEL[role]}
+                    {accessLabel}
                   </span>
                 </div>
               </>

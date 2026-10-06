@@ -33,7 +33,7 @@ import {
 import { useCaseload } from "@/hooks/use-caseload";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 import { supabase } from "@/integrations/supabase/client";
 
 type Props = {
@@ -219,7 +219,7 @@ export function IncidentReportDialog({
   const createFn = useServerFn(createIncident);
   const draftFn = useServerFn(draftIncidentNarrative);
   const reviewFn = useServerFn(reviewIncidentReport);
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const canManageIncidents = can("manage_incidents");
 
   const initialDiscovered = useMemo(

@@ -65,10 +65,8 @@ import {
   shouldReplaceCompletionForResubmit,
   usesCertExpirationCadence,
 } from "./cert-review";
-import {
-  dualWriteCompanyObligationCompletion,
-  dualWriteCompanyObligationInstance,
-} from "./compliance-store-dual-write";
+import { isAdminLevel } from "@/lib/access/levels";
+import { assignmentCodes } from "@/lib/assignment-codes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -367,7 +365,7 @@ export async function snapshotAssigneesInternal(
       supabase.from("org_member_directory").select("id, full_name").in("id", directUserIds),
       supabase
         .from("organization_members")
-        .select("user_id, role")
+        .select("user_id, access_level")
         .eq("organization_id", organizationId)
         .eq("active", true)
         .in("user_id", directUserIds),
@@ -380,20 +378,16 @@ export async function snapshotAssigneesInternal(
         .map((r) => [r.id as string, r.full_name ?? "Unknown"] as [string, string]),
     );
     const roleById = new Map<string, string>(
-      ((roleRows ?? []) as unknown as Array<{ user_id: string; role: string }>).map(
-        (r) => [r.user_id, r.role] as [string, string],
+      ((roleRows ?? []) as unknown as Array<{ user_id: string; access_level: string }>).map(
+        (r) => [r.user_id, r.access_level] as [string, string],
       ),
     );
     directMembers = directUserIds
       .map((uid: string) => {
         const role = roleById.get(uid);
         if (!role) return null;
-        if (
-          ob.assignee_role === "managers_only" &&
-          !["manager", "program_manager", "admin"].includes(role)
-        )
-          return null;
-        if (ob.assignee_role === "admin_only" && !["admin"].includes(role)) return null;
+        if (ob.assignee_role === "managers_only" && !isAdminLevel(role)) return null;
+        if (ob.assignee_role === "admin_only" && role !== "owner") return null;
         return { staff_id: uid, staff_name: nameById.get(uid) ?? "Unknown", staff_role: role };
       })
       .filter((m): m is ResolvedStaffMember => m !== null);
@@ -416,20 +410,6 @@ export async function snapshotAssigneesInternal(
       .from("company_obligation_instance_assignees")
       .upsert(rows, { onConflict: "instance_id,staff_id", ignoreDuplicates: true });
     if (error) throw new Error(error.message);
-  }
-
-  const { data: inst } = await supabase
-    .from("company_obligation_instances")
-    .select("*")
-    .eq("id", instanceId)
-    .maybeSingle();
-  if (inst) {
-    await dualWriteCompanyObligationInstance(
-      supabase,
-      ob,
-      inst as ObligationInstanceRow,
-      filtered,
-    );
   }
 
   return filtered;
@@ -580,7 +560,7 @@ async function resolveAllAssigneesInternal(
       supabase.from("org_member_directory").select("id, full_name").in("id", directUserIds),
       supabase
         .from("organization_members")
-        .select("user_id, role")
+        .select("user_id, access_level")
         .eq("organization_id", organizationId)
         .eq("active", true)
         .in("user_id", directUserIds),
@@ -593,20 +573,16 @@ async function resolveAllAssigneesInternal(
         .map((r) => [r.id as string, r.full_name ?? "Unknown"] as [string, string]),
     );
     const roleById = new Map<string, string>(
-      ((roleRows ?? []) as unknown as Array<{ user_id: string; role: string }>).map(
-        (r) => [r.user_id, r.role] as [string, string],
+      ((roleRows ?? []) as unknown as Array<{ user_id: string; access_level: string }>).map(
+        (r) => [r.user_id, r.access_level] as [string, string],
       ),
     );
     directMembers = directUserIds
       .map((uid: string) => {
         const role = roleById.get(uid);
         if (!role) return null;
-        if (
-          ob.assignee_role === "managers_only" &&
-          !["manager", "program_manager", "admin"].includes(role)
-        )
-          return null;
-        if (ob.assignee_role === "admin_only" && !["admin"].includes(role)) return null;
+        if (ob.assignee_role === "managers_only" && !isAdminLevel(role)) return null;
+        if (ob.assignee_role === "admin_only" && role !== "owner") return null;
         return { staff_id: uid, staff_name: nameById.get(uid) ?? "Unknown", staff_role: role };
       })
       .filter((m): m is ResolvedStaffMember => m !== null);
@@ -728,19 +704,6 @@ async function generatePerPersonInstancesInternal(
       );
       if (assErr) throw new Error(assErr.message);
 
-      await dualWriteCompanyObligationInstance(
-        supabase,
-        ob,
-        inserted as ObligationInstanceRow,
-        [
-          {
-            staff_id: a.staff_id,
-            staff_name: a.staff_name,
-            staff_role: a.staff_role,
-          },
-        ],
-      );
-
       // Reminder scheduling must never block instance creation.
       try {
         await scheduleRemindersInternal(supabase, organizationId, inserted.id, ob);
@@ -832,7 +795,8 @@ async function fetchClientNamesInternal(
 /**
  * scope = 'staff_per_client': one instance per active staff_assignments row
  * whose service_codes overlap the obligation's target_service_codes (empty
- * target = every assignment qualifies). due_day_config.days_after_assignment
+ * target = every assignment with at least one code qualifies; a row with no
+ * codes never qualifies). due_day_config.days_after_assignment
  * bases the due date on the assignment's own created_at rather than a
  * shared calendar period; other cadences fall back to computePeriod, with
  * the client name prefixed onto the period key.
@@ -856,9 +820,12 @@ async function generatePerClientInstancesInternal(
     service_codes: string[] | null;
     created_at: string;
   }>;
-  const qualifying = list.filter((a) =>
-    arraysOverlapCaseInsensitive(ob.target_service_codes ?? [], a.service_codes ?? []),
-  );
+  // Rows with NULL / [] codes grant nothing — they never qualify, not even
+  // for an obligation with an empty target list.
+  const qualifying = list.filter((a) => {
+    const codes = assignmentCodes(a.service_codes);
+    return codes.length > 0 && arraysOverlapCaseInsensitive(ob.target_service_codes ?? [], codes);
+  });
   if (!qualifying.length) return [];
 
   const staffIds = Array.from(new Set(qualifying.map((a) => a.staff_id)));
@@ -940,19 +907,6 @@ async function generatePerClientInstancesInternal(
       { onConflict: "instance_id,staff_id", ignoreDuplicates: true },
     );
     if (assErr) throw new Error(assErr.message);
-
-    await dualWriteCompanyObligationInstance(
-      supabase,
-      ob,
-      inserted as ObligationInstanceRow,
-      [
-        {
-          staff_id: a.staff_id,
-          staff_name: staffNameById.get(a.staff_id) ?? "Unknown",
-          staff_role: "employee",
-        },
-      ],
-    );
 
     await scheduleRemindersInternal(supabase, organizationId, inserted.id, ob);
     created.push(inserted as ObligationInstanceRow);
@@ -1182,7 +1136,6 @@ async function generatePerHomeInstancesInternal(
           const idx = existing.findIndex((r) => r.id === orphan.id);
           if (idx >= 0) existing[idx] = next;
           created.push(next);
-          await dualWriteCompanyObligationInstance(supabase, ob, next);
         }
         continue;
       }
@@ -1207,7 +1160,6 @@ async function generatePerHomeInstancesInternal(
       const row = inserted as ObligationInstanceRow;
       existing.push(row);
       created.push(row);
-      await dualWriteCompanyObligationInstance(supabase, ob, row);
       try {
         await scheduleRemindersInternal(supabase, organizationId, row.id, ob);
       } catch (remErr) {
@@ -1351,10 +1303,10 @@ export async function notifyObligationManagersInternal(
   if (!recipientIds.size) {
     const { data: admins, error: adErr } = await supabase
       .from("organization_members")
-      .select("user_id, role")
+      .select("user_id, access_level")
       .eq("organization_id", organizationId)
       .eq("active", true)
-      .in("role", ["admin"]);
+      .eq("access_level", "owner");
     if (adErr) throw new Error(adErr.message);
     for (const a of (admins ?? []) as Array<{ user_id: string }>) recipientIds.add(a.user_id);
   }
@@ -1468,7 +1420,7 @@ export const checkAndMarkOverdue = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     await checkAndMarkOverdueInternal(supabase, data.organizationId);
     return { ok: true };
   });
@@ -1484,7 +1436,7 @@ export const listMyObligationInstances = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as MyObligationInstanceRow[];
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     await checkAndMarkOverdueInternal(supabase, data.organizationId);
 
@@ -1587,9 +1539,9 @@ export const listStaffObligationInstances = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as StaffObligationFileRow[];
     if (data.staffId === userId) {
-      await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+      await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     } else {
-      await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+      await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     }
 
     await checkAndMarkOverdueInternal(supabase, data.organizationId);
@@ -1707,7 +1659,7 @@ export const getObligationInstanceContext = createServerFn({ method: "POST" })
         instance: null as ObligationInstanceRow | null,
         obligation: null as CompanyObligationRow | null,
       };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const { data: inst, error: iErr } = await supabase
       .from("company_obligation_instances")
@@ -1744,7 +1696,7 @@ export const submitObligationForm = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { submissionId: null as string | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const { data: inst, error: iErr } = await supabase
       .from("company_obligation_instances")
@@ -1997,7 +1949,7 @@ export const listCompanyObligations = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as ObligationListItem[];
     try {
-      await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+      await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
       const { visibleObligations, instancesByObligation } =
         await bootstrapVisibleObligationInstancesInternal(supabase, data.organizationId, {
@@ -2057,22 +2009,17 @@ export const listDeadlineObligationInstances = createServerFn({ method: "POST" }
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as DeadlineObligationItem[];
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const { data: memberRow, error: mErr } = await supabase
       .from("organization_members")
-      .select("role")
+      .select("access_level")
       .eq("organization_id", data.organizationId)
       .eq("user_id", userId)
       .eq("active", true)
       .maybeSingle();
     if (mErr) throw new Error(mErr.message);
-    const role = (memberRow as { role?: string } | null)?.role ?? "";
-    const isAdminRole =
-      role === "admin" ||
-      role === "program_manager" ||
-      role === "manager" ||
-      role === "super_admin";
+    const isAdminRole = isAdminLevel((memberRow as { access_level?: string } | null)?.access_level);
 
     let visibleObligations: CompanyObligationRow[] = [];
     let instancesByObligation: Map<string, ObligationInstanceRow[]> = new Map();
@@ -2179,7 +2126,7 @@ export const getOrgServiceFootprint = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { codes: [] as string[], hasAbiClients: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     return orgServiceFootprintInternal(supabase, data.organizationId);
   });
 
@@ -2201,7 +2148,7 @@ export const listObligationAssignees = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [] as ResolvedStaffMember[];
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const ob = await fetchObligation(supabase, data.organizationId, data.obligationId);
     const assignees = await resolveAllAssigneesInternal(supabase, data.organizationId, ob);
@@ -2224,7 +2171,7 @@ export const countObligationAssigneesMissingHireDate = createServerFn({ method: 
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { missing: 0 };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const ob = await fetchObligation(supabase, data.organizationId, data.obligationId);
     let assignees = await resolveAllAssigneesInternal(supabase, data.organizationId, ob);
@@ -2259,7 +2206,7 @@ export const getCompanyObligation = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { obligation: null, current_instance: null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const ob = await fetchObligation(supabase, data.organizationId, data.obligationId);
     const { data: inst, error: iErr } = await supabase
@@ -2286,7 +2233,7 @@ export const createCompanyObligation = createServerFn({ method: "POST" })
         obligation: null as CompanyObligationRow | null,
         instance: null as ObligationInstanceRow | null,
       };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     throw new Error(ORPHAN_OBLIGATION_CREATE_GONE);
   });
 
@@ -2304,7 +2251,7 @@ export const updateCompanyObligation = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { obligation: null as CompanyObligationRow | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const existing = await fetchObligation(supabase, data.organizationId, data.obligationId);
     if (existing.is_locked)
@@ -2359,7 +2306,7 @@ export const toggleObligationActive = createServerFn({ method: "POST" })
         obligation: null as CompanyObligationRow | null,
         instance: null as ObligationInstanceRow | null,
       };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const existing = await fetchObligation(supabase, data.organizationId, data.obligationId);
     if (existing.is_locked)
@@ -2399,7 +2346,7 @@ export const deleteCompanyObligation = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const existing = await fetchObligation(supabase, data.organizationId, data.obligationId);
     if (existing.is_locked)
@@ -2432,7 +2379,7 @@ export const pauseObligationsForArchivedForm = createServerFn({ method: "POST" }
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { paused: [] as string[] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: obligations, error } = await supabase
       .from("company_obligations")
@@ -2466,7 +2413,7 @@ export const pauseObligationsForArchivedForm = createServerFn({ method: "POST" }
       .select("user_id")
       .eq("organization_id", data.organizationId)
       .eq("active", true)
-      .in("role", ["admin"]);
+      .eq("access_level", "owner");
     if (adErr) throw new Error(adErr.message);
 
     if (admins?.length) {
@@ -2506,7 +2453,7 @@ export const logObligationEvent = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { instance: null as ObligationInstanceRow | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const ob = await fetchObligation(supabase, data.organizationId, data.obligationId);
     if (ob.cadence !== "per_event")
@@ -2633,6 +2580,7 @@ async function runObligationNectarValidation(
           required_keyword_groups: keywordGroups,
         },
       },
+      ob.organization_id,
     );
   } catch (e) {
     return {
@@ -2657,10 +2605,10 @@ async function runObligationNectarValidation(
       reasons.push(`Missing ${group.label} (expected one of: ${(group.any_of ?? []).join(", ")}).`);
   }
   if (nameMatch === "unreadable") {
-    reasons.push("Could not read the staff member's name on the document.");
+    reasons.push("Could not read the team member's name on the document.");
   } else if (nameMatch === "mismatch") {
     reasons.push(
-      `Name on document ("${ocr.name_on_certificate ?? "—"}") does not match staff profile ("${profileName ?? "—"}").`,
+      `Name on document ("${ocr.name_on_certificate ?? "—"}") does not match team member profile ("${profileName ?? "—"}").`,
     );
   }
 
@@ -2707,12 +2655,12 @@ export const recordCompletion = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { instance: null as ObligationInstanceRow | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
     const targetStaffId = data.staffId ?? userId;
     const isOnBehalf = targetStaffId !== userId;
     if (isOnBehalf) {
-      await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+      await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     }
 
     const { data: inst, error: iErr } = await supabase
@@ -2851,14 +2799,6 @@ export const recordCompletion = createServerFn({ method: "POST" })
           .eq("staff_id", targetStaffId)
       : await supabase.from("company_obligation_completions").insert(completionPayload);
     if (cErr) throw new Error(cErr.message);
-    await dualWriteCompanyObligationCompletion(supabase, ob, inst as ObligationInstanceRow, {
-      staff_id: targetStaffId,
-      attestation_text_snapshot: data.attestationTextSnapshot ?? null,
-      attestation_signed_at: data.attestationSignedAt ?? null,
-      upload_path: data.uploadPath ?? null,
-      upload_filename: data.uploadFilename ?? null,
-      completed_at: completedAt,
-    });
     if (replaceId) {
       await resolveInstanceNotifications(supabase, data.instanceId);
     }
@@ -3018,10 +2958,10 @@ async function resolveAdminRecipients(
   if (!recipientIds.size) {
     const { data: admins, error: adErr } = await supabase
       .from("organization_members")
-      .select("user_id, role")
+      .select("user_id, access_level")
       .eq("organization_id", organizationId)
       .eq("active", true)
-      .in("role", ["admin"]);
+      .eq("access_level", "owner");
     if (adErr) throw new Error(adErr.message);
     for (const a of (admins ?? []) as Array<{ user_id: string }>) recipientIds.add(a.user_id);
   }
@@ -3058,12 +2998,6 @@ async function openNextRenewalInstanceInternal(
     .select("*")
     .maybeSingle();
   if (nextErr || !nextInst) return;
-  await dualWriteCompanyObligationInstance(
-    supabase,
-    ob,
-    nextInst as ObligationInstanceRow,
-    [{ staff_id: staffId, staff_name: staffName, staff_role: "employee" }],
-  );
   await supabase.from("company_obligation_instance_assignees").upsert(
     [
       {
@@ -3119,7 +3053,7 @@ export const confirmFailedObligationCompletion = createServerFn({ method: "POST"
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { instance: null as ObligationInstanceRow | null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: completion, error: cErr } = await supabase
       .from("company_obligation_completions")
@@ -3232,11 +3166,6 @@ export const confirmFailedObligationCompletion = createServerFn({ method: "POST"
       }
     }
 
-    await dualWriteCompanyObligationCompletion(supabase, ob, updatedInstance, {
-      staff_id: completion.staff_id as string,
-      completed_at: nowIso,
-    });
-
     if (expiresOn && obligationCreatesInstances(ob) && updatedInstance.status === "completed") {
       await openNextRenewalInstanceInternal(
         supabase,
@@ -3266,7 +3195,7 @@ export const requestObligationCorrection = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: completion, error: cErr } = await supabase
       .from("company_obligation_completions")
@@ -3363,7 +3292,7 @@ export const getCertReview = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<CertReviewRow | null> => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: completion, error: cErr } = await supabase
       .from("company_obligation_completions")
@@ -3416,7 +3345,7 @@ export const listPendingCertReviews = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<CertReviewRow[]> => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return [];
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: rows, error } = await supabase
       .from("company_obligation_completions")
@@ -3513,7 +3442,7 @@ export const remindOutstandingAssignees = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { reminded: 0 };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
     const { data: inst, error: iErr } = await supabase
       .from("company_obligation_instances")
@@ -3599,21 +3528,14 @@ export const waiveInstance = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
-    const { data: waived, error: upErr } = await supabase
+    const { error: upErr } = await supabase
       .from("company_obligation_instances")
       .update({ status: "waived", waive_reason: data.waiveReason })
       .eq("id", data.instanceId)
-      .eq("organization_id", data.organizationId)
-      .select("*")
-      .maybeSingle();
+      .eq("organization_id", data.organizationId);
     if (upErr) throw new Error(upErr.message);
-    if (waived) {
-      const waivedInst = waived as ObligationInstanceRow;
-      const waivedOb = await fetchObligation(supabase, data.organizationId, waivedInst.obligation_id);
-      await dualWriteCompanyObligationInstance(supabase, waivedOb, waivedInst);
-    }
 
     await resolveInstanceNotifications(supabase, data.instanceId);
 
@@ -3739,18 +3661,6 @@ async function generateEventInstancesForClientInternal(
       { onConflict: "instance_id,staff_id", ignoreDuplicates: true },
     );
     if (assErr) throw new Error(assErr.message);
-    await dualWriteCompanyObligationInstance(
-      supabase,
-      ob,
-      inserted as ObligationInstanceRow,
-      [
-        {
-          staff_id: a.staff_id,
-          staff_name: staffNameById.get(a.staff_id) ?? "Unknown",
-          staff_role: "employee",
-        },
-      ],
-    );
     try {
       await scheduleRemindersInternal(supabase, organizationId, inserted.id, ob);
     } catch (remErr) {
@@ -3772,7 +3682,7 @@ export const onPcspActivated = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase; userId: string };
     if (!supabase || !userId) return { ok: false };
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     try {
       await onPcspActivatedInternal(supabase, data.organizationId, data.clientId);
     } catch (e) {

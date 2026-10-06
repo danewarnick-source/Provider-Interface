@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Sparkles, Check, X, HandMetal } from "lucide-react";
+import { Sparkles, Check, X } from "lucide-react";
 import { listOpenShifts, decideClaim, claimOpenShift } from "@/lib/scheduling/open-shifts.functions";
-import { takeOpenShift } from "@/lib/scheduler/setup.functions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
+import { useAccess } from "@/hooks/use-access";
 
 function fmtWhen(iso: string) {
   const d = new Date(iso);
@@ -13,8 +14,9 @@ function fmtWhen(iso: string) {
 }
 
 /**
- * Admin variant: list open + pending-claim shifts. Approve/deny the pending ones.
- * Staff variant: list open shifts only, with Claim button.
+ * Admin variant: open shifts in range. Approve/Deny only when the viewer is
+ * an owner or an agency-wide admin. Team-member variant: Request shift, which
+ * waits for that approval. It does not assign the shift.
  */
 export function OpenShiftsPanel({
   organizationId, startIso, endIso, mode, clientNames, onJumpToShift,
@@ -27,10 +29,11 @@ export function OpenShiftsPanel({
   onJumpToShift?: (id: string) => void;
 }) {
   const qc = useQueryClient();
+  const { user } = useAuth();
+  const { isAgencyAdmin } = useAccess();
   const listFn = useServerFn(listOpenShifts);
   const decideFn = useServerFn(decideClaim);
   const claimFn = useServerFn(claimOpenShift);
-  const takeFn = useServerFn(takeOpenShift);
 
   const q = useQuery({
     queryKey: ["open-shifts", organizationId, startIso, endIso],
@@ -53,13 +56,8 @@ export function OpenShiftsPanel({
   });
   const claim = useMutation({
     mutationFn: (shiftId: string) => claimFn({ data: { shiftId } }),
-    onSuccess: () => { invalidate(); toast.success("Claim submitted — awaiting admin approval"); },
+    onSuccess: () => { invalidate(); toast.success("Requested, waiting for approval"); },
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
-  });
-  const take = useMutation({
-    mutationFn: (shiftId: string) => takeFn({ data: { shift_id: shiftId } }),
-    onSuccess: () => { invalidate(); toast.success("Shift added to your schedule."); },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't take this shift."),
   });
 
   const rows = q.data ?? [];
@@ -76,6 +74,7 @@ export function OpenShiftsPanel({
       <ul className="space-y-1.5">
         {rows.map((s) => {
           const pending = !!s.claim_requested_by;
+          const mine = pending && s.claim_requested_by === user?.id;
           return (
             <li
               key={s.id}
@@ -94,11 +93,11 @@ export function OpenShiftsPanel({
                 </div>
                 <div className="text-[11px] text-muted-foreground">
                   {clientNames?.get(s.client_id) ?? "Client"}
-                  {pending ? " · awaiting admin approval" : ""}
+                  {mode === "admin" && pending ? " · waiting for approval" : ""}
                 </div>
               </button>
               <div className="flex shrink-0 items-center gap-2">
-                {mode === "admin" && pending && (
+                {mode === "admin" && pending && isAgencyAdmin && (
                   <>
                     <Button
                       size="sm"
@@ -121,19 +120,24 @@ export function OpenShiftsPanel({
                   </>
                 )}
                 {mode === "staff" && s.status === "open" && !pending && (
-                  <>
-                    <Button
-                      size="sm"
-                      className="h-10 min-h-[44px] md:min-h-0"
-                      onClick={() => take.mutate(s.id)}
-                      disabled={take.isPending || claim.isPending}
-                    >
-                      <HandMetal className="mr-1 h-3.5 w-3.5" /> Take shift
-                    </Button>
-                  </>
+                  <Button
+                    size="sm"
+                    className="h-10 min-h-[44px] md:min-h-0"
+                    onClick={() => claim.mutate(s.id)}
+                    disabled={claim.isPending}
+                  >
+                    Request shift
+                  </Button>
                 )}
-                {mode === "staff" && pending && (
-                  <span className="text-[11px] font-medium text-amber-700">Pending</span>
+                {mode === "staff" && mine && (
+                  <span className="text-[11px] font-medium text-amber-700">
+                    Requested, waiting for approval
+                  </span>
+                )}
+                {mode === "staff" && pending && !mine && (
+                  <span className="text-[11px] font-medium text-muted-foreground">
+                    Waiting for approval
+                  </span>
                 )}
               </div>
             </li>

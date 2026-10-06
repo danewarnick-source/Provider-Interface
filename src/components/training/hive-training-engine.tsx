@@ -10,6 +10,7 @@ import {
 import { PI_THEME } from "@/lib/pi-theme";
 import { choiceFollowUp, scoreSegmentGate, shouldPersistResumeStep, shuffleCopy, SEGMENT_GATE_PASS, SEGMENT_GATE_TOTAL } from "@/lib/in-hive-training";
 import { TrainingDiagram, type DiagramId } from "@/components/training/in-hive-diagrams";
+import { SafeHtml } from "@/components/safe-html";
 import {
   useTrainingSpeech,
   getSessionAutoRead,
@@ -1860,7 +1861,12 @@ function Accordion({ drops, open, onOpenChange }: { drops: [string, string][]; o
           <button onClick={() => set(value === i ? null : i)} style={{ width: "100%", textAlign: "left", font: "inherit", fontSize: 13, fontWeight: 600, color: NAVY, background: "#f7f8fb", border: "1px solid #e4e7ef", borderRadius: 10, padding: "11px 13px", marginBottom: 7, cursor: "pointer", display: "flex", justifyContent: "space-between", gap: 10 }}>
             <span>{t}</span><span>{value === i ? "\u25B4" : "\u25BE"}</span>
           </button>
-          {value === i && <div style={{ fontSize: 12.8, color: "#42485a", lineHeight: 1.6, padding: "2px 4px 12px" }} dangerouslySetInnerHTML={{ __html: b }} />}
+          {value === i && (
+            <SafeHtml
+              html={b}
+              style={{ fontSize: 12.8, color: "#42485a", lineHeight: 1.6, padding: "2px 4px 12px" }}
+            />
+          )}
         </div>
       ))}
     </div>
@@ -2224,7 +2230,10 @@ export function TrainingModule({
             {step.callout && (
               <div style={{ borderRadius: 12, padding: "12px 14px", marginBottom: 6, border: `1px solid ${step.callout.v === "crit" ? "#f3c6c6" : "#b9d6f2"}`, background: step.callout.v === "crit" ? "#fdeded" : "#eaf3fc" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em", color: step.callout.v === "crit" ? "#a32d2d" : "#185fa5" }}>{step.callout.t}</div>
-                <div style={{ fontSize: 13, lineHeight: 1.5, marginTop: 5, color: step.callout.v === "crit" ? "#7a2222" : "#1c4e80" }} dangerouslySetInnerHTML={{ __html: step.callout.b }} />
+                <SafeHtml
+                  html={step.callout.b}
+                  style={{ fontSize: 13, lineHeight: 1.5, marginTop: 5, color: step.callout.v === "crit" ? "#7a2222" : "#1c4e80" }}
+                />
               </div>
             )}
             {step.facts?.map((f: Fact, n: number) => (

@@ -15,8 +15,10 @@ function publishableClient(
     usernameRow: { email: string } | null;
     status: string | null;
   }> = {},
-): PublishableAuthClient & { signInCalls: Array<{ email: string; password: string }> } {
-  const signInCalls: Array<{ email: string; password: string }> = [];
+): PublishableAuthClient & {
+  signInCalls: Array<{ email: string; password: string; options?: { captchaToken?: string } }>;
+} {
+  const signInCalls: Array<{ email: string; password: string; options?: { captchaToken?: string } }> = [];
   const client: PublishableAuthClient & { signInCalls: typeof signInCalls } = {
     signInCalls,
     auth: {
@@ -113,6 +115,7 @@ describe("performPasswordSignInWithClient", () => {
     assert.equal(client.signInCalls.length, 1);
     assert.equal(client.signInCalls[0].email, "dane@example.com");
     assert.equal(client.signInCalls[0].password, "correct-horse");
+    assert.equal(client.signInCalls[0].options, undefined);
     assert.equal(session.user.id, "0a6df668-a1a4-4cad-86f2-815ba4d9e1c0");
     assert.equal(session.access_token, "access-token");
   });
@@ -134,5 +137,14 @@ describe("performPasswordSignInWithClient", () => {
       },
     );
     assert.equal(client.signInCalls.length, 0);
+  });
+
+  it("forwards a captcha token only when the login form collected one", async () => {
+    const client = publishableClient();
+    await performPasswordSignInWithClient("dane@example.com", "correct-horse", {
+      createPublishableClient: () => client,
+      captchaToken: "turnstile-token",
+    });
+    assert.equal(client.signInCalls[0].options?.captchaToken, "turnstile-token");
   });
 });

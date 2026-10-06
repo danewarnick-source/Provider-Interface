@@ -1,16 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
-import { EmployeesPage } from "./dashboard.employees.index";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/** Permanent redirect: old links live on in saved notifications and emails. */
 export const Route = createFileRoute("/dashboard/employees/new")({
-  head: () => ({ meta: [{ title: "Add employee — Provider Interface" }] }),
-  component: AddEmployeeRoute,
+  beforeLoad: ({ location: { hash } }) => {
+    throw redirect({ to: "/dashboard/team-members", search: { add: 1 }, hash, replace: true });
+  },
 });
-
-function AddEmployeeRoute() {
-  return (
-    <AgencySetupCreateGate>
-      <EmployeesPage />
-    </AgencySetupCreateGate>
-  );
-}

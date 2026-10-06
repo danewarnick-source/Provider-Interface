@@ -1,6 +1,7 @@
 name: Deploy AWS (parallel target)
 
-# Parallel AWS frontend alongside Tuesday Sep 1 Vercel / Lovable.
+# Production deploy: every push to main ships providerinterface.com.
+# Vercel serves the staging sandbox from the staging branch.
 # This workflow never touches wrangler.jsonc, src/server.ts's Cloudflare
 # entry point, or anything Lovable's GitHub sync manages.
 #
@@ -20,7 +21,7 @@ name: Deploy AWS (parallel target)
 # See docs/AWS_LAMBDA.md. Reuses existing GitHub AWS / Vite secrets.
 # Do not create new accounts, buckets, distributions, or Lambdas.
 #
-# Live JS on hivecertify.com must contain dhrrukdcigiiqksibdfb
+# Live JS on providerinterface.com must contain dhrrukdcigiiqksibdfb
 # (Hive-Platform). After build:lambda, CI fails the job if
 # .output/public still contains the retired Lovable project
 # mmknqtdrefbzwfdtykza or a legacy JWT anon key. Copy Vercel
@@ -68,7 +69,7 @@ jobs:
           VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
           PUBLIC_SITE_URL: ${{ secrets.AWS_PUBLIC_SITE_URL }}
 
-      # hivecertify.com login uses this baked client URL. Wrong project
+      # providerinterface.com login uses this baked client URL. Wrong project
       # looks like "Invalid username or password". Dane/Tony must set
       # GitHub Actions secrets + Lambda runtime env to Hive-Platform
       # (dhrrukdcigiiqksibdfb) then re-run Deploy AWS.
@@ -123,7 +124,7 @@ jobs:
           fi
 
       # Job-level DISTRIBUTION_ID is set before this `if:` is evaluated.
-      # Always invalidate /* so hivecertify.com does not keep stale HTML/JS.
+      # Always invalidate /* so providerinterface.com does not keep stale HTML/JS.
       - name: Invalidate CloudFront cache
         if: env.DISTRIBUTION_ID != ''
         run: |

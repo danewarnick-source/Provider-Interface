@@ -45,15 +45,27 @@ describe("hire auto-assign", () => {
     assert.doesNotMatch(hireHook, /assignmentNeedsMandt/);
     assert.doesNotMatch(hireHook, /ensureOpenStaffObligationInternal\(/);
     const roleWriter = readFileSync(
-      fileURLToPath(new URL("./team-access.functions.ts", import.meta.url)),
+      fileURLToPath(new URL("./access/access.functions.ts", import.meta.url)),
       "utf8",
     );
     assert.match(roleWriter, /reevaluateStaffDutiesInternal/);
-    const empCaseload = readFileSync(
-      fileURLToPath(new URL("../routes/dashboard.employees.index.tsx", import.meta.url)),
+    // The caseload lives on the team member profile (Caseload tab), which
+    // saves through setStaffClientCodes; the server-side writer runs the
+    // removal hook and waives the removed client's open staff_per_client items.
+    const caseloadEditor = readFileSync(
+      fileURLToPath(
+        new URL("../components/team-members/profile/caseload-tab.tsx", import.meta.url),
+      ),
       "utf8",
     );
-    assert.match(empCaseload, /onStaffAssignmentRemoved/);
+    assert.match(caseloadEditor, /setStaffClientCodes/);
+    assert.doesNotMatch(caseloadEditor, /from\("staff_assignments"\)/);
+    const writer = readFileSync(
+      fileURLToPath(new URL("./scheduler/setup.functions.ts", import.meta.url)),
+      "utf8",
+    );
+    assert.match(writer, /onStaffAssignmentRemovedInternal/);
+    assert.match(writer, /waiveRemovedClientItemsInternal/);
     const nightly = readFileSync(
       fileURLToPath(new URL("./obligations/remediation.ts", import.meta.url)),
       "utf8",
@@ -80,11 +92,6 @@ describe("hire auto-assign", () => {
       "utf8",
     );
     assert.match(faceSheet, /onClientDutyFactsChanged/);
-    const bsConfig = readFileSync(
-      fileURLToPath(new URL("../components/behavior-support/bs-config-card.tsx", import.meta.url)),
-      "utf8",
-    );
-    assert.match(bsConfig, /onClientDutyFactsChanged/);
   });
 
   it("uses existing due windows (30 / 90 / 180) instead of a second cadence", () => {

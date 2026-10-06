@@ -24,6 +24,7 @@ import { REQUIRED_SETUP_QUESTIONS } from "@/lib/agency-setup-gate";
 import { agencySetupQueryKey, useAgencySetup } from "@/hooks/use-agency-setup";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { isAdminLevel } from "@/lib/access/levels";
 
 export const Route = createFileRoute("/dashboard/settings/compliance-setup")({
   head: () => ({ meta: [{ title: "Agency setup — Provider Interface" }] }),
@@ -57,7 +58,7 @@ function ComplianceSetupPage() {
   const { facts, status, isLoading } = useAgencySetup();
   const orgId = org?.organization_id ?? null;
   const canEdit =
-    org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+    isAdminLevel(org?.access.level);
 
   const [draft, setDraft] = useState<SetupDraft>({
     operates_ol_site: null,

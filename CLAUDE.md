@@ -2,9 +2,17 @@
 HIVE is a multi-tenant compliance platform for Utah DSPD (disability services) providers, replacing Connecteam + manual compliance. AI engine = "Nectar" (AWS Bedrock; Nectar advises/flags, NEVER fabricates documentation or acts unreviewed). First tenant: True North Supports (TNS). Services TNS runs: HHS, SLN, SLH, SEI, DSI. Launch: 2026-07-01, same day the new state contract DHHS91172 takes effect.
 
 ## Architecture & workflow
-- TanStack Start + React + Supabase (LOVABLE CLOUD: no service keys, no direct DB access — all SQL goes to the human via docs/SQL_HANDOFF.md). Lovable.dev co-edits this repo via GitHub sync: small atomic commits, build green before push, one writer at a time.
-- supabase/migrations/ may NOT match the live DB. Confirm schema via SQL handoff queries before relying on it.
+- TanStack Start + React + Supabase. Live project: "Provider-Interface" `dhrrukdcigiiqksibdfb` (Lovable is no longer used). Schema changes are migration files in supabase/migrations/, applied to the live DB directly (Supabase MCP/CLI) — one file per logical step, named for what it does. Small atomic commits, build green before push.
+- Branches & deploys: `staging` = Vercel sandbox (agency-peace-of-mind.vercel.app); `main` = production on AWS (providerinterface.com, via .github/workflows/deploy-aws.yml). Nothing reaches `main` until the user says that change is ready.
+  - Branch new work from `main` (never from `staging`, or unrelated staging work rides along to production). Open the PR against `staging`.
+  - Merging the PR into `staging` puts it on the sandbox, and .github/workflows/sandbox-to-production.yml opens a matching "Production: …" PR from the same branch into `main` (label `production`). Merging that PR is the only way the change reaches production; the user decides when.
+  - Fixes found while testing: push them to the same feature branch. The workflow merges them into `staging` and they show up in the production PR. Never delete the branch or merge `staging` into it.
+  - Only open `staging` → `main` if the user asks to ship everything on staging at once.
+  - Hotfixes may target `main` directly. .github/workflows/staging-sync.yml merges `main` back into `staging` on every push.
+- The live DB is shared by production (main), staging, and PR previews: a migration applied before release must stay compatible with main. Anything that would break main (drops/renames) goes in a separate "Phase B" migration applied right after that change merges to main (not when it merges to staging).
+- Older migrations may not match the live DB. Confirm schema against the live DB before relying on them.
 - NEVER PostgREST-embed organization_members↔profiles (no FK; both key off auth.users.id) — two queries, join in JS.
+- Access model (see docs/access-levels-migration-plan.md): organization_members.access_level (owner/admin/staff) + access_scope (agency/assigned/self) + access_preset_id (access_presets) + access_overrides. 18 categories, each off/view/edit, defined in src/lib/access/categories.ts. Code checks go through src/lib/access/ (useAccess().can / requireCategory). DB helpers: access_is_owner, is_org_admin_or_manager (= Owner or agency-wide Admin), access_has_category, access_can_see_client, access_can_see_staff. Scoped managers come from access_assignments (home/staff/client, many-to-many). Legacy organization_members.role / invitations.role still exist live until supabase/migrations/20260926000000_access_levels_b_drop_legacy_roles.sql is applied (only after the access-levels code is deployed; then regenerate src/integrations/supabase/types.ts). Never read or write `role` in new code.
 - RLS: every org-data table is org-scoped via is_org_member/is_org_admin_or_manager helpers; never USING(true) on org/PHI data. `teams` = homes (team_name/setting/address). `home_designations` holds the Homes & Teams CARE-TEAM role labels (DSP/House Manager/Lead/Supervisor) — that's its legitimate data; never delete it, and never treat its rows as locations/homes.
 
 ## DSPD domain rules (encoded product truths — do not "simplify" these away)
@@ -22,15 +30,13 @@ HIVE is a multi-tenant compliance platform for Utah DSPD (disability services) p
 - locations table exists live-only; was polluted with staff-role names; rebuild only from teams.
 - Old hhs_daily_records table is orphaned; read hhs_daily_records_v instead (never delete the old table without instruction).
 - must_change_password must be enforced at router root. /fix-admin route is deleted; never recreate.
-- The human runs SQL in Lovable's editor and must Clear it before each paste; write handoff SQL truncation-proof (string_agg for lists).
-- Password-reset / invite / magic-link / email-confirm redirects must use `src/lib/auth-redirect.ts` (`passwordResetRedirectUrl` / `resolveAuthOrigin`). Never hardcode a Lovable URL. Origin-based so hivecertify.com and agency-peace-of-mind.vercel.app both work; Lovable hosts are rewritten to https://hivecertify.com. Supabase Dashboard Site URL must also be https://hivecertify.com (ops, not in repo) or Auth will ignore redirectTo.
+- Password-reset / invite / magic-link / email-confirm redirects must use `src/lib/auth-redirect.ts` (`passwordResetRedirectUrl` / `resolveAuthOrigin`). Never hardcode a Lovable URL. Allowed origins: providerinterface.com (+www) and agency-peace-of-mind.vercel.app; hivecertify.com (now a 301 to providerinterface.com) and Lovable hosts are rewritten to https://providerinterface.com. Supabase Dashboard Site URL must be https://providerinterface.com (ops, not in repo) or Auth will ignore redirectTo.
 
 # Build & commit rules for this repo
 
 This project uses TanStack Router (via @lovable.dev/vite-tanstack-config). The
 file src/routeTree.gen.ts is auto-generated AND committed to git. If it is stale
-relative to the route files, the Lovable preview fails to build ("Preview has
-not been built yet").
+relative to the route files, preview builds fail.
 
 ## Required before EVERY commit and push:
 1. Run `npm run build`. This regenerates src/routeTree.gen.ts via the

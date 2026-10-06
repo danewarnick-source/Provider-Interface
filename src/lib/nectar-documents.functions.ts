@@ -63,8 +63,8 @@ function decodeBase64Text(base64: string): string {
 // uploader share one path. Field-key names match what
 // applyExtractedFieldsToClient consumes.
 
-async function callLovableAI(documentText: string, hint?: string) {
-  return parseDocumentWithAI(documentText, hint);
+async function callLovableAI(documentText: string, hint?: string, orgId?: string | null) {
+  return parseDocumentWithAI(documentText, hint, orgId);
 }
 
 // Client autofill logic lives in src/lib/client-import-schema.ts so both
@@ -106,7 +106,7 @@ export const ingestDocument = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+    await requireOrgMembership(supabase, userId, data.organizationId, "staff");
 
 
     // 1. Upload to storage
@@ -193,7 +193,7 @@ export const ingestDocument = createServerFn({ method: "POST" })
         return { document: doc, extracted: [] as Array<{ field_key: string }> };
       }
 
-      const ai = await callLovableAI(text, `documentType=${data.documentType}`);
+      const ai = await callLovableAI(text, `documentType=${data.documentType}`, data.organizationId);
       const rows = (ai.fields ?? []).map((f) => {
         // Fold value_bool / value_array into value_json so they persist (the
         // table has no boolean/array columns).
@@ -431,7 +431,7 @@ export const reviewExtractedField = createServerFn({ method: "POST" })
       .eq("id", data.fieldId)
       .maybeSingle();
     if (!fieldRow?.organization_id) throw new Error("Extracted field not found");
-    await requireOrgMembership(supabase, userId, fieldRow.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, fieldRow.organization_id as string, "admin");
     const update: Record<string, unknown> = {
       status: data.action === "confirm" ? "confirmed" : data.action === "override" ? "overridden" : "rejected",
       reviewed_by: userId,
@@ -459,11 +459,16 @@ export const deleteDocument = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: false };
     const { data: doc } = await supabase
       .from("nectar_documents")
-      .select("storage_path, storage_bucket, organization_id")
+      .select("storage_path, storage_bucket, organization_id, client_id")
       .eq("id", data.documentId)
       .maybeSingle();
     if (!doc?.organization_id) throw new Error("Document not found");
-    await requireOrgMembership(supabase, userId, doc.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, doc.organization_id as string, "admin");
+    if (doc.client_id) {
+      throw new Error(
+        "Client records can't be deleted. Remove it from the client's Files tab instead — it moves to Outdated and is kept for audits.",
+      );
+    }
     if (doc?.storage_path) {
       await supabase.storage.from(doc.storage_bucket as string).remove([doc.storage_path as string]);
     }

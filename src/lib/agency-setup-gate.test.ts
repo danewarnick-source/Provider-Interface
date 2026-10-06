@@ -232,7 +232,7 @@ describe("unit: agency setup gate — required operating facts", () => {
     assert.equal(incomplete.createAllowed, true);
     assert.equal(canSkipAgencySetup(incomplete), false);
     assert.equal(shouldBlockStaffClientCreate(incomplete), false);
-    assert.equal(setupRedirectForPath("/dashboard/employees", incomplete), null);
+    assert.equal(setupRedirectForPath("/dashboard/team-members", incomplete), null);
   });
 });
 
@@ -243,10 +243,6 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
       servicesOffered: ["HHS"],
     });
     assert.equal(canSkipAgencySetup(incomplete), false);
-    const panel = read("../components/onboarding/nectar-onboarding-panel.tsx");
-    assert.match(panel, /canSkipAgencySetup/);
-    assert.match(panel, /disabled=\{!canSkip\}/);
-    assert.doesNotMatch(panel, /Skip — take me to my dashboard/);
   });
 
   it("blocks create UI and server create while incomplete", () => {
@@ -254,8 +250,8 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
     assert.equal(shouldBlockStaffClientCreate(incomplete), true);
     assert.throws(() => assertAgencySetupComplete(incomplete), /Agency setup is incomplete/);
 
-    const hire = read("./employees.functions.ts");
-    const invites = read("./invitations.functions.ts");
+    const hire = read("./team-members/members.functions.ts");
+    const invites = read("./team-members/invites.functions.ts");
     const clients = read("../routes/dashboard.clients.tsx");
     const importCommit = read("./smart-import-commit.functions.ts");
     assert.match(hire, /assertAgencySetupCompleteForOrg/);
@@ -264,6 +260,14 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
     assert.match(importCommit, /assertAgencySetupCompleteForOrg/);
     for (const api of SETUP_CREATE_APIS) {
       assert.ok(api.length > 0);
+    }
+    for (const api of ["createTeamMember", "importTeamMembers", "hireTeamMemberInternal"]) {
+      assert.ok((SETUP_CREATE_APIS as readonly string[]).includes(api));
+      assert.match(hire, new RegExp(`export (const|async function) ${api}\\b`));
+    }
+    for (const gone of ["createEmployeeManually", "applyEmployeeRosterRow", "finishEmployeeSetup"]) {
+      assert.ok(!(SETUP_CREATE_APIS as readonly string[]).includes(gone));
+      assert.doesNotMatch(hire, new RegExp(gone));
     }
   });
 
@@ -295,9 +299,11 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
     assert.doesNotMatch(setupPage, /factsQuery/);
   });
 
-  it("keeps Home available for incomplete-setup guidance", () => {
+  it("does not mount the agency-setup wizard on Home", () => {
     const home = read("../components/admin-home/admin-home-dashboard.tsx");
-    assert.match(home, /NectarOnboardingPanel/);
+    assert.doesNotMatch(home, /NectarOnboardingPanel/);
+    assert.doesNotMatch(home, /nectar-onboarding-panel/);
+    assert.doesNotMatch(home, /agency-setup-panel/);
     assert.doesNotMatch(home, /RequirePermission/);
   });
 });
@@ -509,3 +515,18 @@ describe("unit: persist rollback when a later step fails", () => {
   });
 });
 
+
+describe("unit: agency setup gate — Team Members address", () => {
+  it("gates the roster and profile addresses and no longer needs the old employees paths", () => {
+    assert.equal(isSetupGatedPath("/dashboard/team-members"), true);
+    assert.equal(isSetupGatedPath("/dashboard/team-members/"), true);
+    assert.equal(isSetupGatedPath("/dashboard/team-members/7fabcf5d-f826-487f-8730-8b0c3f1969bb"), true);
+    assert.equal(isSetupGatedPath("/dashboard/team-members-archive"), false);
+    assert.equal(isSetupGatedPath("/dashboard/employees"), false);
+    const blocked = computeAgencySetupStatus(EMPTY_AGENCY_SETUP_FACTS);
+    assert.deepEqual(setupRedirectForPath("/dashboard/team-members", blocked), {
+      to: AGENCY_SETUP_PATH,
+      search: { reason: "setup_incomplete" },
+    });
+  });
+});

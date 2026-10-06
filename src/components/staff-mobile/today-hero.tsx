@@ -62,8 +62,7 @@ export function TodayHero() {
 
   const hhsPeople = (caseload ?? []).filter((c) => {
     const all = clientAuthorizedCodes(c);
-    const codes = allowedCodesFor(assignments, c.id, all);
-    return hasHostHomeDailyCode(codes.length ? codes : all);
+    return hasHostHomeDailyCode(allowedCodesFor(assignments, c.id, all));
   });
 
   // Active EVV punch wins — return to the in-progress shift.
@@ -83,9 +82,8 @@ export function TodayHero() {
     const activeCodes = activeClient
       ? allowedCodesFor(assignments, activeClient.id, clientAuthorizedCodes(activeClient))
       : [];
-    const effectiveActiveCodes = activeCodes.length
-      ? activeCodes
-      : clientAuthorizedCodes(activeClient ?? { job_code: null });
+    // Assigned ∩ authorized only — no fallback to every client code.
+    const effectiveActiveCodes = activeCodes;
     const dualWhileClocked = stackDualCaseloadActions({
       codes: effectiveActiveCodes,
       isHostHomeDailyNoteCard: false,
@@ -239,10 +237,7 @@ export function TodayHero() {
     const leadCodes = lead
       ? allowedCodesFor(assignments, lead.id, clientAuthorizedCodes(lead))
       : [];
-    const effective = leadCodes.length
-      ? leadCodes
-      : clientAuthorizedCodes(lead ?? { job_code: null });
-    return hostHomeDailyNoteCode(effective);
+    return hostHomeDailyNoteCode(leadCodes);
   })();
   const leadDailyClientId = primary?.client_id ?? extraHhs[0]?.id;
   const leadDailyDone = leadDailyClientId ? !!todayNotes?.has(leadDailyClientId) : false;
@@ -326,9 +321,7 @@ export function TodayHero() {
             const leadCodes = lead
               ? allowedCodesFor(assignments, lead.id, clientAuthorizedCodes(lead))
               : [];
-            const effectiveLeadCodes = leadCodes.length
-              ? leadCodes
-              : clientAuthorizedCodes(lead ?? { job_code: null });
+            const effectiveLeadCodes = leadCodes;
             // Not punched in: never Open Punch pad on this row — even for
             // dual-code people with a scheduled DSI/SLH/SEI shift.
             const leadDual = stackDualCaseloadActions({
@@ -434,8 +427,7 @@ export function TodayHero() {
               })}
             {moreHhs.map((c) => {
               const all = clientAuthorizedCodes(c);
-              const codes = allowedCodesFor(assignments, c.id, all);
-              const noteCode = hostHomeDailyNoteCode(codes.length ? codes : all);
+              const noteCode = hostHomeDailyNoteCode(allowedCodesFor(assignments, c.id, all));
               const noteLabel = caseloadDailyNoteLabel({
                 code: noteCode,
                 alreadyDoneToday: !!todayNotes?.has(c.id),

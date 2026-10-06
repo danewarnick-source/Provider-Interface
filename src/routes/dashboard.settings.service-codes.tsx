@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
 import { BookOpenCheck } from "lucide-react";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
 import { OnboardingGuidanceBanner } from "@/components/onboarding/onboarding-guidance-banner";
 import { ServiceCodeRegistryView } from "@/components/settings/service-code-registry-view";
 import { ServiceCatalogView } from "@/components/settings/service-catalog-view";
+import { isOwner } from "@/lib/access/levels";
 
 const search = z.object({
   view: z.enum(["reference", "config"]).catch("reference").optional(),
@@ -16,9 +17,9 @@ export const Route = createFileRoute("/dashboard/settings/service-codes")({
   head: () => ({ meta: [{ title: "Service Codes — Settings" }] }),
   validateSearch: (s) => search.parse(s),
   component: () => (
-    <RequireRole roles={["admin", "program_manager", "manager"]}>
+    <RequireLevel min="admin">
       <ServiceCodesPage />
-    </RequireRole>
+    </RequireLevel>
   ),
 });
 
@@ -26,7 +27,7 @@ function ServiceCodesPage() {
   const { view } = Route.useSearch();
   const { data: org } = useCurrentOrg();
   const activeView = view ?? "reference";
-  const canConfig = org?.role === "admin";
+  const canConfig = isOwner(org?.access.level);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">

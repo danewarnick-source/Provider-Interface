@@ -22,6 +22,7 @@
  * weekday + same start time-of-day + starts_at >= clicked occurrence.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { coerceScheduledShiftStatus } from "@/lib/scheduling/shift-status";
 
 export type ShiftDraft = {
   id?: string;
@@ -34,7 +35,7 @@ export type ShiftDraft = {
   starts_at: string; // ISO
   ends_at: string;   // ISO
   notes: string | null;
-  status: string;    // e.g. "pending"
+  status: string;
   published: boolean;
   created_by: string;
   // Recurrence (optional — defaults match a one-off shift)
@@ -95,7 +96,7 @@ function buildPayload(draft: ShiftDraft): Record<string, unknown> {
     starts_at: draft.starts_at,
     ends_at: draft.ends_at,
     notes: draft.notes?.trim() || null,
-    status: draft.status,
+    status: coerceScheduledShiftStatus(draft.status, draft.staff_id),
     published: draft.published,
     created_by: draft.created_by,
     is_recurring: !!draft.is_recurring,
@@ -130,20 +131,14 @@ async function upsertPreviewShift(draft: ShiftDraft) {
     if (error) throw error;
     return draft.id;
   }
-  // Route insert through the compliance-gated server fn so bundle-level
-  // billing_conflict rules can raise open flags before the row lands.
-  const { insertScheduledShiftsGated } = await import("@/lib/scheduling/shift-commit.functions");
-  const res = await insertScheduledShiftsGated({ data: { rows: [payload as never] } });
-  if (res.status === "needs_review") {
-    // Preview-page callers should catch this and open <ComplianceFlagDialog>;
-    // then re-call saveShift after decisions land. We surface it as an error
-    // with attached candidates so existing catch paths see it.
-    const e = new Error("compliance_review_required") as Error & { candidates?: unknown };
-    e.candidates = res.candidates;
-    throw e;
-  }
-  if (res.blocked) throw new Error("Blocked by compliance flag (Stop chosen)");
-  return res.insertedIds[0];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: inserted, error } = await (supabase as any)
+    .from("scheduled_shifts")
+    .insert(payload)
+    .select("id")
+    .single();
+  if (error) throw error;
+  return (inserted as { id: string }).id;
 }
 
 // =====================================================================

@@ -15,6 +15,9 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
+import { useAuth } from "@/hooks/use-auth";
+import { useAccess } from "@/hooks/use-access";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { RequirePermission } from "@/components/rbac-guard";
 import { Badge } from "@/components/ui/badge";
@@ -52,8 +55,6 @@ import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 
 import { displayMedicaidId } from "@/lib/medicaid-id";
 import { ClientBudgetPanel } from "@/components/clients/client-budget-panel";
-import { ClientMealPlannerMount } from "@/components/clients/client-meal-planner-mount";
-import { ChoreChartForClient } from "@/components/chores/chore-chart-mount";
 
 import { CaseloadEditor } from "@/components/clients/caseload-editor";
 import {
@@ -74,7 +75,6 @@ import {
 import { FieldVisibilityToggle } from "@/components/clients/visibility-toggles";
 import { CodeAssignedStaff } from "@/components/clients/code-assigned-staff";
 import { CustomFieldsForSection } from "@/components/clients/custom-fields-panel";
-import { TargetBehaviorsPanel } from "@/components/clients/target-behaviors-panel";
 import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/hrc-restrictions";
 import { Scale } from "lucide-react";
 import {
@@ -94,7 +94,6 @@ import {
   ShieldCheck,
   GraduationCap,
   Users,
-  UtensilsCrossed,
   ListChecks,
   UserCircle,
   FileUp,
@@ -108,7 +107,7 @@ import {
   FolderOpen,
   X,
 } from "lucide-react";
-import { clientFeatureVisible, useClientFeature } from "@/lib/client-features";
+import { clientFeatureVisible } from "@/lib/client-features";
 import { MarEmarTab } from "@/components/workspace/mar-emar-tab";
 import {
   getClientSpecificTraining,
@@ -245,29 +244,21 @@ function CollapsibleSimpleCard({
 function ClientProfileHub() {
   const { clientId } = Route.useParams();
   const { tab: rawTab } = Route.useSearch();
-  const { data: org } = useCurrentOrg();
+  const { user, loading: authLoading } = useAuth();
+  const orgQ = useCurrentOrg();
+  const org = orgQ.data;
   const router = useRouter();
   const orgId = org?.organization_id;
   const recordAccessFn = useServerFn(recordPhiAccess);
   const chartAuditLogged = useRef(false);
+  const { canCategory } = useAccess();
+  const canMedical = canCategory("client_medical");
+  const canBilling = canCategory("billing");
+  const canIncidents = canCategory("incidents");
+  const canHrc = canCategory("hrc");
 
-  useEffect(() => {
-    if (!orgId || !isRouteUuid(clientId) || chartAuditLogged.current) return;
-    chartAuditLogged.current = true;
-    void recordAccessFn({
-      data: {
-        organizationId: orgId,
-        resourceType: "client_chart",
-        resourceId: clientId,
-        clientId,
-        action: "view",
-        detail: "admin-client-profile-hub",
-        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-      },
-    });
-  }, [orgId, clientId, recordAccessFn]);
-
-  const activeTab = resolveTab(rawTab);
+  const requestedTab = resolveTab(rawTab);
+  const activeTab = requestedTab === "billing" && !canBilling ? "identity" : requestedTab;
 
   const setTab = (t: string) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -292,6 +283,23 @@ function ClientProfileHub() {
   });
 
   const client = clientQ.data;
+
+  useEffect(() => {
+    if (!orgId || !client || !isRouteUuid(clientId) || chartAuditLogged.current) return;
+    chartAuditLogged.current = true;
+    void recordAccessFn({
+      data: {
+        organizationId: orgId,
+        resourceType: "client_chart",
+        resourceId: clientId,
+        clientId,
+        action: "view",
+        detail: "admin-client-profile-hub",
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      },
+    });
+  }, [orgId, clientId, client, recordAccessFn]);
+
   const fullName = client
     ? `${client.first_name ?? ""} ${client.last_name ?? ""}`.trim() || "—"
     : "Loading…";
@@ -307,28 +315,32 @@ function ClientProfileHub() {
       }
     : null;
   const isHostHome = clientFeatureVisible(featureClient, "host_home");
-  const hasMedMonitoringCode = clientFeatureVisible(featureClient, "med_monitoring");
-  const { enabled: emarFeatureEnabled } = useClientFeature(featureClient, "emar");
-  const { data: hasMedications } = useQuery({
-    queryKey: ["client-profile-has-meds", clientId],
-    enabled: isRouteUuid(clientId),
-    queryFn: async () => {
-      const { count } = await supabase
-        .from("client_medications")
-        .select("id", { count: "exact", head: true })
-        .eq("client_id", clientId);
-      return (count ?? 0) > 0;
-    },
-  });
-  // Admin gate: this route is already admin-only (view_clients). Always show
-  // the MAR/eMAR sub-tab so an admin can add the first medication for a
-  // client with none — MarEmarTab handles its own empty/add state.
-  const showEmarSubTab = true;
-  void emarFeatureEnabled;
-  void hasMedMonitoringCode;
-  void hasMedications;
-
   const disabilityCategory = client?.disability_category as string | null | undefined;
+
+  const orgPending =
+    authLoading || orgQ.isLoading || (!!user && orgQ.data === undefined && !orgQ.isError);
+  const clientPending = !!orgId && isRouteUuid(clientId) && clientQ.isLoading;
+  if (orgPending || clientPending) {
+    return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
+  }
+  if (!client) {
+    return (
+      <div className="p-8">
+        <h1 className="text-lg font-semibold">Not found</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          This client is not in your organization.
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-4"
+          onClick={() => router.navigate({ to: "/dashboard/hub/clients" })}
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" /> Client directory
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-6 space-y-6">
@@ -355,7 +367,7 @@ function ClientProfileHub() {
               <Badge className="bg-amber-100 text-amber-800 border border-amber-200">ABI</Badge>
             )}
             {disabilityCategory === "ID-RC" && <Badge variant="outline">ID/RC</Badge>}
-            <FaceSheetButton clientId={clientId} variant="pill" />
+            {canMedical && <FaceSheetButton clientId={clientId} variant="pill" />}
           </div>
         </div>
       </div>
@@ -365,7 +377,7 @@ function ClientProfileHub() {
         <TabsList className="mb-4 flex-wrap h-auto">
           <TabsTrigger value="identity">Identity</TabsTrigger>
           <TabsTrigger value="care-plan">Care plan</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
+          {canBilling && <TabsTrigger value="billing">Billing</TabsTrigger>}
           <TabsTrigger value="files">Client file</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
           <TabsTrigger value="operations">Operations</TabsTrigger>
@@ -400,8 +412,7 @@ function ClientProfileHub() {
           <Tabs defaultValue="goals">
             <TabsList className="mb-4">
               <TabsTrigger value="goals">Goals</TabsTrigger>
-              <TabsTrigger value="behaviors">Target Behaviors</TabsTrigger>
-              <TabsTrigger value="medications">Medications</TabsTrigger>
+              {canMedical && <TabsTrigger value="medications">Medications</TabsTrigger>}
             </TabsList>
 
             <TabsContent value="goals" className="space-y-10">
@@ -412,55 +423,44 @@ function ClientProfileHub() {
               </CareGroup>
             </TabsContent>
 
-            <TabsContent value="behaviors" className="space-y-6">
-              <CareGroup
-                label="Target Behaviors"
-                hint="Named behaviors staff should recognize and document — surfaces in clock-out behavior observations"
-              >
-                <CareSection icon={ClipboardList} accent="amber">
-                  {orgId ? (
-                    <TargetBehaviorsPanel clientId={clientId} orgId={orgId} />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Organization not loaded.</p>
-                  )}
-                </CareSection>
-              </CareGroup>
-            </TabsContent>
-
-            <TabsContent value="medications" className="space-y-6">
-              <CareGroup
-                label="Medications"
-                hint="Medication list & eMAR — same record staff use on shift"
-              >
-                <CareSection icon={Pill} accent="rose">
-                  <MarEmarTab clientId={clientId} clientName={fullName} />
-                </CareSection>
-              </CareGroup>
-            </TabsContent>
+            {canMedical && (
+              <TabsContent value="medications" className="space-y-6">
+                <CareGroup
+                  label="Medications"
+                  hint="Medication list & eMAR — same record staff use on shift"
+                >
+                  <CareSection icon={Pill} accent="rose">
+                    <MarEmarTab clientId={clientId} clientName={fullName} />
+                  </CareSection>
+                </CareGroup>
+              </TabsContent>
+            )}
           </Tabs>
           <CustomFieldsForSection clientId={clientId} section="care_plan" />
         </TabsContent>
 
         {/* BILLING — sole home for authorized codes, per-code rates,
             annual authorization units, and budget. */}
-        <TabsContent value="billing" className="space-y-10">
-          <SectionGroup
-            label="Authorizations & budget"
-            hint="Billing codes, rates, annual units, and remaining funds"
-          >
-            <SectionPanel icon={ShieldCheck} accent="emerald">
-              <BillingCodesPanel
-                clientId={clientId}
-                clientName={fullName}
-                medicaidId={displayMedicaidId(client?.medicaid_id)}
-              />
-            </SectionPanel>
-            <SectionPanel icon={Wallet} accent="teal">
-              <ClientBudgetPanel clientId={clientId} />
-            </SectionPanel>
-          </SectionGroup>
-          <CustomFieldsForSection clientId={clientId} section="billing" />
-        </TabsContent>
+        {canBilling && (
+          <TabsContent value="billing" className="space-y-10">
+            <SectionGroup
+              label="Authorizations & budget"
+              hint="Billing codes, rates, annual units, and remaining funds"
+            >
+              <SectionPanel icon={ShieldCheck} accent="emerald">
+                <BillingCodesPanel
+                  clientId={clientId}
+                  clientName={fullName}
+                  medicaidId={displayMedicaidId(client?.medicaid_id)}
+                />
+              </SectionPanel>
+              <SectionPanel icon={Wallet} accent="teal">
+                <ClientBudgetPanel clientId={clientId} />
+              </SectionPanel>
+            </SectionGroup>
+            <CustomFieldsForSection clientId={clientId} section="billing" />
+          </TabsContent>
+        )}
 
         {/* CLIENT FILE — status cards plus uploaded source documents. */}
         <TabsContent value="files" className="space-y-10">
@@ -494,9 +494,11 @@ function ClientProfileHub() {
             <SectionPanel icon={FileText} accent="indigo">
               <DailyLogsPanel clientId={clientId} orgId={orgId} />
             </SectionPanel>
-            <SectionPanel icon={AlertOctagon} accent="rose">
-              <IncidentsPanel clientId={clientId} orgId={orgId} />
-            </SectionPanel>
+            {canIncidents && (
+              <SectionPanel icon={AlertOctagon} accent="rose">
+                <IncidentsPanel clientId={clientId} orgId={orgId} />
+              </SectionPanel>
+            )}
           </SectionGroup>
         </TabsContent>
 
@@ -508,14 +510,6 @@ function ClientProfileHub() {
             </CareSection>
             <CareSection icon={Users} accent="sky">
               <CaseloadEditor clientId={clientId} />
-            </CareSection>
-          </CareGroup>
-          <CareGroup label="Operational tools" hint="Day-to-day care coordination">
-            <CareSection icon={UtensilsCrossed} accent="orange">
-              <ClientMealPlannerMount clientId={clientId} />
-            </CareSection>
-            <CareSection icon={Sparkles} accent="teal">
-              <ChoreChartForClient clientId={clientId} />
             </CareSection>
           </CareGroup>
           <CustomFieldsForSection clientId={clientId} section="operations" />
@@ -535,9 +529,11 @@ function ClientProfileHub() {
             <SectionPanel icon={CalendarClock} accent="amber">
               <DeadlinesPanel clientId={clientId} />
             </SectionPanel>
-            <SectionPanel icon={Scale} accent="rose">
-              <RightsRestrictionsPanel clientId={clientId} />
-            </SectionPanel>
+            {canHrc && (
+              <SectionPanel icon={Scale} accent="rose">
+                <RightsRestrictionsPanel clientId={clientId} />
+              </SectionPanel>
+            )}
           </SectionGroup>
           <CustomFieldsForSection clientId={clientId} section="compliance" />
         </TabsContent>
@@ -1713,7 +1709,7 @@ function IncidentsPanel({ clientId, orgId }: { clientId: string; orgId?: string 
           "id, incident_date, incident_types, status, is_abuse_neglect, is_fatality, report_number",
         )
         .eq("organization_id", orgId!)
-        .eq("client_id", clientId)
+        .or(incidentInvolvesClientOr(clientId))
         .order("incident_date", { ascending: false })
         .limit(100);
       if (error) throw error;

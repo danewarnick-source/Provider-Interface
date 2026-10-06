@@ -13,7 +13,7 @@ import {
 const TNS = {
   organization_id: TNS_ORGANIZATION_ID,
   is_demo: false,
-  role: "admin" as const,
+  access: { level: "owner" },
   display_acronym: "TNS",
   organization_name: "True North Supports",
 };
@@ -21,7 +21,7 @@ const TNS = {
 const DEMO = {
   organization_id: "aaaaaaaa-demo-org",
   is_demo: true,
-  role: "admin" as const,
+  access: { level: "owner" },
   display_acronym: "DEMO",
   organization_name: "Demo",
 };
@@ -29,7 +29,7 @@ const DEMO = {
 const TEST_AGENCY = {
   organization_id: "bbbbbbbb-test-agency",
   is_demo: false,
-  role: "admin" as const,
+  access: { level: "owner" },
   display_acronym: null,
   organization_name: "Test Agency 1",
 };
@@ -37,7 +37,7 @@ const TEST_AGENCY = {
 const SALT_LAKE = {
   organization_id: "cccccccc-slc-care",
   is_demo: false,
-  role: "admin" as const,
+  access: { level: "owner" },
   display_acronym: null,
   organization_name: "Salt Lake Care Co",
 };
@@ -45,7 +45,7 @@ const SALT_LAKE = {
 const PI_WALK = {
   organization_id: "dddddddd-pi-walk",
   is_demo: false,
-  role: "admin" as const,
+  access: { level: "owner" },
   display_acronym: null,
   organization_name: "pi20",
 };
@@ -53,7 +53,7 @@ const PI_WALK = {
 const PAID_AGENCY = {
   organization_id: "eeeeeeee-paid-org",
   is_demo: false,
-  role: "employee" as const,
+  access: { level: "staff" },
   display_acronym: "ACME",
   organization_name: "Acme DSPD Agency",
 };

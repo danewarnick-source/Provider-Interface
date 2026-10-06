@@ -8,16 +8,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PageShell } from "@/components/layout/page-shell";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { ALL_PERMISSIONS, PERMISSION_LABEL, type Permission } from "@/lib/rbac";
-import { requestPermission } from "@/lib/permissions.functions";
+import { isPermission, PERMISSION_KEYS, type Permission } from "@/lib/access/permission-keys";
+import { CATEGORY_BY_ID, valueLabel } from "@/lib/access/categories";
+import { requestAccess } from "@/lib/access/access.functions";
+
+/** "Scheduling: Edit" — the category setting that grants this permission key. */
+function neededLabel(perm: Permission): string {
+  const rule = PERMISSION_KEYS[perm];
+  if (!rule) return "HIVE platform access";
+  const cat = CATEGORY_BY_ID[rule[0]];
+  return `${cat.label}: ${valueLabel(cat, rule[1])}`;
+}
 
 export const Route = createFileRoute("/unauthorized")({
   head: () => ({ meta: [{ title: "Unauthorized — Provider Interface" }] }),
   validateSearch: (s: Record<string, unknown>): { perm?: Permission; page?: string } => {
     const out: { perm?: Permission; page?: string } = {};
-    if (typeof s.perm === "string" && (ALL_PERMISSIONS as readonly string[]).includes(s.perm)) {
-      out.perm = s.perm as Permission;
-    }
+    if (typeof s.perm === "string" && isPermission(s.perm)) out.perm = s.perm;
     if (typeof s.page === "string") out.page = s.page;
     return out;
   },
@@ -27,7 +34,7 @@ export const Route = createFileRoute("/unauthorized")({
 function UnauthorizedPage() {
   const { perm, page } = Route.useSearch();
   const { data: org } = useCurrentOrg();
-  const requestFn = useServerFn(requestPermission);
+  const requestFn = useServerFn(requestAccess);
   const [showForm, setShowForm] = useState(false);
   const [reason, setReason] = useState("");
   const [sending, setSending] = useState(false);
@@ -38,7 +45,7 @@ function UnauthorizedPage() {
     setSending(true);
     try {
       await requestFn({
-        data: { organizationId: org.organization_id, permission: perm, reason: reason.trim(), pageRequested: page },
+        data: { organization_id: org.organization_id, needed: neededLabel(perm), reason: reason.trim(), page },
       });
       setSent(true);
       toast.success("Access request sent");
@@ -58,11 +65,11 @@ function UnauthorizedPage() {
         <h1 className="mt-4 text-2xl font-semibold tracking-tight">Access denied</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {perm ? (
-            <>You don't have the <strong>{PERMISSION_LABEL[perm]}</strong> permission needed to view this page.</>
+            <>This page needs <strong>{neededLabel(perm)}</strong> access, which your access settings don't include.</>
           ) : (
             "You don't have permission to view this page."
           )}{" "}
-          If you believe this is a mistake, contact your organization admin.
+          If you believe this is a mistake, contact your agency Owner.
         </p>
 
         {perm && org && !sent && (
@@ -72,7 +79,7 @@ function UnauthorizedPage() {
             ) : (
               <div className="space-y-3">
                 <Textarea
-                  placeholder="Why do you need this permission?"
+                  placeholder="Why do you need this access?"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}

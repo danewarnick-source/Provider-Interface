@@ -60,12 +60,6 @@ describe("Compliance spine — parallel writers killed", () => {
     assert.match(resolve, /skipNectarComplianceMutation/);
     assert.doesNotMatch(resolve, /\.from\(["']nectar_compliance_flags/);
 
-    const usage = read("./nectar-requirement-usage.functions.ts");
-    const saveStart = usage.indexOf("export const saveRequirementUsageNote");
-    const save = usage.slice(saveStart, usage.indexOf("export const recategorizeRequirement"));
-    assert.match(save, /skipRequirementUsageWrite/);
-    assert.doesNotMatch(save, /\.insert\(/);
-
     const shift = read("./scheduling/shift-commit.ts");
     const raiseFn = shift.slice(
       shift.indexOf("async function raiseAndMaybeResolve"),
@@ -81,7 +75,8 @@ describe("Compliance spine — parallel writers killed", () => {
     assert.doesNotMatch(incident, /\.insert\(/);
 
     const attest = read("./authoritative-sources.functions.ts");
-    assert.match(attest, /nectar_compliance_instances stay/);
+    assert.doesNotMatch(attest, /export const getRequirementDrillDown/);
+    assert.doesNotMatch(attest, /export const recordComplianceEvidence/);
     const held = read("./nectar-held-timesheets.functions.ts");
     assert.match(held, /nectar_compliance_flags writes are retired/);
     assert.doesNotMatch(held, /\.update\(\{[\s\S]*resolution:/);
@@ -97,27 +92,16 @@ describe("Compliance spine — parallel writers killed", () => {
     );
     assert.match(create, /ORPHAN_OBLIGATION_CREATE_GONE/);
     assert.doesNotMatch(create, /\.from\(["']company_obligations["']\)\s*\n\s*\.insert/);
-
-    const packs = read("./obligation-packs.functions.ts");
-    const packCreate = packs.slice(
-      packs.indexOf("export const createObligationPack"),
-      packs.indexOf("export const assignObligationPack"),
-    );
-    const addItem = packs.slice(
-      packs.indexOf("export const addPackItem"),
-      packs.indexOf("export const attachExistingToPack"),
-    );
-    assert.match(packCreate, /ORPHAN_OBLIGATION_CREATE_GONE/);
-    assert.match(addItem, /ORPHAN_OBLIGATION_CREATE_GONE/);
-    assert.doesNotMatch(packCreate, /\.insert\(/);
-    assert.doesNotMatch(addItem, /\.insert\(/);
   });
 
   it("does not drop nectar or obligation tables", () => {
     const note = read("../../docs/SQL_HANDOFF.md");
-    assert.match(note, /Do not DROP tables\. Do not run Soft SQL for this change/);
-    const step10Note = note.slice(0, note.indexOf("## ACTION — Compliance revamp Step 9"));
-    assert.match(step10Note, /Step 10: stop-writes only/);
+    const step10Start = note.indexOf("## NOTE — Compliance revamp Step 10: stop-writes only");
+    const step9Start = note.indexOf("## ACTION — Compliance revamp Step 9");
+    assert.ok(step10Start >= 0, "step 10 note");
+    assert.ok(step9Start > step10Start, "step 9 follows step 10");
+    const step10Note = note.slice(step10Start, step9Start);
+    assert.match(step10Note, /Do not DROP tables\. Do not run Soft SQL for this change/);
     assert.doesNotMatch(step10Note, /DROP TABLE/);
     assert.doesNotMatch(step10Note, /20260911160000/);
     const step7 = read(

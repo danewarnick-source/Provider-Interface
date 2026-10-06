@@ -68,7 +68,7 @@ export const listSavedReports = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<SavedReport[]> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return [];
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const { data: reports, error } = await supabase
       .from("nectar_saved_reports")
       .select("id, name, prompt, pinned, created_at, updated_at")
@@ -109,7 +109,7 @@ export const saveReport = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { id: "" };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const { data: inserted, error } = await supabase
       .from("nectar_saved_reports")
       .insert({ organization_id: data.organizationId, owner_user_id: userId, name: data.name, prompt: data.prompt, pinned: !!data.pinned })
@@ -134,7 +134,7 @@ export const togglePinReport = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
     const orgId = await orgForSavedReport(supabase, data.id);
-    await requireOrgMembership(supabase, userId, orgId, "manager");
+    await requireOrgMembership(supabase, userId, orgId, "admin");
     const { error } = await supabase
       .from("nectar_saved_reports")
       .update({ pinned: data.pinned })
@@ -151,7 +151,7 @@ export const deleteSavedReport = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
     const orgId = await orgForSavedReport(supabase, data.id);
-    await requireOrgMembership(supabase, userId, orgId, "manager");
+    await requireOrgMembership(supabase, userId, orgId, "admin");
     const { error } = await supabase
       .from("nectar_saved_reports")
       .delete()
@@ -220,7 +220,7 @@ export const upsertReportSchedule = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { id: "", next_run_at: "" };
     const orgId = await orgForSavedReport(supabase, data.saved_report_id);
-    await requireOrgMembership(supabase, userId, orgId, "manager");
+    await requireOrgMembership(supabase, userId, orgId, "admin");
     const next = computeNextRunAt(data);
     const { data: existing } = await supabase
       .from("nectar_report_schedules")
@@ -260,7 +260,7 @@ export const unscheduleReport = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: false };
     const orgId = await orgForSavedReport(supabase, data.id);
-    await requireOrgMembership(supabase, userId, orgId, "manager");
+    await requireOrgMembership(supabase, userId, orgId, "admin");
     const { error } = await supabase
       .from("nectar_report_schedules")
       .update({ active: false })

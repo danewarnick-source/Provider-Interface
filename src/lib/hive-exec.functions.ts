@@ -2,6 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isBillingExempt } from "@/lib/billing-access";
 import {
+  distinctActiveStaff,
+  execAggregateAllowed,
+  sumClockedHours,
+  usageCounts,
+} from "@/lib/exec-aggregates";
+import {
   quoteHiveSubscription,
   type PricingSchedule,
 } from "@/lib/hive-pricing";
@@ -257,6 +263,59 @@ export const getExecKpis = createServerFn({ method: "GET" })
     };
   });
 
+// Counts and sums only. Client rows and timesheet rows stay on the server.
+async function loadExecUsageAggregates(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  userId: string,
+  orgIds: string[],
+  windows?: { since30: string; since7: string },
+): Promise<Map<string, { clients: number; hours_last_30d: number; active_staff_last_7d: number }>> {
+  const { data: isExec, error: execErr } = await supabase.rpc("is_hive_executive", { _user: userId });
+  if (!execAggregateAllowed(isExec === true, !!execErr)) {
+    throw new Error("Access denied — PI Executive permission required.");
+  }
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const admin = supabaseAdmin as any;
+  const result = new Map<string, { clients: number; hours_last_30d: number; active_staff_last_7d: number }>();
+  await Promise.all(
+    orgIds.map(async (orgId) => {
+      const clientRes = await admin
+        .from("clients")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", orgId);
+      if (clientRes.error) throw new Error(clientRes.error.message);
+      let hours = 0;
+      let active = 0;
+      if (windows) {
+        const [hoursRes, activeRes] = await Promise.all([
+          admin
+            .from("evv_timesheets")
+            .select("clock_in_timestamp, clock_out_timestamp")
+            .eq("organization_id", orgId)
+            .gte("clock_in_timestamp", windows.since30),
+          admin
+            .from("evv_timesheets")
+            .select("staff_id")
+            .eq("organization_id", orgId)
+            .gte("clock_in_timestamp", windows.since7),
+        ]);
+        if (hoursRes.error) throw new Error(hoursRes.error.message);
+        if (activeRes.error) throw new Error(activeRes.error.message);
+        hours = sumClockedHours(hoursRes.data ?? []);
+        active = distinctActiveStaff(activeRes.data ?? []);
+      }
+      result.set(orgId, {
+        clients: clientRes.count ?? 0,
+        hours_last_30d: hours,
+        active_staff_last_7d: active,
+      });
+    }),
+  );
+  return result;
+}
+
 // ───── Companies list ──────────────────────────────────────────────────────
 
 export const listCompanies = createServerFn({ method: "GET" })
@@ -293,18 +352,15 @@ export const listCompanies = createServerFn({ method: "GET" })
 
     // Counts (HEAD requests so no row data crosses the wire)
     const orgIds = ((orgs ?? []) as Array<{ id: string; name: string; billing_exempt?: boolean; legal_name?: string | null; dba_name?: string | null }>).map((o) => o.id);
+    const clientUsage = await loadExecUsageAggregates(supabase, userId, orgIds);
     const counts = await Promise.all(
       orgIds.map(async (orgId) => {
-        const [staffRes, clientRes, ticketRes] = await Promise.all([
+        const [staffRes, ticketRes] = await Promise.all([
           supabase
             .from("organization_members")
             .select("id", { count: "exact", head: true })
             .eq("organization_id", orgId)
             .eq("active", true),
-          supabase
-            .from("clients")
-            .select("id", { count: "exact", head: true })
-            .eq("organization_id", orgId),
           supabase
             .from("org_support_tickets")
             .select("id", { count: "exact", head: true })
@@ -314,7 +370,7 @@ export const listCompanies = createServerFn({ method: "GET" })
         return {
           orgId,
           staff: staffRes.count ?? 0,
-          clients: clientRes.count ?? 0,
+          clients: clientUsage.get(orgId)?.clients ?? 0,
           tickets: ticketRes.count ?? 0,
         };
       }),
@@ -467,49 +523,25 @@ export const getCompanyDetail = createServerFn({ method: "POST" })
     const since30 = new Date(Date.now() - 30 * 86_400_000).toISOString();
     const since7 = new Date(Date.now() - 7 * 86_400_000).toISOString();
 
-    const [staffRes, clientRes, hoursRes, activeStaffRes, ticketsRes] = await Promise.all([
+    const [staffRes, ticketsRes, execUsage] = await Promise.all([
       supabase
         .from("organization_members")
         .select("id", { count: "exact", head: true })
         .eq("organization_id", data.organizationId)
         .eq("active", true),
       supabase
-        .from("clients")
-        .select("id", { count: "exact", head: true })
-        .eq("organization_id", data.organizationId),
-      supabase
-        .from("evv_timesheets")
-        .select("clock_in_timestamp, clock_out_timestamp")
-        .eq("organization_id", data.organizationId)
-        .gte("clock_in_timestamp", since30),
-      supabase
-        .from("evv_timesheets")
-        .select("staff_id")
-        .eq("organization_id", data.organizationId)
-        .gte("clock_in_timestamp", since7),
-      supabase
         .from("org_support_tickets")
         .select("id, subject, status, severity, source, created_at, updated_at")
         .eq("organization_id", data.organizationId)
         .order("created_at", { ascending: false })
         .limit(50),
+      loadExecUsageAggregates(supabase, userId, [data.organizationId], { since30, since7 }),
     ]);
-
-    let hours_last_30d = 0;
-    for (const r of (hoursRes.data ?? []) as Array<{
-      clock_in_timestamp: string;
-      clock_out_timestamp: string | null;
-    }>) {
-      if (!r.clock_out_timestamp) continue;
-      const h =
-        (new Date(r.clock_out_timestamp).getTime() - new Date(r.clock_in_timestamp).getTime()) /
-        3_600_000;
-      if (h > 0 && isFinite(h)) hours_last_30d += h;
-    }
-
-    const activeSet = new Set(
-      ((activeStaffRes.data ?? []) as Array<{ staff_id: string }>).map((r) => r.staff_id),
-    );
+    const usageAgg = execUsage.get(data.organizationId) ?? {
+      clients: 0,
+      hours_last_30d: 0,
+      active_staff_last_7d: 0,
+    };
 
     // Live MRR override: when the subscription is on PI Standard, the
     // operator should see what the provider is currently billable for today,
@@ -526,7 +558,7 @@ export const getCompanyDetail = createServerFn({ method: "POST" })
       exempt: orgExempt,
       plan: subPlan,
       staffCount: staffRes.count || subStaff || 1,
-      clientCount: clientRes.count ?? 0,
+      clientCount: usageAgg.clients,
       schedule: (org as { pricing_schedule?: string | null }).pricing_schedule === "founding" ? "founding" : "list",
       foundingEndsAt: (org as { founding_ends_at?: string | null }).founding_ends_at ?? null,
       interval: (sub as { billing_interval: string | null } | null)?.billing_interval ?? null,
@@ -573,12 +605,12 @@ export const getCompanyDetail = createServerFn({ method: "POST" })
             locked_at: (sub as { locked_at: string | null }).locked_at,
           }
         : null,
-      usage: {
-        staff_count: staffRes.count ?? 0,
-        client_count: clientRes.count ?? 0,
-        hours_last_30d: Math.round(hours_last_30d * 10) / 10,
-        active_staff_last_7d: activeSet.size,
-      },
+      usage: usageCounts({
+        staffCount: staffRes.count ?? 0,
+        clientCount: usageAgg.clients,
+        hoursLast30d: usageAgg.hours_last_30d,
+        activeStaffLast7d: usageAgg.active_staff_last_7d,
+      }),
       tickets: (ticketsRes.data ?? []) as CompanyDetail["tickets"],
     };
   });
@@ -624,22 +656,28 @@ export const upsertSubscription = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: false };
     await ensureExecutive(supabase, userId);
 
-    const { data: existing } = await supabase
+    // Subscription rows are written with the service role after the exec check,
+    // so the write does not depend on an executive RLS policy.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const admin = supabaseAdmin as any;
+    const { data: existing, error: readErr } = await admin
       .from("org_subscriptions")
       .select("id")
       .eq("organization_id", data.organizationId)
       .maybeSingle();
+    if (readErr) throw readErr;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const patchAny = data.patch as any;
     if (existing) {
-      const { error } = await supabase
+      const { error } = await admin
         .from("org_subscriptions")
         .update(patchAny)
         .eq("id", existing.id);
       if (error) throw error;
     } else {
-      const { error } = await supabase.from("org_subscriptions").insert({
+      const { error } = await admin.from("org_subscriptions").insert({
         organization_id: data.organizationId,
         ...patchAny,
       });
@@ -904,7 +942,7 @@ export const updateAccountContact = createServerFn({ method: "POST" })
       .maybeSingle();
     const isExec = !!execRow;
     if (!isExec) {
-      await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+      await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     }
 
     const updates: Record<string, unknown> = {};
@@ -948,7 +986,7 @@ export const getAccountContact = createServerFn({ method: "POST" })
     const { data: execRow } = await supabase
       .from("hive_executives").select("id").eq("user_id", userId).eq("active", true).maybeSingle();
     if (!execRow) {
-      await requireOrgMembership(supabase, userId, data.organizationId, "employee");
+      await requireOrgMembership(supabase, userId, data.organizationId, "staff");
     }
     const { data: org, error } = await supabase
       .from("organizations")

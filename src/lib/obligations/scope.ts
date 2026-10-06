@@ -276,9 +276,10 @@ export function employeeScopeFromSnapshot(
   staffId: string,
   snapshot: OrgScopeSnapshot,
 ): EmployeeScopeDraft {
-  const lead = snapshot.members.find((m) => m.staff_id === staffId && m.is_lead)?.group_id ?? null;
+  const members = snapshot?.members ?? [];
+  const lead = members.find((m) => m.staff_id === staffId && m.is_lead)?.group_id ?? null;
   return {
-    scopeGroupId: snapshot.scopeByStaffId[staffId] ?? null,
+    scopeGroupId: snapshot?.scopeByStaffId?.[staffId] ?? null,
     leadGroupId: lead,
   };
 }

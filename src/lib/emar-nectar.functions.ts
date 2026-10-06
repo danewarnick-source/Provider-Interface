@@ -27,7 +27,7 @@ export const emarNectarHelper = createServerFn({ method: "POST" })
       .eq("id", data.clientId)
       .single();
     if (!client) throw new Error("Client not found.");
-    const c = client as { first_name: string; last_name: string };
+    const c = client as { first_name: string; last_name: string; organization_id: string };
     const personName = `${c.first_name} ${c.last_name}`;
 
     // Build factual context from real records (no fabrication)
@@ -101,7 +101,7 @@ export const emarNectarHelper = createServerFn({ method: "POST" })
           ],
         },
       ],
-    });
+    }, { orgId: c.organization_id });
 
     if (!res.ok) {
       const t = await res.text();

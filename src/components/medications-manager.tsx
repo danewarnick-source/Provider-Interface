@@ -153,9 +153,9 @@ export function MedicationsManager({
   const qc = useQueryClient();
   const parseAI = useServerFn(parseMedicationsAI);
   const { data: org } = useCurrentOrg();
-  const role = org?.role ?? null;
-  const canApprove = role === "admin";
-  const canPropose = role === "manager";
+  const role = org?.access.level ?? null;
+  const canApprove = role === "owner";
+  const canPropose = role === "admin";
   const readOnly = !canApprove && !canPropose;
   const [addOpen, setAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);

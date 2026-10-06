@@ -65,9 +65,7 @@ const TOMMY_GOALS = [
   "Daily living — prepare a simple meal with staff support",
 ] as const;
 
-const BLAKE_GOALS = [
-  "Health — complete daily hygiene routine independently",
-] as const;
+const BLAKE_GOALS = ["Health — complete daily hygiene routine independently"] as const;
 
 export const CLIENTS = {
   tommy: {
@@ -139,6 +137,67 @@ export const PENDING_INVITE = {
 };
 
 export const STAFF_LIST = [STAFF.admin, STAFF.jake, STAFF.harvey, STAFF.tom, STAFF.dane];
+
+/**
+ * Evidence summaries the mocked listTeamRoster returns (the real server fn
+ * derives them from evidence_items / evidence_files). One of each roster label:
+ * All current, N missing, N due soon, No pack yet.
+ */
+const EVIDENCE_NONE = {
+  hasPack: false,
+  total: 0,
+  done: 0,
+  dueSoon: 0,
+  missing: 0,
+  awaitingReview: 0,
+  skipped: 0,
+};
+export const ROSTER_EVIDENCE: Record<string, typeof EVIDENCE_NONE> = {
+  [STAFF.jake.id]: { ...EVIDENCE_NONE, hasPack: true, total: 4, done: 4 },
+  [STAFF.harvey.id]: { ...EVIDENCE_NONE, hasPack: true, total: 5, done: 3, missing: 2 },
+  [STAFF.tom.id]: { ...EVIDENCE_NONE, hasPack: true, total: 3, done: 3, dueSoon: 1 },
+  [STAFF.dane.id]: EVIDENCE_NONE,
+  [ADMIN_USER_ID]: EVIDENCE_NONE,
+};
+
+/** Roster Position chips (profiles.staff_type_keys labelled by staff_types). */
+export const ROSTER_POSITIONS: Record<string, Array<{ key: string; label: string }>> = {
+  [STAFF.jake.id]: [{ key: "dsp", label: "Direct Support Professional" }],
+  [STAFF.harvey.id]: [
+    { key: "operations_director", label: "Operations Director" },
+    { key: "dsp", label: "Direct Support Professional" },
+    { key: "hhp", label: "Host Home Provider" },
+  ],
+  [STAFF.tom.id]: [{ key: "hhp", label: "Host Home Provider" }],
+  [STAFF.dane.id]: [{ key: "executive_director", label: "Executive Director" }],
+  [ADMIN_USER_ID]: [],
+};
+
+/** The agency's staff_types — the Position list on Add / Import team members. */
+export const TNS_POSITIONS = [
+  { key: "dsp", label: "Direct Support Professional" },
+  { key: "executive_assistant", label: "Executive Assistant" },
+  { key: "executive_director", label: "Executive Director" },
+  { key: "hhp", label: "Host Home Provider" },
+  { key: "operations_director", label: "Operations Director" },
+];
+
+/** The person createTeamMember / importTeamMembers "adds" in the mocks. */
+export const NEW_TEAM_MEMBER = {
+  id: "00000000-0000-4000-a000-000000000499",
+  name: "Sep Tester",
+  email: "sep1.tester@example.test",
+  tempPassword: "Mock-Temp-Pass2",
+} as const;
+
+/** Mocked org_member_last_sign_ins: the roster admin has never signed in. */
+export const LAST_SIGN_IN: Record<string, string | null> = {
+  [ADMIN_USER_ID]: null,
+  [STAFF.jake.id]: "2026-08-27T12:00:00.000Z",
+  [STAFF.harvey.id]: "2026-08-27T12:00:00.000Z",
+  [STAFF.tom.id]: "2026-08-27T12:00:00.000Z",
+  [STAFF.dane.id]: "2026-08-27T12:00:00.000Z",
+};
 export const CLIENT_LIST = [CLIENTS.tommy, CLIENTS.blake, CLIENTS.stephen, CLIENTS.marcus];
 
 /** Fake daily_logs rows — IDs and narrative are synthetic, not live PHI. */
@@ -163,7 +222,8 @@ export const DAILY_LOGS = [
     pcsp_goals_addressed: [...TOMMY_GOALS],
     narrative:
       "Tommy joined a community outing to the library, chose two books, and practiced meal prep at dinner with staff support. Mood was calm all evening.",
-    signature_data_url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
+    signature_data_url:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
     submitted_at: `${isoDaysAgo(1)}T22:15:00.000Z`,
     created_at: `${isoDaysAgo(1)}T22:15:00.000Z`,
     status: "pending_approval",
@@ -187,7 +247,8 @@ export const DAILY_LOGS = [
     pcsp_goals_addressed: [...BLAKE_GOALS],
     narrative:
       "Blake completed his morning hygiene routine independently and attended a short walk. No incidents. Evening was quiet.",
-    signature_data_url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
+    signature_data_url:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
     submitted_at: `${isoDaysAgo(2)}T21:40:00.000Z`,
     created_at: `${isoDaysAgo(2)}T21:40:00.000Z`,
     status: "approved",
@@ -210,7 +271,8 @@ export const DAILY_LOGS = [
     log_date: isoDaysAgo(3),
     pcsp_goals_addressed: [...TOMMY_GOALS],
     narrative: "Tommy had a good day.",
-    signature_data_url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
+    signature_data_url:
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==",
     submitted_at: `${isoDaysAgo(3)}T20:05:00.000Z`,
     created_at: `${isoDaysAgo(3)}T20:05:00.000Z`,
     status: "rejected",
@@ -225,3 +287,151 @@ export const DAILY_LOGS = [
     word_count: 5,
   },
 ] as const;
+
+/**
+ * Profile page (getTeamMemberProfile) Evidence rows — the real server fn reads
+ * evidence_items / evidence_files. Jake: background on file, OIG due, and he
+ * transports clients with license + insurance on file. Harvey has no pack.
+ */
+const evidenceItem = (staffId: string, key: string, over: Record<string, unknown> = {}) => ({
+  id: `ev-${staffId.slice(-3)}-${key}`,
+  organization_id: ORG_ID,
+  subject_type: "staff",
+  subject_id: staffId,
+  requirement_key: key,
+  title: key,
+  evidence_type: "upload",
+  attestation_text: null,
+  cadence: "once",
+  sow_cite: null,
+  suggested: false,
+  sent_to_staff: false,
+  visible_to_staff_id: null,
+  dual_link_key: null,
+  dual_link_peer_id: null,
+  expires_on: null,
+  first_due_rule: null,
+  first_due_on: null,
+  document_date: null,
+  next_due_on: null,
+  renew_years: null,
+  send_message: null,
+  created_at: "2026-07-01T00:00:00.000Z",
+  updated_at: "2026-07-01T00:00:00.000Z",
+  ...over,
+});
+const evidenceFile = (itemId: string) => ({
+  id: `file-${itemId}`,
+  organization_id: ORG_ID,
+  item_id: itemId,
+  storage_path: `${ORG_ID}/${itemId}.pdf`,
+  filename: "scan.pdf",
+  attested_at: null,
+  attested_by: null,
+  attestation_text_snapshot: null,
+  uploaded_by: ADMIN_USER_ID,
+  uploaded_at: "2026-07-02T15:00:00.000Z",
+  notes: null,
+});
+const JAKE_ITEMS = [
+  evidenceItem(STAFF.jake.id, "background_screening", { document_date: "2026-07-02" }),
+  evidenceItem(STAFF.jake.id, "oig_exclusion", { first_due_on: "2099-01-01" }),
+  evidenceItem(STAFF.jake.id, "driver_license"),
+  evidenceItem(STAFF.jake.id, "auto_insurance_proof"),
+];
+export const PROFILE_EVIDENCE: Record<
+  string,
+  { items: Array<ReturnType<typeof evidenceItem>>; files: Array<ReturnType<typeof evidenceFile>> }
+> = {
+  [STAFF.jake.id]: {
+    items: JAKE_ITEMS,
+    files: JAKE_ITEMS.filter((i) => i.requirement_key !== "oig_exclusion").map((i) =>
+      evidenceFile(i.id),
+    ),
+  },
+};
+
+/** Caseload tab (getMemberCaseload): explicit codes per client. */
+export const PROFILE_CASELOAD: Record<string, Array<{ clientId: string; codes: string[] }>> = {
+  [STAFF.jake.id]: [{ clientId: CLIENTS.tommy.id, codes: ["DSI", "SLH"] }],
+};
+
+/** Overview (getMemberOverview): Jake's punches this week (Mon 9/28 – Sun 10/4, Denver). */
+export const PROFILE_OVERVIEW_TODAY = "2026-09-30";
+export const PROFILE_TIMESHEETS: Record<
+  string,
+  Array<{
+    id: string;
+    client_id: string;
+    service_type_code: string;
+    clock_in_timestamp: string;
+    clock_out_timestamp: string | null;
+    shift_note_text: string | null;
+    goals_completed: string[];
+    import_source: null;
+    staff_confirmed_at: null;
+    status: string;
+    is_out_of_bounds: boolean;
+    outside_geofence_reason: null;
+  }>
+> = {
+  [STAFF.jake.id]: [
+    {
+      id: "00000000-0000-4000-a000-000000000901",
+      client_id: CLIENTS.tommy.id,
+      service_type_code: "DSI",
+      clock_in_timestamp: "2026-09-28T15:00:00.000Z",
+      clock_out_timestamp: "2026-09-28T19:00:00.000Z",
+      shift_note_text:
+        "Tommy planned lunch, shopped from his list and paid at the register with light prompting.",
+      goals_completed: ["goal-1"],
+      import_source: null,
+      staff_confirmed_at: null,
+      status: "Pending",
+      is_out_of_bounds: false,
+      outside_geofence_reason: null,
+    },
+    {
+      id: "00000000-0000-4000-a000-000000000902",
+      client_id: CLIENTS.tommy.id,
+      service_type_code: "DSI",
+      clock_in_timestamp: "2026-09-29T15:00:00.000Z",
+      clock_out_timestamp: "2026-09-29T18:30:00.000Z",
+      shift_note_text: "",
+      goals_completed: [],
+      import_source: null,
+      staff_confirmed_at: null,
+      status: "Pending",
+      is_out_of_bounds: false,
+      outside_geofence_reason: null,
+    },
+  ],
+};
+
+/** Notes tab (listStaffNotes), newest first. */
+export const PROFILE_NOTES = [
+  {
+    id: "00000000-0000-4000-a000-000000000701",
+    kind: "praise",
+    body: "Stayed late to cover the Maple overnight.",
+    createdAt: "2026-09-20T18:00:00.000Z",
+    authorId: ADMIN_USER_ID,
+    authorName: ADMIN_NAME,
+  },
+];
+
+/** Activity tab (getMemberActivity) account history. */
+export const PROFILE_ACCOUNT_ACTIVITY = [
+  {
+    id: "00000000-0000-4000-a000-000000000801",
+    change_type: "member_created",
+    changed_by_name: ADMIN_NAME,
+    created_at: "2025-01-15T00:00:00.000Z",
+  },
+  {
+    id: "00000000-0000-4000-a000-000000000802",
+    change_type: "invite_sent",
+    changed_by_name: ADMIN_NAME,
+    created_at: "2025-01-15T00:05:00.000Z",
+  },
+];

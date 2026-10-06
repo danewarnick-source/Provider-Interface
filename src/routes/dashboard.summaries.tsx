@@ -39,6 +39,7 @@ import {
 } from "@/lib/progress-summaries";
 import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestations.functions";
 import { cn } from "@/lib/utils";
+import { isAdminLevel } from "@/lib/access/levels";
 
 const searchSchema = z.object({
   open: z.string().uuid().optional(),
@@ -79,8 +80,8 @@ function dueTone(due: string, row: ProgressSummaryRow): "overdue" | "week" | "ok
 function SummariesPage() {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id ?? null;
-  const role = org?.role;
-  const isAdmin = role === "admin" || role === "program_manager" || role === "manager";
+  const role = org?.access.level;
+  const isAdmin = isAdminLevel(role);
   const navigate = useNavigate({ from: "/dashboard/summaries" });
   const search = useSearch({ from: "/dashboard/summaries" });
 

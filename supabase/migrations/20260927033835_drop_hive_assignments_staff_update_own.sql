@@ -1,0 +1,11 @@
+-- DB-17b (Lane A, closes DB-18 residual under D12 "no self-issue"). Applied live as version 20260927033835.
+-- Fixes: staff could UPDATE their own hive_training_assignments row (incl. completed_at/status), then mint a
+--   hive_training_certificates row (DB-18 requires completed_at). Now only "assignments org admin write"
+--   (is_org_admin_or_manager, ALL) can update; staff keep SELECT on their own rows.
+-- Callers: no src/edge code updates hive_training_assignments with a user client. All writers use the service role
+--   (training-fulfillment.server.ts, training-stripe-webhook, auto-renew-trainings); the admin assign UI inserts.
+--   No course-player/progress writer exists (progress_pct only read). A future player must complete via a server path.
+-- RESTORE:
+--   CREATE POLICY "assignments staff update own" ON public.hive_training_assignments
+--     AS PERMISSIVE FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+DROP POLICY "assignments staff update own" ON public.hive_training_assignments;

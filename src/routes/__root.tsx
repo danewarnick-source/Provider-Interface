@@ -16,6 +16,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { isChunkLoadError, tryAutoReloadOnce, clearChunkReloadGuard } from "@/lib/chunk-reload";
 import { inviteTokenFromSearchStr } from "@/lib/join-invite";
 import { getPublicRuntimeBlob } from "@/lib/aws/env";
+import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
+import { persistActiveOrgId } from "@/lib/current-org";
+import { createSamePageGate } from "@/lib/route-gate";
 
 function NotFoundComponent() {
   return (
@@ -85,8 +88,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+// Search-param-only navigations (roster filter, sort, search) skip the checks.
+const rootGate = createSamePageGate();
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async ({ location, cause }) => {
+    if (rootGate.skip(cause, location.pathname)) return;
     // Enforce must_change_password BEFORE any child route renders.
     // Running here (not in a useEffect) means the Outlet never renders
     // protected content — the redirect fires synchronously during navigation.
@@ -132,13 +139,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         .maybeSingle(),
       supabase
         .from("organization_members")
-        .select("organization_id, role")
+        .select("organization_id")
         .eq("user_id", session.user.id)
         .eq("active", true)
         .limit(5),
     ]);
     if (profile?.must_change_password) {
       throw redirect({ to: "/reset-password" });
+    }
+
+    let membershipRows = memberships ?? [];
+    // Confirmed sign-in with no membership: provision the agency workspace.
+    // /login and /signup return before this. Invite / training / manual adds
+    // are refused inside ensureSignupWorkspace.
+    if (typeof window !== "undefined" && membershipRows.length === 0) {
+      try {
+        const ensured = await ensureSignupWorkspace({ data: {} });
+        if (ensured?.orgId) {
+          persistActiveOrgId(ensured.orgId);
+          const { data: again } = await supabase
+            .from("organization_members")
+            .select("organization_id")
+            .eq("user_id", session.user.id)
+            .eq("active", true)
+            .limit(5);
+          membershipRows = again ?? [];
+        }
+      } catch {
+        /* leave the signed-in route; signup business step can retry */
+      }
     }
 
     // MFA is off until real PHI launch. Planned: email one-time code after
@@ -151,7 +180,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     // re-check this on a mounted page, or it would forcibly interrupt an
     // already-loaded session mid-shift.
     if (location.pathname.startsWith("/sign-policy/")) return;
-    const orgId = memberships?.[0]?.organization_id;
+    const orgId = membershipRows[0]?.organization_id;
     if (!orgId) return;
     const { data: gatingDocs } = await supabase
       .from("nectar_documents")
@@ -194,11 +223,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "font-src 'self' fonts.googleapis.com fonts.gstatic.com",
           "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
           "script-src 'self' 'unsafe-inline'",
-          "img-src 'self' data: https:",
-          // Nominatim geocode + Supabase + Vercel analytics/ingest. Do NOT put
+          "img-src 'self' data: blob: https://*.supabase.co https://*.tile.openstreetmap.org https://*.s3.amazonaws.com https://*.s3.us-east-1.amazonaws.com",
+          // Nominatim geocode + Supabase + Vercel. Bedrock stays server-side, so
+          // the browser does not get a blanket amazonaws connect. Do NOT put
           // frame-ancestors here — browsers ignore it on <meta http-equiv> and
           // log a console warning; set that directive via HTTP headers only.
-          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://vercel.live https://nominatim.openstreetmap.org https://*.amazonaws.com https://cognito-idp.us-east-1.amazonaws.com",
+          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://vercel.live https://nominatim.openstreetmap.org https://cognito-idp.us-east-1.amazonaws.com https://*.s3.amazonaws.com https://*.s3.us-east-1.amazonaws.com",
           "object-src 'none'",
           "base-uri 'self'",
           "form-action 'self'",
@@ -213,20 +243,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Provider Interface" },
       {
         name: "description",
-        content:
-          "One quiet office for people, the schedule, notes, trainings, and Nectar.",
+        content: "One quiet office for people, the schedule, notes, trainings, and Nectar.",
       },
       { property: "og:title", content: "Provider Interface" },
       { name: "twitter:title", content: "Provider Interface" },
       {
         property: "og:description",
-        content:
-          "One quiet office for people, the schedule, notes, trainings, and Nectar.",
+        content: "One quiet office for people, the schedule, notes, trainings, and Nectar.",
       },
       {
         name: "twitter:description",
-        content:
-          "One quiet office for people, the schedule, notes, trainings, and Nectar.",
+        content: "One quiet office for people, the schedule, notes, trainings, and Nectar.",
       },
       {
         property: "og:image",

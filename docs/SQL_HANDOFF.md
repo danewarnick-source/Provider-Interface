@@ -1,58 +1,268 @@
 # SQL Handoff — run these in Lovable's SQL editor
 
-## ACTION — Platform requirement_defs seed phase 2 (2026-09-16) — hold for Dane
+## CHECK — Access levels Phase 0: read-only look before the build (2026-09-25)
 
-**Do not execute against Hive-Platform production from this PR.**
-Tony/Core pastes after Dane go. Clear the editor first. Additive INSERT/upsert
-only — never drop tables or columns. No production read switch.
+**Safe to run any time.** Every query below only reads; nothing changes.
+Run them one at a time, and **Clear the editor before each paste**. Send
+back the result of each one (a screenshot is fine). This tells us whether
+the live database matches the plan in `docs/access-levels-migration-plan.md`.
 
-Seeds platform `requirement_defs` (`organization_id IS NULL`) for the locked
-DHHS91172 staff / client / company trackable set (132 keys). Titles and
-citations come from the existing catalog. Transport pack stays default-on:
-`driving_record_transport.gate_fact_key = does_not_transport`.
+**1. How many people hold each role today**
 
-Matches `supabase/migrations/20260916140000_seed_platform_requirement_defs.sql`.
+```sql
+SELECT string_agg(o.name || ' — ' || t.role || ': ' || t.n, ' | ' ORDER BY o.name, t.role) AS people_per_role
+FROM (SELECT organization_id, role::text AS role, count(*) AS n
+      FROM organization_members WHERE active GROUP BY 1, 2) t
+JOIN organizations o ON o.id = t.organization_id;
+```
 
-### Probe
+**2. Role values that exist in the live database**
+
+```sql
+SELECT string_agg(enumlabel, ', ' ORDER BY enumsortorder) AS app_role_values
+FROM pg_enum WHERE enumtypid = 'public.app_role'::regtype;
+```
+
+You'd expect: `admin, manager, employee, super_admin, committee_member, program_manager` (order may differ).
+
+**3. What the role helper functions check (one row per function)**
+
+```sql
+SELECT p.proname AS helper,
+       pg_get_functiondef(p.oid) ILIKE '%program_manager%' AS mentions_program_manager,
+       pg_get_functiondef(p.oid) ILIKE '%''manager''%' AS mentions_manager,
+       pg_get_functiondef(p.oid) ILIKE '%''admin''%' AS mentions_admin,
+       pg_get_functiondef(p.oid) ILIKE '%committee_member%' AS mentions_committee,
+       pg_get_functiondef(p.oid) ILIKE '%hive_executive%' AS mentions_hive_exec
+FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'public'
+  AND p.proname IN ('is_org_admin_or_manager','has_org_role','is_hrc_committee_member',
+                    'can_access_client_phi','can_view_staff_pii','has_permission')
+ORDER BY 1;
+```
+
+You'd expect `is_org_admin_or_manager` to be **true** for program_manager, manager and admin. Any missing function row is worth knowing too.
+
+**4. How many security rules use each helper**
+
+```sql
+SELECT count(*) FILTER (WHERE x ~* 'is_org_admin_or_manager') AS uses_admin_or_manager,
+       count(*) FILTER (WHERE x ~* 'has_org_role')            AS uses_has_org_role,
+       count(*) FILTER (WHERE x ~* 'has_permission')          AS uses_has_permission,
+       count(*) FILTER (WHERE x ~* 'is_hrc_committee_member') AS uses_hrc_helper,
+       count(*)                                               AS total_policies
+FROM (SELECT coalesce(qual,'') || ' ' || coalesce(with_check,'') AS x
+      FROM pg_policies WHERE schemaname = 'public') p;
+```
+
+**5. Security rules that write a role word directly (these need hand edits later)**
+
+```sql
+SELECT count(*) AS policies,
+       string_agg(DISTINCT tablename, ', ' ORDER BY tablename) AS tables
+FROM pg_policies
+WHERE schemaname = 'public'
+  AND (coalesce(qual,'') || coalesce(with_check,'')) ~* '''(admin|manager|employee|program_manager|committee_member|super_admin)''';
+```
+
+**6. Per-person permission overrides that will need translating**
+
+```sql
+SELECT count(*) AS overrides,
+       count(DISTINCT user_id) AS people,
+       string_agg(DISTINCT permission, ', ' ORDER BY permission) AS permissions_used
+FROM user_permission_overrides;
+```
+
+**7. Do clients and staff have a home set? (scope by home depends on it)**
+
+```sql
+SELECT (SELECT count(*) FROM clients)                                   AS clients_total,
+       (SELECT count(*) FROM clients WHERE team_id IS NULL)             AS clients_without_home,
+       (SELECT count(*) FROM organization_members WHERE active)         AS active_members,
+       (SELECT count(*) FROM organization_members m JOIN profiles p ON p.id = m.user_id
+         WHERE m.active AND p.team_id IS NULL)                          AS members_without_home;
+```
+
+If any query errors (for example "relation does not exist"), send the error text; that's useful information too.
+
+---
+
+## ACTION — Evidence due-date model (2026-09-18)
+
+**Do not run until Dane approves.** Additive only — adds
+`first_due_rule`, `first_due_on`, `document_date`, `next_due_on`, and
+`renew_years` on `evidence_items`. Does **not** drop columns.
+
+The app is graceful if these columns are missing: Apply / upload /
+attest still work and skip the new due fields.
+
+**Prerequisite:** Phase 1 `evidence_items` table already exists (or apply
+that SQL first).
+
+**To apply:** paste the full contents of
+`supabase/migrations/20260918070000_evidence_due_model.sql`
+into Lovable’s SQL editor (clear the editor first) and run it.
+
+**Confirm (paste this next, after clearing the editor):**
+
+```sql
+SELECT string_agg(column_name, ' | ' ORDER BY column_name) AS due_cols_ok
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'evidence_items'
+  AND column_name IN (
+    'document_date',
+    'first_due_on',
+    'first_due_rule',
+    'next_due_on',
+    'renew_years'
+  );
+```
+
+You want `document_date | first_due_on | first_due_rule | next_due_on | renew_years`.
+
+---
+
+## ACTION — Evidence send_message (2026-09-18)
+
+**Do not run until Dane approves.** Additive only — adds
+`evidence_items.send_message` so admin can attach a note when sending
+Evidence to an employee. Does **not** write `organizations.feature_config`.
+
+The app is graceful if this column is missing: Send still marks the row
+sent and skips the message with a friendly note.
+
+**Prerequisite:** Phase 1 `evidence_items` table already exists (or apply
+that SQL first).
+
+**To apply:** paste the full contents of
+`supabase/migrations/20260918053000_evidence_send_message.sql`
+into Lovable’s SQL editor (clear the editor first) and run it.
+
+**Confirm (paste this next, after clearing the editor):**
+
+```sql
+SELECT string_agg(column_name, ' | ' ORDER BY column_name) AS send_message_ok
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'evidence_items'
+  AND column_name = 'send_message';
+```
+
+You want `send_message`.
+
+---
+
+## ACTION — Evidence Phase 1 tables (2026-09-17)
+
+**Do not run until Dane approves the PR.** Additive only — never drop
+existing tables or columns. Does **not** seed W-9 / I-9. Does **not**
+write `requirement_defs` or revive the encoded SOW applicability engine.
+
+**What this is for:** Admin Evidence (people × requirements). Curated
+packs live in app code. Apply / upload / attest persist **only** on
+`evidence_items`, `evidence_files`, and `evidence_templates`. The app
+does **not** write `organizations.feature_config`. Until Dane pastes
+this SQL, Apply shows a friendly message that storage is not set up
+yet — it will not update a missing `feature_config` column.
+
+**To apply:** paste the full contents of
+`supabase/migrations/20260917220000_evidence_phase1.sql`
+into Lovable’s SQL editor (clear the editor first) and run it.
+
+**What you'll see:** `Success. No rows returned` (or already-exists notices).
+
+**Confirm (paste this next, after clearing the editor):**
+
+```sql
+SELECT string_agg(table_name, ' | ' ORDER BY table_name) AS tables_ok
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN ('evidence_items', 'evidence_files', 'evidence_templates');
+
+SELECT string_agg(id, ' | ' ORDER BY id) AS buckets_ok
+FROM storage.buckets
+WHERE id = 'evidence-files';
+```
+
+You want `evidence_files | evidence_items | evidence_templates` and
+`evidence-files`.
+
+## ACTION — Drop Chores / Chore Chart tables (2026-09-18) — hold for Dane
+
+**Do not Soft-apply / execute against Hive-Platform production from this PR.**
+Tony/Core pastes after Dane go. **Clear the editor first.** This DROP is
+intentional: the Chores product is deleted from app code. Do not invent
+other drops.
+
+Tables (live Hive-Platform; row counts were non-blocking):
+
+`chore_completions`, `chore_client_rotation`, `chore_daily_items`,
+`chore_definitions`, `chore_space_clients`, `client_chore_support`,
+`chore_spaces`.
+
+Also drops those tables' RLS policies, indexes, triggers, and FKs among
+this set. CASCADE is used only so child FKs / attached policies drop with
+the table. Parents (`clients`, `teams`, `organizations`) are not dropped.
+
+Does **not** drop `client_meal_support`, historical `client_documents`
+rows with `document_type = 'chore_chart'`, or storage objects under
+`.../chore-charts/` (no dedicated chore bucket). Historical create-table
+migrations stay in `supabase/migrations/`.
+
+Matches `supabase/migrations/20260918120000_drop_chore_tables.sql`.
+
+### Probe (before)
 
 Clear the editor, paste:
 
 ```sql
-SELECT count(*) AS platform_defs
-FROM public.requirement_defs
-WHERE organization_id IS NULL;
+SELECT string_agg(table_name, ' | ' ORDER BY table_name)
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN (
+    'chore_completions',
+    'chore_client_rotation',
+    'chore_daily_items',
+    'chore_definitions',
+    'chore_space_clients',
+    'client_chore_support',
+    'chore_spaces'
+  );
 ```
 
-**What you'll see:** `0` until this ACTION runs. After apply: `132`.
+**What you'll see:** the seven names above, pipe-separated (whichever
+still exist). `NULL` means they are already gone — skip Apply.
 
 ### Apply
 
 Clear the editor, paste the full file
-`supabase/migrations/20260916140000_seed_platform_requirement_defs.sql`.
+`supabase/migrations/20260918120000_drop_chore_tables.sql`.
 
-**What you'll see:** `INSERT 0 132` the first time; later pastes update in
-place (idempotent on `requirement_key`).
+**What you'll see:** policy-drop notices (or none if already gone), then
+seven `DROP TABLE` (or already-absent notices). No other tables named.
 
-### Verify
+### Verify (after)
 
-Clear the editor, paste:
+Clear the editor, paste the same probe as above.
+
+**What you'll see:** `NULL` (zero matching public tables).
+
+Confirm parents still exist:
 
 ```sql
-SELECT
-  count(*) AS platform_defs,
-  count(*) FILTER (WHERE layer = 'all_staff_clock') AS all_staff_clock,
-  count(*) FILTER (WHERE layer = 'staff_shelf') AS staff_shelf,
-  count(*) FILTER (WHERE layer = 'staff_exception') AS staff_exception,
-  count(*) FILTER (WHERE layer = 'client_shelf') AS client_shelf,
-  count(*) FILTER (WHERE layer = 'company_standing') AS company_standing,
-  string_agg(requirement_key, ',' ORDER BY requirement_key)
-    FILTER (WHERE gate_fact_key = 'does_not_transport') AS transport_opt_out_keys
-FROM public.requirement_defs
-WHERE organization_id IS NULL;
+SELECT string_agg(table_name, ' | ' ORDER BY table_name)
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN ('clients', 'teams', 'organizations', 'client_meal_support');
 ```
 
-**What you'll see:** 132 platform rows, all five layers populated,
-`transport_opt_out_keys = driving_record_transport`.
+**What you'll see:** `client_meal_support | clients | organizations | teams`
+(or those four names, order as aggregated).
+
+After apply: regenerate `src/integrations/supabase/types.ts` from the live
+schema (Lovable type sync) so the dropped tables leave generated types.
 
 ---
 

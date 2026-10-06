@@ -6,6 +6,13 @@ import { Eye, EyeOff } from "lucide-react";
 import { PiPublicPage } from "@/components/pi-landing/pi-public-page";
 
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AuthCaptcha,
+  authCaptchaBlocked,
+  readAuthCaptchaToken,
+  resetAuthCaptcha,
+} from "@/components/auth-captcha";
+import { AUTH_CAPTCHA_REQUIRED } from "@/lib/auth-captcha";
 import { authRedirectUrl } from "@/lib/auth-redirect";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
@@ -13,9 +20,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { signInWithUsername } from "@/lib/login.functions";
 import { checkHiveExecutive } from "@/lib/hive-exec.functions";
 import { completePasswordSignIn, GENERIC_LOGIN_ERROR } from "@/lib/login-auth";
-import { trainingOnlyHomeForMeFn } from "@/lib/training-only-access.functions";
+import { ensureSignupWorkspace } from "@/lib/signup-workspace.functions";
 import {
-  isCompanyAdminRole,
+  isCompanyAdminLevel,
   persistPortalView,
   readStoredPortalView,
   resolvePostLoginLanding,
@@ -26,7 +33,6 @@ import {
   resolveCurrentMembership,
   type MembershipPick,
 } from "@/lib/current-org";
-import type { Role } from "@/lib/rbac";
 import { toast } from "sonner";
 import { isCognitoAuth } from "@/lib/aws/env";
 import { shouldSkipLoginAutoRedirect } from "@/lib/cognito-login-gate";
@@ -51,7 +57,7 @@ export const Route = createFileRoute("/login")({
 function persistPreferredOrgFromRows(
   rows: Array<{
     organization_id?: string;
-    role?: string;
+    access_level?: string | null;
     organizations?: {
       name?: string | null;
       is_demo?: boolean | null;
@@ -64,7 +70,7 @@ function persistPreferredOrgFromRows(
     .map((m) => ({
       organization_id: m.organization_id as string,
       is_demo: m.organizations?.is_demo === true,
-      role: (m.role ?? "employee") as Role,
+      access: { level: m.access_level ?? "staff" },
       display_acronym: m.organizations?.display_acronym ?? null,
       organization_name: m.organizations?.name ?? null,
     }));
@@ -89,7 +95,7 @@ function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const signIn = useServerFn(signInWithUsername);
   const execCheck = useServerFn(checkHiveExecutive);
-  const trainingHomeFn = useServerFn(trainingOnlyHomeForMeFn);
+  const ensureWorkspace = useServerFn(ensureSignupWorkspace);
   const search = Route.useSearch();
   const nextPath = search.next;
   const hadSessionOnArrival = useRef<boolean | null>(null);
@@ -148,14 +154,16 @@ function LoginPage() {
           if (!storedView || storedView === "hive_exec" || storedView === "state_preview") {
             const { data: memberships, error } = await supabase
               .from("organization_members")
-              .select("role, organization_id, organizations(name, is_demo, display_acronym)")
+              .select(
+                "access_level, organization_id, organizations(name, is_demo, display_acronym)",
+              )
               .eq("user_id", session.user.id)
               .eq("active", true);
             if (error) {
               // Fail toward the company dashboard so an owner-exec is not trapped.
               isCompanyAdmin = true;
             } else {
-              isCompanyAdmin = (memberships ?? []).some((m) => isCompanyAdminRole(m.role));
+              isCompanyAdmin = (memberships ?? []).some((m) => isCompanyAdminLevel(m.access_level));
               persistPreferredOrgFromRows(memberships ?? []);
             }
           }
@@ -174,14 +182,32 @@ function LoginPage() {
         try {
           const { data: memberships } = await supabase
             .from("organization_members")
-            .select("id, organization_id, role, organizations(name, is_demo, display_acronym)")
+            .select(
+              "id, organization_id, access_level, organizations(name, is_demo, display_acronym)",
+            )
             .eq("user_id", session.user.id)
             .eq("active", true);
-          persistPreferredOrgFromRows(memberships ?? []);
-          if (!memberships?.length) {
-            const home = await trainingHomeFn();
-            if (home?.hasThirtyDay) target = "/training/course";
+          let rows = memberships ?? [];
+          if (!rows.length) {
+            // Email confirmation no longer creates the workspace. A fresh
+            // agency that signs in here (other tab or device) gets one now.
+            // Invite and manual add are skipped inside the fn.
+            try {
+              const ensured = await ensureWorkspace({ data: {} });
+              if (ensured?.orgId) persistActiveOrgId(ensured.orgId);
+            } catch {
+              /* invite logins continue below */
+            }
+            const { data: refreshed } = await supabase
+              .from("organization_members")
+              .select(
+                "id, organization_id, access_level, organizations(name, is_demo, display_acronym)",
+              )
+              .eq("user_id", session.user.id)
+              .eq("active", true);
+            rows = refreshed ?? [];
           }
+          persistPreferredOrgFromRows(rows);
         } catch {
           /* stay on dashboard */
         }
@@ -191,24 +217,37 @@ function LoginPage() {
     return () => {
       cancelled = true;
     };
-  }, [loading, session, navigate, execCheck, nextPath, justSignedIn, trainingHomeFn]);
+  }, [loading, session, navigate, execCheck, nextPath, justSignedIn, ensureWorkspace]);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const submittedId = String(fd.get("identifier")).trim();
     const password = String(fd.get("password"));
+    if (authCaptchaBlocked()) return toast.error(AUTH_CAPTCHA_REQUIRED);
+    const captchaToken = readAuthCaptchaToken();
     setBusy(true);
 
     const result = await completePasswordSignIn(submittedId, password, {
       signInWithEmail: async (email, pw) => {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password: pw });
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password: pw,
+          ...(captchaToken ? { options: { captchaToken } } : {}),
+        });
         return {
           error: error ? { message: error.message } : null,
           user: data.user ? { id: data.user.id } : null,
         };
       },
-      signInWithUsername: async (id, pw) => signIn({ data: { identifier: id, password: pw } }),
+      signInWithUsername: async (id, pw) =>
+        signIn({
+          data: {
+            identifier: id,
+            password: pw,
+            ...(captchaToken ? { captchaToken } : {}),
+          },
+        }),
       setSession: async (tokens) => {
         const { error } = await supabase.auth.setSession(tokens);
         return { error: error ? { message: error.message } : null };
@@ -228,6 +267,7 @@ function LoginPage() {
       },
     });
     if (!result.ok) {
+      resetAuthCaptcha();
       setBusy(false);
       return toast.error(result.message || GENERIC_LOGIN_ERROR);
     }
@@ -326,7 +366,13 @@ function LoginPage() {
             Saves your email on this device. You still click Sign in.
           </p>
 
-          <button type="submit" disabled={busy} className="pi-home-btn primary" style={{ width: "100%" }}>
+          <AuthCaptcha />
+          <button
+            type="submit"
+            disabled={busy}
+            className="pi-home-btn primary"
+            style={{ width: "100%" }}
+          >
             {busy ? "Signing in…" : "Sign in"}
           </button>
         </form>

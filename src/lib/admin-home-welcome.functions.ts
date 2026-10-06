@@ -19,7 +19,7 @@ export const dismissAdminWelcome = createServerFn({ method: "POST" })
     const supabase = context.supabase as any;
     if (!supabase || !context.userId) return { ok: true as const };
 
-    await requireOrgMembership(supabase, context.userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, context.userId, data.organizationId, "owner");
 
     const { error } = await supabase
       .from("organizations")

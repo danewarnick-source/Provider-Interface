@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
-import { dualWriteNectarAttestation } from "./compliance-store-dual-write";
 
 // =============================================================
 // Foundation D — NECTAR Requirements Engine.
@@ -50,7 +49,7 @@ async function gatherOrgFacts(
         .eq("organization_id", organizationId),
       supabase
         .from("organization_members")
-        .select("role, job_title")
+        .select("job_title")
         .eq("organization_id", organizationId)
         .eq("active", true),
       supabase
@@ -102,11 +101,7 @@ async function gatherOrgFacts(
   const dormantCodes = codes.filter((c) => !activeCodes.includes(c));
 
   const roleSet = new Set<string>();
-  for (const m of (staffRes.data ?? []) as Array<{
-    role: string | null;
-    job_title: string | null;
-  }>) {
-    if (m.role) roleSet.add(m.role.toUpperCase());
+  for (const m of (staffRes.data ?? []) as Array<{ job_title: string | null }>) {
     const jt = (m.job_title ?? "").toUpperCase();
     if (!jt) continue;
     for (const key of ["DSP", "SLM", "HHP", "BCBA", "BC", "RN", "LPN", "QIDP"]) {
@@ -182,6 +177,7 @@ async function aiPropose(
   reqDescription: string | null,
   citation: string | null,
   facts: OrgEntityFacts,
+  orgId?: string | null,
 ) {
   // AI credentials are validated inside the Bedrock adapter (fails loudly).
   const userBody = `REQUIREMENT TITLE: ${reqTitle}
@@ -197,22 +193,7 @@ PROVIDER ENTITIES:
 - Jurisdictions: ${facts.jurisdictions.join(", ")}`;
 
   const { callBedrockChatCompletions, BedrockError } = await import("@/lib/ai-bedrock.server");
-  const { acquireBedrockSlot, recordBedrockTokens, RateLimitError } = await import(
-    "@/lib/nectar-rate-limit.server"
-  );
   const { TransientAIError } = await import("@/lib/authoritative-sources.server");
-
-  // Gate every call through the shared 8-rpm Bedrock slot bucket. If the bucket
-  // is saturated beyond its wait window, surface as transient so the caller
-  // retries with backoff instead of failing outright.
-  try {
-    await acquireBedrockSlot();
-  } catch (e) {
-    if (e instanceof RateLimitError) {
-      throw new TransientAIError(e.message, Math.max(5_000, e.waitMs || 30_000));
-    }
-    throw e;
-  }
 
   let json;
   try {
@@ -222,6 +203,7 @@ PROVIDER ENTITIES:
         { role: "user", content: userBody },
       ],
       response_format: { type: "json_object" },
+      orgId,
     });
   } catch (e) {
     if (e instanceof BedrockError) {
@@ -238,19 +220,6 @@ PROVIDER ENTITIES:
     }
     throw e;
   }
-
-  // Best-effort daily-token bookkeeping so pre-fill counts against the same
-  // daily cap as drafting.
-  const usage = ((json as unknown as { usage?: unknown })?.usage ?? {}) as {
-    total_tokens?: number;
-    input_tokens?: number;
-    output_tokens?: number;
-  };
-  const totalTokens =
-    typeof usage.total_tokens === "number"
-      ? usage.total_tokens
-      : Number(usage.input_tokens ?? 0) + Number(usage.output_tokens ?? 0);
-  if (totalTokens > 0) void recordBedrockTokens(totalTokens);
 
   const raw: unknown = (() => {
     try {
@@ -287,7 +256,7 @@ export const proposeRequirementMappings = createServerFn({ method: "POST" })
       .eq("id", data.requirementId)
       .single();
     if (rErr || !req) throw new Error(rErr?.message ?? "Requirement not found");
-    await requireOrgMembership(supabase, userId, req.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, req.organization_id as string, "admin");
 
     const facts = await gatherOrgFacts(supabase, req.organization_id as string);
     const proposals = await aiPropose(
@@ -295,6 +264,7 @@ export const proposeRequirementMappings = createServerFn({ method: "POST" })
       (req.description as string | null) ?? null,
       (req.source_citation as string | null) ?? null,
       facts,
+      req.organization_id as string,
     );
 
     // Normalize + filter: drop code/role scopes whose value isn't in the live set.
@@ -424,7 +394,7 @@ export const setRequirementMapping = createServerFn({ method: "POST" })
         supabase,
         userId,
         (existing as { organization_id: string }).organization_id,
-        "manager",
+        "admin",
       );
 
       const patch: {
@@ -459,7 +429,7 @@ export const setRequirementMapping = createServerFn({ method: "POST" })
     if (!data.organizationId || !data.requirementId || !data.scopeKind) {
       throw new Error("organizationId, requirementId, scopeKind required to create");
     }
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const { data: row, error } = await supabase
       .from("nectar_requirement_mappings")
       .insert({
@@ -497,7 +467,7 @@ export const deleteRequirementMapping = createServerFn({ method: "POST" })
       supabase,
       userId,
       (existing as { organization_id: string }).organization_id,
-      "manager",
+      "admin",
     );
     const { error } = await supabase
       .from("nectar_requirement_mappings")
@@ -689,7 +659,7 @@ export const prefillRequirementMappings = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     if (!supabase || !userId)
       return { processed: 0, inserted: 0, failed: 0, skipped: 0, candidates: 0, alreadyMapped: 0 };
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
 
 
     // Which requirements already have at least one mapping? Skip those.
@@ -743,6 +713,7 @@ export const prefillRequirementMappings = createServerFn({ method: "POST" })
             req.description,
             req.source_citation,
             facts,
+            req.organization_id,
           );
 
           processed += 1;
@@ -870,7 +841,7 @@ export const confirmRequirementWithScopes = createServerFn({ method: "POST" })
       .eq("id", data.requirementId)
       .single();
     if (rErr || !req) throw new Error(rErr?.message ?? "Requirement not found");
-    await requireOrgMembership(supabase, userId, req.organization_id as string, "manager");
+    await requireOrgMembership(supabase, userId, req.organization_id as string, "admin");
 
     // Confirm the requirement itself.
     const { error: upErr } = await supabase
@@ -958,14 +929,6 @@ export const confirmRequirementWithScopes = createServerFn({ method: "POST" })
         scopes_confirmed: scopesConfirmed,
         nectar_prefilled: true,
       },
-    });
-    await dualWriteNectarAttestation({
-      supabase,
-      organizationId: req.organization_id as string,
-      attestedBy: userId,
-      scope: "requirement_verify",
-      requirementTitle: req.title as string,
-      statement,
     });
 
     return { ok: true, scopesConfirmed };
@@ -1112,7 +1075,7 @@ export const upsertAuthorizedCode = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return null;
-    await requireOrgMembership(supabase, userId, data.organizationId, "manager");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     const code = data.code.trim().toUpperCase();
     if (!code) throw new Error("Code required");
 
@@ -1173,7 +1136,7 @@ export const removeAuthorizedCode = createServerFn({ method: "POST" })
       supabase,
       userId,
       (existing as { organization_id: string }).organization_id,
-      "manager",
+      "admin",
     );
     const { error } = await supabase
       .from("provider_authorized_codes")

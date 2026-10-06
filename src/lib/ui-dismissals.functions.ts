@@ -3,8 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 // Per-user, localStorage-free dismissal of one-time UI hints (e.g. the HHS
-// host-home explainer banner). Mirrors the existing per-user pref pattern
-// (user_celebration_mute): a tiny table keyed off auth.users.id, user-owned
+// host-home explainer banner). A tiny table keyed off auth.users.id, user-owned
 // RLS. Reads/writes degrade gracefully when the table has not been created
 // yet (the SQL is a human handoff), so no surface crashes pre-migration.
 

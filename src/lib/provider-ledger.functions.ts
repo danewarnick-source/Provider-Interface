@@ -44,7 +44,7 @@ export const listLedgerEntries = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { entries: [] };
-    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, userId, data.organizationId, "owner");
     const { data: rows, error } = await supabase
       .from("provider_ledger_entries")
       .select("*")
@@ -76,7 +76,7 @@ export const createLedgerEntry = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { entry: null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, userId, data.organizationId, "owner");
     const { data: row, error } = await supabase
       .from("provider_ledger_entries")
       .insert({
@@ -113,7 +113,7 @@ export const updateLedgerEntry = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { entry: null };
-    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, userId, data.organizationId, "owner");
     const { id, organizationId, ...patch } = data;
     const { data: row, error } = await supabase
       .from("provider_ledger_entries")
@@ -138,7 +138,7 @@ export const deleteLedgerEntry = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     if (!supabase || !userId) return { ok: true as const };
-    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    await requireOrgMembership(supabase, userId, data.organizationId, "owner");
     const { error } = await supabase
       .from("provider_ledger_entries")
       .delete()

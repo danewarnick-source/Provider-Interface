@@ -150,11 +150,15 @@ export const CLIENT_LIST = [
   CLIENTS.avery,
 ];
 
-/** DSP Jake is assigned to every fixture client (all codes on the client). */
-export const STAFF_ASSIGNMENTS = CLIENT_LIST.map((c, i) => ({
+/**
+ * DSP Jake is assigned to every fixture client that has authorized codes,
+ * with those codes listed explicitly (NULL / [] is never "all codes").
+ * Marcus has no codes, so there is no assignment to write for him.
+ */
+export const STAFF_ASSIGNMENTS = CLIENT_LIST.filter((c) => c.codes.length > 0).map((c, i) => ({
   id: `sa-jake-${String(i + 1).padStart(2, "0")}`,
   organization_id: ORG_ID,
   staff_id: STAFF.jake.id,
   client_id: c.id,
-  service_codes: null as string[] | null,
+  service_codes: [...c.codes],
 }));

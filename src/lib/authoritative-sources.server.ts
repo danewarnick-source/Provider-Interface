@@ -4,11 +4,7 @@
 // from within handler bodies. See docs/tanstack-serverfn-splitting.
 import { z } from "zod";
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
-import {
-  acquireBedrockSlot,
-  recordBedrockTokens,
-  RateLimitError,
-} from "@/lib/nectar-rate-limit.server";
+import { RateLimitError } from "@/lib/nectar-rate-limit.server";
 
 export const AUTH_KINDS = [
   "state_sow",
@@ -124,9 +120,8 @@ export const PolicySummaryExtraction = z.object({
  * chunk window we take the first window only (best-effort — a provider
  * policy this long is unusual, and the admin can re-run after trimming).
  */
-export async function extractPolicySummary(text: string): Promise<string[]> {
+export async function extractPolicySummary(text: string, orgId?: string | null): Promise<string[]> {
   const windowText = text.slice(0, 60_000);
-  await acquireBedrockSlot();
   const res = await gatewayFetch({
     model: "bedrock",
     messages: [
@@ -135,7 +130,7 @@ export async function extractPolicySummary(text: string): Promise<string[]> {
     ],
     response_format: { type: "json_object" },
     max_tokens: 4_000,
-  });
+  }, { orgId });
   if (res.status === 429) throw new TransientAIError("AI rate limit reached. Try again in a moment.");
   if (res.status === 402)
     throw new Error("AI credits exhausted. Add funds in Settings → Workspace → Usage.");
@@ -144,12 +139,6 @@ export async function extractPolicySummary(text: string): Promise<string[]> {
   }
   if (!res.ok) throw new Error(`AI gateway error ${res.status}`);
   const json = await res.json();
-  const usage = (json?.usage ?? {}) as { total_tokens?: number; input_tokens?: number; output_tokens?: number };
-  const totalTokens =
-    typeof usage.total_tokens === "number"
-      ? usage.total_tokens
-      : (Number(usage.input_tokens ?? 0) + Number(usage.output_tokens ?? 0));
-  if (totalTokens > 0) void recordBedrockTokens(totalTokens);
   const content: string = json.choices?.[0]?.message?.content ?? "{}";
   const repaired = repairJsonPayload(content);
   let raw: unknown;
@@ -356,13 +345,9 @@ export function repairJsonPayload(raw: string): string {
 export async function extractOnce(
   windowText: string,
   partLabel: string,
-  opts: { maxTokens?: number } = {},
+  opts: { maxTokens?: number; orgId?: string | null } = {},
 ): Promise<Array<z.infer<typeof ReqItem>>> {
   const maxTokens = opts.maxTokens ?? 16_000;
-
-  // Wait for a rate-limit slot before actually calling Bedrock. This is the
-  // ONLY place that talks to the model, so gating here is sufficient.
-  await acquireBedrockSlot();
 
   const res = await gatewayFetch({
     // NOTE: this string is ignored by the Bedrock shim in
@@ -378,7 +363,7 @@ export async function extractOnce(
     ],
     response_format: { type: "json_object" },
     max_tokens: maxTokens,
-  });
+  }, { orgId: opts.orgId });
   if (res.status === 429) {
     throw new TransientAIError("AI rate limit reached. Try again in a moment.");
   }
@@ -389,14 +374,6 @@ export async function extractOnce(
   }
   if (!res.ok) throw new ChunkParseError(`AI gateway error ${res.status}`);
   const json = await res.json();
-
-  // Record token usage into the daily bucket (best-effort).
-  const usage = (json?.usage ?? {}) as { total_tokens?: number; input_tokens?: number; output_tokens?: number };
-  const totalTokens =
-    typeof usage.total_tokens === "number"
-      ? usage.total_tokens
-      : (Number(usage.input_tokens ?? 0) + Number(usage.output_tokens ?? 0));
-  if (totalTokens > 0) void recordBedrockTokens(totalTokens);
 
   const finishReason: string | undefined = json.choices?.[0]?.finish_reason;
   const content: string = json.choices?.[0]?.message?.content ?? "{}";
@@ -430,6 +407,7 @@ export async function extractOnce(
 export async function extractChunkOnce(
   windowText: string,
   partLabel: string,
+  orgId?: string | null,
 ): Promise<{ items: Array<z.infer<typeof ReqItem>>; failures: string[] }> {
   const attempts: Array<{ maxTokens: number }> = [
     { maxTokens: 16_000 },
@@ -438,7 +416,7 @@ export async function extractChunkOnce(
   let lastErr: Error | null = null;
   for (let i = 0; i < attempts.length; i += 1) {
     try {
-      const items = await extractOnce(windowText, partLabel, attempts[i]);
+      const items = await extractOnce(windowText, partLabel, { ...attempts[i], orgId });
       return { items, failures: [] };
     } catch (err) {
       if (isTransientAIError(err)) throw err; // caller decides how to back off
@@ -473,7 +451,7 @@ export async function mapWithConcurrency<T, R>(
   return results;
 }
 
-export async function extractRequirementsFromText(text: string): Promise<{
+export async function extractRequirementsFromText(text: string, orgId?: string | null): Promise<{
   items: Array<z.infer<typeof ReqItem>>;
   chunkCount: number;
   chunkFailures: string[];
@@ -482,7 +460,7 @@ export async function extractRequirementsFromText(text: string): Promise<{
 
   const chunks = chunkDocumentText(text);
   const perChunk = await mapWithConcurrency(chunks, 1, (chunk, i) =>
-    extractChunkOnce(chunk, `PART ${i + 1} OF ${chunks.length}`),
+    extractChunkOnce(chunk, `PART ${i + 1} OF ${chunks.length}`, orgId),
   );
 
   const merged: Array<z.infer<typeof ReqItem>> = [];
@@ -542,8 +520,8 @@ export async function generatePlainLanguageExplanation(
   title: string,
   description: string | null,
   citation: string | null,
+  orgId?: string | null,
 ): Promise<string> {
-  await acquireBedrockSlot();
   const userBody = `CITATION: ${citation ?? "—"}
 REQUIREMENT TITLE: ${title}
 REQUIREMENT TEXT: ${description ?? "(no extended text — restate the title only)"}`;
@@ -556,7 +534,7 @@ REQUIREMENT TEXT: ${description ?? "(no extended text — restate the title only
     ],
     response_format: { type: "json_object" },
     max_tokens: 1_200,
-  });
+  }, { orgId });
   if (res.status === 429) throw new TransientAIError("AI rate limit reached. Try again in a moment.");
   if (res.status === 402)
     throw new Error("AI credits exhausted. Add funds in Settings → Workspace → Usage.");
@@ -565,12 +543,6 @@ REQUIREMENT TEXT: ${description ?? "(no extended text — restate the title only
   }
   if (!res.ok) throw new Error(`AI gateway error ${res.status}`);
   const json = await res.json();
-  const usage = (json?.usage ?? {}) as { total_tokens?: number; input_tokens?: number; output_tokens?: number };
-  const totalTokens =
-    typeof usage.total_tokens === "number"
-      ? usage.total_tokens
-      : (Number(usage.input_tokens ?? 0) + Number(usage.output_tokens ?? 0));
-  if (totalTokens > 0) void recordBedrockTokens(totalTokens);
   const content: string = json.choices?.[0]?.message?.content ?? "{}";
   const repaired = repairJsonPayload(content);
   let raw: unknown;

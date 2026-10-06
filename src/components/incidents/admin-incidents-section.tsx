@@ -13,7 +13,7 @@ import {
 import { INCIDENT_CATEGORIES, GUARDIAN_METHODS, type GuardianMethod } from "./incident-categories";
 import { useCaseload } from "@/hooks/use-caseload";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAccess } from "@/hooks/use-access";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -286,7 +286,7 @@ function IncidentCard({
   actors: Map<string, string>;
   onSubmitUpi: (id: string) => void;
 }) {
-  const { can } = usePermissions();
+  const { can } = useAccess();
   const { data: org } = useCurrentOrg();
   const canManageIncidents = can("manage_incidents");
   const [expanded, setExpanded] = useState(false);

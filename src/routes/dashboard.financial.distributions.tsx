@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Copy, Sparkles, Info, ShieldCheck, AlertTriangle, Save } from "lucide-react";
 import { computeEntryUnits, fmtUSD } from "@/lib/billing-units";
 import { toast } from "sonner";
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 import {
   getDistPlans,
   getDistParticipants,
@@ -36,9 +36,9 @@ import {
 export const Route = createFileRoute("/dashboard/financial/distributions")({
   head: () => ({ meta: [{ title: "Distributions — Provider Interface" }] }),
   component: () => (
-    <RequireRole roles={["admin"]}>
+    <RequireLevel min="owner">
       <DistributionsPage />
-    </RequireRole>
+    </RequireLevel>
   ),
 });
 

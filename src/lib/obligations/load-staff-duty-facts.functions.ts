@@ -2,6 +2,7 @@
 // or null flags (unanswered). Never invent SEI columns or a second assignment table.
 
 import { UNKNOWN_STAFF_DUTY_FACTS, type StaffDutyFacts } from "./duty-applicability.ts";
+import { assignmentCodes } from "../assignment-codes.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -31,12 +32,13 @@ export async function loadStaffDutyFactsInternal(
     out.set(staffId, { staffId, ...UNKNOWN_STAFF_DUTY_FACTS });
   }
 
-  let members: Array<{ user_id: string; role: string | null; manager_id?: string | null }> = [];
+  let members: Array<{ user_id: string; access_level: string | null; manager_id?: string | null }> =
+    [];
   let managerIdKnown = true;
   {
     const full = await supabase
       .from("organization_members")
-      .select("user_id, role, manager_id")
+      .select("user_id, access_level, manager_id")
       .eq("organization_id", organizationId)
       .eq("active", true)
       .in("user_id", ids);
@@ -44,18 +46,18 @@ export async function loadStaffDutyFactsInternal(
       managerIdKnown = false;
       const retry = await supabase
         .from("organization_members")
-        .select("user_id, role")
+        .select("user_id, access_level")
         .eq("organization_id", organizationId)
         .eq("active", true)
         .in("user_id", ids);
       if (retry.error) throw new Error(retry.error.message);
-      members = (retry.data ?? []) as Array<{ user_id: string; role: string | null }>;
+      members = (retry.data ?? []) as Array<{ user_id: string; access_level: string | null }>;
     } else if (full.error) {
       throw new Error(full.error.message);
     } else {
       members = (full.data ?? []) as Array<{
         user_id: string;
-        role: string | null;
+        access_level: string | null;
         manager_id: string | null;
       }>;
     }
@@ -78,14 +80,15 @@ export async function loadStaffDutyFactsInternal(
         client_id: string;
         service_codes: string[] | null;
       }>) {
+        // NULL / [] codes grant nothing: the row adds no client and no code.
+        const rowCodes = assignmentCodes(row.service_codes);
+        if (rowCodes.length === 0) continue;
         const bucket = assignedByStaff.get(row.staff_id) ?? {
           clientIds: new Set<string>(),
           codes: new Set<string>(),
         };
         if (row.client_id) bucket.clientIds.add(row.client_id);
-        for (const code of row.service_codes ?? []) {
-          if (code) bucket.codes.add(code.toUpperCase());
-        }
+        for (const code of rowCodes) bucket.codes.add(code);
         assignedByStaff.set(row.staff_id, bucket);
       }
     }
@@ -131,37 +134,6 @@ export async function loadStaffDutyFactsInternal(
     abiCaseloadKnown.value = true;
   }
 
-  const behaviorClientIds = new Set<string>();
-  const behaviorCaseloadKnown = { value: false };
-  {
-    const [{ data: bsc, error: bErr }, { data: targets, error: tErr }] = await Promise.all([
-      supabase
-        .from("behavior_support_clients")
-        .select("client_id")
-        .eq("organization_id", organizationId)
-        .eq("features_enabled", true),
-      supabase
-        .from("client_target_behaviors")
-        .select("client_id")
-        .eq("organization_id", organizationId),
-    ]);
-    if (
-      (bErr && !tableMissing(bErr.message) && !columnsMissing(bErr.message)) ||
-      (tErr && !tableMissing(tErr.message) && !columnsMissing(tErr.message))
-    ) {
-      throw new Error((bErr ?? tErr)!.message);
-    }
-    if (!bErr && !tErr) {
-      behaviorCaseloadKnown.value = true;
-      for (const row of (bsc ?? []) as Array<{ client_id: string }>) {
-        if (row.client_id) behaviorClientIds.add(row.client_id);
-      }
-      for (const row of (targets ?? []) as Array<{ client_id: string }>) {
-        if (row.client_id) behaviorClientIds.add(row.client_id);
-      }
-    }
-  }
-
   const profileById = new Map<
     string,
     { requires_abi: boolean | null; requires_deescalation: boolean | null }
@@ -196,14 +168,16 @@ export async function loadStaffDutyFactsInternal(
     const clientIds = assigned ? [...assigned.clientIds] : [];
     const codes = assigned ? [...assigned.codes] : [];
     const hasAbiCaseload = clientIds.some((id) => abiClientIds.has(id));
-    const hasBehaviorCaseload = clientIds.some((id) => behaviorClientIds.has(id));
+    // Behavior-support caseload tracking was removed. De-escalation follows
+    // profiles.requires_deescalation only.
+    const hasBehaviorCaseload = false;
     const prof = profileById.get(staffId);
     const isTransporter =
       transporterIds.has(staffId) || codes.some((c) => c.toUpperCase() === "MTP");
 
     out.set(staffId, {
       staffId,
-      role: mem?.role ?? null,
+      role: mem?.access_level ?? null,
       assignmentsKnown: assignmentsKnown.value,
       assignedClientIds: clientIds,
       assignedServiceCodes: codes,
@@ -212,7 +186,7 @@ export async function loadStaffDutyFactsInternal(
       abiCaseloadKnown: abiCaseloadKnown.value,
       hasAbiCaseload,
       requiresAbi: prof?.requires_abi ?? null,
-      behaviorCaseloadKnown: behaviorCaseloadKnown.value,
+      behaviorCaseloadKnown: true,
       hasBehaviorCaseload,
       requiresDeescalation: prof?.requires_deescalation ?? null,
       managerIdKnown,

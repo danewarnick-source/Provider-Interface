@@ -1,10 +1,5 @@
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  BehaviorObservationsBlock,
-  type BehaviorAnswers,
-} from "@/components/evv/behavior-observations-block";
-import { BehaviorObservationsBoundary } from "@/components/evv/behavior-observations-boundary";
 import { IncidentReportDialog } from "@/components/incidents/incident-report-dialog";
 import {
   ShiftMedDueCheck,
@@ -25,16 +20,12 @@ interface PunchPadShiftSignalsProps {
   incidentReportIds: string[];
   incidentDialogOpen: boolean;
   incidentTriggerOpen: boolean;
-  behaviorEnabled: boolean;
-  behaviorAnswers: BehaviorAnswers;
-  targetBehaviorOptions: string[];
   onIncidentAnswer: (answer: "yes" | "no") => void;
   onIncidentDialogOpenChange: (open: boolean) => void;
   onIncidentTriggerOpenChange: (open: boolean) => void;
   onIncidentSubmitted: (reportId: string) => void;
   onAppointmentTriggered: () => void;
   onTriggersResolved: (resolved: boolean) => void;
-  onBehaviorChange: (answers: BehaviorAnswers) => void;
   onMedResolvedChange: (resolved: boolean) => void;
   onPendingDosesChange: (pending: PendingMedDose[]) => void;
 }
@@ -50,16 +41,12 @@ export function PunchPadShiftSignals({
   incidentReportIds,
   incidentDialogOpen,
   incidentTriggerOpen,
-  behaviorEnabled,
-  behaviorAnswers,
-  targetBehaviorOptions,
   onIncidentAnswer,
   onIncidentDialogOpenChange,
   onIncidentTriggerOpenChange,
   onIncidentSubmitted,
   onAppointmentTriggered,
   onTriggersResolved,
-  onBehaviorChange,
   onMedResolvedChange,
   onPendingDosesChange,
 }: PunchPadShiftSignalsProps) {
@@ -144,17 +131,6 @@ export function PunchPadShiftSignals({
         triggeredByNoteType={incidentTriggerOpen ? "evv_timesheet" : null}
         onSubmitted={onIncidentSubmitted}
       />
-
-      {behaviorEnabled && (
-        <BehaviorObservationsBoundary answersSnapshot={behaviorAnswers}>
-          <BehaviorObservationsBlock
-            value={behaviorAnswers}
-            onChange={onBehaviorChange}
-            targetBehaviorOptions={targetBehaviorOptions}
-            onOpenIncident={() => onIncidentDialogOpenChange(true)}
-          />
-        </BehaviorObservationsBoundary>
-      )}
 
       {organizationId && (
         <ShiftMedDueCheckSlot

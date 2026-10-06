@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { RequireRole } from "@/components/rbac-guard";
+import { RequireLevel } from "@/components/rbac-guard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,9 +24,9 @@ import { listOrgLoans } from "@/lib/client-loans.functions";
 export const Route = createFileRoute("/dashboard/client-loans")({
   head: () => ({ meta: [{ title: "Client Loan Ledger — Provider Interface" }] }),
   component: () => (
-    <RequireRole roles={["admin"]}>
+    <RequireLevel min="owner">
       <ClientLoansPage />
-    </RequireRole>
+    </RequireLevel>
   ),
 });
 

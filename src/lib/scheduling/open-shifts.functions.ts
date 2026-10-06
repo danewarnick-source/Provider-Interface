@@ -1,12 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { isAgencyAdmin } from "@/lib/access/levels";
 
 /**
  * Open shifts = scheduled_shifts where staff_id IS NULL and status='open'.
  * Lifecycle:
  *   admin posts → status='open'
- *   staff claims → status stays 'open', claim_requested_by = userId (staff_id still NULL)
+ *   team member requests → status stays 'open', claim_requested_by = userId (staff_id still NULL)
  *   admin approves → status='accepted', staff_id = claim_requested_by, claim_requested_by NULL
  *   admin denies → status='open', claim_requested_by NULL
  *
@@ -39,52 +41,6 @@ export const listOpenShifts = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
-export const postOpenShift = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    organizationId: string;
-    clientId: string;
-    serviceCode: string;
-    startsAtIso: string;
-    endsAtIso: string;
-    locationId?: string | null;
-    notes?: string;
-  }) => z.object({
-    organizationId: z.string().uuid(),
-    clientId: z.string().uuid(),
-    serviceCode: z.string().min(1),
-    startsAtIso: z.string(),
-    endsAtIso: z.string(),
-    locationId: z.string().uuid().nullable().optional(),
-    notes: z.string().optional(),
-  }).parse(d))
-  .handler(async ({ data, context }) => {
-    if (!context.supabase || !context.userId) return null;
-    const insertRow = {
-      organization_id: data.organizationId,
-      staff_id: null,
-      client_id: data.clientId,
-      service_code: data.serviceCode.toUpperCase(),
-      job_code: data.serviceCode.toUpperCase(),
-      starts_at: data.startsAtIso,
-      ends_at: data.endsAtIso,
-      location_id: data.locationId ?? null,
-      notes: data.notes ?? null,
-      status: "open",
-      published: true,
-      shift_type: "hourly",
-      created_from: "manual",
-    };
-    const { gateScheduledShiftInsert } = await import("@/lib/scheduling/shift-commit");
-    await gateScheduledShiftInsert(context.supabase, [insertRow as never], { mode: "bulk_auto", userId: context.userId });
-    const { data: row, error } = await context.supabase
-      .from("scheduled_shifts")
-      .insert(insertRow)
-      .select("*").single();
-    if (error) throw error;
-    return row;
-  });
-
 export const claimOpenShift = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { shiftId: string }) =>
@@ -94,19 +50,26 @@ export const claimOpenShift = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: false };
     const { data: shift, error: gErr } = await supabase
       .from("scheduled_shifts")
-      .select("id, organization_id, status, staff_id, client_id, starts_at, service_code")
+      .select("id, organization_id, status, staff_id, client_id, starts_at, service_code, claim_requested_by")
       .eq("id", data.shiftId).maybeSingle();
     if (gErr) throw gErr;
     if (!shift) throw new Error("Shift not found");
     if (shift.staff_id) throw new Error("Shift is already assigned");
     if (shift.status !== "open") throw new Error("Shift is not open for claim");
+    if (shift.claim_requested_by === userId) return { ok: true };
+    if (shift.claim_requested_by) throw new Error("Someone already requested this shift.");
 
-    const { error: uErr } = await supabase
+    const { data: updated, error: uErr } = await supabase
       .from("scheduled_shifts")
-      // Keep status "open" while claim is pending approval — "pending" is not a valid status.
+      // Request only. Assignment (staff_id / status) waits for an admin decision.
       .update({ claim_requested_by: userId })
-      .eq("id", data.shiftId);
+      .eq("id", data.shiftId)
+      .eq("status", "open")
+      .is("staff_id", null)
+      .is("claim_requested_by", null)
+      .select("id");
     if (uErr) throw uErr;
+    if (!updated?.length) throw new Error("This shift is no longer available to request.");
 
     // Notify admins (best-effort): role-targeted notification
     try {
@@ -114,9 +77,9 @@ export const claimOpenShift = createServerFn({ method: "POST" })
         organization_id: shift.organization_id,
         recipient_role: "admin",
         type: "shift_claim_request",
-        title: "Open shift claimed",
-        body: `A staff member requested to claim ${shift.service_code ?? "an open shift"} on ${new Date(shift.starts_at).toLocaleDateString()}.`,
-        link_to: `/dashboard/schedule-preview?shift=${data.shiftId}`,
+        title: "Open shift requested",
+        body: `A team member requested ${shift.service_code ?? "an open shift"} on ${new Date(shift.starts_at).toLocaleDateString()}.`,
+        link_to: `/dashboard/scheduler`,
         related_id: data.shiftId,
         related_type: "scheduled_shift",
       });
@@ -138,6 +101,12 @@ export const decideClaim = createServerFn({ method: "POST" })
       .eq("id", data.shiftId).maybeSingle();
     if (gErr) throw gErr;
     if (!shift) throw new Error("Shift not found");
+    // is_org_admin_or_manager: owner, or an admin whose scope is the whole agency.
+    // A home-scoped admin is still an Admin, and that update is denied by RLS.
+    const access = await requireOrgMembership(supabase, userId, shift.organization_id, "admin");
+    if (!isAgencyAdmin(access.level, access.scope)) {
+      throw new Error("Only an owner or an agency-wide admin can approve or deny a shift request.");
+    }
     if (!shift.claim_requested_by) throw new Error("No pending claim on this shift");
 
     const claimant = shift.claim_requested_by;

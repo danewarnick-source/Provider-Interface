@@ -44,6 +44,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { isAdminLevel } from "@/lib/access/levels";
 
 const PAGE_SIZE = 100;
 // Server-side page size for exhaustively paginating through all matching
@@ -160,7 +161,7 @@ export function RecordsTab() {
   const qc = useQueryClient();
   const adminName = (user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? "Administrator";
   const orgId = org?.organization_id;
-  const isAdmin = org?.role === "admin" || org?.role === "program_manager" || org?.role === "manager";
+  const isAdmin = isAdminLevel(org?.access.level);
 
   const [mode, setMode] = useState<Mode>("all");
   const [type, setType] = useState<RecordType>("all");
