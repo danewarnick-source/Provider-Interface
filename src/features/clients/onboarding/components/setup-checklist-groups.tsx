@@ -58,8 +58,8 @@ import {
   PROFILE_FIELD_BY_KEY,
   type ProfileField,
 } from "@/lib/client-profile-fields";
-import { CaseloadEditor } from "@/components/clients/caseload-editor";
-import { NectarAsk } from "@/components/clients/nectar-ask";
+import { CaseloadEditor } from "@/features/clients/care-team";
+import { NectarAsk } from "@/features/clients/shared";
 import { localYmd } from "@/lib/local-date";
 
 export type BillingCodeRow = {

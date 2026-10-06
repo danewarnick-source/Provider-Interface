@@ -387,7 +387,7 @@ export const STATE_INVENTORY: InventoryItem[] = [
     kind: "config",
     label: "Fire-drill cadence",
     utah_value: "Monthly",
-    source: "components/clients/client-documents-card.tsx",
+    source: "features/clients/documents/components/client-documents-card.tsx",
     extracted: false,
   },
 

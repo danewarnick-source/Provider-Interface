@@ -26,7 +26,7 @@ import {
   getClientIntakeChecklist,
   upsertClientIntakeCompletion,
 } from "@/lib/client-hr.functions";
-import { ClientDocumentsCard } from "@/components/clients/client-documents-card";
+import { ClientDocumentsCard } from "@/features/clients/documents";
 import { localYmd } from "@/lib/local-date";
 
 const STATUSES = [

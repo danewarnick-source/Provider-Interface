@@ -12,7 +12,7 @@ import {
   type ClientFileCard,
   type ClientFileStatus,
 } from "@/lib/client-file";
-import { ClientDocumentsCard } from "@/components/clients/client-documents-card";
+import { ClientDocumentsCard } from "./client-documents-card";
 
 function statusBadgeClass(status: ClientFileStatus): string {
   if (status === "on_file") return "border-emerald-300 bg-emerald-50 text-emerald-800";

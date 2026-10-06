@@ -24,8 +24,8 @@ import {
   RatesForm,
   GuardianForm,
   type State as OnboardingState,
-} from "@/components/clients/finish-onboarding-card";
-import { CaseloadEditor } from "@/components/clients/caseload-editor";
+} from "./finish-onboarding-card";
+import { CaseloadEditor } from "@/features/clients/care-team";
 import { FEATURE_CODES } from "@/lib/client-features";
 import { isClockableServiceCode, isDailyServiceCode } from "@/lib/service-billing";
 

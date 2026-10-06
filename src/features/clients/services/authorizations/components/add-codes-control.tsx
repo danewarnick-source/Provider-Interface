@@ -16,7 +16,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
 import { addClientBillingCodes } from "@/lib/finish-onboarding.functions";
-import { CodeAssignedStaff } from "@/components/clients/code-assigned-staff";
+import { CodeAssignedStaff } from "./code-assigned-staff";
 import { UserPlus } from "lucide-react";
 
 // Full DSPD code catalog (EVV_SERVICE_CODES is the canonical registry —

@@ -18,8 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { CaseloadEditor } from "@/components/clients/caseload-editor";
-import { AddCodesControl } from "@/components/clients/add-codes-control";
+import { CaseloadEditor } from "@/features/clients/care-team";
+import { AddCodesControl } from "@/features/clients/services/authorizations";
 import {
   getClientOnboardingState,
   saveOnboardingClientPatch,

@@ -23,8 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { ClientPhotoCard } from "@/components/clients/client-photo-card";
-import { NectarAsk } from "@/components/clients/nectar-ask";
+import { ClientPhotoCard } from "./client-photo-card";
+import { NectarAsk } from "@/features/clients/shared";
 import { Textarea } from "@/components/ui/textarea";
 import {
   RESTRICTION_ELEMENTS,
@@ -36,8 +36,8 @@ import {
   setRhsHospitalizationDay,
   deleteRhsHospitalizationDay,
 } from "@/lib/rhs-hospitalization.functions";
-import { HealthcareProvidersCard } from "@/components/clients/healthcare-providers-card";
-import { BelongingsInventoryCard } from "@/components/clients/belongings-inventory-card";
+import { HealthcareProvidersCard } from "@/features/clients/contacts";
+import { BelongingsInventoryCard } from "@/features/clients/residential";
 import {
   listRhsEvacuationDrills,
   recordRhsEvacuationDrill,

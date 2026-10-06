@@ -11,7 +11,7 @@ import {
   User,
 } from "lucide-react";
 import type { CaseloadClient } from "@/hooks/use-caseload";
-import { ClientPhotoCard } from "@/components/clients/client-photo-card";
+import { ClientPhotoCard } from "@/features/clients/general";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import type { CustomFieldWithValue } from "@/lib/client-care-data.functions";
 

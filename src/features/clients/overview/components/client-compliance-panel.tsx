@@ -6,7 +6,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { ClientIntakeChecklistCard } from "./client-intake-checklist-card";
+import { ClientIntakeChecklistCard } from "@/features/clients/onboarding";
 
 interface ClientCompliancePanelProps {
   open: boolean;

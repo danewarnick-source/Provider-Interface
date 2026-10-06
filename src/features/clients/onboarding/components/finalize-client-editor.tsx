@@ -32,7 +32,7 @@ import {
 import { commitSingleSubject } from "@/lib/smart-import-commit.functions";
 import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
-import { CaseloadEditor, type CaseloadDraftValue } from "@/components/clients/caseload-editor";
+import { CaseloadEditor, type CaseloadDraftValue } from "@/features/clients/care-team";
 
 type FieldKey =
   | "first_name" | "last_name" | "date_of_birth" | "physical_address"
