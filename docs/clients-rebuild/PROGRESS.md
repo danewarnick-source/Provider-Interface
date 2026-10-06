@@ -400,3 +400,10 @@ One short report per prompt. A new session continues from the first prompt not m
   - The confirmed summary is not saved as a `client_documents` file yet; `summary_document_id` is still unused.
   - Open do-not-schedule exclusions are left open on discharge.
   - Team removal happens after the RPC, so it is not atomic with the rest. If RLS stops it, the UI says how many team members are still assigned.
+
+## P11 follow-up: team removal inside the discharge transaction
+- **Status:** committed directly to `clients-rebuild` (`d4a7c3a1`), at Jeff's request after P11 merged.
+- **What was done:** `discharge_client` now removes the client's `staff_assignments` rows right after recording who was on the team in `ended_items`, so the discharge and the team removal succeed or fail together. The server function no longer deletes assignments afterwards, and the dialog's "still assigned" warning is gone.
+- **Migration:** `20261007100000_clients_discharge_removes_team_atomically` (additive; replaces `discharge_client`, same signature). Jeff applied it in the SQL editor, because the Supabase tool holds DELETE statements for a confirmation this session can't show. It's recorded in `schema_migrations`, and the live function body matches the file exactly.
+- **Live check:** a discharge of a real client inside a block that always rolls back took the team from 3 to 0, kept all 3 in the snapshot and set the status. A second call refused ("already discharged"). After the rollback the client is still active with its team, and `client_discharges` still has 0 rows.
+- **Checks:** tsc 203 errors before and after. Unit tests 1838 pass, 5 fail; the 5 are the ones already failing on main. Build passes.
