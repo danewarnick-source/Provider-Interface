@@ -38,6 +38,7 @@ import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
 import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
 import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
 import { levelForRole, withAccessLevel } from "./access-level";
+import { clientOverviewPayload } from "./client-profile-mock";
 import { isPcspServerFn, pcspServerFnPayload } from "./pcsp-mock";
 import { addClientPayload, listClientsPayload } from "./clients-list-mock";
 import { staffClientReadiness } from "../../src/lib/team-members/readiness";
@@ -1000,6 +1001,8 @@ function serverFnPayload(url: string, body: string): unknown {
   const addPayload = addClientPayload(fn, body);
   if (addPayload !== undefined) return addPayload;
   if (/^writeClientRecord$/.test(fn)) return { ids: ["00000000-0000-4000-a000-0000000000c3"] };
+  // Client profile Overview (src/lib/clients/overview.functions.ts).
+  if (/^getClientOverview/.test(fn)) return clientOverviewPayload();
   // PCSP import (src/lib/clients/pcsp/import.functions.ts).
   const pcsp = /readPcsp/.test(fn) ? "readPcsp" : /confirmPcsp/.test(fn) ? "confirmPcsp" : isPcspServerFn(body);
   if (pcsp) return pcspServerFnPayload(pcsp);

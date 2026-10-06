@@ -34,8 +34,10 @@ import {
 } from "@/lib/smart-import-commit.functions";
 import { generateSmartImportReminders } from "@/lib/smart-import-reminders.functions";
 import { previewUndoImport, undoCommittedImport } from "@/lib/smart-import-history.functions";
-import { ClientLiveBadge } from "@/components/clients/add/client-readiness-card";
-import { SetupChecklist } from "@/components/clients/add/setup-checklist";
+import {
+  ClientNeedsAttentionList,
+  ClientReadyBadge,
+} from "@/components/clients/shared/client-needs-attention";
 import { employeeSmartImportRedirect } from "@/lib/employee-smart-import-block";
 
 export const Route = createFileRoute("/dashboard/smart-import/$jobId/done")({
@@ -349,7 +351,7 @@ function DonePage() {
                   <div className="flex items-center gap-2 text-xs">
                     {s.committed ? (
                       s.subject_type === "client" && s.record_id ? (
-                        <ClientLiveBadge clientId={s.record_id} />
+                        <ClientReadyBadge clientId={s.record_id} />
                       ) : (
                         <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
                           live
@@ -399,7 +401,7 @@ function DonePage() {
                 )}
                 {s.record_id && s.subject_type === "client" && s.committed && (
                   <div className="mt-3">
-                    <SetupChecklist clientId={s.record_id} jobId={jobId} />
+                    <ClientNeedsAttentionList clientId={s.record_id} />
                   </div>
                 )}
               </div>

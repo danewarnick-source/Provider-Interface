@@ -271,7 +271,7 @@ export function buildClientFileCards(
     "photograph",
     !!facts.photoPath,
     null,
-    `${profile}?tab=identity`,
+    `${profile}?section=profile`,
     facts.photoPath
       ? { path: facts.photoPath, filename: "photograph", bucket: "client-photos" }
       : undefined,
@@ -282,7 +282,7 @@ export function buildClientFileCards(
     "pcsp",
     pcspOnFile && !(facts.pcspExpiration && facts.pcspExpiration < now.toISOString().slice(0, 10)),
     facts.pcspExpiration,
-    `${profile}?tab=client-file`,
+    `${profile}?section=file`,
     { ...firstEvidence(pcspDocs), bucket: "client-documents" },
   );
 
@@ -290,7 +290,7 @@ export function buildClientFileCards(
     "grievance",
     facts.grievanceOk || grievanceDocs.length > 0,
     null,
-    `${profile}?tab=identity`,
+    `${profile}?section=file`,
     { ...firstEvidence(grievanceDocs), bucket: "client-documents" },
   );
 
@@ -298,7 +298,7 @@ export function buildClientFileCards(
     "support_strategies",
     facts.supportStrategiesOk || strategyDocs.length > 0,
     facts.supportStrategiesOk ? null : facts.supportStrategiesDueAt,
-    `${profile}?tab=operations`,
+    `${profile}?section=plans`,
     { ...firstEvidence(strategyDocs), bucket: "client-documents" },
   );
 
@@ -309,7 +309,7 @@ export function buildClientFileCards(
     "clinical_legal",
     clinicalLegalOnFile(facts),
     null,
-    `${profile}?tab=client-file`,
+    `${profile}?section=file`,
     { ...firstEvidence(clinicalDocs), bucket: "client-documents" },
   );
 
@@ -318,12 +318,12 @@ export function buildClientFileCards(
     "housemate",
     housemateOnFile,
     housemateOnFile ? null : facts.housemateDueAt,
-    `${profile}?tab=client-file`,
+    `${profile}?section=file`,
     { ...firstEvidence(housemateDocs), bucket: "client-documents" },
   );
 
   const belongDue = facts.belongingsOn ? addYear(facts.belongingsOn) : null;
-  push("belongings", !!facts.belongingsOn, belongDue, `${profile}?tab=identity`);
+  push("belongings", !!facts.belongingsOn, belongDue, `${profile}?section=file`);
 
   const needsRnb = codesHas(facts.codes, RNB_CODES);
   const needsLease = codesHas(facts.codes, LEASE_CODES);
@@ -334,11 +334,11 @@ export function buildClientFileCards(
     "lease_rb",
     leaseOk,
     null,
-    `${profile}?tab=client-file`,
+    `${profile}?section=file`,
     { ...leaseEvidence, bucket: "client-documents" },
   );
 
-  push("money_funds", facts.hasPbaAccount, null, `${profile}?tab=billing`);
+  push("money_funds", facts.hasPbaAccount, null, `${profile}?section=services`);
 
   return cards;
 }

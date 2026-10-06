@@ -5,18 +5,12 @@ import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { toast } from "sonner";
 
-export function FaceSheetButton({
-  clientId,
-  variant = "default",
-}: {
-  clientId: string;
-  /** "default" = outline sm button; "pill" = tiny chip matching identity-row pills. */
-  variant?: "default" | "pill";
-}) {
+/** Builds the Client Face Sheet PDF and opens it (downloads when popups are blocked). */
+export function useOpenFaceSheet(clientId: string) {
   const gen = useServerFn(generateClientFaceSheet);
   const [busy, setBusy] = useState(false);
 
-  const openSheet = async () => {
+  const open = async () => {
     setBusy(true);
     try {
       const { pdfBase64, filename } = await gen({ data: { clientId } });
@@ -43,27 +37,17 @@ export function FaceSheetButton({
     }
   };
 
-  if (variant === "pill") {
-    return (
-      <button
-        type="button"
-        onClick={openSheet}
-        disabled={busy}
-        title="Generate Client Face Sheet PDF"
-        className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition hover:border-primary/40 hover:text-foreground disabled:opacity-60"
-      >
-        <FileText className="h-3 w-3" />
-        {busy ? "Building…" : "Face Sheet"}
-      </button>
-    );
-  }
+  return { open, busy };
+}
 
+export function FaceSheetButton({ clientId }: { clientId: string }) {
+  const { open, busy } = useOpenFaceSheet(clientId);
   return (
     <Button
       type="button"
       variant="outline"
       size="sm"
-      onClick={openSheet}
+      onClick={() => void open()}
       disabled={busy}
       className="shrink-0"
     >

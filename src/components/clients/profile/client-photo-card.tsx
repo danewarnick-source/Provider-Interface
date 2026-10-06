@@ -1,20 +1,30 @@
 // ClientPhotoCard — mounts <PhotoUpload> against the client-photos bucket
 // and persists to clients.client_photo_url + clients.client_photo_taken_on.
+// Shows the date taken (editable) and warns once the photo is 5+ years old.
 
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { AlertTriangle, Camera } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { useAccess } from "@/hooks/use-access";
 import { Card, CardContent } from "@/components/ui/card";
-import { Camera } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { PhotoUpload } from "@/components/person/photo-upload";
-import { todayYmd } from "@/lib/clients/dates";
-import { useServerFn } from "@tanstack/react-start";
+import { formatDate, todayYmd } from "@/lib/clients/dates";
+import { photoStatus } from "@/lib/clients/readiness";
 import { updateClient } from "@/lib/clients/writes.functions";
+
+type Patch = { client_photo_url?: string | null; client_photo_taken_on?: string | null };
 
 export function ClientPhotoCard({ clientId }: { clientId: string }) {
   const qc = useQueryClient();
   const { data: org } = useCurrentOrg();
+  const canEdit = useAccess().canCategory("clients", "edit");
   const orgId = org?.organization_id ?? null;
+  const [editingDate, setEditingDate] = useState(false);
 
   const q = useQuery({
     queryKey: ["client-photo-card", clientId],
@@ -31,36 +41,72 @@ export function ClientPhotoCard({ clientId }: { clientId: string }) {
 
   const updateClientFn = useServerFn(updateClient);
   const persist = useMutation({
-    mutationFn: async (patch: { client_photo_url: string | null; client_photo_taken_on: string | null }) => {
+    mutationFn: async (patch: Patch) => {
       if (!orgId) throw new Error("No organization selected.");
       await updateClientFn({ data: { organizationId: orgId, clientId, patch } });
     },
     onSuccess: () => {
+      setEditingDate(false);
       qc.invalidateQueries({ queryKey: ["client-photo-card", clientId] });
       qc.invalidateQueries({ queryKey: ["client-face-sheet-info", clientId] });
+      qc.invalidateQueries({ queryKey: ["client-profile"] });
       // Any workspace/header queries that read the photo — refresh broadly.
       qc.invalidateQueries({ queryKey: ["client-workspace"] });
       qc.invalidateQueries({ queryKey: ["caseload"] });
     },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const c = q.data;
   const name = c ? `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() : null;
   const currentPath = (c?.client_photo_url ?? null) as string | null;
+  const takenOn = (c?.client_photo_taken_on ?? null) as string | null;
+  const status = photoStatus({ url: currentPath, takenOn });
 
   return (
-    <Card>
+    <Card data-testid="client-photo-card">
       <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-2.5">
           <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
             <Camera className="h-3.5 w-3.5" />
           </span>
-          <div>
-            <h3 className="text-sm font-semibold leading-tight">Client photo</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Used on the Client Face Sheet. Recent, front-facing preferred.
-              {c?.client_photo_taken_on ? ` Last taken ${c.client_photo_taken_on}.` : ""}
+          <div className="space-y-1">
+            <h3 className="text-sm font-semibold leading-tight">Photo</h3>
+            <p className="text-xs text-muted-foreground">
+              Used on the face sheet. Recent and front-facing. Retake every 5 years.
             </p>
+            {currentPath ? (
+              editingDate ? (
+                <Input
+                  type="date"
+                  className="h-8 w-44"
+                  aria-label="Date taken"
+                  defaultValue={takenOn ?? ""}
+                  onBlur={(e) => persist.mutate({ client_photo_taken_on: e.target.value || null })}
+                />
+              ) : (
+                <p className="text-xs">
+                  Taken {takenOn ? formatDate(takenOn) : "on an unknown date"}
+                  {canEdit ? (
+                    <button
+                      type="button"
+                      className="ml-2 text-primary hover:underline"
+                      onClick={() => setEditingDate(true)}
+                    >
+                      Change date
+                    </button>
+                  ) : null}
+                </p>
+              )
+            ) : null}
+            {status === "old" ? (
+              <p
+                className="flex items-center gap-1 text-xs font-medium text-amber-700"
+                data-testid="client-photo-old"
+              >
+                <AlertTriangle className="h-3.5 w-3.5" /> Over 5 years old — take a new photo.
+              </p>
+            ) : null}
           </div>
         </div>
         {orgId ? (
@@ -77,10 +123,7 @@ export function ClientPhotoCard({ clientId }: { clientId: string }) {
               });
             }}
             onCleared={async () => {
-              await persist.mutateAsync({
-                client_photo_url: null,
-                client_photo_taken_on: null,
-              });
+              await persist.mutateAsync({ client_photo_url: null, client_photo_taken_on: null });
             }}
           />
         ) : (

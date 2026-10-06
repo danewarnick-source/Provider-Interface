@@ -242,7 +242,7 @@ export function BillingCodesDetail({ clientId, clientName, medicaidId }: Props) 
     qc.invalidateQueries({ queryKey: ["client-active-codes"] });
     qc.invalidateQueries({ queryKey: ["client-budget"] });
     qc.invalidateQueries({ queryKey: ["client-codes-summary", clientId] });
-    qc.invalidateQueries({ queryKey: ["client-readiness", clientId] });
+    qc.invalidateQueries({ queryKey: ["client-overview"] });
     qc.invalidateQueries({ queryKey: ["caseload"] });
     qc.invalidateQueries({ queryKey: ["scheduler-data"] });
     if (failed.length === 0) cancelBulk();
@@ -785,7 +785,7 @@ function CodeRow({
     qc.invalidateQueries({ queryKey: ["client-active-codes"] });
     qc.invalidateQueries({ queryKey: ["client-budget"] });
     qc.invalidateQueries({ queryKey: ["client-codes-summary", _clientId] });
-    qc.invalidateQueries({ queryKey: ["client-readiness", _clientId] });
+    qc.invalidateQueries({ queryKey: ["client-overview"] });
     qc.invalidateQueries({ queryKey: ["caseload"] });
     qc.invalidateQueries({ queryKey: ["scheduler-data"] });
   }

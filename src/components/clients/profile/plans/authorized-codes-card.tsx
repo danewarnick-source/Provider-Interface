@@ -13,7 +13,7 @@ export function AuthorizedCodesCard({ clientId, codes }: { clientId: string; cod
           <Link
             to="/dashboard/clients/$clientId"
             params={{ clientId }}
-            search={{ tab: "billing" }}
+            search={{ section: "services" }}
           >
             Manage in Billing →
           </Link>

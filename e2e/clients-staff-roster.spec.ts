@@ -94,28 +94,25 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await shot(page, "clients_list_and_chart");
   });
 
-  test("2. Client chart shows DSPD codes, home, and key care tabs", async ({ page }) => {
+  test("2. Client chart shows DSPD codes, home, and the profile sections", async ({ page }) => {
     await gotoAdmin(page, `/dashboard/clients/${CLIENTS.tommy.id}`);
     await expect(page.getByRole("heading", { name: /Tommy Jones/i })).toBeVisible({
       timeout: 20_000,
     });
-    await expect(page.getByText(/Host home/i).first()).toBeVisible();
-    await expect(page.getByRole("tab", { name: /^Identity$/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /Care plan/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /^Billing$/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /^Client file$/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /Operations/i })).toBeVisible();
+    const menu = page.getByTestId("profile-section-menu");
+    for (const key of ["overview", "profile", "contacts", "plans", "services", "file", "team"]) {
+      await expect(menu.getByTestId(`profile-section-${key}`)).toBeVisible();
+    }
+    for (const code of ["DSI", "HHS", "SEI", "SLH"]) {
+      await expect(page.getByTestId("client-profile-code").filter({ hasText: code })).toBeVisible();
+    }
 
-    await page.getByRole("tab", { name: /^Billing$/i }).click();
+    await menu.getByTestId("profile-section-services").click();
+    await expect(page.getByTestId("client-section-services")).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText("DSI").first()).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText("HHS").first()).toBeVisible();
-    await expect(page.getByText("SEI").first()).toBeVisible();
-    await expect(page.getByText("SLH").first()).toBeVisible();
 
-    await page.getByRole("tab", { name: /Care plan/i }).click();
-    await expect(page.getByRole("tab", { name: /^Goals$/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /Target Behaviors/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /Medications/i })).toBeVisible();
+    await menu.getByTestId("profile-section-health").click();
+    await expect(page.getByTestId("client-section-health")).toBeVisible({ timeout: 10_000 });
 
     await gotoAdmin(page, "/dashboard/homes");
     await expect(page.getByRole("heading", { name: /Homes & Teams/i }).first()).toBeVisible({

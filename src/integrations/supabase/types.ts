@@ -2098,6 +2098,8 @@ export type Database = {
       client_approved_locations: {
         Row: {
           address: string | null
+          archived_at: string | null
+          archived_by: string | null
           client_id: string
           created_at: string
           created_by: string | null
@@ -2112,6 +2114,8 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           client_id: string
           created_at?: string
           created_by?: string | null
@@ -2126,6 +2130,8 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           client_id?: string
           created_at?: string
           created_by?: string | null

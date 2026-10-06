@@ -114,6 +114,35 @@ export function primaryContact<T extends Sortable>(
   return contactsWithRole(contacts, role, now)[0] ?? null;
 }
 
+/** Role filters on the profile Contacts section. */
+export const CONTACT_FILTERS = ["all", "family", "emergency", "coordinator", "medical"] as const;
+export type ContactFilter = (typeof CONTACT_FILTERS)[number];
+
+export const CONTACT_FILTER_LABELS: Record<ContactFilter, string> = {
+  all: "All",
+  family: "Guardian & representative",
+  emergency: "Emergency",
+  coordinator: "Support coordinator",
+  medical: "Doctors & providers",
+};
+
+const FILTER_ROLES: Record<Exclude<ContactFilter, "all">, readonly ContactRole[]> = {
+  family: ["guardian", "representative"],
+  emergency: ["emergency"],
+  coordinator: ["support_coordinator"],
+  medical: PROVIDER_ROLES,
+};
+
+/** Active contacts for a filter, in role order, primary first within a role. */
+export function contactsForFilter<T extends Sortable>(
+  contacts: readonly T[],
+  filter: ContactFilter,
+  now: Date = new Date(),
+): T[] {
+  const roles = filter === "all" ? CONTACT_ROLES : FILTER_ROLES[filter];
+  return roles.flatMap((role) => contactsWithRole(contacts, role, now));
+}
+
 /** Group a mixed list (many clients) by client_id. */
 export function contactsByClient<T extends Pick<ClientContact, "client_id">>(
   contacts: readonly T[],
