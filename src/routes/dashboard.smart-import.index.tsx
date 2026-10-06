@@ -38,12 +38,19 @@ export const Route = createFileRoute("/dashboard/smart-import/")({
       throw redirect(employeeSmartImportRedirect());
     }
   },
-  component: () => (
-    <RequirePermission perm="view_staff_records">
+  component: SmartImportGate,
+});
+
+// Client imports need Clients: Edit; timesheet / daily-note imports stay on staff records.
+function SmartImportGate() {
+  const { mode } = Route.useSearch();
+  const perm = mode === "timesheets" || mode === "daily_notes" ? "view_staff_records" : "edit_client_records";
+  return (
+    <RequirePermission perm={perm}>
       <SmartImportPage />
     </RequirePermission>
-  ),
-});
+  );
+}
 
 type Mode = "employee" | "client" | "timesheets" | "daily_notes";
 type FileChip = {

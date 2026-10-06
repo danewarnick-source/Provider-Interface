@@ -42,7 +42,7 @@ import { employeeSmartImportRedirect } from "@/lib/employee-smart-import-block";
 export const Route = createFileRoute("/dashboard/smart-import/$jobId/done")({
   head: () => ({ meta: [{ title: "Smart Import — Done" }] }),
   component: () => (
-    <RequirePermission perm="view_staff_records">
+    <RequirePermission perm="edit_client_records">
       <DonePage />
     </RequirePermission>
   ),
@@ -55,7 +55,6 @@ function describeUndo(r: unknown): string {
     module?: string;
     field?: string;
     field_key?: string;
-    tag?: string;
     staff_id?: string;
     client_id?: string;
   };
@@ -66,8 +65,6 @@ function describeUndo(r: unknown): string {
       return `Disable ${x.module} on ${x.display_name}`;
     case "custom_field":
       return `Clear custom field "${x.field_key}" on ${x.display_name}`;
-    case "filed_scrap":
-      return `Remove filed note ${x.tag} from ${x.display_name}`;
     case "assignment":
       return `Remove staff↔client assignment`;
     case "profile_field":

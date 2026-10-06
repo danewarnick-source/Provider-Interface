@@ -74,9 +74,8 @@ export const getReviewSubject = createServerFn({ method: "POST" })
       .single();
     if (error || !subject) throw new Error("Subject not found");
 
-    const [{ data: fields }, { data: unfiled }, { data: certs }, { data: questions }] = await Promise.all([
+    const [{ data: fields }, { data: certs }, { data: questions }] = await Promise.all([
       sb.from("extracted_fields").select("*").eq("import_subject_id", data.subjectId).order("is_custom_attribute"),
-      sb.from("unfiled_items").select("*").eq("import_subject_id", data.subjectId),
       sb.from("import_cert_documents").select("*").eq("import_subject_id", data.subjectId),
       sb.from("import_nectar_questions").select("*").eq("import_subject_id", data.subjectId),
     ]);
@@ -134,7 +133,6 @@ export const getReviewSubject = createServerFn({ method: "POST" })
     return {
       subject,
       fields: fields ?? [],
-      unfiled: unfiled ?? [],
       certs: certs ?? [],
       questions: questions ?? [],
       matched,
@@ -650,26 +648,6 @@ export const answerNectarQuestion = createServerFn({ method: "POST" })
       answered_by: context.userId,
       answered_at: new Date().toISOString(),
     }).eq("id", data.questionId);
-    return { ok: true };
-  });
-
-// ---------- File an unfiled item ----------
-const FileUnfiled = z.object({
-  itemId: z.string().uuid(),
-  filed_to: z.string().nullable(), // null = leave
-});
-export const fileUnfiledItem = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => FileUnfiled.parse(i))
-  .handler(async ({ data, context }) => {
-    if (!context.supabase || !context.userId) return { ok: false };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
-    await sb.from("unfiled_items").update({
-      filed_to: data.filed_to,
-      filed_by: data.filed_to ? context.userId : null,
-      filed_at: data.filed_to ? new Date().toISOString() : null,
-    }).eq("id", data.itemId);
     return { ok: true };
   });
 

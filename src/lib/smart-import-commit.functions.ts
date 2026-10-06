@@ -494,7 +494,6 @@ export async function runJobCommit(
         userId,
       );
       await commitCerts(sb, orgId, subj, recordId, jobId, userId, gaps);
-      await commitUnfiled(sb, subj, recordId, jobId, userId);
       await applyProvisioning(sb, orgId, subj, recordId, jobId, userId, gaps);
 
       await sb
@@ -1369,46 +1368,6 @@ async function commitCerts(
       c.state === "verified" ? "source" : "admin_override",
       userId,
       "commit_cert",
-    );
-  }
-}
-
-// --------------------------------------------------------------
-async function commitUnfiled(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sb: any,
-  subj: { id: string; subject_type: "client" | "employee"; org_id?: string },
-  recordId: string | null,
-  jobId: string,
-  userId: string,
-) {
-  const { data: items } = await sb
-    .from("unfiled_items")
-    .select("*")
-    .eq("import_subject_id", subj.id);
-  for (const it of items ?? []) {
-    if (!it.filed_to) continue; // unassigned scraps persist as recoverable
-    // For clients we append the scrap to special_directions as a tagged note.
-    if (recordId && subj.subject_type === "client") {
-      const tag = `[${it.filed_to}]`;
-      const { data: c } = await sb
-        .from("clients")
-        .select("special_directions")
-        .eq("id", recordId)
-        .maybeSingle();
-      const existing = (c?.special_directions ?? "").trim();
-      const next = existing ? `${existing}\n${tag} ${it.text}` : `${tag} ${it.text}`;
-      await sb.from("clients").update({ special_directions: next }).eq("id", recordId);
-    }
-    await audit(
-      sb,
-      jobId,
-      it.org_id,
-      subj.id,
-      `Filed scrap under "${it.filed_to}"`,
-      "admin_override",
-      userId,
-      "file_scrap",
     );
   }
 }

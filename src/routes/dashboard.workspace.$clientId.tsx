@@ -36,6 +36,7 @@ import { useTodayShifts } from "@/hooks/use-today-shifts";
 import { ClientPhoto } from "@/components/client-photo";
 import { FaceSheetButton } from "@/components/clients/face-sheet-button";
 import { useClientFeature, clientFeatureVisible } from "@/lib/client-features";
+import { ClientAccessGate } from "@/components/clients/client-access-gate";
 
 function ActiveShiftReimbursementSlot({ clientId }: { clientId: string }) {
   const { data: active } = useActiveShift();
@@ -63,8 +64,17 @@ export const Route = createFileRoute("/dashboard/workspace/$clientId")({
       fallbackTo: "/dashboard/clients",
     });
   },
-  component: ClientWorkspace,
+  component: ClientWorkspaceRoute,
 });
+
+function ClientWorkspaceRoute() {
+  const { clientId } = Route.useParams();
+  return (
+    <ClientAccessGate clientId={clientId}>
+      <ClientWorkspace />
+    </ClientAccessGate>
+  );
+}
 
 function ClientWorkspace() {
   const { clientId } = Route.useParams();

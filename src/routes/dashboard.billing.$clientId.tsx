@@ -25,6 +25,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { listRateHistory, type RateHistoryRow } from "@/lib/billing-rates.functions";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getAuthStatus, AuthStatusBadge } from "@/lib/billing-auth-status";
+import { RequirePermission } from "@/components/rbac-guard";
+import { useAccess } from "@/hooks/use-access";
+import { writeClientRecord } from "@/lib/clients/writes.functions";
 
 export const Route = createFileRoute("/dashboard/billing/$clientId")({
   head: () => ({ meta: [{ title: "Client Billing — Provider Interface" }] }),
@@ -34,7 +37,11 @@ export const Route = createFileRoute("/dashboard/billing/$clientId")({
       fallbackTo: "/dashboard/billing",
     });
   },
-  component: ClientBillingDetail,
+  component: () => (
+    <RequirePermission perm="view_billing">
+      <ClientBillingDetail />
+    </RequirePermission>
+  ),
 });
 
 type ClientRow = { id: string; first_name: string; last_name: string; medicaid_id: string | null };
@@ -46,6 +53,8 @@ function ClientBillingDetail() {
   const router = useRouter();
   const { data: allCodes, refetch } = useAllClientBillingCodes();
   const { data: budgets } = useClientBudget(clientId);
+  const canEdit = useAccess().can("manage_billing");
+  const writeRecordFn = useServerFn(writeClientRecord);
 
   const clientQ = useQuery({
     enabled: !!org?.organization_id && isRouteUuid(clientId),
@@ -81,12 +90,10 @@ function ClientBillingDetail() {
     const start = row.service_start_date || null;
     const end = row.service_end_date || null;
     if (!end) return toast.error("End date is required for every authorization");
-    if (start && new Date(end) <= new Date(start)) {
+    if (start && end <= start) {
       return toast.error("End date must be after the start date");
     }
     const payload = {
-      organization_id: org.organization_id,
-      client_id: clientId,
       service_code: row.service_code.toUpperCase(),
       unit_type: row.unit_type ?? "Q",
       rate_per_unit: Number(row.rate_per_unit ?? 0),
@@ -104,19 +111,33 @@ function ClientBillingDetail() {
       sce: row.sce || null,
       provider_approver_email: row.provider_approver_email || null,
     };
-    const { error } = await supabase
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .from("client_billing_codes" as any)
-      .upsert(payload, { onConflict: "organization_id,client_id,service_code" });
-    if (error) return toast.error(error.message);
+    try {
+      await writeRecordFn({
+        data: {
+          organizationId: org.organization_id,
+          clientId,
+          table: "client_billing_codes",
+          op: "upsert",
+          onConflict: "organization_id,client_id,service_code",
+          values: payload,
+        },
+      });
+    } catch (e) {
+      return toast.error(e instanceof Error ? e.message : "Save failed");
+    }
     toast.success("Saved");
     refetch();
   };
 
   const remove = async (id: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from("client_billing_codes" as any).delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (!org?.organization_id) return;
+    try {
+      await writeRecordFn({
+        data: { organizationId: org.organization_id, clientId, table: "client_billing_codes", op: "delete", id },
+      });
+    } catch (e) {
+      return toast.error(e instanceof Error ? e.message : "Remove failed");
+    }
     refetch();
   };
 
@@ -215,51 +236,54 @@ function ClientBillingDetail() {
                     </div>
                   </td>
                   <td className="p-2">
-                    <Input type="number" step="0.01" defaultValue={row.rate_per_unit}
-                      onBlur={(e) => upsert({ ...row, rate_per_unit: Number(e.target.value) })}
+                    <Input type="number" step="0.01" defaultValue={row.rate_per_unit} readOnly={!canEdit}
+                      onBlur={(e) => canEdit && upsert({ ...row, rate_per_unit: Number(e.target.value) })}
                       className="h-8 w-24" />
                   </td>
                   <td className="p-2">
-                    <Input type="number" defaultValue={row.annual_unit_authorization}
-                      onBlur={(e) => upsert({ ...row, annual_unit_authorization: Number(e.target.value) })}
+                    <Input type="number" defaultValue={row.annual_unit_authorization} readOnly={!canEdit}
+                      onBlur={(e) => canEdit && upsert({ ...row, annual_unit_authorization: Number(e.target.value) })}
                       className="h-8 w-28" />
                   </td>
                   <td className="p-2">
-                    <Input type="number" defaultValue={row.monthly_max_units ?? ""}
-                      onBlur={(e) => upsert({ ...row, monthly_max_units: e.target.value === "" ? null : Number(e.target.value) })}
+                    <Input type="number" defaultValue={row.monthly_max_units ?? ""} readOnly={!canEdit}
+                      onBlur={(e) => canEdit && upsert({ ...row, monthly_max_units: e.target.value === "" ? null : Number(e.target.value) })}
                       className="h-8 w-24" />
                   </td>
                   <td className="p-2">
-                    <Input type="number" defaultValue={row.weekly_cap_units ?? ""}
-                      onBlur={(e) => upsert({ ...row, weekly_cap_units: e.target.value === "" ? null : Number(e.target.value) })}
+                    <Input type="number" defaultValue={row.weekly_cap_units ?? ""} readOnly={!canEdit}
+                      onBlur={(e) => canEdit && upsert({ ...row, weekly_cap_units: e.target.value === "" ? null : Number(e.target.value) })}
                       className="h-8 w-24" />
                   </td>
                   <td className="p-2">
-                    <Input type="date" defaultValue={row.service_start_date ?? ""}
-                      onBlur={(e) => upsert({ ...row, service_start_date: e.target.value || null })}
+                    <Input type="date" defaultValue={row.service_start_date ?? ""} readOnly={!canEdit}
+                      onBlur={(e) => canEdit && upsert({ ...row, service_start_date: e.target.value || null })}
                       className="h-8 w-36" />
                   </td>
                   <td className="p-2">
-                    <Input type="date" required defaultValue={row.service_end_date ?? ""}
-                      onBlur={(e) => upsert({ ...row, service_end_date: e.target.value || null })}
+                    <Input type="date" required defaultValue={row.service_end_date ?? ""} readOnly={!canEdit}
+                      onBlur={(e) => canEdit && upsert({ ...row, service_end_date: e.target.value || null })}
                       className={`h-8 w-36 ${!row.service_end_date ? "border-amber-500/60 bg-amber-500/5" : ""}`} />
                   </td>
                   <td className="p-2">
-                    <Input defaultValue={row.sce ?? ""}
-                      onBlur={(e) => upsert({ ...row, sce: e.target.value || null })}
+                    <Input defaultValue={row.sce ?? ""} readOnly={!canEdit}
+                      onBlur={(e) => canEdit && upsert({ ...row, sce: e.target.value || null })}
                       className="h-8 w-24" />
                   </td>
                   <td className="p-2">
                     <div className="flex items-center gap-1">
                       <RateHistoryButton clientId={row.client_id} serviceCode={row.service_code} />
-                      <Button size="icon" variant="ghost" onClick={() => remove(row.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {canEdit && (
+                        <Button size="icon" variant="ghost" onClick={() => remove(row.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>
                 );
               })}
+              {canEdit && (
               <tr className="border-t border-border bg-muted/30">
                 <td className="p-2">
                   <Input placeholder="DSI / HHS / …" value={newRow.service_code}
@@ -296,6 +320,7 @@ function ClientBillingDetail() {
                   </Button>
                 </td>
               </tr>
+              )}
             </tbody>
           </table>
         </div>

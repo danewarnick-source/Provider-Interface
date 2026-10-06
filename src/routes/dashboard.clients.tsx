@@ -25,7 +25,7 @@ import {
 import {
   UserPlus, Contact2, MapPin, Loader2,
   ChevronRight, AlertTriangle, Search,
-  ArrowLeft, Sparkles, FileSpreadsheet,
+  ArrowLeft, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { OnboardingReturnBar } from "@/components/onboarding/onboarding-return-bar";
@@ -108,6 +108,8 @@ const GEOFENCE_OPTIONS = [
 // ─── Geocoding helpers (preserved exactly) ───────────────────────────────────
 
 import { geocodeAddress } from "@/lib/geocode";
+import { createClient, updateClient } from "@/lib/clients/writes.functions";
+import { useAccess } from "@/hooks/use-access";
 
 
 
@@ -154,6 +156,7 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
   const { status: setupStatus } = useAgencySetup();
   const loadSetup = useServerFn(getAgencySetupStatus);
   const createBlocked = shouldBlockStaffClientCreate(setupStatus);
+  const canEditClients = useAccess().can("edit_client_records");
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(startWithAddOpen);
   const [rosterTab, setRosterTab] = useState<"active" | "archived">("active");
@@ -189,14 +192,13 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
     [allClients],
   );
 
+  const updateClientFn = useServerFn(updateClient);
+  const createClientFn = useServerFn(createClient);
   const reactivateM = useMutation({
     mutationFn: async (clientId: string) => {
-      const { error } = await (supabase as any)
-        .from("clients")
-        .update({ account_status: "active" })
-        .eq("id", clientId)
-        .eq("organization_id", org!.organization_id);
-      if (error) throw error;
+      await updateClientFn({
+        data: { organizationId: org!.organization_id, clientId, patch: { account_status: "active" } },
+      });
       return clientId;
     },
     onSuccess: () => {
@@ -248,8 +250,14 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
       assertAgencySetupComplete(await loadSetup({ data: { organizationId: org.organization_id } }));
       const coords = await resolveCoords(input.physical_address);
       const isOwn = input.is_own_guardian ?? true;
-      const { data, error } = await (supabase as any).from("clients").insert({
-        organization_id:      org!.organization_id,
+      const stubCodes = (input.job_code ?? [])
+        .map((c) => c.toUpperCase())
+        .filter(Boolean)
+        .map((service_code) => ({
+          service_code,
+          unit_type: (isDailyServiceCode(service_code) ? "day" : "unit") as "day" | "unit",
+        }));
+      const { id: newId } = await createClientFn({ data: { organizationId: org.organization_id, stubCodes, values: {
         first_name:           input.first_name,
         last_name:            input.last_name,
         phone_number:         input.phone_number,
@@ -271,26 +279,9 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
         guardian_phone:       isOwn ? null : (input.guardian_phone?.trim() || null),
         guardian_relationship:isOwn ? null : (input.guardian_relationship?.trim() || null),
         guardian_email:       isOwn ? null : (input.guardian_email?.trim() || null),
-      }).select("id").single();
-      if (error) throw error;
+      } } });
 
-      const codes = (input.job_code ?? []).map((c) => c.toUpperCase()).filter(Boolean);
-      if (codes.length) {
-        const stubRows = codes.map((service_code) => ({
-          organization_id: org!.organization_id,
-          client_id: data!.id,
-          service_code,
-          unit_type: isDailyServiceCode(service_code) ? "day" : "unit",
-          annual_unit_authorization: 0,
-          rate_per_unit: 0,
-        }));
-        const { error: bcErr } = await (supabase as any)
-          .from("client_billing_codes")
-          .upsert(stubRows, { onConflict: "organization_id,client_id,service_code" });
-        if (bcErr) throw bcErr;
-      }
-
-      return { id: data!.id as string, mode: input.intake_mode, name: `${input.first_name} ${input.last_name}`.trim() };
+      return { id: newId, mode: input.intake_mode, name: `${input.first_name} ${input.last_name}`.trim() };
     },
     onSuccess: ({ id, mode, name }) => {
       toast.success(
@@ -353,15 +344,11 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
             Manage individuals served, authorized service codes, and care configurations.
           </p>
         </div>
+        {canEditClients && (
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline">
-            <Link to="/dashboard/smart-import" search={{ mode: "client" }}>
-              <FileSpreadsheet className="mr-2 h-4 w-4" /> Import CSV
-            </Link>
-          </Button>
           <Button asChild variant="outline" className="border-primary/40 text-primary hover:bg-primary/5">
             <Link to="/dashboard/smart-import" search={{ mode: "client" }}>
-              <Sparkles className="mr-2 h-4 w-4" /> Smart Import
+              <Sparkles className="mr-2 h-4 w-4" /> Import
             </Link>
           </Button>
           <Button
@@ -390,6 +377,7 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
             />
           </Dialog>
         </div>
+        )}
       </div>
 
       {/* Search */}
@@ -499,7 +487,7 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
                           size="sm"
                           variant="outline"
                           className="h-8 text-xs"
-                          disabled={reactivateM.isPending}
+                          disabled={!canEditClients || reactivateM.isPending}
                           onClick={(e) => { e.stopPropagation(); reactivateM.mutate(c.id); }}
                         >
                           {reactivateM.isPending && reactivateM.variables === c.id
@@ -619,7 +607,7 @@ export function ClientsPage({ startWithAddOpen = false }: { startWithAddOpen?: b
                                 size="sm"
                                 variant="outline"
                                 className="h-7 text-xs"
-                                disabled={reactivateM.isPending}
+                                disabled={!canEditClients || reactivateM.isPending}
                                 onClick={(e) => { e.stopPropagation(); reactivateM.mutate(c.id); }}
                               >
                                 {reactivateM.isPending && reactivateM.variables === c.id

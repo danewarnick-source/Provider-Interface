@@ -47,6 +47,7 @@ import {
   COMPLETENESS_PASS_FEEDBACK,
   localWordCountCheck,
 } from "@/lib/nectar-completeness";
+import { ClientAccessGate } from "@/components/clients/client-access-gate";
 
 const hhsSearch = z.object({
   tab: z.string().optional(),
@@ -83,7 +84,11 @@ interface ClientFull {
 
 function HhsClientHubRoute() {
   const { clientId } = Route.useParams();
-  return <HhsClientHub clientId={clientId} />;
+  return (
+    <ClientAccessGate clientId={clientId}>
+      <HhsClientHub clientId={clientId} />
+    </ClientAccessGate>
+  );
 }
 
 export function HhsClientHub({ clientId }: { clientId: string }) {

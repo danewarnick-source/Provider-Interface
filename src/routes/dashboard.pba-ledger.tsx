@@ -45,11 +45,14 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useServerFn } from "@tanstack/react-start";
+import { useAccess } from "@/hooks/use-access";
+import { writeClientRecord } from "@/lib/clients/writes.functions";
 
 export const Route = createFileRoute("/dashboard/pba-ledger")({
   head: () => ({ meta: [{ title: "PBA Trust Ledger — Provider Interface" }] }),
   component: () => (
-    <RequirePermission perm="manage_billing">
+    <RequirePermission perm="view_billing">
       <PbaLedgerPage />
     </RequirePermission>
   ),
@@ -79,6 +82,8 @@ export function PbaLedgerPage() {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();
+  const canEdit = useAccess().can("manage_billing");
+  const writeRecordFn = useServerFn(writeClientRecord);
 
   const { data: clients } = useQuery({
     enabled: !!org,
@@ -144,14 +149,15 @@ export function PbaLedgerPage() {
 
   const createAcct = useMutation({
     mutationFn: async (input: { client_id: string; threshold: number; notes: string }) => {
-      const { error } = await supabase.from("pba_accounts" as never).insert({
-        organization_id: org!.organization_id,
-        client_id: input.client_id,
-        medicaid_threshold: input.threshold,
-        notes: input.notes || null,
-        created_by: user!.id,
-      } as never);
-      if (error) throw error;
+      await writeRecordFn({
+        data: {
+          organizationId: org!.organization_id,
+          clientId: input.client_id,
+          table: "pba_accounts",
+          op: "insert",
+          values: { medicaid_threshold: input.threshold, notes: input.notes || null, created_by: user!.id },
+        },
+      });
     },
     onSuccess: () => {
       toast.success("PBA account opened");
@@ -184,16 +190,20 @@ export function PbaLedgerPage() {
           "Independent audit required: the original account owner cannot verify their own ledger.",
         );
       }
-      const { error } = await supabase
-        .from("pba_audit_samples" as never)
-        .update({
-          status: "verified",
-          verified_at: new Date().toISOString(),
-          assigned_auditor: user!.id,
-          verifier_notes: args.notes,
-        } as never)
-        .eq("id", args.sampleId);
-      if (error) throw error;
+      await writeRecordFn({
+        data: {
+          organizationId: org!.organization_id,
+          table: "pba_audit_samples",
+          op: "update",
+          id: args.sampleId,
+          values: {
+            status: "verified",
+            verified_at: new Date().toISOString(),
+            assigned_auditor: user!.id,
+            verifier_notes: args.notes,
+          },
+        },
+      });
     },
     onSuccess: () => {
       toast.success("Audit verified");
@@ -213,11 +223,13 @@ export function PbaLedgerPage() {
           </p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm">
-              <Plus className="mr-1.5 h-4 w-4" /> Open PBA account
-            </Button>
-          </DialogTrigger>
+          {canEdit && (
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="mr-1.5 h-4 w-4" /> Open PBA account
+              </Button>
+            </DialogTrigger>
+          )}
           <OpenAccountDialog
             clients={clients ?? []}
             onSave={(v) => createAcct.mutate(v)}
@@ -320,15 +332,17 @@ export function PbaLedgerPage() {
               Article 15 — random sampling. Original account owner cannot verify.
             </p>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => regenSample.mutate()}
-            disabled={regenSample.isPending}
-          >
-            <Shuffle className="mr-1.5 h-3.5 w-3.5" />{" "}
-            {regenSample.isPending ? "Picking…" : "Regenerate this quarter's sample"}
-          </Button>
+          {canEdit && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => regenSample.mutate()}
+              disabled={regenSample.isPending}
+            >
+              <Shuffle className="mr-1.5 h-3.5 w-3.5" />{" "}
+              {regenSample.isPending ? "Picking…" : "Regenerate this quarter's sample"}
+            </Button>
+          )}
         </div>
         <Table>
           <TableHeader>
@@ -373,7 +387,7 @@ export function PbaLedgerPage() {
                     {s.verified_at ? new Date(s.verified_at).toLocaleString() : "—"}
                   </TableCell>
                   <TableCell className="text-right">
-                    {s.status === "pending" && (
+                    {s.status === "pending" && canEdit && (
                       <VerifyButton
                         onConfirm={(notes) =>
                           verifyMut.mutate({
@@ -530,6 +544,8 @@ function AccountLedgerDialog({ account, clientName }: { account: PbaAccount; cli
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();
+  const canEdit = useAccess().can("manage_billing");
+  const writeRecordFn = useServerFn(writeClientRecord);
 
   const { data: txs } = useQuery({
     enabled: !!org,
@@ -577,18 +593,24 @@ function AccountLedgerDialog({ account, clientName }: { account: PbaAccount; cli
 
   const addTx = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("pba_transactions" as never).insert({
-        organization_id: org!.organization_id,
-        account_id: account.id,
-        txn_type: type,
-        amount: Number(amount),
-        occurred_on: date,
-        memo: memo || null,
-        counterparty: counterparty || null,
-        receipt_url: receiptUrl || null,
-        created_by: user!.id,
-      } as never);
-      if (error) throw error;
+      await writeRecordFn({
+        data: {
+          organizationId: org!.organization_id,
+          clientId: account.client_id,
+          table: "pba_transactions",
+          op: "insert",
+          values: {
+            account_id: account.id,
+            txn_type: type,
+            amount: Number(amount),
+            occurred_on: date,
+            memo: memo || null,
+            counterparty: counterparty || null,
+            receipt_url: receiptUrl || null,
+            created_by: user!.id,
+          },
+        },
+      });
     },
     onSuccess: () => {
       toast.success("Transaction recorded");
@@ -627,134 +649,136 @@ function AccountLedgerDialog({ account, clientName }: { account: PbaAccount; cli
         />
       </div>
 
-      <div className="rounded-lg border border-border p-4">
-        <h4 className="text-sm font-semibold">New transaction</h4>
+      {canEdit && (
+        <div className="rounded-lg border border-border p-4">
+          <h4 className="text-sm font-semibold">New transaction</h4>
 
-        {/* Drop-zone */}
-        <label
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragOver(true);
-          }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragOver(false);
-            const f = e.dataTransfer.files?.[0];
-            if (f) void handleFile(f);
-          }}
-          className={cn(
-            "mt-3 flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed p-4 text-center transition-colors",
-            dragOver
-              ? "border-sky-500 bg-sky-500/10"
-              : "border-border bg-muted/30 hover:bg-muted/50",
-          )}
-        >
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/jpg,application/pdf"
-            className="hidden"
-            disabled={uploading}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
+          {/* Drop-zone */}
+          <label
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              const f = e.dataTransfer.files?.[0];
               if (f) void handleFile(f);
             }}
-          />
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <ImageIcon className="h-4 w-4 text-sky-600" />
-            Upload or drag a receipt
-          </div>
-          <p className="text-[11px] text-muted-foreground">
-            PNG, JPG, or PDF. The file is stored with this transaction. Enter the amount and details
-            yourself.
-          </p>
-          {uploading && <p className="text-[11px] text-sky-600">Uploading securely…</p>}
-        </label>
-
-        <div className="mt-3 grid gap-3 md:grid-cols-4">
-          <div className="grid gap-1.5">
-            <Label>Type</Label>
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="deposit">Deposit</SelectItem>
-                <SelectItem value="withdrawal">Withdrawal</SelectItem>
-                <SelectItem value="transfer">Transfer</SelectItem>
-                <SelectItem value="interest">Interest</SelectItem>
-                <SelectItem value="debt">Outstanding debt</SelectItem>
-                <SelectItem value="split_cost">Split-cost</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-1.5">
-            <Label>Amount</Label>
-            <Input
-              type="number"
-              min="0"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-1.5">
-            <Label>Date</Label>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </div>
-          <div className="grid gap-1.5">
-            <Label>Location / Description</Label>
-            <Input
-              value={counterparty}
-              onChange={(e) => setCounterparty(e.target.value)}
-              maxLength={120}
-            />
-          </div>
-          <div className="grid gap-1.5 md:col-span-4">
-            <Label>Memo</Label>
-            <Input value={memo} onChange={(e) => setMemo(e.target.value)} maxLength={300} />
-          </div>
-          {needsReceipt && !receiptUrl && (
-            <div className="md:col-span-4 grid gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
-              <Label className="flex items-center gap-1.5 text-xs">
-                <Receipt className="h-3.5 w-3.5" /> Receipt required (amount over $50) — use the
-                drop-zone above
-              </Label>
-            </div>
-          )}
-          {receiptPreview && (
-            <div className="md:col-span-4 flex items-start gap-3 rounded-md border border-border bg-muted/30 p-3">
-              <img
-                src={receiptPreview}
-                alt="Receipt preview"
-                className="h-28 w-28 rounded border border-border object-cover"
-              />
-              <div className="flex-1 text-xs text-muted-foreground">
-                <p className="font-medium text-foreground">Captured snapshot</p>
-                <p className="mt-1">
-                  Receipt attached. Enter the amount and details, then log the transaction.
-                </p>
-                {receiptUrl && (
-                  <Badge
-                    variant="outline"
-                    className="mt-2 border-emerald-500/30 bg-emerald-500/10 text-[10px] text-emerald-700 dark:text-emerald-300"
-                  >
-                    <Upload className="mr-1 h-3 w-3" /> Stored in secure vault
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="mt-3 flex justify-end">
-          <Button
-            onClick={() => addTx.mutate()}
-            disabled={!amount || addTx.isPending || (needsReceipt && !receiptUrl)}
+            className={cn(
+              "mt-3 flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed p-4 text-center transition-colors",
+              dragOver
+                ? "border-sky-500 bg-sky-500/10"
+                : "border-border bg-muted/30 hover:bg-muted/50",
+            )}
           >
-            {addTx.isPending ? "Saving…" : "Confirm & Log Transaction"}
-          </Button>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,application/pdf"
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void handleFile(f);
+              }}
+            />
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <ImageIcon className="h-4 w-4 text-sky-600" />
+              Upload or drag a receipt
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              PNG, JPG, or PDF. The file is stored with this transaction. Enter the amount and details
+              yourself.
+            </p>
+            {uploading && <p className="text-[11px] text-sky-600">Uploading securely…</p>}
+          </label>
+
+          <div className="mt-3 grid gap-3 md:grid-cols-4">
+            <div className="grid gap-1.5">
+              <Label>Type</Label>
+              <Select value={type} onValueChange={setType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="deposit">Deposit</SelectItem>
+                  <SelectItem value="withdrawal">Withdrawal</SelectItem>
+                  <SelectItem value="transfer">Transfer</SelectItem>
+                  <SelectItem value="interest">Interest</SelectItem>
+                  <SelectItem value="debt">Outstanding debt</SelectItem>
+                  <SelectItem value="split_cost">Split-cost</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-1.5">
+              <Label>Amount</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label>Date</Label>
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <div className="grid gap-1.5">
+              <Label>Location / Description</Label>
+              <Input
+                value={counterparty}
+                onChange={(e) => setCounterparty(e.target.value)}
+                maxLength={120}
+              />
+            </div>
+            <div className="grid gap-1.5 md:col-span-4">
+              <Label>Memo</Label>
+              <Input value={memo} onChange={(e) => setMemo(e.target.value)} maxLength={300} />
+            </div>
+            {needsReceipt && !receiptUrl && (
+              <div className="md:col-span-4 grid gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+                <Label className="flex items-center gap-1.5 text-xs">
+                  <Receipt className="h-3.5 w-3.5" /> Receipt required (amount over $50) — use the
+                  drop-zone above
+                </Label>
+              </div>
+            )}
+            {receiptPreview && (
+              <div className="md:col-span-4 flex items-start gap-3 rounded-md border border-border bg-muted/30 p-3">
+                <img
+                  src={receiptPreview}
+                  alt="Receipt preview"
+                  className="h-28 w-28 rounded border border-border object-cover"
+                />
+                <div className="flex-1 text-xs text-muted-foreground">
+                  <p className="font-medium text-foreground">Captured snapshot</p>
+                  <p className="mt-1">
+                    Receipt attached. Enter the amount and details, then log the transaction.
+                  </p>
+                  {receiptUrl && (
+                    <Badge
+                      variant="outline"
+                      className="mt-2 border-emerald-500/30 bg-emerald-500/10 text-[10px] text-emerald-700 dark:text-emerald-300"
+                    >
+                      <Upload className="mr-1 h-3 w-3" /> Stored in secure vault
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="mt-3 flex justify-end">
+            <Button
+              onClick={() => addTx.mutate()}
+              disabled={!amount || addTx.isPending || (needsReceipt && !receiptUrl)}
+            >
+              {addTx.isPending ? "Saving…" : "Confirm & Log Transaction"}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="rounded-lg border border-border">
         <Table>
