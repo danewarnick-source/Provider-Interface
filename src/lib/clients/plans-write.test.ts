@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { appendGoalsToCurrentPlan, insertPlan, newGoalTexts, replaceCurrentPlanGoals } from "./plans-write.ts";
+import { appendGoalsToCurrentPlan, insertPlan, newGoalTexts } from "./plans-write.ts";
 
 type Row = Record<string, unknown>;
 
@@ -66,32 +66,10 @@ describe("insertPlan", () => {
     assert.equal(db.tables.client_plans[0].status, "current");
     assert.equal(db.tables.client_plans[1].status, "upcoming");
   });
-});
-
-describe("replaceCurrentPlanGoals", () => {
-  it("ends the current plan's goals and adds the new ones with one support each", async () => {
-    const db = fakeDb({
-      client_plans: [{ id: "p", client_id: "c1", status: "current" }],
-      client_goals: [{ id: "g0", plan_id: "p", status: "active", goal_text: "Old" }],
-    });
-    const r = await replaceCurrentPlanGoals(db, {
-      ...scope, userId: "u",
-      goals: [
-        { goal_text: "New", support_text: "Help", details: " ", our_codes: ["dsi"] },
-        { goal_text: "  ", support_text: "", details: null, our_codes: [] },
-      ],
-    });
-    assert.deepEqual(r, { planId: "p", goalCount: 1 });
-    assert.equal(db.tables.client_goals[0].status, "ended");
-    assert.equal(db.tables.client_goals[1].goal_text, "New");
-    assert.deepEqual(db.tables.client_goal_supports[0].our_codes, ["DSI"]);
-    assert.equal(db.tables.client_goal_supports[0].details, null);
-  });
-  it("creates a plan when the client has none", async () => {
+  it("links the PCSP document when given", async () => {
     const db = fakeDb({});
-    const r = await replaceCurrentPlanGoals(db, { ...scope, userId: "u", goals: [] });
-    assert.equal(db.tables.client_plans[0].id, r.planId);
-    assert.equal(db.tables.client_plans[0].source, "pcsp_upload");
+    await insertPlan(db, { ...scope, source: "pcsp_upload", document_id: "doc-1" });
+    assert.equal(db.tables.client_plans[0].document_id, "doc-1");
   });
 });
 
