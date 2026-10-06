@@ -54,6 +54,7 @@ import { formatPeriodMonthYear } from "@/lib/progress-summaries";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { onClientDutyFactsChanged } from "@/lib/staff-assignment-hooks.functions";
 import { isAdminLevel } from "@/lib/access/levels";
+import { localYmd } from "@/lib/local-date";
 
 type ClientRow = Record<string, unknown>;
 type DocRow = { id: string; document_type: string | null; file_name: string | null; storage_path: string | null; uploaded_at: string | null };
@@ -72,7 +73,7 @@ const RECORD_LABELS: Record<RecKey, { title: string; sub: string }> = {
   dnr: { title: "DNR order", sub: "Required when DNR is on file" },
   grievance_policy: { title: "Grievance policy", sub: "A signed copy on file" },
   individualized_plan: { title: "Individualized plans", sub: "Behavior support / IEP / similar" },
-  room_board_agreement: { title: "Room and Board Agreement", sub: "Signed legal doc — HHS only, no expiration" },
+  room_board_agreement: { title: "Room and Board Agreement", sub: "Signed legal doc — HHS and PPS, no expiration" },
   els_shortened_school_hours: { title: "ELS — shortened school hours doc", sub: "School district letter/form — ELS under 22 only" },
   els_iep: { title: "ELS — Individualized Education Plan (IEP)", sub: "ELS under 22 only" },
 };
@@ -151,7 +152,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
     enabled: !!orgId,
     queryKey: ["client-profile-tab-codes", orgId, clientId],
     queryFn: async () => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = localYmd();
       const { data, error } = await supabase
         .from("client_billing_codes")
         .select("service_code, service_start_date, service_end_date")
@@ -171,6 +172,8 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   const primaryRestriction = restrictions[0] ?? null;
   const activeCodes = activeCodesQ.data?.codes ?? [];
   const isHhs = activeCodes.includes("HHS");
+  const isRhs = activeCodes.includes("RHS");
+  const needsRoomBoard = isHhs || activeCodes.includes("PPS");
   const showBelongings = activeCodes.some((c) => ["HHS", "RHS", "SLH", "PPS"].includes(c));
   const isEls = activeCodes.includes("ELS");
   const isEpr = activeCodes.includes("EPR");
@@ -201,7 +204,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
         client={client}
         docs={docs}
         restriction={primaryRestriction}
-        isHhs={isHhs}
+        needsRoomBoard={needsRoomBoard}
         showElsSchoolDocs={showElsSchoolDocs}
         onOpenFiles={onOpenFiles}
         onContinueIntake={() => navigate({ to: "/dashboard/client-intake/$clientId", params: { clientId } })}
@@ -218,7 +221,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
           {canHrc && (
             <HrcCard clientId={clientId} orgId={orgId!} client={client} docs={docs} restriction={primaryRestriction} />
           )}
-          {isHhs && <RoomBoardAgreementCard clientId={clientId} docs={docs} onOpenFiles={onOpenFiles} />}
+          {needsRoomBoard && <RoomBoardAgreementCard clientId={clientId} docs={docs} onOpenFiles={onOpenFiles} />}
           {showElsSchoolDocs && <ElsSchoolDocumentationCard clientId={clientId} docs={docs} />}
           {isEpr && <EprInformedChoiceCard clientId={clientId} docs={docs} serviceStart={eprServiceStart} />}
           {isSjd && (
@@ -231,8 +234,8 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
             />
           )}
           {isSjd && <SjdUsorOutreachCard clientId={clientId} orgId={orgId!} />}
-          <RhsHospitalizationCard clientId={clientId} orgId={orgId!} />
-          <RhsEvacuationDrillsCard clientId={clientId} orgId={orgId!} />
+          {isRhs && <RhsHospitalizationCard clientId={clientId} orgId={orgId!} />}
+          {isRhs && <RhsEvacuationDrillsCard clientId={clientId} orgId={orgId!} />}
         </div>
       </div>
 
@@ -245,7 +248,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
   );
 }
 
-// ── Room and Board Agreement (HHS only) ─────────────────────────────────────
+// ── Room and Board Agreement (HHS and PPS) ─────────────────────────────────────
 
 function RoomBoardAgreementCard({ clientId, docs, onOpenFiles }: { clientId: string; docs: DocRow[]; onOpenFiles: () => void }) {
   const doc = docs.find((d) => d.document_type === "room_board_agreement");
@@ -350,7 +353,7 @@ function ElsSchoolDocumentationCard({ clientId, docs }: { clientId: string; docs
 function EprInformedChoiceCard({ clientId, docs, serviceStart }: { clientId: string; docs: DocRow[]; serviceStart: string | null }) {
   const doc = docs.find((d) => d.document_type === "epr_informed_choice");
   const dueDate = serviceStart ? new Date(new Date(`${serviceStart}T00:00:00`).getTime() + 60 * 86_400_000) : null;
-  const dueStr = dueDate ? dueDate.toISOString().slice(0, 10) : null;
+  const dueStr = dueDate ? localYmd(dueDate) : null;
   const isOverdue = !doc && !!dueDate && dueDate.getTime() < Date.now();
   return (
     <Card className="overflow-hidden">
@@ -472,9 +475,9 @@ function SjdAssessmentDocumentationCard({
           : isOverdue ? "border-red-300 bg-red-50 text-red-700"
           : "border-amber-300/60 bg-amber-50/40 text-amber-800",
       )}>
-        {doc ? `Satisfied — deadline was ${fmtDate(due.toISOString().slice(0, 10))}`
-          : isOverdue ? `Overdue — was due ${fmtDate(due.toISOString().slice(0, 10))} (${days} days)`
-          : `Due ${fmtDate(due.toISOString().slice(0, 10))} — ${days} days`}
+        {doc ? `Satisfied — deadline was ${fmtDate(localYmd(due))}`
+          : isOverdue ? `Overdue — was due ${fmtDate(localYmd(due))} (${days} days)`
+          : `Due ${fmtDate(localYmd(due))} — ${days} days`}
       </div>
     );
   }
@@ -757,8 +760,8 @@ function CardShell({
 // ── Record completeness bar ────────────────────────────────────────────────
 
 function RecordCompletenessBar({
-  clientId, orgId, client, docs, restriction, isHhs, showElsSchoolDocs, onOpenFiles, onContinueIntake,
-}: { clientId: string; orgId: string; client: ClientRow; docs: DocRow[]; restriction: RestrictionRecord | null; isHhs: boolean; showElsSchoolDocs: boolean; onOpenFiles: () => void; onContinueIntake: () => void }) {
+  clientId, orgId, client, docs, restriction, needsRoomBoard, showElsSchoolDocs, onOpenFiles, onContinueIntake,
+}: { clientId: string; orgId: string; client: ClientRow; docs: DocRow[]; restriction: RestrictionRecord | null; needsRoomBoard: boolean; showElsSchoolDocs: boolean; onOpenFiles: () => void; onContinueIntake: () => void }) {
   const [open, setOpen] = useState(false);
   const recordAccessFn = useServerFn(recordPhiAccess);
 
@@ -787,7 +790,7 @@ function RecordCompletenessBar({
       return { state: "missing" };
     }
     if (key === "room_board_agreement") {
-      if (!isHhs) return { state: "na" };
+      if (!needsRoomBoard) return { state: "na" };
       const rbaDoc = docs.find((d) => d.document_type === "room_board_agreement");
       return rbaDoc ? { state: "ok", doc: rbaDoc } : { state: "missing" };
     }
@@ -1538,7 +1541,7 @@ function RhsHospitalizationCard({ clientId, orgId }: { clientId: string; orgId: 
   const setFn = useServerFn(setRhsHospitalizationDay);
   const deleteFn = useServerFn(deleteRhsHospitalizationDay);
   const [adding, setAdding] = useState(false);
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(localYmd());
   const [notes, setNotes] = useState("");
 
   const q = useQuery({
@@ -1632,7 +1635,7 @@ function RhsEvacuationDrillsCard({ clientId, orgId }: { clientId: string; orgId:
   const recordFn = useServerFn(recordRhsEvacuationDrill);
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({
-    drill_date: new Date().toISOString().slice(0, 10),
+    drill_date: localYmd(),
     simulation_type: "Fire" as "Fire" | "Earthquake" | "Severe Weather" | "Other",
     duration_minutes: "",
     participants: "",
@@ -1662,7 +1665,7 @@ function RhsEvacuationDrillsCard({ clientId, orgId }: { clientId: string; orgId:
       qc.invalidateQueries({ queryKey: ["rhs-evacuation-drills", orgId, clientId] });
       qc.invalidateQueries({ queryKey: ["deadlines"] });
       setAdding(false);
-      setDraft({ drill_date: new Date().toISOString().slice(0, 10), simulation_type: "Fire", duration_minutes: "", participants: "", notes: "" });
+      setDraft({ drill_date: localYmd(), simulation_type: "Fire", duration_minutes: "", participants: "", notes: "" });
     },
     onError: (e: Error) => toast.error(e.message),
   });
