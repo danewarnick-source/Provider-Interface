@@ -439,7 +439,8 @@ export function PunchPad({
       const { data, error } = await supabase
         .from("client_approved_locations")
         .select("id, label, latitude, longitude, geofence_radius_feet")
-        .eq("client_id", approvedClientId!);
+        .eq("client_id", approvedClientId!)
+        .is("archived_at", null);
       if (error) throw error;
       return (data ?? []).map((r) => ({
         id: r.id as string,
