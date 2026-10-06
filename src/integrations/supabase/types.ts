@@ -2358,6 +2358,8 @@ export type Database = {
       client_billing_codes: {
         Row: {
           annual_unit_authorization: number
+          authorization_approved_on: string | null
+          authorization_number: string | null
           authorization_pending: boolean
           client_id: string
           created_at: string
@@ -2380,6 +2382,8 @@ export type Database = {
         }
         Insert: {
           annual_unit_authorization?: number
+          authorization_approved_on?: string | null
+          authorization_number?: string | null
           authorization_pending?: boolean
           client_id: string
           created_at?: string
@@ -2402,6 +2406,8 @@ export type Database = {
         }
         Update: {
           annual_unit_authorization?: number
+          authorization_approved_on?: string | null
+          authorization_number?: string | null
           authorization_pending?: boolean
           client_id?: string
           created_at?: string
@@ -2441,6 +2447,8 @@ export type Database = {
       }
       client_budget_lines: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           budget_id: string
           created_at: string
           day_of_month: number | null
@@ -2454,6 +2462,8 @@ export type Database = {
           variable: number
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           budget_id: string
           created_at?: string
           day_of_month?: number | null
@@ -2467,6 +2477,8 @@ export type Database = {
           variable?: number
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           budget_id?: string
           created_at?: string
           day_of_month?: number | null
@@ -2621,6 +2633,7 @@ export type Database = {
           effective_to_mode:
             | Database["public"]["Enums"]["doc_effective_to_mode"]
             | null
+          expires_on: string | null
           file_name: string
           file_size_bytes: number | null
           file_url: string
@@ -2645,6 +2658,7 @@ export type Database = {
           effective_to_mode?:
             | Database["public"]["Enums"]["doc_effective_to_mode"]
             | null
+          expires_on?: string | null
           file_name: string
           file_size_bytes?: number | null
           file_url: string
@@ -2669,6 +2683,7 @@ export type Database = {
           effective_to_mode?:
             | Database["public"]["Enums"]["doc_effective_to_mode"]
             | null
+          expires_on?: string | null
           file_name?: string
           file_size_bytes?: number | null
           file_url?: string
