@@ -65,7 +65,8 @@ describe("route UUID params", () => {
       "utf8",
     );
     assert.match(clientsNew, /createFileRoute\("\/dashboard\/clients\/new"\)/);
-    assert.match(clientsNew, /startWithAddOpen/);
+    assert.match(clientsNew, /to: "\/dashboard\/clients"/);
+    assert.match(clientsNew, /add: 1/);
     assert.match(staffNew, /createFileRoute\("\/dashboard\/employees\/new"\)/);
     assert.match(staffNew, /to: "\/dashboard\/team-members"/);
     assert.match(staffNew, /add: 1/);

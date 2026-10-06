@@ -51,7 +51,6 @@ export function clientFeatureVisible(
 
 /**
  * Per-client feature keys (stored in clients.feature_config jsonb).
- * Keep in sync with FEATURE_TOGGLES in src/routes/dashboard.clients.tsx.
  */
 export type ClientFeatureKey =
   | "daily_notes"
