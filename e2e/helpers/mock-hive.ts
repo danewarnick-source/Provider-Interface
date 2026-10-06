@@ -38,6 +38,7 @@ import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
 import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
 import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
 import { levelForRole, withAccessLevel } from "./access-level";
+import { isPcspServerFn, pcspServerFnPayload } from "./pcsp-mock";
 import { staffClientReadiness } from "../../src/lib/team-members/readiness";
 import { buildMemberOverview } from "../../src/lib/team-members/overview";
 
@@ -995,6 +996,9 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/^updateClient$/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c1" };
   if (/^createClient$/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c2" };
   if (/^writeClientRecord$/.test(fn)) return { ids: ["00000000-0000-4000-a000-0000000000c3"] };
+  // PCSP import (src/lib/clients/pcsp/import.functions.ts).
+  const pcsp = /readPcsp/.test(fn) ? "readPcsp" : /confirmPcsp/.test(fn) ? "confirmPcsp" : isPcspServerFn(body);
+  if (pcsp) return pcspServerFnPayload(pcsp);
   if (/listTeamRoster/i.test(fn)) return teamRosterRows();
   if (/listTeamInvites/i.test(fn)) return teamInviteRows();
   if (/rosterOrgHasHomes/i.test(fn)) return !activeMockOpts.noHomes;
