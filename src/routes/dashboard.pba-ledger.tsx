@@ -787,14 +787,7 @@ function AccountLedgerDialog({ account, clientName }: { account: PbaAccount; cli
                 <TableCell className="text-sm text-muted-foreground">{t.memo || "—"}</TableCell>
                 <TableCell>
                   {t.receipt_url ? (
-                    <a
-                      href={t.receipt_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-primary underline text-xs"
-                    >
-                      View
-                    </a>
+                    <ReceiptLink path={t.receipt_url} />
                   ) : (
                     <span className="text-[11px] text-muted-foreground">—</span>
                   )}
@@ -805,6 +798,42 @@ function AccountLedgerDialog({ account, clientName }: { account: PbaAccount; cli
         </Table>
       </div>
     </DialogContent>
+  );
+}
+
+/** receipt_url holds a storage path in the private receipts bucket; sign it on click. */
+function ReceiptLink({ path }: { path: string }) {
+  const [opening, setOpening] = useState(false);
+  const open = async () => {
+    if (/^https?:\/\//.test(path)) {
+      window.open(path, "_blank", "noopener,noreferrer");
+      return;
+    }
+    const tab = window.open("", "_blank");
+    setOpening(true);
+    try {
+      const { data, error } = await supabase.storage
+        .from("client_receipt_snapshots")
+        .createSignedUrl(path, 60 * 5);
+      if (error || !data?.signedUrl) throw error ?? new Error("Could not open the receipt");
+      if (tab) tab.location.href = data.signedUrl;
+      else window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      tab?.close();
+      toast.error((e as Error).message);
+    } finally {
+      setOpening(false);
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={open}
+      disabled={opening}
+      className="text-primary underline text-xs disabled:opacity-50"
+    >
+      {opening ? "Opening…" : "View"}
+    </button>
   );
 }
 
