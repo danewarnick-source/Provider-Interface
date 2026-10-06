@@ -56,8 +56,10 @@ const squash = (s: string) => s.replace(/\s+/g, " ").trim();
 function cell(raw: unknown, haystack: string): Sourced<string> {
   const f = (raw ?? {}) as { value?: unknown; page?: unknown; quote?: unknown };
   const quote = typeof f.quote === "string" ? squash(f.quote) : "";
-  const value = typeof f.value === "string" || typeof f.value === "number" ? squash(String(f.value)) : "";
-  if (!quote || !value || !haystack.includes(quote.toLowerCase())) return { value: null, page: null, quote: "" };
+  const value =
+    typeof f.value === "string" || typeof f.value === "number" ? squash(String(f.value)) : "";
+  if (!quote || !value || !haystack.includes(quote.toLowerCase()))
+    return { value: null, page: null, quote: "" };
   return { value, page: typeof f.page === "number" ? f.page : null, quote };
 }
 
@@ -79,13 +81,19 @@ export function parseFormDate(s: string | null): string | null {
 
 function mapCell<T>(c: Sourced<string>, parse: (s: string | null) => T | null): Sourced<T> {
   const value = parse(c.value);
-  return value == null ? { value: null, page: c.page, quote: c.quote } : { value, page: c.page, quote: c.quote };
+  return value == null
+    ? { value: null, page: c.page, quote: c.quote }
+    : { value, page: c.page, quote: c.quote };
 }
 
 /** Nectar's reply → checked fields. Unquoted or unreadable values come back null. */
 export function read1056FromReply(reply: unknown, text: string): Read1056 {
   const hay = squash(text).toLowerCase();
-  const r = (reply ?? {}) as { authorizationNumber?: unknown; approvedOn?: unknown; lines?: unknown };
+  const r = (reply ?? {}) as {
+    authorizationNumber?: unknown;
+    approvedOn?: unknown;
+    lines?: unknown;
+  };
   const lines = Array.isArray(r.lines) ? r.lines.slice(0, 40) : [];
   return {
     authorizationNumber: cell(r.authorizationNumber, hay),
@@ -175,7 +183,8 @@ export function review1056Problems(review: Review1056, agencyCodes: readonly str
   const kept = review.lines.filter((l) => l.include);
   if (kept.length === 0) return ["Keep at least one line, or cancel."];
   const out: string[] = [];
-  if (review.approvedOn && !isYmd(review.approvedOn)) out.push("The 1056 approved date isn't a real date.");
+  if (review.approvedOn && !isYmd(review.approvedOn))
+    out.push("The 1056 approved date isn't a real date.");
   const seen = new Set<string>();
   for (const l of kept) {
     out.push(...authorizationProblems(lineInput(review, l), agencyCodes));
@@ -191,10 +200,12 @@ export function read1056Checks(read: Read1056): string[] {
   const out: string[] = [];
   if (!read.authorizationNumber.value) out.push("The 1056 number wasn't found — type it in.");
   if (!read.approvedOn.value) out.push("The approved date wasn't found — type it in.");
-  if (read.lines.length === 0) out.push("No service lines were found. Enter the authorizations by hand.");
+  if (read.lines.length === 0)
+    out.push("No service lines were found. Enter the authorizations by hand.");
   for (const l of read.lines) {
     const missing = LINE_FIELDS.filter((f) => l[f].value == null);
-    if (missing.length) out.push(`${l.code.value}: couldn't read ${missing.join(", ")} — check the form.`);
+    if (missing.length)
+      out.push(`${l.code.value}: couldn't read ${missing.join(", ")} — check the form.`);
   }
   return out;
 }
@@ -210,7 +221,9 @@ export function rowsFrom1056(
       ...authorizationValues(lineInput(review, l)),
       organization_id: ctx.organizationId,
       client_id: ctx.clientId,
-      rate_source: review.authorizationNumber ? `from 1056 ${review.authorizationNumber}` : "from 1056",
+      rate_source: review.authorizationNumber
+        ? `from 1056 ${review.authorizationNumber}`
+        : "from 1056",
       rate_source_plan_number: review.authorizationNumber || null,
       rate_source_document_id: ctx.documentId,
       rate_source_at: ctx.now,

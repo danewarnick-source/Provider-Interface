@@ -13,7 +13,7 @@ import { isLikelyBadCoord } from "./geo.ts";
 import type { CompletenessResult } from "./nectar-completeness.ts";
 import { requiresUpiFiling } from "./progress-summaries.ts";
 
-/** Same window as `getAuthStatus` in billing-auth-status.tsx — kept here so node tests do not import React. */
+/** Authorization window status (active / expired / upcoming / end-needed). */
 function authWindowStatus(
   start?: string | null,
   end?: string | null,

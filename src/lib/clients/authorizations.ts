@@ -64,7 +64,11 @@ function ymd(d: Date): string {
 }
 
 /** The view of one authorization with `used` units (from units.ts usedUnitsForCode). */
-export function authorizationView(row: AuthorizationRow, used: number, now: Date = new Date()): AuthorizationView {
+export function authorizationView(
+  row: AuthorizationRow,
+  used: number,
+  now: Date = new Date(),
+): AuthorizationView {
   const today = todayYmd(now);
   const state = authorizationState(row, today);
   const daily = isDailyServiceCode(row.service_code);
@@ -72,7 +76,11 @@ export function authorizationView(row: AuthorizationRow, used: number, now: Date
   const rate = Number(row.rate_per_unit ?? 0);
   const money =
     rate > 0 && pace.annual > 0
-      ? { authorized: pace.annual * rate, used: Math.min(used, pace.annual) * rate, left: pace.left * rate }
+      ? {
+          authorized: pace.annual * rate,
+          used: Math.min(used, pace.annual) * rate,
+          left: pace.left * rate,
+        }
       : null;
 
   let perWeekToUseRest: number | null = null;
@@ -94,7 +102,16 @@ export function authorizationView(row: AuthorizationRow, used: number, now: Date
       runsOutOn = today;
     }
   }
-  return { row, state, daily, unitWord: daily ? "days" : "units", pace, money, perWeekToUseRest, runsOutOn };
+  return {
+    row,
+    state,
+    daily,
+    unitWord: daily ? "days" : "units",
+    pace,
+    money,
+    perWeekToUseRest,
+    runsOutOn,
+  };
 }
 
 /** Dollar totals over authorizations that aren't ended and have a rate. */
@@ -147,7 +164,10 @@ export function normalizeCode(code: string): string {
 }
 
 /** Problems that stop a save, in plain English. `agencyCodes` empty = not checked. */
-export function authorizationProblems(input: AuthorizationInput, agencyCodes: readonly string[]): string[] {
+export function authorizationProblems(
+  input: AuthorizationInput,
+  agencyCodes: readonly string[],
+): string[] {
   const out: string[] = [];
   const code = normalizeCode(input.code);
   const label = code || "This line";
@@ -156,23 +176,34 @@ export function authorizationProblems(input: AuthorizationInput, agencyCodes: re
     out.push(`${code} isn't one of your agency's approved codes.`);
   if (!(input.unitType in UNIT_TYPES)) out.push(`${label}: pick a unit type.`);
   else if (code && isDailyServiceCode(code) !== (input.unitType === "day"))
-    out.push(`${label}: ${isDailyServiceCode(code) ? "is billed by the day" : "isn't a daily code"} — check the unit type.`);
+    out.push(
+      `${label}: ${isDailyServiceCode(code) ? "is billed by the day" : "isn't a daily code"} — check the unit type.`,
+    );
   if (input.rate == null || !Number.isFinite(input.rate) || input.rate < 0)
     out.push(`${label}: enter the rate (0 or more).`);
   if (input.annualUnits == null || !Number.isInteger(input.annualUnits) || input.annualUnits < 0)
     out.push(`${label}: units per year must be a whole number.`);
-  if (input.monthlyMaxUnits != null && (!Number.isInteger(input.monthlyMaxUnits) || input.monthlyMaxUnits < 0))
+  if (
+    input.monthlyMaxUnits != null &&
+    (!Number.isInteger(input.monthlyMaxUnits) || input.monthlyMaxUnits < 0)
+  )
     out.push(`${label}: units per month must be a whole number.`);
   if (!isYmd(input.start)) out.push(`${label}: enter a real start date.`);
   if (!isYmd(input.end)) out.push(`${label}: enter a real end date.`);
-  else if (isYmd(input.start) && input.end <= input.start) out.push(`${label}: the end date must be after the start date.`);
-  if (input.approvedOn && !isYmd(input.approvedOn)) out.push(`${label}: the 1056 approved date isn't a real date.`);
-  if ((input.authorizationNumber ?? "").length > 40) out.push(`${label}: the 1056 number is too long.`);
+  else if (isYmd(input.start) && input.end <= input.start)
+    out.push(`${label}: the end date must be after the start date.`);
+  if (input.approvedOn && !isYmd(input.approvedOn))
+    out.push(`${label}: the 1056 approved date isn't a real date.`);
+  if ((input.authorizationNumber ?? "").length > 40)
+    out.push(`${label}: the 1056 number is too long.`);
   return out;
 }
 
 /** Problems with ending an authorization on `endOn`. */
-export function endProblems(row: Pick<AuthorizationRow, "service_start_date" | "service_end_date">, endOn: string): string[] {
+export function endProblems(
+  row: Pick<AuthorizationRow, "service_start_date" | "service_end_date">,
+  endOn: string,
+): string[] {
   if (!isYmd(endOn)) return ["Pick a real end date."];
   const start = row.service_start_date?.slice(0, 10);
   if (start && endOn < start) return ["The end date can't be before the start date."];
@@ -192,5 +223,36 @@ export function authorizationValues(input: AuthorizationInput): Record<string, u
     authorization_number: input.authorizationNumber?.trim() || null,
     authorization_approved_on: input.approvedOn || null,
     authorization_pending: false,
+  };
+}
+
+/** Editor values for a row (null = a new code). Renewing keeps the code, unit and rate only. */
+export function inputFromRow(row: AuthorizationRow | null, renew: boolean): AuthorizationInput {
+  if (!row)
+    return {
+      code: "",
+      unitType: "Q",
+      rate: null,
+      annualUnits: null,
+      start: null,
+      end: null,
+      authorizationNumber: "",
+      approvedOn: null,
+    };
+  return {
+    code: row.service_code,
+    unitType:
+      row.unit_type in UNIT_TYPES
+        ? row.unit_type
+        : isDailyServiceCode(row.service_code)
+          ? "day"
+          : "Q",
+    rate: row.rate_per_unit,
+    annualUnits: renew ? null : row.annual_unit_authorization,
+    monthlyMaxUnits: row.monthly_max_units,
+    start: renew ? null : row.service_start_date,
+    end: renew ? null : row.service_end_date,
+    authorizationNumber: renew ? "" : (row.authorization_number ?? ""),
+    approvedOn: renew ? null : row.authorization_approved_on,
   };
 }

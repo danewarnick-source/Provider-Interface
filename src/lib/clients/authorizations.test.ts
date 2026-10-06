@@ -6,6 +6,7 @@ import {
   authorizationValues,
   authorizationView,
   endProblems,
+  inputFromRow,
   isYmd,
   servicesTotals,
   sortAuthorizations,
@@ -52,7 +53,15 @@ describe("authorizationView: units used vs left and pace", () => {
     assert.equal(v.unitWord, "units");
   });
   it("gives units per week to use the rest by the end date", () => {
-    const v = authorizationView(row({ annual_unit_authorization: 364, service_start_date: "2026-07-01", service_end_date: "2027-06-29" }), 0, at("2026-07-01"));
+    const v = authorizationView(
+      row({
+        annual_unit_authorization: 364,
+        service_start_date: "2026-07-01",
+        service_end_date: "2027-06-29",
+      }),
+      0,
+      at("2026-07-01"),
+    );
     assert.ok(v.perWeekToUseRest !== null && Math.abs(v.perWeekToUseRest - 7) < 0.01);
     assert.equal(v.runsOutOn, null);
   });
@@ -61,7 +70,11 @@ describe("authorizationView: units used vs left and pace", () => {
     assert.ok(v.runsOutOn && v.runsOutOn < "2027-06-30");
   });
   it("has no dollars without a rate and counts days for daily codes", () => {
-    const v = authorizationView(row({ service_code: "HHS", unit_type: "day", rate_per_unit: 0 }), 10, at("2026-10-01"));
+    const v = authorizationView(
+      row({ service_code: "HHS", unit_type: "day", rate_per_unit: 0 }),
+      10,
+      at("2026-10-01"),
+    );
     assert.equal(v.money, null);
     assert.equal(v.unitWord, "days");
   });
@@ -77,17 +90,30 @@ describe("totals and sorting", () => {
     const now = at("2026-10-01");
     const views = [
       authorizationView(row(), 100, now),
-      authorizationView(row({ id: "b", service_code: "SEI", service_end_date: "2026-09-01" }), 0, now),
+      authorizationView(
+        row({ id: "b", service_code: "SEI", service_end_date: "2026-09-01" }),
+        0,
+        now,
+      ),
     ];
     assert.deepEqual(servicesTotals(views), { authorized: 5000, used: 500, left: 4500 });
-    assert.deepEqual(sortAuthorizations(views).map((v) => v.row.id), ["a1", "b"]);
+    assert.deepEqual(
+      sortAuthorizations(views).map((v) => v.row.id),
+      ["a1", "b"],
+    );
   });
 });
 
 describe("authorizationProblems: 1056 field validation", () => {
   const ok: AuthorizationInput = {
-    code: "dsi", unitType: "Q", rate: 5.25, annualUnits: 1200, start: "2026-07-01", end: "2027-06-30",
-    authorizationNumber: "100200", approvedOn: "2026-06-20",
+    code: "dsi",
+    unitType: "Q",
+    rate: 5.25,
+    annualUnits: 1200,
+    start: "2026-07-01",
+    end: "2027-06-30",
+    authorizationNumber: "100200",
+    approvedOn: "2026-06-20",
   };
   it("accepts a clean line", () => {
     assert.deepEqual(authorizationProblems(ok, ["DSI", "SEI"]), []);
@@ -97,15 +123,31 @@ describe("authorizationProblems: 1056 field validation", () => {
     assert.deepEqual(authorizationProblems({ ...ok, code: "COM" }, []), []);
   });
   it("needs whole-number units", () => {
-    assert.ok(authorizationProblems({ ...ok, annualUnits: 12.5 }, []).some((p) => /whole number/.test(p)));
+    assert.ok(
+      authorizationProblems({ ...ok, annualUnits: 12.5 }, []).some((p) => /whole number/.test(p)),
+    );
   });
   it("needs real dates with the end after the start", () => {
-    assert.ok(authorizationProblems({ ...ok, start: "2026-02-30" }, []).some((p) => /start date/.test(p)));
-    assert.ok(authorizationProblems({ ...ok, end: "2026-07-01" }, []).some((p) => /after the start/.test(p)));
-    assert.ok(authorizationProblems({ ...ok, approvedOn: "06/20/2026" }, []).some((p) => /approved date/.test(p)));
+    assert.ok(
+      authorizationProblems({ ...ok, start: "2026-02-30" }, []).some((p) => /start date/.test(p)),
+    );
+    assert.ok(
+      authorizationProblems({ ...ok, end: "2026-07-01" }, []).some((p) =>
+        /after the start/.test(p),
+      ),
+    );
+    assert.ok(
+      authorizationProblems({ ...ok, approvedOn: "06/20/2026" }, []).some((p) =>
+        /approved date/.test(p),
+      ),
+    );
   });
   it("checks the unit type against daily codes", () => {
-    assert.ok(authorizationProblems({ ...ok, code: "HHS", unitType: "Q" }, []).some((p) => /by the day/.test(p)));
+    assert.ok(
+      authorizationProblems({ ...ok, code: "HHS", unitType: "Q" }, []).some((p) =>
+        /by the day/.test(p),
+      ),
+    );
     assert.deepEqual(authorizationProblems({ ...ok, code: "HHS", unitType: "day" }, []), []);
   });
   it("builds clean values", () => {
@@ -125,5 +167,22 @@ describe("endProblems and isYmd", () => {
   it("only takes real calendar dates", () => {
     assert.equal(isYmd("2028-02-29"), true);
     assert.equal(isYmd("2027-02-29"), false);
+  });
+});
+
+describe("inputFromRow", () => {
+  it("starts blank for a new code", () => {
+    assert.equal(inputFromRow(null, false).code, "");
+  });
+  it("copies a row for editing and keeps only code, unit and rate to renew", () => {
+    const r = row({ service_code: "HHS", unit_type: "unit" });
+    const edit = inputFromRow(r, false);
+    assert.equal(edit.unitType, "day");
+    assert.equal(edit.annualUnits, 1000);
+    const renew = inputFromRow(r, true);
+    assert.equal(renew.rate, 5);
+    assert.equal(renew.start, null);
+    assert.equal(renew.annualUnits, null);
+    assert.equal(renew.authorizationNumber, "");
   });
 });

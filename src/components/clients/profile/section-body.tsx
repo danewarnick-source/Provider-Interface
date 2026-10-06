@@ -54,9 +54,9 @@ export function SectionBody({
     case "plans":
       return <PlansSection orgId={orgId} data={data} />;
     case "services":
-      return <ServicesSection data={data} />;
+      return <ServicesSection orgId={orgId} data={data} />;
     case "file":
-      return <FileSection orgId={orgId} data={data} onOpenFiles={() => onSelect("file")} />;
+      return <FileSection orgId={orgId} data={data} />;
     case "team":
       return <TeamSection clientId={clientId} />;
     case "activity":

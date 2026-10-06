@@ -80,7 +80,10 @@ describe("1056 review", () => {
   const read = read1056FromReply(REPLY, TEXT);
   it("unticks lines for codes the agency isn't approved for", () => {
     const review = initial1056Review(read, ["DSI", "SEI"]);
-    assert.deepEqual(review.lines.map((l) => l.include), [true, false]);
+    assert.deepEqual(
+      review.lines.map((l) => l.include),
+      [true, false],
+    );
     assert.deepEqual(review1056Problems(review, ["DSI", "SEI"]), []);
   });
   it("blocks confirm for unapproved codes, missing dates and part units", () => {
@@ -100,7 +103,12 @@ describe("1056 review", () => {
   });
   it("builds authorization rows with the 1056 number and source", () => {
     const review = initial1056Review(read, ["DSI"]);
-    const rows = rowsFrom1056(review, { organizationId: "o", clientId: "c", documentId: "d", now: "2026-06-21T00:00:00Z" });
+    const rows = rowsFrom1056(review, {
+      organizationId: "o",
+      clientId: "c",
+      documentId: "d",
+      now: "2026-06-21T00:00:00Z",
+    });
     assert.equal(rows.length, 1);
     assert.equal(rows[0].service_code, "DSI");
     assert.equal(rows[0].authorization_number, "900111");
