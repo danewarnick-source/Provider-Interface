@@ -1,7 +1,8 @@
 // Client profile — the page body behind /dashboard/clients/$clientId.
 // Side-menu sections (?section=), header with the ⋯ menu, and the one
 // needs-attention list (lib/clients/readiness.ts) feeding Overview and the
-// menu badges.
+// menu badges. A discharged client's sections are read-only, with the
+// discharge card on top.
 
 import { useEffect, useRef } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
@@ -11,6 +12,7 @@ import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAccess } from "@/hooks/use-access";
+import { RecordReadOnlyProvider } from "@/hooks/use-record-read-only";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { isRouteUuid } from "@/lib/route-uuid";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
@@ -24,7 +26,8 @@ import {
   type ClientProfileSection,
 } from "@/lib/clients/profile-sections";
 import { ClientProfileShell } from "./profile-shell";
-import { ClientProfileHeader } from "./profile-header";
+import { ClientProfileHeader, isDischarged } from "./profile-header";
+import { DischargeCard } from "./discharge/discharge-card";
 import { SectionBody } from "./section-body";
 import { useClientProfile } from "./use-client-profile";
 import { useClientMoneyPresence } from "./money/use-client-money";
@@ -110,6 +113,7 @@ export function ClientProfilePage() {
   }
 
   const data = profileQ.data;
+  const discharged = isDischarged(data.client.account_status);
   const attention = overviewQ.data?.attention ?? [];
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["client-profile"] });
@@ -136,16 +140,21 @@ export function ClientProfilePage() {
         active={active}
         onSelect={select}
       >
-        <SectionBody
-          section={active}
-          orgId={orgId}
-          data={data}
-          overview={overviewQ.data ?? null}
-          overviewLoading={overviewQ.isLoading}
-          overviewError={overviewQ.isError}
-          onSelect={select}
-          onChanged={refresh}
-        />
+        {discharged ? (
+          <DischargeCard orgId={orgId} clientId={clientId} onChanged={refresh} />
+        ) : null}
+        <RecordReadOnlyProvider readOnly={discharged}>
+          <SectionBody
+            section={active}
+            orgId={orgId}
+            data={data}
+            overview={overviewQ.data ?? null}
+            overviewLoading={overviewQ.isLoading}
+            overviewError={overviewQ.isError}
+            onSelect={select}
+            onChanged={refresh}
+          />
+        </RecordReadOnlyProvider>
       </ClientProfileShell>
     </div>
   );

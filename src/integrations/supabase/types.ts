@@ -2621,6 +2621,91 @@ export type Database = {
           },
         ]
       }
+      client_discharges: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          discharge_date: string
+          ended_items: Json
+          id: string
+          initiated_by: string
+          notice_date: string | null
+          organization_id: string
+          reactivated_at: string | null
+          reactivated_by: string | null
+          reason: string
+          summary_confirmed_at: string | null
+          summary_confirmed_by: string | null
+          summary_document_id: string | null
+          summary_drafted_by_nectar: boolean
+          summary_sent_on: string | null
+          summary_text: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          discharge_date: string
+          ended_items?: Json
+          id?: string
+          initiated_by: string
+          notice_date?: string | null
+          organization_id: string
+          reactivated_at?: string | null
+          reactivated_by?: string | null
+          reason: string
+          summary_confirmed_at?: string | null
+          summary_confirmed_by?: string | null
+          summary_document_id?: string | null
+          summary_drafted_by_nectar?: boolean
+          summary_sent_on?: string | null
+          summary_text?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          discharge_date?: string
+          ended_items?: Json
+          id?: string
+          initiated_by?: string
+          notice_date?: string | null
+          organization_id?: string
+          reactivated_at?: string | null
+          reactivated_by?: string | null
+          reason?: string
+          summary_confirmed_at?: string | null
+          summary_confirmed_by?: string | null
+          summary_document_id?: string | null
+          summary_drafted_by_nectar?: boolean
+          summary_sent_on?: string | null
+          summary_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_discharges_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_discharges_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_discharges_summary_document_id_fkey"
+            columns: ["summary_document_id"]
+            isOneToOne: false
+            referencedRelation: "client_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_documents: {
         Row: {
           archived_at: string | null
@@ -16308,6 +16393,12 @@ export type Database = {
         }[]
       }
       client_goal_client: { Args: { _goal: string }; Returns: string }
+      client_discharge_assert: { Args: { _client: string }; Returns: string }
+      client_discharge_cutoff: { Args: { _discharge_date: string }; Returns: string }
+      client_discharge_preview: {
+        Args: { _client: string; _discharge_date: string }
+        Returns: Json
+      }
       client_has_med_admin_code: {
         Args: { _client_id: string }
         Returns: boolean
@@ -16458,6 +16549,19 @@ export type Database = {
         }
       }
       discard_import_job_hard: { Args: { _job_id: string }; Returns: Json }
+      discharge_client: {
+        Args: {
+          _client: string
+          _discharge_date: string
+          _initiated_by: string
+          _notice_date: string
+          _reason: string
+          _summary_confirmed: boolean
+          _summary_drafted_by_nectar: boolean
+          _summary_text: string
+        }
+        Returns: string
+      }
       find_possible_duplicate_referral: {
         Args: {
           _age: number
@@ -16797,6 +16901,7 @@ export type Database = {
         Args: { retention?: string }
         Returns: number
       }
+      reactivate_client: { Args: { _client: string }; Returns: undefined }
       reject_med_change_proposal: {
         Args: { _notes: string; _proposal_id: string }
         Returns: undefined

@@ -29,11 +29,16 @@ export const MEDICAL_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "weight_pounds",
 ]);
 
-/** clients columns no caller may set through a patch. */
+/**
+ * clients columns no caller may set through a patch. Status and discharge
+ * date change only through the discharge flow (discharge.functions.ts).
+ */
 export const LOCKED_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "id",
   "organization_id",
   "created_at",
+  "account_status",
+  "discharge_date",
 ]);
 
 function sameValue(a: unknown, b: unknown): boolean {
@@ -62,7 +67,6 @@ export function actionsForClientPatch(
   const actions = new Set<ManageClientAction>(["edit"]);
   for (const k of changedClientFields(before, patch)) {
     if (MEDICAL_CLIENT_FIELDS.has(k)) actions.add("edit_medical");
-    if (k === "account_status" || k === "discharge_date") actions.add("discharge");
   }
   return [...actions];
 }
@@ -100,7 +104,12 @@ export const CLIENT_RECORD_TABLES = {
     key: "client",
     hasOrgColumn: true,
   },
-  client_absences: { action: "edit_medical", ops: ["insert", "update"], key: "client", hasOrgColumn: true },
+  client_absences: {
+    action: "edit_medical",
+    ops: ["insert", "update"],
+    key: "client",
+    hasOrgColumn: true,
+  },
   sjd_assessment_selections: { action: "edit", ops: ["upsert"], key: "client", hasOrgColumn: true },
   hrc_restriction_records: {
     action: "edit_hrc",

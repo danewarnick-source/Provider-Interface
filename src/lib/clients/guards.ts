@@ -26,6 +26,15 @@ export type ManageClientAction = (typeof MANAGE_CLIENT_ACTIONS)[number];
 export const NO_PERMISSION_MESSAGE = "You don't have permission to change this";
 export const CLIENT_OUT_OF_SCOPE_MESSAGE = "This client isn't in your assigned homes or clients";
 export const CLIENT_NOT_FOUND_MESSAGE = "Client not found in this organization";
+export const CLIENT_DISCHARGED_MESSAGE =
+  "This client is discharged, so their record is read-only. Reactivate them to make changes.";
+
+/** Actions still allowed on a discharged client (reading, and the discharge itself). */
+export const DISCHARGED_CLIENT_ACTIONS: ReadonlySet<ManageClientAction> = new Set([
+  "view",
+  "view_medical",
+  "discharge",
+]);
 
 /** Which category, at which minimum, each action needs. */
 export function categoryForClientAction(action: ManageClientAction): {
@@ -68,8 +77,8 @@ export interface ManageClientGuardDeps {
     category: CategoryId,
     min: "view" | "edit",
   ) => Promise<{ level: AccessLevel; scope: AccessScope }>;
-  /** clients.organization_id for the client, or null when no row. */
-  loadClientOrg: (clientId: string) => Promise<string | null>;
+  /** The client's organization and whether they are discharged, or null when no row. */
+  loadClient: (clientId: string) => Promise<{ organizationId: string; discharged: boolean } | null>;
   /** access_can_see_client(_client, _user). */
   canSeeClient: (clientId: string) => Promise<boolean>;
 }
@@ -78,8 +87,9 @@ export interface ManageClientGuardDeps {
  * Rules in order:
  *  (a) category at the action's minimum,
  *  (b) the client exists and belongs to organizationId,
- *  (c) non-agency-scope actors must be able to see the client.
- * (b) and (c) are skipped when there is no client yet.
+ *  (c) non-agency-scope actors must be able to see the client,
+ *  (d) a discharged client is read-only: only view and discharge actions pass.
+ * (b)–(d) are skipped when there is no client yet.
  */
 export async function runManageClientGuard(
   input: ManageClientGuardInput,
@@ -91,12 +101,17 @@ export async function runManageClientGuard(
   const clientId = input.clientId ?? null;
   if (!clientId) return actor;
 
-  const org = await deps.loadClientOrg(clientId);
-  if (!org || org !== input.organizationId) throw new Error(CLIENT_NOT_FOUND_MESSAGE);
+  const client = await deps.loadClient(clientId);
+  if (!client || client.organizationId !== input.organizationId) {
+    throw new Error(CLIENT_NOT_FOUND_MESSAGE);
+  }
 
   if (actor.scope !== "agency") {
     const visible = await deps.canSeeClient(clientId);
     if (!visible) throw new Error(CLIENT_OUT_OF_SCOPE_MESSAGE);
+  }
+  if (client.discharged && !DISCHARGED_CLIENT_ACTIONS.has(input.action)) {
+    throw new Error(CLIENT_DISCHARGED_MESSAGE);
   }
   return actor;
 }

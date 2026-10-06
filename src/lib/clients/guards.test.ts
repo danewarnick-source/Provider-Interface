@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  CLIENT_DISCHARGED_MESSAGE,
   CLIENT_NOT_FOUND_MESSAGE,
   CLIENT_OUT_OF_SCOPE_MESSAGE,
   MANAGE_CLIENT_ACTIONS,
@@ -22,10 +23,11 @@ function fakeDeps(opts: {
   categoryError?: string;
   clientOrg?: string | null;
   canSee?: boolean;
+  discharged?: boolean;
 }) {
   const calls = {
     requireCategory: [] as Array<[string, string]>,
-    loadClientOrg: 0,
+    loadClient: 0,
     canSeeClient: 0,
   };
   const deps: ManageClientGuardDeps = {
@@ -34,9 +36,10 @@ function fakeDeps(opts: {
       if (opts.categoryError) throw new Error(opts.categoryError);
       return { level: "admin", scope: opts.scope ?? "agency" };
     },
-    loadClientOrg: async () => {
-      calls.loadClientOrg++;
-      return opts.clientOrg === undefined ? ORG : opts.clientOrg;
+    loadClient: async () => {
+      calls.loadClient++;
+      const org = opts.clientOrg === undefined ? ORG : opts.clientOrg;
+      return org ? { organizationId: org, discharged: opts.discharged ?? false } : null;
     },
     canSeeClient: async () => {
       calls.canSeeClient++;
@@ -84,7 +87,7 @@ describe("runManageClientGuard", () => {
   it("stops before any lookup when the category is missing", async () => {
     const { deps, calls } = fakeDeps({ categoryError: "Forbidden: requires edit on clients" });
     await assert.rejects(run("edit", deps), /Forbidden/);
-    assert.equal(calls.loadClientOrg, 0);
+    assert.equal(calls.loadClient, 0);
     assert.equal(calls.canSeeClient, 0);
   });
 
@@ -115,10 +118,24 @@ describe("runManageClientGuard", () => {
     assert.equal(calls.canSeeClient, 1);
   });
 
+  it("a discharged client is read-only", async () => {
+    const { deps } = fakeDeps({ discharged: true });
+    for (const action of ["edit", "edit_medical", "edit_billing", "edit_funds"] as const) {
+      await assert.rejects(run(action, deps), new RegExp(CLIENT_DISCHARGED_MESSAGE.slice(0, 30)));
+    }
+  });
+
+  it("a discharged client can still be viewed, and discharged or reactivated", async () => {
+    const { deps } = fakeDeps({ discharged: true });
+    await run("view", deps);
+    await run("view_medical", deps);
+    await run("discharge", deps);
+  });
+
   it("no client (create) checks only the category", async () => {
     const { deps, calls } = fakeDeps({ scope: "assigned" });
     await run("create", deps, null);
-    assert.equal(calls.loadClientOrg, 0);
+    assert.equal(calls.loadClient, 0);
     assert.equal(calls.canSeeClient, 0);
   });
 });

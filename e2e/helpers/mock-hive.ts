@@ -1016,6 +1016,15 @@ function serverFnPayload(url: string, body: string): unknown {
   const addPayload = addClientPayload(fn, body);
   if (addPayload !== undefined) return addPayload;
   if (/^writeClientRecord$/.test(fn)) return { ids: ["00000000-0000-4000-a000-0000000000c3"] };
+  // Discharge (src/lib/clients/discharge.functions.ts): no open discharge; writes echo.
+  if (/^getClientDischarge/.test(fn)) return null;
+  if (/^previewDischarge/.test(fn)) {
+    return { ended: { authorizations: [], team: [], shifts: [] }, upcoming: [] };
+  }
+  if (/^dischargeClient/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c4", teamLeft: 0 };
+  if (/^(reactivateClient|saveDischargeSummary|markDischargeSummarySent)/.test(fn)) {
+    return { ok: true };
+  }
   // Client profile Overview (src/lib/clients/overview.functions.ts).
   if (/^getClientOverview/.test(fn)) return clientOverviewPayload();
   // Services & billing and Client file (services.functions.ts, file.functions.ts).

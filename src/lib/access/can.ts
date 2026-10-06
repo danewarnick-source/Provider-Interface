@@ -54,6 +54,15 @@ export function hasPermission(cats: Record<CategoryId, CategoryValue>, key: stri
   return !!rule && hasCategory(cats, rule[0], rule[1]);
 }
 
+/** The same categories with every Edit lowered to View (a read-only record, e.g. a discharged client). */
+export function viewOnlyCategories(
+  cats: Record<CategoryId, CategoryValue>,
+): Record<CategoryId, CategoryValue> {
+  const out = { ...cats };
+  for (const id of CATEGORY_IDS) if (out[id] === "edit") out[id] = "view";
+  return out;
+}
+
 /** Keeps only the settings that differ from the preset, so overrides stay small and readable. */
 export function diffOverrides(
   preset: unknown,

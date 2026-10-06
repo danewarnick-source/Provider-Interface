@@ -42,11 +42,14 @@ describe("actionsForClientPatch", () => {
       "edit_medical",
     ]);
   });
-  it("status changes are a discharge action", () => {
-    assert.ok(
-      actionsForClientPatch({ account_status: "active" }, { account_status: "archived" }).includes(
-        "discharge",
-      ),
+  it("status and discharge date change only through the discharge flow", () => {
+    assert.throws(
+      () => actionsForClientPatch({ account_status: "active" }, { account_status: "archived" }),
+      /can't be changed: account_status/,
+    );
+    assert.throws(
+      () => actionsForClientPatch({}, { discharge_date: "2026-01-02" }),
+      /can't be changed: discharge_date/,
     );
   });
   it("refuses to move a client to another organization", () => {
