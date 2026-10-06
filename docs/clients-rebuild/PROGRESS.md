@@ -91,3 +91,42 @@ One short report per prompt. A new session continues from the first prompt not m
   - P12: drop the columns and tables in the `legacy-fields.ts` drop list. Renaming the import extraction keys needs a migration of stored-job keys.
   - The registry list moved to `profile-field-registry.ts`.
   - Touched files that are still oversized are listed in the PR body.
+
+## P4
+- **Status:** merged. PR #449 (https://github.com/danewarnick-source/Provider-Interface/pull/449) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p4-plans-goals`.
+- **What was done:**
+  - New tables `client_plans` → `client_goals` → `client_goal_supports`. Supports carry `our_codes`.
+  - Pure helpers in `src/lib/clients/plans.ts`: `planStatusOn`, `planInEffectOn`, `currentPlan`, `waitingDays`, `supportsForCode(s)`, `goalsOn`, `goalView`.
+  - Other new files:
+    - `plans-load.ts`: `loadPlanBundle(s)`.
+    - `plans-write.ts`: `insertPlan`, `replaceCurrentPlanGoals`, `appendGoalsToCurrentPlan`.
+    - `plans.functions.ts`: add a plan, save or end a goal, save or end a support. All go through `assertCanManageClient`.
+    - `plan-summaries.ts`: summary goals and note tagging.
+    - `legacy-plans.ts`: the backfill mapping and the P12 drop list.
+  - These now show supports by code, from the plan in effect on the note's date:
+    - punch pad clock-out (`evv/goal-support-checklist.tsx`), shift page, staff quick info, workspace
+    - host-home daily logs (route and HHS hub)
+    - Nectar staff answers (the asker's assignment and shift codes), Nectar note draft
+    - progress summaries and their drafter (stores `plan_id`)
+    - client-specific training
+  - Notes store `goal_ids` / `support_ids` arrays on `daily_logs` and `evv_timesheets`.
+  - Care plan tab: new `components/clients/profile/plans/` (goal tree, dialogs, PCSP pull). Training card goals are read-only.
+  - Every writer and reader of `clients.pcsp_goals` was removed. `goals-for-staff.ts` was deleted.
+- **Checks:**
+  - tsc: 203 errors before, 203 after; the error sets are identical.
+  - Unit tests: 1656 of 1661 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e staff-go-live: 6/6 before and after.
+  - e2e roster: 11 pass / 4 fail before and after, the same tests.
+  - e2e daily-logs: 2 pass / 4 fail before and after. The 4 were already failing on the base branch (the "Daily Logs" heading is not found).
+- **Migrations:**
+  - `20261006134832_clients_plans_goals` applied to live. Backfilled 12 plans (3 dated), 6 goals and 6 supports.
+  - None written-but-not-applied.
+- **Files:** 19 added, 2 deleted.
+- **Notes for later prompts:**
+  - Migrated plans with only a "YYYY-YYYY" label are undated; the label is kept in `client_plans.label`.
+  - PCSP Nectar extraction now writes into the current plan, ending the old goals. P5 replaces it.
+  - P8 still has to move `plan_year` / `pcsp_expiration_date` / `pcsp_signed_date` (profile, file, face sheet, import) and add the plan date editing UI.
+  - Per-goal staff visibility toggles reset, because goal IDs changed.
+  - Goals added without supports get one blank support listing the client's active codes.
