@@ -11,9 +11,9 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   assignmentCodes,
   assignmentCoversCode,
-  clientAuthorizedCodes,
   uncoveredCodes,
 } from "@/lib/assignment-codes";
+import { loadActiveCodes } from "@/lib/clients/codes";
 
 export type StaffOption = { id: string; name: string };
 
@@ -39,12 +39,7 @@ export function useClientCodeAssignments(clientId: string | undefined) {
           .select("staff_id, service_codes")
           .eq("organization_id", orgId!)
           .eq("client_id", clientId!),
-        supabase
-          .from("clients")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .select("authorized_dspd_codes, job_code" as any)
-          .eq("id", clientId!)
-          .maybeSingle(),
+        loadActiveCodes(supabase, [clientId!]),
         supabase
           .from("organization_members")
           .select("user_id")
@@ -52,12 +47,9 @@ export function useClientCodeAssignments(clientId: string | undefined) {
           .eq("active", true),
       ]);
       if (assignRes.error) throw assignRes.error;
-      if (clientRes.error) throw clientRes.error;
       if (membersRes.error) throw membersRes.error;
 
-      const authorizedCodes = clientAuthorizedCodes(
-        (clientRes.data ?? {}) as { authorized_dspd_codes?: string[] | null; job_code?: string[] | null },
-      );
+      const authorizedCodes = clientRes.get(clientId!) ?? [];
 
       const memberIds = ((membersRes.data ?? []) as Array<{ user_id: string | null }>)
         .map((m) => m.user_id)

@@ -11,6 +11,7 @@ import {
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { contactsByClient, loadClientContacts, primaryContact } from "@/lib/clients/contacts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -113,12 +114,17 @@ function SummariesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("clients")
-        .select("id, first_name, last_name, created_at, support_coordinator_name")
+        .select("id, first_name, last_name, created_at")
         .eq("organization_id", orgId!)
         .order("last_name", { ascending: true });
       if (error) throw error;
-      return (data ?? []).map((c) => ({
+      const rows = data ?? [];
+      const contacts = await loadClientContacts(supabase, rows.map((c) => c.id));
+      const byClient = contactsByClient(contacts);
+      return rows.map((c) => ({
         ...c,
+        support_coordinator_name:
+          primaryContact(byClient.get(c.id) ?? [], "support_coordinator")?.name ?? null,
         hive_start_date: null as string | null,
       }));
     },
@@ -528,7 +534,7 @@ function SummaryReviewDialog({
       return content;
     }
     const provider = bundleQ.data.organization.legal_name || bundleQ.data.organization.name || orgName || "Provider";
-    const sc = bundleQ.data.client.support_coordinator_name || "Not on file";
+    const sc = bundleQ.data.client.support_coordinator?.name || "Not on file";
     const header = [
       `PERSON: ${clientName}`,
       `SERVICES PROVIDED THIS PERIOD: ${s.service_codes.join(", ") || "(none)"}`,
@@ -699,8 +705,8 @@ function SummaryReviewDialog({
       providerName: b.organization.legal_name || b.organization.name || orgName || "Provider",
       providerAddress: b.organization.address,
       providerPhone: b.organization.phone,
-      supportCoordinatorName: b.client.support_coordinator_name,
-      supportCoordinatorEmail: b.client.support_coordinator_email,
+      supportCoordinatorName: b.client.support_coordinator?.name ?? null,
+      supportCoordinatorEmail: b.client.support_coordinator?.email ?? null,
       staffNames: b.staffNames,
       logoDataUrl,
       aiReviewAttested: !!(s.ai_review_attested_at || aiAttested),
@@ -980,7 +986,7 @@ function SourcePanel({ bundle }: { bundle: SummarySourceBundle }) {
         <div><span className="text-muted-foreground">Dates:</span> {summary.period_start} → {summary.period_end}</div>
         <div><span className="text-muted-foreground">Services:</span> {servicesInPeriod.map((s) => s.service_code).join(", ") || "(none)"}</div>
         <div><span className="text-muted-foreground">Provider:</span> {organization.legal_name || organization.name || "—"}</div>
-        <div><span className="text-muted-foreground">Support Coordinator:</span> {client.support_coordinator_name || "Not on file"}</div>
+        <div><span className="text-muted-foreground">Support Coordinator:</span> {client.support_coordinator?.name || "Not on file"}</div>
         <div><span className="text-muted-foreground">Staff:</span> {staffNames.join(", ") || "—"}</div>
         <div><span className="text-muted-foreground">Cadence:</span> {summaryCadenceLabel(summary.period_kind, summary.service_codes)}</div>
         {untaggedSourceCount > 0 && (

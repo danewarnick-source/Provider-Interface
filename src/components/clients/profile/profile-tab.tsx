@@ -12,7 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  AlertTriangle, Check, ChevronDown, ChevronUp, Pencil, Plus, Upload, X,
+  AlertTriangle, Check, ChevronDown, ChevronUp, Pencil, Upload,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
@@ -24,6 +24,9 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { ClientPhotoCard } from "@/components/clients/profile/client-photo-card";
+import { ClientContactsCard } from "@/components/clients/profile/client-contacts-card";
+import { useClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
+import { contactLine, primaryContact } from "@/lib/clients/contacts";
 import { NectarAsk } from "@/components/clients/shared/nectar-ask";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -78,7 +81,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
         .from("clients")
         .select(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          "id, first_name, last_name, medicaid_id, date_of_birth, phone_number, physical_address, is_own_guardian, guardian_name, guardian_phone, support_coordinator_name, support_coordinator_phone, support_coordinator_email, admission_date, discharge_date, diagnoses, primary_care_name, special_directions, dnr_status, account_status, pcsp_expiration_date, rights_restrictions, has_abi, hr_applicable, dnr_applicable, pcp_name, pcp_phone, specialist_name, specialist_phone, med_prescriber_name, med_prescriber_phone, medical_insurance, client_photo_url, profile_photo_url" as any,
+          "id, first_name, last_name, medicaid_id, date_of_birth, phone_number, physical_address, is_own_guardian, admission_date, discharge_date, diagnoses, special_directions, dnr_status, account_status, pcsp_expiration_date, rights_restrictions, has_abi, hr_applicable, dnr_applicable, client_photo_url" as any,
         )
         .eq("id", clientId)
         .maybeSingle();
@@ -99,21 +102,6 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
         .order("uploaded_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as DocRow[];
-    },
-  });
-
-  const contactsQ = useQuery({
-    enabled: !!orgId && isRouteUuid(clientId),
-    queryKey: ["client-emergency-contacts", orgId, clientId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("client_emergency_contacts")
-        .select("id, name, phone, relationship")
-        .eq("client_id", clientId)
-        .is("archived_at", null)
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as { id: string; name: string; phone: string | null; relationship: string | null }[];
     },
   });
 
@@ -151,7 +139,6 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
 
   const client = clientQ.data ?? null;
   const docs = docsQ.data ?? [];
-  const contacts = contactsQ.data ?? [];
   const restrictions = restrictionsQ.data ?? [];
   const primaryRestriction = restrictions[0] ?? null;
   const activeCodes = activeCodesQ.data?.codes ?? [];
@@ -197,7 +184,7 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
       <div className="grid gap-4 items-start lg:grid-cols-[1.65fr_1fr]">
         <IdentityCard clientId={clientId} client={client} />
         <div className="space-y-4">
-          <ContactsCard clientId={clientId} orgId={orgId!} contacts={contacts} />
+          <ClientContactsCard clientId={clientId} />
           <AtGlanceCard clientId={clientId} client={client} />
           {canHrc && (
             <HrcCard clientId={clientId} orgId={orgId!} client={client} docs={docs} restriction={primaryRestriction} />
@@ -659,10 +646,6 @@ function fmtDate(s: string | null | undefined): string {
   return s;
 }
 
-function initials(name: string): string {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0]?.toUpperCase()).join("");
-}
-
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 py-2 text-sm border-b border-border/60 last:border-0">
@@ -752,7 +735,7 @@ function RecordCompletenessBar({
   type RecState = "ok" | "missing" | "na";
   function stateFor(key: RecKey): { state: RecState; doc?: DocRow } {
     if (key === "photograph") {
-      const hasPhoto = !!(client.client_photo_url || client.profile_photo_url);
+      const hasPhoto = !!client.client_photo_url;
       return hasPhoto ? { state: "ok" } : { state: "missing" };
     }
     if (key === "hrc_approval") {
@@ -954,6 +937,7 @@ if (!org?.organization_id) throw new Error("No organization selected.");
 
 function IdentityCard({ clientId, client }: { clientId: string; client: ClientRow }) {
   const qc = useQueryClient();
+  const contacts = useClientContacts(clientId).data ?? [];
   const { data: org } = useCurrentOrg();
   const updateClientFn = useServerFn(updateClient);
   const dutyFactsFn = useServerFn(onClientDutyFactsChanged);
@@ -965,11 +949,6 @@ function IdentityCard({ clientId, client }: { clientId: string; client: ClientRo
     date_of_birth: (client.date_of_birth as string) ?? "",
     phone_number: (client.phone_number as string) ?? "",
     is_own_guardian: client.is_own_guardian === true,
-    guardian_name: (client.guardian_name as string) ?? "",
-    guardian_phone: (client.guardian_phone as string) ?? "",
-    support_coordinator_name: (client.support_coordinator_name as string) ?? "",
-    support_coordinator_phone: (client.support_coordinator_phone as string) ?? "",
-    support_coordinator_email: (client.support_coordinator_email as string) ?? "",
     admission_date: (client.admission_date as string) ?? "",
     discharge_date: (client.discharge_date as string) ?? "",
     has_abi: client.has_abi === true,
@@ -988,11 +967,6 @@ function IdentityCard({ clientId, client }: { clientId: string; client: ClientRo
         date_of_birth: draft.date_of_birth || null,
         phone_number: draft.phone_number.trim() || null,
         is_own_guardian: draft.is_own_guardian,
-        guardian_name: draft.is_own_guardian ? null : (draft.guardian_name.trim() || null),
-        guardian_phone: draft.is_own_guardian ? null : (draft.guardian_phone.trim() || null),
-        support_coordinator_name: draft.support_coordinator_name.trim() || null,
-        support_coordinator_phone: draft.support_coordinator_phone.trim() || null,
-        support_coordinator_email: draft.support_coordinator_email.trim() || null,
         admission_date: draft.admission_date || null,
         discharge_date: draft.discharge_date || null,
         has_abi: draft.has_abi,
@@ -1024,11 +998,12 @@ if (!org?.organization_id) throw new Error("No organization selected.");
   const dob = fmtDate(client.date_of_birth as string | null);
   const dobAge = client.date_of_birth ? `${dob}${a != null ? ` · ${a}` : ""}` : null;
 
+  const guardian = primaryContact(contacts, "guardian");
   const guardianValue = client.is_own_guardian === true
     ? "Self-guardian"
-    : client.guardian_name
-      ? `Has guardian · ${client.guardian_name}${client.guardian_phone ? ` · ${client.guardian_phone}` : ""}`
-      : null;
+    : guardian
+      ? `Has guardian · ${contactLine(guardian)}`
+      : "Has guardian — add them under Contacts";
 
   return (
     <CardShell
@@ -1064,10 +1039,7 @@ if (!org?.organization_id) throw new Error("No organization selected.");
               </span>
             </Row>
 
-            <GroupHeader>Support Coordinator</GroupHeader>
-            <Row label="Name">{(client.support_coordinator_name as string) || null}</Row>
-            <Row label="Phone">{(client.support_coordinator_phone as string) || null}</Row>
-            <Row label="Email">{(client.support_coordinator_email as string) || null}</Row>
+            <Row label="Support coordinator">{contactLine(primaryContact(contacts, "support_coordinator")) || null}</Row>
 
             <GroupHeader>Enrollment</GroupHeader>
             <Row label="Admitted">{fmtDate(client.admission_date as string | null)}</Row>
@@ -1094,20 +1066,8 @@ if (!org?.organization_id) throw new Error("No organization selected.");
                 <Label htmlFor="self-guardian" className="text-sm">Self-guardian</Label>
               </div>
               {!draft.is_own_guardian ? (
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <LabeledInput label="Guardian name" value={draft.guardian_name} onChange={(v) => set("guardian_name", v)} />
-                  <LabeledInput label="Guardian phone" value={draft.guardian_phone} onChange={(v) => set("guardian_phone", v)} />
-                </div>
+                <p className="mt-2 text-xs text-muted-foreground">Add or edit the guardian and support coordinator under Contacts.</p>
               ) : null}
-            </div>
-
-            <div>
-              <GroupHeader>Support Coordinator</GroupHeader>
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                <LabeledInput label="Name" value={draft.support_coordinator_name} onChange={(v) => set("support_coordinator_name", v)} />
-                <LabeledInput label="Phone" value={draft.support_coordinator_phone} onChange={(v) => set("support_coordinator_phone", v)} />
-                <LabeledInput label="Email" value={draft.support_coordinator_email} onChange={(v) => set("support_coordinator_email", v)} />
-              </div>
             </div>
 
             <div>
@@ -1160,100 +1120,6 @@ function LabeledInput({ label, value, onChange, type }: { label: string; value: 
   );
 }
 
-// ── Contacts ───────────────────────────────────────────────────────────────
-
-type ContactDraft = { id?: string; name: string; phone: string; relationship: string; _deleted?: boolean };
-
-function ContactsCard({
-  clientId, orgId, contacts,
-}: { clientId: string; orgId: string; contacts: { id: string; name: string; phone: string | null; relationship: string | null }[] }) {
-  const qc = useQueryClient();
-  const writeRecordFn = useServerFn(writeClientRecord);
-  const [editing, setEditing] = useState(false);
-  const baseline = (): ContactDraft[] => contacts.map((c) => ({ id: c.id, name: c.name, phone: c.phone ?? "", relationship: c.relationship ?? "" }));
-  const [draft, setDraft] = useState<ContactDraft[]>(baseline);
-
-  const mut = useMutation({
-    mutationFn: async () => {
-      if (!isRouteUuid(clientId)) {
-        throw new Error("Save the client before adding emergency contacts.");
-      }
-      const uid = (await supabase.auth.getUser()).data.user?.id ?? null;
-      for (const c of draft) {
-        const rowId = isRouteUuid(c.id) ? c.id : undefined;
-        const base = { organizationId: orgId, clientId, table: "client_emergency_contacts" } as const;
-        if (c._deleted && rowId) {
-          await writeRecordFn({
-            data: { ...base, op: "update", id: rowId, values: { archived_at: new Date().toISOString(), archived_by: uid } },
-          });
-        } else if (!c._deleted) {
-          const name = c.name.trim();
-          if (!name) continue;
-          const payload = { name, phone: c.phone.trim() || null, relationship: c.relationship.trim() || null };
-          if (rowId) {
-            await writeRecordFn({ data: { ...base, op: "update", id: rowId, values: payload } });
-          } else {
-            await writeRecordFn({ data: { ...base, op: "insert", values: payload } });
-          }
-        }
-      }
-    },
-    onSuccess: () => {
-      toast.success("Contacts updated.");
-      qc.invalidateQueries({ queryKey: ["client-emergency-contacts"] });
-      setEditing(false);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  return (
-    <CardShell
-      title="Contacts"
-      subtitle="Who to call if something happens on shift."
-      editing={editing}
-      onEdit={() => { setDraft(baseline()); setEditing(true); }}
-      onSave={() => mut.mutate()}
-      onCancel={() => setEditing(false)}
-      saving={mut.isPending}
-    >
-      {!editing ? (
-        contacts.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-2">No emergency contacts on file.</p>
-        ) : (
-          <ul>
-            {contacts.map((c) => (
-              <li key={c.id} className="flex items-center gap-3 py-2.5 border-b border-border/60 last:border-0">
-                <div className="h-8 w-8 rounded-md bg-muted grid place-items-center text-[11px] font-bold text-muted-foreground flex-none">{initials(c.name) || "?"}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold truncate leading-tight">{c.name}</div>
-                  {c.relationship ? <div className="text-[11px] text-muted-foreground truncate mt-0.5">{c.relationship}</div> : null}
-                </div>
-                <div className="text-xs text-muted-foreground tabular-nums text-right">{c.phone || "—"}</div>
-              </li>
-            ))}
-          </ul>
-        )
-      ) : (
-        <div className="space-y-2">
-          {draft.map((c, i) => c._deleted ? null : (
-            <div key={c.id ?? `new-${i}`} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end">
-              <LabeledInput label="Name" value={c.name} onChange={(v) => setDraft((d) => d.map((x, j) => j === i ? { ...x, name: v } : x))} />
-              <LabeledInput label="Phone" value={c.phone} onChange={(v) => setDraft((d) => d.map((x, j) => j === i ? { ...x, phone: v } : x))} />
-              <LabeledInput label="Relationship" value={c.relationship} onChange={(v) => setDraft((d) => d.map((x, j) => j === i ? { ...x, relationship: v } : x))} />
-              <Button variant="ghost" size="icon" aria-label="Remove" onClick={() => setDraft((d) => d.map((x, j) => j === i ? { ...x, _deleted: true } : x))}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-          <Button variant="outline" size="sm" onClick={() => setDraft((d) => [...d, { name: "", phone: "", relationship: "" }])}>
-            <Plus className="h-3.5 w-3.5 mr-1" /> Add contact
-          </Button>
-        </div>
-      )}
-    </CardShell>
-  );
-}
-
 // ── At a glance ────────────────────────────────────────────────────────────
 
 function AtGlanceCard({ clientId, client }: { clientId: string; client: ClientRow }) {
@@ -1264,9 +1130,9 @@ function AtGlanceCard({ clientId, client }: { clientId: string; client: ClientRo
   const [editing, setEditing] = useState(false);
   const diagnoses = Array.isArray(client.diagnoses) ? (client.diagnoses as string[]) : [];
   const primaryDx = diagnoses[0] ?? "";
+  const primaryDoctor = primaryContact(useClientContacts(clientId).data ?? [], "primary_doctor");
   const baseline = () => ({
     primary_dx: primaryDx,
-    primary_care_name: (client.primary_care_name as string) ?? "",
     pcsp_expiration_date: (client.pcsp_expiration_date as string) ?? "",
   });
   const [draft, setDraft] = useState(baseline);
@@ -1284,7 +1150,6 @@ if (!org?.organization_id) throw new Error("No organization selected.");
           clientId,
           patch: {
             diagnoses: updatedDiagnoses,
-            primary_care_name: draft.primary_care_name.trim() || null,
             pcsp_expiration_date: draft.pcsp_expiration_date || null,
           },
         },
@@ -1327,7 +1192,7 @@ if (!org?.organization_id) throw new Error("No organization selected.");
       {!editing ? (
         <>
           <Row label="Primary diagnosis">{primaryDx || null}</Row>
-          <Row label="Primary care">{(client.primary_care_name as string) || null}</Row>
+          <Row label="Primary care">{contactLine(primaryDoctor) || null}</Row>
           <Row label="PCSP expiration">
             {pcspExp ? (
               <span className={cn("inline-flex items-center gap-1", pcspWarn && "text-red-600 font-semibold")}>
@@ -1343,7 +1208,6 @@ if (!org?.organization_id) throw new Error("No organization selected.");
       ) : (
         <div className="grid grid-cols-1 gap-2">
           <LabeledInput label="Primary diagnosis" value={draft.primary_dx} onChange={(v) => setDraft((d) => ({ ...d, primary_dx: v }))} />
-          <LabeledInput label="Primary care" value={draft.primary_care_name} onChange={(v) => setDraft((d) => ({ ...d, primary_care_name: v }))} />
           <LabeledInput label="PCSP expiration" type="date" value={draft.pcsp_expiration_date} onChange={(v) => setDraft((d) => ({ ...d, pcsp_expiration_date: v }))} />
         </div>
       )}

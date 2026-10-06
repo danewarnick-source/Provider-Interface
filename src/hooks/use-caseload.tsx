@@ -4,6 +4,18 @@ import { useAuth } from "./use-auth";
 import { useCurrentOrg } from "./use-org";
 import { usePortalView } from "./use-portal-view";
 import { isAdminLevel } from "@/lib/access/levels";
+import { loadActiveCodes } from "@/lib/clients/codes";
+
+type ClientRow = Omit<CaseloadClient, "codes">;
+
+const CASELOAD_COLUMNS =
+  "id, first_name, last_name, home_latitude, home_longitude, pcsp_goals, medicaid_id, physical_address, geofence_radius_feet, special_directions, client_photo_url, feature_config, date_of_birth";
+
+/** Attach each client's active codes (one client_active_codes call). */
+async function withCodes(rows: ClientRow[]): Promise<CaseloadClient[]> {
+  const codes = await loadActiveCodes(supabase, rows.map((r) => r.id));
+  return rows.map((r) => ({ ...r, codes: codes.get(r.id) ?? [] }));
+}
 
 export type CaseloadClient = {
   id: string;
@@ -12,16 +24,14 @@ export type CaseloadClient = {
   home_latitude: number | null;
   home_longitude: number | null;
   pcsp_goals: string[];
-  job_code: string[] | null;
-  authorized_dspd_codes: string[] | null;
+  /** Active service codes from client_billing_codes (the one source). */
+  codes: string[];
   medicaid_id: string | null;
   physical_address: string | null;
   geofence_radius_feet?: number | null;
   special_directions: string | null;
-  profile_photo_url: string | null;
+  client_photo_url: string | null;
   feature_config: Record<string, boolean> | null;
-  emergency_contact_name?: string | null;
-  emergency_contact_phone?: string | null;
   date_of_birth?: string | null;
 };
 
@@ -48,11 +58,11 @@ export function useCaseload() {
         const { data, error } = await supabase
           .from("clients")
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .select("id, first_name, last_name, home_latitude, home_longitude, pcsp_goals, job_code, authorized_dspd_codes, medicaid_id, physical_address, geofence_radius_feet, special_directions, profile_photo_url, feature_config, emergency_contact_name, emergency_contact_phone, date_of_birth" as any)
+          .select(CASELOAD_COLUMNS as any)
           .eq("organization_id", org!.organization_id)
           .order("last_name");
         if (error) throw error;
-        return (data ?? []) as unknown as CaseloadClient[];
+        return withCodes((data ?? []) as unknown as ClientRow[]);
       }
 
       // Staff: caseload resolver handles direct assignments + group-home override
@@ -64,9 +74,9 @@ export function useCaseload() {
         { _org: org!.organization_id, _staff: user!.id } as any,
       );
       if (error) throw error;
-      const rows = (data ?? []) as unknown as CaseloadClient[];
+      const rows = (data ?? []) as unknown as ClientRow[];
       // Sort by last name to match prior behavior
-      return [...rows].sort((a, b) => (a.last_name ?? "").localeCompare(b.last_name ?? ""));
+      return withCodes([...rows].sort((a, b) => (a.last_name ?? "").localeCompare(b.last_name ?? "")));
 
     },
   });

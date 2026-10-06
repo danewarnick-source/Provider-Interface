@@ -37,15 +37,15 @@ export function clientHasFeature(
  * Final visibility for a code-driven feature on a given client.
  * Per-client `feature_config[feature]` ALWAYS wins over the code-derived
  * default (true → force on, false → force off). When unset, fall back to
- * whether the client's authorized codes include the feature.
+ * whether the client's active codes (src/lib/clients/codes.ts) include the feature.
  */
 export function clientFeatureVisible(
-  client: { feature_config?: Record<string, boolean> | null; authorized_dspd_codes?: readonly string[] | null } | null | undefined,
+  client: { feature_config?: Record<string, boolean> | null; codes?: readonly string[] | null } | null | undefined,
   feature: ClientCodeFeature,
 ): boolean {
   const override = client?.feature_config?.[feature];
   if (typeof override === "boolean") return override;
-  return clientHasFeature(client?.authorized_dspd_codes ?? null, feature);
+  return clientHasFeature(client?.codes ?? null, feature);
 }
 
 

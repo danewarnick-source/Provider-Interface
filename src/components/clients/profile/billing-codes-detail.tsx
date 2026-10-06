@@ -57,7 +57,7 @@ import {
 import { getAuthStatus, AuthStatusBadge } from "@/lib/billing-auth-status";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { daysUntil } from "@/lib/clients/dates";
-import { updateClient, writeClientRecord } from "@/lib/clients/writes.functions";
+import { writeClientRecord } from "@/lib/clients/writes.functions";
 
 type Draft = { annual: string; rate: string; endDate: string };
 function draftFromCode(c: { annual_unit_authorization: number | null; rate_per_unit: number | null; service_end_date: string | null }): Draft {
@@ -239,6 +239,7 @@ export function BillingCodesDetail({ clientId, clientName, medicaidId }: Props) 
     }
     qc.invalidateQueries({ queryKey: ["all-client-billing-codes"] });
     qc.invalidateQueries({ queryKey: ["client-billing-codes"] });
+    qc.invalidateQueries({ queryKey: ["client-active-codes"] });
     qc.invalidateQueries({ queryKey: ["client-budget"] });
     qc.invalidateQueries({ queryKey: ["client-codes-summary", clientId] });
     qc.invalidateQueries({ queryKey: ["client-readiness", clientId] });
@@ -501,6 +502,7 @@ function BudgetUploadButton({ clientId }: { clientId: string }) {
 
       toast.success(`Applied ${toApply.length} code${toApply.length === 1 ? "" : "s"} from the form.`);
       qc.invalidateQueries({ queryKey: ["client-billing-codes"] });
+      qc.invalidateQueries({ queryKey: ["client-active-codes"] });
       qc.invalidateQueries({ queryKey: ["all-client-billing-codes"] });
       qc.invalidateQueries({ queryKey: ["client-budget"] });
       qc.invalidateQueries({ queryKey: ["client-docs", clientId] });
@@ -697,7 +699,6 @@ function CodeRow({
 }) {
   const qc = useQueryClient();
   const writeRecordFn = useServerFn(writeClientRecord);
-  const updateClientFn = useServerFn(updateClient);
   const { data: org } = useCurrentOrg();
   const code = budget.code as Budget["code"] & {
     rate_source?: string | null;
@@ -759,6 +760,7 @@ function CodeRow({
     toast.success(`${code.service_code} end date set`);
     qc.invalidateQueries({ queryKey: ["all-client-billing-codes"] });
     qc.invalidateQueries({ queryKey: ["client-billing-codes"] });
+    qc.invalidateQueries({ queryKey: ["client-active-codes"] });
     qc.invalidateQueries({ queryKey: ["client-budget"] });
     return true;
   }
@@ -775,36 +777,12 @@ function CodeRow({
       setDeleting(false);
       return toast.error(e instanceof Error ? e.message : "Remove failed");
     }
-    // Strip code (case-insensitive) from clients.authorized_dspd_codes and job_code
-    const { data: clientRow } = await supabase
-      .from("clients")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .select("authorized_dspd_codes, job_code" as any)
-      .eq("id", _clientId)
-      .maybeSingle();
-    if (clientRow) {
-      const targetUpper = code.service_code.toUpperCase();
-      const authorized = ((clientRow as unknown as { authorized_dspd_codes?: string[] | null }).authorized_dspd_codes ?? [])
-        .filter((c) => (c ?? "").toUpperCase() !== targetUpper);
-      const jobCodes = ((clientRow as unknown as { job_code?: string[] | null }).job_code ?? [])
-        .filter((c) => (c ?? "").toUpperCase() !== targetUpper);
-      try {
-        await updateClientFn({
-          data: {
-            organizationId: org.organization_id,
-            clientId: _clientId,
-            patch: { authorized_dspd_codes: authorized, job_code: jobCodes },
-          },
-        });
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Could not update the client's code list");
-      }
-    }
     setDeleting(false);
     setConfirmDelete(false);
     toast.success(`Removed ${code.service_code}`);
     qc.invalidateQueries({ queryKey: ["all-client-billing-codes"] });
     qc.invalidateQueries({ queryKey: ["client-billing-codes"] });
+    qc.invalidateQueries({ queryKey: ["client-active-codes"] });
     qc.invalidateQueries({ queryKey: ["client-budget"] });
     qc.invalidateQueries({ queryKey: ["client-codes-summary", _clientId] });
     qc.invalidateQueries({ queryKey: ["client-readiness", _clientId] });

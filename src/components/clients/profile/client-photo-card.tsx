@@ -7,6 +7,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { Card, CardContent } from "@/components/ui/card";
 import { Camera } from "lucide-react";
 import { PhotoUpload } from "@/components/person/photo-upload";
+import { todayYmd } from "@/lib/clients/dates";
 import { useServerFn } from "@tanstack/react-start";
 import { updateClient } from "@/lib/clients/writes.functions";
 
@@ -20,7 +21,7 @@ export function ClientPhotoCard({ clientId }: { clientId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("clients")
-        .select("first_name, last_name, client_photo_url, profile_photo_url, client_photo_taken_on")
+        .select("first_name, last_name, client_photo_url, client_photo_taken_on")
         .eq("id", clientId)
         .maybeSingle();
       if (error) throw error;
@@ -45,7 +46,7 @@ export function ClientPhotoCard({ clientId }: { clientId: string }) {
 
   const c = q.data;
   const name = c ? `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() : null;
-  const currentPath = (c?.client_photo_url ?? c?.profile_photo_url ?? null) as string | null;
+  const currentPath = (c?.client_photo_url ?? null) as string | null;
 
   return (
     <Card>
@@ -72,7 +73,7 @@ export function ClientPhotoCard({ clientId }: { clientId: string }) {
             onUploaded={async (path) => {
               await persist.mutateAsync({
                 client_photo_url: path,
-                client_photo_taken_on: new Date().toISOString().slice(0, 10),
+                client_photo_taken_on: todayYmd(),
               });
             }}
             onCleared={async () => {

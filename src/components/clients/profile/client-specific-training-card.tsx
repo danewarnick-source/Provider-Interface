@@ -28,7 +28,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Sparkles, Loader2, CheckCircle2, RefreshCw, Pencil, Trash2, Plus, ArrowUp, ArrowDown, Shield, BookOpen, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
-import { clientAuthorizedCodes } from "@/lib/assignment-codes";
+import { loadActiveCodes } from "@/lib/clients/codes";
 
 type Training = {
   id: string;
@@ -984,20 +984,12 @@ export function PublishConfirmDialog({
           .select("staff_id")
           .eq("organization_id", orgId!)
           .eq("client_id", clientId),
-        supabase
-          .from("clients")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .select("authorized_dspd_codes, job_code" as any)
-          .eq("id", clientId)
-          .maybeSingle(),
+        loadActiveCodes(supabase, [clientId]),
       ]);
       if (a.error) throw a.error;
-      if (c.error) throw c.error;
       return {
         staffIds: (a.data ?? []).map((r) => (r as { staff_id: string }).staff_id),
-        codes: clientAuthorizedCodes(
-          (c.data ?? {}) as { authorized_dspd_codes?: string[] | null; job_code?: string[] | null },
-        ),
+        codes: c.get(clientId) ?? [],
       };
     },
   });

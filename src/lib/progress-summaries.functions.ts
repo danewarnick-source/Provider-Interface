@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { loadClientContacts, primaryContact, type ClientContact } from "@/lib/clients/contacts";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
@@ -469,9 +470,8 @@ export type SummarySourceBundle = {
     first_name: string;
     last_name: string;
     pcsp_goals: string[];
-    support_coordinator_name: string | null;
-    support_coordinator_email: string | null;
-    support_coordinator_phone: string | null;
+    /** The client's main support coordinator (client_contacts). */
+    support_coordinator: ClientContact | null;
   };
   goals: SummaryPcspGoal[];
   organization: {
@@ -554,7 +554,7 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
 
     const { data: client, error: cErr } = await supabase
       .from("clients")
-      .select("id, first_name, last_name, pcsp_goals, support_coordinator_name, support_coordinator_email, support_coordinator_phone")
+      .select("id, first_name, last_name, pcsp_goals")
       .eq("id", summaryRow.client_id)
       .eq("organization_id", data.organizationId)
       .maybeSingle();
@@ -717,9 +717,10 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
         first_name: client.first_name,
         last_name: client.last_name,
         pcsp_goals: (client.pcsp_goals ?? []) as string[],
-        support_coordinator_name: client.support_coordinator_name ?? null,
-        support_coordinator_email: client.support_coordinator_email ?? null,
-        support_coordinator_phone: client.support_coordinator_phone ?? null,
+        support_coordinator: primaryContact(
+          await loadClientContacts(supabase, [client.id]),
+          "support_coordinator",
+        ),
       },
       goals,
       organization: {

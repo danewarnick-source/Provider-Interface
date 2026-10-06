@@ -29,10 +29,10 @@ import { Search, Save, X, Tag } from "lucide-react";
 import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
 import {
   assignmentCodes,
-  clientAuthorizedCodes,
   normalizeServiceCodes,
   uncoveredCodes,
 } from "@/lib/assignment-codes";
+import { loadActiveCodes } from "@/lib/clients/codes";
 
 type StaffOption = { id: string; name: string };
 
@@ -113,18 +113,10 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
           .select("staff_id, service_codes")
           .eq("organization_id", orgId!)
           .eq("client_id", clientId!),
-        supabase
-          .from("clients")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .select("authorized_dspd_codes, job_code" as any)
-          .eq("id", clientId!)
-          .maybeSingle(),
+        loadActiveCodes(supabase, [clientId!]),
       ]);
       if (a.error) throw a.error;
-      if (c.error) throw c.error;
-      const codes = clientAuthorizedCodes(
-        (c.data ?? {}) as { authorized_dspd_codes?: string[] | null; job_code?: string[] | null },
-      );
+      const codes = c.get(clientId!) ?? [];
       return {
         assignments: ((a.data ?? []) as Array<{ staff_id: string; service_codes: string[] | null }>),
         codes,

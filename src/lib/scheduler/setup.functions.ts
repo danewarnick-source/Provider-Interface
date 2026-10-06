@@ -13,19 +13,19 @@ import { assertCanManageMember } from "@/lib/team-members/guards.server";
 import { waiveRemovedClientItemsInternal } from "@/lib/team-members/caseload.functions";
 import {
   assignmentCodes,
-  clientAuthorizedCodes,
   normalizeServiceCode,
   resolveStaffClientCodes,
   withCodeAdded,
   withCodeRemoved,
 } from "@/lib/assignment-codes";
+import { loadActiveCodes } from "@/lib/clients/codes";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Staff ↔ client code assignments — the single write path.
 //
 // Every staff_assignments row lists its codes explicitly. NULL / [] is never
 // "all codes". Codes must be a subset of the client's currently authorized
-// codes (clientAuthorizedCodes). An empty list deletes the assignment row —
+// codes (active client_billing_codes rows, loadActiveCodes). An empty list deletes the assignment row —
 // assignments are settings, not records — and waives that client's open
 // staff_per_client items ("Removed from caseload"); those are never deleted.
 //
@@ -48,15 +48,13 @@ async function loadClientCodes(
 ): Promise<string[]> {
   const { data: clientRow, error } = await supabase
     .from("clients")
-    .select("authorized_dspd_codes, job_code")
+    .select("id")
     .eq("organization_id", organizationId)
     .eq("id", clientId)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!clientRow) throw new Error("Client not found in this organization");
-  return clientAuthorizedCodes(
-    clientRow as { authorized_dspd_codes?: string[] | null; job_code?: string[] | null },
-  );
+  return (await loadActiveCodes(supabase, [clientId])).get(clientId) ?? [];
 }
 
 async function loadAssignmentRow(
@@ -79,7 +77,7 @@ async function loadAssignmentRow(
 /**
  * Write one staff member's explicit codes for one client. codes = [] deletes
  * the row. Caller has already run the permission check and validated codes
- * against clientAuthorizedCodes.
+ * against the client's active codes.
  */
 /** Obligation hooks are best-effort: the assignment is already saved. */
 async function runAssignmentHook(label: string, fn: () => Promise<void>): Promise<void> {

@@ -5,13 +5,22 @@
  * - Every visible value is passed through `field()`. Empty / null / undefined
  *   renders literally as "Not on file". No inference, no autofill from
  *   related data — this is a law-enforcement-facing safety document.
- * - Data comes only from real records: clients row, organizations row,
- *   organization_branding row, and the client's own uploaded photo.
+ * - Data comes only from real records: clients row, the client's contacts
+ *   (client_contacts), organizations row, organization_branding row, and the
+ *   client's own uploaded photo (client_photo_url).
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont, type PDFImage } from "pdf-lib";
+import {
+  activeContacts,
+  contactsWithRole,
+  loadClientContacts,
+  primaryContact,
+  type ClientContact,
+} from "./contacts";
+import { formatDate } from "./dates";
 
 const NOT_ON_FILE = "Not on file";
 
@@ -26,10 +35,21 @@ function field(v: unknown): string {
 }
 
 function fmtDate(d: string | null | undefined): string {
-  if (!d) return NOT_ON_FILE;
-  const dt = new Date(d);
-  if (Number.isNaN(dt.getTime())) return NOT_ON_FILE;
-  return dt.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  return formatDate(d, { year: "numeric", month: "short", day: "numeric" }, NOT_ON_FILE);
+}
+
+/** Name (relationship / company), phone, email, address — or "Not on file". */
+function contactBlock(c: ClientContact | null | undefined): string {
+  if (!c) return NOT_ON_FILE;
+  const tag = c.relationship ?? c.company;
+  return [
+    tag ? `${c.name} (${tag})` : c.name,
+    c.phone ? `Phone: ${c.phone}` : "",
+    c.email ? `Email: ${c.email}` : "",
+    c.address ?? "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function maskedSsn(last4: string | null | undefined): string {
@@ -92,7 +112,7 @@ export const generateClientFaceSheet = createServerFn({ method: "POST" })
     }
     const [logoBytes, photoBytes] = await Promise.all([
       downloadBytes("org-branding", branding?.logo_path),
-      downloadBytes("client-photos", client.client_photo_url ?? client.profile_photo_url),
+      downloadBytes("client-photos", client.client_photo_url),
     ]);
 
     // 4) Build PDF.
@@ -120,8 +140,11 @@ export const generateClientFaceSheet = createServerFn({ method: "POST" })
       tryEmbedImage(photoBytes),
     ]);
 
+    const contacts = activeContacts(await loadClientContacts(supabase, [client.id]));
+
     drawFaceSheet(page, helv, helvB, {
       client,
+      contacts,
       org: org ?? null,
       branding: branding ?? null,
       logoImg,
@@ -150,6 +173,7 @@ type Client = Record<string, unknown> & {
 
 type Ctx = {
   client: Client;
+  contacts: ClientContact[];
   org: { id: string; name: string | null; legal_name: string | null; dba_name: string | null } | null;
   branding: { logo_path: string | null; org_address: string | null; org_phone: string | null } | null;
   logoImg: PDFImage | null;
@@ -241,7 +265,7 @@ function hr(page: PDFPage, y: number): void {
 }
 
 function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): void {
-  const { client, org, branding, logoImg, photoImg } = ctx;
+  const { client, contacts, org, branding, logoImg, photoImg } = ctx;
 
   // ── Header ────────────────────────────────────────────────────────────
   // Logo top-left OR org name as large title
@@ -373,8 +397,7 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
   yR = sectionHeader(page, "Insurance & ID", rightXCol, yR, colW, helvB);
   yR = drawKV(page, "Medicaid case #", field(client.medicaid_case_number), rightXCol, yR, colW, helv, helvB);
   yR = drawKV(page, "Medicaid #", field(client.medicaid_id), rightXCol, yR, colW, helv, helvB);
-  yR = drawKV(page, "Medicare #", field(client.medicare_number), rightXCol, yR, colW, helv, helvB);
-  yR = drawKV(page, "Private insurance", field(client.private_insurance ?? client.medical_insurance), rightXCol, yR, colW, helv, helvB);
+  yR = drawKV(page, "Insurance", field(client.insurance), rightXCol, yR, colW, helv, helvB);
   yR = drawKV(page, "Utah ID #", field(client.state_id_number), rightXCol, yR, colW, helv, helvB);
   yR = drawKV(page, "Utah ID expires", fmtDate(client.state_id_expires_on as string | null), rightXCol, yR, colW, helv, helvB);
   yR = drawKV(page, "Payment sources", field(client.payment_sources), rightXCol, yR, colW, helv, helvB);
@@ -387,95 +410,18 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
   // ── Contacts block ────────────────────────────────────────────────────
   y = sectionHeader(page, "Contacts", M, y, PAGE_W - M * 2, helvB);
   const c3 = (PAGE_W - M * 2 - 16) / 2;
-  let yG = y;
+  const emergency = contactsWithRole(contacts, "emergency");
+  const guardians = contactsWithRole(contacts, "guardian");
   const guardianLabel = (client.is_own_guardian as boolean)
     ? "Client is own guardian"
-    : [
-        field(client.guardian_name),
-        field(client.guardian_relationship) !== NOT_ON_FILE ? `(${client.guardian_relationship})` : "",
-        field(client.guardian_phone) !== NOT_ON_FILE ? `\nPhone: ${client.guardian_phone}` : "",
-        field(client.guardian_email) !== NOT_ON_FILE ? `\nEmail: ${client.guardian_email}` : "",
-        field(client.guardian_address) !== NOT_ON_FILE ? `\n${client.guardian_address}` : "",
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .trim() || NOT_ON_FILE;
+    : guardians.map(contactBlock).join("\n") || NOT_ON_FILE;
+  let yG = y;
   yG = drawKV(page, "Legal guardian(s)", guardianLabel, M, yG, c3, helv, helvB);
-
-  yG = drawKV(
-    page,
-    "Primary emergency contact",
-    [
-      field(client.emergency_contact_name),
-      field(client.emergency_contact_relationship) !== NOT_ON_FILE
-        ? `(${client.emergency_contact_relationship})`
-        : "",
-      field(client.emergency_contact_phone) !== NOT_ON_FILE
-        ? `\nPhone: ${client.emergency_contact_phone}`
-        : "",
-      field(client.emergency_contact_address) !== NOT_ON_FILE
-        ? `\n${client.emergency_contact_address}`
-        : "",
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim() || NOT_ON_FILE,
-    M,
-    yG,
-    c3,
-    helv,
-    helvB,
-  );
+  yG = drawKV(page, "Primary emergency contact", contactBlock(emergency[0]), M, yG, c3, helv, helvB);
 
   let yG2 = y;
-  yG2 = drawKV(
-    page,
-    "Secondary emergency contact",
-    [
-      field(client.emergency_contact_2_name),
-      field(client.emergency_contact_2_relationship) !== NOT_ON_FILE
-        ? `(${client.emergency_contact_2_relationship})`
-        : "",
-      field(client.emergency_contact_2_phone) !== NOT_ON_FILE
-        ? `\nPhone: ${client.emergency_contact_2_phone}`
-        : "",
-      field(client.emergency_contact_2_address) !== NOT_ON_FILE
-        ? `\n${client.emergency_contact_2_address}`
-        : "",
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim() || NOT_ON_FILE,
-    M + c3 + 16,
-    yG2,
-    c3,
-    helv,
-    helvB,
-  );
-  yG2 = drawKV(
-    page,
-    "Support coordinator",
-    [
-      field(client.support_coordinator_name),
-      field(client.support_coordinator_company) !== NOT_ON_FILE
-        ? `(${client.support_coordinator_company})`
-        : "",
-      field(client.support_coordinator_phone) !== NOT_ON_FILE
-        ? `\nPhone: ${client.support_coordinator_phone}`
-        : "",
-      field(client.support_coordinator_email) !== NOT_ON_FILE
-        ? `\nEmail: ${client.support_coordinator_email}`
-        : "",
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim() || NOT_ON_FILE,
-    M + c3 + 16,
-    yG2,
-    c3,
-    helv,
-    helvB,
-  );
+  yG2 = drawKV(page, "Secondary emergency contact", contactBlock(emergency[1]), M + c3 + 16, yG2, c3, helv, helvB);
+  yG2 = drawKV(page, "Support coordinator", contactBlock(primaryContact(contacts, "support_coordinator")), M + c3 + 16, yG2, c3, helv, helvB);
 
   y = Math.min(yG, yG2) - 4;
   hr(page, y);
@@ -485,43 +431,16 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
   y = sectionHeader(page, "Services", M, y, PAGE_W - M * 2, helvB);
   const s3 = (PAGE_W - M * 2 - 32) / 3;
   let ySA = y;
-  ySA = drawKV(page, "Residential provider", field(client.residential_provider), M, ySA, s3, helv, helvB);
-  ySA = drawKV(page, "Day program / agency", field(client.day_program_provider), M, ySA, s3, helv, helvB);
+  const others = contactsWithRole(contacts, "other_provider");
+  ySA = drawKV(page, "Other providers", others.map(contactBlock).join("\n") || NOT_ON_FILE, M, ySA, s3, helv, helvB);
 
   let ySB = y;
-  const physician = [
-    field(client.pcp_name ?? client.primary_care_name),
-    field(client.pcp_phone ?? client.primary_care_phone) !== NOT_ON_FILE
-      ? `Phone: ${client.pcp_phone ?? client.primary_care_phone}`
-      : "",
-    field(client.physician_address) !== NOT_ON_FILE ? String(client.physician_address) : "",
-  ]
-    .filter(Boolean)
-    .join("\n")
-    .trim();
-  ySB = drawKV(page, "Physician", physician || NOT_ON_FILE, M + s3 + 16, ySB, s3, helv, helvB);
-  const dentist = [
-    field(client.dentist_name),
-    field(client.dentist_phone) !== NOT_ON_FILE ? `Phone: ${client.dentist_phone}` : "",
-    field(client.dentist_address) !== NOT_ON_FILE ? String(client.dentist_address) : "",
-  ]
-    .filter(Boolean)
-    .join("\n")
-    .trim();
-  ySB = drawKV(page, "Dentist", dentist || NOT_ON_FILE, M + s3 + 16, ySB, s3, helv, helvB);
+  ySB = drawKV(page, "Physician", contactBlock(primaryContact(contacts, "primary_doctor")), M + s3 + 16, ySB, s3, helv, helvB);
+  ySB = drawKV(page, "Dentist", contactBlock(primaryContact(contacts, "dentist")), M + s3 + 16, ySB, s3, helv, helvB);
 
   let ySC = y;
-  const psych = [
-    field(client.psychiatrist_name ?? client.med_prescriber_name ?? client.prescriber_name),
-    field(client.psychiatrist_phone ?? client.med_prescriber_phone ?? client.prescriber_phone) !== NOT_ON_FILE
-      ? `Phone: ${client.psychiatrist_phone ?? client.med_prescriber_phone ?? client.prescriber_phone}`
-      : "",
-    field(client.psychiatrist_address) !== NOT_ON_FILE ? String(client.psychiatrist_address) : "",
-  ]
-    .filter(Boolean)
-    .join("\n")
-    .trim();
-  ySC = drawKV(page, "Psychiatrist", psych || NOT_ON_FILE, M + (s3 + 16) * 2, ySC, s3, helv, helvB);
+  const psych = primaryContact(contacts, "psychiatrist") ?? primaryContact(contacts, "prescriber");
+  ySC = drawKV(page, "Psychiatrist / prescriber", contactBlock(psych), M + (s3 + 16) * 2, ySC, s3, helv, helvB);
 
   y = Math.min(ySA, ySB, ySC) - 4;
   hr(page, y);
@@ -531,9 +450,8 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
   y = sectionHeader(page, "Safety", M, y, PAGE_W - M * 2, helvB);
   const s2 = (PAGE_W - M * 2 - 16) / 2;
   let ySF = y;
-  ySF = drawKV(page, "Pertinent health info / concerns", field(client.pertinent_health_notes ?? client.clinical_alert), M, ySF, s2, helv, helvB);
+  ySF = drawKV(page, "Must-knows / health concerns", field(client.special_directions), M, ySF, s2, helv, helvB);
   ySF = drawKV(page, "Allergies", field(client.allergies), M, ySF, s2, helv, helvB);
-  ySF = drawKV(page, "Special dietary needs", field(client.dietary_needs), M, ySF, s2, helv, helvB);
 
   let ySFR = y;
   const desc = [

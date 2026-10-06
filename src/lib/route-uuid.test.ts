@@ -43,16 +43,15 @@ describe("route UUID params", () => {
     }
   });
 
-  it("emergency-contact queries and saves skip the literal new", () => {
+  it("contact queries skip the literal new", () => {
     const src = readFileSync(
-      fileURLToPath(new URL("../components/clients/profile/profile-tab.tsx", import.meta.url)),
+      fileURLToPath(
+        new URL("../components/clients/shared/hooks/use-client-contacts.ts", import.meta.url),
+      ),
       "utf8",
     );
-    assert.match(src, /enabled: !!orgId && isRouteUuid\(clientId\)/);
-    assert.match(src, /client_emergency_contacts/);
-    assert.match(src, /const rowId = isRouteUuid\(c\.id\) \? c\.id : undefined/);
-    assert.match(src, /Save the client before adding emergency contacts/);
-    assert.match(src, /Add contact/);
+    assert.match(src, /enabled: isRouteUuid\(clientId\)/);
+    assert.match(src, /loadClientContacts/);
   });
 
   it("keeps a distinct /new create path for clients and staff", () => {

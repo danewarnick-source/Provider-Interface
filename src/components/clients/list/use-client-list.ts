@@ -5,10 +5,11 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { backfillOrgHomePinsFromAddresses } from "@/lib/clients/home-pin.functions";
 import { updateClient } from "@/lib/clients/writes.functions";
+import { loadActiveCodes } from "@/lib/clients/codes";
 import type { ClientListRow, RosterTab } from "./client-list-types";
 
 const CLIENT_LIST_COLUMNS =
-  "id, first_name, last_name, phone_number, physical_address, pcsp_goals, job_code, authorized_dspd_codes, medicaid_id, account_status, geofence_radius_feet, special_directions, date_of_birth, emergency_contact_name, emergency_contact_phone, is_own_guardian, guardian_name, guardian_phone, guardian_relationship, guardian_email, feature_config, profile_photo_url, intake_status";
+  "id, first_name, last_name, phone_number, physical_address, medicaid_id, account_status, intake_status";
 
 const isArchived = (c: ClientListRow) => (c.account_status ?? "active") === "archived";
 
@@ -20,16 +21,15 @@ export function useClientList(organizationId: string | undefined, rosterTab: Ros
     enabled: !!organizationId,
     queryKey: ["clients", organizationId],
     queryFn: async (): Promise<ClientListRow[]> => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("clients")
         .select(CLIENT_LIST_COLUMNS)
         .eq("organization_id", organizationId!)
         .order("last_name", { ascending: true });
       if (error) throw error;
-      return ((data ?? []) as any[]).map((c) => ({
-        ...c,
-        job_code: (c.authorized_dspd_codes?.length ? c.authorized_dspd_codes : c.job_code) ?? [],
-      })) as ClientListRow[];
+      const rows = (data ?? []) as Omit<ClientListRow, "codes">[];
+      const codes = await loadActiveCodes(supabase, rows.map((c) => c.id));
+      return rows.map((c) => ({ ...c, codes: codes.get(c.id) ?? [] }));
     },
   });
 

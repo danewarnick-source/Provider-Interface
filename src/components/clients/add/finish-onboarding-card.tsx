@@ -41,11 +41,10 @@ const EOL_CONFIRMATION_KEYS = new Set<string>([
   "palliative_care_status",
   "hospice_status",
 ]);
-import {
-  PROFILE_FIELD_BY_KEY,
-  getProfileFieldValue,
-  type ProfileField,
-} from "@/lib/clients/profile-fields";
+import { PROFILE_FIELD_BY_KEY, type ProfileField } from "@/lib/clients/profile-field-registry";
+import { getProfileFieldValue } from "@/lib/clients/profile-fields";
+import { primaryContact } from "@/lib/clients/contacts";
+import { useSaveContact } from "@/components/clients/shared/hooks/use-client-contacts";
 
 
 
@@ -354,33 +353,22 @@ function RateRow({
 export function GuardianForm({
   clientId, state, onSaved,
 }: { clientId: string; state: State; onSaved: () => void }) {
-  const c = state.client as { is_own_guardian?: boolean | null; guardian_name?: string | null; guardian_phone?: string | null; guardian_relationship?: string | null; guardian_email?: string | null };
+  const c = state.client as { is_own_guardian?: boolean | null };
+  const guardian = primaryContact(state.contacts, "guardian");
   const [isOwn, setIsOwn] = useState(c.is_own_guardian ?? true);
-  const [name, setName] = useState(c.guardian_name ?? "");
-  const [phone, setPhone] = useState(c.guardian_phone ?? "");
-  const [rel, setRel] = useState(c.guardian_relationship ?? "");
-  const [email, setEmail] = useState(c.guardian_email ?? "");
+  const [name, setName] = useState(guardian?.name ?? "");
+  const [phone, setPhone] = useState(guardian?.phone ?? "");
+  const [rel, setRel] = useState(guardian?.relationship ?? "");
+  const [email, setEmail] = useState(guardian?.email ?? "");
   const saveFn = useServerFn(saveOnboardingClientPatch);
+  const saveContact = useSaveContact(clientId);
   const m = useMutation({
-    mutationFn: () =>
-      saveFn({
-        data: {
-          clientId,
-          patch: isOwn
-            ? {
-                is_own_guardian: true,
-                guardian_name: null, guardian_phone: null,
-                guardian_relationship: null, guardian_email: null,
-              }
-            : {
-                is_own_guardian: false,
-                guardian_name: name.trim(),
-                guardian_phone: phone.trim(),
-                guardian_relationship: rel.trim() || null,
-                guardian_email: email.trim() || null,
-              },
-        },
-      }),
+    mutationFn: async () => {
+      await saveFn({ data: { clientId, patch: { is_own_guardian: isOwn } } });
+      if (!isOwn) {
+        await saveContact(guardian, { role: "guardian", name, phone, relationship: rel, email, is_primary: true });
+      }
+    },
     onSuccess: () => { toast.success("Guardian saved."); onSaved(); },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -449,6 +437,7 @@ function SowField({
     state.client as Record<string, unknown>,
     state.profileCustoms,
     field,
+    state.contacts,
   );
   const initial: string | boolean =
     field.type === "bool"

@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { isRouteUuid, redirectUnlessUuidParam } from "@/lib/route-uuid";
 import { z } from "zod";
 import { useCaseload } from "@/hooks/use-caseload";
-import { useMyAssignments, allowedCodesFor, clientAuthorizedCodes } from "@/hooks/use-my-assignments";
+import { useMyAssignments, allowedCodesFor } from "@/hooks/use-my-assignments";
 import { isClockableServiceCode } from "@/lib/service-billing";
 import { resolveGeofenceRadiusFeet } from "@/lib/geo";
 
@@ -119,10 +119,7 @@ function ClientWorkspace() {
     if (requestedTab) setTab(requestedTab);
   }, [requestedTab]);
 
-  const clientCodes = useMemo(
-    () => (client ? clientAuthorizedCodes(client) : []),
-    [client],
-  );
+  const clientCodes = useMemo(() => client?.codes ?? [], [client]);
   const allowedCodes = useMemo(
     () => (client ? allowedCodesFor(assignments, client.id, clientCodes) : []),
     [client, assignments, clientCodes],
@@ -170,7 +167,7 @@ function ClientWorkspace() {
   const planFeatureClient = client
     ? {
         feature_config: client.feature_config ?? null,
-        authorized_dspd_codes: client.authorized_dspd_codes ?? client.job_code ?? null,
+        codes: client.codes,
       }
     : null;
   const hasMedMonitoringCode = clientFeatureVisible(planFeatureClient, "med_monitoring");
@@ -210,7 +207,7 @@ function ClientWorkspace() {
           </Link>
           <div className="mt-2 flex flex-col items-start gap-4 sm:flex-row">
             <ClientPhoto
-              path={client.profile_photo_url}
+              path={client.client_photo_url}
               alt={`${client.first_name} ${client.last_name}`}
               className="h-10 w-10 rounded-full object-cover border-2 border-border"
               fallback={
@@ -330,9 +327,7 @@ function ClientWorkspace() {
                 facility: client.physical_address,
                 authorizedCodes: allowedHourly.length
                   ? allowedHourly
-                  : (clientAuthorizedCodes(client).length
-                    ? clientAuthorizedCodes(client)
-                    : undefined),
+                  : (client.codes.length ? client.codes : undefined),
                 homeLat: client.home_latitude,
                 homeLng: client.home_longitude,
                 geofenceRadiusFeet: resolveGeofenceRadiusFeet(client.geofence_radius_feet),

@@ -63,7 +63,6 @@ type ClientRow = {
   grievance_signed_date: string | null;
   pcsp_expiration_date: string | null;
   client_photo_url: string | null;
-  profile_photo_url: string | null;
 };
 
 function displayName(c: { first_name: string | null; last_name: string | null }): string {
@@ -97,7 +96,7 @@ export async function loadOrgClientFileIndex(
       supabase
         .from("clients")
         .select(
-          "id, first_name, last_name, account_status, is_own_guardian, grievance_acknowledged, grievance_signed_date, pcsp_expiration_date, client_photo_url, profile_photo_url",
+          "id, first_name, last_name, account_status, is_own_guardian, grievance_acknowledged, grievance_signed_date, pcsp_expiration_date, client_photo_url",
         )
         .eq("organization_id", organizationId),
     [] as ClientRow[],
@@ -309,7 +308,7 @@ export async function loadOrgClientFileIndex(
 
     const facts: ClientFileFacts = {
       codes,
-      photoPath: c.client_photo_url || c.profile_photo_url || null,
+      photoPath: c.client_photo_url || null,
       isOwnGuardian: c.is_own_guardian === true,
       grievanceOk: !!c.grievance_acknowledged || !!c.grievance_signed_date,
       pcspExpiration: c.pcsp_expiration_date ? c.pcsp_expiration_date.slice(0, 10) : null,

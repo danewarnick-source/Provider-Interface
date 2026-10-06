@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { activeContacts, contactsByClient, contactsWithRole, loadClientContacts } from "@/lib/clients/contacts";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
@@ -106,6 +107,8 @@ interface ClientFact {
   name: string;
   pcsp_goals: string[];
   special_directions: string | null;
+  /** Who to call: guardian + emergency contacts (client_contacts). */
+  contacts: Array<{ role: string; name: string; relationship: string | null; phone: string | null }>;
   medications: Array<{
     id: string;
     name: string;
@@ -455,13 +458,20 @@ export const askNectarStaff = createServerFn({ method: "POST" })
           medsByClient.set(m.client_id, arr);
         }
       }
+      const contactsById = contactsByClient(
+        activeContacts(await loadClientContacts(supabase, clientIdsToInclude).catch(() => [])),
+      );
       for (const c of assignedRows.filter((r) => clientIdsToInclude.includes(r.id))) {
         const directions = c.special_directions?.trim() ?? "";
+        const mine = contactsById.get(c.id) ?? [];
         clientFacts.push({
           id: c.id,
           name: `${c.first_name} ${c.last_name}`.trim(),
           pcsp_goals: slimPcspGoals(c.pcsp_goals),
           special_directions: directions ? directions.slice(0, wantsMeds ? 400 : 200) : null,
+          contacts: [...contactsWithRole(mine, "guardian"), ...contactsWithRole(mine, "emergency")]
+            .slice(0, 4)
+            .map((x) => ({ role: x.role, name: x.name, relationship: x.relationship, phone: x.phone })),
           medications: wantsMeds
             ? (medsByClient.get(c.id) ?? []).map((m) => ({
                 id: m.id, name: m.medication_name, dosage: m.dosage, frequency: m.frequency,
