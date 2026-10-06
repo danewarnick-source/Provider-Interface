@@ -144,8 +144,8 @@ function OutlineEditor({
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        What this provider will consider. NECTAR will score incoming referrals
-        against this outline in a later increment.
+        What this provider will consider. Incoming referrals are scored
+        against this outline.
         {readOnly && (
           <span className="ml-1 font-medium">
             Read-only — requires Manage referrals.

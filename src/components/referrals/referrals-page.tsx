@@ -144,9 +144,8 @@ export function ReferralsPage() {
         <div>
           <h2 className="text-lg font-semibold tracking-tight">Referrals</h2>
           <p className="text-sm text-muted-foreground">
-            Prospective-client intake inquiries. Move through the pipeline; log
-            every contact, meeting, and note. Matching and follow-up email land
-            in later increments.
+            Prospective-client intake inquiries. Move through the pipeline and
+            log every contact, meeting, and note.
           </p>
         </div>
         {orgId && (
