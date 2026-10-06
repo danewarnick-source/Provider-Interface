@@ -207,11 +207,13 @@ export function StageAdvancer({
 export function ReferralDetailDialog({
   organizationId,
   referralId,
+  canEdit,
   open,
   onOpenChange,
 }: {
   organizationId: string;
   referralId: string | null;
+  canEdit: boolean;
   open: boolean;
   onOpenChange: (o: boolean) => void;
 }) {
@@ -285,7 +287,7 @@ export function ReferralDetailDialog({
           <DialogTitle>Referral activity</DialogTitle>
         </DialogHeader>
 
-        {/* Logger */}
+        {canEdit && (
         <div className="space-y-3 rounded-md border border-border bg-muted/30 p-3">
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <div>
@@ -357,6 +359,7 @@ export function ReferralDetailDialog({
             </Button>
           </div>
         </div>
+        )}
 
         {/* Timeline */}
         <div className="mt-3 space-y-2">
@@ -371,6 +374,7 @@ export function ReferralDetailDialog({
                 activity={a}
                 allActivities={activities.data ?? []}
                 organizationId={organizationId}
+                canEdit={canEdit}
                 editFn={editFn}
                 onSaved={() =>
                   qc.invalidateQueries({
@@ -421,12 +425,14 @@ function ActivityRow({
   activity,
   allActivities,
   organizationId,
+  canEdit,
   editFn,
   onSaved,
 }: {
   activity: Activity;
   allActivities: Activity[];
   organizationId: string;
+  canEdit: boolean;
   editFn: (args: {
     data: { organization_id: string; original_id: string; body: string };
   }) => Promise<unknown>;
@@ -545,7 +551,8 @@ function ActivityRow({
           {activity.body && (
             <div className="mt-1 whitespace-pre-wrap">{activity.body}</div>
           )}
-          {(activity.activity_type === "note" ||
+          {canEdit &&
+            (activity.activity_type === "note" ||
             activity.activity_type === "contact" ||
             activity.activity_type === "meeting") && (
             <div className="mt-2 flex justify-end">

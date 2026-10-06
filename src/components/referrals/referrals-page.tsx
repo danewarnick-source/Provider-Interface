@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { useAccess } from "@/hooks/use-access";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,6 +89,8 @@ function splitList(s: string): string[] {
 export function ReferralsPage() {
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
+  const { can } = useAccess();
+  const canEdit = can("manage_referrals");
 
   const listFn = useServerFn(listReferrals);
   const scListFn = useServerFn(listSupportCoordinators);
@@ -165,14 +168,14 @@ export function ReferralsPage() {
               </button>
             </div>
             <ProviderInterestOutlineButton organizationId={orgId} />
-            <CallCaptureDialog organizationId={orgId} />
-            <NewReferralDialog organizationId={orgId} />
+            {canEdit && <CallCaptureDialog organizationId={orgId} />}
+            {canEdit && <NewReferralDialog organizationId={orgId} />}
           </div>
         )}
       </div>
 
       {view === "archived" && orgId ? (
-        <ArchivedReferralsList organizationId={orgId} />
+        <ArchivedReferralsList organizationId={orgId} canEdit={canEdit} />
       ) : (
         <>
       <PipelineStatsBar stats={stats.data} />
@@ -270,7 +273,7 @@ export function ReferralsPage() {
                             ))}
                           </div>
                         )}
-                        {orgId && (
+                        {orgId && canEdit && (
                           <div className="mt-2 flex items-center justify-between gap-2">
                             <StageAdvancer
                               organizationId={orgId}
@@ -337,6 +340,7 @@ export function ReferralsPage() {
         <ReferralDetailDialog
           organizationId={orgId}
           referralId={detailId}
+          canEdit={canEdit}
           open={!!detailId}
           onOpenChange={(o) => !o && setDetailId(null)}
         />
@@ -1055,7 +1059,13 @@ function NewReferralDialog({ organizationId }: { organizationId: string }) {
 
 // ─── Archived list ─────────────────────────────────────────────
 
-function ArchivedReferralsList({ organizationId }: { organizationId: string }) {
+function ArchivedReferralsList({
+  organizationId,
+  canEdit,
+}: {
+  organizationId: string;
+  canEdit: boolean;
+}) {
   const qc = useQueryClient();
   const listFn = useServerFn(listArchivedReferrals);
   const restoreFn = useServerFn(restoreReferral);
@@ -1114,14 +1124,16 @@ function ArchivedReferralsList({ organizationId }: { organizationId: string }) {
                 {r.archive_reason ? ` · ${r.archive_reason}` : ""}
               </div>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={aged || restore.isPending}
-              onClick={() => restore.mutate(r.id)}
-            >
-              <RotateCcw className="mr-1 h-3 w-3" /> Restore
-            </Button>
+            {canEdit && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={aged || restore.isPending}
+                onClick={() => restore.mutate(r.id)}
+              >
+                <RotateCcw className="mr-1 h-3 w-3" /> Restore
+              </Button>
+            )}
           </li>
         );
       })}
