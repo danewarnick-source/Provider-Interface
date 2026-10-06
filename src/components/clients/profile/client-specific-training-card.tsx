@@ -14,7 +14,6 @@ import {
   type CSTContent,
   type CSTSection,
   type CSTItem,
-  type CSTGoal,
   type CSTReviewQuestion,
 } from "@/lib/clients/training.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,12 +28,15 @@ import { Sparkles, Loader2, CheckCircle2, RefreshCw, Pencil, Trash2, Plus, Arrow
 import { toast } from "sonner";
 import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
 import { loadActiveCodes } from "@/lib/clients/codes";
+import { todayYmd } from "@/lib/clients/dates";
+import { activeGoalViewsOn } from "@/lib/clients/plans";
+import { GoalTree } from "@/components/clients/profile/plans/goal-tree";
+import { clientPlansKey, useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
 
 type Training = {
   id: string;
   title: string;
   content: CSTContent;
-  goals: CSTGoal[] | null;
   review_questions: CSTReviewQuestion[] | null;
   attestation_statement: string;
   status: "draft" | "published";
@@ -86,8 +88,8 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
   const [editing, setEditing] = useState(false);
   const [draftContent, setDraftContent] = useState<CSTContent | null>(null);
   const [draftTitle, setDraftTitle] = useState<string>("");
-  const [editingGoals, setEditingGoals] = useState(false);
-  const [draftGoals, setDraftGoals] = useState<CSTGoal[] | null>(null);
+  const plansQ = useClientPlans(clientId);
+  const planGoals = activeGoalViewsOn(plansQ.data, todayYmd());
   const [editingQuestions, setEditingQuestions] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
 
@@ -140,17 +142,6 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const saveGoalsMut = useMutation({
-    mutationFn: (payload: { id: string; goals: CSTGoal[] }) => updateFn({ data: payload }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey });
-      toast.success("Goals saved.");
-      setEditingGoals(false);
-      setDraftGoals(null);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   const extractGoalsMut = useMutation({
     mutationFn: () => extractGoalsFn({ data: { clientId } }),
     onSuccess: (res) => {
@@ -159,7 +150,8 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
         return;
       }
       qc.invalidateQueries({ queryKey });
-      toast.success(`Extracted ${res.goalCount} goal${res.goalCount === 1 ? "" : "s"} — review below.`);
+      qc.invalidateQueries({ queryKey: clientPlansKey(clientId) });
+      toast.success(`Extracted ${res.goalCount} goal${res.goalCount === 1 ? "" : "s"} into the current plan — review below.`);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -180,17 +172,6 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
   function saveEdit() {
     if (!training || !draftContent) return;
     updateMut.mutate({ id: training.id, title: draftTitle, content: draftContent });
-  }
-
-  function startEditGoals() {
-    if (!training) return;
-    setDraftGoals(structuredClone(training.goals ?? []));
-    setEditingGoals(true);
-  }
-  function cancelEditGoals() { setEditingGoals(false); setDraftGoals(null); }
-  function saveGoals() {
-    if (!training || draftGoals === null) return;
-    saveGoalsMut.mutate({ id: training.id, goals: draftGoals });
   }
 
   if (isLoading) {
@@ -327,55 +308,32 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
         onChange={(next) => setDraftContent(next)}
       />
 
-      {/* PCSP Goals editor */}
+      {/* Plan goals (client_goals — edited in the care plan) */}
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h4 className="text-sm font-semibold">PCSP Goals (in-depth, verbatim)</h4>
+          <h4 className="text-sm font-semibold">Plan goals and supports</h4>
           <span className="text-xs text-muted-foreground">
-            {(training.goals ?? []).length} goal{(training.goals ?? []).length === 1 ? "" : "s"}
+            {planGoals.length} goal{planGoals.length === 1 ? "" : "s"}
           </span>
           <div className="ml-auto flex flex-wrap gap-2">
-            {!editingGoals && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => extractGoalsMut.mutate()}
-                  disabled={extractGoalsMut.isPending}
-                >
-                  {extractGoalsMut.isPending
-                    ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                    : <BookOpen className="mr-1.5 h-3.5 w-3.5" />}
-                  Extract goals from PCSP (NECTAR)
-                </Button>
-                {(training.goals ?? []).length > 0 && (
-                  <Button variant="outline" size="sm" onClick={startEditGoals}>
-                    <Pencil className="mr-1.5 h-3.5 w-3.5" />Edit goals
-                  </Button>
-                )}
-              </>
-            )}
-            {editingGoals && (
-              <>
-                <Button variant="ghost" size="sm" onClick={cancelEditGoals}>Cancel</Button>
-                <Button size="sm" onClick={saveGoals} disabled={saveGoalsMut.isPending}>
-                  {saveGoalsMut.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-                  Save goals
-                </Button>
-              </>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => extractGoalsMut.mutate()}
+              disabled={extractGoalsMut.isPending}
+            >
+              {extractGoalsMut.isPending
+                ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                : <BookOpen className="mr-1.5 h-3.5 w-3.5" />}
+              Extract goals from PCSP (NECTAR)
+            </Button>
           </div>
         </div>
-
-        {editingGoals && draftGoals !== null ? (
-          <GoalsEditor goals={draftGoals} onChange={setDraftGoals} clientId={clientId} />
-        ) : (training.goals ?? []).length > 0 ? (
-          <GoalsView goals={training.goals ?? []} />
-        ) : (
-          <div className="rounded-md border border-dashed border-border/60 bg-muted/30 p-3 text-sm text-muted-foreground">
-            No in-depth goals yet. Click "Extract goals from PCSP (NECTAR)" to pull them from the uploaded PCSP document, or add them manually after clicking "Edit goals."
-          </div>
-        )}
+        <GoalTree
+          goals={planGoals}
+          empty={'No goals on the current plan yet. Extract them from the uploaded PCSP, or add them in the client\'s care plan.'}
+        />
+        <p className="text-xs text-muted-foreground">Goals and supports are edited in the client's care plan.</p>
       </div>
 
       {/* Review questions */}
@@ -683,152 +641,6 @@ function ItemView({
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-// ── Goals read-only view ────────────────────────────────────────────────────
-export function GoalsView({ goals }: { goals: CSTGoal[] }) {
-  return (
-    <div className="space-y-3">
-      {goals.map((g) => (
-        <div key={g.id} className="rounded-lg border border-border/60 bg-card p-3 space-y-2">
-          <div>
-            <div className="text-xs font-medium text-muted-foreground mb-0.5">Goal</div>
-            <p className="text-sm whitespace-pre-wrap">{g.goal || <span className="italic text-muted-foreground">(empty)</span>}</p>
-          </div>
-          {g.supports && (
-            <div>
-              <div className="text-xs font-medium text-muted-foreground mb-0.5">Supports</div>
-              <p className="text-sm whitespace-pre-wrap">{g.supports}</p>
-            </div>
-          )}
-          {g.details && (
-            <div>
-              <div className="text-xs font-medium text-muted-foreground mb-0.5">Details</div>
-              <p className="text-sm whitespace-pre-wrap">{g.details}</p>
-            </div>
-          )}
-          {g.job_codes.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {g.job_codes.map((c) => (
-                <span key={c} className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{c}</span>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-
-// ── Goals editor ─────────────────────────────────────────────────────────────
-export function GoalsEditor({ goals, onChange, clientId }: { goals: CSTGoal[]; onChange: (next: CSTGoal[]) => void; clientId: string }) {
-  const { data: billingCodes, isLoading: codesLoading } = useClientBillingCodes(clientId);
-  const availableCodes = (billingCodes ?? []).map((r) => r.service_code);
-
-  function addGoal() {
-    onChange([...goals, {
-      id: `s_${Math.random().toString(36).slice(2, 10)}`,
-      goal: "", supports: "", details: "", job_codes: [],
-    }]);
-  }
-  function removeGoal(idx: number) { onChange(goals.filter((_, i) => i !== idx)); }
-  function patchGoal(idx: number, patch: Partial<CSTGoal>) {
-    const next = [...goals];
-    next[idx] = { ...next[idx], ...patch };
-    onChange(next);
-  }
-  function toggleCode(idx: number, code: string) {
-    const current = goals[idx].job_codes;
-    const next = current.includes(code)
-      ? current.filter((c) => c !== code)
-      : [...current, code];
-    patchGoal(idx, { job_codes: next });
-  }
-
-  return (
-    <div className="space-y-3">
-      {goals.map((g, idx) => (
-        <div key={g.id} className="rounded-lg border border-border/60 bg-card p-3 space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-medium text-muted-foreground">Goal {idx + 1}</span>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => removeGoal(idx)}>
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium">Goal</label>
-            <Textarea
-              value={g.goal}
-              rows={3}
-              onChange={(e) => patchGoal(idx, { goal: e.target.value })}
-              placeholder="Verbatim goal/objective statement from PCSP"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium">Supports (what staff do)</label>
-            <Textarea
-              value={g.supports}
-              rows={2}
-              onChange={(e) => patchGoal(idx, { supports: e.target.value })}
-              placeholder="Support strategy text (verbatim)"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium">Objective / measure</label>
-            <Textarea
-              value={g.details}
-              rows={2}
-              onChange={(e) => patchGoal(idx, { details: e.target.value })}
-              placeholder="Measures, frequency, target, timeline (verbatim)"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium">Service codes</label>
-            {codesLoading ? (
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Loader2 className="h-3 w-3 animate-spin" />Loading authorized codes…
-              </p>
-            ) : availableCodes.length === 0 ? (
-              <p className="text-xs text-amber-700 bg-amber-50/70 border border-amber-200 rounded px-2 py-1.5">
-                No authorized service codes on file for this client. Add them under Billing first, then return here to assign codes to this goal.
-              </p>
-            ) : (
-              <>
-                <div className="flex flex-wrap gap-1.5">
-                  {availableCodes.map((code) => {
-                    const selected = g.job_codes.includes(code);
-                    return (
-                      <button
-                        key={code}
-                        type="button"
-                        onClick={() => toggleCode(idx, code)}
-                        className={`rounded px-2 py-0.5 text-xs font-mono border transition-colors ${
-                          selected
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-muted text-muted-foreground border-border hover:border-primary/60 hover:text-foreground"
-                        }`}
-                      >
-                        {code}
-                      </button>
-                    );
-                  })}
-                </div>
-                {g.job_codes.length === 0 && (
-                  <p className="text-xs text-amber-700 mt-1">
-                    No codes selected — this goal won't appear for any staff member during any shift until at least one code is picked.
-                  </p>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      ))}
-      <Button variant="outline" size="sm" onClick={addGoal}>
-        <Plus className="mr-1.5 h-3.5 w-3.5" />Add goal
-      </Button>
     </div>
   );
 }

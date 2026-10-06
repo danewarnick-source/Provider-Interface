@@ -331,7 +331,6 @@ function ClientWorkspace() {
                 homeLat: client.home_latitude,
                 homeLng: client.home_longitude,
                 geofenceRadiusFeet: resolveGeofenceRadiusFeet(client.geofence_radius_feet),
-                pcspGoals: client.pcsp_goals ?? [],
               }}
               presetServiceCode={effectivePresetCode}
               lockServiceCode={!!effectivePresetCode}

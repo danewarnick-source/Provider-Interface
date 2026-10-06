@@ -34,7 +34,6 @@ export const CASELOAD = [
     home_latitude: 40.76,
     home_longitude: -111.89,
     geofence_radius_feet: 1000,
-    pcsp_goals: TOMMY_GOALS,
   },
   {
     id: BLAKE_ID,
@@ -46,7 +45,6 @@ export const CASELOAD = [
     home_latitude: null,
     home_longitude: null,
     geofence_radius_feet: null,
-    pcsp_goals: [],
   },
   {
     id: STEPHEN_ID,
@@ -58,7 +56,6 @@ export const CASELOAD = [
     home_latitude: null,
     home_longitude: null,
     geofence_radius_feet: null,
-    pcsp_goals: [],
   },
   {
     id: MARCUS_ID,
@@ -70,7 +67,6 @@ export const CASELOAD = [
     home_latitude: null,
     home_longitude: null,
     geofence_radius_feet: null,
-    pcsp_goals: [],
   },
 ];
 

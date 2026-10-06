@@ -26,6 +26,7 @@ import {
   type State as OnboardingState,
 } from "@/components/clients/add/finish-onboarding-card";
 import { CaseloadEditor } from "@/components/clients/shared/caseload-editor";
+import { useCurrentPlanGoals } from "@/components/clients/shared/hooks/use-plan-goals";
 import { FEATURE_CODES } from "@/lib/clients/features";
 import { isClockableServiceCode, isDailyServiceCode } from "@/lib/service-billing";
 
@@ -268,59 +269,25 @@ function CodesQuestion({
 
 // ── Goals inline form ─────────────────────────────────────────────────────
 function GoalsInlineForm({ clientId, onSaved }: { clientId: string; onSaved: () => void }) {
-  const qc = useQueryClient();
   const [draft, setDraft] = useState("");
+  const { goals, addGoal, endGoal } = useCurrentPlanGoals(clientId);
+  const busy = addGoal.isPending || endGoal.isPending;
 
-  const goalsQ = useQuery({
-    queryKey: ["client-pcsp-goals", clientId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("clients")
-        .select("pcsp_goals")
-        .eq("id", clientId)
-        .maybeSingle();
-      if (error) throw error;
-      return ((data?.pcsp_goals ?? []) as string[]).filter(Boolean);
-    },
-  });
-
-  const m = useMutation({
-    mutationFn: async (next: string[]) => {
-      const { data, error } = await supabase
-        .from("clients")
-        .update({ pcsp_goals: next })
-        .eq("id", clientId)
-        .select("id");
-      if (error) throw error;
-      if (!data || data.length === 0) {
-        throw new Error("Goals not saved — record not found or no permission.");
-      }
-      return next;
-    },
-    onSuccess: () => {
-      setDraft("");
-      qc.invalidateQueries({ queryKey: ["client-pcsp-goals", clientId] });
-      toast.success("PCSP goals saved.");
-      onSaved();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const goals = goalsQ.data ?? [];
-
-  const addGoal = () => {
+  const add = () => {
     const v = draft.trim();
     if (!v) return;
-    const dedup = Array.from(new Set([...goals, v]));
-    if (dedup.length === goals.length) {
+    if (goals.some((g) => g.goal_text.trim().toLowerCase() === v.toLowerCase())) {
       toast.message("That goal is already in the list.");
       return;
     }
-    m.mutate(dedup);
-  };
-
-  const removeGoal = (g: string) => {
-    m.mutate(goals.filter((x) => x !== g));
+    addGoal.mutate(v, {
+      onSuccess: () => {
+        setDraft("");
+        toast.success("Goal saved.");
+        onSaved();
+      },
+      onError: (e) => toast.error(e.message),
+    });
   };
 
   return (
@@ -328,13 +295,13 @@ function GoalsInlineForm({ clientId, onSaved }: { clientId: string; onSaved: () 
       {goals.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {goals.map((g) => (
-            <Badge key={g} variant="secondary" className="gap-1 pr-1">
-              <span className="max-w-[18rem] truncate">{g}</span>
+            <Badge key={g.id} variant="secondary" className="gap-1 pr-1">
+              <span className="max-w-[18rem] truncate">{g.goal_text}</span>
               <button
                 type="button"
-                aria-label="Remove goal"
-                onClick={() => removeGoal(g)}
-                disabled={m.isPending}
+                aria-label="End goal"
+                onClick={() => endGoal.mutate(g.id, { onSuccess: onSaved, onError: (e) => toast.error(e.message) })}
+                disabled={busy}
                 className="rounded hover:bg-muted-foreground/20 p-0.5"
               >
                 <XIcon className="h-3 w-3" />
@@ -347,16 +314,16 @@ function GoalsInlineForm({ clientId, onSaved }: { clientId: string; onSaved: () 
         <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="Add a PCSP goal…"
+          placeholder="Add a goal…"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              addGoal();
+              add();
             }
           }}
         />
-        <Button size="sm" onClick={addGoal} disabled={m.isPending || !draft.trim()}>
-          {m.isPending ? "Saving…" : "Add goal"}
+        <Button size="sm" onClick={add} disabled={busy || !draft.trim()}>
+          {addGoal.isPending ? "Saving…" : "Add goal"}
         </Button>
       </div>
     </div>

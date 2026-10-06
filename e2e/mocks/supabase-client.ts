@@ -24,6 +24,7 @@ import {
   CLIENT_LIST,
   ORG_ID as TNS_ORG_ID,
   ORG_NAME as TNS_ORG_NAME,
+  planFixtureRows,
   STAFF,
   STAFF_LIST,
 } from "../fixtures/tns-roster";
@@ -112,7 +113,6 @@ function tnsClientRows(): Record<string, unknown>[] {
     swallowing_alerts: [],
     home_latitude: null,
     home_longitude: null,
-    pcsp_goals: [...c.pcsp_goals],
     intake_status: "complete",
     team_id: c.team_id,
     must_change_password: false,
@@ -261,6 +261,10 @@ function tableRows(table: string): Record<string, unknown>[] {
           created_at: "2026-01-01T00:00:00.000Z",
         },
       ];
+    case "client_plans":
+    case "client_goals":
+    case "client_goal_supports":
+      return hhs ? planFixtureRows(TNS_ORG_ID)[table] : [];
     case "host_supervision_contacts":
     case "incidents":
     case "daily_logs":

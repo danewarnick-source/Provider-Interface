@@ -61,6 +61,7 @@ import { CaseloadEditor } from "@/components/clients/shared/caseload-editor";
 import { useSaveContact } from "@/components/clients/shared/hooks/use-client-contacts";
 import { contactsWithRole, primaryContact, type ClientContact } from "@/lib/clients/contacts";
 import { NectarAsk } from "@/components/clients/shared/nectar-ask";
+import { useCurrentPlanGoals } from "@/components/clients/shared/hooks/use-plan-goals";
 
 export type BillingCodeRow = {
   id: string;
@@ -70,7 +71,6 @@ export type BillingCodeRow = {
 };
 
 export type ClientPcsp = {
-  pcsp_goals: string[] | null;
   physical_address: string | null;
   geofence_radius_feet: number | null;
   is_own_guardian: boolean | null;
@@ -215,7 +215,6 @@ export function RequiredToGoLiveGroup({
       />
       <GoalsRow
         clientId={clientId}
-        goals={(client.pcsp_goals ?? []) as string[]}
         passing={rowPass.goals}
         onChanged={onChanged}
       />
@@ -502,26 +501,17 @@ function RateSubCard({ row, onChanged }: { row: BillingCodeRow; onChanged: () =>
 // Row 3: PCSP goals
 // ---------------------------------------------------------------------------
 function GoalsRow({
-  clientId, goals, passing, onChanged,
-}: { clientId: string; goals: string[]; passing: boolean; onChanged: () => void }) {
+  clientId, passing, onChanged,
+}: { clientId: string; passing: boolean; onChanged: () => void }) {
   const [draft, setDraft] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  async function write(next: string[]) {
-    setSaving(true);
-    const { error } = await supabase
-      .from("clients")
-      .update({ pcsp_goals: next })
-      .eq("id", clientId);
-    setSaving(false);
-    if (error) { toast.error(error.message); return; }
-    onChanged();
-  }
+  const { goals, addGoal, endGoal } = useCurrentPlanGoals(clientId);
+  const saving = addGoal.isPending || endGoal.isPending;
+  const done = { onSuccess: onChanged, onError: (e: Error) => toast.error(e.message) };
 
   return (
     <ChecklistRow
       passing={passing}
-      label="PCSP goals captured"
+      label="Plan goals captured"
       valueChip={
         goals.length > 0 ? (
           <span className="text-xs text-muted-foreground">{goals.length} goal{goals.length === 1 ? "" : "s"}</span>
@@ -534,16 +524,16 @@ function GoalsRow({
           {goals.length === 0 ? (
             <li className="text-xs text-muted-foreground">No goals yet.</li>
           ) : null}
-          {goals.map((g, i) => (
-            <li key={i} className="flex items-center justify-between gap-2 rounded-md border border-border px-2 py-1.5 text-sm">
-              <span className="min-w-0 break-words">{g}</span>
+          {goals.map((g) => (
+            <li key={g.id} className="flex items-center justify-between gap-2 rounded-md border border-border px-2 py-1.5 text-sm">
+              <span className="min-w-0 break-words">{g.goal_text}</span>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                onClick={() => write(goals.filter((_, j) => j !== i))}
+                onClick={() => endGoal.mutate(g.id, done)}
                 disabled={saving}
-                aria-label="Remove goal"
+                aria-label="End goal"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -556,11 +546,10 @@ function GoalsRow({
             <Input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="e.g. Independently prepare lunch 3×/wk" />
           </div>
           <Button
-            onClick={async () => {
+            onClick={() => {
               const t = draft.trim();
               if (!t) return;
-              await write([...goals, t]);
-              setDraft("");
+              addGoal.mutate(t, { ...done, onSuccess: () => { setDraft(""); onChanged(); } });
             }}
             disabled={saving || !draft.trim()}
           >

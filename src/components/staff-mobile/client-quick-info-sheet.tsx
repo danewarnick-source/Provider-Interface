@@ -10,6 +10,7 @@ import {
 } from "react";
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
 import { useActiveShift } from "@/hooks/use-active-shift";
+import { useClientCareData } from "@/hooks/use-client-care-data";
 import type { CaseloadClient } from "@/hooks/use-caseload";
 import { displayPersonName } from "@/lib/person-name";
 import { useClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
@@ -47,12 +48,15 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
   }, [isOnTheClock]);
 
   const fullName = displayPersonName(client.first_name, client.last_name);
-  const goals = client.pcsp_goals ?? [];
+  const [open, setOpen] = useState(false);
+  // On the clock: the goals with supports for this shift's code; otherwise every plan goal.
+  const shiftCode = isOnTheClock ? active?.service_type_code ?? null : null;
+  const care = useClientCareData(open ? client.id : null, shiftCode).data?.visibility;
+  const goals = ((shiftCode ? care?.goalsForStaff : care?.staffCare.goals) ?? []).map((g) => g.goal);
   const todaysGoal = goals[0];
   const elapsed =
     isOnTheClock && active ? fmtElapsed(now - new Date(active.clock_in_timestamp).getTime()) : "";
 
-  const [open, setOpen] = useState(false);
   const contacts = useClientContacts(open ? client.id : undefined).data ?? [];
   const emergency = [
     ...contactsWithRole(contacts, "emergency"),
@@ -118,7 +122,7 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
           </Section>
 
           {/* (b) PCSP goals — today + view all */}
-          <Section tone="success" icon={<Target className="h-4 w-4" />} title="PCSP Goals">
+          <Section tone="success" icon={<Target className="h-4 w-4" />} title="Goals">
             {todaysGoal ? (
               <>
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-[#0d5c3d]">
@@ -145,7 +149,9 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
                 )}
               </>
             ) : (
-              <p className="text-sm text-muted-foreground">No PCSP goals on file.</p>
+              <p className="text-sm text-muted-foreground">
+                {shiftCode ? `No goals on the plan list ${shiftCode}.` : "No goals on the plan yet."}
+              </p>
             )}
           </Section>
 

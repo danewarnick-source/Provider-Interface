@@ -1,0 +1,155 @@
+// Care plan: the current plan year's goals → supports → codes, with add /
+// edit / end. Nothing is deleted: goals are ended, supports get an end date.
+import { useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { Loader2, Pencil, Plus, Sparkles, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FieldVisibilityToggle } from "@/components/clients/profile/visibility-toggles";
+import { clientPlansKey, useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
+import { formatDate, todayYmd } from "@/lib/clients/dates";
+import { currentPlan, goalView, waitingDays, type GoalView } from "@/lib/clients/plans";
+import { addClientPlan, endClientGoal, endGoalSupport } from "@/lib/clients/plans.functions";
+import { GoalTree } from "./goal-tree";
+import { GoalDialog, SupportDialog } from "./goal-dialogs";
+import { usePcspGoalExtract } from "./use-pcsp-goal-extract";
+
+type Support = GoalView["supports"][number];
+
+export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; orgId?: string; codes: string[] }) {
+  const qc = useQueryClient();
+  const plansQ = useClientPlans(clientId);
+  const addPlanFn = useServerFn(addClientPlan);
+  const endGoalFn = useServerFn(endClientGoal);
+  const endSupportFn = useServerFn(endGoalSupport);
+  const pcsp = usePcspGoalExtract(clientId, orgId);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [goalDlg, setGoalDlg] = useState<{ goal: GoalView | null; planId: string } | null>(null);
+  const [supportDlg, setSupportDlg] = useState<{ goal: GoalView; support: Support | null } | null>(null);
+
+  const plans = plansQ.data?.plans ?? [];
+  const plan = currentPlan(plans);
+  const today = todayYmd();
+  const goals = (plansQ.data?.goals ?? [])
+    .filter((g) => g.plan_id === plan?.id && g.status === "active")
+    .map((g) => goalView(g, g.supports.filter((s) => !s.end_date || s.end_date >= today)));
+  const waiting = waitingDays(plans);
+  const scope = orgId ? { organizationId: orgId, clientId } : null;
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: clientPlansKey(clientId) });
+    qc.invalidateQueries({ queryKey: ["client-care-data", clientId] });
+  };
+  const act = (work: () => Promise<unknown>) => () => void work().then(refresh, (e: Error) => toast.error(e.message));
+
+  async function ensurePlanId(): Promise<string | null> {
+    if (plan) return plan.id;
+    if (!scope) return null;
+    const { id } = await addPlanFn({ data: scope });
+    return id;
+  }
+
+  const planLine = plan
+    ? plan.start_date || plan.end_date
+      ? `Plan year ${formatDate(plan.start_date)} – ${formatDate(plan.end_date)}`
+      : plan.label ? `Plan year ${plan.label} (no dates on file)` : "Plan year dates not on file"
+    : "No plan year on file yet";
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Plan goals</CardTitle>
+        <p className="text-xs text-muted-foreground">{planLine}</p>
+        {waiting !== null && waiting > 0 && (
+          <p className="text-xs text-amber-700">Plan ended {waiting} day{waiting === 1 ? "" : "s"} ago — waiting on the new PCSP.</p>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <input
+          ref={fileRef}
+          type="file"
+          className="hidden"
+          accept=".pdf,.docx,.txt,.doc"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void pcsp.uploadAndExtract(f);
+            e.target.value = "";
+          }}
+        />
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            disabled={pcsp.busy || !orgId}
+            onClick={() => (pcsp.hasPcsp ? void pcsp.runExtract() : fileRef.current?.click())}
+          >
+            {pcsp.busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            {pcsp.hasPcsp ? "Pull goals from the PCSP (NECTAR)" : "Upload PCSP & pull goals (NECTAR)"}
+          </Button>
+          <Button type="button" size="sm" className="gap-1.5" disabled={!scope} onClick={act(async () => {
+            const planId = await ensurePlanId();
+            if (planId) setGoalDlg({ goal: null, planId });
+          })}>
+            <Plus className="h-3.5 w-3.5" /> Add goal
+          </Button>
+        </div>
+        {pcsp.hasPcsp && goals.length > 0 && (
+          <p className="text-[11px] text-muted-foreground">Pulling goals again ends the current goals (kept in history) and adds the PCSP's.</p>
+        )}
+        {plansQ.isLoading ? (
+          <p className="text-muted-foreground"><Loader2 className="mr-1 inline h-3.5 w-3.5 animate-spin" />Loading…</p>
+        ) : (
+          <GoalTree
+            goals={goals}
+            empty="No goals yet — pull them from the PCSP or add them."
+            goalActions={(g) => (
+              <div className="flex shrink-0 items-center gap-0.5">
+                <FieldVisibilityToggle clientId={clientId} section="care_plan" kind="goal" id={g.id} label="this goal" />
+                <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Add support" onClick={() => setSupportDlg({ goal: g, support: null })}>
+                  <Plus className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Edit goal" onClick={() => plan && setGoalDlg({ goal: g, planId: plan.id })}>
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  size="icon" variant="ghost" className="h-7 w-7" aria-label="End goal" disabled={!scope}
+                  onClick={act(() => endGoalFn({ data: { ...scope!, goalId: g.id } }))}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            )}
+            supportActions={(g, s) => (
+              <div className="flex shrink-0 items-center gap-0.5">
+                <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Edit support" onClick={() => setSupportDlg({ goal: g, support: s })}>
+                  <Pencil className="h-3 w-3" />
+                </Button>
+                <Button
+                  size="icon" variant="ghost" className="h-7 w-7" aria-label="End support" disabled={!scope}
+                  onClick={act(() => endSupportFn({ data: { ...scope!, goalId: g.id, supportId: s.id } }))}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+          />
+        )}
+      </CardContent>
+      {scope && (
+        <>
+          {goalDlg && (
+            <GoalDialog scope={scope} planId={goalDlg.planId} goal={goalDlg.goal} open onClose={() => setGoalDlg(null)} onSaved={refresh} />
+          )}
+          <SupportDialog
+            scope={scope} goal={supportDlg?.goal ?? null} support={supportDlg?.support ?? null} codes={codes}
+            open={!!supportDlg} onClose={() => setSupportDlg(null)} onSaved={refresh}
+          />
+        </>
+      )}
+    </Card>
+  );
+}
+

@@ -50,7 +50,6 @@ export function useAddClient(
         last_name:            input.last_name,
         phone_number:         input.phone_number,
         physical_address:     input.physical_address,
-        pcsp_goals:           [],
         medicaid_id:          input.medicaid_id,
         geofence_radius_feet: input.geofence_radius_feet,
         home_latitude:        coords.lat,
