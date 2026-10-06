@@ -31,6 +31,8 @@ import { todayYmd } from "@/lib/clients/dates";
 import { activeGoalViewsOn } from "@/lib/clients/plans";
 import { GoalTree } from "@/components/clients/profile/plans/goal-tree";
 import { useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
+import { useOrgStaff } from "@/components/clients/shared/hooks/use-org-staff";
+import { invalidateTeam } from "@/components/clients/profile/team/team-changes";
 
 type Training = {
   id: string;
@@ -722,44 +724,11 @@ export function PublishConfirmDialog({
   const [stagedAdds, setStagedAdds] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
 
-  const staffQ = useQuery({
-    enabled: !!orgId && open,
-    queryKey: ["caseload-editor-staff", orgId],
-    queryFn: async (): Promise<{ id: string; name: string }[]> => {
-      const { data: members, error: mErr } = await supabase
-        .from("organization_members")
-        .select("user_id")
-        .eq("organization_id", orgId!)
-        .eq("active", true);
-      if (mErr) throw mErr;
-      const ids = (members ?? [])
-        .map((m) => (m as { user_id: string | null }).user_id)
-        .filter((x): x is string => !!x);
-      if (ids.length === 0) return [];
-      const { data: profs, error: pErr } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name, full_name, is_active")
-        .in("id", ids);
-      if (pErr) throw pErr;
-      return ((profs ?? []) as Array<{
-        id: string; first_name: string | null; last_name: string | null;
-        full_name: string | null; is_active: boolean | null;
-      }>)
-        .filter((p) => p.is_active !== false)
-        .map((p) => ({
-          id: p.id,
-          name:
-            (p.full_name?.trim()) ||
-            [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
-            "Staff",
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-    },
-  });
+  const staffQ = useOrgStaff(open ? orgId : undefined);
 
   const currentQ = useQuery({
     enabled: !!orgId && !!clientId && open,
-    queryKey: ["caseload-editor-current", orgId, clientId],
+    queryKey: ["client-team-publish", orgId, clientId],
     queryFn: async (): Promise<{ staffIds: string[]; codes: string[] }> => {
       const [a, c] = await Promise.all([
         supabase
@@ -800,10 +769,8 @@ export function PublishConfirmDialog({
             data: { organizationId: orgId, staffId, clientId, codes: clientCodes },
           });
         }
-        qc.invalidateQueries({ queryKey: ["caseload-editor-current"] });
-        qc.invalidateQueries({ queryKey: ["caseload"] });
-        qc.invalidateQueries({ queryKey: ["my-assignments"] });
-        qc.invalidateQueries({ queryKey: ["scheduler-data"] });
+        qc.invalidateQueries({ queryKey: ["client-team-publish"] });
+        invalidateTeam(qc);
       }
       await publishAsync();
       const total = currentIds.length + adds.length;

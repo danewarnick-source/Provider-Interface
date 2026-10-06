@@ -11,6 +11,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { newShiftStatus } from "@/lib/scheduling/shift-status";
+import { openExcludedShifts } from "@/lib/clients/exclusions";
+import { loadActiveExclusions } from "@/lib/clients/exclusions-check.server";
 import { expandRecurringOccurrences, occurrenceSlotKey } from "@/lib/scheduler/recurrence";
 
 type ShiftRow = {
@@ -204,6 +206,14 @@ export const applyRepeat = createServerFn({ method: "POST" })
         created_from: "manual",
       });
     }
+    // Copied shifts never keep a team member on the client's do-not-schedule list.
+    let opened = 0;
+    if (data.keep_staff && rows.length > 0) {
+      const exclusions = await loadActiveExclusions(supabase, data.organization_id);
+      const r = openExcludedShifts(rows as Array<{ client_id: string; staff_id: string | null }>, exclusions);
+      opened = r.opened;
+      rows.splice(0, rows.length, ...r.rows.map((x) => ({ ...x, status: newShiftStatus(x.staff_id) })));
+    }
     if (rows.length > 0) {
       const { gateScheduledShiftInsert } = await import("@/lib/scheduling/shift-commit");
       await gateScheduledShiftInsert(supabase, rows as never, { mode: "bulk_auto", userId });
@@ -211,7 +221,7 @@ export const applyRepeat = createServerFn({ method: "POST" })
       if (error) throw error;
       inserted = rows.length;
     }
-    return { inserted, skipped };
+    return { inserted, skipped, opened };
   });
 
 // ──────────────────────────────────────────────────────────────────────────────

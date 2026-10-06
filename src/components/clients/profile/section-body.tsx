@@ -8,6 +8,7 @@ import { ContactsSection } from "./contacts/contacts-section";
 import { HealthSection } from "./sections/health-section";
 import { PlansSection } from "./sections/plans-section";
 import { ServicesSection } from "./sections/services-section";
+import { MoneySection } from "./sections/money-section";
 import { FileSection } from "./sections/file-section";
 import { TeamSection } from "./sections/team-section";
 import { ActivitySection } from "./sections/activity-section";
@@ -55,10 +56,12 @@ export function SectionBody({
       return <PlansSection orgId={orgId} data={data} />;
     case "services":
       return <ServicesSection orgId={orgId} data={data} />;
+    case "money":
+      return <MoneySection orgId={orgId} data={data} />;
     case "file":
       return <FileSection orgId={orgId} data={data} />;
     case "team":
-      return <TeamSection clientId={clientId} />;
+      return <TeamSection clientId={clientId} orgId={orgId} overview={overview} />;
     case "activity":
       return <ActivitySection clientId={clientId} orgId={orgId} />;
   }

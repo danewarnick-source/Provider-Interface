@@ -1,13 +1,14 @@
 // Scheduler server functions for the new code-section scheduler at
 // /dashboard/scheduler. All writes go through `requireSupabaseAuth` so RLS
-// is enforced as the calling user. Validation rules (caseload, time-off,
-// authorized code) match the product spec for the rebuilt scheduler.
+// is enforced as the calling user. Validation rules (do-not-schedule list,
+// caseload, time-off, authorized code) match the product spec for the rebuilt scheduler.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { coerceScheduledShiftStatus } from "@/lib/scheduling/shift-status";
 import { denverWeekUtcBounds } from "@/lib/scheduler/recurrence";
 import { assignmentCoversCode, normalizeServiceCode } from "@/lib/assignment-codes";
+import { assertStaffNotExcluded } from "@/lib/clients/exclusions-check.server";
 
 const ShiftInput = z.object({
   id: z.string().uuid().optional(),
@@ -136,6 +137,14 @@ export const saveShift = createServerFn({ method: "POST" })
         [client?.first_name, client?.last_name].filter(Boolean).join(" ").trim() ||
         "this client";
 
+      // Do-not-schedule list first: it says why, even if still on the caseload.
+      await assertStaffNotExcluded(supabase, {
+        organizationId: data.organization_id,
+        clientId: data.client_id,
+        staffId: data.staff_id,
+        staffName,
+        clientName,
+      });
       await assertStaffOnCaseload(
         supabase,
         data.organization_id,

@@ -500,6 +500,20 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
       ];
     case "organization_features":
       return [];
+    // Money section: one made-up PBA account so the section shows.
+    case "pba_accounts":
+      return [
+        {
+          id: "00000000-0000-4000-a000-0000000000f1",
+          organization_id: ORG_ID,
+          client_id: CLIENTS.tommy.id,
+          current_balance: 420,
+          medicaid_threshold: 2000,
+          opened_on: "2026-01-05",
+          notes: null,
+          created_by: null,
+        },
+      ];
     default:
       return [];
   }

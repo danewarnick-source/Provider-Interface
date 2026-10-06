@@ -186,6 +186,27 @@ export const listOrgLoans = createServerFn({ method: "GET" })
     return rows ?? [];
   });
 
+/** One client's loan agreements (Money section). Owner-only, like the rest. */
+export const listClientLoans = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ organization_id: z.string().uuid(), client_id: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) return [];
+    await requireOrgMembership(supabase, userId, data.organization_id, "owner");
+    await assertEnabled(supabase, data.organization_id);
+    const { data: rows, error } = await (supabase as any)
+      .from("client_loans")
+      .select("id, client_id, borrower_name, status, agreement_date, advance_amount, advance_cadence, updated_at")
+      .eq("organization_id", data.organization_id)
+      .eq("client_id", data.client_id)
+      .order("updated_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
 export const getClientLoanMarkers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => orgOnly.parse(d))

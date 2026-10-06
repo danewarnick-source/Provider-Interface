@@ -26,12 +26,19 @@ export function PlansSection({ orgId, data }: { orgId: string; data: ClientProfi
   const currentGoals = (bundle?.goals ?? []).filter((g) => g.plan_id === current?.id);
   return (
     <div className="space-y-4" data-testid="client-section-plans">
-      <PlanYearsCard orgId={orgId} clientId={clientId} plans={plans} canEdit={access.canCategory("clients", "edit")} />
+      <PlanYearsCard
+        orgId={orgId}
+        clientId={clientId}
+        plans={plans}
+        canEdit={access.canCategory("clients", "edit")}
+      />
       <PlanGoalsPanel clientId={clientId} orgId={orgId} codes={data.codes} />
       <SupportStrategiesPanel clientId={clientId} orgId={orgId} dueOn={strategiesDueOn(current)} />
       <SummariesPanel clientId={clientId} orgId={orgId} codes={data.codes} />
       {access.canCategory("hrc") ? <RestrictionsCard orgId={orgId} data={data} /> : null}
-      {needsBehaviorSupportPlan(data.codes, currentGoals) ? <BspCard orgId={orgId} clientId={clientId} /> : null}
+      {needsBehaviorSupportPlan(data.codes, currentGoals) ? (
+        <BspCard orgId={orgId} clientId={clientId} />
+      ) : null}
     </div>
   );
 }

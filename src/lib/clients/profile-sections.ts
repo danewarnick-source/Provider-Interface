@@ -9,6 +9,7 @@ export const CLIENT_PROFILE_SECTIONS = [
   "health",
   "plans",
   "services",
+  "money",
   "file",
   "team",
   "activity",
@@ -24,13 +25,18 @@ export const CLIENT_SECTION_LABEL: Record<ClientProfileSection, string> = {
   health: "Health",
   plans: "Plans",
   services: "Services & billing",
+  money: "Money",
   file: "Client file",
   team: "Team",
   activity: "Activity & notes",
 };
 
-/** What the viewer may open. Health needs Client medical; Services needs Billing. */
-export type ClientSectionViewer = { canMedical: boolean; canBilling: boolean };
+/**
+ * What the viewer may open. Health needs Client medical; Services needs
+ * Billing; Money needs Billing and only shows for a client with PBA, loans or
+ * spending (lib/clients/money.ts moneySectionApplies).
+ */
+export type ClientSectionViewer = { canMedical: boolean; canBilling: boolean; hasMoney?: boolean };
 
 export function isClientProfileSection(v: unknown): v is ClientProfileSection {
   return typeof v === "string" && (CLIENT_PROFILE_SECTIONS as readonly string[]).includes(v);
@@ -41,6 +47,7 @@ export function visibleClientSections(viewer: ClientSectionViewer): ClientProfil
   return CLIENT_PROFILE_SECTIONS.filter((s) => {
     if (s === "health") return viewer.canMedical;
     if (s === "services") return viewer.canBilling;
+    if (s === "money") return viewer.canBilling && viewer.hasMoney === true;
     return true;
   });
 }
@@ -57,7 +64,8 @@ const LEGACY_TAB_SECTION: Record<string, ClientProfileSection> = {
   summaries: "plans",
   deadlines: "overview",
   billing: "services",
-  funds: "services",
+  funds: "money",
+  pba: "money",
   codes: "services",
   files: "file",
   "client-file": "file",
