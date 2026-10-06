@@ -31,7 +31,7 @@ import { logPhiAccess } from "@/lib/phi-access-audit.server";
 import { assignmentCoversCode } from "@/lib/assignment-codes";
 import { queryOptions } from "@tanstack/react-query";
 import { activeContacts, loadClientContacts, type ClientContact } from "./contacts";
-import { goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans";
+import { currentPlan, goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans";
 import { loadPlanBundle } from "./plans-load";
 import { todayYmd } from "./dates";
 import {
@@ -73,7 +73,8 @@ export type CareIdentity = {
   hr_applicable: boolean | null;
   dnr_applicable: boolean | null;
   diagnoses: string[];
-  pcsp_expiration_date: string | null;
+  /** End date of the plan year in effect (client_plans). */
+  plan_end_date: string | null;
   special_directions: string | null;
 };
 
@@ -225,7 +226,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
         hr_applicable: null,
         dnr_applicable: null,
         diagnoses: [],
-        pcsp_expiration_date: null,
+        plan_end_date: null,
         special_directions: null,
       };
       const emptyVisibilityRow: ClientVisibilityRow = { sections: {} as any, fields: {} as any };
@@ -271,7 +272,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
       supabase
         .from("clients")
         .select(
-          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, self_admin_med_support, self_admin_med_support_locked, about_me, phone_number, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, pcsp_expiration_date, special_directions",
+          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, self_admin_med_support, self_admin_med_support_locked, about_me, phone_number, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, special_directions",
         )
         .eq("id", clientId)
         .maybeSingle(),
@@ -361,7 +362,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
       diagnoses: Array.isArray(row.diagnoses)
         ? (row.diagnoses as unknown[]).map((s) => String(s ?? "").trim()).filter(Boolean)
         : [],
-      pcsp_expiration_date: row.pcsp_expiration_date ?? null,
+      plan_end_date: currentPlan(planBundle.plans)?.end_date ?? null,
       special_directions: row.special_directions ?? null,
     };
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { appendGoalsToCurrentPlan, insertPlan, newGoalTexts } from "./plans-write.ts";
+import { appendGoalsToCurrentPlan, importPlanYear, insertPlan, newGoalTexts } from "./plans-write.ts";
 
 type Row = Record<string, unknown>;
 
@@ -85,5 +85,24 @@ describe("appendGoalsToCurrentPlan", () => {
     assert.equal(db.tables.client_goals[1].sort, 1);
     assert.deepEqual(db.tables.client_goal_supports[0].our_codes, ["HHS"]);
     assert.equal(db.tables.client_goal_supports[0].support_text, "");
+  });
+});
+
+describe("importPlanYear", () => {
+  it("adds the imported plan year once", async () => {
+    const db = fakeDb({ client_plans: [] });
+    const fields = { plan_year: "01/01/2026 - 12/31/2026", pcsp_expiration_date: null };
+    const id = await importPlanYear(db, { ...scope, ...fields });
+    assert.ok(id);
+    const plan = db.tables.client_plans[0];
+    assert.equal(plan.start_date, "2026-01-01");
+    assert.equal(plan.end_date, "2026-12-31");
+    assert.equal(plan.source, "migrated");
+    assert.equal(await importPlanYear(db, { ...scope, ...fields }), null);
+    assert.equal(db.tables.client_plans.length, 1);
+  });
+  it("adds nothing without plan dates or a label", async () => {
+    const db = fakeDb({ client_plans: [] });
+    assert.equal(await importPlanYear(db, { ...scope, plan_year: null, pcsp_expiration_date: null }), null);
   });
 });
