@@ -1,9 +1,7 @@
 /**
- * Shared visibility toggle UI. Two components:
- *   • <SectionVisibilityToggle> — one per section (hard override).
- *   • <FieldVisibilityToggle>   — per-field eye/eye-off icon.
+ * <FieldVisibilityToggle> — per-field eye/eye-off icon on the client profile.
  *
- * Both write through `setClientStaffVisibility` and invalidate the
+ * It writes through `setClientStaffVisibility` and invalidate the
  * `client-care-data` query keys so every staff surface refreshes.
  *
  * We use a local `pending` boolean around an awaited server-fn call
@@ -15,8 +13,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
@@ -50,42 +47,6 @@ function useVisibility(clientId: string) {
   };
 
   return { data: q.data, save, pending };
-}
-
-export function SectionVisibilityToggle({
-  clientId,
-  section,
-}: {
-  clientId: string;
-  section: SectionName;
-}) {
-  const { data, save, pending } = useVisibility(clientId);
-  const on = data ? isSectionVisible(data.visibilityRow, section) : SECTION_DEFAULTS[section];
-
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-3 py-2 mb-4">
-      <div className="min-w-0">
-        <div className="text-sm font-medium">
-          Staff can see this section{on ? "" : " — hidden"}
-        </div>
-        <div className="text-xs text-muted-foreground">
-          {on
-            ? `Staff-facing surfaces show ${SECTION_LABEL[section]} fields (subject to individual field toggles below).`
-            : `Nothing in ${SECTION_LABEL[section]} reaches staff, regardless of individual field settings.`}
-          {" "}Default:{" "}{SECTION_DEFAULTS[section] ? "on" : "off"}.
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        {pending && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
-        <Switch
-          checked={on}
-          disabled={pending}
-          onCheckedChange={(v) => save({ clientId, sectionPatch: { [section]: v } })}
-          aria-label={`Toggle ${SECTION_LABEL[section]} visibility for staff`}
-        />
-      </div>
-    </div>
-  );
 }
 
 export function FieldVisibilityToggle({
