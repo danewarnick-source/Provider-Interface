@@ -19,6 +19,8 @@ import {
   type RestrictionRecord,
 } from "@/lib/hrc-restrictions";
 import { useAccess } from "@/hooks/use-access";
+import { useServerFn } from "@tanstack/react-start";
+import { writeClientRecord } from "@/lib/clients/writes.functions";
 
 export const Route = createFileRoute("/dashboard/hrc")({
   head: () => ({ meta: [{ title: "Human Rights Committee (HRC) — Provider Interface" }] }),
@@ -149,6 +151,7 @@ type ClientLite = { id: string; first_name: string; last_name: string };
 
 function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: string | null }) {
   const qc = useQueryClient();
+  const writeRecordFn = useServerFn(writeClientRecord);
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<RestrictionRecord | null>(null);
   const [newClientId, setNewClientId] = useState("");
@@ -198,13 +201,15 @@ function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: st
     mutationFn: async (values: { client_id: string; restriction_title: string }) => {
       if (!values.client_id) throw new Error("Pick a client first.");
       if (!values.restriction_title.trim()) throw new Error("Restriction title is required.");
-      const { error } = await supabase.from("hrc_restriction_records" as never).insert({
-        organization_id: orgId!,
-        client_id: values.client_id,
-        restriction_title: values.restriction_title.trim(),
-        active: true,
-      } as never);
-      if (error) throw error;
+      await writeRecordFn({
+        data: {
+          organizationId: orgId!,
+          clientId: values.client_id,
+          table: "hrc_restriction_records",
+          op: "insert",
+          values: { restriction_title: values.restriction_title.trim(), active: true },
+        },
+      });
     },
     onSuccess: () => {
       toast.success("Restriction added");
@@ -323,6 +328,7 @@ function RestrictionEditDialog({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const writeRecordFn = useServerFn(writeClientRecord);
   const [fields, setFields] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
     for (const def of RESTRICTION_ELEMENTS) {
@@ -340,11 +346,16 @@ function RestrictionEditDialog({
         patch[def.textField as string] = fields[def.textField as string]?.trim() || null;
         if (def.dateField) patch[def.dateField as string] = fields[def.dateField as string] || null;
       }
-      const { error } = await supabase
-        .from("hrc_restriction_records" as never)
-        .update(patch as never)
-        .eq("id", record.id);
-      if (error) throw error;
+      await writeRecordFn({
+        data: {
+          organizationId: orgId!,
+          clientId: record.client_id,
+          table: "hrc_restriction_records",
+          op: "update",
+          id: record.id,
+          values: patch,
+        },
+      });
     },
     onSuccess: () => {
       toast.success("Restriction updated");
@@ -467,6 +478,7 @@ type HrcMeetingRow = {
 
 function MeetingsStub({ canManage, orgId }: { canManage: boolean; orgId: string | null }) {
   const qc = useQueryClient();
+  const writeRecordFn = useServerFn(writeClientRecord);
   const [open, setOpen] = useState(false);
   const [meetingDate, setMeetingDate] = useState(new Date().toISOString().slice(0, 10));
   const [attendees, setAttendees] = useState("");
@@ -505,15 +517,20 @@ function MeetingsStub({ canManage, orgId }: { canManage: boolean; orgId: string 
         minutes_document_path = path;
         minutes_document_name = values.file.name;
       }
-      const { error } = await supabase.from("hrc_meetings").insert({
-        organization_id: orgId!,
-        meeting_date: values.meeting_date,
-        attendees: values.attendees.trim(),
-        minutes: values.minutes.trim() || null,
-        minutes_document_path,
-        minutes_document_name,
+      await writeRecordFn({
+        data: {
+          organizationId: orgId!,
+          table: "hrc_meetings",
+          op: "insert",
+          values: {
+            meeting_date: values.meeting_date,
+            attendees: values.attendees.trim(),
+            minutes: values.minutes.trim() || null,
+            minutes_document_path,
+            minutes_document_name,
+          },
+        },
       });
-      if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Meeting recorded");
@@ -645,6 +662,7 @@ function MeetingsStub({ canManage, orgId }: { canManage: boolean; orgId: string 
 
 function ReviewsStub({ canManage, orgId }: { canManage: boolean; orgId: string | null }) {
   const qc = useQueryClient();
+  const writeRecordFn = useServerFn(writeClientRecord);
   const [open, setOpen] = useState(false);
   const [restrictionSummary, setRestrictionSummary] = useState("");
   const [status, setStatus] = useState("pending_review");
@@ -667,12 +685,14 @@ function ReviewsStub({ canManage, orgId }: { canManage: boolean; orgId: string |
   const add = useMutation({
     mutationFn: async (values: { restriction_summary: string; status: string }) => {
       if (!values.restriction_summary.trim()) throw new Error("Restriction summary is required.");
-      const { error } = await supabase.from("hrc_reviews").insert({
-        organization_id: orgId!,
-        restriction_summary: values.restriction_summary.trim(),
-        status: values.status,
+      await writeRecordFn({
+        data: {
+          organizationId: orgId!,
+          table: "hrc_reviews",
+          op: "insert",
+          values: { restriction_summary: values.restriction_summary.trim(), status: values.status },
+        },
       });
-      if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Review recorded");

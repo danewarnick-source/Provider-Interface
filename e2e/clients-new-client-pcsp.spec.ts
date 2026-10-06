@@ -143,10 +143,8 @@ test("Clients → Smart Import → finalize a new client from a PCSP", async ({
   }
 
   // ── Step 2 — Smart Import: upload PCSP ───────────────────────────────────
-  const smartImportLink = page
-    .locator('a:has-text("Smart Import"), button:has-text("Smart Import")')
-    .first();
-  await expect(smartImportLink, "Smart Import entry button missing on Clients").toBeVisible({ timeout: 10_000 });
+  const smartImportLink = page.getByRole("link", { name: /^Import$/ }).first();
+  await expect(smartImportLink, "Import entry button missing on Clients").toBeVisible({ timeout: 10_000 });
   await smartImportLink.click();
   await page.waitForURL(/\/dashboard\/smart-import/, { timeout: 15_000 });
   await page.waitForLoadState("networkidle").catch(() => {});

@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { updateClient } from "@/lib/clients/writes.functions";
 
 const FIELDS = [
   // Identity & IDs
@@ -89,6 +90,7 @@ function toIntOrNull(v: string): number | null {
 export function FaceSheetInfoCard({ clientId }: { clientId: string }) {
   const qc = useQueryClient();
   const { data: org } = useCurrentOrg();
+  const updateClientFn = useServerFn(updateClient);
   const dutyFactsFn = useServerFn(onClientDutyFactsChanged);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
@@ -152,9 +154,8 @@ export function FaceSheetInfoCard({ clientId }: { clientId: string }) {
         psychiatrist_phone: form.psychiatrist_phone || null,
         psychiatrist_address: form.psychiatrist_address || null,
       };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await supabase.from("clients").update(patch as any).eq("id", clientId);
-      if (error) throw error;
+      if (!org?.organization_id) throw new Error("No organization selected.");
+      await updateClientFn({ data: { organizationId: org.organization_id, clientId, patch } });
       const priorSigned = toStr((q.data as Row | undefined)?.pcsp_signed_date);
       if (org?.organization_id && form.pcsp_signed_date !== priorSigned) {
         try {

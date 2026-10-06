@@ -13,6 +13,7 @@ import {
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { isNonAnswer } from "@/lib/nectar-quality";
 import { isRouteUuid } from "@/lib/route-uuid";
+import { parseLocalDate } from "@/lib/clients/dates";
 
 /**
  * Live per-code budget ledger. For each authorized billing code we
@@ -46,9 +47,7 @@ export type CodeBudget = {
 };
 
 function parseDate(s: string | null | undefined): Date | null {
-  if (!s) return null;
-  const d = new Date(s);
-  return isNaN(d.getTime()) ? null : d;
+  return parseLocalDate(s);
 }
 
 function weeksBetween(a: Date, b: Date): number {
@@ -97,16 +96,6 @@ export function useClientBudget(clientId: string | undefined) {
       if (earliestStart) dlQ = dlQ.gte("record_date", earliestStart.toISOString().slice(0, 10));
       const { data: dlRows, error: dlErr } = await dlQ;
       if (dlErr) throw dlErr;
-
-      // Hospitalized/non-billable RHS days never count toward budget usage.
-      const { data: hospRows } = await supabase
-        .from("rhs_hospitalization_days" as never)
-        .select("record_date")
-        .eq("organization_id", org!.organization_id)
-        .eq("client_id", clientId!);
-      const hospitalizedDates = new Set(
-        ((hospRows ?? []) as unknown as Array<{ record_date: string }>).map((r) => r.record_date),
-      );
 
       return codes.map((code): CodeBudget => {
         const period_start = parseDate(code.service_start_date);
@@ -175,7 +164,6 @@ export function useClientBudget(clientId: string | undefined) {
               : (!isNonAnswer(note) && note.trim().length > 0);
             if (!qualifies) continue;
             const dateStr = billIn.slice(0, 10);
-            if (code.service_code === "RHS" && hospitalizedDates.has(dateStr)) continue;
             dates.add(dateStr);
           }
           used_days = dates.size;

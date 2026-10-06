@@ -58,7 +58,9 @@ function ClientsHub() {
         </RequirePermission>
       ),
     },
-    {
+  );
+  if (can("view_billing")) {
+    tabs.push({
       key: "funds",
       label: "Funds",
       render: () => (
@@ -67,7 +69,7 @@ function ClientsHub() {
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               PBA Trust Ledger
             </h3>
-            <RequirePermission perm="view_clients">
+            <RequirePermission perm="view_billing">
               <PbaLedgerPage />
             </RequirePermission>
           </section>
@@ -81,12 +83,14 @@ function ClientsHub() {
           </section>
         </div>
       ),
-    },
-  );
+    });
+  }
   return (
-    <AgencySetupCreateGate>
-      <HubShell title="Clients" basePath="/dashboard/hub/clients" tabs={tabs} />
-    </AgencySetupCreateGate>
+    <RequirePermission perm="view_clients">
+      <AgencySetupCreateGate>
+        <HubShell title="Clients" basePath="/dashboard/hub/clients" tabs={tabs} />
+      </AgencySetupCreateGate>
+    </RequirePermission>
   );
 }
 

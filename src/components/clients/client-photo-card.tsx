@@ -7,6 +7,8 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { Card, CardContent } from "@/components/ui/card";
 import { Camera } from "lucide-react";
 import { PhotoUpload } from "@/components/person/photo-upload";
+import { useServerFn } from "@tanstack/react-start";
+import { updateClient } from "@/lib/clients/writes.functions";
 
 export function ClientPhotoCard({ clientId }: { clientId: string }) {
   const qc = useQueryClient();
@@ -26,10 +28,11 @@ export function ClientPhotoCard({ clientId }: { clientId: string }) {
     },
   });
 
+  const updateClientFn = useServerFn(updateClient);
   const persist = useMutation({
     mutationFn: async (patch: { client_photo_url: string | null; client_photo_taken_on: string | null }) => {
-      const { error } = await supabase.from("clients").update(patch).eq("id", clientId);
-      if (error) throw error;
+      if (!orgId) throw new Error("No organization selected.");
+      await updateClientFn({ data: { organizationId: orgId, clientId, patch } });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["client-photo-card", clientId] });

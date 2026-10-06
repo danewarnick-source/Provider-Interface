@@ -31,29 +31,14 @@ import {
   computeRestrictionCompletion,
   type RestrictionRecord,
 } from "@/lib/hrc-restrictions";
-import {
-  listRhsHospitalizationDays,
-  setRhsHospitalizationDay,
-  deleteRhsHospitalizationDay,
-} from "@/lib/rhs-hospitalization.functions";
-import { HealthcareProvidersCard } from "@/components/clients/healthcare-providers-card";
 import { BelongingsInventoryCard } from "@/components/clients/belongings-inventory-card";
-import {
-  listRhsEvacuationDrills,
-  recordRhsEvacuationDrill,
-} from "@/lib/rhs-evacuation-drills.functions";
-import {
-  Select as UiSelect,
-  SelectContent as UiSelectContent,
-  SelectItem as UiSelectItem,
-  SelectTrigger as UiSelectTrigger,
-  SelectValue as UiSelectValue,
-} from "@/components/ui/select";
 import { listUpiAttestations, recordUpiAttestation } from "@/lib/upi-attestations.functions";
 import { formatPeriodMonthYear } from "@/lib/progress-summaries";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { onClientDutyFactsChanged } from "@/lib/staff-assignment-hooks.functions";
 import { isAdminLevel } from "@/lib/access/levels";
+import { ageOn, daysUntil, parseLocalDate } from "@/lib/clients/dates";
+import { updateClient, writeClientRecord } from "@/lib/clients/writes.functions";
 
 type ClientRow = Record<string, unknown>;
 type DocRow = { id: string; document_type: string | null; file_name: string | null; storage_path: string | null; uploaded_at: string | null };
@@ -214,7 +199,6 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
         <div className="space-y-4">
           <ContactsCard clientId={clientId} orgId={orgId!} contacts={contacts} />
           <AtGlanceCard clientId={clientId} client={client} />
-          <HealthcareProvidersCard clientId={clientId} orgId={orgId!} />
           {canHrc && (
             <HrcCard clientId={clientId} orgId={orgId!} client={client} docs={docs} restriction={primaryRestriction} />
           )}
@@ -231,8 +215,6 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
             />
           )}
           {isSjd && <SjdUsorOutreachCard clientId={clientId} orgId={orgId!} />}
-          <RhsHospitalizationCard clientId={clientId} orgId={orgId!} />
-          <RhsEvacuationDrillsCard clientId={clientId} orgId={orgId!} />
         </div>
       </div>
 
@@ -349,7 +331,8 @@ function ElsSchoolDocumentationCard({ clientId, docs }: { clientId: string; docs
 
 function EprInformedChoiceCard({ clientId, docs, serviceStart }: { clientId: string; docs: DocRow[]; serviceStart: string | null }) {
   const doc = docs.find((d) => d.document_type === "epr_informed_choice");
-  const dueDate = serviceStart ? new Date(new Date(`${serviceStart}T00:00:00`).getTime() + 60 * 86_400_000) : null;
+  const serviceStartDate = parseLocalDate(serviceStart);
+  const dueDate = serviceStartDate ? new Date(serviceStartDate.getTime() + 60 * 86_400_000) : null;
   const dueStr = dueDate ? dueDate.toISOString().slice(0, 10) : null;
   const isOverdue = !doc && !!dueDate && dueDate.getTime() < Date.now();
   return (
@@ -409,6 +392,7 @@ function SjdAssessmentDocumentationCard({
   clientId, orgId, docs, serviceStart, isOrgAdmin,
 }: { clientId: string; orgId: string; docs: DocRow[]; serviceStart: string | null; isOrgAdmin: boolean }) {
   const qc = useQueryClient();
+  const writeRecordFn = useServerFn(writeClientRecord);
 
   const selectionQ = useQuery({
     queryKey: ["sjd-assessment-selection", orgId, clientId],
@@ -430,16 +414,20 @@ function SjdAssessmentDocumentationCard({
 
   const saveMut = useMutation({
     mutationFn: async (patch: Partial<SjdSelection>) => {
-      const { error } = await supabase
-        .from("sjd_assessment_selections" as never)
-        .upsert({
-          organization_id: orgId,
-          client_id: clientId,
-          assessment_type: patch.assessment_type ?? selection.assessment_type,
-          assessment_start_date: "assessment_start_date" in patch ? patch.assessment_start_date : selection.assessment_start_date,
-          updated_at: new Date().toISOString(),
-        } as never, { onConflict: "organization_id,client_id" });
-      if (error) throw error;
+      await writeRecordFn({
+        data: {
+          organizationId: orgId,
+          clientId,
+          table: "sjd_assessment_selections",
+          op: "upsert",
+          onConflict: "organization_id,client_id",
+          values: {
+            assessment_type: patch.assessment_type ?? selection.assessment_type,
+            assessment_start_date: "assessment_start_date" in patch ? patch.assessment_start_date : selection.assessment_start_date,
+            updated_at: new Date().toISOString(),
+          },
+        },
+      });
     },
     onSuccess: () => {
       toast.success("Saved.");
@@ -453,10 +441,10 @@ function SjdAssessmentDocumentationCard({
   const discoveryDoc = docs.find((d) => d.document_type === "sjd_discovery_assessment");
   const vocationalDoc = docs.find((d) => d.document_type === "sjd_vocational_assessment");
 
-  const discoveryDue = serviceStart ? new Date(new Date(`${serviceStart}T00:00:00`).getTime() + 60 * 86_400_000) : null;
-  const vocationalDue = selection.assessment_start_date
-    ? new Date(new Date(`${selection.assessment_start_date}T00:00:00`).getTime() + 30 * 86_400_000)
-    : null;
+  const serviceStartDate = parseLocalDate(serviceStart);
+  const discoveryDue = serviceStartDate ? new Date(serviceStartDate.getTime() + 60 * 86_400_000) : null;
+  const vocationalStart = parseLocalDate(selection.assessment_start_date);
+  const vocationalDue = vocationalStart ? new Date(vocationalStart.getTime() + 30 * 86_400_000) : null;
 
   function DeadlineBanner({ due, doc, days, missingHint }: { due: Date | null; doc: DocRow | undefined; days: number; missingHint: string }) {
     if (!due) {
@@ -660,14 +648,7 @@ function SjdUsorOutreachCard({ clientId, orgId }: { clientId: string; orgId: str
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function age(dob: string | null | undefined): number | null {
-  if (!dob) return null;
-  const d = new Date(dob);
-  if (Number.isNaN(d.getTime())) return null;
-  const now = new Date();
-  let a = now.getFullYear() - d.getFullYear();
-  const m = now.getMonth() - d.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
-  return a;
+  return ageOn(dob);
 }
 
 function fmtDate(s: string | null | undefined): string {
@@ -722,6 +703,7 @@ function CardShell({
   children: React.ReactNode;
   headerRight?: React.ReactNode;
 }) {
+  const canEdit = useAccess().can("edit_client_records");
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-0">
@@ -733,7 +715,7 @@ function CardShell({
           </div>
           <div className="flex items-center gap-2">
             {headerRight}
-            {onEdit && !editing ? (
+            {onEdit && !editing && canEdit ? (
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit} aria-label="Edit">
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -913,14 +895,19 @@ function RecordCompletenessBar({
 
 function ClinicalAlertBanner({ clientId, client }: { clientId: string; client: ClientRow }) {
   const qc = useQueryClient();
+  const canEdit = useAccess().can("edit_client_records");
+  const { data: org } = useCurrentOrg();
+  const updateClientFn = useServerFn(updateClient);
   const initial = (client.special_directions as string | null) ?? "";
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(initial);
 
   const mut = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("clients").update({ special_directions: draft.trim() || null }).eq("id", clientId);
-      if (error) throw error;
+if (!org?.organization_id) throw new Error("No organization selected.");
+      await updateClientFn({
+        data: { organizationId: org.organization_id, clientId, patch: { special_directions: draft.trim() || null } },
+      });
     },
     onSuccess: () => {
       toast.success("Clinical alert updated.");
@@ -953,11 +940,11 @@ function ClinicalAlertBanner({ clientId, client }: { clientId: string; client: C
             <Button size="sm" variant="outline" onClick={() => { setDraft(initial); setEditing(false); }}>Cancel</Button>
             <Button size="sm" onClick={() => mut.mutate()} disabled={mut.isPending}>{mut.isPending ? "Saving…" : "Save"}</Button>
           </div>
-        ) : (
+        ) : canEdit ? (
           <Button size="sm" variant="outline" onClick={() => { setDraft(initial); setEditing(true); }}>
             <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
           </Button>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -968,6 +955,7 @@ function ClinicalAlertBanner({ clientId, client }: { clientId: string; client: C
 function IdentityCard({ clientId, client }: { clientId: string; client: ClientRow }) {
   const qc = useQueryClient();
   const { data: org } = useCurrentOrg();
+  const updateClientFn = useServerFn(updateClient);
   const dutyFactsFn = useServerFn(onClientDutyFactsChanged);
   const [editing, setEditing] = useState(false);
   const baseline = () => ({
@@ -1011,9 +999,8 @@ function IdentityCard({ clientId, client }: { clientId: string; client: ClientRo
         hr_applicable: draft.hr_applicable,
         dnr_applicable: draft.dnr_applicable,
       };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await supabase.from("clients").update(payload as any).eq("id", clientId);
-      if (error) throw error;
+if (!org?.organization_id) throw new Error("No organization selected.");
+      await updateClientFn({ data: { organizationId: org.organization_id, clientId, patch: payload } });
       if (org?.organization_id && draft.has_abi !== (client.has_abi === true)) {
         try {
           await dutyFactsFn({
@@ -1181,6 +1168,7 @@ function ContactsCard({
   clientId, orgId, contacts,
 }: { clientId: string; orgId: string; contacts: { id: string; name: string; phone: string | null; relationship: string | null }[] }) {
   const qc = useQueryClient();
+  const writeRecordFn = useServerFn(writeClientRecord);
   const [editing, setEditing] = useState(false);
   const baseline = (): ContactDraft[] => contacts.map((c) => ({ id: c.id, name: c.name, phone: c.phone ?? "", relationship: c.relationship ?? "" }));
   const [draft, setDraft] = useState<ContactDraft[]>(baseline);
@@ -1193,22 +1181,19 @@ function ContactsCard({
       const uid = (await supabase.auth.getUser()).data.user?.id ?? null;
       for (const c of draft) {
         const rowId = isRouteUuid(c.id) ? c.id : undefined;
+        const base = { organizationId: orgId, clientId, table: "client_emergency_contacts" } as const;
         if (c._deleted && rowId) {
-          const { error } = await supabase
-            .from("client_emergency_contacts")
-            .update({ archived_at: new Date().toISOString(), archived_by: uid })
-            .eq("id", rowId);
-          if (error) throw error;
+          await writeRecordFn({
+            data: { ...base, op: "update", id: rowId, values: { archived_at: new Date().toISOString(), archived_by: uid } },
+          });
         } else if (!c._deleted) {
           const name = c.name.trim();
           if (!name) continue;
-          const payload = { organization_id: orgId, client_id: clientId, name, phone: c.phone.trim() || null, relationship: c.relationship.trim() || null };
+          const payload = { name, phone: c.phone.trim() || null, relationship: c.relationship.trim() || null };
           if (rowId) {
-            const { error } = await supabase.from("client_emergency_contacts").update(payload).eq("id", rowId);
-            if (error) throw error;
+            await writeRecordFn({ data: { ...base, op: "update", id: rowId, values: payload } });
           } else {
-            const { error } = await supabase.from("client_emergency_contacts").insert(payload);
-            if (error) throw error;
+            await writeRecordFn({ data: { ...base, op: "insert", values: payload } });
           }
         }
       }
@@ -1274,6 +1259,7 @@ function ContactsCard({
 function AtGlanceCard({ clientId, client }: { clientId: string; client: ClientRow }) {
   const qc = useQueryClient();
   const { data: org } = useCurrentOrg();
+  const updateClientFn = useServerFn(updateClient);
   const dutyFactsFn = useServerFn(onClientDutyFactsChanged);
   const [editing, setEditing] = useState(false);
   const diagnoses = Array.isArray(client.diagnoses) ? (client.diagnoses as string[]) : [];
@@ -1291,12 +1277,18 @@ function AtGlanceCard({ clientId, client }: { clientId: string; client: ClientRo
       const updatedDiagnoses = newDx
         ? [newDx, ...diagnoses.slice(1)]
         : diagnoses.slice(1);
-      const { error } = await supabase.from("clients").update({
-        diagnoses: updatedDiagnoses,
-        primary_care_name: draft.primary_care_name.trim() || null,
-        pcsp_expiration_date: draft.pcsp_expiration_date || null,
-      }).eq("id", clientId);
-      if (error) throw error;
+if (!org?.organization_id) throw new Error("No organization selected.");
+      await updateClientFn({
+        data: {
+          organizationId: org.organization_id,
+          clientId,
+          patch: {
+            diagnoses: updatedDiagnoses,
+            primary_care_name: draft.primary_care_name.trim() || null,
+            pcsp_expiration_date: draft.pcsp_expiration_date || null,
+          },
+        },
+      });
       const priorExp = (client.pcsp_expiration_date as string) ?? "";
       if (org?.organization_id && draft.pcsp_expiration_date !== priorExp) {
         try {
@@ -1319,9 +1311,8 @@ function AtGlanceCard({ clientId, client }: { clientId: string; client: ClientRo
   const pcspExp = (client.pcsp_expiration_date as string | null) ?? null;
   const pcspWarn = useMemo(() => {
     if (!pcspExp) return false;
-    const exp = new Date(pcspExp);
-    const ms = exp.getTime() - Date.now();
-    return ms < 30 * 24 * 3600 * 1000;
+    const days = daysUntil(pcspExp);
+    return days !== null && days < 30;
   }, [pcspExp]);
 
   return (
@@ -1366,6 +1357,9 @@ function HrcCard({
   clientId, orgId, client, docs, restriction,
 }: { clientId: string; orgId: string; client: ClientRow; docs: DocRow[]; restriction: RestrictionRecord | null }) {
   const qc = useQueryClient();
+  const updateClientFn = useServerFn(updateClient);
+  const writeRecordFn = useServerFn(writeClientRecord);
+  const canEditHrc = useAccess().canCategory("hrc", "edit");
   const hasRestrictions = client.hr_applicable === true;
   const hrrDoc = docs.find(
     (d) =>
@@ -1394,8 +1388,7 @@ function HrcCard({
 
   const toggleMutation = useMutation({
     mutationFn: async (value: boolean) => {
-      const { error } = await supabase.from("clients").update({ hr_applicable: value }).eq("id", clientId);
-      if (error) throw error;
+await updateClientFn({ data: { organizationId: orgId, clientId, patch: { hr_applicable: value } } });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["client-profile-tab"] });
@@ -1412,19 +1405,19 @@ function HrcCard({
         if (def.dateField) patch[def.dateField as string] = fields[def.dateField as string] || null;
       }
       if (restriction) {
-        const { error } = await supabase
-          .from("hrc_restriction_records" as never)
-          .update(patch as never)
-          .eq("id", restriction.id);
-        if (error) throw error;
+        await writeRecordFn({
+          data: { organizationId: orgId, clientId, table: "hrc_restriction_records", op: "update", id: restriction.id, values: patch },
+        });
       } else {
-        const { error } = await supabase.from("hrc_restriction_records" as never).insert({
-          organization_id: orgId,
-          client_id: clientId,
-          restriction_title: "Rights restriction",
-          ...patch,
-        } as never);
-        if (error) throw error;
+        await writeRecordFn({
+          data: {
+            organizationId: orgId,
+            clientId,
+            table: "hrc_restriction_records",
+            op: "insert",
+            values: { restriction_title: "Rights restriction", ...patch },
+          },
+        });
       }
     },
     onSuccess: () => {
@@ -1456,7 +1449,7 @@ function HrcCard({
             <span className="text-sm font-medium">Does this client have any rights restrictions?</span>
             <div className="flex items-center gap-2 text-sm">
               <span className={!hasRestrictions ? "font-semibold" : "text-muted-foreground"}>No</span>
-              <Switch checked={hasRestrictions} onCheckedChange={(v) => toggleMutation.mutate(v)} />
+              <Switch checked={hasRestrictions} disabled={!canEditHrc} onCheckedChange={(v) => toggleMutation.mutate(v)} />
               <span className={hasRestrictions ? "font-semibold" : "text-muted-foreground"}>Yes</span>
             </div>
           </label>
@@ -1498,9 +1491,11 @@ function HrcCard({
                 </div>
               ))}
               <div className="flex justify-end">
+                {canEditHrc && (
                 <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
                   {saveMutation.isPending ? "Saving…" : "Save restriction form"}
                 </Button>
+                )}
               </div>
 
               <div className="pt-2 border-t border-border/60">
@@ -1530,227 +1525,19 @@ function HrcCard({
   );
 }
 
-// ── RHS hospitalization / non-billable days ─────────────────────────────────
-
-function RhsHospitalizationCard({ clientId, orgId }: { clientId: string; orgId: string }) {
-  const qc = useQueryClient();
-  const listFn = useServerFn(listRhsHospitalizationDays);
-  const setFn = useServerFn(setRhsHospitalizationDay);
-  const deleteFn = useServerFn(deleteRhsHospitalizationDay);
-  const [adding, setAdding] = useState(false);
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [notes, setNotes] = useState("");
-
-  const q = useQuery({
-    queryKey: ["rhs-hospitalization-days", orgId, clientId],
-    queryFn: () => listFn({ data: { organization_id: orgId, client_id: clientId } }),
-  });
-
-  const save = useMutation({
-    mutationFn: () => setFn({ data: { organization_id: orgId, client_id: clientId, record_date: date, notes } }),
-    onSuccess: () => {
-      toast.success("Marked hospitalized — day excluded from RHS billing.");
-      qc.invalidateQueries({ queryKey: ["rhs-hospitalization-days", orgId, clientId] });
-      qc.invalidateQueries({ queryKey: ["client-budget"] });
-      setAdding(false);
-      setNotes("");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const remove = useMutation({
-    mutationFn: (id: string) => deleteFn({ data: { organization_id: orgId, id } }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["rhs-hospitalization-days", orgId, clientId] });
-      qc.invalidateQueries({ queryKey: ["client-budget"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const days = q.data ?? [];
-
-  return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-0">
-        <div className="flex items-start gap-2.5 px-5 py-4 border-b border-border/60">
-          <HexMarker />
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold leading-tight">RHS hospitalized / non-billable days</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Excludes the day from RHS billing.</p>
-          </div>
-          <Button variant="ghost" size="sm" onClick={() => setAdding((v) => !v)}>
-            <Plus className="h-3.5 w-3.5 mr-1" /> Add
-          </Button>
-        </div>
-        <div className="p-5 space-y-3">
-          {adding && (
-            <div className="space-y-2 rounded-md border border-rose-300 bg-rose-50/40 p-3">
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-44" />
-              <Label className="text-xs">🏥 Hospitalization details (required)</Label>
-              <textarea
-                className="w-full min-h-[70px] rounded-md border border-border bg-background px-3 py-2 text-sm"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Reason for hospitalization, hospital name, expected duration…"
-              />
-              <div className="flex justify-end gap-2">
-                <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>Cancel</Button>
-                <Button size="sm" disabled={save.isPending || !notes.trim()} onClick={() => save.mutate()}>
-                  {save.isPending ? "Saving…" : "Save"}
-                </Button>
-              </div>
-            </div>
-          )}
-          {days.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No hospitalized days on file.</p>
-          ) : (
-            <ul className="space-y-2">
-              {days.map((d) => (
-                <li key={d.id} className="flex items-start justify-between gap-3 rounded-md border border-rose-300/60 bg-rose-50/30 p-2.5 text-sm">
-                  <div className="min-w-0">
-                    <div className="font-semibold text-rose-800">🏥 {fmtDate(d.record_date)} — non-billable</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{d.notes}</div>
-                  </div>
-                  <Button size="sm" variant="ghost" onClick={() => remove.mutate(d.id)}>
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ── RHS quarterly evacuation drills ──────────────────────────────────────────
-
-function RhsEvacuationDrillsCard({ clientId, orgId }: { clientId: string; orgId: string }) {
-  const qc = useQueryClient();
-  const listFn = useServerFn(listRhsEvacuationDrills);
-  const recordFn = useServerFn(recordRhsEvacuationDrill);
-  const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState({
-    drill_date: new Date().toISOString().slice(0, 10),
-    simulation_type: "Fire" as "Fire" | "Earthquake" | "Severe Weather" | "Other",
-    duration_minutes: "",
-    participants: "",
-    notes: "",
-  });
-
-  const q = useQuery({
-    queryKey: ["rhs-evacuation-drills", orgId, clientId],
-    queryFn: () => listFn({ data: { organization_id: orgId, client_id: clientId } }),
-  });
-
-  const save = useMutation({
-    mutationFn: () =>
-      recordFn({
-        data: {
-          organization_id: orgId,
-          client_id: clientId,
-          drill_date: draft.drill_date,
-          simulation_type: draft.simulation_type,
-          duration_minutes: draft.duration_minutes ? Number(draft.duration_minutes) : null,
-          participants: draft.participants,
-          notes: draft.notes,
-        },
-      }),
-    onSuccess: () => {
-      toast.success("Drill recorded.");
-      qc.invalidateQueries({ queryKey: ["rhs-evacuation-drills", orgId, clientId] });
-      qc.invalidateQueries({ queryKey: ["deadlines"] });
-      setAdding(false);
-      setDraft({ drill_date: new Date().toISOString().slice(0, 10), simulation_type: "Fire", duration_minutes: "", participants: "", notes: "" });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const drills = q.data ?? [];
-
-  return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-0">
-        <div className="flex items-start gap-2.5 px-5 py-4 border-b border-border/60">
-          <HexMarker />
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold leading-tight">RHS evacuation drills</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Quarterly — due every 90 days.</p>
-          </div>
-          <Button variant="ghost" size="sm" onClick={() => setAdding((v) => !v)}>
-            <Plus className="h-3.5 w-3.5 mr-1" /> Log drill
-          </Button>
-        </div>
-        <div className="p-5 space-y-3">
-          {adding && (
-            <div className="space-y-2 rounded-md border border-border p-3">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label className="text-xs">Drill date</Label>
-                  <Input type="date" value={draft.drill_date} onChange={(e) => setDraft((d) => ({ ...d, drill_date: e.target.value }))} />
-                </div>
-                <div>
-                  <Label className="text-xs">Simulation type</Label>
-                  <UiSelect value={draft.simulation_type} onValueChange={(v) => setDraft((d) => ({ ...d, simulation_type: v as typeof d.simulation_type }))}>
-                    <UiSelectTrigger><UiSelectValue /></UiSelectTrigger>
-                    <UiSelectContent>
-                      <UiSelectItem value="Fire">Fire</UiSelectItem>
-                      <UiSelectItem value="Earthquake">Earthquake</UiSelectItem>
-                      <UiSelectItem value="Severe Weather">Severe Weather</UiSelectItem>
-                      <UiSelectItem value="Other">Other</UiSelectItem>
-                    </UiSelectContent>
-                  </UiSelect>
-                </div>
-                <div>
-                  <Label className="text-xs">Duration (minutes)</Label>
-                  <Input type="number" min="0" value={draft.duration_minutes} onChange={(e) => setDraft((d) => ({ ...d, duration_minutes: e.target.value }))} />
-                </div>
-                <div>
-                  <Label className="text-xs">Participants</Label>
-                  <Input value={draft.participants} onChange={(e) => setDraft((d) => ({ ...d, participants: e.target.value }))} placeholder="Names" />
-                </div>
-              </div>
-              <Label className="text-xs">Notes</Label>
-              <Textarea value={draft.notes} onChange={(e) => setDraft((d) => ({ ...d, notes: e.target.value }))} rows={2} />
-              <div className="flex justify-end gap-2">
-                <Button size="sm" variant="ghost" onClick={() => setAdding(false)}>Cancel</Button>
-                <Button size="sm" disabled={save.isPending} onClick={() => save.mutate()}>{save.isPending ? "Saving…" : "Save"}</Button>
-              </div>
-            </div>
-          )}
-          {drills.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No drills recorded yet.</p>
-          ) : (
-            <ul className="space-y-2">
-              {drills.map((d) => (
-                <li key={d.id} className="rounded-md border border-border p-2.5 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{fmtDate(d.drill_date)} — {d.simulation_type}</span>
-                    {d.duration_minutes != null && <span className="text-xs text-muted-foreground">{d.duration_minutes} min</span>}
-                  </div>
-                  {d.participants && <div className="text-xs text-muted-foreground mt-0.5">Participants: {d.participants}</div>}
-                  {d.notes && <div className="text-xs text-muted-foreground mt-0.5">{d.notes}</div>}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 // ── Record retention footer ────────────────────────────────────────────────
 
 function RetentionFooter({ clientId, status }: { clientId: string; status: string }) {
   const qc = useQueryClient();
+  const canEdit = useAccess().can("edit_client_records");
+  const { data: org } = useCurrentOrg();
+  const updateClientFn = useServerFn(updateClient);
   const isArchived = status === "archived";
   const mut = useMutation({
     mutationFn: async () => {
       const next = isArchived ? "active" : "archived";
-      const { error } = await supabase.from("clients").update({ account_status: next }).eq("id", clientId);
-      if (error) throw error;
+if (!org?.organization_id) throw new Error("No organization selected.");
+      await updateClientFn({ data: { organizationId: org.organization_id, clientId, patch: { account_status: next } } });
     },
     onSuccess: () => {
       toast.success(isArchived ? "Client reactivated." : "Client archived.");
@@ -1768,6 +1555,7 @@ function RetentionFooter({ clientId, status }: { clientId: string; status: strin
           Medicaid requires client records be kept for 7 years. A client can be <b className="text-foreground font-semibold">archived</b> (hidden from active lists) but the record is never deleted.
         </p>
       </div>
+      {canEdit && (
       <Button
         variant="outline"
         size="sm"
@@ -1777,6 +1565,7 @@ function RetentionFooter({ clientId, status }: { clientId: string; status: strin
       >
         {isArchived ? "Reactivate client" : "Archive client"}
       </Button>
+      )}
     </div>
   );
 }
