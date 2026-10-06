@@ -126,6 +126,7 @@ import {
 import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
 import { onPcspActivated } from "@/lib/company-obligations.functions";
 import { computeSupportStrategyCoverage } from "@/lib/support-strategy-coverage";
+import { MONTHLY_SUMMARY_CODES } from "@/lib/progress-summaries";
 
 type ProfileTab =
   | "identity"
@@ -1866,11 +1867,14 @@ function NewSummaryDialog({
   const now = new Date();
   const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const defaultQuarter = `${now.getFullYear()}-Q${Math.floor(now.getMonth() / 3) + 1}`;
-  const [periodKind, setPeriodKind] = useState<"monthly" | "quarterly">("quarterly");
+  const codesUpper = serviceCodes.map((c) => c.toUpperCase());
+  const [periodKind, setPeriodKind] = useState<"monthly" | "quarterly">(
+    codesUpper.some((c) => MONTHLY_SUMMARY_CODES.has(c)) ? "monthly" : "quarterly",
+  );
   const [month, setMonth] = useState(defaultMonth);
   const [quarter, setQuarter] = useState(defaultQuarter);
   const [summaryKind, setSummaryKind] = useState<"narrative" | "financial_statement">("narrative");
-  const [requiresUpi, setRequiresUpi] = useState(false);
+  const [requiresUpi, setRequiresUpi] = useState(codesUpper.includes("SEI"));
   const [saving, setSaving] = useState(false);
 
   const computePeriod = () => {
