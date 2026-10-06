@@ -83,12 +83,12 @@ describe("hire auto-assign", () => {
     assert.match(importWriter, /reevaluateStaffAssignedToClientInternal/);
     assert.match(hireHook, /onClientDutyFactsChanged/);
     const profileTab = readFileSync(
-      fileURLToPath(new URL("../components/clients/profile/cards/at-glance-card.tsx", import.meta.url)),
+      fileURLToPath(new URL("../components/clients/profile/health/care-card.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(profileTab, /onClientDutyFactsChanged/);
     const faceSheet = readFileSync(
-      fileURLToPath(new URL("../components/clients/profile/face-sheet-info-card.tsx", import.meta.url)),
+      fileURLToPath(new URL("../components/clients/profile/plans/plan-dates-dialog.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(faceSheet, /onClientDutyFactsChanged/);

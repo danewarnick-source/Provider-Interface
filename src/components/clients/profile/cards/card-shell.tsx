@@ -1,6 +1,6 @@
-// Shared look for the record cards that sit in the Health, Plans and Client
-// file sections until those sections are rebuilt: card frame with an edit
-// pencil, label/value rows, group headers and a labeled input.
+// Shared look for the record cards in the Health, Plans and Client file
+// sections: card frame with an edit pencil, label/value rows, group headers
+// and a labeled input.
 
 import type { ReactNode } from "react";
 import { Pencil } from "lucide-react";
@@ -58,6 +58,7 @@ export function CardShell({
   saving,
   children,
   headerRight,
+  canEdit: canEditProp,
 }: {
   title: string;
   subtitle?: string;
@@ -68,8 +69,11 @@ export function CardShell({
   saving?: boolean;
   children: ReactNode;
   headerRight?: ReactNode;
+  /** Overrides the default Clients: Edit check (e.g. Client medical: Edit). */
+  canEdit?: boolean;
 }) {
-  const canEdit = useAccess().can("edit_client_records");
+  const canEditClients = useAccess().can("edit_client_records");
+  const canEdit = canEditProp ?? canEditClients;
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-0">
