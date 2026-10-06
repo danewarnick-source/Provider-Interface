@@ -13,8 +13,8 @@ import {
   listOrgClientFileMatrix,
   listOrgClientFilePack,
   type ClientFileMatrixRow,
-} from "@/lib/client-file.functions";
-import { missingClientFileCsv } from "@/lib/client-file";
+} from "@/lib/clients/file.functions";
+import { missingClientFileCsv } from "@/lib/clients/file";
 import { personnelPackHtml } from "@/lib/team-members/file";
 
 async function signedEvidenceUrl(

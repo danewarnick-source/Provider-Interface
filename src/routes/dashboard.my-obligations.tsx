@@ -43,8 +43,8 @@ import {
   clientFormKindForTitle,
   clientFormTitleForKind,
   type ClientFormKind,
-} from "@/lib/client-form-obligations";
-import { getMyClientTrainingStatuses } from "@/lib/client-specific-training.functions";
+} from "@/lib/clients/form-obligations";
+import { getMyClientTrainingStatuses } from "@/lib/clients/training.functions";
 import { getAgencyPolicyForInstance } from "@/lib/agency-policies.functions";
 import { policyMediaKind } from "@/lib/agency-policies";
 import { isPackSentinel, obligationIsRequired } from "@/lib/obligation-packs";

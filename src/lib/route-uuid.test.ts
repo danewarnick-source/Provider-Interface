@@ -45,7 +45,7 @@ describe("route UUID params", () => {
 
   it("emergency-contact queries and saves skip the literal new", () => {
     const src = readFileSync(
-      fileURLToPath(new URL("../components/clients/profile-tab.tsx", import.meta.url)),
+      fileURLToPath(new URL("../components/clients/profile/profile-tab.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(src, /enabled: !!orgId && isRouteUuid\(clientId\)/);
@@ -65,7 +65,8 @@ describe("route UUID params", () => {
       "utf8",
     );
     assert.match(clientsNew, /createFileRoute\("\/dashboard\/clients\/new"\)/);
-    assert.match(clientsNew, /startWithAddOpen/);
+    assert.match(clientsNew, /to: "\/dashboard\/clients"/);
+    assert.match(clientsNew, /add: 1/);
     assert.match(staffNew, /createFileRoute\("\/dashboard\/employees\/new"\)/);
     assert.match(staffNew, /to: "\/dashboard\/team-members"/);
     assert.match(staffNew, /add: 1/);

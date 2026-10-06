@@ -34,9 +34,9 @@ import { ClientSpendingShiftPanel } from "@/components/staff-mobile/client-spend
 import { useActiveShift } from "@/hooks/use-active-shift";
 import { useTodayShifts } from "@/hooks/use-today-shifts";
 import { ClientPhoto } from "@/components/client-photo";
-import { FaceSheetButton } from "@/components/clients/face-sheet-button";
-import { useClientFeature, clientFeatureVisible } from "@/lib/client-features";
-import { ClientAccessGate } from "@/components/clients/client-access-gate";
+import { FaceSheetButton } from "@/components/clients/profile/face-sheet-button";
+import { useClientFeature, clientFeatureVisible } from "@/lib/clients/features";
+import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
 
 function ActiveShiftReimbursementSlot({ clientId }: { clientId: string }) {
   const { data: active } = useActiveShift();

@@ -11,8 +11,8 @@ import {
   type CSTContent,
   type CSTReviewQuestion,
   type CSTGoal,
-} from "@/lib/client-specific-training.functions";
-import { SectionsView, GoalsView } from "@/components/clients/client-specific-training-card";
+} from "@/lib/clients/training.functions";
+import { SectionsView, GoalsView } from "@/components/clients/profile/client-specific-training-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle2, Shield, Loader2, AlertTriangle, BookOpen, Users, FileSignature } from "lucide-react";
 import { TrainingCertificateDialog, type TrainingCertificateRecord } from "@/components/training/training-certificate-dialog";
 import { toast } from "sonner";
-import { ClientAccessGate } from "@/components/clients/client-access-gate";
+import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
 
 const searchSchema = z.object({
   trainingType: z.enum(["person_specific", "support_strategies", "person_centered"]).optional(),

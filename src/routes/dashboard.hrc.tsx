@@ -17,7 +17,7 @@ import {
   RESTRICTION_ELEMENTS,
   computeRestrictionCompletion,
   type RestrictionRecord,
-} from "@/lib/hrc-restrictions";
+} from "@/lib/clients/hrc";
 import { useAccess } from "@/hooks/use-access";
 import { useServerFn } from "@tanstack/react-start";
 import { writeClientRecord } from "@/lib/clients/writes.functions";

@@ -111,7 +111,7 @@ describe("scheduler — shifts only for an assigned code", () => {
 
 describe("readers never treat NULL / [] as all codes", () => {
   it("client-care-data: staff see only codes on their assignment row", () => {
-    const s = src("./client-care-data.functions.ts");
+    const s = src("./clients/care-data.functions.ts");
     assert.match(s, /assignmentCoversCode\(myCodeScope\?\.service_codes, c\.service_code\)/);
     assert.doesNotMatch(s, /service_codes === null\s*\?\s*authorized_codes/);
   });

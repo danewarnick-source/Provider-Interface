@@ -8,7 +8,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { syncHomePinFromAddress } from "@/lib/home-pin";
+import { syncHomePinFromAddress } from "@/lib/clients/home-pin";
 import {
   CLIENT_PROFILE_FIELDS,
   PROFILE_CLIENT_COLUMNS,
@@ -17,7 +17,7 @@ import {
   writeProfileFieldValue,
   type ProfileCustomsMap,
   type ProfileField,
-} from "@/lib/client-profile-fields";
+} from "@/lib/clients/profile-fields";
 
 // Whitelist of clients-table columns the wizard may patch directly via
 // saveOnboardingClientPatch (legacy helpers below). The registry's
