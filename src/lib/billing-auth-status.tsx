@@ -2,6 +2,13 @@ import { Badge } from "@/components/ui/badge";
 
 export type AuthStatus = "active" | "expired" | "upcoming" | "end-needed";
 
+// `new Date("YYYY-MM-DD")` is UTC midnight — the previous evening in Utah —
+// which marked codes expired on their last valid day.
+function localDay(ymd: string): Date {
+  const [y, m, d] = ymd.slice(0, 10).split("-").map(Number);
+  return y && m && d ? new Date(y, m - 1, d) : new Date(NaN);
+}
+
 export function getAuthStatus(
   start?: string | null,
   end?: string | null,
@@ -9,11 +16,11 @@ export function getAuthStatus(
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   if (!end) return "end-needed";
-  const e = new Date(end);
+  const e = localDay(end);
   if (isNaN(e.getTime())) return "end-needed";
   if (e < today) return "expired";
   if (start) {
-    const s = new Date(start);
+    const s = localDay(start);
     if (!isNaN(s.getTime()) && s > today) return "upcoming";
   }
   return "active";
