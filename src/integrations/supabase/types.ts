@@ -784,6 +784,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "activity_reimbursement_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "activity_reimbursement_requests_shift_id_fkey"
             columns: ["shift_id"]
             isOneToOne: false
@@ -859,6 +866,13 @@ export type Database = {
             columns: ["bank_account_id"]
             isOneToOne: true
             referencedRelation: "agency_bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_bank_mappings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
@@ -2199,7 +2213,15 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "client_belongings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       client_billing_code_rate_history: {
         Row: {
@@ -2262,6 +2284,13 @@ export type Database = {
             columns: ["billing_code_id"]
             isOneToOne: false
             referencedRelation: "client_billing_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_billing_code_rate_history_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
@@ -2448,6 +2477,78 @@ export type Database = {
           },
         ]
       }
+      client_contacts: {
+        Row: {
+          address: string | null
+          client_id: string
+          company: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          ended_on: string | null
+          id: string
+          is_primary: boolean
+          name: string
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          relationship: string | null
+          role: string
+          sort: number
+        }
+        Insert: {
+          address?: string | null
+          client_id: string
+          company?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          ended_on?: string | null
+          id?: string
+          is_primary?: boolean
+          name: string
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          relationship?: string | null
+          role: string
+          sort?: number
+        }
+        Update: {
+          address?: string | null
+          client_id?: string
+          company?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          ended_on?: string | null
+          id?: string
+          is_primary?: boolean
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          relationship?: string | null
+          role?: string
+          sort?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_documents: {
         Row: {
           archived_at: string | null
@@ -2523,6 +2624,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "client_documents_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "client_documents_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
@@ -2573,6 +2681,13 @@ export type Database = {
           relationship?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "client_emergency_contacts_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "client_emergency_contacts_client_id_fkey"
             columns: ["client_id"]
@@ -2863,6 +2978,242 @@ export type Database = {
           },
         ]
       }
+      client_meal_actuals: {
+        Row: {
+          actual_date: string
+          confirmed_at: string
+          confirmed_by: string | null
+          created_at: string
+          id: string
+          meal_plan_id: string
+          meal_slot: string
+          note: string | null
+          outcome: string
+          updated_at: string
+        }
+        Insert: {
+          actual_date: string
+          confirmed_at?: string
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          meal_plan_id: string
+          meal_slot: string
+          note?: string | null
+          outcome: string
+          updated_at?: string
+        }
+        Update: {
+          actual_date?: string
+          confirmed_at?: string
+          confirmed_by?: string | null
+          created_at?: string
+          id?: string
+          meal_plan_id?: string
+          meal_slot?: string
+          note?: string | null
+          outcome?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_meal_actuals_meal_plan_id_fkey"
+            columns: ["meal_plan_id"]
+            isOneToOne: false
+            referencedRelation: "client_meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_meal_plans: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          food_likes: string | null
+          foods_to_avoid: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          updated_at: string
+          week_start_date: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          food_likes?: string | null
+          foods_to_avoid?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          updated_at?: string
+          week_start_date: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          food_likes?: string | null
+          foods_to_avoid?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          updated_at?: string
+          week_start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_meal_plans_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_meal_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_meal_support: {
+        Row: {
+          activated_at: string | null
+          activated_by: string | null
+          client_id: string
+          created_at: string
+          goal_note: string | null
+          id: string
+          organization_id: string
+          reason: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          activated_by?: string | null
+          client_id: string
+          created_at?: string
+          goal_note?: string | null
+          id?: string
+          organization_id: string
+          reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          activated_by?: string | null
+          client_id?: string
+          created_at?: string
+          goal_note?: string | null
+          id?: string
+          organization_id?: string
+          reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_meal_support_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_meal_support_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_meals: {
+        Row: {
+          calories: number | null
+          carbs_g: number | null
+          created_at: string
+          day_of_week: number
+          description: string | null
+          estimated_cost: number | null
+          extra_value: number | null
+          fat_g: number | null
+          id: string
+          label: string
+          meal_plan_id: string
+          meal_slot: string
+          notes: string | null
+          nutrition_estimated: Json
+          nutrition_value: number | null
+          protein_g: number | null
+          recipe_id: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          calories?: number | null
+          carbs_g?: number | null
+          created_at?: string
+          day_of_week: number
+          description?: string | null
+          estimated_cost?: number | null
+          extra_value?: number | null
+          fat_g?: number | null
+          id?: string
+          label?: string
+          meal_plan_id: string
+          meal_slot: string
+          notes?: string | null
+          nutrition_estimated?: Json
+          nutrition_value?: number | null
+          protein_g?: number | null
+          recipe_id?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          calories?: number | null
+          carbs_g?: number | null
+          created_at?: string
+          day_of_week?: number
+          description?: string | null
+          estimated_cost?: number | null
+          extra_value?: number | null
+          fat_g?: number | null
+          id?: string
+          label?: string
+          meal_plan_id?: string
+          meal_slot?: string
+          notes?: string | null
+          nutrition_estimated?: Json
+          nutrition_value?: number | null
+          protein_g?: number | null
+          recipe_id?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_meals_meal_plan_id_fkey"
+            columns: ["meal_plan_id"]
+            isOneToOne: false
+            referencedRelation: "client_meal_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_meals_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "client_recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_medications: {
         Row: {
           adverse_effects: string | null
@@ -3002,7 +3353,84 @@ export type Database = {
           support_level?: string | null
           support_level_needs_review?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "client_medications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_nutrition_config: {
+        Row: {
+          calorie_target: number | null
+          carbs_target_g: number | null
+          client_id: string
+          created_at: string
+          extra_label: string | null
+          extra_target: number | null
+          extra_unit: string | null
+          fat_target_g: number | null
+          id: string
+          nutrition_label: string
+          nutrition_unit: string
+          organization_id: string
+          protein_target_g: number | null
+          updated_at: string
+          use_extra_field: boolean
+        }
+        Insert: {
+          calorie_target?: number | null
+          carbs_target_g?: number | null
+          client_id: string
+          created_at?: string
+          extra_label?: string | null
+          extra_target?: number | null
+          extra_unit?: string | null
+          fat_target_g?: number | null
+          id?: string
+          nutrition_label?: string
+          nutrition_unit?: string
+          organization_id: string
+          protein_target_g?: number | null
+          updated_at?: string
+          use_extra_field?: boolean
+        }
+        Update: {
+          calorie_target?: number | null
+          carbs_target_g?: number | null
+          client_id?: string
+          created_at?: string
+          extra_label?: string | null
+          extra_target?: number | null
+          extra_unit?: string | null
+          fat_target_g?: number | null
+          id?: string
+          nutrition_label?: string
+          nutrition_unit?: string
+          organization_id?: string
+          protein_target_g?: number | null
+          updated_at?: string
+          use_extra_field?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_nutrition_config_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_nutrition_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       client_progress_summaries: {
         Row: {
@@ -3178,6 +3606,136 @@ export type Database = {
           },
         ]
       }
+      client_recipe_ingredients: {
+        Row: {
+          created_at: string
+          estimated_cost: number | null
+          id: string
+          item: string
+          quantity: string | null
+          recipe_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          estimated_cost?: number | null
+          id?: string
+          item: string
+          quantity?: string | null
+          recipe_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          estimated_cost?: number | null
+          id?: string
+          item?: string
+          quantity?: string | null
+          recipe_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_recipe_ingredients_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "client_recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_recipes: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          organization_id: string
+          source_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          organization_id: string
+          source_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          source_text?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_recipes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_recipes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_shopping_items: {
+        Row: {
+          checked: boolean
+          created_at: string
+          id: string
+          item: string
+          meal_plan_id: string
+          quantity: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          checked?: boolean
+          created_at?: string
+          id?: string
+          item?: string
+          meal_plan_id: string
+          quantity?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          checked?: boolean
+          created_at?: string
+          id?: string
+          item?: string
+          meal_plan_id?: string
+          quantity?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_shopping_items_meal_plan_id_fkey"
+            columns: ["meal_plan_id"]
+            isOneToOne: false
+            referencedRelation: "client_meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_specific_trainings: {
         Row: {
           approved_at: string | null
@@ -3292,6 +3850,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "client_spending_log_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "client_spending_log_shift_id_fkey"
             columns: ["shift_id"]
             isOneToOne: false
@@ -3385,6 +3950,7 @@ export type Database = {
       }
       clients: {
         Row: {
+          about_me: string | null
           account_status: string
           admin_hours_per_week: number | null
           admission_date: string | null
@@ -3452,6 +4018,7 @@ export type Database = {
           identifying_marks: string | null
           immunizations: string[] | null
           income_sources: string[] | null
+          insurance: string | null
           intake_date: string | null
           intake_status: string
           is_own_guardian: boolean
@@ -3519,6 +4086,7 @@ export type Database = {
           weight_pounds: number | null
         }
         Insert: {
+          about_me?: string | null
           account_status?: string
           admin_hours_per_week?: number | null
           admission_date?: string | null
@@ -3586,6 +4154,7 @@ export type Database = {
           identifying_marks?: string | null
           immunizations?: string[] | null
           income_sources?: string[] | null
+          insurance?: string | null
           intake_date?: string | null
           intake_status?: string
           is_own_guardian?: boolean
@@ -3653,6 +4222,7 @@ export type Database = {
           weight_pounds?: number | null
         }
         Update: {
+          about_me?: string | null
           account_status?: string
           admin_hours_per_week?: number | null
           admission_date?: string | null
@@ -3720,6 +4290,7 @@ export type Database = {
           identifying_marks?: string | null
           immunizations?: string[] | null
           income_sources?: string[] | null
+          insurance?: string | null
           intake_date?: string | null
           intake_status?: string
           is_own_guardian?: boolean
@@ -4413,6 +4984,13 @@ export type Database = {
           variance?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "controlled_med_counts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "controlled_med_counts_emar_log_id_fkey"
             columns: ["emar_log_id"]
@@ -6901,7 +7479,15 @@ export type Database = {
           removed_on?: string | null
           status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hhs_client_inventories_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hhs_evacuation_drills: {
         Row: {
@@ -6940,7 +7526,15 @@ export type Database = {
           record_date?: string
           simulation_type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hhs_evacuation_drills_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hhs_host_home_monthly: {
         Row: {
@@ -7123,7 +7717,15 @@ export type Database = {
           upi_filed_by?: string | null
           upi_reference_number?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hhs_incident_reports_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hhs_medical_logs: {
         Row: {
@@ -7165,7 +7767,15 @@ export type Database = {
           reason?: string
           record_date?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hhs_medical_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hhs_monthly_attendance: {
         Row: {
@@ -7216,7 +7826,15 @@ export type Database = {
           signee_user_id?: string | null
           staff_initials_signature?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hhs_monthly_attendance_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hhs_monthly_certifications: {
         Row: {
@@ -7300,7 +7918,15 @@ export type Database = {
           provider_id?: string
           target_month?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hhs_monthly_summaries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hhs_transfer_logs: {
         Row: {
@@ -7339,7 +7965,15 @@ export type Database = {
           record_date?: string
           transferred_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hhs_transfer_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hive_base_template_versions: {
         Row: {
@@ -9491,6 +10125,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "medication_change_proposals_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "medication_change_proposals_medication_id_fkey"
             columns: ["medication_id"]
             isOneToOne: false
@@ -9552,6 +10193,13 @@ export type Database = {
           transferred_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "medication_transfers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "medication_transfers_medication_id_fkey"
             columns: ["medication_id"]
@@ -10020,6 +10668,13 @@ export type Database = {
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "nectar_documents_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "nectar_documents_client_id_fkey"
             columns: ["client_id"]
@@ -11014,6 +11669,38 @@ export type Database = {
           },
         ]
       }
+      org_shopping_library: {
+        Row: {
+          created_at: string
+          id: string
+          item: string
+          last_used_at: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item: string
+          last_used_at?: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item?: string
+          last_used_at?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_shopping_library_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_subscriptions: {
         Row: {
           billing_interval: string | null
@@ -11626,7 +12313,15 @@ export type Database = {
           organization_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pba_accounts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pba_audit_samples: {
         Row: {
@@ -13197,6 +13892,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "shift_completeness_flags_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "shift_completeness_flags_shift_id_fkey"
             columns: ["shift_id"]
             isOneToOne: false
@@ -13495,7 +14197,15 @@ export type Database = {
           service_codes?: string[] | null
           staff_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "staff_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       staff_checklist_completion: {
         Row: {
@@ -14181,7 +14891,15 @@ export type Database = {
           title?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "submitted_forms_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_coordinators: {
         Row: {
@@ -14418,6 +15136,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "threads_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "threads_organization_id_fkey"
             columns: ["organization_id"]
@@ -14871,6 +15596,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "upi_attestations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "upi_attestations_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -14984,7 +15716,15 @@ export type Database = {
           organization_id?: string | null
           tenant_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "staff_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hhs_daily_records_v: {
         Row: {
@@ -15072,7 +15812,6 @@ export type Database = {
         Args: { _org: string; _staff: string; _viewer: string }
         Returns: boolean
       }
-      client_deletion_impact: { Args: { _client_id: string }; Returns: Json }
       client_has_med_admin_code: {
         Args: { _client_id: string }
         Returns: boolean
@@ -15080,6 +15819,7 @@ export type Database = {
       clients_for_staff: {
         Args: { _org: string; _staff: string }
         Returns: {
+          about_me: string | null
           account_status: string
           admin_hours_per_week: number | null
           admission_date: string | null
@@ -15147,6 +15887,7 @@ export type Database = {
           identifying_marks: string | null
           immunizations: string[] | null
           income_sources: string[] | null
+          insurance: string | null
           intake_date: string | null
           intake_status: string
           is_own_guardian: boolean
@@ -15220,7 +15961,6 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      delete_client_hard: { Args: { _client_id: string }; Returns: Json }
       discard_import_job_hard: { Args: { _job_id: string }; Returns: Json }
       find_possible_duplicate_referral: {
         Args: {
@@ -15580,6 +16320,10 @@ export type Database = {
       staff_assigned_to_client: {
         Args: { _client_id: string; _staff: string }
         Returns: boolean
+      }
+      sync_client_intake_status: {
+        Args: { _client: string }
+        Returns: undefined
       }
       user_has_active_credential: {
         Args: { _cert_type: string; _org_id: string; _user_id: string }
