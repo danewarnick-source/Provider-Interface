@@ -469,14 +469,14 @@ describe("Evidence people roster", () => {
         first_name: "Bea",
         last_name: "Stone",
         account_status: "active",
-        authorized_dspd_codes: ["HHS"],
+        codes: ["HHS"],
       },
       {
         id: "c-1",
         first_name: "Ann",
         last_name: "Lee",
         account_status: "discharged",
-        job_code: ["SLN"],
+        codes: ["SLN"],
       },
       {
         id: "c-3",
@@ -492,30 +492,23 @@ describe("Evidence people roster", () => {
     assert.equal(people[0]?.subtitle, "SLN");
     assert.equal(people[1]?.subtitle, "HHS");
 
+    const noCodes = async () => new Map<string, string[]>();
     const failed = await loadEvidenceClientPeople(async () => ({
       data: null,
       error: { message: "permission denied for table clients" },
-    }));
+    }), noCodes);
     assert.deepEqual(failed.people, []);
     assert.match(failed.error ?? "", /permission denied/);
 
-    const slim = await loadEvidenceClientPeople(async (columns) => {
-      if (columns.includes("job_code")) {
-        return { data: null, error: { message: "column job_code does not exist" } };
-      }
-      return {
-        data: [
-          {
-            id: "c-9",
-            first_name: "Pat",
-            last_name: "Ng",
-            account_status: "active",
-          },
-        ],
+    const slim = await loadEvidenceClientPeople(
+      async () => ({
+        data: [{ id: "c-9", first_name: "Pat", last_name: "Ng", account_status: "active" }],
         error: null,
-      };
-    });
+      }),
+      async (ids) => new Map(ids.map((id) => [id, ["DSI"]])),
+    );
     assert.equal(slim.error, null);
+    assert.equal(slim.people[0]?.subtitle, "DSI");
     assert.equal(slim.people[0]?.full_name, "Pat Ng");
   });
 

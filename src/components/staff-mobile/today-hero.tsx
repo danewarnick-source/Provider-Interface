@@ -9,7 +9,6 @@ import {
   allowedCodesFor,
   caseloadCardActions,
   caseloadDailyNoteLabel,
-  clientAuthorizedCodes,
   firstClockableCode,
   hasHostHomeDailyCode,
   hostHomeDailyNoteCode,
@@ -61,7 +60,7 @@ export function TodayHero() {
   const now = Date.now();
 
   const hhsPeople = (caseload ?? []).filter((c) => {
-    const all = clientAuthorizedCodes(c);
+    const all = c.codes;
     return hasHostHomeDailyCode(allowedCodesFor(assignments, c.id, all));
   });
 
@@ -80,7 +79,7 @@ export function TodayHero() {
       : "earlier";
     const activeClient = (caseload ?? []).find((c) => c.id === active.client_id);
     const activeCodes = activeClient
-      ? allowedCodesFor(assignments, activeClient.id, clientAuthorizedCodes(activeClient))
+      ? allowedCodesFor(assignments, activeClient.id, activeClient.codes)
       : [];
     // Assigned ∩ authorized only — no fallback to every client code.
     const effectiveActiveCodes = activeCodes;
@@ -235,7 +234,7 @@ export function TodayHero() {
   const leadDailyNoteCode = (() => {
     const lead = (caseload ?? []).find((c) => c.id === (primary?.client_id ?? extraHhs[0]?.id));
     const leadCodes = lead
-      ? allowedCodesFor(assignments, lead.id, clientAuthorizedCodes(lead))
+      ? allowedCodesFor(assignments, lead.id, lead.codes)
       : [];
     return hostHomeDailyNoteCode(leadCodes);
   })();
@@ -319,7 +318,7 @@ export function TodayHero() {
             const isHostHomeLead = primaryDaily || !primary;
             const lead = (caseload ?? []).find((c) => c.id === leadClientId);
             const leadCodes = lead
-              ? allowedCodesFor(assignments, lead.id, clientAuthorizedCodes(lead))
+              ? allowedCodesFor(assignments, lead.id, lead.codes)
               : [];
             const effectiveLeadCodes = leadCodes;
             // Not punched in: never Open Punch pad on this row — even for
@@ -426,7 +425,7 @@ export function TodayHero() {
                 );
               })}
             {moreHhs.map((c) => {
-              const all = clientAuthorizedCodes(c);
+              const all = c.codes;
               const noteCode = hostHomeDailyNoteCode(allowedCodesFor(assignments, c.id, all));
               const noteLabel = caseloadDailyNoteLabel({
                 code: noteCode,

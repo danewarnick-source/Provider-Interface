@@ -9,7 +9,7 @@ const mockBase = `http://127.0.0.1:${mockPort}`;
  */
 export default defineConfig({
   testDir: "..",
-  testMatch: /clients-staff-roster\.spec\.ts/,
+  testMatch: /clients-(staff-roster|pcsp-review|profile-sections)\.spec\.ts/,
   retries: 0,
   timeout: 90_000,
   expect: { timeout: 15_000 },

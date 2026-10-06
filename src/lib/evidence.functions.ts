@@ -6,6 +6,7 @@
  * Does not read or write organizations.feature_config.
  * Does not write requirement_defs or company_obligations.
  */
+import { loadActiveCodes } from "@/lib/clients/codes";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -448,6 +449,7 @@ async function listClientPeople(
       .select(columns)
       .eq("organization_id", organizationId)
       .order("last_name", { ascending: true }),
+    (ids) => loadActiveCodes(sb, ids),
   );
 }
 

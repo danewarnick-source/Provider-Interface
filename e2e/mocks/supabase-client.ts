@@ -24,6 +24,7 @@ import {
   CLIENT_LIST,
   ORG_ID as TNS_ORG_ID,
   ORG_NAME as TNS_ORG_NAME,
+  planFixtureRows,
   STAFF,
   STAFF_LIST,
 } from "../fixtures/tns-roster";
@@ -100,8 +101,6 @@ function tnsClientRows(): Record<string, unknown>[] {
     last_name: c.last_name,
     phone_number: null,
     physical_address: null,
-    job_code: [...c.codes],
-    authorized_dspd_codes: [...c.codes],
     medicaid_id: c.medicaid_id,
     account_status: "active",
     geofence_radius_feet: 500,
@@ -114,7 +113,6 @@ function tnsClientRows(): Record<string, unknown>[] {
     swallowing_alerts: [],
     home_latitude: null,
     home_longitude: null,
-    pcsp_goals: [...c.pcsp_goals],
     intake_status: "complete",
     team_id: c.team_id,
     must_change_password: false,
@@ -263,6 +261,10 @@ function tableRows(table: string): Record<string, unknown>[] {
           created_at: "2026-01-01T00:00:00.000Z",
         },
       ];
+    case "client_plans":
+    case "client_goals":
+    case "client_goal_supports":
+      return hhs ? planFixtureRows(TNS_ORG_ID)[table] : [];
     case "host_supervision_contacts":
     case "incidents":
     case "daily_logs":
@@ -437,6 +439,15 @@ export const supabase = {
   },
   from: (table: string) => new QueryBuilder(table),
   rpc: async (name: string, args?: Record<string, unknown>) => {
+    if (name === "client_active_codes") {
+      const ids = (args?._client_ids as string[] | undefined) ?? [];
+      return {
+        data: CLIENT_LIST.filter((c) => ids.includes(c.id)).flatMap((c) =>
+          c.codes.map((service_code) => ({ client_id: c.id, service_code, service_end_date: null })),
+        ),
+        error: null,
+      };
+    }
     if (name === "clients_for_staff") {
       if (readFlag("hive.e2e.noAssignments") === "1") return { data: [], error: null };
       const staffId = String(args?._staff ?? activeSession().user.id);

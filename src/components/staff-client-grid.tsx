@@ -10,7 +10,6 @@ import {
   allowedCodesFor,
   caseloadCardActions,
   caseloadDailyNoteLabel,
-  clientAuthorizedCodes,
   defaultCaseloadCode,
   hasHostHomeDailyCode,
   hostHomeDailyNoteCode,
@@ -38,7 +37,7 @@ import {
 } from "lucide-react";
 import { ClientQuickInfoSheet } from "@/components/staff-mobile/client-quick-info-sheet";
 import { ClientCapBars } from "@/components/staff-mobile/client-cap-bars";
-import { getMyClientTrainingStatuses } from "@/lib/client-specific-training.functions";
+import { getMyClientTrainingStatuses } from "@/lib/clients/training.functions";
 import {
   billingUnitLabel,
   isClockableServiceCode,
@@ -102,7 +101,7 @@ function ClientDetail({
   cardActionsVisible: boolean;
   dailyNoteDone: boolean;
 }) {
-  const allCodes = clientAuthorizedCodes(c);
+  const allCodes = c.codes;
   const codes = allowedCodesFor(assignments, c.id, allCodes);
   const isOnTheClock = !!activeShift && activeShift.client_id === c.id;
 
@@ -286,7 +285,7 @@ function ClientRow({
   const isOnTheClock = !!activeShift && activeShift.client_id === c.id;
   useTick(isOnTheClock);
   const navigate = useNavigate();
-  const allCodes = clientAuthorizedCodes(c);
+  const allCodes = c.codes;
   // Assigned ∩ authorized only — no fallback to every client code.
   const effectiveCodes = allowedCodesFor(assignments, c.id, allCodes);
   const hasHhs = hasHostHomeDailyCode(effectiveCodes);

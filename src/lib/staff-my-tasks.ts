@@ -8,7 +8,7 @@ import {
 } from "./obligations/catalog-live-bridge.ts";
 import { dueLabel } from "./team-members/file.ts";
 import { inHiveCourseIdForTitle, staffCourseProgressLabel } from "./in-hive-training.ts";
-import { clientFormKindForTitle } from "./client-form-obligations.ts";
+import { clientFormKindForTitle } from "./clients/form-obligations.ts";
 import { isFormUuid } from "./resolve-obligation-form.ts";
 import { staffSurfaceReviewKind } from "./cert-review.ts";
 

@@ -17,6 +17,8 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { FieldRenderer } from "@/components/forms/field-renderer";
 import { type FormField, isFieldVisible } from "@/lib/forms-utils";
 import { supabase } from "@/integrations/supabase/client";
+import { activeContacts, loadClientContacts, primaryContact, type ClientContact } from "@/lib/clients/contacts";
+import { legacyContactKey } from "@/lib/clients/legacy-fields";
 import { formatPersonName } from "@/lib/person-name";
 import { toast } from "sonner";
 
@@ -97,7 +99,7 @@ function ObligationBanner({ instanceId }: { instanceId: string }) {
   );
 }
 
-/** Map live client columns onto common intake form field ids. */
+/** Map the client row + contacts onto common intake form field ids. */
 function seedAnswersFromClient(row: {
   first_name?: string | null;
   last_name?: string | null;
@@ -105,12 +107,8 @@ function seedAnswersFromClient(row: {
   phone_number?: string | null;
   physical_address?: string | null;
   is_own_guardian?: boolean | null;
-  guardian_name?: string | null;
-  guardian_phone?: string | null;
   date_of_birth?: string | null;
-  emergency_contact_name?: string | null;
-  emergency_contact_phone?: string | null;
-}): Record<string, unknown> {
+}, contacts: ClientContact[]): Record<string, unknown> {
   const full = formatPersonName(row.first_name ?? "", "", row.last_name ?? "");
   const out: Record<string, unknown> = {};
   if (full) out.full_name = full;
@@ -126,13 +124,17 @@ function seedAnswersFromClient(row: {
     out.physical_address = row.physical_address;
   }
   if (row.date_of_birth) out.date_of_birth = row.date_of_birth;
-  if (row.emergency_contact_name) out.emergency_contact_name = row.emergency_contact_name;
-  if (row.emergency_contact_phone) out.emergency_contact_phone = row.emergency_contact_phone;
+  // Form field ids for contacts are the old flat keys (stored form templates use them).
+  const seedContact = (role: "emergency" | "guardian") => {
+    const c = primaryContact(contacts, role);
+    if (c?.name) out[legacyContactKey(role, "name")] = c.name;
+    if (c?.phone) out[legacyContactKey(role, "phone")] = c.phone;
+  };
+  seedContact("emergency");
   if (row.is_own_guardian === true) out.guardian_status = "self";
   else if (row.is_own_guardian === false) {
     out.guardian_status = "guardian";
-    if (row.guardian_name) out.guardian_name = row.guardian_name;
-    if (row.guardian_phone) out.guardian_phone = row.guardian_phone;
+    seedContact("guardian");
   }
   return out;
 }
@@ -171,7 +173,7 @@ function FillForm() {
       const { data: row } = await supabase
         .from("clients")
         .select(
-          "first_name, last_name, medicaid_id, phone_number, physical_address, is_own_guardian, guardian_name, guardian_phone, date_of_birth, emergency_contact_name, emergency_contact_phone",
+          "first_name, last_name, medicaid_id, phone_number, physical_address, is_own_guardian, date_of_birth",
         )
         .eq("id", clientId)
         .maybeSingle();
@@ -179,7 +181,8 @@ function FillForm() {
         setPrefilled(true);
         return;
       }
-      const seed = seedAnswersFromClient(row);
+      const contacts = activeContacts(await loadClientContacts(supabase, [clientId]));
+      const seed = seedAnswersFromClient(row, contacts);
       const fieldIds = new Set(fields.map((f) => f.id));
       setAnswers((prev) => {
         const next = { ...prev };

@@ -79,7 +79,7 @@ describe("employee Smart Import hard block", () => {
       new URL("../routes/dashboard.smart-import.$jobId.done.tsx", import.meta.url),
       "utf8",
     );
-    const fields = readFileSync(new URL("./custom-fields.functions.ts", import.meta.url), "utf8");
+    const fields = readFileSync(new URL("./clients/custom-fields.functions.ts", import.meta.url), "utf8");
     const reviewFns = readFileSync(
       new URL("./smart-import-review.functions.ts", import.meta.url),
       "utf8",

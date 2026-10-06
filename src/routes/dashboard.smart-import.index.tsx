@@ -25,7 +25,7 @@ import {
 } from "@/lib/smart-import.functions";
 import { TimesheetsImportWizard } from "@/components/smart-import/timesheets/timesheets-import-wizard";
 import { DailyNotesImportWizard } from "@/components/smart-import/daily-notes/daily-notes-import-wizard";
-import { downloadClientTemplate } from "@/lib/client-import-template";
+import { downloadClientTemplate } from "@/lib/clients/import-template";
 import { smartImportNeedsAi } from "@/lib/smart-import-ai-gate";
 
 const SearchSchema = z.object({ mode: z.enum(["employee", "client", "timesheets", "daily_notes"]).optional() });
@@ -38,12 +38,19 @@ export const Route = createFileRoute("/dashboard/smart-import/")({
       throw redirect(employeeSmartImportRedirect());
     }
   },
-  component: () => (
-    <RequirePermission perm="view_staff_records">
+  component: SmartImportGate,
+});
+
+// Client imports need Clients: Edit; timesheet / daily-note imports stay on staff records.
+function SmartImportGate() {
+  const { mode } = Route.useSearch();
+  const perm = mode === "timesheets" || mode === "daily_notes" ? "view_staff_records" : "edit_client_records";
+  return (
+    <RequirePermission perm={perm}>
       <SmartImportPage />
     </RequirePermission>
-  ),
-});
+  );
+}
 
 type Mode = "employee" | "client" | "timesheets" | "daily_notes";
 type FileChip = {

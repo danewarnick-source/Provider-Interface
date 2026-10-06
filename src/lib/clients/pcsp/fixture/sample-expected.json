@@ -1,0 +1,304 @@
+{
+  "plan": {
+    "start": "2026-09-01",
+    "end": "2027-08-31",
+    "activatedOn": "2026-08-20",
+    "status": "Active",
+    "meetingDate": "2026-08-15"
+  },
+  "person": {
+    "name": "Pat Q. Example",
+    "pid": "0000000",
+    "residentialAddress": "100 Sample Street Exampleville, UT 84000",
+    "mailingAddress": "",
+    "phone": "555-0100",
+    "supportCoordinator": {
+      "name": "Casey Sample",
+      "email": "casey@example.test",
+      "phone": "555-0101",
+      "company": "Sample Coordination Co"
+    }
+  },
+  "goals": [
+    {
+      "goal": "Pat will cook a simple meal each week.",
+      "domain": "Healthy Living",
+      "currentStatus": "Pat makes sandwiches with help.",
+      "strengths": "Pat follows picture recipes.",
+      "barriers": "Needs help with the stove.",
+      "successPerson": "Pat cooks pasta on Sundays.",
+      "successTeam": "Pat cooks with only verbal prompts.",
+      "supports": [
+        {
+          "support": "Staff will coach Pat through each recipe step.",
+          "details": "Use the picture recipe binder.",
+          "start": "2026-09-01",
+          "end": "2027-08-31",
+          "providers": [
+            {
+              "code": "DSI",
+              "provider": "Example Supports, LLC",
+              "ours": true
+            }
+          ],
+          "ourCodes": [
+            "DSI"
+          ],
+          "naturalSupport": "Parent shops for groceries.",
+          "otherSupport": "",
+          "healthNeeds": [
+            {
+              "category": "Kitchen safety",
+              "description": "Staff stay within reach at the stove."
+            },
+            {
+              "category": "Burns",
+              "description": "Check that burners are off."
+            }
+          ],
+          "page": 3
+        },
+        {
+          "support": "Behavior consultant will review the kitchen plan with staff.",
+          "details": "",
+          "start": "2026-08-15",
+          "end": "2027-08-31",
+          "providers": [
+            {
+              "code": "BC2",
+              "provider": "Sample Behavior Group Inc",
+              "ours": false
+            }
+          ],
+          "ourCodes": [],
+          "naturalSupport": "",
+          "otherSupport": "",
+          "healthNeeds": [],
+          "page": 3
+        },
+        {
+          "support": "Staff will help Pat clean up after cooking.",
+          "details": "",
+          "start": null,
+          "end": null,
+          "providers": [
+            {
+              "code": "DSI",
+              "provider": "Example Supports LLC",
+              "ours": true
+            }
+          ],
+          "ourCodes": [
+            "DSI"
+          ],
+          "naturalSupport": "",
+          "otherSupport": "",
+          "healthNeeds": [],
+          "page": 4
+        }
+      ],
+      "page": 3
+    },
+    {
+      "goal": "Pat will work at a job in the community.",
+      "domain": "Daily Life Employment",
+      "currentStatus": "",
+      "strengths": "",
+      "barriers": "",
+      "successPerson": "",
+      "successTeam": "",
+      "supports": [
+        {
+          "support": "Job coach will support Pat at work.",
+          "details": "",
+          "start": "2026-09-01",
+          "end": "2027-08-31",
+          "providers": [
+            {
+              "code": "SEI",
+              "provider": "Example Supports LLC",
+              "ours": true
+            }
+          ],
+          "ourCodes": [
+            "SEI"
+          ],
+          "naturalSupport": "",
+          "otherSupport": "",
+          "healthNeeds": [],
+          "page": 4
+        },
+        {
+          "support": "Sibling gives Pat rides to work.",
+          "details": "",
+          "start": null,
+          "end": null,
+          "providers": [],
+          "ourCodes": [],
+          "naturalSupport": "Sibling",
+          "otherSupport": "",
+          "healthNeeds": [],
+          "page": 5
+        }
+      ],
+      "page": 4
+    }
+  ],
+  "nonGoalSupports": [
+    {
+      "support": "Behavior support plan for Pat at home.",
+      "details": "Sample Behavior Group writes the plan.",
+      "start": "2026-09-01",
+      "end": "2027-08-31"
+    },
+    {
+      "support": "Annual dental visit.",
+      "details": "",
+      "start": null,
+      "end": null
+    }
+  ],
+  "purchasedServices": [
+    {
+      "code": "DSI",
+      "name": "Day Supports Individual",
+      "unitType": "15 Minutes",
+      "units": 2000,
+      "start": "2026-09-01",
+      "end": "2027-08-31",
+      "page": 6
+    },
+    {
+      "code": "",
+      "name": "",
+      "unitType": "Daily",
+      "units": 365,
+      "start": "2026-09-01",
+      "end": "2027-08-31",
+      "page": 6
+    },
+    {
+      "code": "SEI",
+      "name": "Supported Employment Individual",
+      "unitType": "15 Minutes",
+      "units": 1040,
+      "start": "2026-09-01",
+      "end": "2027-08-31",
+      "page": 6
+    }
+  ],
+  "budget": [
+    {
+      "code": "DSI",
+      "kind": "W",
+      "provider": "Example Supports, LLC",
+      "ours": true,
+      "start": "2026-09-01",
+      "end": "2027-08-31",
+      "rate": 8.5,
+      "maxMonthlyUnits": 200,
+      "annualUnits": 2000,
+      "total": 17000
+    },
+    {
+      "code": "HHS",
+      "kind": "D",
+      "provider": "Example Supports, LLC",
+      "ours": true,
+      "start": "2026-09-01",
+      "end": "2027-08-31",
+      "rate": 120,
+      "maxMonthlyUnits": 31,
+      "annualUnits": 365,
+      "total": 43800
+    },
+    {
+      "code": "SEI",
+      "kind": "W",
+      "provider": "Example Supports LLC",
+      "ours": true,
+      "start": "2026-09-01",
+      "end": "2027-08-31",
+      "rate": 9.25,
+      "maxMonthlyUnits": 100,
+      "annualUnits": 1040,
+      "total": 9620
+    },
+    {
+      "code": "BC2",
+      "kind": "W",
+      "provider": "Sample Behavior Group Inc",
+      "ours": false,
+      "start": "2026-09-01",
+      "end": "2027-08-31",
+      "rate": 20,
+      "maxMonthlyUnits": 10,
+      "annualUnits": 96,
+      "total": 1920
+    }
+  ],
+  "risks": [
+    {
+      "risk": "Choking on large bites of food.",
+      "response": "Cut food into small pieces.",
+      "responseTime": "Immediate",
+      "notes": "Staff watch during all meals."
+    }
+  ],
+  "aboutMe": [
+    {
+      "domain": "Healthy Living",
+      "label": "Likes outdoors",
+      "note": "Pat enjoys gardening and music. Morning walks help.",
+      "source": "Pat"
+    },
+    {
+      "domain": "Safety & Security",
+      "label": "Does not like",
+      "note": "Loud crowded rooms.",
+      "source": "Guardian"
+    }
+  ],
+  "lastYearGoals": [
+    {
+      "goal": "Pat will cook a simple meal each week.",
+      "ongoing": true,
+      "status": "Partially met"
+    },
+    {
+      "goal": "Pat will ride the bus to the library.",
+      "ongoing": false,
+      "status": "Met"
+    }
+  ],
+  "issues": [
+    {
+      "level": "warn",
+      "page": 5,
+      "message": "The bottom of this page is printed on top of itself. The readable top part was used; the overlapping part was skipped. Check it by eye."
+    },
+    {
+      "level": "error",
+      "page": 6,
+      "message": "A purchased service is listed without its code (the code line is missing in the PDF). Enter the code by hand."
+    },
+    {
+      "level": "warn",
+      "page": 6,
+      "message": "The PCSP prints \"Code RP4 is obsolete\". Confirm which service this applies to."
+    },
+    {
+      "level": "warn",
+      "page": 3,
+      "message": "Support starts 2026-08-15, before the plan starts."
+    },
+    {
+      "level": "warn",
+      "message": "Budget line HHS isn't in the purchased services list."
+    },
+    {
+      "level": "warn",
+      "message": "HHS has a budget but no goal support lists it, so staff on HHS would have nothing to report on."
+    }
+  ]
+}

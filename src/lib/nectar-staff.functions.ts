@@ -1,5 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { activeContacts, contactsByClient, contactsWithRole, loadClientContacts } from "@/lib/clients/contacts";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { todayYmd } from "@/lib/clients/dates";
+import { goalLine, goalsOn, supportsForCodes, type ClientPlanBundle } from "@/lib/clients/plans";
+import { loadPlanBundles } from "@/lib/clients/plans-load";
 
 import { assertBedrockConfigured, gatewayFetch } from "@/lib/ai-bedrock.server";
 import {
@@ -104,8 +108,11 @@ interface TrainingFact { id: string; title: string; kind: "doc" | "lesson"; exce
 interface ClientFact {
   id: string;
   name: string;
-  pcsp_goals: string[];
+  /** Plan goals with the supports for the codes this team member works for the client. */
+  goals: string[];
   special_directions: string | null;
+  /** Who to call: guardian + emergency contacts (client_contacts). */
+  contacts: Array<{ role: string; name: string; relationship: string | null; phone: string | null }>;
   medications: Array<{
     id: string;
     name: string;
@@ -287,7 +294,7 @@ export const askNectarStaff = createServerFn({ method: "POST" })
     });
     const assignedRows = (assignedRpc.data as Array<{
       id: string; first_name: string; last_name: string;
-      pcsp_goals: string[] | null; special_directions: string | null;
+      special_directions: string | null;
     }> | null) ?? [];
     const allowed = new Set(assignedRows.map((r) => r.id));
     const caseloadPeople: NamedPerson[] = assignedRows.map((r) => ({
@@ -455,13 +462,38 @@ export const askNectarStaff = createServerFn({ method: "POST" })
           medsByClient.set(m.client_id, arr);
         }
       }
+      const contactsById = contactsByClient(
+        activeContacts(await loadClientContacts(supabase, clientIdsToInclude).catch(() => [])),
+      );
+      // Goals: the supports for the codes the asker works for each client
+      // (their assignment codes plus the codes of their own shifts).
+      const plansById = await loadPlanBundles(supabase, clientIdsToInclude).catch(() => new Map<string, ClientPlanBundle>());
+      const assignQ = await supabase
+        .from("staff_assignments")
+        .select("client_id, service_codes")
+        .eq("staff_id", userId)
+        .in("client_id", clientIdsToInclude);
+      const myCodes = new Map<string, string[]>();
+      for (const a of (assignQ.data ?? []) as Array<{ client_id: string; service_codes: string[] | null }>) {
+        myCodes.set(a.client_id, [...(myCodes.get(a.client_id) ?? []), ...(a.service_codes ?? [])]);
+      }
+      for (const s of ownShifts) {
+        if (s.job_code) myCodes.set(s.client_id, [...(myCodes.get(s.client_id) ?? []), s.job_code]);
+      }
+      const today = todayYmd();
       for (const c of assignedRows.filter((r) => clientIdsToInclude.includes(r.id))) {
         const directions = c.special_directions?.trim() ?? "";
+        const mine = contactsById.get(c.id) ?? [];
         clientFacts.push({
           id: c.id,
           name: `${c.first_name} ${c.last_name}`.trim(),
-          pcsp_goals: slimPcspGoals(c.pcsp_goals),
+          goals: slimPcspGoals(
+            supportsForCodes(goalsOn(plansById.get(c.id), today).goals, myCodes.get(c.id) ?? [], today).map(goalLine),
+          ),
           special_directions: directions ? directions.slice(0, wantsMeds ? 400 : 200) : null,
+          contacts: [...contactsWithRole(mine, "guardian"), ...contactsWithRole(mine, "emergency")]
+            .slice(0, 4)
+            .map((x) => ({ role: x.role, name: x.name, relationship: x.relationship, phone: x.phone })),
           medications: wantsMeds
             ? (medsByClient.get(c.id) ?? []).map((m) => ({
                 id: m.id, name: m.medication_name, dosage: m.dosage, frequency: m.frequency,
@@ -545,7 +577,7 @@ ABSOLUTE SCOPE RULES (you MUST refuse anything outside these):
    - Training material the staff member has access to (from FACTS.training).
    - The staff member's OWN role/duties/processes (FACTS.caller).
    - The staff member's OWN published schedule (FACTS.schedule) — upcoming shifts and how many of THEIR shifts they have with a named person this month. Times are Mountain Time. Answer day-name questions from this pack.
-   - For clients listed in FACTS.clients: their PCSP goals, special directions (safety), and active medications needed to safely deliver care. These people are on this staff member's caseload right now.
+   - For clients listed in FACTS.clients: their plan goals with the supports for this staff member's service codes, special directions (safety), and active medications needed to safely deliver care. These people are on this staff member's caseload right now.
 2. FORBIDDEN — REFUSE and direct them to a manager/admin (do not compute or guess):
    - Pay, rates, dollars, overtime pay, estimated earnings, "how much did I make", or any money.
    - Hours worked / hours this week / month / pay period. Even if you can see shift start/end times, do not add them up as hours worked.
@@ -561,7 +593,7 @@ ANSWER STYLE:
 - Lead with the direct answer. Then specifics. Then a brief "Source:" line with the policy/training/schedule title when used.
 - For schedule answers, list weekday + time + person + service code from FACTS.schedule. If the pack is empty, say you do not see published shifts in this window.
 - For medications, ALWAYS include dosage, frequency, route, and any choking-risk or PRN notes when present.
-- For PCSP goals, list them as the goals the staff member should be reporting on in daily paperwork.
+- For goals, list each goal with its supports for this staff member's code: these are what they report on in daily paperwork.
 - If the question is outside scope, respond ONLY with a short refusal that tells them to ask their manager/admin. Do not hedge or guess.
 
 PRIVACY: Client information here is PHI. The user is authorized for these specific people only.

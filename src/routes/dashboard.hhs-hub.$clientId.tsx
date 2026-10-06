@@ -9,7 +9,6 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   useMyAssignments,
   allowedCodesFor,
-  clientAuthorizedCodes,
 } from "@/hooks/use-my-assignments";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +34,8 @@ import { evaluateShiftNote } from "@/lib/ai-coach.functions";
 import { saveDailyRecord, savePrnForm, saveIncidentReport } from "@/lib/hhs.functions";
 import { denverYmd } from "@/lib/denver-date";
 import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
-import { useClientFeature } from "@/lib/client-features";
+import { useClientFeature } from "@/lib/clients/features";
+import { useClientActiveCodes } from "@/components/clients/shared/hooks/use-active-codes";
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";
 import { DailyNoteMedsBlock, type DailyNoteMedication } from "@/components/medications/daily-note-meds-block";
 import { type PendingMedDose } from "@/components/medications/shift-med-due-check";
@@ -47,6 +47,8 @@ import {
   COMPLETENESS_PASS_FEEDBACK,
   localWordCountCheck,
 } from "@/lib/nectar-completeness";
+import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
+import { useSupportsForCode } from "@/components/clients/shared/hooks/use-plan-goals";
 
 const hhsSearch = z.object({
   tab: z.string().optional(),
@@ -68,13 +70,10 @@ interface ClientFull {
   id: string;
   first_name: string;
   last_name: string;
-  pcsp_goals: string[] | null;
   physical_address: string | null;
   special_directions: string | null;
-  profile_photo_url: string | null;
+  client_photo_url: string | null;
   geofence_radius_feet: number | null;
-  authorized_dspd_codes: string[] | null;
-  job_code?: string[] | null;
   feature_config: Record<string, boolean> | null;
   allergies: string[] | null;
   dysphagia: boolean | null;
@@ -83,7 +82,11 @@ interface ClientFull {
 
 function HhsClientHubRoute() {
   const { clientId } = Route.useParams();
-  return <HhsClientHub clientId={clientId} />;
+  return (
+    <ClientAccessGate clientId={clientId}>
+      <HhsClientHub clientId={clientId} />
+    </ClientAccessGate>
+  );
 }
 
 export function HhsClientHub({ clientId }: { clientId: string }) {
@@ -102,7 +105,7 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
     queryFn: async () => {
       const { data } = await supabase
         .from("clients")
-        .select("id, first_name, last_name, pcsp_goals, physical_address, special_directions, profile_photo_url, geofence_radius_feet, authorized_dspd_codes, job_code, feature_config, allergies, dysphagia, swallowing_alerts" as any)
+        .select("id, first_name, last_name, physical_address, special_directions, client_photo_url, geofence_radius_feet, feature_config, allergies, dysphagia, swallowing_alerts" as any)
         .eq("id", clientId)
         .maybeSingle();
       return data as ClientFull | null;
@@ -123,10 +126,11 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
   });
 
   const { data: assignments } = useMyAssignments();
+  const clientCodes = useClientActiveCodes(client?.id);
   const allowedCodes = useMemo(() => {
     if (!client) return [];
-    return allowedCodesFor(assignments, client.id, clientAuthorizedCodes(client));
-  }, [client, assignments]);
+    return allowedCodesFor(assignments, client.id, clientCodes);
+  }, [client, assignments, clientCodes]);
   const allowedDaily = useMemo(
     () => allowedCodes.filter(isDailyServiceCode),
     [allowedCodes],
@@ -258,12 +262,15 @@ function DailyNoteTab({
   const qc = useQueryClient();
   const evalFn = useServerFn(evaluateShiftNote);
   const saveFn = useServerFn(saveDailyRecord);
-  const pcsp   = client.pcsp_goals ?? [];
+  // HHS supports from the plan in effect on the note's date, grouped by goal.
+  const supports = useSupportsForCode(client.id, "HHS", recordDate);
+  const picked = supports.options.filter((o) => goals.includes(o.supportId));
+  const goalLabels = picked.map((o) => o.label);
 
   const MIN_WORDS = NECTAR_DRAFT_MIN_WORDS;
   const words     = countNoteWords(note);
   const narrativeOk = words >= MIN_WORDS;
-  const hasGoal     = goals.length > 0;
+  const hasGoal     = picked.length > 0;
 
   useEffect(() => {
     setTimeout(() => clearCanvas(), 0);
@@ -344,7 +351,7 @@ function DailyNoteTab({
     setAiBusy(true);
     try {
       const result = await evalFn({
-        data: { narrative: note, goals, clientFirstName: client.first_name, serviceCode: "HHS" },
+        data: { narrative: note, goals: goalLabels, clientFirstName: client.first_name, serviceCode: "HHS" },
       });
       if (result.status !== "Verified") {
         setCompletenessErrors(result.checks.filter((c) => !c.passed));
@@ -391,7 +398,9 @@ function DailyNoteTab({
           clientId: client.id,
           recordDate,
           narrative: note,
-          pcspGoalsAddressed: goals,
+          pcspGoalsAddressed: goalLabels,
+          goalIds: [...new Set(picked.map((o) => o.goalId))],
+          supportIds: picked.map((o) => o.supportId),
           aiStatus: "Verified",
           aiFeedback,
           signatureDataUrl: signature,
@@ -433,34 +442,43 @@ function DailyNoteTab({
           </p>
         </div>
 
-        {/* PCSP Goals — phone-friendly tap rows (≥44px), full-width, easy to check */}
+        {/* Goals → HHS supports — phone-friendly tap rows (≥44px), full-width, easy to check */}
         <div>
-          <Label>PCSP Goals Addressed Today</Label>
-          <div className="mt-2 space-y-1.5">
-            {pcsp.length === 0 && <p className="text-xs text-muted-foreground">No PCSP goals on file.</p>}
-            {pcsp.map((g) => {
-              const checked = goals.includes(g);
-              return (
-                <label
-                  key={g}
-                  className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm transition ${
-                    checked
-                      ? "border-accent/40 bg-accent/10"
-                      : "border-border bg-card hover:bg-secondary/60"
-                  }`}
-                >
-                  <Checkbox
-                    className="mt-0.5"
-                    checked={checked}
-                    onCheckedChange={(c) => {
-                      setGoals(c ? [...goals, g] : goals.filter((x) => x !== g));
-                      if (completenessErrors.length) setCompletenessErrors([]);
-                    }}
-                  />
-                  <span className="min-w-0 flex-1 leading-snug">{g}</span>
-                </label>
-              );
-            })}
+          <Label>Goals worked on today</Label>
+          <div className="mt-2 space-y-3">
+            {supports.groups.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                {supports.isLoading ? "Loading goals…" : "No supports on this person's plan list HHS. Ask your supervisor to add them."}
+              </p>
+            )}
+            {supports.groups.map((g) => (
+              <div key={g.id} className="space-y-1.5">
+                <p className="text-xs font-semibold text-foreground">{g.goal}</p>
+                {g.supports.map((s) => {
+                  const checked = goals.includes(s.id);
+                  return (
+                    <label
+                      key={s.id}
+                      className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm transition ${
+                        checked
+                          ? "border-accent/40 bg-accent/10"
+                          : "border-border bg-card hover:bg-secondary/60"
+                      }`}
+                    >
+                      <Checkbox
+                        className="mt-0.5"
+                        checked={checked}
+                        onCheckedChange={(c) => {
+                          setGoals(c ? [...goals, s.id] : goals.filter((x) => x !== s.id));
+                          if (completenessErrors.length) setCompletenessErrors([]);
+                        }}
+                      />
+                      <span className="min-w-0 flex-1 leading-snug">{s.support_text.trim() || "Worked on this goal"}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
 
@@ -495,7 +513,7 @@ function DailyNoteTab({
         {/* Nectar deterministic trigger prompt — runs on-device, blocks submit. */}
         <NectarShiftNoteDraft
           narrative={note}
-          goals={goals}
+          goals={goalLabels}
           clientFirstName={client.first_name}
           onApplyDraft={(draft) => {
             setNote(draft);

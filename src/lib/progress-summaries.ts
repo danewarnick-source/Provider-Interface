@@ -1,19 +1,44 @@
-// Pure helpers for client progress summary periods.
-// HHS / RHS / DSI / SLH / SLN → quarterly narrative (due 15 days after quarter end).
-// SEI / PN1 / PN2 / CMP / CMS → monthly narrative (due 15th of following month).
-//   SEI additionally requires UPI attestation.
-// PBA → monthly FINANCIAL STATEMENT marker (no AI draft).
+// Pure helpers for client progress summary periods. Cadences follow
+// DHHS91172 (eff 7/1/26):
+//   MONTHLY narrative (due the 15th of the following month): SEI, SJD, CMP,
+//     CMS, PN1, PN2. SEI / SJD are typed into the state UPI portal (admin).
+//   PBA → monthly FINANCIAL STATEMENT (no AI draft).
+//   QUARTERLY narrative (due 15 days after quarter end): every other code,
+//     incl. HHS / RHS / DSI / SLH / SLN.
+//   No summary: respite, ELS, MTP and PM1/PM2 (NO_SUMMARY_CODES).
 //
 // Goal-progress section is omitted entirely for clients whose only services
 // are in GOAL_PROGRESS_EXCLUDED_CODES (ELS, MTP, PBA, PM1/PM2, RP/RL respite).
 
-export const QUARTERLY_SUMMARY_CODES = new Set(["HHS", "RHS", "DSI", "SLH", "SLN"]);
-// CMP/CMS moved from (implicit, never-generated) quarterly to explicit monthly
-// cadence — forward-looking only, does not touch any historical quarterly rows.
-// SJD (Supported Employment — Job Development) also monthly, same UPI
-// attestation requirement as SEI.
 export const MONTHLY_SUMMARY_CODES = new Set(["SEI", "SJD", "PN1", "PN2", "CMP", "CMS"]);
 export const FINANCIAL_STATEMENT_CODES = new Set(["PBA"]);
+/** Codes that owe no progress summary at all. */
+export const NO_SUMMARY_CODES = new Set(["ELS", "MTP", "PM1", "PM2", "RP2", "RP3", "RP4", "RP5", "RL6"]);
+
+export type SummaryCadence = "quarterly" | "monthly" | "financial";
+
+/** How often one code owes a summary; null when it owes none. */
+export function summaryCadenceForCode(raw: string): SummaryCadence | null {
+  const code = raw.trim().toUpperCase();
+  if (!code || NO_SUMMARY_CODES.has(code)) return null;
+  if (FINANCIAL_STATEMENT_CODES.has(code)) return "financial";
+  if (MONTHLY_SUMMARY_CODES.has(code)) return "monthly";
+  return "quarterly";
+}
+
+export type OwedSummary = { code: string; cadence: SummaryCadence; upi: boolean };
+
+/** Every code (distinct, upper-cased) that owes a summary, with its cadence. */
+export function summariesOwed(codes: readonly string[]): OwedSummary[] {
+  const out: OwedSummary[] = [];
+  for (const raw of codes) {
+    const code = raw.trim().toUpperCase();
+    const cadence = summaryCadenceForCode(code);
+    if (!cadence || out.some((o) => o.code === code)) continue;
+    out.push({ code, cadence, upi: UPI_FILING_CODES.has(code) });
+  }
+  return out;
+}
 
 /**
  * Lightweight per-code required-field guidance surfaced to Nectar's draft
@@ -135,7 +160,7 @@ export function isPeriodInProgress(periodEnd: string, now: Date = new Date()): b
 
 export type SummaryBuckets = {
   quarterly: Set<string>;
-  monthlyNarrative: Set<string>;  // SEI / PN1 / PN2
+  monthlyNarrative: Set<string>;  // SEI / SJD / CMP / CMS / PN1 / PN2
   monthlyFinancial: Set<string>;  // PBA
 };
 
@@ -143,9 +168,10 @@ export function bucketCodes(codes: string[]): SummaryBuckets {
   const b: SummaryBuckets = { quarterly: new Set(), monthlyNarrative: new Set(), monthlyFinancial: new Set() };
   for (const raw of codes) {
     const c = raw.toUpperCase();
-    if (QUARTERLY_SUMMARY_CODES.has(c)) b.quarterly.add(c);
-    if (MONTHLY_SUMMARY_CODES.has(c)) b.monthlyNarrative.add(c);
-    if (FINANCIAL_STATEMENT_CODES.has(c)) b.monthlyFinancial.add(c);
+    const cadence = summaryCadenceForCode(c);
+    if (cadence === "quarterly") b.quarterly.add(c);
+    if (cadence === "monthly") b.monthlyNarrative.add(c);
+    if (cadence === "financial") b.monthlyFinancial.add(c);
   }
   return b;
 }

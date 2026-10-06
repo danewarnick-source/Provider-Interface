@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { loadActiveCodes } from "@/lib/clients/codes";
 import { loadEvidenceClientPeople } from "./people.ts";
 import type { EvidencePerson } from "./types.ts";
 
@@ -15,5 +16,6 @@ export async function fetchEvidenceClientPeople(
       .select(columns)
       .eq("organization_id", organizationId)
       .order("last_name", { ascending: true }),
+    (ids) => loadActiveCodes(supabase, ids),
   );
 }

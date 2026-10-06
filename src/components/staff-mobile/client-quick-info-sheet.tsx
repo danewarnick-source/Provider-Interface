@@ -10,27 +10,18 @@ import {
 } from "react";
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
 import { useActiveShift } from "@/hooks/use-active-shift";
+import { useClientCareData } from "@/hooks/use-client-care-data";
 import type { CaseloadClient } from "@/hooks/use-caseload";
 import { displayPersonName } from "@/lib/person-name";
+import { useClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
+import { CONTACT_ROLE_LABELS, contactsWithRole } from "@/lib/clients/contacts";
+import { formatDate } from "@/lib/clients/dates";
 import { AlertTriangle, Target, Phone, Heart, IdCard, ChevronRight } from "lucide-react";
 
 type Props = {
   client: CaseloadClient;
   trigger: ReactNode;
 };
-
-function fmtDate(d: string | null) {
-  if (!d) return "—";
-  try {
-    return new Date(d + (d.length === 10 ? "T00:00:00" : "")).toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return d;
-  }
-}
 
 function fmtElapsed(ms: number) {
   if (ms < 0) ms = 0;
@@ -57,12 +48,20 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
   }, [isOnTheClock]);
 
   const fullName = displayPersonName(client.first_name, client.last_name);
-  const goals = client.pcsp_goals ?? [];
+  const [open, setOpen] = useState(false);
+  // On the clock: the goals with supports for this shift's code; otherwise every plan goal.
+  const shiftCode = isOnTheClock ? active?.service_type_code ?? null : null;
+  const care = useClientCareData(open ? client.id : null, shiftCode).data?.visibility;
+  const goals = ((shiftCode ? care?.goalsForStaff : care?.staffCare.goals) ?? []).map((g) => g.goal);
   const todaysGoal = goals[0];
   const elapsed =
     isOnTheClock && active ? fmtElapsed(now - new Date(active.clock_in_timestamp).getTime()) : "";
 
-  const [open, setOpen] = useState(false);
+  const contacts = useClientContacts(open ? client.id : undefined).data ?? [];
+  const emergency = [
+    ...contactsWithRole(contacts, "emergency"),
+    ...contactsWithRole(contacts, "guardian"),
+  ];
   const triggerEl = isValidElement(trigger)
     ? cloneElement(trigger as ReactElement<{ onClick?: (e: MouseEvent) => void }>, {
         onClick: (e: MouseEvent) => {
@@ -123,7 +122,7 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
           </Section>
 
           {/* (b) PCSP goals — today + view all */}
-          <Section tone="success" icon={<Target className="h-4 w-4" />} title="PCSP Goals">
+          <Section tone="success" icon={<Target className="h-4 w-4" />} title="Goals">
             {todaysGoal ? (
               <>
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-[#0d5c3d]">
@@ -150,17 +149,21 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
                 )}
               </>
             ) : (
-              <p className="text-sm text-muted-foreground">No PCSP goals on file.</p>
+              <p className="text-sm text-muted-foreground">
+                {shiftCode ? `No goals on the plan list ${shiftCode}.` : "No goals on the plan yet."}
+              </p>
             )}
           </Section>
 
           {/* (c) Emergency contacts incl. on-call supervisor */}
           <Section tone="info" icon={<Phone className="h-4 w-4" />} title="Emergency Contacts">
-            <ContactRow
-              label="Emergency contact"
-              name={client.emergency_contact_name ?? null}
-              phone={client.emergency_contact_phone ?? null}
-            />
+            {emergency.length === 0 ? (
+              <ContactRow label="Emergency contact" name={null} phone={null} />
+            ) : (
+              emergency.map((c) => (
+                <ContactRow key={c.id} label={CONTACT_ROLE_LABELS[c.role]} name={c.relationship ? `${c.name} (${c.relationship})` : c.name} phone={c.phone} />
+              ))
+            )}
             <ContactRow label="On-call supervisor" name="See team roster" phone={null} muted />
           </Section>
 
@@ -175,7 +178,7 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
           {/* (e) Key IDs */}
           <Section tone="neutral" icon={<IdCard className="h-4 w-4" />} title="Key IDs & Address">
             <KvRow k="Medicaid ID" v={client.medicaid_id ?? "—"} mono />
-            <KvRow k="Date of birth" v={fmtDate(client.date_of_birth ?? null)} />
+            <KvRow k="Date of birth" v={formatDate(client.date_of_birth)} />
             <KvRow k="Address" v={client.physical_address ?? "—"} />
           </Section>
         </div>

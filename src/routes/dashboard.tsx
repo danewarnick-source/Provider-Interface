@@ -254,7 +254,7 @@ const ADMIN_NAV: NavItem[] = [
     perm: "view_staff_records",
     feature: "staff_onboarding",
   },
-  { to: "/dashboard/hub/clients", label: "Clients", icon: Contact2, feature: "client_intake" },
+  { to: "/dashboard/hub/clients", label: "Clients", icon: Contact2, perm: "view_clients", feature: "client_intake" },
   { to: "/dashboard/scheduler", label: "Scheduler", icon: CalendarDays, feature: "evv_timesheets" },
   {
     to: "/dashboard/hub/documentation",

@@ -151,17 +151,12 @@ function clientRow() {
     last_name: "Lee",
     home_latitude: 40.7608,
     home_longitude: -111.891,
-    pcsp_goals: ["Stay safe in the community"],
-    job_code: ["SLH", "SLN"],
-    authorized_dspd_codes: ["SLH", "SLN"],
     medicaid_id: "000123456789",
     physical_address: "123 Test St, Salt Lake City, UT",
     geofence_radius_feet: 500,
     special_directions: null,
-    profile_photo_url: null,
+    client_photo_url: null,
     feature_config: {},
-    emergency_contact_name: null,
-    emergency_contact_phone: null,
     date_of_birth: "1995-01-15",
     organization_id: IDS.org,
   };
@@ -783,6 +778,15 @@ export async function installHiveE2E(
 
     if (table.startsWith("rpc/")) {
       const rpc = table.slice(4);
+      if (rpc === "client_active_codes") {
+        const row = clientRow();
+        await fulfillJson(route, 200, ["SLH", "SLN"].map((service_code) => ({
+          client_id: row.id,
+          service_code,
+          service_end_date: null,
+        })));
+        return;
+      }
       if (rpc === "clients_for_staff" || rpc === "is_hive_executive") {
         if (rpc === "is_hive_executive") {
           await fulfillJson(route, 200, false);

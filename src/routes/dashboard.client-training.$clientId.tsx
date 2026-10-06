@@ -10,9 +10,10 @@ import {
   checkAnswerRelevance,
   type CSTContent,
   type CSTReviewQuestion,
-  type CSTGoal,
-} from "@/lib/client-specific-training.functions";
-import { SectionsView, GoalsView } from "@/components/clients/client-specific-training-card";
+} from "@/lib/clients/training.functions";
+import { SectionsView } from "@/components/clients/profile/client-specific-training-card";
+import { GoalTree } from "@/components/clients/profile/plans/goal-tree";
+import type { GoalView } from "@/lib/clients/plans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle2, Shield, Loader2, AlertTriangle, BookOpen, Users, FileSignature } from "lucide-react";
 import { TrainingCertificateDialog, type TrainingCertificateRecord } from "@/components/training/training-certificate-dialog";
 import { toast } from "sonner";
+import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
 
 const searchSchema = z.object({
   trainingType: z.enum(["person_specific", "support_strategies", "person_centered"]).optional(),
@@ -35,8 +37,17 @@ export const Route = createFileRoute("/dashboard/client-training/$clientId")({
       fallbackTo: "/dashboard/clients",
     });
   },
-  component: ClientTrainingViewer,
+  component: ClientTrainingRoute,
 });
+
+function ClientTrainingRoute() {
+  const { clientId } = Route.useParams();
+  return (
+    <ClientAccessGate clientId={clientId}>
+      <ClientTrainingViewer />
+    </ClientAccessGate>
+  );
+}
 
 // ── Question answer state ────────────────────────────────────────────────────
 type QAnswer = { question: string; answer: string; tab: string; relevant: boolean | null; hint: string; checking: boolean };
@@ -185,7 +196,7 @@ function ClientTrainingViewer() {
   }
 
   const alreadyCurrent = (completion?.is_current && pinned) || justCompleted;
-  const goals = (training as { goals?: CSTGoal[] | null }).goals ?? null;
+  const goals = (training as { goals?: GoalView[] | null }).goals ?? null;
 
   const allAnswered = questions.length === 0 || answers.every((a) => wordCount(a.answer) >= MIN_WORDS);
   const anyChecking = answers.some((a) => a.checking);
@@ -284,7 +295,7 @@ function ClientTrainingViewer() {
                   <h3 className="text-sm font-semibold">Goals</h3>
                   <Badge variant="outline" className="text-xs">{goals.length}</Badge>
                 </div>
-                <GoalsView goals={goals} />
+                <GoalTree goals={goals} />
               </div>
             )}
 

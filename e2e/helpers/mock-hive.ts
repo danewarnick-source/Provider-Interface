@@ -18,6 +18,7 @@ import {
   LAST_SIGN_IN,
   NEW_TEAM_MEMBER,
   ORG_ID,
+  planFixtureRows,
   ORG_NAME,
   PENDING_INVITE,
   PROFILE_ACCOUNT_ACTIVITY,
@@ -37,6 +38,10 @@ import { computeAgencySetupStatus } from "../../src/lib/agency-setup-gate";
 import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
 import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
 import { levelForRole, withAccessLevel } from "./access-level";
+import { clientOverviewPayload } from "./client-profile-mock";
+import { clientServicesPayload, requiredDocumentsPayload } from "./client-services-mock";
+import { isPcspServerFn, pcspServerFnPayload } from "./pcsp-mock";
+import { addClientPayload, listClientsPayload } from "./clients-list-mock";
 import { staffClientReadiness } from "../../src/lib/team-members/readiness";
 import { buildMemberOverview } from "../../src/lib/team-members/overview";
 
@@ -196,29 +201,15 @@ function clientRow(c: (typeof CLIENT_LIST)[number]): Row {
     last_name: c.last_name,
     phone_number: null,
     physical_address: null,
-    pcsp_goals: [...c.pcsp_goals],
-    job_code: [...c.codes],
     home_latitude: null,
     home_longitude: null,
-    authorized_dspd_codes: [...c.codes],
     medicaid_id: c.medicaid_id,
     account_status: "active",
     geofence_radius_feet: 500,
     special_directions: null,
     date_of_birth: null,
-    emergency_contact_name: null,
-    emergency_contact_phone: null,
-    emergency_contact_instructions: null,
-    emergency_contact_2_name: null,
-    emergency_contact_2_phone: null,
-    emergency_contact_2_instructions: null,
     is_own_guardian: true,
-    guardian_name: null,
-    guardian_phone: null,
-    guardian_relationship: null,
-    guardian_email: null,
     feature_config: {},
-    profile_photo_url: null,
     intake_status: "complete",
     team_id: c.team_id,
     level_of_need: null,
@@ -233,9 +224,6 @@ function clientRow(c: (typeof CLIENT_LIST)[number]): Row {
     palliative_care_status: null,
     hospice_status: null,
     admin_hours_per_week: null,
-    support_coordinator_name: null,
-    support_coordinator_email: null,
-    support_coordinator_phone: null,
     disability_category: null,
     bsp_status: null,
     diagnoses: null,
@@ -440,6 +428,10 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "home_staff_designations":
     case "client_staffing_ratios":
       return [];
+    case "client_plans":
+    case "client_goals":
+    case "client_goal_supports":
+      return opts.emptyClients ? [] : planFixtureRows(ORG_ID)[table];
     case "daily_logs":
       return opts.emptyLogs ? [] : DAILY_LOGS.map((row) => expandDailyLog(row));
     case "invitations":
@@ -508,6 +500,20 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
       ];
     case "organization_features":
       return [];
+    // Money section: one made-up PBA account so the section shows.
+    case "pba_accounts":
+      return [
+        {
+          id: "00000000-0000-4000-a000-0000000000f1",
+          organization_id: ORG_ID,
+          client_id: CLIENTS.tommy.id,
+          current_balance: 420,
+          medicaid_threshold: 2000,
+          opened_on: "2026-01-05",
+          notes: null,
+          created_by: null,
+        },
+      ];
     default:
       return [];
   }
@@ -584,6 +590,17 @@ async function handleSupabase(
 
   if (url.pathname.startsWith("/rest/v1/rpc/")) {
     const rpc = url.pathname.replace("/rest/v1/rpc/", "").split("/")[0];
+    if (rpc === "client_active_codes") {
+      const ids = ((route.request().postDataJSON() ?? {}) as { _client_ids?: string[] })._client_ids ?? [];
+      await fulfillJson(
+        route,
+        200,
+        CLIENT_LIST.filter((c) => ids.includes(c.id)).flatMap((c) =>
+          c.codes.map((service_code) => ({ client_id: c.id, service_code, service_end_date: null })),
+        ),
+      );
+      return;
+    }
     if (rpc === "clients_for_staff") {
       if (opts.emptyClients || opts.noAssignments) {
         await fulfillJson(route, 200, []);
@@ -699,17 +716,11 @@ function emptyClientCareData(clientId: string) {
     status: "active",
     phone_number: null,
     is_own_guardian: true,
-    guardian_name: null,
-    guardian_phone: null,
-    support_coordinator_name: null,
-    support_coordinator_phone: null,
-    support_coordinator_email: null,
     has_abi: null,
     hr_applicable: null,
     dnr_applicable: null,
     diagnoses: [] as string[],
-    primary_care_name: null,
-    pcsp_expiration_date: null,
+    plan_end_date: null,
     special_directions: null,
   };
   const sections = {
@@ -723,13 +734,13 @@ function emptyClientCareData(clientId: string) {
   return {
     identity,
     flags: { self_admin_med_support: false, self_admin_med_support_locked: false },
-    pcsp_training_id: null,
+    plan: null,
     goals: [],
     medications: [],
     authorized_codes: [],
     custom_fields: [],
-    emergency_contacts: [],
-    preferred_activities: [],
+    contacts: [],
+    about_me: null,
     visibilityRow: { sections: {}, fields: {} },
     visibility: {
       goalsForStaff: [],
@@ -742,8 +753,8 @@ function emptyClientCareData(clientId: string) {
         medications: [],
         authorized_codes: [],
         custom_fields: [],
-        emergency_contacts: [],
-        preferred_activities: [],
+        contacts: [],
+        about_me: null,
       },
     },
   };
@@ -998,6 +1009,30 @@ function inferServerFn(url: string, body: string): string {
 function serverFnPayload(url: string, body: string): unknown {
   const fn = inferServerFn(url, body);
   const fnBlob = `${fn}\n${url}\n${body}`;
+  // Client writes (src/lib/clients/writes.functions.ts) — echo a made-up id.
+  if (/^updateClient$/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c1" };
+  // Client list + Add client (src/lib/clients/list.functions.ts, create.functions.ts).
+  if (/^listClients/.test(fn)) return listClientsPayload(body, activeMockOpts);
+  const addPayload = addClientPayload(fn, body);
+  if (addPayload !== undefined) return addPayload;
+  if (/^writeClientRecord$/.test(fn)) return { ids: ["00000000-0000-4000-a000-0000000000c3"] };
+  // Discharge (src/lib/clients/discharge.functions.ts): no open discharge; writes echo.
+  if (/^getClientDischarge/.test(fn)) return null;
+  if (/^previewDischarge/.test(fn)) {
+    return { ended: { authorizations: [], team: [], shifts: [] }, upcoming: [] };
+  }
+  if (/^dischargeClient/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c4" };
+  if (/^(reactivateClient|saveDischargeSummary|markDischargeSummarySent)/.test(fn)) {
+    return { ok: true };
+  }
+  // Client profile Overview (src/lib/clients/overview.functions.ts).
+  if (/^getClientOverview/.test(fn)) return clientOverviewPayload();
+  // Services & billing and Client file (services.functions.ts, file.functions.ts).
+  if (/^getClientServices/.test(fn)) return clientServicesPayload();
+  if (/^listClientRequiredDocuments/.test(fn)) return requiredDocumentsPayload();
+  // PCSP import (src/lib/clients/pcsp/import.functions.ts).
+  const pcsp = /readPcsp/.test(fn) ? "readPcsp" : /confirmPcsp/.test(fn) ? "confirmPcsp" : isPcspServerFn(body);
+  if (pcsp) return pcspServerFnPayload(pcsp);
   if (/listTeamRoster/i.test(fn)) return teamRosterRows();
   if (/listTeamInvites/i.test(fn)) return teamInviteRows();
   if (/rosterOrgHasHomes/i.test(fn)) return !activeMockOpts.noHomes;
@@ -1276,7 +1311,7 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/getClientSpecificTraining|getSupportStrategies/i.test(fn)) {
     return { training: null };
   }
-  if (/getClientIntakeChecklist|getUiDismissals/i.test(fn)) return [];
+  if (/getUiDismissals/i.test(fn)) return [];
   // Arrays: obligations, instances, lists. Safer default than an object
   // so dashboard `.map()` / `for...of` calls don't crash the shell.
   if (
@@ -1498,6 +1533,10 @@ async function handleServerFn(route: Route) {
     return;
   }
   const body = req.postData() ?? req.url();
+  if (activeMockOpts.clientsError && /^listClients/.test(inferServerFn(req.url(), body))) {
+    await route.fulfill({ status: 500, contentType: "text/plain", body: "Mocked clients read failure" });
+    return;
+  }
   const payload = serverFnPayload(req.url(), body);
   const serialized = await toCrossJSONAsync({ result: payload });
   await route.fulfill({

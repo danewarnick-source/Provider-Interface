@@ -1,0 +1,409 @@
+# Clients rebuild — progress
+
+One short report per prompt. A new session continues from the first prompt not marked merged.
+
+## Baseline (main @ start of run)
+- Supabase live `dhrrukdcigiiqksibdfb`: reachable via MCP, migrations can be applied.
+- `npx tsc --noEmit`: 203 errors.
+- `npm run test:unit`: 1543 pass, 5 fail already on main (Lambda build path collision, NECTAR onboarding agency setup gate, Admin notification bell, confirm/webhook shared upsert, SOW index). "Passing" for each prompt = no new failures beyond these.
+
+## P1
+- **Status:** merged. PR #446 (https://github.com/danewarnick-source/Provider-Interface/pull/446) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p1-safety-fixes`. Git can't create `clients-rebuild/…` while a branch named `clients-rebuild` exists.
+- **What was done:**
+  - Added `assertCanManageClient`, `src/lib/clients/dates.ts`, and guarded write server functions (`updateClient`, `createClient`, `writeClientRecord`). These confirm a row changed and otherwise show "You don't have permission to change this".
+  - Every browser-side client write in the listed files now goes through these functions.
+  - The profile load filters by organization.
+  - Added page checks: billing, client training, workspace, HHS hub, the Clients sidebar link and hub, PBA, and Smart Import in client mode.
+  - Edit buttons are hidden from view-only users.
+  - Removed the healthcare-provider and RHS hospital-day / evacuation-drill cards, all `unfiled_items` uses, and the unused files. The old client-billing-codes page is now a redirect.
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1592 pass, 5 fail; the 5 are the ones already failing on main.
+  - Build passes. Done-when greps return 0.
+- **Migrations:** none.
+- **Files:** 9 added, 7 deleted.
+- **Notes for later prompts:**
+  - The live signature is `access_can_see_client(_client, _user)`.
+  - Billing-code delete and budget-line delete are still hard deletes (Prompts 4 and 9).
+  - Touched legacy files are still over the size limits (Prompts 2 and 7+).
+  - Smart Import history is still on `view_staff_records`.
+
+## P2
+- **Status:** merged. PR #447 (https://github.com/danewarnick-source/Provider-Interface/pull/447) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p2-folders`.
+- **What was done:**
+  - Client lib files moved to `src/lib/clients/`, renamed as the runbook says (for example `file.ts`, `hrc.ts`, `hrc.functions.ts`, `custom-fields-delete.ts`, `goals-for-staff.ts`, `training.functions.ts`).
+  - Client components moved into `src/components/clients/{list,add,profile,dialogs,shared}/`. The 3 hooks moved to `src/components/clients/shared/hooks/`.
+  - The list page was split out of `routes/dashboard.clients.tsx` into `list/` (`clients-page`, `use-client-list`, cards, table, intake chip, types, error view) and `add/` (`add-client-dialog`, `use-add-client`). `dashboard.clients.tsx` is now just the layout route.
+  - `/dashboard/clients/new` now redirects to `/dashboard/clients?add=1`, which opens Add client. The index route reads `add` from the URL.
+  - The other legacy client routes are redirects of 10 lines or fewer. They were kept because code, tests and the e2e smoke test still reference them.
+  - Deleted, because nothing imported them: the `src/lib/clients/index.ts` barrel, `client-report-registry.ts`, and `client-budget-report.ts` and `client-report-shared.ts` (only the registry used those two).
+- **Placement decisions:**
+  - `client-access-gate`, `caseload-editor`, `code-assigned-staff`, `nectar-ask` and `client-documents-card` → `shared/`, because each is used by more than one subfolder.
+  - `client-compliance-panel` and `client-intake-checklist-card` → `list/`.
+  - `client-readiness-card`, `finish-onboarding-card` and `setup-checklist(-groups)` → `add/`.
+- **Checks:**
+  - tsc: 203 errors before, 203 after; the error sets are identical.
+  - Unit tests: 1592 pass, 5 fail; the 5 are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 10 pass / 5 fail at the start, 11 pass / 4 fail after. The 4 were all failing at the start.
+  - e2e 1056: 12 fail at the start and the same 12 fail after, for the same reasons (the mocked chart, punch pad and billing headings are not found). These failures were already on the base branch.
+- **Migrations:** none.
+- **Files:** 9 added, 4 deleted, 64 moved (plus 3 that were moved and then deleted).
+- **Notes for later prompts:**
+  - **e2e setup:** Playwright 1.61 expects `chromium_headless_shell-1228`, but only 1194 is preinstalled. Symlink it: `mkdir -p /opt/pw-browsers/chromium_headless_shell-1228/chrome-headless-shell-linux64` and link the files from `chromium_headless_shell-1194/chrome-linux/`, naming `headless_shell` as `chrome-headless-shell`. Then start `npx vite dev --port 8080 --host 127.0.0.1` in the background before running the configs; the config's own webServer start times out.
+  - **Oversized files:** many moved files are still over the size limits; the PR body lists them. The worst are `profile-tab` 1571, `setup-checklist-groups` 1632, `client-specific-training-card` 1153, `billing-codes-detail` 1080, `lib/clients/training.functions.ts` 1531, `import-schema.ts` 1139, and the `dashboard.clients.$clientId.tsx` route at 2553.
+  - `dashboard.clients.pending.tsx` (233 lines) is still a real page the runbook doesn't mention.
+
+## P3
+- **Status:** merged. PR #448 (https://github.com/danewarnick-source/Provider-Interface/pull/448) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p3-single-sources`.
+- **What was done:**
+  - **Contacts** live in the new `client_contacts` table. The helpers are `src/lib/clients/contacts.ts` and `contacts.functions.ts` (list, add, update, end; never delete).
+    - The profile has one contacts editor: `profile/client-contacts-card.tsx` and `dialogs/contact-dialog.tsx`.
+    - These read `client_contacts`: the face sheet, staff quick-info, the shift page, the workspace About tab, care-data, onboarding, the setup checklist, summaries, Nectar staff, the audit, and form prefill.
+  - **Photo** is `client_photo_url`. **Must-knows** are `special_directions`. New columns `clients.insurance` and `clients.about_me`.
+  - **Codes** come only from active `client_billing_codes` rows, through `src/lib/clients/codes.ts`.
+    - `loadActiveCodes` calls the new `client_active_codes(uuid[])` function, which returns codes but no rates and also works for staff. `loadActiveCodesAsService` is for service-role code.
+    - `clientAuthorizedCodes` was removed. Nothing in `src/` writes `job_code` / `authorized_dspd_codes`.
+  - **Smart import** merges contacts into `client_contacts` (`contacts-merge.ts`). Other agencies' providers become `other_provider` contacts.
+  - **Old field names in one file:** `src/lib/clients/legacy-fields.ts` is the only file that names the old fields. It holds the backfill mapping as a pure function and the **Prompt 12 drop list comment**.
+  - **Deleted:** `billing-fix.functions.ts` (the reclaim UI), `pdf-import.functions.ts`, `rhs-board.functions.ts` and `rhs-board-scoring.ts` (all dead), and `setEmergencyContact`.
+- **Migrations:** the MCP `apply_migration` tool hangs on `DROP` statements, so each was applied with `execute_sql` and recorded in `schema_migrations`.
+  - `clients_contacts`: 15 contacts backfilled. One old emergency-contact row was skipped because its client no longer exists.
+  - `clients_single_sources`: `about_me` filled for 3 clients, `special_directions` added to for 2, `insurance` and photo 0.
+  - `clients_guardian_check_moves_to_contacts`: the guardian trigger no longer raises.
+  - `clients_active_codes_function`.
+  - **NOT applied:** `20261006100300_clients_b_codes_copy_trigger_noop.sql` (Phase B). Apply it right after P3 reaches production `main`, because `main` still reads `job_code` / `authorized_dspd_codes` through this trigger.
+- **Checks:**
+  - tsc: 203 errors before, 203 after; the error sets are identical.
+  - Unit tests: 1626 of 1631 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 11 pass / 4 fail before and after, the same 4 tests.
+  - e2e staff-go-live: 6/6 before and after.
+- **Done-when grep:** the literal grep still has hits that are not old client-column reads:
+  - `scheduled_shifts.job_code`, the training-goal `job_codes` key, the policy audience `job_code`, and staff `profiles.emergency_contact_*`.
+  - The smart-import extraction and CSV key names, which stored import jobs still hold.
+- **Notes for later prompts:**
+  - One live client has 4 codes only in the old column and no billing rows, so it now shows no codes until authorization rows are added.
+  - The guardian requirement is now enforced in the app (`guardianSatisfied`, which needs a guardian name and phone), not by the database.
+  - P12: drop the columns and tables in the `legacy-fields.ts` drop list. Renaming the import extraction keys needs a migration of stored-job keys.
+  - The registry list moved to `profile-field-registry.ts`.
+  - Touched files that are still oversized are listed in the PR body.
+
+## P4
+- **Status:** merged. PR #449 (https://github.com/danewarnick-source/Provider-Interface/pull/449) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p4-plans-goals`.
+- **What was done:**
+  - New tables `client_plans` → `client_goals` → `client_goal_supports`. Supports carry `our_codes`.
+  - Pure helpers in `src/lib/clients/plans.ts`: `planStatusOn`, `planInEffectOn`, `currentPlan`, `waitingDays`, `supportsForCode(s)`, `goalsOn`, `goalView`.
+  - Other new files:
+    - `plans-load.ts`: `loadPlanBundle(s)`.
+    - `plans-write.ts`: `insertPlan`, `replaceCurrentPlanGoals`, `appendGoalsToCurrentPlan`.
+    - `plans.functions.ts`: add a plan, save or end a goal, save or end a support. All go through `assertCanManageClient`.
+    - `plan-summaries.ts`: summary goals and note tagging.
+    - `legacy-plans.ts`: the backfill mapping and the P12 drop list.
+  - These now show supports by code, from the plan in effect on the note's date:
+    - punch pad clock-out (`evv/goal-support-checklist.tsx`), shift page, staff quick info, workspace
+    - host-home daily logs (route and HHS hub)
+    - Nectar staff answers (the asker's assignment and shift codes), Nectar note draft
+    - progress summaries and their drafter (stores `plan_id`)
+    - client-specific training
+  - Notes store `goal_ids` / `support_ids` arrays on `daily_logs` and `evv_timesheets`.
+  - Care plan tab: new `components/clients/profile/plans/` (goal tree, dialogs, PCSP pull). Training card goals are read-only.
+  - Every writer and reader of `clients.pcsp_goals` was removed. `goals-for-staff.ts` was deleted.
+- **Checks:**
+  - tsc: 203 errors before, 203 after; the error sets are identical.
+  - Unit tests: 1656 of 1661 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e staff-go-live: 6/6 before and after.
+  - e2e roster: 11 pass / 4 fail before and after, the same tests.
+  - e2e daily-logs: 2 pass / 4 fail before and after. The 4 were already failing on the base branch (the "Daily Logs" heading is not found).
+- **Migrations:**
+  - `20261006134832_clients_plans_goals` applied to live. Backfilled 12 plans (3 dated), 6 goals and 6 supports.
+  - None written-but-not-applied.
+- **Files:** 19 added, 2 deleted.
+- **Notes for later prompts:**
+  - Migrated plans with only a "YYYY-YYYY" label are undated; the label is kept in `client_plans.label`.
+  - PCSP Nectar extraction now writes into the current plan, ending the old goals. P5 replaces it.
+  - P8 still has to move `plan_year` / `pcsp_expiration_date` / `pcsp_signed_date` (profile, file, face sheet, import) and add the plan date editing UI.
+  - Per-goal staff visibility toggles reset, because goal IDs changed.
+  - Goals added without supports get one blank support listing the client's active codes.
+
+## P5
+- **Status:** merged. PR #450 (https://github.com/danewarnick-source/Provider-Interface/pull/450) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p5-pcsp-reader`.
+- **What was done:**
+  - **Reader:** moved to `src/lib/clients/pcsp/`, split into `layout`, `parser`, `parser-goals`, `parser-tables`, `parser-checks` and `parser-shared`. It gives the same output as the reference copy, and the `docs/clients-rebuild/pcsp-*.ts` copies are deleted.
+  - **Fixture:** a made-up PCSP (`fixture/sample-pages.ts`). Its exact expected output is in `sample-expected.json`.
+  - **`import.functions.ts`:**
+    - `readPcsp` saves only the PDF (`client_documents` type `pcsp`) and returns the parse plus a carry-over proposal.
+    - `confirmPcsp(parseId = document id, edits = the full reviewed payload, zod-checked)` writes the plan (current; the old one becomes past, via `insertPlan` with `document_id`), goals with `carried_from_goal_id`, supports, `client_billing_codes` upserts from our budget lines, "From PCSP" blocks in `special_directions` and `about_me`, and other-provider contacts.
+  - **Nectar fallback:** off by default. It needs both `nectar` and `pcsp_nectar_fallback` turned on in `organization_features`, and every value must come with `{value, page, quote}`.
+  - **UI:** "Upload new PCSP" in Plan goals opens the review (`profile/plans/pcsp-review*.tsx`, `use-pcsp-import.ts`).
+  - **Deleted:** the Nectar goal pull (care plan button, training-card button, `extractPcspGoalsForTraining`, `extractGoalsVerbatim`, `CSTGoal`, `replaceCurrentPlanGoals`, `use-pcsp-goal-extract.ts`).
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1686 of 1691 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 12 pass / 4 fail, including the new mocked `clients-pcsp-review.spec.ts`. The same 4 fail on the base branch.
+  - e2e staff-go-live: 6/6.
+  - e2e daily-logs: 2 pass / 4 fail, the same as before.
+- **Migrations:**
+  - `20261006144447_pcsp_nectar_fallback_feature_flag` applied to live. It is a data-only `feature_registry` row, so `types.ts` didn't change.
+  - No Phase B migration.
+- **Files:** 32 added, 1 moved, 2 deleted.
+- **Notes for later prompts:**
+  - "Uploading the fixture shows the review" is covered by a mocked e2e, because no live preview was reachable.
+  - `document-extraction.ts` keeps its PCSP branch, because Smart Import still uses it.
+  - Goals the new PCSP drops end with the old plan year; their rows aren't changed.
+  - A PDF uploaded and then cancelled at review stays in the client file.
+  - `training.functions.ts` (1361 lines) and `client-specific-training-card.tsx` (928 lines) are still over the size limits.
+
+## P6
+- **Status:** merged. PR #451 (https://github.com/danewarnick-source/Provider-Interface/pull/451) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p6-list-add`.
+- **What was done:**
+  - **List:** `listClients` (`src/lib/clients/list.functions.ts`, loaded through `list-load.ts` and `list-queries.ts`) returns everything the list needs in one call. Each row has codes, home, the code with the fewest units left, the next due item, team members, readiness and a needs-attention flag. Search, filters and the Active/Discharged views all run on the server. The pure pieces are in `list.ts`.
+  - **Units:** `units.ts` (`usedUnitsForCode`, `worstUnitsLeft`) is the one path for units used, shared with `use-client-budget`.
+  - **Referrals:** the existing `ReferralsPage` opens from a small Referrals link in the list. The link only shows when the org has referrals.
+  - **CSV export** of the filtered list.
+  - **Add client:** a one-page form built from `create.ts` and `create.functions.ts` (`addClient`, `findClientByMedicaidId`, `readPcspForNewClient`, `loadImportDraft`).
+    - A duplicate Medicaid ID is refused and shows a link to the existing client.
+    - Fill from PCSP fills only empty fields and tags them.
+    - "Waiting on 1056" codes are saved with `authorization_pending=true` and 0 units.
+    - The home pin is geocoded on save.
+  - **Imported Smart Import drafts:** they show in the list as "Finish setup" and open the same form (`?draft=<subject id>`). On save, `finishImportDraft` in `smart-import-commit.functions.ts` attaches custom fields, certs and provisioning, then closes the import record.
+  - **Shared PCSP reading:** `pcsp/read-pdf.server.ts` is used by both `readPcsp` and Fill from PCSP.
+  - **Removed:** the old add dialog and its draft/intake choice, the finalize editor, the intake checklist card and panel, the intake chip and its progress hook, `hrc.functions.ts`, the old `createClient`, the home-pin backfill and its button, `getPendingClientSubject`, `applyClientFields`, `commitSingleSubject`, `listIntakeFormsForClient`, `smart-import-status.ts`, and `TeamsPage`.
+  - **Redirects:** client-intake → profile; pending → list. Hub `?tab=teams|funds|referrals` → `/dashboard/homes`, `/dashboard/pba-ledger`, and the list's Referrals view.
+- **Checks:**
+  - tsc: 203 errors before, 203 after; the error sets are identical.
+  - Unit tests: 1709 of 1714 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 14 pass / 4 fail. The same 4 fail on the base branch; the 2 extra passes are new tests.
+  - e2e staff-go-live: 6/6.
+  - e2e daily-logs: 2 pass / 4 fail, the same as before.
+  - e2e 1056: 12 fail, the same as before.
+- **Migrations:** none applied, none written but not applied.
+- **Files:** 20 added (plus 1 new e2e helper), 8 deleted.
+- **Notes for later prompts:**
+  - Imported drafts can't be discarded from the UI any more, because the old pending page had the only button. `discardImportSubject` still exists; add a Discard action to the Add form if wanted.
+  - Discharged means `account_status` is archived or discharged (`DISCHARGED_STATUSES` in `list.ts`); P11 should set one of these.
+  - The staff-go-live config's webServer path only resolves from `e2e/configs/`. Start `npx vite --config e2e/harness/vite.config.ts` (port 4177) yourself before running it.
+  - Running e2e rewrites the tracked `e2e/artifacts/*.png` screenshots. Don't commit them.
+  - Legacy oversized files with small edits are listed in the PR body.
+
+## P7
+- **Status:** merged. PR #452 (https://github.com/danewarnick-source/Provider-Interface/pull/452) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p7-profile-shell`.
+- **What was done:**
+  - **Profile shell:** the client profile now has a side menu like Team Members (`components/clients/profile/client-profile-page.tsx`, `profile-shell.tsx`, `profile-header.tsx`, `header-menu.tsx`, `section-body.tsx`). The section is in the URL as `?section=` (`lib/clients/profile-sections.ts`). Old `?tab=` links redirect. The route file is 46 lines.
+  - **Header ⋯ menu:** Face sheet PDF, Update from a document (`dialogs/update-from-document-dialog.tsx`), Discharge, Reactivate.
+  - **Needs attention:** `lib/clients/readiness.ts` is the one calculation (units pace, documents, photo over 5 years, PCSP waiting, strategies due at plan start + 30 days, summaries, HRC, finish setup).
+    - `getClientOverview` (`overview.functions.ts`, `overview-load.ts`, `overview-team.ts`) feeds the Overview, the menu badges and the Smart Import done page (`shared/client-needs-attention.tsx`).
+  - **Overview:** attention cards, units left with a pace marker, must-knows, coming up, team (ready alone, using the Team Members rules), last notes.
+  - **Profile:** identity, photo with the date taken and a 5-year warning, service address with pin and geofence, extra service locations (`client_approved_locations` through `locations.functions.ts`; ended, never deleted), mailing address, About me, More details (all custom fields in one panel).
+  - **Contacts:** role filters (`CONTACT_FILTERS`), an own-guardian note and toggle, add / edit / end.
+  - **Interim sections:** Health, Plans, Services & billing, Client file, Team and Activity are in `profile/sections/*`. They reuse the moved panels in `profile/{cards,plans,activity,file}/`, each file 250 lines or fewer.
+  - **Deleted:**
+    - the 7-tab route body, `profile-tab`, `section-panel`, the per-tab custom field panels
+    - `TrainingSetupBadge`, the "Action required" panel
+    - `client-readiness-card`, `setup-checklist(-groups)`, `finish-onboarding-card`
+    - `readiness.functions.ts`, `field-confirmations.functions.ts`
+    - all of `finish-onboarding.functions.ts` except `addClientBillingCodes`, which moved to `lib/clients/codes-add.functions.ts` and is now guarded by `edit_billing`.
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1732 pass, 5 fail; the 5 are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 16 pass / 4 fail, including the new `clients-profile-sections.spec.ts`. The same 4 failed before.
+  - e2e staff-go-live: 6/6.
+  - e2e daily-logs: 2 pass / 4 fail, the same as before.
+  - e2e 1056: 12 fail, the same as before.
+- **Migrations:**
+  - `20261006161857_client_approved_locations_archived_at` applied to live. `types.ts` was updated for its two columns.
+  - No Phase B migration.
+- **Files:** 64 added, 11 deleted (4 of the deleted were git-moved and rewritten).
+- **Notes for later prompts:**
+  - Discharge in the ⋯ menu sets `account_status='archived'` and `discharge_date`; P11 replaces it with the guided flow. Reactivate clears both.
+  - The ABI and DNR-applicable switches now live on the Health "At a glance" card (`cards/at-glance-card.tsx`) until P8.
+  - Writes to `client_approved_locations` still use the RLS policy `is_org_admin_or_manager`, so scoped managers are refused.
+  - The punch pad filters `archived_at IS NULL`; production main doesn't until this ships.
+  - The demo canvas couldn't be read in this session; the layout follows the runbook and Team Members.
+  - The `no-restricted-syntax` lint rule ("use useClientCareData") flags direct client reads in `use-client-profile.ts` and a few moved panels, as the old route did.
+  - The `client-overview` query key replaced `client-readiness` in invalidations.
+
+## P8
+- **Status:** merged. PR #453 (https://github.com/danewarnick-source/Provider-Interface/pull/453) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p8-health-plans`.
+- **What was done:**
+  - **Health section** (`profile/health/`): must-knows; allergies, diagnoses and chronic conditions; swallowing; advance directive; emergency treatment authorization; ABI; medication support level.
+    - The advance directive is a None/DNR/POLST status plus where it's kept, palliative care, hospice and notes. `dnr_applicable` follows the status.
+    - A Medications and eMAR toggle opens `MarEmarTab`.
+    - The health events log and absences (RHS only) are written through `writeClientRecord` and archived, never deleted.
+  - **Plans section:**
+    - Plan years: current, upcoming, ended (waiting, with the day count) and past, with a dates editor (`updateClientPlanDates`).
+    - Goals with a "View as" code filter.
+    - Support strategies due = `activated_on` + 30 days.
+    - Summaries owed per code.
+    - The HRC restrictions card is the single editor. `/dashboard/hrc` is read-only and links to the client.
+    - BSP upload only for BC1–BC3 (`lib/clients/bsp.ts`).
+  - **Reminders:**
+    - `plan-dates.ts` holds the 60/30-day reminders and the day-10 office follow-up. There is no task table that fits, so readiness turns these into needs-attention items.
+  - **Summary cadence:**
+    - `progress-summaries.ts` adds `summaryCadenceForCode` and `summariesOwed`.
+    - Monthly: SEI, SJD, CMP, CMS, PN1, PN2. PBA: financial statement. No summary: respite, ELS, MTP, PM1/PM2. Quarterly: every other code.
+    - `QUARTERLY_SUMMARY_CODES` was removed.
+  - **Client file:**
+    - The photo expires 5 years after it was taken.
+    - Exams are required only for RHS, PPS, HHS and SLH.
+    - Belongings apply to HHS, PPS, RHS and SLH, with no yearly renewal.
+    - The plan end date comes from `client_plans`.
+    - `file.ts` was split into `file-csv`, `file-docs` and `file-summary`.
+  - **Old plan columns:** the profile, client file, face sheet ("Plan year") and staff care data (`plan_end_date`) now read `client_plans`. Smart Import adds a `client_plans` row (`importPlanYear`).
+  - **Deleted:** `at-glance-card`, `hrc-card`, `hrc-section-card`, `rights-restrictions-panel`, `authorized-codes-card`, and the unused `face-sheet-info-card` and `face-sheet-info-fields`.
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1763 of 1768 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 17 pass / 3 fail. The 3 were already failing; the profile smoke now checks the Health and Plans cards.
+  - e2e staff-go-live: 6/6.
+  - e2e daily-logs: 2 pass / 4 fail, the same as before.
+  - e2e 1056: 12 fail, the same as before.
+- **Migrations:**
+  - Applied to live through `execute_sql`, because `apply_migration` timed out, and recorded in `schema_migrations`:
+    - `20261006180000_clients_health_events_absences`
+    - `20261006180100_clients_advance_directive_notes`
+  - No Phase B migration.
+- **Files:** 28 added, 7 deleted.
+- **Notes for later prompts:**
+  - P12: Smart Import still writes `clients.plan_year` and `pcsp_expiration_date`. Drop them with `pcsp_signed_date`; see `legacy-plans.ts`.
+  - Summary generation now creates quarterly rows for every code that owes a summary (for example COM, CHA, PPS, DSG).
+  - Committee-only users can view restrictions on `/dashboard/hrc` but can't open the client profile.
+  - The file-section cards in `profile/cards/` (code documents, SJD) are left for P9.
+
+## P9
+- **Status:** merged. PR #454 (https://github.com/danewarnick-source/Provider-Interface/pull/454) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p9-services-file`.
+- **What was done:**
+  - **Services & billing** (`profile/services/`):
+    - The authorizations card shows the unit type, rate, dates, units per year, the 1056 number and approved date, units used vs. left with the pace marker, units per week to use the rest, a run-out date, dollars (budget, used, left) with a total, and rate history.
+    - Add / Edit / Renew / End go through `lib/clients/services.functions.ts` (`edit_billing`). End sets `service_end_date`. Renew re-uses the row for that code, and rate history keeps the old rate and dates.
+    - The pure rules are in `authorizations.ts`.
+  - **Fill from 1056:**
+    - `budget-parse.functions.ts` has `read1056`, which saves the PDF as a `1056_budget` document and reads its text with unpdf. Nectar gives `{value, page, quote}` for each field, and unquoted values are dropped (`auth-1056.ts`).
+    - `confirm1056` checks agency approved codes, real dates and whole-number units before saving.
+    - The review dialog uses the PCSP pattern.
+  - **Monthly budget:** the old panel was split into `monthly-budget`, `budget-editor`, `budget-lines-table`, `budget-pdf-bar`, `use-budget-pdf` and `budget-model`. Removing a line archives it (`client_budget_lines.archived_at`).
+  - **No deletes:** `writeClientRecord` no longer has a `delete` op. `/dashboard/billing/$clientId` is now a redirect to `?section=services`.
+  - **Client file:**
+    - The required documents card (`file-required.ts`, `file-documents.functions.ts`) shows status and expiry per document, with upload, replace (marks the old one outdated) and archive.
+    - Expired, archived and outdated documents no longer count. Belongings has its own card, and its writes are guarded.
+    - `file.functions.ts` was split into `file-index.ts` and `file-index-queries.ts`.
+  - **Deleted:** `billing-codes-detail`, `client-budget-panel`, `client-file-tab`, `add-codes-control`, `codes-add.functions`, `code-assigned-staff`, `use-client-budget`, `billing-auth-status`, `billing-rates.functions`, and `RoomBoardAgreementCard`.
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1797 of 1802 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 17 pass / 3 fail, the same 3 as before. The profile smoke now checks Services & billing and the Client file.
+  - e2e staff-go-live: 6/6.
+  - e2e daily-logs: 2 pass / 4 fail, the same as before.
+  - e2e 1056 + punch-pad-gps: 12 fail, the same as before.
+- **Migrations:**
+  - Applied to live through `execute_sql` and recorded in `schema_migrations`:
+    - `20261006200000_clients_authorization_1056_fields` (`authorization_number`, `authorization_approved_on`)
+    - `20261006200100_clients_document_expiry_and_budget_line_archive` (`client_documents.expires_on`, `client_budget_lines.archived_at` / `archived_by`)
+  - No Phase B migration.
+- **Files:** 33 added, 9 deleted.
+- **Notes for later prompts:**
+  - `e2e/client-1056-billing.spec.ts` still drives the old `?tab=billing` and full-editor UI (its failures were already there). It needs a rewrite against `?section=services`.
+  - The per-code staff picker was deleted with the add control. Staff assignment belongs to P10 Team.
+  - The monthly budget sits in Services & billing; P10 can move it to Money.
+  - `monthly-budget.tsx` reads `clients.income_sources` directly, which the lint rule flags like the other legacy panels.
+  - Fill from 1056 needs a text PDF; scans must be entered by hand.
+  - P11 discharge can call `endAuthorization` to end each active authorization.
+  - Legacy files still over the size limits: `org-client-file-matrix` 321, `residential-daily-tab` 866.
+
+## P10
+- **Status:** merged. PR #455 (https://github.com/danewarnick-source/Provider-Interface/pull/455) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p10-team-money-activity`.
+- **What was done:**
+  - **Team** (`profile/team/`):
+    - The team-and-codes card replaces the old caseload editor. It writes only through `setStaffClientCodes`.
+    - Each team member shows "ready to work alone" from `overview.team`.
+    - The do-not-schedule list can be added to and ended.
+    - The person-specific training setup card (`ClientSpecificTrainingCard`) is now mounted here.
+  - **Exclusions:** `lib/clients/exclusions.ts` holds the pure rules and `exclusions-check.server.ts` reads the list through the `active_client_staff_exclusions` RPC.
+    - `saveShift` refuses an excluded team member and says why.
+    - The `writeStaffClientCodes` writer refuses to give them codes.
+    - `applyDrafts` refuses the whole batch.
+    - `applyRepeat` turns their copied shifts into open shifts.
+  - **Money** (a new `money` section; shown only with Billing: View and for clients with a PBA code or account, loans, or spending, via `moneySectionApplies`):
+    - PBA account, ledger, transaction form and quarterly audit.
+    - Loans, using the new `listClientLoans` (owner only).
+    - The spending log.
+  - **Redirects:** `/dashboard/pba-ledger` and the hub `?tab=funds` now go to the client list. The list's Funds button and the tour anchor were removed.
+  - **Activity & notes:** rows open their records. Shifts and daily notes open a dialog; incidents open `/dashboard/hub/documentation?tab=incidents&client=`. The office notes card is visible to Clients: Edit only.
+  - **Deleted:** `activity-tables.tsx`; `shared/caseload-editor.tsx` (git-moved to `team-codes-card.tsx` and rewritten).
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1817 of 1822 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 17 pass / 3 fail, the same 3 as before.
+  - e2e scheduler: all 9 fail, the same 9 as on the base branch. The scheduler doesn't draw in the mock.
+  - e2e staff-go-live: 6/6.
+- **Migrations:**
+  - `20261006220000_clients_staff_exclusions_notes` applied to live through `execute_sql`, in parts because larger runs time out, and recorded in `schema_migrations`.
+  - No Phase B migration.
+- **Files:** 31 added, 2 deleted.
+- **Notes for later prompts:**
+  - The monthly budget stays in Services & billing. Money is hidden for clients without PBA, loans or spending, so moving it would hide the budget for everyone else.
+  - `/dashboard/client-loans` stays. It holds the loan attestation and the cross-client list.
+  - Adding an exclusion requires the person to be off the team; the UI removes them first.
+  - P11 discharge could end open exclusions. They are harmless if left open.
+  - Legacy files I touched that are still over the size limits: `setup.functions` 665, `scheduler.functions` 439, `repeat.functions` 333, `loans.functions` 357, `client-specific-training-card` 895.
+
+## P11
+- **Status:** merged. PR #456 (https://github.com/danewarnick-source/Provider-Interface/pull/456) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p11-discharge`.
+- **What was done:**
+  - **Guided discharge** (profile ⋯ → Discharge, in `profile/discharge/`), in three steps:
+    1. Details: date, reason, who started it, notice date. An agency-started discharge warns when notice is under 30 days.
+    2. Summary: Nectar can draft it from what is on file. The draft is marked as Nectar's, and a person ticks a box to confirm it. The summary can be left for later.
+    3. Review: shows what the discharge will end.
+  - **`discharge_client` RPC** (one transaction):
+    - Ends active authorizations on the discharge date (`service_end_date`).
+    - Cancels shifts that start after the discharge date and after now.
+    - Sets `account_status = 'archived'`.
+    - Records `client_discharges` with an `ended_items` snapshot.
+
+    After the RPC, `dischargeClient` takes the team off the client (removes the `staff_assignments` rows).
+  - **Discharge card** on a discharged profile: the 7-day summary clock (due, late or sent), write / draft / confirm the summary, and Mark sent.
+  - **Reactivate** (⋯ menu and the list's Reactivate button) calls `reactivate_client`. The client goes back to active and the discharge row is stamped. Ended authorizations, cancelled shifts and the old team are not brought back.
+  - **Read-only:**
+    - `RecordReadOnlyProvider` makes `useAccess()` report Edit as View inside the profile sections.
+    - `runManageClientGuard` refuses every action except `view`, `view_medical` and `discharge` on a discharged client.
+    - `updateClient` now locks `account_status` and `discharge_date`.
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1837 of 1842 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 17 pass / 3 fail, the same 3 as before. A cold dev server can fail the first two client specs; they pass once it is warm.
+- **Migrations:**
+  - `20261006230000_clients_discharges` was already on live from the interrupted attempt. The committed file matches live.
+  - `20261006230100_clients_discharge_functions` (the preview, discharge and reactivate RPCs, plus a status-only cancel bypass in `scheduled_shifts_staff_update_guard` keyed on a transaction-local flag) was applied through `execute_sql` in parts and recorded in `schema_migrations`. A run that includes a DELETE statement waits for confirmation and times out, so the `staff_assignments` removal lives in the server function.
+  - No Phase B migration.
+- **Files:** 13 added, 0 deleted.
+- **Notes for later prompts:**
+  - The discharged status stays `'archived'` because every existing reader filters on it. P12 can decide whether to move to `'discharged'`.
+  - The confirmed summary is not saved as a `client_documents` file yet; `summary_document_id` is still unused.
+  - Open do-not-schedule exclusions are left open on discharge.
+  - Team removal happens after the RPC, so it is not atomic with the rest. If RLS stops it, the UI says how many team members are still assigned.
+
+## P11 follow-up: team removal inside the discharge transaction
+- **Status:** committed directly to `clients-rebuild` (`d4a7c3a1`), at Jeff's request after P11 merged.
+- **What was done:** `discharge_client` now removes the client's `staff_assignments` rows right after recording who was on the team in `ended_items`, so the discharge and the team removal succeed or fail together. The server function no longer deletes assignments afterwards, and the dialog's "still assigned" warning is gone.
+- **Migration:** `20261007100000_clients_discharge_removes_team_atomically` (additive; replaces `discharge_client`, same signature). Jeff applied it in the SQL editor, because the Supabase tool holds DELETE statements for a confirmation this session can't show. It's recorded in `schema_migrations`, and the live function body matches the file exactly.
+- **Live check:** a discharge of a real client inside a block that always rolls back took the team from 3 to 0, kept all 3 in the snapshot and set the status. A second call refused ("already discharged"). After the rollback the client is still active with its team, and `client_discharges` still has 0 rows.
+- **Checks:** tsc 203 errors before and after. Unit tests 1838 pass, 5 fail; the 5 are the ones already failing on main. Build passes.

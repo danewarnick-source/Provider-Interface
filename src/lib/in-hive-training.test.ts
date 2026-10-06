@@ -50,7 +50,7 @@ import {
 import { examQuestionsFor } from "./in-hive-training-exams.ts";
 import { ANNUAL_CE_COURSE_ID, ANNUAL_CE_OBLIGATION_TITLE } from "./in-hive-training-annual-ce.ts";
 import { PCT_COURSE_ID, PCT_OBLIGATION_TITLE } from "./in-hive-training-pct.ts";
-import { PCT_CLIENT_OBLIGATION_TITLE } from "./client-form-obligations.ts";
+import { PCT_CLIENT_OBLIGATION_TITLE } from "./clients/form-obligations.ts";
 
 const Q: ExamQuestion[] = [
   {

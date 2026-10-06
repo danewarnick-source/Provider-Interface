@@ -1,4 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
+import { loadClientContacts, primaryContact } from "@/lib/clients/contacts";
+import { loadPlanBundle } from "@/lib/clients/plans-load";
+import { noteAddressesAny, summaryGoals, type SummaryGoal } from "@/lib/clients/plan-summaries";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
@@ -15,7 +18,8 @@ import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
  * row as `no_source` BEFORE invoking this function — this drafter throws
  * if asked to draft from nothing.
  *
- * Source scoping: goals carry job_codes (CST). Notes/shift reports stamped
+ * Source scoping: goals come from the plan in effect at period end, with the
+ * supports for the summary's codes (goal → support). Notes/shift reports stamped
  * with matching service codes (or goal tags) are preferred; untagged sources
  * are listed separately for human review — Nectar must not invent a job code.
  */
@@ -41,7 +45,6 @@ function truncate(s: string, n: number): string {
   return s.length > n ? s.slice(0, n) + "…" : s;
 }
 
-type GoalIn = { id: string; goal: string; job_codes: string[] };
 
 /**
  * Pulls the source bundle and asks Nectar to draft the summary. Writes the
@@ -79,12 +82,13 @@ export const draftProgressSummary = createServerFn({ method: "POST" })
     // 2. Client + goals.
     const { data: client, error: cErr } = await supabase
       .from("clients")
-      .select("first_name, last_name, pcsp_goals, support_coordinator_name")
+      .select("first_name, last_name")
       .eq("id", row.client_id)
       .eq("organization_id", data.organizationId)
       .maybeSingle();
     if (cErr) throw new Error(cErr.message);
     if (!client) throw new Error("Client not found");
+    const coordinator = primaryContact(await loadClientContacts(supabase, [row.client_id]), "support_coordinator");
 
     const { data: org } = await supabase
       .from("organizations")
@@ -92,35 +96,11 @@ export const draftProgressSummary = createServerFn({ method: "POST" })
       .eq("id", data.organizationId)
       .maybeSingle();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: cst } = await (supabase as any)
-      .from("client_specific_trainings")
-      .select("goals")
-      .eq("organization_id", data.organizationId)
-      .eq("client_id", row.client_id)
-      .eq("training_type", "person_specific")
-      .maybeSingle();
-
     const services = ((row.service_codes ?? []) as string[]).map((c) => c.toUpperCase());
-    const periodCodes = new Set(services);
 
-    let goals: GoalIn[] = [];
-    const cstGoals = (cst?.goals ?? null) as Array<{ id?: string; goal?: string; job_codes?: string[] }> | null;
-    if (Array.isArray(cstGoals) && cstGoals.length > 0) {
-      goals = cstGoals
-        .map((g, i) => ({
-          id: String(g.id ?? `g-${i}`),
-          goal: String(g.goal ?? "").trim(),
-          job_codes: (g.job_codes ?? []).map((c) => String(c).toUpperCase()).filter(Boolean),
-        }))
-        .filter((g) => g.goal.length > 0)
-        .filter((g) => g.job_codes.length === 0 || g.job_codes.some((c) => periodCodes.has(c)));
-    }
-    if (goals.length === 0) {
-      goals = ((client.pcsp_goals ?? []) as string[])
-        .map((g, i) => ({ id: `flat-${i}`, goal: String(g).trim(), job_codes: [] as string[] }))
-        .filter((g) => g.goal.length > 0);
-    }
+    // Goals → supports for this summary's codes, from the plan in effect at period end.
+    const fromPlan = summaryGoals(await loadPlanBundle(supabase, row.client_id), row.period_end, services);
+    let goals: SummaryGoal[] = fromPlan.goals;
 
     if (data.goalId) {
       goals = goals.filter((g) => g.id === data.goalId);
@@ -130,7 +110,7 @@ export const draftProgressSummary = createServerFn({ method: "POST" })
     // 3. Source docs in period.
     const { data: logs, error: lErr } = await supabase
       .from("daily_logs")
-      .select("log_date, narrative, pcsp_goals_addressed")
+      .select("log_date, narrative, pcsp_goals_addressed, goal_ids")
       .eq("organization_id", data.organizationId)
       .eq("client_id", row.client_id)
       .eq("status", "approved")
@@ -172,7 +152,7 @@ export const draftProgressSummary = createServerFn({ method: "POST" })
       .lte("incident_date", row.period_end)
       .order("incident_date", { ascending: true });
 
-    type LogRow = { log_date: string; narrative: string; pcsp_goals_addressed: string[] | null };
+    type LogRow = { log_date: string; narrative: string; pcsp_goals_addressed: string[] | null; goal_ids: string[] | null };
     type ReportRow = { created_at: string; narrative: string | null; scheduled_shift_id: string | null; service_code: string | null };
     const approvedLogs = (logs ?? []) as LogRow[];
     const submittedReports: ReportRow[] = ((reports ?? []) as Array<{
@@ -190,19 +170,14 @@ export const draftProgressSummary = createServerFn({ method: "POST" })
       narrative_during: string;
     }>;
 
-    const goalTexts = new Set(goals.map((g) => g.goal.toLowerCase()));
     const relevantCodes = new Set(
       goals.flatMap((g) => (g.job_codes.length ? g.job_codes : services)),
     );
 
-    const taggedLogs = approvedLogs.filter((l) => {
-      const addressed = (l.pcsp_goals_addressed ?? []).map((g) => String(g).toLowerCase());
-      return addressed.some((g) => goalTexts.has(g));
-    });
-    const untaggedLogs = approvedLogs.filter((l) => {
-      const addressed = (l.pcsp_goals_addressed ?? []).map((g) => String(g).toLowerCase());
-      return addressed.length === 0 || !addressed.some((g) => goalTexts.has(g));
-    });
+    const addressesGoal = (l: LogRow) =>
+      noteAddressesAny({ goal_ids: l.goal_ids, addressed: l.pcsp_goals_addressed }, goals);
+    const taggedLogs = approvedLogs.filter(addressesGoal);
+    const untaggedLogs = approvedLogs.filter((l) => !addressesGoal(l));
 
     const taggedReports = submittedReports.filter((r) =>
       r.service_code && relevantCodes.has(r.service_code),
@@ -309,10 +284,11 @@ OUTPUT FORMAT — STRICT JSON only, no markdown, no code fences:
         }).join("\n");
 
     const goalsBlock = goals.length === 0
-      ? "(no PCSP goals on record)"
+      ? "(no plan goals on record)"
       : goals.map((g, idx) => {
-          const codes = g.job_codes.length ? g.job_codes.join(", ") : "(no job codes tagged — treat as applicable to period services)";
-          return `${idx + 1}. [${g.id}] ${g.goal}\n   job_codes: ${codes}`;
+          const codes = g.job_codes.length ? g.job_codes.join(", ") : "(no codes on its supports — treat as applicable to period services)";
+          const supports = g.supports.length ? g.supports.map((s) => `\n   support: ${truncate(s, 300)}`).join("") : "";
+          return `${idx + 1}. [${g.id}] ${g.goal}\n   job_codes: ${codes}${supports}`;
         }).join("\n");
 
     const user = singleGoalMode
@@ -338,10 +314,10 @@ ${incidentsBlock}`
 SERVICES PROVIDED THIS PERIOD: ${services.join(", ") || "(none)"}
 DATE RANGE: ${row.period_start} to ${row.period_end}
 PROVIDER: ${providerName}
-SUPPORT COORDINATOR: ${client.support_coordinator_name?.trim() || "Not on file"}
+SUPPORT COORDINATOR: ${coordinator?.name?.trim() || "Not on file"}
 INCLUDE GOAL PROGRESS SECTION: ${includeGoals ? "YES" : "NO (excluded by service type)"}
 
-PCSP GOALS (with job_codes):
+PLAN GOALS (with job_codes and the supports for these services):
 ${goalsBlock}
 
 CODE-TAGGED APPROVED DAILY LOGS (${taggedLogs.length}):
@@ -395,7 +371,8 @@ ${incidentsBlock}`;
       shift_report_count: taggedReports.length,
       untagged_shift_reports: untaggedReports.length,
       incident_ids: incidentList.map((i) => i.report_number),
-      pcsp_goals_used: goals.map((g) => ({ id: g.id, goal: g.goal, job_codes: g.job_codes })),
+      plan_id: fromPlan.planId,
+      pcsp_goals_used: goals.map((g) => ({ id: g.id, goal: g.goal, job_codes: g.job_codes, supports: g.supports })),
       services,
       include_goal_progress: includeGoals,
       single_goal_id: data.goalId ?? null,
@@ -410,6 +387,7 @@ ${incidentsBlock}`;
         drafted_at: new Date().toISOString(),
         drafted_by: userId,
         status: "draft",
+        plan_id: fromPlan.planId,
       })
       .eq("id", row.id);
     if (error) throw new Error(error.message);

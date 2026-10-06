@@ -13,19 +13,21 @@ import { assertCanManageMember } from "@/lib/team-members/guards.server";
 import { waiveRemovedClientItemsInternal } from "@/lib/team-members/caseload.functions";
 import {
   assignmentCodes,
-  clientAuthorizedCodes,
   normalizeServiceCode,
   resolveStaffClientCodes,
   withCodeAdded,
   withCodeRemoved,
 } from "@/lib/assignment-codes";
+import { loadActiveCodes } from "@/lib/clients/codes";
+import { exclusionAssignRefusal, exclusionRefusal, findExclusion } from "@/lib/clients/exclusions";
+import { exclusionFor, loadActiveExclusions } from "@/lib/clients/exclusions-check.server";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Staff ↔ client code assignments — the single write path.
 //
 // Every staff_assignments row lists its codes explicitly. NULL / [] is never
 // "all codes". Codes must be a subset of the client's currently authorized
-// codes (clientAuthorizedCodes). An empty list deletes the assignment row —
+// codes (active client_billing_codes rows, loadActiveCodes). An empty list deletes the assignment row —
 // assignments are settings, not records — and waives that client's open
 // staff_per_client items ("Removed from caseload"); those are never deleted.
 //
@@ -48,15 +50,13 @@ async function loadClientCodes(
 ): Promise<string[]> {
   const { data: clientRow, error } = await supabase
     .from("clients")
-    .select("authorized_dspd_codes, job_code")
+    .select("id")
     .eq("organization_id", organizationId)
     .eq("id", clientId)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!clientRow) throw new Error("Client not found in this organization");
-  return clientAuthorizedCodes(
-    clientRow as { authorized_dspd_codes?: string[] | null; job_code?: string[] | null },
-  );
+  return (await loadActiveCodes(supabase, [clientId])).get(clientId) ?? [];
 }
 
 async function loadAssignmentRow(
@@ -79,7 +79,7 @@ async function loadAssignmentRow(
 /**
  * Write one staff member's explicit codes for one client. codes = [] deletes
  * the row. Caller has already run the permission check and validated codes
- * against clientAuthorizedCodes.
+ * against the client's active codes.
  */
 /** Obligation hooks are best-effort: the assignment is already saved. */
 async function runAssignmentHook(label: string, fn: () => Promise<void>): Promise<void> {
@@ -95,6 +95,11 @@ async function writeStaffClientCodes(
   args: { organizationId: string; staffId: string; clientId: string; codes: string[] },
 ): Promise<{ status: "created" | "updated" | "removed" | "unchanged" }> {
   const { organizationId, staffId, clientId, codes } = args;
+  if (codes.length > 0) {
+    // Nobody on the client's do-not-schedule list joins the team.
+    const excluded = await exclusionFor(supabase, organizationId, clientId, staffId);
+    if (excluded) throw new Error(exclusionAssignRefusal(excluded.reason));
+  }
   const existing = await loadAssignmentRow(supabase, organizationId, staffId, clientId);
 
   if (codes.length === 0) {
@@ -546,6 +551,36 @@ export const autoFillOpenShifts = createServerFn({ method: "POST" })
     return { proposals };
   });
 
+/** Refuse the whole batch when any draft puts an excluded team member with a client. */
+async function assertDraftsNotExcluded(
+  supabase: AnySupabase,
+  organizationId: string,
+  drafts: Array<{ staff_id?: string | null; client_id?: string | null; assign_to_shift_id?: string | null }>,
+): Promise<void> {
+  const staffed = drafts.filter((d) => d.staff_id);
+  if (staffed.length === 0) return;
+  const exclusions = await loadActiveExclusions(supabase, organizationId);
+  if (exclusions.length === 0) return;
+  const shiftIds = staffed.map((d) => d.assign_to_shift_id).filter((x): x is string => !!x);
+  const shiftClient = new Map<string, string>();
+  if (shiftIds.length) {
+    const { data, error } = await supabase
+      .from("scheduled_shifts")
+      .select("id, client_id")
+      .eq("organization_id", organizationId)
+      .in("id", shiftIds);
+    if (error) throw new Error(error.message);
+    for (const r of (data ?? []) as Array<{ id: string; client_id: string }>) {
+      shiftClient.set(r.id, r.client_id);
+    }
+  }
+  for (const d of staffed) {
+    const clientId = d.assign_to_shift_id ? shiftClient.get(d.assign_to_shift_id) : d.client_id;
+    const hit = clientId ? findExclusion(exclusions, clientId, d.staff_id!) : null;
+    if (hit) throw new Error(exclusionRefusal("A drafted team member", "the client", hit.reason));
+  }
+}
+
 // Accept a batch of nectar/auto-fill drafts — writes through createShift-equivalent.
 export const applyDrafts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -585,6 +620,7 @@ export const applyDrafts = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { supabase, userId } = context as any;
     if (!supabase || !userId) return { created: 0, assigned: 0 };
+    await assertDraftsNotExcluded(supabase, data.organization_id, data.drafts);
     let created = 0;
     let assigned = 0;
     for (const d of data.drafts) {

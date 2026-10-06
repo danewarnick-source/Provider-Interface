@@ -64,9 +64,9 @@ describe("setStaffClientCodes — the single write path", () => {
     assert.doesNotMatch(setup, /setClientCaseload/);
   });
 
-  it("validates codes ⊆ clientAuthorizedCodes and gates on staff_roster edit + access_can_see_staff", () => {
+  it("validates codes ⊆ the client's active codes and gates on staff_roster edit + access_can_see_staff", () => {
     assert.match(setup, /resolveStaffClientCodes\(data\.codes, authorized\)/);
-    assert.match(setup, /clientAuthorizedCodes\(/);
+    assert.match(setup, /loadActiveCodes\(supabase, \[clientId\]\)/);
     assert.match(setup, /action: "edit_caseload"/);
   });
 
@@ -111,7 +111,7 @@ describe("scheduler — shifts only for an assigned code", () => {
 
 describe("readers never treat NULL / [] as all codes", () => {
   it("client-care-data: staff see only codes on their assignment row", () => {
-    const s = src("./client-care-data.functions.ts");
+    const s = src("./clients/care-data.functions.ts");
     assert.match(s, /assignmentCoversCode\(myCodeScope\?\.service_codes, c\.service_code\)/);
     assert.doesNotMatch(s, /service_codes === null\s*\?\s*authorized_codes/);
   });

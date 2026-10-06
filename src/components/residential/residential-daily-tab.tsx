@@ -51,7 +51,7 @@ function thisMonth(): string {
  * HHS only: it's the one service code with no time clock, so its
  * single-entry-per-day daily-note model applies. Every other daily-rate
  * code (RHS, DSG, and the rest) is documented through the normal
- * clocked-shift + shift-note flow instead — see useClientBudget for how
+ * clocked-shift + shift-note flow instead — see usedUnitsForCode (lib/clients/units.ts) for how
  * those billable days are determined.
  *
  * Scope shipped this pass:

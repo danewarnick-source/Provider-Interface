@@ -80,7 +80,7 @@ export const discardImportJob = createServerFn({ method: "POST" })
 
     // Wipe staging — explicit deletes (in addition to the FK cascade) so
     // any non-cascading writes are scrubbed.
-    const jobIdEq = ["extracted_fields", "unfiled_items", "assignment_map",
+    const jobIdEq = ["extracted_fields", "assignment_map",
       "provisioning_plan", "import_subjects", "import_cert_documents",
       "import_nectar_questions", "import_field_provenance", "import_documents"];
     for (const t of jobIdEq) {
@@ -103,7 +103,6 @@ type UndoItem =
   | { kind: "client_record"; record_id: string; display_name: string; reason: string }
   | { kind: "feature_flag"; client_id: string; module: string; display_name: string }
   | { kind: "custom_field"; entity_id: string; entity_kind: string; field_key: string; display_name: string }
-  | { kind: "filed_scrap"; client_id: string; tag: string; text: string; display_name: string }
   | { kind: "assignment"; staff_id: string; client_id: string }
   | { kind: "profile_field"; profile_id: string; field: string; display_name: string }
   | { kind: "skipped_manual_edit"; record_id: string; display_name: string; reason: string };
@@ -134,9 +133,10 @@ async function buildUndoPlan(
     // ---- New clients we created -> safe to remove if untouched after commit
     if (s.subject_type === "client" && s.review_decision !== "update") {
       const { data: c } = await sb.from("clients")
-        .select("id, updated_at, first_name, last_name").eq("id", s.committed_record_id).maybeSingle();
+        .select("id, created_at, first_name, last_name").eq("id", s.committed_record_id).maybeSingle();
       if (!c) continue;
-      const edited = new Date(c.updated_at).getTime() > committedMs + GRACE_MS;
+      // clients has no updated_at; created_at is the only timestamp on the row.
+      const edited = new Date(c.created_at).getTime() > committedMs + GRACE_MS;
       if (edited) {
         skips.push({ kind: "skipped_manual_edit", record_id: c.id, display_name: s.display_name,
           reason: "Profile edited after import — kept." });
@@ -156,12 +156,6 @@ async function buildUndoPlan(
         if (p.planned_action === "enable_feature") {
           removes.push({ kind: "feature_flag", client_id: s.committed_record_id, module: p.target_module, display_name: s.display_name });
         }
-      }
-
-      // Filed scraps -> tagged notes
-      const { data: items } = await sb.from("unfiled_items").select("filed_to, text, org_id").eq("import_subject_id", s.id);
-      for (const it of items ?? []) {
-        if (it.filed_to) removes.push({ kind: "filed_scrap", client_id: s.committed_record_id, tag: `[${it.filed_to}]`, text: it.text, display_name: s.display_name });
       }
     }
 
@@ -251,16 +245,6 @@ export const undoCommittedImport = createServerFn({ method: "POST" })
             await sb.from("custom_field_values").delete()
               .eq("definition_id", def.id).eq("entity_id", item.entity_id);
             removed.push(`Cleared custom field ${item.field_key} on ${item.display_name}`);
-          }
-        } else if (item.kind === "filed_scrap") {
-          const { data: c } = await sb.from("clients").select("special_directions, updated_at").eq("id", item.client_id).maybeSingle();
-          if (c?.special_directions) {
-            const line = `${item.tag} ${item.text}`;
-            if (c.special_directions.includes(line)) {
-              const next = c.special_directions.replace(line, "").replace(/\n\n+/g, "\n").trim();
-              await sb.from("clients").update({ special_directions: next }).eq("id", item.client_id);
-              removed.push(`Removed filed note on ${item.display_name}`);
-            }
           }
         } else if (item.kind === "assignment") {
           await sb.from("staff_assignments").delete()

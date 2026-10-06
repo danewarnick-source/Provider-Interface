@@ -7,10 +7,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { z } from "zod";
-import { applyExtractedFieldsToClient } from "@/lib/client-import-schema";
+import { applyExtractedFieldsToClient } from "@/lib/clients/import-schema";
 import {
   validateClientDraft,
   filterBlocking,
+  isGuardianValueEmpty,
   normalizeGuardianFields,
   parseOwnGuardianValue,
   type ClientDraft,
@@ -24,13 +25,30 @@ import {
   reevaluateStaffAssignedToClientInternal,
 } from "@/lib/staff-assignment-hooks.functions";
 import { enrichNamesFromFull } from "@/lib/person-name";
-import { clientAuthorizedCodes, importAssignmentCodes } from "@/lib/assignment-codes";
+import { importAssignmentCodes } from "@/lib/assignment-codes";
+import { loadActiveCodes } from "@/lib/clients/codes";
+import { importPlanYear } from "@/lib/clients/plans-write";
+import {
+  LEGACY_ALERT_KEY,
+  LEGACY_CONTACT_KEYS,
+  LEGACY_SINGLE_SOURCE_KEYS,
+  legacyContactKey,
+} from "@/lib/clients/legacy-fields";
 import { hireTeamMemberInternal } from "@/lib/team-members/members.functions";
 import { classifyImportInvite, hasUsableInviteEmail } from "@/lib/import-invite";
 
 const JobId = z.object({ jobId: z.string().uuid() });
 
-// Map of extracted target_field -> column on clients
+/** Extracted keys applyExtractedFieldsToClient lands outside clients columns. */
+const LANDED_BY_AUTOFILL = new Set<string>([
+  ...Object.keys(LEGACY_CONTACT_KEYS),
+  LEGACY_ALERT_KEY,
+  ...Object.values(LEGACY_SINGLE_SOURCE_KEYS),
+]);
+
+// Map of extracted target_field -> column on clients. Contacts, the must-knows
+// alert and the single-source fields are not here: applyExtractedFieldsToClient
+// lands them in client_contacts / special_directions / insurance / about_me.
 const CLIENT_COL: Record<string, string> = {
   first_name: "first_name",
   last_name: "last_name",
@@ -42,33 +60,6 @@ const CLIENT_COL: Record<string, string> = {
   dob: "date_of_birth",
   date_of_birth: "date_of_birth",
   is_own_guardian: "is_own_guardian",
-  guardian_name: "guardian_name",
-  guardian_phone: "guardian_phone",
-  guardian_relationship: "guardian_relationship",
-  guardian_email: "guardian_email",
-  guardian_address: "guardian_address",
-  emergency_contact_name: "emergency_contact_name",
-  emergency_contact_phone: "emergency_contact_phone",
-  emergency_contact_instructions: "emergency_contact_instructions",
-  support_coordinator_name: "support_coordinator_name",
-  support_coordinator_email: "support_coordinator_email",
-  support_coordinator_phone: "support_coordinator_phone",
-  support_coordinator_company: "support_coordinator_company",
-  primary_care_name: "primary_care_name",
-  primary_care_phone: "primary_care_phone",
-  pcp_name: "primary_care_name",
-  pcp_phone: "primary_care_phone",
-  specialist_name: "specialist_name",
-  specialist_phone: "specialist_phone",
-  med_prescriber_name: "prescriber_name",
-  med_prescriber_phone: "prescriber_phone",
-  neurologist_name: "neurologist_name",
-  neurologist_phone: "neurologist_phone",
-  dentist_name: "dentist_name",
-  dentist_phone: "dentist_phone",
-  prescriber_name: "prescriber_name",
-  prescriber_phone: "prescriber_phone",
-  clinical_alert: "clinical_alert",
   special_directions: "special_directions",
   dysphagia: "dysphagia",
   self_admin_med_support: "self_admin_med_support",
@@ -79,7 +70,6 @@ const CLIENT_COL: Record<string, string> = {
   swallowing_alerts: "swallowing_alerts",
   rights_restrictions: "rights_restrictions",
   court_orders: "court_orders",
-  preferred_activities: "preferred_activities",
   roommates: "roommates",
   personal_belongings_inventory: "personal_belongings_inventory",
   has_abi: "has_abi",
@@ -88,9 +78,7 @@ const CLIENT_COL: Record<string, string> = {
   advanced_directives: "advanced_directives",
   emergency_medical_treatment_authorization: "emergency_medical_treatment_authorization",
   bsp_status: "bsp_status",
-  medical_insurance: "medical_insurance",
   housing_voucher: "housing_voucher",
-  preferred_living: "preferred_living",
   plan_year: "plan_year",
   disability_category: "disability_category",
   admission_date: "admission_date",
@@ -150,7 +138,6 @@ const CLIENT_ARRAY_COLS = new Set([
   "swallowing_alerts",
   "rights_restrictions",
   "court_orders",
-  "preferred_activities",
   "roommates",
   "personal_belongings_inventory",
 ]);
@@ -228,34 +215,6 @@ export const recommitSmartImportJob = createServerFn({ method: "POST" })
     if (!orgId) throw new Error("Job has no organization to commit into.");
     await requireOrgMembership(sb, context.userId, orgId, "owner");
     return runJobCommit(sb, context.userId, data.jobId);
-  });
-
-// Commit a single pending subject (used by the Pending Clients workspace's
-// "Save & finalize" path). Same engine; just filters candidates to one
-// row so unrelated ready siblings are not auto-committed.
-const SingleSubject = z.object({ subjectId: z.string().uuid() });
-export const commitSingleSubject = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => SingleSubject.parse(i))
-  .handler(async ({ data, context }) => {
-    if (!context.supabase || !context.userId) return { results: [], jobCommitted: false };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
-    const { data: subj, error } = await sb
-      .from("import_subjects")
-      .select("id, import_job_id, org_id")
-      .eq("id", data.subjectId)
-      .single();
-    if (error || !subj) throw new Error("Subject not found");
-    const { data: job } = await sb
-      .from("import_jobs")
-      .select("id, org_id, target_org_id, source")
-      .eq("id", subj.import_job_id)
-      .single();
-    const orgId = (job?.source === "white_glove" ? job.target_org_id : job?.org_id) as string;
-    if (!orgId) throw new Error("Job has no organization to commit into.");
-    await requireOrgMembership(sb, context.userId, orgId, "owner");
-    return runJobCommit(sb, context.userId, subj.import_job_id, { subjectId: data.subjectId });
   });
 
 // Internal helper — usable from other server fns (e.g. submitForSetup) so
@@ -494,7 +453,6 @@ export async function runJobCommit(
         userId,
       );
       await commitCerts(sb, orgId, subj, recordId, jobId, userId, gaps);
-      await commitUnfiled(sb, subj, recordId, jobId, userId);
       await applyProvisioning(sb, orgId, subj, recordId, jobId, userId, gaps);
 
       await sb
@@ -621,27 +579,23 @@ async function commitClient(
 
   // Coerce/normalize guardianship via the shared helper so the trigger,
   // validator, and reviewer agree on what "self-guardian" means.
+  // The guardian's own details go to client_contacts (applyExtractedFieldsToClient);
+  // only is_own_guardian lives on the client row.
+  const guardianNamed = fields.some(
+    (f) =>
+      !f.is_custom_attribute &&
+      f.target_field === legacyContactKey("guardian", "name") &&
+      !isGuardianValueEmpty(f.value),
+  );
   const normalize = (m: Record<string, unknown>, defaultSelf: boolean) => {
-    const guardianTouched =
-      "is_own_guardian" in m ||
-      "guardian_name" in m ||
-      "guardian_phone" in m ||
-      "guardian_relationship" in m ||
-      "guardian_email" in m;
-    if (!guardianTouched) return; // non-destructive on update path
-    // Coerce string booleans first so normalizeGuardianFields sees real bools.
+    if (!("is_own_guardian" in m) && !guardianNamed) return; // non-destructive on update path
+    // Coerce string booleans first.
     if (m.is_own_guardian === "true") m.is_own_guardian = true;
     else if (m.is_own_guardian === "false") m.is_own_guardian = false;
-    if (defaultSelf && (m.is_own_guardian === undefined || m.is_own_guardian === null)) {
-      m.is_own_guardian = true;
+    if (m.is_own_guardian === undefined || m.is_own_guardian === null) {
+      if (guardianNamed) m.is_own_guardian = false;
+      else if (defaultSelf) m.is_own_guardian = true;
     }
-    normalizeGuardianFields(
-      m as ClientDraft & {
-        guardian_phone?: string | null;
-        guardian_relationship?: string | null;
-        guardian_email?: string | null;
-      },
-    );
   };
 
   // Resilient writer: PostgREST rejects the whole payload if any key is
@@ -758,6 +712,17 @@ async function commitClient(
     await audit(sb, jobId, orgId, subj.id, "Created new client", "source", userId, "create_client");
   }
 
+  // The plan year lives in client_plans (the Plans section reads it there).
+  if (mapped.plan_year || mapped.pcsp_expiration_date) {
+    await importPlanYear(sb, {
+      organizationId: orgId,
+      clientId: recordId,
+      userId,
+      plan_year: (mapped.plan_year as string | undefined) ?? null,
+      pcsp_expiration_date: (mapped.pcsp_expiration_date as string | undefined) ?? null,
+    });
+  }
+
   // Provenance rows for each core field
   for (const f of fields) {
     if (f.is_custom_attribute) continue;
@@ -782,7 +747,9 @@ async function commitClient(
   }
 
   // Surface fields that had no mapping (gaps)
-  const unmapped = fields.filter((f) => !f.is_custom_attribute && !CLIENT_COL[f.target_field]);
+  const unmapped = fields.filter(
+    (f) => !f.is_custom_attribute && !CLIENT_COL[f.target_field] && !LANDED_BY_AUTOFILL.has(f.target_field),
+  );
   for (const u of unmapped) gaps.push(`Unmapped: ${u.target_field}`);
 
   // Run the shared autofill so Smart Import seeds billing codes, goals,
@@ -876,25 +843,6 @@ async function commitClient(
     );
   }
 
-  // The visible Profile > Contacts card reads client_emergency_contacts, not
-  // the legacy scalar emergency-contact columns on clients. Mirror reviewed
-  // PCSP emergency contacts there so finalization actually populates the UI.
-  try {
-    await seedEmergencyContacts(sb, orgId, recordId, fields);
-  } catch (err) {
-    gaps.push(`Contacts warning: ${(err as Error).message}`);
-    await audit(
-      sb,
-      jobId,
-      orgId,
-      subj.id,
-      `Emergency contacts seed failed: ${(err as Error).message}`,
-      "admin_override",
-      userId,
-      "contacts_seed_error",
-    );
-  }
-
   // ─── PCSP single-source-of-truth ──────────────────────────────────────
   // If this subject's PCSP-typed fields trace to one or more
   // import_documents, copy each file into the client-documents bucket and
@@ -977,58 +925,6 @@ async function commitClient(
   }
 
   return recordId;
-}
-
-async function seedEmergencyContacts(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sb: any,
-  orgId: string,
-  clientId: string,
-  fields: Array<{ target_field: string; value: string | null; is_custom_attribute: boolean }>,
-) {
-  const active = fields.filter((f) => !f.is_custom_attribute);
-  const valueOf = (key: string) =>
-    active.find((f) => f.target_field === key)?.value?.trim() || null;
-  const rows = [
-    {
-      name: valueOf("emergency_contact_name"),
-      phone: valueOf("emergency_contact_phone"),
-      relationship: valueOf("emergency_contact_relationship"),
-    },
-    {
-      name: valueOf("emergency_contact_2_name"),
-      phone: valueOf("emergency_contact_2_phone"),
-      relationship: valueOf("emergency_contact_2_relationship"),
-    },
-  ].filter((r) => r.name);
-  if (!rows.length) return;
-
-  const { data: existing, error: existingErr } = await sb
-    .from("client_emergency_contacts")
-    .select("name, phone")
-    .eq("organization_id", orgId)
-    .eq("client_id", clientId);
-  if (existingErr) throw new Error(existingErr.message);
-  const seen = new Set(
-    (existing ?? []).map(
-      (r: { name: string; phone: string | null }) =>
-        `${r.name.trim().toLowerCase()}|${(r.phone ?? "").trim().toLowerCase()}`,
-    ),
-  );
-  const inserts = rows
-    .filter(
-      (r) => !seen.has(`${r.name!.trim().toLowerCase()}|${(r.phone ?? "").trim().toLowerCase()}`),
-    )
-    .map((r) => ({
-      organization_id: orgId,
-      client_id: clientId,
-      name: r.name!,
-      phone: r.phone,
-      relationship: r.relationship,
-    }));
-  if (!inserts.length) return;
-  const { error } = await sb.from("client_emergency_contacts").insert(inserts);
-  if (error) throw new Error(error.message);
 }
 
 // Helper for the pre-commit validation gate. Builds a minimal ClientDraft
@@ -1373,44 +1269,64 @@ async function commitCerts(
   }
 }
 
-// --------------------------------------------------------------
-async function commitUnfiled(
+/**
+ * A Smart Import client draft finished on the Add client form. The form has
+ * already created the client (recordId); this attaches the import's extras
+ * (custom fields, certs, provisioning) and closes the draft. Same steps as
+ * runJobCommit after its own insert. Returns gaps to show.
+ */
+export async function finishImportDraft(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sb: any,
-  subj: { id: string; subject_type: "client" | "employee"; org_id?: string },
-  recordId: string | null,
-  jobId: string,
+  sbIn: any,
   userId: string,
-) {
-  const { data: items } = await sb
-    .from("unfiled_items")
-    .select("*")
-    .eq("import_subject_id", subj.id);
-  for (const it of items ?? []) {
-    if (!it.filed_to) continue; // unassigned scraps persist as recoverable
-    // For clients we append the scrap to special_directions as a tagged note.
-    if (recordId && subj.subject_type === "client") {
-      const tag = `[${it.filed_to}]`;
-      const { data: c } = await sb
-        .from("clients")
-        .select("special_directions")
-        .eq("id", recordId)
-        .maybeSingle();
-      const existing = (c?.special_directions ?? "").trim();
-      const next = existing ? `${existing}\n${tag} ${it.text}` : `${tag} ${it.text}`;
-      await sb.from("clients").update({ special_directions: next }).eq("id", recordId);
-    }
-    await audit(
-      sb,
-      jobId,
-      it.org_id,
-      subj.id,
-      `Filed scrap under "${it.filed_to}"`,
-      "admin_override",
-      userId,
-      "file_scrap",
-    );
+  args: { subjectId: string; recordId: string; organizationId: string },
+): Promise<string[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = sbIn as any;
+  const { data: subj, error } = await sb
+    .from("import_subjects")
+    .select("id, import_job_id, subject_type, display_name, committed_at, discarded_at")
+    .eq("id", args.subjectId)
+    .maybeSingle();
+  if (error || !subj || subj.subject_type !== "client") throw new Error("This imported draft was not found.");
+  if (subj.committed_at || subj.discarded_at) throw new Error("This imported draft was already finished or discarded.");
+  const { data: job } = await sb
+    .from("import_jobs")
+    .select("id, org_id, source")
+    .eq("id", subj.import_job_id)
+    .maybeSingle();
+  if (!job || job.source === "white_glove" || job.org_id !== args.organizationId) {
+    throw new Error("Finish this import from Smart Import.");
   }
+  const gaps: string[] = [];
+  const { data: fields } = await sb
+    .from("extracted_fields")
+    .select("*")
+    .eq("import_subject_id", subj.id)
+    .neq("status", "ignored")
+    .is("dismissed_at", null);
+  await attachCustomAttributes(
+    sb,
+    args.organizationId,
+    subj,
+    args.recordId,
+    (fields ?? []).filter((f: { is_custom_attribute: boolean }) => f.is_custom_attribute),
+    job.id,
+    userId,
+  );
+  await commitCerts(sb, args.organizationId, subj, args.recordId, job.id, userId, gaps);
+  await applyProvisioning(sb, args.organizationId, subj, args.recordId, job.id, userId, gaps);
+  await sb
+    .from("import_subjects")
+    .update({
+      committed_record_id: args.recordId,
+      committed_at: new Date().toISOString(),
+      review_status: "approved",
+      commit_error: null,
+    })
+    .eq("id", subj.id);
+  await audit(sb, job.id, args.organizationId, subj.id, "Finished on the Add client form", "admin_override", userId, "commit_subject");
+  return gaps;
 }
 
 // --------------------------------------------------------------
@@ -1526,21 +1442,8 @@ async function applyAssignmentMap(
     // Every staff_assignments row lists its codes explicitly. The source's
     // codes (∩ the client's authorized codes) when it has some; otherwise the
     // client's currently authorized codes. Never NULL / "all codes".
-    const { data: clientRow } = await sb
-      .from("clients")
-      .select("authorized_dspd_codes, job_code")
-      .eq("organization_id", orgId)
-      .eq("id", clientId)
-      .maybeSingle();
-    const codes = importAssignmentCodes(
-      r.service_codes,
-      clientAuthorizedCodes(
-        (clientRow ?? {}) as {
-          authorized_dspd_codes?: string[] | null;
-          job_code?: string[] | null;
-        },
-      ),
-    );
+    const clientCodes = (await loadActiveCodes(sb, [clientId])).get(clientId) ?? [];
+    const codes = importAssignmentCodes(r.service_codes, clientCodes);
     if (codes.length === 0) {
       await audit(
         sb,

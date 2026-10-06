@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { loadActiveCodes } from "@/lib/clients/codes";
+import { formatDate } from "@/lib/clients/dates";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAccess } from "@/hooks/use-access";
 import { Card } from "@/components/ui/card";
@@ -53,7 +55,8 @@ type ClientSafety = {
   first_name: string;
   last_name: string;
   date_of_birth: string | null;
-  authorized_dspd_codes: string[] | null;
+  /** Active service codes (client_billing_codes). */
+  codes: string[];
   allergies: string[];
   dysphagia: boolean;
   swallowing_alerts: string[];
@@ -69,11 +72,12 @@ export function useClientSafety(clientId: string) {
     queryFn: async (): Promise<ClientSafety> => {
       const { data, error } = await (supabase as any)
         .from("clients")
-        .select("id, first_name, last_name, date_of_birth, authorized_dspd_codes, allergies, dysphagia, swallowing_alerts, self_admin_med_support")
+        .select("id, first_name, last_name, date_of_birth, allergies, dysphagia, swallowing_alerts, self_admin_med_support")
         .eq("id", clientId)
         .single();
       if (error) throw error;
-      return data as ClientSafety;
+      const codes = await loadActiveCodes(supabase, [clientId]);
+      return { ...(data as Omit<ClientSafety, "codes">), codes: codes.get(clientId) ?? [] };
     },
   });
 }
@@ -81,14 +85,12 @@ export function useClientSafety(clientId: string) {
 /** Clinical safety header — name + service chip + DOB on left, allergies pills
  *  on right, then amber alert lines for swallowing/crushed-med policy. */
 export function ClinicalSafetyHeader({ client }: { client: ClientSafety }) {
-  const services = (client.authorized_dspd_codes ?? []).filter(Boolean);
+  const services = client.codes;
   const primaryService = services[0];
   const allergies = client.allergies ?? [];
   const alerts = client.swallowing_alerts ?? [];
   const dob = client.date_of_birth
-    ? new Date(client.date_of_birth + "T00:00:00").toLocaleDateString(undefined, {
-        year: "numeric", month: "2-digit", day: "2-digit",
-      })
+    ? formatDate(client.date_of_birth, { year: "numeric", month: "2-digit", day: "2-digit" })
     : null;
   return (
     <Card className="p-4">

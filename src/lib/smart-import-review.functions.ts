@@ -74,9 +74,8 @@ export const getReviewSubject = createServerFn({ method: "POST" })
       .single();
     if (error || !subject) throw new Error("Subject not found");
 
-    const [{ data: fields }, { data: unfiled }, { data: certs }, { data: questions }] = await Promise.all([
+    const [{ data: fields }, { data: certs }, { data: questions }] = await Promise.all([
       sb.from("extracted_fields").select("*").eq("import_subject_id", data.subjectId).order("is_custom_attribute"),
-      sb.from("unfiled_items").select("*").eq("import_subject_id", data.subjectId),
       sb.from("import_cert_documents").select("*").eq("import_subject_id", data.subjectId),
       sb.from("import_nectar_questions").select("*").eq("import_subject_id", data.subjectId),
     ]);
@@ -134,7 +133,6 @@ export const getReviewSubject = createServerFn({ method: "POST" })
     return {
       subject,
       fields: fields ?? [],
-      unfiled: unfiled ?? [],
       certs: certs ?? [],
       questions: questions ?? [],
       matched,
@@ -650,26 +648,6 @@ export const answerNectarQuestion = createServerFn({ method: "POST" })
       answered_by: context.userId,
       answered_at: new Date().toISOString(),
     }).eq("id", data.questionId);
-    return { ok: true };
-  });
-
-// ---------- File an unfiled item ----------
-const FileUnfiled = z.object({
-  itemId: z.string().uuid(),
-  filed_to: z.string().nullable(), // null = leave
-});
-export const fileUnfiledItem = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => FileUnfiled.parse(i))
-  .handler(async ({ data, context }) => {
-    if (!context.supabase || !context.userId) return { ok: false };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
-    await sb.from("unfiled_items").update({
-      filed_to: data.filed_to,
-      filed_by: data.filed_to ? context.userId : null,
-      filed_at: data.filed_to ? new Date().toISOString() : null,
-    }).eq("id", data.itemId);
     return { ok: true };
   });
 
@@ -1209,10 +1187,8 @@ export const applyMissingClientFields = createServerFn({ method: "POST" })
 // PENDING CLIENTS WORKSPACE — server fns
 // ===========================================================================
 
-// Editable target_fields for the generalized FinalizeClientEditor. Mirrors
-// the keys recognized by buildDraftFromExtractedFields and the commit-time
-// CLIENT_COL map, so a value the admin saves here is what the validator and
-// commit step both read back.
+// Client target_fields a review issue can point at. Mirrors the keys
+// recognized by buildDraftFromExtractedFields and the commit-time CLIENT_COL map.
 const EDITABLE_CLIENT_TARGETS = [
   "first_name",
   "last_name",
@@ -1254,112 +1230,6 @@ export const ISSUE_KEY_TO_TARGET: Record<string, EditableTarget> = {
 };
 
 
-const ApplyFields = z.object({
-  subjectId: z.string().uuid(),
-  values: z.record(z.string(), z.union([z.string(), z.boolean(), z.null()])),
-});
-
-// Generalized field writer — successor to applyMissingClientFields. Accepts
-// any editable target_field and upserts each as an extracted_fields row with
-// admin_override provenance, preserving original_value. Returns the latest
-// validation snapshot so the editor can refresh its "ready to finalize"
-// indicator without a second round-trip.
-export const applyClientFields = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ApplyFields.parse(i))
-  .handler(async ({ data, context }) => {
-    if (!context.supabase || !context.userId) {
-      return { ok: false, issues: [], blocking: [], readyToFinalize: false };
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
-    const { data: subj } = await sb
-      .from("import_subjects")
-      .select("import_job_id, org_id, subject_type, committed_at, validation_overrides")
-      .eq("id", data.subjectId)
-      .single();
-    if (!subj) throw new Error("Subject not found");
-    if (subj.subject_type !== "client") throw new Error("Only client subjects are supported here.");
-    if (subj.committed_at) throw new Error("This client is already committed — open the live profile to edit.");
-
-    const editable = new Set<string>(EDITABLE_CLIENT_TARGETS);
-    const writes: Array<[string, string]> = [];
-    for (const [k, raw] of Object.entries(data.values)) {
-      if (!editable.has(k)) continue;
-      let str: string;
-      if (typeof raw === "boolean") str = raw ? "true" : "false";
-      else if (raw == null) str = "";
-      else str = String(raw).trim();
-      writes.push([k, str]);
-    }
-
-    for (const [target, value] of writes) {
-      const { data: existing } = await sb
-        .from("extracted_fields")
-        .select("id, value, original_value")
-        .eq("import_subject_id", data.subjectId)
-        .eq("target_field", target)
-        .maybeSingle();
-      if (existing) {
-        await sb.from("extracted_fields").update({
-          value,
-          original_value: existing.original_value ?? existing.value,
-          status: "edited",
-          provenance: "admin_override",
-          edited_by: context.userId,
-          edited_at: new Date().toISOString(),
-        }).eq("id", existing.id);
-      } else {
-        await sb.from("extracted_fields").insert({
-          import_job_id: subj.import_job_id,
-          org_id: subj.org_id,
-          import_subject_id: data.subjectId,
-          target_table: "clients",
-          target_field: target,
-          value,
-          status: "edited",
-          confidence: 1,
-          provenance: "admin_override",
-          is_custom_attribute: false,
-          edited_by: context.userId,
-          edited_at: new Date().toISOString(),
-        });
-      }
-    }
-
-    // Clear stale commit_error so the UI stops surfacing it pre-revalidation.
-    await sb.from("import_subjects").update({ commit_error: null }).eq("id", data.subjectId);
-
-    await sb.from("import_audit").insert({
-      import_job_id: subj.import_job_id,
-      org_id: subj.org_id,
-      subject_id: data.subjectId,
-      item: `Pending client fields updated (${writes.length})`,
-      traces_to: "admin_override",
-      actor: context.userId,
-      action: "apply_client_fields",
-    });
-
-    // Recompute validation for the live editor.
-    const { data: rows } = await sb
-      .from("extracted_fields")
-      .select("target_field, value")
-      .eq("import_subject_id", data.subjectId);
-    const draft = buildDraftFromExtractedFields(rows ?? []);
-    const tenant = subj.org_id ? await fetchTenantIdentity(sb, subj.org_id) : { codesHeld: [], names: [] };
-    const validation = validateClientDraft(draft, { tenant });
-    const overrides = (subj.validation_overrides as Record<string, boolean>) ?? {};
-    const blocking = filterBlocking(validation.issues, overrides);
-    return {
-      ok: true,
-      issues: validation.issues,
-      blocking: blocking.map((b) => ({ key: b.key, field: b.field ?? null, message: b.message })),
-      readyToFinalize: blocking.length === 0,
-    };
-  });
-
-// Workspace aggregator — every uncommitted, non-discarded client subject in
-// the caller's org, with per-subject blocking issues + ready-to-finalize.
 const PendingList = z.object({ organizationId: z.string().uuid() });
 export const listPendingClientSubjects = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -1436,104 +1306,6 @@ export const listPendingClientSubjects = createServerFn({ method: "POST" })
 
     return { items, jobs: jobMap };
   });
-
-// Per-subject view for the editor: current values + live validation. The
-// FinalizeClientEditor seeds its inputs from `values` and renders `blocking`
-// inline.
-export const getPendingClientSubject = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => SubjectId.parse(i))
-  .handler(async ({ data, context }) => {
-    if (!context.supabase || !context.userId) return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
-    const { data: subj } = await sb
-      .from("import_subjects")
-      .select("id, import_job_id, org_id, subject_type, display_name, match_status, matched_record_id, review_status, review_decision, commit_error, validation_overrides, committed_at, discarded_at")
-      .eq("id", data.subjectId)
-      .single();
-    if (!subj) throw new Error("Subject not found");
-
-    const { data: fields } = await sb
-      .from("extracted_fields")
-      .select("target_field, value")
-      .eq("import_subject_id", data.subjectId);
-    const values: Record<string, string | null> = {};
-    for (const f of fields ?? []) values[f.target_field] = f.value;
-
-    const draft = buildDraftFromExtractedFields(fields ?? [], subj.display_name);
-
-    const tenant = subj.org_id ? await fetchTenantIdentity(sb, subj.org_id) : { codesHeld: [], names: [] };
-    const validation = validateClientDraft(draft, { tenant });
-    const overrides = (subj.validation_overrides as Record<string, boolean>) ?? {};
-    const blocking = filterBlocking(validation.issues, overrides);
-
-    // ── Unified review items ─────────────────────────────────────────
-    // Merge: blocking validation (Required), warnings + contradictions
-    // (Needs confirmation), and any open NECTAR clarifying questions.
-    const { data: questions } = await sb
-      .from("import_nectar_questions")
-      .select("id, question, answer")
-      .eq("import_subject_id", data.subjectId);
-
-
-    type ReviewItem = {
-      id: string;
-      category: "required" | "confirmation" | "optional";
-      field: string | null;
-      message: string;
-      source: "validation" | "contradiction" | "nectar_question";
-      questionId?: string;
-    };
-    const reviewItems: ReviewItem[] = [];
-
-    const contradictionKeys = new Set(
-      findClientContradictions(draft).map((c) => c.key),
-    );
-    for (const issue of validation.issues) {
-      if (overrides[issue.key]) continue;
-      const isContradiction = contradictionKeys.has(issue.key);
-      // Unknown self-guardian status is a required confirmation (binary
-      // choice) — show under "Needs confirmation" even though it blocks.
-      const isConfirmation = isContradiction || issue.key === "guardian.unknown_status";
-      let category: ReviewItem["category"];
-      if (issue.severity === "error" && !isConfirmation) category = "required";
-      else if (isConfirmation) category = "confirmation";
-      else category = "optional";
-      reviewItems.push({
-        id: issue.key,
-        category,
-        field: issue.field ?? null,
-        message: issue.message,
-        source: isContradiction ? "contradiction" : "validation",
-      });
-    }
-
-    for (const q of (questions ?? []) as Array<{ id: string; question: string; answer: string | null }>) {
-      if (q.answer && q.answer.trim()) continue;
-      reviewItems.push({
-        id: `q:${q.id}`,
-        category: "confirmation",
-        field: null,
-
-        message: q.question,
-        source: "nectar_question",
-        questionId: q.id,
-      });
-    }
-
-    const readyToFinalize = blocking.length === 0 && !subj.committed_at && !subj.discarded_at;
-
-    return {
-      subject: subj,
-      values,
-      issues: validation.issues,
-      blocking: blocking.map((b) => ({ key: b.key, field: b.field ?? null, message: b.message })),
-      reviewItems,
-      readyToFinalize,
-    };
-  });
-
 
 // Per-subject discard. Sets discarded_at/discarded_by (additive columns from
 // migration) so the workspace filters the row out, the staging audit/history

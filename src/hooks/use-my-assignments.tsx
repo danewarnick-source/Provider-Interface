@@ -10,7 +10,6 @@ export {
   caseloadCardActions,
   caseloadDailyNoteLabel,
   caseloadTimeClockLabel,
-  clientAuthorizedCodes,
   defaultCaseloadCode,
   firstClockableCode,
   hasHhsCode,

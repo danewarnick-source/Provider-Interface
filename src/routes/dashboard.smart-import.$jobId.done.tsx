@@ -34,15 +34,16 @@ import {
 } from "@/lib/smart-import-commit.functions";
 import { generateSmartImportReminders } from "@/lib/smart-import-reminders.functions";
 import { previewUndoImport, undoCommittedImport } from "@/lib/smart-import-history.functions";
-import { ClientLiveBadge } from "@/components/clients/client-readiness-card";
-import { SetupChecklist } from "@/components/clients/setup-checklist";
-import { FinalizeClientEditor } from "@/components/clients/finalize-client-editor";
+import {
+  ClientNeedsAttentionList,
+  ClientReadyBadge,
+} from "@/components/clients/shared/client-needs-attention";
 import { employeeSmartImportRedirect } from "@/lib/employee-smart-import-block";
 
 export const Route = createFileRoute("/dashboard/smart-import/$jobId/done")({
   head: () => ({ meta: [{ title: "Smart Import — Done" }] }),
   component: () => (
-    <RequirePermission perm="view_staff_records">
+    <RequirePermission perm="edit_client_records">
       <DonePage />
     </RequirePermission>
   ),
@@ -55,7 +56,6 @@ function describeUndo(r: unknown): string {
     module?: string;
     field?: string;
     field_key?: string;
-    tag?: string;
     staff_id?: string;
     client_id?: string;
   };
@@ -66,8 +66,6 @@ function describeUndo(r: unknown): string {
       return `Disable ${x.module} on ${x.display_name}`;
     case "custom_field":
       return `Clear custom field "${x.field_key}" on ${x.display_name}`;
-    case "filed_scrap":
-      return `Remove filed note ${x.tag} from ${x.display_name}`;
     case "assignment":
       return `Remove staff↔client assignment`;
     case "profile_field":
@@ -99,7 +97,6 @@ function DonePage() {
   );
   const [runError, setRunError] = useState<string | null>(null);
   const [undoOpen, setUndoOpen] = useState(false);
-  const [fixSubject, setFixSubject] = useState<string | null>(null);
 
   const q = useQuery({
     queryKey: ["smart-import-done", jobId, runState],
@@ -281,7 +278,7 @@ function DonePage() {
             {job.mode === "client" && committedCount < subjects.length && (
               <>
                 {" "}
-                Finish the rest from the <strong>Pending Clients</strong> workspace.
+                Finish the rest from the client list (tagged <strong>Finish setup</strong>).
               </>
             )}
           </p>
@@ -297,7 +294,7 @@ function DonePage() {
         <div className="flex flex-wrap gap-2">
           {job.mode === "client" && committedCount < subjects.length && (
             <Button asChild>
-              <Link to="/dashboard/clients/pending">Review pending clients</Link>
+              <Link to="/dashboard/clients">Finish setup in the client list</Link>
             </Button>
           )}
           {pendingCommit > 0 && committedCount > 0 && (
@@ -354,7 +351,7 @@ function DonePage() {
                   <div className="flex items-center gap-2 text-xs">
                     {s.committed ? (
                       s.subject_type === "client" && s.record_id ? (
-                        <ClientLiveBadge clientId={s.record_id} />
+                        <ClientReadyBadge clientId={s.record_id} />
                       ) : (
                         <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
                           live
@@ -385,8 +382,10 @@ function DonePage() {
                 )}
                 {canFix && (
                   <div className="mt-2">
-                    <Button size="sm" onClick={() => setFixSubject(s.id)}>
-                      <Wrench className="mr-2 h-3.5 w-3.5" /> Complete missing info
+                    <Button size="sm" asChild>
+                      <Link to="/dashboard/clients" search={{ draft: s.id }}>
+                        <Wrench className="mr-2 h-3.5 w-3.5" /> Complete missing info
+                      </Link>
                     </Button>
                   </div>
                 )}
@@ -402,7 +401,7 @@ function DonePage() {
                 )}
                 {s.record_id && s.subject_type === "client" && s.committed && (
                   <div className="mt-3">
-                    <SetupChecklist clientId={s.record_id} jobId={jobId} />
+                    <ClientNeedsAttentionList clientId={s.record_id} />
                   </div>
                 )}
               </div>
@@ -525,18 +524,6 @@ function DonePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Generalized per-subject finalize editor (replaces guardianship-only fixer). */}
-      <FinalizeClientEditor
-        subjectId={fixSubject}
-        open={!!fixSubject}
-        onOpenChange={(o) => {
-          if (!o) setFixSubject(null);
-        }}
-        onFinalized={() => {
-          invalidateAfterCommit();
-          q.refetch();
-        }}
-      />
     </div>
   );
 }

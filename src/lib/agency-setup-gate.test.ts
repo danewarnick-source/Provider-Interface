@@ -252,7 +252,7 @@ describe("unit: agency setup gate — skip, create, redirect", () => {
 
     const hire = read("./team-members/members.functions.ts");
     const invites = read("./team-members/invites.functions.ts");
-    const clients = read("../routes/dashboard.clients.tsx");
+    const clients = read("../components/clients/list/clients-page.tsx");
     const importCommit = read("./smart-import-commit.functions.ts");
     assert.match(hire, /assertAgencySetupCompleteForOrg/);
     assert.match(invites, /assertAgencySetupCompleteForOrg/);

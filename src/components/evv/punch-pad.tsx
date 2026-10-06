@@ -36,7 +36,6 @@ import { PiMark } from "@/components/pi-landing/pi-mark";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode, maskMemberId, padMemberId } from "@/lib/evv-codes";
-import { clientAuthorizedCodes } from "@/lib/assignment-codes";
 import { roundToQuarterHourISO } from "@/lib/time-rounding";
 import { computeEntryUnits } from "@/lib/billing-units";
 import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
@@ -65,7 +64,7 @@ import { PendingTrackingFormsDialog, type PendingForm } from "@/components/evv/p
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";
 import { IncidentReportDialog } from "@/components/incidents/incident-report-dialog";
 import { AlertTriangle as AlertTriangleIcon } from "lucide-react";
-import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
+import { useActiveCodes } from "@/components/clients/shared/hooks/use-active-codes";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { ShiftMedDueCheck, type PendingMedDose } from "@/components/medications/shift-med-due-check";
 import { useComplianceGate } from "@/hooks/use-compliance-gate";
@@ -89,7 +88,6 @@ type LockedClient = {
   homeLat?: number | null;
   homeLng?: number | null;
   geofenceRadiusFeet?: number | null;
-  pcspGoals?: string[];
 };
 
 type ActiveShift = {
@@ -123,6 +121,8 @@ import {
 } from "@/lib/geo";
 import { gpsFixFromPosition, HIGH_ACCURACY_GPS_OPTIONS } from "@/lib/gps";
 import { selectedPill, unselectedPill } from "@/components/evv/toggle-styles";
+import { BASELINE_GOAL, GoalSupportChecklist } from "@/components/evv/goal-support-checklist";
+import { goalSupportOptions } from "@/lib/clients/plans";
 import { isAdminLevel } from "@/lib/access/levels";
 
 function fmtElapsed(ms: number): string {
@@ -150,12 +150,11 @@ export interface PunchPadProps {
     last_name: string;
     medicaid_id: string | null;
     physical_address: string | null;
-    job_code?: string[] | null;
-    authorized_dspd_codes?: string[] | null;
+    /** Active service codes (client_billing_codes). */
+    codes?: string[];
     home_latitude?: number | null;
     home_longitude?: number | null;
     geofence_radius_feet?: number | null;
-    pcsp_goals?: string[] | null;
   }>;
   /** Pre-fill the service code dropdown (e.g. from scheduled shift). */
   presetServiceCode?: string;
@@ -440,7 +439,8 @@ export function PunchPad({
       const { data, error } = await supabase
         .from("client_approved_locations")
         .select("id, label, latitude, longitude, geofence_radius_feet")
-        .eq("client_id", approvedClientId!);
+        .eq("client_id", approvedClientId!)
+        .is("archived_at", null);
       if (error) throw error;
       return (data ?? []).map((r) => ({
         id: r.id as string,
@@ -471,17 +471,13 @@ export function PunchPad({
     return () => clearInterval(t);
   }, [activeMatchesThisPad, active?.id]);
 
-  // ── Authorized billing codes (single source of truth: client_billing_codes) ──
-  // Used instead of the stale job_code array on the clients row.
+  // ── Authorized billing codes (one source: active client_billing_codes rows) ──
   // EVV uses ALL authorized codes (no day-program filter here).
   const effectiveClientId = lockedClient?.id ?? selectedClientId ?? undefined;
-  const clientBillingCodesQ = useClientBillingCodes(effectiveClientId || undefined);
+  const activeCodesQ = useActiveCodes(effectiveClientId ? [effectiveClientId] : []);
   const billingAuthorizedCodes: string[] | undefined = (() => {
-    if (!clientBillingCodesQ.data) return undefined;
-    const codes = clientBillingCodesQ.data
-      .map((b) => String(b.service_code ?? "").trim())
-      .filter(Boolean);
-    return codes.length ? codes : undefined;
+    const codes = effectiveClientId ? activeCodesQ.data?.get(effectiveClientId) : undefined;
+    return codes?.length ? codes : undefined;
   })();
 
   // ── Client derivation ───────────────────────────────────────────────────────
@@ -495,14 +491,10 @@ export function PunchPad({
           name: `${c.first_name} ${c.last_name}`.trim(),
           memberId: padMemberId(c.medicaid_id),
           facility: c.physical_address,
-          // Prefer client_billing_codes. Empty/missing 1056 rows fall back to
-          // authorized_dspd_codes (then job_code) so SLH still appears.
-          authorizedCodes: billingAuthorizedCodes
-            ?? (clientAuthorizedCodes(c).length ? clientAuthorizedCodes(c) : undefined),
+          authorizedCodes: billingAuthorizedCodes ?? (c.codes?.length ? c.codes : undefined),
           homeLat: c.home_latitude ?? null,
           homeLng: c.home_longitude ?? null,
           geofenceRadiusFeet: c.geofence_radius_feet ?? null,
-          pcspGoals: c.pcsp_goals ?? undefined,
         };
       })();
 
@@ -518,11 +510,11 @@ export function PunchPad({
     }
     // No authorized codes yet — if still loading, show nothing; once loaded
     // an empty array means the client truly has no authorized codes.
-    if (clientBillingCodesQ.isLoading) {
+    if (activeCodesQ.isLoading) {
       return EVV_SERVICE_CODES.map((c) => ({ code: c.code, label: c.label }));
     }
     return [];
-  }, [lockedClient, billingAuthorizedCodes, clientBillingCodesQ.isLoading, clientForPunch]);
+  }, [lockedClient, billingAuthorizedCodes, activeCodesQ.isLoading, clientForPunch]);
 
   // ── Geofence derivation ─────────────────────────────────────────────────────
   const mapRadiusFeet = resolveGeofenceRadiusFeet(clientForPunch?.geofenceRadiusFeet);
@@ -923,23 +915,27 @@ export function PunchPad({
   // CLOCK-OUT FLOW
   // ────────────────────────────────────────────────────────────────────────────
 
-  // Structured PCSP goals for the active shift's client come through the
-  // canonical shared reader (`useClientCareData`). Clock-out shows every
-  // visible on-file goal (untagged included). No screen re-filters.
-  const activeClientIdForGoals = active?.client_id ?? null;
+  // The client's supports for this shift's code (plan in effect today),
+  // grouped under their goal, come through the canonical shared reader
+  // (`useClientCareData`). Before clock-in it reads the selected client/code.
   const careData = useClientCareData(
-    activeClientIdForGoals,
-    active?.service_type_code ?? null,
+    active?.client_id ?? clientForPunch?.id ?? null,
+    (active?.service_type_code ?? serviceCode) || null,
   );
+  const goalGroups = useMemo(() => careData.data?.visibility.goalsForStaff ?? [], [careData.data]);
+  const supportOptions = useMemo(() => goalSupportOptions(goalGroups), [goalGroups]);
 
-  const activeClientGoals = useMemo<string[]>(() => {
-    const rows = careData.data?.visibility.goalsForStaff ?? [];
-    const fromCare = rows.map((g) => g.goal.trim()).filter((s) => s.length > 0);
-    if (fromCare.length > 0) return fromCare;
-    return (lockedClient?.pcspGoals ?? [])
-      .map((g) => String(g).trim())
-      .filter((s) => s.length > 0);
-  }, [careData.data, lockedClient?.pcspGoals]);
+  /** Checked supports as note lines (+ baseline), with the goal/support ids they record. */
+  function selectedGoalWork(): { labels: string[]; goalIds: string[]; supportIds: string[] } {
+    const picked = supportOptions.filter((o) => checkedGoals[o.supportId]);
+    const labels = picked.map((o) => o.label);
+    if (baselineChecked) labels.push(BASELINE_GOAL);
+    return {
+      labels,
+      goalIds: [...new Set(picked.map((o) => o.goalId))],
+      supportIds: picked.map((o) => o.supportId),
+    };
+  }
 
 
 
@@ -1241,7 +1237,7 @@ export function PunchPad({
       lockedClient?.name?.split(" ")?.[0] ??
       caseload.find((c) => c.id === (active?.client_id ?? selectedClientId))?.first_name ??
       "the client";
-    const goals = lockedClient?.pcspGoals ?? [];
+    const goals = supportOptions.map((o) => o.label);
     setAskBusy(true);
     setAskResult(null);
     try {
@@ -1422,10 +1418,7 @@ export function PunchPad({
     }
 
 
-    const selectedGoals = Object.entries(checkedGoals)
-      .filter(([, v]) => v)
-      .map(([k]) => k);
-    if (baselineChecked) selectedGoals.push("General baseline monitoring & safety oversight");
+    const work = selectedGoalWork();
 
     const clockOut = new Date().toISOString();
     const update: Record<string, unknown> = {
@@ -1436,7 +1429,9 @@ export function PunchPad({
       status:               "Pending",
       timezone_setting:     "America/Denver",
       shift_note_text:      narrative.trim(),
-      goals_completed:      selectedGoals,
+      goals_completed:      work.labels,
+      goal_ids:             work.goalIds,
+      support_ids:          work.supportIds,
       raw_clock_out:        clockOut,
       rounded_clock_out:    roundToQuarterHourISO(clockOut),
       // Per-entry quarter-hour units (round-to-NEAREST); raw timestamps stay untouched.
@@ -1774,10 +1769,7 @@ export function PunchPad({
     let aiVerdictFeedback = COMPLETENESS_PASS_FEEDBACK;
     setAiBusy(true);
     try {
-      const selectedGoalsForAi = Object.entries(checkedGoals)
-        .filter(([, v]) => v)
-        .map(([k]) => k);
-      if (baselineChecked) selectedGoalsForAi.push("General baseline monitoring & safety oversight");
+      const selectedGoalsForAi = selectedGoalWork().labels;
 
       const clientFirst =
         lockedClient?.name?.split(" ")?.[0] ??
@@ -2142,10 +2134,10 @@ export function PunchPad({
               </p>
               <ul className="mt-1 space-y-0.5 text-[12px] leading-snug text-[color:var(--navy-900)]/90">
                 <li>• A progress note (50-word minimum, objective)</li>
-                <li>• At least one PCSP goal checked
-                  {clientForPunch.pcspGoals?.length
-                    ? ` (${clientForPunch.pcspGoals.length} on file)`
-                    : " (none on file — ask your supervisor)"}
+                <li>• At least one goal support checked
+                  {supportOptions.length
+                    ? ` (${supportOptions.length} for ${serviceCode})`
+                    : " (none for this code — ask your supervisor)"}
                 </li>
                 {isEvvLockedCode(serviceCode) && (
                   <li>• In-radius clock-out, or a written variance</li>
@@ -2653,56 +2645,15 @@ export function PunchPad({
               <div className="grid gap-4">
                 {/* PCSP goals */}
                 <div className="grid gap-2">
-                  <h3 className="text-sm font-semibold">Person-Centered Support Plan (PCSP) Objectives Tracker</h3>
-                  <div className="grid gap-1.5 rounded-md border border-border p-3">
-                    {activeClientGoals.length === 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        No PCSP goals on file for this individual.
-                        Goals come from the uploaded PCSP on the client profile.
-                        Use baseline monitoring below.
-                      </p>
-                    )}
-                    {activeClientGoals.map((goal, idx) => {
-                      const id = `goal-${idx}`;
-                      const sel = !!checkedGoals[goal];
-                      return (
-                        <label
-                          key={id}
-                          htmlFor={id}
-                          className={`flex cursor-pointer items-start gap-2 rounded-md border p-1.5 text-sm ${
-                            sel ? selectedPill : unselectedPill
-                          }`}
-                        >
-                          <input
-                            id={id}
-                            type="checkbox"
-                            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[color:var(--amber-600)]"
-                            checked={sel}
-                            onChange={(e) => setCheckedGoals((p) => ({ ...p, [goal]: e.target.checked }))}
-                          />
-                          <span className="break-words">{goal}</span>
-                        </label>
-                      );
-                    })}
-                    <div className="my-1 border-t border-dashed border-border" />
-                    <label
-                      htmlFor="goal-baseline"
-                      className={`flex cursor-pointer items-start gap-2 rounded-md border p-1.5 text-sm ${
-                        baselineChecked ? selectedPill : unselectedPill
-                      }`}
-                    >
-                      <input
-                        id="goal-baseline"
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[color:var(--amber-600)]"
-                        checked={baselineChecked}
-                        onChange={(e) => setBaselineChecked(e.target.checked)}
-                      />
-                      <span className="break-words italic text-muted-foreground">
-                        General baseline monitoring &amp; safety oversight
-                      </span>
-                    </label>
-                  </div>
+                  <h3 className="text-sm font-semibold">Goals worked on this shift</h3>
+                  <GoalSupportChecklist
+                    groups={goalGroups}
+                    serviceCode={active?.service_type_code ?? null}
+                    checked={checkedGoals}
+                    onCheck={(id, on) => setCheckedGoals((p) => ({ ...p, [id]: on }))}
+                    baselineChecked={baselineChecked}
+                    onBaseline={setBaselineChecked}
+                  />
                   {!hasGoalSelected && (
                     <p className="text-[11px] text-muted-foreground">
                       Select at least one goal worked on this shift.
@@ -2715,11 +2666,11 @@ export function PunchPad({
                   <Label htmlFor="evv-narrative">
                     Mandatory Progress Note &amp; Narrative Log
                   </Label>
-                  {activeClientGoals.length > 0 && (
+                  {goalGroups.length > 0 && (
                     <div className="rounded-md border border-border bg-muted/40 px-2.5 py-1.5 text-[11px] text-foreground">
-                      <span className="font-semibold">PCSP goals to address:</span>{" "}
-                      {activeClientGoals.slice(0, 3).join("; ")}
-                      {activeClientGoals.length > 3 && ` (+${activeClientGoals.length - 3} more)`}
+                      <span className="font-semibold">Goals to address:</span>{" "}
+                      {goalGroups.slice(0, 3).map((g) => g.goal).join("; ")}
+                      {goalGroups.length > 3 && ` (+${goalGroups.length - 3} more)`}
                     </div>
                   )}
                   <OriginalSpeechAudit transcript={originalTranscript} />
@@ -2761,8 +2712,7 @@ export function PunchPad({
                   <NectarShiftNoteDraft
                     narrative={narrative}
                     goals={[
-                      ...Object.entries(checkedGoals).filter(([, v]) => v).map(([k]) => k),
-                      ...(baselineChecked ? ["General baseline monitoring & safety oversight"] : []),
+                      ...selectedGoalWork().labels,
                     ]}
                     clientFirstName={
                       lockedClient?.name?.split(" ")?.[0] ??

@@ -1,7 +1,7 @@
 // Host-home daily note rule, shared by the Daily Logs page's "Missing entries"
 // list and the team member Overview. Pure: no I/O.
 //
-// A client is on the daily-note model when its job_code includes HHS (host
+// A client is on the daily-note model when its active codes include HHS (host
 // home) or RP5 (Exceptional Care Respite With Room and Board — same daily
 // summary note). One note per client per day:
 //   - A day counts only on or after an assignment's start date (the
@@ -16,10 +16,10 @@
 export type DailyLogProgram = "HHS" | "RP5";
 
 /** HHS is host-home daily-note billing; RP5 uses the identical daily-summary-note model. */
-export function dailyLogProgram(c: { job_code?: string[] | null }): DailyLogProgram | null {
-  if (!Array.isArray(c.job_code)) return null;
-  if (c.job_code.includes("HHS")) return "HHS";
-  if (c.job_code.includes("RP5")) return "RP5";
+export function dailyLogProgram(c: { codes?: readonly string[] | null }): DailyLogProgram | null {
+  if (!Array.isArray(c.codes)) return null;
+  if (c.codes.includes("HHS")) return "HHS";
+  if (c.codes.includes("RP5")) return "RP5";
   return null;
 }
 

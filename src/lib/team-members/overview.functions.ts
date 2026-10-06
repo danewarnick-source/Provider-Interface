@@ -14,6 +14,7 @@ import { requireCategory } from "@/lib/access/require";
 import { hasCategory } from "@/lib/access/can";
 import { denverYmd } from "@/lib/denver-date";
 import { dailyLogProgram } from "@/lib/daily-log-missing";
+import { loadActiveCodesAsService } from "@/lib/clients/codes";
 import { loadDailyNoteFacts } from "@/lib/daily-log-missing.functions";
 import type { EvidenceFileRow } from "@/lib/evidence/types";
 import { inHiveRefUuid } from "@/lib/in-hive-training";
@@ -74,7 +75,8 @@ type ClientNameRow = {
   id: string;
   first_name: string | null;
   last_name: string | null;
-  job_code?: string[] | null;
+  /** Active service codes (client_billing_codes). */
+  codes?: string[];
 };
 
 function clientName(c: ClientNameRow): string {
@@ -97,7 +99,13 @@ async function caseloadClients(
   staffId: string,
 ): Promise<ClientNameRow[]> {
   const { data, error } = await supabase.rpc("clients_for_staff", { _org: orgId, _staff: staffId });
-  if (!error) return (data ?? []) as ClientNameRow[];
+  const rows = !error ? ((data ?? []) as ClientNameRow[]) : await directCaseload(admin, orgId, staffId);
+  const codes = await loadActiveCodesAsService(admin, rows.map((r) => r.id));
+  return rows.map((r) => ({ id: r.id, first_name: r.first_name, last_name: r.last_name, codes: codes.get(r.id) ?? [] }));
+}
+
+/** The direct staff_assignments half of clients_for_staff. */
+async function directCaseload(admin: Sb, orgId: string, staffId: string): Promise<ClientNameRow[]> {
   const { data: assigns, error: aErr } = await admin
     .from("staff_assignments")
     .select("client_id")
@@ -108,7 +116,7 @@ async function caseloadClients(
     (ids) =>
       admin
         .from("clients")
-        .select("id, first_name, last_name, job_code")
+        .select("id, first_name, last_name")
         .eq("organization_id", orgId)
         .in("id", ids),
     [...new Set(((assigns ?? []) as Array<{ client_id: string }>).map((a) => a.client_id))],

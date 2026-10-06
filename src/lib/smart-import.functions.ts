@@ -14,6 +14,7 @@ import { parseDocumentWithAI, extractGoalsOnly, documentLikelyHasGoals, CORE_CLI
 import { enrichNamesFromFull, firstNameWithMiddle, formatPersonName } from "@/lib/person-name";
 import { smartImportNeedsAi } from "@/lib/smart-import-ai-gate";
 import { findDuplicateClientInOrg, mayRunOrgWideClientDedup, type DedupClientRow } from "@/lib/smart-import-dedup";
+import { assertCanManageClient } from "@/lib/clients/guards.server";
 
 function digitsOnly(v: string | null | undefined): string {
   return (v ?? "").replace(/\D/g, "");
@@ -110,13 +111,8 @@ async function mergeInJobDuplicateClientSubjects(
           .eq("id", f.id);
         have.add(f.target_field);
       }
-      await sb
-        .from("unfiled_items")
-        .update({ import_subject_id: keeperId })
-        .eq("import_subject_id", dupId);
       // Drop leftover field rows still on the duplicate, then the subject.
       await sb.from("extracted_fields").delete().eq("import_subject_id", dupId);
-      await sb.from("unfiled_items").delete().eq("import_subject_id", dupId);
       await sb.from("import_subjects").delete().eq("id", dupId);
     }
 
@@ -332,6 +328,14 @@ export const createSmartImportJob = createServerFn({ method: "POST" })
     if (!context.supabase || !context.userId) return { jobId: "" };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = context.supabase as any;
+    if (data.mode === "client") {
+      await assertCanManageClient({
+        supabase: sb,
+        actorId: context.userId,
+        organizationId: data.organizationId,
+        action: "import",
+      });
+    }
     const { data: row, error } = await sb
       .from("import_jobs")
       .insert({
@@ -661,15 +665,6 @@ export const runSmartExtraction = createServerFn({ method: "POST" })
               is_custom_attribute: f.is_custom,
             });
             if (!first && !f.is_custom) seen.set(f.target_field, blob.file_name);
-          }
-          for (const leftover of extracted.unfiled) {
-            await sb.from("unfiled_items").insert({
-              import_job_id: data.jobId,
-              import_subject_id: subj.id,
-              org_id: data.organizationId,
-              text: leftover,
-              source_document_id: blob.source_document_id,
-            });
           }
         }
       }

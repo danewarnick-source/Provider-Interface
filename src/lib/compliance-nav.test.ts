@@ -106,12 +106,12 @@ describe("Compliance nav lock", () => {
     assert.match(panel, /SowIndexPanel/);
   });
 
-  it("does not rename the client profile Compliance tab", () => {
-    const profile = readFileSync(
-      new URL("../routes/dashboard.clients.$clientId.tsx", import.meta.url),
+  it("sends the old client profile Compliance tab to the Plans section", () => {
+    const sections = readFileSync(
+      new URL("./clients/profile-sections.ts", import.meta.url),
       "utf8",
     );
-    assert.match(profile, /<TabsTrigger value="compliance">Compliance<\/TabsTrigger>/);
+    assert.match(sections, /compliance: "plans"/);
   });
 });
 

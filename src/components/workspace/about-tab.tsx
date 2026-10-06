@@ -1,5 +1,4 @@
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import {
@@ -11,9 +10,11 @@ import {
   User,
 } from "lucide-react";
 import type { CaseloadClient } from "@/hooks/use-caseload";
-import { ClientPhotoCard } from "@/components/clients/client-photo-card";
+import { ClientPhotoCard } from "@/components/clients/profile/client-photo-card";
 import { useClientCareData } from "@/hooks/use-client-care-data";
-import type { CustomFieldWithValue } from "@/lib/client-care-data.functions";
+import type { CustomFieldWithValue } from "@/lib/clients/care-data.functions";
+import { ageOn, daysUntil } from "@/lib/clients/dates";
+import { contactLine, contactsWithRole, primaryContact } from "@/lib/clients/contacts";
 
 function formatCustomValue(f: CustomFieldWithValue): string {
   const v = f.value;
@@ -34,14 +35,7 @@ function fmtDate(s: string | null | undefined): string {
 }
 
 function age(dob: string | null | undefined): number | null {
-  if (!dob) return null;
-  const d = new Date(dob);
-  if (Number.isNaN(d.getTime())) return null;
-  const now = new Date();
-  let a = now.getFullYear() - d.getFullYear();
-  const m = now.getMonth() - d.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
-  return a;
+  return ageOn(dob);
 }
 
 function isEmpty(v: React.ReactNode): boolean {
@@ -89,19 +83,23 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
   const dob = identity?.date_of_birth ?? null;
   const dobAge = dob ? `${fmtDate(dob)}${age(dob) != null ? ` · ${age(dob)}` : ""}` : null;
 
+  const contacts = staffCare?.contacts ?? [];
+  const guardian = primaryContact(contacts, "guardian");
+  const coordinator = primaryContact(contacts, "support_coordinator");
+  const primaryDoctor = primaryContact(contacts, "primary_doctor");
+  const emergency = contactsWithRole(contacts, "emergency");
   const guardianValue = identity?.is_own_guardian === true
     ? "Self-guardian"
-    : identity?.guardian_name
-      ? `${identity.guardian_name}${identity.guardian_phone ? ` · ${identity.guardian_phone}` : ""}`
+    : guardian
+      ? contactLine(guardian)
       : null;
 
   const primaryDx = identity?.diagnoses?.[0] ?? null;
-  const pcspExp = identity?.pcsp_expiration_date ?? null;
+  const pcspExp = identity?.plan_end_date ?? null;
   const pcspWarn = (() => {
     if (!pcspExp) return false;
-    const d = new Date(pcspExp);
-    if (Number.isNaN(d.getTime())) return false;
-    return d.getTime() - Date.now() < 30 * 24 * 3600 * 1000;
+    const days = daysUntil(pcspExp);
+    return days !== null && days < 30;
   })();
 
   return (
@@ -137,18 +135,18 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
         </Group>
 
         <Group header="Support Coordinator">
-          <Row label="Name">{identity?.support_coordinator_name || null}</Row>
+          <Row label="Name">{coordinator?.name || null}</Row>
           <Row label="Phone">
-            {identity?.support_coordinator_phone ? (
-              <a href={`tel:${identity.support_coordinator_phone}`} className="text-primary hover:underline">
-                {identity.support_coordinator_phone}
+            {coordinator?.phone ? (
+              <a href={`tel:${coordinator.phone}`} className="text-primary hover:underline">
+                {coordinator.phone}
               </a>
             ) : null}
           </Row>
           <Row label="Email">
-            {identity?.support_coordinator_email ? (
-              <a href={`mailto:${identity.support_coordinator_email}`} className="text-primary hover:underline break-all">
-                {identity.support_coordinator_email}
+            {coordinator?.email ? (
+              <a href={`mailto:${coordinator.email}`} className="text-primary hover:underline break-all">
+                {coordinator.email}
               </a>
             ) : null}
           </Row>
@@ -184,12 +182,12 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
       </Card>
 
       {/* At a glance */}
-      {(primaryDx || identity?.primary_care_name || pcspExp || identity?.admission_date) && (
+      {(primaryDx || primaryDoctor || pcspExp || identity?.admission_date) && (
         <Card className="p-5">
           <h3 className="mb-1 text-sm font-semibold">At a glance</h3>
           <Row label="Primary diagnosis">{primaryDx}</Row>
-          <Row label="Primary care">{identity?.primary_care_name || null}</Row>
-          <Row label="PCSP expiration">
+          <Row label="Primary care">{primaryDoctor ? contactLine(primaryDoctor) : null}</Row>
+          <Row label="Plan year ends">
             {pcspExp ? (
               <span className={cn("inline-flex items-center gap-1", pcspWarn && "text-red-600 font-semibold")}>
                 {pcspWarn ? <AlertTriangle className="h-3.5 w-3.5" /> : null}
@@ -207,9 +205,9 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
         <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold">
           <Phone className="h-3.5 w-3.5" /> Emergency Contacts
         </h3>
-        {(staffCare?.emergency_contacts ?? []).length > 0 ? (
+        {emergency.length > 0 ? (
           <ul className="space-y-2">
-            {(staffCare?.emergency_contacts ?? []).map((c) => (
+            {emergency.map((c) => (
               <li key={c.id} className="rounded-md border border-border bg-background px-3 py-2 text-sm">
                 <p className="font-medium leading-snug">
                   {c.name}
@@ -279,14 +277,8 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
         <h3 className="mb-3 flex items-center gap-1.5 text-sm font-semibold">
           <Heart className="h-3.5 w-3.5 text-rose-500" /> Interests & Hobbies
         </h3>
-        {(staffCare?.preferred_activities ?? []).length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
-            {(staffCare?.preferred_activities ?? []).map((a) => (
-              <Badge key={a} variant="secondary" className="font-normal">
-                {a}
-              </Badge>
-            ))}
-          </div>
+        {staffCare?.about_me ? (
+          <p className="whitespace-pre-wrap text-sm">{staffCare.about_me}</p>
         ) : (
           <p className="text-sm text-muted-foreground">
             No interests or hobbies recorded yet.

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { activeCodesForClients } from "@/lib/clients/codes";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 
@@ -45,7 +46,7 @@ const HIVE_NAV_GUIDE = `PI NAVIGATION MAP (use these paths verbatim — never in
 
 ADMIN AREA (admin/manager/super_admin):
 - /dashboard/compliance-desk — Records review: review submitted timesheets, daily logs, EVV punches, incidents.
-- /dashboard/pba-ledger — PBA Trust Ledger: client personal-budget accounts, deposits, withdrawals, audit samples.
+- PBA Trust Ledger: open a client's profile → Money (only for clients with PBA, loans or spending): PBA account, deposits, withdrawals, quarterly audit sample.
 - /dashboard/scheduling — Scheduling: publish/edit staff shifts on a calendar.
 - /dashboard/team-members — Team Members: staff roster, profiles, pay rates, certifications, role assignments.
 - /dashboard/evidence — Evidence: Staff / Client / Company people × requirements grid. Suggestions only. Not a scoreboard.
@@ -421,7 +422,7 @@ async function gatherFacts(
         .eq("organization_id", orgId),
       supabase
         .from("client_billing_codes")
-        .select("service_code,client_id")
+        .select("service_code,client_id,service_end_date")
         .eq("organization_id", orgId)
         .limit(1000),
     ]);
@@ -439,7 +440,10 @@ async function gatherFacts(
       ? null
       : labelCountForOrg(orgId, pbaAll.count ?? 0, orgId).count;
 
-    const codeRows: Array<{ service_code: string; client_id: string }> = allCodes.data ?? [];
+    const codeRows: Array<{ service_code: string; client_id: string; service_end_date: string | null }> =
+      allCodes.data ?? [];
+    // A client's codes: active authorization rows only (the one source).
+    const activeByClient = activeCodesForClients(codeRows);
     facts.service_codes.all_distinct = Array.from(
       new Set(codeRows.map((r) => r.service_code)),
     ).sort();
@@ -470,7 +474,7 @@ async function gatherFacts(
       for (const tok of tokens) {
         const r = await supabase
           .from("clients")
-          .select("id,first_name,last_name,account_status,authorized_dspd_codes")
+          .select("id,first_name,last_name,account_status")
           .eq("organization_id", orgId)
           .ilike("last_name", `${tok}%`)
           .limit(5);
@@ -479,16 +483,14 @@ async function gatherFacts(
           first_name: string;
           last_name: string;
           account_status: string;
-          authorized_dspd_codes: string[] | null;
         }>) {
           if (seen.has(c.id)) continue;
           seen.add(c.id);
-          const codes = codeRows.filter((cr) => cr.client_id === c.id).map((cr) => cr.service_code);
           facts.client_matches.push({
             id: c.id,
             name: `${c.first_name} ${c.last_name}`,
             status: c.account_status,
-            service_codes: Array.from(new Set([...(c.authorized_dspd_codes ?? []), ...codes])),
+            service_codes: activeByClient.get(c.id) ?? [],
           });
         }
       }

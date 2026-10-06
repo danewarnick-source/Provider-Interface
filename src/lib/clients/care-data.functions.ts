@@ -1,0 +1,539 @@
+/**
+ * client-care-data.functions.ts
+ *
+ * THE single canonical read path for a client's care information used by
+ * the PCSP tab, eMAR chart, shift/clock-out flows, workspace, punch-pad,
+ * and any staff-facing surface.
+ *
+ * Why this exists:
+ *   Different screens used to each write their own query against `clients`,
+ *   `client_medications`, `client_specific_trainings`, and
+ *   `client_billing_codes`. That's what allowed:
+ *     • PCSP tab and Profile tab disagreeing on admission_date (timezone
+ *       conversion bug)
+ *     • Med attestation writing to a different table than the eMAR chart
+ *       reads from
+ *   Every read of a client's identity/goals/meds/authorized-codes MUST go
+ *   through `getClientCareData` (server) or `useClientCareData` (client),
+ *   so we can never diverge again. The lint rule in eslint.config.js
+ *   enforces this.
+ *
+ * Staff-visibility rules live in the returned `visibility` block. Screens
+ * do NOT re-implement "which goal is complete enough to show" — they read
+ * from `visibility`. Goals come from the plan in effect today
+ * (client_plans → client_goals → client_goal_supports); clock-out shows only
+ * the supports whose codes include the shift's code, grouped by goal.
+ */
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireOrgMembership } from "@/integrations/supabase/require-org";
+import { logPhiAccess } from "@/lib/phi-access-audit.server";
+import { assignmentCoversCode } from "@/lib/assignment-codes";
+import { queryOptions } from "@tanstack/react-query";
+import { activeContacts, loadClientContacts, type ClientContact } from "./contacts";
+import { currentPlan, goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans";
+import { loadPlanBundle } from "./plans-load";
+import { todayYmd } from "./dates";
+import {
+  type ClientVisibilityRow,
+  type SectionName,
+  fieldKey,
+  isFieldVisible,
+  isSectionVisible,
+} from "./staff-visibility";
+
+// ── Return types ────────────────────────────────────────────────────────────
+
+/** A goal of the plan in effect today with its supports (all, or one code's). */
+export type CareGoal = GoalView;
+
+export type CarePlan = {
+  id: string;
+  start_date: string | null;
+  end_date: string | null;
+  /** 'ended' while waiting for a new plan after the end date. */
+  status: PlanStatus;
+} | null;
+
+export type CareIdentity = {
+  id: string;
+  organization_id: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  preferred_name: string | null;
+  date_of_birth: string | null;
+  /** Raw YYYY-MM-DD string. Never converted through Date() — that's the bug. */
+  admission_date: string | null;
+  discharge_date: string | null;
+  medicaid_id: string | null;
+  status: string | null;
+  phone_number: string | null;
+  is_own_guardian: boolean | null;
+  has_abi: boolean | null;
+  hr_applicable: boolean | null;
+  dnr_applicable: boolean | null;
+  diagnoses: string[];
+  /** End date of the plan year in effect (client_plans). */
+  plan_end_date: string | null;
+  special_directions: string | null;
+};
+
+
+export type CareFlags = {
+  self_admin_med_support: boolean;
+  self_admin_med_support_locked: boolean;
+};
+
+export type CareMedication = {
+  id: string;
+  medication_name: string | null;
+  dosage: string | null;
+  route: string | null;
+  frequency: string | null;
+  scheduled_time: string | null;
+  prescriber: string | null;
+  instructions: string | null;
+  support_level: string | null;
+  is_prn: boolean | null;
+  prn_instructions: string | null;
+  purpose: string | null;
+  adverse_effects: string | null;
+  choking_risk: string | null;
+  is_controlled: boolean | null;
+  is_active: boolean | null;
+};
+
+export type CareAuthorizedCode = {
+  id: string;
+  organization_id: string;
+  client_id: string;
+  service_code: string;
+  unit_type: string;
+  rate_per_unit: number;
+  annual_unit_authorization: number;
+  monthly_max_units: number | null;
+  weekly_cap_units: number | null;
+  service_start_date: string | null;
+  service_end_date: string | null;
+  sce: string | null;
+  provider_approver_email: string | null;
+  authorization_pending: boolean | null;
+};
+
+export type CustomFieldValue = {
+  value_text: string | null;
+  value_number: number | null;
+  value_boolean: boolean | null;
+  value_date: string | null;
+} | null;
+
+export type CustomFieldWithValue = {
+  id: string;
+  field_key: string;
+  field_label: string;
+  data_type: "text" | "number" | "boolean" | "date";
+  section: SectionName;
+  value: CustomFieldValue;
+};
+
+export type ClientCareVisibility = {
+  /** Goals staff may check on clock-out / punch-pad: only supports whose
+   *  codes include the shift's code, grouped under their (visible) goal.
+   *  Empty when no shift code is given. */
+  goalsForStaff: CareGoal[];
+  medicationsVisible: boolean;
+  /** The shift's active service code echoed back, uppercased. */
+  shiftServiceCode: string | null;
+  /** Resolved section on/off state (defaults applied). */
+  sections: Record<SectionName, boolean>;
+  /** Filtered projection staff-facing surfaces should render. Admin
+   *  surfaces read the raw `identity` / `goals` / `medications` /
+   *  `authorized_codes` fields — this block enforces the two-level
+   *  section+field visibility (identity/care_plan) and, for
+   *  `authorized_codes`, staff_assignments-based visibility: a staff
+   *  member sees a code iff they're assigned to work it (no separate
+   *  toggle). */
+  staffCare: {
+    identity: CareIdentity;
+    goals: CareGoal[];
+    medications: CareMedication[];
+    authorized_codes: CareAuthorizedCode[];
+    /** Custom fields whose owning section is toggled on for staff.
+     *  Custom fields have no per-field visibility switch — they inherit
+     *  their section's toggle exclusively. */
+    custom_fields: CustomFieldWithValue[];
+    /** Active contacts (client_contacts). Always mirrors admin — no visibility gating. */
+    contacts: ClientContact[];
+    /** Always mirrors admin — no visibility gating. */
+    about_me: string | null;
+  };
+};
+
+export type ClientCareData = {
+  identity: CareIdentity;
+  flags: CareFlags;
+  /** The plan in effect today (null when the client has none). */
+  plan: CarePlan;
+  goals: CareGoal[];
+  medications: CareMedication[];
+  authorized_codes: CareAuthorizedCode[];
+  /** All custom fields (admin view). Staff view uses
+   *  `visibility.staffCare.custom_fields` (filtered by section toggle). */
+  custom_fields: CustomFieldWithValue[];
+  /** Active contacts (client_contacts). */
+  contacts: ClientContact[];
+  about_me: string | null;
+  /** Raw visibility row (as stored). Admin toggle UIs read this. */
+  visibilityRow: ClientVisibilityRow;
+  visibility: ClientCareVisibility;
+};
+
+
+// ── Server function ─────────────────────────────────────────────────────────
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+export const getClientCareData = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { clientId: string; shiftServiceCode?: string | null }) => {
+    if (!input?.clientId || typeof input.clientId !== "string") {
+      throw new Error("clientId is required");
+    }
+    return {
+      clientId: input.clientId,
+      shiftServiceCode: input.shiftServiceCode ?? null,
+    };
+  })
+  .handler(async ({ data, context }): Promise<ClientCareData> => {
+    const { clientId, shiftServiceCode } = data;
+    const supabase = context.supabase as any;
+    const userId = context.userId as string;
+    if (!supabase || !userId) {
+      const emptyIdentity: CareIdentity = {
+        id: clientId,
+        organization_id: null,
+        first_name: null,
+        last_name: null,
+        preferred_name: null,
+        date_of_birth: null,
+        admission_date: null,
+        discharge_date: null,
+        medicaid_id: null,
+        status: null,
+        phone_number: null,
+        is_own_guardian: null,
+        has_abi: null,
+        hr_applicable: null,
+        dnr_applicable: null,
+        diagnoses: [],
+        plan_end_date: null,
+        special_directions: null,
+      };
+      const emptyVisibilityRow: ClientVisibilityRow = { sections: {} as any, fields: {} as any };
+      const emptySections = {
+        identity: false,
+        care_plan: false,
+        billing: false,
+        files: false,
+        operations: false,
+        compliance: false,
+      } as Record<SectionName, boolean>;
+      return {
+        identity: emptyIdentity,
+        flags: { self_admin_med_support: false, self_admin_med_support_locked: false },
+        plan: null,
+        goals: [],
+        medications: [],
+        authorized_codes: [],
+        custom_fields: [],
+        contacts: [],
+        about_me: null,
+        visibilityRow: emptyVisibilityRow,
+        visibility: {
+          goalsForStaff: [],
+          medicationsVisible: false,
+          shiftServiceCode: shiftServiceCode ? shiftServiceCode.toUpperCase() : null,
+          sections: emptySections,
+          staffCare: {
+            identity: emptyIdentity,
+            goals: [],
+            medications: [],
+            authorized_codes: [],
+            custom_fields: [],
+            contacts: [],
+            about_me: null,
+          },
+        },
+      };
+    }
+
+    const [clientRes, planBundle, medsRes, codesRes, visRes, cfDefsRes, cfValsRes, ecRes, myAssignRes] =
+      await Promise.all([
+      supabase
+        .from("clients")
+        .select(
+          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, self_admin_med_support, self_admin_med_support_locked, about_me, phone_number, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, special_directions",
+        )
+        .eq("id", clientId)
+        .maybeSingle(),
+
+      // Non-fatal: the punch pad must still load if the plan read fails.
+      loadPlanBundle(supabase, clientId).catch(() => ({ plans: [], goals: [] })),
+      supabase
+        .from("client_medications")
+        .select(
+          "id, medication_name, dosage, route, frequency, scheduled_time, prescriber, instructions, support_level, is_prn, prn_instructions, purpose, adverse_effects, choking_risk, is_controlled, is_active",
+        )
+        .eq("client_id", clientId)
+        .eq("is_active", true)
+        .order("medication_name", { ascending: true }),
+      supabase
+        .from("client_billing_codes")
+        .select("*")
+        .eq("client_id", clientId)
+        .order("service_code"),
+      supabase
+        .from("client_staff_visibility")
+        .select("sections, fields")
+        .eq("client_id", clientId)
+        .maybeSingle(),
+      supabase
+        .from("custom_field_definitions")
+        .select("id, field_key, field_label, data_type, section, organization_id")
+        .eq("entity_kind", "client")
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("custom_field_values")
+        .select("definition_id, value_text, value_number, value_boolean, value_date")
+        .eq("entity_kind", "client")
+        .eq("entity_id", clientId),
+      loadClientContacts(supabase, [clientId]).catch(() => [] as ClientContact[]),
+      supabase
+        .from("staff_assignments")
+        .select("service_codes")
+        .eq("client_id", clientId)
+        .eq("staff_id", userId)
+        .maybeSingle(),
+    ]);
+
+
+    if (clientRes.error) throw clientRes.error;
+    const clientRow = clientRes.data as { organization_id?: string | null } | null;
+    const organizationIdForAccess = clientRow?.organization_id;
+    if (!organizationIdForAccess) {
+      throw new Error("Client not found or not accessible");
+    }
+    await requireOrgMembership(supabase, userId, organizationIdForAccess, "staff");
+    void logPhiAccess({
+      supabaseUserClient: supabase,
+      userId,
+      organizationId: organizationIdForAccess,
+      resourceType: "client_chart",
+      resourceId: clientId,
+      clientId,
+      action: "view",
+      detail: "getClientCareData",
+    });
+
+    // Continue with existing response assembly below.
+    if (!clientRes.data) throw new Error("Client not found");
+    if (medsRes.error) throw medsRes.error;
+    if (codesRes.error) throw codesRes.error;
+    // visRes / cfDefsRes / cfValsRes errors are non-fatal — treat as empty
+
+
+    const row = clientRes.data as Record<string, any>;
+    const identity: CareIdentity = {
+      id: row.id,
+      organization_id: row.organization_id ?? null,
+      first_name: row.first_name ?? null,
+      last_name: row.last_name ?? null,
+      preferred_name: null,
+      date_of_birth: row.date_of_birth ?? null,
+      admission_date: row.admission_date ?? null,
+      discharge_date: row.discharge_date ?? null,
+      medicaid_id: row.medicaid_id ?? null,
+      status: row.account_status ?? null,
+      phone_number: row.phone_number ?? null,
+      is_own_guardian: row.is_own_guardian ?? null,
+      has_abi: row.has_abi ?? null,
+      hr_applicable: row.hr_applicable ?? null,
+      dnr_applicable: row.dnr_applicable ?? null,
+      diagnoses: Array.isArray(row.diagnoses)
+        ? (row.diagnoses as unknown[]).map((s) => String(s ?? "").trim()).filter(Boolean)
+        : [],
+      plan_end_date: currentPlan(planBundle.plans)?.end_date ?? null,
+      special_directions: row.special_directions ?? null,
+    };
+
+
+    const flags: CareFlags = {
+      self_admin_med_support: !!row.self_admin_med_support,
+      self_admin_med_support_locked: !!row.self_admin_med_support_locked,
+    };
+
+    // Goals of the plan in effect today (the ended plan while waiting for a new one).
+    const today = todayYmd();
+    const inEffect = goalsOn(planBundle, today);
+    const activeGoals = inEffect.goals.filter((g) => g.status === "active");
+    const goals: CareGoal[] = activeGoals.map((g) => goalView(g));
+    const plan: CarePlan = inEffect.plan
+      ? {
+          id: inEffect.plan.id,
+          start_date: inEffect.plan.start_date,
+          end_date: inEffect.plan.end_date,
+          status: inEffect.status ?? inEffect.plan.status,
+        }
+      : null;
+
+    // Filter authorized codes to currently-open only (same rule as
+    // useClientBillingCodes — no end date or end date > today).
+    const authorized_codes: CareAuthorizedCode[] = (
+      (codesRes.data ?? []) as CareAuthorizedCode[]
+    ).filter((c) => !c.service_end_date || c.service_end_date > today);
+
+    const medications = (medsRes.data ?? []) as CareMedication[];
+
+    // ── Visibility layer — the ONE place staff-side filters live ──────────
+    const visRow = (visRes?.data ?? null) as {
+      sections?: Record<string, boolean> | null;
+      fields?: Record<string, boolean> | null;
+    } | null;
+    const visibilityRow: ClientVisibilityRow = {
+      sections: (visRow?.sections ?? {}) as ClientVisibilityRow["sections"],
+      fields: (visRow?.fields ?? {}) as ClientVisibilityRow["fields"],
+    };
+
+    const sections = {
+      identity: isSectionVisible(visibilityRow, "identity"),
+      care_plan: isSectionVisible(visibilityRow, "care_plan"),
+      billing: isSectionVisible(visibilityRow, "billing"),
+      files: isSectionVisible(visibilityRow, "files"),
+      operations: isSectionVisible(visibilityRow, "operations"),
+      compliance: isSectionVisible(visibilityRow, "compliance"),
+    } as Record<SectionName, boolean>;
+
+    // Filter individual items for the staff-facing projection.
+    const identityStaff: CareIdentity = sections.identity
+      ? {
+          ...identity,
+          admission_date: isFieldVisible(visibilityRow, fieldKey("identity", "field", "admission_date")) ? identity.admission_date : null,
+          medicaid_id: isFieldVisible(visibilityRow, fieldKey("identity", "field", "medicaid_id")) ? identity.medicaid_id : null,
+          discharge_date: isFieldVisible(visibilityRow, fieldKey("identity", "field", "discharge_date")) ? identity.discharge_date : null,
+        }
+      : {
+          ...identity,
+          // Name/DOB always retained so staff can still identify the person.
+          admission_date: null,
+          discharge_date: null,
+          medicaid_id: null,
+          preferred_name: null,
+          status: null,
+        };
+
+    // PCSP goals always mirror what admin has on file — the blanket
+    // care_plan section toggle does NOT zero the list out (same rule as
+    // goalsForStaff below). Per-goal visibility switches are still honored
+    // so admins can hide a specific goal.
+    const goalsStaffAll = goals.filter((g) =>
+      isFieldVisible(visibilityRow, fieldKey("care_plan", "goal", g.id))
+    );
+
+    const medicationsStaff = sections.care_plan
+      ? medications.filter((m) => isFieldVisible(visibilityRow, fieldKey("care_plan", "medication", m.id)))
+      : [];
+
+    // Authorized codes have no visibility toggle — assignment IS visibility.
+    // A staff member sees a code here iff they're assigned (via
+    // staff_assignments) to work that code for this client. Every row lists
+    // its codes; NULL / [] or no row means no codes are visible to them.
+    const myCodeScope = (myAssignRes?.data as { service_codes: string[] | null } | null) ?? null;
+    const authorizedCodesStaff = authorized_codes.filter((c) =>
+      assignmentCoversCode(myCodeScope?.service_codes, c.service_code),
+    );
+
+    // ── Custom fields ────────────────────────────────────────────────────
+    // Scope defs to the client's own org (cross-org rows would be blocked
+    // by RLS anyway, but this keeps the payload tight for the common case
+    // where the querier belongs to that same org).
+    const orgId = identity.organization_id;
+    const cfValueByDef = new Map<string, CustomFieldValue>();
+    for (const v of ((cfValsRes?.data ?? []) as any[])) {
+      cfValueByDef.set(v.definition_id, {
+        value_text: v.value_text ?? null,
+        value_number: v.value_number ?? null,
+        value_boolean: v.value_boolean ?? null,
+        value_date: v.value_date ?? null,
+      });
+    }
+    const custom_fields: CustomFieldWithValue[] = ((cfDefsRes?.data ?? []) as any[])
+      .filter((d) => !orgId || d.organization_id === orgId)
+      .map((d) => ({
+        id: String(d.id),
+        field_key: String(d.field_key ?? ""),
+        field_label: String(d.field_label ?? ""),
+        data_type: (d.data_type ?? "text") as CustomFieldWithValue["data_type"],
+        section: ((d.section ?? "identity") as SectionName),
+        value: cfValueByDef.get(d.id) ?? null,
+      }));
+    // Custom fields inherit their section's toggle — no per-field key.
+    const customFieldsStaff = custom_fields.filter((f) => sections[f.section]);
+
+    // goalsForStaff — clock-out checklist: the supports for the shift's
+    // code, grouped under their goal. Per-goal visibility is still honored.
+    const codeUpper = shiftServiceCode ? shiftServiceCode.toUpperCase() : null;
+    const goalsForStaff = supportsForCode(activeGoals, codeUpper, today)
+      .filter((g) => isFieldVisible(visibilityRow, fieldKey("care_plan", "goal", g.goal.id)))
+      .map((g) => goalView(g.goal, g.supports));
+
+    const contacts = activeContacts((ecRes ?? []) as ClientContact[]);
+    const about_me: string | null = row.about_me ?? null;
+
+    const visibility: ClientCareVisibility = {
+      goalsForStaff,
+      medicationsVisible: medicationsStaff.length > 0,
+      shiftServiceCode: codeUpper,
+      sections,
+      staffCare: {
+        identity: identityStaff,
+        goals: goalsStaffAll,
+        medications: medicationsStaff,
+        authorized_codes: authorizedCodesStaff,
+        custom_fields: customFieldsStaff,
+        contacts,
+        about_me,
+      },
+    };
+
+    return {
+      identity,
+      flags,
+      plan,
+      goals,
+      medications,
+      authorized_codes,
+      custom_fields,
+      contacts,
+      about_me,
+      visibilityRow,
+      visibility,
+    };
+  });
+
+
+// ── Query options helper (for loaders and hooks) ────────────────────────────
+
+export function clientCareDataQueryOptions(
+  clientId: string | null | undefined,
+  shiftServiceCode?: string | null,
+) {
+  const code = shiftServiceCode ?? null;
+  return queryOptions({
+    queryKey: ["client-care-data", clientId ?? null, code],
+    enabled: !!clientId,
+    queryFn: () =>
+      getClientCareData({
+        data: { clientId: clientId as string, shiftServiceCode: code },
+      }),
+  });
+}

@@ -109,7 +109,7 @@ async function openPunchPad(page: Page) {
 const HOME = { lat: 40.7608, lng: -111.891 };
 
 test.describe("Admin home pin", () => {
-  test("identity tab shows home pin controls", async ({ page }) => {
+  test("profile section shows home pin controls", async ({ page }) => {
     await installHiveMocks(page, { persona: "admin" });
     await page.goto(`/dashboard/clients/${CLIENTS.tommy.id}?tab=identity`, {
       waitUntil: "domcontentloaded",

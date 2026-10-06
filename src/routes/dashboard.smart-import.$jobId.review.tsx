@@ -16,7 +16,6 @@ import {
   Users,
   ChevronRight,
   Link2,
-  Inbox,
   Info,
   Send,
 } from "lucide-react";
@@ -44,7 +43,6 @@ import {
   setSubjectDecision,
   setSubjectReady,
   answerNectarQuestion,
-  fileUnfiledItem,
   computeProvisioningForecast,
   togglePlanItem,
   submitForSetup,
@@ -112,7 +110,7 @@ function stepStorageKey(jobId: string, subjectId: string) {
 export const Route = createFileRoute("/dashboard/smart-import/$jobId/review")({
   head: () => ({ meta: [{ title: "Smart Import Review — NECTAR" }] }),
   component: () => (
-    <RequirePermission perm="view_staff_records">
+    <RequirePermission perm="edit_client_records">
       <ReviewPage />
     </RequirePermission>
   ),
@@ -480,14 +478,9 @@ function useCompleteSetup({
         );
         if (committedRows.length === 1 && mode === "client" && committedRows[0].record_id) {
           navigate({
-            to: "/dashboard/client-intake/$clientId",
+            to: "/dashboard/clients/$clientId",
             params: { clientId: committedRows[0].record_id! },
-          }).catch(() =>
-            navigate({
-              to: "/dashboard/clients/$clientId",
-              params: { clientId: committedRows[0].record_id! },
-            }).catch(() => navigate({ to: "/dashboard/clients" })),
-          );
+          }).catch(() => navigate({ to: "/dashboard/clients" }));
         } else if (mode === "client") {
           navigate({ to: "/dashboard/clients" });
         } else {
@@ -820,7 +813,6 @@ function SubjectReview({
         stored === "medications" ||
         stored === "goals" ||
         stored === "services" ||
-        stored === "plan" ||
         stored === "staff" ||
         stored === "review"
       ) {
@@ -842,7 +834,6 @@ function SubjectReview({
         stored === "medications" ||
         stored === "goals" ||
         stored === "services" ||
-        stored === "plan" ||
         stored === "staff" ||
         stored === "review"
       ) {
@@ -886,7 +877,7 @@ function SubjectReview({
       </div>
     );
 
-  const { subject, fields, unfiled, questions, matched } = q.data;
+  const { subject, fields, questions, matched } = q.data;
   const tenant = (q.data as { tenant?: { codesHeld: string[]; names: string[] } }).tenant ?? {
     codesHeld: [],
     names: [],
@@ -915,9 +906,6 @@ function SubjectReview({
   const askCount = (questions as Array<{ answer: string | null }>).filter(
     (qq) => !qq.answer,
   ).length;
-  const extraCount = (unfiled as Array<{ filed_to: string | null }>).filter(
-    (u) => !u.filed_to,
-  ).length;
   // Drop per-code routing issues — they're replaced by the inline billing table editor.
   const validationOverrides = validation?.overrides ?? {};
   const visibleIssues = (validation?.issues ?? []).filter(
@@ -932,7 +920,6 @@ function SubjectReview({
     { id: "medications", label: "Medications / MAR" },
     { id: "goals", label: "PCSP goals" },
     { id: "services", label: "Services" },
-    { id: "plan", label: "Unmatched notes", badge: extraCount || undefined },
     { id: "staff", label: "Staff & training" },
     { id: "review", label: "Review", badge: askCount + issueCount || undefined },
   ];
@@ -969,7 +956,6 @@ function SubjectReview({
         decision={subject.review_decision}
         tenant={tenant}
         questions={questions}
-        unfiled={unfiled}
         jobId={jobId}
         subjects={subjects}
         assignments={assignments}
@@ -989,7 +975,7 @@ function SubjectReview({
 // ---------------------------- SubjectWizard ----------------------------
 // Presentational wrapper: groups existing review panels into a guided
 // step rail. Reuses every existing piece (PlacementLineup, QuestionsPanel,
-// UnfiledPanel, ProvisioningPanel) — no new server fns,
+// ProvisioningPanel) — no new server fns,
 // no rebuilt fields, no separate commit path.
 const PERSON_FIELDS_SET = new Set([
   "first_name",
@@ -1079,7 +1065,6 @@ type WizardStepId =
   | "medications"
   | "goals"
   | "services"
-  | "plan"
   | "staff"
   | "review";
 
@@ -1092,7 +1077,6 @@ function SubjectWizard({
   decision,
   tenant,
   questions,
-  unfiled,
   jobId,
   subjects,
   assignments,
@@ -1113,7 +1097,6 @@ function SubjectWizard({
   decision: SubjectRow["review_decision"];
   tenant: TenantIdentity;
   questions: Array<{ id: string; question: string; context: string | null; answer: string | null }>;
-  unfiled: Array<{ id: string; text: string; filed_to: string | null }>;
   jobId: string;
   subjects: SubjectRow[];
   assignments: Array<{
@@ -1227,17 +1210,6 @@ function SubjectWizard({
       {step === "goals" && jobMode === "client" && (
         <GoalsReviewPanel subjectId={subjectId} fields={goalFields} onChanged={onChanged} />
       )}
-      {step === "plan" && (
-        <div className="space-y-3">
-          <div className="rounded-xl border border-border bg-card p-2.5 text-[11px] leading-snug text-muted-foreground shadow-[var(--shadow-card)]">
-            Notes NECTAR pulled from your uploads but couldn't confidently file into a section
-            (Health, Behavioral, Preferences, etc.). Uploaded files themselves — PCSP, MAR, and any
-            supporting docs — are stored with this import and don't need to be re-attached here.
-            File each note under an existing section, create a new one, or leave it for later.
-          </div>
-          <UnfiledPanel items={unfiled} onChanged={onChanged} />
-        </div>
-      )}
       {step === "staff" && (
         <div className="space-y-3">
           <div className="rounded-xl border border-border bg-card p-2.5 text-[11px] leading-snug text-muted-foreground shadow-[var(--shadow-card)]">
@@ -1273,7 +1245,6 @@ function SubjectWizard({
               review_status: "in_progress",
             }}
             fields={fields}
-            unfiled={unfiled}
             assignments={assignments}
             subjects={subjects}
             tenant={tenant}
@@ -4110,126 +4081,6 @@ function QuestionItem({
   );
 }
 
-// ---------------------------- UnfiledPanel ----------------------------
-const FILE_SECTIONS = [
-  "notes",
-  "contact_info",
-  "emergency_contact",
-  "preferences",
-  "medical",
-  "behavioral",
-];
-function UnfiledPanel({
-  items,
-  onChanged,
-}: {
-  items: Array<{ id: string; text: string; filed_to: string | null }>;
-  onChanged: () => void;
-}) {
-  if (items.length === 0) {
-    return (
-      <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-[var(--shadow-card)]">
-        NECTAR filed every note from your uploads into a section. Nothing here needs your attention.
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-2">
-      {items.map((it) => (
-        <UnfiledItem key={it.id} item={it} onChanged={onChanged} />
-      ))}
-    </div>
-  );
-}
-function UnfiledItem({
-  item,
-  onChanged,
-}: {
-  item: { id: string; text: string; filed_to: string | null };
-  onChanged: () => void;
-}) {
-  const file = useServerFn(fileUnfiledItem);
-  const [section, setSection] = useState(item.filed_to ?? "");
-  const [newSection, setNewSection] = useState("");
-  const [mode, setMode] = useState<"existing" | "new" | "leave">(
-    item.filed_to ? "existing" : "leave",
-  );
-
-  const m = useMutation({
-    mutationFn: () =>
-      file({
-        data: {
-          itemId: item.id,
-          filed_to: mode === "leave" ? null : mode === "new" ? newSection.trim() : section,
-        },
-      }),
-    onSuccess: () => {
-      toast.success("Filed");
-      onChanged();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-      <div className="flex items-start gap-2 text-sm">
-        <Inbox className="mt-0.5 h-4 w-4 text-muted-foreground" />
-        <div className="flex-1">{item.text}</div>
-      </div>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <Select value={mode} onValueChange={(v) => setMode(v as "existing" | "new" | "leave")}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="existing">File under existing</SelectItem>
-            <SelectItem value="new">Create new section</SelectItem>
-            <SelectItem value="leave">Leave for later</SelectItem>
-          </SelectContent>
-        </Select>
-        {mode === "existing" && (
-          <Select value={section} onValueChange={setSection}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Pick a section" />
-            </SelectTrigger>
-            <SelectContent>
-              {FILE_SECTIONS.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s.replace("_", " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        {mode === "new" && (
-          <Input
-            className="w-[200px]"
-            placeholder="New section name"
-            value={newSection}
-            onChange={(e) => setNewSection(e.target.value)}
-          />
-        )}
-        <Button
-          size="sm"
-          onClick={() => m.mutate()}
-          disabled={
-            m.isPending ||
-            (mode === "existing" && !section) ||
-            (mode === "new" && !newSection.trim())
-          }
-        >
-          {m.isPending && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}Save
-        </Button>
-      </div>
-      {item.filed_to && (
-        <div className="mt-2 text-xs text-muted-foreground">
-          Currently filed under <strong>{item.filed_to}</strong>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ---------------------------- ImportSummaryPanel ----------------------------
 // Final read-only outline shown at Step 8. Recaps every previous step so the
 // admin sees the complete "this is what will be created" record in one place
@@ -4237,7 +4088,6 @@ function UnfiledItem({
 function ImportSummaryPanel({
   subject,
   fields,
-  unfiled,
   assignments,
   subjects,
   tenant,
@@ -4246,7 +4096,6 @@ function ImportSummaryPanel({
 }: {
   subject: SubjectRow;
   fields: FieldRow[];
-  unfiled: Array<{ id: string; text: string; filed_to: string | null }>;
   assignments: Array<{
     id: string;
     relation_type: string;
@@ -4345,9 +4194,6 @@ function ImportSummaryPanel({
   const unknownProviderCount = parsedBilling.filter(
     (r) => providerOwnership(r.provider_name, tenant) === "unknown",
   ).length;
-
-  // Documents (unfiled = supporting docs bucket)
-  const docs = unfiled;
 
   // Staff / assignments
   const clientId = subject.id;
@@ -4657,34 +4503,6 @@ function ImportSummaryPanel({
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
-
-        {/* Plan & documents */}
-        <div className={cardCls}>
-          <SectionHeader
-            title="Unmatched notes"
-            step="plan"
-            count={`${docs.length} note${docs.length === 1 ? "" : "s"} still to file`}
-          />
-          {docs.length === 0 ? (
-            <div className="text-[11px] text-muted-foreground italic">
-              — every note from your uploads was filed automatically —
-            </div>
-          ) : (
-            <ul className="space-y-0.5 text-[11px]">
-              {docs.slice(0, 8).map((d) => (
-                <li key={d.id} className="truncate">
-                  <span>{d.text}</span>
-                  {d.filed_to && (
-                    <span className="text-muted-foreground"> · filed to {d.filed_to}</span>
-                  )}
-                </li>
-              ))}
-              {docs.length > 8 && (
-                <li className="text-muted-foreground">+ {docs.length - 8} more</li>
-              )}
-            </ul>
           )}
         </div>
 

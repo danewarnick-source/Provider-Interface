@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import { ABI_OBLIGATION_TITLE, THIRTY_DAY_OBLIGATION_TITLE } from "./in-hive-training.ts";
-import { PCT_HIRE_COURSE_TITLE } from "./client-form-obligations.ts";
+import { PCT_HIRE_COURSE_TITLE } from "./clients/form-obligations.ts";
 import {
   CODE_OF_CONDUCT_TITLE,
   CONFLICT_OF_INTEREST_TITLE,
@@ -83,12 +83,12 @@ describe("hire auto-assign", () => {
     assert.match(importWriter, /reevaluateStaffAssignedToClientInternal/);
     assert.match(hireHook, /onClientDutyFactsChanged/);
     const profileTab = readFileSync(
-      fileURLToPath(new URL("../components/clients/profile-tab.tsx", import.meta.url)),
+      fileURLToPath(new URL("../components/clients/profile/health/care-card.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(profileTab, /onClientDutyFactsChanged/);
     const faceSheet = readFileSync(
-      fileURLToPath(new URL("../components/clients/face-sheet-info-card.tsx", import.meta.url)),
+      fileURLToPath(new URL("../components/clients/profile/plans/plan-dates-dialog.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(faceSheet, /onClientDutyFactsChanged/);

@@ -3,7 +3,7 @@
 // uploader (src/lib/nectar-documents.functions.ts) and Smart
 // Import (src/lib/smart-import.functions.ts). One prompt, one
 // schema, one parser. Field keys here MUST match the keys that
-// applyExtractedFieldsToClient consumes in client-import-schema.ts.
+// applyExtractedFieldsToClient consumes in clients/import-schema.ts.
 // =============================================================
 
 import { z } from "zod";
@@ -37,7 +37,7 @@ export type ParseOutT = z.infer<typeof ParseOut>;
 // The canonical set of field_keys the extractor is expected to produce
 // for client documents. applyExtractedFieldsToClient reads these names
 // directly; Smart Import uses this set to know what is NOT a custom
-// attribute. Keep in lockstep with client-import-schema.ts.
+// attribute. Keep in lockstep with clients/import-schema.ts.
 export const CORE_CLIENT_FIELD_KEYS = new Set<string>([
   // Person
   "first_name", "last_name", "full_name", "middle_name", "dob", "medicaid_id", "phone", "plan_year",

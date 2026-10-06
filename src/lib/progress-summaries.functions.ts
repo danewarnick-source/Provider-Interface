@@ -1,4 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
+import { loadClientContacts, primaryContact, type ClientContact } from "@/lib/clients/contacts";
+import { loadPlanBundle } from "@/lib/clients/plans-load";
+import { noteAddressesAny, summaryGoals, type SummaryGoal } from "@/lib/clients/plan-summaries";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
@@ -7,12 +10,10 @@ import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
 import {
   clientNeedsGoalProgress,
   filterPeriodsByFloor,
-  FINANCIAL_STATEMENT_CODES,
-  MONTHLY_SUMMARY_CODES,
-  QUARTERLY_SUMMARY_CODES,
   recentMonthlyPeriods,
   recentQuarterlyPeriods,
   requiresUpiFiling,
+  summaryCadenceForCode,
   summaryPeriodFloor,
   type SummaryPeriod,
 } from "./progress-summaries";
@@ -201,11 +202,7 @@ export const ensureCurrentSummaryPeriods = createServerFn({ method: "POST" })
       if (row.service_start_date && row.service_start_date > today) continue;
       if (row.service_end_date && row.service_end_date < today) continue;
       const code = (row.service_code ?? "").toUpperCase();
-      if (
-        !QUARTERLY_SUMMARY_CODES.has(code) &&
-        !MONTHLY_SUMMARY_CODES.has(code) &&
-        !FINANCIAL_STATEMENT_CODES.has(code)
-      ) continue;
+      if (!summaryCadenceForCode(code)) continue;
       const arr = byClient.get(row.client_id) ?? [];
       arr.push({ code, start: row.service_start_date ?? null });
       byClient.set(row.client_id, arr);
@@ -253,9 +250,9 @@ export const ensureCurrentSummaryPeriods = createServerFn({ method: "POST" })
       const quarterly = filterPeriodsByFloor(quarterlyAll, floor);
       const monthly = filterPeriodsByFloor(monthlyAll, floor);
 
-      const quarterlyEntries = entries.filter((e) => QUARTERLY_SUMMARY_CODES.has(e.code));
-      const monthlyNarrativeEntries = entries.filter((e) => MONTHLY_SUMMARY_CODES.has(e.code));
-      const monthlyFinancialEntries = entries.filter((e) => FINANCIAL_STATEMENT_CODES.has(e.code));
+      const quarterlyEntries = entries.filter((e) => summaryCadenceForCode(e.code) === "quarterly");
+      const monthlyNarrativeEntries = entries.filter((e) => summaryCadenceForCode(e.code) === "monthly");
+      const monthlyFinancialEntries = entries.filter((e) => summaryCadenceForCode(e.code) === "financial");
 
       // Quarterly narrative.
       for (const p of quarterly) {
@@ -456,11 +453,8 @@ export const attestSummarySentToSc = createServerFn({ method: "POST" })
 
 // ─── Source bundle + draft/save/finalize ──────────────────────────────────
 
-export type SummaryPcspGoal = {
-  id: string;
-  goal: string;
-  job_codes: string[];
-};
+/** A plan goal with its supports for the summary's codes (plan in effect at period end). */
+export type SummaryPcspGoal = SummaryGoal;
 
 export type SummarySourceBundle = {
   summary: ProgressSummaryRow;
@@ -468,10 +462,8 @@ export type SummarySourceBundle = {
     id: string;
     first_name: string;
     last_name: string;
-    pcsp_goals: string[];
-    support_coordinator_name: string | null;
-    support_coordinator_email: string | null;
-    support_coordinator_phone: string | null;
+    /** The client's main support coordinator (client_contacts). */
+    support_coordinator: ClientContact | null;
   };
   goals: SummaryPcspGoal[];
   organization: {
@@ -488,6 +480,7 @@ export type SummarySourceBundle = {
     log_date: string;
     narrative: string;
     pcsp_goals_addressed: string[];
+    goal_ids: string[];
     staff_name: string | null;
     approved_at: string | null;
   }>;
@@ -554,7 +547,7 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
 
     const { data: client, error: cErr } = await supabase
       .from("clients")
-      .select("id, first_name, last_name, pcsp_goals, support_coordinator_name, support_coordinator_email, support_coordinator_phone")
+      .select("id, first_name, last_name")
       .eq("id", summaryRow.client_id)
       .eq("organization_id", data.organizationId)
       .maybeSingle();
@@ -572,35 +565,13 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
       .eq("organization_id", data.organizationId)
       .maybeSingle();
 
-    // Prefer rich CST goals (with job_codes); fall back to flat pcsp_goals.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: cst } = await (supabase as any)
-      .from("client_specific_trainings")
-      .select("goals")
-      .eq("organization_id", data.organizationId)
-      .eq("client_id", summaryRow.client_id)
-      .eq("training_type", "person_specific")
-      .maybeSingle();
+    // Goals → supports for this summary's codes, from the plan in effect at period end.
     const periodCodes = new Set((summaryRow.service_codes ?? []).map((c) => c.toUpperCase()));
-    let goals: SummaryPcspGoal[] = [];
-    const cstGoals = (cst?.goals ?? null) as Array<{ id?: string; goal?: string; job_codes?: string[] }> | null;
-    if (Array.isArray(cstGoals) && cstGoals.length > 0) {
-      goals = cstGoals
-        .map((g, i) => ({
-          id: String(g.id ?? `g-${i}`),
-          goal: String(g.goal ?? "").trim(),
-          job_codes: (g.job_codes ?? []).map((c) => String(c).toUpperCase()).filter(Boolean),
-        }))
-        .filter((g) => g.goal.length > 0)
-        .filter((g) =>
-          g.job_codes.length === 0 || g.job_codes.some((c) => periodCodes.has(c)),
-        );
-    }
-    if (goals.length === 0) {
-      goals = ((client.pcsp_goals ?? []) as string[])
-        .map((g, i) => ({ id: `flat-${i}`, goal: String(g).trim(), job_codes: [] as string[] }))
-        .filter((g) => g.goal.length > 0);
-    }
+    const { goals } = summaryGoals(
+      await loadPlanBundle(supabase, summaryRow.client_id),
+      summaryRow.period_end,
+      [...periodCodes],
+    );
 
     const { data: services, error: svcErr } = await supabase
       .from("client_billing_codes")
@@ -616,7 +587,7 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
 
     const { data: logs, error: lErr } = await supabase
       .from("daily_logs")
-      .select("id, log_date, narrative, pcsp_goals_addressed, user_id, approved_at")
+      .select("id, log_date, narrative, pcsp_goals_addressed, goal_ids, user_id, approved_at")
       .eq("organization_id", data.organizationId)
       .eq("client_id", summaryRow.client_id)
       .eq("status", "approved")
@@ -673,11 +644,11 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
       }
     }
 
-    const goalTexts = new Set(goals.map((g) => g.goal.toLowerCase()));
     let untaggedSourceCount = 0;
     const dailyLogs = (logs ?? []).map((l) => {
       const addressed = (l.pcsp_goals_addressed ?? []) as string[];
-      if (addressed.length === 0 || !addressed.some((g) => goalTexts.has(String(g).toLowerCase()))) {
+      const goalIds = (l.goal_ids ?? []) as string[];
+      if (!noteAddressesAny({ goal_ids: goalIds, addressed }, goals)) {
         untaggedSourceCount += 1;
       }
       return {
@@ -685,6 +656,7 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
         log_date: l.log_date,
         narrative: l.narrative,
         pcsp_goals_addressed: addressed,
+        goal_ids: goalIds,
         staff_name: l.user_id ? (nameById.get(l.user_id) ?? null) : null,
         approved_at: l.approved_at,
       };
@@ -716,10 +688,10 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
         id: client.id,
         first_name: client.first_name,
         last_name: client.last_name,
-        pcsp_goals: (client.pcsp_goals ?? []) as string[],
-        support_coordinator_name: client.support_coordinator_name ?? null,
-        support_coordinator_email: client.support_coordinator_email ?? null,
-        support_coordinator_phone: client.support_coordinator_phone ?? null,
+        support_coordinator: primaryContact(
+          await loadClientContacts(supabase, [client.id]),
+          "support_coordinator",
+        ),
       },
       goals,
       organization: {

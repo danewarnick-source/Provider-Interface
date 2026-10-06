@@ -14,7 +14,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireCategory } from "@/lib/access/require";
 import { hasCategory } from "@/lib/access/can";
 import { isAdminLevel } from "@/lib/access/levels";
-import { clientAuthorizedCodes, assignmentCodes } from "@/lib/assignment-codes";
+import { assignmentCodes } from "@/lib/assignment-codes";
+import { loadActiveCodesAsService } from "@/lib/clients/codes";
 import { denverYmd } from "@/lib/denver-date";
 import { parseIsoDate, resolveHireDate } from "@/lib/evidence/due";
 import type { EvidenceFileRow } from "@/lib/evidence/types";
@@ -31,7 +32,7 @@ type Sb = SupabaseClient<any>;
 export type CaseloadClient = {
   clientId: string;
   name: string;
-  /** clientAuthorizedCodes — what the chips may toggle. */
+  /** The client's active codes (client_billing_codes) — what the chips may toggle. */
   authorizedCodes: string[];
   hasAbi: boolean;
   /** Behavior-support caseload tracking was removed; always false for now. */
@@ -74,15 +75,13 @@ type ClientRow = {
   id: string;
   first_name: string | null;
   last_name: string | null;
-  authorized_dspd_codes: string[] | null;
-  job_code: string[] | null;
   has_abi: boolean | null;
   account_status: string | null;
   discharge_date: string | null;
 };
 
 const CLIENT_SELECT =
-  "id, first_name, last_name, authorized_dspd_codes, job_code, has_abi, account_status, discharge_date";
+  "id, first_name, last_name, has_abi, account_status, discharge_date";
 
 function clientName(c: ClientRow): string {
   return [c.first_name, c.last_name].filter(Boolean).join(" ").trim() || "Client";
@@ -198,6 +197,7 @@ export const getMemberCaseload = createServerFn({ method: "POST" })
     const allClients = new Map(visible);
     for (const c of hidden) allClients.set(c.id, c);
     const clientIds = [...allClients.keys()];
+    const activeCodes = await loadActiveCodesAsService(admin, clientIds);
 
     const evidenceItems = (items.data ?? []) as BadgeEvidenceItem[];
     const [files, trainings, completions] = await Promise.all([
@@ -261,7 +261,7 @@ export const getMemberCaseload = createServerFn({ method: "POST" })
     const toClient = (c: ClientRow): CaseloadClient => ({
       clientId: c.id,
       name: clientName(c),
-      authorizedCodes: clientAuthorizedCodes(c),
+      authorizedCodes: activeCodes.get(c.id) ?? [],
       hasAbi: c.has_abi === true,
       // Behavior-support tracking was removed from the app (see
       // docs/SQL_HANDOFF_behavior_removal.sql); the rule stays in readiness.ts.

@@ -11,7 +11,7 @@ import {
 import { isPackSentinel, obligationIsRequired } from "@/lib/obligation-packs";
 import { isUnlinkedFormDuty, isFormUuid } from "@/lib/resolve-obligation-form";
 import { inHiveCourseIdForTitle, topicCodesForCourse } from "@/lib/in-hive-training";
-import { clientFormKindForTitle } from "@/lib/client-form-obligations";
+import { clientFormKindForTitle } from "@/lib/clients/form-obligations";
 import {
   completedCodesFromProgress,
   loadInHiveCourseProgress,
