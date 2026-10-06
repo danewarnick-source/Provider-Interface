@@ -1,5 +1,6 @@
-// Care plan: the current plan year's goals → supports → codes, with add /
-// edit / end. Nothing is deleted: goals are ended, supports get an end date.
+// Plan goals: the current plan year's goals → supports → codes, with add /
+// edit / end and "View as" a code (what a team member working that code
+// sees). Nothing is deleted: goals are ended, supports get an end date.
 import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FieldVisibilityToggle } from "@/components/clients/profile/visibility-toggles";
 import { clientPlansKey, useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
-import { formatDate, todayYmd } from "@/lib/clients/dates";
-import { currentPlan, goalView, waitingDays, type GoalView } from "@/lib/clients/plans";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { todayYmd } from "@/lib/clients/dates";
+import { currentPlan, goalView, supportsForCode, type GoalView } from "@/lib/clients/plans";
 import { addClientPlan, endClientGoal, endGoalSupport } from "@/lib/clients/plans.functions";
 import { GoalTree } from "./goal-tree";
 import { GoalDialog, SupportDialog } from "./goal-dialogs";
@@ -29,14 +31,16 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
   const fileRef = useRef<HTMLInputElement>(null);
   const [goalDlg, setGoalDlg] = useState<{ goal: GoalView | null; planId: string } | null>(null);
   const [supportDlg, setSupportDlg] = useState<{ goal: GoalView; support: Support | null } | null>(null);
+  const [viewAs, setViewAs] = useState("all");
 
   const plans = plansQ.data?.plans ?? [];
   const plan = currentPlan(plans);
   const today = todayYmd();
-  const goals = (plansQ.data?.goals ?? [])
-    .filter((g) => g.plan_id === plan?.id && g.status === "active")
-    .map((g) => goalView(g, g.supports.filter((s) => !s.end_date || s.end_date >= today)));
-  const waiting = waitingDays(plans);
+  const planGoals = (plansQ.data?.goals ?? []).filter((g) => g.plan_id === plan?.id && g.status === "active");
+  const goals =
+    viewAs === "all"
+      ? planGoals.map((g) => goalView(g, g.supports.filter((s) => !s.end_date || s.end_date >= today)))
+      : supportsForCode(planGoals, viewAs, today).map((g) => goalView(g.goal, g.supports));
   const scope = orgId ? { organizationId: orgId, clientId } : null;
   const refresh = () => {
     qc.invalidateQueries({ queryKey: clientPlansKey(clientId) });
@@ -51,20 +55,25 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
     return id;
   }
 
-  const planLine = plan
-    ? plan.start_date || plan.end_date
-      ? `Plan year ${formatDate(plan.start_date)} – ${formatDate(plan.end_date)}`
-      : plan.label ? `Plan year ${plan.label} (no dates on file)` : "Plan year dates not on file"
-    : "No plan year on file yet";
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Plan goals</CardTitle>
-        <p className="text-xs text-muted-foreground">{planLine}</p>
-        {waiting !== null && waiting > 0 && (
-          <p className="text-xs text-amber-700">Plan ended {waiting} day{waiting === 1 ? "" : "s"} ago — waiting on the new PCSP.</p>
-        )}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="text-base">Plan goals</CardTitle>
+          <Select value={viewAs} onValueChange={setViewAs}>
+            <SelectTrigger className="h-8 w-44" aria-label="View as" data-testid="plan-view-as">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">View as: all codes</SelectItem>
+              {codes.map((c) => (
+                <SelectItem key={c} value={c}>
+                  View as: {c}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
         <input
@@ -99,7 +108,7 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
         ) : (
           <GoalTree
             goals={goals}
-            empty="No goals yet — upload the PCSP or add them."
+            empty={viewAs === "all" ? "No goals yet — upload the PCSP or add them." : `No supports list ${viewAs} — a team member working ${viewAs} sees no goals.`}
             goalActions={(g) => (
               <div className="flex shrink-0 items-center gap-0.5">
                 <FieldVisibilityToggle clientId={clientId} section="care_plan" kind="goal" id={g.id} label="this goal" />

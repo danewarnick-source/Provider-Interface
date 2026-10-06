@@ -2,6 +2,7 @@
 // nothing yet, an uploaded document, and the toolbar over a written draft.
 // State and mutations live in support-strategies-panel.tsx.
 
+import { formatDate } from "@/lib/clients/dates";
 import type { ReactNode } from "react";
 import {
   CheckCircle2,
@@ -23,7 +24,15 @@ function Spin({ on, icon }: { on: boolean; icon: ReactNode }) {
 }
 
 /** Collapsible card title row. */
-export function StrategiesTitle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+export function StrategiesTitle({
+  open,
+  onToggle,
+  dueOn,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  dueOn: string | null;
+}) {
   return (
     <div className="flex items-center gap-2">
       <button
@@ -35,6 +44,11 @@ export function StrategiesTitle({ open, onToggle }: { open: boolean; onToggle: (
         {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
       </button>
       <CardTitle className="text-base">Support strategies</CardTitle>
+      {dueOn ? (
+        <span className="text-xs text-muted-foreground" data-testid="strategies-due">
+          Due {formatDate(dueOn)}
+        </span>
+      ) : null}
     </div>
   );
 }

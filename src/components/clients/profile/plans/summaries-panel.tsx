@@ -1,4 +1,6 @@
-// Progress summaries on file for this client, with "New summary".
+// Progress summaries: which of the client's codes owe one and how often
+// (progress-summaries.ts cadence rules), the summaries on file, and
+// "New summary".
 
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
@@ -7,7 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { summariesOwed } from "@/lib/progress-summaries";
 import { ReadOnlyTable } from "@/components/clients/profile/read-only-table";
+
+const CADENCE: Record<string, string> = {
+  quarterly: "quarterly",
+  monthly: "monthly",
+  financial: "monthly financial statement",
+};
 import { NewSummaryDialog } from "./new-summary-dialog";
 
 export function SummariesPanel({
@@ -49,6 +58,18 @@ export function SummariesPanel({
         </Button>
       </CardHeader>
       <CardContent className="p-0">
+        <div className="flex flex-wrap gap-1.5 px-6 pb-3 text-xs" data-testid="client-summaries-owed">
+          {summariesOwed(codes).length === 0 ? (
+            <span className="text-muted-foreground">None of this client's codes owe a summary.</span>
+          ) : (
+            summariesOwed(codes).map((o) => (
+              <Badge key={o.code} variant="outline" className="font-normal">
+                {o.code} · {CADENCE[o.cadence]}
+                {o.upi ? " · enter in UPI" : ""}
+              </Badge>
+            ))
+          )}
+        </div>
         <ReadOnlyTable
           loading={q.isLoading}
           empty="No progress summaries on file."
