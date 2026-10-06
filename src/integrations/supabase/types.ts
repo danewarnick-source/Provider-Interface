@@ -4304,6 +4304,7 @@ export type Database = {
           account_status: string
           admin_hours_per_week: number | null
           admission_date: string | null
+          advance_directive_notes: string | null
           advanced_directives: boolean | null
           allergies: string[]
           authorized_dspd_codes: string[]
@@ -4440,6 +4441,7 @@ export type Database = {
           account_status?: string
           admin_hours_per_week?: number | null
           admission_date?: string | null
+          advance_directive_notes?: string | null
           advanced_directives?: boolean | null
           allergies?: string[]
           authorized_dspd_codes?: string[]
@@ -4576,6 +4578,7 @@ export type Database = {
           account_status?: string
           admin_hours_per_week?: number | null
           admission_date?: string | null
+          advance_directive_notes?: string | null
           advanced_directives?: boolean | null
           allergies?: string[]
           authorized_dspd_codes?: string[]

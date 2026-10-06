@@ -19,6 +19,7 @@ export const MEDICAL_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "immunizations",
   "dnr_status",
   "dnr_location",
+  "advance_directive_notes",
   "dnr_applicable",
   "polst_status",
   "palliative_care_status",
