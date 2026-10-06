@@ -57,6 +57,12 @@ import {
 import { getAuthStatus, AuthStatusBadge } from "@/lib/billing-auth-status";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { localYmd } from "@/lib/local-date";
+import {
+  authorizationAlerts,
+  needs1056Numbers,
+  UNITS_LOW_PCT,
+  type AuthRowInput,
+} from "@/lib/authorization-guardrails";
 
 type Draft = { annual: string; rate: string; endDate: string };
 function draftFromCode(c: { annual_unit_authorization: number | null; rate_per_unit: number | null; service_end_date: string | null }): Draft {
@@ -137,31 +143,13 @@ export function BillingCodesDetail({ clientId, clientName, medicaidId }: Props) 
   );
 
   // Read-only. Shows what is already on the 1056 row. Does not invent dates or rates.
-  const authWarnings = useMemo(() => {
-    const lines: string[] = [];
-    for (const b of budgets ?? []) {
-      const c = b.code as typeof b.code & { authorization_pending?: boolean };
-      const status = getAuthStatus(c.service_start_date, c.service_end_date);
-      const label = (c.service_code || "code").trim() || "code";
-      if (status === "expired" && c.service_end_date) {
-        lines.push(`${label} expired ${c.service_end_date}. Enter the real renewal 1056 — do not invent an end date.`);
-        continue;
-      }
-      if (c.service_end_date && status !== "expired") {
-        const end = new Date(`${c.service_end_date}T00:00:00`);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const days = Math.round((end.getTime() - today.getTime()) / 86_400_000);
-        if (Number.isFinite(days) && days >= 0 && days <= 14) {
-          lines.push(`${label} ends ${c.service_end_date}. Enter the real renewal when you have it.`);
-        }
-      }
-      if (c.authorization_pending || Number(c.rate_per_unit ?? 0) === 0) {
-        lines.push(`${label} is pending or $0. Enter the real rate and units from the 1056.`);
-      }
-    }
-    return lines;
-  }, [budgets]);
+  const authWarnings = useMemo(
+    () =>
+      (budgets ?? []).flatMap((b) =>
+        authorizationAlerts(b.code as AuthRowInput, b.used_pct).map((a) => a.message),
+      ),
+    [budgets],
+  );
 
   const [bulkEdit, setBulkEdit] = useState(false);
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
@@ -308,7 +296,7 @@ export function BillingCodesDetail({ clientId, clientName, medicaidId }: Props) 
         {authWarnings.length > 0 && (
           <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-950 dark:text-amber-100">
             <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
-              <AlertTriangle className="h-3.5 w-3.5" /> Authorization needs a real 1056
+              <AlertTriangle className="h-3.5 w-3.5" /> Authorization alerts
             </p>
             <ul className="mt-1.5 list-disc space-y-0.5 pl-5 text-xs">
               {authWarnings.map((line) => (
@@ -717,6 +705,7 @@ function CodeRow({
 
   const exhausted = annualUnits > 0 && usedUnits >= annualUnits;
   const isEmpty = usedUnits === 0;
+  const placeholder = needs1056Numbers(code as AuthRowInput);
 
   const annualVal = editing ? (draft?.annual ?? String(annualUnits)) : String(annualUnits);
   const rateVal = editing ? (draft?.rate ?? String(rateNum)) : String(rateNum);
@@ -811,9 +800,9 @@ function CodeRow({
               Variable rate · client-specific
             </Badge>
           )}
-          {isVariable && rateNum <= 0 && (
+          {placeholder && (
             <Badge variant="outline" className="gap-1 border-amber-500/60 bg-amber-500/15 text-[10px] font-semibold text-amber-800 dark:text-amber-200">
-              <AlertTriangle className="h-3 w-3" /> No worksheet rate on file
+              <AlertTriangle className="h-3 w-3" /> Needs 1056 numbers
             </Badge>
           )}
           {exhausted && (
@@ -823,11 +812,6 @@ function CodeRow({
           )}
           {!exhausted && isEmpty && (
             <Badge variant="outline" className="text-[10px]">No usage logged yet</Badge>
-          )}
-          {(code as unknown as { authorization_pending?: boolean }).authorization_pending && (
-            <Badge variant="outline" className="gap-1 border-amber-500/60 bg-amber-500/15 text-[10px] font-semibold text-amber-800 dark:text-amber-200">
-              <AlertTriangle className="h-3 w-3" /> rate/units pending — enter to complete
-            </Badge>
           )}
           <AuthStatusBadge status={status} />
         </div>
@@ -959,7 +943,7 @@ function CodeRow({
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <div
               className={`h-full rounded-full transition-all ${
-                exhausted ? "bg-destructive" : pct >= 80 ? "bg-amber-500" : "bg-primary"
+                exhausted ? "bg-destructive" : pct >= UNITS_LOW_PCT ? "bg-amber-500" : "bg-primary"
               }`}
               style={{ width: `${pct}%` }}
             />
