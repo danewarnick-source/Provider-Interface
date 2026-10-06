@@ -282,3 +282,45 @@ One short report per prompt. A new session continues from the first prompt not m
   - Summary generation now creates quarterly rows for every code that owes a summary (for example COM, CHA, PPS, DSG).
   - Committee-only users can view restrictions on `/dashboard/hrc` but can't open the client profile.
   - The file-section cards in `profile/cards/` (code documents, SJD) are left for P9.
+
+## P9
+- **Status:** merged. PR #454 (https://github.com/danewarnick-source/Provider-Interface/pull/454) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p9-services-file`.
+- **What was done:**
+  - **Services & billing** (`profile/services/`):
+    - The authorizations card shows the unit type, rate, dates, units per year, the 1056 number and approved date, units used vs. left with the pace marker, units per week to use the rest, a run-out date, dollars (budget, used, left) with a total, and rate history.
+    - Add / Edit / Renew / End go through `lib/clients/services.functions.ts` (`edit_billing`). End sets `service_end_date`. Renew re-uses the row for that code, and rate history keeps the old rate and dates.
+    - The pure rules are in `authorizations.ts`.
+  - **Fill from 1056:**
+    - `budget-parse.functions.ts` has `read1056`, which saves the PDF as a `1056_budget` document and reads its text with unpdf. Nectar gives `{value, page, quote}` for each field, and unquoted values are dropped (`auth-1056.ts`).
+    - `confirm1056` checks agency approved codes, real dates and whole-number units before saving.
+    - The review dialog uses the PCSP pattern.
+  - **Monthly budget:** the old panel was split into `monthly-budget`, `budget-editor`, `budget-lines-table`, `budget-pdf-bar`, `use-budget-pdf` and `budget-model`. Removing a line archives it (`client_budget_lines.archived_at`).
+  - **No deletes:** `writeClientRecord` no longer has a `delete` op. `/dashboard/billing/$clientId` is now a redirect to `?section=services`.
+  - **Client file:**
+    - The required documents card (`file-required.ts`, `file-documents.functions.ts`) shows status and expiry per document, with upload, replace (marks the old one outdated) and archive.
+    - Expired, archived and outdated documents no longer count. Belongings has its own card, and its writes are guarded.
+    - `file.functions.ts` was split into `file-index.ts` and `file-index-queries.ts`.
+  - **Deleted:** `billing-codes-detail`, `client-budget-panel`, `client-file-tab`, `add-codes-control`, `codes-add.functions`, `code-assigned-staff`, `use-client-budget`, `billing-auth-status`, `billing-rates.functions`, and `RoomBoardAgreementCard`.
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1797 of 1802 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 17 pass / 3 fail, the same 3 as before. The profile smoke now checks Services & billing and the Client file.
+  - e2e staff-go-live: 6/6.
+  - e2e daily-logs: 2 pass / 4 fail, the same as before.
+  - e2e 1056 + punch-pad-gps: 12 fail, the same as before.
+- **Migrations:**
+  - Applied to live through `execute_sql` and recorded in `schema_migrations`:
+    - `20261006200000_clients_authorization_1056_fields` (`authorization_number`, `authorization_approved_on`)
+    - `20261006200100_clients_document_expiry_and_budget_line_archive` (`client_documents.expires_on`, `client_budget_lines.archived_at` / `archived_by`)
+  - No Phase B migration.
+- **Files:** 33 added, 9 deleted.
+- **Notes for later prompts:**
+  - `e2e/client-1056-billing.spec.ts` still drives the old `?tab=billing` and full-editor UI (its failures were already there). It needs a rewrite against `?section=services`.
+  - The per-code staff picker was deleted with the add control. Staff assignment belongs to P10 Team.
+  - The monthly budget sits in Services & billing; P10 can move it to Money.
+  - `monthly-budget.tsx` reads `clients.income_sources` directly, which the lint rule flags like the other legacy panels.
+  - Fill from 1056 needs a text PDF; scans must be entered by hand.
+  - P11 discharge can call `endAuthorization` to end each active authorization.
+  - Legacy files still over the size limits: `org-client-file-matrix` 321, `residential-daily-tab` 866.
