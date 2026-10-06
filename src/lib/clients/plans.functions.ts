@@ -11,9 +11,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanManageClient } from "./guards.server";
 import { assertRowsChanged } from "./writes";
 import { todayYmd } from "./dates";
-import { normalizeCodes, type ClientPlanBundle } from "./plans";
+import { normalizeCodes } from "./plans";
 import { insertPlan } from "./plans-write";
-import { GOAL_COLUMNS, PLAN_COLUMNS, SUPPORT_COLUMNS, loadPlanBundle } from "./plans-load";
+import { GOAL_COLUMNS, SUPPORT_COLUMNS } from "./plans-load";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = SupabaseClient<any>;
@@ -28,16 +28,6 @@ const ymd = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish();
 const text = z.string().max(4000).nullish();
 const clean = (v: string | null | undefined) => (v?.trim() ? v.trim() : null);
 
-/** Every plan year for one client with its goals and supports. */
-export const getClientPlans = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object(scope).parse(d))
-  .handler(async ({ data, context }): Promise<ClientPlanBundle> => {
-    const { sb, userId } = ctx(context);
-    await assertCanManageClient({ supabase: sb, actorId: userId, ...data, action: "view" });
-    return loadPlanBundle(sb, data.clientId);
-  });
-
 const planFields = { start_date: ymd, end_date: ymd, activated_on: ymd, meeting_date: ymd };
 
 export const addClientPlan = createServerFn({ method: "POST" })
@@ -47,23 +37,6 @@ export const addClientPlan = createServerFn({ method: "POST" })
     const { sb, userId } = ctx(context);
     await assertCanManageClient({ supabase: sb, actorId: userId, ...data, action: "edit" });
     return { id: await insertPlan(sb, { ...data, userId, source: "manual" }) };
-  });
-
-export const updateClientPlan = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ ...scope, planId: z.string().uuid(), ...planFields }).parse(d))
-  .handler(async ({ data, context }) => {
-    const { sb, userId } = ctx(context);
-    const { organizationId, clientId, planId, ...dates } = data;
-    await assertCanManageClient({ supabase: sb, actorId: userId, organizationId, clientId, action: "edit" });
-    const { data: rows, error } = await sb
-      .from("client_plans")
-      .update(dates)
-      .eq("id", planId)
-      .eq("client_id", clientId)
-      .select(PLAN_COLUMNS);
-    if (error) throw new Error(error.message);
-    return assertRowsChanged(rows)[0];
   });
 
 const goalFields = z.object({

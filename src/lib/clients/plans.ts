@@ -4,8 +4,7 @@
 
 import { daysUntil, parseLocalDate, todayYmd } from "./dates.ts";
 
-export const PLAN_STATUSES = ["upcoming", "current", "ended", "past"] as const;
-export type PlanStatus = (typeof PLAN_STATUSES)[number];
+export type PlanStatus = "upcoming" | "current" | "ended" | "past";
 export type PlanSource = "pcsp_upload" | "manual" | "migrated";
 
 export interface ClientPlan {
@@ -166,14 +165,6 @@ export function supportsForCode(
     if (supports.length) out.push({ goal, supports });
   }
   return out;
-}
-
-/** Every code any active goal's support lists (sorted). */
-export function codesInGoals(goals: readonly ClientGoal[]): string[] {
-  const all = goals
-    .filter((g) => g.status === "active")
-    .flatMap((g) => g.supports.flatMap((s) => normalizeCodes(s.our_codes)));
-  return [...new Set(all)].sort();
 }
 
 /** One line for a goal and its supports, for prompts and plain-text lists. */

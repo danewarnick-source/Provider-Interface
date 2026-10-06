@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   activeGoalViewsOn,
-  codesInGoals,
   goalView,
   currentPlan,
   goalLine,
@@ -167,9 +166,6 @@ describe("planInEffectOn / currentPlan / waitingDays", () => {
 describe("helpers", () => {
   it("normalizeCodes", () => {
     assert.deepEqual(normalizeCodes([" dsi", "DSI", "", null, "hhs"]), ["DSI", "HHS"]);
-  });
-  it("codesInGoals lists codes from active goals", () => {
-    assert.deepEqual(codesInGoals(goals), ["DSI", "HHS"]);
   });
   it("goalLine joins supports", () => {
     assert.equal(goalLine(supportsForCode(goals, "HHS")[0]), "Goal g2 — supports: Support s3");

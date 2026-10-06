@@ -7,7 +7,7 @@ import { nestGoals, type ClientGoal, type ClientPlan, type ClientPlanBundle } fr
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TableSupabase = { from: (table: string) => any };
 
-export const PLAN_COLUMNS =
+const PLAN_COLUMNS =
   "id, client_id, start_date, end_date, activated_on, meeting_date, status, label, source, document_id, created_at";
 export const GOAL_COLUMNS =
   "id, client_id, plan_id, carried_from_goal_id, goal_text, domain, current_status, strengths, barriers, success_person, success_team, sort, status, ended_on";
