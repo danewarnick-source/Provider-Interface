@@ -62,7 +62,12 @@ describe("tableConfig", () => {
     assert.throws(() => tableConfig("clients", "insert"), /Unknown client table/);
   });
   it("rejects ops not allowed on a table", () => {
-    assert.throws(() => tableConfig("client_documents", "delete"), /not allowed/);
+    assert.throws(() => tableConfig("client_progress_summaries", "update"), /not allowed/);
+  });
+  it("allows no deletes on any client table (records are ended or archived)", () => {
+    for (const cfg of Object.values(CLIENT_RECORD_TABLES)) {
+      assert.equal((cfg.ops as readonly string[]).includes("delete"), false);
+    }
   });
   it("maps tables to the right action", () => {
     assert.equal(CLIENT_RECORD_TABLES.client_billing_codes.action, "edit_billing");

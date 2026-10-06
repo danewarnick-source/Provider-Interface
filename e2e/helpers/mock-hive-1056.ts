@@ -7,6 +7,7 @@
  *   - TanStack Start server-fn POSTs (so add/edit 1056 never hits live)
  */
 import { expect, type Page, type Route } from "@playwright/test";
+import { clientServicesPayload } from "./client-services-mock";
 import { toCrossJSONAsync } from "seroval";
 import {
   ADMIN_EMAIL,
@@ -592,9 +593,10 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/saveClientPhysicalAddress/i.test(fn)) {
     return { ok: true, address: "1 Hive Way, Salt Lake City, UT" };
   }
-  if (/addClientBillingCodes/i.test(fn)) {
-    return { ok: true, added: 0 };
+  if (/saveAuthorization|endAuthorization/i.test(fn)) {
+    return { id: "00000000-0000-4000-a000-0000000009a1" };
   }
+  if (/getClientServices/i.test(fn)) return clientServicesPayload();
   if (/createTeamMember/i.test(fn)) {
     return { status: "created", userId: "00000000-0000-4000-a000-000000000499", invited: true };
   }

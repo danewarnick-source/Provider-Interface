@@ -2,15 +2,9 @@
 // says usage should be (share of the authorization year gone by).
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/clients/dates";
-import { OVER_PACE_POINTS, UNITS_LOW_PCT, type CodePace } from "@/lib/clients/readiness";
-
-function barTone(p: CodePace): string {
-  if (p.leftPct <= UNITS_LOW_PCT) return "bg-destructive";
-  if (p.usedPct - p.elapsedPct >= OVER_PACE_POINTS) return "bg-amber-500";
-  return "bg-emerald-500";
-}
+import type { CodePace } from "@/lib/clients/readiness";
+import { UnitsBar } from "../services/units-bar";
 
 export function UnitsCard({ paces, loading }: { paces: CodePace[]; loading: boolean }) {
   return (
@@ -39,19 +33,7 @@ export function UnitsCard({ paces, loading }: { paces: CodePace[]; loading: bool
                       : "No units on file"}
                 </span>
               </div>
-              {p.annual > 0 && !p.pending ? (
-                <div className="relative mt-1 h-2 rounded-full bg-muted" aria-hidden>
-                  <div
-                    className={cn("h-2 rounded-full", barTone(p))}
-                    style={{ width: `${p.usedPct}%` }}
-                  />
-                  <div
-                    className="absolute -top-0.5 h-3 w-0.5 bg-foreground"
-                    style={{ left: `${p.elapsedPct}%` }}
-                    title="Today's pace"
-                  />
-                </div>
-              ) : null}
+              {p.annual > 0 && !p.pending ? <UnitsBar pace={p} /> : null}
               {p.end ? (
                 <p className="mt-0.5 text-[11px] text-muted-foreground">
                   {formatDate(p.start)} – {formatDate(p.end)}

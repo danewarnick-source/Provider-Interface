@@ -145,8 +145,8 @@ test.describe("1056 authorizations — mocked admin", () => {
       "Cancel/unsaved add must not PATCH/POST client_billing_codes",
     ).toBe(before);
     expect(
-      handle.mutatingServerFns.some((fn) => /addClientBillingCodes/i.test(fn)),
-      "AddCodesControl must not call addClientBillingCodes when Add is not clicked",
+      handle.mutatingServerFns.some((fn) => /saveAuthorization|confirm1056/i.test(fn)),
+      "No authorization is saved until Save / Confirm is clicked",
     ).toBe(false);
 
     await gotoAdmin(page, `/dashboard/clients/${CLIENTS.tommy.id}?tab=billing`);
@@ -215,8 +215,6 @@ test.describe("1056 authorizations — mocked admin", () => {
     await expect(page.getByText(/Individual Medicaid ID/i).first()).toBeVisible({
       timeout: 10_000,
     });
-    // BillingCodesDetail is not passed medicaidId from the chart, so the card
-    // value is an em-dash even though Identity has MOCK-TJ-001. Record that.
     const billingCard = page.locator("text=Individual Medicaid ID").first().locator("xpath=../..");
     const billingMedicaidText = ((await billingCard.innerText().catch(() => "")) || "").replace(
       /\s+/g,

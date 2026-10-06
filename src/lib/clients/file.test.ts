@@ -202,7 +202,7 @@ describe("Client file surface lock", () => {
       .map((rel) => readFileSync(new URL(rel, import.meta.url), "utf8"))
       .join("\n");
     assert.match(profile, /Client file/);
-    assert.match(profile, /ClientFileTab/);
+    assert.match(profile, /RequiredDocumentsCard/);
     assert.doesNotMatch(profile, /PersonCenteredProfilePanel/);
     assert.doesNotMatch(profile, /<CardTitle className="text-base">Person-Centered Thinking<\/CardTitle>/);
     assert.doesNotMatch(profile, /<TabsTrigger value="files">Files<\/TabsTrigger>/);

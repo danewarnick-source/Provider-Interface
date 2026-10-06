@@ -67,7 +67,8 @@ export function actionsForClientPatch(
   return [...actions];
 }
 
-export type ClientRecordOp = "insert" | "update" | "upsert" | "delete";
+/** No "delete": client records are ended or archived, never deleted. */
+export type ClientRecordOp = "insert" | "update" | "upsert";
 
 /**
  * How a table's rows tie back to a client:
@@ -111,7 +112,7 @@ export const CLIENT_RECORD_TABLES = {
   hrc_meetings: { action: "edit_hrc", ops: ["insert"], key: "org", hasOrgColumn: true },
   client_billing_codes: {
     action: "edit_billing",
-    ops: ["insert", "update", "upsert", "delete"],
+    ops: ["insert", "update", "upsert"],
     key: "client",
     hasOrgColumn: true,
   },
@@ -123,7 +124,7 @@ export const CLIENT_RECORD_TABLES = {
   },
   client_budget_lines: {
     action: "edit_funds",
-    ops: ["insert", "update", "delete"],
+    ops: ["insert", "update"],
     key: { parent: "client_budgets", fk: "budget_id" },
     hasOrgColumn: false,
   },

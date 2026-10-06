@@ -3,7 +3,7 @@
 // fabricates. Empty fields render as "—".
 //
 // Reused by:
-//   • Download PDF / Print buttons (ClientBudgetPanel)
+//   • Download PDF / Print buttons (profile/services/budget-pdf-bar)
 //   • Ship to client file (uploads the same bytes to client-documents)
 //   • deferred "Email budget" action (will attach the same bytes)
 

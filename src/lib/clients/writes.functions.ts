@@ -104,17 +104,18 @@ const recordSchema = z.object({
   organizationId: z.string().uuid(),
   clientId: z.string().uuid().nullable().optional(),
   table: z.enum(CLIENT_RECORD_TABLE_NAMES as [string, ...string[]]),
-  op: z.enum(["insert", "update", "upsert", "delete"]),
+  op: z.enum(["insert", "update", "upsert"]),
   /** insert/upsert: one row or many. update: the changed columns. */
   values: z.union([patchSchema, z.array(patchSchema)]).optional(),
-  /** update/delete: the row id. */
+  /** update: the row id. */
   id: z.string().uuid().optional(),
   onConflict: z.string().max(200).optional(),
 });
 
 /**
- * Insert/update/upsert/delete on one of the allow-listed client tables
- * (see CLIENT_RECORD_TABLES). Scoping columns are forced from the request.
+ * Insert/update/upsert on one of the allow-listed client tables (see
+ * CLIENT_RECORD_TABLES). Scoping columns are forced from the request.
+ * Client records are never deleted (7-year retention): end or archive them.
  */
 export const writeClientRecord = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -166,12 +167,10 @@ export const writeClientRecord = createServerFn({ method: "POST" })
         const parentId = (existing as Record<string, unknown> | null)?.[fk];
         await assertParentBelongs(sb, cfg, [parentId], organizationId, clientId);
       }
-      const base = sb.from(table);
-      let q =
-        op === "update"
-          ? base.update(stripScopeColumns((data.values as Record<string, unknown>) ?? {}))
-          : base.delete();
-      q = q.eq("id", id);
+      let q = sb
+        .from(table)
+        .update(stripScopeColumns((data.values as Record<string, unknown>) ?? {}))
+        .eq("id", id);
       if (cfg.hasOrgColumn) q = q.eq("organization_id", organizationId);
       if (cfg.key === "client") q = q.eq("client_id", clientId as string);
       result = await q.select("id");

@@ -1,24 +1,17 @@
-// The documents a client's codes add to the Client file: Room and Board
-// (HHS), ELS school documents (under 22), EPR informed choice, SJD
-// assessment and USOR outreach, and the belongings inventory.
+// The documents a client's codes add to the Client file: ELS school
+// documents (under 22), EPR informed choice, and SJD assessment and USOR
+// outreach. Room and board, exams and other required documents are in the
+// Required documents card; the belongings inventory has its own card.
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { isAdminLevel } from "@/lib/access/levels";
 import { ageOn } from "@/lib/clients/dates";
-import { BelongingsInventoryCard } from "@/components/clients/profile/belongings-inventory-card";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
-import {
-  EprInformedChoiceCard,
-  ElsSchoolDocumentationCard,
-  RoomBoardAgreementCard,
-  type DocRow,
-} from "./code-document-cards";
+import { EprInformedChoiceCard, ElsSchoolDocumentationCard, type DocRow } from "./code-document-cards";
 import { SjdAssessmentDocumentationCard } from "./sjd-assessment-card";
 import { SjdUsorOutreachCard } from "./sjd-usor-card";
-
-const BELONGINGS = ["HHS", "RHS", "SLH", "PPS"];
 
 /** Earliest service start date on file for a code. */
 function firstStart(
@@ -34,15 +27,7 @@ function firstStart(
   );
 }
 
-export function CodeDocuments({
-  orgId,
-  data,
-  onOpenFiles,
-}: {
-  orgId: string;
-  data: ClientProfileData;
-  onOpenFiles: () => void;
-}) {
+export function CodeDocuments({ orgId, data }: { orgId: string; data: ClientProfileData }) {
   const { data: org } = useCurrentOrg();
   const clientId = data.client.id;
   const codes = data.codes;
@@ -54,6 +39,7 @@ export function CodeDocuments({
         .select("id, document_type, file_name, storage_path, uploaded_at")
         .eq("organization_id", orgId)
         .eq("client_id", clientId)
+        .is("archived_at", null)
         .order("uploaded_at", { ascending: false });
       if (error) throw error;
       return (rows ?? []) as DocRow[];
@@ -79,9 +65,6 @@ export function CodeDocuments({
 
   return (
     <div className="space-y-4">
-      {codes.includes("HHS") && (
-        <RoomBoardAgreementCard clientId={clientId} docs={docs} onOpenFiles={onOpenFiles} />
-      )}
       {showEls && <ElsSchoolDocumentationCard clientId={clientId} docs={docs} />}
       {codes.includes("EPR") && (
         <EprInformedChoiceCard
@@ -101,9 +84,6 @@ export function CodeDocuments({
           />
           <SjdUsorOutreachCard clientId={clientId} orgId={orgId} />
         </>
-      )}
-      {codes.some((c) => BELONGINGS.includes(c)) && (
-        <BelongingsInventoryCard clientId={clientId} clientName={data.name} />
       )}
     </div>
   );

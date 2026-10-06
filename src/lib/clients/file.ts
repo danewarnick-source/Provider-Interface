@@ -19,6 +19,7 @@ import {
   STRATEGY_DOC_TYPES,
   docsOfType,
   firstEvidence,
+  liveDocs,
   normType,
   type ClientFileDoc,
 } from "./file-docs.ts";
@@ -157,8 +158,8 @@ export function photoExpiresOn(takenOn: string | null | undefined): string | nul
   return `${y + PHOTO_VALID_YEARS}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 
-function clinicalLegalOnFile(facts: ClientFileFacts): boolean {
-  const types = new Set(facts.docs.map((d) => normType(d.document_type)));
+function clinicalLegalOnFile(facts: ClientFileFacts, docs: ClientFileDoc[]): boolean {
+  const types = new Set(docs.map((d) => normType(d.document_type)));
   const needsExams = codesHas(facts.codes, EXAM_CODES);
   if (needsExams && !(types.has("medical_exam") && types.has("dental_exam"))) return false;
   if (facts.isOwnGuardian) return true;
@@ -193,13 +194,15 @@ export function buildClientFileCards(
     });
   };
 
-  const pcspDocs = docsOfType(facts.docs, PCSP_DOC_TYPES);
-  const grievanceDocs = docsOfType(facts.docs, GRIEVANCE_DOC_TYPES);
-  const clinicalDocs = docsOfType(facts.docs, CLINICAL_LEGAL_DOC_TYPES);
-  const rnbDocs = docsOfType(facts.docs, RNB_DOC_TYPES);
-  const leaseDocs = docsOfType(facts.docs, LEASE_DOC_TYPES);
-  const housemateDocs = docsOfType(facts.docs, HOUSEMATE_DOC_TYPES);
-  const strategyDocs = docsOfType(facts.docs, STRATEGY_DOC_TYPES);
+  // Expired documents (past client_documents.expires_on) no longer count.
+  const docs = liveDocs(facts.docs, now.toISOString().slice(0, 10));
+  const pcspDocs = docsOfType(docs, PCSP_DOC_TYPES);
+  const grievanceDocs = docsOfType(docs, GRIEVANCE_DOC_TYPES);
+  const clinicalDocs = docsOfType(docs, CLINICAL_LEGAL_DOC_TYPES);
+  const rnbDocs = docsOfType(docs, RNB_DOC_TYPES);
+  const leaseDocs = docsOfType(docs, LEASE_DOC_TYPES);
+  const housemateDocs = docsOfType(docs, HOUSEMATE_DOC_TYPES);
+  const strategyDocs = docsOfType(docs, STRATEGY_DOC_TYPES);
 
   push(
     "photograph",
@@ -241,7 +244,7 @@ export function buildClientFileCards(
 
   push(
     "clinical_legal",
-    clinicalLegalOnFile(facts),
+    clinicalLegalOnFile(facts, docs),
     null,
     `${profile}?section=file`,
     { ...firstEvidence(clinicalDocs), bucket: "client-documents" },

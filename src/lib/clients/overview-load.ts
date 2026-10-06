@@ -8,7 +8,7 @@ import { computeRestrictionCompletion, type RestrictionRecord } from "./hrc";
 import { isActiveCodeRow, loadActiveCodes } from "./codes";
 import { guardianSatisfied, loadClientContacts } from "./contacts";
 import { todayYmd } from "./dates";
-import { loadOrgClientFileIndex } from "./file.functions";
+import { loadOrgClientFileIndex } from "./file-index";
 import { loadUsage, rows, type AuthRow, type Sb } from "./list-queries";
 import { comingUpItems, lastNotes, type ClientOverview } from "./overview";
 import { loadOverviewTeam } from "./overview-team";
