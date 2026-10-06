@@ -590,7 +590,6 @@ function tableRows(
       has_abi: false,
       home_latitude: null,
       home_longitude: null,
-      pcsp_goals: [],
       medicaid_id: "000111222",
       physical_address: "1 Hive Way, Salt Lake City, UT",
       special_directions: null,

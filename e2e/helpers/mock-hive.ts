@@ -18,6 +18,7 @@ import {
   LAST_SIGN_IN,
   NEW_TEAM_MEMBER,
   ORG_ID,
+  planFixtureRows,
   ORG_NAME,
   PENDING_INVITE,
   PROFILE_ACCOUNT_ACTIVITY,
@@ -196,7 +197,6 @@ function clientRow(c: (typeof CLIENT_LIST)[number]): Row {
     last_name: c.last_name,
     phone_number: null,
     physical_address: null,
-    pcsp_goals: [...c.pcsp_goals],
     home_latitude: null,
     home_longitude: null,
     medicaid_id: c.medicaid_id,
@@ -424,6 +424,10 @@ function tableRows(table: string, opts: MockOptions, personaId: string): Row[] {
     case "home_staff_designations":
     case "client_staffing_ratios":
       return [];
+    case "client_plans":
+    case "client_goals":
+    case "client_goal_supports":
+      return opts.emptyClients ? [] : planFixtureRows(ORG_ID)[table];
     case "daily_logs":
       return opts.emptyLogs ? [] : DAILY_LOGS.map((row) => expandDailyLog(row));
     case "invitations":
@@ -712,7 +716,7 @@ function emptyClientCareData(clientId: string) {
   return {
     identity,
     flags: { self_admin_med_support: false, self_admin_med_support_locked: false },
-    pcsp_training_id: null,
+    plan: null,
     goals: [],
     medications: [],
     authorized_codes: [],

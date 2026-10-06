@@ -170,7 +170,6 @@ function clientRow(c: (typeof CLIENT_LIST)[number]): Row {
     physical_address: "1 Hive Way, Salt Lake City, UT",
     home_latitude: 40.7608,
     home_longitude: -111.891,
-    pcsp_goals: [],
     medicaid_id: c.medicaid_id,
     account_status: "active",
     geofence_radius_feet: 500,
@@ -537,7 +536,7 @@ function emptyClientCareData(clientId: string) {
   return {
     identity,
     flags: { self_admin_med_support: false, self_admin_med_support_locked: false },
-    pcsp_training_id: null,
+    plan: null,
     goals: [],
     medications: [],
     authorized_codes: [],

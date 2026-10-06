@@ -151,7 +151,6 @@ function clientRow() {
     last_name: "Lee",
     home_latitude: 40.7608,
     home_longitude: -111.891,
-    pcsp_goals: ["Stay safe in the community"],
     medicaid_id: "000123456789",
     physical_address: "123 Test St, Salt Lake City, UT",
     geofence_radius_feet: 500,
