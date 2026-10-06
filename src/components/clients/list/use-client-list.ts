@@ -3,7 +3,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { listClients } from "@/lib/clients/list.functions";
-import { updateClient } from "@/lib/clients/writes.functions";
+import { reactivateClient } from "@/lib/clients/discharge.functions";
 import type { ListFilters } from "@/lib/clients/list";
 
 function useDebounced<T>(value: T, ms: number): T {
@@ -38,12 +38,10 @@ export function useClientList(organizationId: string | undefined, filters: ListF
       }),
   });
 
-  const updateClientFn = useServerFn(updateClient);
+  const reactivateFn = useServerFn(reactivateClient);
   const reactivate = useMutation({
     mutationFn: async (clientId: string) => {
-      await updateClientFn({
-        data: { organizationId: organizationId!, clientId, patch: { account_status: "active" } },
-      });
+      await reactivateFn({ data: { organizationId: organizationId!, clientId } });
       return clientId;
     },
     onSuccess: () => {

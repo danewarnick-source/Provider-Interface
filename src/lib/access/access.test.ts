@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { diffOverrides, effectiveCategories, hasCategory, hasPermission } from "./can.ts";
+import {
+  diffOverrides,
+  effectiveCategories,
+  hasCategory,
+  hasPermission,
+  viewOnlyCategories,
+} from "./can.ts";
 import { CATEGORIES, CATEGORY_IDS } from "./categories.ts";
 import { isAgencyAdmin, isLevelAtLeast } from "./levels.ts";
 import { resolveMemberAccess } from "./member.ts";
@@ -48,6 +54,13 @@ describe("hasPermission", () => {
     const owner = effectiveCategories({ level: "owner" });
     assert.equal(hasPermission(owner, "not_a_key"), false);
     assert.equal(hasPermission(owner, "manage_all_orgs"), false);
+  });
+
+  it("view-only categories keep View and drop Edit", () => {
+    const ro = viewOnlyCategories(effectiveCategories({ level: "owner" }));
+    assert.equal(hasCategory(ro, "clients", "view"), true);
+    assert.equal(hasCategory(ro, "clients", "edit"), false);
+    assert.equal(hasPermission(ro, "edit_client_records"), false);
   });
 
   it("maps every permission key to a real category or null", () => {

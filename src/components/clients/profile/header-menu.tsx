@@ -1,24 +1,20 @@
 // ⋯ menu on the client profile header: Face sheet PDF, Update from a
-// document, Discharge, Reactivate. Discharge here only records the date and
-// moves the client to Discharged (records are kept; the guided discharge
-// flow replaces this in a later step).
+// document, Discharge (the guided flow in ./discharge/), Reactivate.
 
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,11 +22,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAccess } from "@/hooks/use-access";
-import { todayYmd } from "@/lib/clients/dates";
-import { updateClient } from "@/lib/clients/writes.functions";
 import { UpdateFromDocumentDialog } from "@/components/clients/dialogs/update-from-document-dialog";
 import { useOpenFaceSheet } from "./face-sheet-button";
 import type { ClientProfileData } from "./use-client-profile";
+import { DischargeDialog } from "./discharge/discharge-dialog";
+import { useDischargeWrites } from "./discharge/use-discharge";
 
 export function HeaderMenu({
   orgId,
@@ -46,28 +42,13 @@ export function HeaderMenu({
   const { canCategory } = useAccess();
   const clientId = data.client.id;
   const faceSheet = useOpenFaceSheet(clientId);
-  const updateFn = useServerFn(updateClient);
   const [updating, setUpdating] = useState(false);
   const [discharging, setDischarging] = useState(false);
-  const [date, setDate] = useState(todayYmd());
+  const [reactivating, setReactivating] = useState(false);
+  const { reactivate } = useDischargeWrites(orgId, clientId, onChanged);
 
   const canMedical = canCategory("client_medical");
   const canEdit = canCategory("clients", "edit");
-
-  const status = useMutation({
-    mutationFn: (patch: Record<string, unknown>) =>
-      updateFn({ data: { organizationId: orgId, clientId, patch } }),
-    onSuccess: (_r, patch) => {
-      toast.success(
-        patch.account_status === "active"
-          ? `${data.name} is active again.`
-          : `${data.name} is discharged. The record is kept.`,
-      );
-      setDischarging(false);
-      onChanged();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   if (!canMedical && !canEdit) return null;
 
@@ -90,7 +71,7 @@ export function HeaderMenu({
               {faceSheet.busy ? "Building face sheet…" : "Face sheet PDF"}
             </DropdownMenuItem>
           ) : null}
-          {canEdit ? (
+          {canEdit && !discharged ? (
             <DropdownMenuItem onSelect={() => setUpdating(true)}>
               Update from a document
             </DropdownMenuItem>
@@ -98,18 +79,16 @@ export function HeaderMenu({
           {canEdit && !discharged ? (
             <DropdownMenuItem
               className="text-destructive"
-              onSelect={() => {
-                setDate(todayYmd());
-                setDischarging(true);
-              }}
+              onSelect={() => setDischarging(true)}
+              data-testid="client-profile-discharge"
             >
               Discharge
             </DropdownMenuItem>
           ) : null}
           {canEdit && discharged ? (
             <DropdownMenuItem
-              disabled={status.isPending}
-              onSelect={() => status.mutate({ account_status: "active", discharge_date: null })}
+              onSelect={() => setReactivating(true)}
+              data-testid="client-profile-reactivate"
             >
               Reactivate
             </DropdownMenuItem>
@@ -125,38 +104,42 @@ export function HeaderMenu({
         onApplied={onChanged}
       />
 
-      <Dialog open={discharging} onOpenChange={setDischarging}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Discharge {data.name}?</DialogTitle>
-            <DialogDescription>
-              They move to the Discharged list. Nothing is deleted: Medicaid requires client records
-              be kept for 7 years. You can reactivate them later.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-1">
-            <Label htmlFor="discharge-date">Discharge date</Label>
-            <Input
-              id="discharge-date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDischarging(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={!date || status.isPending}
-              onClick={() => status.mutate({ account_status: "archived", discharge_date: date })}
+      <DischargeDialog
+        open={discharging}
+        onOpenChange={setDischarging}
+        orgId={orgId}
+        clientId={clientId}
+        name={data.name}
+        onChanged={onChanged}
+      />
+
+      <AlertDialog open={reactivating} onOpenChange={setReactivating}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reactivate {data.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              They move back to the active list and their record can be changed again. The discharge
+              stays on file, and ended authorizations, cancelled shifts and the old team aren't
+              brought back: add them again as needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={reactivate.isPending}
+              onClick={() =>
+                reactivate.mutate(undefined, {
+                  onSuccess: () => toast.success(`${data.name} is active again.`),
+                  onError: (e: Error) => toast.error(e.message),
+                })
+              }
+              data-testid="client-reactivate-confirm"
             >
-              {status.isPending ? "Saving…" : "Discharge"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              Reactivate
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

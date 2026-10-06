@@ -4,6 +4,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireCategory } from "@/lib/access/require";
+import { DISCHARGED_STATUSES } from "./list";
 import { friendlyGuardError, runManageClientGuard, type ManageClientAction } from "./guards";
 
 export type { ManageClientAction } from "./guards";
@@ -27,15 +28,22 @@ export async function assertCanManageClient(args: {
           const access = await requireCategory(supabase, actorId, organizationId, category, min);
           return { level: access.level, scope: access.scope };
         },
-        loadClientOrg: async (id) => {
+        loadClient: async (id) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { data, error } = await (supabase as any)
             .from("clients")
-            .select("organization_id")
+            .select("organization_id, account_status")
             .eq("id", id)
             .maybeSingle();
           if (error) throw new Error(error.message);
-          return (data as { organization_id: string } | null)?.organization_id ?? null;
+          const row = data as { organization_id: string; account_status: string | null } | null;
+          if (!row) return null;
+          return {
+            organizationId: row.organization_id,
+            discharged: (DISCHARGED_STATUSES as readonly string[]).includes(
+              row.account_status ?? "",
+            ),
+          };
         },
         canSeeClient: async (id) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
