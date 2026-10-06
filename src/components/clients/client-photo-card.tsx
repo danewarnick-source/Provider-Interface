@@ -7,6 +7,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { Card, CardContent } from "@/components/ui/card";
 import { Camera } from "lucide-react";
 import { PhotoUpload } from "@/components/person/photo-upload";
+import { localYmd } from "@/lib/local-date";
 
 export function ClientPhotoCard({ clientId }: { clientId: string }) {
   const qc = useQueryClient();
@@ -69,7 +70,7 @@ export function ClientPhotoCard({ clientId }: { clientId: string }) {
             onUploaded={async (path) => {
               await persist.mutateAsync({
                 client_photo_url: path,
-                client_photo_taken_on: new Date().toISOString().slice(0, 10),
+                client_photo_taken_on: localYmd(),
               });
             }}
             onCleared={async () => {

@@ -25,6 +25,7 @@ import {
   discardClientBelonging,
   type ClientBelongingRow,
 } from "@/lib/client-belongings.functions";
+import { localYmd } from "@/lib/local-date";
 
 function fmtDate(d: string | null): string {
   if (!d) return "—";
@@ -207,7 +208,7 @@ function AddItemDialog({
   const [itemName, setItemName] = useState("");
   const [description, setDescription] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("");
-  const [inventoriedOn, setInventoriedOn] = useState(new Date().toISOString().slice(0, 10));
+  const [inventoriedOn, setInventoriedOn] = useState(localYmd());
   const value = Number(estimatedValue) || 0;
 
   return (
@@ -264,7 +265,7 @@ function DiscardDialog({
   onSubmit: (v: { discardReason: string; discardedOn: string; signature: string | null }) => void;
 }) {
   const [discardReason, setDiscardReason] = useState("");
-  const [discardedOn, setDiscardedOn] = useState(new Date().toISOString().slice(0, 10));
+  const [discardedOn, setDiscardedOn] = useState(localYmd());
   const [signature, setSignature] = useState<string | null>(null);
   const needsSignature = (row?.estimated_value ?? 0) >= 50;
 

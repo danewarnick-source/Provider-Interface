@@ -27,6 +27,7 @@ import {
   upsertClientIntakeCompletion,
 } from "@/lib/client-hr.functions";
 import { ClientDocumentsCard } from "@/components/clients/client-documents-card";
+import { localYmd } from "@/lib/local-date";
 
 const STATUSES = [
   "not_started",
@@ -94,7 +95,7 @@ export function ClientIntakeChecklistCard({
           status: v.status,
           completed_date:
             v.status === "complete"
-              ? new Date().toISOString().slice(0, 10)
+              ? localYmd()
               : null,
           evidence_document_id: v.evidence_document_id ?? null,
         },

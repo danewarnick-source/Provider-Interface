@@ -60,6 +60,7 @@ import {
 } from "@/lib/client-profile-fields";
 import { CaseloadEditor } from "@/components/clients/caseload-editor";
 import { NectarAsk } from "@/components/clients/nectar-ask";
+import { localYmd } from "@/lib/local-date";
 
 export type BillingCodeRow = {
   id: string;
@@ -938,7 +939,7 @@ function GrievanceRow({
   passing: boolean;
   onChanged: () => void;
 }) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localYmd();
   const [acked, setAcked] = useState(initial.acknowledged);
   const [date, setDate] = useState(initial.date || today);
   const saveFn = useServerFn(setGrievanceAcknowledgment);

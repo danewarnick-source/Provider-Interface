@@ -56,6 +56,7 @@ import {
 } from "@/lib/billing-budget-parse.functions";
 import { getAuthStatus, AuthStatusBadge } from "@/lib/billing-auth-status";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { localYmd } from "@/lib/local-date";
 
 type Draft = { annual: string; rate: string; endDate: string };
 function draftFromCode(c: { annual_unit_authorization: number | null; rate_per_unit: number | null; service_end_date: string | null }): Draft {
@@ -836,7 +837,7 @@ function CodeRow({
             variant="ghost"
             onClick={() => {
               if (usedUnits > 0 && !endDateDraft)
-                setEndDateDraft(code.service_end_date ?? new Date().toISOString().slice(0, 10));
+                setEndDateDraft(code.service_end_date ?? localYmd());
               setConfirmDelete(true);
             }}
             className="h-7 gap-1 px-2 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
