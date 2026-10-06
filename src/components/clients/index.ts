@@ -7,7 +7,6 @@ export * from './client-compliance-panel';
 export * from './client-documents-card';
 export * from './client-file-tab';
 export * from './client-intake-checklist-card';
-export * from './client-meal-planner-panel';
 export * from './client-photo-card';
 export * from './client-readiness-card';
 export * from './client-specific-training-card';
