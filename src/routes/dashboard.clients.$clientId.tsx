@@ -5,7 +5,7 @@
 // new tables, no business-logic changes, no billing math, no EVV CSV.
 //
 // Tabs: Overview / Plan & goals / Billing codes / Shifts / Daily logs /
-// Incidents / Summaries / Host-home cert / Deadlines / Documents.
+// Incidents / Summaries / Host-home cert / Documents.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
@@ -68,12 +68,10 @@ import { HomePinCard } from "@/components/clients/home-pin-card";
 import { FaceSheetButton } from "@/components/clients/face-sheet-button";
 import {
   SectionsView,
-  ClientSpecificTrainingCard,
   GoalsEditor,
   PublishConfirmDialog,
 } from "@/components/clients/client-specific-training-card";
 import { FieldVisibilityToggle } from "@/components/clients/visibility-toggles";
-import { CodeAssignedStaff } from "@/components/clients/code-assigned-staff";
 import { CustomFieldsForSection } from "@/components/clients/custom-fields-panel";
 import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/hrc-restrictions";
 import { Scale } from "lucide-react";
@@ -210,36 +208,6 @@ function resolveTab(raw: string | undefined): ProfileTab {
   if (raw === "funds" || raw === "codes") return "billing";
   if (raw === "documents" || raw === "pcsp" || raw === "client-file") return "files";
   return "identity";
-}
-
-function CollapsibleSimpleCard({
-  title,
-  children,
-  defaultOpen = false,
-}: {
-  title: string;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-label={open ? "Collapse" : "Expand"}
-            className="rounded p-1 hover:bg-muted"
-          >
-            {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </button>
-          <CardTitle className="text-base">{title}</CardTitle>
-        </div>
-      </CardHeader>
-      {open && <CardContent>{children}</CardContent>}
-    </Card>
-  );
 }
 
 function ClientProfileHub() {
@@ -518,7 +486,7 @@ function ClientProfileHub() {
 
         {/* COMPLIANCE — summaries, host-home certifications, deadlines. */}
         <TabsContent value="compliance" className="space-y-10">
-          <SectionGroup label="Reporting & deadlines" hint="Summaries and upcoming due dates">
+          <SectionGroup label="Reporting" hint="Summaries and certifications">
             <SectionPanel icon={ClipboardList} accent="violet">
               <SummariesPanel clientId={clientId} orgId={orgId} client={client} />
             </SectionPanel>
@@ -527,9 +495,6 @@ function ClientProfileHub() {
                 <HostHomeCertPanel clientId={clientId} orgId={orgId} />
               </SectionPanel>
             )}
-            <SectionPanel icon={CalendarClock} accent="amber">
-              <DeadlinesPanel clientId={clientId} />
-            </SectionPanel>
             {canHrc && (
               <SectionPanel icon={Scale} accent="rose">
                 <RightsRestrictionsPanel clientId={clientId} />
@@ -2166,22 +2131,6 @@ function RightsRestrictionsPanel({ clientId }: { clientId: string }) {
           </Link>
           .
         </p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function DeadlinesPanel({ clientId }: { clientId: string }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Action required</CardTitle>
-      </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">
-        Urgent compliance items for this client are tracked on the Client file.{" "}
-        <Link className="underline" to="/dashboard/compliance" search={{ tab: "client" }}>
-          Open Client file →
-        </Link>
       </CardContent>
     </Card>
   );
