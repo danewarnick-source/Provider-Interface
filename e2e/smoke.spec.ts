@@ -48,7 +48,6 @@ const STATIC_ROUTES: string[] = [
   "/dashboard/assignments",
   "/dashboard/audit",
   "/dashboard/authoritative-sources",
-  "/dashboard/client-billing-codes",
   "/dashboard/client-loans",
   "/dashboard/command-center",
   "/dashboard/compliance-desk",
@@ -89,7 +88,6 @@ const STATIC_ROUTES: string[] = [
 
   // Clients
   "/dashboard/clients",
-  "/dashboard/clients/rhs-board",
 
   // Team Members
   "/dashboard/team-members",

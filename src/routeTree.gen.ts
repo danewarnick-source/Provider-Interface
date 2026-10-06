@@ -45,7 +45,6 @@ import { Route as DashboardAssignmentsRouteImport } from './routes/dashboard.ass
 import { Route as DashboardAuditRouteImport } from './routes/dashboard.audit'
 import { Route as DashboardAuthoritativeSourcesRouteImport } from './routes/dashboard.authoritative-sources'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard.billing'
-import { Route as DashboardClientBillingCodesRouteImport } from './routes/dashboard.client-billing-codes'
 import { Route as DashboardClientFileRouteImport } from './routes/dashboard.client-file'
 import { Route as DashboardClientLoansRouteImport } from './routes/dashboard.client-loans'
 import { Route as DashboardClientsRouteImport } from './routes/dashboard.clients'
@@ -72,7 +71,6 @@ import { Route as DashboardHrcRouteImport } from './routes/dashboard.hrc'
 import { Route as DashboardInboxRouteImport } from './routes/dashboard.inbox'
 import { Route as DashboardInternalAuditRouteImport } from './routes/dashboard.internal-audit'
 import { Route as DashboardInvitationsRouteImport } from './routes/dashboard.invitations'
-import { Route as DashboardMyClientTrainingsRouteImport } from './routes/dashboard.my-client-trainings'
 import { Route as DashboardMyEvidenceRouteImport } from './routes/dashboard.my-evidence'
 import { Route as DashboardMyHistoricalDailyNotesRouteImport } from './routes/dashboard.my-historical-daily-notes'
 import { Route as DashboardMyHistoricalRecordsRouteImport } from './routes/dashboard.my-historical-records'
@@ -118,7 +116,6 @@ import { Route as DashboardClientsIndexRouteImport } from './routes/dashboard.cl
 import { Route as DashboardClientsClientIdRouteImport } from './routes/dashboard.clients.$clientId'
 import { Route as DashboardClientsNewRouteImport } from './routes/dashboard.clients.new'
 import { Route as DashboardClientsPendingRouteImport } from './routes/dashboard.clients.pending'
-import { Route as DashboardClientsRhsBoardRouteImport } from './routes/dashboard.clients.rhs-board'
 import { Route as DashboardEmployeesIndexRouteImport } from './routes/dashboard.employees.index'
 import { Route as DashboardEmployeesStaffIdRouteImport } from './routes/dashboard.employees.$staffId'
 import { Route as DashboardEmployeesHireDatesRouteImport } from './routes/dashboard.employees.hire-dates'
@@ -388,12 +385,6 @@ const DashboardBillingRoute = DashboardBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardClientBillingCodesRoute =
-  DashboardClientBillingCodesRouteImport.update({
-    id: '/client-billing-codes',
-    path: '/client-billing-codes',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardClientFileRoute = DashboardClientFileRouteImport.update({
   id: '/client-file',
   path: '/client-file',
@@ -528,12 +519,6 @@ const DashboardInvitationsRoute = DashboardInvitationsRouteImport.update({
   path: '/invitations',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardMyClientTrainingsRoute =
-  DashboardMyClientTrainingsRouteImport.update({
-    id: '/my-client-trainings',
-    path: '/my-client-trainings',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardMyEvidenceRoute = DashboardMyEvidenceRouteImport.update({
   id: '/my-evidence',
   path: '/my-evidence',
@@ -770,12 +755,6 @@ const DashboardClientsPendingRoute = DashboardClientsPendingRouteImport.update({
   path: '/pending',
   getParentRoute: () => DashboardClientsRoute,
 } as any)
-const DashboardClientsRhsBoardRoute =
-  DashboardClientsRhsBoardRouteImport.update({
-    id: '/rhs-board',
-    path: '/rhs-board',
-    getParentRoute: () => DashboardClientsRoute,
-  } as any)
 const DashboardEmployeesIndexRoute = DashboardEmployeesIndexRouteImport.update({
   id: '/employees/',
   path: '/employees/',
@@ -1304,7 +1283,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/audit': typeof DashboardAuditRoute
   '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
   '/dashboard/billing': typeof DashboardBillingRouteWithChildren
-  '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
   '/dashboard/client-file': typeof DashboardClientFileRoute
   '/dashboard/client-loans': typeof DashboardClientLoansRoute
   '/dashboard/clients': typeof DashboardClientsRouteWithChildren
@@ -1331,7 +1309,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/inbox': typeof DashboardInboxRoute
   '/dashboard/internal-audit': typeof DashboardInternalAuditRoute
   '/dashboard/invitations': typeof DashboardInvitationsRoute
-  '/dashboard/my-client-trainings': typeof DashboardMyClientTrainingsRoute
   '/dashboard/my-evidence': typeof DashboardMyEvidenceRoute
   '/dashboard/my-historical-daily-notes': typeof DashboardMyHistoricalDailyNotesRoute
   '/dashboard/my-historical-records': typeof DashboardMyHistoricalRecordsRoute
@@ -1378,7 +1355,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
   '/dashboard/clients/new': typeof DashboardClientsNewRoute
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
-  '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
   '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
@@ -1498,7 +1474,6 @@ export interface FileRoutesByTo {
   '/dashboard/assignments': typeof DashboardAssignmentsRoute
   '/dashboard/audit': typeof DashboardAuditRoute
   '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
-  '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
   '/dashboard/client-file': typeof DashboardClientFileRoute
   '/dashboard/client-loans': typeof DashboardClientLoansRoute
   '/dashboard/command-center': typeof DashboardCommandCenterRoute
@@ -1521,7 +1496,6 @@ export interface FileRoutesByTo {
   '/dashboard/inbox': typeof DashboardInboxRoute
   '/dashboard/internal-audit': typeof DashboardInternalAuditRoute
   '/dashboard/invitations': typeof DashboardInvitationsRoute
-  '/dashboard/my-client-trainings': typeof DashboardMyClientTrainingsRoute
   '/dashboard/my-evidence': typeof DashboardMyEvidenceRoute
   '/dashboard/my-historical-daily-notes': typeof DashboardMyHistoricalDailyNotesRoute
   '/dashboard/my-historical-records': typeof DashboardMyHistoricalRecordsRoute
@@ -1567,7 +1541,6 @@ export interface FileRoutesByTo {
   '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
   '/dashboard/clients/new': typeof DashboardClientsNewRoute
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
-  '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
   '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
@@ -1692,7 +1665,6 @@ export interface FileRoutesById {
   '/dashboard/audit': typeof DashboardAuditRoute
   '/dashboard/authoritative-sources': typeof DashboardAuthoritativeSourcesRoute
   '/dashboard/billing': typeof DashboardBillingRouteWithChildren
-  '/dashboard/client-billing-codes': typeof DashboardClientBillingCodesRoute
   '/dashboard/client-file': typeof DashboardClientFileRoute
   '/dashboard/client-loans': typeof DashboardClientLoansRoute
   '/dashboard/clients': typeof DashboardClientsRouteWithChildren
@@ -1719,7 +1691,6 @@ export interface FileRoutesById {
   '/dashboard/inbox': typeof DashboardInboxRoute
   '/dashboard/internal-audit': typeof DashboardInternalAuditRoute
   '/dashboard/invitations': typeof DashboardInvitationsRoute
-  '/dashboard/my-client-trainings': typeof DashboardMyClientTrainingsRoute
   '/dashboard/my-evidence': typeof DashboardMyEvidenceRoute
   '/dashboard/my-historical-daily-notes': typeof DashboardMyHistoricalDailyNotesRoute
   '/dashboard/my-historical-records': typeof DashboardMyHistoricalRecordsRoute
@@ -1766,7 +1737,6 @@ export interface FileRoutesById {
   '/dashboard/clients/$clientId': typeof DashboardClientsClientIdRoute
   '/dashboard/clients/new': typeof DashboardClientsNewRoute
   '/dashboard/clients/pending': typeof DashboardClientsPendingRoute
-  '/dashboard/clients/rhs-board': typeof DashboardClientsRhsBoardRoute
   '/dashboard/employees/$staffId': typeof DashboardEmployeesStaffIdRoute
   '/dashboard/employees/hire-dates': typeof DashboardEmployeesHireDatesRoute
   '/dashboard/employees/new': typeof DashboardEmployeesNewRoute
@@ -1892,7 +1862,6 @@ export interface FileRouteTypes {
     | '/dashboard/audit'
     | '/dashboard/authoritative-sources'
     | '/dashboard/billing'
-    | '/dashboard/client-billing-codes'
     | '/dashboard/client-file'
     | '/dashboard/client-loans'
     | '/dashboard/clients'
@@ -1919,7 +1888,6 @@ export interface FileRouteTypes {
     | '/dashboard/inbox'
     | '/dashboard/internal-audit'
     | '/dashboard/invitations'
-    | '/dashboard/my-client-trainings'
     | '/dashboard/my-evidence'
     | '/dashboard/my-historical-daily-notes'
     | '/dashboard/my-historical-records'
@@ -1966,7 +1934,6 @@ export interface FileRouteTypes {
     | '/dashboard/clients/$clientId'
     | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
-    | '/dashboard/clients/rhs-board'
     | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
     | '/dashboard/employees/new'
@@ -2086,7 +2053,6 @@ export interface FileRouteTypes {
     | '/dashboard/assignments'
     | '/dashboard/audit'
     | '/dashboard/authoritative-sources'
-    | '/dashboard/client-billing-codes'
     | '/dashboard/client-file'
     | '/dashboard/client-loans'
     | '/dashboard/command-center'
@@ -2109,7 +2075,6 @@ export interface FileRouteTypes {
     | '/dashboard/inbox'
     | '/dashboard/internal-audit'
     | '/dashboard/invitations'
-    | '/dashboard/my-client-trainings'
     | '/dashboard/my-evidence'
     | '/dashboard/my-historical-daily-notes'
     | '/dashboard/my-historical-records'
@@ -2155,7 +2120,6 @@ export interface FileRouteTypes {
     | '/dashboard/clients/$clientId'
     | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
-    | '/dashboard/clients/rhs-board'
     | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
     | '/dashboard/employees/new'
@@ -2279,7 +2243,6 @@ export interface FileRouteTypes {
     | '/dashboard/audit'
     | '/dashboard/authoritative-sources'
     | '/dashboard/billing'
-    | '/dashboard/client-billing-codes'
     | '/dashboard/client-file'
     | '/dashboard/client-loans'
     | '/dashboard/clients'
@@ -2306,7 +2269,6 @@ export interface FileRouteTypes {
     | '/dashboard/inbox'
     | '/dashboard/internal-audit'
     | '/dashboard/invitations'
-    | '/dashboard/my-client-trainings'
     | '/dashboard/my-evidence'
     | '/dashboard/my-historical-daily-notes'
     | '/dashboard/my-historical-records'
@@ -2353,7 +2315,6 @@ export interface FileRouteTypes {
     | '/dashboard/clients/$clientId'
     | '/dashboard/clients/new'
     | '/dashboard/clients/pending'
-    | '/dashboard/clients/rhs-board'
     | '/dashboard/employees/$staffId'
     | '/dashboard/employees/hire-dates'
     | '/dashboard/employees/new'
@@ -2742,13 +2703,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBillingRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/client-billing-codes': {
-      id: '/dashboard/client-billing-codes'
-      path: '/client-billing-codes'
-      fullPath: '/dashboard/client-billing-codes'
-      preLoaderRoute: typeof DashboardClientBillingCodesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/client-file': {
       id: '/dashboard/client-file'
       path: '/client-file'
@@ -2929,13 +2883,6 @@ declare module '@tanstack/react-router' {
       path: '/invitations'
       fullPath: '/dashboard/invitations'
       preLoaderRoute: typeof DashboardInvitationsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/my-client-trainings': {
-      id: '/dashboard/my-client-trainings'
-      path: '/my-client-trainings'
-      fullPath: '/dashboard/my-client-trainings'
-      preLoaderRoute: typeof DashboardMyClientTrainingsRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/my-evidence': {
@@ -3251,13 +3198,6 @@ declare module '@tanstack/react-router' {
       path: '/pending'
       fullPath: '/dashboard/clients/pending'
       preLoaderRoute: typeof DashboardClientsPendingRouteImport
-      parentRoute: typeof DashboardClientsRoute
-    }
-    '/dashboard/clients/rhs-board': {
-      id: '/dashboard/clients/rhs-board'
-      path: '/rhs-board'
-      fullPath: '/dashboard/clients/rhs-board'
-      preLoaderRoute: typeof DashboardClientsRhsBoardRouteImport
       parentRoute: typeof DashboardClientsRoute
     }
     '/dashboard/employees/': {
@@ -3903,7 +3843,6 @@ interface DashboardClientsRouteChildren {
   DashboardClientsClientIdRoute: typeof DashboardClientsClientIdRoute
   DashboardClientsNewRoute: typeof DashboardClientsNewRoute
   DashboardClientsPendingRoute: typeof DashboardClientsPendingRoute
-  DashboardClientsRhsBoardRoute: typeof DashboardClientsRhsBoardRoute
   DashboardClientsIndexRoute: typeof DashboardClientsIndexRoute
 }
 
@@ -3911,7 +3850,6 @@ const DashboardClientsRouteChildren: DashboardClientsRouteChildren = {
   DashboardClientsClientIdRoute: DashboardClientsClientIdRoute,
   DashboardClientsNewRoute: DashboardClientsNewRoute,
   DashboardClientsPendingRoute: DashboardClientsPendingRoute,
-  DashboardClientsRhsBoardRoute: DashboardClientsRhsBoardRoute,
   DashboardClientsIndexRoute: DashboardClientsIndexRoute,
 }
 
@@ -4151,7 +4089,6 @@ interface DashboardRouteChildren {
   DashboardAuditRoute: typeof DashboardAuditRoute
   DashboardAuthoritativeSourcesRoute: typeof DashboardAuthoritativeSourcesRoute
   DashboardBillingRoute: typeof DashboardBillingRouteWithChildren
-  DashboardClientBillingCodesRoute: typeof DashboardClientBillingCodesRoute
   DashboardClientFileRoute: typeof DashboardClientFileRoute
   DashboardClientLoansRoute: typeof DashboardClientLoansRoute
   DashboardClientsRoute: typeof DashboardClientsRouteWithChildren
@@ -4178,7 +4115,6 @@ interface DashboardRouteChildren {
   DashboardInboxRoute: typeof DashboardInboxRoute
   DashboardInternalAuditRoute: typeof DashboardInternalAuditRoute
   DashboardInvitationsRoute: typeof DashboardInvitationsRoute
-  DashboardMyClientTrainingsRoute: typeof DashboardMyClientTrainingsRoute
   DashboardMyEvidenceRoute: typeof DashboardMyEvidenceRoute
   DashboardMyHistoricalDailyNotesRoute: typeof DashboardMyHistoricalDailyNotesRoute
   DashboardMyHistoricalRecordsRoute: typeof DashboardMyHistoricalRecordsRoute
@@ -4235,7 +4171,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAuditRoute: DashboardAuditRoute,
   DashboardAuthoritativeSourcesRoute: DashboardAuthoritativeSourcesRoute,
   DashboardBillingRoute: DashboardBillingRouteWithChildren,
-  DashboardClientBillingCodesRoute: DashboardClientBillingCodesRoute,
   DashboardClientFileRoute: DashboardClientFileRoute,
   DashboardClientLoansRoute: DashboardClientLoansRoute,
   DashboardClientsRoute: DashboardClientsRouteWithChildren,
@@ -4263,7 +4198,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardInboxRoute: DashboardInboxRoute,
   DashboardInternalAuditRoute: DashboardInternalAuditRoute,
   DashboardInvitationsRoute: DashboardInvitationsRoute,
-  DashboardMyClientTrainingsRoute: DashboardMyClientTrainingsRoute,
   DashboardMyEvidenceRoute: DashboardMyEvidenceRoute,
   DashboardMyHistoricalDailyNotesRoute: DashboardMyHistoricalDailyNotesRoute,
   DashboardMyHistoricalRecordsRoute: DashboardMyHistoricalRecordsRoute,
