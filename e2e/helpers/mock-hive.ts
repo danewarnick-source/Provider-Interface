@@ -39,6 +39,7 @@ import type { AgencySetupFacts } from "../../src/lib/agency-setup-completion";
 import { emptyOrgScopeSnapshot } from "../../src/lib/obligations/scope";
 import { levelForRole, withAccessLevel } from "./access-level";
 import { isPcspServerFn, pcspServerFnPayload } from "./pcsp-mock";
+import { addClientPayload, listClientsPayload } from "./clients-list-mock";
 import { staffClientReadiness } from "../../src/lib/team-members/readiness";
 import { buildMemberOverview } from "../../src/lib/team-members/overview";
 
@@ -994,7 +995,10 @@ function serverFnPayload(url: string, body: string): unknown {
   const fnBlob = `${fn}\n${url}\n${body}`;
   // Client writes (src/lib/clients/writes.functions.ts) — echo a made-up id.
   if (/^updateClient$/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c1" };
-  if (/^createClient$/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c2" };
+  // Client list + Add client (src/lib/clients/list.functions.ts, create.functions.ts).
+  if (/^listClients/.test(fn)) return listClientsPayload(body, activeMockOpts);
+  const addPayload = addClientPayload(fn, body);
+  if (addPayload !== undefined) return addPayload;
   if (/^writeClientRecord$/.test(fn)) return { ids: ["00000000-0000-4000-a000-0000000000c3"] };
   // PCSP import (src/lib/clients/pcsp/import.functions.ts).
   const pcsp = /readPcsp/.test(fn) ? "readPcsp" : /confirmPcsp/.test(fn) ? "confirmPcsp" : isPcspServerFn(body);
@@ -1277,7 +1281,7 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/getClientSpecificTraining|getSupportStrategies/i.test(fn)) {
     return { training: null };
   }
-  if (/getClientIntakeChecklist|getUiDismissals/i.test(fn)) return [];
+  if (/getUiDismissals/i.test(fn)) return [];
   // Arrays: obligations, instances, lists. Safer default than an object
   // so dashboard `.map()` / `for...of` calls don't crash the shell.
   if (
@@ -1499,6 +1503,10 @@ async function handleServerFn(route: Route) {
     return;
   }
   const body = req.postData() ?? req.url();
+  if (activeMockOpts.clientsError && /^listClients/.test(inferServerFn(req.url(), body))) {
+    await route.fulfill({ status: 500, contentType: "text/plain", body: "Mocked clients read failure" });
+    return;
+  }
   const payload = serverFnPayload(req.url(), body);
   const serialized = await toCrossJSONAsync({ result: payload });
   await route.fulfill({

@@ -701,7 +701,7 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/getClientSpecificTraining|getSupportStrategies/i.test(fn)) {
     return { training: null };
   }
-  if (/getClientIntakeChecklist|getUiDismissals/i.test(fn)) return [];
+  if (/getUiDismissals/i.test(fn)) return [];
   // Arrays: obligations, instances, lists. Safer default than an object
   // so dashboard `.map()` / `for...of` calls don't crash the shell.
   if (
