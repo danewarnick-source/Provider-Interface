@@ -10,9 +10,10 @@ import {
   checkAnswerRelevance,
   type CSTContent,
   type CSTReviewQuestion,
-  type CSTGoal,
 } from "@/lib/clients/training.functions";
-import { SectionsView, GoalsView } from "@/components/clients/profile/client-specific-training-card";
+import { SectionsView } from "@/components/clients/profile/client-specific-training-card";
+import { GoalTree } from "@/components/clients/profile/plans/goal-tree";
+import type { GoalView } from "@/lib/clients/plans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -195,7 +196,7 @@ function ClientTrainingViewer() {
   }
 
   const alreadyCurrent = (completion?.is_current && pinned) || justCompleted;
-  const goals = (training as { goals?: CSTGoal[] | null }).goals ?? null;
+  const goals = (training as { goals?: GoalView[] | null }).goals ?? null;
 
   const allAnswered = questions.length === 0 || answers.every((a) => wordCount(a.answer) >= MIN_WORDS);
   const anyChecking = answers.some((a) => a.checking);
@@ -294,7 +295,7 @@ function ClientTrainingViewer() {
                   <h3 className="text-sm font-semibold">Goals</h3>
                   <Badge variant="outline" className="text-xs">{goals.length}</Badge>
                 </div>
-                <GoalsView goals={goals} />
+                <GoalTree goals={goals} />
               </div>
             )}
 

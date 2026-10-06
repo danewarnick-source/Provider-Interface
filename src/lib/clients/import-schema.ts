@@ -16,6 +16,8 @@
 import { enrichNamesFromFull, firstNameWithMiddle } from "@/lib/person-name";
 import { activeContacts, guardianSatisfied, loadClientContacts } from "./contacts";
 import { applyContactMergePlan, planContactMerge } from "./contacts-merge";
+import { loadActiveCodesAsService } from "./codes";
+import { appendGoalsToCurrentPlan } from "./plans-write";
 import {
   LEGACY_ALERT_KEY,
   LEGACY_CONTACT_KEYS,
@@ -223,7 +225,7 @@ export async function applyExtractedFieldsToClient(
       "id, first_name, last_name, date_of_birth, medicaid_id, phone_number, physical_address, mailing_address, " +
       "is_own_guardian, " +
       "special_directions, allergies, dysphagia, swallowing_alerts, self_admin_med_support, " +
-      "pcsp_goals, team_id, " +
+      "team_id, " +
       "bsp_status, insurance, about_me, housing_voucher, " +
       "plan_year, disability_category, staff_ratio, " +
       "advanced_directives, emergency_medical_treatment_authorization, " +
@@ -398,7 +400,6 @@ export async function applyExtractedFieldsToClient(
     .filter((f) => f.field_key === "pcsp_goal")
     .map((f) => fieldText(f))
     .filter((s): s is string => !!s);
-  if (goals.length) mergeArrayColumn("pcsp_goals", goals);
 
   // Medical / compliance
   setScalarText("bsp_status", "bsp_status");
@@ -668,6 +669,17 @@ export async function applyExtractedFieldsToClient(
       } catch (err) {
         await onError("client_contacts_merge_error", (err as Error).message);
       }
+    }
+  }
+
+  // ── PCSP goals → the current plan (new goal text only; blank support with active codes) ──
+  if (goals.length) {
+    try {
+      const codes = (await loadActiveCodesAsService(supabase, [clientId])).get(clientId) ?? [];
+      const added = await appendGoalsToCurrentPlan(supabase, { organizationId, clientId, goals, codes });
+      if (added) autofilled.push(`client_goals(${added})`);
+    } catch (err) {
+      await onError("client_goals_merge_error", (err as Error).message);
     }
   }
 

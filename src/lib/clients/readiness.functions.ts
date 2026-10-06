@@ -4,6 +4,8 @@
 import { isActiveCodeRow } from "./codes";
 import { guardianSatisfied, loadClientContacts } from "./contacts";
 import { todayYmd } from "./dates";
+import { goalsOn } from "./plans";
+import { loadPlanBundle } from "./plans-load";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
@@ -49,7 +51,7 @@ export const clientReadiness = createServerFn({ method: "POST" })
 
     const { data: client } = await sb
       .from("clients")
-      .select("organization_id, home_latitude, home_longitude, is_own_guardian, pcsp_goals")
+      .select("organization_id, home_latitude, home_longitude, is_own_guardian")
       .eq("id", data.clientId)
       .maybeSingle();
     if (!client) throw new Error("Client not found");
@@ -68,7 +70,7 @@ export const clientReadiness = createServerFn({ method: "POST" })
       throw new Error("Forbidden");
     }
 
-    const [{ data: codes }, { count: staffCount }, contacts] = await Promise.all([
+    const [{ data: codes }, { count: staffCount }, contacts, plans] = await Promise.all([
       sb
         .from("client_billing_codes")
         .select("service_code, rate_per_unit, annual_unit_authorization, service_end_date")
@@ -80,6 +82,7 @@ export const clientReadiness = createServerFn({ method: "POST" })
         .eq("organization_id", client.organization_id)
         .eq("client_id", data.clientId),
       loadClientContacts(sb, [data.clientId]),
+      loadPlanBundle(sb, data.clientId),
     ]);
 
     const today = todayYmd();
@@ -105,8 +108,7 @@ export const clientReadiness = createServerFn({ method: "POST" })
     const hasStaff = (staffCount ?? 0) > 0;
     const evvReady = client.home_latitude != null && client.home_longitude != null;
     const guardianValid = guardianSatisfied(client.is_own_guardian, contacts);
-    const goalsPresent =
-      Array.isArray(client.pcsp_goals) && (client.pcsp_goals as unknown[]).length > 0;
+    const goalsPresent = goalsOn(plans, today).goals.some((g) => g.status === "active");
 
     return {
       schedulable,

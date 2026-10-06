@@ -69,10 +69,10 @@ import { FaceSheetButton } from "@/components/clients/profile/face-sheet-button"
 import {
   SectionsView,
   ClientSpecificTrainingCard,
-  GoalsEditor,
   PublishConfirmDialog,
 } from "@/components/clients/profile/client-specific-training-card";
-import { FieldVisibilityToggle } from "@/components/clients/profile/visibility-toggles";
+import { PlanGoalsPanel } from "@/components/clients/profile/plans/plan-goals-panel";
+import { AuthorizedCodesCard } from "@/components/clients/profile/plans/authorized-codes-card";
 import { CodeAssignedStaff } from "@/components/clients/shared/code-assigned-staff";
 import { CustomFieldsForSection } from "@/components/clients/profile/custom-fields-panel";
 import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/clients/hrc";
@@ -84,7 +84,6 @@ import {
   ChevronDown,
   ChevronRight,
   Loader2,
-  Pencil,
   Pill,
   RefreshCw,
   Sparkles,
@@ -116,17 +115,13 @@ import {
   attachSupportStrategyDocument,
   updateClientSpecificTraining,
   publishClientSpecificTraining,
-  extractPcspGoalsForTraining,
-  draftClientSpecificTrainingBlank,
   type CSTContent,
   type CSTSection,
-  type CSTGoal,
   type CSTReviewQuestion,
 } from "@/lib/clients/training.functions";
 import { useClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
-import { onPcspActivated } from "@/lib/company-obligations.functions";
 import { computeSupportStrategyCoverage } from "@/lib/clients/strategy-coverage";
-import { updateClient, writeClientRecord } from "@/lib/clients/writes.functions";
+import { writeClientRecord } from "@/lib/clients/writes.functions";
 
 type ProfileTab =
   | "identity"
@@ -274,7 +269,7 @@ function ClientProfileHub() {
         .from("clients")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .select(
-          "id, first_name, last_name, phone_number, physical_address, home_latitude, home_longitude, geofence_radius_feet, date_of_birth, medicaid_id, account_status, pcsp_goals, special_directions, level_of_need, form_1056_number, form_1056_approved_date, grievance_acknowledged, grievance_signed_date, rights_restrictions, dnr_status, dnr_location, polst_status, palliative_care_status, hospice_status, team_id, admin_hours_per_week, feature_config, disability_category, bsp_status, diagnoses, advanced_directives, admission_date, discharge_date" as any,
+          "id, first_name, last_name, phone_number, physical_address, home_latitude, home_longitude, geofence_radius_feet, date_of_birth, medicaid_id, account_status, special_directions, level_of_need, form_1056_number, form_1056_approved_date, grievance_acknowledged, grievance_signed_date, rights_restrictions, dnr_status, dnr_location, polst_status, palliative_care_status, hospice_status, team_id, admin_hours_per_week, feature_config, disability_category, bsp_status, diagnoses, advanced_directives, admission_date, discharge_date" as any,
         )
         .eq("id", clientId)
         .eq("organization_id", orgId!)
@@ -419,7 +414,7 @@ function ClientProfileHub() {
             <TabsContent value="goals" className="space-y-10">
               <CareGroup label="Goals" hint="Structured PCSP goals — sole editable home">
                 <CareSection icon={Target} accent="indigo">
-                  <PlanGoalsPanel client={client} clientId={clientId} orgId={orgId} />
+                  <PlanGoalsTab client={client} clientId={clientId} orgId={orgId} />
                 </CareSection>
               </CareGroup>
             </TabsContent>
@@ -583,408 +578,13 @@ function TrainingSetupBadge({ clientId }: { clientId: string }) {
   );
 }
 
-function PlanGoalsPanel({
-  client,
-  clientId,
-  orgId,
-}: {
-  client: ClientRow;
-  clientId: string;
-  orgId?: string;
-}) {
-  const qc = useQueryClient();
+function PlanGoalsTab({ client, clientId, orgId }: { client: ClientRow; clientId: string; orgId?: string }) {
   const codes = (client?.codes as string[] | undefined) ?? [];
-  const [busy, setBusy] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const getCST = useServerFn(getClientSpecificTraining);
-  const extractFn = useServerFn(extractPcspGoalsForTraining);
-  const updateCST = useServerFn(updateClientSpecificTraining);
-  const draftBlankCST = useServerFn(draftClientSpecificTrainingBlank);
-  const pcspClockFn = useServerFn(onPcspActivated);
-  const updateClientFn = useServerFn(updateClient);
-  const writeRecordFn = useServerFn(writeClientRecord);
-  const { data: cstData } = useQuery({
-    queryKey: ["client-specific-training", clientId],
-    queryFn: () => getCST({ data: { clientId } }),
-    staleTime: 30_000,
-  });
-  const { data: planHasPcsp } = useQuery({
-    queryKey: ["client-has-pcsp", clientId],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("client_documents")
-        .select("id", { count: "exact", head: true })
-        .eq("client_id", clientId)
-        .ilike("document_type", "pcsp");
-      if (error) throw error;
-      return (count ?? 0) > 0;
-    },
-    staleTime: 30_000,
-  });
-
-  const extractedGoals = ((cstData?.training as { goals?: CSTGoal[] } | null)?.goals ??
-    []) as CSTGoal[];
-  const goalIsIncomplete = (g: CSTGoal) => !g.supports?.trim() || !g.details?.trim();
-  const missingLabel = (g: CSTGoal) => {
-    const ms = !g.supports?.trim();
-    const md = !g.details?.trim();
-    if (ms && md) return "Needs supports & details";
-    if (ms) return "Needs supports";
-    if (md) return "Needs details";
-    return "";
-  };
-  const incompleteCount = extractedGoals.filter(goalIsIncomplete).length;
-  const [openGoal, setOpenGoal] = useState<string | number | null>(null);
-  const [editingGoals, setEditingGoals] = useState(false);
-  const [draftGoals, setDraftGoals] = useState<CSTGoal[] | null>(null);
-
-  const saveGoalsMut = useMutation({
-    mutationFn: async () => {
-      if (!draftGoals) throw new Error("No goals to save");
-      let tid = (cstData?.training as { id?: string } | null)?.id;
-      if (!tid) {
-        const res = await draftBlankCST({ data: { clientId } });
-        tid = (res?.training as { id?: string } | null)?.id;
-        if (!tid) throw new Error("Could not create training record");
-      }
-      await updateCST({ data: { id: tid, goals: draftGoals } });
-      const flat = draftGoals
-        .map((g) => g.goal)
-        .filter((g): g is string => !!g && g.trim().length > 0);
-      if (!orgId) throw new Error("Organization not loaded");
-      await updateClientFn({ data: { organizationId: orgId, clientId, patch: { pcsp_goals: flat } } });
-    },
-    onSuccess: () => {
-      toast.success("Goals updated");
-      setEditingGoals(false);
-      setDraftGoals(null);
-      qc.invalidateQueries({ queryKey: ["client-specific-training", clientId] });
-      qc.invalidateQueries({ queryKey: ["client-profile", orgId, clientId] });
-      qc.invalidateQueries({ queryKey: ["client", clientId] });
-    },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Failed to save goals"),
-  });
-
-  function startManualEntry() {
-    setDraftGoals([
-      { id: crypto.randomUUID(), goal: "", supports: "", details: "", job_codes: [] } as CSTGoal,
-    ]);
-    setEditingGoals(true);
-  }
-
-  async function syncFlatGoals() {
-    const res = await getCST({ data: { clientId } });
-    const goals = ((res?.training as { goals?: CSTGoal[] } | null)?.goals ?? []) as CSTGoal[];
-    const flat = goals.map((g) => g.goal).filter((g): g is string => !!g && g.trim().length > 0);
-    if (orgId) await updateClientFn({ data: { organizationId: orgId, clientId, patch: { pcsp_goals: flat } } });
-    qc.invalidateQueries({ queryKey: ["client-specific-training", clientId] });
-    qc.invalidateQueries({ queryKey: ["client-profile", orgId, clientId] });
-    qc.invalidateQueries({ queryKey: ["client", clientId] });
-  }
-
-  async function runExtract() {
-    setBusy(true);
-    try {
-      const res = await extractFn({ data: { clientId } });
-      if (!res?.ok) {
-        toast.error(res?.reason ?? "Extraction failed");
-        return;
-      }
-      toast.success(`Extracted ${res.goalCount} goals from the PCSP`);
-      await syncFlatGoals();
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Extraction failed");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handlePcspUpload(file: File) {
-    if (!orgId) {
-      toast.error("Organization not loaded");
-      return;
-    }
-    setBusy(true);
-    try {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const path = `${orgId}/${clientId}/pcsp/${Date.now()}_${safeName}`;
-      const { error: upErr } = await supabase.storage
-        .from("client-documents")
-        .upload(path, file, { upsert: false });
-      if (upErr) throw upErr;
-      await writeRecordFn({
-        data: {
-          organizationId: orgId,
-          clientId,
-          table: "client_documents",
-          op: "insert",
-          values: { document_type: "pcsp", file_name: file.name, file_url: path, storage_path: path },
-        },
-      });
-      if (orgId) {
-        try {
-          await pcspClockFn({ data: { organizationId: orgId, clientId } });
-        } catch {
-          /* Event clock must not block the PCSP upload. */
-        }
-      }
-      // PCSP is one document shown in both Care and Files — refresh both.
-      qc.invalidateQueries({ queryKey: ["client-docs", orgId, clientId] });
-      qc.invalidateQueries({ queryKey: ["client-has-pcsp", clientId] });
-      const res = await extractFn({ data: { clientId } });
-      if (!res?.ok) {
-        toast.error(res?.reason ?? "Extraction failed");
-        return;
-      }
-      toast.success(`Extracted ${res.goalCount} goals from the PCSP`);
-      await syncFlatGoals();
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   if (!client) return <SkeletonCard />;
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">PCSP goals</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <input
-            ref={fileRef}
-            type="file"
-            className="hidden"
-            accept=".pdf,.docx,.txt,.doc"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) void handlePcspUpload(f);
-              e.target.value = "";
-            }}
-          />
-          {editingGoals ? (
-            <div className="space-y-2">
-              <GoalsEditor goals={draftGoals ?? []} onChange={setDraftGoals} clientId={clientId} />
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setEditingGoals(false);
-                    setDraftGoals(null);
-                  }}
-                  disabled={saveGoalsMut.isPending}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => saveGoalsMut.mutate()}
-                  disabled={saveGoalsMut.isPending}
-                  className="gap-1"
-                >
-                  {saveGoalsMut.isPending && <Loader2 className="h-3 w-3 animate-spin" />}
-                  Save goals
-                </Button>
-              </div>
-            </div>
-          ) : extractedGoals.length === 0 ? (
-            <div className="space-y-2">
-              {planHasPcsp ? (
-                <p className="text-muted-foreground">
-                  PCSP on file — pull goals from it, or add them manually.
-                </p>
-              ) : (
-                <p className="text-muted-foreground">
-                  No goals yet — upload a PCSP so NECTAR can pull them, or add them manually.
-                </p>
-              )}
-              <div className="flex flex-wrap gap-2">
-                {planHasPcsp ? (
-                  <Button
-                    type="button"
-                    onClick={() => void runExtract()}
-                    disabled={busy}
-                    className="gap-2"
-                  >
-                    {busy ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-4 w-4" />
-                    )}
-                    {busy ? "Extracting…" : "Extract goals from existing PCSP"}
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    onClick={() => fileRef.current?.click()}
-                    disabled={busy || !orgId}
-                    className="gap-2"
-                  >
-                    {busy ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-4 w-4" />
-                    )}
-                    {busy ? "Extracting…" : "Upload PCSP & extract goals (NECTAR)"}
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={startManualEntry}
-                  disabled={busy}
-                  className="gap-2"
-                >
-                  <Pencil className="h-4 w-4" />
-                  Add goals manually
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-medium">{extractedGoals.length} goals extracted from PCSP</p>
-                <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => {
-                      setDraftGoals(structuredClone(extractedGoals));
-                      setEditingGoals(true);
-                    }}
-                    disabled={busy}
-                    aria-label="Edit goals"
-                    className="h-7 w-7"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => void runExtract()}
-                    disabled={busy}
-                    className="gap-1"
-                  >
-                    {busy ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-3 w-3" />
-                    )}
-                    Re-extract from PCSP
-                  </Button>
-                </div>
-              </div>
-              {incompleteCount > 0 && (
-                <p className="text-xs text-amber-700 dark:text-amber-400">
-                  {incompleteCount} of {extractedGoals.length} goals need supports or details —
-                  click the pencil to add them.
-                </p>
-              )}
-              <ul className="space-y-2">
-                {extractedGoals.map((g, i) => {
-                  const key = g.id ?? i;
-                  const isOpen = openGoal === key;
-                  const incomplete = goalIsIncomplete(g);
-                  return (
-                    <li key={key} className="rounded-md border border-border p-2">
-                      <div className="flex items-start gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setOpenGoal(isOpen ? null : key)}
-                          className="flex flex-1 items-start gap-2 text-left"
-                          aria-expanded={isOpen}
-                        >
-                          {isOpen ? (
-                            <ChevronDown className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground" />
-                          ) : (
-                            <ChevronRight className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground" />
-                          )}
-                          <p className={isOpen ? "flex-1" : "flex-1 line-clamp-2"}>{g.goal}</p>
-                        </button>
-                        {g.id && (
-                          <FieldVisibilityToggle
-                            clientId={clientId}
-                            section="care_plan"
-                            kind="goal"
-                            id={String(g.id)}
-                            label="this goal"
-                          />
-                        )}
-                      </div>
-                      {(incomplete || (Array.isArray(g.job_codes) && g.job_codes.length > 0)) && (
-                        <div className="mt-1 flex flex-wrap items-center gap-1 pl-5">
-                          {incomplete && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
-                              ⚠ {missingLabel(g)}
-                            </span>
-                          )}
-                          {Array.isArray(g.job_codes) &&
-                            g.job_codes.map((c, j) => (
-                              <Badge key={`${c}-${j}`} variant="outline" className="text-[10px]">
-                                {c}
-                              </Badge>
-                            ))}
-                        </div>
-                      )}
-                      {isOpen && (
-                        <div className="mt-2 space-y-1 pl-5 text-xs text-muted-foreground">
-                          <p>
-                            <span className="font-medium text-foreground">Supports:</span>{" "}
-                            {g.supports?.trim() ? g.supports : "—"}
-                          </p>
-                          <p>
-                            <span className="font-medium text-foreground">Details:</span>{" "}
-                            {g.details?.trim() ? g.details : "—"}
-                          </p>
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Authorized DSPD codes</CardTitle>
-          <Button asChild variant="ghost" size="sm">
-            <Link
-              to="/dashboard/clients/$clientId"
-              params={{ clientId }}
-              search={{ tab: "billing" }}
-            >
-              Manage in Billing →
-            </Link>
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <p className="text-xs text-muted-foreground">
-            Read-only reference. Codes, rates, dates, and staff assignments are managed on the
-            Billing tab.
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {codes.length === 0 ? (
-              <span className="text-muted-foreground">None.</span>
-            ) : (
-              codes.map((c) => (
-                <Badge key={c} variant="outline">
-                  {c}
-                </Badge>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <PlanGoalsPanel clientId={clientId} orgId={orgId} codes={codes} />
+      <AuthorizedCodesCard clientId={clientId} codes={codes} />
     </div>
   );
 }

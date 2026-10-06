@@ -58,12 +58,12 @@ export function SetupChecklist({ clientId, jobId }: { clientId: string; jobId: s
     queryFn: async (): Promise<ClientPcsp> => {
       const { data, error } = await supabase
         .from("clients")
-        .select("pcsp_goals, physical_address, geofence_radius_feet, is_own_guardian")
+        .select("physical_address, geofence_radius_feet, is_own_guardian")
         .eq("id", clientId)
         .maybeSingle();
       if (error) throw new Error(error.message);
       return (data ?? {
-        pcsp_goals: [], physical_address: null, geofence_radius_feet: null,
+        physical_address: null, geofence_radius_feet: null,
         is_own_guardian: null,
       }) as ClientPcsp;
     },
