@@ -82,6 +82,15 @@ export const generateClientFaceSheet = createServerFn({ method: "POST" })
       .eq("organization_id", client.organization_id)
       .maybeSingle();
 
+    const { data: contactRows, error: contactsErr } = await supabase
+      .from("client_emergency_contacts")
+      .select("name, phone, relationship")
+      .eq("client_id", data.clientId)
+      .is("archived_at", null)
+      .order("created_at", { ascending: true })
+      .limit(2);
+    if (contactsErr) throw new Error(contactsErr.message);
+
     // 3) Optional binary assets: logo + client photo.
     async function downloadBytes(bucket: string, path: string | null | undefined): Promise<Uint8Array | null> {
       if (!path) return null;
@@ -122,6 +131,7 @@ export const generateClientFaceSheet = createServerFn({ method: "POST" })
 
     drawFaceSheet(page, helv, helvB, {
       client,
+      contacts: emergencyContactsFor(client, contactRows ?? []),
       org: org ?? null,
       branding: branding ?? null,
       logoImg,
@@ -148,8 +158,64 @@ type Client = Record<string, unknown> & {
   organization_id: string;
 };
 
+type EmergencyContact = {
+  name: string | null;
+  relationship: string | null;
+  phone: string | null;
+  address: string | null;
+};
+
+/**
+ * The profile edits client_emergency_contacts; the two emergency_contact_*
+ * column sets are pre-table data. Use the table when it has any active row,
+ * otherwise the legacy columns, so nothing on file is ever dropped.
+ */
+function emergencyContactsFor(
+  client: Client,
+  rows: Array<{ name: string; phone: string | null; relationship: string | null }>,
+): [EmergencyContact, EmergencyContact] {
+  const blank: EmergencyContact = { name: null, relationship: null, phone: null, address: null };
+  if (rows.length > 0) {
+    const [a, b] = rows.map((r) => ({ ...blank, name: r.name, phone: r.phone, relationship: r.relationship }));
+    return [a ?? blank, b ?? blank];
+  }
+  return [
+    {
+      name: textOrNull(client.emergency_contact_name),
+      relationship: textOrNull(client.emergency_contact_relationship),
+      phone: textOrNull(client.emergency_contact_phone),
+      address: textOrNull(client.emergency_contact_address),
+    },
+    {
+      name: textOrNull(client.emergency_contact_2_name),
+      relationship: textOrNull(client.emergency_contact_2_relationship),
+      phone: textOrNull(client.emergency_contact_2_phone),
+      address: textOrNull(client.emergency_contact_2_address),
+    },
+  ];
+}
+
+function textOrNull(v: unknown): string | null {
+  return v == null ? null : String(v);
+}
+
+function contactLabel(c: EmergencyContact): string {
+  return (
+    [
+      field(c.name),
+      field(c.relationship) !== NOT_ON_FILE ? `(${c.relationship})` : "",
+      field(c.phone) !== NOT_ON_FILE ? `\nPhone: ${c.phone}` : "",
+      field(c.address) !== NOT_ON_FILE ? `\n${c.address}` : "",
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .trim() || NOT_ON_FILE
+  );
+}
+
 type Ctx = {
   client: Client;
+  contacts: [EmergencyContact, EmergencyContact];
   org: { id: string; name: string | null; legal_name: string | null; dba_name: string | null } | null;
   branding: { logo_path: string | null; org_address: string | null; org_phone: string | null } | null;
   logoImg: PDFImage | null;
@@ -241,7 +307,7 @@ function hr(page: PDFPage, y: number): void {
 }
 
 function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): void {
-  const { client, org, branding, logoImg, photoImg } = ctx;
+  const { client, contacts, org, branding, logoImg, photoImg } = ctx;
 
   // ── Header ────────────────────────────────────────────────────────────
   // Logo top-left OR org name as large title
@@ -405,21 +471,7 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
   yG = drawKV(
     page,
     "Primary emergency contact",
-    [
-      field(client.emergency_contact_name),
-      field(client.emergency_contact_relationship) !== NOT_ON_FILE
-        ? `(${client.emergency_contact_relationship})`
-        : "",
-      field(client.emergency_contact_phone) !== NOT_ON_FILE
-        ? `\nPhone: ${client.emergency_contact_phone}`
-        : "",
-      field(client.emergency_contact_address) !== NOT_ON_FILE
-        ? `\n${client.emergency_contact_address}`
-        : "",
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim() || NOT_ON_FILE,
+    contactLabel(contacts[0]),
     M,
     yG,
     c3,
@@ -431,21 +483,7 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
   yG2 = drawKV(
     page,
     "Secondary emergency contact",
-    [
-      field(client.emergency_contact_2_name),
-      field(client.emergency_contact_2_relationship) !== NOT_ON_FILE
-        ? `(${client.emergency_contact_2_relationship})`
-        : "",
-      field(client.emergency_contact_2_phone) !== NOT_ON_FILE
-        ? `\nPhone: ${client.emergency_contact_2_phone}`
-        : "",
-      field(client.emergency_contact_2_address) !== NOT_ON_FILE
-        ? `\n${client.emergency_contact_2_address}`
-        : "",
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim() || NOT_ON_FILE,
+    contactLabel(contacts[1]),
     M + c3 + 16,
     yG2,
     c3,
