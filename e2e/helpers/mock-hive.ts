@@ -998,6 +998,10 @@ function inferServerFn(url: string, body: string): string {
 function serverFnPayload(url: string, body: string): unknown {
   const fn = inferServerFn(url, body);
   const fnBlob = `${fn}\n${url}\n${body}`;
+  // Client writes (src/lib/clients/writes.functions.ts) — echo a made-up id.
+  if (/^updateClient$/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c1" };
+  if (/^createClient$/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c2" };
+  if (/^writeClientRecord$/.test(fn)) return { ids: ["00000000-0000-4000-a000-0000000000c3"] };
   if (/listTeamRoster/i.test(fn)) return teamRosterRows();
   if (/listTeamInvites/i.test(fn)) return teamInviteRows();
   if (/rosterOrgHasHomes/i.test(fn)) return !activeMockOpts.noHomes;

@@ -38,13 +38,17 @@ export function ageOn(birthDate: string | null | undefined, on: Date = new Date(
   if (!dob) return null;
   let age = on.getFullYear() - dob.getFullYear();
   const beforeBirthday =
-    on.getMonth() < dob.getMonth() || (on.getMonth() === dob.getMonth() && on.getDate() < dob.getDate());
+    on.getMonth() < dob.getMonth() ||
+    (on.getMonth() === dob.getMonth() && on.getDate() < dob.getDate());
   if (beforeBirthday) age -= 1;
   return age;
 }
 
 /** Calendar days from `from` (default today) to the date; negative when past; null when blank. */
-export function daysUntil(value: string | null | undefined, from: Date = new Date()): number | null {
+export function daysUntil(
+  value: string | null | undefined,
+  from: Date = new Date(),
+): number | null {
   const d = parseLocalDate(value);
   if (!d) return null;
   const ms = startOfDay(d).getTime() - startOfDay(from).getTime();

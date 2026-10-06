@@ -23,7 +23,11 @@ function fakeDeps(opts: {
   clientOrg?: string | null;
   canSee?: boolean;
 }) {
-  const calls = { requireCategory: [] as Array<[string, string]>, loadClientOrg: 0, canSeeClient: 0 };
+  const calls = {
+    requireCategory: [] as Array<[string, string]>,
+    loadClientOrg: 0,
+    canSeeClient: 0,
+  };
   const deps: ManageClientGuardDeps = {
     requireCategory: async (category, min) => {
       calls.requireCategory.push([category, min]);
@@ -42,8 +46,11 @@ function fakeDeps(opts: {
   return { deps, calls };
 }
 
-const run = (action: ManageClientAction, deps: ManageClientGuardDeps, clientId: string | null = CLIENT) =>
-  runManageClientGuard({ actorId: ACTOR, organizationId: ORG, clientId, action }, deps);
+const run = (
+  action: ManageClientAction,
+  deps: ManageClientGuardDeps,
+  clientId: string | null = CLIENT,
+) => runManageClientGuard({ actorId: ACTOR, organizationId: ORG, clientId, action }, deps);
 
 describe("categoryForClientAction", () => {
   const expected: Record<ManageClientAction, [string, string]> = {
@@ -118,9 +125,15 @@ describe("runManageClientGuard", () => {
 
 describe("friendlyGuardError", () => {
   it("turns Forbidden into plain English", () => {
-    assert.equal(friendlyGuardError(new Error("Forbidden: requires edit on clients")).message, NO_PERMISSION_MESSAGE);
+    assert.equal(
+      friendlyGuardError(new Error("Forbidden: requires edit on clients")).message,
+      NO_PERMISSION_MESSAGE,
+    );
   });
   it("keeps other messages", () => {
-    assert.equal(friendlyGuardError(new Error(CLIENT_NOT_FOUND_MESSAGE)).message, CLIENT_NOT_FOUND_MESSAGE);
+    assert.equal(
+      friendlyGuardError(new Error(CLIENT_NOT_FOUND_MESSAGE)).message,
+      CLIENT_NOT_FOUND_MESSAGE,
+    );
   });
 });
