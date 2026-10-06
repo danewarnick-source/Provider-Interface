@@ -20,6 +20,7 @@ import {
   type ClientRecordTable,
 } from "./writes";
 import { CLIENT_NOT_FOUND_MESSAGE } from "./guards";
+import { CONTACT_ROLES, cleanContactFields } from "./contacts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = SupabaseClient<any>;
@@ -82,7 +83,8 @@ export const updateClient = createServerFn({ method: "POST" })
 /**
  * Add a client (Clients: Edit). Returns the new id. `stubCodes` are $0
  * placeholder authorization rows for the codes picked on the add form (part of
- * adding the client, so they need only Clients: Edit).
+ * adding the client, so they need only Clients: Edit). `contacts` (e.g. the
+ * guardian) go to client_contacts.
  */
 export const createClient = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -99,6 +101,19 @@ export const createClient = createServerFn({ method: "POST" })
             }),
           )
           .max(50)
+          .optional(),
+        contacts: z
+          .array(
+            z.object({
+              role: z.enum(CONTACT_ROLES),
+              name: z.string().max(200),
+              relationship: z.string().max(200).nullish(),
+              phone: z.string().max(200).nullish(),
+              email: z.string().max(200).nullish(),
+              is_primary: z.boolean().optional(),
+            }),
+          )
+          .max(20)
           .optional(),
       })
       .parse(d),
@@ -131,6 +146,16 @@ export const createClient = createServerFn({ method: "POST" })
         .from("client_billing_codes")
         .upsert(stubs, { onConflict: "organization_id,client_id,service_code" });
       if (bcErr) throw new Error(bcErr.message);
+    }
+    if (data.contacts?.length) {
+      const contacts = data.contacts.map((c) => ({
+        ...cleanContactFields(c),
+        organization_id: organizationId,
+        client_id: row.id,
+        created_by: userId,
+      }));
+      const { error: ccErr } = await sb.from("client_contacts").insert(contacts);
+      if (ccErr) throw new Error(ccErr.message);
     }
     return { id: row.id };
   });

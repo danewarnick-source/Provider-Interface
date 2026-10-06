@@ -2,7 +2,6 @@
 
 export * from '../hhs.functions';
 export * from '../hhs-certifications.functions';
-export * from '../rhs-board.functions';
 export * from '../emar-pass.functions';
 export * from '../emar-nectar.functions';
 export * from '../emar-status';

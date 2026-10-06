@@ -1,7 +1,7 @@
 // Inline DSPD service-code adder. No navigation: pick codes the client
 // doesn't already have, click Add → upserts client_billing_codes rows
-// (rate 0, units 0 — filled in by the Rates step) and merges the codes
-// into clients.authorized_dspd_codes + clients.job_code. Used by the
+// (rate 0, units 0 — filled in by the Rates step); client_billing_codes is
+// the one source for a client's codes. Used by the
 // readiness card and the onboarding wizard's billing step so the
 // "schedulable" / "billable" checks can flip to ✓ in place.
 import { useMemo, useState } from "react";
@@ -39,21 +39,11 @@ export function AddCodesControl({
   const existingQ = useQuery({
     queryKey: ["client-codes-summary", clientId],
     queryFn: async () => {
-      const [{ data: client }, { data: rows }] = await Promise.all([
-        supabase
-          .from("clients")
-          .select("authorized_dspd_codes")
-          .eq("id", clientId)
-          .maybeSingle(),
-        supabase
-          .from("client_billing_codes")
-          .select("service_code")
-          .eq("client_id", clientId),
-      ]);
+      const { data: rows } = await supabase
+        .from("client_billing_codes")
+        .select("service_code")
+        .eq("client_id", clientId);
       const set = new Set<string>();
-      for (const c of (client?.authorized_dspd_codes ?? []) as string[]) {
-        if (c) set.add(c.toUpperCase());
-      }
       for (const r of (rows ?? []) as Array<{ service_code: string | null }>) {
         if (r.service_code) set.add(r.service_code.toUpperCase());
       }

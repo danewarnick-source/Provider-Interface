@@ -16,7 +16,7 @@ export function ClientListCards({
   return (
     <div className="block divide-y divide-border md:hidden">
       {rows.map((c) => {
-        const codes = c.job_code ?? [];
+        const codes = c.codes;
         return (
           <div
             key={c.id}

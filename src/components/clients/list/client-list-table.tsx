@@ -29,7 +29,7 @@ export function ClientListTable({
         </TableHeader>
         <TableBody>
           {rows.map((c) => {
-            const codes = c.job_code ?? [];
+            const codes = c.codes;
             const shownCodes = codes.slice(0, 3);
             const extraCodes = codes.length - shownCodes.length;
             return (

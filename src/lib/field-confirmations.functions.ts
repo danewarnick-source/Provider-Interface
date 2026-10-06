@@ -2,6 +2,8 @@
 // - getClientFieldStates: computes has/none/unknown for every TRACKED_FIELD
 //   using real data checks plus the clients.field_confirmations jsonb.
 // - setFieldConfirmation: writes one key into clients.field_confirmations.
+import { LEGACY_ALERT_KEY } from "@/lib/clients/legacy-fields";
+import { activeContacts, guardianSatisfied, loadClientContacts } from "@/lib/clients/contacts";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
@@ -36,7 +38,7 @@ export const getClientFieldStates = createServerFn({ method: "POST" })
     const { data: client } = await sb
       .from("clients")
       .select(
-        "id, organization_id, allergies, dysphagia, swallowing_alerts, special_directions, is_own_guardian, guardian_name, field_confirmations",
+        "id, organization_id, allergies, dysphagia, swallowing_alerts, special_directions, is_own_guardian, field_confirmations",
       )
       .eq("id", data.clientId)
       .maybeSingle();
@@ -60,7 +62,7 @@ export const getClientFieldStates = createServerFn({ method: "POST" })
       .filter((k) =>
         ![
           "medications", "allergies", "dysphagia", "swallowing_alerts",
-          "clinical_alert", "guardian",
+          LEGACY_ALERT_KEY, "guardian",
         ].includes(k),
       );
     const { data: defs } = await sb
@@ -95,12 +97,10 @@ export const getClientFieldStates = createServerFn({ method: "POST" })
       allergies: Array.isArray(client.allergies) && (client.allergies as unknown[]).length > 0,
       dysphagia: client.dysphagia === true,
       swallowing_alerts: Array.isArray(client.swallowing_alerts) && (client.swallowing_alerts as unknown[]).length > 0,
-      clinical_alert: !!(client.special_directions && String(client.special_directions).trim()),
+      [LEGACY_ALERT_KEY]: !!(client.special_directions && String(client.special_directions).trim()),
       // Guardian state is "has" when either branch is positively configured:
-      // self-guardian = true OR is_own_guardian = false + a guardian name.
-      guardian:
-        client.is_own_guardian === true ||
-        (client.is_own_guardian === false && !!client.guardian_name?.trim()),
+      // self-guardian = true OR is_own_guardian = false + a guardian contact.
+      guardian: guardianSatisfied(client.is_own_guardian, activeContacts(await loadClientContacts(sb, [data.clientId]))),
     };
     for (const k of customKeys) hasMap[k] = customHas.has(k);
 

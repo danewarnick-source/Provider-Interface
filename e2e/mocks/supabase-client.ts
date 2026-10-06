@@ -100,8 +100,6 @@ function tnsClientRows(): Record<string, unknown>[] {
     last_name: c.last_name,
     phone_number: null,
     physical_address: null,
-    job_code: [...c.codes],
-    authorized_dspd_codes: [...c.codes],
     medicaid_id: c.medicaid_id,
     account_status: "active",
     geofence_radius_feet: 500,
@@ -437,6 +435,15 @@ export const supabase = {
   },
   from: (table: string) => new QueryBuilder(table),
   rpc: async (name: string, args?: Record<string, unknown>) => {
+    if (name === "client_active_codes") {
+      const ids = (args?._client_ids as string[] | undefined) ?? [];
+      return {
+        data: CLIENT_LIST.filter((c) => ids.includes(c.id)).flatMap((c) =>
+          c.codes.map((service_code) => ({ client_id: c.id, service_code, service_end_date: null })),
+        ),
+        error: null,
+      };
+    }
     if (name === "clients_for_staff") {
       if (readFlag("hive.e2e.noAssignments") === "1") return { data: [], error: null };
       const staffId = String(args?._staff ?? activeSession().user.id);

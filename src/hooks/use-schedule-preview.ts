@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { loadActiveCodes } from "@/lib/clients/codes";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "./use-org";
 import { DAILY_SERVICE_CODES, isDailyServiceCode } from "@/lib/service-billing";
@@ -21,7 +22,8 @@ export type ShiftRow = {
   service_code: string | null;
   created_from: string | null;
 };
-export type ClientRow = { id: string; first_name: string; last_name: string; team_id: string | null; job_code: string[] };
+/** `codes` = active service codes (client_billing_codes). */
+export type ClientRow = { id: string; first_name: string; last_name: string; team_id: string | null; codes: string[] };
 export type TeamRow = { id: string; team_name: string };
 export type StaffRow = { id: string; name: string };
 
@@ -46,7 +48,7 @@ export function useSchedulePreview(weekStart: Date) {
           .lt("starts_at", weekEnd.toISOString()),
         supabase
           .from("clients")
-          .select("id, first_name, last_name, team_id, job_code")
+          .select("id, first_name, last_name, team_id")
           .eq("organization_id", orgId!),
         supabase.from("teams").select("id, team_name").eq("organization_id", orgId!),
         // Org-to-user membership lives here (profiles.tenant_id is unused).
@@ -57,7 +59,9 @@ export function useSchedulePreview(weekStart: Date) {
       ]);
       if (shiftsRes.error) throw shiftsRes.error;
       const shifts = (shiftsRes.data ?? []) as ShiftRow[];
-      const clients = (clientsRes.data ?? []) as ClientRow[];
+      const clientRows = (clientsRes.data ?? []) as Omit<ClientRow, "codes">[];
+      const codes = await loadActiveCodes(supabase, clientRows.map((c) => c.id));
+      const clients: ClientRow[] = clientRows.map((c) => ({ ...c, codes: codes.get(c.id) ?? [] }));
       const teams = (teamsRes.data ?? []) as TeamRow[];
       const memberIds = Array.from(
         new Set(

@@ -8,8 +8,8 @@ export type EvidenceClientRow = {
   first_name: string | null;
   last_name: string | null;
   account_status: string | null;
-  authorized_dspd_codes?: string[] | null;
-  job_code?: string[] | null;
+  /** Active service codes (client_billing_codes). */
+  codes?: string[];
 };
 
 /** Same active roster rule as the Clients page — only archived is hidden. */
@@ -22,7 +22,7 @@ export function mapClientRowsToPeople(rows: readonly EvidenceClientRow[]): Evide
     .filter((c) => isListedEvidenceClient(c.account_status))
     .map((c) => {
       const name = `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "Client";
-      const codes = c.authorized_dspd_codes ?? c.job_code ?? [];
+      const codes = c.codes ?? [];
       return {
         id: c.id,
         full_name: name,
@@ -38,21 +38,19 @@ export type ClientPeopleQuery = (columns: string) => PromiseLike<{
   error: { message: string } | null;
 }>;
 
-/** Full column select, then a slim retry so a missing optional column is not an empty roster. */
+/**
+ * Client roster for Evidence. Codes (the row subtitle) come from `loadCodes`
+ * (active client_billing_codes); a failed code lookup still shows the roster.
+ */
 export async function loadEvidenceClientPeople(
   query: ClientPeopleQuery,
+  loadCodes: (clientIds: string[]) => Promise<Map<string, string[]>>,
 ): Promise<{ people: EvidencePerson[]; error: string | null }> {
-  const full = await query(
-    "id, first_name, last_name, account_status, authorized_dspd_codes, job_code",
-  );
-  if (!full.error) {
-    return { people: mapClientRowsToPeople(full.data ?? []), error: null };
-  }
-  const slim = await query("id, first_name, last_name, account_status");
-  if (slim.error) {
-    return { people: [], error: slim.error.message || full.error.message };
-  }
-  return { people: mapClientRowsToPeople(slim.data ?? []), error: null };
+  const res = await query("id, first_name, last_name, account_status");
+  if (res.error) return { people: [], error: res.error.message };
+  const rows = res.data ?? [];
+  const codes = await loadCodes(rows.map((r) => r.id)).catch(() => new Map<string, string[]>());
+  return { people: mapClientRowsToPeople(rows.map((r) => ({ ...r, codes: codes.get(r.id) ?? [] }))), error: null };
 }
 
 export type EvidenceEmployeeRow = {

@@ -4,6 +4,21 @@
 // Honest scope: these fns persist data the admin enters / attaches in the
 // done-page checklist. They do NOT perform document extraction — upload
 // only attaches the file. Extraction is wired in a later prompt.
+import {
+  CONTACT_ROLE_LABELS,
+  activeContacts,
+  contactsWithRole,
+  isContactRole,
+  loadClientContacts,
+  setContactParts,
+  type ContactRole,
+} from "@/lib/clients/contacts";
+import {
+  LEGACY_ALERT_KEY,
+  LEGACY_CONTACT_KEYS,
+  LEGACY_SINGLE_SOURCE_KEYS,
+  type ContactPart,
+} from "@/lib/clients/legacy-fields";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
@@ -288,48 +303,44 @@ export const extractAndApplyClientUpload = createServerFn({ method: "POST" })
 // extractor + applyExtractedFieldsToClient writer; nothing is written until
 // applySelectedClientFields runs.
 
-// field_key (as emitted by parseDocumentWithAI) → clients column + label.
-// Matches the mappings in applyExtractedFieldsToClient.
-const PROFILE_FIELD_MAP: Record<string, { column: string; label: string; kind: "text" | "bool" | "date" | "array" }> = {
+// field_key (as emitted by parseDocumentWithAI) → where it lands + label.
+// Matches the mappings in applyExtractedFieldsToClient: a clients column, or a
+// part of a client contact (guardian, emergency, support coordinator, doctors).
+type FieldKind = "text" | "bool" | "date" | "array";
+type ProfileFieldMeta =
+  | { column: string; label: string; kind: FieldKind }
+  | { contact: { role: ContactRole; part: ContactPart; slot: number }; label: string; kind: "text" };
+
+const CONTACT_FIELD_MAP: Record<string, ProfileFieldMeta> = Object.fromEntries(
+  Object.entries(LEGACY_CONTACT_KEYS).map(([key, contact]) => [
+    key,
+    {
+      contact,
+      label: `${CONTACT_ROLE_LABELS[contact.role]}${contact.slot ? " #2" : ""} ${contact.part}`,
+      kind: "text" as const,
+    },
+  ]),
+);
+
+const PROFILE_FIELD_MAP: Record<string, ProfileFieldMeta> = {
+  ...CONTACT_FIELD_MAP,
   first_name: { column: "first_name", label: "First name", kind: "text" },
   last_name: { column: "last_name", label: "Last name", kind: "text" },
   dob: { column: "date_of_birth", label: "Date of birth", kind: "date" },
   medicaid_id: { column: "medicaid_id", label: "Medicaid ID", kind: "text" },
   phone: { column: "phone_number", label: "Phone", kind: "text" },
   physical_address: { column: "physical_address", label: "Physical address", kind: "text" },
-  emergency_contact_name: { column: "emergency_contact_name", label: "Emergency contact name", kind: "text" },
-  emergency_contact_phone: { column: "emergency_contact_phone", label: "Emergency contact phone", kind: "text" },
-  emergency_contact_instructions: { column: "emergency_contact_instructions", label: "Emergency contact instructions", kind: "text" },
-  emergency_contact_2_name: { column: "emergency_contact_2_name", label: "Emergency contact #2 name", kind: "text" },
-  emergency_contact_2_phone: { column: "emergency_contact_2_phone", label: "Emergency contact #2 phone", kind: "text" },
-  emergency_contact_2_instructions: { column: "emergency_contact_2_instructions", label: "Emergency contact #2 instructions", kind: "text" },
   is_own_guardian: { column: "is_own_guardian", label: "Own guardian", kind: "bool" },
-  guardian_name: { column: "guardian_name", label: "Guardian name", kind: "text" },
-  guardian_phone: { column: "guardian_phone", label: "Guardian phone", kind: "text" },
-  guardian_relationship: { column: "guardian_relationship", label: "Guardian relationship", kind: "text" },
-  guardian_email: { column: "guardian_email", label: "Guardian email", kind: "text" },
-  guardian_address: { column: "guardian_address", label: "Guardian address", kind: "text" },
-  clinical_alert: { column: "special_directions", label: "Clinical alert / special directions", kind: "text" },
+  [LEGACY_ALERT_KEY]: { column: "special_directions", label: "Must-knows for staff", kind: "text" },
   special_directions: { column: "special_directions", label: "Special directions", kind: "text" },
   dysphagia: { column: "dysphagia", label: "Dysphagia", kind: "bool" },
   self_admin_med_support: { column: "self_admin_med_support", label: "Self-administer med support", kind: "bool" },
   allergies: { column: "allergies", label: "Allergies", kind: "array" },
   swallowing_alerts: { column: "swallowing_alerts", label: "Swallowing alerts", kind: "array" },
-  support_coordinator_name: { column: "support_coordinator_name", label: "Support coordinator name", kind: "text" },
-  support_coordinator_email: { column: "support_coordinator_email", label: "Support coordinator email", kind: "text" },
-  support_coordinator_phone: { column: "support_coordinator_phone", label: "Support coordinator phone", kind: "text" },
-  primary_care_name: { column: "primary_care_name", label: "Primary care name", kind: "text" },
-  primary_care_phone: { column: "primary_care_phone", label: "Primary care phone", kind: "text" },
-  neurologist_name: { column: "neurologist_name", label: "Neurologist name", kind: "text" },
-  neurologist_phone: { column: "neurologist_phone", label: "Neurologist phone", kind: "text" },
-  dentist_name: { column: "dentist_name", label: "Dentist name", kind: "text" },
-  dentist_phone: { column: "dentist_phone", label: "Dentist phone", kind: "text" },
-  prescriber_name: { column: "prescriber_name", label: "Prescriber name", kind: "text" },
-  prescriber_phone: { column: "prescriber_phone", label: "Prescriber phone", kind: "text" },
   bsp_status: { column: "bsp_status", label: "BSP status", kind: "text" },
-  medical_insurance: { column: "medical_insurance", label: "Medical insurance", kind: "text" },
+  [LEGACY_SINGLE_SOURCE_KEYS.insurance]: { column: "insurance", label: "Insurance", kind: "text" },
   housing_voucher: { column: "housing_voucher", label: "Housing voucher", kind: "text" },
-  preferred_living: { column: "preferred_living", label: "Preferred living", kind: "text" },
+  [LEGACY_SINGLE_SOURCE_KEYS.living]: { column: "about_me", label: "About me (preferred living)", kind: "text" },
   plan_year: { column: "plan_year", label: "Plan year", kind: "text" },
   disability_category: { column: "disability_category", label: "Disability category", kind: "text" },
   staff_ratio: { column: "staff_ratio", label: "Staff ratio", kind: "text" },
@@ -348,7 +359,7 @@ const PROFILE_FIELD_MAP: Record<string, { column: string; label: string; kind: "
   immunizations: { column: "immunizations", label: "Immunizations", kind: "array" },
   court_orders: { column: "court_orders", label: "Court orders", kind: "array" },
   rights_restrictions: { column: "rights_restrictions", label: "Rights restrictions", kind: "array" },
-  preferred_activities: { column: "preferred_activities", label: "Preferred activities", kind: "array" },
+  [LEGACY_SINGLE_SOURCE_KEYS.activities]: { column: "about_me", label: "About me (activities)", kind: "array" },
   roommates: { column: "roommates", label: "Roommates", kind: "array" },
   personal_belongings_inventory: { column: "personal_belongings_inventory", label: "Personal belongings inventory", kind: "array" },
   admission_date: { column: "admission_date", label: "Admission date", kind: "date" },
@@ -440,14 +451,21 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
       confidence: f.confidence ?? 0.85,
     }));
 
-    // Project the columns we might compare against.
-    const columns = Array.from(new Set(Object.values(PROFILE_FIELD_MAP).map((m) => m.column)));
+    // Project the columns (and contacts) we might compare against.
+    const columns = Array.from(
+      new Set(Object.values(PROFILE_FIELD_MAP).flatMap((m) => ("column" in m ? [m.column] : []))),
+    );
     const { data: client } = await sb
       .from("clients")
       .select(["id", ...columns].join(","))
       .eq("id", data.clientId)
       .maybeSingle();
     const row = (client ?? {}) as Record<string, unknown>;
+    const contacts = activeContacts(await loadClientContacts(sb, [data.clientId]));
+    const currentOf = (meta: ProfileFieldMeta): unknown =>
+      "column" in meta
+        ? row[meta.column]
+        : contactsWithRole(contacts, meta.contact.role)[meta.contact.slot]?.[meta.contact.part];
 
     type Proposal = {
       field_key: string;
@@ -468,7 +486,7 @@ export const previewClientUpdateFromDocument = createServerFn({ method: "POST" }
       seen.add(f.field_key);
       const incoming = displayFromField(meta, f).trim();
       if (!incoming) continue;
-      const current = displayFromCurrent(meta, row[meta.column]);
+      const current = displayFromCurrent(meta, currentOf(meta));
       const changed = (current ?? "") !== incoming;
       proposals.push({
         field_key: f.field_key,
@@ -579,10 +597,27 @@ export const resolveMergeFlag = createServerFn({ method: "POST" })
       // still mark the flag resolved so it stops blocking the queue, and the
       // admin can manually fix the field on the profile page.
       try {
-        await sb
-          .from("clients")
-          .update({ [flag.field]: flag.incoming_value })
-          .eq("id", flag.client_id);
+        const contactField = /^contact:([a-z_]+)\.([a-z_]+)$/.exec(flag.field);
+        if (contactField && isContactRole(contactField[1])) {
+          const { data: c } = await sb
+            .from("clients")
+            .select("organization_id")
+            .eq("id", flag.client_id)
+            .maybeSingle();
+          if (c) {
+            await setContactParts(sb, {
+              organizationId: c.organization_id,
+              clientId: flag.client_id,
+              role: contactField[1],
+              parts: { [contactField[2]]: flag.incoming_value },
+            });
+          }
+        } else {
+          await sb
+            .from("clients")
+            .update({ [flag.field]: flag.incoming_value })
+            .eq("id", flag.client_id);
+        }
       } catch { /* best-effort */ }
     }
     // keep_both / merge_into_existing don't need a column write; they're
@@ -638,7 +673,7 @@ export const overrideValidationIssue = createServerFn({ method: "POST" })
     return { ok: true, overrides: next };
   });
 
-// ── SOW supplemental: level of need, secondary emergency contact ────────
+// ── SOW supplemental: level of need ────────────────────────────────────
 export const setLevelOfNeed = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
@@ -655,34 +690,6 @@ export const setLevelOfNeed = createServerFn({ method: "POST" })
       .from("clients")
       .update({ level_of_need: data.value?.trim() || null })
       .eq("id", data.clientId);
-    if (error) throw error;
-    return { ok: true };
-  });
-
-export const setEmergencyContact = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({
-      clientId: z.string().uuid(),
-      slot: z.enum(["primary", "secondary"]),
-      name: z.string().max(120).nullable().optional(),
-      phone: z.string().max(40).nullable().optional(),
-      instructions: z.string().max(2000).nullable().optional(),
-    }).parse(i),
-  )
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as Sb;
-    if (!sb || !context.userId) return { ok: false };
-    await requireAdminForClient(sb, context.userId as string, data.clientId);
-    const cols = data.slot === "primary"
-      ? { name: "emergency_contact_name", phone: "emergency_contact_phone", instr: "emergency_contact_instructions" }
-      : { name: "emergency_contact_2_name", phone: "emergency_contact_2_phone", instr: "emergency_contact_2_instructions" };
-    const patch: Record<string, unknown> = {};
-    if (data.name !== undefined) patch[cols.name] = data.name?.trim() || null;
-    if (data.phone !== undefined) patch[cols.phone] = data.phone?.trim() || null;
-    if (data.instructions !== undefined) patch[cols.instr] = data.instructions?.trim() || null;
-    if (Object.keys(patch).length === 0) return { ok: true };
-    const { error } = await sb.from("clients").update(patch).eq("id", data.clientId);
     if (error) throw error;
     return { ok: true };
   });

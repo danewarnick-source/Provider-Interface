@@ -11,26 +11,7 @@ export const MEDICAL_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "swallowing_alerts",
   "self_admin_med_support",
   "self_admin_med_support_locked",
-  "primary_care_name",
-  "primary_care_phone",
-  "neurologist_name",
-  "neurologist_phone",
-  "dentist_name",
-  "dentist_phone",
-  "dentist_address",
-  "prescriber_name",
-  "prescriber_phone",
-  "med_prescriber_name",
-  "med_prescriber_phone",
-  "pcp_name",
-  "pcp_phone",
-  "specialist_name",
-  "specialist_phone",
-  "psychiatrist_name",
-  "psychiatrist_phone",
-  "psychiatrist_address",
-  "physician_address",
-  "medical_insurance",
+  "insurance",
   "advanced_directives",
   "emergency_medical_treatment_authorization",
   "diagnoses",
@@ -43,17 +24,8 @@ export const MEDICAL_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "palliative_care_status",
   "hospice_status",
   "has_abi",
-  "clinical_alert",
-  "pertinent_health_notes",
-  "dietary_needs",
   "height_inches",
   "weight_pounds",
-]);
-
-/** clients columns that are billing authorizations (need Billing: Edit to change). */
-export const BILLING_CLIENT_FIELDS: ReadonlySet<string> = new Set([
-  "authorized_dspd_codes",
-  "job_code",
 ]);
 
 /** clients columns no caller may set through a patch. */
@@ -89,7 +61,6 @@ export function actionsForClientPatch(
   const actions = new Set<ManageClientAction>(["edit"]);
   for (const k of changedClientFields(before, patch)) {
     if (MEDICAL_CLIENT_FIELDS.has(k)) actions.add("edit_medical");
-    if (BILLING_CLIENT_FIELDS.has(k)) actions.add("edit_billing");
     if (k === "account_status" || k === "discharge_date") actions.add("discharge");
   }
   return [...actions];
@@ -114,12 +85,6 @@ export interface ClientRecordTable {
 }
 
 export const CLIENT_RECORD_TABLES = {
-  client_emergency_contacts: {
-    action: "edit",
-    ops: ["insert", "update"],
-    key: "client",
-    hasOrgColumn: true,
-  },
   client_documents: {
     action: "edit",
     ops: ["insert", "update"],

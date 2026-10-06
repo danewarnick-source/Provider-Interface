@@ -2,7 +2,7 @@
 // only shows west of UTC.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ageOn, daysUntil, formatDate, parseLocalDate } from "./dates.ts";
+import { ageOn, daysUntil, formatDate, parseLocalDate, todayYmd } from "./dates.ts";
 
 process.env.TZ = "America/Denver";
 
@@ -61,5 +61,13 @@ describe("daysUntil", () => {
   });
   it("null when blank", () => {
     assert.equal(daysUntil(undefined), null);
+  });
+});
+
+describe("todayYmd", () => {
+  it("uses the local calendar day, not UTC", () => {
+    // 11pm in Utah on Jul 1 is already Jul 2 in UTC.
+    assert.equal(todayYmd(new Date(2026, 6, 1, 23, 30)), "2026-07-01");
+    assert.equal(todayYmd(new Date(2026, 0, 5)), "2026-01-05");
   });
 });

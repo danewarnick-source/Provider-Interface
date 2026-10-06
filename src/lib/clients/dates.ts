@@ -54,3 +54,9 @@ export function daysUntil(
   const ms = startOfDay(d).getTime() - startOfDay(from).getTime();
   return Math.round(ms / 86_400_000);
 }
+
+/** Today (or `now`) as a local YYYY-MM-DD. */
+export function todayYmd(now: Date = new Date()): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`;
+}

@@ -2,8 +2,9 @@
 // with a real, admin-editable data source on the `clients` row.
 //
 // Grouped sections: Identity & IDs, Insurance & Payment, Physical Description,
-// Places Frequented, Health / Safety. All fields optional (intake never
-// blocked) — present so staff can complete the record over time.
+// Places Frequented, Allergies. All fields optional (intake never blocked).
+// Contacts and providers are edited in Contacts (client_contacts); staff
+// must-knows in the profile's alert (special_directions).
 //
 // Reads/writes: public.clients (RLS-scoped to org members via existing policy).
 
@@ -17,10 +18,8 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { onClientDutyFactsChanged } from "@/lib/staff-assignment-hooks.functions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { updateClient } from "@/lib/clients/writes.functions";
+import { Field, Section } from "./face-sheet-info-fields";
 
 const FIELDS = [
   // Identity & IDs
@@ -34,8 +33,7 @@ const FIELDS = [
   "intake_date",
   "medicaid_case_number",
   "medicaid_id",
-  "medicare_number",
-  "private_insurance",
+  "insurance",
   "payment_sources",
   "income_sources",
   // Physical
@@ -46,22 +44,7 @@ const FIELDS = [
   "identifying_marks",
   "places_frequented",
   // Safety / Health
-  "pertinent_health_notes",
   "allergies",
-  "dietary_needs",
-  // Providers
-  "residential_provider",
-  "day_program_provider",
-  "physician_address",
-  "dentist_address",
-  "psychiatrist_name",
-  "psychiatrist_phone",
-  "psychiatrist_address",
-  // Emergency contacts (address/relationship additions on clients row)
-  "emergency_contact_relationship",
-  "emergency_contact_address",
-  "emergency_contact_2_relationship",
-  "emergency_contact_2_address",
 ] as const;
 
 
@@ -127,14 +110,9 @@ export function FaceSheetInfoCard({ clientId }: { clientId: string }) {
         state_id_expires_on: form.state_id_expires_on || null,
         pcsp_signed_date: form.pcsp_signed_date || null,
         intake_date: form.intake_date || null,
-        emergency_contact_relationship: form.emergency_contact_relationship || null,
-        emergency_contact_address: form.emergency_contact_address || null,
-        emergency_contact_2_relationship: form.emergency_contact_2_relationship || null,
-        emergency_contact_2_address: form.emergency_contact_2_address || null,
         medicaid_case_number: form.medicaid_case_number || null,
         medicaid_id: form.medicaid_id || null,
-        medicare_number: form.medicare_number || null,
-        private_insurance: form.private_insurance || null,
+        insurance: form.insurance || null,
         payment_sources: toArr(form.payment_sources ?? ""),
         income_sources: toArr(form.income_sources ?? ""),
         height_inches: toIntOrNull(form.height_inches ?? ""),
@@ -143,16 +121,7 @@ export function FaceSheetInfoCard({ clientId }: { clientId: string }) {
         eye_color: form.eye_color || null,
         identifying_marks: form.identifying_marks || null,
         places_frequented: form.places_frequented || null,
-        pertinent_health_notes: form.pertinent_health_notes || null,
         allergies: toArr(form.allergies ?? ""),
-        dietary_needs: form.dietary_needs || null,
-        residential_provider: form.residential_provider || null,
-        day_program_provider: form.day_program_provider || null,
-        physician_address: form.physician_address || null,
-        dentist_address: form.dentist_address || null,
-        psychiatrist_name: form.psychiatrist_name || null,
-        psychiatrist_phone: form.psychiatrist_phone || null,
-        psychiatrist_address: form.psychiatrist_address || null,
       };
       if (!org?.organization_id) throw new Error("No organization selected.");
       await updateClientFn({ data: { organizationId: org.organization_id, clientId, patch } });
@@ -210,21 +179,10 @@ export function FaceSheetInfoCard({ clientId }: { clientId: string }) {
             <Field label="Intake date" k="intake_date" type="date" form={form} set={set} editing={editing} />
           </Section>
 
-          <Section title="Emergency contacts (extras on record)">
-            <Field label="Primary — relationship" k="emergency_contact_relationship" form={form} set={set} editing={editing} />
-            <Field label="Primary — address" k="emergency_contact_address" multiline form={form} set={set} editing={editing} full />
-            <Field label="Secondary — relationship" k="emergency_contact_2_relationship" form={form} set={set} editing={editing} />
-            <Field label="Secondary — address" k="emergency_contact_2_address" multiline form={form} set={set} editing={editing} full />
-          </Section>
-
-
-
-
           <Section title="Insurance & Payment">
             <Field label="Medicaid case #" k="medicaid_case_number" form={form} set={set} editing={editing} />
             <Field label="Medicaid #" k="medicaid_id" form={form} set={set} editing={editing} />
-            <Field label="Medicare #" k="medicare_number" form={form} set={set} editing={editing} />
-            <Field label="Private health insurance" k="private_insurance" form={form} set={set} editing={editing} />
+            <Field label="Insurance (Medicare, private plans)" k="insurance" multiline form={form} set={set} editing={editing} full />
             <Field label="Payment sources (comma-separated)" k="payment_sources" form={form} set={set} editing={editing} />
             <Field label="Income sources (comma-separated)" k="income_sources" form={form} set={set} editing={editing} />
           </Section>
@@ -239,19 +197,7 @@ export function FaceSheetInfoCard({ clientId }: { clientId: string }) {
           </Section>
 
           <Section title="Health & Safety">
-            <Field label="Pertinent health info" k="pertinent_health_notes" multiline form={form} set={set} editing={editing} full />
             <Field label="Allergies (comma-separated)" k="allergies" form={form} set={set} editing={editing} full />
-            <Field label="Special dietary needs" k="dietary_needs" multiline form={form} set={set} editing={editing} full />
-          </Section>
-
-          <Section title="Providers & Services">
-            <Field label="Residential provider" k="residential_provider" form={form} set={set} editing={editing} />
-            <Field label="Day program / agency" k="day_program_provider" form={form} set={set} editing={editing} />
-            <Field label="Physician address" k="physician_address" multiline form={form} set={set} editing={editing} full />
-            <Field label="Dentist address" k="dentist_address" multiline form={form} set={set} editing={editing} full />
-            <Field label="Psychiatrist name" k="psychiatrist_name" form={form} set={set} editing={editing} />
-            <Field label="Psychiatrist phone" k="psychiatrist_phone" form={form} set={set} editing={editing} />
-            <Field label="Psychiatrist address" k="psychiatrist_address" multiline form={form} set={set} editing={editing} full />
           </Section>
 
           {editing && (
@@ -267,56 +213,5 @@ export function FaceSheetInfoCard({ clientId }: { clientId: string }) {
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section>
-      <h4 className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.07em] text-muted-foreground/80">
-        {title}
-      </h4>
-      <div className="grid gap-3 sm:grid-cols-2">{children}</div>
-    </section>
-  );
-}
-
-function Field({
-  label, k, type = "text", multiline, full, editing, form, set,
-}: {
-  label: string;
-  k: string;
-  type?: string;
-  multiline?: boolean;
-  full?: boolean;
-  editing: boolean;
-  form: Record<string, string>;
-  set: (k: string, v: string) => void;
-}) {
-  const val = form[k] ?? "";
-  return (
-    <div className={full ? "sm:col-span-2" : undefined}>
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
-      {editing ? (
-        multiline ? (
-          <Textarea
-            className="mt-1 min-h-[68px] text-sm"
-            value={val}
-            onChange={(e) => set(k, e.target.value)}
-          />
-        ) : (
-          <Input
-            className="mt-1 h-9 text-sm"
-            type={type}
-            value={val}
-            onChange={(e) => set(k, e.target.value)}
-          />
-        )
-      ) : (
-        <div className="mt-1 min-h-[36px] whitespace-pre-wrap rounded-md border border-border/40 bg-muted/20 px-3 py-1.5 text-sm">
-          {val || <span className="text-muted-foreground">Not on file</span>}
-        </div>
-      )}
-    </div>
   );
 }

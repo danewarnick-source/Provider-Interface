@@ -22,6 +22,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ClientPhoto } from "@/components/client-photo";
+import { useClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
+import { contactLine, primaryContact } from "@/lib/clients/contacts";
 
 export const Route = createFileRoute("/dashboard/shift/$shiftId")({
   head: () => ({ meta: [{ title: "Shift Overview — Provider Interface" }] }),
@@ -39,7 +42,7 @@ type Shift = {
   ends_at: string;
   status: string;
   notes: string | null;
-  client: { first_name: string | null; last_name: string | null; profile_photo_url: string | null; date_of_birth: string | null; phone_number: string | null; physical_address: string | null; special_directions: string | null; pcsp_goals: string | null; emergency_contact_name: string | null; emergency_contact_phone: string | null; medicaid_id: string | null } | null;
+  client: { first_name: string | null; last_name: string | null; client_photo_url: string | null; date_of_birth: string | null; phone_number: string | null; physical_address: string | null; special_directions: string | null; pcsp_goals: string | null; medicaid_id: string | null } | null;
   code: { id: string; code: string; label: string | null; kind: string } | null;
 };
 
@@ -54,7 +57,7 @@ function ShiftOverviewPage() {
       const { data, error } = await supabase
         .from("scheduled_shifts")
         .select(
-          "id, organization_id, staff_id, client_id, code_id, job_code, starts_at, ends_at, status, notes, client:client_id(first_name,last_name,profile_photo_url,date_of_birth,phone_number,physical_address,special_directions,pcsp_goals,emergency_contact_name,emergency_contact_phone,medicaid_id), code:code_id(id,code,label,kind)",
+          "id, organization_id, staff_id, client_id, code_id, job_code, starts_at, ends_at, status, notes, client:client_id(first_name,last_name,client_photo_url,date_of_birth,phone_number,physical_address,special_directions,pcsp_goals,medicaid_id), code:code_id(id,code,label,kind)",
         )
         .eq("id", shiftId)
         .maybeSingle();
@@ -152,17 +155,21 @@ function HhsSupportHoursNote({
 
 function ClientProfileCard({ shift, clientName }: { shift: Shift; clientName: string }) {
   const c = shift.client;
+  const emergency = primaryContact(useClientContacts(shift.client_id).data ?? [], "emergency");
   return (
     <section className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-start gap-3">
         <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
-          {c?.profile_photo_url ? (
-            <img src={c.profile_photo_url} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-              <User className="h-6 w-6" />
-            </div>
-          )}
+          <ClientPhoto
+            path={c?.client_photo_url}
+            alt=""
+            className="h-full w-full object-cover"
+            fallback={
+              <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                <User className="h-6 w-6" />
+              </div>
+            }
+          />
         </div>
         <div className="min-w-0 flex-1">
           <h1 className="text-lg font-semibold leading-tight text-foreground">{clientName}</h1>
@@ -177,7 +184,7 @@ function ClientProfileCard({ shift, clientName }: { shift: Shift; clientName: st
           <Link to="/dashboard/workspace/$clientId" params={{ clientId: shift.client_id }}>Full profile</Link>
         </Button>
       </div>
-      {(c?.special_directions || c?.pcsp_goals || c?.emergency_contact_name) && (
+      {(c?.special_directions || c?.pcsp_goals || emergency) && (
         <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
           {c?.special_directions && (
             <div className="rounded-md bg-amber-50 p-2 text-amber-900">
@@ -191,10 +198,10 @@ function ClientProfileCard({ shift, clientName }: { shift: Shift; clientName: st
               <p className="whitespace-pre-wrap">{c.pcsp_goals}</p>
             </div>
           )}
-          {c?.emergency_contact_name && (
+          {emergency && (
             <div className="rounded-md bg-muted/40 p-2">
               <p className="font-semibold mb-0.5">Emergency contact</p>
-              <p>{c.emergency_contact_name} {c.emergency_contact_phone ? `· ${c.emergency_contact_phone}` : ""}</p>
+              <p>{contactLine(emergency)}</p>
             </div>
           )}
         </div>

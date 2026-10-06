@@ -29,6 +29,7 @@ import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { logPhiAccess } from "@/lib/phi-access-audit.server";
 import { assignmentCoversCode } from "@/lib/assignment-codes";
 import { queryOptions } from "@tanstack/react-query";
+import { activeContacts, loadClientContacts, type ClientContact } from "./contacts";
 import type { CSTGoal } from "./training.functions";
 import {
   type ClientVisibilityRow,
@@ -64,16 +65,10 @@ export type CareIdentity = {
   status: string | null;
   phone_number: string | null;
   is_own_guardian: boolean | null;
-  guardian_name: string | null;
-  guardian_phone: string | null;
-  support_coordinator_name: string | null;
-  support_coordinator_phone: string | null;
-  support_coordinator_email: string | null;
   has_abi: boolean | null;
   hr_applicable: boolean | null;
   dnr_applicable: boolean | null;
   diagnoses: string[];
-  primary_care_name: string | null;
   pcsp_expiration_date: string | null;
   special_directions: string | null;
 };
@@ -136,13 +131,6 @@ export type CustomFieldWithValue = {
   value: CustomFieldValue;
 };
 
-export type CareEmergencyContact = {
-  id: string;
-  name: string;
-  phone: string | null;
-  relationship: string | null;
-};
-
 export type ClientCareVisibility = {
   /** Goals staff may check on clock-out / punch-pad.
    *  Rule: non-empty statement AND per-goal visible. Uploaded PCSP goals
@@ -169,10 +157,10 @@ export type ClientCareVisibility = {
      *  Custom fields have no per-field visibility switch — they inherit
      *  their section's toggle exclusively. */
     custom_fields: CustomFieldWithValue[];
+    /** Active contacts (client_contacts). Always mirrors admin — no visibility gating. */
+    contacts: ClientContact[];
     /** Always mirrors admin — no visibility gating. */
-    emergency_contacts: CareEmergencyContact[];
-    /** Always mirrors admin — no visibility gating. */
-    preferred_activities: string[];
+    about_me: string | null;
   };
 };
 
@@ -188,8 +176,9 @@ export type ClientCareData = {
   /** All custom fields (admin view). Staff view uses
    *  `visibility.staffCare.custom_fields` (filtered by section toggle). */
   custom_fields: CustomFieldWithValue[];
-  emergency_contacts: CareEmergencyContact[];
-  preferred_activities: string[];
+  /** Active contacts (client_contacts). */
+  contacts: ClientContact[];
+  about_me: string | null;
   /** Raw visibility row (as stored). Admin toggle UIs read this. */
   visibilityRow: ClientVisibilityRow;
   visibility: ClientCareVisibility;
@@ -229,16 +218,10 @@ export const getClientCareData = createServerFn({ method: "GET" })
         status: null,
         phone_number: null,
         is_own_guardian: null,
-        guardian_name: null,
-        guardian_phone: null,
-        support_coordinator_name: null,
-        support_coordinator_phone: null,
-        support_coordinator_email: null,
         has_abi: null,
         hr_applicable: null,
         dnr_applicable: null,
         diagnoses: [],
-        primary_care_name: null,
         pcsp_expiration_date: null,
         special_directions: null,
       };
@@ -259,8 +242,8 @@ export const getClientCareData = createServerFn({ method: "GET" })
         medications: [],
         authorized_codes: [],
         custom_fields: [],
-        emergency_contacts: [],
-        preferred_activities: [],
+        contacts: [],
+        about_me: null,
         visibilityRow: emptyVisibilityRow,
         visibility: {
           goalsForStaff: [],
@@ -273,8 +256,8 @@ export const getClientCareData = createServerFn({ method: "GET" })
             medications: [],
             authorized_codes: [],
             custom_fields: [],
-            emergency_contacts: [],
-            preferred_activities: [],
+            contacts: [],
+            about_me: null,
           },
         },
       };
@@ -285,7 +268,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
       supabase
         .from("clients")
         .select(
-          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, self_admin_med_support, self_admin_med_support_locked, preferred_activities, phone_number, is_own_guardian, guardian_name, guardian_phone, support_coordinator_name, support_coordinator_phone, support_coordinator_email, has_abi, hr_applicable, dnr_applicable, diagnoses, primary_care_name, pcsp_expiration_date, special_directions, pcsp_goals",
+          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, self_admin_med_support, self_admin_med_support_locked, about_me, phone_number, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, pcsp_expiration_date, special_directions, pcsp_goals",
         )
         .eq("id", clientId)
         .maybeSingle(),
@@ -324,12 +307,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
         .select("definition_id, value_text, value_number, value_boolean, value_date")
         .eq("entity_kind", "client")
         .eq("entity_id", clientId),
-      supabase
-        .from("client_emergency_contacts")
-        .select("id, name, phone, relationship")
-        .eq("client_id", clientId)
-        .is("archived_at", null)
-        .order("created_at", { ascending: true }),
+      loadClientContacts(supabase, [clientId]).catch(() => [] as ClientContact[]),
       supabase
         .from("staff_assignments")
         .select("service_codes")
@@ -379,18 +357,12 @@ export const getClientCareData = createServerFn({ method: "GET" })
       status: row.account_status ?? null,
       phone_number: row.phone_number ?? null,
       is_own_guardian: row.is_own_guardian ?? null,
-      guardian_name: row.guardian_name ?? null,
-      guardian_phone: row.guardian_phone ?? null,
-      support_coordinator_name: row.support_coordinator_name ?? null,
-      support_coordinator_phone: row.support_coordinator_phone ?? null,
-      support_coordinator_email: row.support_coordinator_email ?? null,
       has_abi: row.has_abi ?? null,
       hr_applicable: row.hr_applicable ?? null,
       dnr_applicable: row.dnr_applicable ?? null,
       diagnoses: Array.isArray(row.diagnoses)
         ? (row.diagnoses as unknown[]).map((s) => String(s ?? "").trim()).filter(Boolean)
         : [],
-      primary_care_name: row.primary_care_name ?? null,
       pcsp_expiration_date: row.pcsp_expiration_date ?? null,
       special_directions: row.special_directions ?? null,
     };
@@ -519,22 +491,15 @@ export const getClientCareData = createServerFn({ method: "GET" })
 
     // goalsForStaff — clock-out checklist. Same on-file PCSP goals the
     // client profile shows (plus the flat pcsp_goals fallback above).
-    // Intentionally does NOT require a matching job_code / service code.
+    // Intentionally does NOT require a matching service code.
     // Per-goal field visibility switches are still honored.
     const codeUpper = shiftServiceCode ? shiftServiceCode.toUpperCase() : null;
     const goalsForStaff = selectGoalsForStaffClockOut(goals, (goalId) =>
       isFieldVisible(visibilityRow, fieldKey("care_plan", "goal", goalId)),
     );
 
-    const emergency_contacts: CareEmergencyContact[] = ((ecRes?.data ?? []) as any[]).map((c) => ({
-      id: String(c.id),
-      name: String(c.name ?? ""),
-      phone: c.phone ?? null,
-      relationship: c.relationship ?? null,
-    }));
-    const preferred_activities: string[] = Array.isArray(row.preferred_activities)
-      ? (row.preferred_activities as unknown[]).map((s) => String(s ?? "").trim()).filter(Boolean)
-      : [];
+    const contacts = activeContacts((ecRes ?? []) as ClientContact[]);
+    const about_me: string | null = row.about_me ?? null;
 
     const visibility: ClientCareVisibility = {
       goalsForStaff,
@@ -547,8 +512,8 @@ export const getClientCareData = createServerFn({ method: "GET" })
         medications: medicationsStaff,
         authorized_codes: authorizedCodesStaff,
         custom_fields: customFieldsStaff,
-        emergency_contacts,
-        preferred_activities,
+        contacts,
+        about_me,
       },
     };
 
@@ -561,8 +526,8 @@ export const getClientCareData = createServerFn({ method: "GET" })
       medications,
       authorized_codes,
       custom_fields,
-      emergency_contacts,
-      preferred_activities,
+      contacts,
+      about_me,
       visibilityRow,
       visibility,
     };

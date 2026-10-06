@@ -39,7 +39,6 @@ import {
 } from "@/lib/finish-onboarding.functions";
 import {
   setLevelOfNeed,
-  setEmergencyContact,
   setGrievanceAcknowledgment,
   appendClientArrayField,
   upsertClientMedication,
@@ -57,8 +56,10 @@ import { isClockableServiceCode } from "@/lib/service-billing";
 import {
   PROFILE_FIELD_BY_KEY,
   type ProfileField,
-} from "@/lib/clients/profile-fields";
+} from "@/lib/clients/profile-field-registry";
 import { CaseloadEditor } from "@/components/clients/shared/caseload-editor";
+import { useSaveContact } from "@/components/clients/shared/hooks/use-client-contacts";
+import { contactsWithRole, primaryContact, type ClientContact } from "@/lib/clients/contacts";
 import { NectarAsk } from "@/components/clients/shared/nectar-ask";
 
 export type BillingCodeRow = {
@@ -73,14 +74,10 @@ export type ClientPcsp = {
   physical_address: string | null;
   geofence_radius_feet: number | null;
   is_own_guardian: boolean | null;
-  guardian_name: string | null;
 };
 
 export type SowSupp = {
   level_of_need: string | null;
-  emergency_contact_2_name: string | null;
-  emergency_contact_2_phone: string | null;
-  emergency_contact_2_instructions: string | null;
   grievance_acknowledged: boolean | null;
   grievance_signed_date: string | null;
 };
@@ -187,6 +184,7 @@ export function RequiredToGoLiveGroup({
   codes,
   client,
   sowSupp,
+  contacts,
   sowMissingKeys,
   evvApplicable,
   rowPass,
@@ -196,6 +194,7 @@ export function RequiredToGoLiveGroup({
   codes: BillingCodeRow[];
   client: ClientPcsp;
   sowSupp: SowSupp;
+  contacts: ClientContact[];
   sowMissingKeys: string[];
   evvApplicable: boolean;
   rowPass: RequiredRowPass;
@@ -229,7 +228,7 @@ export function RequiredToGoLiveGroup({
         clientId={clientId}
         initial={{
           is_own_guardian: client.is_own_guardian ?? null,
-          guardian_name: client.guardian_name ?? "",
+          guardian: primaryContact(contacts, "guardian"),
         }}
         passing={rowPass.guardian}
         onChanged={onChanged}
@@ -259,11 +258,7 @@ export function RequiredToGoLiveGroup({
       />
       <EmergencyContact2Row
         clientId={clientId}
-        initial={{
-          name: sowSupp.emergency_contact_2_name ?? "",
-          phone: sowSupp.emergency_contact_2_phone ?? "",
-          instructions: sowSupp.emergency_contact_2_instructions ?? "",
-        }}
+        second={contactsWithRole(contacts, "emergency")[1] ?? null}
         passing={rowPass.ec2}
         onChanged={onChanged}
       />
@@ -611,27 +606,24 @@ function GuardianRow({
   clientId, initial, passing, onChanged,
 }: {
   clientId: string;
-  initial: { is_own_guardian: boolean | null; guardian_name: string };
+  initial: { is_own_guardian: boolean | null; guardian: ClientContact | null };
   passing: boolean;
   onChanged: () => void;
 }) {
   const [isOwn, setIsOwn] = useState<boolean>(initial.is_own_guardian ?? true);
-  const [name, setName] = useState<string>(initial.guardian_name ?? "");
+  const [name, setName] = useState<string>(initial.guardian?.name ?? "");
+  const [phone, setPhone] = useState<string>(initial.guardian?.phone ?? "");
   const patchFn = useServerFn(saveOnboardingClientPatch);
+  const saveContact = useSaveContact(clientId);
   const m = useMutation({
-    mutationFn: () => patchFn({
-      data: {
-        clientId,
-        patch: {
-          is_own_guardian: isOwn,
-          guardian_name: isOwn ? null : name.trim(),
-        },
-      },
-    }),
+    mutationFn: async () => {
+      await patchFn({ data: { clientId, patch: { is_own_guardian: isOwn } } });
+      if (!isOwn) await saveContact(initial.guardian, { role: "guardian", name, phone, is_primary: true });
+    },
     onSuccess: () => { toast.success("Guardianship saved."); onChanged(); },
     onError: (e: Error) => toast.error(e.message),
   });
-  const blocked = !isOwn && !name.trim();
+  const blocked = !isOwn && (!name.trim() || !phone.trim());
   return (
     <ChecklistRow
       passing={passing}
@@ -639,7 +631,7 @@ function GuardianRow({
       valueChip={
         passing ? (
           <span className="text-xs text-muted-foreground">
-            {initial.is_own_guardian ? "Own guardian" : initial.guardian_name}
+            {initial.is_own_guardian ? "Own guardian" : initial.guardian?.name}
           </span>
         ) : null
       }
@@ -654,9 +646,15 @@ function GuardianRow({
           <Switch checked={isOwn} onCheckedChange={setIsOwn} />
         </div>
         {!isOwn ? (
-          <div className="space-y-1">
-            <Label className="text-xs">Guardian name <span className="text-destructive">*</span></Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full legal name" />
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label className="text-xs">Guardian name <span className="text-destructive">*</span></Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full legal name" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Guardian phone <span className="text-destructive">*</span></Label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
           </div>
         ) : null}
         <div className="flex justify-end">
@@ -869,19 +867,19 @@ function LevelOfNeedRow({
 // Row 9: second emergency contact
 // ---------------------------------------------------------------------------
 function EmergencyContact2Row({
-  clientId, initial, passing, onChanged,
+  clientId, second, passing, onChanged,
 }: {
   clientId: string;
-  initial: { name: string; phone: string; instructions: string };
+  second: ClientContact | null;
   passing: boolean;
   onChanged: () => void;
 }) {
-  const [name, setName] = useState(initial.name);
-  const [phone, setPhone] = useState(initial.phone);
-  const [instr, setInstr] = useState(initial.instructions);
-  const saveFn = useServerFn(setEmergencyContact);
+  const [name, setName] = useState(second?.name ?? "");
+  const [phone, setPhone] = useState(second?.phone ?? "");
+  const [instr, setInstr] = useState(second?.notes ?? "");
+  const saveContact = useSaveContact(clientId);
   const m = useMutation({
-    mutationFn: () => saveFn({ data: { clientId, slot: "secondary", name, phone, instructions: instr } }),
+    mutationFn: () => saveContact(second, { role: "emergency", name, phone, notes: instr, is_primary: false }),
     onSuccess: () => { toast.success("Secondary emergency contact saved."); onChanged(); },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -891,7 +889,7 @@ function EmergencyContact2Row({
       label="Second emergency contact"
       valueChip={
         passing ? (
-          <span className="text-xs text-muted-foreground">{initial.name}</span>
+          <span className="text-xs text-muted-foreground">{second?.name}</span>
         ) : null
       }
       defaultOpen={!passing}

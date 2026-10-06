@@ -13,20 +13,19 @@ import {
   CLIENT_PROFILE_FIELDS,
   PROFILE_CLIENT_COLUMNS,
   PROFILE_CUSTOM_KEYS,
-  profileFieldHasValue,
-  writeProfileFieldValue,
   type ProfileCustomsMap,
   type ProfileField,
-} from "@/lib/clients/profile-fields";
+} from "@/lib/clients/profile-field-registry";
+import { profileFieldHasValue, writeProfileFieldValue } from "@/lib/clients/profile-fields";
+import { activeContacts, guardianSatisfied, loadClientContacts } from "@/lib/clients/contacts";
 
 // Whitelist of clients-table columns the wizard may patch directly via
 // saveOnboardingClientPatch (legacy helpers below). The registry's
 // writeProfileFieldValue handles every other column write.
+// Contacts (guardian, emergency, …) are written through contacts.functions.ts.
 const PATCHABLE_CLIENT_COLS = new Set([
   "physical_address", "geofence_radius_feet",
-  "is_own_guardian", "guardian_name", "guardian_phone",
-  "guardian_relationship", "guardian_email", "guardian_address",
-  "emergency_contact_name", "emergency_contact_phone",
+  "is_own_guardian",
   "special_directions", "allergies",
 ]);
 
@@ -64,8 +63,7 @@ export const getClientOnboardingState = createServerFn({ method: "POST" })
     const extraCols = [
       "id", "organization_id",
       "home_latitude", "home_longitude", "geofence_radius_feet",
-      "is_own_guardian", "guardian_name", "guardian_phone",
-      "guardian_relationship", "guardian_email",
+      "is_own_guardian",
     ];
     const cols = Array.from(new Set([...extraCols, ...PROFILE_CLIENT_COLUMNS])).join(", ");
     const { data: client, error } = await sb
@@ -76,6 +74,7 @@ export const getClientOnboardingState = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!client) throw new Error("Client not found");
     await assertOrgMember(sb, context.userId, client.organization_id);
+    const contacts = activeContacts(await loadClientContacts(sb, [data.clientId]));
 
     const [{ count: assignedCount }, { data: codes }, { data: defs }] = await Promise.all([
       sb
@@ -148,20 +147,17 @@ export const getClientOnboardingState = createServerFn({ method: "POST" })
       },
     );
 
-    const guardianOk =
-      client.is_own_guardian === true ||
-      (client.is_own_guardian === false &&
-        !!client.guardian_name?.trim() &&
-        !!client.guardian_phone?.trim());
+    const guardianOk = guardianSatisfied(client.is_own_guardian, contacts);
 
     // SOW-required registry fields that don't yet have a value.
     const sowMissingKeys: string[] = CLIENT_PROFILE_FIELDS
-      .filter((f) => f.sowRequired && !profileFieldHasValue(client as Record<string, unknown>, profileCustoms, f))
+      .filter((f) => f.sowRequired && !profileFieldHasValue(client as Record<string, unknown>, profileCustoms, f, contacts))
       .map((f) => f.key);
 
     return {
       organizationId: client.organization_id as string,
       client,
+      contacts,
       profileCustoms,
       sowMissingKeys,
       assignedCount: assignedCount ?? 0,
@@ -485,8 +481,7 @@ export const skipOnboardingItem = createServerFn({ method: "POST" })
 // Add one or more DSPD service codes to a client. Used by the inline "Add
 // billing code" control on the readiness card + onboarding wizard — no
 // navigation: upsert client_billing_codes (default rate 0, default annual
-// auth 0) and merge codes into clients.authorized_dspd_codes + job_code
-// (billing codes mirror — job_code kept in sync for scheduler reads).
+// auth 0). client_billing_codes is the one source for a client's codes.
 // ---------------------------------------------------------------------------
 export const addClientBillingCodes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -504,7 +499,7 @@ export const addClientBillingCodes = createServerFn({ method: "POST" })
 
     const { data: client } = await sb
       .from("clients")
-      .select("id, organization_id, authorized_dspd_codes, job_code")
+      .select("id, organization_id")
       .eq("id", data.clientId)
       .maybeSingle();
     if (!client) throw new Error("Client not found");
@@ -573,28 +568,12 @@ export const addClientBillingCodes = createServerFn({ method: "POST" })
       throw new Error("No billing-code rows were written.");
     }
 
-    const mergedAuthorized = Array.from(
-      new Set([...(client.authorized_dspd_codes ?? []), ...codes]),
-    );
-    const mergedJobCode = Array.from(
-      new Set([...(client.job_code ?? []), ...codes]),
-    );
-    const { error: cErr } = await sb
-      .from("clients")
-      .update({
-        authorized_dspd_codes: mergedAuthorized,
-        job_code: mergedJobCode,
-      })
-      .eq("id", data.clientId);
-    if (cErr) throw new Error(cErr.message);
-
     return { ok: true, added: upserted.length };
   });
 
 // ---------------------------------------------------------------------------
-// Remove a single client_billing_codes row. Also cleans the mirrored entries
-// in clients.authorized_dspd_codes / clients.job_code for that service code,
-// so readiness recomputes correctly. Used by the Setup Checklist row 1.
+// Remove a single client_billing_codes row (codes live only there, so
+// readiness recomputes from it). Used by the Setup Checklist row 1.
 // ---------------------------------------------------------------------------
 export const removeClientBillingCode = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -619,23 +598,5 @@ export const removeClientBillingCode = createServerFn({ method: "POST" })
       .eq("id", data.codeId);
     if (dErr) throw new Error(dErr.message);
 
-    const code = String(row.service_code ?? "").trim().toUpperCase();
-    if (code) {
-      const { data: client } = await sb
-        .from("clients")
-        .select("authorized_dspd_codes, job_code")
-        .eq("id", row.client_id)
-        .maybeSingle();
-      if (client) {
-        const authorized = ((client.authorized_dspd_codes ?? []) as string[])
-          .filter((c) => String(c ?? "").trim().toUpperCase() !== code);
-        const jobCode = ((client.job_code ?? []) as string[])
-          .filter((c) => String(c ?? "").trim().toUpperCase() !== code);
-        await sb
-          .from("clients")
-          .update({ authorized_dspd_codes: authorized, job_code: jobCode })
-          .eq("id", row.client_id);
-      }
-    }
     return { ok: true };
   });

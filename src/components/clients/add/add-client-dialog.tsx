@@ -19,20 +19,13 @@ export type AddClientValues = {
   last_name: string;
   phone_number: string;
   physical_address: string;
-  pcsp_goals: string[];
-  job_code: string[];
+  /** Service codes picked here become $0 authorization rows (client_billing_codes). */
+  codes: string[];
   medicaid_id: string;
   geofence_radius_feet: number;
-  special_directions: string;
-  date_of_birth: string;
-  emergency_contact_name: string;
-  emergency_contact_phone: string;
-  profile_photo_url: string;
-  is_own_guardian?: boolean;
-  guardian_name?: string;
-  guardian_phone?: string;
-  guardian_relationship?: string;
-  guardian_email?: string;
+  is_own_guardian: boolean;
+  /** Required when the client is not their own guardian; saved to client_contacts. */
+  guardian: { name: string; phone: string; relationship: string; email: string } | null;
   intake_mode: "intake" | "profile-only";
 };
 
@@ -86,16 +79,12 @@ export function AddClientDialog({
     onSubmit({
       first_name: first.trim(), last_name: last.trim(),
       phone_number: phone.trim(), physical_address: addr.trim(),
-      pcsp_goals: [], job_code: jobCodes,
+      codes: jobCodes,
       medicaid_id: medicaidId.trim(), geofence_radius_feet: radius,
-      special_directions: "", date_of_birth: "",
-      emergency_contact_name: "", emergency_contact_phone: "",
-      profile_photo_url: "",
       is_own_guardian: isOwnGuardian,
-      guardian_name: isOwnGuardian ? "" : gName.trim(),
-      guardian_phone: isOwnGuardian ? "" : gPhone.trim(),
-      guardian_relationship: isOwnGuardian ? "" : gRel.trim(),
-      guardian_email: isOwnGuardian ? "" : gEmail.trim(),
+      guardian: isOwnGuardian
+        ? null
+        : { name: gName.trim(), phone: gPhone.trim(), relationship: gRel.trim(), email: gEmail.trim() },
       intake_mode: mode!,
     });
   }

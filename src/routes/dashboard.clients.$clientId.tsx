@@ -39,7 +39,7 @@ import {
   previewClientUpdateFromDocument,
   applySelectedClientFields,
 } from "@/lib/import-checklist.functions";
-import { reclaimExternalCodesAsOurs } from "@/lib/clients/billing-fix.functions";
+import { loadActiveCodes } from "@/lib/clients/codes";
 import { AddCodesControl } from "@/components/clients/add/add-codes-control";
 import { BillingCodesDetail } from "@/components/clients/profile/billing-codes-detail";
 import {
@@ -274,13 +274,16 @@ function ClientProfileHub() {
         .from("clients")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .select(
-          "id, first_name, last_name, phone_number, physical_address, home_latitude, home_longitude, geofence_radius_feet, date_of_birth, medicaid_id, account_status, authorized_dspd_codes, pcsp_goals, job_code, special_directions, emergency_contact_name, emergency_contact_phone, emergency_contact_instructions, emergency_contact_2_name, emergency_contact_2_phone, emergency_contact_2_instructions, level_of_need, form_1056_number, form_1056_approved_date, grievance_acknowledged, grievance_signed_date, rights_restrictions, dnr_status, dnr_location, polst_status, palliative_care_status, hospice_status, team_id, admin_hours_per_week, feature_config, support_coordinator_name, support_coordinator_email, support_coordinator_phone, disability_category, bsp_status, diagnoses, advanced_directives, admission_date, discharge_date" as any,
+          "id, first_name, last_name, phone_number, physical_address, home_latitude, home_longitude, geofence_radius_feet, date_of_birth, medicaid_id, account_status, pcsp_goals, special_directions, level_of_need, form_1056_number, form_1056_approved_date, grievance_acknowledged, grievance_signed_date, rights_restrictions, dnr_status, dnr_location, polst_status, palliative_care_status, hospice_status, team_id, admin_hours_per_week, feature_config, disability_category, bsp_status, diagnoses, advanced_directives, admission_date, discharge_date" as any,
         )
         .eq("id", clientId)
         .eq("organization_id", orgId!)
         .maybeSingle();
       if (error) throw error;
-      return data as Record<string, unknown> | null;
+      if (!data) return null;
+      // Service codes: active client_billing_codes rows (the one source).
+      const codes = (await loadActiveCodes(supabase, [clientId])).get(clientId) ?? [];
+      return { ...(data as unknown as Record<string, unknown>), codes } as Record<string, unknown>;
     },
   });
 
@@ -305,15 +308,11 @@ function ClientProfileHub() {
   const fullName = client
     ? `${client.first_name ?? ""} ${client.last_name ?? ""}`.trim() || "—"
     : "Loading…";
-  const codes: string[] = Array.isArray(client?.job_code)
-    ? (client?.job_code as string[])
-    : Array.isArray(client?.authorized_dspd_codes)
-      ? (client?.authorized_dspd_codes as string[])
-      : [];
+  const codes = (client?.codes as string[] | undefined) ?? [];
   const featureClient = client
     ? {
         feature_config: (client.feature_config as Record<string, boolean> | null) ?? null,
-        authorized_dspd_codes: codes,
+        codes,
       }
     : null;
   const isHostHome = clientFeatureVisible(featureClient, "host_home");
@@ -594,9 +593,7 @@ function PlanGoalsPanel({
   orgId?: string;
 }) {
   const qc = useQueryClient();
-  const codes = Array.isArray(client?.authorized_dspd_codes)
-    ? (client!.authorized_dspd_codes as string[])
-    : [];
+  const codes = (client?.codes as string[] | undefined) ?? [];
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -1520,68 +1517,8 @@ function BillingCodesPanel({
 }) {
   const qc = useQueryClient();
 
-  // Safety net: surface external-service rows whose codes should probably be
-  // ours (e.g. Smart Import misclassified the provider name). One-click
-  // "Reclaim" moves them back to authorized codes + pending billing stubs.
-  const { data: reclaimableCodes } = useQuery({
-    queryKey: ["client-reclaimable-codes", clientId],
-    queryFn: async () => {
-      const [{ data: client, error: cErr }, { data: ext, error: eErr }] = await Promise.all([
-        supabase.from("clients").select("authorized_dspd_codes").eq("id", clientId).maybeSingle(),
-        supabase.from("client_external_services").select("service_code").eq("client_id", clientId),
-      ]);
-      if (cErr) throw cErr;
-      if (eErr) throw eErr;
-      const known = new Set(
-        (Array.isArray(client?.authorized_dspd_codes)
-          ? (client!.authorized_dspd_codes as string[])
-          : []
-        ).map((c) => c.toUpperCase()),
-      );
-      const missing = Array.from(
-        new Set((ext ?? []).map((r) => String(r.service_code ?? "").toUpperCase()).filter(Boolean)),
-      ).filter((c) => !known.has(c));
-      return missing;
-    },
-    staleTime: 30_000,
-  });
-  const reclaimFn = useServerFn(reclaimExternalCodesAsOurs);
-  const reclaimMut = useMutation({
-    mutationFn: async (list: string[]) => reclaimFn({ data: { clientId, codes: list } }),
-    onSuccess: (res) => {
-      toast.success(`Reclaimed ${res.moved} code${res.moved === 1 ? "" : "s"} as yours`);
-      qc.invalidateQueries({ queryKey: ["client-reclaimable-codes", clientId] });
-      qc.invalidateQueries({ queryKey: ["client-profile-codes", clientId] });
-      qc.invalidateQueries({ queryKey: ["client-profile"] });
-      qc.invalidateQueries({ queryKey: ["all-client-billing-codes"] });
-      qc.invalidateQueries({ queryKey: ["client-billing-codes"] });
-      qc.invalidateQueries({ queryKey: ["client-budget"] });
-    },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Failed to reclaim"),
-  });
-
   return (
     <div className="space-y-3">
-      {reclaimableCodes && reclaimableCodes.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-50/60 px-4 py-2.5 text-xs text-amber-900 dark:bg-amber-950/20 dark:text-amber-200">
-          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-          <span className="min-w-0">
-            {reclaimableCodes.length} code{reclaimableCodes.length === 1 ? "" : "s"} from this
-            client's PCSP {reclaimableCodes.length === 1 ? "isn't" : "aren't"} authorized here:{" "}
-            <span className="font-medium">{reclaimableCodes.join(", ")}</span>. Smart Import may
-            have filed {reclaimableCodes.length === 1 ? "it" : "them"} as another provider's.
-          </span>
-          <Button
-            type="button"
-            size="sm"
-            className="h-7 ml-auto"
-            disabled={reclaimMut.isPending}
-            onClick={() => reclaimMut.mutate(reclaimableCodes)}
-          >
-            {reclaimMut.isPending ? "Reclaiming…" : "Reclaim as ours"}
-          </Button>
-        </div>
-      )}
       <BillingCodesDetail clientId={clientId} clientName={clientName} medicaidId={medicaidId} />
       <Card>
         <CardHeader className="pb-2">
@@ -1592,8 +1529,8 @@ function BillingCodesPanel({
             clientId={clientId}
             compact
             onAdded={() => {
-              qc.invalidateQueries({ queryKey: ["client-reclaimable-codes", clientId] });
               qc.invalidateQueries({ queryKey: ["client-profile-codes", clientId] });
+              qc.invalidateQueries({ queryKey: ["client-active-codes"] });
               qc.invalidateQueries({ queryKey: ["client-profile"] });
               qc.invalidateQueries({ queryKey: ["all-client-billing-codes"] });
               qc.invalidateQueries({ queryKey: ["client-billing-codes"] });
@@ -1789,9 +1726,7 @@ function SummariesPanel({
     },
   });
 
-  const codes = Array.isArray(client?.authorized_dspd_codes)
-    ? (client!.authorized_dspd_codes as string[])
-    : [];
+  const codes = (client?.codes as string[] | undefined) ?? [];
 
   return (
     <Card>

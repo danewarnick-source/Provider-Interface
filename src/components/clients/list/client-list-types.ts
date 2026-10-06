@@ -4,26 +4,10 @@ export type ClientListRow = {
   last_name: string;
   phone_number: string | null;
   physical_address: string | null;
-  pcsp_goals: string[];
-  job_code: string[];
-  authorized_dspd_codes: string[];
+  /** Active service codes (client_billing_codes). */
+  codes: string[];
   medicaid_id: string | null;
   account_status: string | null;
-  geofence_radius_feet: number | null;
-  special_directions: string | null;
-  date_of_birth: string | null;
-  emergency_contact_name: string | null;
-  emergency_contact_phone: string | null;
-  // Guardianship — when is_own_guardian = true, the other guardian_* fields
-  // must be empty. See `validate_client_guardianship` trigger.
-  is_own_guardian: boolean | null;
-  guardian_name: string | null;
-  guardian_phone: string | null;
-  guardian_relationship: string | null;
-  guardian_email: string | null;
-  // feature toggles stored as JSON
-  feature_config: Record<string, boolean> | null;
-  profile_photo_url: string | null;
   intake_status: string | null;
 };
 

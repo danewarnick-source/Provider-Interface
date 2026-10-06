@@ -35,36 +35,28 @@ export function useAddClient(
       if (!organizationId) throw new Error("No organization selected.");
       assertAgencySetupComplete(await loadSetup({ data: { organizationId } }));
       const coords = await resolveCoords(input.physical_address);
-      const isOwn = input.is_own_guardian ?? true;
-      const stubCodes = (input.job_code ?? [])
+      const stubCodes = input.codes
         .map((c) => c.toUpperCase())
         .filter(Boolean)
         .map((service_code) => ({
           service_code,
           unit_type: (isDailyServiceCode(service_code) ? "day" : "unit") as "day" | "unit",
         }));
-      const { id: newId } = await createClientFn({ data: { organizationId, stubCodes, values: {
+      const contacts = input.guardian
+        ? [{ role: "guardian" as const, ...input.guardian, is_primary: true }]
+        : [];
+      const { id: newId } = await createClientFn({ data: { organizationId, stubCodes, contacts, values: {
         first_name:           input.first_name,
         last_name:            input.last_name,
         phone_number:         input.phone_number,
         physical_address:     input.physical_address,
-        pcsp_goals:           input.pcsp_goals,
-        authorized_dspd_codes: input.job_code,
-        job_code:             input.job_code,
+        pcsp_goals:           [],
         medicaid_id:          input.medicaid_id,
         geofence_radius_feet: input.geofence_radius_feet,
-        special_directions:   input.special_directions || null,
-        date_of_birth:        input.date_of_birth || null,
-        emergency_contact_name:  input.emergency_contact_name || null,
-        emergency_contact_phone: input.emergency_contact_phone || null,
         home_latitude:        coords.lat,
         home_longitude:       coords.lng,
         intake_status:        input.intake_mode === "intake" ? "in_progress" : "pending",
-        is_own_guardian:      isOwn,
-        guardian_name:        isOwn ? null : (input.guardian_name?.trim() || null),
-        guardian_phone:       isOwn ? null : (input.guardian_phone?.trim() || null),
-        guardian_relationship:isOwn ? null : (input.guardian_relationship?.trim() || null),
-        guardian_email:       isOwn ? null : (input.guardian_email?.trim() || null),
+        is_own_guardian:      input.is_own_guardian,
       } } });
 
       return { id: newId, mode: input.intake_mode, name: `${input.first_name} ${input.last_name}`.trim() };

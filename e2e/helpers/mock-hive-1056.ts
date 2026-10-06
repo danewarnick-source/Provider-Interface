@@ -171,26 +171,13 @@ function clientRow(c: (typeof CLIENT_LIST)[number]): Row {
     home_latitude: 40.7608,
     home_longitude: -111.891,
     pcsp_goals: [],
-    job_code: [...c.codes],
-    authorized_dspd_codes: [...c.codes],
     medicaid_id: c.medicaid_id,
     account_status: "active",
     geofence_radius_feet: 500,
     special_directions: null,
     date_of_birth: null,
-    emergency_contact_name: null,
-    emergency_contact_phone: null,
-    emergency_contact_instructions: null,
-    emergency_contact_2_name: null,
-    emergency_contact_2_phone: null,
-    emergency_contact_2_instructions: null,
     is_own_guardian: true,
-    guardian_name: null,
-    guardian_phone: null,
-    guardian_relationship: null,
-    guardian_email: null,
     feature_config: {},
-    profile_photo_url: null,
     intake_status: "complete",
     team_id: c.team_id,
     level_of_need: null,
@@ -205,9 +192,6 @@ function clientRow(c: (typeof CLIENT_LIST)[number]): Row {
     palliative_care_status: null,
     hospice_status: null,
     admin_hours_per_week: null,
-    support_coordinator_name: null,
-    support_coordinator_email: null,
-    support_coordinator_phone: null,
     disability_category: null,
     bsp_status: null,
     diagnoses: null,
@@ -415,6 +399,17 @@ async function handleSupabase(
 
   if (url.pathname.startsWith("/rest/v1/rpc/")) {
     const rpc = url.pathname.replace("/rest/v1/rpc/", "").split("/")[0];
+    if (rpc === "client_active_codes") {
+      const ids = ((route.request().postDataJSON() ?? {}) as { _client_ids?: string[] })._client_ids ?? [];
+      await fulfillJson(
+        route,
+        200,
+        CLIENT_LIST.filter((c) => ids.includes(c.id)).flatMap((c) =>
+          c.codes.map((service_code) => ({ client_id: c.id, service_code, service_end_date: null })),
+        ),
+      );
+      return;
+    }
     if (rpc === "clients_for_staff") {
       const assignedIds = new Set(
         STAFF_ASSIGNMENTS.filter((a) => a.staff_id === personaId).map((a) => a.client_id),
@@ -524,16 +519,10 @@ function emptyClientCareData(clientId: string) {
     status: "active",
     phone_number: null,
     is_own_guardian: true,
-    guardian_name: null,
-    guardian_phone: null,
-    support_coordinator_name: null,
-    support_coordinator_phone: null,
-    support_coordinator_email: null,
     has_abi: null,
     hr_applicable: null,
     dnr_applicable: null,
     diagnoses: [] as string[],
-    primary_care_name: null,
     pcsp_expiration_date: null,
     special_directions: null,
   };
@@ -553,8 +542,8 @@ function emptyClientCareData(clientId: string) {
     medications: [],
     authorized_codes: [],
     custom_fields: [],
-    emergency_contacts: [],
-    preferred_activities: [],
+    contacts: [],
+    about_me: null,
     visibilityRow: { sections: {}, fields: {} },
     visibility: {
       goalsForStaff: [],
@@ -567,8 +556,8 @@ function emptyClientCareData(clientId: string) {
         medications: [],
         authorized_codes: [],
         custom_fields: [],
-        emergency_contacts: [],
-        preferred_activities: [],
+        contacts: [],
+        about_me: null,
       },
     },
   };

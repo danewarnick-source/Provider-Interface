@@ -36,11 +36,11 @@ describe("actionsForClientPatch", () => {
       ["edit"],
     );
   });
-  it("authorized codes need Billing: Edit", () => {
-    assert.deepEqual(
-      actionsForClientPatch({ authorized_dspd_codes: [] }, { authorized_dspd_codes: ["SLH"] }),
-      ["edit", "edit_billing"],
-    );
+  it("insurance is medical info", () => {
+    assert.deepEqual(actionsForClientPatch({ insurance: null }, { insurance: "Plan A" }), [
+      "edit",
+      "edit_medical",
+    ]);
   });
   it("status changes are a discharge action", () => {
     assert.ok(
@@ -62,13 +62,13 @@ describe("tableConfig", () => {
     assert.throws(() => tableConfig("clients", "insert"), /Unknown client table/);
   });
   it("rejects ops not allowed on a table", () => {
-    assert.throws(() => tableConfig("client_emergency_contacts", "delete"), /not allowed/);
+    assert.throws(() => tableConfig("client_documents", "delete"), /not allowed/);
   });
   it("maps tables to the right action", () => {
     assert.equal(CLIENT_RECORD_TABLES.client_billing_codes.action, "edit_billing");
     assert.equal(CLIENT_RECORD_TABLES.hrc_restriction_records.action, "edit_hrc");
     assert.equal(CLIENT_RECORD_TABLES.pba_transactions.action, "edit_funds");
-    assert.equal(CLIENT_RECORD_TABLES.client_emergency_contacts.action, "edit");
+    assert.equal(CLIENT_RECORD_TABLES.client_documents.action, "edit");
   });
 });
 

@@ -586,20 +586,16 @@ function tableRows(
       last_name: "Chen",
       intake_status: "complete",
       account_status: "active",
-      authorized_dspd_codes: ["HHS", "SLH", "DSI"],
       disability_category: null,
       has_abi: false,
       home_latitude: null,
       home_longitude: null,
       pcsp_goals: [],
-      job_code: null,
       medicaid_id: "000111222",
       physical_address: "1 Hive Way, Salt Lake City, UT",
       special_directions: null,
-      profile_photo_url: null,
+      client_photo_url: null,
       feature_config: null,
-      emergency_contact_name: null,
-      emergency_contact_phone: null,
       date_of_birth: "1999-04-12",
     },
   ];
@@ -1326,6 +1322,12 @@ async function handleSupabase(route: Route, persona: MockPersona, fx: ReturnType
   }
 
   if (url.pathname.startsWith("/rest/v1/rpc/")) {
+    if (url.pathname.endsWith("/client_active_codes")) {
+      return fulfillJson(
+        route,
+        ["HHS", "SLH", "DSI"].map((service_code) => ({ client_id: CLIENT_ID, service_code, service_end_date: null })),
+      );
+    }
     return fulfillJson(route, []);
   }
 

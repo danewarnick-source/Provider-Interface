@@ -14,6 +14,16 @@
 // =============================================================
 
 import { enrichNamesFromFull, firstNameWithMiddle } from "@/lib/person-name";
+import { activeContacts, guardianSatisfied, loadClientContacts } from "./contacts";
+import { applyContactMergePlan, planContactMerge } from "./contacts-merge";
+import {
+  LEGACY_ALERT_KEY,
+  LEGACY_CONTACT_KEYS,
+  LEGACY_SINGLE_SOURCE_KEYS,
+  legacyContactsForClient,
+  singleSourcesFromLegacy,
+  type LegacyExternalService,
+} from "./legacy-fields";
 
 export interface ExtractedField {
   field_key: string;
@@ -211,23 +221,14 @@ export async function applyExtractedFieldsToClient(
     .from("clients")
     .select(
       "id, first_name, last_name, date_of_birth, medicaid_id, phone_number, physical_address, mailing_address, " +
-      "emergency_contact_name, emergency_contact_phone, emergency_contact_instructions, " +
-      "is_own_guardian, guardian_name, guardian_phone, guardian_relationship, guardian_email, guardian_address, " +
+      "is_own_guardian, " +
       "special_directions, allergies, dysphagia, swallowing_alerts, self_admin_med_support, " +
-      "pcsp_goals, authorized_dspd_codes, job_code, team_id, " +
-      "support_coordinator_name, support_coordinator_email, support_coordinator_phone, support_coordinator_company, " +
-      "primary_care_name, primary_care_phone, " +
-      "pcp_name, pcp_phone, specialist_name, specialist_phone, " +
-      "med_prescriber_name, med_prescriber_phone, " +
-      "neurologist_name, neurologist_phone, " +
-      "dentist_name, dentist_phone, " +
-      "prescriber_name, prescriber_phone, " +
-      "bsp_status, medical_insurance, housing_voucher, preferred_living, " +
+      "pcsp_goals, team_id, " +
+      "bsp_status, insurance, about_me, housing_voucher, " +
       "plan_year, disability_category, staff_ratio, " +
       "advanced_directives, emergency_medical_treatment_authorization, " +
       "diagnoses, chronic_conditions, immunizations, court_orders, rights_restrictions, " +
-      "preferred_activities, roommates, personal_belongings_inventory, " +
-      "emergency_contact_2_name, emergency_contact_2_phone, emergency_contact_2_instructions, " +
+      "roommates, personal_belongings_inventory, " +
       "grievance_acknowledged, grievance_signed_date, " +
       "dnr_status, dnr_location, polst_status, palliative_care_status, hospice_status, " +
       "admission_date, discharge_date, form_1056_number, form_1056_approved_date",
@@ -358,8 +359,6 @@ export async function applyExtractedFieldsToClient(
   setScalarText("phone_number", "phone");
   setScalarText("physical_address", "physical_address");
   setScalarText("mailing_address", "mailing_address");
-  setScalarText("emergency_contact_name", "emergency_contact_name");
-  setScalarText("emergency_contact_phone", "emergency_contact_phone");
 
   const isOwn = byKey.get("is_own_guardian");
   const isOwnVal = isOwn ? fieldBool(isOwn) : null;
@@ -373,14 +372,19 @@ export async function applyExtractedFieldsToClient(
       update.is_own_guardian = false;
       autofilled.push("is_own_guardian");
     }
-    setScalarText("guardian_name", "guardian_name");
-    setScalarText("guardian_phone", "guardian_phone");
-    setScalarText("guardian_relationship", "guardian_relationship");
-    setScalarText("guardian_email", "guardian_email");
-    setScalarText("guardian_address", "guardian_address");
   }
 
-  setScalarText("special_directions", "clinical_alert");
+  // Contacts (guardian, emergency, support coordinator, doctors) are merged
+  // into client_contacts below, after the code rows are classified.
+  const flatContacts: Record<string, string | null> = {};
+  for (const [key, target] of Object.entries(LEGACY_CONTACT_KEYS)) {
+    if (isOwnVal === true && target.role === "guardian") continue;
+    const f = byKey.get(key);
+    if (f) flatContacts[key] = fieldText(f);
+  }
+  let externalProviders: LegacyExternalService[] = [];
+
+  setScalarText("special_directions", LEGACY_ALERT_KEY);
   if (!update.special_directions) setScalarText("special_directions", "special_directions");
   setScalarBool("dysphagia", "dysphagia");
   setScalarBool("self_admin_med_support", "self_admin_med_support");
@@ -396,38 +400,27 @@ export async function applyExtractedFieldsToClient(
     .filter((s): s is string => !!s);
   if (goals.length) mergeArrayColumn("pcsp_goals", goals);
 
-  // Support coordinator
-  setScalarText("support_coordinator_name", "support_coordinator_name");
-  setScalarText("support_coordinator_email", "support_coordinator_email");
-  setScalarText("support_coordinator_phone", "support_coordinator_phone");
-  setScalarText("support_coordinator_company", "support_coordinator_company");
-
-  // Medical providers
-  setScalarText("primary_care_name", "primary_care_name");
-  setScalarText("primary_care_phone", "primary_care_phone");
-  // PCP / specialist / med-prescriber (Prompt 22 additive columns).
-  setScalarText("pcp_name", "pcp_name");
-  setScalarText("pcp_phone", "pcp_phone");
-  setScalarText("specialist_name", "specialist_name");
-  setScalarText("specialist_phone", "specialist_phone");
-  setScalarText("med_prescriber_name", "med_prescriber_name");
-  setScalarText("med_prescriber_phone", "med_prescriber_phone");
-  setScalarText("neurologist_name", "neurologist_name");
-  setScalarText("neurologist_phone", "neurologist_phone");
-  setScalarText("dentist_name", "dentist_name");
-  setScalarText("dentist_phone", "dentist_phone");
-  setScalarText("prescriber_name", "prescriber_name");
-  setScalarText("prescriber_phone", "prescriber_phone");
-
   // Medical / compliance
   setScalarText("bsp_status", "bsp_status");
-  setScalarText("medical_insurance", "medical_insurance");
+  setScalarText("insurance", LEGACY_SINGLE_SOURCE_KEYS.insurance);
   setScalarText("housing_voucher", "housing_voucher");
-  setScalarText("preferred_living", "preferred_living");
-  setScalarText("emergency_contact_instructions", "emergency_contact_instructions");
-  setScalarText("emergency_contact_2_name", "emergency_contact_2_name");
-  setScalarText("emergency_contact_2_phone", "emergency_contact_2_phone");
-  setScalarText("emergency_contact_2_instructions", "emergency_contact_2_instructions");
+  // About me ← preferred activities / living (only fills an empty About me).
+  {
+    const activities = byKey.get(LEGACY_SINGLE_SOURCE_KEYS.activities);
+    const living = byKey.get(LEGACY_SINGLE_SOURCE_KEYS.living);
+    const aboutMe = singleSourcesFromLegacy({
+      preferred_activities: activities ? fieldArray(activities) : null,
+      preferred_living: living ? fieldText(living) : null,
+    }).about_me;
+    const cur = (client as Record<string, unknown>).about_me as string | null;
+    if (aboutMe && !cur?.trim()) {
+      update.about_me = aboutMe;
+      autofilled.push("about_me");
+    } else if (aboutMe && cur !== aboutMe) {
+      suggested.push("about_me");
+      void writeScalarConflict("about_me", cur, aboutMe);
+    }
+  }
   setScalarText("plan_year", "plan_year");
   setScalarText("disability_category", "disability_category");
   setScalarText("staff_ratio", "staff_ratio");
@@ -463,8 +456,6 @@ export async function applyExtractedFieldsToClient(
   if (courtF) mergeArrayColumn("court_orders", fieldArray(courtF) ?? []);
   const rightsF = byKey.get("rights_restrictions");
   if (rightsF) mergeArrayColumn("rights_restrictions", fieldArray(rightsF) ?? []);
-  const activitiesF = byKey.get("preferred_activities");
-  if (activitiesF) mergeArrayColumn("preferred_activities", fieldArray(activitiesF) ?? []);
   const roommatesF = byKey.get("roommates");
   if (roommatesF) mergeArrayColumn("roommates", fieldArray(roommatesF) ?? []);
   const belongingsF = byKey.get("personal_belongings_inventory");
@@ -498,7 +489,7 @@ export async function applyExtractedFieldsToClient(
       const row = f.value_json as Record<string, unknown>;
       // Rows the admin explicitly marked "not our organization" are
       // informational-only on the record and MUST NOT flow into billing
-      // codes OR into client_external_services. Skip entirely.
+      // codes OR into the client's other-provider contacts. Skip entirely.
       if (row.ownership_ack === "not_ours") continue;
       if (row.service_code) {
         codeRows.push({
@@ -546,34 +537,13 @@ export async function applyExtractedFieldsToClient(
     const overrides = ctx.overrides ?? {};
     const partition = partitionCodeRows(codeRows, tenant, overrides);
 
-    // External / coordination-only services — preserve but do NOT bill.
-    if (partition.other.length) {
-      const externalRows = partition.other.map((r) => ({
-        organization_id: organizationId,
-        client_id: clientId,
-        service_code: r.service_code,
-        provider_name: r.provider_name ?? null,
-        note: r._classification.reason ?? null,
-      }));
-      // Replace this client's external set from this import to keep it
-      // idempotent without depending on a partial unique index.
-      const codesToReplace = Array.from(new Set(externalRows.map((r) => r.service_code)));
-      const { error: delErr } = await supabase
-        .from("client_external_services")
-        .delete()
-        .eq("organization_id", organizationId)
-        .eq("client_id", clientId)
-        .in("service_code", codesToReplace);
-      if (delErr) await onError("external_services_delete_error", delErr.message);
-      const { error: extErr } = await supabase
-        .from("client_external_services")
-        .insert(externalRows);
-      if (extErr) {
-        await onError("external_services_insert_error", extErr.message);
-      } else {
-        autofilled.push(`client_external_services(${externalRows.length})`);
-      }
-    }
+    // External / coordination-only services — kept as "other provider"
+    // contacts (merged below), never billed.
+    externalProviders = partition.other.map((r) => ({
+      provider_name: r.provider_name ?? null,
+      service_code: r.service_code,
+      note: r._classification.reason ?? null,
+    }));
     if (partition.ignored.length) {
       suggested.push(`Ignored ${partition.ignored.length} non-billing line(s) per admin choice.`);
     }
@@ -590,24 +560,13 @@ export async function applyExtractedFieldsToClient(
 
   if (codeRows.length) {
     const codes = Array.from(new Set(codeRows.map((r) => r.service_code)));
-    // Only PCSP and 1056 are authoritative for the active code SET. Other
-    // document types (MAR, BSP, immunization, allergy, end-of-life docs) must
-    // NEVER touch authorized_dspd_codes / job_code, even if a stray
-    // billing_code_row leaks through.
+    // Only PCSP and 1056 are authoritative for the active code SET (they may
+    // close stale authorization rows below). Other document types (MAR, BSP,
+    // immunization, allergy, end-of-life docs) only add/refresh rows.
     const isAuthoritative =
       sourceDocumentType === null || // legacy callers (no type) keep prior behavior
       sourceDocumentType === "pcsp" ||
       sourceDocumentType === "1056_budget";
-
-    if (isAuthoritative) {
-      const curCodes = ((client as Record<string, unknown>).authorized_dspd_codes as string[] | null) ?? [];
-      const sameSet = curCodes.length === codes.length && curCodes.every((c) => codes.includes(c));
-      if (!sameSet) {
-        update.authorized_dspd_codes = codes;
-        autofilled.push("authorized_dspd_codes");
-      }
-      update.job_code = codes;
-    }
 
     const { isDailyServiceCode } = await import("@/lib/service-billing");
 
@@ -689,6 +648,25 @@ export async function applyExtractedFieldsToClient(
           .update({ service_end_date: today })
           .eq("id", (r as { id: string }).id);
         suggested.push(`Closed stale auth: ${(r as { service_code: string }).service_code}`);
+      }
+    }
+  }
+
+  // ── Contacts → client_contacts (fill gaps, never overwrite; conflicts flagged) ──
+  {
+    const incoming = legacyContactsForClient(flatContacts, [], externalProviders);
+    if (incoming.length) {
+      try {
+        const existing = activeContacts(await loadClientContacts(supabase, [clientId]));
+        const plan = planContactMerge(existing, incoming);
+        const changed = await applyContactMergePlan(supabase, organizationId, clientId, plan);
+        if (changed) autofilled.push(`client_contacts(${changed})`);
+        for (const c of plan.conflicts) {
+          suggested.push(c.field);
+          void writeScalarConflict(c.field, c.existing, c.incoming);
+        }
+      } catch (err) {
+        await onError("client_contacts_merge_error", (err as Error).message);
       }
     }
   }
@@ -904,10 +882,8 @@ export async function applyExtractedFieldsToClient(
   // Bind extraction → store under the SAME keys the wizard / profile read
   // back. Any extracted field matching a registry custom field's `key` or
   // one of its `extractionKeys` is persisted via writeProfileFieldValue.
-  const {
-    CLIENT_PROFILE_FIELDS,
-    writeProfileFieldValue,
-  } = await import("@/lib/clients/profile-fields");
+  const { CLIENT_PROFILE_FIELDS } = await import("@/lib/clients/profile-field-registry");
+  const { writeProfileFieldValue } = await import("@/lib/clients/profile-fields");
   const registryConsumed = new Set<string>();
   for (const field of CLIENT_PROFILE_FIELDS) {
     if (field.storage.kind !== "custom") continue;
@@ -942,41 +918,30 @@ export async function applyExtractedFieldsToClient(
   const KNOWN_CORE = new Set<string>([
     "first_name", "last_name", "full_name", "dob", "date_of_birth", "medicaid_id", "phone",
     "physical_address", "mailing_address",
-    "emergency_contact_name", "emergency_contact_phone", "emergency_contact_relationship", "emergency_contact_instructions",
-    "is_own_guardian", "guardian_name", "guardian_phone", "guardian_relationship",
-    "guardian_email", "guardian_address",
-    "clinical_alert", "special_directions", "dysphagia", "self_admin_med_support",
+    // Contacts (→ client_contacts) and the must-knows alert (→ special_directions)
+    ...Object.keys(LEGACY_CONTACT_KEYS), LEGACY_ALERT_KEY,
+    "is_own_guardian",
+    "special_directions", "dysphagia", "self_admin_med_support",
     "allergies", "swallowing_alerts", "pcsp_goal",
     "billing_code_row", "service_code", "rate", "max_units", "unit_type",
     "weekly_cap_units", "plan_start", "plan_end",
     "team_name", "staff_ratio",
     "client_medication", "pcsp_has_medications",
-    // Support coordinator
-    "support_coordinator_name", "support_coordinator_email", "support_coordinator_phone",
-    "support_coordinator_company",
-    // Medical providers
-    "primary_care_name", "primary_care_phone",
-    "pcp_name", "pcp_phone", "specialist_name", "specialist_phone",
-    "med_prescriber_name", "med_prescriber_phone",
-    "neurologist_name", "neurologist_phone",
-    "dentist_name", "dentist_phone",
-    "prescriber_name", "prescriber_phone",
     // Medical / compliance
-    "bsp_status", "medical_insurance", "housing_voucher", "preferred_living",
+    "bsp_status", "housing_voucher", ...Object.values(LEGACY_SINGLE_SOURCE_KEYS),
     "plan_year", "disability_category", "pcsp_expiration_date",
     "advanced_directives", "emergency_medical_treatment_authorization",
     "has_abi", "hr_applicable", "dnr_applicable",
     // Array columns
     "diagnoses", "chronic_conditions", "immunizations",
     "court_orders", "rights_restrictions",
-    "preferred_activities", "roommates", "personal_belongings_inventory",
+    "roommates", "personal_belongings_inventory",
     // SOW §1.10 dates
     "admission_date", "discharge_date", "pcsp_expiration_date",
     // 1056 header fields
     "form_1056_number", "form_1056_approved_date",
     // SOW supplemental
     "level_of_need",
-    "emergency_contact_2_name", "emergency_contact_2_phone", "emergency_contact_2_relationship", "emergency_contact_2_instructions",
     "grievance_acknowledged", "grievance_signed_date",
     // End-of-life / advanced care
     "dnr_status", "dnr_location", "polst_status", "palliative_care_status", "hospice_status",
@@ -1058,7 +1023,7 @@ export async function applyExtractedFieldsToClient(
     const { data: cur } = await supabase
       .from("clients")
       .select(
-        "allergies, dysphagia, swallowing_alerts, special_directions, is_own_guardian, guardian_name, field_confirmations",
+        "allergies, dysphagia, swallowing_alerts, special_directions, is_own_guardian, field_confirmations",
       )
       .eq("id", clientId)
       .maybeSingle();
@@ -1073,7 +1038,7 @@ export async function applyExtractedFieldsToClient(
       // Custom-field-backed tracked fields.
       const builtIn = new Set([
         "medications", "allergies", "dysphagia", "swallowing_alerts",
-        "clinical_alert", "guardian",
+        LEGACY_ALERT_KEY, "guardian",
       ]);
       const customKeys = TRACKED_FIELDS
         .map((f: { key: string }) => f.key)
@@ -1107,10 +1072,11 @@ export async function applyExtractedFieldsToClient(
         allergies: Array.isArray(cur.allergies) && cur.allergies.length > 0,
         dysphagia: cur.dysphagia === true,
         swallowing_alerts: Array.isArray(cur.swallowing_alerts) && cur.swallowing_alerts.length > 0,
-        clinical_alert: !!(cur.special_directions && String(cur.special_directions).trim()),
-        guardian:
-          cur.is_own_guardian === true ||
-          (cur.is_own_guardian === false && !!cur.guardian_name?.trim()),
+        [LEGACY_ALERT_KEY]: !!(cur.special_directions && String(cur.special_directions).trim()),
+        guardian: guardianSatisfied(
+          cur.is_own_guardian,
+          activeContacts(await loadClientContacts(supabase, [clientId])),
+        ),
       };
       for (const k of customKeys) hasMap[k] = customHas.has(k);
 

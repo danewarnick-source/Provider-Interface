@@ -27,6 +27,8 @@ import {
   type ClientPcsp,
   type SowSupp,
 } from "./setup-checklist-groups";
+import { clientContactsKey, useClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
+import { contactsWithRole } from "@/lib/clients/contacts";
 
 export { ChecklistRow } from "./setup-checklist-groups";
 
@@ -56,24 +58,26 @@ export function SetupChecklist({ clientId, jobId }: { clientId: string; jobId: s
     queryFn: async (): Promise<ClientPcsp> => {
       const { data, error } = await supabase
         .from("clients")
-        .select("pcsp_goals, physical_address, geofence_radius_feet, is_own_guardian, guardian_name")
+        .select("pcsp_goals, physical_address, geofence_radius_feet, is_own_guardian")
         .eq("id", clientId)
         .maybeSingle();
       if (error) throw new Error(error.message);
       return (data ?? {
         pcsp_goals: [], physical_address: null, geofence_radius_feet: null,
-        is_own_guardian: null, guardian_name: null,
+        is_own_guardian: null,
       }) as ClientPcsp;
     },
   });
 
   // SOW supplemental — separate columns on clients.
+  const contacts = useClientContacts(clientId).data ?? [];
+
   const sowSuppQ = useQuery({
     queryKey: ["client-sow-supp", clientId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("clients")
-        .select("level_of_need, emergency_contact_2_name, emergency_contact_2_phone, emergency_contact_2_instructions, grievance_acknowledged, grievance_signed_date")
+        .select("level_of_need, grievance_acknowledged, grievance_signed_date")
         .eq("id", clientId)
         .maybeSingle();
       if (error) throw new Error(error.message);
@@ -103,6 +107,7 @@ export function SetupChecklist({ clientId, jobId }: { clientId: string; jobId: s
     qc.invalidateQueries({ queryKey: ["client-sow-supp", clientId] });
     qc.invalidateQueries({ queryKey: ["client-onboarding-state", clientId] });
     qc.invalidateQueries({ queryKey: ["client-field-states", clientId] });
+    qc.invalidateQueries({ queryKey: clientContactsKey(clientId) });
     qc.invalidateQueries({ queryKey: ["client-medications", clientId] });
   };
 
@@ -162,7 +167,7 @@ export function SetupChecklist({ clientId, jobId }: { clientId: string; jobId: s
     evv: readiness.evvReady,
     sow: sowMissingKeys.length === 0,
     lon: !!sowSupp.level_of_need?.trim(),
-    ec2: !!sowSupp.emergency_contact_2_name?.trim(),
+    ec2: contactsWithRole(contacts, "emergency").length >= 2,
     grievance: !!sowSupp.grievance_acknowledged,
     // Rights row passes when answered. The HRC sub-flow is enforced
     // inside the row component itself — the row stays expanded with a
@@ -209,6 +214,7 @@ export function SetupChecklist({ clientId, jobId }: { clientId: string; jobId: s
         codes={codes}
         client={client}
         sowSupp={sowSupp}
+        contacts={contacts}
         sowMissingKeys={sowMissingKeys}
         evvApplicable={evvApplicable}
         rowPass={rowPass}

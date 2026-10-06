@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { loadClientContacts, primaryContact } from "@/lib/clients/contacts";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
@@ -79,12 +80,13 @@ export const draftProgressSummary = createServerFn({ method: "POST" })
     // 2. Client + goals.
     const { data: client, error: cErr } = await supabase
       .from("clients")
-      .select("first_name, last_name, pcsp_goals, support_coordinator_name")
+      .select("first_name, last_name, pcsp_goals")
       .eq("id", row.client_id)
       .eq("organization_id", data.organizationId)
       .maybeSingle();
     if (cErr) throw new Error(cErr.message);
     if (!client) throw new Error("Client not found");
+    const coordinator = primaryContact(await loadClientContacts(supabase, [row.client_id]), "support_coordinator");
 
     const { data: org } = await supabase
       .from("organizations")
@@ -338,7 +340,7 @@ ${incidentsBlock}`
 SERVICES PROVIDED THIS PERIOD: ${services.join(", ") || "(none)"}
 DATE RANGE: ${row.period_start} to ${row.period_end}
 PROVIDER: ${providerName}
-SUPPORT COORDINATOR: ${client.support_coordinator_name?.trim() || "Not on file"}
+SUPPORT COORDINATOR: ${coordinator?.name?.trim() || "Not on file"}
 INCLUDE GOAL PROGRESS SECTION: ${includeGoals ? "YES" : "NO (excluded by service type)"}
 
 PCSP GOALS (with job_codes):

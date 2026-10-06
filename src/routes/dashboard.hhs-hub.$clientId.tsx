@@ -9,7 +9,6 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import {
   useMyAssignments,
   allowedCodesFor,
-  clientAuthorizedCodes,
 } from "@/hooks/use-my-assignments";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +35,7 @@ import { saveDailyRecord, savePrnForm, saveIncidentReport } from "@/lib/hhs.func
 import { denverYmd } from "@/lib/denver-date";
 import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
 import { useClientFeature } from "@/lib/clients/features";
+import { useClientActiveCodes } from "@/components/clients/shared/hooks/use-active-codes";
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";
 import { DailyNoteMedsBlock, type DailyNoteMedication } from "@/components/medications/daily-note-meds-block";
 import { type PendingMedDose } from "@/components/medications/shift-med-due-check";
@@ -72,10 +72,8 @@ interface ClientFull {
   pcsp_goals: string[] | null;
   physical_address: string | null;
   special_directions: string | null;
-  profile_photo_url: string | null;
+  client_photo_url: string | null;
   geofence_radius_feet: number | null;
-  authorized_dspd_codes: string[] | null;
-  job_code?: string[] | null;
   feature_config: Record<string, boolean> | null;
   allergies: string[] | null;
   dysphagia: boolean | null;
@@ -107,7 +105,7 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
     queryFn: async () => {
       const { data } = await supabase
         .from("clients")
-        .select("id, first_name, last_name, pcsp_goals, physical_address, special_directions, profile_photo_url, geofence_radius_feet, authorized_dspd_codes, job_code, feature_config, allergies, dysphagia, swallowing_alerts" as any)
+        .select("id, first_name, last_name, pcsp_goals, physical_address, special_directions, client_photo_url, geofence_radius_feet, feature_config, allergies, dysphagia, swallowing_alerts" as any)
         .eq("id", clientId)
         .maybeSingle();
       return data as ClientFull | null;
@@ -128,10 +126,11 @@ export function HhsClientHub({ clientId }: { clientId: string }) {
   });
 
   const { data: assignments } = useMyAssignments();
+  const clientCodes = useClientActiveCodes(client?.id);
   const allowedCodes = useMemo(() => {
     if (!client) return [];
-    return allowedCodesFor(assignments, client.id, clientAuthorizedCodes(client));
-  }, [client, assignments]);
+    return allowedCodesFor(assignments, client.id, clientCodes);
+  }, [client, assignments, clientCodes]);
   const allowedDaily = useMemo(
     () => allowedCodes.filter(isDailyServiceCode),
     [allowedCodes],

@@ -36,7 +36,6 @@ import { PiMark } from "@/components/pi-landing/pi-mark";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { EVV_SERVICE_CODES, evvServiceLabel, isEvvLockedCode, maskMemberId, padMemberId } from "@/lib/evv-codes";
-import { clientAuthorizedCodes } from "@/lib/assignment-codes";
 import { roundToQuarterHourISO } from "@/lib/time-rounding";
 import { computeEntryUnits } from "@/lib/billing-units";
 import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
@@ -65,7 +64,7 @@ import { PendingTrackingFormsDialog, type PendingForm } from "@/components/evv/p
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";
 import { IncidentReportDialog } from "@/components/incidents/incident-report-dialog";
 import { AlertTriangle as AlertTriangleIcon } from "lucide-react";
-import { useClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
+import { useActiveCodes } from "@/components/clients/shared/hooks/use-active-codes";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { ShiftMedDueCheck, type PendingMedDose } from "@/components/medications/shift-med-due-check";
 import { useComplianceGate } from "@/hooks/use-compliance-gate";
@@ -150,8 +149,8 @@ export interface PunchPadProps {
     last_name: string;
     medicaid_id: string | null;
     physical_address: string | null;
-    job_code?: string[] | null;
-    authorized_dspd_codes?: string[] | null;
+    /** Active service codes (client_billing_codes). */
+    codes?: string[];
     home_latitude?: number | null;
     home_longitude?: number | null;
     geofence_radius_feet?: number | null;
@@ -471,17 +470,13 @@ export function PunchPad({
     return () => clearInterval(t);
   }, [activeMatchesThisPad, active?.id]);
 
-  // ── Authorized billing codes (single source of truth: client_billing_codes) ──
-  // Used instead of the stale job_code array on the clients row.
+  // ── Authorized billing codes (one source: active client_billing_codes rows) ──
   // EVV uses ALL authorized codes (no day-program filter here).
   const effectiveClientId = lockedClient?.id ?? selectedClientId ?? undefined;
-  const clientBillingCodesQ = useClientBillingCodes(effectiveClientId || undefined);
+  const activeCodesQ = useActiveCodes(effectiveClientId ? [effectiveClientId] : []);
   const billingAuthorizedCodes: string[] | undefined = (() => {
-    if (!clientBillingCodesQ.data) return undefined;
-    const codes = clientBillingCodesQ.data
-      .map((b) => String(b.service_code ?? "").trim())
-      .filter(Boolean);
-    return codes.length ? codes : undefined;
+    const codes = effectiveClientId ? activeCodesQ.data?.get(effectiveClientId) : undefined;
+    return codes?.length ? codes : undefined;
   })();
 
   // ── Client derivation ───────────────────────────────────────────────────────
@@ -495,10 +490,7 @@ export function PunchPad({
           name: `${c.first_name} ${c.last_name}`.trim(),
           memberId: padMemberId(c.medicaid_id),
           facility: c.physical_address,
-          // Prefer client_billing_codes. Empty/missing 1056 rows fall back to
-          // authorized_dspd_codes (then job_code) so SLH still appears.
-          authorizedCodes: billingAuthorizedCodes
-            ?? (clientAuthorizedCodes(c).length ? clientAuthorizedCodes(c) : undefined),
+          authorizedCodes: billingAuthorizedCodes ?? (c.codes?.length ? c.codes : undefined),
           homeLat: c.home_latitude ?? null,
           homeLng: c.home_longitude ?? null,
           geofenceRadiusFeet: c.geofence_radius_feet ?? null,
@@ -518,11 +510,11 @@ export function PunchPad({
     }
     // No authorized codes yet — if still loading, show nothing; once loaded
     // an empty array means the client truly has no authorized codes.
-    if (clientBillingCodesQ.isLoading) {
+    if (activeCodesQ.isLoading) {
       return EVV_SERVICE_CODES.map((c) => ({ code: c.code, label: c.label }));
     }
     return [];
-  }, [lockedClient, billingAuthorizedCodes, clientBillingCodesQ.isLoading, clientForPunch]);
+  }, [lockedClient, billingAuthorizedCodes, activeCodesQ.isLoading, clientForPunch]);
 
   // ── Geofence derivation ─────────────────────────────────────────────────────
   const mapRadiusFeet = resolveGeofenceRadiusFeet(clientForPunch?.geofenceRadiusFeet);
