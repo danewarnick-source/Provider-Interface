@@ -117,7 +117,7 @@ export function AddIdentityFields({
           <Link
             to="/dashboard/clients/$clientId"
             params={{ clientId: duplicate.id }}
-            search={{ tab: "overview" }}
+            search={{}}
             className="font-semibold underline"
           >
             {duplicate.name}

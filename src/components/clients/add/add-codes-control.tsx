@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/checkbox-multi-select";
 import { supabase } from "@/integrations/supabase/client";
 import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
-import { addClientBillingCodes } from "@/lib/finish-onboarding.functions";
+import { addClientBillingCodes } from "@/lib/clients/codes-add.functions";
 import { CodeAssignedStaff } from "@/components/clients/shared/code-assigned-staff";
 import { UserPlus } from "lucide-react";
 
@@ -69,8 +69,7 @@ export function AddCodesControl({
       setPicked([]);
       qc.invalidateQueries({ queryKey: ["client-codes-summary", clientId] });
       qc.invalidateQueries({ queryKey: ["client-billing-codes"] });
-      qc.invalidateQueries({ queryKey: ["client-readiness", clientId] });
-      qc.invalidateQueries({ queryKey: ["finish-onboarding", clientId] });
+      qc.invalidateQueries({ queryKey: ["client-overview"] });
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
       qc.invalidateQueries({ queryKey: ["caseload"] });
       qc.invalidateQueries({ queryKey: ["clients"] });

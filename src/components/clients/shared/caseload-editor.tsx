@@ -217,8 +217,7 @@ export function CaseloadEditor(props: CaseloadEditorProps) {
       qc.invalidateQueries({ queryKey: ["caseload"] });
       qc.invalidateQueries({ queryKey: ["my-assignments"] });
       qc.invalidateQueries({ queryKey: ["scheduler-data"] });
-      qc.invalidateQueries({ queryKey: ["client-readiness", clientId] });
-      qc.invalidateQueries({ queryKey: ["finish-onboarding", clientId] });
+      qc.invalidateQueries({ queryKey: ["client-overview"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });

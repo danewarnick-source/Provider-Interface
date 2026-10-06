@@ -568,7 +568,7 @@ export const runInternalAudit = createServerFn({ method: "POST" })
             subjectKind: "client",
             subjectId: c.id,
             subjectName: `${c.last_name}, ${c.first_name}`,
-            fixHref: `/dashboard/clients/${c.id}?tab=overview`,
+            fixHref: `/dashboard/clients/${c.id}`,
             fixLabel: "Add support coordinator",
             asOf: todayIso(),
           });

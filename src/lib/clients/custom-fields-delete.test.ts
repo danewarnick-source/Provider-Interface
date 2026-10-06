@@ -43,10 +43,14 @@ describe("customFieldDeleteCopy", () => {
 });
 
 describe("client custom field delete wiring", () => {
-  const panel = readFileSync(
-    new URL("../../components/clients/profile/custom-fields-panel.tsx", import.meta.url),
-    "utf8",
-  );
+  const panel = ["more-details-card.tsx", "more-details-parts.tsx"]
+    .map((f) =>
+      readFileSync(
+        new URL(`../../components/clients/profile/details/${f}`, import.meta.url),
+        "utf8",
+      ),
+    )
+    .join("\n");
   const fns = readFileSync(new URL("./custom-fields.functions.ts", import.meta.url), "utf8");
 
   it("selects rows, select-all, and delete selected on the existing panel", () => {

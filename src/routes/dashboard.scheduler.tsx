@@ -609,7 +609,7 @@ function ClientCell({
         <Link
           to="/dashboard/clients/$clientId"
           params={{ clientId: client.id }}
-          search={{ tab: "codes" }}
+          search={{ section: "services" }}
           className="text-[11px] underline text-[color:var(--amber-700,var(--hive-gold))]"
         >
           Set units

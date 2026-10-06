@@ -47,7 +47,7 @@ export function useCurrentPlanGoals(clientId: string) {
   };
   const refresh = () => {
     qc.invalidateQueries({ queryKey: clientPlansKey(clientId) });
-    qc.invalidateQueries({ queryKey: ["client-readiness", clientId] });
+    qc.invalidateQueries({ queryKey: ["client-overview"] });
     qc.invalidateQueries({ queryKey: ["client-care-data", clientId] });
   };
 

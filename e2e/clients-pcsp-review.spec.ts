@@ -23,8 +23,7 @@ test("uploading the sample PCSP shows the review; nothing is written until Confi
 
   await page.goto(`/dashboard/clients/${CLIENTS.tommy.id}`, { waitUntil: "domcontentloaded" });
   await waitForDashboard(page);
-  await page.getByRole("tab", { name: /Care plan/i }).click();
-  await page.getByRole("tab", { name: /^Goals$/i }).click();
+  await page.getByTestId("profile-section-plans").first().click();
   await expect(page.getByRole("button", { name: /Upload new PCSP/i })).toBeVisible({ timeout: 20_000 });
 
   await page.getByTestId("pcsp-upload-input").setInputFiles({

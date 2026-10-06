@@ -70,7 +70,7 @@ export function ClientListTable({
                     <Link
                       to="/dashboard/clients/$clientId"
                       params={{ clientId: c.id }}
-                      search={{ tab: "overview" }}
+                      search={{}}
                       className="flex w-full items-center gap-2 rounded-sm px-4 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <ClientAvatar row={c} />

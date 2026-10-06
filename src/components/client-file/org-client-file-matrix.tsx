@@ -274,7 +274,7 @@ function MatrixRow({
         <Link
           to="/dashboard/clients/$clientId"
           params={{ clientId: row.client_id }}
-          search={{ tab: "client-file" }}
+          search={{ section: "file" }}
           className="font-medium text-[var(--hive-ink)] hover:underline"
           onClick={(e) => e.stopPropagation()}
         >

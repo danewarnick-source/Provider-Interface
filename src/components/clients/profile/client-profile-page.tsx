@@ -1,0 +1,145 @@
+// Client profile — the page body behind /dashboard/clients/$clientId.
+// Side-menu sections (?section=), header with the ⋯ menu, and the one
+// needs-attention list (lib/clients/readiness.ts) feeding Overview and the
+// menu badges.
+
+import { useEffect, useRef } from "react";
+import { getRouteApi, Link } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { ShieldAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useAccess } from "@/hooks/use-access";
+import { useCurrentOrg } from "@/hooks/use-org";
+import { isRouteUuid } from "@/lib/route-uuid";
+import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { getClientOverview } from "@/lib/clients/overview.functions";
+import { clientOverviewKey } from "@/lib/clients/overview";
+import { attentionBySection } from "@/lib/clients/readiness";
+import {
+  clientSectionSearchValue,
+  resolveClientSection,
+  visibleClientSections,
+  type ClientProfileSection,
+} from "@/lib/clients/profile-sections";
+import { ClientProfileShell } from "./profile-shell";
+import { ClientProfileHeader } from "./profile-header";
+import { SectionBody } from "./section-body";
+import { useClientProfile } from "./use-client-profile";
+
+const profileRoute = getRouteApi("/dashboard/clients/$clientId");
+
+export function ClientProfilePage() {
+  const { clientId } = profileRoute.useParams();
+  const { section } = profileRoute.useSearch();
+  const navigate = profileRoute.useNavigate();
+  const { data: org, isLoading: orgLoading } = useCurrentOrg();
+  const { canCategory } = useAccess();
+  const qc = useQueryClient();
+  const orgId = org?.organization_id;
+  const overviewFn = useServerFn(getClientOverview);
+  const auditFn = useServerFn(recordPhiAccess);
+  const audited = useRef(false);
+
+  const profileQ = useClientProfile(orgId, clientId);
+  const overviewQ = useQuery({
+    enabled: !!orgId && isRouteUuid(clientId) && !!profileQ.data,
+    queryKey: clientOverviewKey(orgId, clientId),
+    queryFn: () => overviewFn({ data: { organizationId: orgId!, clientId } }),
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
+  });
+
+  useEffect(() => {
+    if (!orgId || !profileQ.data || audited.current) return;
+    audited.current = true;
+    void auditFn({
+      data: {
+        organizationId: orgId,
+        resourceType: "client_chart",
+        resourceId: clientId,
+        clientId,
+        action: "view",
+        detail: "admin-client-profile-hub",
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      },
+    });
+  }, [orgId, clientId, profileQ.data, auditFn]);
+
+  // Any save on this page refreshes the Overview (attention, units, team).
+  useEffect(() => {
+    if (!orgId) return;
+    return qc.getMutationCache().subscribe((event) => {
+      if (event.type === "updated" && event.action.type === "success") {
+        void qc.invalidateQueries({ queryKey: clientOverviewKey(orgId, clientId) });
+      }
+    });
+  }, [qc, orgId, clientId]);
+
+  const viewer = { canMedical: canCategory("client_medical"), canBilling: canCategory("billing") };
+  const visible = visibleClientSections(viewer);
+  const active = resolveClientSection(section, viewer);
+
+  if (orgLoading || (orgId && profileQ.isLoading)) {
+    return <div className="p-6 text-sm text-muted-foreground">Loading client…</div>;
+  }
+  if (!orgId || !profileQ.data) {
+    return (
+      <Card className="m-6 border-rose-200 bg-rose-50/30" data-testid="client-profile-not-found">
+        <CardContent className="space-y-3 p-6 text-sm text-rose-700">
+          <p>
+            <ShieldAlert className="mr-2 inline h-4 w-4" />
+            {profileQ.isError
+              ? "Couldn't load this client. Please try again."
+              : "This client isn't in your agency."}
+          </p>
+          <Button size="sm" variant="outline" asChild>
+            <Link to="/dashboard/clients">Back to Clients</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const data = profileQ.data;
+  const attention = overviewQ.data?.attention ?? [];
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["client-profile"] });
+    void qc.invalidateQueries({ queryKey: clientOverviewKey(orgId, clientId) });
+  };
+  const select = (next: ClientProfileSection) =>
+    // Sections replace the entry: Back leaves the profile in one step.
+    navigate({
+      replace: true,
+      search: (prev) => ({ ...prev, section: clientSectionSearchValue(next) }),
+    });
+
+  return (
+    <div
+      className="container mx-auto min-w-0 max-w-7xl overflow-x-hidden px-4 py-6"
+      data-testid="client-profile-page"
+      data-active-section={active}
+    >
+      <ClientProfileShell
+        header={<ClientProfileHeader orgId={orgId} data={data} onChanged={refresh} />}
+        visible={visible}
+        attentionCounts={attentionBySection(attention)}
+        attentionTotal={attention.length}
+        active={active}
+        onSelect={select}
+      >
+        <SectionBody
+          section={active}
+          orgId={orgId}
+          data={data}
+          overview={overviewQ.data ?? null}
+          overviewLoading={overviewQ.isLoading}
+          overviewError={overviewQ.isError}
+          onSelect={select}
+          onChanged={refresh}
+        />
+      </ClientProfileShell>
+    </div>
+  );
+}
