@@ -15812,6 +15812,14 @@ export type Database = {
         Args: { _org: string; _staff: string; _viewer: string }
         Returns: boolean
       }
+      client_active_codes: {
+        Args: { _client_ids: string[] }
+        Returns: {
+          client_id: string
+          service_code: string
+          service_end_date: string
+        }[]
+      }
       client_has_med_admin_code: {
         Args: { _client_id: string }
         Returns: boolean
