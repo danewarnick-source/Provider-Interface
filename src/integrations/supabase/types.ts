@@ -2751,6 +2751,155 @@ export type Database = {
           },
         ]
       }
+      client_goal_supports: {
+        Row: {
+          created_at: string
+          details: string | null
+          end_date: string | null
+          goal_id: string
+          health_needs: string[]
+          id: string
+          organization_id: string
+          other_providers: Json
+          our_codes: string[]
+          sort: number
+          start_date: string | null
+          support_text: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          end_date?: string | null
+          goal_id: string
+          health_needs?: string[]
+          id?: string
+          organization_id: string
+          other_providers?: Json
+          our_codes?: string[]
+          sort?: number
+          start_date?: string | null
+          support_text?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          end_date?: string | null
+          goal_id?: string
+          health_needs?: string[]
+          id?: string
+          organization_id?: string
+          other_providers?: Json
+          our_codes?: string[]
+          sort?: number
+          start_date?: string | null
+          support_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_goal_supports_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "client_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_goal_supports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_goals: {
+        Row: {
+          barriers: string | null
+          carried_from_goal_id: string | null
+          client_id: string
+          created_at: string
+          created_by: string | null
+          current_status: string | null
+          domain: string | null
+          ended_on: string | null
+          goal_text: string
+          id: string
+          organization_id: string
+          plan_id: string
+          sort: number
+          status: string
+          strengths: string | null
+          success_person: string | null
+          success_team: string | null
+        }
+        Insert: {
+          barriers?: string | null
+          carried_from_goal_id?: string | null
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          current_status?: string | null
+          domain?: string | null
+          ended_on?: string | null
+          goal_text: string
+          id?: string
+          organization_id: string
+          plan_id: string
+          sort?: number
+          status?: string
+          strengths?: string | null
+          success_person?: string | null
+          success_team?: string | null
+        }
+        Update: {
+          barriers?: string | null
+          carried_from_goal_id?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          current_status?: string | null
+          domain?: string | null
+          ended_on?: string | null
+          goal_text?: string
+          id?: string
+          organization_id?: string
+          plan_id?: string
+          sort?: number
+          status?: string
+          strengths?: string | null
+          success_person?: string | null
+          success_team?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_goals_carried_from_goal_id_fkey"
+            columns: ["carried_from_goal_id"]
+            isOneToOne: false
+            referencedRelation: "client_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_goals_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_goals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_goals_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "client_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_intake_completion: {
         Row: {
           client_id: string
@@ -3432,6 +3581,76 @@ export type Database = {
           },
         ]
       }
+      client_plans: {
+        Row: {
+          activated_on: string | null
+          client_id: string
+          created_at: string
+          created_by: string | null
+          document_id: string | null
+          end_date: string | null
+          id: string
+          label: string | null
+          meeting_date: string | null
+          organization_id: string
+          source: string
+          start_date: string | null
+          status: string
+        }
+        Insert: {
+          activated_on?: string | null
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          end_date?: string | null
+          id?: string
+          label?: string | null
+          meeting_date?: string | null
+          organization_id: string
+          source?: string
+          start_date?: string | null
+          status?: string
+        }
+        Update: {
+          activated_on?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          end_date?: string | null
+          id?: string
+          label?: string | null
+          meeting_date?: string | null
+          organization_id?: string
+          source?: string
+          start_date?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_plans_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_plans_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "client_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_progress_summaries: {
         Row: {
           ai_review_attested_at: string | null
@@ -3456,6 +3675,7 @@ export type Database = {
           period_kind: string
           period_label: string
           period_start: string
+          plan_id: string | null
           requires_upi_attestation: boolean
           sc_sent_at: string | null
           sc_sent_by: string | null
@@ -3489,6 +3709,7 @@ export type Database = {
           period_kind: string
           period_label: string
           period_start: string
+          plan_id?: string | null
           requires_upi_attestation?: boolean
           sc_sent_at?: string | null
           sc_sent_by?: string | null
@@ -3522,6 +3743,7 @@ export type Database = {
           period_kind?: string
           period_label?: string
           period_start?: string
+          plan_id?: string | null
           requires_upi_attestation?: boolean
           sc_sent_at?: string | null
           sc_sent_by?: string | null
@@ -3545,6 +3767,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_progress_summaries_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "client_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -5115,6 +5344,7 @@ export type Database = {
           denied_at: string | null
           denied_by: string | null
           followup_form_types: string[] | null
+          goal_ids: string[] | null
           historical_attestation_text: string | null
           historical_attestation_version: string | null
           id: string
@@ -5134,6 +5364,7 @@ export type Database = {
           status: string
           submitted_at: string
           submitted_late: boolean
+          support_ids: string[] | null
           user_id: string
           word_count: number | null
         }
@@ -5155,6 +5386,7 @@ export type Database = {
           denied_at?: string | null
           denied_by?: string | null
           followup_form_types?: string[] | null
+          goal_ids?: string[] | null
           historical_attestation_text?: string | null
           historical_attestation_version?: string | null
           id?: string
@@ -5174,6 +5406,7 @@ export type Database = {
           status?: string
           submitted_at?: string
           submitted_late?: boolean
+          support_ids?: string[] | null
           user_id: string
           word_count?: number | null
         }
@@ -5195,6 +5428,7 @@ export type Database = {
           denied_at?: string | null
           denied_by?: string | null
           followup_form_types?: string[] | null
+          goal_ids?: string[] | null
           historical_attestation_text?: string | null
           historical_attestation_version?: string | null
           id?: string
@@ -5214,6 +5448,7 @@ export type Database = {
           status?: string
           submitted_at?: string
           submitted_late?: boolean
+          support_ids?: string[] | null
           user_id?: string
           word_count?: number | null
         }
@@ -6213,6 +6448,7 @@ export type Database = {
           edited_by_admin_name: string | null
           followup_form_types: string[] | null
           geofence_variance_justification: string | null
+          goal_ids: string[] | null
           goals_completed: Json
           gps_in_bypass_reason: string | null
           gps_in_bypassed: boolean
@@ -6265,6 +6501,7 @@ export type Database = {
           staff_id: string
           status: string
           submitted_late: boolean
+          support_ids: string[] | null
           tenant_id: string | null
           timesheet_embedding: string | null
           timezone_setting: string
@@ -6300,6 +6537,7 @@ export type Database = {
           edited_by_admin_name?: string | null
           followup_form_types?: string[] | null
           geofence_variance_justification?: string | null
+          goal_ids?: string[] | null
           goals_completed?: Json
           gps_in_bypass_reason?: string | null
           gps_in_bypassed?: boolean
@@ -6352,6 +6590,7 @@ export type Database = {
           staff_id: string
           status?: string
           submitted_late?: boolean
+          support_ids?: string[] | null
           tenant_id?: string | null
           timesheet_embedding?: string | null
           timezone_setting?: string
@@ -6387,6 +6626,7 @@ export type Database = {
           edited_by_admin_name?: string | null
           followup_form_types?: string[] | null
           geofence_variance_justification?: string | null
+          goal_ids?: string[] | null
           goals_completed?: Json
           gps_in_bypass_reason?: string | null
           gps_in_bypassed?: boolean
@@ -6439,6 +6679,7 @@ export type Database = {
           staff_id?: string
           status?: string
           submitted_late?: boolean
+          support_ids?: string[] | null
           tenant_id?: string | null
           timesheet_embedding?: string | null
           timezone_setting?: string
@@ -15820,6 +16061,7 @@ export type Database = {
           service_end_date: string
         }[]
       }
+      client_goal_client: { Args: { _goal: string }; Returns: string }
       client_has_med_admin_code: {
         Args: { _client_id: string }
         Returns: boolean
