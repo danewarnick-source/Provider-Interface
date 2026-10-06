@@ -9,7 +9,7 @@ import { loadActiveCodes } from "@/lib/clients/codes";
 type ClientRow = Omit<CaseloadClient, "codes">;
 
 const CASELOAD_COLUMNS =
-  "id, first_name, last_name, home_latitude, home_longitude, pcsp_goals, medicaid_id, physical_address, geofence_radius_feet, special_directions, client_photo_url, feature_config, date_of_birth";
+  "id, first_name, last_name, home_latitude, home_longitude, medicaid_id, physical_address, geofence_radius_feet, special_directions, client_photo_url, feature_config, date_of_birth";
 
 /** Attach each client's active codes (one client_active_codes call). */
 async function withCodes(rows: ClientRow[]): Promise<CaseloadClient[]> {
@@ -23,7 +23,6 @@ export type CaseloadClient = {
   last_name: string;
   home_latitude: number | null;
   home_longitude: number | null;
-  pcsp_goals: string[];
   /** Active service codes from client_billing_codes (the one source). */
   codes: string[];
   medicaid_id: string | null;

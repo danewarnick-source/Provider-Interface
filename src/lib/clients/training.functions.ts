@@ -5,6 +5,15 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { CLIENT_FORM_LABEL, clientFormKindForTitle } from "@/lib/clients/form-obligations";
 import { isAdminLevel } from "@/lib/access/levels";
+import { todayYmd } from "./dates";
+import { activeGoalViewsOn, type GoalView } from "./plans";
+import { loadPlanBundle } from "./plans-load";
+import { replaceCurrentPlanGoals } from "./plans-write";
+
+/** Active goals (with supports) of the client's plan in effect today. */
+async function planGoals(supabase: AnySupabase, clientId: string): Promise<GoalView[]> {
+  return activeGoalViewsOn(await loadPlanBundle(supabase, clientId), todayYmd());
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -62,8 +71,8 @@ export type CSTSection = {
 };
 export type CSTContent = { sections: CSTSection[] };
 
-// In-depth PCSP goal — verbatim from the PCSP, admin-reviewed. Training-local
-// (NOT the platform-wide clients.pcsp_goals).
+// One goal as read verbatim from a PCSP by the extractor; saved into the
+// client's current plan (client_goals + client_goal_supports).
 export type CSTGoal = {
   id: string;
   goal: string;        // the goal/objective statement (verbatim)
@@ -102,13 +111,6 @@ const SectionSchema = z.object({
   job_codes: z.array(z.string()).optional(),
 });
 const ContentSchema = z.object({ sections: z.array(SectionSchema).max(30) });
-const GoalSchema = z.object({
-  id: z.string(),
-  goal: z.string(),
-  supports: z.string(),
-  details: z.string(),
-  job_codes: z.array(z.string()),
-});
 const ReviewQuestionSchema = z.object({
   id: z.string(),
   tab: z.string(),
@@ -132,53 +134,26 @@ async function assembleVerbatim(
   // the narrative, goals/directions get their own dedicated sections below).
   const { data: client } = await supabase
     .from("clients")
-    .select("first_name, last_name, date_of_birth, special_directions, pcsp_goals")
+    .select("first_name, last_name, date_of_birth, special_directions")
     .eq("id", clientId)
     .maybeSingle();
+  const goalViews = await planGoals(supabase, clientId).catch(() => [] as GoalView[]);
 
   // a. Goals & desired outcomes ─────────────────────────────────────────────
-  // Prefer richer training-local goals (jsonb on client_specific_trainings)
-  // when present — each goal carries supports/details and is the substantive
-  // centerpiece. Fall back to the flat clients.pcsp_goals string list.
-  try {
-    let richGoals: Array<{ goal?: string; supports?: string; details?: string }> = [];
-    try {
-      const { data: existingTraining } = await supabase
-        .from("client_specific_trainings")
-        .select("goals")
-        .eq("client_id", clientId)
-        .eq("training_type", "person_specific")
-        .maybeSingle();
-      const g = existingTraining?.goals;
-      if (Array.isArray(g)) {
-        richGoals = g as Array<{ goal?: string; supports?: string; details?: string }>;
-      }
-    } catch { /* table/column may differ — fall through */ }
-
-    if (richGoals.length) {
-      const items: CSTItem[] = richGoals
-        .filter((g) => (g?.goal ?? "").toString().trim().length)
-        .map((g) => ({
-          kind: "kv" as const,
-          label: String(g.goal).slice(0, 200),
-          pairs: [
-            { label: "Supports", value: (g.supports ?? "").toString().trim() || "—" },
-            { label: "Detail / measure / timeline", value: (g.details ?? "").toString().trim() || "—" },
-          ],
-        }));
-      if (items.length) sections.push({ id: sid(), title: "Goals & desired outcomes", items });
-    } else if (client && Array.isArray(client.pcsp_goals) && client.pcsp_goals.length) {
-      sections.push({
-        id: sid(),
-        title: "Goals & desired outcomes",
-        items: [{
-          kind: "list",
-          label: "Goals",
-          values: (client.pcsp_goals as unknown[]).map(String).filter((s) => s.trim().length),
-        }],
-      });
-    }
-  } catch { /* ignore */ }
+  // The plan in effect today: each goal with its supports (and their codes).
+  if (goalViews.length) {
+    const items: CSTItem[] = goalViews.map((g) => ({
+      kind: "kv" as const,
+      label: g.goal.slice(0, 200),
+      pairs: g.supports.length
+        ? g.supports.map((s) => ({
+            label: s.our_codes.length ? `Support (${s.our_codes.join(", ")})` : "Support",
+            value: [s.support_text.trim(), s.details?.trim()].filter(Boolean).join(" — ") || "—",
+          }))
+        : [{ label: "Supports", value: "—" }],
+    }));
+    sections.push({ id: sid(), title: "Goals & desired outcomes", items });
+  }
 
   // b. Support approach & directions ────────────────────────────────────────
   if (client?.special_directions && String(client.special_directions).trim().length) {
@@ -300,7 +275,7 @@ async function assembleVerbatim(
   try {
     if (client) {
       const fullName = `${client.first_name ?? ""} ${client.last_name ?? ""}`.trim() || "This person";
-      const goals: string[] = Array.isArray(client.pcsp_goals) ? (client.pcsp_goals as unknown[]).map(String) : [];
+      const goals: string[] = goalViews.map((g) => g.goal);
       let ageBand = "";
       if (client.date_of_birth) {
         const yrs = Math.floor((Date.now() - new Date(String(client.date_of_birth)).getTime()) / (365.25 * 24 * 3600 * 1000));
@@ -312,7 +287,7 @@ async function assembleVerbatim(
         `Name: ${fullName}`,
         ageBand ? `Age band: ${ageBand}` : "",
         client.special_directions ? `Special directions: ${String(client.special_directions)}` : "",
-        goals.length ? `PCSP goals:\n${goals.map((g, i) => `  ${i + 1}. ${g}`).join("\n")}` : "",
+        goals.length ? `Plan goals:\n${goals.map((g, i) => `  ${i + 1}. ${g}`).join("\n")}` : "",
         intakeHighlights.length ? `Intake highlights:\n${intakeHighlights.slice(0, 12).map((h) => `  - ${h}`).join("\n")}` : "",
       ].filter(Boolean).join("\n");
       const narrative = await draftTrainingNarrative(facts, orgId);
@@ -417,10 +392,9 @@ async function extractGoalsVerbatim(documentText: string, orgId?: string | null)
   }));
 }
 
-// ── EXTRACT PCSP goals for person-specific training (admin) ─────────────────
+// ── EXTRACT PCSP goals into the current plan (admin) ────────────────────────
 // Downloads the client's most-recent PCSP document, runs extractGoalsVerbatim,
-// and stores the result on the client_specific_trainings.goals column.
-// Creates a draft training row if none exists.
+// and saves the goals (one support each) into the client's current plan.
 export const extractPcspGoalsForTraining = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ clientId: z.string().uuid() }).parse(d))
@@ -461,40 +435,14 @@ export const extractPcspGoalsForTraining = createServerFn({ method: "POST" })
     // 3) Verbatim goal extraction.
     const goals = await extractGoalsVerbatim(text, m.organization_id);
 
-    // 4) Store on the person_specific training row (create draft if none exists).
-    const { data: existing } = await supabase
-      .from("client_specific_trainings")
-      .select("id")
-      .eq("client_id", data.clientId)
-      .eq("training_type", "person_specific")
-      .maybeSingle();
-
-    if (existing) {
-      const { error: uErr } = await supabase
-        .from("client_specific_trainings")
-        .update({ goals: goals as unknown, status: "draft", approved_by: null, approved_at: null })
-        .eq("id", existing.id);
-      if (uErr) throw new Error(uErr.message);
-      return { ok: true as const, goalCount: goals.length, trainingId: existing.id as string };
-    } else {
-      const content = await assembleVerbatim(supabase, m.organization_id, data.clientId);
-      const { data: inserted, error: iErr } = await supabase
-        .from("client_specific_trainings")
-        .insert({
-          organization_id: m.organization_id,
-          client_id: data.clientId,
-          training_type: "person_specific",
-          title: "Client-Specific Training",
-          content: content as unknown,
-          goals: goals as unknown,
-          status: "draft",
-          version: 1,
-        })
-        .select("id")
-        .maybeSingle();
-      if (iErr) throw new Error(iErr.message);
-      return { ok: true as const, goalCount: goals.length, trainingId: (inserted?.id ?? null) as string | null };
-    }
+    // 4) Save into the client's current plan (its previous goals are ended, kept).
+    const saved = await replaceCurrentPlanGoals(supabase, {
+      organizationId: m.organization_id,
+      clientId: data.clientId,
+      userId,
+      goals: goals.map((g) => ({ goal_text: g.goal, support_text: g.supports, details: g.details, our_codes: g.job_codes })),
+    });
+    return { ok: true as const, goalCount: saved.goalCount };
   });
 
 // ── GET current training (admin) ────────────────────────────────────────────
@@ -700,14 +648,13 @@ export const attachClientSpecificTrainingDocument = createServerFn({ method: "PO
     return { ok: true, documentId: doc?.id ?? null };
   });
 
-// ── UPDATE content/title/goals (admin) ─────────────────────────────────────
+// ── UPDATE content/title (admin) ───────────────────────────────────────────
 export const updateClientSpecificTraining = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
     id: z.string().uuid(),
     title: z.string().min(1).max(200).optional(),
     content: ContentSchema.optional(),
-    goals: z.array(GoalSchema).optional(),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
@@ -724,7 +671,6 @@ export const updateClientSpecificTraining = createServerFn({ method: "POST" })
     const patch: Record<string, unknown> = {};
     if (data.title !== undefined) patch.title = data.title;
     if (data.content !== undefined) patch.content = data.content;
-    if (data.goals !== undefined) patch.goals = data.goals;
     // Editing a published version returns it to draft (requires re-approval).
     if (row.status === "published") {
       patch.status = "draft";
@@ -880,12 +826,7 @@ async function assembleSupportStrategyStubs(
   orgId: string,
   clientId: string,
 ): Promise<CSTContent> {
-  const { data: client } = await supabase
-    .from("clients")
-    .select("pcsp_goals")
-    .eq("id", clientId)
-    .maybeSingle();
-  const goals: string[] = Array.isArray(client?.pcsp_goals) ? (client!.pcsp_goals as string[]) : [];
+  const goals: string[] = (await planGoals(supabase, clientId)).map((g) => g.goal);
   if (!goals.length) {
     void orgId;
     return { sections: [{ id: sid(), title: "Support strategy", items: [
@@ -1176,7 +1117,7 @@ export const getStaffClientSpecificTraining = createServerFn({ method: "GET" })
 
     const { data: training, error } = await supabase
       .from("client_specific_trainings")
-      .select("id, organization_id, client_id, title, content, goals, review_questions, attestation_statement, status, version, updated_at")
+      .select("id, organization_id, client_id, title, content, review_questions, attestation_statement, status, version, updated_at")
       .eq("client_id", data.clientId)
       .eq("training_type", trainingType)
       .maybeSingle();
@@ -1207,7 +1148,7 @@ export const getStaffClientSpecificTraining = createServerFn({ method: "GET" })
         client_id: training.client_id,
         title: training.title,
         content: training.content,
-        goals: training.goals,
+        goals: await planGoals(supabase, data.clientId),
         review_questions: training.review_questions,
         attestation_statement: training.attestation_statement,
         version: training.version,

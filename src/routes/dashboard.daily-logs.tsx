@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useCaseload } from "@/hooks/use-caseload";
+import { useSupportsForCode } from "@/components/clients/shared/hooks/use-plan-goals";
 import { useEffectiveView } from "@/hooks/use-effective-view";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -59,7 +60,6 @@ type CaseloadClient = {
   id: string;
   first_name: string;
   last_name: string;
-  pcsp_goals: string[];
   codes: string[];
   medicaid_id?: string | null;
 };
@@ -327,7 +327,7 @@ function StaffDailyJournal() {
                     {c.first_name} {c.last_name}
                   </p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {c.pcsp_goals?.length ?? 0} PCSP goal{(c.pcsp_goals?.length ?? 0) === 1 ? "" : "s"}
+                    {dailyLogProgram(c) ?? "HHS"} daily log
                   </p>
                   {todaySubmitted ? (
                     <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
@@ -377,6 +377,7 @@ function DailyLogDialog({
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();
 
+  // Checked supports (ids) for this log's code, from the plan in effect on the log date.
   const [goals, setGoals]       = useState<string[]>([]);
   const [narrative, setNarrative] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -418,6 +419,9 @@ function DailyLogDialog({
   const logDate = date ?? new Date().toISOString().split("T")[0];
   const program = client ? dailyLogProgram(client) ?? "HHS" : "HHS";
   const journalTitle = program === "RP5" ? "RP5 Daily Summary Note" : "Host Home Daily Compliance Journal";
+  const supports = useSupportsForCode(client?.id, program, logDate);
+  const picked = supports.options.filter((o) => goals.includes(o.supportId));
+  const goalLabels = picked.map((o) => o.label);
 
   useEffect(() => {
     stopRecording();
@@ -452,7 +456,7 @@ function DailyLogDialog({
 
   const words = wordCount(narrative);
   const narrativeOk = words >= MIN_WORDS;
-  const hasGoal = goals.length > 0;
+  const hasGoal = picked.length > 0;
   const canSubmit = hasGoal && narrativeOk && hasSigRef.current && !submitting && !aiBusy;
 
   function toggleGoal(g: string) {
@@ -560,7 +564,9 @@ function DailyLogDialog({
       client_id:              client.id,
       service_code:           dailyLogProgram(client) ?? "HHS",
       log_date:               logDate,
-      pcsp_goals_addressed:   goals,
+      pcsp_goals_addressed:   goalLabels,
+      goal_ids:               [...new Set(picked.map((o) => o.goalId))],
+      support_ids:            picked.map((o) => o.supportId),
       narrative:              narrative.trim(),
       signature_data_url:     signature,
       status:                 "pending_approval",
@@ -602,7 +608,7 @@ function DailyLogDialog({
   // ── Submit flow ──────────────────────────────────────────────────────────────
   async function handleSubmit(opts?: { exception?: boolean }) {
     if (!client || !canSubmit) return;
-    if (!hasGoal) { toast.error("Select at least one PCSP goal."); return; }
+    if (!hasGoal) { toast.error("Select at least one goal support."); return; }
     if (!narrativeOk) { setShowNarrativeError(true); return; }
 
     const isException = !!opts?.exception;
@@ -615,7 +621,7 @@ function DailyLogDialog({
       try {
         const clientFirst = client.first_name;
         const result = await coachFn({
-          data: { narrative: narrative.trim(), goals, clientFirstName: clientFirst },
+          data: { narrative: narrative.trim(), goals: goalLabels, clientFirstName: clientFirst },
         });
         verdict = result;
         setAiCoach(result);
@@ -750,28 +756,37 @@ function DailyLogDialog({
                 </div>
               )}
 
-              {/* PCSP goals */}
+              {/* Goals → supports for this log's code */}
               <div>
-                <Label className="mb-2 block text-sm font-medium">PCSP Goals Addressed Today</Label>
-                {(client.pcsp_goals?.length ?? 0) > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {(client.pcsp_goals ?? []).map((g) => {
-                      const on = goals.includes(g);
-                      return (
-                        <button key={g} type="button" onClick={() => toggleGoal(g)}
-                          className={`rounded-full border px-4 py-2 text-sm font-medium transition-all active:scale-[0.97] ${
-                            on
-                              ? "border-teal-600 bg-teal-600 text-white shadow-sm hover:bg-teal-700"
-                              : "border-slate-200 bg-white text-slate-700 hover:border-teal-400 hover:bg-teal-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-teal-950/40"
-                          }`}>
-                          {on ? "✓ " : ""}{g}
-                        </button>
-                      );
-                    })}
+                <Label className="mb-2 block text-sm font-medium">Goals worked on today ({program})</Label>
+                {supports.groups.length > 0 ? (
+                  <div className="space-y-3">
+                    {supports.groups.map((g) => (
+                      <div key={g.id} className="space-y-1.5">
+                        <p className="text-xs font-semibold text-foreground">{g.goal}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {g.supports.map((s) => {
+                            const on = goals.includes(s.id);
+                            return (
+                              <button key={s.id} type="button" onClick={() => toggleGoal(s.id)}
+                                className={`rounded-full border px-4 py-2 text-left text-sm font-medium transition-all active:scale-[0.97] ${
+                                  on
+                                    ? "border-teal-600 bg-teal-600 text-white shadow-sm hover:bg-teal-700"
+                                    : "border-slate-200 bg-white text-slate-700 hover:border-teal-400 hover:bg-teal-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-teal-950/40"
+                                }`}>
+                                {on ? "✓ " : ""}{s.support_text.trim() || "Worked on this goal"}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
-                    No PCSP goals on file. Add them in the Clients tab first.
+                    {supports.isLoading
+                      ? "Loading goals…"
+                      : `No supports on this person's plan list ${program}. Ask your supervisor to add them in the client's care plan.`}
                   </p>
                 )}
               </div>

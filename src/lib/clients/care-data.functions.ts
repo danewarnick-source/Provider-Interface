@@ -20,8 +20,9 @@
  *
  * Staff-visibility rules live in the returned `visibility` block. Screens
  * do NOT re-implement "which goal is complete enough to show" — they read
- * from `visibility`. Clock-out shows the client's on-file PCSP goals
- * (untagged included); it does not require a matching service code.
+ * from `visibility`. Goals come from the plan in effect today
+ * (client_plans → client_goals → client_goal_supports); clock-out shows only
+ * the supports whose codes include the shift's code, grouped by goal.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -30,7 +31,9 @@ import { logPhiAccess } from "@/lib/phi-access-audit.server";
 import { assignmentCoversCode } from "@/lib/assignment-codes";
 import { queryOptions } from "@tanstack/react-query";
 import { activeContacts, loadClientContacts, type ClientContact } from "./contacts";
-import type { CSTGoal } from "./training.functions";
+import { goalView, goalsOn, supportsForCode, type GoalView, type PlanStatus } from "./plans";
+import { loadPlanBundle } from "./plans-load";
+import { todayYmd } from "./dates";
 import {
   type ClientVisibilityRow,
   type SectionName,
@@ -38,18 +41,19 @@ import {
   isFieldVisible,
   isSectionVisible,
 } from "./staff-visibility";
-import {
-  mergeClientGoalSources,
-  selectGoalsForStaffClockOut,
-  type StaffPcspGoal,
-} from "./goals-for-staff";
 
 // ── Return types ────────────────────────────────────────────────────────────
 
-export type CareGoal = CSTGoal & {
-  /** true when the goal has both a statement AND ≥1 assigned service code. */
-  is_complete: boolean;
-};
+/** A goal of the plan in effect today with its supports (all, or one code's). */
+export type CareGoal = GoalView;
+
+export type CarePlan = {
+  id: string;
+  start_date: string | null;
+  end_date: string | null;
+  /** 'ended' while waiting for a new plan after the end date. */
+  status: PlanStatus;
+} | null;
 
 export type CareIdentity = {
   id: string;
@@ -132,9 +136,9 @@ export type CustomFieldWithValue = {
 };
 
 export type ClientCareVisibility = {
-  /** Goals staff may check on clock-out / punch-pad.
-   *  Rule: non-empty statement AND per-goal visible. Uploaded PCSP goals
-   *  appear even when job_codes is empty or does not match the punch. */
+  /** Goals staff may check on clock-out / punch-pad: only supports whose
+   *  codes include the shift's code, grouped under their (visible) goal.
+   *  Empty when no shift code is given. */
   goalsForStaff: CareGoal[];
   medicationsVisible: boolean;
   /** The shift's active service code echoed back, uppercased. */
@@ -167,9 +171,8 @@ export type ClientCareVisibility = {
 export type ClientCareData = {
   identity: CareIdentity;
   flags: CareFlags;
-  /** CST (person_specific) row id — needed by admin editors that write
-   *  goals back. Null when no CST row exists yet. */
-  pcsp_training_id: string | null;
+  /** The plan in effect today (null when the client has none). */
+  plan: CarePlan;
   goals: CareGoal[];
   medications: CareMedication[];
   authorized_codes: CareAuthorizedCode[];
@@ -237,7 +240,7 @@ export const getClientCareData = createServerFn({ method: "GET" })
       return {
         identity: emptyIdentity,
         flags: { self_admin_med_support: false, self_admin_med_support_locked: false },
-        pcsp_training_id: null,
+        plan: null,
         goals: [],
         medications: [],
         authorized_codes: [],
@@ -263,22 +266,18 @@ export const getClientCareData = createServerFn({ method: "GET" })
       };
     }
 
-    const [clientRes, cstRes, medsRes, codesRes, visRes, cfDefsRes, cfValsRes, ecRes, myAssignRes] =
+    const [clientRes, planBundle, medsRes, codesRes, visRes, cfDefsRes, cfValsRes, ecRes, myAssignRes] =
       await Promise.all([
       supabase
         .from("clients")
         .select(
-          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, self_admin_med_support, self_admin_med_support_locked, about_me, phone_number, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, pcsp_expiration_date, special_directions, pcsp_goals",
+          "id, organization_id, first_name, last_name, date_of_birth, admission_date, discharge_date, medicaid_id, account_status, self_admin_med_support, self_admin_med_support_locked, about_me, phone_number, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, pcsp_expiration_date, special_directions",
         )
         .eq("id", clientId)
         .maybeSingle(),
 
-      supabase
-        .from("client_specific_trainings")
-        .select("id, goals")
-        .eq("client_id", clientId)
-        .eq("training_type", "person_specific")
-        .maybeSingle(),
+      // Non-fatal: the punch pad must still load if the plan read fails.
+      loadPlanBundle(supabase, clientId).catch(() => ({ plans: [], goals: [] })),
       supabase
         .from("client_medications")
         .select(
@@ -337,7 +336,6 @@ export const getClientCareData = createServerFn({ method: "GET" })
 
     // Continue with existing response assembly below.
     if (!clientRes.data) throw new Error("Client not found");
-    if (cstRes.error) throw cstRes.error;
     if (medsRes.error) throw medsRes.error;
     if (codesRes.error) throw codesRes.error;
     // visRes / cfDefsRes / cfValsRes errors are non-fatal — treat as empty
@@ -373,31 +371,22 @@ export const getClientCareData = createServerFn({ method: "GET" })
       self_admin_med_support_locked: !!row.self_admin_med_support_locked,
     };
 
-    // Structured CST goals, then the flat clients.pcsp_goals copy written
-    // on PCSP upload when CST is empty. Do not invent statements.
-    const rawGoals = Array.isArray(cstRes.data?.goals) ? cstRes.data!.goals : [];
-    const structured: StaffPcspGoal[] = rawGoals.map((g: any) => {
-      const goalText = String(g?.goal ?? "").trim();
-      const jobCodes = Array.isArray(g?.job_codes)
-        ? g.job_codes.map((c: unknown) => String(c ?? "").trim()).filter(Boolean)
-        : [];
-      return {
-        id: String(g?.id ?? crypto.randomUUID()),
-        goal: goalText,
-        supports: String(g?.supports ?? ""),
-        details: String(g?.details ?? ""),
-        job_codes: jobCodes,
-      };
-    });
-    const merged = mergeClientGoalSources(structured, row.pcsp_goals);
-    const goals: CareGoal[] = merged.map((g) => ({
-      ...g,
-      is_complete: g.goal.trim().length > 0 && g.job_codes.length > 0,
-    }));
+    // Goals of the plan in effect today (the ended plan while waiting for a new one).
+    const today = todayYmd();
+    const inEffect = goalsOn(planBundle, today);
+    const activeGoals = inEffect.goals.filter((g) => g.status === "active");
+    const goals: CareGoal[] = activeGoals.map((g) => goalView(g));
+    const plan: CarePlan = inEffect.plan
+      ? {
+          id: inEffect.plan.id,
+          start_date: inEffect.plan.start_date,
+          end_date: inEffect.plan.end_date,
+          status: inEffect.status ?? inEffect.plan.status,
+        }
+      : null;
 
     // Filter authorized codes to currently-open only (same rule as
     // useClientBillingCodes — no end date or end date > today).
-    const today = new Date().toISOString().slice(0, 10);
     const authorized_codes: CareAuthorizedCode[] = (
       (codesRes.data ?? []) as CareAuthorizedCode[]
     ).filter((c) => !c.service_end_date || c.service_end_date > today);
@@ -489,14 +478,12 @@ export const getClientCareData = createServerFn({ method: "GET" })
     // Custom fields inherit their section's toggle — no per-field key.
     const customFieldsStaff = custom_fields.filter((f) => sections[f.section]);
 
-    // goalsForStaff — clock-out checklist. Same on-file PCSP goals the
-    // client profile shows (plus the flat pcsp_goals fallback above).
-    // Intentionally does NOT require a matching service code.
-    // Per-goal field visibility switches are still honored.
+    // goalsForStaff — clock-out checklist: the supports for the shift's
+    // code, grouped under their goal. Per-goal visibility is still honored.
     const codeUpper = shiftServiceCode ? shiftServiceCode.toUpperCase() : null;
-    const goalsForStaff = selectGoalsForStaffClockOut(goals, (goalId) =>
-      isFieldVisible(visibilityRow, fieldKey("care_plan", "goal", goalId)),
-    );
+    const goalsForStaff = supportsForCode(activeGoals, codeUpper, today)
+      .filter((g) => isFieldVisible(visibilityRow, fieldKey("care_plan", "goal", g.goal.id)))
+      .map((g) => goalView(g.goal, g.supports));
 
     const contacts = activeContacts((ecRes ?? []) as ClientContact[]);
     const about_me: string | null = row.about_me ?? null;
@@ -517,11 +504,10 @@ export const getClientCareData = createServerFn({ method: "GET" })
       },
     };
 
-    const pcsp_training_id = (cstRes.data?.id as string | undefined) ?? null;
     return {
       identity,
       flags,
-      pcsp_training_id,
+      plan,
       goals,
       medications,
       authorized_codes,
