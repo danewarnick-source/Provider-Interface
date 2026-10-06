@@ -12377,69 +12377,6 @@ export type Database = {
           },
         ]
       }
-      recurring_shift_patterns: {
-        Row: {
-          active: boolean
-          client_id: string | null
-          created_at: string
-          created_by: string | null
-          crosses_midnight: boolean
-          effective_from: string
-          effective_until: string | null
-          end_time_local: string
-          id: string
-          location_id: string | null
-          name: string | null
-          notes: string | null
-          organization_id: string
-          service_code_id: string | null
-          staff_id: string | null
-          start_time_local: string
-          updated_at: string
-          weekday_mask: number
-        }
-        Insert: {
-          active?: boolean
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          crosses_midnight?: boolean
-          effective_from?: string
-          effective_until?: string | null
-          end_time_local: string
-          id?: string
-          location_id?: string | null
-          name?: string | null
-          notes?: string | null
-          organization_id: string
-          service_code_id?: string | null
-          staff_id?: string | null
-          start_time_local: string
-          updated_at?: string
-          weekday_mask?: number
-        }
-        Update: {
-          active?: boolean
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          crosses_midnight?: boolean
-          effective_from?: string
-          effective_until?: string | null
-          end_time_local?: string
-          id?: string
-          location_id?: string | null
-          name?: string | null
-          notes?: string | null
-          organization_id?: string
-          service_code_id?: string | null
-          staff_id?: string | null
-          start_time_local?: string
-          updated_at?: string
-          weekday_mask?: number
-        }
-        Relationships: []
-      }
       referral_activities: {
         Row: {
           activity_type: string
@@ -14935,57 +14872,6 @@ export type Database = {
       }
     }
     Views: {
-      day_program_billable_v: {
-        Row: {
-          activity_note: string | null
-          attendance_id: string | null
-          billed_mode: string | null
-          billed_rate: number | null
-          billed_units: number | null
-          cap_snapshot: number | null
-          client_id: string | null
-          dollars: number | null
-          organization_id: string | null
-          row_kind: string | null
-          service_code: string | null
-          session_date: string | null
-          session_id: string | null
-        }
-        Relationships: []
-      }
-      employee_client_assignments: {
-        Row: {
-          client_id: string | null
-          created_at: string | null
-          created_by: string | null
-          employee_id: string | null
-          id: string | null
-          is_group_home_assignment: boolean | null
-          organization_id: string | null
-          tenant_id: string | null
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          employee_id?: string | null
-          id?: string | null
-          is_group_home_assignment?: boolean | null
-          organization_id?: string | null
-          tenant_id?: string | null
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          employee_id?: string | null
-          id?: string | null
-          is_group_home_assignment?: boolean | null
-          organization_id?: string | null
-          tenant_id?: string | null
-        }
-        Relationships: []
-      }
       hhs_daily_records_v: {
         Row: {
           billable: boolean | null
@@ -15588,12 +15474,7 @@ export type Database = {
     Enums: {
       access_level: "owner" | "admin" | "staff"
       agreement_status: "not_started" | "sent" | "signed" | "expired"
-      bc_behavior_source: "nectar" | "manual"
-      bc_behavior_status: "draft" | "approved" | "published" | "archived"
       bc_code: "BC1" | "BC2" | "BC3"
-      bc_doc_type: "FBA" | "BSP"
-      bc_flag_type: "credential_mismatch" | "deadline_overdue" | "coverage_gap"
-      bc_review_note_type: "monthly_review" | "note"
       doc_date_source: "from_document" | "provider_entered"
       doc_effective_to_mode: "fixed_date" | "ongoing" | "until_replaced"
       doc_status: "current" | "outdated"
@@ -15776,12 +15657,7 @@ export const Constants = {
     Enums: {
       access_level: ["owner", "admin", "staff"],
       agreement_status: ["not_started", "sent", "signed", "expired"],
-      bc_behavior_source: ["nectar", "manual"],
-      bc_behavior_status: ["draft", "approved", "published", "archived"],
       bc_code: ["BC1", "BC2", "BC3"],
-      bc_doc_type: ["FBA", "BSP"],
-      bc_flag_type: ["credential_mismatch", "deadline_overdue", "coverage_gap"],
-      bc_review_note_type: ["monthly_review", "note"],
       doc_date_source: ["from_document", "provider_entered"],
       doc_effective_to_mode: ["fixed_date", "ongoing", "until_replaced"],
       doc_status: ["current", "outdated"],
