@@ -15,7 +15,7 @@ type ProfileName = {
   is_active: boolean | null;
 };
 
-export function profileName(p: Pick<ProfileName, "first_name" | "last_name" | "full_name">): string {
+function profileName(p: Pick<ProfileName, "first_name" | "last_name" | "full_name">): string {
   return (
     p.full_name?.trim() ||
     [p.first_name, p.last_name].filter(Boolean).join(" ").trim() ||
@@ -65,9 +65,7 @@ export function useProfileNames(ids: readonly string[]) {
         .select("id, first_name, last_name, full_name")
         .in("id", key);
       if (error) throw error;
-      return new Map(
-        ((data ?? []) as ProfileName[]).map((p) => [p.id, profileName(p)] as const),
-      );
+      return new Map(((data ?? []) as ProfileName[]).map((p) => [p.id, profileName(p)] as const));
     },
   });
 }

@@ -3,7 +3,13 @@
 import type { QueryClient } from "@tanstack/react-query";
 
 export function invalidateTeam(qc: QueryClient): void {
-  for (const key of ["client-team", "client-overview", "caseload", "my-assignments", "scheduler-data"]) {
+  for (const key of [
+    "client-team",
+    "client-overview",
+    "caseload",
+    "my-assignments",
+    "scheduler-data",
+  ]) {
     void qc.invalidateQueries({ queryKey: [key] });
   }
 }

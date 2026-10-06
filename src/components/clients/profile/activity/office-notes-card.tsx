@@ -36,7 +36,9 @@ export function OfficeNotesCard({ clientId, orgId }: { clientId: string; orgId: 
     },
   });
   const notes = openNotes(q.data ?? []);
-  const names = useProfileNames(notes.map((n) => n.created_by).filter((x): x is string => !!x)).data;
+  const names = useProfileNames(
+    notes.map((n) => n.created_by).filter((x): x is string => !!x),
+  ).data;
 
   const addM = useMutation({
     mutationFn: () => addFn({ data: { organizationId: orgId, clientId, body: draft } }),
@@ -48,7 +50,8 @@ export function OfficeNotesCard({ clientId, orgId }: { clientId: string; orgId: 
     onError: (e: Error) => toast.error(e.message),
   });
   const archiveM = useMutation({
-    mutationFn: (noteId: string) => archiveFn({ data: { organizationId: orgId, clientId, noteId } }),
+    mutationFn: (noteId: string) =>
+      archiveFn({ data: { organizationId: orgId, clientId, noteId } }),
     onSuccess: () => {
       toast.success("Note archived");
       void qc.invalidateQueries({ queryKey: key });
@@ -73,7 +76,11 @@ export function OfficeNotesCard({ clientId, orgId }: { clientId: string; orgId: 
             aria-label="New office note"
           />
           <div className="flex justify-end">
-            <Button size="sm" disabled={!draft.trim() || addM.isPending} onClick={() => addM.mutate()}>
+            <Button
+              size="sm"
+              disabled={!draft.trim() || addM.isPending}
+              onClick={() => addM.mutate()}
+            >
               {addM.isPending ? "Saving…" : "Add note"}
             </Button>
           </div>

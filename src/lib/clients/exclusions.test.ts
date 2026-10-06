@@ -36,7 +36,10 @@ describe("refusal messages", () => {
       exclusionRefusal("Pat", "Sam", "  "),
       "You can't schedule this — Pat is on Sam's do-not-schedule list.",
     );
-    assert.match(exclusionAssignRefusal("Family request"), /do-not-schedule list: Family request\. End that first\./);
+    assert.match(
+      exclusionAssignRefusal("Family request"),
+      /do-not-schedule list: Family request\. End that first\./,
+    );
   });
 });
 

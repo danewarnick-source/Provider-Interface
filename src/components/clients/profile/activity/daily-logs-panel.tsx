@@ -9,7 +9,7 @@ import { ReadOnlyTable } from "@/components/clients/profile/read-only-table";
 import { useProfileNames } from "@/components/clients/shared/hooks/use-org-staff";
 import { RecordDialog } from "./record-dialog";
 
-export const DAILY_LOGS_LIMIT = 100;
+const DAILY_LOGS_LIMIT = 100;
 
 type LogRow = {
   id: string;
@@ -29,7 +29,9 @@ export function DailyLogsPanel({ clientId, orgId }: { clientId: string; orgId: s
     queryFn: async (): Promise<LogRow[]> => {
       const { data, error } = await supabase
         .from("daily_logs")
-        .select("id, log_date, status, narrative, submitted_at, user_id, submitted_late, denial_reason")
+        .select(
+          "id, log_date, status, narrative, submitted_at, user_id, submitted_late, denial_reason",
+        )
         .eq("organization_id", orgId)
         .eq("client_id", clientId)
         .order("log_date", { ascending: false })
@@ -77,7 +79,9 @@ export function DailyLogsPanel({ clientId, orgId }: { clientId: string; orgId: s
               value: open.submitted_at ? new Date(open.submitted_at).toLocaleString() : "—",
             },
             { label: "Late", value: open.submitted_late ? "Yes" : "No" },
-            ...(open.denial_reason ? [{ label: "Sent back because", value: open.denial_reason }] : []),
+            ...(open.denial_reason
+              ? [{ label: "Sent back because", value: open.denial_reason }]
+              : []),
           ]}
           bodyLabel="Note"
           body={open.narrative}

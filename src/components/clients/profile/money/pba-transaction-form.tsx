@@ -12,7 +12,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { todayYmd } from "@/lib/clients/dates";
 import { PBA_TXN_TYPES, pbaNeedsReceipt } from "@/lib/clients/money";
 import { writeClientRecord } from "@/lib/clients/writes.functions";
@@ -124,7 +130,12 @@ export function PbaTransactionForm({ orgId, account }: { orgId: string; account:
         </div>
         <div className="grid gap-1.5 md:col-span-4">
           <Label htmlFor="pba-memo">Memo</Label>
-          <Input id="pba-memo" value={memo} maxLength={300} onChange={(e) => setMemo(e.target.value)} />
+          <Input
+            id="pba-memo"
+            value={memo}
+            maxLength={300}
+            onChange={(e) => setMemo(e.target.value)}
+          />
         </div>
       </div>
       <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed p-3 text-sm hover:bg-muted/40">
@@ -139,7 +150,11 @@ export function PbaTransactionForm({ orgId, account }: { orgId: string; account:
           }}
         />
         <ImageIcon className="h-4 w-4" />
-        {uploading ? "Uploading…" : receipt ? "Receipt attached — choose another to replace" : "Attach a receipt (PNG, JPG or PDF)"}
+        {uploading
+          ? "Uploading…"
+          : receipt
+            ? "Receipt attached — choose another to replace"
+            : "Attach a receipt (PNG, JPG or PDF)"}
       </label>
       {needsReceipt && !receipt ? (
         <p className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
@@ -149,7 +164,13 @@ export function PbaTransactionForm({ orgId, account }: { orgId: string; account:
       <div className="flex justify-end">
         <Button
           onClick={() => addM.mutate()}
-          disabled={!(Number(amount) > 0) || !date || addM.isPending || uploading || (needsReceipt && !receipt)}
+          disabled={
+            !(Number(amount) > 0) ||
+            !date ||
+            addM.isPending ||
+            uploading ||
+            (needsReceipt && !receipt)
+          }
         >
           {addM.isPending ? "Saving…" : "Log transaction"}
         </Button>

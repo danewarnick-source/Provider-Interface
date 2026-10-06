@@ -28,7 +28,11 @@ export async function exclusionFor(
   clientId: string,
   staffId: string,
 ): Promise<StaffExclusion | null> {
-  return findExclusion(await loadActiveExclusions(supabase, organizationId, clientId), clientId, staffId);
+  return findExclusion(
+    await loadActiveExclusions(supabase, organizationId, clientId),
+    clientId,
+    staffId,
+  );
 }
 
 /** Throws the scheduler refusal when the team member is excluded. */

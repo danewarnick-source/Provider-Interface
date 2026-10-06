@@ -12,7 +12,9 @@ export function ActivitySection({ clientId, orgId }: { clientId: string; orgId: 
   const { canCategory } = useAccess();
   return (
     <div className="space-y-4" data-testid="client-section-activity">
-      {canCategory("clients", "edit") ? <OfficeNotesCard clientId={clientId} orgId={orgId} /> : null}
+      {canCategory("clients", "edit") ? (
+        <OfficeNotesCard clientId={clientId} orgId={orgId} />
+      ) : null}
       <ShiftsPanel clientId={clientId} orgId={orgId} />
       <DailyLogsPanel clientId={clientId} orgId={orgId} />
       {canCategory("incidents") ? <IncidentsPanel clientId={clientId} orgId={orgId} /> : null}

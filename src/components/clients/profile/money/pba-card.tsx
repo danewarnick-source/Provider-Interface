@@ -20,9 +20,15 @@ import { PbaLedgerDialog } from "./pba-ledger-dialog";
 import { pbaAccountKey, useClientPba } from "./use-client-money";
 
 const TONE: Record<PbaTone, { label: string; cls: string }> = {
-  healthy: { label: "Healthy", cls: "border-emerald-500/40 text-emerald-700 dark:text-emerald-300" },
+  healthy: {
+    label: "Healthy",
+    cls: "border-emerald-500/40 text-emerald-700 dark:text-emerald-300",
+  },
   watch: { label: "Watch", cls: "border-amber-500/40 text-amber-700 dark:text-amber-300" },
-  near_limit: { label: "Near the Medicaid limit", cls: "border-red-500/40 text-red-700 dark:text-red-300" },
+  near_limit: {
+    label: "Near the Medicaid limit",
+    cls: "border-red-500/40 text-red-700 dark:text-red-300",
+  },
 };
 
 export function PbaCard({

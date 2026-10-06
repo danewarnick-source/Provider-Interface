@@ -11,7 +11,7 @@ import { useProfileNames } from "@/components/clients/shared/hooks/use-org-staff
 import { shiftHours } from "@/lib/clients/notes";
 import { RecordDialog } from "./record-dialog";
 
-export const SHIFTS_LIMIT = 200;
+const SHIFTS_LIMIT = 200;
 
 type ShiftRow = {
   id: string;

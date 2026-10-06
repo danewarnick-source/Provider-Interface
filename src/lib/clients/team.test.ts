@@ -8,11 +8,23 @@ describe("assignmentChanges", () => {
     ["b", ["SLH"]],
   ]);
   it("is clean when nothing changed (order doesn't matter)", () => {
-    const r = assignmentChanges(original, new Map([["a", ["DSI", "SLH"]], ["b", ["SLH"]]]));
+    const r = assignmentChanges(
+      original,
+      new Map([
+        ["a", ["DSI", "SLH"]],
+        ["b", ["SLH"]],
+      ]),
+    );
     assert.deepEqual(r, { writes: [], dirty: false });
   });
   it("writes adds, changes and removals ([] removes)", () => {
-    const r = assignmentChanges(original, new Map([["a", ["SLH"]], ["c", ["DSI"]]]));
+    const r = assignmentChanges(
+      original,
+      new Map([
+        ["a", ["SLH"]],
+        ["c", ["DSI"]],
+      ]),
+    );
     assert.deepEqual(r.writes, [
       ["a", ["SLH"]],
       ["c", ["DSI"]],
@@ -24,6 +36,14 @@ describe("assignmentChanges", () => {
 
 describe("staffMissingCodes", () => {
   it("lists checked team members with no codes", () => {
-    assert.deepEqual(staffMissingCodes(new Map([["a", []], ["b", ["SLH"]]])), ["a"]);
+    assert.deepEqual(
+      staffMissingCodes(
+        new Map([
+          ["a", []],
+          ["b", ["SLH"]],
+        ]),
+      ),
+      ["a"],
+    );
   });
 });

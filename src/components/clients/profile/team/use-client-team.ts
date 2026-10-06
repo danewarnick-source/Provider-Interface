@@ -20,7 +20,7 @@ export type ClientTeam = {
   exclusions: TeamExclusion[];
 };
 
-export const clientTeamKey = (orgId: string, clientId: string) =>
+const clientTeamKey = (orgId: string, clientId: string) =>
   ["client-team", orgId, clientId] as const;
 
 export function useClientTeam(orgId: string, clientId: string) {
@@ -45,7 +45,10 @@ export function useClientTeam(orgId: string, clientId: string) {
       if (a.error) throw a.error;
       if (x.error) throw x.error;
       const assigned = new Map<string, string[]>();
-      for (const r of (a.data ?? []) as Array<{ staff_id: string; service_codes: string[] | null }>) {
+      for (const r of (a.data ?? []) as Array<{
+        staff_id: string;
+        service_codes: string[] | null;
+      }>) {
         assigned.set(r.staff_id, assignmentCodes(r.service_codes));
       }
       return {

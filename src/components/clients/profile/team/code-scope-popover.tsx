@@ -39,7 +39,9 @@ export function CodeScopePopover({
           disabled={disabled}
         >
           <Tag className="h-3 w-3" />
-          <span className="max-w-[140px] truncate">{value.length ? value.join(", ") : "No codes"}</span>
+          <span className="max-w-[140px] truncate">
+            {value.length ? value.join(", ") : "No codes"}
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-2" align="end">

@@ -112,8 +112,8 @@ export function TeamCodesCard({
       <CardContent className="space-y-3">
         {!teamQ.isLoading && codes.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            This client has no active codes yet. Add one in Services & billing before assigning
-            team members.
+            This client has no active codes yet. Add one in Services & billing before assigning team
+            members.
           </p>
         ) : null}
         {noStaffFor.map((code) => (
@@ -147,7 +147,10 @@ export function TeamCodesCard({
               const isExcluded = excluded.has(s.id);
               const r = ready.get(s.id);
               return (
-                <li key={s.id} className="flex min-h-11 flex-wrap items-center gap-2 px-3 py-2 text-sm">
+                <li
+                  key={s.id}
+                  className="flex min-h-11 flex-wrap items-center gap-2 px-3 py-2 text-sm"
+                >
                   <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2">
                     <Checkbox
                       checked={checked}
@@ -159,7 +162,9 @@ export function TeamCodesCard({
                   </label>
                   {isExcluded ? <Badge variant="destructive">Do not schedule</Badge> : null}
                   {checked && r ? (
-                    <Badge variant={r.readyAlone ? "secondary" : "outline"}>{r.readinessLabel}</Badge>
+                    <Badge variant={r.readyAlone ? "secondary" : "outline"}>
+                      {r.readinessLabel}
+                    </Badge>
                   ) : null}
                   {checked ? (
                     <CodeScopePopover
@@ -170,7 +175,9 @@ export function TeamCodesCard({
                     />
                   ) : null}
                   {checked && !original.has(s.id) ? <Badge>new</Badge> : null}
-                  {!checked && original.has(s.id) ? <Badge variant="destructive">remove</Badge> : null}
+                  {!checked && original.has(s.id) ? (
+                    <Badge variant="destructive">remove</Badge>
+                  ) : null}
                 </li>
               );
             })}

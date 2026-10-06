@@ -25,7 +25,10 @@ export type PbaAuditSample = {
   verifier_notes: string | null;
 };
 
-const count = async (table: "pba_accounts" | "client_loans" | "client_spending_log", clientId: string) => {
+const count = async (
+  table: "pba_accounts" | "client_loans" | "client_spending_log",
+  clientId: string,
+) => {
   const { count: n, error } = await supabase
     .from(table)
     .select("id", { count: "exact", head: true })

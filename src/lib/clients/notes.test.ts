@@ -4,7 +4,10 @@ import { CLIENT_NOTE_MAX, cleanNoteBody, openNotes, shiftHours } from "./notes.t
 
 describe("cleanNoteBody", () => {
   it("trims and checks length", () => {
-    assert.deepEqual(cleanNoteBody("  Called the office \n"), { ok: true, value: "Called the office" });
+    assert.deepEqual(cleanNoteBody("  Called the office \n"), {
+      ok: true,
+      value: "Called the office",
+    });
     assert.equal(cleanNoteBody("   ").ok, false);
     assert.equal(cleanNoteBody("x".repeat(CLIENT_NOTE_MAX + 1)).ok, false);
   });

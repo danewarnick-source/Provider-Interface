@@ -59,7 +59,8 @@ export function cleanExclusionReason(
   reason: string,
 ): { ok: true; value: string } | { ok: false; error: string } {
   const value = reason.trim();
-  if (!value) return { ok: false, error: "Say why this team member shouldn't work with the client." };
+  if (!value)
+    return { ok: false, error: "Say why this team member shouldn't work with the client." };
   if (value.length > EXCLUSION_REASON_MAX) {
     return { ok: false, error: `Keep the reason under ${EXCLUSION_REASON_MAX} characters.` };
   }

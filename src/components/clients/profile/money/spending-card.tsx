@@ -10,7 +10,7 @@ import { useProfileNames } from "@/components/clients/shared/hooks/use-org-staff
 import { formatMoney, moneyTotal } from "@/lib/clients/money";
 import { ReceiptLink, SPENDING_RECEIPTS_BUCKET } from "./receipt-link";
 
-export const SPENDING_LIMIT = 200;
+const SPENDING_LIMIT = 200;
 
 type SpendRow = {
   id: string;
@@ -57,9 +57,15 @@ export function SpendingCard({ orgId, clientId }: { orgId: string; clientId: str
           rows={rows}
           columns={[
             { header: "Date", cell: (r) => new Date(r.spent_at).toLocaleDateString() },
-            { header: "Amount", cell: (r) => <span className="font-mono">{formatMoney(Number(r.amount))}</span> },
+            {
+              header: "Amount",
+              cell: (r) => <span className="font-mono">{formatMoney(Number(r.amount))}</span>,
+            },
             { header: "For", cell: (r) => r.purpose ?? "—" },
-            { header: "Team member", cell: (r) => (r.staff_id ? (names?.get(r.staff_id) ?? "Team member") : "—") },
+            {
+              header: "Team member",
+              cell: (r) => (r.staff_id ? (names?.get(r.staff_id) ?? "Team member") : "—"),
+            },
             {
               header: "Receipt",
               cell: (r) => <ReceiptLink path={r.receipt_path} bucket={SPENDING_RECEIPTS_BUCKET} />,

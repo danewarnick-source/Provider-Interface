@@ -12,7 +12,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { canVerifyPbaSample } from "@/lib/clients/money";
@@ -84,7 +90,10 @@ export function PbaAuditRow({
   });
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-md border p-3 text-sm" data-testid="pba-audit">
+    <div
+      className="flex flex-wrap items-center gap-2 rounded-md border p-3 text-sm"
+      data-testid="pba-audit"
+    >
       <span className="font-medium">Quarterly audit:</span>
       {!sample ? (
         <>
@@ -102,12 +111,18 @@ export function PbaAuditRow({
           ) : null}
         </>
       ) : sample.status === "verified" ? (
-        <Badge variant="outline" className="border-emerald-500/40 text-emerald-700 dark:text-emerald-300">
+        <Badge
+          variant="outline"
+          className="border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+        >
           Verified {sample.verified_at ? new Date(sample.verified_at).toLocaleDateString() : ""}
         </Badge>
       ) : (
         <>
-          <Badge variant="outline" className="border-amber-500/40 text-amber-700 dark:text-amber-300">
+          <Badge
+            variant="outline"
+            className="border-amber-500/40 text-amber-700 dark:text-amber-300"
+          >
             Picked — needs independent verification
           </Badge>
           {canEdit && user && canVerifyPbaSample(account.created_by, user.id) ? (

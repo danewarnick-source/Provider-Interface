@@ -30,7 +30,10 @@ export function RecordDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto" data-testid="activity-record">
+      <DialogContent
+        className="max-h-[90vh] max-w-2xl overflow-y-auto"
+        data-testid="activity-record"
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="sr-only">Record details</DialogDescription>
