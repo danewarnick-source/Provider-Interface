@@ -3648,6 +3648,54 @@ export type Database = {
           },
         ]
       }
+      client_notes: {
+        Row: {
+          archived_at: string | null
+          archived_by: string | null
+          body: string
+          client_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
+          body: string
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          archived_by?: string | null
+          body?: string
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_nutrition_config: {
         Row: {
           calorie_target: number | null
@@ -4226,6 +4274,57 @@ export type Database = {
             columns: ["shift_id"]
             isOneToOne: false
             referencedRelation: "evv_timesheets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_staff_exclusions: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          ended_at: string | null
+          ended_by: string | null
+          id: string
+          organization_id: string
+          reason: string
+          staff_user_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          organization_id: string
+          reason: string
+          staff_user_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          id?: string
+          organization_id?: string
+          reason?: string
+          staff_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_staff_exclusions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_staff_exclusions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -16151,6 +16250,14 @@ export type Database = {
       }
     }
     Functions: {
+      active_client_staff_exclusions: {
+        Args: { _client?: string; _org: string }
+        Returns: {
+          client_id: string
+          reason: string
+          staff_user_id: string
+        }[]
+      }
       accept_invitation: { Args: { _token: string }; Returns: string }
       access_can_see_client: {
         Args: { _client: string; _user: string }
