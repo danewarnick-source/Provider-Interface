@@ -4,7 +4,7 @@
 --   about_me           ← preferred_activities / preferred_living
 --   special_directions ← + clinical_alert / pertinent_health_notes / dietary_needs (staff must-knows)
 --   client_photo_url   ← profile_photo_url where empty
--- Mirrors singleSourcesFromLegacy() in src/lib/clients/contacts-backfill.ts.
+-- Mirrors singleSourcesFromLegacy() in src/lib/clients/legacy-fields.ts.
 -- Idempotent: only fills empty targets, and only appends text not already there.
 
 ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS insurance text;

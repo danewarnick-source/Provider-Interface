@@ -62,7 +62,7 @@ CREATE POLICY "clients editors update client contacts" ON public.client_contacts
 -- No DELETE policy: contacts are ended (ended_on), never deleted (7-year retention).
 
 -- ---------------------------------------------------------------------------
--- Backfill. Mirrors legacyContactsForClient() in src/lib/clients/contacts-backfill.ts.
+-- Backfill. Mirrors legacyContactsForClient() in src/lib/clients/legacy-fields.ts.
 -- Empty values are skipped; a nameless entry with a phone/email gets the role
 -- label as its name; the same client+role+name+phone is inserted once.
 -- Idempotent: re-running adds only contacts not already present.
