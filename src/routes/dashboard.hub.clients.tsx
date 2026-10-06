@@ -1,11 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 import { HubShell, type HubTab } from "@/components/admin-hubs/hub-shell";
-import { RequireLevel, RequirePermission } from "@/components/rbac-guard";
+import { RequirePermission } from "@/components/rbac-guard";
 import { useAccess } from "@/hooks/use-access";
 import { ClientsPage } from "./dashboard.clients";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
-import { TeamsPage } from "./dashboard.teams";
 import { PbaLedgerPage } from "./dashboard.pba-ledger";
 import { ClientLoansPage } from "./dashboard.client-loans";
 import { ReferralsPage } from "@/components/referrals/referrals-page";
@@ -16,7 +15,7 @@ const search = z.object({
 });
 
 function ClientsHub() {
-  const { can } = useAccess();
+  const { can, isOwner } = useAccess();
   const tabs: HubTab[] = [
     {
       key: "directory",
@@ -50,15 +49,6 @@ function ClientsHub() {
   }
   tabs.push(
     {
-      key: "teams",
-      label: "Teams & homes",
-      render: () => (
-        <RequirePermission perm="view_clients">
-          <TeamsPage />
-        </RequirePermission>
-      ),
-    },
-    {
       key: "funds",
       label: "Funds",
       render: () => (
@@ -71,14 +61,14 @@ function ClientsHub() {
               <PbaLedgerPage />
             </RequirePermission>
           </section>
-          <section>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Client Loan Ledger
-            </h3>
-            <RequireLevel min="owner">
+          {isOwner && (
+            <section>
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                Client Loan Ledger
+              </h3>
               <ClientLoansPage />
-            </RequireLevel>
-          </section>
+            </section>
+          )}
         </div>
       ),
     },
@@ -94,6 +84,9 @@ export const Route = createFileRoute("/dashboard/hub/clients")({
   head: () => ({ meta: [{ title: "Clients — Provider Interface" }] }),
   validateSearch: (s) => search.parse(s),
   beforeLoad: ({ search: s }) => {
+    if (s.tab === "teams") {
+      throw redirect({ to: "/dashboard/homes", replace: true });
+    }
     if (s.tab === "hosts") {
       throw redirect({
         to: "/dashboard/hub/clients",
