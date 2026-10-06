@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
   addDays,
@@ -123,5 +124,28 @@ describe("Nectar summary", () => {
     assert.equal(parseSummaryDraft('{"summary":" Draft. "}'), "Draft.");
     assert.equal(parseSummaryDraft('```json\n{"summary":"Draft."}\n```'), "Draft.");
     assert.equal(parseSummaryDraft("not json"), "");
+  });
+});
+
+describe("discharge is one transaction", () => {
+  it("discharge_client takes the team off inside the function; the server fn doesn't", () => {
+    const sql = readFileSync(
+      new URL(
+        "../../../supabase/migrations/20261007100000_clients_discharge_removes_team_atomically.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const body = sql.slice(sql.indexOf("as $$"));
+    const snapshot = body.indexOf("into v_team");
+    const removal = body.indexOf("delete from public.staff_assignments");
+    assert.ok(
+      snapshot > 0 && removal > snapshot,
+      "team is snapshotted, then removed, in the function",
+    );
+    assert.ok(removal < body.indexOf("insert into public.client_discharges"));
+    const fn = readFileSync(new URL("./discharge.functions.ts", import.meta.url), "utf8");
+    assert.doesNotMatch(fn, /from\("staff_assignments"\)/);
+    assert.doesNotMatch(fn, /teamLeft/);
   });
 });

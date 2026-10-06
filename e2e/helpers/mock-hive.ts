@@ -1021,7 +1021,7 @@ function serverFnPayload(url: string, body: string): unknown {
   if (/^previewDischarge/.test(fn)) {
     return { ended: { authorizations: [], team: [], shifts: [] }, upcoming: [] };
   }
-  if (/^dischargeClient/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c4", teamLeft: 0 };
+  if (/^dischargeClient/.test(fn)) return { id: "00000000-0000-4000-a000-0000000000c4" };
   if (/^(reactivateClient|saveDischargeSummary|markDischargeSummarySent)/.test(fn)) {
     return { ok: true };
   }

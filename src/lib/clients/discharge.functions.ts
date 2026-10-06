@@ -1,6 +1,6 @@
 // Discharge server functions: preview what a discharge ends, let Nectar draft
-// the summary, discharge (one transaction in discharge_client, then the team
-// comes off the client), keep the summary and its 7-day clock, and reactivate.
+// the summary, discharge (one transaction in discharge_client, which also takes
+// the team off the client), keep the summary and its 7-day clock, and reactivate.
 // Every call runs assertCanManageClient first. Nothing is deleted from the
 // client's record: authorizations are ended, shifts cancelled, the discharge
 // row is kept when the client is reactivated.
@@ -122,9 +122,9 @@ const dischargeInput = scope.extend({
 });
 
 /**
- * Discharge: ends active authorizations, cancels future shifts, moves the
- * client to Discharged and records it (one transaction), then takes the team
- * off the client. teamLeft > 0 means some team members couldn't be removed.
+ * Discharge: ends active authorizations, takes the team off the client,
+ * cancels future shifts, moves the client to Discharged and records it — all
+ * in one transaction (discharge_client), so either everything happens or none of it.
  */
 export const dischargeClient = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -145,18 +145,7 @@ export const dischargeClient = createServerFn({ method: "POST" })
       _summary_confirmed: data.summaryConfirmed,
     });
     if (error) throw new Error(error.message);
-    const { error: teamErr } = await sb
-      .from("staff_assignments")
-      .delete()
-      .eq("organization_id", data.organizationId)
-      .eq("client_id", data.clientId);
-    const { count } = await sb
-      .from("staff_assignments")
-      .select("id", { count: "exact", head: true })
-      .eq("organization_id", data.organizationId)
-      .eq("client_id", data.clientId);
-    if (teamErr) console.warn("[discharge] team removal failed:", teamErr.message);
-    return { id: id as string, teamLeft: count ?? 0 };
+    return { id: id as string };
   });
 
 /** Save (and optionally confirm) the discharge summary. Confirmed text is final. */

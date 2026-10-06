@@ -83,13 +83,8 @@ export function DischargeDialog({
     discharge.mutate(
       { ...input, summaryDraftedByNectar: summary.draftedByNectar },
       {
-        onSuccess: (r) => {
+        onSuccess: () => {
           toast.success(`${name} is discharged. The record is kept.`);
-          if (r.teamLeft > 0) {
-            toast.warning(
-              `${r.teamLeft} team member${r.teamLeft === 1 ? " is" : "s are"} still assigned. Ask an admin to take them off.`,
-            );
-          }
           close(false);
         },
         onError: (e: Error) => toast.error(e.message),
