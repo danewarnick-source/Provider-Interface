@@ -1,0 +1,111 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { appendGoalsToCurrentPlan, insertPlan, newGoalTexts, replaceCurrentPlanGoals } from "./plans-write.ts";
+
+type Row = Record<string, unknown>;
+
+/** Tiny in-memory stand-in for the Supabase query builder (eq filters only). */
+function fakeDb(seed: Record<string, Row[]>) {
+  const tables: Record<string, Row[]> = structuredClone(seed);
+  let n = 0;
+  const log: string[] = [];
+  function from(table: string) {
+    const rows = (tables[table] ??= []);
+    const filters: Array<[string, unknown]> = [];
+    let op: "select" | "insert" | "update" = "select";
+    let payload: Row | null = null;
+    let headCount = false;
+    const match = () => rows.filter((r) => filters.every(([k, v]) => r[k] === v));
+    const run = () => {
+      if (op === "insert") {
+        const row = { id: `${table}-${++n}`, ...payload };
+        rows.push(row);
+        log.push(`insert ${table}`);
+        return { data: [row], error: null };
+      }
+      if (op === "update") {
+        const hit = match();
+        for (const r of hit) Object.assign(r, payload);
+        log.push(`update ${table} x${hit.length}`);
+        return { data: hit, error: null };
+      }
+      const hit = match();
+      return headCount ? { count: hit.length, data: null, error: null } : { data: hit, error: null };
+    };
+    const q = {
+      select(_c?: string, opts?: { head?: boolean }) { headCount = !!opts?.head; return q; },
+      insert(p: Row) { op = "insert"; payload = p; return q; },
+      update(p: Row) { op = "update"; payload = p; return q; },
+      eq(k: string, v: unknown) { filters.push([k, v]); return q; },
+      maybeSingle() { const r = run(); return Promise.resolve({ data: (r.data as Row[] | null)?.[0] ?? null, error: null }); },
+      then(res: (v: unknown) => unknown) { return Promise.resolve(run()).then(res); },
+    };
+    return q;
+  }
+  return { from, tables, log };
+}
+
+const scope = { organizationId: "org", clientId: "c1" };
+
+describe("newGoalTexts", () => {
+  it("drops goals already on the plan and repeats", () => {
+    assert.deepEqual(newGoalTexts(["Cook a meal"], [" cook  a MEAL ", "Walk", "walk", ""]), ["Walk"]);
+  });
+});
+
+describe("insertPlan", () => {
+  it("a new current plan retires the old current one", async () => {
+    const db = fakeDb({ client_plans: [{ id: "old", client_id: "c1", status: "current" }] });
+    const id = await insertPlan(db, { ...scope, source: "manual" });
+    assert.equal(db.tables.client_plans.find((p) => p.id === "old")!.status, "past");
+    assert.equal(db.tables.client_plans.find((p) => p.id === id)!.status, "current");
+  });
+  it("a future plan is upcoming and leaves the current plan alone", async () => {
+    const db = fakeDb({ client_plans: [{ id: "old", client_id: "c1", status: "current" }] });
+    await insertPlan(db, { ...scope, source: "manual", start_date: "2999-01-01", end_date: "2999-12-31" });
+    assert.equal(db.tables.client_plans[0].status, "current");
+    assert.equal(db.tables.client_plans[1].status, "upcoming");
+  });
+});
+
+describe("replaceCurrentPlanGoals", () => {
+  it("ends the current plan's goals and adds the new ones with one support each", async () => {
+    const db = fakeDb({
+      client_plans: [{ id: "p", client_id: "c1", status: "current" }],
+      client_goals: [{ id: "g0", plan_id: "p", status: "active", goal_text: "Old" }],
+    });
+    const r = await replaceCurrentPlanGoals(db, {
+      ...scope, userId: "u",
+      goals: [
+        { goal_text: "New", support_text: "Help", details: " ", our_codes: ["dsi"] },
+        { goal_text: "  ", support_text: "", details: null, our_codes: [] },
+      ],
+    });
+    assert.deepEqual(r, { planId: "p", goalCount: 1 });
+    assert.equal(db.tables.client_goals[0].status, "ended");
+    assert.equal(db.tables.client_goals[1].goal_text, "New");
+    assert.deepEqual(db.tables.client_goal_supports[0].our_codes, ["DSI"]);
+    assert.equal(db.tables.client_goal_supports[0].details, null);
+  });
+  it("creates a plan when the client has none", async () => {
+    const db = fakeDb({});
+    const r = await replaceCurrentPlanGoals(db, { ...scope, userId: "u", goals: [] });
+    assert.equal(db.tables.client_plans[0].id, r.planId);
+    assert.equal(db.tables.client_plans[0].source, "pcsp_upload");
+  });
+});
+
+describe("appendGoalsToCurrentPlan", () => {
+  it("adds only goals the plan doesn't have, with the given codes", async () => {
+    const db = fakeDb({
+      client_plans: [{ id: "p", client_id: "c1", status: "current" }],
+      client_goals: [{ id: "g0", plan_id: "p", status: "active", goal_text: "Cook" }],
+    });
+    const added = await appendGoalsToCurrentPlan(db, { ...scope, goals: ["cook", "Walk"], codes: ["hhs"] });
+    assert.equal(added, 1);
+    assert.equal(db.tables.client_goals[1].goal_text, "Walk");
+    assert.equal(db.tables.client_goals[1].sort, 1);
+    assert.deepEqual(db.tables.client_goal_supports[0].our_codes, ["HHS"]);
+    assert.equal(db.tables.client_goal_supports[0].support_text, "");
+  });
+});
