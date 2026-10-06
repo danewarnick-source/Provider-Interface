@@ -363,3 +363,40 @@ One short report per prompt. A new session continues from the first prompt not m
   - Adding an exclusion requires the person to be off the team; the UI removes them first.
   - P11 discharge could end open exclusions. They are harmless if left open.
   - Legacy files I touched that are still over the size limits: `setup.functions` 665, `scheduler.functions` 439, `repeat.functions` 333, `loans.functions` 357, `client-specific-training-card` 895.
+
+## P11
+- **Status:** merged. PR #456 (https://github.com/danewarnick-source/Provider-Interface/pull/456) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p11-discharge`.
+- **What was done:**
+  - **Guided discharge** (profile ⋯ → Discharge, in `profile/discharge/`), in three steps:
+    1. Details: date, reason, who started it, notice date. An agency-started discharge warns when notice is under 30 days.
+    2. Summary: Nectar can draft it from what is on file. The draft is marked as Nectar's, and a person ticks a box to confirm it. The summary can be left for later.
+    3. Review: shows what the discharge will end.
+  - **`discharge_client` RPC** (one transaction):
+    - Ends active authorizations on the discharge date (`service_end_date`).
+    - Cancels shifts that start after the discharge date and after now.
+    - Sets `account_status = 'archived'`.
+    - Records `client_discharges` with an `ended_items` snapshot.
+
+    After the RPC, `dischargeClient` takes the team off the client (removes the `staff_assignments` rows).
+  - **Discharge card** on a discharged profile: the 7-day summary clock (due, late or sent), write / draft / confirm the summary, and Mark sent.
+  - **Reactivate** (⋯ menu and the list's Reactivate button) calls `reactivate_client`. The client goes back to active and the discharge row is stamped. Ended authorizations, cancelled shifts and the old team are not brought back.
+  - **Read-only:**
+    - `RecordReadOnlyProvider` makes `useAccess()` report Edit as View inside the profile sections.
+    - `runManageClientGuard` refuses every action except `view`, `view_medical` and `discharge` on a discharged client.
+    - `updateClient` now locks `account_status` and `discharge_date`.
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1837 of 1842 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 17 pass / 3 fail, the same 3 as before. A cold dev server can fail the first two client specs; they pass once it is warm.
+- **Migrations:**
+  - `20261006230000_clients_discharges` was already on live from the interrupted attempt. The committed file matches live.
+  - `20261006230100_clients_discharge_functions` (the preview, discharge and reactivate RPCs, plus a status-only cancel bypass in `scheduled_shifts_staff_update_guard` keyed on a transaction-local flag) was applied through `execute_sql` in parts and recorded in `schema_migrations`. A run that includes a DELETE statement waits for confirmation and times out, so the `staff_assignments` removal lives in the server function.
+  - No Phase B migration.
+- **Files:** 13 added, 0 deleted.
+- **Notes for later prompts:**
+  - The discharged status stays `'archived'` because every existing reader filters on it. P12 can decide whether to move to `'discharged'`.
+  - The confirmed summary is not saved as a `client_documents` file yet; `summary_document_id` is still unused.
+  - Open do-not-schedule exclusions are left open on discharge.
+  - Team removal happens after the RPC, so it is not atomic with the rest. If RLS stops it, the UI says how many team members are still assigned.
