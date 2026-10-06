@@ -160,3 +160,37 @@ One short report per prompt. A new session continues from the first prompt not m
   - Goals the new PCSP drops end with the old plan year; their rows aren't changed.
   - A PDF uploaded and then cancelled at review stays in the client file.
   - `training.functions.ts` (1361 lines) and `client-specific-training-card.tsx` (928 lines) are still over the size limits.
+
+## P6
+- **Status:** merged. PR #451 (https://github.com/danewarnick-source/Provider-Interface/pull/451) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p6-list-add`.
+- **What was done:**
+  - **List:** `listClients` (`src/lib/clients/list.functions.ts`, loaded through `list-load.ts` and `list-queries.ts`) returns everything the list needs in one call. Each row has codes, home, the code with the fewest units left, the next due item, team members, readiness and a needs-attention flag. Search, filters and the Active/Discharged views all run on the server. The pure pieces are in `list.ts`.
+  - **Units:** `units.ts` (`usedUnitsForCode`, `worstUnitsLeft`) is the one path for units used, shared with `use-client-budget`.
+  - **Referrals:** the existing `ReferralsPage` opens from a small Referrals link in the list. The link only shows when the org has referrals.
+  - **CSV export** of the filtered list.
+  - **Add client:** a one-page form built from `create.ts` and `create.functions.ts` (`addClient`, `findClientByMedicaidId`, `readPcspForNewClient`, `loadImportDraft`).
+    - A duplicate Medicaid ID is refused and shows a link to the existing client.
+    - Fill from PCSP fills only empty fields and tags them.
+    - "Waiting on 1056" codes are saved with `authorization_pending=true` and 0 units.
+    - The home pin is geocoded on save.
+  - **Imported Smart Import drafts:** they show in the list as "Finish setup" and open the same form (`?draft=<subject id>`). On save, `finishImportDraft` in `smart-import-commit.functions.ts` attaches custom fields, certs and provisioning, then closes the import record.
+  - **Shared PCSP reading:** `pcsp/read-pdf.server.ts` is used by both `readPcsp` and Fill from PCSP.
+  - **Removed:** the old add dialog and its draft/intake choice, the finalize editor, the intake checklist card and panel, the intake chip and its progress hook, `hrc.functions.ts`, the old `createClient`, the home-pin backfill and its button, `getPendingClientSubject`, `applyClientFields`, `commitSingleSubject`, `listIntakeFormsForClient`, `smart-import-status.ts`, and `TeamsPage`.
+  - **Redirects:** client-intake → profile; pending → list. Hub `?tab=teams|funds|referrals` → `/dashboard/homes`, `/dashboard/pba-ledger`, and the list's Referrals view.
+- **Checks:**
+  - tsc: 203 errors before, 203 after; the error sets are identical.
+  - Unit tests: 1709 of 1714 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 14 pass / 4 fail. The same 4 fail on the base branch; the 2 extra passes are new tests.
+  - e2e staff-go-live: 6/6.
+  - e2e daily-logs: 2 pass / 4 fail, the same as before.
+  - e2e 1056: 12 fail, the same as before.
+- **Migrations:** none applied, none written but not applied.
+- **Files:** 20 added (plus 1 new e2e helper), 8 deleted.
+- **Notes for later prompts:**
+  - Imported drafts can't be discarded from the UI any more, because the old pending page had the only button. `discardImportSubject` still exists; add a Discard action to the Add form if wanted.
+  - Discharged means `account_status` is archived or discharged (`DISCHARGED_STATUSES` in `list.ts`); P11 should set one of these.
+  - The staff-go-live config's webServer path only resolves from `e2e/configs/`. Start `npx vite --config e2e/harness/vite.config.ts` (port 4177) yourself before running it.
+  - Running e2e rewrites the tracked `e2e/artifacts/*.png` screenshots. Don't commit them.
+  - Legacy oversized files with small edits are listed in the PR body.
