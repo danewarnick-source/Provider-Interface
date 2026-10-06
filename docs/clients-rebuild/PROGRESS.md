@@ -130,3 +130,33 @@ One short report per prompt. A new session continues from the first prompt not m
   - P8 still has to move `plan_year` / `pcsp_expiration_date` / `pcsp_signed_date` (profile, file, face sheet, import) and add the plan date editing UI.
   - Per-goal staff visibility toggles reset, because goal IDs changed.
   - Goals added without supports get one blank support listing the client's active codes.
+
+## P5
+- **Status:** merged. PR #450 (https://github.com/danewarnick-source/Provider-Interface/pull/450) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p5-pcsp-reader`.
+- **What was done:**
+  - **Reader:** moved to `src/lib/clients/pcsp/`, split into `layout`, `parser`, `parser-goals`, `parser-tables`, `parser-checks` and `parser-shared`. It gives the same output as the reference copy, and the `docs/clients-rebuild/pcsp-*.ts` copies are deleted.
+  - **Fixture:** a made-up PCSP (`fixture/sample-pages.ts`). Its exact expected output is in `sample-expected.json`.
+  - **`import.functions.ts`:**
+    - `readPcsp` saves only the PDF (`client_documents` type `pcsp`) and returns the parse plus a carry-over proposal.
+    - `confirmPcsp(parseId = document id, edits = the full reviewed payload, zod-checked)` writes the plan (current; the old one becomes past, via `insertPlan` with `document_id`), goals with `carried_from_goal_id`, supports, `client_billing_codes` upserts from our budget lines, "From PCSP" blocks in `special_directions` and `about_me`, and other-provider contacts.
+  - **Nectar fallback:** off by default. It needs both `nectar` and `pcsp_nectar_fallback` turned on in `organization_features`, and every value must come with `{value, page, quote}`.
+  - **UI:** "Upload new PCSP" in Plan goals opens the review (`profile/plans/pcsp-review*.tsx`, `use-pcsp-import.ts`).
+  - **Deleted:** the Nectar goal pull (care plan button, training-card button, `extractPcspGoalsForTraining`, `extractGoalsVerbatim`, `CSTGoal`, `replaceCurrentPlanGoals`, `use-pcsp-goal-extract.ts`).
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1686 of 1691 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 12 pass / 4 fail, including the new mocked `clients-pcsp-review.spec.ts`. The same 4 fail on the base branch.
+  - e2e staff-go-live: 6/6.
+  - e2e daily-logs: 2 pass / 4 fail, the same as before.
+- **Migrations:**
+  - `20261006144447_pcsp_nectar_fallback_feature_flag` applied to live. It is a data-only `feature_registry` row, so `types.ts` didn't change.
+  - No Phase B migration.
+- **Files:** 32 added, 1 moved, 2 deleted.
+- **Notes for later prompts:**
+  - "Uploading the fixture shows the review" is covered by a mocked e2e, because no live preview was reachable.
+  - `document-extraction.ts` keeps its PCSP branch, because Smart Import still uses it.
+  - Goals the new PCSP drops end with the old plan year; their rows aren't changed.
+  - A PDF uploaded and then cancelled at review stays in the client file.
+  - `training.functions.ts` (1361 lines) and `client-specific-training-card.tsx` (928 lines) are still over the size limits.
