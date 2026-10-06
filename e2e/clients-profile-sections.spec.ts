@@ -15,6 +15,7 @@ const SECTIONS = [
   "health",
   "plans",
   "services",
+  "money",
   "file",
   "team",
   "activity",
@@ -51,6 +52,21 @@ test("client profile opens every section from the side menu", async ({ page }) =
       await expect(page.getByTestId("client-authorization-row")).toHaveCount(1);
       await expect(page.getByText("600 left")).toBeVisible();
       await expect(page.getByTestId("client-monthly-budget")).toBeVisible();
+    }
+    if (key === "money") {
+      await expect(page.getByTestId("client-money-pba")).toBeVisible();
+      await expect(page.getByText("$420.00")).toBeVisible();
+      await expect(page.getByTestId("pba-audit")).toBeVisible();
+      await expect(page.getByTestId("client-money-spending")).toBeVisible();
+    }
+    if (key === "team") {
+      await expect(page.getByTestId("client-team-codes")).toBeVisible();
+      await expect(page.getByTestId("client-do-not-schedule")).toBeVisible();
+    }
+    if (key === "activity") {
+      await expect(page.getByTestId("client-office-notes")).toBeVisible();
+      await expect(page.getByTestId("client-activity-shifts")).toBeVisible();
+      await expect(page.getByTestId("client-activity-logs")).toBeVisible();
     }
     if (key === "file") {
       await expect(page.getByTestId("client-required-document")).toHaveCount(3);
