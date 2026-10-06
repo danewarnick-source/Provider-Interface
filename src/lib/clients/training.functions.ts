@@ -8,7 +8,6 @@ import { isAdminLevel } from "@/lib/access/levels";
 import { todayYmd } from "./dates";
 import { activeGoalViewsOn, type GoalView } from "./plans";
 import { loadPlanBundle } from "./plans-load";
-import { replaceCurrentPlanGoals } from "./plans-write";
 
 /** Active goals (with supports) of the client's plan in effect today. */
 async function planGoals(supabase: AnySupabase, clientId: string): Promise<GoalView[]> {
@@ -70,16 +69,6 @@ export type CSTSection = {
   job_codes?: string[];
 };
 export type CSTContent = { sections: CSTSection[] };
-
-// One goal as read verbatim from a PCSP by the extractor; saved into the
-// client's current plan (client_goals + client_goal_supports).
-export type CSTGoal = {
-  id: string;
-  goal: string;        // the goal/objective statement (verbatim)
-  supports: string;    // what will be done to assist (verbatim from PCSP)
-  details: string;     // objective detail: measures, frequency, target, timeline (verbatim)
-  job_codes: string[]; // service/job code(s) linked to this goal
-};
 
 // Applied-reasoning prompt shown to staff per tab.
 export type CSTReviewQuestion = {
@@ -344,106 +333,6 @@ async function draftTrainingNarrative(facts: string, orgId?: string | null): Pro
     return "";
   }
 }
-
-// ── Verbatim PCSP goal extractor (admin, NECTAR) ────────────────────────────
-// Reads the uploaded PCSP document and returns one CSTGoal per goal/objective
-// row. Every field is STRICTLY verbatim — no summarisation, no authored prose.
-async function extractGoalsVerbatim(documentText: string, orgId?: string | null): Promise<CSTGoal[]> {
-  const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
-  const system = [
-    "You are NECTAR, a STRICTLY VERBATIM extraction engine for a Utah DSPD PCSP.",
-    "Extract each goal from the PCSP as a structured object. Use ONLY text that appears in the document.",
-    "Do NOT summarize, paraphrase, infer, or author any care guidance. Quote the document.",
-    "PCSP goals typically appear in a table or section with columns/fields like Goal/Objective, Supports/Support Strategy, Details, and Support/Service Code.",
-    "For EACH distinct goal emit one object with:",
-    "  goal: the goal/objective statement, verbatim.",
-    "  supports: what will be done to assist the person (the support strategy text), verbatim. Empty string if not present.",
-    "  details: objective detail such as measures, frequency, target, timeline, verbatim. Empty string if not present.",
-    "  job_codes: array of any service/support code(s) shown for that goal (e.g. 'SLN','DSI'). Empty array if none.",
-    "Omit administrative boilerplate (headers, addresses, signatures). Only the goal rows.",
-    'Respond ONLY with JSON: { "goals": [ { "goal": "...", "supports": "...", "details": "...", "job_codes": ["..."] } ] }',
-    "No preamble, no markdown fences.",
-  ].join("\n");
-
-  const res = await gatewayFetch({
-    messages: [
-      { role: "system", content: system },
-      { role: "user", content: `PCSP DOCUMENT TEXT:\n\n${documentText.slice(0, 120_000)}` },
-    ],
-    response_format: { type: "json_object" },
-  }, { orgId });
-  if (!res.ok) throw new Error(`NECTAR extraction failed (${res.status}).`);
-  const body = await res.json();
-  const content: string = body?.choices?.[0]?.message?.content ?? "{}";
-  let parsed: { goals?: Array<{ goal?: string; supports?: string; details?: string; job_codes?: string[] }> };
-  try {
-    const clean = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-    parsed = JSON.parse(clean || "{}");
-  } catch {
-    throw new Error("NECTAR returned malformed JSON extracting goals.");
-  }
-  const rows = Array.isArray(parsed.goals) ? parsed.goals : [];
-  return rows.map((r) => ({
-    id: sid(),
-    goal: String(r.goal ?? "").slice(0, 4000),
-    supports: String(r.supports ?? "").slice(0, 4000),
-    details: String(r.details ?? "").slice(0, 4000),
-    job_codes: Array.isArray(r.job_codes) ? r.job_codes.map((c) => String(c).slice(0, 40)) : [],
-  }));
-}
-
-// ── EXTRACT PCSP goals into the current plan (admin) ────────────────────────
-// Downloads the client's most-recent PCSP document, runs extractGoalsVerbatim,
-// and saves the goals (one support each) into the client's current plan.
-export const extractPcspGoalsForTraining = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ clientId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
-    if (!supabase || !userId) return { ok: false as const, reason: "Not authenticated." };
-    const m = await getMembership(supabase, userId);
-    adminGuard(m.access_level);
-    await assertClientInOrg(supabase, data.clientId, m.organization_id);
-
-    // 1) Find the most recent PCSP document for this client.
-    const { data: docs, error: dErr } = await supabase
-      .from("client_documents")
-      .select("id, document_type, file_name, storage_path, file_url, uploaded_at")
-      .eq("client_id", data.clientId)
-      .order("uploaded_at", { ascending: false });
-    if (dErr) throw new Error(dErr.message);
-    const pcsp = (docs ?? []).find((d: { document_type: string | null }) =>
-      (d.document_type ?? "").toLowerCase().includes("pcsp"),
-    );
-    if (!pcsp) {
-      return { ok: false as const, reason: "No PCSP document found on this client. Upload the PCSP first, or enter goals manually." };
-    }
-
-    // 2) Download + extract text.
-    const path = (pcsp.storage_path as string) || (pcsp.file_url as string);
-    const { data: file, error: dlErr } = await supabase.storage.from("client-documents").download(path);
-    if (dlErr || !file) {
-      return { ok: false as const, reason: `Could not download the PCSP document: ${dlErr?.message ?? "no file"}` };
-    }
-    const buf = Buffer.from(await file.arrayBuffer());
-    const { extractTextFromUpload } = await import("@/lib/document-text.server");
-    const text = await extractTextFromUpload(buf, pcsp.file_name as string);
-    if (!text || text.trim().length < 20) {
-      return { ok: false as const, reason: "NECTAR couldn't read the PCSP text (scanned PDF?). Enter goals manually." };
-    }
-
-    // 3) Verbatim goal extraction.
-    const goals = await extractGoalsVerbatim(text, m.organization_id);
-
-    // 4) Save into the client's current plan (its previous goals are ended, kept).
-    const saved = await replaceCurrentPlanGoals(supabase, {
-      organizationId: m.organization_id,
-      clientId: data.clientId,
-      userId,
-      goals: goals.map((g) => ({ goal_text: g.goal, support_text: g.supports, details: g.details, our_codes: g.job_codes })),
-    });
-    return { ok: true as const, goalCount: saved.goalCount };
-  });
 
 // ── GET current training (admin) ────────────────────────────────────────────
 export const getClientSpecificTraining = createServerFn({ method: "GET" })

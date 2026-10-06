@@ -1,7 +1,7 @@
-// Server-side plan writes shared by the plan server functions, PCSP goal
-// extraction and smart import. They take the caller's Supabase client;
+// Server-side plan writes shared by the plan server functions, the PCSP
+// import and smart import. They take the caller's Supabase client;
 // callers run assertCanManageClient (or an equivalent admin check) first.
-// Nothing is deleted: replaced goals are ended, replaced plans become 'past'.
+// Nothing is deleted: replaced plans become 'past'.
 
 import { todayYmd } from "./dates.ts";
 import { assertRowsChanged } from "./writes.ts";
@@ -20,7 +20,8 @@ async function retireCurrent(sb: Sb, clientId: string): Promise<void> {
 export async function insertPlan(
   sb: Sb,
   a: { organizationId: string; clientId: string; userId?: string | null; source: PlanSource;
-       start_date?: string | null; end_date?: string | null; activated_on?: string | null; meeting_date?: string | null },
+       start_date?: string | null; end_date?: string | null; activated_on?: string | null; meeting_date?: string | null;
+       document_id?: string | null },
 ): Promise<string> {
   const dates = { start_date: a.start_date ?? null, end_date: a.end_date ?? null };
   const status = planStatusOn({ ...dates, status: "current" }, todayYmd());
@@ -31,6 +32,7 @@ export async function insertPlan(
       organization_id: a.organizationId, client_id: a.clientId, ...dates, status,
       activated_on: a.activated_on ?? null, meeting_date: a.meeting_date ?? null,
       source: a.source, created_by: a.userId ?? null,
+      ...(a.document_id ? { document_id: a.document_id } : {}),
     })
     .select("id");
   if (error) throw new Error(error.message);
@@ -44,7 +46,7 @@ async function currentPlanId(sb: Sb, a: { organizationId: string; clientId: stri
   return (data as { id: string } | null)?.id ?? (await insertPlan(sb, a));
 }
 
-export interface ImportedGoal {
+interface ImportedGoal {
   goal_text: string;
   support_text: string;
   details: string | null;
@@ -75,21 +77,6 @@ async function addGoals(
     added++;
   }
   return added;
-}
-
-/**
- * Replace the current plan's goals with goals read from a PCSP: its active
- * goals are ended (kept), the new ones added with one support each.
- */
-export async function replaceCurrentPlanGoals(
-  sb: Sb,
-  a: { organizationId: string; clientId: string; userId: string; goals: ImportedGoal[] },
-): Promise<{ planId: string; goalCount: number }> {
-  const planId = await currentPlanId(sb, { ...a, source: "pcsp_upload" });
-  const { error } = await sb
-    .from("client_goals").update({ status: "ended", ended_on: todayYmd() }).eq("plan_id", planId).eq("status", "active");
-  if (error) throw new Error(error.message);
-  return { planId, goalCount: await addGoals(sb, { ...a, planId }) };
 }
 
 /** Goal texts not already active on the plan (case/space-insensitive), first copy only. */

@@ -1,7 +1,7 @@
 // Turns a PDF into pages of text lines that keep their column positions.
 // USTEPS PCSPs use two-column "Label:  value" rows and tables, so the reader
 // needs to know WHERE on the line each word sits, not just the words.
-// In PI this runs server-side with unpdf (already in package.json).
+// Runs server-side with unpdf (see import.functions.ts).
 
 export type LayoutLine = { y: number; text: string };
 export type LayoutPage = { index: number; lines: LayoutLine[] };
@@ -32,15 +32,22 @@ export function itemsToLines(items: Item[]): LayoutLine[] {
   });
 }
 
-export async function pdfToLayout(bytes: Uint8Array, unpdf: any): Promise<LayoutPage[]> {
-  const doc = await unpdf.getDocumentProxy(bytes);
+type TextItem = { str?: unknown; transform?: number[]; width?: number };
+type PdfDoc = {
+  numPages: number;
+  getPage: (i: number) => Promise<{ getTextContent: () => Promise<{ items: unknown[] }> }>;
+};
+export type UnpdfLike = { getDocumentProxy: (bytes: Uint8Array) => Promise<unknown> };
+
+export async function pdfToLayout(bytes: Uint8Array, unpdf: UnpdfLike): Promise<LayoutPage[]> {
+  const doc = (await unpdf.getDocumentProxy(bytes)) as PdfDoc;
   const pages: LayoutPage[] = [];
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
     const tc = await page.getTextContent();
-    const items: Item[] = tc.items
-      .filter((t: any) => typeof t.str === "string")
-      .map((t: any) => ({ str: t.str, x: t.transform[4], y: t.transform[5], w: t.width }));
+    const items: Item[] = (tc.items as TextItem[])
+      .filter((t) => typeof t.str === "string" && Array.isArray(t.transform))
+      .map((t) => ({ str: t.str as string, x: t.transform![4], y: t.transform![5], w: t.width ?? 0 }));
     pages.push({ index: i, lines: itemsToLines(items) });
   }
   return pages;
