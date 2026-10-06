@@ -8,7 +8,7 @@ export type FeatureKey =
 /**
  * Legacy provider_tenants / tenant_features flags. That catalog is unused
  * (0 rows on PI-Platform). Client feature visibility is driven by DSPD
- * codes + clients.feature_config — see client-features.ts.
+ * codes + clients.feature_config — see src/lib/clients/features.ts.
  */
 export function useDisabledFeatures() {
   return useQuery({

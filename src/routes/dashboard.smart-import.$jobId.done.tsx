@@ -34,9 +34,9 @@ import {
 } from "@/lib/smart-import-commit.functions";
 import { generateSmartImportReminders } from "@/lib/smart-import-reminders.functions";
 import { previewUndoImport, undoCommittedImport } from "@/lib/smart-import-history.functions";
-import { ClientLiveBadge } from "@/components/clients/client-readiness-card";
-import { SetupChecklist } from "@/components/clients/setup-checklist";
-import { FinalizeClientEditor } from "@/components/clients/finalize-client-editor";
+import { ClientLiveBadge } from "@/components/clients/add/client-readiness-card";
+import { SetupChecklist } from "@/components/clients/add/setup-checklist";
+import { FinalizeClientEditor } from "@/components/clients/add/finalize-client-editor";
 import { employeeSmartImportRedirect } from "@/lib/employee-smart-import-block";
 
 export const Route = createFileRoute("/dashboard/smart-import/$jobId/done")({

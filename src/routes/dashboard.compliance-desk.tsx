@@ -39,7 +39,7 @@ import { NectarFocusBanner } from "@/components/nectar/nectar-focus-banner";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { reviewExceptions } from "@/lib/records-review-rules";
 import { RecordsReviewActions } from "@/components/records/records-review-actions";
-import { useAllClientBillingCodes } from "@/hooks/use-client-billing-codes";
+import { useAllClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
 import { evaluateEntryReadiness, factsFromTimesheet, matchAuthRow } from "@/lib/dspd-entry-readiness";
 import { EntryReadinessPanel } from "@/components/billing/billing-holds";
 

@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg, useOrgDisplayName } from "@/hooks/use-org";
-import { useAllClientBillingCodes } from "@/hooks/use-client-billing-codes";
+import { useAllClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
 import { fmtHours, fmtUSD, fmtUnits, unitsToHours, computeEntryUnits, UNITS_PER_HOUR } from "@/lib/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { Button } from "@/components/ui/button";

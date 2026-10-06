@@ -39,9 +39,9 @@ import {
   previewClientUpdateFromDocument,
   applySelectedClientFields,
 } from "@/lib/import-checklist.functions";
-import { reclaimExternalCodesAsOurs } from "@/lib/client-billing-fix.functions";
-import { AddCodesControl } from "@/components/clients/add-codes-control";
-import { BillingCodesDetail } from "@/components/clients/billing-codes-detail";
+import { reclaimExternalCodesAsOurs } from "@/lib/clients/billing-fix.functions";
+import { AddCodesControl } from "@/components/clients/add/add-codes-control";
+import { BillingCodesDetail } from "@/components/clients/profile/billing-codes-detail";
 import {
   Table,
   TableBody,
@@ -50,32 +50,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ClientFileTab } from "@/components/clients/client-file-tab";
+import { ClientFileTab } from "@/components/clients/profile/client-file-tab";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 
 import { displayMedicaidId } from "@/lib/medicaid-id";
-import { ClientBudgetPanel } from "@/components/clients/client-budget-panel";
+import { ClientBudgetPanel } from "@/components/clients/profile/client-budget-panel";
 
-import { CaseloadEditor } from "@/components/clients/caseload-editor";
+import { CaseloadEditor } from "@/components/clients/shared/caseload-editor";
 import {
   SectionPanel,
   SectionGroup,
   CareSection,
   CareGroup,
-} from "@/components/clients/section-panel";
-import { ClientProfileTab } from "@/components/clients/profile-tab";
-import { HomePinCard } from "@/components/clients/home-pin-card";
-import { FaceSheetButton } from "@/components/clients/face-sheet-button";
+} from "@/components/clients/profile/section-panel";
+import { ClientProfileTab } from "@/components/clients/profile/profile-tab";
+import { HomePinCard } from "@/components/clients/profile/home-pin-card";
+import { FaceSheetButton } from "@/components/clients/profile/face-sheet-button";
 import {
   SectionsView,
   ClientSpecificTrainingCard,
   GoalsEditor,
   PublishConfirmDialog,
-} from "@/components/clients/client-specific-training-card";
-import { FieldVisibilityToggle } from "@/components/clients/visibility-toggles";
-import { CodeAssignedStaff } from "@/components/clients/code-assigned-staff";
-import { CustomFieldsForSection } from "@/components/clients/custom-fields-panel";
-import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/hrc-restrictions";
+} from "@/components/clients/profile/client-specific-training-card";
+import { FieldVisibilityToggle } from "@/components/clients/profile/visibility-toggles";
+import { CodeAssignedStaff } from "@/components/clients/shared/code-assigned-staff";
+import { CustomFieldsForSection } from "@/components/clients/profile/custom-fields-panel";
+import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/clients/hrc";
 import { Scale } from "lucide-react";
 import {
   AlertTriangle,
@@ -107,7 +107,7 @@ import {
   FolderOpen,
   X,
 } from "lucide-react";
-import { clientFeatureVisible } from "@/lib/client-features";
+import { clientFeatureVisible } from "@/lib/clients/features";
 import { MarEmarTab } from "@/components/workspace/mar-emar-tab";
 import {
   getClientSpecificTraining,
@@ -122,10 +122,10 @@ import {
   type CSTSection,
   type CSTGoal,
   type CSTReviewQuestion,
-} from "@/lib/client-specific-training.functions";
-import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
+} from "@/lib/clients/training.functions";
+import { useClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
 import { onPcspActivated } from "@/lib/company-obligations.functions";
-import { computeSupportStrategyCoverage } from "@/lib/support-strategy-coverage";
+import { computeSupportStrategyCoverage } from "@/lib/clients/strategy-coverage";
 import { updateClient, writeClientRecord } from "@/lib/clients/writes.functions";
 
 type ProfileTab =

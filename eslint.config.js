@@ -49,17 +49,17 @@ export default tseslint.config(
   },
   // Guardrail: care data is read through the canonical
   // `getClientCareData` / `useClientCareData` path only.
-  // See src/lib/client-care-data.functions.ts for the shared reader and
+  // See src/lib/clients/care-data.functions.ts for the shared reader and
   // the visibility rules.
   {
     files: ["src/**/*.{ts,tsx}"],
     ignores: [
       // The canonical reader itself.
-      "src/lib/client-care-data.functions.ts",
+      "src/lib/clients/care-data.functions.ts",
       // Legacy hooks kept as thin wrappers — scheduled for follow-up
       // migration one care-surface at a time.
-      "src/hooks/use-client-billing-codes.tsx",
-      "src/hooks/use-client-budget.tsx",
+      "src/components/clients/shared/hooks/use-client-billing-codes.tsx",
+      "src/components/clients/shared/hooks/use-client-budget.tsx",
       "src/hooks/use-client-caps.tsx",
       "src/hooks/use-shift-med-due-status.tsx",
       // Server-only pipelines that touch these tables for import / billing
@@ -77,11 +77,11 @@ export default tseslint.config(
       "src/components/workspace/about-tab.tsx",
       "src/components/medications-manager.tsx",
       "src/components/mar-calendar.tsx",
-      "src/components/clients/setup-checklist.tsx",
-      "src/components/clients/client-specific-training-card.tsx",
-      "src/components/clients/client-readiness-card.tsx",
-      "src/components/clients/profile-tab.tsx",
-      "src/components/clients/face-sheet-info-card.tsx",
+      "src/components/clients/add/setup-checklist.tsx",
+      "src/components/clients/profile/client-specific-training-card.tsx",
+      "src/components/clients/add/client-readiness-card.tsx",
+      "src/components/clients/profile/profile-tab.tsx",
+      "src/components/clients/profile/face-sheet-info-card.tsx",
       "src/components/staff-mobile/client-quick-info-sheet.tsx",
       "src/components/smart-import/**",
       "src/components/audit-portal/**",
@@ -110,7 +110,7 @@ export default tseslint.config(
           selector:
             "CallExpression[callee.property.name='from'][arguments.0.value=/^(clients|client_medications|client_specific_trainings|client_billing_codes)$/]",
           message:
-            "Read client care data via `useClientCareData` (or `getClientCareData` on the server) from src/lib/client-care-data.functions.ts. Do not query clients / client_medications / client_specific_trainings / client_billing_codes directly. Staff-visibility rules live in the shared reader's `visibility` block.",
+            "Read client care data via `useClientCareData` (or `getClientCareData` on the server) from src/lib/clients/care-data.functions.ts. Do not query clients / client_medications / client_specific_trainings / client_billing_codes directly. Staff-visibility rules live in the shared reader's `visibility` block.",
         },
       ],
     },
@@ -118,8 +118,8 @@ export default tseslint.config(
   eslintPluginPrettier,
   {
     files: [
-      "src/components/clients/profile-tab.tsx",
-      "src/components/clients/face-sheet-info-card.tsx",
+      "src/components/clients/profile/profile-tab.tsx",
+      "src/components/clients/profile/face-sheet-info-card.tsx",
     ],
     rules: { "prettier/prettier": "off" },
   },

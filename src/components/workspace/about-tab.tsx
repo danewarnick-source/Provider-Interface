@@ -11,9 +11,9 @@ import {
   User,
 } from "lucide-react";
 import type { CaseloadClient } from "@/hooks/use-caseload";
-import { ClientPhotoCard } from "@/components/clients/client-photo-card";
+import { ClientPhotoCard } from "@/components/clients/profile/client-photo-card";
 import { useClientCareData } from "@/hooks/use-client-care-data";
-import type { CustomFieldWithValue } from "@/lib/client-care-data.functions";
+import type { CustomFieldWithValue } from "@/lib/clients/care-data.functions";
 import { ageOn, daysUntil } from "@/lib/clients/dates";
 
 function formatCustomValue(f: CustomFieldWithValue): string {

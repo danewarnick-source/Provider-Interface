@@ -5,7 +5,7 @@ import {
   ABI_OBLIGATION_TITLE,
   THIRTY_DAY_OBLIGATION_TITLE,
 } from "./in-hive-training.ts";
-import { PCT_HIRE_COURSE_TITLE } from "./client-form-obligations.ts";
+import { PCT_HIRE_COURSE_TITLE } from "./clients/form-obligations.ts";
 import { CODE_OF_CONDUCT_TITLE } from "./obligation-auto-assign.ts";
 import {
   cellIncrementsRed,

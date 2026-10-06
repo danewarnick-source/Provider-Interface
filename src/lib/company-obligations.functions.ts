@@ -36,7 +36,7 @@ import {
 } from "./sow-obligation-catalog";
 import { obligationAppliesToFootprint } from "./dspd-audit-tool";
 import { STANDING_SOW_DUTIES } from "./standing-sow-duties";
-import { isRetiredPerClientPctTitle } from "./client-form-obligations";
+import { isRetiredPerClientPctTitle } from "./clients/form-obligations";
 import { homePeriodKey, obligationDutyKey, perHomeServiceCode } from "./obligation-assignee-rules";
 import { loadOrgFacts, type OrgFacts } from "./obligations/applicability";
 import {

@@ -35,7 +35,7 @@ import { evaluateShiftNote } from "@/lib/ai-coach.functions";
 import { saveDailyRecord, savePrnForm, saveIncidentReport } from "@/lib/hhs.functions";
 import { denverYmd } from "@/lib/denver-date";
 import { invalidateStaffCaseloadWork } from "@/lib/staff-caseload-cache";
-import { useClientFeature } from "@/lib/client-features";
+import { useClientFeature } from "@/lib/clients/features";
 import { NoteTriggerPrompt } from "@/components/residential/note-trigger-prompt";
 import { DailyNoteMedsBlock, type DailyNoteMedication } from "@/components/medications/daily-note-meds-block";
 import { type PendingMedDose } from "@/components/medications/shift-med-due-check";
@@ -47,7 +47,7 @@ import {
   COMPLETENESS_PASS_FEEDBACK,
   localWordCountCheck,
 } from "@/lib/nectar-completeness";
-import { ClientAccessGate } from "@/components/clients/client-access-gate";
+import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
 
 const hhsSearch = z.object({
   tab: z.string().optional(),
