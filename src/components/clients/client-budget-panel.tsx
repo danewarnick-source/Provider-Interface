@@ -32,6 +32,8 @@ import {
 } from "@/lib/client-budget-pdf";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { isAdminLevel } from "@/lib/access/levels";
+import { useServerFn } from "@tanstack/react-start";
+import { writeClientRecord } from "@/lib/clients/writes.functions";
 
 
 type Section = "income" | "expense" | "other";
@@ -80,6 +82,7 @@ export function ClientBudgetPanel({ clientId }: { clientId: string }) {
   const orgId = org?.organization_id;
   const canEdit = isAdminLevel(org?.access.level);
   const qc = useQueryClient();
+  const writeRecordFn = useServerFn(writeClientRecord);
 
   const [monthInput, setMonthInput] = useState<string>(currentMonthValue());
   const periodMonth = firstOfMonth(monthInput);
@@ -135,16 +138,16 @@ export function ClientBudgetPanel({ clientId }: { clientId: string }) {
     mutationFn: async () => {
       if (!orgId) throw new Error("No organization");
       const uid = (await supabase.auth.getUser()).data.user?.id ?? null;
-      const { data: newBudget, error } = await supabase
-        .from("client_budgets")
-        .insert({
-          organization_id: orgId,
-          client_id: clientId,
-          period_month: periodMonth,
-          created_by: uid,
-        })
-        .select("*")
-        .single();
+      const { ids } = await writeRecordFn({
+        data: {
+          organizationId: orgId,
+          clientId,
+          table: "client_budgets",
+          op: "insert",
+          values: { period_month: periodMonth, created_by: uid },
+        },
+      });
+      const { data: newBudget, error } = await supabase.from("client_budgets").select("*").eq("id", ids[0]).single();
       if (error) throw error;
 
       // Seed income lines from client.income_sources (labels only — no fabricated amounts).
@@ -164,8 +167,9 @@ export function ClientBudgetPanel({ clientId }: { clientId: string }) {
           day_of_month: null,
         }));
       if (seedRows.length) {
-        const { error: eIns } = await supabase.from("client_budget_lines").insert(seedRows);
-        if (eIns) throw eIns;
+        await writeRecordFn({
+          data: { organizationId: orgId, clientId, table: "client_budget_lines", op: "insert", values: seedRows },
+        });
       }
       return newBudget as Budget;
     },
@@ -270,6 +274,8 @@ function BudgetEditor({
   orgName: string;
 }) {
   const qc = useQueryClient();
+  const writeRecordFn = useServerFn(writeClientRecord);
+  const lineWrite = { organizationId, clientId, table: "client_budget_lines" } as const;
 
   // Local draft state so keystrokes don't fire a request per character.
   const [draft, setDraft] = useState<BudgetLine[]>(lines);
@@ -288,11 +294,16 @@ function BudgetEditor({
   const addLine = useMutation({
     mutationFn: async (section: Section) => {
       const nextOrder = Math.max(-1, ...draft.filter((l) => l.section === section).map((l) => l.sort_order)) + 1;
-      const { error } = await supabase.from("client_budget_lines").insert({
-        budget_id: budget.id, section, sort_order: nextOrder,
-        label: "", non_variable: 0, variable: 0, notes: null, day_of_month: null,
+      await writeRecordFn({
+        data: {
+          ...lineWrite,
+          op: "insert",
+          values: {
+            budget_id: budget.id, section, sort_order: nextOrder,
+            label: "", non_variable: 0, variable: 0, notes: null, day_of_month: null,
+          },
+        },
       });
-      if (error) throw error;
     },
     onSuccess: invalidate,
     onError: (e: Error) => toast.error(e.message),
@@ -300,8 +311,7 @@ function BudgetEditor({
 
   const deleteLine = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("client_budget_lines").delete().eq("id", id);
-      if (error) throw error;
+      await writeRecordFn({ data: { ...lineWrite, op: "delete", id } });
     },
     onSuccess: invalidate,
     onError: (e: Error) => toast.error(e.message),
@@ -311,21 +321,22 @@ function BudgetEditor({
     mutationFn: async () => {
       const updates = draft.filter((l) => dirtyIds.has(l.id));
       for (const l of updates) {
-        const { error } = await supabase
-          .from("client_budget_lines")
-          .update({
-            label: l.label, non_variable: l.non_variable, variable: l.variable, notes: l.notes,
-            day_of_month: l.day_of_month,
-          })
-          .eq("id", l.id);
-        if (error) throw error;
+        await writeRecordFn({
+          data: {
+            ...lineWrite,
+            op: "update",
+            id: l.id,
+            values: {
+              label: l.label, non_variable: l.non_variable, variable: l.variable, notes: l.notes,
+              day_of_month: l.day_of_month,
+            },
+          },
+        });
       }
       if (detailsDirty) {
-        const { error } = await supabase
-          .from("client_budgets")
-          .update({ details })
-          .eq("id", budget.id);
-        if (error) throw error;
+        await writeRecordFn({
+          data: { organizationId, clientId, table: "client_budgets", op: "update", id: budget.id, values: { details } },
+        });
       }
     },
     onSuccess: () => {
@@ -358,6 +369,7 @@ function BudgetEditor({
 
   const { data: branding } = useOrgBranding(organizationId);
   const qcInner = useQueryClient();
+  const shipWriteFn = useServerFn(writeClientRecord);
 
   // ── Load logo bytes on demand (cached). ────────────────────────────────
   const [logoState, setLogoState] = useState<BudgetPdfLogo | null>(null);
@@ -504,19 +516,22 @@ function BudgetEditor({
       if (upErr) throw upErr;
 
       const fileName = `Financial Support — Monthly Budget ${periodLabel}.pdf`;
-      const { error: insErr } = await supabase
-        .from("client_documents")
-        .insert({
-          client_id: clientId,
-          organization_id: organizationId,
-          file_name: fileName,
-          document_type: "financial_support_budget",
-          file_url: `storage://client-documents/${storagePath}`,
-          storage_path: storagePath,
-          file_size_bytes: bytes.byteLength,
-          uploaded_by: uid,
-        });
-      if (insErr) throw insErr;
+      await shipWriteFn({
+        data: {
+          organizationId,
+          clientId,
+          table: "client_documents",
+          op: "insert",
+          values: {
+            file_name: fileName,
+            document_type: "financial_support_budget",
+            file_url: `storage://client-documents/${storagePath}`,
+            storage_path: storagePath,
+            file_size_bytes: bytes.byteLength,
+            uploaded_by: uid,
+          },
+        },
+      });
 
       toast.success(`Shipped to client file (${periodLabel})`);
       qcInner.invalidateQueries({ queryKey: ["client-budget-shipped", clientId, budget.period_month] });

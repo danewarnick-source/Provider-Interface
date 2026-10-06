@@ -126,6 +126,7 @@ import {
 import { useClientBillingCodes } from "@/hooks/use-client-billing-codes";
 import { onPcspActivated } from "@/lib/company-obligations.functions";
 import { computeSupportStrategyCoverage } from "@/lib/support-strategy-coverage";
+import { updateClient, writeClientRecord } from "@/lib/clients/writes.functions";
 
 type ProfileTab =
   | "identity"
@@ -276,6 +277,7 @@ function ClientProfileHub() {
           "id, first_name, last_name, phone_number, physical_address, home_latitude, home_longitude, geofence_radius_feet, date_of_birth, medicaid_id, account_status, authorized_dspd_codes, pcsp_goals, job_code, special_directions, emergency_contact_name, emergency_contact_phone, emergency_contact_instructions, emergency_contact_2_name, emergency_contact_2_phone, emergency_contact_2_instructions, level_of_need, form_1056_number, form_1056_approved_date, grievance_acknowledged, grievance_signed_date, rights_restrictions, dnr_status, dnr_location, polst_status, palliative_care_status, hospice_status, team_id, admin_hours_per_week, feature_config, support_coordinator_name, support_coordinator_email, support_coordinator_phone, disability_category, bsp_status, diagnoses, advanced_directives, admission_date, discharge_date" as any,
         )
         .eq("id", clientId)
+        .eq("organization_id", orgId!)
         .maybeSingle();
       if (error) throw error;
       return data as Record<string, unknown> | null;
@@ -603,6 +605,8 @@ function PlanGoalsPanel({
   const updateCST = useServerFn(updateClientSpecificTraining);
   const draftBlankCST = useServerFn(draftClientSpecificTrainingBlank);
   const pcspClockFn = useServerFn(onPcspActivated);
+  const updateClientFn = useServerFn(updateClient);
+  const writeRecordFn = useServerFn(writeClientRecord);
   const { data: cstData } = useQuery({
     queryKey: ["client-specific-training", clientId],
     queryFn: () => getCST({ data: { clientId } }),
@@ -651,11 +655,8 @@ function PlanGoalsPanel({
       const flat = draftGoals
         .map((g) => g.goal)
         .filter((g): g is string => !!g && g.trim().length > 0);
-      const { error } = await supabase
-        .from("clients")
-        .update({ pcsp_goals: flat })
-        .eq("id", clientId);
-      if (error) throw error;
+      if (!orgId) throw new Error("Organization not loaded");
+      await updateClientFn({ data: { organizationId: orgId, clientId, patch: { pcsp_goals: flat } } });
     },
     onSuccess: () => {
       toast.success("Goals updated");
@@ -679,7 +680,7 @@ function PlanGoalsPanel({
     const res = await getCST({ data: { clientId } });
     const goals = ((res?.training as { goals?: CSTGoal[] } | null)?.goals ?? []) as CSTGoal[];
     const flat = goals.map((g) => g.goal).filter((g): g is string => !!g && g.trim().length > 0);
-    await supabase.from("clients").update({ pcsp_goals: flat }).eq("id", clientId);
+    if (orgId) await updateClientFn({ data: { organizationId: orgId, clientId, patch: { pcsp_goals: flat } } });
     qc.invalidateQueries({ queryKey: ["client-specific-training", clientId] });
     qc.invalidateQueries({ queryKey: ["client-profile", orgId, clientId] });
     qc.invalidateQueries({ queryKey: ["client", clientId] });
@@ -715,15 +716,15 @@ function PlanGoalsPanel({
         .from("client-documents")
         .upload(path, file, { upsert: false });
       if (upErr) throw upErr;
-      const { error: insErr } = await supabase.from("client_documents").insert({
-        client_id: clientId,
-        organization_id: orgId,
-        document_type: "pcsp",
-        file_name: file.name,
-        file_url: path,
-        storage_path: path,
+      await writeRecordFn({
+        data: {
+          organizationId: orgId,
+          clientId,
+          table: "client_documents",
+          op: "insert",
+          values: { document_type: "pcsp", file_name: file.name, file_url: path, storage_path: path },
+        },
       });
-      if (insErr) throw insErr;
       if (orgId) {
         try {
           await pcspClockFn({ data: { organizationId: orgId, clientId } });
@@ -1867,6 +1868,7 @@ function NewSummaryDialog({
   const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const defaultQuarter = `${now.getFullYear()}-Q${Math.floor(now.getMonth() / 3) + 1}`;
   const [periodKind, setPeriodKind] = useState<"monthly" | "quarterly">("quarterly");
+  const writeRecordFn = useServerFn(writeClientRecord);
   const [month, setMonth] = useState(defaultMonth);
   const [quarter, setQuarter] = useState(defaultQuarter);
   const [summaryKind, setSummaryKind] = useState<"narrative" | "financial_statement">("narrative");
@@ -1947,29 +1949,28 @@ function NewSummaryDialog({
         return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
-        .from("client_progress_summaries")
-        .insert({
-          organization_id: orgId,
-          client_id: clientId,
-          summary_kind: summaryKind,
-          period_kind: periodKind,
-          period_label: p.period_label,
-          period_start: p.period_start,
-          period_end: p.period_end,
-          due_date: p.due_date,
-          status: "pending",
-          service_codes: serviceCodes,
-          include_goal_progress: summaryKind === "narrative",
-          requires_upi_attestation: requiresUpi,
-        })
-        .select("id")
-        .single();
-      if (error) throw error;
-      if (!data?.id) throw new Error("Summary not created — record not returned.");
+      const { ids } = await writeRecordFn({
+        data: {
+          organizationId: orgId,
+          clientId,
+          table: "client_progress_summaries",
+          op: "insert",
+          values: {
+            summary_kind: summaryKind,
+            period_kind: periodKind,
+            period_label: p.period_label,
+            period_start: p.period_start,
+            period_end: p.period_end,
+            due_date: p.due_date,
+            status: "pending",
+            service_codes: serviceCodes,
+            include_goal_progress: summaryKind === "narrative",
+            requires_upi_attestation: requiresUpi,
+          },
+        },
+      });
       toast.success("Summary created — open the editor to draft.");
-      onCreated(data.id);
+      onCreated(ids[0]);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Failed to create summary";
       if (/duplicate|unique/i.test(msg)) {

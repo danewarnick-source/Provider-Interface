@@ -57,6 +57,7 @@ import {
 import { getAuthStatus, AuthStatusBadge } from "@/lib/billing-auth-status";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { daysUntil } from "@/lib/clients/dates";
+import { updateClient, writeClientRecord } from "@/lib/clients/writes.functions";
 
 type Draft = { annual: string; rate: string; endDate: string };
 function draftFromCode(c: { annual_unit_authorization: number | null; rate_per_unit: number | null; service_end_date: string | null }): Draft {
@@ -86,6 +87,7 @@ export function BillingCodesDetail({ clientId, clientName, medicaidId }: Props) 
   const { data: budgets, isLoading } = useClientBudget(clientId);
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();
+  const writeRecordFn = useServerFn(writeClientRecord);
   const identityQ = useQuery({
     enabled: !!clientId && (!displayMedicaidId(medicaidId) || !clientName?.trim()),
     queryKey: ["billing-card-identity", clientId],
@@ -218,20 +220,23 @@ export function BillingCodesDetail({ clientId, clientName, medicaidId }: Props) 
           rate_source_at: new Date().toISOString(),
         };
         if (d.endDate) payload.service_end_date = d.endDate;
-        const { error } = await supabase
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .from("client_billing_codes" as any)
-          .update(payload)
-          .eq("id", id)
-          .eq("organization_id", org.organization_id!);
-        return { id, error };
+        try {
+          await writeRecordFn({
+            data: { organizationId: org.organization_id!, clientId, table: "client_billing_codes", op: "update", id, values: payload },
+          });
+          return { id, error: null };
+        } catch (error) {
+          return { id, error: error as Error };
+        }
       }),
     );
     setSaving(false);
     const failed = results.filter((r) => r.error);
     const ok = results.length - failed.length;
     if (ok > 0) toast.success(`Updated ${ok} of ${results.length} codes`);
-    if (failed.length > 0) toast.error(`${failed.length} update${failed.length === 1 ? "" : "s"} failed`);
+    if (failed.length > 0) {
+      toast.error(`${failed.length} update${failed.length === 1 ? "" : "s"} failed: ${failed[0].error?.message ?? ""}`);
+    }
     qc.invalidateQueries({ queryKey: ["all-client-billing-codes"] });
     qc.invalidateQueries({ queryKey: ["client-billing-codes"] });
     qc.invalidateQueries({ queryKey: ["client-budget"] });
@@ -380,6 +385,7 @@ function BudgetUploadButton({ clientId }: { clientId: string }) {
   const { data: org } = useCurrentOrg();
   const fileRef = useRef<HTMLInputElement | null>(null);
   const parseFn = useServerFn(parseClientBudgetDocument);
+  const writeRecordFn = useServerFn(writeClientRecord);
 
   const [uploading, setUploading] = useState(false);
   const [parsing, setParsing] = useState(false);
@@ -403,21 +409,22 @@ function BudgetUploadButton({ clientId }: { clientId: string }) {
       // Bucket is private + org-scoped; store a stable reference and use
       // signed URLs at read time.
       const fileUrlRef = `storage://client-documents/${path}`;
-      const { data: insertData, error: insErr } = await (supabase as any)
-        .from("client_documents")
-        .insert({
-          client_id: clientId,
-          organization_id: org.organization_id,
-          file_name: file.name,
-          document_type: docType,
-          file_url: fileUrlRef,
-          storage_path: path,
-          file_size_bytes: file.size,
-        })
-        .select("id")
-        .single();
-      if (insErr) throw insErr;
-      setDocId(insertData.id);
+      const { ids } = await writeRecordFn({
+        data: {
+          organizationId: org.organization_id,
+          clientId,
+          table: "client_documents",
+          op: "insert",
+          values: {
+            file_name: file.name,
+            document_type: docType,
+            file_url: fileUrlRef,
+            storage_path: path,
+            file_size_bytes: file.size,
+          },
+        },
+      });
+      setDocId(ids[0]);
 
       setUploading(false);
       setParsing(true);
@@ -474,21 +481,21 @@ function BudgetUploadButton({ clientId }: { clientId: string }) {
         if (r.start_date) payload.service_start_date = r.start_date;
         if (r.end_date) payload.service_end_date = r.end_date;
 
+        const base = { organizationId: org.organization_id, clientId, table: "client_billing_codes" } as const;
         if (existing?.id) {
-          await (supabase as any)
-            .from("client_billing_codes")
-            .update(payload)
-            .eq("id", existing.id);
+          await writeRecordFn({ data: { ...base, op: "update", id: existing.id, values: payload } });
         } else {
-          await (supabase as any)
-            .from("client_billing_codes")
-            .insert({
-              client_id: clientId,
-              organization_id: org.organization_id,
-              service_code: r.service_code,
-              unit_type: isDailyServiceCode(r.service_code) ? "day" : "unit",
-              ...payload,
-            });
+          await writeRecordFn({
+            data: {
+              ...base,
+              op: "insert",
+              values: {
+                service_code: r.service_code,
+                unit_type: isDailyServiceCode(r.service_code) ? "day" : "unit",
+                ...payload,
+              },
+            },
+          });
         }
       }
 
@@ -689,6 +696,8 @@ function CodeRow({
   onDraftChange?: (patch: Partial<Draft>) => void;
 }) {
   const qc = useQueryClient();
+  const writeRecordFn = useServerFn(writeClientRecord);
+  const updateClientFn = useServerFn(updateClient);
   const { data: org } = useCurrentOrg();
   const code = budget.code as Budget["code"] & {
     rate_source?: string | null;
@@ -730,17 +739,23 @@ function CodeRow({
       return false;
     }
     setSavingEnd(true);
-    const { error } = await supabase
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .from("client_billing_codes" as any)
-      .update({ service_end_date: endDateDraft })
-      .eq("id", code.id)
-      .eq("organization_id", org.organization_id);
-    setSavingEnd(false);
-    if (error) {
-      toast.error(error.message);
+    try {
+      await writeRecordFn({
+        data: {
+          organizationId: org.organization_id,
+          clientId: _clientId,
+          table: "client_billing_codes",
+          op: "update",
+          id: code.id,
+          values: { service_end_date: endDateDraft },
+        },
+      });
+    } catch (e) {
+      setSavingEnd(false);
+      toast.error(e instanceof Error ? e.message : "Save failed");
       return false;
     }
+    setSavingEnd(false);
     toast.success(`${code.service_code} end date set`);
     qc.invalidateQueries({ queryKey: ["all-client-billing-codes"] });
     qc.invalidateQueries({ queryKey: ["client-billing-codes"] });
@@ -752,15 +767,13 @@ function CodeRow({
     if (!org?.organization_id) return;
     setDeleting(true);
     // Delete the billing code row
-    const { error: delErr } = await supabase
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .from("client_billing_codes" as any)
-      .delete()
-      .eq("id", code.id)
-      .eq("organization_id", org.organization_id);
-    if (delErr) {
+    try {
+      await writeRecordFn({
+        data: { organizationId: org.organization_id, clientId: _clientId, table: "client_billing_codes", op: "delete", id: code.id },
+      });
+    } catch (e) {
       setDeleting(false);
-      return toast.error(delErr.message);
+      return toast.error(e instanceof Error ? e.message : "Remove failed");
     }
     // Strip code (case-insensitive) from clients.authorized_dspd_codes and job_code
     const { data: clientRow } = await supabase
@@ -775,11 +788,17 @@ function CodeRow({
         .filter((c) => (c ?? "").toUpperCase() !== targetUpper);
       const jobCodes = ((clientRow as unknown as { job_code?: string[] | null }).job_code ?? [])
         .filter((c) => (c ?? "").toUpperCase() !== targetUpper);
-      await supabase
-        .from("clients")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update({ authorized_dspd_codes: authorized, job_code: jobCodes } as any)
-        .eq("id", _clientId);
+      try {
+        await updateClientFn({
+          data: {
+            organizationId: org.organization_id,
+            clientId: _clientId,
+            patch: { authorized_dspd_codes: authorized, job_code: jobCodes },
+          },
+        });
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Could not update the client's code list");
+      }
     }
     setDeleting(false);
     setConfirmDelete(false);
