@@ -36,7 +36,6 @@ import { generateSmartImportReminders } from "@/lib/smart-import-reminders.funct
 import { previewUndoImport, undoCommittedImport } from "@/lib/smart-import-history.functions";
 import { ClientLiveBadge } from "@/components/clients/add/client-readiness-card";
 import { SetupChecklist } from "@/components/clients/add/setup-checklist";
-import { FinalizeClientEditor } from "@/components/clients/add/finalize-client-editor";
 import { employeeSmartImportRedirect } from "@/lib/employee-smart-import-block";
 
 export const Route = createFileRoute("/dashboard/smart-import/$jobId/done")({
@@ -96,7 +95,6 @@ function DonePage() {
   );
   const [runError, setRunError] = useState<string | null>(null);
   const [undoOpen, setUndoOpen] = useState(false);
-  const [fixSubject, setFixSubject] = useState<string | null>(null);
 
   const q = useQuery({
     queryKey: ["smart-import-done", jobId, runState],
@@ -278,7 +276,7 @@ function DonePage() {
             {job.mode === "client" && committedCount < subjects.length && (
               <>
                 {" "}
-                Finish the rest from the <strong>Pending Clients</strong> workspace.
+                Finish the rest from the client list (tagged <strong>Finish setup</strong>).
               </>
             )}
           </p>
@@ -294,7 +292,7 @@ function DonePage() {
         <div className="flex flex-wrap gap-2">
           {job.mode === "client" && committedCount < subjects.length && (
             <Button asChild>
-              <Link to="/dashboard/clients/pending">Review pending clients</Link>
+              <Link to="/dashboard/clients">Finish setup in the client list</Link>
             </Button>
           )}
           {pendingCommit > 0 && committedCount > 0 && (
@@ -382,8 +380,10 @@ function DonePage() {
                 )}
                 {canFix && (
                   <div className="mt-2">
-                    <Button size="sm" onClick={() => setFixSubject(s.id)}>
-                      <Wrench className="mr-2 h-3.5 w-3.5" /> Complete missing info
+                    <Button size="sm" asChild>
+                      <Link to="/dashboard/clients" search={{ draft: s.id }}>
+                        <Wrench className="mr-2 h-3.5 w-3.5" /> Complete missing info
+                      </Link>
                     </Button>
                   </div>
                 )}
@@ -522,18 +522,6 @@ function DonePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Generalized per-subject finalize editor (replaces guardianship-only fixer). */}
-      <FinalizeClientEditor
-        subjectId={fixSubject}
-        open={!!fixSubject}
-        onOpenChange={(o) => {
-          if (!o) setFixSubject(null);
-        }}
-        onFinalized={() => {
-          invalidateAfterCommit();
-          q.refetch();
-        }}
-      />
     </div>
   );
 }

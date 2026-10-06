@@ -78,7 +78,7 @@ type AuditSample = {
   assigned_auditor: string | null;
 };
 
-export function PbaLedgerPage() {
+function PbaLedgerPage() {
   const { user } = useAuth();
   const { data: org } = useCurrentOrg();
   const qc = useQueryClient();

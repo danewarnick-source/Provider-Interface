@@ -6,7 +6,6 @@
 // service addresses, and level of need are intentionally absent here.
 
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { isRouteUuid } from "@/lib/route-uuid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -68,7 +67,6 @@ const RECORD_LABELS: Record<RecKey, { title: string; sub: string }> = {
 const HRR_FILENAME_RE = /hrr|hrc|human[\s_-]*rights|rights[\s_-]*restriction/i;
 
 export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; onOpenFiles: () => void }) {
-  const navigate = useNavigate();
   const { data: org } = useCurrentOrg();
   const orgId = org?.organization_id;
   const canHrc = useAccess().canCategory("hrc");
@@ -176,7 +174,6 @@ export function ClientProfileTab({ clientId, onOpenFiles }: { clientId: string; 
         isHhs={isHhs}
         showElsSchoolDocs={showElsSchoolDocs}
         onOpenFiles={onOpenFiles}
-        onContinueIntake={() => navigate({ to: "/dashboard/client-intake/$clientId", params: { clientId } })}
       />
 
       <ClinicalAlertBanner clientId={clientId} client={client} />
@@ -722,8 +719,8 @@ function CardShell({
 // ── Record completeness bar ────────────────────────────────────────────────
 
 function RecordCompletenessBar({
-  clientId, orgId, client, docs, restriction, isHhs, showElsSchoolDocs, onOpenFiles, onContinueIntake,
-}: { clientId: string; orgId: string; client: ClientRow; docs: DocRow[]; restriction: RestrictionRecord | null; isHhs: boolean; showElsSchoolDocs: boolean; onOpenFiles: () => void; onContinueIntake: () => void }) {
+  clientId, orgId, client, docs, restriction, isHhs, showElsSchoolDocs, onOpenFiles,
+}: { clientId: string; orgId: string; client: ClientRow; docs: DocRow[]; restriction: RestrictionRecord | null; isHhs: boolean; showElsSchoolDocs: boolean; onOpenFiles: () => void }) {
   const [open, setOpen] = useState(false);
   const recordAccessFn = useServerFn(recordPhiAccess);
 
@@ -864,7 +861,6 @@ function RecordCompletenessBar({
               );
             })}
             <div className="flex justify-end gap-2 pt-3 border-t">
-              <Button variant="outline" size="sm" onClick={onContinueIntake}>Continue intake</Button>
               <Button size="sm" onClick={onOpenFiles}>Open Client file</Button>
             </div>
           </div>

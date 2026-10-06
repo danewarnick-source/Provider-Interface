@@ -9,15 +9,7 @@ import { initialReview, type ReviewedPcsp } from "@/lib/clients/pcsp/review";
 import { onPcspActivated } from "@/lib/company-obligations.functions";
 import { clientPlansKey } from "@/components/clients/shared/hooks/use-plan-goals";
 import { clientContactsKey } from "@/components/clients/shared/hooks/use-client-contacts";
-
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).replace(/^data:[^,]*,/, ""));
-    reader.onerror = () => reject(reader.error ?? new Error("Couldn't read the file."));
-    reader.readAsDataURL(file);
-  });
-}
+import { fileToBase64 } from "@/components/clients/shared/file-to-base64";
 
 export function usePcspImport(clientId: string, orgId: string | undefined) {
   const qc = useQueryClient();

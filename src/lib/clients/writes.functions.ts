@@ -20,7 +20,6 @@ import {
   type ClientRecordTable,
 } from "./writes";
 import { CLIENT_NOT_FOUND_MESSAGE } from "./guards";
-import { CONTACT_ROLES, cleanContactFields } from "./contacts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = SupabaseClient<any>;
@@ -78,86 +77,6 @@ export const updateClient = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     assertRowsChanged(rows);
     return { id: clientId };
-  });
-
-/**
- * Add a client (Clients: Edit). Returns the new id. `stubCodes` are $0
- * placeholder authorization rows for the codes picked on the add form (part of
- * adding the client, so they need only Clients: Edit). `contacts` (e.g. the
- * guardian) go to client_contacts.
- */
-export const createClient = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z
-      .object({
-        organizationId: z.string().uuid(),
-        values: patchSchema,
-        stubCodes: z
-          .array(
-            z.object({
-              service_code: z.string().min(1).max(10),
-              unit_type: z.enum(["day", "unit"]),
-            }),
-          )
-          .max(50)
-          .optional(),
-        contacts: z
-          .array(
-            z.object({
-              role: z.enum(CONTACT_ROLES),
-              name: z.string().max(200),
-              relationship: z.string().max(200).nullish(),
-              phone: z.string().max(200).nullish(),
-              email: z.string().max(200).nullish(),
-              is_primary: z.boolean().optional(),
-            }),
-          )
-          .max(20)
-          .optional(),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { sb, userId } = ctx(context);
-    const { organizationId, values } = data;
-    await assertCanManageClient({
-      supabase: sb,
-      actorId: userId,
-      organizationId,
-      action: "create",
-    });
-    const { id: _id, created_at: _c, ...rest } = values;
-    const { data: rows, error } = await sb
-      .from("clients")
-      .insert({ ...rest, organization_id: organizationId })
-      .select("id");
-    if (error) throw new Error(error.message);
-    const [row] = assertRowsChanged(rows as Array<{ id: string }> | null);
-    if (data.stubCodes?.length) {
-      const stubs = data.stubCodes.map((c) => ({
-        ...c,
-        organization_id: organizationId,
-        client_id: row.id,
-        annual_unit_authorization: 0,
-        rate_per_unit: 0,
-      }));
-      const { error: bcErr } = await sb
-        .from("client_billing_codes")
-        .upsert(stubs, { onConflict: "organization_id,client_id,service_code" });
-      if (bcErr) throw new Error(bcErr.message);
-    }
-    if (data.contacts?.length) {
-      const contacts = data.contacts.map((c) => ({
-        ...cleanContactFields(c),
-        organization_id: organizationId,
-        client_id: row.id,
-        created_by: userId,
-      }));
-      const { error: ccErr } = await sb.from("client_contacts").insert(contacts);
-      if (ccErr) throw new Error(ccErr.message);
-    }
-    return { id: row.id };
   });
 
 async function assertParentBelongs(

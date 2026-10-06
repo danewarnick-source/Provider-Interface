@@ -4,78 +4,54 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { getAgencySetupStatus } from "@/lib/agency-setup-gate.functions";
 import { assertAgencySetupComplete } from "@/lib/agency-setup-gate";
-import { createClient } from "@/lib/clients/writes.functions";
-import { geocodeAddress } from "@/lib/geocode";
-import { isDailyServiceCode } from "@/lib/service-billing";
-import type { AddClientValues } from "./add-client-dialog";
+import { addClient, type AddClientResult } from "@/lib/clients/create.functions";
+import type { AddClientForm } from "@/lib/clients/create";
 
-// The home pin anchors the EVV geofence, so it only ever comes from the
-// client's street address — never from the admin's own device location.
-async function resolveCoords(addr: string): Promise<{ lat: number | null; lng: number | null }> {
-  if (!addr?.trim()) return { lat: null, lng: null };
-  const geo = await geocodeAddress(addr);
-  return geo ? { lat: geo.lat, lng: geo.lng } : { lat: null, lng: null };
-}
-
-/** Quick-add a client from the directory, then land on intake or the new profile. */
+/** Save the Add client form; on success open the new client's profile. */
 export function useAddClient(
-  organizationId: string | undefined,
-  { onCreated, onDraftCreated }: {
-    onCreated: () => void;
-    onDraftCreated: (client: { id: string; name: string }) => void;
+  organizationId: string,
+  {
+    draftId,
+    onDone,
+    onDuplicate,
+  }: {
+    draftId: string | null;
+    onDone: () => void;
+    onDuplicate: (existing: { id: string; name: string }) => void;
   },
 ) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const loadSetup = useServerFn(getAgencySetupStatus);
-  const createClientFn = useServerFn(createClient);
+  const addClientFn = useServerFn(addClient);
 
   return useMutation({
-    mutationFn: async (input: AddClientValues) => {
-      if (!organizationId) throw new Error("No organization selected.");
+    mutationFn: async (form: AddClientForm): Promise<AddClientResult> => {
       assertAgencySetupComplete(await loadSetup({ data: { organizationId } }));
-      const coords = await resolveCoords(input.physical_address);
-      const stubCodes = input.codes
-        .map((c) => c.toUpperCase())
-        .filter(Boolean)
-        .map((service_code) => ({
-          service_code,
-          unit_type: (isDailyServiceCode(service_code) ? "day" : "unit") as "day" | "unit",
-        }));
-      const contacts = input.guardian
-        ? [{ role: "guardian" as const, ...input.guardian, is_primary: true }]
-        : [];
-      const { id: newId } = await createClientFn({ data: { organizationId, stubCodes, contacts, values: {
-        first_name:           input.first_name,
-        last_name:            input.last_name,
-        phone_number:         input.phone_number,
-        physical_address:     input.physical_address,
-        medicaid_id:          input.medicaid_id,
-        geofence_radius_feet: input.geofence_radius_feet,
-        home_latitude:        coords.lat,
-        home_longitude:       coords.lng,
-        intake_status:        input.intake_mode === "intake" ? "in_progress" : "pending",
-        is_own_guardian:      input.is_own_guardian,
-      } } });
-
-      return { id: newId, mode: input.intake_mode, name: `${input.first_name} ${input.last_name}`.trim() };
+      return addClientFn({ data: { organizationId, form, draftSubjectId: draftId } });
     },
-    onSuccess: ({ id, mode, name }) => {
-      toast.success(
-        mode === "intake"
-          ? "Client created — starting intake. You can set Evidence packs from Evidence after intake."
-          : "Draft client saved. Open Evidence to run the add-client questionnaire.",
-      );
-      qc.invalidateQueries({ queryKey: ["clients"] });
-      onCreated();
-      if (mode === "intake") {
-        navigate({ to: "/dashboard/client-intake/$clientId", params: { clientId: id } });
-      } else {
-        // Land on the new client so the draft state (missing fields, intake_status=pending) is visible.
-        navigate({ to: "/dashboard/clients/$clientId", params: { clientId: id }, search: { tab: "overview" } });
-        // Open the intake checklist panel so incomplete items are immediately visible.
-        onDraftCreated({ id, name });
+    onSuccess: (res) => {
+      if (res.status === "duplicate") {
+        onDuplicate(res.existing);
+        return;
       }
+      if (res.status === "invalid") {
+        toast.error(`Please complete: ${res.problems.join(", ")}.`);
+        return;
+      }
+      toast.success(
+        res.pinFound
+          ? "Client added."
+          : "Client added. The address couldn't be pinned on the map — set the home pin on their profile.",
+      );
+      for (const gap of res.gaps) toast.message(gap);
+      qc.invalidateQueries({ queryKey: ["clients"] });
+      onDone();
+      navigate({
+        to: "/dashboard/clients/$clientId",
+        params: { clientId: res.id },
+        search: { tab: "overview" },
+      });
     },
     onError: (e: Error) => toast.error(e.message),
   });
