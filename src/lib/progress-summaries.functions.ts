@@ -10,12 +10,10 @@ import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
 import {
   clientNeedsGoalProgress,
   filterPeriodsByFloor,
-  FINANCIAL_STATEMENT_CODES,
-  MONTHLY_SUMMARY_CODES,
-  QUARTERLY_SUMMARY_CODES,
   recentMonthlyPeriods,
   recentQuarterlyPeriods,
   requiresUpiFiling,
+  summaryCadenceForCode,
   summaryPeriodFloor,
   type SummaryPeriod,
 } from "./progress-summaries";
@@ -204,11 +202,7 @@ export const ensureCurrentSummaryPeriods = createServerFn({ method: "POST" })
       if (row.service_start_date && row.service_start_date > today) continue;
       if (row.service_end_date && row.service_end_date < today) continue;
       const code = (row.service_code ?? "").toUpperCase();
-      if (
-        !QUARTERLY_SUMMARY_CODES.has(code) &&
-        !MONTHLY_SUMMARY_CODES.has(code) &&
-        !FINANCIAL_STATEMENT_CODES.has(code)
-      ) continue;
+      if (!summaryCadenceForCode(code)) continue;
       const arr = byClient.get(row.client_id) ?? [];
       arr.push({ code, start: row.service_start_date ?? null });
       byClient.set(row.client_id, arr);
@@ -256,9 +250,9 @@ export const ensureCurrentSummaryPeriods = createServerFn({ method: "POST" })
       const quarterly = filterPeriodsByFloor(quarterlyAll, floor);
       const monthly = filterPeriodsByFloor(monthlyAll, floor);
 
-      const quarterlyEntries = entries.filter((e) => QUARTERLY_SUMMARY_CODES.has(e.code));
-      const monthlyNarrativeEntries = entries.filter((e) => MONTHLY_SUMMARY_CODES.has(e.code));
-      const monthlyFinancialEntries = entries.filter((e) => FINANCIAL_STATEMENT_CODES.has(e.code));
+      const quarterlyEntries = entries.filter((e) => summaryCadenceForCode(e.code) === "quarterly");
+      const monthlyNarrativeEntries = entries.filter((e) => summaryCadenceForCode(e.code) === "monthly");
+      const monthlyFinancialEntries = entries.filter((e) => summaryCadenceForCode(e.code) === "financial");
 
       // Quarterly narrative.
       for (const p of quarterly) {

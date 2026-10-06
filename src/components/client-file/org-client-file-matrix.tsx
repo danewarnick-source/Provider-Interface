@@ -14,7 +14,7 @@ import {
   listOrgClientFilePack,
   type ClientFileMatrixRow,
 } from "@/lib/clients/file.functions";
-import { missingClientFileCsv } from "@/lib/clients/file";
+import { missingClientFileCsv } from "@/lib/clients/file-csv";
 import { personnelPackHtml } from "@/lib/team-members/file";
 
 async function signedEvidenceUrl(

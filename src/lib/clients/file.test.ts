@@ -13,9 +13,10 @@ import {
   cardApplies,
   clientFileStatus,
   clientFileStatusLabel,
-  missingClientFileCsv,
+  photoExpiresOn,
   type ClientFileFacts,
 } from "./file.ts";
+import { missingClientFileCsv } from "./file-csv.ts";
 
 const now = new Date("2026-09-10T12:00:00.000Z");
 
@@ -23,9 +24,10 @@ function facts(overrides: Partial<ClientFileFacts> = {}): ClientFileFacts {
   return {
     codes: ["HHS", "DSI"],
     photoPath: null,
+    photoTakenOn: null,
     isOwnGuardian: true,
     grievanceOk: false,
-    pcspExpiration: null,
+    planEndDate: null,
     docs: [],
     belongingsOn: null,
     supportStrategiesOk: false,
@@ -85,7 +87,7 @@ describe("cardApplies", () => {
   });
 
   it("keeps the locked gate sets", () => {
-    assert.deepEqual([...BELONGINGS_CODES].sort(), ["HHS", "RHS", "SLH"]);
+    assert.deepEqual([...BELONGINGS_CODES].sort(), ["HHS", "PPS", "RHS", "SLH"]);
     assert.deepEqual([...HOUSEMATE_CODES].sort(), ["HHS", "PPS", "RHS"]);
     assert.deepEqual([...RNB_CODES].sort(), ["HHS", "PPS"]);
     assert.deepEqual([...LEASE_CODES].sort(), ["RHS"]);
@@ -120,7 +122,7 @@ describe("buildClientFileCards", () => {
       "c1",
       facts({
         docs: [{ document_type: "pcsp", storage_path: "org/pcsp.pdf", file_name: "pcsp.pdf" }],
-        pcspExpiration: "2026-09-14",
+        planEndDate: "2026-09-14",
       }),
       now,
     );
@@ -137,6 +139,42 @@ describe("buildClientFileCards", () => {
     );
     assert.equal(missing?.status, "missing");
     assert.equal(onFile?.status, "on_file");
+  });
+
+  it("expires the photo 5 years after it was taken", () => {
+    assert.equal(photoExpiresOn("2021-09-12"), "2026-09-12");
+    assert.equal(photoExpiresOn(null), null);
+    const card = (takenOn: string) =>
+      buildClientFileCards("c1", facts({ photoPath: "org/p.jpg", photoTakenOn: takenOn }), now).find(
+        (c) => c.key === "photograph",
+      );
+    assert.equal(card("2021-09-12")?.status, "due_soon");
+    assert.equal(card("2021-09-12")?.dueAt, "2026-09-12");
+    assert.equal(card("2021-01-01")?.status, "missing");
+    assert.equal(card("2024-01-01")?.status, "on_file");
+  });
+
+  it("needs medical and dental exams only for RHS, PPS, HHS and SLH", () => {
+    const clinical = (codes: string[]) =>
+      buildClientFileCards("c1", facts({ codes }), now).find((c) => c.key === "clinical_legal");
+    for (const code of ["RHS", "PPS", "HHS", "SLH"]) assert.equal(clinical([code])?.status, "missing", code);
+    for (const code of ["SLN", "DSI", "SEI"]) assert.equal(clinical([code])?.status, "on_file", code);
+    const withExams = buildClientFileCards(
+      "c1",
+      facts({ codes: ["HHS"], docs: [{ document_type: "medical_exam" }, { document_type: "dental_exam" }] }),
+      now,
+    ).find((c) => c.key === "clinical_legal");
+    assert.equal(withExams?.status, "on_file");
+  });
+
+  it("keeps belongings on file with no yearly renewal, for HHS, PPS, RHS and SLH only", () => {
+    for (const code of ["HHS", "PPS", "RHS", "SLH"]) assert.equal(cardApplies("belongings", [code]), true, code);
+    assert.equal(cardApplies("belongings", ["SLN"]), false);
+    const card = buildClientFileCards("c1", facts({ codes: ["PPS"], belongingsOn: "2020-01-01" }), now).find(
+      (c) => c.key === "belongings",
+    );
+    assert.equal(card?.status, "on_file");
+    assert.equal(card?.dueAt, null);
   });
 });
 

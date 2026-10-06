@@ -1,12 +1,15 @@
 // The one "needs attention" calculation for a client. Pure: the Overview,
 // the section badges and the Smart Import done page all read its output.
 // Covers units pacing, documents due or missing (photo older than 5 years
-// included), PCSP waiting, support strategies due, summaries due, HRC
-// reviews and finish-setup gaps. Advisory only: it never blocks a save.
+// included), plan-year reminders (60 / 30 days before the end), PCSP waiting
+// (with the office follow-up from day 10), support strategies due (plan
+// activation + 30 days), summaries due, HRC reviews and finish-setup gaps.
+// Advisory only: it never blocks a save.
 
 import { listReadiness } from "./list.ts";
 import { daysUntil, parseLocalDate } from "./dates.ts";
-import { currentPlan, waitingDays, type ClientPlan } from "./plans.ts";
+import { addDaysYmd, planReminder, strategiesDueOn } from "./plan-dates.ts";
+import { currentPlan, type ClientPlan } from "./plans.ts";
 import type { ClientProfileSection } from "./profile-sections.ts";
 
 export type AttentionTone = "bad" | "warn";
@@ -45,17 +48,8 @@ export const UNITS_LOW_PCT = 10;
 export const OVER_PACE_POINTS = 10;
 /** Days before a due date that the Overview starts flagging it. */
 export const ATTENTION_DUE_DAYS = 14;
-/** Days after the current plan starts that support strategies are due. */
-export const STRATEGIES_DUE_DAYS = 30;
 
 const DAY_MS = 86_400_000;
-
-function addDays(ymd: string, days: number): string | null {
-  const d = parseLocalDate(ymd);
-  if (!d) return null;
-  d.setDate(d.getDate() + days);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 
 /** Pace for one code. No end date: the window is one year from the start. */
 export function codePace(
@@ -73,7 +67,7 @@ export function codePace(
   const left = Math.max(0, annual - used);
   const start = parseLocalDate(row.service_start_date);
   const endYmd =
-    row.service_end_date ?? (row.service_start_date ? addDays(row.service_start_date, 364) : null);
+    row.service_end_date ?? (row.service_start_date ? addDaysYmd(row.service_start_date, 364) : null);
   const end = parseLocalDate(endYmd);
   let elapsedPct = 0;
   if (start && end && end > start) {
@@ -199,25 +193,32 @@ export function clientAttention(input: ReadinessInput, now: Date = new Date()): 
     });
   }
 
-  const waiting = waitingDays(input.plans, now);
-  if (waiting != null && waiting > 0) {
+  const reminder = planReminder(input.plans, now);
+  if (reminder?.kind === "waiting") {
+    const d = reminder.days;
     add({
       key: "pcsp-waiting",
-      title: "Waiting on the new PCSP",
-      detail: `${waiting} day${waiting === 1 ? "" : "s"} since the plan year ended`,
-      tone: waiting >= 10 ? "bad" : "warn",
+      title: reminder.officeTask ? "Office: follow up on the new PCSP" : "Waiting on the new PCSP",
+      detail: `${d} day${d === 1 ? "" : "s"} since the plan year ended`,
+      tone: reminder.officeTask ? "bad" : "warn",
+      section: "plans",
+    });
+  } else if (reminder?.kind === "ending") {
+    add({
+      key: `plan-ending:${reminder.threshold}`,
+      title: "Plan year ending — schedule the PCSP meeting",
+      detail: `Ends in ${reminder.days} day${reminder.days === 1 ? "" : "s"}`,
+      tone: "warn",
       section: "plans",
     });
   }
 
   if (input.strategies && !input.strategies.published) {
-    const current = currentPlan(input.plans, now);
-    const due = current?.activated_on ?? current?.start_date ?? null;
-    const days = daysUntil(due ? addDays(due, STRATEGIES_DUE_DAYS) : null, now);
+    const days = daysUntil(strategiesDueOn(currentPlan(input.plans, now)), now);
     add({
       key: "strategies",
       title: "Support strategies not published",
-      detail: days == null ? "Not set up" : dueText(days),
+      detail: days == null ? "Add the plan's activation date" : dueText(days),
       tone: days != null && days < 0 ? "bad" : "warn",
       section: "plans",
     });

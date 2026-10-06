@@ -92,6 +92,13 @@ export const CLIENT_RECORD_TABLES = {
     hasOrgColumn: true,
   },
   client_progress_summaries: { action: "edit", ops: ["insert"], key: "client", hasOrgColumn: true },
+  client_health_events: {
+    action: "edit_medical",
+    ops: ["insert", "update"],
+    key: "client",
+    hasOrgColumn: true,
+  },
+  client_absences: { action: "edit_medical", ops: ["insert", "update"], key: "client", hasOrgColumn: true },
   sjd_assessment_selections: { action: "edit", ops: ["upsert"], key: "client", hasOrgColumn: true },
   hrc_restriction_records: {
     action: "edit_hrc",
