@@ -4,7 +4,8 @@
 //
 // PROMPT 12 DROP LIST — after P4 nothing in src/ reads or writes these:
 //   clients.pcsp_goals, client_specific_trainings.goals.
-// Still read/written until the Plans section replaces them (Prompt 8):
+// Smart Import still fills these (and now also adds the client_plans row);
+// profile, Plans, client file, face sheet and staff screens read client_plans:
 //   clients.plan_year, clients.pcsp_expiration_date, clients.pcsp_signed_date.
 // Kept: daily_logs.pcsp_goals_addressed / evv_timesheets.goals_completed are the
 //   note's own text record of what was worked on (goal_ids/support_ids sit beside them).

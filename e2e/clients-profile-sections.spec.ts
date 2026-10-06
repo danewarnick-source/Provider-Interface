@@ -38,6 +38,15 @@ test("client profile opens every section from the side menu", async ({ page }) =
     await page.getByTestId(`profile-section-${key}`).first().click();
     await expect(pageRoot).toHaveAttribute("data-active-section", key);
     await expect(page.getByTestId(`client-section-${key}`)).toBeVisible({ timeout: 20_000 });
+    if (key === "health") {
+      await expect(page.getByTestId("advance-directive")).toBeVisible();
+      await expect(page.getByTestId("client-health-events")).toBeVisible();
+    }
+    if (key === "plans") {
+      await expect(page.getByTestId("client-plan-years")).toBeVisible();
+      await expect(page.getByTestId("plan-view-as")).toBeVisible();
+      await expect(page.getByTestId("client-summaries-owed")).toBeVisible();
+    }
     if (key === "overview") await expect(page).not.toHaveURL(/section=/);
     else await expect(page).toHaveURL(new RegExp(`section=${key}`));
   }

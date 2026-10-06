@@ -27,6 +27,7 @@ import {
 import { enrichNamesFromFull } from "@/lib/person-name";
 import { importAssignmentCodes } from "@/lib/assignment-codes";
 import { loadActiveCodes } from "@/lib/clients/codes";
+import { importPlanYear } from "@/lib/clients/plans-write";
 import {
   LEGACY_ALERT_KEY,
   LEGACY_CONTACT_KEYS,
@@ -709,6 +710,17 @@ async function commitClient(
     const row = await insertClient(mapped);
     recordId = row.id;
     await audit(sb, jobId, orgId, subj.id, "Created new client", "source", userId, "create_client");
+  }
+
+  // The plan year lives in client_plans (the Plans section reads it there).
+  if (mapped.plan_year || mapped.pcsp_expiration_date) {
+    await importPlanYear(sb, {
+      organizationId: orgId,
+      clientId: recordId,
+      userId,
+      plan_year: (mapped.plan_year as string | undefined) ?? null,
+      pcsp_expiration_date: (mapped.pcsp_expiration_date as string | undefined) ?? null,
+    });
   }
 
   // Provenance rows for each core field

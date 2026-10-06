@@ -10,7 +10,7 @@ import { loadClientContacts, activeContacts, primaryContact } from "@/lib/client
 import { currentPlan, type ClientPlan } from "@/lib/clients/plans";
 
 const CLIENT_COLUMNS =
-  "id, organization_id, first_name, last_name, date_of_birth, phone_number, medicaid_id, client_pid, insurance, admission_date, discharge_date, account_status, team_id, special_directions, about_me, physical_address, mailing_address, client_photo_url, client_photo_taken_on, is_own_guardian, has_abi, hr_applicable, dnr_applicable, diagnoses, pcsp_expiration_date, feature_config, disability_category";
+  "id, organization_id, first_name, last_name, date_of_birth, phone_number, medicaid_id, client_pid, insurance, admission_date, discharge_date, account_status, team_id, special_directions, about_me, physical_address, mailing_address, client_photo_url, client_photo_taken_on, is_own_guardian, hr_applicable, feature_config, disability_category";
 
 export type ClientProfileRow = {
   id: string;
@@ -33,11 +33,7 @@ export type ClientProfileRow = {
   client_photo_url: string | null;
   client_photo_taken_on: string | null;
   is_own_guardian: boolean | null;
-  has_abi: boolean | null;
   hr_applicable: boolean | null;
-  dnr_applicable: boolean | null;
-  diagnoses: string[] | null;
-  pcsp_expiration_date: string | null;
   feature_config: Record<string, boolean> | null;
   disability_category: string | null;
 };

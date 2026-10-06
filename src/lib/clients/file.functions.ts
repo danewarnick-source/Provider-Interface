@@ -8,10 +8,12 @@ import {
   isHousemateObligationTitle,
   tallyClientFileCards,
   type ClientFileCard,
-  type ClientFileDoc,
   type ClientFileFacts,
   type ClientFileSummary,
 } from "@/lib/clients/file";
+import type { ClientFileDoc } from "@/lib/clients/file-docs";
+import { strategiesDueOn } from "@/lib/clients/plan-dates";
+import { currentPlan, type ClientPlan } from "@/lib/clients/plans";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
@@ -61,8 +63,8 @@ type ClientRow = {
   is_own_guardian: boolean | null;
   grievance_acknowledged: boolean | null;
   grievance_signed_date: string | null;
-  pcsp_expiration_date: string | null;
   client_photo_url: string | null;
+  client_photo_taken_on: string | null;
 };
 
 function displayName(c: { first_name: string | null; last_name: string | null }): string {
@@ -89,14 +91,13 @@ export async function loadOrgClientFileIndex(
   clientFilter?: string[] | null,
 ): Promise<ClientFileIndex> {
   const today = new Date().toISOString().slice(0, 10);
-  const last365 = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   const clientRows = await maybe(
     () =>
       supabase
         .from("clients")
         .select(
-          "id, first_name, last_name, account_status, is_own_guardian, grievance_acknowledged, grievance_signed_date, pcsp_expiration_date, client_photo_url",
+          "id, first_name, last_name, account_status, is_own_guardian, grievance_acknowledged, grievance_signed_date, client_photo_url, client_photo_taken_on",
         )
         .eq("organization_id", organizationId),
     [] as ClientRow[],
@@ -125,9 +126,10 @@ export async function loadOrgClientFileIndex(
   const summaryRows: Array<ClientFileSummary & { client_id: string }> = [];
   const pbaRows: Array<{ client_id: string }> = [];
   const ssRows: Array<{ client_id: string; status: string | null }> = [];
+  const planRows: ClientPlan[] = [];
 
   for (const ids of chunkIds(clientIds)) {
-    const [codes, docs, belongs, summaries, pbas, strategies] = await Promise.all([
+    const [codes, docs, belongs, summaries, pbas, strategies, plans] = await Promise.all([
       maybe(
         () =>
           supabase
@@ -186,6 +188,15 @@ export async function loadOrgClientFileIndex(
             .in("client_id", ids),
         [] as Array<{ client_id: string; status: string | null }>,
       ),
+      maybe(
+        () =>
+          supabase
+            .from("client_plans")
+            .select("id, client_id, start_date, end_date, activated_on, meeting_date, status, label, source, document_id, created_at")
+            .eq("organization_id", organizationId)
+            .in("client_id", ids),
+        [] as ClientPlan[],
+      ),
     ]);
     codeRows.push(...codes);
     docRows.push(...docs);
@@ -193,7 +204,11 @@ export async function loadOrgClientFileIndex(
     summaryRows.push(...summaries);
     pbaRows.push(...pbas);
     ssRows.push(...strategies);
+    planRows.push(...plans);
   }
+
+  const plansByClient = new Map<string, ClientPlan[]>();
+  for (const p of planRows) plansByClient.set(p.client_id, [...(plansByClient.get(p.client_id) ?? []), p]);
 
   const codesByClient = new Map<string, Set<string>>();
   for (const r of codeRows) {
@@ -215,8 +230,8 @@ export async function loadOrgClientFileIndex(
   const belongByClient = new Map<string, string>();
   for (const b of belongRows) {
     if (!b.inventoried_on) continue;
+    // Belongings are inventoried once (no yearly renewal): any inventory counts.
     const on = b.inventoried_on.slice(0, 10);
-    if (on < last365) continue;
     const prev = belongByClient.get(b.client_id);
     if (!prev || on > prev) belongByClient.set(b.client_id, on);
   }
@@ -295,6 +310,7 @@ export async function loadOrgClientFileIndex(
 
   for (const c of scoped) {
     const codes = Array.from(codesByClient.get(c.id) ?? []).sort();
+    const plan = currentPlan(plansByClient.get(c.id) ?? [], now);
     const docs = docsByClient.get(c.id) ?? [];
     const strategyList = strategyStatuses.get(c.id) ?? [];
     let supportOk = false;
@@ -309,13 +325,14 @@ export async function loadOrgClientFileIndex(
     const facts: ClientFileFacts = {
       codes,
       photoPath: c.client_photo_url || null,
+      photoTakenOn: c.client_photo_taken_on,
       isOwnGuardian: c.is_own_guardian === true,
       grievanceOk: !!c.grievance_acknowledged || !!c.grievance_signed_date,
-      pcspExpiration: c.pcsp_expiration_date ? c.pcsp_expiration_date.slice(0, 10) : null,
+      planEndDate: plan?.end_date?.slice(0, 10) ?? null,
       docs,
       belongingsOn: belongByClient.get(c.id) ?? null,
       supportStrategiesOk: supportOk,
-      supportStrategiesDueAt: null,
+      supportStrategiesDueAt: strategiesDueOn(plan),
       housemateOnFile: housemateByClient.get(c.id)?.onFile ?? false,
       housemateDueAt: housemateByClient.get(c.id)?.dueAt ?? null,
       summaries: summariesByClient.get(c.id) ?? [],

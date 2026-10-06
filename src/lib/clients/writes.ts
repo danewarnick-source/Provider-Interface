@@ -19,6 +19,7 @@ export const MEDICAL_CLIENT_FIELDS: ReadonlySet<string> = new Set([
   "immunizations",
   "dnr_status",
   "dnr_location",
+  "advance_directive_notes",
   "dnr_applicable",
   "polst_status",
   "palliative_care_status",
@@ -92,6 +93,13 @@ export const CLIENT_RECORD_TABLES = {
     hasOrgColumn: true,
   },
   client_progress_summaries: { action: "edit", ops: ["insert"], key: "client", hasOrgColumn: true },
+  client_health_events: {
+    action: "edit_medical",
+    ops: ["insert", "update"],
+    key: "client",
+    hasOrgColumn: true,
+  },
+  client_absences: { action: "edit_medical", ops: ["insert", "update"], key: "client", hasOrgColumn: true },
   sjd_assessment_selections: { action: "edit", ops: ["upsert"], key: "client", hasOrgColumn: true },
   hrc_restriction_records: {
     action: "edit_hrc",

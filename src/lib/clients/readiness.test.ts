@@ -177,3 +177,21 @@ describe("clientAttention", () => {
     assert.equal(s?.tone, "warn");
   });
 });
+
+describe("plan-year reminders in needs attention", () => {
+  it("reminds 60 days before the plan year ends", () => {
+    const items = clientAttention(input({ plans: [plan({ end_date: "2026-11-30" })] }), NOW);
+    const r = items.find((i) => i.key === "plan-ending:60");
+    assert.equal(r?.detail, "Ends in 55 days");
+    assert.equal(r?.section, "plans");
+  });
+  it("turns waiting into an office follow-up from day 10", () => {
+    const items = clientAttention(
+      input({ plans: [plan({ start_date: "2025-09-01", end_date: "2026-09-26" })] }),
+      NOW,
+    );
+    const w = items.find((i) => i.key === "pcsp-waiting");
+    assert.equal(w?.title, "Office: follow up on the new PCSP");
+    assert.equal(w?.tone, "bad");
+  });
+});

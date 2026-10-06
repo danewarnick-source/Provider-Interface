@@ -6,6 +6,7 @@
 import { todayYmd } from "./dates.ts";
 import { assertRowsChanged } from "./writes.ts";
 import { normalizeCodes, planStatusOn, type PlanSource } from "./plans.ts";
+import { legacyPlanForClient } from "./legacy-plans.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = { from: (table: string) => any };
@@ -21,7 +22,7 @@ export async function insertPlan(
   sb: Sb,
   a: { organizationId: string; clientId: string; userId?: string | null; source: PlanSource;
        start_date?: string | null; end_date?: string | null; activated_on?: string | null; meeting_date?: string | null;
-       document_id?: string | null },
+       document_id?: string | null; label?: string | null },
 ): Promise<string> {
   const dates = { start_date: a.start_date ?? null, end_date: a.end_date ?? null };
   const status = planStatusOn({ ...dates, status: "current" }, todayYmd());
@@ -33,6 +34,7 @@ export async function insertPlan(
       activated_on: a.activated_on ?? null, meeting_date: a.meeting_date ?? null,
       source: a.source, created_by: a.userId ?? null,
       ...(a.document_id ? { document_id: a.document_id } : {}),
+      ...(a.label ? { label: a.label } : {}),
     })
     .select("id");
   if (error) throw new Error(error.message);
@@ -109,5 +111,32 @@ export async function appendGoalsToCurrentPlan(
     ...a,
     planId,
     goals: texts.map((goal_text) => ({ goal_text, support_text: "", details: null, our_codes: a.codes })),
+  });
+}
+
+/**
+ * Smart import: a plan year from an imported "plan year" / PCSP end date,
+ * unless the client already has that plan year. Returns the new plan id, or
+ * null when nothing was added.
+ */
+export async function importPlanYear(
+  sb: Sb,
+  a: { organizationId: string; clientId: string; userId?: string | null;
+       plan_year: string | null; pcsp_expiration_date: string | null },
+): Promise<string | null> {
+  const m = legacyPlanForClient(a, todayYmd());
+  if (!m.start_date && !m.end_date && !m.label) return null;
+  const { data, error } = await sb.from("client_plans").select("id, start_date, end_date, label").eq("client_id", a.clientId);
+  if (error) throw new Error(error.message);
+  const rows = (data ?? []) as Array<{ start_date: string | null; end_date: string | null; label: string | null }>;
+  const same = rows.some((r) =>
+    m.start_date || m.end_date
+      ? (!!m.start_date && r.start_date === m.start_date) || (!!m.end_date && r.end_date === m.end_date)
+      : r.label === m.label,
+  );
+  if (same) return null;
+  return insertPlan(sb, {
+    organizationId: a.organizationId, clientId: a.clientId, userId: a.userId, source: "migrated",
+    start_date: m.start_date, end_date: m.end_date, label: m.label,
   });
 }

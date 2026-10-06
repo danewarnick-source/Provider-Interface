@@ -21,6 +21,7 @@ import {
   type ClientContact,
 } from "./contacts";
 import { formatDate } from "./dates";
+import { currentPlan, type ClientPlan } from "./plans";
 
 const NOT_ON_FILE = "Not on file";
 
@@ -141,10 +142,16 @@ export const generateClientFaceSheet = createServerFn({ method: "POST" })
     ]);
 
     const contacts = activeContacts(await loadClientContacts(supabase, [client.id]));
+    const { data: planRows } = await supabase
+      .from("client_plans")
+      .select("id, client_id, start_date, end_date, activated_on, meeting_date, status, label, source, document_id")
+      .eq("client_id", client.id);
+    const plan = currentPlan((planRows ?? []) as ClientPlan[]);
 
     drawFaceSheet(page, helv, helvB, {
       client,
       contacts,
+      plan,
       org: org ?? null,
       branding: branding ?? null,
       logoImg,
@@ -174,6 +181,8 @@ type Client = Record<string, unknown> & {
 type Ctx = {
   client: Client;
   contacts: ClientContact[];
+  /** The client's current plan year (client_plans). */
+  plan: ClientPlan | null;
   org: { id: string; name: string | null; legal_name: string | null; dba_name: string | null } | null;
   branding: { logo_path: string | null; org_address: string | null; org_phone: string | null } | null;
   logoImg: PDFImage | null;
@@ -265,7 +274,7 @@ function hr(page: PDFPage, y: number): void {
 }
 
 function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): void {
-  const { client, contacts, org, branding, logoImg, photoImg } = ctx;
+  const { client, contacts, plan, org, branding, logoImg, photoImg } = ctx;
 
   // ── Header ────────────────────────────────────────────────────────────
   // Logo top-left OR org name as large title
@@ -367,9 +376,11 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
   drawKV(page, "Intake date", fmtDate(client.intake_date as string | null) === NOT_ON_FILE
     ? fmtDate(client.admission_date as string | null)
     : fmtDate(client.intake_date as string | null), M, bandY, bandColW, helv, helvB);
-  drawKV(page, "PCSP date", fmtDate(client.pcsp_signed_date as string | null) === NOT_ON_FILE
-    ? fmtDate(client.pcsp_expiration_date as string | null)
-    : fmtDate(client.pcsp_signed_date as string | null), M + bandColW + 8, bandY, bandColW, helv, helvB);
+  const planYear =
+    plan && (plan.start_date || plan.end_date)
+      ? `${fmtDate(plan.start_date)} – ${fmtDate(plan.end_date)}`
+      : (plan?.label ?? NOT_ON_FILE);
+  drawKV(page, "Plan year", planYear, M + bandColW + 8, bandY, bandColW, helv, helvB);
   drawKV(page, "PID #", field(client.client_pid ?? client.form_1056_number), M + (bandColW + 8) * 2, bandY, bandColW, helv, helvB);
 
   y = photoY - 24;

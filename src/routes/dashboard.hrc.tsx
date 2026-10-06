@@ -11,13 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Scale, CalendarDays, ClipboardList, Users, ShieldAlert, CheckCircle2, Circle } from "lucide-react";
+import { Scale, CalendarDays, ClipboardList, Users, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
-import {
-  RESTRICTION_ELEMENTS,
-  computeRestrictionCompletion,
-  type RestrictionRecord,
-} from "@/lib/clients/hrc";
+import { computeRestrictionCompletion, type RestrictionRecord } from "@/lib/clients/hrc";
+import { RestrictionDialog } from "@/components/clients/profile/plans/restriction-dialog";
 import { useAccess } from "@/hooks/use-access";
 import { useServerFn } from "@tanstack/react-start";
 import { writeClientRecord } from "@/lib/clients/writes.functions";
@@ -149,14 +146,10 @@ export function HrcPage() {
 
 type ClientLite = { id: string; first_name: string; last_name: string };
 
+/** Active restrictions across clients. Each is added and edited on the
+ *  client's Plans section (the single editor); rows link there. */
 function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: string | null }) {
-  const qc = useQueryClient();
-  const writeRecordFn = useServerFn(writeClientRecord);
-  const [addOpen, setAddOpen] = useState(false);
-  const [editing, setEditing] = useState<RestrictionRecord | null>(null);
-  const [newClientId, setNewClientId] = useState("");
-  const [newTitle, setNewTitle] = useState("");
-
+  const [viewing, setViewing] = useState<RestrictionRecord | null>(null);
   const { data: clients } = useQuery({
     enabled: !!orgId,
     queryKey: ["hrc-clients", orgId],
@@ -197,30 +190,6 @@ function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: st
     return c ? `${c.first_name} ${c.last_name}` : "Unknown client";
   };
 
-  const create = useMutation({
-    mutationFn: async (values: { client_id: string; restriction_title: string }) => {
-      if (!values.client_id) throw new Error("Pick a client first.");
-      if (!values.restriction_title.trim()) throw new Error("Restriction title is required.");
-      await writeRecordFn({
-        data: {
-          organizationId: orgId!,
-          clientId: values.client_id,
-          table: "hrc_restriction_records",
-          op: "insert",
-          values: { restriction_title: values.restriction_title.trim(), active: true },
-        },
-      });
-    },
-    onSuccess: () => {
-      toast.success("Restriction added");
-      qc.invalidateQueries({ queryKey: ["hrc-restrictions", orgId] });
-      setAddOpen(false);
-      setNewClientId("");
-      setNewTitle("");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   const active = (restrictions ?? []).filter((r) => r.active);
 
   return (
@@ -248,219 +217,35 @@ function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: st
                   >
                     {completion.completedCount}/{completion.total} documented
                   </Badge>
-                  <Button size="sm" variant="ghost" onClick={() => setEditing(r)}>
-                    {canManage ? "Edit" : "View"}
+                  <Button size="sm" variant="ghost" onClick={() => setViewing(r)}>
+                    View
                   </Button>
+                  {canManage ? (
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to="/dashboard/clients/$clientId" params={{ clientId: r.client_id }} search={{ section: "plans" }}>
+                        Edit on client
+                      </Link>
+                    </Button>
+                  ) : null}
                 </div>
               </li>
             );
           })}
         </ul>
       )}
-      {canManage && (
-        <>
-          <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
-            Add restriction
-          </Button>
-          <Dialog open={addOpen} onOpenChange={setAddOpen}>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Flag a new rights restriction</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <Label>Client</Label>
-                  <Select value={newClientId} onValueChange={setNewClientId}>
-                    <SelectTrigger><SelectValue placeholder="Select a client" /></SelectTrigger>
-                    <SelectContent>
-                      {(clients ?? []).map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label>Restriction</Label>
-                  <Input
-                    value={newTitle}
-                    onChange={(e) => setNewTitle(e.target.value)}
-                    placeholder="e.g. Restricted access to kitchen after 9pm"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
-                <Button
-                  disabled={create.isPending}
-                  onClick={() => create.mutate({ client_id: newClientId, restriction_title: newTitle })}
-                >
-                  Add restriction
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </>
-      )}
-      {editing && (
-        <RestrictionEditDialog
-          record={editing}
-          clientName={nameOf(editing.client_id)}
-          canManage={canManage}
+      <p className="text-xs text-muted-foreground">
+        Restrictions are added and documented on each client's Plans section.
+      </p>
+      {viewing && orgId ? (
+        <RestrictionDialog
+          record={viewing}
+          clientName={nameOf(viewing.client_id)}
+          canManage={false}
           orgId={orgId}
-          onClose={() => setEditing(null)}
+          onClose={() => setViewing(null)}
         />
-      )}
+      ) : null}
     </div>
-  );
-}
-
-function RestrictionEditDialog({
-  record,
-  clientName,
-  canManage,
-  orgId,
-  onClose,
-}: {
-  record: RestrictionRecord;
-  clientName: string;
-  canManage: boolean;
-  orgId: string | null;
-  onClose: () => void;
-}) {
-  const qc = useQueryClient();
-  const writeRecordFn = useServerFn(writeClientRecord);
-  const [fields, setFields] = useState<Record<string, string>>(() => {
-    const init: Record<string, string> = {};
-    for (const def of RESTRICTION_ELEMENTS) {
-      init[def.textField as string] = (record[def.textField] as string | null) ?? "";
-      if (def.dateField) init[def.dateField as string] = (record[def.dateField] as string | null) ?? "";
-    }
-    return init;
-  });
-  const [active, setActive] = useState(record.active);
-
-  const save = useMutation({
-    mutationFn: async () => {
-      const patch: Record<string, string | boolean | null> = { active };
-      for (const def of RESTRICTION_ELEMENTS) {
-        patch[def.textField as string] = fields[def.textField as string]?.trim() || null;
-        if (def.dateField) patch[def.dateField as string] = fields[def.dateField as string] || null;
-      }
-      await writeRecordFn({
-        data: {
-          organizationId: orgId!,
-          clientId: record.client_id,
-          table: "hrc_restriction_records",
-          op: "update",
-          id: record.id,
-          values: patch,
-        },
-      });
-    },
-    onSuccess: () => {
-      toast.success("Restriction updated");
-      qc.invalidateQueries({ queryKey: ["hrc-restrictions", orgId] });
-      qc.invalidateQueries({ queryKey: ["client-restrictions", record.client_id] });
-      onClose();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const previewRecord: RestrictionRecord = { ...record, active };
-  for (const def of RESTRICTION_ELEMENTS) {
-    (previewRecord as unknown as Record<string, string | null>)[def.textField as string] =
-      fields[def.textField as string] || null;
-    if (def.dateField) {
-      (previewRecord as unknown as Record<string, string | null>)[def.dateField as string] =
-        fields[def.dateField as string] || null;
-    }
-  }
-  const completion = computeRestrictionCompletion(previewRecord);
-
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {record.restriction_title} — {clientName}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2">
-          <span className="text-sm font-medium">
-            {completion.isComplete ? "Fully documented" : "Incomplete documentation"}
-          </span>
-          <Badge
-            variant={completion.isComplete ? "default" : "outline"}
-            className={completion.isComplete ? "bg-emerald-600 hover:bg-emerald-600" : "border-amber-400 text-amber-800"}
-          >
-            {completion.completedCount}/{completion.total}
-          </Badge>
-        </div>
-        <div className="space-y-4">
-          {RESTRICTION_ELEMENTS.map((def) => {
-            const isComplete = completion.elements.find((e) => e.def.key === def.key)?.complete ?? false;
-            return (
-              <div key={def.key} className="space-y-2 rounded-md border border-border p-3">
-                <div className="flex items-start gap-2">
-                  {isComplete ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                  ) : (
-                    <Circle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-                  )}
-                  <div>
-                    <div className="text-sm font-medium">
-                      ({def.letter}) {def.label}
-                    </div>
-                    <div className="text-xs text-muted-foreground">{def.description}</div>
-                  </div>
-                </div>
-                <Textarea
-                  disabled={!canManage}
-                  rows={2}
-                  value={fields[def.textField as string] ?? ""}
-                  onChange={(e) =>
-                    setFields((f) => ({ ...f, [def.textField as string]: e.target.value }))
-                  }
-                  placeholder={`Describe ${def.label.toLowerCase()}…`}
-                />
-                {def.dateField && (
-                  <div className="max-w-[220px] space-y-1">
-                    <Label className="text-xs">{def.dateLabel}</Label>
-                    <Input
-                      disabled={!canManage}
-                      type="date"
-                      value={fields[def.dateField as string] ?? ""}
-                      onChange={(e) =>
-                        setFields((f) => ({ ...f, [def.dateField as string]: e.target.value }))
-                      }
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          {canManage && (
-            <div className="flex items-center gap-2">
-              <Label htmlFor="restriction-active" className="text-sm">Restriction still active</Label>
-              <input
-                id="restriction-active"
-                type="checkbox"
-                checked={active}
-                onChange={(e) => setActive(e.target.checked)}
-              />
-            </div>
-          )}
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Close</Button>
-          {canManage && (
-            <Button disabled={save.isPending} onClick={() => save.mutate()}>
-              Save
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
 

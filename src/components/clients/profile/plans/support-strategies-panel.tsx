@@ -37,7 +37,16 @@ import {
 
 type SSRow = { id: string; content: CSTContent; status: string; version: number };
 
-export function SupportStrategiesPanel({ clientId, orgId }: { clientId: string; orgId?: string }) {
+export function SupportStrategiesPanel({
+  clientId,
+  orgId,
+  dueOn,
+}: {
+  clientId: string;
+  orgId?: string;
+  /** Current plan activation + 30 days; shown until published. */
+  dueOn: string | null;
+}) {
   const qc = useQueryClient();
   const getSS = useServerFn(getSupportStrategiesTraining);
   const draftSS = useServerFn(draftSupportStrategies);
@@ -143,7 +152,11 @@ export function SupportStrategiesPanel({ clientId, orgId }: { clientId: string; 
     <>
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-          <StrategiesTitle open={bodyOpen || !training} onToggle={() => setBodyOpen((v) => !v)} />
+          <StrategiesTitle
+            open={bodyOpen || !training}
+            onToggle={() => setBodyOpen((v) => !v)}
+            dueOn={training?.status === "published" ? null : dueOn}
+          />
           {training ? (
             <div className="flex flex-wrap items-center gap-2">
               <SSStatusBadge status={training.status} version={training.version} />

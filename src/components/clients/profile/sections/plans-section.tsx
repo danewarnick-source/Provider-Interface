@@ -1,32 +1,37 @@
-// Plans (rebuilt in a later step): plan goals and supports, authorized
-// codes, support strategies, progress summaries and rights restrictions.
+// Plans: plan years (with 60/30-day reminders and the waiting count), plan
+// goals → supports with "View as" a code, support strategies (due 30 days
+// after the plan is activated), progress summaries for every code that owes
+// one, rights restrictions (the single HRC editor) and, for BC1–BC3
+// clients, the behavior support plan.
 
 import { useAccess } from "@/hooks/use-access";
+import { needsBehaviorSupportPlan } from "@/lib/clients/bsp";
+import { strategiesDueOn } from "@/lib/clients/plan-dates";
+import { currentPlan } from "@/lib/clients/plans";
+import { useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
+import { PlanYearsCard } from "@/components/clients/profile/plans/plan-years-card";
 import { PlanGoalsPanel } from "@/components/clients/profile/plans/plan-goals-panel";
-import { AuthorizedCodesCard } from "@/components/clients/profile/plans/authorized-codes-card";
 import { SupportStrategiesPanel } from "@/components/clients/profile/plans/support-strategies-panel";
 import { SummariesPanel } from "@/components/clients/profile/plans/summaries-panel";
-import { RightsRestrictionsPanel } from "@/components/clients/profile/plans/rights-restrictions-panel";
-import { HrcSectionCard } from "@/components/clients/profile/cards/hrc-section-card";
+import { RestrictionsCard } from "@/components/clients/profile/plans/restrictions-card";
+import { BspCard } from "@/components/clients/profile/plans/bsp-card";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
 
 export function PlansSection({ orgId, data }: { orgId: string; data: ClientProfileData }) {
-  const canHrc = useAccess().canCategory("hrc");
+  const access = useAccess();
   const clientId = data.client.id;
+  const bundle = useClientPlans(clientId).data;
+  const plans = bundle?.plans ?? [];
+  const current = currentPlan(plans);
+  const currentGoals = (bundle?.goals ?? []).filter((g) => g.plan_id === current?.id);
   return (
     <div className="space-y-4" data-testid="client-section-plans">
-      <div className="grid gap-4 md:grid-cols-2">
-        <PlanGoalsPanel clientId={clientId} orgId={orgId} codes={data.codes} />
-        <AuthorizedCodesCard clientId={clientId} codes={data.codes} />
-      </div>
-      <SupportStrategiesPanel clientId={clientId} orgId={orgId} />
+      <PlanYearsCard orgId={orgId} clientId={clientId} plans={plans} canEdit={access.canCategory("clients", "edit")} />
+      <PlanGoalsPanel clientId={clientId} orgId={orgId} codes={data.codes} />
+      <SupportStrategiesPanel clientId={clientId} orgId={orgId} dueOn={strategiesDueOn(current)} />
       <SummariesPanel clientId={clientId} orgId={orgId} codes={data.codes} />
-      {canHrc ? (
-        <>
-          <HrcSectionCard orgId={orgId} client={data.client} />
-          <RightsRestrictionsPanel clientId={clientId} />
-        </>
-      ) : null}
+      {access.canCategory("hrc") ? <RestrictionsCard orgId={orgId} data={data} /> : null}
+      {needsBehaviorSupportPlan(data.codes, currentGoals) ? <BspCard orgId={orgId} clientId={clientId} /> : null}
     </div>
   );
 }

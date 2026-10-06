@@ -95,7 +95,7 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
       : null;
 
   const primaryDx = identity?.diagnoses?.[0] ?? null;
-  const pcspExp = identity?.pcsp_expiration_date ?? null;
+  const pcspExp = identity?.plan_end_date ?? null;
   const pcspWarn = (() => {
     if (!pcspExp) return false;
     const days = daysUntil(pcspExp);
@@ -187,7 +187,7 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
           <h3 className="mb-1 text-sm font-semibold">At a glance</h3>
           <Row label="Primary diagnosis">{primaryDx}</Row>
           <Row label="Primary care">{primaryDoctor ? contactLine(primaryDoctor) : null}</Row>
-          <Row label="PCSP expiration">
+          <Row label="Plan year ends">
             {pcspExp ? (
               <span className={cn("inline-flex items-center gap-1", pcspWarn && "text-red-600 font-semibold")}>
                 {pcspWarn ? <AlertTriangle className="h-3.5 w-3.5" /> : null}

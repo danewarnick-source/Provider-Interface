@@ -11,7 +11,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanManageClient } from "./guards.server";
 import { assertRowsChanged } from "./writes";
 import { todayYmd } from "./dates";
-import { normalizeCodes } from "./plans";
+import { normalizeCodes, planStatusOn, type PlanStatus } from "./plans";
 import { insertPlan } from "./plans-write";
 import { GOAL_COLUMNS, SUPPORT_COLUMNS } from "./plans-load";
 
@@ -174,4 +174,40 @@ export const endGoalSupport = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     assertRowsChanged(rows);
     return { id: data.supportId };
+  });
+
+/**
+ * Edit a plan year's dates. Its status follows the new dates (a plan
+ * already replaced stays 'past'); a plan that becomes current retires the
+ * client's other current plan, as adding one does.
+ */
+export const updateClientPlanDates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ ...scope, planId: z.string().uuid(), ...planFields }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { sb, userId } = ctx(context);
+    const { organizationId, clientId, planId } = data;
+    await assertCanManageClient({ supabase: sb, actorId: userId, organizationId, clientId, action: "edit" });
+    const { data: before, error: readErr } = await sb
+      .from("client_plans").select("status").eq("id", planId).eq("client_id", clientId).maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+    if (!before) throw new Error("Plan year not found for this client.");
+    const dates = {
+      start_date: data.start_date ?? null, end_date: data.end_date ?? null,
+      activated_on: data.activated_on ?? null, meeting_date: data.meeting_date ?? null,
+    };
+    if (dates.start_date && dates.end_date && dates.end_date < dates.start_date) {
+      throw new Error("The plan year can't end before it starts.");
+    }
+    const status = planStatusOn({ ...dates, status: (before as { status: PlanStatus }).status }, todayYmd());
+    if (status === "current") {
+      const { error } = await sb
+        .from("client_plans").update({ status: "past" }).eq("client_id", clientId).eq("status", "current").neq("id", planId);
+      if (error) throw new Error(error.message);
+    }
+    const { data: rows, error } = await sb
+      .from("client_plans").update({ ...dates, status }).eq("id", planId).eq("client_id", clientId).select("id");
+    if (error) throw new Error(error.message);
+    assertRowsChanged(rows);
+    return { id: planId, status };
   });

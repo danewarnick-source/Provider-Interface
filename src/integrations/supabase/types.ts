@@ -2095,6 +2095,60 @@ export type Database = {
         }
         Relationships: []
       }
+      client_absences: {
+        Row: {
+          archived_at: string | null
+          client_id: string
+          created_at: string
+          created_by: string | null
+          from_date: string
+          id: string
+          notes: string | null
+          organization_id: string
+          reason: string
+          to_date: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          from_date: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          reason: string
+          to_date?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          from_date?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          reason?: string
+          to_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_absences_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_absences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_approved_locations: {
         Row: {
           address: string | null
@@ -2902,6 +2956,67 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "client_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_health_events: {
+        Row: {
+          archived_at: string | null
+          client_id: string
+          created_at: string
+          created_by: string | null
+          document_id: string | null
+          event_date: string
+          event_type: string
+          id: string
+          notes: string | null
+          organization_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          event_date: string
+          event_type: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_health_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_health_events_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "client_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_health_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -4189,6 +4304,7 @@ export type Database = {
           account_status: string
           admin_hours_per_week: number | null
           admission_date: string | null
+          advance_directive_notes: string | null
           advanced_directives: boolean | null
           allergies: string[]
           authorized_dspd_codes: string[]
@@ -4325,6 +4441,7 @@ export type Database = {
           account_status?: string
           admin_hours_per_week?: number | null
           admission_date?: string | null
+          advance_directive_notes?: string | null
           advanced_directives?: boolean | null
           allergies?: string[]
           authorized_dspd_codes?: string[]
@@ -4461,6 +4578,7 @@ export type Database = {
           account_status?: string
           admin_hours_per_week?: number | null
           admission_date?: string | null
+          advance_directive_notes?: string | null
           advanced_directives?: boolean | null
           allergies?: string[]
           authorized_dspd_codes?: string[]

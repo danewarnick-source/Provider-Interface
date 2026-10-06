@@ -522,7 +522,7 @@ function emptyClientCareData(clientId: string) {
     hr_applicable: null,
     dnr_applicable: null,
     diagnoses: [] as string[],
-    pcsp_expiration_date: null,
+    plan_end_date: null,
     special_directions: null,
   };
   const sections = {
