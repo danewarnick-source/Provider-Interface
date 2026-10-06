@@ -55,7 +55,6 @@ import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 
 import { displayMedicaidId } from "@/lib/medicaid-id";
 import { ClientBudgetPanel } from "@/components/clients/client-budget-panel";
-import { ClientMealPlannerMount } from "@/components/clients/client-meal-planner-mount";
 
 import { CaseloadEditor } from "@/components/clients/caseload-editor";
 import {
@@ -95,7 +94,6 @@ import {
   ShieldCheck,
   GraduationCap,
   Users,
-  UtensilsCrossed,
   ListChecks,
   UserCircle,
   FileUp,
@@ -512,11 +510,6 @@ function ClientProfileHub() {
             </CareSection>
             <CareSection icon={Users} accent="sky">
               <CaseloadEditor clientId={clientId} />
-            </CareSection>
-          </CareGroup>
-          <CareGroup label="Operational tools" hint="Day-to-day care coordination">
-            <CareSection icon={UtensilsCrossed} accent="orange">
-              <ClientMealPlannerMount clientId={clientId} />
             </CareSection>
           </CareGroup>
           <CustomFieldsForSection clientId={clientId} section="operations" />
