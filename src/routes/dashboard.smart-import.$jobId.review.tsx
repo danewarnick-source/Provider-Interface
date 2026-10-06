@@ -478,14 +478,9 @@ function useCompleteSetup({
         );
         if (committedRows.length === 1 && mode === "client" && committedRows[0].record_id) {
           navigate({
-            to: "/dashboard/client-intake/$clientId",
+            to: "/dashboard/clients/$clientId",
             params: { clientId: committedRows[0].record_id! },
-          }).catch(() =>
-            navigate({
-              to: "/dashboard/clients/$clientId",
-              params: { clientId: committedRows[0].record_id! },
-            }).catch(() => navigate({ to: "/dashboard/clients" })),
-          );
+          }).catch(() => navigate({ to: "/dashboard/clients" }));
         } else if (mode === "client") {
           navigate({ to: "/dashboard/clients" });
         } else {

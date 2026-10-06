@@ -2,18 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "../../../../hooks/use-org";
 import { useAllClientBillingCodes, type ClientBillingCode } from "./use-client-billing-codes";
-import {
-  computeEntryUnits,
-  effectiveBillingTimes,
-  isBillableForReview,
-  remainingUnitsForCode,
-  unitsToHours,
-  UNITS_PER_HOUR,
-} from "@/lib/billing-units";
+import { remainingUnitsForCode, unitsToHours, UNITS_PER_HOUR } from "@/lib/billing-units";
 import { isDailyServiceCode } from "@/lib/service-billing";
-import { isNonAnswer } from "@/lib/nectar-quality";
 import { isRouteUuid } from "@/lib/route-uuid";
 import { parseLocalDate } from "@/lib/clients/dates";
+import { usedUnitsForCode, type UsageDay, type UsageTimesheet } from "@/lib/clients/units";
 
 /**
  * Live per-code budget ledger. For each authorized billing code we
@@ -121,94 +114,14 @@ export function useClientBudget(clientId: string | undefined) {
           };
         }
 
-        // Sum usage strictly within the code's period.
-        let used_hours = 0;
-        let used_days = 0;
-        let used_entry_units = 0;
-        if (code.service_code === "RHS" || code.service_code === "DSG") {
-          // Shared residential setting: any staff member who clocked in/out
-          // with a real shift note for this client on a date makes that
-          // whole date billable — this is an aggregate check across every
-          // staff member who worked that date, not a single "the" daily
-          // note. RHS requires a substantive (50+ word) note; DSG only
-          // requires a complete clocked shift with a real (non-blank,
-          // non-placeholder) note — its SOW bar is start/end time on the
-          // documentation, not narrative depth.
-          const dates = new Set<string>();
-          for (const r of (tsRows ?? []) as Array<{
-            service_type_code: string | null;
-            clock_in_timestamp: string | null;
-            clock_out_timestamp: string | null;
-            rounded_clock_in: string | null;
-            rounded_clock_out: string | null;
-            corrected_clock_in: string | null;
-            corrected_clock_out: string | null;
-            review_status: string | null;
-            shift_note_text: string | null;
-          }>) {
-            if (r.service_type_code !== code.service_code) continue;
-            if (!isBillableForReview(r)) continue;
-            const billIn = (r.review_status === "approved" && r.corrected_clock_in)
-              ? r.corrected_clock_in
-              : (r.rounded_clock_in ?? r.clock_in_timestamp);
-            const billOut = (r.review_status === "approved" && r.corrected_clock_out)
-              ? r.corrected_clock_out
-              : (r.rounded_clock_out ?? r.clock_out_timestamp);
-            if (!billIn || !billOut) continue;
-            const inT = new Date(billIn);
-            if (inT < period_start) continue;
-            if (period_end && inT > period_end) continue;
-            const note = r.shift_note_text ?? "";
-            const qualifies = code.service_code === "RHS"
-              ? (!isNonAnswer(note) && note.trim().length >= 50)
-              : (!isNonAnswer(note) && note.trim().length > 0);
-            if (!qualifies) continue;
-            const dateStr = billIn.slice(0, 10);
-            dates.add(dateStr);
-          }
-          used_days = dates.size;
-        } else if (is_daily) {
-          const dates = new Set<string>();
-          for (const r of (dlRows ?? []) as Array<{ record_date: string | null; service_code: string | null }>) {
-            if (!r.record_date) continue;
-            // View rows carry the service code — attribute days to the exact code.
-            if (r.service_code && r.service_code !== code.service_code) continue;
-            const d = new Date(r.record_date + "T00:00:00");
-            if (d < period_start) continue;
-            if (period_end && d > period_end) continue;
-            dates.add(r.record_date);
-          }
-          used_days = dates.size;
-        } else {
-          for (const r of (tsRows ?? []) as Array<{
-            service_type_code: string | null;
-            clock_in_timestamp: string | null;
-            clock_out_timestamp: string | null;
-            rounded_clock_in: string | null;
-            rounded_clock_out: string | null;
-            corrected_clock_in: string | null;
-            corrected_clock_out: string | null;
-            review_status: string | null;
-          }>) {
-            if (r.service_type_code !== code.service_code) continue;
-            const times = effectiveBillingTimes(r);
-            if (!times) continue;
-            const billIn = times.in;
-            const billOut = times.out;
-            const inT = new Date(billIn);
-            if (inT < period_start) continue;
-            if (period_end && inT > period_end) continue;
-            const hrs =
-              (new Date(billOut).getTime() - inT.getTime()) / 3_600_000;
-            if (hrs > 0 && isFinite(hrs)) {
-              used_hours += hrs;
-              // Per-entry rounding; the bucket sums entry units, never re-rounds.
-              used_entry_units += computeEntryUnits(billIn, billOut);
-            }
-          }
-        }
-
-        const used_units = is_daily ? used_days : used_entry_units;
+        const usage = usedUnitsForCode(
+          { ...code, service_code: String(code.service_code) },
+          (tsRows ?? []) as UsageTimesheet[],
+          (dlRows ?? []) as UsageDay[],
+        );
+        const used_days = usage.usedDays;
+        const used_hours = usage.usedHours;
+        const used_units = usage.usedUnits;
         const annual = code.annual_unit_authorization ?? 0;
         const remaining_units = remainingUnitsForCode(annual, used_units);
         const remaining_hours = is_daily

@@ -216,34 +216,6 @@ export const recommitSmartImportJob = createServerFn({ method: "POST" })
     return runJobCommit(sb, context.userId, data.jobId);
   });
 
-// Commit a single pending subject (used by the Pending Clients workspace's
-// "Save & finalize" path). Same engine; just filters candidates to one
-// row so unrelated ready siblings are not auto-committed.
-const SingleSubject = z.object({ subjectId: z.string().uuid() });
-export const commitSingleSubject = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => SingleSubject.parse(i))
-  .handler(async ({ data, context }) => {
-    if (!context.supabase || !context.userId) return { results: [], jobCommitted: false };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
-    const { data: subj, error } = await sb
-      .from("import_subjects")
-      .select("id, import_job_id, org_id")
-      .eq("id", data.subjectId)
-      .single();
-    if (error || !subj) throw new Error("Subject not found");
-    const { data: job } = await sb
-      .from("import_jobs")
-      .select("id, org_id, target_org_id, source")
-      .eq("id", subj.import_job_id)
-      .single();
-    const orgId = (job?.source === "white_glove" ? job.target_org_id : job?.org_id) as string;
-    if (!orgId) throw new Error("Job has no organization to commit into.");
-    await requireOrgMembership(sb, context.userId, orgId, "owner");
-    return runJobCommit(sb, context.userId, subj.import_job_id, { subjectId: data.subjectId });
-  });
-
 // Internal helper — usable from other server fns (e.g. submitForSetup) so
 // the self-service path can commit in one shot without re-entering the
 // server-fn boundary. `opts.subjectId` narrows the commit to a single
@@ -1283,6 +1255,66 @@ async function commitCerts(
       "commit_cert",
     );
   }
+}
+
+/**
+ * A Smart Import client draft finished on the Add client form. The form has
+ * already created the client (recordId); this attaches the import's extras
+ * (custom fields, certs, provisioning) and closes the draft. Same steps as
+ * runJobCommit after its own insert. Returns gaps to show.
+ */
+export async function finishImportDraft(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sbIn: any,
+  userId: string,
+  args: { subjectId: string; recordId: string; organizationId: string },
+): Promise<string[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = sbIn as any;
+  const { data: subj, error } = await sb
+    .from("import_subjects")
+    .select("id, import_job_id, subject_type, display_name, committed_at, discarded_at")
+    .eq("id", args.subjectId)
+    .maybeSingle();
+  if (error || !subj || subj.subject_type !== "client") throw new Error("This imported draft was not found.");
+  if (subj.committed_at || subj.discarded_at) throw new Error("This imported draft was already finished or discarded.");
+  const { data: job } = await sb
+    .from("import_jobs")
+    .select("id, org_id, source")
+    .eq("id", subj.import_job_id)
+    .maybeSingle();
+  if (!job || job.source === "white_glove" || job.org_id !== args.organizationId) {
+    throw new Error("Finish this import from Smart Import.");
+  }
+  const gaps: string[] = [];
+  const { data: fields } = await sb
+    .from("extracted_fields")
+    .select("*")
+    .eq("import_subject_id", subj.id)
+    .neq("status", "ignored")
+    .is("dismissed_at", null);
+  await attachCustomAttributes(
+    sb,
+    args.organizationId,
+    subj,
+    args.recordId,
+    (fields ?? []).filter((f: { is_custom_attribute: boolean }) => f.is_custom_attribute),
+    job.id,
+    userId,
+  );
+  await commitCerts(sb, args.organizationId, subj, args.recordId, job.id, userId, gaps);
+  await applyProvisioning(sb, args.organizationId, subj, args.recordId, job.id, userId, gaps);
+  await sb
+    .from("import_subjects")
+    .update({
+      committed_record_id: args.recordId,
+      committed_at: new Date().toISOString(),
+      review_status: "approved",
+      commit_error: null,
+    })
+    .eq("id", subj.id);
+  await audit(sb, job.id, args.organizationId, subj.id, "Finished on the Add client form", "admin_override", userId, "commit_subject");
+  return gaps;
 }
 
 // --------------------------------------------------------------

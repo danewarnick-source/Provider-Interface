@@ -1,43 +1,22 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 import { HubShell, type HubTab } from "@/components/admin-hubs/hub-shell";
-import { RequireLevel, RequirePermission } from "@/components/rbac-guard";
+import { RequirePermission } from "@/components/rbac-guard";
 import { useAccess } from "@/hooks/use-access";
 import { ClientsPage } from "@/components/clients/list/clients-page";
 import { AgencySetupCreateGate } from "@/components/onboarding/agency-setup-create-gate";
-import { TeamsPage } from "./dashboard.teams";
-import { PbaLedgerPage } from "./dashboard.pba-ledger";
-import { ClientLoansPage } from "./dashboard.client-loans";
-import { ReferralsPage } from "@/components/referrals/referrals-page";
 import { HostsPage } from "@/components/hosts/hosts-page";
 
+// Old tabs: hosts → placements; referrals → the client list's Referrals view;
+// teams → Homes; funds → the PBA ledger (moves to the profile's Money later).
 const search = z.object({
   tab: z.enum(["directory", "referrals", "placements", "hosts", "teams", "funds"]).optional(),
 });
 
 function ClientsHub() {
   const { can } = useAccess();
-  const tabs: HubTab[] = [
-    {
-      key: "directory",
-      label: "Directory",
-      render: () => (
-        <RequirePermission perm="view_clients">
-          <ClientsPage />
-        </RequirePermission>
-      ),
-    },
-  ];
+  const tabs: HubTab[] = [{ key: "directory", label: "Directory", render: () => <ClientsPage /> }];
   if (can("view_referrals") || can("manage_referrals")) {
-    tabs.push({
-      key: "referrals",
-      label: "Referrals",
-      render: () => (
-        <RequirePermission perm="view_referrals">
-          <ReferralsPage />
-        </RequirePermission>
-      ),
-    });
     tabs.push({
       key: "placements",
       label: "Placements",
@@ -45,43 +24,6 @@ function ClientsHub() {
         <RequirePermission perm="view_referrals">
           <HostsPage />
         </RequirePermission>
-      ),
-    });
-  }
-  tabs.push(
-    {
-      key: "teams",
-      label: "Teams & homes",
-      render: () => (
-        <RequirePermission perm="view_clients">
-          <TeamsPage />
-        </RequirePermission>
-      ),
-    },
-  );
-  if (can("view_billing")) {
-    tabs.push({
-      key: "funds",
-      label: "Funds",
-      render: () => (
-        <div className="space-y-10">
-          <section>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              PBA Trust Ledger
-            </h3>
-            <RequirePermission perm="view_billing">
-              <PbaLedgerPage />
-            </RequirePermission>
-          </section>
-          <section>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Client Loan Ledger
-            </h3>
-            <RequireLevel min="owner">
-              <ClientLoansPage />
-            </RequireLevel>
-          </section>
-        </div>
       ),
     });
   }
@@ -98,13 +40,16 @@ export const Route = createFileRoute("/dashboard/hub/clients")({
   head: () => ({ meta: [{ title: "Clients — Provider Interface" }] }),
   validateSearch: (s) => search.parse(s),
   beforeLoad: ({ search: s }) => {
-    if (s.tab === "hosts") {
+    if (s.tab === "hosts")
       throw redirect({
         to: "/dashboard/hub/clients",
         search: { tab: "placements" },
         replace: true,
       });
-    }
+    if (s.tab === "referrals")
+      throw redirect({ to: "/dashboard/clients", search: { view: "referrals" }, replace: true });
+    if (s.tab === "teams") throw redirect({ to: "/dashboard/homes", replace: true });
+    if (s.tab === "funds") throw redirect({ to: "/dashboard/pba-ledger", replace: true });
   },
   component: ClientsHub,
 });
