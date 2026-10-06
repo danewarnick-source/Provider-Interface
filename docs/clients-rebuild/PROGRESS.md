@@ -324,3 +324,42 @@ One short report per prompt. A new session continues from the first prompt not m
   - Fill from 1056 needs a text PDF; scans must be entered by hand.
   - P11 discharge can call `endAuthorization` to end each active authorization.
   - Legacy files still over the size limits: `org-client-file-matrix` 321, `residential-daily-tab` 866.
+
+## P10
+- **Status:** merged. PR #455 (https://github.com/danewarnick-source/Provider-Interface/pull/455) was squash-merged into `clients-rebuild`.
+- **Branch:** `clients-rebuild-p10-team-money-activity`.
+- **What was done:**
+  - **Team** (`profile/team/`):
+    - The team-and-codes card replaces the old caseload editor. It writes only through `setStaffClientCodes`.
+    - Each team member shows "ready to work alone" from `overview.team`.
+    - The do-not-schedule list can be added to and ended.
+    - The person-specific training setup card (`ClientSpecificTrainingCard`) is now mounted here.
+  - **Exclusions:** `lib/clients/exclusions.ts` holds the pure rules and `exclusions-check.server.ts` reads the list through the `active_client_staff_exclusions` RPC.
+    - `saveShift` refuses an excluded team member and says why.
+    - The `writeStaffClientCodes` writer refuses to give them codes.
+    - `applyDrafts` refuses the whole batch.
+    - `applyRepeat` turns their copied shifts into open shifts.
+  - **Money** (a new `money` section; shown only with Billing: View and for clients with a PBA code or account, loans, or spending, via `moneySectionApplies`):
+    - PBA account, ledger, transaction form and quarterly audit.
+    - Loans, using the new `listClientLoans` (owner only).
+    - The spending log.
+  - **Redirects:** `/dashboard/pba-ledger` and the hub `?tab=funds` now go to the client list. The list's Funds button and the tour anchor were removed.
+  - **Activity & notes:** rows open their records. Shifts and daily notes open a dialog; incidents open `/dashboard/hub/documentation?tab=incidents&client=`. The office notes card is visible to Clients: Edit only.
+  - **Deleted:** `activity-tables.tsx`; `shared/caseload-editor.tsx` (git-moved to `team-codes-card.tsx` and rewritten).
+- **Checks:**
+  - tsc: 203 errors before, 203 after.
+  - Unit tests: 1817 of 1822 pass. The 5 failures are the ones already failing on main.
+  - Build passes.
+  - e2e roster: 17 pass / 3 fail, the same 3 as before.
+  - e2e scheduler: all 9 fail, the same 9 as on the base branch. The scheduler doesn't draw in the mock.
+  - e2e staff-go-live: 6/6.
+- **Migrations:**
+  - `20261006220000_clients_staff_exclusions_notes` applied to live through `execute_sql`, in parts because larger runs time out, and recorded in `schema_migrations`.
+  - No Phase B migration.
+- **Files:** 31 added, 2 deleted.
+- **Notes for later prompts:**
+  - The monthly budget stays in Services & billing. Money is hidden for clients without PBA, loans or spending, so moving it would hide the budget for everyone else.
+  - `/dashboard/client-loans` stays. It holds the loan attestation and the cross-client list.
+  - Adding an exclusion requires the person to be off the team; the UI removes them first.
+  - P11 discharge could end open exclusions. They are harmless if left open.
+  - Legacy files I touched that are still over the size limits: `setup.functions` 665, `scheduler.functions` 439, `repeat.functions` 333, `loans.functions` 357, `client-specific-training-card` 895.
