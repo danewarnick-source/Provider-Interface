@@ -13,6 +13,7 @@ import {
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { isNonAnswer } from "@/lib/nectar-quality";
 import { isRouteUuid } from "@/lib/route-uuid";
+import { parseLocalDate } from "@/lib/clients/dates";
 
 /**
  * Live per-code budget ledger. For each authorized billing code we
@@ -46,9 +47,7 @@ export type CodeBudget = {
 };
 
 function parseDate(s: string | null | undefined): Date | null {
-  if (!s) return null;
-  const d = new Date(s);
-  return isNaN(d.getTime()) ? null : d;
+  return parseLocalDate(s);
 }
 
 function weeksBetween(a: Date, b: Date): number {

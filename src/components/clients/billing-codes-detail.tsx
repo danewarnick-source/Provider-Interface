@@ -56,6 +56,7 @@ import {
 } from "@/lib/billing-budget-parse.functions";
 import { getAuthStatus, AuthStatusBadge } from "@/lib/billing-auth-status";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { daysUntil } from "@/lib/clients/dates";
 
 type Draft = { annual: string; rate: string; endDate: string };
 function draftFromCode(c: { annual_unit_authorization: number | null; rate_per_unit: number | null; service_end_date: string | null }): Draft {
@@ -147,11 +148,8 @@ export function BillingCodesDetail({ clientId, clientName, medicaidId }: Props) 
         continue;
       }
       if (c.service_end_date && status !== "expired") {
-        const end = new Date(`${c.service_end_date}T00:00:00`);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const days = Math.round((end.getTime() - today.getTime()) / 86_400_000);
-        if (Number.isFinite(days) && days >= 0 && days <= 14) {
+        const days = daysUntil(c.service_end_date);
+        if (days !== null && days >= 0 && days <= 14) {
           lines.push(`${label} ends ${c.service_end_date}. Enter the real renewal when you have it.`);
         }
       }
@@ -203,7 +201,7 @@ export function BillingCodesDetail({ clientId, clientName, medicaidId }: Props) 
       if (!isFinite(a) || a < 0) return toast.error("Annual units must be non-negative");
       if (!isFinite(r) || r < 0) return toast.error("Rate must be non-negative");
       const b = current.find((x) => x.code.id === id);
-      if (d.endDate && b?.code.service_start_date && new Date(d.endDate) <= new Date(b.code.service_start_date)) {
+      if (d.endDate && b?.code.service_start_date && d.endDate <= b.code.service_start_date) {
         return toast.error(`${b.code.service_code}: end date must be after start date`);
       }
     }
@@ -727,7 +725,7 @@ function CodeRow({
       toast.error("Pick an end date");
       return false;
     }
-    if (code.service_start_date && new Date(endDateDraft) <= new Date(code.service_start_date)) {
+    if (code.service_start_date && endDateDraft <= code.service_start_date) {
       toast.error("End date must be after the start date");
       return false;
     }

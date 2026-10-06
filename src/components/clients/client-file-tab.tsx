@@ -13,6 +13,7 @@ import {
   type ClientFileStatus,
 } from "@/lib/client-file";
 import { ClientDocumentsCard } from "@/components/clients/client-documents-card";
+import { formatDate } from "@/lib/clients/dates";
 
 function statusBadgeClass(status: ClientFileStatus): string {
   if (status === "on_file") return "border-emerald-300 bg-emerald-50 text-emerald-800";
@@ -21,10 +22,7 @@ function statusBadgeClass(status: ClientFileStatus): string {
 }
 
 function formatDue(iso: string | null): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return formatDate(iso);
 }
 
 async function signedUrl(bucket: "client-documents" | "client-photos", path: string): Promise<string> {

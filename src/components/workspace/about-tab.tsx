@@ -14,6 +14,7 @@ import type { CaseloadClient } from "@/hooks/use-caseload";
 import { ClientPhotoCard } from "@/components/clients/client-photo-card";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import type { CustomFieldWithValue } from "@/lib/client-care-data.functions";
+import { ageOn, daysUntil } from "@/lib/clients/dates";
 
 function formatCustomValue(f: CustomFieldWithValue): string {
   const v = f.value;
@@ -34,14 +35,7 @@ function fmtDate(s: string | null | undefined): string {
 }
 
 function age(dob: string | null | undefined): number | null {
-  if (!dob) return null;
-  const d = new Date(dob);
-  if (Number.isNaN(d.getTime())) return null;
-  const now = new Date();
-  let a = now.getFullYear() - d.getFullYear();
-  const m = now.getMonth() - d.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
-  return a;
+  return ageOn(dob);
 }
 
 function isEmpty(v: React.ReactNode): boolean {
@@ -99,9 +93,8 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
   const pcspExp = identity?.pcsp_expiration_date ?? null;
   const pcspWarn = (() => {
     if (!pcspExp) return false;
-    const d = new Date(pcspExp);
-    if (Number.isNaN(d.getTime())) return false;
-    return d.getTime() - Date.now() < 30 * 24 * 3600 * 1000;
+    const days = daysUntil(pcspExp);
+    return days !== null && days < 30;
   })();
 
   return (

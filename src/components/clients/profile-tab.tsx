@@ -54,6 +54,7 @@ import { formatPeriodMonthYear } from "@/lib/progress-summaries";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { onClientDutyFactsChanged } from "@/lib/staff-assignment-hooks.functions";
 import { isAdminLevel } from "@/lib/access/levels";
+import { ageOn, daysUntil, parseLocalDate } from "@/lib/clients/dates";
 
 type ClientRow = Record<string, unknown>;
 type DocRow = { id: string; document_type: string | null; file_name: string | null; storage_path: string | null; uploaded_at: string | null };
@@ -349,7 +350,8 @@ function ElsSchoolDocumentationCard({ clientId, docs }: { clientId: string; docs
 
 function EprInformedChoiceCard({ clientId, docs, serviceStart }: { clientId: string; docs: DocRow[]; serviceStart: string | null }) {
   const doc = docs.find((d) => d.document_type === "epr_informed_choice");
-  const dueDate = serviceStart ? new Date(new Date(`${serviceStart}T00:00:00`).getTime() + 60 * 86_400_000) : null;
+  const serviceStartDate = parseLocalDate(serviceStart);
+  const dueDate = serviceStartDate ? new Date(serviceStartDate.getTime() + 60 * 86_400_000) : null;
   const dueStr = dueDate ? dueDate.toISOString().slice(0, 10) : null;
   const isOverdue = !doc && !!dueDate && dueDate.getTime() < Date.now();
   return (
@@ -453,10 +455,10 @@ function SjdAssessmentDocumentationCard({
   const discoveryDoc = docs.find((d) => d.document_type === "sjd_discovery_assessment");
   const vocationalDoc = docs.find((d) => d.document_type === "sjd_vocational_assessment");
 
-  const discoveryDue = serviceStart ? new Date(new Date(`${serviceStart}T00:00:00`).getTime() + 60 * 86_400_000) : null;
-  const vocationalDue = selection.assessment_start_date
-    ? new Date(new Date(`${selection.assessment_start_date}T00:00:00`).getTime() + 30 * 86_400_000)
-    : null;
+  const serviceStartDate = parseLocalDate(serviceStart);
+  const discoveryDue = serviceStartDate ? new Date(serviceStartDate.getTime() + 60 * 86_400_000) : null;
+  const vocationalStart = parseLocalDate(selection.assessment_start_date);
+  const vocationalDue = vocationalStart ? new Date(vocationalStart.getTime() + 30 * 86_400_000) : null;
 
   function DeadlineBanner({ due, doc, days, missingHint }: { due: Date | null; doc: DocRow | undefined; days: number; missingHint: string }) {
     if (!due) {
@@ -660,14 +662,7 @@ function SjdUsorOutreachCard({ clientId, orgId }: { clientId: string; orgId: str
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function age(dob: string | null | undefined): number | null {
-  if (!dob) return null;
-  const d = new Date(dob);
-  if (Number.isNaN(d.getTime())) return null;
-  const now = new Date();
-  let a = now.getFullYear() - d.getFullYear();
-  const m = now.getMonth() - d.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
-  return a;
+  return ageOn(dob);
 }
 
 function fmtDate(s: string | null | undefined): string {
@@ -1319,9 +1314,8 @@ function AtGlanceCard({ clientId, client }: { clientId: string; client: ClientRo
   const pcspExp = (client.pcsp_expiration_date as string | null) ?? null;
   const pcspWarn = useMemo(() => {
     if (!pcspExp) return false;
-    const exp = new Date(pcspExp);
-    const ms = exp.getTime() - Date.now();
-    return ms < 30 * 24 * 3600 * 1000;
+    const days = daysUntil(pcspExp);
+    return days !== null && days < 30;
   }, [pcspExp]);
 
   return (
