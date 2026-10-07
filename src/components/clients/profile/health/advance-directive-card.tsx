@@ -39,6 +39,7 @@ export function AdvanceDirectiveCard({
   const set = (patch: Partial<DirectiveDraft>) => setDraft((d) => (d ? { ...d, ...patch } : d));
   return (
     <SectionCard
+      id="health-directive"
       icon={FileSignature}
       tone="danger"
       title="Advance directive"

@@ -1,5 +1,5 @@
-// Write an office note (Clients: Edit). Used by the Office notes card and
-// the header's "Add note" dialog.
+// Write an office note (Clients: Edit). Used by the "Add note" dialog on
+// the profile header and the Activity header.
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

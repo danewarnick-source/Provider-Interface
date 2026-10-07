@@ -4,7 +4,9 @@
 // owner; spending: org members).
 
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { getLoanFeatureStatus, listClientLoans } from "@/lib/clients/loans.functions";
 import { moneySectionApplies, quarterStart } from "@/lib/clients/money";
 
 export type PbaAccount = {
@@ -85,4 +87,55 @@ export function useClientPba(orgId: string, clientId: string) {
       return { account, sample: ((s ?? [])[0] as PbaAuditSample | undefined) ?? null };
     },
   });
+}
+
+export type SpendRow = {
+  id: string;
+  amount: number;
+  purpose: string | null;
+  spent_at: string;
+  staff_id: string | null;
+  receipt_path: string | null;
+  notes: string | null;
+};
+
+const SPENDING_LIMIT = 200;
+
+/** The spending log, newest first (the last 200 entries). */
+export function useClientSpending(orgId: string, clientId: string) {
+  return useQuery({
+    queryKey: ["client-spending", orgId, clientId],
+    queryFn: async (): Promise<SpendRow[]> => {
+      const { data, error } = await supabase
+        .from("client_spending_log")
+        .select("id, amount, purpose, spent_at, staff_id, receipt_path, notes")
+        .eq("organization_id", orgId)
+        .eq("client_id", clientId)
+        .order("spent_at", { ascending: false })
+        .limit(SPENDING_LIMIT);
+      if (error) throw error;
+      return (data ?? []) as SpendRow[];
+    },
+  });
+}
+
+export type LoanRow = { id: string; borrower_name: string; agreement_date: string; status: string };
+
+/** Loan agreements (owners only): whether loan records are on, and the client's loans. */
+export function useClientLoans(orgId: string, clientId: string, isOwner: boolean) {
+  const statusFn = useServerFn(getLoanFeatureStatus);
+  const listFn = useServerFn(listClientLoans);
+  const status = useQuery({
+    enabled: isOwner,
+    queryKey: ["loan-feature-status", orgId],
+    queryFn: () => statusFn({ data: { organization_id: orgId } }),
+  });
+  const enabled = isOwner && status.data?.enabled === true;
+  const loans = useQuery({
+    enabled,
+    queryKey: ["loans", orgId, "client", clientId],
+    queryFn: async () =>
+      (await listFn({ data: { organization_id: orgId, client_id: clientId } })) as LoanRow[],
+  });
+  return { status, loans, enabled };
 }

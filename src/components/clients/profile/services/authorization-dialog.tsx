@@ -24,6 +24,7 @@ import {
   type AuthorizationInput,
   type AuthorizationRow,
 } from "@/lib/clients/authorizations";
+import { renewProblems } from "@/lib/clients/authorization-renewal";
 import { isDailyServiceCode } from "@/lib/service-billing";
 import { saveAuthorization } from "@/lib/clients/services.functions";
 
@@ -51,7 +52,10 @@ export function AuthorizationDialog({
   const saveFn = useServerFn(saveAuthorization);
   const [input, setInput] = useState<AuthorizationInput>(() => inputFromRow(row, renew));
   const [saving, setSaving] = useState(false);
-  const problems = authorizationProblems(input, agencyCodes);
+  const problems = [
+    ...authorizationProblems(input, agencyCodes),
+    ...(renew && row ? renewProblems(row, input) : []),
+  ];
   const set = (patch: Partial<AuthorizationInput>) => setInput((i) => ({ ...i, ...patch }));
 
   async function save() {
@@ -91,7 +95,9 @@ export function AuthorizationDialog({
                 : "Add an authorization"}
           </DialogTitle>
           <DialogDescription>
-            Copy these from the client's 1056. Units must be whole numbers.
+            {renew
+              ? "A new period from the new 1056. The old one keeps its dates and 1056 number under Past authorizations."
+              : "Copy these from the client's 1056. Units must be whole numbers."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-3">

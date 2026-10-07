@@ -93,12 +93,12 @@ export function DoNotScheduleCard({
       icon={Ban}
       tone="ok"
       title="Do not schedule"
-      description="The scheduler won't place these team members with this client and says why."
+      description="Team members who must never work with this client, and why. The scheduler refuses them."
       testId="client-do-not-schedule"
       actions={
         canEdit ? (
           <Button variant="outline" onClick={() => setAdding(true)}>
-            <Plus className="h-4 w-4" /> Add to list
+            <Plus className="h-4 w-4" /> Add to do-not-schedule list
           </Button>
         ) : null
       }

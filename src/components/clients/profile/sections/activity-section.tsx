@@ -1,23 +1,146 @@
-// Activity & notes: shifts, daily notes and incidents (incidents need
-// Incidents: View), each row opening its record, plus office notes (Clients:
-// Edit only).
+// Activity & notes: one timeline of shifts, daily logs, incidents (needs
+// Incidents: View) and office notes (Clients: Edit only; staff never see
+// them), newest first, with filter pills. Each entry opens its full record
+// in a side panel.
 
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { History } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { useAccess } from "@/hooks/use-access";
-import { ShiftsPanel } from "@/components/clients/profile/activity/shifts-panel";
-import { DailyLogsPanel } from "@/components/clients/profile/activity/daily-logs-panel";
-import { IncidentsPanel } from "@/components/clients/profile/activity/incidents-panel";
-import { OfficeNotesCard } from "@/components/clients/profile/activity/office-notes-card";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
+import { useProfileNames } from "@/components/clients/shared/hooks/use-org-staff";
+import { AddNoteButton } from "@/components/clients/profile/activity/add-note-button";
+import { ActivityEntryRow } from "@/components/clients/profile/activity/activity-entry";
+import {
+  ActivityRecordPanel,
+  recordFor,
+  type OpenRecord,
+} from "@/components/clients/profile/activity/activity-record-panel";
+import { officeNotesKey } from "@/components/clients/profile/activity/office-note-composer";
+import { useClientActivity } from "@/components/clients/profile/activity/use-client-activity";
+import {
+  activityFilters,
+  buildTimeline,
+  filterTimeline,
+  type ActivityEntry,
+  type ActivityFilter,
+} from "@/lib/clients/activity";
+import { openNotes } from "@/lib/clients/notes";
+import { archiveClientNote } from "@/lib/clients/team.functions";
+
+const PAGE = 40;
 
 export function ActivitySection({ clientId, orgId }: { clientId: string; orgId: string }) {
   const { canCategory } = useAccess();
+  const qc = useQueryClient();
+  const archiveFn = useServerFn(archiveClientNote);
+  const viewer = {
+    canSeeIncidents: canCategory("incidents"),
+    canSeeOfficeNotes: canCategory("clients", "edit"),
+  };
+  const a = useClientActivity(orgId, clientId, viewer);
+  const notes = openNotes(a.notes);
+  const [filter, setFilter] = useState<ActivityFilter>("all");
+  const [shown, setShown] = useState(PAGE);
+  const [open, setOpen] = useState<OpenRecord | null>(null);
+  const timeline = buildTimeline(
+    { shifts: a.shifts, logs: a.logs, incidents: a.incidents, notes },
+    viewer,
+  );
+  const entries = filterTimeline(timeline, filter);
+  const names = useProfileNames(
+    timeline.map((e) => e.authorId).filter((x): x is string => !!x),
+  ).data;
+  const author = (e: ActivityEntry) =>
+    e.authorId ? (names?.get(e.authorId) ?? "Team member") : null;
+
+  const archiveM = useMutation({
+    mutationFn: (noteId: string) => archiveFn({ data: { organizationId: orgId, clientId, noteId } }),
+    onSuccess: () => {
+      toast.success("Note archived");
+      setOpen(null);
+      void qc.invalidateQueries({ queryKey: officeNotesKey(orgId, clientId) });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const openEntry = (e: ActivityEntry) =>
+    setOpen(recordFor(e, { shifts: a.shifts, logs: a.logs, incidents: a.incidents, notes }));
+
   return (
     <div className="flex flex-col gap-5" data-testid="client-section-activity">
-      {canCategory("clients", "edit") ? (
-        <OfficeNotesCard clientId={clientId} orgId={orgId} />
-      ) : null}
-      <ShiftsPanel clientId={clientId} orgId={orgId} />
-      <DailyLogsPanel clientId={clientId} orgId={orgId} />
-      {canCategory("incidents") ? <IncidentsPanel clientId={clientId} orgId={orgId} /> : null}
+      <SectionCard
+        icon={History}
+        tone="neutral"
+        title="Activity & notes"
+        description="Shifts, daily logs, incidents and office notes, newest first."
+        testId="client-activity-timeline"
+        actions={
+          viewer.canSeeOfficeNotes ? (
+            <AddNoteButton orgId={orgId} clientId={clientId} primary />
+          ) : null
+        }
+      >
+        <div
+          className="mb-3 flex gap-1 overflow-x-auto pb-1"
+          role="group"
+          aria-label="Filter activity"
+        >
+          {activityFilters(viewer).map((f) => (
+            <Button
+              key={f.value}
+              variant={filter === f.value ? "secondary" : "ghost"}
+              aria-pressed={filter === f.value}
+              className="shrink-0 rounded-full max-md:min-h-11"
+              onClick={() => {
+                setFilter(f.value);
+                setShown(PAGE);
+              }}
+            >
+              {f.label}
+            </Button>
+          ))}
+        </div>
+        {a.loading ? (
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : a.failed ? (
+          <p className="text-sm text-destructive">Couldn't load activity. Please try again.</p>
+        ) : entries.length === 0 ? (
+          <EmptyState>
+            Nothing here yet. Shift notes and daily logs show up once team members write them.
+          </EmptyState>
+        ) : (
+          <>
+            <ul className="divide-y divide-hive-border">
+              {entries.slice(0, shown).map((e) => (
+                <ActivityEntryRow
+                  key={e.key}
+                  entry={e}
+                  author={author(e)}
+                  onOpen={() => openEntry(e)}
+                />
+              ))}
+            </ul>
+            {entries.length > shown ? (
+              <Button variant="outline" className="mt-3" onClick={() => setShown(shown + PAGE)}>
+                Show {Math.min(PAGE, entries.length - shown)} more
+              </Button>
+            ) : null}
+          </>
+        )}
+      </SectionCard>
+      <ActivityRecordPanel
+        record={open}
+        author={open ? (author(open.entry) ?? "—") : "—"}
+        clientId={clientId}
+        archiving={archiveM.isPending}
+        onArchive={(id) => archiveM.mutate(id)}
+        onClose={() => setOpen(null)}
+      />
     </div>
   );
 }
