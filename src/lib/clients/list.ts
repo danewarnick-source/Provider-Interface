@@ -1,6 +1,5 @@
 // Client list: pure pieces shared by the server call (list.functions.ts) and
-// the page — next due item, readiness, "needs attention", filters, search
-// terms and CSV. No Supabase here.
+// the page — next due item, readiness, filters, search terms and CSV. No Supabase here.
 
 import { neutralizeCsvFormula } from "../csv-safe.ts";
 import { isClockableServiceCode } from "../service-billing.ts";
@@ -36,7 +35,6 @@ export type ClientListRow = {
   nextDue: DueItem | null;
   staff: { id: string; name: string }[];
   readiness: Readiness;
-  needsAttention: boolean;
 };
 
 export type ListFilters = {
@@ -45,7 +43,6 @@ export type ListFilters = {
   code: string | null;
   homeId: string | null;
   staffId: string | null;
-  needsAttention: boolean;
 };
 
 /** Days before a due date that the list starts flagging it. */
@@ -93,16 +90,7 @@ export function listReadiness(args: {
   return { ready: missing.length === 0, missing };
 }
 
-export function rowNeedsAttention(
-  row: Pick<ClientListRow, "kind" | "readiness" | "unitsLeft" | "nextDue">,
-): boolean {
-  if (row.kind === "draft") return true;
-  if (!row.readiness.ready) return true;
-  if (row.unitsLeft && row.unitsLeft.pct <= LOW_UNITS_PCT) return true;
-  return !!row.nextDue && row.nextDue.days <= DUE_SOON_DAYS;
-}
-
-/** Code / home / staff / needs-attention filters (search and view are applied in the query). */
+/** Code / home / staff filters (search and view are applied in the query). */
 export function applyListFilters(
   rows: readonly ClientListRow[],
   f: Omit<ListFilters, "view" | "search">,
@@ -113,7 +101,6 @@ export function applyListFilters(
     if (code && !r.codes.includes(code)) return false;
     if (f.homeId && r.home?.id !== f.homeId) return false;
     if (f.staffId && !r.staff.some((s) => s.id === f.staffId)) return false;
-    if (f.needsAttention && !r.needsAttention) return false;
     return true;
   });
 }

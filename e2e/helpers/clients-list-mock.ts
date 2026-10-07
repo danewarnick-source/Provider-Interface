@@ -9,7 +9,6 @@ import { CLIENT_LIST, TEAMS } from "../fixtures/tns-roster";
 import {
   applyListFilters,
   listReadiness,
-  rowNeedsAttention,
   searchTerms,
   sortRows,
   type ClientListRow,
@@ -91,9 +90,7 @@ function rows(opts: ClientListMockOpts): ClientListRow[] {
         hasPin: true,
         guardianOk: true,
       }),
-      needsAttention: false,
     };
-    row.needsAttention = rowNeedsAttention(row);
     return row;
   });
 }
@@ -118,7 +115,6 @@ function draftRows(opts: ClientListMockOpts, terms: string[]): ClientListRow[] {
       nextDue: null,
       staff: [],
       readiness: { ready: false, missing: ["Finish setup"] },
-      needsAttention: true,
     },
   ];
 }
@@ -138,7 +134,6 @@ export function listClientsPayload(body: string, opts: ClientListMockOpts) {
     code: field(body, "code"),
     homeId: field(body, "homeId"),
     staffId: field(body, "staffId"),
-    needsAttention: field(body, "needsAttention") === "true",
   };
   const drafts =
     view === "active" && !filters.code && !filters.homeId && !filters.staffId

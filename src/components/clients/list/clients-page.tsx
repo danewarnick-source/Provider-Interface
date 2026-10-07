@@ -44,7 +44,6 @@ export function ClientsPage({
     code: null,
     homeId: null,
     staffId: null,
-    needsAttention: false,
   });
   const [add, setAdd] = useState<{ open: boolean; draftId: string | null }>({
     open: startWithAddOpen || !!startDraftId,
@@ -54,13 +53,7 @@ export function ClientsPage({
   const { query, reactivate } = useClientList(orgId, { ...filters, view: listView });
   const data = query.data;
   const rows = data?.rows ?? [];
-  const filtering = !!(
-    filters.search.trim() ||
-    filters.code ||
-    filters.homeId ||
-    filters.staffId ||
-    filters.needsAttention
-  );
+  const filtering = !!(filters.search.trim() || filters.code || filters.homeId || filters.staffId);
 
   const viewProps: ClientListViewProps = {
     rows,

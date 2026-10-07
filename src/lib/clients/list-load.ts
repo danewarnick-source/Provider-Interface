@@ -10,7 +10,6 @@ import {
   applyListFilters,
   listReadiness,
   nextDueItem,
-  rowNeedsAttention,
   sortRows,
   type ClientListRow,
   type ListFilters,
@@ -180,9 +179,7 @@ export async function loadClientList(
         hasPin: c.home_latitude != null && c.home_longitude != null,
         guardianOk: guardianSatisfied(c.is_own_guardian, contactBy.get(c.id) ?? [], now),
       }),
-      needsAttention: false,
     };
-    row.needsAttention = rowNeedsAttention(row);
     return row;
   });
 

@@ -22,7 +22,6 @@ export const listClients = createServerFn({ method: "POST" })
         code: z.string().max(10).nullish(),
         homeId: z.string().uuid().nullish(),
         staffId: z.string().uuid().nullish(),
-        needsAttention: z.boolean().default(false),
       })
       .parse(d),
   )
@@ -46,7 +45,6 @@ export const listClients = createServerFn({ method: "POST" })
         code: data.code ?? null,
         homeId: data.homeId ?? null,
         staffId: data.staffId ?? null,
-        needsAttention: data.needsAttention,
       },
       { referralsVisible: hasCategory(access.categories, "hosts", "view") },
     );

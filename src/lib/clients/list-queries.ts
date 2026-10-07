@@ -149,7 +149,6 @@ export async function loadDrafts(sb: Sb, orgId: string, f: ListFilters): Promise
         nextDue: null,
         staff: [],
         readiness: { ready: false, missing: ["Finish setup"] },
-        needsAttention: true,
       };
     });
 }

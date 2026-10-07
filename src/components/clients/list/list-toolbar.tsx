@@ -1,4 +1,4 @@
-import { AlertTriangle, Download, Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -84,14 +84,6 @@ export function ListToolbar({
             </SelectContent>
           </Select>
         )}
-        <Button
-          type="button"
-          variant={filters.needsAttention ? "default" : "outline"}
-          aria-pressed={filters.needsAttention}
-          onClick={() => onChange({ needsAttention: !filters.needsAttention })}
-        >
-          <AlertTriangle className="mr-1.5 h-3.5 w-3.5" /> Needs attention
-        </Button>
         <Button
           type="button"
           variant="outline"

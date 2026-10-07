@@ -6,7 +6,6 @@ import {
   draftMatches,
   listReadiness,
   nextDueItem,
-  rowNeedsAttention,
   searchTerms,
   sortRows,
   type ClientListRow,
@@ -30,7 +29,6 @@ function row(p: Partial<ClientListRow> = {}): ClientListRow {
     nextDue: null,
     staff: [{ id: "s1", name: "Sam Staff" }],
     readiness: { ready: true, missing: [] },
-    needsAttention: false,
     ...p,
   };
 }
@@ -73,38 +71,14 @@ describe("listReadiness", () => {
   });
 });
 
-describe("rowNeedsAttention", () => {
-  it("flags drafts, not-ready rows, low units and things due soon", () => {
-    assert.equal(rowNeedsAttention(row()), false);
-    assert.equal(rowNeedsAttention(row({ kind: "draft" })), true);
-    assert.equal(rowNeedsAttention(row({ readiness: { ready: false, missing: ["x"] } })), true);
-    assert.equal(
-      rowNeedsAttention(row({ unitsLeft: { code: "DSI", left: 5, annual: 100, pct: 5 } })),
-      true,
-    );
-    assert.equal(
-      rowNeedsAttention(row({ unitsLeft: { code: "DSI", left: 50, annual: 100, pct: 50 } })),
-      false,
-    );
-    assert.equal(
-      rowNeedsAttention(row({ nextDue: { label: "Summary due", date: "2026-10-10", days: 4 } })),
-      true,
-    );
-    assert.equal(
-      rowNeedsAttention(row({ nextDue: { label: "Plan renews", date: "2027-01-10", days: 96 } })),
-      false,
-    );
-  });
-});
-
 describe("applyListFilters", () => {
   const rows = [
     row({ id: "a", codes: ["DSI", "HHS"] }),
-    row({ id: "b", codes: ["SEI"], home: null, staff: [], needsAttention: true }),
+    row({ id: "b", codes: ["SEI"], home: null, staff: [] }),
     row({ id: "d", kind: "draft", codes: [], home: null, staff: [] }),
   ];
-  const none = { code: null, homeId: null, staffId: null, needsAttention: false };
-  it("filters by code, home, staff and needs attention", () => {
+  const none = { code: null, homeId: null, staffId: null };
+  it("filters by code, home and staff", () => {
     assert.deepEqual(
       applyListFilters(rows, none).map((r) => r.id),
       ["a", "b", "d"],
@@ -120,10 +94,6 @@ describe("applyListFilters", () => {
     assert.deepEqual(
       applyListFilters(rows, { ...none, staffId: "s1" }).map((r) => r.id),
       ["a"],
-    );
-    assert.deepEqual(
-      applyListFilters(rows, { ...none, needsAttention: true }).map((r) => r.id),
-      ["b", "d"],
     );
   });
 });
