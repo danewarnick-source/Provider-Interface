@@ -1,7 +1,7 @@
 // =============================================================
-// Shared document extractor — used by BOTH the per-client
-// uploader (src/lib/nectar-documents.functions.ts) and Smart
-// Import (src/lib/smart-import.functions.ts). One prompt, one
+// Shared document extractor — used by the per-client uploader
+// (src/lib/nectar-documents.functions.ts) and the client upload
+// helpers (src/lib/import-checklist.functions.ts). One prompt, one
 // schema, one parser. Field keys here MUST match the keys that
 // applyExtractedFieldsToClient consumes in clients/import-schema.ts.
 // =============================================================
@@ -33,69 +33,6 @@ export const ParseOut = z.object({
   fields: z.array(FieldOut).max(500).default([]),
 });
 export type ParseOutT = z.infer<typeof ParseOut>;
-
-// The canonical set of field_keys the extractor is expected to produce
-// for client documents. applyExtractedFieldsToClient reads these names
-// directly; Smart Import uses this set to know what is NOT a custom
-// attribute. Keep in lockstep with clients/import-schema.ts.
-export const CORE_CLIENT_FIELD_KEYS = new Set<string>([
-  // Person
-  "first_name", "last_name", "full_name", "middle_name", "dob", "medicaid_id", "phone", "plan_year",
-  "disability_category", "admission_date", "discharge_date", "pcsp_expiration_date",
-  // Address
-  "physical_address",
-  // Emergency contact (split, never one blob) — primary + secondary
-  "emergency_contact_name", "emergency_contact_phone", "emergency_contact_relationship", "emergency_contact_instructions",
-  "emergency_contact_2_name", "emergency_contact_2_phone", "emergency_contact_2_relationship", "emergency_contact_2_instructions",
-  // Guardian
-  "is_own_guardian", "guardian_name", "guardian_phone",
-  "guardian_relationship", "guardian_email", "guardian_address",
-  // Goals — ONE field per goal
-  "pcsp_goal",
-  // Health
-  "allergies", "dysphagia", "swallowing_alerts", "self_admin_med_support",
-  "clinical_alert", "special_directions",
-  // Medications — ONE field per medication + an overall presence boolean
-  "client_medication", "pcsp_has_medications",
-  // Billing — ONE field per authorized service code
-  "billing_code_row",
-  // 1056 (DSPD Service Authorization Form)
-  "form_1056_number", "form_1056_approved_date",
-  // Support coordinator
-  "support_coordinator_name", "support_coordinator_email", "support_coordinator_phone",
-  // Medical
-  "primary_care_name", "primary_care_phone",
-  "neurologist_name", "neurologist_phone",
-  "dentist_name", "dentist_phone",
-  "prescriber_name", "prescriber_phone",
-  "medical_insurance",
-  "diagnoses", "chronic_conditions", "immunizations",
-  "emergency_medical_treatment_authorization", "advanced_directives",
-  // Rights / behavior / end-of-life
-  "rights_restrictions", "bsp_status",
-  "dnr_status", "dnr_location", "polst_status", "palliative_care_status", "hospice_status",
-  // SOW supplemental
-  "grievance_acknowledged", "grievance_signed_date",
-  // Service plan
-  "staff_ratio", "preferred_activities", "preferred_living", "roommates",
-  "housing_voucher", "court_orders", "personal_belongings_inventory",
-  "team_name",
-  // PCSP additions
-  "mailing_address", "support_coordinator_company", "representative_payee",
-  // Per-goal context
-  "goal_domain", "goal_current_status", "goal_strengths", "goal_barriers", "goal_success_criteria",
-  // Expanded profile capture (PCSP-first) — populated via profile-field registry
-  // and/or auto-parked as custom_field_values so nothing visible in the PCSP is lost.
-  "gender", "pronouns", "preferred_name", "primary_language", "communication_notes",
-  "race", "ethnicity", "marital_status",
-  "secondary_phone", "email", "county",
-  "mobility_notes", "adaptive_equipment", "dietary_restrictions",
-  "vision_status", "hearing_status", "weight", "height", "blood_type",
-  "day_program_name", "day_program_phone", "transportation_notes", "funding_source",
-  "secondary_insurance", "medicare_id",
-  "pcsp_author_name", "pcsp_meeting_date", "pcsp_effective_start", "pcsp_review_date",
-  "pcsp_signed_by_client", "pcsp_signed_by_guardian",
-]);
 
 export const SYSTEM_PROMPT = `You are NECTAR, an extraction engine for a Utah DSPD provider compliance platform (PI).
 You receive raw text from a document (PCSP, 1056 budget, SOW, referral, intake, assessment, certification, contract, etc.).
@@ -390,91 +327,6 @@ export async function parseDocumentWithAI(
     }
   }
   return tolerantParseExtraction(parsed, documentText.trim().length, content);
-}
-
-// -----------------------------------------------------------------
-// Goals-only focused extraction.
-//
-// The wide extraction pass occasionally drops the entire goals section on
-// PCSPs — the model returns person/health/billing rows and simply omits
-// pcsp_goal, leaving the review wizard with "No PCSP goals were found" on
-// a document that clearly contains goals. This is a second, focused pass
-// used as a safety net: same structured shape, ONLY goals. Callers should
-// invoke this when the primary pass returned zero pcsp_goal fields.
-// -----------------------------------------------------------------
-const GOALS_ONLY_SYSTEM_PROMPT = `You extract ONLY Person-Centered Support Plan (PCSP) goals from the document.
-
-Return a single JSON object with a top-level array named "fields". Every element MUST have field_key = "pcsp_goal" and field_group = "goals". Emit ONE element per distinct goal / objective / outcome row in the PCSP goal table. Do not emit any other field_key.
-
-For each goal, put the structured outline in value_json:
-  {
-    text,                  // the goal / objective statement as written
-    domain,                // e.g. "Community Living", "Healthy Living", "Safety", "Employment"
-    why,                   // rationale — why this goal exists for THIS person
-    responsible_party,     // who owns delivering support (e.g. "Direct Support Staff", "Support Coordinator")
-    service_codes,         // ARRAY of DSPD codes that fund/capture this goal (e.g. ["SLN","DSI"])
-    supports,              // HOW staff support the goal day-to-day (strategies, prompts, cues)
-    data_capture,          // WHAT staff document in daily logs / progress notes
-    behavior_plan_link,    // reference to related BSP objective, if any
-    intake_sources,        // related intake / independence-assessment references
-    success_criteria,      // what "achieved" looks like
-    current_status,        // baseline / current level of independence
-    strengths,             // strengths the person brings toward this goal
-    barriers               // known barriers
-  }
-Include ONLY keys the document supports. NEVER invent responsible parties, service codes, behavior-plan links, or intake references. If a goal is only a bare sentence, emit just { text }.
-
-Also include source_locator (e.g. "page 3", "Goal 2 row") and confidence 0..1.
-
-Return ONLY JSON, no commentary. If the document contains no goals at all, return {"fields": []}.`;
-
-export async function extractGoalsOnly(documentText: string, orgId?: string | null): Promise<ParseOutT> {
-  const res = await gatewayFetch({
-    messages: [
-      { role: "system", content: GOALS_ONLY_SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: `DOCUMENT TEXT:\n\n${documentText.slice(0, 120_000)}`,
-      },
-    ],
-    response_format: { type: "json_object" },
-    max_tokens: 12000,
-  }, { orgId });
-  if (res.status === 429) throw new Error(friendlyAiErrorMessage(429, "Throttled"));
-  if (!res.ok) {
-    const t = await res.text().catch(() => "");
-    console.error(`[document-extraction] goals AI gateway ${res.status}: ${t.slice(0, 600)}`);
-    throw new Error(friendlyAiErrorMessage(res.status, t));
-  }
-  const body = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string }; finish_reason?: string }>;
-  };
-  const content: string = body?.choices?.[0]?.message?.content ?? "{}";
-  const clean = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(clean || "{}");
-  } catch {
-    const salvaged = tryCloseTruncatedJson(clean);
-    if (salvaged) {
-      try { parsed = JSON.parse(salvaged); } catch { /* ignore */ }
-    }
-    if (parsed === undefined) {
-      console.error("[document-extraction] goals-only pass returned unparseable JSON");
-      return { document_type: null, fiscal_year: null, effective_start: null, effective_end: null, medicaid_id: null, title: null, fields: [] };
-    }
-  }
-  const out = tolerantParseExtraction(parsed, documentText.trim().length, content);
-  // Defensive: only keep pcsp_goal rows in case the model drifted.
-  return { ...out, fields: (out.fields ?? []).filter((f) => f.field_key === "pcsp_goal") };
-}
-
-// Rough heuristic: does the source document appear to contain a goals section?
-// Used to decide whether an empty goals result is likely an extraction miss
-// (document HAS goals → retry) vs. the PCSP genuinely having none.
-export function documentLikelyHasGoals(text: string): boolean {
-  if (!text) return false;
-  return /\b(goals?|objectives?|outcomes?|action plan|support plan|desired outcomes?)\b/i.test(text);
 }
 
 // Close an unterminated JSON object/array string well enough for JSON.parse to

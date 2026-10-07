@@ -120,23 +120,6 @@ export function withCodeRemoved(
   return assignmentCodes(current).filter((c) => c !== drop);
 }
 
-/**
- * Codes a Smart Import assignment commits: the source's codes that the client
- * is authorized for, or — when the source lists none — all of the client's
- * authorized codes, written out explicitly. [] means nothing can be written
- * (client has no authorized codes, or none of the source codes are).
- */
-export function importAssignmentCodes(
-  sourceCodes: readonly unknown[] | null | undefined,
-  authorized: string[],
-): string[] {
-  const auth = normalizeServiceCodes(authorized);
-  const source = normalizeServiceCodes(sourceCodes);
-  if (source.length === 0) return auth;
-  const allowed = new Set(auth);
-  return source.filter((c) => allowed.has(c));
-}
-
 /** Authorized codes nobody is assigned to yet (for "No staff assigned to {code} yet"). */
 export function uncoveredCodes(
   authorized: string[],

@@ -96,7 +96,7 @@ compliance-flag tables can be safely dropped, if they ever should be.
 
 ## Import / Smart Import
 - `import_jobs`, `import_documents`, `import_subjects`, `import_audit`, `import_access_log`,
-  `import_cert_documents`, `import_field_provenance`, `import_merge_flags`, `import_nectar_questions` — Smart import tooling.
+  `import_cert_documents`, `import_field_provenance`, `import_merge_flags`, `import_nectar_questions` — Former Smart Import tables (feature removed Oct 2026; rows kept, tables dropped in a later removal step). `import_merge_flags` is still written by document-upload autofill.
 
 ## State Onboarding (live — Hive-exec state expansion tooling)
 - `platform_states` — Master list of states Hive operates/plans to operate in; queried directly by `dashboard.tsx` for the state picker.

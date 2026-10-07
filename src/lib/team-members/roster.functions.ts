@@ -14,7 +14,7 @@ import { requireCategory } from "@/lib/access/require";
 import { hasCategory } from "@/lib/access/can";
 import { denverYmd } from "@/lib/denver-date";
 import { parseIsoDate, resolveHireDate } from "@/lib/evidence/due";
-import { splitPersonName } from "@/lib/team-members/import";
+import { splitPersonName } from "@/lib/team-members/import-columns";
 import {
   EMPTY_EVIDENCE,
   asRosterLevel,

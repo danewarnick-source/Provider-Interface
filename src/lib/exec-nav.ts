@@ -9,7 +9,6 @@ import {
   CreditCard,
   Activity,
   LifeBuoy,
-  ArrowRightLeft,
   Mail,
   Sparkles,
   FileSignature,
@@ -63,12 +62,6 @@ export const EXEC_DOMAINS: ExecDomain[] = [
         to: "/dashboard/hive-exec/new-company",
         label: "Add Company",
         icon: Plus,
-        capability: "companies.write",
-      },
-      {
-        to: "/dashboard/hive-exec/company-migration",
-        label: "Company Migration",
-        icon: ArrowRightLeft,
         capability: "companies.write",
       },
       {

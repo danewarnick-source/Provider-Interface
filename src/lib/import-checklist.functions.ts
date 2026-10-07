@@ -1,16 +1,10 @@
-// Thin server fns used by ImportChecklist + NectarAsk. Each one is
+// Thin server fns used by the client document uploads and NectarAsk. Each one is
 // org-scoped via the user's organization_members row for the client.
-//
-// Honest scope: these fns persist data the admin enters / attaches in the
-// done-page checklist. They do NOT perform document extraction — upload
-// only attaches the file. Extraction is wired in a later prompt.
 import {
   CONTACT_ROLE_LABELS,
   activeContacts,
   contactsWithRole,
-  isContactRole,
   loadClientContacts,
-  setContactParts,
   type ContactRole,
 } from "@/lib/clients/contacts";
 import {
@@ -570,107 +564,6 @@ export const applySelectedClientFields = createServerFn({ method: "POST" })
       customCreated: summary.customCreated,
       appliedCount: fields.length,
     };
-  });
-
-// ── Resolve a merge flag (keep both / merge / replace) ───────────────────
-const ResolveFlag = z.object({
-  flagId: z.string().uuid(),
-  action: z.enum(["keep_both", "merge_into_existing", "replace"]),
-});
-export const resolveMergeFlag = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ResolveFlag.parse(i))
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as Sb;
-    if (!sb || !context.userId) return { ok: false };
-    const { data: flag } = await sb
-      .from("import_merge_flags")
-      .select("id, client_id, field, incoming_value, kind")
-      .eq("id", data.flagId)
-      .maybeSingle();
-    if (!flag) throw new Error("Flag not found");
-    await requireAdminForClient(sb, context.userId as string, flag.client_id);
-
-    if (data.action === "replace" && flag.field && flag.incoming_value) {
-      // Only safe to auto-apply on plain text scalar columns on `clients`. We
-      // try the update; if it fails (column doesn't exist / wrong shape) we
-      // still mark the flag resolved so it stops blocking the queue, and the
-      // admin can manually fix the field on the profile page.
-      try {
-        const contactField = /^contact:([a-z_]+)\.([a-z_]+)$/.exec(flag.field);
-        if (contactField && isContactRole(contactField[1])) {
-          const { data: c } = await sb
-            .from("clients")
-            .select("organization_id")
-            .eq("id", flag.client_id)
-            .maybeSingle();
-          if (c) {
-            await setContactParts(sb, {
-              organizationId: c.organization_id,
-              clientId: flag.client_id,
-              role: contactField[1],
-              parts: { [contactField[2]]: flag.incoming_value },
-            });
-          }
-        } else {
-          await sb
-            .from("clients")
-            .update({ [flag.field]: flag.incoming_value })
-            .eq("id", flag.client_id);
-        }
-      } catch { /* best-effort */ }
-    }
-    // keep_both / merge_into_existing don't need a column write; they're
-    // admin acknowledgements that the existing value stays as-is.
-
-    const { error } = await sb
-      .from("import_merge_flags")
-      .update({
-        resolved_action: data.action,
-        resolved_at: new Date().toISOString(),
-        resolved_by: context.userId,
-      })
-      .eq("id", data.flagId);
-    if (error) throw error;
-    return { ok: true };
-  });
-
-// ── Override a validation issue ─────────────────────────────────────────
-const OverrideIssue = z.object({
-  subjectId: z.string().uuid(),
-  issueKey: z.string().min(1).max(120),
-  overridden: z.boolean(),
-});
-export const overrideValidationIssue = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => OverrideIssue.parse(i))
-  .handler(async ({ data, context }) => {
-    const sb = context.supabase as Sb;
-    if (!sb || !context.userId) return { ok: false, overrides: {} };
-    const { data: subj } = await sb
-      .from("import_subjects")
-      .select("id, org_id, import_job_id, validation_overrides")
-      .eq("id", data.subjectId)
-      .maybeSingle();
-    if (!subj) throw new Error("Subject not found");
-    const next = { ...(subj.validation_overrides as Record<string, boolean> ?? {}) };
-    if (data.overridden) next[data.issueKey] = true;
-    else delete next[data.issueKey];
-    const { error } = await sb
-      .from("import_subjects")
-      .update({ validation_overrides: next })
-      .eq("id", data.subjectId);
-    if (error) throw error;
-    await sb.from("import_audit").insert({
-      import_job_id: subj.import_job_id,
-      org_id: subj.org_id,
-      subject_id: data.subjectId,
-      item: `Validation issue ${data.issueKey} ${data.overridden ? "overridden" : "un-overridden"} by admin`,
-      traces_to: "admin_override",
-      actor: context.userId,
-      action: data.overridden ? "validation_override" : "validation_override_removed",
-    });
-    return { ok: true, overrides: next };
   });
 
 // ── SOW supplemental: level of need ────────────────────────────────────

@@ -45,20 +45,15 @@ describe("codesCell", () => {
 
 describe("readinessTag", () => {
   it("says Ready to schedule, N to fix (reasons in the tooltip) or Finish setup", () => {
-    assert.deepEqual(readinessTag({ kind: "client", readiness: { ready: true, missing: [] } }), {
+    assert.deepEqual(readinessTag({ readiness: { ready: true, missing: [] } }), {
       tone: "ok",
       text: "Ready to schedule",
     });
     assert.deepEqual(
       readinessTag({
-        kind: "client",
         readiness: { ready: false, missing: ["Authorizations ended Aug 31, 2026", "x"] },
       }),
       { tone: "danger", text: "2 to fix", title: "Authorizations ended Aug 31, 2026\nx" },
-    );
-    assert.equal(
-      readinessTag({ kind: "draft", readiness: { ready: false, missing: [] } }).text,
-      "Finish setup",
     );
   });
 });

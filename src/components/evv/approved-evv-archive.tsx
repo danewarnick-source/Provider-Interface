@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { CheckboxMultiSelect } from "@/components/ui/checkbox-multi-select";
 import { EVV_SERVICE_CODES } from "@/lib/evv-codes";
 import { downloadCsv } from "@/lib/utah-evv-export";
-import { HistoricalTimesheetBadge } from "@/components/smart-import/timesheets/historical-timesheet-badge";
+import { HistoricalTimesheetBadge } from "@/components/evv/historical-timesheet-badge";
 import { toast } from "sonner";
 import { isAdminLevel } from "@/lib/access/levels";
 

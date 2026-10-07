@@ -11,11 +11,9 @@ import type { AddClientForm } from "@/lib/clients/create";
 export function useAddClient(
   organizationId: string,
   {
-    draftId,
     onDone,
     onDuplicate,
   }: {
-    draftId: string | null;
     onDone: () => void;
     onDuplicate: (existing: { id: string; name: string }) => void;
   },
@@ -28,7 +26,7 @@ export function useAddClient(
   return useMutation({
     mutationFn: async (form: AddClientForm): Promise<AddClientResult> => {
       assertAgencySetupComplete(await loadSetup({ data: { organizationId } }));
-      return addClientFn({ data: { organizationId, form, draftSubjectId: draftId } });
+      return addClientFn({ data: { organizationId, form } });
     },
     onSuccess: (res) => {
       if (res.status === "duplicate") {
@@ -44,7 +42,6 @@ export function useAddClient(
           ? "Client added."
           : "Client added. The address couldn't be pinned on the map — set the home pin on their profile.",
       );
-      for (const gap of res.gaps) toast.message(gap);
       qc.invalidateQueries({ queryKey: ["clients"] });
       onDone();
       navigate({

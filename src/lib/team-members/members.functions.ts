@@ -84,9 +84,8 @@ export type HireTeamMemberResult = {
 };
 
 /**
- * One hire path for Add team member, Import team members and Smart Import.
- * Generates the password on the server. Never sends email. Manual adds refuse
- * an existing account; Smart Import links it.
+ * One hire path for Add team member and Import team members. Generates the
+ * password on the server. Never sends email. Refuses an existing account.
  */
 export async function hireTeamMemberInternal(
   data: HireTeamMemberInput,

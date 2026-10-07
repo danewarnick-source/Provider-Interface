@@ -20,7 +20,6 @@ import {
   countView,
   groupBy,
   loadClients,
-  loadDrafts,
   loadPreferredNames,
   loadUsage,
   rows,
@@ -47,14 +46,13 @@ export async function loadClientList(
 ): Promise<ClientListResult> {
   const now = opts.now ?? new Date();
   const today = todayYmd(now);
-  const [clients, homes, active, discharged, drafts, referralCount] = await Promise.all([
+  const [clients, homes, active, discharged, referralCount] = await Promise.all([
     loadClients(sb, orgId, f),
     rows<{ id: string; team_name: string }>(
       sb.from("teams").select("id, team_name").eq("organization_id", orgId).order("team_name"),
     ),
     countView(sb, orgId, false),
     countView(sb, orgId, true),
-    loadDrafts(sb, orgId, f),
     opts.referralsVisible
       ? sb
           .from("referrals")
@@ -177,7 +175,6 @@ export async function loadClientList(
     );
     const row: ClientListRow = {
       id: c.id,
-      kind: "client",
       first_name: c.first_name,
       last_name: c.last_name,
       preferred_name: preferred.get(c.id) ?? null,
@@ -214,7 +211,7 @@ export async function loadClientList(
   ].sort((a, b) => a.name.localeCompare(b.name));
   const codeOptions = [...new Set(built.flatMap((r) => r.codes))].sort();
   return {
-    rows: sortRows(applyListFilters([...drafts, ...built], f)),
+    rows: sortRows(applyListFilters(built, f)),
     counts: { active, discharged },
     homes: homes.map((h) => ({ id: h.id, name: h.team_name })),
     staffOptions,
