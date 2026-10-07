@@ -40,3 +40,11 @@
 - Added 3: list/list-shortcut.tsx, lib/clients/list-display.ts (+ .test.ts). Deleted 0. Removed exports rowNeedsAttention, CodeBadges (zero imports). needsAttention now only in Smart Import.
 - Client-area lines 38,167 → 38,680 (+513).
 - Blockers: none. Note: list makes one extra best-effort read of the preferred_name custom field for "Goes by".
+
+### C3 — Overview and Profile sections — MERGED
+- PR #460 (https://github.com/danewarnick-source/Provider-Interface/pull/460), squash-merged as d9d90d9d.
+- Checks: build passes; tsc 203 (= baseline); unit 1889 tests, only the 5 baseline failures. E2E not run. Re-verified before merge.
+- Migrations applied to dhrrukdcigiiqksibdfb: 20261007120000_clients_about_me_summary.sql (client_about_me table, RLS like client_plans); 20261007120100_clients_about_me_strip_pcsp_blocks.sql (UPDATE, 1 row, hand-written text kept). Types regenerated. Nothing NEEDS JEFF.
+- Added 13 code files (lib/clients/about-me*.ts, evv.ts, details/about-card.tsx, about-editor.tsx, agency-notes.tsx, use-about-me.ts, evv-note.tsx, detail-tile.tsx, profile/use-home-pin.ts + tests). Deleted: aboutMeLines, PCSP-review About rows, whenText (no files; client-photo-card.tsx kept, used by workspace/about-tab.tsx).
+- Client-area lines 38,680 → 39,970 (+1,290).
+- Blockers: none. Notes: client_about_me FKs have no ON DELETE (C10 is soft-delete only, so fine).
