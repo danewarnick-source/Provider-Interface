@@ -84,3 +84,13 @@
 - Added 15: shared lib/spreadsheet-import/ + components/spreadsheet-import/, lib/clients/import-sheet*.ts (+test), add-client-start.tsx, import-clients-dialog.tsx, import-client-row.tsx, use-import-clients.ts, team-members import-columns/import-template/import-member-row.
 - Client-area lines 44,219 → 44,939 (+720, new spreadsheet import).
 - Blockers: none. Follow-ups: team member template drift fixed (Supervisor, Worker type added; Job title removed); import_merge_flags still written by document upload but nothing resolves them; hireTeamMemberInternal keeps an unused "smart_import" branch; one open employee draft left as is.
+
+### C8 — Fill from PCSP fills everything — MERGED
+- PR #465 (https://github.com/danewarnick-source/Provider-Interface/pull/465), squash-merged as 06cd70b0.
+- Checks: build passes; tsc 203 (= baseline); unit 1980 tests, only the 5 baseline failures. E2E not run. Re-verified before merge (incl. storage-path org/folder checks on every server download).
+- Migration applied: 20261007170000_clients_pcsp_read_log.sql (pcsp_read_log, no PHI; RLS: org admins read, members insert own). Nothing NEEDS JEFF.
+- Add client from PCSP and Plans upload both write only via confirm-write.ts (profile blanks, SC + providers, plan year, goals/supports, codes with units); addClientFromPcsp saves client + plan in one server call (not one DB transaction: if the plan save fails the client is kept and the screen links to Plans). About draft started, approval required. PCSP filed on the Evidence "Current PCSP on file" row.
+- "Four tries" findings: base64 PDF in the request body hit host size limits (~3.4 MB+) → now uploads straight to client-documents storage; errors were a brief toast / bare 500 → now on-screen reason + Try again; provider-name match used one name and missed "L.L.C." → both names, case/punctuation/LLC/Inc-insensitive (tested). Server time limit is host config (not raised); durations now logged.
+- Added 17 (agency-match.ts, read-report.ts, confirm-profile.ts + tests, file-pcsp.server.ts, create.server.ts, create-from-pcsp.functions.ts, evidence/record-upload.server.ts, migration…). Deleted 0; removed pcspBytes, norm, ourAgencyMatcher.
+- Client-area lines 44,939 → 46,297.
+- Blockers: none.
