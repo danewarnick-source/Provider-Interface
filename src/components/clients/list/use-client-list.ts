@@ -33,7 +33,6 @@ export function useClientList(organizationId: string | undefined, filters: ListF
           code: filters.code,
           homeId: filters.homeId,
           staffId: filters.staffId,
-          needsAttention: filters.needsAttention,
         },
       }),
   });

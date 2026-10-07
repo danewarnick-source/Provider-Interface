@@ -1,11 +1,26 @@
 import { AlertTriangle, CheckCircle2, Wrench } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { StatusTag } from "@/components/clients/profile/cards/card-parts";
+import { cn } from "@/lib/utils";
 import { jobCodeLabel } from "@/lib/job-codes";
-import { formatDate } from "@/lib/clients/dates";
-import { LOW_UNITS_PCT, DUE_SOON_DAYS, type ClientListRow } from "@/lib/clients/list";
+import { goesByLine } from "@/lib/clients/profile-header";
+import type { ClientListRow } from "@/lib/clients/list";
+import {
+  canFixSection,
+  codesCell,
+  dueTone,
+  nextDueText,
+  readinessTag,
+  unitsLow,
+  unitsShortcut,
+  type ListViewer,
+} from "@/lib/clients/list-display";
+import { EmptyCell, SectionLink } from "./list-shortcut";
+
+type CellProps = { row: ClientListRow; viewer: ListViewer };
 
 export function ClientAvatar({ row, size = "sm" }: { row: ClientListRow; size?: "sm" | "md" }) {
-  const box = size === "md" ? "h-9 w-9 text-xs" : "h-7 w-7 text-[11px]";
+  const box = size === "md" ? "h-10 w-10 text-xs" : "h-8 w-8 text-[11px]";
   if (row.photo_url) {
     return (
       <img src={row.photo_url} alt="" className={`${box} shrink-0 rounded-full object-cover`} />
@@ -13,7 +28,7 @@ export function ClientAvatar({ row, size = "sm" }: { row: ClientListRow; size?: 
   }
   return (
     <span
-      className={`${box} inline-flex shrink-0 items-center justify-center rounded-full bg-primary/10 font-bold text-primary`}
+      className={`${box} inline-flex shrink-0 items-center justify-center rounded-full bg-hive-ink font-bold text-white`}
     >
       {row.first_name?.[0] ?? ""}
       {row.last_name?.[0] ?? ""}
@@ -21,16 +36,34 @@ export function ClientAvatar({ row, size = "sm" }: { row: ClientListRow; size?: 
   );
 }
 
-export function CodeBadges({ codes, max = 4 }: { codes: string[]; max?: number }) {
-  if (!codes.length) return <span className="text-xs text-muted-foreground">No codes</span>;
-  const shown = codes.slice(0, max);
+/** Name with "Goes by …" under it when the client has a preferred name. */
+export function NameBlock({ row }: { row: ClientListRow }) {
+  const goesBy = goesByLine({
+    preferredName: row.preferred_name,
+    firstName: row.first_name,
+    age: null,
+    home: null,
+  });
   return (
-    <div className="flex flex-wrap items-center gap-1">
-      {shown.map((code) => (
+    <span className="min-w-0">
+      <span className="block truncate font-semibold text-hive-ink">
+        {`${row.first_name} ${row.last_name}`.trim()}
+      </span>
+      {goesBy ? (
+        <span className="block truncate text-xs font-normal text-muted-foreground">{goesBy}</span>
+      ) : null}
+    </span>
+  );
+}
+
+function CodePills({ codes, max, dim }: { codes: string[]; max: number; dim?: boolean }) {
+  return (
+    <>
+      {codes.slice(0, max).map((code) => (
         <Badge
           key={code}
           variant="outline"
-          className="font-mono text-[10px]"
+          className={cn("bg-hive-surface font-mono text-[10px]", dim && "opacity-60")}
           title={jobCodeLabel(code)}
         >
           {code}
@@ -41,17 +74,58 @@ export function CodeBadges({ codes, max = 4 }: { codes: string[]; max?: number }
           +{codes.length - max}
         </Badge>
       )}
+    </>
+  );
+}
+
+/** Active codes; ended codes dimmed with "Ended Aug 31 · Renew"; or "+ Add codes". */
+export function CodesCell({ row, viewer, max = 4 }: CellProps & { max?: number }) {
+  const cell = codesCell(row);
+  if (cell.kind === "none") {
+    return <EmptyCell row={row} viewer={viewer} shortcut="codes" fallback="No codes" />;
+  }
+  if (cell.kind === "active") {
+    return (
+      <div className="flex flex-wrap items-center gap-1">
+        <CodePills codes={cell.codes} max={max} />
+      </div>
+    );
+  }
+  const canRenew = row.kind === "client" && canFixSection(cell.section, viewer);
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      <CodePills codes={cell.codes} max={max} dim />
+      {canRenew ? (
+        <SectionLink
+          clientId={row.id}
+          section={cell.section}
+          className="rounded-full border border-hive-gold bg-hive-gold-soft px-2 text-hive-ink"
+        >
+          {cell.status} · Renew
+        </SectionLink>
+      ) : (
+        <StatusTag tone="profile">{cell.status}</StatusTag>
+      )}
     </div>
   );
 }
 
-export function UnitsLeftCell({ row }: { row: ClientListRow }) {
+export function HomeCell({ row, viewer }: CellProps) {
+  if (row.home) {
+    return <span className="text-sm text-muted-foreground">{row.home.name}</span>;
+  }
+  return <EmptyCell row={row} viewer={viewer} shortcut="home" fallback="—" />;
+}
+
+export function UnitsLeftCell({ row, viewer }: CellProps) {
   const u = row.unitsLeft;
-  if (!u) return <span className="text-xs text-muted-foreground">—</span>;
-  const low = u.pct <= LOW_UNITS_PCT;
+  if (!u) return <EmptyCell row={row} viewer={viewer} shortcut={unitsShortcut(row)} fallback="—" />;
   return (
     <span
-      className={`text-xs tabular-nums ${low ? "font-semibold text-rose-700 dark:text-rose-400" : "text-muted-foreground"}`}
+      className={cn(
+        "text-xs tabular-nums",
+        unitsLow(row) ? "font-semibold text-[var(--hive-danger-fg)]" : "text-muted-foreground",
+      )}
       title={`${u.code}: ${u.left.toLocaleString()} of ${u.annual.toLocaleString()} units left`}
     >
       <span className="font-mono">{u.code}</span> {u.left.toLocaleString()} left
@@ -62,22 +136,16 @@ export function UnitsLeftCell({ row }: { row: ClientListRow }) {
 export function NextDueCell({ row }: { row: ClientListRow }) {
   const d = row.nextDue;
   if (!d) return <span className="text-xs text-muted-foreground">—</span>;
-  const tone =
-    d.days < 0
-      ? "text-rose-700 dark:text-rose-400 font-semibold"
-      : d.days <= DUE_SOON_DAYS
-        ? "text-amber-700 dark:text-amber-400"
-        : "text-muted-foreground";
-  return (
-    <span className={`text-xs ${tone}`}>
-      {d.label} · {formatDate(d.date, { month: "short", day: "numeric" })}
-      {d.days < 0 ? " (overdue)" : ""}
-    </span>
-  );
+  const tone = dueTone(d);
+  if (tone === "normal")
+    return <span className="text-xs text-muted-foreground">{nextDueText(d)}</span>;
+  return <StatusTag tone={tone === "overdue" ? "danger" : "profile"}>{nextDueText(d)}</StatusTag>;
 }
 
-export function StaffCell({ row }: { row: ClientListRow }) {
-  if (!row.staff.length) return <span className="text-xs text-muted-foreground">None</span>;
+export function StaffCell({ row, viewer }: CellProps) {
+  if (!row.staff.length) {
+    return <EmptyCell row={row} viewer={viewer} shortcut="team" fallback="None" />;
+  }
   const names = row.staff.map((s) => s.name);
   return (
     <span className="text-xs text-muted-foreground" title={names.join(", ")}>
@@ -87,27 +155,14 @@ export function StaffCell({ row }: { row: ClientListRow }) {
   );
 }
 
+const TAG_ICON = { ok: CheckCircle2, danger: AlertTriangle, profile: Wrench } as const;
+
 export function ReadinessTag({ row }: { row: ClientListRow }) {
-  if (row.kind === "draft") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-        <Wrench className="h-3 w-3" /> Finish setup
-      </span>
-    );
-  }
-  if (row.readiness.ready) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-        <CheckCircle2 className="h-3 w-3" /> Ready
-      </span>
-    );
-  }
+  const tag = readinessTag(row);
+  const Icon = TAG_ICON[tag.tone];
   return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700 dark:bg-rose-900/40 dark:text-rose-300"
-      title={row.readiness.missing.join("\n")}
-    >
-      <AlertTriangle className="h-3 w-3" /> {row.readiness.missing.length} to fix
-    </span>
+    <StatusTag tone={tag.tone} title={tag.title} testId="client-readiness-tag">
+      <Icon className="h-3 w-3" aria-hidden /> {tag.text}
+    </StatusTag>
   );
 }

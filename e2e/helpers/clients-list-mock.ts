@@ -9,7 +9,6 @@ import { CLIENT_LIST, TEAMS } from "../fixtures/tns-roster";
 import {
   applyListFilters,
   listReadiness,
-  rowNeedsAttention,
   searchTerms,
   sortRows,
   type ClientListRow,
@@ -76,14 +75,20 @@ function rows(opts: ClientListMockOpts): ClientListRow[] {
       kind: "client",
       first_name: c.first_name,
       last_name: c.last_name,
+      preferred_name: null,
       photo_url: null,
       medicaid_id: c.medicaid_id,
       client_pid: null,
       account_status: "active",
       codes,
+      endedCodes: null,
+      planExpired: false,
       home: team ? { id: team.id, name: team.team_name } : null,
       unitsLeft: codes.length ? { code: codes[0], left: 800, annual: 1000, pct: 80 } : null,
-      nextDue: codes.length ? { label: "Summary due", date: "2027-01-15", days: 90 } : null,
+      needsUnits: false,
+      nextDue: codes.length
+        ? { kind: "summary", label: "Summary due", date: "2027-01-15", days: 90 }
+        : null,
       staff: [],
       readiness: listReadiness({
         codes,
@@ -91,9 +96,7 @@ function rows(opts: ClientListMockOpts): ClientListRow[] {
         hasPin: true,
         guardianOk: true,
       }),
-      needsAttention: false,
     };
-    row.needsAttention = rowNeedsAttention(row);
     return row;
   });
 }
@@ -108,17 +111,20 @@ function draftRows(opts: ClientListMockOpts, terms: string[]): ClientListRow[] {
       kind: "draft",
       first_name: "Jordan",
       last_name: "Draftsample",
+      preferred_name: null,
       photo_url: null,
       medicaid_id: null,
       client_pid: null,
       account_status: null,
       codes: [],
+      endedCodes: null,
+      planExpired: false,
       home: null,
       unitsLeft: null,
+      needsUnits: false,
       nextDue: null,
       staff: [],
       readiness: { ready: false, missing: ["Finish setup"] },
-      needsAttention: true,
     },
   ];
 }
@@ -138,7 +144,6 @@ export function listClientsPayload(body: string, opts: ClientListMockOpts) {
     code: field(body, "code"),
     homeId: field(body, "homeId"),
     staffId: field(body, "staffId"),
-    needsAttention: field(body, "needsAttention") === "true",
   };
   const drafts =
     view === "active" && !filters.code && !filters.homeId && !filters.staffId

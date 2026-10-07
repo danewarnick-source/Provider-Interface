@@ -30,7 +30,7 @@ export function ListViewTabs({
             aria-selected={view === t.key}
             onClick={() => onChange(t.key)}
             className={
-              "rounded px-3 py-1 font-medium transition-colors " +
+              "min-h-8 rounded px-3 py-1 font-medium transition-colors max-md:min-h-11 " +
               (view === t.key
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground")
@@ -49,9 +49,9 @@ export function ListViewTabs({
         <button
           type="button"
           onClick={() => onChange(view === "referrals" ? "active" : "referrals")}
-          className={`text-xs font-medium underline-offset-2 hover:underline ${view === "referrals" ? "text-foreground" : "text-primary"}`}
+          className={`min-h-8 text-xs font-medium underline-offset-2 max-md:min-h-11 hover:underline ${view === "referrals" ? "text-foreground" : "text-primary"}`}
         >
-          {view === "referrals" ? "← Back to clients" : "Referrals"}
+          {view === "referrals" ? "← Back to clients" : "Show referrals"}
         </button>
       )}
     </div>
