@@ -57,3 +57,12 @@
 - Client-area lines 39,970 → 41,238. dashboard.summaries.tsx 1057 → 444; client-specific-training-card.tsx 895 → 645.
 - Size: plans.ts 301 (+3, old file lightly touched; reported). Already oversized: training.functions.ts 1381, client-specific-training-card.tsx 645, dashboard.summaries.tsx 444.
 - Blockers: none. Non-goal supports stored under one "Other needs in the PCSP" goal row (kind='other_need').
+
+### C5 — Client file and Evidence — MERGED
+- PR #462 (https://github.com/danewarnick-source/Provider-Interface/pull/462), squash-merged as 9dae38e0.
+- Checks: build passes; tsc 203 (= baseline); unit 1937 tests, only the 5 baseline failures (26 new). E2E not run. Re-verified before merge.
+- Migration applied: 20261007140000_evidence_client_packs.sql (evidence_client_packs table, RLS like evidence_items; evidence_items.added_by_hand, .description). 0 rows affected. Nothing NEEDS JEFF.
+- Added 17 (lib/clients/file-packs.ts, file-rows.ts + tests, file-packs.server.ts, file-evidence.functions.ts, evidence/store.server.ts, items.server.ts, 9 components under profile/file/). Deleted 5: file-required.ts (+test, REQUIRED_DOCS), required-documents-card.tsx, document-upload-dialog.tsx, file-documents.functions.ts. evidence.functions.ts 1,398 → 896.
+- Catalog: medical/dental exams, guardian papers, optional 1056 copy, PPS residence pack, housemate discussion in RHS pack; § cites checked against docs/compliance/dhhs91172/Requirements.json (several fixed).
+- Client-area lines 41,238 → 42,938.
+- Blockers: none. Follow-ups: packs re-sync to code changes when an owner/admin opens the Client file (others see it computed live); the agency Evidence grid doesn't read the new "optional" flag yet (1056 copy may show missing there); catalog.ts 1,643 → 1,737 (already oversized).
