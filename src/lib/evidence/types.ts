@@ -135,6 +135,8 @@ export type EvidenceRequirementDef = {
   links: readonly EvidenceHelpLink[];
   subject: EvidenceSubject;
   dualLink: DualLinkKind | null;
+  /** Nice to keep, never counted as missing (e.g. a copy of the 1056, which lives in UPI). */
+  optional?: boolean;
 };
 
 export type QuestionnaireAnswers = {
@@ -192,6 +194,10 @@ export type EvidenceItemRow = {
   opt_out_reason?: string | null;
   /** Append-only skip / restore log. */
   history?: EvidenceHistoryEntry[] | null;
+  /** Added one at a time, not from a pack: it never follows the client's codes. */
+  added_by_hand?: boolean | null;
+  /** A custom item's short explanation (catalog items use the catalog `why`). */
+  description?: string | null;
   created_at: string;
   updated_at: string;
 };
