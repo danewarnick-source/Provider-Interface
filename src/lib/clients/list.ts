@@ -28,7 +28,6 @@ export type Readiness = {
 
 export type ClientListRow = {
   id: string;
-  kind: "client" | "draft";
   first_name: string;
   last_name: string;
   preferred_name: string | null;
@@ -154,7 +153,6 @@ export function applyListFilters(
 ): ClientListRow[] {
   const code = f.code?.toUpperCase() ?? null;
   return rows.filter((r) => {
-    if (r.kind === "draft") return !code && !f.homeId && !f.staffId;
     if (code && !r.codes.includes(code)) return false;
     if (f.homeId && r.home?.id !== f.homeId) return false;
     if (f.staffId && !r.staff.some((s) => s.id === f.staffId)) return false;
@@ -162,18 +160,9 @@ export function applyListFilters(
   });
 }
 
-/** Does a draft's display name match every search term? */
-export function draftMatches(name: string, terms: readonly string[]): boolean {
-  const n = name.toLowerCase();
-  return terms.every((t) => n.includes(t));
-}
-
 export function sortRows(rows: ClientListRow[]): ClientListRow[] {
   return rows.sort(
-    (a, b) =>
-      (a.kind === "draft" ? 0 : 1) - (b.kind === "draft" ? 0 : 1) ||
-      a.last_name.localeCompare(b.last_name) ||
-      a.first_name.localeCompare(b.first_name),
+    (a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name),
   );
 }
 
@@ -207,11 +196,7 @@ export function clientListCsv(rows: readonly ClientListRow[]): string {
       r.nextDue?.label ?? "",
       r.nextDue?.date ?? "",
       r.staff.map((s) => s.name).join("; "),
-      r.kind === "draft"
-        ? "Finish setup"
-        : r.readiness.ready
-          ? "Yes"
-          : r.readiness.missing.join("; "),
+      r.readiness.ready ? "Yes" : r.readiness.missing.join("; "),
     ]
       .map(csvCell)
       .join(","),

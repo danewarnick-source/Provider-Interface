@@ -1,8 +1,8 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { readPcspForNewClient } from "@/lib/clients/create.functions";
 import type { PcspResult } from "@/lib/clients/pcsp/parser-shared";
 import { fileToBase64 } from "@/components/clients/shared/file-to-base64";
@@ -11,9 +11,14 @@ import { fileToBase64 } from "@/components/clients/shared/file-to-base64";
 export function FillFromPcsp({
   organizationId,
   onRead,
+  children,
+  buttonProps,
 }: {
   organizationId: string;
   onRead: (p: PcspResult) => void;
+  /** Button content; defaults to "Fill from PCSP". */
+  children?: ReactNode;
+  buttonProps?: ButtonProps;
 }) {
   const input = useRef<HTMLInputElement | null>(null);
   const readFn = useServerFn(readPcspForNewClient);
@@ -46,15 +51,21 @@ export function FillFromPcsp({
         type="button"
         size="sm"
         variant="outline"
+        {...buttonProps}
         disabled={reading}
         onClick={() => input.current?.click()}
       >
         {reading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Reading the PCSP…
+          </>
         ) : (
-          <FileText className="mr-2 h-4 w-4" />
+          (children ?? (
+            <>
+              <FileText className="mr-2 h-4 w-4" /> Fill from PCSP
+            </>
+          ))
         )}
-        Fill from PCSP
       </Button>
     </>
   );

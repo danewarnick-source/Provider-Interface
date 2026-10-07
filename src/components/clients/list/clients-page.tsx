@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { Contact2, Loader2, Sparkles, UserPlus } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Contact2, Loader2, UserPlus } from "lucide-react";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState, StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { useCurrentOrg } from "@/hooks/use-org";
 import { shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
 import type { ListFilters } from "@/lib/clients/list";
 import { AddClientSheet } from "@/components/clients/add/add-client-sheet";
+import { ImportClientsDialog } from "@/components/clients/add/import-clients-dialog";
 import { ClientListCards } from "./client-list-cards";
 import { ClientListTable } from "./client-list-table";
 import type { ClientListViewProps } from "./client-list-types";
@@ -33,11 +34,9 @@ const NO_FILTERS: ListFilters = {
 
 export function ClientsPage({
   startWithAddOpen = false,
-  startDraftId = null,
   startView = "active",
 }: {
   startWithAddOpen?: boolean;
-  startDraftId?: string | null;
   startView?: PageView;
 }) {
   const { data: org } = useCurrentOrg();
@@ -49,10 +48,8 @@ export function ClientsPage({
   const navigate = useNavigate();
   const [view, setView] = useState<PageView>(startView);
   const [filters, setFilters] = useState<ListFilters>(NO_FILTERS);
-  const [add, setAdd] = useState<{ open: boolean; draftId: string | null }>({
-    open: startWithAddOpen || !!startDraftId,
-    draftId: startDraftId,
-  });
+  const [addOpen, setAddOpen] = useState(startWithAddOpen);
+  const [importOpen, setImportOpen] = useState(false);
   const listView = view === "discharged" ? "discharged" : "active";
   const { query, reactivate } = useClientList(orgId, { ...filters, view: listView });
   const data = query.data;
@@ -73,7 +70,6 @@ export function ClientsPage({
     reactivate,
     onOpenClient: (clientId) =>
       navigate({ to: "/dashboard/clients/$clientId", params: { clientId }, search: {} }),
-    onOpenDraft: (draftId) => setAdd({ open: true, draftId }),
   };
 
   return (
@@ -94,20 +90,13 @@ export function ClientsPage({
                 </StatusTag>
               ) : null}
               {canEditClients && (
-                <>
-                  <Button asChild variant="outline">
-                    <Link to="/dashboard/smart-import" search={{ mode: "client" }}>
-                      <Sparkles className="h-4 w-4" /> Import clients
-                    </Link>
-                  </Button>
-                  <Button
-                    disabled={createBlocked}
-                    data-testid="add-client-button"
-                    onClick={() => setAdd({ open: true, draftId: null })}
-                  >
-                    <UserPlus className="h-4 w-4" /> Add client
-                  </Button>
-                </>
+                <Button
+                  disabled={createBlocked}
+                  data-testid="add-client-button"
+                  onClick={() => setAddOpen(true)}
+                >
+                  <UserPlus className="h-4 w-4" /> Add client
+                </Button>
               )}
             </>
           }
@@ -129,12 +118,7 @@ export function ClientsPage({
           homes={data?.homes ?? []}
           staffOptions={data?.staffOptions ?? []}
           exportDisabled={!rows.length}
-          onExport={() =>
-            downloadClientCsv(
-              rows.filter((r) => r.kind === "client"),
-              listView,
-            )
-          }
+          onExport={() => downloadClientCsv(rows, listView)}
         />
 
         {view === "referrals" ? (
@@ -161,10 +145,7 @@ export function ClientsPage({
                           Clear search and filters
                         </Button>
                       ) : listView === "active" && canEditClients ? (
-                        <Button
-                          disabled={createBlocked}
-                          onClick={() => setAdd({ open: true, draftId: null })}
-                        >
+                        <Button disabled={createBlocked} onClick={() => setAddOpen(true)}>
                           <UserPlus className="h-4 w-4" /> Add client
                         </Button>
                       ) : null
@@ -188,13 +169,21 @@ export function ClientsPage({
         )}
 
         {orgId && (
-          <AddClientSheet
-            organizationId={orgId}
-            open={add.open}
-            draftId={add.draftId}
-            homes={data?.homes ?? []}
-            onOpenChange={(open) => setAdd((a) => ({ open, draftId: open ? a.draftId : null }))}
-          />
+          <>
+            <AddClientSheet
+              organizationId={orgId}
+              open={addOpen}
+              homes={data?.homes ?? []}
+              onOpenChange={setAddOpen}
+              onImportSpreadsheet={() => setImportOpen(true)}
+            />
+            <ImportClientsDialog
+              organizationId={orgId}
+              open={importOpen}
+              homes={data?.homes ?? []}
+              onOpenChange={setImportOpen}
+            />
+          </>
         )}
       </div>
     </AgencySetupCreateGate>

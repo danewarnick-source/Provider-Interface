@@ -24,7 +24,3 @@ export function HistoricalTimesheetBadge({
     </span>
   );
 }
-
-export function isHistoricalTimesheet(row: { import_source?: string | null } | null | undefined): boolean {
-  return !!row && row.import_source === "historical_import";
-}

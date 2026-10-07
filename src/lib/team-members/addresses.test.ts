@@ -73,10 +73,6 @@ describe("Team Members addresses", () => {
       /hr_document_currency: "\/dashboard\/team-members"/,
     );
     assert.match(
-      read("lib/employee-smart-import-block.ts"),
-      /to: "\/dashboard\/team-members",\s+search: \{ import: 1 \}/,
-    );
-    assert.match(
       read("components/access/members-panel.tsx"),
       /to="\/dashboard\/team-members\/\$staffId"\s+params=\{\{ staffId: m\.user_id \}\}\s+hash="access"/,
     );

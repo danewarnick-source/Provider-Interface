@@ -3,7 +3,6 @@ import { describe, it } from "node:test";
 import {
   applyListFilters,
   clientListCsv,
-  draftMatches,
   endedCodesFor,
   listReadiness,
   nextDueItem,
@@ -18,7 +17,6 @@ const NOW = new Date(2026, 9, 6, 12); // Oct 6 2026, local
 function row(p: Partial<ClientListRow> = {}): ClientListRow {
   return {
     id: "c1",
-    kind: "client",
     first_name: "Pat",
     last_name: "Example",
     preferred_name: null,
@@ -85,7 +83,10 @@ describe("listReadiness", () => {
       ready: false,
       missing: ["No home pin (address not found)"],
     });
-    assert.deepEqual(listReadiness({ ...base, codes: ["DSI", "HHS"] }), { ready: true, missing: [] });
+    assert.deepEqual(listReadiness({ ...base, codes: ["DSI", "HHS"] }), {
+      ready: true,
+      missing: [],
+    });
   });
   it("says authorizations ended (with the date) when codes ended rather than never existed", () => {
     const r = listReadiness({
@@ -122,13 +123,12 @@ describe("applyListFilters", () => {
   const rows = [
     row({ id: "a", codes: ["DSI", "HHS"] }),
     row({ id: "b", codes: ["SEI"], home: null, staff: [] }),
-    row({ id: "d", kind: "draft", codes: [], home: null, staff: [] }),
   ];
   const none = { code: null, homeId: null, staffId: null };
   it("filters by code, home and staff", () => {
     assert.deepEqual(
       applyListFilters(rows, none).map((r) => r.id),
-      ["a", "b", "d"],
+      ["a", "b"],
     );
     assert.deepEqual(
       applyListFilters(rows, { ...none, code: "hhs" }).map((r) => r.id),
@@ -145,18 +145,15 @@ describe("applyListFilters", () => {
   });
 });
 
-describe("drafts and sorting", () => {
-  it("matches drafts by every term and sorts drafts first, then by last name", () => {
-    assert.equal(draftMatches("Pat Example", ["pat", "exa"]), true);
-    assert.equal(draftMatches("Pat Example", ["zed"]), false);
+describe("sorting", () => {
+  it("sorts by last name", () => {
     const sorted = sortRows([
       row({ id: "z", last_name: "Zed" }),
       row({ id: "a", last_name: "Able" }),
-      row({ id: "d", kind: "draft", last_name: "Zz" }),
     ]);
     assert.deepEqual(
       sorted.map((r) => r.id),
-      ["d", "a", "z"],
+      ["a", "z"],
     );
   });
 });

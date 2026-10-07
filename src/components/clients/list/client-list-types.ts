@@ -14,7 +14,6 @@ export type ClientListViewProps = {
     mutate: (clientId: string) => void;
   };
   onOpenClient: (clientId: string) => void;
-  onOpenDraft: (subjectId: string) => void;
 };
 
 /** Row clicks open the client unless the click landed on a control. */

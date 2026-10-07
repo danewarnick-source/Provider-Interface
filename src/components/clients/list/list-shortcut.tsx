@@ -55,7 +55,7 @@ export function EmptyCell({
   fallback: string;
 }) {
   const s = shortcut ? LIST_SHORTCUTS[shortcut] : null;
-  if (!s || row.kind !== "client" || !canFixSection(s.section, viewer)) {
+  if (!s || !canFixSection(s.section, viewer)) {
     return <span className="text-xs text-muted-foreground">{fallback}</span>;
   }
   return (

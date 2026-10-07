@@ -66,15 +66,14 @@ export function codesCell(
       };
 }
 
-export type TagTone = "ok" | "danger" | "profile";
+export type TagTone = "ok" | "danger";
 
-/** The readiness pill: "Ready to schedule", "<N> to fix" (reasons in the tooltip) or "Finish setup". */
-export function readinessTag(row: Pick<ClientListRow, "kind" | "readiness">): {
+/** The readiness pill: "Ready to schedule" or "<N> to fix" (reasons in the tooltip). */
+export function readinessTag(row: Pick<ClientListRow, "readiness">): {
   tone: TagTone;
   text: string;
   title?: string;
 } {
-  if (row.kind === "draft") return { tone: "profile", text: "Finish setup" };
   if (row.readiness.ready) return { tone: "ok", text: "Ready to schedule" };
   return {
     tone: "danger",

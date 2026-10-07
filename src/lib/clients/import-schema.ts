@@ -4,7 +4,7 @@
 //
 // Used by:
 //  - per-client document upload (src/lib/nectar-documents.functions.ts)
-//  - Smart Import commit (src/lib/smart-import-commit.functions.ts)
+//  - client upload helpers (src/lib/import-checklist.functions.ts)
 //
 // Behavior:
 //  - Confidence-gated (>= 0.6) for AI-sourced fields.

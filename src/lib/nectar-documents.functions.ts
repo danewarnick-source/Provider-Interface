@@ -59,16 +59,14 @@ function decodeBase64Text(base64: string): string {
 
 // ---------- AI parsing via shared extractor (AWS Bedrock) ----------
 // SYSTEM_PROMPT, FieldOut, ParseOut, and the gateway call live in
-// src/lib/document-extraction.ts so Smart Import and the per-client
-// uploader share one path. Field-key names match what
+// src/lib/document-extraction.ts, shared with the client upload helpers. Field-key names match what
 // applyExtractedFieldsToClient consumes.
 
 async function callLovableAI(documentText: string, hint?: string, orgId?: string | null) {
   return parseDocumentWithAI(documentText, hint, orgId);
 }
 
-// Client autofill logic lives in src/lib/clients/import-schema.ts so both
-// per-client upload and Smart Import call the same path.
+// Client autofill logic lives in src/lib/clients/import-schema.ts.
 import { applyExtractedFieldsToClient } from "@/lib/clients/import-schema";
 
 

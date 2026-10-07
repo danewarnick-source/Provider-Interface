@@ -51,6 +51,8 @@ export const addClientFormSchema = z.object({
   client_pid: text(50),
   phone: text(50),
   address: text(255),
+  /** When services start (saved as the clients start date). */
+  start_date: ymd.nullable().default(null),
   support_coordinator: personSchema,
   is_own_guardian: z.boolean(),
   guardian: personSchema,
@@ -77,6 +79,7 @@ export function emptyAddClientForm(): AddClientForm {
     client_pid: "",
     phone: "",
     address: "",
+    start_date: null,
     support_coordinator: { ...EMPTY_PERSON },
     is_own_guardian: true,
     guardian: { ...EMPTY_PERSON },
@@ -138,6 +141,7 @@ export function clientValues(f: AddClientForm): Record<string, unknown> {
     client_pid: blank(f.client_pid),
     phone_number: blank(f.phone),
     physical_address: blank(f.address),
+    admission_date: f.start_date,
     team_id: f.home_id,
     geofence_radius_feet: f.geofence_radius_feet,
     is_own_guardian: f.is_own_guardian,
@@ -252,48 +256,4 @@ export function prefillFromPcsp(
   }
   if (ours.length) filled.push("codes");
   return { form, filled };
-}
-
-/** Smart Import draft values (extracted_fields by target) → form. Unknown keys are ignored. */
-export function formFromDraftValues(
-  values: Record<string, string | null | undefined>,
-): AddClientForm {
-  const f = emptyAddClientForm();
-  const v = (k: string) => String(values[k] ?? "").trim();
-  f.first_name = v("first_name");
-  f.last_name = v("last_name");
-  f.date_of_birth = /^\d{4}-\d{2}-\d{2}$/.test(v("date_of_birth")) ? v("date_of_birth") : null;
-  f.medicaid_id = v("medicaid_id");
-  f.client_pid = v("client_pid");
-  f.phone = v("phone") || v("phone_number");
-  f.address = v("physical_address");
-  const own = v("is_own_guardian").toLowerCase();
-  f.is_own_guardian = own === "" || own === "true" || own === '{"bool":true}';
-  f.guardian = {
-    name: v("guardian_name"),
-    phone: v("guardian_phone"),
-    email: v("guardian_email"),
-    relationship: v("guardian_relationship"),
-    company: "",
-  };
-  f.support_coordinator = {
-    name: v("support_coordinator_name"),
-    phone: v("support_coordinator_phone"),
-    email: v("support_coordinator_email"),
-    company: v("support_coordinator_company"),
-    relationship: "",
-  };
-  const codes = (v("authorized_dspd_codes") || v("job_code"))
-    .split(/[,\s;]+/)
-    .map((c) => c.trim().toUpperCase())
-    .filter(Boolean);
-  f.codes = [...new Set(codes)].map((code) => ({
-    code,
-    waiting: true,
-    start: null,
-    end: null,
-    units: null,
-    rate: null,
-  }));
-  return f;
 }

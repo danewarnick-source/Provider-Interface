@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, Wrench } from "lucide-react";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { cn } from "@/lib/utils";
@@ -91,7 +91,7 @@ export function CodesCell({ row, viewer, max = 4 }: CellProps & { max?: number }
       </div>
     );
   }
-  const canRenew = row.kind === "client" && canFixSection(cell.section, viewer);
+  const canRenew = canFixSection(cell.section, viewer);
   return (
     <div className="flex flex-wrap items-center gap-1">
       <CodePills codes={cell.codes} max={max} dim />
@@ -155,7 +155,7 @@ export function StaffCell({ row, viewer }: CellProps) {
   );
 }
 
-const TAG_ICON = { ok: CheckCircle2, danger: AlertTriangle, profile: Wrench } as const;
+const TAG_ICON = { ok: CheckCircle2, danger: AlertTriangle } as const;
 
 export function ReadinessTag({ row }: { row: ClientListRow }) {
   const tag = readinessTag(row);

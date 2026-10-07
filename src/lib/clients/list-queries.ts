@@ -3,13 +3,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ClientCodeRow } from "./codes";
-import {
-  DISCHARGED_STATUSES,
-  draftMatches,
-  searchTerms,
-  type ClientListRow,
-  type ListFilters,
-} from "./list";
+import { DISCHARGED_STATUSES, searchTerms, type ListFilters } from "./list";
 import type { UsageCode, UsageDay, UsageTimesheet } from "./units";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -116,45 +110,6 @@ export async function loadUsage(sb: Sb, orgId: string, ids: string[], auths: Aut
     ),
   ]);
   return { sheets, days };
-}
-
-export async function loadDrafts(sb: Sb, orgId: string, f: ListFilters): Promise<ClientListRow[]> {
-  if (f.view !== "active" || f.code || f.homeId || f.staffId) return [];
-  const subjects = await rows<{ id: string; display_name: string | null }>(
-    sb
-      .from("import_subjects")
-      .select("id, display_name")
-      .eq("org_id", orgId)
-      .eq("subject_type", "client")
-      .is("committed_at", null)
-      .is("discarded_at", null),
-  ).catch(() => []);
-  const terms = searchTerms(f.search);
-  return subjects
-    .filter((s) => draftMatches(s.display_name ?? "", terms))
-    .map((s) => {
-      const [first, ...rest] = (s.display_name?.trim() || "Unnamed imported client").split(/\s+/);
-      return {
-        id: s.id,
-        kind: "draft" as const,
-        first_name: first,
-        last_name: rest.join(" "),
-        preferred_name: null,
-        photo_url: null,
-        medicaid_id: null,
-        client_pid: null,
-        account_status: null,
-        codes: [],
-        endedCodes: null,
-        planExpired: false,
-        home: null,
-        unitsLeft: null,
-        needsUnits: false,
-        nextDue: null,
-        staff: [],
-        readiness: { ready: false, missing: ["Finish setup"] },
-      };
-    });
 }
 
 /** The "preferred_name" custom field per client (client_id → text). Empty on any error. */

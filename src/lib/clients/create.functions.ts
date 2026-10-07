@@ -1,13 +1,12 @@
 // Add client: the one write path for a new client (form → clients row,
-// authorizations, contacts, home pin). Imported Smart Import drafts open the
-// same form and finish through here too. Every call checks
-// assertCanManageClient first.
+// authorizations, contacts, home pin). The spreadsheet import saves each row
+// through addClient too. Every call checks assertCanManageClient first.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { finishImportDraft } from "@/lib/smart-import-commit.functions";
+import { IMPORT_MAX_ROWS } from "@/lib/team-members/add-member";
 import { assertCanManageClient } from "./guards.server";
 import { cleanContactFields } from "./contacts";
 import {
@@ -16,9 +15,7 @@ import {
   clientValues,
   contactRows,
   findMedicaidDuplicate,
-  formFromDraftValues,
   formProblems,
-  type AddClientForm,
 } from "./create";
 import { syncHomePinFromAddress } from "./home-pin";
 import { pcspBytes, readPcspPdf } from "./pcsp/read-pdf.server";
@@ -35,39 +32,47 @@ function ctx(context: { supabase?: unknown; userId?: string | null }): { sb: Sb;
 
 export type ExistingClient = { id: string; name: string };
 
-async function medicaidDuplicate(
+export type MedicaidMatch = ExistingClient & { medicaidId: string };
+
+/** For each Medicaid ID given, the client here already using it (if any). */
+async function medicaidMatches(
   sb: Sb,
   organizationId: string,
-  medicaidId: string,
-): Promise<ExistingClient | null> {
-  if (!medicaidId.trim()) return null;
+  medicaidIds: readonly string[],
+): Promise<MedicaidMatch[]> {
+  const wanted = medicaidIds.filter((m) => m.trim());
+  if (!wanted.length) return [];
   const { data, error } = await sb
     .from("clients")
     .select("id, first_name, last_name, medicaid_id")
     .eq("organization_id", organizationId)
     .not("medicaid_id", "is", null);
   if (error) throw new Error(error.message);
-  const hit = findMedicaidDuplicate(
-    medicaidId,
-    (data ?? []) as Array<{
-      id: string;
-      first_name: string;
-      last_name: string;
-      medicaid_id: string | null;
-    }>,
-  );
-  return hit ? { id: hit.id, name: `${hit.first_name} ${hit.last_name}`.trim() } : null;
+  const rows = (data ?? []) as Array<{
+    id: string;
+    first_name: string;
+    last_name: string;
+    medicaid_id: string | null;
+  }>;
+  return wanted.flatMap((medicaidId) => {
+    const hit = findMedicaidDuplicate(medicaidId, rows);
+    return hit
+      ? [{ medicaidId, id: hit.id, name: `${hit.first_name} ${hit.last_name}`.trim() }]
+      : [];
+  });
 }
 
 const orgScope = { organizationId: z.string().uuid() };
 
-/** The client already using this Medicaid ID, or null. */
-export const findClientByMedicaidId = createServerFn({ method: "POST" })
+/** Clients here already using any of these Medicaid IDs (Add client and the spreadsheet import). */
+export const findClientsByMedicaidIds = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ ...orgScope, medicaidId: z.string().max(50) }).parse(d),
+    z
+      .object({ ...orgScope, medicaidIds: z.array(z.string().max(50)).min(1).max(IMPORT_MAX_ROWS) })
+      .parse(d),
   )
-  .handler(async ({ data, context }): Promise<ExistingClient | null> => {
+  .handler(async ({ data, context }): Promise<MedicaidMatch[]> => {
     const { sb, userId } = ctx(context);
     await assertCanManageClient({
       supabase: sb,
@@ -75,7 +80,7 @@ export const findClientByMedicaidId = createServerFn({ method: "POST" })
       organizationId: data.organizationId,
       action: "create",
     });
-    return medicaidDuplicate(sb, data.organizationId, data.medicaidId);
+    return medicaidMatches(sb, data.organizationId, data.medicaidIds);
   });
 
 /** Read a PCSP to fill the form. Saves nothing (the client doesn't exist yet). */
@@ -95,61 +100,15 @@ export const readPcspForNewClient = createServerFn({ method: "POST" })
     return (await readPcspPdf(sb, data.organizationId, pcspBytes(data.fileBase64))).parse;
   });
 
-/** An imported Smart Import draft as Add client form values. */
-export const loadImportDraft = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ ...orgScope, subjectId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }): Promise<{ form: AddClientForm; name: string }> => {
-    const { sb, userId } = ctx(context);
-    await assertCanManageClient({
-      supabase: sb,
-      actorId: userId,
-      organizationId: data.organizationId,
-      action: "create",
-    });
-    const { data: subj, error } = await sb
-      .from("import_subjects")
-      .select("id, display_name")
-      .eq("id", data.subjectId)
-      .eq("org_id", data.organizationId)
-      .is("committed_at", null)
-      .is("discarded_at", null)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!subj) throw new Error("This imported draft was not found or is already finished.");
-    const { data: fields, error: fErr } = await sb
-      .from("extracted_fields")
-      .select("target_field, value")
-      .eq("import_subject_id", data.subjectId)
-      .neq("status", "ignored")
-      .is("dismissed_at", null);
-    if (fErr) throw new Error(fErr.message);
-    const values: Record<string, string | null> = {};
-    for (const f of (fields ?? []) as Array<{ target_field: string; value: string | null }>)
-      values[f.target_field] = f.value;
-    return {
-      form: formFromDraftValues(values),
-      name: (subj as { display_name: string | null }).display_name?.trim() || "Imported client",
-    };
-  });
-
 export type AddClientResult =
-  | { status: "created"; id: string; pinFound: boolean; gaps: string[] }
+  | { status: "created"; id: string; pinFound: boolean }
   | { status: "duplicate"; existing: ExistingClient }
   | { status: "invalid"; problems: string[] };
 
-/** Save the Add client form (optionally finishing an imported draft). */
+/** Save the Add client form. */
 export const addClient = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z
-      .object({
-        ...orgScope,
-        form: addClientFormSchema,
-        draftSubjectId: z.string().uuid().nullish(),
-      })
-      .parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ ...orgScope, form: addClientFormSchema }).parse(d))
   .handler(async ({ data, context }): Promise<AddClientResult> => {
     const { sb, userId } = ctx(context);
     const { organizationId, form } = data;
@@ -161,8 +120,9 @@ export const addClient = createServerFn({ method: "POST" })
     });
     const problems = formProblems(form);
     if (problems.length) return { status: "invalid", problems };
-    const existing = await medicaidDuplicate(sb, organizationId, form.medicaid_id);
-    if (existing) return { status: "duplicate", existing };
+    const [existing] = await medicaidMatches(sb, organizationId, [form.medicaid_id]);
+    if (existing)
+      return { status: "duplicate", existing: { id: existing.id, name: existing.name } };
 
     const { data: rows, error } = await sb
       .from("clients")
@@ -203,12 +163,5 @@ export const addClient = createServerFn({ method: "POST" })
         pinFound = false;
       }
     }
-    const gaps = data.draftSubjectId
-      ? await finishImportDraft(sb, userId, {
-          subjectId: data.draftSubjectId,
-          recordId: id,
-          organizationId,
-        })
-      : [];
-    return { status: "created", id, pinFound, gaps };
+    return { status: "created", id, pinFound };
   });

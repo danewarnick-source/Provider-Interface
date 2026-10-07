@@ -1,11 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { FileText, ChevronRight, BellRing, MessageSquare } from "lucide-react";
+import { FileText, ChevronRight, MessageSquare } from "lucide-react";
 import { listMyThreads } from "@/lib/threads.functions";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { listMyForms, getMyFormNotifications } from "@/lib/forms.functions";
-import { listSmartImportReminders } from "@/lib/smart-import-reminders.functions";
 import {
   periodKeyFor,
   formDueDateFor,
@@ -25,7 +24,7 @@ type Chip = {
 };
 
 /**
- * Compact attention chips for forms and cert reminders.
+ * Compact attention chips for forms and shift questions.
  * Obligation items live on the Staff Obligations tab only.
  */
 export function AttentionStrip() {
@@ -33,7 +32,6 @@ export function AttentionStrip() {
   const orgId = org?.organization_id ?? null;
   const fetchForms = useServerFn(listMyForms);
   const fetchBell = useServerFn(getMyFormNotifications);
-  const fetchSI = useServerFn(listSmartImportReminders);
   const fetchThreads = useServerFn(listMyThreads);
 
   const { data: formsData } = useQuery({
@@ -44,11 +42,6 @@ export function AttentionStrip() {
   const { data: bell } = useQuery({
     queryKey: ["my-form-notifs"],
     queryFn: () => fetchBell(),
-    staleTime: 60_000,
-  });
-  const { data: si } = useQuery({
-    queryKey: ["my-smart-import-reminders"],
-    queryFn: () => fetchSI({ data: { scope: "mine" } }),
     staleTime: 60_000,
   });
   const { data: threads } = useQuery({
@@ -99,21 +92,6 @@ export function AttentionStrip() {
       icon: FileText,
       tone: "info",
       label: `${unreadAssigned} new form${unreadAssigned === 1 ? "" : "s"}`,
-    });
-  }
-
-  // Smart Import reminders for me — provisional/expiring certs needing upload.
-  const siCount = (si?.reminders ?? []).length;
-  if (siCount > 0) {
-    const hasCritical = (si?.reminders ?? []).some(
-      (r: { urgency: string }) => r.urgency === "critical",
-    );
-    chips.push({
-      key: "smart-import",
-      to: "/dashboard/my-evidence",
-      icon: BellRing,
-      tone: hasCritical ? "danger" : "warn",
-      label: `${siCount} cert reminder${siCount === 1 ? "" : "s"}`,
     });
   }
 

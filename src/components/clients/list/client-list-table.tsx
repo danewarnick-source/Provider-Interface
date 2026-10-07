@@ -29,7 +29,6 @@ export function ClientListTable({
   viewer,
   reactivate,
   onOpenClient,
-  onOpenDraft,
 }: ClientListViewProps) {
   return (
     <div className="hidden max-h-[calc(100vh-18rem)] overflow-auto md:block">
@@ -47,7 +46,6 @@ export function ClientListTable({
         </TableHeader>
         <TableBody>
           {rows.map((c) => {
-            const draft = c.kind === "draft";
             const inner = (
               <>
                 <ClientAvatar row={c} />
@@ -58,32 +56,25 @@ export function ClientListTable({
             return (
               <TableRow
                 key={c.id}
-                data-testid={draft ? "client-draft-row" : "client-row"}
+                data-testid="client-row"
                 className="h-14 cursor-pointer transition-colors hover:bg-[var(--hive-muted-surface)]"
                 onClick={(e) => {
                   if (isRowControlClick(e.target)) return;
-                  if (draft) onOpenDraft(c.id);
-                  else onOpenClient(c.id);
+                  onOpenClient(c.id);
                 }}
               >
                 <TableCell className="min-w-[200px] p-0">
-                  {draft ? (
-                    <button type="button" onClick={() => onOpenDraft(c.id)} className={cellBox}>
-                      {inner}
-                    </button>
-                  ) : (
-                    <Link
-                      to="/dashboard/clients/$clientId"
-                      params={{ clientId: c.id }}
-                      search={{}}
-                      className={`${cellBox} rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
-                    >
-                      {inner}
-                    </Link>
-                  )}
+                  <Link
+                    to="/dashboard/clients/$clientId"
+                    params={{ clientId: c.id }}
+                    search={{}}
+                    className={`${cellBox} rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+                  >
+                    {inner}
+                  </Link>
                 </TableCell>
                 <TableCell className="py-2">
-                  {draft ? null : <CodesCell row={c} viewer={viewer} />}
+                  <CodesCell row={c} viewer={viewer} />
                 </TableCell>
                 <TableCell className="max-w-[160px] truncate py-2">
                   <HomeCell row={c} viewer={viewer} />

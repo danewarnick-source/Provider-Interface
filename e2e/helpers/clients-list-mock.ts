@@ -17,12 +17,11 @@ import {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SAMPLE = path.join(here, "../../src/lib/clients/pcsp/fixture/sample-expected.json");
 
-export const DRAFT_SUBJECT_ID = "00000000-0000-4000-a000-0000000006d1";
 export const NEW_CLIENT_ID = "00000000-0000-4000-a000-0000000000c2";
 
 export const clientListCalls = { list: 0, add: 0, bodies: [] as string[] };
 
-export type ClientListMockOpts = { emptyClients?: boolean; noDrafts?: boolean };
+export type ClientListMockOpts = { emptyClients?: boolean };
 
 type SerovalNode = {
   t?: number;
@@ -72,7 +71,6 @@ function rows(opts: ClientListMockOpts): ClientListRow[] {
     const codes = [...c.codes];
     const row: ClientListRow = {
       id: c.id,
-      kind: "client",
       first_name: c.first_name,
       last_name: c.last_name,
       preferred_name: null,
@@ -101,34 +99,6 @@ function rows(opts: ClientListMockOpts): ClientListRow[] {
   });
 }
 
-function draftRows(opts: ClientListMockOpts, terms: string[]): ClientListRow[] {
-  if (opts.emptyClients || opts.noDrafts) return [];
-  const name = "Jordan Draftsample";
-  if (!terms.every((t) => name.toLowerCase().includes(t))) return [];
-  return [
-    {
-      id: DRAFT_SUBJECT_ID,
-      kind: "draft",
-      first_name: "Jordan",
-      last_name: "Draftsample",
-      preferred_name: null,
-      photo_url: null,
-      medicaid_id: null,
-      client_pid: null,
-      account_status: null,
-      codes: [],
-      endedCodes: null,
-      planExpired: false,
-      home: null,
-      unitsLeft: null,
-      needsUnits: false,
-      nextDue: null,
-      staff: [],
-      readiness: { ready: false, missing: ["Finish setup"] },
-    },
-  ];
-}
-
 export function listClientsPayload(body: string, opts: ClientListMockOpts) {
   clientListCalls.list++;
   clientListCalls.bodies.push(body);
@@ -145,12 +115,8 @@ export function listClientsPayload(body: string, opts: ClientListMockOpts) {
     homeId: field(body, "homeId"),
     staffId: field(body, "staffId"),
   };
-  const drafts =
-    view === "active" && !filters.code && !filters.homeId && !filters.staffId
-      ? draftRows(opts, terms)
-      : [];
   return {
-    rows: sortRows(applyListFilters([...drafts, ...matched], filters)),
+    rows: sortRows(applyListFilters(matched, filters)),
     counts: { active: rows(opts).length, discharged: 0 },
     homes: TEAMS.map((t) => ({ id: t.id, name: t.team_name })),
     staffOptions: [],
@@ -167,34 +133,20 @@ function duplicateOf(body: string): { id: string; name: string } | null {
 
 /** Payload for the Add client server functions, or undefined when `fn` isn't one. */
 export function addClientPayload(fn: string, body: string): unknown {
-  if (/^findClientByMedicaidId/.test(fn)) return duplicateOf(body);
-  if (/^readPcspForNewClient/.test(fn)) return JSON.parse(fs.readFileSync(SAMPLE, "utf8"));
-  if (/^loadImportDraft/.test(fn)) {
-    return {
-      name: "Jordan Draftsample",
-      form: {
-        first_name: "Jordan",
-        last_name: "Draftsample",
-        date_of_birth: null,
-        medicaid_id: "",
-        client_pid: "",
-        phone: "",
-        address: "",
-        support_coordinator: { name: "", phone: "", email: "", relationship: "", company: "" },
-        is_own_guardian: true,
-        guardian: { name: "", phone: "", email: "", relationship: "", company: "" },
-        codes: [{ code: "DSI", waiting: true, start: null, end: null, units: null, rate: null }],
-        home_id: null,
-        geofence_radius_feet: 1000,
-      },
-    };
+  if (/^findClientsByMedicaidIds/.test(fn)) {
+    return CLIENT_LIST.filter((c) => c.medicaid_id && body.includes(c.medicaid_id)).map((c) => ({
+      id: c.id,
+      name: `${c.first_name} ${c.last_name}`,
+      medicaidId: c.medicaid_id,
+    }));
   }
+  if (/^readPcspForNewClient/.test(fn)) return JSON.parse(fs.readFileSync(SAMPLE, "utf8"));
   if (/^addClient/.test(fn)) {
     clientListCalls.add++;
     const existing = duplicateOf(body);
     return existing
       ? { status: "duplicate", existing }
-      : { status: "created", id: NEW_CLIENT_ID, pinFound: true, gaps: [] };
+      : { status: "created", id: NEW_CLIENT_ID, pinFound: true };
   }
   return undefined;
 }
