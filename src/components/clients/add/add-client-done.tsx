@@ -1,6 +1,8 @@
-// Add client from a PCSP, last screen: what was saved and filed (kept on
-// screen), then open the profile, where Nectar starts the About draft for a
-// person to approve.
+// Add client, last screen: what was saved (and, from a PCSP, what was filed),
+// kept on screen, then the choice: "Finish setting up <first name> now" (the
+// optional setup steps) or "Later" (their profile, with the "Finish setting
+// up" banner). From a PCSP, the profile also starts Nectar's About draft for
+// a person to approve.
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,53 +20,69 @@ function Line({ ok, children }: { ok: boolean; children: string }) {
   );
 }
 
+export type AddedClient = {
+  id: string;
+  pinFound: boolean;
+  /** Only when added from a PCSP. */
+  pcsp: { plan: NewClientSaved["plan"]; reviewed: ReviewedPcsp["plan"] } | null;
+};
+
 export function AddClientDone({
-  saved,
+  added,
   firstName,
-  plan,
   onClose,
 }: {
-  saved: NewClientSaved;
+  added: AddedClient;
   firstName: string;
-  plan: ReviewedPcsp["plan"];
   onClose: () => void;
 }) {
-  const p = saved.plan;
+  const p = added.pcsp?.plan ?? null;
+  const search =
+    p === null ? {} : p.ok ? { section: "profile" as const, about: "draft" as const } : { section: "plans" as const };
   return (
     <div className="space-y-4" data-testid="add-client-done">
       <ul className="space-y-2">
         <Line ok>{`${firstName} is added.`}</Line>
-        {p.ok ? (
+        {p?.ok ? (
           <>
-            <Line ok>{savedReport(p.saved, plan)}</Line>
+            <Line ok>{savedReport(p.saved, added.pcsp!.reviewed)}</Line>
             <Line ok={typeof p.filed === "string"}>{filedReport(p.filed)}</Line>
           </>
-        ) : (
+        ) : p ? (
           <Line ok={false}>
             {`The plan wasn't saved: ${p.message.trim().replace(/\.?$/, ".")} Open Plans on their profile and upload the PCSP again.`}
           </Line>
-        )}
-        {!saved.pinFound && (
+        ) : null}
+        {!added.pinFound && (
           <Line ok={false}>The address couldn't be pinned on the map. Set the home pin on their profile.</Line>
         )}
       </ul>
-      {p.ok && (
-        <p className="text-xs text-muted-foreground">
-          Their profile opens with Nectar drafting “About {firstName}” from the PCSP. Nothing is saved until you approve it.
-        </p>
-      )}
+      <p className="text-xs text-muted-foreground">
+        Finish setting up adds their photo, contacts, health, team, behavior plan and client file,
+        a few short questions at a time. Every step can be skipped.
+        {p?.ok ? ` Nectar also drafts “About ${firstName}” from the PCSP; nothing is saved until you approve it.` : ""}
+      </p>
       <div className="flex flex-wrap justify-end gap-2 max-md:[&_a]:min-h-11 max-md:[&_button]:min-h-11">
-        <Button variant="outline" onClick={onClose}>
-          Close
-        </Button>
-        <Button asChild data-testid="add-client-open-profile">
+        <Button variant="outline" asChild>
           <Link
             to="/dashboard/clients/$clientId"
-            params={{ clientId: saved.id }}
-            search={p.ok ? { section: "profile", about: "draft" } : { section: "plans" }}
+            params={{ clientId: added.id }}
+            search={search}
             onClick={onClose}
+            data-testid="add-client-later"
           >
-            {p.ok ? `Open ${firstName}'s profile` : `Open ${firstName}'s Plans`}
+            Later
+          </Link>
+        </Button>
+        <Button asChild>
+          <Link
+            to="/dashboard/clients/$clientId"
+            params={{ clientId: added.id }}
+            search={{ ...search, setup: "open" as const }}
+            onClick={onClose}
+            data-testid="add-client-finish-setup"
+          >
+            Finish setting up {firstName} now
           </Link>
         </Button>
       </div>

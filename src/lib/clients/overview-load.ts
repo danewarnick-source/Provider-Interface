@@ -18,6 +18,7 @@ import { loadPlanBundle } from "./plans-load";
 import { agencySupports, isUploadDoc, strategyCoverage, type StrategySupport } from "./support-strategies";
 import type { CSTContent } from "./training.functions";
 import { clientAttention, codePace } from "./readiness";
+import { loadAttentionScope } from "./support-scope.server";
 import { usedUnitsForCode } from "./units";
 
 /** Approved or not, and "N of M supports have a strategy" (an uploaded document covers all). */
@@ -60,7 +61,7 @@ export async function loadClientOverview(
   );
   const client = clientRows[0];
   if (!client) throw new Error("Client not found in this organization");
-  const [codes, auths, contacts, plans, summaries, restrictions, strategies, fileView, team, bundle] =
+  const [codes, auths, contacts, plans, summaries, restrictions, strategies, fileView, team, bundle, scope] =
     await Promise.all([
       loadActiveCodes(sb, ids),
       rows<AuthRow>(
@@ -96,6 +97,7 @@ export async function loadClientOverview(
       loadClientFileView(sb, orgId, clientId, now),
       loadOverviewTeam(sb, orgId, clientId, client.has_abi === true),
       loadPlanBundle(sb, clientId),
+      loadAttentionScope(sb, orgId, clientId),
     ]);
   const clientCodes = codes.get(clientId) ?? [];
   const activeAuths = auths.filter((a) => isActiveCodeRow(a, today));
@@ -120,6 +122,8 @@ export async function loadClientOverview(
         nextReview: r.next_review_date,
         complete: computeRestrictionCompletion(r).isComplete,
       })),
+      hidden: scope.hidden,
+      directive: scope.directive,
       setup: {
         staffCount: team.length,
         hasPin: client.home_latitude != null && client.home_longitude != null,

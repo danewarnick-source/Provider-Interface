@@ -178,6 +178,8 @@ export function ImportClientsDialog({
               <DialogDescription data-testid="import-clients-summary">
                 Added {added.length} client{added.length === 1 ? "" : "s"}
                 {skipped.length > 0 && `, skipped ${skipped.length}`}.
+                {added.length > 0 &&
+                  " Each one opens with “Finish setting up” for their photo, health, team and client file."}
               </DialogDescription>
             </DialogHeader>
             {added.length > 0 && (

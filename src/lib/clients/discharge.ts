@@ -149,7 +149,7 @@ export type SummaryFacts = {
 export function summaryFactsText(f: SummaryFacts): string {
   const lines = [
     `Client first name: ${f.firstName || "the client"}`,
-    `Admitted: ${f.admissionDate ?? "not on file"}`,
+    `Start date: ${f.admissionDate ?? "not on file"}`,
     `Discharge date: ${f.dischargeDate}`,
     `Started by: ${INITIATED_BY[f.initiatedBy]}`,
     `Reason: ${f.reason.trim()}`,

@@ -1,5 +1,5 @@
 // Identity on the Profile section: date of birth and age, Medicaid ID
-// (masked), DSPD PID, own guardian, language, admitted, phone and insurance.
+// (masked), DSPD PID, own guardian, language, start date, phone and insurance.
 // Name and home are in the header; editing covers them too. Insurance is
 // medical info, so changing it needs Client medical: Edit (on the server).
 
@@ -140,7 +140,7 @@ export function IdentityCard({
               {c.is_own_guardian == null ? null : c.is_own_guardian ? "Yes" : "No"}
             </Field>
             <Field label="Language">{language}</Field>
-            <Field label="Admitted">{c.admission_date ? formatDate(c.admission_date) : null}</Field>
+            <Field label="Start date">{c.admission_date ? formatDate(c.admission_date) : null}</Field>
             <Field label="Phone">{c.phone_number || null}</Field>
             <Field label="Insurance">{c.insurance || null}</Field>
           </FieldGrid>
@@ -164,7 +164,7 @@ export function IdentityCard({
           <LabeledInput label="DSPD PID" value={draft.client_pid} onChange={set("client_pid")} />
           <LabeledInput label="Insurance" value={draft.insurance} onChange={set("insurance")} />
           <LabeledInput
-            label="Admitted"
+            label="Start date"
             type="date"
             value={draft.admission_date}
             onChange={set("admission_date")}

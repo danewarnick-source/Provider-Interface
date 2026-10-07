@@ -356,7 +356,7 @@ const PROFILE_FIELD_MAP: Record<string, ProfileFieldMeta> = {
   [LEGACY_SINGLE_SOURCE_KEYS.activities]: { column: "about_me", label: "About me (activities)", kind: "array" },
   roommates: { column: "roommates", label: "Roommates", kind: "array" },
   personal_belongings_inventory: { column: "personal_belongings_inventory", label: "Personal belongings inventory", kind: "array" },
-  admission_date: { column: "admission_date", label: "Admission date", kind: "date" },
+  admission_date: { column: "admission_date", label: "Start date", kind: "date" },
   discharge_date: { column: "discharge_date", label: "Discharge date", kind: "date" },
   form_1056_number: { column: "form_1056_number", label: "1056 form number", kind: "text" },
   form_1056_approved_date: { column: "form_1056_approved_date", label: "1056 approved date", kind: "date" },

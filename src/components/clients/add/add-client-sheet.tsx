@@ -21,14 +21,14 @@ import {
 } from "@/lib/clients/create";
 import { PcspReview } from "@/components/clients/profile/plans/pcsp-review";
 import { PcspReadFailed, PcspReadSummary } from "@/components/clients/shared/pcsp-read-notes";
-import { AddClientDone } from "./add-client-done";
+import { AddClientDone, type AddedClient } from "./add-client-done";
 import { AddClientStart } from "./add-client-start";
 import { AddCodesFields } from "./add-codes-fields";
 import { AddContactsFields } from "./add-contacts-fields";
 import { AddIdentityFields } from "./add-identity-fields";
 import { FillFromPcsp } from "./fill-from-pcsp";
 import { useAddClient } from "./use-add-client";
-import { useNewClientPcsp, type NewClientSaved } from "./use-new-client-pcsp";
+import { useNewClientPcsp } from "./use-new-client-pcsp";
 
 type Existing = { id: string; name: string };
 type Step = "start" | "form" | "review" | "done";
@@ -36,7 +36,8 @@ type Step = "start" | "form" | "review" | "done";
 /**
  * Add client: "Start from their PCSP" (form → PCSP review → one save of the
  * client and the plan) or "Enter by hand" (one form page), or the link to the
- * spreadsheet import.
+ * spreadsheet import. After the save: "Finish setting up <first name> now" or
+ * "Later".
  */
 export function AddClientSheet({
   organizationId,
@@ -55,7 +56,7 @@ export function AddClientSheet({
   const [form, setForm] = useState<AddClientForm>(emptyAddClientForm);
   const [filled, setFilled] = useState<FilledField[]>([]);
   const [duplicate, setDuplicate] = useState<Existing | null>(null);
-  const [saved, setSaved] = useState<NewClientSaved | null>(null);
+  const [added, setAdded] = useState<AddedClient | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const pcsp = useNewClientPcsp(organizationId);
   const set = (patch: Partial<AddClientForm>) => {
@@ -69,7 +70,7 @@ export function AddClientSheet({
     setForm(emptyAddClientForm());
     setFilled([]);
     setDuplicate(null);
-    setSaved(null);
+    setAdded(null);
     pcsp.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -95,7 +96,10 @@ export function AddClientSheet({
   }
 
   const save = useAddClient(organizationId, {
-    onDone: () => onOpenChange(false),
+    onCreated: (c) => {
+      setAdded({ ...c, pcsp: null });
+      setStep("done");
+    },
     onDuplicate: setDuplicate,
   });
   function submit() {
@@ -112,8 +116,12 @@ export function AddClientSheet({
     if (res?.status === "duplicate") {
       setDuplicate(res.existing);
       setStep("form");
-    } else if (res?.status === "created") {
-      setSaved(res);
+    } else if (res?.status === "created" && pcsp.review) {
+      setAdded({
+        id: res.id,
+        pinFound: res.pinFound,
+        pcsp: { plan: res.plan, reviewed: pcsp.review.plan },
+      });
       setStep("done");
     }
   }
@@ -156,11 +164,10 @@ export function AddClientSheet({
                 : "Fields marked * are required. Everything else can be added later on the profile."}
           </DialogDescription>
         </DialogHeader>
-        {step === "done" && saved && pcsp.review ? (
+        {step === "done" && added ? (
           <AddClientDone
-            saved={saved}
+            added={added}
             firstName={form.first_name.trim()}
-            plan={pcsp.review.plan}
             onClose={() => onOpenChange(false)}
           />
         ) : step === "start" ? (

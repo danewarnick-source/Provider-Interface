@@ -1,6 +1,7 @@
 // Add client's writes, shared by Add client (by hand and from a PCSP) and
-// the spreadsheet import: the clients row, authorizations, contacts and the
-// home pin. Callers run assertCanManageClient first.
+// the spreadsheet import: the clients row, authorizations, contacts, the
+// home pin, and the "Finish setting up" banner (support-scope.server.ts).
+// Callers run assertCanManageClient first.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cleanContactFields } from "./contacts";
@@ -13,6 +14,7 @@ import {
   type AddClientForm,
 } from "./create";
 import { syncHomePinFromAddress } from "./home-pin";
+import { startClientSetup } from "./support-scope.server";
 import { assertRowsChanged } from "./writes";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -74,6 +76,7 @@ export async function createClientFromForm(
     .select("id");
   if (error) throw new Error(error.message);
   const [{ id }] = assertRowsChanged(rows as Array<{ id: string }> | null);
+  await startClientSetup(sb, organizationId, id);
 
   const auths = authorizationRows(form, organizationId, id);
   if (auths.length) {
