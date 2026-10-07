@@ -138,7 +138,7 @@ export async function downloadPcsp(sb: Sb, storagePath: string, prefix: string):
 }
 
 export type PcspReadOutcome =
-  | ({ ok: true } & PcspPdfRead)
+  | ({ ok: true; sizeBytes: number } & PcspPdfRead)
   | { ok: false; message: string };
 
 /**
@@ -154,7 +154,7 @@ export async function readUploadedPcsp(
   let out: PcspReadOutcome;
   try {
     const bytes = await downloadPcsp(sb, a.storagePath, a.prefix);
-    out = { ok: true, ...(await readPcspPdf(sb, a.organizationId, bytes)) };
+    out = { ok: true, sizeBytes: bytes.byteLength, ...(await readPcspPdf(sb, a.organizationId, bytes)) };
   } catch (e) {
     out = { ok: false, message: readFailure(e instanceof Error ? e.message : String(e)) };
   }

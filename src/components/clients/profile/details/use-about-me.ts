@@ -1,7 +1,9 @@
 // Data and actions for the "About <first name>" card: the approved summary,
-// Nectar's draft (held in memory until a person approves) and the approve.
+// Nectar's draft (held in memory until a person approves), the approve, and
+// starting the draft when the profile is opened with ?about=draft.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -43,4 +45,26 @@ export function useAboutMe(orgId: string, clientId: string) {
   });
 
   return { view, draft, setDraft, startDraft, approve };
+}
+
+/**
+ * After a PCSP is used the profile opens with ?about=draft: start Nectar's
+ * draft once (an editor approves it before anything is saved) and drop the flag.
+ */
+export function useAutoDraft(clientId: string, canEdit: boolean, ready: boolean, start: () => void) {
+  const search = useSearch({ strict: false }) as { about?: string };
+  const navigate = useNavigate();
+  const started = useRef(false);
+  const wanted = search.about === "draft";
+  useEffect(() => {
+    if (!wanted || !canEdit || !ready || started.current) return;
+    started.current = true;
+    start();
+    void navigate({
+      to: "/dashboard/clients/$clientId",
+      params: { clientId },
+      search: (prev) => ({ ...prev, about: undefined }),
+      replace: true,
+    });
+  }, [wanted, canEdit, ready, start, navigate, clientId]);
 }

@@ -63,7 +63,7 @@ export const readPcsp = createServerFn({ method: "POST" })
     // The PDF is kept in the client's documents even if the review is cancelled.
     const documentId = await insertPcspDocument(sb, {
       organizationId, clientId, userId, fileName: data.fileName, storagePath: data.storagePath,
-      sizeBytes: null, start: parse.plan.start, end: parse.plan.end,
+      sizeBytes: res.sizeBytes, start: parse.plan.start, end: parse.plan.end,
     });
 
     const { data: plan } = await sb

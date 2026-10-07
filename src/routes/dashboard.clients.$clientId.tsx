@@ -16,6 +16,8 @@ import {
 const profileSearch = z.object({
   section: z.enum(CLIENT_PROFILE_SECTIONS).optional().catch(undefined),
   tab: z.string().max(40).optional().catch(undefined),
+  /** "draft": start Nectar's About draft for a person to approve (after a PCSP is used). */
+  about: z.enum(["draft"]).optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/dashboard/clients/$clientId")({
