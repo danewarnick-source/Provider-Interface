@@ -1,11 +1,11 @@
-// Profile section: identity (lead card), photo + About me, the service
-// address with the clock-in pin and geofence, extra service locations +
-// mailing address, and More details (custom fields).
+// Profile section: "About <first name>" (lead, full width), then Identity |
+// Service address side by side, extra service locations | mailing address,
+// and More details (custom fields). The photo lives in the header.
 
-import { Mail, Smile } from "lucide-react";
-import { ClientPhotoCard } from "@/components/clients/profile/client-photo-card";
+import { Mail } from "lucide-react";
 import { HomePinCard } from "@/components/clients/profile/home-pin-card";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
+import { AboutCard } from "./about-card";
 import { IdentityCard } from "./identity-card";
 import { MoreDetailsCard } from "./more-details-card";
 import { ServiceLocationsCard } from "./service-locations-card";
@@ -23,25 +23,19 @@ export function ProfileSection({
   const clientId = data.client.id;
   return (
     <div className="flex flex-col gap-5" data-testid="client-section-profile">
-      <IdentityCard key={clientId} orgId={orgId} data={data} onChanged={onChanged} />
-      <div className="grid gap-5 md:grid-cols-2">
-        <ClientPhotoCard clientId={clientId} />
-        <TextFieldCard
-          orgId={orgId}
-          clientId={clientId}
-          field="about_me"
-          icon={Smile}
-          title="About me"
-          subtitle="What matters to them, in their words where possible."
-          value={data.client.about_me}
-          empty="Nothing written yet."
-          rows={5}
-          onChanged={onChanged}
-        />
+      <AboutCard
+        orgId={orgId}
+        clientId={clientId}
+        firstName={data.client.first_name?.trim() ?? ""}
+        agencyNotes={data.client.about_me}
+        onChanged={onChanged}
+      />
+      <div className="grid items-stretch gap-5 md:grid-cols-2 [&>*]:h-full">
+        <IdentityCard key={clientId} orgId={orgId} data={data} onChanged={onChanged} />
+        <HomePinCard clientId={clientId} codes={data.codes} />
       </div>
-      <HomePinCard clientId={clientId} />
-      <div className="grid gap-5 md:grid-cols-2">
-        <ServiceLocationsCard orgId={orgId} clientId={clientId} />
+      <div className="grid items-stretch gap-5 md:grid-cols-2 [&>*]:h-full">
+        <ServiceLocationsCard orgId={orgId} clientId={clientId} codes={data.codes} />
         <TextFieldCard
           orgId={orgId}
           clientId={clientId}
