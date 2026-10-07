@@ -3,7 +3,7 @@
 ## Notes for the run
 - PR #457 (clients-rebuild → staging) was **already merged on Oct 6, 2026**. No open "Production:" PR exists for clients-rebuild, so pushes to clients-rebuild do not auto-sync to staging. The polish PRs land on clients-rebuild; shipping them needs a new clients-rebuild → staging PR later (the user decides).
 - **Runbook updated (Oct 7, 2026):** the run is now C1 → C10, and **no e2e (Playwright) tests** are run, added or fixed. Checks are build, tsc and unit tests vs. the baseline, plus a "Check on staging" click-through list at the end of every PR body. The e2e baseline below is kept for reference only and is not a merge gate. (run-e2e.sh removed.)
-- Prompt files: C1-C2 is in this folder (updated no-e2e version). C3-C4, C5-C6 and C7-C10 have **not been provided yet**. The run stops after C2 until they're added here.
+- Prompt files: all five are in this folder (C1-C2 updated no-e2e version; C3-C4, C5-C6, C7-C10 added Oct 7, 2026).
 
 ## Baseline (clients-rebuild @ d14b63ff, Oct 7, 2026)
 - `npx tsc --noEmit`: **203** errors (none under src/components/clients or src/lib/clients).
