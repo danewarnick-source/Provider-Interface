@@ -5,7 +5,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Clock } from "lucide-react";
+import { formatDate } from "@/lib/clients/dates";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { ReadOnlyTable } from "@/components/clients/profile/read-only-table";
 import { useProfileNames } from "@/components/clients/shared/hooks/use-org-staff";
 import { shiftHours } from "@/lib/clients/notes";
@@ -50,35 +52,35 @@ export function ShiftsPanel({ clientId, orgId }: { clientId: string; orgId: stri
   const who = (id: string | null) => (id ? (names?.get(id) ?? "Team member") : "—");
 
   return (
-    <Card data-testid="client-activity-shifts">
-      <CardHeader>
-        <CardTitle className="text-base">Shifts</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <ReadOnlyTable
-          loading={q.isLoading}
-          empty="No shifts recorded for this client."
-          rows={rows}
-          onOpen={setOpen}
-          columns={[
-            {
-              header: "Date",
-              cell: (r) =>
-                r.clock_in_timestamp ? new Date(r.clock_in_timestamp).toLocaleDateString() : "—",
-            },
-            { header: "Team member", cell: (r) => who(r.staff_id) },
-            {
-              header: "Code",
-              cell: (r) => <code className="font-mono">{r.service_type_code ?? "—"}</code>,
-            },
-            {
-              header: "Hours",
-              cell: (r) => shiftHours(r.clock_in_timestamp, r.clock_out_timestamp) ?? "Open",
-            },
-            { header: "Status", cell: (r) => <Badge variant="outline">{r.status ?? "—"}</Badge> },
-          ]}
-        />
-      </CardContent>
+    <SectionCard
+      icon={Clock}
+      tone="neutral"
+      title="Shifts"
+      description="Every shift worked with this client. Click a row to see the times and the shift note."
+      testId="client-activity-shifts"
+    >
+      <ReadOnlyTable
+        loading={q.isLoading}
+        empty="No shifts recorded for this client."
+        rows={rows}
+        onOpen={setOpen}
+        columns={[
+          {
+            header: "Date",
+            cell: (r) => (r.clock_in_timestamp ? formatDate(r.clock_in_timestamp) : "—"),
+          },
+          { header: "Team member", cell: (r) => who(r.staff_id) },
+          {
+            header: "Code",
+            cell: (r) => <code className="font-mono">{r.service_type_code ?? "—"}</code>,
+          },
+          {
+            header: "Hours",
+            cell: (r) => shiftHours(r.clock_in_timestamp, r.clock_out_timestamp) ?? "Open",
+          },
+          { header: "Status", cell: (r) => <Badge variant="outline">{r.status ?? "—"}</Badge> },
+        ]}
+      />
       {open ? (
         <RecordDialog
           open
@@ -101,6 +103,6 @@ export function ShiftsPanel({ clientId, orgId }: { clientId: string; orgId: stri
           body={open.shift_note_text}
         />
       ) : null}
-    </Card>
+    </SectionCard>
   );
 }

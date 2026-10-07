@@ -6,7 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Siren } from "lucide-react";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { ReadOnlyTable } from "@/components/clients/profile/read-only-table";
 
 type IncidentRow = {
@@ -43,37 +44,38 @@ export function IncidentsPanel({ clientId, orgId }: { clientId: string; orgId: s
       search: { tab: "incidents", client: clientId },
     });
   return (
-    <Card data-testid="client-activity-incidents">
-      <CardHeader>
-        <CardTitle className="text-base">Incidents</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <ReadOnlyTable
-          loading={q.isLoading}
-          empty="No incidents recorded."
-          rows={q.data ?? []}
-          onOpen={open}
-          columns={[
-            { header: "Date", cell: (r) => r.incident_date ?? "—" },
-            {
-              header: "Report #",
-              cell: (r) => <code className="font-mono text-xs">{r.report_number ?? "—"}</code>,
-            },
-            { header: "Types", cell: (r) => (r.incident_types ?? []).join(", ") || "—" },
-            {
-              header: "Flags",
-              cell: (r) => (
-                <div className="flex gap-1">
-                  {r.is_abuse_neglect ? <Badge variant="destructive">A/N</Badge> : null}
-                  {r.is_fatality ? <Badge variant="destructive">Fatality</Badge> : null}
-                  {!r.is_abuse_neglect && !r.is_fatality ? "—" : null}
-                </div>
-              ),
-            },
-            { header: "Status", cell: (r) => <Badge variant="outline">{r.status ?? "—"}</Badge> },
-          ]}
-        />
-      </CardContent>
-    </Card>
+    <SectionCard
+      icon={Siren}
+      tone="neutral"
+      title="Incidents"
+      description="Incidents involving this client. Click a row to see the report."
+      testId="client-activity-incidents"
+    >
+      <ReadOnlyTable
+        loading={q.isLoading}
+        empty="No incidents recorded."
+        rows={q.data ?? []}
+        onOpen={open}
+        columns={[
+          { header: "Date", cell: (r) => r.incident_date ?? "—" },
+          {
+            header: "Report #",
+            cell: (r) => <code className="font-mono text-xs">{r.report_number ?? "—"}</code>,
+          },
+          { header: "Types", cell: (r) => (r.incident_types ?? []).join(", ") || "—" },
+          {
+            header: "Flags",
+            cell: (r) => (
+              <div className="flex gap-1">
+                {r.is_abuse_neglect ? <Badge variant="destructive">A/N</Badge> : null}
+                {r.is_fatality ? <Badge variant="destructive">Fatality</Badge> : null}
+                {!r.is_abuse_neglect && !r.is_fatality ? "—" : null}
+              </div>
+            ),
+          },
+          { header: "Status", cell: (r) => <Badge variant="outline">{r.status ?? "—"}</Badge> },
+        ]}
+      />
+    </SectionCard>
   );
 }

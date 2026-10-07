@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { NotebookPen } from "lucide-react";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { ReadOnlyTable } from "@/components/clients/profile/read-only-table";
 import { useProfileNames } from "@/components/clients/shared/hooks/use-org-staff";
 import { RecordDialog } from "./record-dialog";
@@ -45,27 +46,28 @@ export function DailyLogsPanel({ clientId, orgId }: { clientId: string; orgId: s
   const who = (id: string | null) => (id ? (names?.get(id) ?? "Team member") : "—");
 
   return (
-    <Card data-testid="client-activity-logs">
-      <CardHeader>
-        <CardTitle className="text-base">Daily notes</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <ReadOnlyTable
-          loading={q.isLoading}
-          empty="No daily notes recorded."
-          rows={rows}
-          onOpen={setOpen}
-          columns={[
-            { header: "Date", cell: (r) => r.log_date ?? "—" },
-            { header: "Written by", cell: (r) => who(r.user_id) },
-            { header: "Status", cell: (r) => <Badge variant="outline">{r.status ?? "—"}</Badge> },
-            {
-              header: "Note",
-              cell: (r) => <span className="line-clamp-2 max-w-md">{r.narrative ?? "—"}</span>,
-            },
-          ]}
-        />
-      </CardContent>
+    <SectionCard
+      icon={NotebookPen}
+      tone="neutral"
+      title="Daily notes"
+      description="Daily notes written about this client. Click a row to read it."
+      testId="client-activity-logs"
+    >
+      <ReadOnlyTable
+        loading={q.isLoading}
+        empty="No daily notes recorded."
+        rows={rows}
+        onOpen={setOpen}
+        columns={[
+          { header: "Date", cell: (r) => r.log_date ?? "—" },
+          { header: "Written by", cell: (r) => who(r.user_id) },
+          { header: "Status", cell: (r) => <Badge variant="outline">{r.status ?? "—"}</Badge> },
+          {
+            header: "Note",
+            cell: (r) => <span className="line-clamp-2 max-w-md">{r.narrative ?? "—"}</span>,
+          },
+        ]}
+      />
       {open ? (
         <RecordDialog
           open
@@ -87,6 +89,6 @@ export function DailyLogsPanel({ clientId, orgId }: { clientId: string; orgId: s
           body={open.narrative}
         />
       ) : null}
-    </Card>
+    </SectionCard>
   );
 }

@@ -2,8 +2,10 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { FileText, Loader2, Sparkles, Upload, ExternalLink, X } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileText, FolderOpen, Loader2, Sparkles, Upload, ExternalLink } from "lucide-react";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCurrentOrg } from "@/hooks/use-org";
+import { formatDate } from "@/lib/clients/dates";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ingestDocument,
@@ -207,12 +210,13 @@ export function ClientDocumentsCard({
   });
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Client Documents
-          </CardTitle>
+    <SectionCard
+      icon={FolderOpen}
+      tone="info"
+      title="Client documents"
+      description={`Every file on record for ${clientName}. Nectar reads each upload; the file stays here and in Company Docs.`}
+      actions={
+        <>
           <UploadDocDialog
             orgId={orgId}
             clientId={clientId}
@@ -260,24 +264,19 @@ export function ClientDocumentsCard({
             }}
             doc={preview}
           />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Guardian papers, PCSP, 1056, intake/referrals, assessments, consents. NECTAR parses each
-          file on upload — billing fields from a PCSP/1056 flow into the billing layer; the file
-          itself stays here and appears in{" "}
-          <span className="font-medium text-foreground">Company Docs</span> tagged to {clientName}.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-2">
+        </>
+      }
+    >
+      <div className="space-y-2">
         {isLoading && (
           <div className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-border/60 bg-card/30 p-4 text-xs text-muted-foreground">
             <Loader2 className="h-3 w-3 animate-spin" /> Loading…
           </div>
         )}
         {!isLoading && docs.length === 0 && (
-          <div className="rounded-lg border border-dashed border-border/60 bg-card/30 p-4 text-center text-xs text-muted-foreground">
-            No client documents yet. Upload a PCSP, 1056, or intake to seed NECTAR for {clientName}.
-          </div>
+          <EmptyState>
+            No client documents yet. Upload a PCSP, 1056 or intake so Nectar knows {clientName}.
+          </EmptyState>
         )}
         {docs.map((d) => (
           <div
@@ -305,16 +304,14 @@ export function ClientDocumentsCard({
                   <ParseStatus status={d.parse_status} />
                 </div>
                 <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                  {d.file_name} · {new Date(d.created_at).toLocaleDateString()}
+                  {d.file_name} · {formatDate(d.created_at)}
                   {d.uploaded_by_name ? ` · ${d.uploaded_by_name}` : ""}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 gap-1 text-xs"
+                variant="outline"
                 onClick={async () => {
                   if (d.source === "client" && d.storage_path) {
                     const { data: signed } = await supabase.storage
@@ -346,19 +343,21 @@ export function ClientDocumentsCard({
                   }
                 }}
               >
-                <ExternalLink className="h-3 w-3" /> Open
+                <ExternalLink className="h-4 w-4" /> Open file
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 text-destructive"
-                onClick={() => {
-                  if (confirm(`Move "${d.title}" to Outdated? The file is kept for audits.`))
-                    del.mutate(d);
-                }}
-              >
-                <X className="h-3 w-3" />
-              </Button>
+              <RowMenu
+                label={`More actions for ${d.title}`}
+                items={[
+                  {
+                    label: "Move to Outdated",
+                    danger: true,
+                    onSelect: () => {
+                      if (confirm(`Move "${d.title}" to Outdated? The file is kept for audits.`))
+                        del.mutate(d);
+                    },
+                  },
+                ]}
+              />
             </div>
           </div>
         ))}
@@ -374,8 +373,8 @@ export function ClientDocumentsCard({
           clientId={clientId}
           title="Outdated / Superseded (PCSP & files)"
         />
-      </CardContent>
-    </Card>
+      </div>
+    </SectionCard>
   );
 }
 
@@ -511,8 +510,8 @@ function UploadDocDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm" className="h-8 gap-1.5 bg-amber-500 text-amber-950 hover:bg-amber-400">
-          <Upload className="h-3.5 w-3.5" /> Upload document
+        <Button>
+          <Upload className="h-4 w-4" /> Upload document
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
@@ -563,14 +562,10 @@ function UploadDocDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            disabled={!file || mut.isPending}
-            onClick={() => mut.mutate()}
-            className="bg-amber-500 text-amber-950 hover:bg-amber-400"
-          >
+          <Button disabled={!file || mut.isPending} onClick={() => mut.mutate()}>
             {mut.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
