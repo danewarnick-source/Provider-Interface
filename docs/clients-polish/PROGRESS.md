@@ -24,3 +24,11 @@
 - E2E 1056 (12): **12 failing** — all 7 in client-1056-billing.spec.ts (:65, :100, :159, :196, :239, :264, :295) and all 5 in punch-pad-gps.spec.ts (:112, :155, :168, :188, :199)
 
 ## Steps
+
+### C1 — Shared layout, header and side menu — MERGED
+- PR #458 (https://github.com/danewarnick-source/Provider-Interface/pull/458), squash-merged into clients-rebuild as 02d9d9c6.
+- Checks: build passes (routeTree unchanged); tsc 203 (= baseline); unit 1856 tests, only the 5 baseline failures (13 new tests). E2E not run (runbook). Re-verified tsc/unit before merge.
+- Migrations: none.
+- Added 10: cards/section-card.tsx, cards/card-parts.tsx, cards/row-menu.tsx, profile-shell/tones.ts, header-pills.tsx, plans/pcsp-upload-button.tsx, activity/office-note-composer.tsx, activity/add-note-button.tsx, lib/clients/profile-header.ts (+ .test.ts). Deleted: cards/card-shell.tsx (CardShell, HexMarker, GroupHeader, Row, fmtDate); SkeletonCard, StrategiesTitle removed. Zero remaining imports.
+- Client-area lines 37,295 → 38,167 (+872; 737 in new files).
+- Blockers: none. Note: e2e/clients-new-client-pcsp.spec.ts:146 expects a link named "Import" (now "Import clients"); e2e not maintained per runbook, and C7 removes Import anyway.
