@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ProfileShell, type ProfileShellSection } from "@/components/profile-shell/profile-shell";
+import type { ProfileTone } from "@/components/profile-shell/tones";
 import {
   CLIENT_PROFILE_SECTIONS,
   CLIENT_SECTION_LABEL,
@@ -34,6 +35,20 @@ const SECTION_ICON: Record<ClientProfileSection, LucideIcon> = {
   file: FolderOpen,
   team: Users,
   activity: Activity,
+};
+
+/** Section tones, matching the cards inside each section. */
+const SECTION_TONE: Record<ClientProfileSection, ProfileTone> = {
+  overview: "neutral",
+  profile: "profile",
+  contacts: "info",
+  health: "danger",
+  plans: "ok",
+  services: "profile",
+  money: "neutral",
+  file: "info",
+  team: "ok",
+  activity: "neutral",
 };
 
 export function ClientProfileShell({
@@ -60,6 +75,7 @@ export function ClientProfileShell({
         key,
         label: CLIENT_SECTION_LABEL[key],
         icon: SECTION_ICON[key],
+        tone: SECTION_TONE[key],
         visible: visible.includes(key),
         badge: count > 0 ? { count, tone: "warn" as const } : null,
       };
