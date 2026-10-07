@@ -112,3 +112,8 @@
 - MCP table_write was already removed Sep 27 (606dfdb5); new unit test guards against its return and against .delete() on clients/organization_members.
 - Client-area lines 47,978 → 48,018.
 - Blockers: none. Judgment calls: deleting a team member also deactivates them (restore keeps them deactivated); Restore is Owners only; uploaded documents, authorizations and auto-created summary slots don't count as service history. Note: production main doesn't filter deleted_at until this ships.
+
+## Run complete (Oct 7, 2026)
+- C1–C10 all merged into clients-rebuild (#458–#467). PR #457 body updated with the "Clients polish" section (table, lines, migrations, Phase B, decisions, Check on staging).
+- Client area 37,295 → 48,018; repo-wide net −4,402 lines (Smart Import removal).
+- Outstanding: Phase B migration 20261007160000 (apply after reaching main); a clients-rebuild → staging PR is needed to put this on the sandbox (#457 was already merged).
