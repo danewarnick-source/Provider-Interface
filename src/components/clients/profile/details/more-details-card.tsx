@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Trash2 } from "lucide-react";
+import { ListPlus, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,7 +23,9 @@ import { useAccess } from "@/hooks/use-access";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { deleteCustomFieldDefinitions } from "@/lib/clients/custom-fields.functions";
 import { chunkIds, customFieldDeleteCopy } from "@/lib/clients/custom-fields-delete";
-import { CardShell } from "@/components/clients/profile/cards/card-shell";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { AddCustomFieldButton, CustomFieldRow } from "./more-details-parts";
 
 export function MoreDetailsCard({ clientId }: { clientId: string }) {
@@ -91,21 +93,43 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
     setConfirm({ ids, labels });
   }
 
+  const card = {
+    icon: ListPlus,
+    tone: "profile" as const,
+    title: "More details",
+    description: "Your agency's own fields, the same on every client.",
+  };
+
   if (!fields.length) {
     return canEdit && orgId ? (
-      <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-        <span>Need to track something else about clients? Add a detail field.</span>
-        <AddCustomFieldButton clientId={clientId} orgId={orgId} />
-      </div>
+      <SectionCard {...card}>
+        <EmptyState action={<AddCustomFieldButton clientId={clientId} orgId={orgId} />}>
+          Need to track something else about clients? Add a detail field.
+        </EmptyState>
+      </SectionCard>
     ) : null;
   }
 
   return (
-    <CardShell
-      title="More details"
-      subtitle="Your agency's own fields."
-      headerRight={
-        canEdit && orgId ? <AddCustomFieldButton clientId={clientId} orgId={orgId} /> : null
+    <SectionCard
+      {...card}
+      actions={
+        canEdit && orgId ? (
+          <>
+            <AddCustomFieldButton clientId={clientId} orgId={orgId} />
+            <RowMenu
+              label="More actions for More details"
+              items={[
+                {
+                  label: `Delete selected fields${selectedFields.length ? ` (${selectedFields.length})` : ""}`,
+                  danger: true,
+                  disabled: !selectedFields.length || delMut.isPending,
+                  onSelect: () => requestDelete(selectedFields.map((f) => f.id)),
+                },
+              ]}
+            />
+          </>
+        ) : null
       }
     >
       {canEdit ? (
@@ -121,17 +145,6 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
             Select all
           </label>
           <span className="text-xs text-muted-foreground">{selected.size} selected</span>
-          <Button
-            type="button"
-            size="sm"
-            variant="destructive"
-            disabled={!selectedFields.length || delMut.isPending}
-            onClick={() => requestDelete(selectedFields.map((f) => f.id))}
-          >
-            <Trash2 className="mr-1 h-3.5 w-3.5" />
-            Delete selected
-            {selectedFields.length ? ` (${selectedFields.length})` : ""}
-          </Button>
         </div>
       ) : null}
       <ul className="space-y-2" data-testid="client-more-details">
@@ -185,6 +198,6 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </CardShell>
+    </SectionCard>
   );
 }
