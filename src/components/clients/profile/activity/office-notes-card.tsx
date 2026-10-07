@@ -1,24 +1,24 @@
 // Office notes: notes about the client for the office only (Clients: Edit to
 // read or write; staff never see them). Archived, never deleted.
 
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { StickyNote } from "lucide-react";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { useProfileNames } from "@/components/clients/shared/hooks/use-org-staff";
-import { CLIENT_NOTE_MAX, openNotes, type ClientNote } from "@/lib/clients/notes";
-import { addClientNote, archiveClientNote } from "@/lib/clients/team.functions";
+import { formatDate } from "@/lib/clients/dates";
+import { openNotes, type ClientNote } from "@/lib/clients/notes";
+import { archiveClientNote } from "@/lib/clients/team.functions";
+import { OfficeNoteComposer, officeNotesKey } from "./office-note-composer";
 
 export function OfficeNotesCard({ clientId, orgId }: { clientId: string; orgId: string }) {
   const qc = useQueryClient();
-  const addFn = useServerFn(addClientNote);
   const archiveFn = useServerFn(archiveClientNote);
-  const [draft, setDraft] = useState("");
-  const key = ["client-office-notes", orgId, clientId];
+  const key = officeNotesKey(orgId, clientId);
 
   const q = useQuery({
     queryKey: key,
@@ -40,15 +40,6 @@ export function OfficeNotesCard({ clientId, orgId }: { clientId: string; orgId: 
     notes.map((n) => n.created_by).filter((x): x is string => !!x),
   ).data;
 
-  const addM = useMutation({
-    mutationFn: () => addFn({ data: { organizationId: orgId, clientId, body: draft } }),
-    onSuccess: () => {
-      setDraft("");
-      toast.success("Note saved");
-      void qc.invalidateQueries({ queryKey: key });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
   const archiveM = useMutation({
     mutationFn: (noteId: string) =>
       archiveFn({ data: { organizationId: orgId, clientId, noteId } }),
@@ -60,60 +51,46 @@ export function OfficeNotesCard({ clientId, orgId }: { clientId: string; orgId: 
   });
 
   return (
-    <Card data-testid="client-office-notes">
-      <CardHeader>
-        <CardTitle className="text-base">Office notes</CardTitle>
-        <p className="text-xs text-muted-foreground">Only people who can edit clients see these.</p>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="space-y-2">
-          <Textarea
-            rows={3}
-            value={draft}
-            maxLength={CLIENT_NOTE_MAX}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Add a note for the office…"
-            aria-label="New office note"
-          />
-          <div className="flex justify-end">
-            <Button
-              size="sm"
-              disabled={!draft.trim() || addM.isPending}
-              onClick={() => addM.mutate()}
-            >
-              {addM.isPending ? "Saving…" : "Add note"}
-            </Button>
-          </div>
-        </div>
+    <SectionCard
+      icon={StickyNote}
+      tone="neutral"
+      title="Office notes"
+      description="Notes for the office. Only people who can edit clients see these."
+      testId="client-office-notes"
+    >
+      <div className="space-y-3">
+        <OfficeNoteComposer orgId={orgId} clientId={clientId} />
         {q.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : notes.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No office notes yet.</p>
+          <EmptyState>No office notes yet.</EmptyState>
         ) : (
           <ul className="space-y-2">
             {notes.map((n) => (
-              <li key={n.id} className="rounded-md border p-3">
+              <li key={n.id} className="rounded-xl border p-3">
                 <p className="whitespace-pre-wrap text-sm">{n.body}</p>
                 <div className="mt-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
                   <span>
-                    {new Date(n.created_at).toLocaleString()}
+                    {formatDate(n.created_at)}
                     {n.created_by ? ` · ${names?.get(n.created_by) ?? "Team member"}` : ""}
                   </span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 text-xs"
-                    disabled={archiveM.isPending}
-                    onClick={() => archiveM.mutate(n.id)}
-                  >
-                    Archive
-                  </Button>
+                  <RowMenu
+                    label="More actions for this note"
+                    items={[
+                      {
+                        label: "Archive note",
+                        danger: true,
+                        disabled: archiveM.isPending,
+                        onSelect: () => archiveM.mutate(n.id),
+                      },
+                    ]}
+                  />
                 </div>
               </li>
             ))}
           </ul>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </SectionCard>
   );
 }

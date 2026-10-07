@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isRouteUuid } from "@/lib/route-uuid";
 import { loadActiveCodes } from "@/lib/clients/codes";
 import { loadClientContacts, activeContacts, primaryContact } from "@/lib/clients/contacts";
-import { currentPlan, type ClientPlan } from "@/lib/clients/plans";
+import { currentPlan, waitingDays, type ClientPlan } from "@/lib/clients/plans";
 
 const CLIENT_COLUMNS =
   "id, organization_id, first_name, last_name, date_of_birth, phone_number, medicaid_id, client_pid, insurance, admission_date, discharge_date, account_status, team_id, special_directions, about_me, physical_address, mailing_address, client_photo_url, client_photo_taken_on, is_own_guardian, hr_applicable, feature_config, disability_category";
@@ -45,6 +45,9 @@ export type ClientProfileData = {
   home: { id: string; name: string } | null;
   plan: Pick<ClientPlan, "start_date" | "end_date" | "label"> | null;
   supportCoordinator: string | null;
+  guardian: { name: string; relationship: string | null } | null;
+  /** Days since the plan year ended with no new PCSP; 0 when a plan is in effect. */
+  pcspOverdueDays: number;
 };
 
 export const clientProfileKey = (orgId: string | undefined, clientId: string) =>
@@ -77,8 +80,11 @@ export function useClientProfile(orgId: string | undefined, clientId: string) {
           .eq("client_id", clientId),
         loadClientContacts(supabase, [clientId]),
       ]);
-      const plan = currentPlan((plans.data ?? []) as ClientPlan[]);
-      const sc = primaryContact(activeContacts(contacts), "support_coordinator");
+      const planRows = (plans.data ?? []) as ClientPlan[];
+      const plan = currentPlan(planRows);
+      const active = activeContacts(contacts);
+      const sc = primaryContact(active, "support_coordinator");
+      const guardian = primaryContact(active, "guardian");
       const team = home.data as { id: string; team_name: string } | null;
       return {
         client,
@@ -89,6 +95,8 @@ export function useClientProfile(orgId: string | undefined, clientId: string) {
           ? { start_date: plan.start_date, end_date: plan.end_date, label: plan.label }
           : null,
         supportCoordinator: sc?.name ?? null,
+        guardian: guardian ? { name: guardian.name, relationship: guardian.relationship } : null,
+        pcspOverdueDays: waitingDays(planRows) ?? 0,
       };
     },
   });
