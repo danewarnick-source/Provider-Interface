@@ -94,3 +94,12 @@
 - Added 17 (agency-match.ts, read-report.ts, confirm-profile.ts + tests, file-pcsp.server.ts, create.server.ts, create-from-pcsp.functions.ts, evidence/record-upload.server.ts, migration…). Deleted 0; removed pcspBytes, norm, ourAgencyMatcher.
 - Client-area lines 44,939 → 46,297.
 - Blockers: none.
+
+### C9 — Optional full setup, hide what doesn't apply — MERGED
+- PR #466 (https://github.com/danewarnick-source/Provider-Interface/pull/466), squash-merged as bd2e48e3.
+- Checks: build passes; tsc 203 (= baseline); unit 1994 tests, only the 5 baseline failures. E2E not run. Re-verified before merge.
+- Migration applied: 20261007180000_clients_support_scope.sql (client_support_scope, RLS like client_about_me). 0 rows. Nothing NEEDS JEFF.
+- "Admitted" → "Start date" (label only; UI grep clean). All three add-client paths land on "Finish setting up"; clients added before this get no banner.
+- Added 17 (lib/clients/support-scope*.ts, client-setup.ts + tests, health/diet-card.tsx, 12 files under profile/setup/). Deleted 1: health/swallowing-card.tsx (merged into Diet and swallowing).
+- Client-area lines 46,297 → 47,978.
+- Blockers: none. Judgment calls for Jeff: "No" on BSP hides the BSP card even for BC1–BC3 clients; "No" on advance directive doesn't hide it if a DNR/POLST is recorded; new Needs attention item "Signed DNR / POLST form missing".
