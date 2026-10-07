@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 import {
   canVerifyPbaSample,
   formatMoney,
+  isOpenLoan,
+  spentThisMonth,
   moneySectionApplies,
   moneyTotal,
   pbaHeadroomPercent,
@@ -62,5 +64,28 @@ describe("audit and totals", () => {
   it("sums to the cent", () => {
     assert.equal(moneyTotal([{ amount: 0.1 }, { amount: "0.2" }, { amount: null }]), 0.3);
     assert.equal(formatMoney(12.5), "$12.50");
+  });
+});
+
+describe("money tiles", () => {
+  it("sums only this month's spending", () => {
+    const now = new Date(2026, 9, 15, 12);
+    assert.equal(
+      spentThisMonth(
+        [
+          { amount: 10.5, spent_at: "2026-10-01" },
+          { amount: "4.25", spent_at: new Date(2026, 9, 14, 9).toISOString() },
+          { amount: 99, spent_at: "2026-09-30" },
+        ],
+        now,
+      ),
+      14.75,
+    );
+  });
+  it("counts drafts and active loans as open, settled ones as closed", () => {
+    assert.equal(isOpenLoan("draft"), true);
+    assert.equal(isOpenLoan("active"), true);
+    assert.equal(isOpenLoan("Paid"), false);
+    assert.equal(isOpenLoan("closed"), false);
   });
 });

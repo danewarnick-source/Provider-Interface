@@ -31,17 +31,21 @@ export function PbaCard({
   clientId,
   clientName,
   canEdit,
+  ledgerOpen,
+  onLedgerOpenChange,
 }: {
   orgId: string;
   clientId: string;
   clientName: string;
   canEdit: boolean;
+  /** The ledger dialog (also opened by the Money header's "Add transaction"). */
+  ledgerOpen: boolean;
+  onLedgerOpenChange: (open: boolean) => void;
 }) {
   const qc = useQueryClient();
   const writeFn = useServerFn(writeClientRecord);
   const { user } = useAuth();
   const q = useClientPba(orgId, clientId);
-  const [ledgerOpen, setLedgerOpen] = useState(false);
   const [threshold, setThreshold] = useState("2000");
   const account = q.data?.account ?? null;
 
@@ -68,13 +72,13 @@ export function PbaCard({
     <SectionCard
       icon={Wallet}
       tone="neutral"
-      title="PBA trust account"
-      description="The client's money the agency holds, against the Medicaid limit."
+      title="PBA ledger"
+      description="Every deposit and withdrawal, with receipts, and this quarter's audit sample."
       testId="client-money-pba"
       actions={
         account ? (
-          <Button variant="outline" onClick={() => setLedgerOpen(true)}>
-            Open ledger
+          <Button variant="outline" onClick={() => onLedgerOpenChange(true)}>
+            Open PBA ledger
           </Button>
         ) : null
       }
@@ -125,7 +129,7 @@ export function PbaCard({
             />
             <PbaLedgerDialog
               open={ledgerOpen}
-              onOpenChange={setLedgerOpen}
+              onOpenChange={onLedgerOpenChange}
               orgId={orgId}
               account={account}
               clientName={clientName}
@@ -147,21 +151,12 @@ function AccountSummary({
   const thr = Number(account.medicaid_threshold);
   const tone = TONE[pbaTone(bal, thr)];
   return (
-    <div className="flex flex-wrap items-center gap-4">
-      <Stat label="Balance" value={formatMoney(bal)} />
-      <Stat label="Medicaid limit" value={formatMoney(thr)} />
-      <Stat label="Room left" value={`${pbaHeadroomPercent(bal, thr)}%`} />
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
       <StatusTag tone={tone.tone}>{tone.label}</StatusTag>
-      <span className="text-xs text-muted-foreground">Opened {formatDate(account.opened_on)}</span>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="font-mono text-lg font-semibold">{value}</p>
-    </div>
+      <span>
+        Medicaid limit {formatMoney(thr)} · {pbaHeadroomPercent(bal, thr)}% room left · opened{" "}
+        {formatDate(account.opened_on)}
+      </span>
+    </p>
   );
 }

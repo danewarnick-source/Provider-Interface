@@ -4,17 +4,13 @@
 
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { HandCoins, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { formatDate } from "@/lib/clients/dates";
 import { LoanEditor } from "@/components/loans/loan-editor";
-import { getLoanFeatureStatus, listClientLoans } from "@/lib/clients/loans.functions";
-
-type LoanRow = { id: string; borrower_name: string; agreement_date: string; status: string };
+import { useClientLoans } from "./use-client-money";
 
 export function LoansCard({
   orgId,
@@ -27,20 +23,8 @@ export function LoansCard({
   clientId: string;
   clientName: string;
 }) {
-  const statusFn = useServerFn(getLoanFeatureStatus);
-  const listFn = useServerFn(listClientLoans);
   const [editing, setEditing] = useState<{ loanId?: string; borrower: string } | null>(null);
-  const statusQ = useQuery({
-    queryKey: ["loan-feature-status", orgId],
-    queryFn: () => statusFn({ data: { organization_id: orgId } }),
-  });
-  const enabled = statusQ.data?.enabled === true;
-  const loansQ = useQuery({
-    enabled,
-    queryKey: ["loans", orgId, "client", clientId],
-    queryFn: async () =>
-      (await listFn({ data: { organization_id: orgId, client_id: clientId } })) as LoanRow[],
-  });
+  const { status: statusQ, loans: loansQ, enabled } = useClientLoans(orgId, clientId, true);
 
   if (editing) {
     return (
