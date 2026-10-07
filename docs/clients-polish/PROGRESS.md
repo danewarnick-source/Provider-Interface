@@ -66,3 +66,12 @@
 - Catalog: medical/dental exams, guardian papers, optional 1056 copy, PPS residence pack, housemate discussion in RHS pack; § cites checked against docs/compliance/dhhs91172/Requirements.json (several fixed).
 - Client-area lines 41,238 → 42,938.
 - Blockers: none. Follow-ups: packs re-sync to code changes when an owner/admin opens the Client file (others see it computed live); the agency Evidence grid doesn't read the new "optional" flag yet (1056 copy may show missing there); catalog.ts 1,643 → 1,737 (already oversized).
+
+### C6 — Contacts, Health, Services, Money, Team, Activity — MERGED
+- PR #463 (https://github.com/danewarnick-source/Provider-Interface/pull/463), squash-merged as d171bb13.
+- Checks: build passes; tsc 203 (= baseline); unit 1956 tests, only the 5 baseline failures. E2E not run. Re-verified before merge.
+- Migration applied: 20261007150000_clients_authorization_history_keeps_1056.sql (nullable 1056 number/approved date/units columns on client_billing_code_rate_history; history trigger also copies them and fires on their change). 0 rows. Nothing NEEDS JEFF. Side effect on main (shared DB): a 1056-number/units-only edit now also writes a history row.
+- Renew bug fixed: renewal reused the single client+code row and lost the old 1056 number/date/units; now kept in history, renewal must start after the old end date (tested). "Past authorizations" reads history.
+- Added 24 (lib/clients/activity.ts, authorization-renewal.ts, health-tiles.ts + tests; section headers/cards). Deleted 11 (shifts/daily-logs/incidents/office-notes panels, activity record-dialog, contact-row, care-card, authorization-row, authorizations-card, team-codes-card, code-scope-popover).
+- Client-area lines 42,938 → 44,219.
+- Blockers: none. Notes: Team saves per person (Save team / Undo removed); office notes keep lock + edit-only visibility; 1056 review "Confirm" → "Save authorizations from the 1056".
