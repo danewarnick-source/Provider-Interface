@@ -4518,6 +4518,69 @@ export type Database = {
           },
         ]
       }
+      client_support_scope: {
+        Row: {
+          answered_at: string | null
+          answered_by: string | null
+          client_id: string
+          created_at: string
+          has_advance_directive: boolean | null
+          has_bsp: boolean | null
+          helps_with_appointments: boolean | null
+          helps_with_medications: boolean | null
+          no_photo: boolean | null
+          organization_id: string
+          setup_finished_at: string | null
+          setup_started_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          answered_at?: string | null
+          answered_by?: string | null
+          client_id: string
+          created_at?: string
+          has_advance_directive?: boolean | null
+          has_bsp?: boolean | null
+          helps_with_appointments?: boolean | null
+          helps_with_medications?: boolean | null
+          no_photo?: boolean | null
+          organization_id: string
+          setup_finished_at?: string | null
+          setup_started_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          answered_at?: string | null
+          answered_by?: string | null
+          client_id?: string
+          created_at?: string
+          has_advance_directive?: boolean | null
+          has_bsp?: boolean | null
+          helps_with_appointments?: boolean | null
+          helps_with_medications?: boolean | null
+          no_photo?: boolean | null
+          organization_id?: string
+          setup_finished_at?: string | null
+          setup_started_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_support_scope_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_support_scope_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_weekly_targets: {
         Row: {
           client_id: string
