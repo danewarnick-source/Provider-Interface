@@ -41,6 +41,7 @@ export const SAMPLE_PCSP_PAGES: LayoutPage[] = [
     "Personal Information",
     f("Legal Name:", "Pat Q. Example"),
     f("PID:", "0000000"),
+    f("Date of Birth:", "01/02/1990"),
     f("Residential Address:", "100 Sample Street"),
     at([24, "Exampleville, UT 84000"]),
     f("Phone:", "555-0100"),

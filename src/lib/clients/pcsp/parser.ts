@@ -3,11 +3,12 @@
 // plus a list of issues for a person to review. Anything the reader can't
 // place is reported, never guessed.
 
+import { ourAgencyMatcher } from "./agency-match.ts";
 import type { LayoutPage } from "./layout.ts";
 import { readGoals } from "./parser-goals.ts";
 import { runChecks } from "./parser-checks.ts";
 import {
-  indent, longDate, ourAgencyMatcher, SECTIONS, squash, usDate,
+  indent, longDate, SECTIONS, squash, usDate,
   type Issue, type L, type PcspOptions, type PcspResult,
 } from "./parser-shared.ts";
 import {
@@ -74,7 +75,7 @@ function splitSections(body: L[]): PcspSection[] {
 function emptyResult(): PcspResult {
   return {
     plan: { start: null, end: null, activatedOn: null, status: null, meetingDate: null },
-    person: { name: "", pid: "", residentialAddress: "", mailingAddress: "", phone: "", supportCoordinator: { name: "", email: "", phone: "", company: "" } },
+    person: { name: "", pid: "", dob: null, residentialAddress: "", mailingAddress: "", phone: "", supportCoordinator: { name: "", email: "", phone: "", company: "" } },
     goals: [], nonGoalSupports: [], purchasedServices: [], budget: [], risks: [], aboutMe: [], lastYearGoals: [], issues: [],
   };
 }
@@ -83,7 +84,7 @@ function emptyResult(): PcspResult {
 export function readPcspPages(pages: LayoutPage[], opts: PcspOptions): { result: PcspResult; sections: PcspSection[] } {
   const res = emptyResult();
   const { issues } = res;
-  const isOurs = ourAgencyMatcher(opts.agencyName);
+  const isOurs = ourAgencyMatcher([opts.agencyName, ...(opts.otherNames ?? [])]);
   const body = pageBodies(pages, res, issues);
 
   // Plan dates from the cover line "09/01/2026 - 08/31/2027".

@@ -9,6 +9,7 @@
   "person": {
     "name": "Pat Q. Example",
     "pid": "0000000",
+    "dob": "1990-01-02",
     "residentialAddress": "100 Sample Street Exampleville, UT 84000",
     "mailingAddress": "",
     "phone": "555-0100",

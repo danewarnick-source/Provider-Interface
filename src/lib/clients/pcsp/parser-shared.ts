@@ -30,7 +30,7 @@ export type LastYearGoal = { goal: string; ongoing: boolean | null; status: stri
 
 export type PcspResult = {
   plan: { start: string | null; end: string | null; activatedOn: string | null; status: string | null; meetingDate: string | null };
-  person: { name: string; pid: string; residentialAddress: string; mailingAddress: string; phone: string;
+  person: { name: string; pid: string; dob: string | null; residentialAddress: string; mailingAddress: string; phone: string;
     supportCoordinator: { name: string; email: string; phone: string; company: string } };
   goals: Goal[];
   nonGoalSupports: NonGoalSupport[];
@@ -42,7 +42,13 @@ export type PcspResult = {
   issues: Issue[];
 };
 
-export type PcspOptions = { agencyName: string; agencyCodes: string[] };
+export type PcspOptions = {
+  /** The agency's legal name (Settings); also used in "no purchased services for …". */
+  agencyName: string;
+  /** Other names the agency goes by; a provider matching any of them is "ours". */
+  otherNames?: string[];
+  agencyCodes: string[];
+};
 
 /** One body line with the page it came from. */
 export type L = { page: number; y: number; text: string };
@@ -57,8 +63,6 @@ export const DOMAINS = ["Daily Life Employment", "Community Living", "Safety & S
   "Social Spirituality", "Citizenship & Advocacy"];
 export const LABEL = /^(\s*)([A-Z][A-Za-z ()/&'?-]{1,40}?):(\s+(.*))?$/;
 
-export const norm = (s: string) =>
-  s.toUpperCase().replace(/[^A-Z0-9 ]/g, " ").replace(/\b(LLC|INC|CORP|CO)\b/g, "").replace(/\s+/g, " ").trim();
 export const squash = (s: string) => s.replace(/\s+/g, " ").trim();
 export const usDate = (s: string | undefined | null) => {
   const m = s && s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
@@ -72,15 +76,6 @@ export const longDate = (s: string) => {
   return m && MONTHS[m[1]] ? `${m[3]}-${MONTHS[m[1]]}-${m[2].padStart(2, "0")}` : null;
 };
 export const indent = (t: string) => t.length - t.trimStart().length;
-
-/** "Is this provider name our agency?" by normalized legal name. */
-export function ourAgencyMatcher(agencyName: string): (provider: string) => boolean {
-  const agency = norm(agencyName);
-  return (p: string) => {
-    const n = norm(p);
-    return !!agency && !!n && (n.includes(agency) || agency.includes(n));
-  };
-}
 
 /** "DSI  Example Supports, LLC" → the paid provider; null when the line isn't one. */
 export function parseProvider(v: string, isOurs: (provider: string) => boolean): Provider | null {
