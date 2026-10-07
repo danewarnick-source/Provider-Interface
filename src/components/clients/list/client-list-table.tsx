@@ -12,17 +12,21 @@ import {
 import { isRowControlClick, type ClientListViewProps } from "./client-list-types";
 import {
   ClientAvatar,
-  CodeBadges,
+  CodesCell,
+  HomeCell,
+  NameBlock,
   NextDueCell,
   ReadinessTag,
   StaffCell,
   UnitsLeftCell,
 } from "./list-cells";
 
+/** Desktop table; the whole row opens the profile. Scrolls inside its own box. */
 export function ClientListTable({
   rows,
   discharged,
   canEditClients,
+  viewer,
   reactivate,
   onOpenClient,
   onOpenDraft,
@@ -30,70 +34,70 @@ export function ClientListTable({
   return (
     <div className="hidden max-h-[calc(100vh-18rem)] overflow-auto md:block">
       <Table>
-        <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur supports-[backdrop-filter]:bg-muted/60">
+        <TableHeader className="sticky top-0 z-10 bg-[var(--hive-muted-surface)]">
           <TableRow>
             <TableHead>Client</TableHead>
             <TableHead>Codes</TableHead>
             <TableHead>Home</TableHead>
             <TableHead>Units left</TableHead>
             <TableHead>Next due</TableHead>
-            <TableHead>Team members</TableHead>
-            <TableHead>{discharged ? "" : "Ready"}</TableHead>
+            <TableHead>Team</TableHead>
+            <TableHead className="text-right">{discharged ? "" : "Readiness"}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((c) => {
             const draft = c.kind === "draft";
-            const name = `${c.first_name} ${c.last_name}`.trim();
+            const inner = (
+              <>
+                <ClientAvatar row={c} />
+                <NameBlock row={c} />
+              </>
+            );
+            const cellBox = "flex w-full items-center gap-3 px-4 py-2 text-left";
             return (
               <TableRow
                 key={c.id}
                 data-testid={draft ? "client-draft-row" : "client-row"}
-                className="h-12 cursor-pointer transition-colors hover:bg-muted/50"
+                className="h-14 cursor-pointer transition-colors hover:bg-[var(--hive-muted-surface)]"
                 onClick={(e) => {
                   if (isRowControlClick(e.target)) return;
                   if (draft) onOpenDraft(c.id);
                   else onOpenClient(c.id);
                 }}
               >
-                <TableCell className="whitespace-nowrap p-0 font-medium">
+                <TableCell className="min-w-[200px] p-0">
                   {draft ? (
-                    <button
-                      type="button"
-                      onClick={() => onOpenDraft(c.id)}
-                      className="flex w-full items-center gap-2 px-4 py-2 text-left"
-                    >
-                      <ClientAvatar row={c} />
-                      <span className="truncate">{name}</span>
+                    <button type="button" onClick={() => onOpenDraft(c.id)} className={cellBox}>
+                      {inner}
                     </button>
                   ) : (
                     <Link
                       to="/dashboard/clients/$clientId"
                       params={{ clientId: c.id }}
                       search={{}}
-                      className="flex w-full items-center gap-2 rounded-sm px-4 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className={`${cellBox} rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
                     >
-                      <ClientAvatar row={c} />
-                      <span className="truncate">{name}</span>
+                      {inner}
                     </Link>
                   )}
                 </TableCell>
                 <TableCell className="py-2">
-                  <CodeBadges codes={c.codes} />
+                  {draft ? null : <CodesCell row={c} viewer={viewer} />}
                 </TableCell>
-                <TableCell className="max-w-[160px] truncate py-2 text-sm text-muted-foreground">
-                  {c.home?.name ?? "—"}
+                <TableCell className="max-w-[160px] truncate py-2">
+                  <HomeCell row={c} viewer={viewer} />
                 </TableCell>
                 <TableCell className="whitespace-nowrap py-2">
-                  <UnitsLeftCell row={c} />
+                  <UnitsLeftCell row={c} viewer={viewer} />
                 </TableCell>
                 <TableCell className="whitespace-nowrap py-2">
                   <NextDueCell row={c} />
                 </TableCell>
                 <TableCell className="max-w-[180px] truncate py-2">
-                  <StaffCell row={c} />
+                  <StaffCell row={c} viewer={viewer} />
                 </TableCell>
-                <TableCell className="py-2 text-right" data-no-row-nav>
+                <TableCell className="py-2 text-right" data-no-row-nav={discharged || undefined}>
                   {discharged ? (
                     <Button
                       variant="outline"
