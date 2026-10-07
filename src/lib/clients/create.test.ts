@@ -184,6 +184,7 @@ describe("prefillFromPcsp", () => {
     nonGoalSupports: [],
     purchasedServices: [],
     risks: [],
+    aboutMe: [],
     lastYearGoals: [],
     issues: [],
   } as PcspResult;
