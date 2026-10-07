@@ -74,7 +74,7 @@ export function AddIdentityFields({
             maxLength={100}
           />
         </Field>
-        <Field label="Date of birth">
+        <Field label="Date of birth" tag={has("date_of_birth")}>
           <Input
             type="date"
             value={form.date_of_birth ?? ""}

@@ -58,7 +58,7 @@ const seed = () => ({
   client_plans: [{ id: "old", client_id: "c1", status: "current" }],
   client_goals: [{ id: "g-cook", plan_id: "old", client_id: "c1", status: "active", goal_text: parse.goals[0].goal }],
   client_billing_codes: [{ id: "b-dsi", client_id: "c1", service_code: "DSI", rate_per_unit: 7 }],
-  clients: [{ id: "c1", special_directions: "Allergic to cats.", about_me: null }],
+  clients: [{ id: "c1", special_directions: "Allergic to cats.", about_me: null, phone_number: "555-0199" }],
   client_contacts: [{ id: "k1", client_id: "c1", name: "Casey Sample", sort: 0 }],
 });
 const args = (review: ReturnType<typeof initialReview>) => ({
@@ -72,7 +72,10 @@ test("confirm creates the plan, goals, supports, authorizations, must-knows and 
   const r = review();
   r.plan.start = "2000-01-01";
   const out = await applyReviewedPcsp(db, args(r));
-  assert.deepEqual({ ...out, planId: typeof out.planId }, { planId: "string", goals: 3, supports: 6, codes: ["DSI", "HHS", "SEI"], contacts: 1 });
+  assert.deepEqual({ ...out, planId: typeof out.planId }, {
+    planId: "string", goals: 3, supports: 6, codes: ["DSI", "HHS", "SEI"], contacts: 1,
+    profile: ["PID", "date of birth", "address"],
+  });
   const plans = db.tables.client_plans;
   assert.equal(plans.find((p) => p.id === "old")!.status, "past");
   const plan = plans.find((p) => p.id === out.planId)!;
@@ -95,6 +98,10 @@ test("confirm creates the plan, goals, supports, authorizations, must-knows and 
   const client = db.tables.clients[0];
   assert.match(String(client.special_directions), /^Allergic to cats\.\n\nFrom PCSP 2000-01-01 – 2027-08-31:\n- Choking/);
   assert.equal(client.about_me, null);
+  // Blank profile fields are filled; the phone a person typed is kept.
+  assert.deepEqual([client.client_pid, client.date_of_birth, client.phone_number], ["0000000", "1990-01-02", "555-0199"]);
+  // The support coordinator is already a contact (same name), so only the other provider is added.
+  assert.equal(db.tables.client_contacts.length, 2);
   assert.equal(db.tables.client_contacts[1].role, "other_provider");
 });
 
@@ -106,4 +113,12 @@ test("nothing is written when the review has problems or the document isn't this
   await assert.rejects(applyReviewedPcsp(db, args(bad)), /start and end dates/);
   await assert.rejects(applyReviewedPcsp(db, { ...args(review()), documentId: "other" }), /wasn't found/);
   assert.equal(JSON.stringify(db.tables), before);
+});
+
+test("a new support coordinator from the PCSP is added as the primary coordinator", async () => {
+  const db = fakeDb({ ...seed(), client_contacts: [] });
+  const out = await applyReviewedPcsp(db, args(review()));
+  assert.equal(out.contacts, 2);
+  const sc = db.tables.client_contacts[0];
+  assert.deepEqual([sc.role, sc.name, sc.email, sc.is_primary], ["support_coordinator", "Casey Sample", "casey@example.test", true]);
 });

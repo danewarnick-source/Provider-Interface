@@ -16,6 +16,12 @@ const support = z.object({
 });
 
 export const reviewedPcspSchema = z.object({
+  person: z.object({
+    pid: text(50), dob: ymd, phone: text(50), address: text(255),
+    supportCoordinator: z.object({
+      include: z.boolean(), name: text(200), phone: text(50), email: text(200), company: text(200),
+    }),
+  }),
   plan: z.object({ start: ymd, end: ymd, activatedOn: ymd, meetingDate: ymd }),
   goals: z.array(z.object({
     include: z.boolean(),

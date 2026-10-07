@@ -25,7 +25,14 @@ export type ReviewBudgetLine = {
 export type ReviewOtherNeed = ReviewSupport & { include: boolean };
 export type ReviewOtherProvider = { include: boolean; code: string; provider: string; note: string };
 
+/** Profile details and support coordinator (blank profile fields are filled; the coordinator is added once). */
+export type ReviewPerson = {
+  pid: string; dob: string | null; phone: string; address: string;
+  supportCoordinator: { include: boolean; name: string; phone: string; email: string; company: string };
+};
+
 export type ReviewedPcsp = {
+  person: ReviewPerson;
   plan: { start: string | null; end: string | null; activatedOn: string | null; meetingDate: string | null };
   goals: ReviewGoal[];
   otherNeeds: ReviewOtherNeed[];
@@ -71,7 +78,13 @@ export function otherProvidersFrom(parse: PcspResult): ReviewOtherProvider[] {
 
 export function initialReview(parse: PcspResult, carry: CarryOver): ReviewedPcsp {
   const unitFor = (code: string) => parse.purchasedServices.find((p) => p.code === code)?.unitType;
+  const p = parse.person;
+  const sc = p.supportCoordinator;
   return {
+    person: {
+      pid: p.pid, dob: p.dob, phone: p.phone, address: p.residentialAddress,
+      supportCoordinator: { include: !!sc.name.trim(), name: sc.name, phone: sc.phone, email: sc.email, company: sc.company },
+    },
     plan: { start: parse.plan.start, end: parse.plan.end, activatedOn: parse.plan.activatedOn, meetingDate: parse.plan.meetingDate },
     goals: parse.goals.map((g, i) => {
       const c = carry.goals.find((x) => x.index === i);

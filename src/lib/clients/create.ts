@@ -1,6 +1,6 @@
 // Add client: the one-page form's shape, checks, and how it maps onto
-// clients / client_billing_codes / client_contacts. Also "Fill from PCSP"
-// (Prompt 5's reader output → form fields, each filled field tagged).
+// clients / client_billing_codes / client_contacts. Also "Start from their
+// PCSP" (the reader's output → the form's fields, each filled field tagged).
 // Pure; the writes live in create.functions.ts.
 
 import { z } from "zod";
@@ -197,21 +197,21 @@ export function contactRows(f: AddClientForm) {
 export type FilledField =
   | "name"
   | "client_pid"
+  | "date_of_birth"
   | "phone"
   | "address"
-  | "support_coordinator"
-  | "codes";
+  | "support_coordinator";
 
-/** Fill the form from a PCSP read. Only empty fields are filled; returns which ones were. */
+/**
+ * Fill the form's first step from a PCSP read. Only empty fields are filled;
+ * returns which ones were. Codes, units and the plan come from the PCSP
+ * review (confirm-write.ts), not the form.
+ */
 export function prefillFromPcsp(
   f: AddClientForm,
   p: PcspResult,
 ): { form: AddClientForm; filled: FilledField[] } {
-  const form: AddClientForm = {
-    ...f,
-    support_coordinator: { ...f.support_coordinator },
-    codes: [...f.codes],
-  };
+  const form: AddClientForm = { ...f, support_coordinator: { ...f.support_coordinator } };
   const filled: FilledField[] = [];
   const parts = p.person.name.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2 && !form.first_name && !form.last_name) {
@@ -222,6 +222,10 @@ export function prefillFromPcsp(
   if (p.person.pid && !form.client_pid) {
     form.client_pid = p.person.pid;
     filled.push("client_pid");
+  }
+  if (p.person.dob && !form.date_of_birth) {
+    form.date_of_birth = p.person.dob;
+    filled.push("date_of_birth");
   }
   if (p.person.phone && !form.phone) {
     form.phone = p.person.phone;
@@ -242,18 +246,5 @@ export function prefillFromPcsp(
     };
     filled.push("support_coordinator");
   }
-  const have = new Set(form.codes.map((c) => c.code));
-  const ours = p.budget.filter((b) => b.ours && b.code && !have.has(b.code.toUpperCase()));
-  for (const b of ours) {
-    form.codes.push({
-      code: b.code.toUpperCase(),
-      waiting: false,
-      start: b.start || null,
-      end: b.end || null,
-      units: b.annualUnits || null,
-      rate: b.rate || null,
-    });
-  }
-  if (ours.length) filled.push("codes");
   return { form, filled };
 }
