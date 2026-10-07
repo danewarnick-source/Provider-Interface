@@ -7,6 +7,7 @@ import { CLIENT_FORM_LABEL, clientFormKindForTitle } from "@/lib/clients/form-ob
 import { isAdminLevel } from "@/lib/access/levels";
 import { todayYmd } from "./dates";
 import { activeGoalViewsOn, type GoalView } from "./plans";
+import { agencySupports, buildStrategySections, supportsToDraft, type StrategySupport } from "./support-strategies";
 import { loadPlanBundle } from "./plans-load";
 
 /** Active goals (with supports) of the client's plan in effect today. */
@@ -67,8 +68,16 @@ export type CSTSection = {
   /** Service/job code(s) this strategy section covers (support_strategies
    *  training only — SOW §1.24(5) coverage check reads this). */
   job_codes?: string[];
+  /** Support strategies: the client_goal_supports row this section is for. */
+  support_id?: string;
+  /** Support strategies: a person edited it, so a rebuild keeps it. */
+  edited?: boolean;
 };
-export type CSTContent = { sections: CSTSection[] };
+export type CSTContent = {
+  sections: CSTSection[];
+  /** Support strategies: why they were approved with supports still lacking one. */
+  approval_note?: string;
+};
 
 // Applied-reasoning prompt shown to staff per tab.
 export type CSTReviewQuestion = {
@@ -98,8 +107,13 @@ const SectionSchema = z.object({
   title: z.string().min(1).max(200),
   items: z.array(ItemSchema).max(50),
   job_codes: z.array(z.string()).optional(),
+  support_id: z.string().max(64).optional(),
+  edited: z.boolean().optional(),
 });
-const ContentSchema = z.object({ sections: z.array(SectionSchema).max(30) });
+const ContentSchema = z.object({
+  sections: z.array(SectionSchema).max(60),
+  approval_note: z.string().max(2000).optional(),
+});
 const ReviewQuestionSchema = z.object({
   id: z.string(),
   tab: z.string(),
@@ -579,7 +593,11 @@ export const updateClientSpecificTraining = createServerFn({ method: "POST" })
 // ── APPROVE & PUBLISH (admin) ──────────────────────────────────────────────
 export const publishClientSpecificTraining = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) => z.object({
+    id: z.string().uuid(),
+    /** Support strategies approved with gaps: the person's reason. */
+    note: z.string().trim().min(1).max(2000).optional(),
+  }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
     if (!supabase || !userId) return { training: null };
@@ -587,17 +605,19 @@ export const publishClientSpecificTraining = createServerFn({ method: "POST" })
     adminGuard(m.access_level);
     const { data: row, error } = await supabase
       .from("client_specific_trainings")
-      .select("organization_id")
+      .select("organization_id, content")
       .eq("id", data.id)
       .maybeSingle();
     if (error || !row) throw new Error("Training not found.");
     if (row.organization_id !== m.organization_id) throw new Error("Forbidden.");
+    const content = (row.content ?? { sections: [] }) as CSTContent;
     const { data: updated, error: uErr } = await supabase
       .from("client_specific_trainings")
       .update({
         status: "published",
         approved_by: userId,
         approved_at: new Date().toISOString(),
+        content: { ...content, approval_note: data.note } as unknown,
       })
       .eq("id", data.id)
       .select("*")
@@ -672,23 +692,25 @@ export const checkAnswerRelevance = createServerFn({ method: "POST" })
 // One row per client (training_type='support_strategies'). Admin-authored:
 // stub from PCSP goals (NECTAR verbatim), blank, or uploaded provider doc.
 
-// NECTAR drafts "Instructions to staff" for each PCSP goal. This is an
-// AI-drafted starting point only — the agency admin MUST review, edit, and
-// attest before publishing. NECTAR never auto-publishes; status stays "draft".
-async function draftSupportStrategyInstructions(goals: string[], orgId?: string | null): Promise<string[]> {
-  if (!goals.length) return [];
+// NECTAR drafts the "Support strategy" for each PCSP support paid to the
+// agency. This is an AI-drafted starting point only — the agency admin MUST
+// review, edit, and approve. NECTAR never auto-publishes; status stays "draft".
+async function draftSupportStrategyInstructions(supports: StrategySupport[], orgId?: string | null): Promise<string[]> {
+  if (!supports.length) return [];
   try {
     const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
     const system = [
       "You are NECTAR, drafting staff support strategies for a Utah DSPD direct-support worker.",
-      "For each PCSP goal, write clear, practical 'instructions to staff' — what the worker should DO on shift to help the client work toward that goal.",
-      "Ground every instruction in the goal as written; do not invent diagnoses, clinical interventions, behavioral protocols, or medical procedures.",
-      "Write in plain, natural language a support worker can follow. 2–5 sentences per goal.",
-      "This is a DRAFT the agency admin will review, edit, and attest to before it reaches staff.",
-      'Respond ONLY with JSON: { "strategies": [ { "goal": "...", "instructions": "..." } ] } preserving goal order.',
+      "For each PCSP support (with its goal and support details), write clear, practical instructions — what the worker should DO on shift to provide that support.",
+      "Ground every instruction in the goal, support and details as written; do not invent diagnoses, clinical interventions, behavioral protocols, or medical procedures.",
+      "Write in plain, natural language a support worker can follow. 2–5 sentences per support.",
+      "This is a DRAFT the agency admin will review, edit, and approve before it reaches staff.",
+      'Respond ONLY with JSON: { "strategies": [ { "support": "...", "instructions": "..." } ] } preserving the order given.',
       "No preamble, no markdown fences.",
     ].join("\n");
-    const user = `PCSP GOALS (in order):\n${goals.map((g, i) => `${i + 1}. ${g}`).join("\n")}`;
+    const user = `PCSP SUPPORTS (in order):\n${supports
+      .map((s, i) => `${i + 1}. Goal: ${s.goal}\n   Support: ${s.support}\n   Support details: ${s.details || "None listed"}`)
+      .join("\n")}`;
     const res = await gatewayFetch({
       messages: [
         { role: "system", content: system },
@@ -696,47 +718,37 @@ async function draftSupportStrategyInstructions(goals: string[], orgId?: string 
       ],
       response_format: { type: "json_object" },
     }, { orgId });
-    if (!res.ok) return goals.map(() => "");
+    if (!res.ok) return supports.map(() => "");
     const body = await res.json();
     const content: string = body?.choices?.[0]?.message?.content ?? "{}";
     const clean = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
     const parsed = JSON.parse(clean || "{}") as {
-      strategies?: Array<{ goal?: string; instructions?: string }>;
+      strategies?: Array<{ support?: string; instructions?: string }>;
     };
     const rows = Array.isArray(parsed.strategies) ? parsed.strategies : [];
-    return goals.map((_, i) => String(rows[i]?.instructions ?? "").slice(0, 4000));
+    return supports.map((_, i) => String(rows[i]?.instructions ?? "").slice(0, 4000));
   } catch {
-    return goals.map(() => "");
+    return supports.map(() => "");
   }
 }
 
+/**
+ * One section per support paid to the agency (support-strategies.ts). Edited
+ * sections are kept; with `nectar`, the others get a fresh Nectar draft.
+ */
 async function assembleSupportStrategyStubs(
   supabase: AnySupabase,
   orgId: string,
   clientId: string,
+  existing: CSTSection[],
+  nectar: boolean,
 ): Promise<CSTContent> {
-  const goals: string[] = (await planGoals(supabase, clientId)).map((g) => g.goal);
-  if (!goals.length) {
-    void orgId;
-    return { sections: [{ id: sid(), title: "Support strategy", items: [
-      { kind: "text" as const, label: "Goal this supports", value: "" },
-      { kind: "text" as const, label: "Instructions to staff", value: "" },
-    ] }] };
-  }
-  // AI-drafted starting point; admin reviews/edits/attests before publish.
-  const instructions = await draftSupportStrategyInstructions(goals, orgId);
-  const sections: CSTSection[] = goals.map((g, i) => ({
-    id: sid(),
-    title: "Support strategy",
-    items: [
-      { kind: "text" as const, label: "Goal this supports", value: String(g) },
-      { kind: "text" as const, label: "Instructions to staff", value: instructions[i] ?? "" },
-    ],
-  }));
-  void orgId;
-  return { sections };
+  const supports = agencySupports(await planGoals(supabase, clientId));
+  const toDraft = nectar ? supportsToDraft(supports, existing) : [];
+  const texts = await draftSupportStrategyInstructions(toDraft, orgId);
+  const drafts = new Map(toDraft.map((s, i) => [s.supportId, texts[i] ?? ""]));
+  return { sections: buildStrategySections(supports, existing, drafts) };
 }
-
 
 export const getSupportStrategiesTraining = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -754,7 +766,16 @@ export const getSupportStrategiesTraining = createServerFn({ method: "GET" })
       .eq("training_type", "support_strategies")
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return { training: row };
+    let approverName: string | null = null;
+    if (row?.approved_by) {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("id", row.approved_by)
+        .maybeSingle();
+      approverName = [p?.first_name, p?.last_name].filter(Boolean).join(" ").trim() || null;
+    }
+    return { training: row, approverName };
   });
 
 export const draftSupportStrategies = createServerFn({ method: "POST" })
@@ -770,17 +791,16 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
     adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
 
-    let content: CSTContent;
-    if (data.mode === "blank") {
-      content = { sections: [
-        { id: sid(), title: "Support strategy", items: [
-          { kind: "text", label: "Goal this supports", value: "" },
-          { kind: "text", label: "Instructions to staff", value: "" },
-        ] },
-      ] };
-    } else {
-      content = await assembleSupportStrategyStubs(supabase, m.organization_id, data.clientId);
-    }
+    const { data: current } = await supabase
+      .from("client_specific_trainings")
+      .select("content")
+      .eq("client_id", data.clientId)
+      .eq("training_type", "support_strategies")
+      .maybeSingle();
+    const kept = ((current?.content as CSTContent | undefined)?.sections ?? []).filter((x) => x.edited);
+    const content = await assembleSupportStrategyStubs(
+      supabase, m.organization_id, data.clientId, kept, data.mode !== "blank",
+    );
 
     const { data: existing } = await supabase
       .from("client_specific_trainings")

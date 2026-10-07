@@ -74,7 +74,7 @@ test("other-provider contacts skip names the client already has", () => {
   assert.deepEqual(contactRows(r, { ...ids, existingNames: ["sample behavior group inc"], startSort: 0 }), []);
 });
 
-test("continuing goals carry history only from a goal on the current plan", () => {
+test("carried-over goals carry history only from a goal on the current plan", () => {
   const [cook, job] = review().goals;
   assert.equal(carriedFrom(cook, new Set(["g-cook"])), "g-cook");
   assert.equal(carriedFrom(cook, new Set()), null);

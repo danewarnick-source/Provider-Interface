@@ -3,6 +3,7 @@
 // shortcuts on empty cells. Pure: no React, no Supabase.
 
 import { formatDate } from "./dates.ts";
+import { pcspDueHeadline } from "./pcsp-status.ts";
 import type { ClientListRow, DueItem } from "./list.ts";
 import { DUE_SOON_DAYS, LOW_UNITS_PCT } from "./list.ts";
 import { visibleClientSections, type ClientProfileSection } from "./profile-sections.ts";
@@ -84,12 +85,9 @@ export function readinessTag(row: Pick<ClientListRow, "kind" | "readiness">): {
 
 const plural = (n: number) => `${n} day${n === 1 ? "" : "s"}`;
 
-/** Next due line; the plan year uses the Plans wording ("PCSP is N days overdue"). */
+/** Next due line; the plan year uses the Plans wording (pcsp-status.ts). */
 export function nextDueText(d: DueItem): string {
-  if (d.kind === "plan") {
-    if (d.days < 0) return `PCSP is ${plural(-d.days)} overdue`;
-    return d.days === 0 ? "PCSP expires today" : `PCSP expires in ${plural(d.days)}`;
-  }
+  if (d.kind === "plan") return pcspDueHeadline(d.days, d.date);
   if (d.days < 0) return `${d.label} · ${plural(-d.days)} overdue`;
   return `${d.label} · ${shortDate(d.date)}`;
 }

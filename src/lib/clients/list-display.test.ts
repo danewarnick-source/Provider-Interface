@@ -68,8 +68,8 @@ describe("nextDueText and dueTone", () => {
     const plan = { kind: "plan" as const, label: "Plan renews", date: "2026-09-01" };
     assert.equal(nextDueText({ ...plan, days: -36 }), "PCSP is 36 days overdue");
     assert.equal(nextDueText({ ...plan, days: -1 }), "PCSP is 1 day overdue");
-    assert.equal(nextDueText({ ...plan, days: 12 }), "PCSP expires in 12 days");
-    assert.equal(nextDueText({ ...plan, days: 0 }), "PCSP expires today");
+    assert.equal(nextDueText({ ...plan, days: 12 }), "PCSP expires in 12 days (Sep 1)");
+    assert.equal(nextDueText({ ...plan, days: 0 }), "PCSP expires today (Sep 1)");
   });
   it("keeps other items' labels with a short date or days overdue", () => {
     const s = { kind: "summary" as const, label: "Summary due", date: "2026-10-15" };

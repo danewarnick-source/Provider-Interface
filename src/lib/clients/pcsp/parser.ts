@@ -44,8 +44,8 @@ function pageBodies(pages: LayoutPage[], res: PcspResult, issues: Issue[]): L[] 
       const cut = heads.length > 1 ? heads[1] : 0;
       keep = keep.slice(0, cut);
       issues.push({ level: "warn", page: p.index, message: cut
-        ? "The bottom of this page is printed on top of itself. The readable top part was used; the overlapping part was skipped. Check it by eye."
-        : "This page's text is printed on top of itself and was skipped. Check it by eye." });
+        ? `Page ${p.index} didn't print cleanly in this PDF, so part of it couldn't be read. Open page ${p.index} of the PCSP and check that the goals and supports from that page are listed below.`
+        : `Page ${p.index} couldn't be read at all. Open page ${p.index} of the PCSP and add anything from it by hand.` });
     }
     for (const l of keep) if (!FOOTER.test(l.text.trim())) body.push(l);
   }
@@ -98,7 +98,7 @@ export function readPcspPages(pages: LayoutPage[], opts: PcspOptions): { result:
   readPerson(get("Personal Information"), res.person);
   readMeetingMinutes(get("Plan Meeting Minutes"), res.plan);
   res.goals = readGoals(get("Goals and Supports"), isOurs, issues);
-  res.nonGoalSupports = readNonGoalSupports(get("Non Goal Supports"));
+  res.nonGoalSupports = readNonGoalSupports(get("Non Goal Supports"), isOurs);
   res.purchasedServices = readPurchasedServices(get("DSPD Purchased Services"), issues);
   res.budget = readBudget(get("Plan Budget"), isOurs, issues);
   res.risks = readRisks(get("List of Identified Risks"));

@@ -9,10 +9,13 @@ import { assertRowsChanged } from "../writes.ts";
 import {
   billingRows, blockHeading, carriedFrom, confirmProblems, contactRows, mergePcspBlock, riskLines,
 } from "./confirm-plan.ts";
-import type { ReviewedPcsp } from "./review.ts";
+import type { ReviewedPcsp, ReviewSupport } from "./review.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = { from: (table: string) => any };
+
+/** goal_text of the row that holds a plan's non-goal supports (client_goals.kind 'other_need'). */
+export const OTHER_NEEDS_GOAL = "Other needs in the PCSP";
 
 export interface ConfirmArgs {
   organizationId: string;
@@ -66,19 +69,15 @@ export async function applyReviewedPcsp(sb: Sb, a: ConfirmArgs): Promise<Confirm
   });
 
   let goals = 0, supports = 0;
-  for (const g of a.review.goals.filter((x) => x.include && x.goal.trim())) {
-    const clean = (s: string) => s.trim() || null;
+  const clean = (s: string) => s.trim() || null;
+  async function insertGoal(row: Record<string, unknown>, list: ReviewSupport[]): Promise<void> {
     const { data: rows, error } = await sb.from("client_goals").insert({
-      organization_id: a.organizationId, client_id: a.clientId, plan_id: planId, sort: goals,
-      goal_text: g.goal.trim(), domain: clean(g.domain), current_status: clean(g.currentStatus),
-      strengths: clean(g.strengths), barriers: clean(g.barriers),
-      success_person: clean(g.successPerson), success_team: clean(g.successTeam),
-      carried_from_goal_id: carriedFrom(g, currentGoalIds), created_by: a.userId,
+      organization_id: a.organizationId, client_id: a.clientId, plan_id: planId, sort: goals, created_by: a.userId, ...row,
     }).select("id");
     fail(error);
     const goalId = (assertRowsChanged(rows as unknown[])[0] as { id: string }).id;
     goals++;
-    const supportRows = g.supports.map((s, sort) => ({
+    const supportRows = list.map((s, sort) => ({
       organization_id: a.organizationId, goal_id: goalId, sort,
       support_text: s.support.trim(), details: s.details.trim() || null,
       start_date: s.start, end_date: s.end, our_codes: normalizeCodes(s.ourCodes),
@@ -91,6 +90,17 @@ export async function applyReviewedPcsp(sb: Sb, a: ConfirmArgs): Promise<Confirm
       supports += supportRows.length;
     }
   }
+  for (const g of a.review.goals.filter((x) => x.include && x.goal.trim())) {
+    await insertGoal({
+      goal_text: g.goal.trim(), domain: clean(g.domain), current_status: clean(g.currentStatus),
+      strengths: clean(g.strengths), barriers: clean(g.barriers),
+      success_person: clean(g.successPerson), success_team: clean(g.successTeam),
+      carried_from_goal_id: carriedFrom(g, currentGoalIds),
+    }, g.supports);
+  }
+  // Kept non-goal supports go under one "Other needs in the PCSP" row.
+  const otherNeeds = a.review.otherNeeds.filter((x) => x.include && x.support.trim());
+  if (otherNeeds.length) await insertGoal({ goal_text: OTHER_NEEDS_GOAL, kind: "other_need" }, otherNeeds);
 
   const codes = billingRows(a.review, { ...a });
   if (codes.length) {

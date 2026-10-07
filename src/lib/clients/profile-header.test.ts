@@ -94,23 +94,31 @@ describe("guardianTile", () => {
 
 describe("planYearTile", () => {
   it("shows the end date when current", () => {
-    assert.deepEqual(planYearTile("2027-08-31", 0, fmt), {
+    assert.deepEqual(planYearTile("2027-08-31", { kind: "ok", endDate: "2027-08-31", days: 300 }, fmt), {
       value: "F(2027-08-31)",
       note: null,
       warn: false,
     });
   });
-  it("turns amber when the PCSP is overdue", () => {
-    assert.deepEqual(planYearTile("2026-08-31", 12, fmt), {
-      value: "F(2026-08-31)",
-      note: "PCSP is 12 days overdue",
-      warn: true,
-    });
-    assert.equal(planYearTile("2026-08-31", 1, fmt).note, "PCSP is 1 day overdue");
+  it("uses the PCSP wording when it expires soon or is overdue", () => {
+    const soon = planYearTile(
+      "2026-11-05",
+      { kind: "expiring", endDate: "2026-11-05", days: 30, threshold: 30 },
+      fmt,
+    );
+    assert.deepEqual(soon, { value: "F(2026-11-05)", note: "PCSP expires in 30 days (Nov 5)", warn: false });
+    assert.deepEqual(
+      planYearTile("2026-08-31", { kind: "overdue", endDate: "2026-08-31", days: 12, followUp: true }, fmt),
+      { value: "F(2026-08-31)", note: "PCSP is 12 days overdue", warn: true },
+    );
+    assert.equal(
+      planYearTile("2026-08-31", { kind: "overdue", endDate: "2026-08-31", days: 1, followUp: false }, fmt).note,
+      "PCSP is 1 day overdue",
+    );
   });
-  it("warns when there is no plan year", () => {
-    assert.deepEqual(planYearTile(null, null, fmt), {
-      value: "No plan year on file",
+  it("warns when there is no PCSP", () => {
+    assert.deepEqual(planYearTile(null, { kind: "none" }, fmt), {
+      value: "No PCSP on file",
       note: null,
       warn: true,
     });

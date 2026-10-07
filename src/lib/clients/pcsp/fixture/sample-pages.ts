@@ -2,8 +2,10 @@
 // from a PDF). Every name, number and address here is invented — no PHI.
 // Used by parser.test.ts (exact output) and the e2e mock for the review.
 // Covers: 2 goals, a support that runs onto the next page, several supports
-// per goal, another agency's provider, a purchased service missing its code,
-// an "obsolete" line, and a page printed on top of itself.
+// per goal, another agency's provider, a non-goal support paid to the agency,
+// purchased services with the code and name split by one space or a dash, a
+// service continued across a page break, one missing its code, the standard
+// "obsolete" lines plus one naming a code, and a page printed on top of itself.
 
 import type { LayoutPage } from "../layout.ts";
 
@@ -130,21 +132,40 @@ export const SAMPLE_PCSP_PAGES: LayoutPage[] = [
     f("Support:", "Behavior support plan for Pat at home."),
     f("Support Details:", "Sample Behavior Group writes the plan."),
     f("Support Dates:", "Start Date: 09/01/2026   End Date: 08/31/2027"),
+    f("Support:", "Host home helps Pat with daily living."),
+    f("Paid Provider:", "HHS  Example Supports, LLC"),
+    f("Support Dates:", "Start Date: 09/01/2026   End Date: 08/31/2027"),
     f("Support:", "Annual dental visit."),
     "DSPD Purchased Services",
     at([2, "DSI   Day Supports Individual"]),
     f("Type:", "15 Minutes", 4),
     f("Amount:", "2000 Units", 4),
     f("Duration:", "09/01/2026 - 08/31/2027", 4),
+    at([2, "HHS Host Home Support"]),
     f("Type:", "Daily", 4),
     f("Amount:", "365 Units", 4),
     f("Duration:", "09/01/2026 - 08/31/2027", 4),
+    at([4, "* Services marked with an asterisk are now obsolete."]),
     at([4, "Code RP4 is obsolete"]),
+    at([2, "SLN - Supported Living Natural"]),
+    f("Type:", "15 Minutes", 4),
+    f("Amount:", "400 Units", 4),
+    f("Duration:", "09/01/2026 - 08/31/2027", 4),
     at([2, "SEI   Supported Employment Individual"]),
+    f("Type:", "15 Minutes", 4),
+    ...footer(),
+  ]),
+  page(7, [
+    HEADER,
+    "DSPD Purchased Services",
     f("Type:", "15 Minutes", 4),
     f("Amount:", "1040 Units", 4),
     f("Duration:", "09/01/2026 - 08/31/2027", 4),
+    f("Type:", "Hourly", 4),
+    f("Amount:", "50 Units", 4),
+    f("Duration:", "09/01/2026 - 08/31/2027", 4),
     "Plan Budget",
+    at([2, "* Lines for obsolete services are shown for reference."]),
     at([2, "Example"]),
     at([2, "DSI  W  09/01/2026  08/31/2027  ELIG  $8.50  200  2000  $17,000.00"]),
     at([2, "Supports, LLC"]),

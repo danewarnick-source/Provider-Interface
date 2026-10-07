@@ -8,7 +8,8 @@
 
 import { listReadiness } from "./list.ts";
 import { daysUntil, parseLocalDate } from "./dates.ts";
-import { addDaysYmd, planReminder, strategiesDueOn } from "./plan-dates.ts";
+import { addDaysYmd, strategiesDueOn } from "./plan-dates.ts";
+import { pcspState, pcspWords } from "./pcsp-status.ts";
 import { currentPlan, type ClientPlan } from "./plans.ts";
 import type { ClientProfileSection } from "./profile-sections.ts";
 
@@ -108,8 +109,12 @@ export type ReadinessInput = {
   fileCards: readonly { key: string; title: string; status: string; dueAt: string | null }[];
   photo: { url: string | null; takenOn: string | null };
   plans: readonly ClientPlan[];
-  /** null when the client's codes don't need support strategies. */
-  strategies: { published: boolean } | null;
+  /**
+   * Support strategies (support-strategies.ts coverage): approved or not, and
+   * how many of the agency's supports have one. null when the client's codes
+   * don't need them.
+   */
+  strategies: { published: boolean; covered: number; total: number } | null;
   summaries: readonly { label: string; dueDate: string | null }[];
   restrictions: readonly { title: string; nextReview: string | null; complete: boolean }[];
   setup: { staffCount: number; hasPin: boolean; guardianOk: boolean };
@@ -193,31 +198,32 @@ export function clientAttention(input: ReadinessInput, now: Date = new Date()): 
     });
   }
 
-  const reminder = planReminder(input.plans, now);
-  if (reminder?.kind === "waiting") {
-    const d = reminder.days;
+  const pcsp = pcspState(input.plans, now);
+  const words = pcspWords(pcsp);
+  if (words) {
     add({
-      key: "pcsp-waiting",
-      title: reminder.officeTask ? "Office: follow up on the new PCSP" : "Waiting on the new PCSP",
-      detail: `${d} day${d === 1 ? "" : "s"} since the plan year ended`,
-      tone: reminder.officeTask ? "bad" : "warn",
-      section: "plans",
-    });
-  } else if (reminder?.kind === "ending") {
-    add({
-      key: `plan-ending:${reminder.threshold}`,
-      title: "Plan year ending — schedule the PCSP meeting",
-      detail: `Ends in ${reminder.days} day${reminder.days === 1 ? "" : "s"}`,
-      tone: "warn",
+      key:
+        pcsp.kind === "overdue"
+          ? "pcsp-waiting"
+          : pcsp.kind === "expiring"
+            ? `plan-ending:${pcsp.threshold}`
+            : "pcsp-none",
+      title: words.headline,
+      detail: words.action ?? "",
+      tone: pcsp.kind === "expiring" || (pcsp.kind === "overdue" && !pcsp.followUp) ? "warn" : "bad",
       section: "plans",
     });
   }
 
-  if (input.strategies && !input.strategies.published) {
+  const st = input.strategies;
+  if (st && (!st.published || st.covered < st.total)) {
     const days = daysUntil(strategiesDueOn(currentPlan(input.plans, now)), now);
     add({
       key: "strategies",
-      title: "Support strategies not published",
+      title:
+        st.covered < st.total
+          ? `Support strategies: ${st.covered} of ${st.total} supports have a strategy`
+          : "Support strategies not approved",
       detail: days == null ? "Add the plan's activation date" : dueText(days),
       tone: days != null && days < 0 ? "bad" : "warn",
       section: "plans",

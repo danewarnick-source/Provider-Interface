@@ -68,7 +68,7 @@ export const readPcsp = createServerFn({ method: "POST" })
     const currentPlan = (plan as PcspRead["currentPlan"]) ?? null;
     let currentGoals: { id: string; goal_text: string }[] = [];
     if (currentPlan) {
-      const { data: g } = await sb.from("client_goals").select("id, goal_text").eq("plan_id", currentPlan.id).eq("status", "active");
+      const { data: g } = await sb.from("client_goals").select("id, goal_text").eq("plan_id", currentPlan.id).eq("status", "active").eq("kind", "goal");
       currentGoals = (g ?? []) as typeof currentGoals;
     }
     const carry = proposeCarryOver(parse.goals.map((g) => g.goal), currentGoals, parse.lastYearGoals);

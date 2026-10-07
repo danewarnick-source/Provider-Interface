@@ -1,20 +1,27 @@
-// Support strategies for this client (client_specific_trainings,
-// training_type 'support_strategies'): draft from PCSP goals with Nectar,
-// write by hand or upload a document, edit, then a person approves and
-// publishes. Drafting and publishing need a PCSP on file.
+// Support strategies (client_specific_trainings, training_type
+// 'support_strategies'): one strategy per PCSP support paid to the agency,
+// grouped under its goal and open by default. Nectar drafts; a person edits
+// each one in place and approves. Sections someone edited survive a rebuild.
+// Admins manage them; due to the support coordinator 30 days after the PCSP
+// is activated.
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { ClipboardList } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { strategiesDueOn } from "@/lib/clients/plan-dates";
+import type { ClientPlan } from "@/lib/clients/plans";
 import {
-  SectionsView,
-  PublishConfirmDialog,
-} from "@/components/clients/profile/client-specific-training-card";
+  isUploadDoc,
+  strategyCoverage,
+  strategyStatus,
+  strategyView,
+  withStrategy,
+  type StrategySupport,
+} from "@/lib/clients/support-strategies";
 import {
   attachSupportStrategyDocument,
   draftSupportStrategies,
@@ -23,31 +30,33 @@ import {
   updateClientSpecificTraining,
   type CSTContent,
 } from "@/lib/clients/training.functions";
-import {
-  PcspFirstDialog,
-  SSStatusBadge,
-  SupportStrategyCoveragePanel,
-  isUploadDoc,
-} from "./support-strategies-parts";
-import {
-  StrategiesDescription,
-  StrategiesEmpty,
-  StrategiesToolbar,
-  StrategiesUploaded,
-} from "./support-strategies-cards";
-import { useHasPcsp } from "./use-latest-document";
+import { PcspFirstDialog } from "./support-strategies-parts";
+import { StrategiesEmpty, StrategiesStatus, StrategiesUploaded } from "./support-strategies-cards";
+import { SupportStrategiesList } from "./support-strategies-list";
+import { PublishConfirmDialog } from "./publish-confirm-dialog";
 
-type SSRow = { id: string; content: CSTContent; status: string; version: number };
+type SSRow = {
+  id: string;
+  content: CSTContent;
+  status: string;
+  version: number;
+  approved_at: string | null;
+};
 
 export function SupportStrategiesPanel({
   clientId,
   orgId,
-  dueOn,
+  plan,
+  supports,
+  canEdit,
 }: {
   clientId: string;
   orgId?: string;
-  /** Current plan activation + 30 days; shown until published. */
-  dueOn: string | null;
+  /** The current plan year (due date; "out of date" when newer than the approval). */
+  plan: ClientPlan | null;
+  /** The current plan's supports paid to the agency. */
+  supports: StrategySupport[];
+  canEdit: boolean;
 }) {
   const qc = useQueryClient();
   const getSS = useServerFn(getSupportStrategiesTraining);
@@ -56,40 +65,47 @@ export function SupportStrategiesPanel({
   const updateFn = useServerFn(updateClientSpecificTraining);
   const publishFn = useServerFn(publishClientSpecificTraining);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [draftContent, setDraftContent] = useState<CSTContent | null>(null);
-  const [bodyOpen, setBodyOpen] = useState(false);
   const [pcspPrompt, setPcspPrompt] = useState(false);
   const [publishDialog, setPublishDialog] = useState(false);
-  const queryKey = useMemo(() => ["support-strategies-training", clientId], [clientId]);
+  const queryKey = ["support-strategies-training", clientId];
 
-  const pcspReady = useHasPcsp(clientId);
-  const { data, isLoading } = useQuery({ queryKey, queryFn: () => getSS({ data: { clientId } }) });
+  const { data, isLoading } = useQuery({
+    queryKey,
+    enabled: canEdit,
+    queryFn: () => getSS({ data: { clientId } }),
+  });
   const training = (data?.training ?? null) as SSRow | null;
+  const refresh = () => qc.invalidateQueries({ queryKey });
+  const fail = (e: Error) => toast.error(e.message);
 
-  const done = (msg: string) => () => {
-    qc.invalidateQueries({ queryKey });
-    setEditing(false);
-    setDraftContent(null);
-    toast.success(msg);
-  };
   const draftMut = useMutation({
     mutationFn: (mode: "nectar" | "blank" | "rebuild") => draftSS({ data: { clientId, mode } }),
-    onSuccess: done("Support strategies draft ready."),
-    onError: (e: Error) => toast.error(e.message),
+    onSuccess: async () => {
+      await refresh();
+      toast.success("Support strategies drafted. Review each one below, then approve.");
+      requestAnimationFrame(() =>
+        listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+    },
+    onError: fail,
   });
   const updateMut = useMutation({
-    mutationFn: (payload: { id: string; content: CSTContent }) => updateFn({ data: payload }),
-    onSuccess: done("Saved."),
-    onError: (e: Error) => toast.error(e.message),
+    mutationFn: (content: CSTContent) => updateFn({ data: { id: training!.id, content } }),
+    onSuccess: () => {
+      refresh();
+      toast.success("Strategy saved.");
+    },
+    onError: fail,
   });
   const publishMut = useMutation({
-    mutationFn: (id: string) => publishFn({ data: { id } }),
-    onSuccess: done("Support strategies published."),
-    onError: (e: Error) => toast.error(e.message),
+    mutationFn: (note?: string) => publishFn({ data: { id: training!.id, note } }),
+    onSuccess: () => refresh(),
+    onError: fail,
   });
 
+  const pcspReady = !!plan;
   /** Runs `fn` when a PCSP is on file; otherwise explains why not. */
   const needPcsp = (fn: () => void) => () => (pcspReady ? fn() : setPcspPrompt(true));
 
@@ -104,7 +120,7 @@ export function SupportStrategiesPanel({
         .upload(path, file, { upsert: false });
       if (error) throw error;
       await attachSS({ data: { clientId, fileName: file.name, storagePath: path } });
-      qc.invalidateQueries({ queryKey });
+      refresh();
       toast.success("Document attached.");
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Upload failed.");
@@ -128,103 +144,79 @@ export function SupportStrategiesPanel({
   );
   const pickFile = needPcsp(() => fileInputRef.current?.click());
 
-  const content = training?.content as CSTContent | undefined;
+  const content = training?.content;
   const uploaded = !!content && isUploadDoc(content);
   const link = uploaded ? content!.sections[0].items[0] : null;
   const fileName = link?.kind === "link" ? (link.links[0]?.label ?? "document") : "document";
-  const published = training?.status === "published";
-  const working: CSTContent | undefined = editing && draftContent ? draftContent : content;
+  const sections = !content || uploaded ? [] : content.sections;
+  const coverage = strategyCoverage(supports, sections);
+  const status = training
+    ? strategyStatus(training, data?.approverName ?? null, plan, supports, sections)
+    : null;
+  const rebuild = needPcsp(() => {
+    if (
+      window.confirm(
+        "Rebuild from PCSP supports? Strategies someone edited are kept; the rest are drafted again.",
+      )
+    )
+      draftMut.mutate("rebuild");
+  });
 
   return (
-    <>
-      <SectionCard
-        icon={ClipboardList}
-        tone="ok"
-        title="Support strategies"
-        description={
-          <StrategiesDescription dueOn={training?.status === "published" ? null : dueOn} />
-        }
-        actions={
-          training ? (
-            <>
-              <SSStatusBadge status={training.status} version={training.version} />
-              {!uploaded && bodyOpen ? (
-                <StrategiesToolbar
-                  editing={editing}
-                  published={published}
-                  rebuilding={draftMut.isPending}
-                  publishing={publishMut.isPending}
-                  saving={updateMut.isPending}
-                  onEdit={needPcsp(() => {
-                    setDraftContent(structuredClone(content!));
-                    setEditing(true);
-                  })}
-                  onRebuild={needPcsp(() => {
-                    if (
-                      window.confirm("Rebuild from current PCSP goals? The draft will be replaced.")
-                    )
-                      draftMut.mutate("rebuild");
-                  })}
-                  onPublish={needPcsp(() => setPublishDialog(true))}
-                  onCancel={() => {
-                    setEditing(false);
-                    setDraftContent(null);
-                  }}
-                  onSave={() =>
-                    draftContent && updateMut.mutate({ id: training.id, content: draftContent })
-                  }
-                />
-              ) : null}
-              {!editing ? (
-                <Button variant="outline" onClick={() => setBodyOpen((v) => !v)}>
-                  {bodyOpen ? "Hide strategies" : "Show strategies"}
-                </Button>
-              ) : null}
-            </>
-          ) : null
-        }
-      >
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
-        ) : !training ? (
-          <StrategiesEmpty
-            pcspReady={pcspReady}
-            drafting={draftMut.isPending}
-            uploading={uploading || !orgId}
-            onDraft={(mode) => needPcsp(() => draftMut.mutate(mode))()}
-            onUpload={pickFile}
-            fileInput={fileInput}
+    <SectionCard
+      icon={ClipboardList}
+      tone="ok"
+      title="Support strategies"
+      description="Support strategies: instructions to staff for each support."
+      testId="support-strategies-card"
+    >
+      {!canEdit ? (
+        <p className="text-sm text-muted-foreground">
+          Admins write and approve this client's support strategies.
+        </p>
+      ) : isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : !training ? (
+        <StrategiesEmpty
+          pcspReady={pcspReady}
+          supportCount={supports.length}
+          drafting={draftMut.isPending}
+          uploading={uploading || !orgId}
+          onDraft={(mode) => needPcsp(() => draftMut.mutate(mode))()}
+          onUpload={pickFile}
+          fileInput={fileInput}
+        />
+      ) : uploaded ? (
+        <StrategiesUploaded
+          fileName={fileName}
+          published={training.status === "published"}
+          publishing={publishMut.isPending}
+          uploading={uploading || !orgId}
+          onPublish={needPcsp(() => setPublishDialog(true))}
+          onReplace={pickFile}
+          fileInput={fileInput}
+        />
+      ) : (
+        <div className="space-y-3" ref={listRef}>
+          <StrategiesStatus
+            status={status!}
+            covered={coverage.covered}
+            total={coverage.total}
+            dueOn={strategiesDueOn(plan)}
+            canEdit={canEdit}
+            busy={{ approving: publishMut.isPending, rebuilding: draftMut.isPending }}
+            onApprove={needPcsp(() => setPublishDialog(true))}
+            onRebuild={rebuild}
           />
-        ) : bodyOpen ? (
-          <div className="space-y-4">
-            {uploaded ? (
-              <StrategiesUploaded
-                fileName={fileName}
-                published={published}
-                pcspReady={pcspReady}
-                publishing={publishMut.isPending}
-                uploading={uploading || !orgId}
-                onPublish={needPcsp(() => setPublishDialog(true))}
-                onReplace={pickFile}
-                fileInput={fileInput}
-              />
-            ) : (
-              <>
-                {published && (
-                  <SupportStrategyCoveragePanel clientId={clientId} sections={content!.sections} />
-                )}
-                <SectionsView
-                  content={working!}
-                  editing={editing}
-                  onChange={setDraftContent}
-                  clientId={clientId}
-                  showJobCodes
-                />
-              </>
-            )}
-          </div>
-        ) : null}
-      </SectionCard>
+          <SupportStrategiesList
+            views={sections.map(strategyView)}
+            currentIds={new Set(supports.map((s) => s.supportId))}
+            canEdit={canEdit}
+            saving={updateMut.isPending}
+            onSave={(id, text) => updateMut.mutateAsync(withStrategy(content!, id, text))}
+          />
+        </div>
+      )}
       <PcspFirstDialog open={pcspPrompt} onOpenChange={setPcspPrompt} />
       {training ? (
         <PublishConfirmDialog
@@ -234,9 +226,14 @@ export function SupportStrategiesPanel({
           orgId={orgId}
           kindLabel="support strategies"
           isPublishing={publishMut.isPending}
-          publishAsync={() => publishMut.mutateAsync(training.id)}
+          publishAsync={(note) => publishMut.mutateAsync(note)}
+          gaps={
+            uploaded
+              ? undefined
+              : coverage.missing.map((s) => `${s.support || "Support"} (${s.codes.join(", ")})`)
+          }
         />
       ) : null}
-    </>
+    </SectionCard>
   );
 }

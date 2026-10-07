@@ -149,13 +149,33 @@
       "support": "Behavior support plan for Pat at home.",
       "details": "Sample Behavior Group writes the plan.",
       "start": "2026-09-01",
-      "end": "2027-08-31"
+      "end": "2027-08-31",
+      "providers": [],
+      "ourCodes": []
+    },
+    {
+      "support": "Host home helps Pat with daily living.",
+      "details": "",
+      "start": "2026-09-01",
+      "end": "2027-08-31",
+      "providers": [
+        {
+          "code": "HHS",
+          "provider": "Example Supports, LLC",
+          "ours": true
+        }
+      ],
+      "ourCodes": [
+        "HHS"
+      ]
     },
     {
       "support": "Annual dental visit.",
       "details": "",
       "start": null,
-      "end": null
+      "end": null,
+      "providers": [],
+      "ourCodes": []
     }
   ],
   "purchasedServices": [
@@ -169,10 +189,19 @@
       "page": 6
     },
     {
-      "code": "",
-      "name": "",
+      "code": "HHS",
+      "name": "Host Home Support",
       "unitType": "Daily",
       "units": 365,
+      "start": "2026-09-01",
+      "end": "2027-08-31",
+      "page": 6
+    },
+    {
+      "code": "SLN",
+      "name": "Supported Living Natural",
+      "unitType": "15 Minutes",
+      "units": 400,
       "start": "2026-09-01",
       "end": "2027-08-31",
       "page": 6
@@ -185,6 +214,15 @@
       "start": "2026-09-01",
       "end": "2027-08-31",
       "page": 6
+    },
+    {
+      "code": "",
+      "name": "",
+      "unitType": "Hourly",
+      "units": 50,
+      "start": "2026-09-01",
+      "end": "2027-08-31",
+      "page": 7
     }
   ],
   "budget": [
@@ -275,26 +313,22 @@
     {
       "level": "warn",
       "page": 5,
-      "message": "The bottom of this page is printed on top of itself. The readable top part was used; the overlapping part was skipped. Check it by eye."
-    },
-    {
-      "level": "error",
-      "page": 6,
-      "message": "A purchased service is listed without its code (the code line is missing in the PDF). Enter the code by hand."
+      "message": "Page 5 didn't print cleanly in this PDF, so part of it couldn't be read. Open page 5 of the PCSP and check that the goals and supports from that page are listed below."
     },
     {
       "level": "warn",
       "page": 6,
-      "message": "The PCSP prints \"Code RP4 is obsolete\". Confirm which service this applies to."
+      "message": "The PCSP says RP4 is obsolete. Check whether this client still has RP4."
+    },
+    {
+      "level": "error",
+      "page": 7,
+      "message": "A purchased service is listed without its code (the code line is missing in the PDF). Enter the code by hand."
     },
     {
       "level": "warn",
       "page": 3,
       "message": "Support starts 2026-08-15, before the plan starts."
-    },
-    {
-      "level": "warn",
-      "message": "Budget line HHS isn't in the purchased services list."
     },
     {
       "level": "warn",

@@ -13,19 +13,22 @@ export function NewSummaryDialog({
   clientId,
   orgId,
   serviceCodes,
+  defaultKind = "quarterly",
   onClose,
   onCreated,
 }: {
   clientId: string;
   orgId: string;
   serviceCodes: string[];
+  /** Monthly when the client owes monthly summaries. */
+  defaultKind?: "monthly" | "quarterly";
   onClose: () => void;
   onCreated: (summaryId: string) => void;
 }) {
   const now = new Date();
   const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const defaultQuarter = `${now.getFullYear()}-Q${Math.floor(now.getMonth() / 3) + 1}`;
-  const [periodKind, setPeriodKind] = useState<"monthly" | "quarterly">("quarterly");
+  const [periodKind, setPeriodKind] = useState<"monthly" | "quarterly">(defaultKind);
   const writeRecordFn = useServerFn(writeClientRecord);
   const [month, setMonth] = useState(defaultMonth);
   const [quarter, setQuarter] = useState(defaultQuarter);
@@ -125,7 +128,7 @@ export function NewSummaryDialog({
           },
         },
       });
-      toast.success("Summary created — open the editor to draft.");
+      toast.success("Summary started.");
       onCreated(ids[0]);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Failed to create summary";
@@ -151,7 +154,7 @@ export function NewSummaryDialog({
         <div>
           <h3 className="text-base font-semibold">New progress summary</h3>
           <p className="text-xs text-muted-foreground">
-            Creates a draft row; open the editor to pre-fill from logs and finalize.
+            Starts the summary for one period; it opens next so Nectar can draft it from the notes.
           </p>
         </div>
         <div className="space-y-3 text-sm">
@@ -210,7 +213,7 @@ export function NewSummaryDialog({
             Cancel
           </Button>
           <Button onClick={submit} disabled={saving}>
-            {saving ? "Creating…" : "Create draft"}
+            {saving ? "Starting…" : "Start summary"}
           </Button>
         </div>
       </div>
