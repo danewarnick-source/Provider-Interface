@@ -3,7 +3,9 @@
 // Covers units pacing, documents due or missing (photo older than 5 years
 // included), plan-year reminders (60 / 30 days before the end), PCSP waiting
 // (with the office follow-up from day 10), support strategies due (plan
-// activation + 30 days), summaries due, HRC reviews and finish-setup gaps.
+// activation + 30 days), summaries due, HRC reviews, a recorded DNR/POLST
+// with no signed form, and finish-setup gaps. Cards the setup answers hide
+// (support-scope.ts) never count.
 // Advisory only: it never blocks a save.
 
 import { listReadiness } from "./list.ts";
@@ -12,6 +14,7 @@ import { addDaysYmd, strategiesDueOn } from "./plan-dates.ts";
 import { pcspState, pcspWords } from "./pcsp-status.ts";
 import { currentPlan, type ClientPlan } from "./plans.ts";
 import type { ClientProfileSection } from "./profile-sections.ts";
+import type { ScopeCard } from "./support-scope.ts";
 
 export type AttentionTone = "bad" | "warn";
 
@@ -118,6 +121,10 @@ export type ReadinessInput = {
   summaries: readonly { label: string; dueDate: string | null }[];
   restrictions: readonly { title: string; nextReview: string | null; complete: boolean }[];
   setup: { staffCount: number; hasPin: boolean; guardianOk: boolean };
+  /** Cards the client's setup answers hide (support-scope.ts); they never count here. */
+  hidden?: readonly ScopeCard[];
+  /** A DNR or POLST is recorded, so the signed form must be on file. */
+  directive?: { required: boolean; onFile: boolean };
 };
 
 function dueText(days: number): string {
@@ -170,14 +177,26 @@ export function clientAttention(input: ReadinessInput, now: Date = new Date()): 
     }
   }
 
+  const hidden = new Set(input.hidden ?? []);
   const photo = photoStatus(input.photo, now);
-  if (photo !== "ok") {
+  if (photo !== "ok" && !hidden.has("photo")) {
     add({
       key: "photo",
       title: photo === "missing" ? "Photo missing" : "Photo is over 5 years old",
       detail: photo === "missing" ? "Add a current photo" : "Take a new photo",
       tone: "warn",
       section: "profile",
+    });
+  }
+
+  const dir = input.directive;
+  if (dir?.required && !dir.onFile && !hidden.has("advance_directive")) {
+    add({
+      key: "directive",
+      title: "Signed DNR / POLST form missing",
+      detail: "Upload it on the Advance directive card",
+      tone: "bad",
+      section: "health",
     });
   }
 

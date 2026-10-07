@@ -220,3 +220,20 @@ describe("plan-year reminders in needs attention", () => {
     assert.equal(w?.tone, "bad");
   });
 });
+
+describe("setup answers in needs attention", () => {
+  const keys = (over: Partial<ReadinessInput>) => clientAttention(input(over), NOW).map((i) => i.key);
+  it("a hidden photo never counts", () => {
+    const noPhoto = { photo: { url: null, takenOn: null } };
+    assert.ok(keys(noPhoto).includes("photo"));
+    assert.ok(!keys({ ...noPhoto, hidden: ["photo"] }).includes("photo"));
+  });
+  it("a recorded DNR/POLST needs the signed form, unless the card is hidden", () => {
+    const dir = { directive: { required: true, onFile: false } };
+    const item = clientAttention(input(dir), NOW).find((i) => i.key === "directive");
+    assert.equal(item?.section, "health");
+    assert.ok(!keys({ directive: { required: true, onFile: true } }).includes("directive"));
+    assert.ok(!keys({ directive: { required: false, onFile: false } }).includes("directive"));
+    assert.ok(!keys({ ...dir, hidden: ["advance_directive"] }).includes("directive"));
+  });
+});
