@@ -116,7 +116,7 @@ describe("Nectar summary", () => {
       goals: [],
       notesInLast90Days: 4,
     });
-    assert.match(text, /Admitted: not on file/);
+    assert.match(text, /Start date: not on file/);
     assert.match(text, /SLN \(2025-07-01 to open\)/);
     assert.match(text, /Plan goals: none on file/);
   });

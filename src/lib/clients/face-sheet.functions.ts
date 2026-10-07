@@ -373,9 +373,9 @@ function drawFaceSheet(page: PDFPage, helv: PDFFont, helvB: PDFFont, ctx: Ctx): 
 
   const bandColW = idW / 3 - 6;
   const bandY = y;
-  drawKV(page, "Intake date", fmtDate(client.intake_date as string | null) === NOT_ON_FILE
-    ? fmtDate(client.admission_date as string | null)
-    : fmtDate(client.intake_date as string | null), M, bandY, bandColW, helv, helvB);
+  drawKV(page, "Start date", fmtDate(client.admission_date as string | null) === NOT_ON_FILE
+    ? fmtDate(client.intake_date as string | null)
+    : fmtDate(client.admission_date as string | null), M, bandY, bandColW, helv, helvB);
   const planYear =
     plan && (plan.start_date || plan.end_date)
       ? `${fmtDate(plan.start_date)} – ${fmtDate(plan.end_date)}`
