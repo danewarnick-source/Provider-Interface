@@ -20,7 +20,6 @@ import type { ClientProfileData } from "@/components/clients/profile/use-client-
 import {
   activeContacts,
   contactCardOrder,
-  contactsWithRole,
   pastContacts,
   type ClientContact,
   type ContactFields,
@@ -30,6 +29,7 @@ import {
   endClientContact,
   updateClientContact,
 } from "@/lib/clients/contacts.functions";
+import { guardianStatus } from "@/lib/clients/guardian";
 import { updateClient } from "@/lib/clients/writes.functions";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState, StatusTag } from "@/components/clients/profile/cards/card-parts";
@@ -80,7 +80,19 @@ export function ContactsSection({ orgId, data }: { orgId: string; data: ClientPr
   });
 
   const isOwn = data.client.is_own_guardian === true;
-  const hasGuardian = contactsWithRole(all, "guardian").length > 0;
+  const guardian = guardianStatus(data.client.is_own_guardian, all);
+  const note = {
+    own: { tag: "Own guardian", text: `${data.name} is their own guardian.` },
+    on_file: { tag: "Guardian on file", text: null },
+    no_phone: {
+      tag: "Guardian has no phone",
+      text: "Add a phone for the guardian so staff can reach them.",
+    },
+    missing: {
+      tag: "No guardian on file",
+      text: `Add the guardian, or mark ${data.name} as their own guardian.`,
+    },
+  }[guardian.kind];
   const addButton = (
     <Button onClick={() => setDialog({ contact: null })}>
       <Plus className="h-4 w-4" /> Add contact
@@ -101,14 +113,10 @@ export function ContactsSection({ orgId, data }: { orgId: string; data: ClientPr
           data-testid="client-guardian-note"
         >
           <p className="flex flex-wrap items-center gap-2 text-sm text-hive-ink">
-            <StatusTag tone={isOwn || hasGuardian ? "ok" : "danger"}>
-              {isOwn ? "Own guardian" : hasGuardian ? "Guardian on file" : "No guardian on file"}
+            <StatusTag tone={guardian.kind === "own" || guardian.kind === "on_file" ? "ok" : "danger"}>
+              {note.tag}
             </StatusTag>
-            {isOwn
-              ? `${data.name} is their own guardian.`
-              : hasGuardian
-                ? null
-                : `Add the guardian, or mark ${data.name} as their own guardian.`}
+            {note.text}
           </p>
           {canEdit ? (
             <label className="flex min-h-10 items-center gap-2 text-sm text-muted-foreground">

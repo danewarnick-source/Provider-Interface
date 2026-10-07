@@ -69,16 +69,31 @@ describe("nextDueItem", () => {
 describe("listReadiness", () => {
   it("lists what's missing in plain words", () => {
     assert.deepEqual(
-      listReadiness({ codes: ["DSI"], staffCount: 1, hasPin: true, guardianOk: true }),
+      listReadiness({ codes: ["DSI"], staffCount: 1, hasPin: true, guardianGap: null }),
       { ready: true, missing: [] },
     );
-    const r = listReadiness({ codes: [], staffCount: 0, hasPin: false, guardianOk: false });
+    const r = listReadiness({
+      codes: [],
+      staffCount: 0,
+      hasPin: false,
+      guardianGap: "Guardian not on file",
+    });
     assert.equal(r.ready, false);
     assert.equal(r.missing.length, 3);
     assert.equal(r.missing[0], "No authorized service code");
+    assert.equal(r.missing[2], "Guardian not on file");
+    assert.deepEqual(
+      listReadiness({
+        codes: ["DSI"],
+        staffCount: 1,
+        hasPin: true,
+        guardianGap: "Guardian has no phone",
+      }).missing,
+      ["Guardian has no phone"],
+    );
   });
   it("needs a home pin only for a client with an EVV code", () => {
-    const base = { staffCount: 1, hasPin: false, guardianOk: true };
+    const base = { staffCount: 1, hasPin: false, guardianGap: null };
     assert.deepEqual(listReadiness({ ...base, codes: ["SLH"] }), {
       ready: false,
       missing: ["No home pin (address not found)"],
@@ -93,7 +108,7 @@ describe("listReadiness", () => {
       codes: [],
       staffCount: 1,
       hasPin: true,
-      guardianOk: true,
+      guardianGap: null,
       endedOn: "2026-08-31",
     });
     assert.deepEqual(r.missing, ["Authorizations ended Aug 31, 2026"]);

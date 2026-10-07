@@ -92,7 +92,7 @@ function rows(opts: ClientListMockOpts): ClientListRow[] {
         codes,
         staffCount: codes.length ? 1 : 0,
         hasPin: true,
-        guardianOk: true,
+        guardianGap: null,
       }),
     };
     return row;

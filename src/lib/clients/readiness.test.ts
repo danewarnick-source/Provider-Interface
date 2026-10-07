@@ -37,7 +37,7 @@ function input(over: Partial<ReadinessInput> = {}): ReadinessInput {
     strategies: null,
     summaries: [],
     restrictions: [],
-    setup: { staffCount: 1, hasPin: true, guardianOk: true },
+    setup: { staffCount: 1, hasPin: true, guardianGap: null },
     ...over,
   };
 }
@@ -92,17 +92,20 @@ describe("clientAttention", () => {
 
   it("lists finish-setup gaps with the section that fixes them", () => {
     const items = clientAttention(
-      input({ codes: [], setup: { staffCount: 0, hasPin: false, guardianOk: false } }),
+      input({
+        codes: [],
+        setup: { staffCount: 0, hasPin: false, guardianGap: "Guardian has no phone" },
+      }),
       NOW,
     );
     const by = Object.fromEntries(items.map((i) => [i.detail, i.section]));
     assert.equal(by["No authorized service code"], "services");
     assert.equal(by["No team member assigned"], "team");
-    assert.equal(by["Guardian not on file"], "contacts");
+    assert.equal(by["Guardian has no phone"], "contacts");
   });
 
   it("flags a missing home pin only for a client with an EVV code", () => {
-    const noPin = { staffCount: 1, hasPin: false, guardianOk: true };
+    const noPin = { staffCount: 1, hasPin: false, guardianGap: null };
     const evv = clientAttention(input({ codes: ["SLN"], setup: noPin }), NOW);
     assert.deepEqual(
       evv.map((i) => [i.detail, i.section]),

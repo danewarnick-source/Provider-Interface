@@ -1,6 +1,7 @@
 // Client profile header ("soft panel"): the pure pieces behind the subtitle
 // line, the readiness pill and the three info tiles. No React, no Supabase.
 
+import { guardianLabel, type GuardianStatus } from "./guardian.ts";
 import { pcspWords, type PcspState } from "./pcsp-status.ts";
 import type { AttentionItem } from "./readiness.ts";
 
@@ -48,17 +49,17 @@ export function headerReadiness(
   return { ready: missing.length === 0, missing };
 }
 
-/** Guardian tile: name (relationship), "Own guardian", or not on file. */
-export function guardianTile(
-  isOwnGuardian: boolean | null | undefined,
-  guardian: { name: string; relationship: string | null } | null,
-): { value: string; missing: boolean } {
-  if (isOwnGuardian === true) return { value: "Own guardian", missing: false };
-  if (guardian) {
-    const rel = guardian.relationship?.trim();
-    return { value: rel ? `${guardian.name} (${rel})` : guardian.name, missing: false };
-  }
-  return { value: "Not on file", missing: true };
+/**
+ * Guardian tile from guardianStatus(): "Own guardian", "Name (Mother)", the
+ * name with "no phone" (amber), or "Not on file" (amber).
+ */
+export function guardianTile(status: GuardianStatus): { value: string; missing: boolean } {
+  if (status.kind === "own") return { value: "Own guardian", missing: false };
+  if (status.kind === "missing") return { value: "Not on file", missing: true };
+  const label = guardianLabel(status.guardian);
+  return status.kind === "on_file"
+    ? { value: label, missing: false }
+    : { value: `${label} · no phone`, missing: true };
 }
 
 /**

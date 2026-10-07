@@ -232,20 +232,6 @@ export async function loadClientContacts(
   return (data ?? []) as ClientContact[];
 }
 
-/**
- * The guardian requirement: the client is their own guardian, or (explicitly
- * not their own guardian and) an active guardian contact with a phone is on file.
- */
-export function guardianSatisfied(
-  isOwnGuardian: boolean | null | undefined,
-  contacts: readonly Pick<ClientContact, "role" | "is_primary" | "sort" | "ended_on" | "phone">[],
-  now: Date = new Date(),
-): boolean {
-  if (isOwnGuardian === true) return true;
-  if (isOwnGuardian !== false) return false;
-  return contactsWithRole(contacts, "guardian", now).some((c) => !!c.phone?.trim());
-}
-
 export type ContactPartValues = Partial<Omit<ContactFields, "role" | "is_primary">>;
 
 /**

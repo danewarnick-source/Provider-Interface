@@ -14,7 +14,8 @@
 // =============================================================
 
 import { enrichNamesFromFull, firstNameWithMiddle } from "@/lib/person-name";
-import { activeContacts, guardianSatisfied, loadClientContacts } from "./contacts";
+import { activeContacts, loadClientContacts } from "./contacts";
+import { guardianGap, guardianStatus } from "./guardian";
 import { applyContactMergePlan, planContactMerge } from "./contacts-merge";
 import { loadActiveCodesAsService } from "./codes";
 import { appendGoalsToCurrentPlan } from "./plans-write";
@@ -1085,10 +1086,10 @@ export async function applyExtractedFieldsToClient(
         dysphagia: cur.dysphagia === true,
         swallowing_alerts: Array.isArray(cur.swallowing_alerts) && cur.swallowing_alerts.length > 0,
         [LEGACY_ALERT_KEY]: !!(cur.special_directions && String(cur.special_directions).trim()),
-        guardian: guardianSatisfied(
-          cur.is_own_guardian,
-          activeContacts(await loadClientContacts(supabase, [clientId])),
-        ),
+        guardian:
+          guardianGap(
+            guardianStatus(cur.is_own_guardian, await loadClientContacts(supabase, [clientId])),
+          ) === null,
       };
       for (const k of customKeys) hasMap[k] = customHas.has(k);
 

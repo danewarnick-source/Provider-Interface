@@ -4,7 +4,8 @@
 // their clients. Called only from list.functions.ts.
 
 import { activeCodesForClients, isActiveCodeRow, loadActiveCodes } from "./codes";
-import { guardianSatisfied, loadClientContacts, type ClientContact } from "./contacts";
+import { loadClientContacts, type ClientContact } from "./contacts";
+import { guardianGap, guardianStatus } from "./guardian";
 import { todayYmd } from "./dates";
 import {
   applyListFilters,
@@ -199,7 +200,7 @@ export async function loadClientList(
         codes: clientCodes,
         staffCount: staff.length,
         hasPin: c.home_latitude != null && c.home_longitude != null,
-        guardianOk: guardianSatisfied(c.is_own_guardian, contactBy.get(c.id) ?? [], now),
+        guardianGap: guardianGap(guardianStatus(c.is_own_guardian, contactBy.get(c.id) ?? [], now)),
         endedOn: endedCodes?.endedOn ?? null,
       }),
     };

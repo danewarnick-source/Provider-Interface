@@ -120,7 +120,7 @@ export type ReadinessInput = {
   strategies: { published: boolean; covered: number; total: number } | null;
   summaries: readonly { label: string; dueDate: string | null }[];
   restrictions: readonly { title: string; nextReview: string | null; complete: boolean }[];
-  setup: { staffCount: number; hasPin: boolean; guardianOk: boolean };
+  setup: { staffCount: number; hasPin: boolean; guardianGap: string | null };
   /** Cards the client's setup answers hide (support-scope.ts); they never count here. */
   hidden?: readonly ScopeCard[];
   /** A DNR or POLST is recorded, so the signed form must be on file. */

@@ -95,7 +95,8 @@ export function listReadiness(args: {
   codes: readonly string[];
   staffCount: number;
   hasPin: boolean;
-  guardianOk: boolean;
+  /** guardianGap(): "Guardian not on file" / "Guardian has no phone", or null. */
+  guardianGap: string | null;
   /** When every authorization has ended: the latest end date. */
   endedOn?: string | null;
 }): Readiness {
@@ -110,7 +111,7 @@ export function listReadiness(args: {
   if (args.staffCount === 0) missing.push("No team member assigned");
   if (!args.hasPin && clientEvvCodes(args.codes).length)
     missing.push("No home pin (address not found)");
-  if (!args.guardianOk) missing.push("Guardian not on file");
+  if (args.guardianGap) missing.push(args.guardianGap);
   return { ready: missing.length === 0, missing };
 }
 

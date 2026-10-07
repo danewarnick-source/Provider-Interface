@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { PersonAvatar } from "@/components/person/person-avatar";
 import { useAccess } from "@/hooks/use-access";
 import { useClientCareData } from "@/hooks/use-client-care-data";
+import { useAllClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
+import { primaryContact } from "@/lib/clients/contacts";
+import { guardianStatus } from "@/lib/clients/guardian";
 import { ageOn, formatDate } from "@/lib/clients/dates";
 import { DISCHARGED_STATUSES } from "@/lib/clients/list";
 import type { AttentionItem } from "@/lib/clients/readiness";
@@ -56,7 +59,14 @@ export function ClientProfileHeader({
     age: ageOn(client.date_of_birth),
     home: data.home?.name,
   });
-  const guardian = guardianTile(client.is_own_guardian, data.guardian);
+  // Same cached contacts as the Contacts section, so a save there updates these tiles.
+  const contacts = useAllClientContacts(client.id).data;
+  const guardian = contacts
+    ? guardianTile(guardianStatus(client.is_own_guardian, contacts))
+    : { value: "…", missing: false };
+  const coordinator = contacts
+    ? (primaryContact(contacts, "support_coordinator")?.name ?? "Not on file")
+    : "…";
   const plan = planYearTile(
     data.pcsp.kind === "none" ? null : data.pcsp.endDate,
     data.pcsp,
@@ -124,7 +134,7 @@ export function ClientProfileHeader({
           />
           <InfoTile
             label="Support coordinator"
-            value={data.supportCoordinator ?? "Not on file"}
+            value={coordinator}
             link={{ label: "Open Contacts", onClick: () => onSelect("contacts") }}
             testId="client-header-coordinator"
           />

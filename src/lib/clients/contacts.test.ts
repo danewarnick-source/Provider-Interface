@@ -10,7 +10,6 @@ import {
   contactTag,
   pastContacts,
   contactsWithRole,
-  guardianSatisfied,
   primaryContact,
   setContactParts,
   type ClientContact,
@@ -132,20 +131,6 @@ describe("cleanContactFields", () => {
   });
   it("requires a name", () => {
     assert.throws(() => cleanContactFields({ role: "guardian", name: "  " }), /needs a name/);
-  });
-});
-
-describe("guardianSatisfied", () => {
-  it("is met by self-guardian or an active guardian with a phone", () => {
-    assert.equal(guardianSatisfied(true, [], NOW), true);
-    assert.equal(guardianSatisfied(null, [], NOW), false);
-    assert.equal(guardianSatisfied(false, [], NOW), false);
-    assert.equal(guardianSatisfied(false, [c({ role: "guardian", phone: "555-0100" })], NOW), true);
-    assert.equal(guardianSatisfied(false, [c({ role: "guardian", phone: null })], NOW), false);
-    assert.equal(
-      guardianSatisfied(false, [c({ role: "guardian", phone: "555-0100", ended_on: "2026-01-01" })], NOW),
-      false,
-    );
   });
 });
 

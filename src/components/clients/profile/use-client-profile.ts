@@ -1,12 +1,13 @@
 // The client row behind the profile header and the Profile section, plus
-// codes (active client_billing_codes), home name, current plan year and the
-// support coordinator. Org-filtered; `null` when the client isn't in the org.
+// codes (active client_billing_codes), home name and current plan year.
+// Contacts (guardian, support coordinator) come from useAllClientContacts, the
+// same cached query the Contacts section saves into. Org-filtered; `null` when
+// the client isn't in the org.
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isRouteUuid } from "@/lib/route-uuid";
 import { loadActiveCodes } from "@/lib/clients/codes";
-import { loadClientContacts, activeContacts, primaryContact } from "@/lib/clients/contacts";
 import { currentPlan, type ClientPlan } from "@/lib/clients/plans";
 import { pcspState, type PcspState } from "@/lib/clients/pcsp-status";
 
@@ -45,8 +46,6 @@ export type ClientProfileData = {
   codes: string[];
   home: { id: string; name: string } | null;
   plan: Pick<ClientPlan, "start_date" | "end_date" | "label"> | null;
-  supportCoordinator: string | null;
-  guardian: { name: string; relationship: string | null } | null;
   /** The PCSP's state today (pcsp-status.ts): the header tile's wording. */
   pcsp: PcspState;
 };
@@ -68,7 +67,7 @@ export function useClientProfile(orgId: string | undefined, clientId: string) {
       if (error) throw error;
       if (!data) return null;
       const client = data as unknown as ClientProfileRow;
-      const [codes, home, plans, contacts] = await Promise.all([
+      const [codes, home, plans] = await Promise.all([
         loadActiveCodes(supabase, [clientId]),
         client.team_id
           ? supabase.from("teams").select("id, team_name").eq("id", client.team_id).maybeSingle()
@@ -79,13 +78,9 @@ export function useClientProfile(orgId: string | undefined, clientId: string) {
             "id, client_id, start_date, end_date, activated_on, meeting_date, status, label, source, document_id",
           )
           .eq("client_id", clientId),
-        loadClientContacts(supabase, [clientId]),
       ]);
       const planRows = (plans.data ?? []) as ClientPlan[];
       const plan = currentPlan(planRows);
-      const active = activeContacts(contacts);
-      const sc = primaryContact(active, "support_coordinator");
-      const guardian = primaryContact(active, "guardian");
       const team = home.data as { id: string; team_name: string } | null;
       return {
         client,
@@ -95,8 +90,6 @@ export function useClientProfile(orgId: string | undefined, clientId: string) {
         plan: plan
           ? { start_date: plan.start_date, end_date: plan.end_date, label: plan.label }
           : null,
-        supportCoordinator: sc?.name ?? null,
-        guardian: guardian ? { name: guardian.name, relationship: guardian.relationship } : null,
         pcsp: pcspState(planRows),
       };
     },

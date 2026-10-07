@@ -71,24 +71,37 @@ describe("headerReadiness", () => {
 });
 
 describe("guardianTile", () => {
-  it("prefers own guardian", () => {
-    assert.deepEqual(guardianTile(true, { name: "Pat", relationship: "Mother" }), {
-      value: "Own guardian",
+  const g = (over: Partial<{ name: string; relationship: string | null; phone: string | null }>) => ({
+    role: "guardian" as const,
+    is_primary: true,
+    sort: 0,
+    ended_on: null,
+    name: "Pat Example",
+    relationship: "Mother",
+    phone: "555-0100",
+    ...over,
+  });
+  it("own guardian", () => {
+    assert.deepEqual(guardianTile({ kind: "own" }), { value: "Own guardian", missing: false });
+  });
+  it("on file: name and relationship", () => {
+    assert.deepEqual(guardianTile({ kind: "on_file", guardian: g({}) }), {
+      value: "Pat Example (Mother)",
       missing: false,
     });
-  });
-  it("shows name and relationship", () => {
     assert.equal(
-      guardianTile(false, { name: "Pat Example", relationship: "Mother" }).value,
-      "Pat Example (Mother)",
-    );
-    assert.equal(
-      guardianTile(null, { name: "Pat Example", relationship: null }).value,
+      guardianTile({ kind: "on_file", guardian: g({ relationship: null }) }).value,
       "Pat Example",
     );
   });
-  it("flags a missing guardian", () => {
-    assert.deepEqual(guardianTile(false, null), { value: "Not on file", missing: true });
+  it("no phone: the name, flagged", () => {
+    assert.deepEqual(guardianTile({ kind: "no_phone", guardian: g({ phone: null }) }), {
+      value: "Pat Example (Mother) · no phone",
+      missing: true,
+    });
+  });
+  it("missing", () => {
+    assert.deepEqual(guardianTile({ kind: "missing" }), { value: "Not on file", missing: true });
   });
 });
 

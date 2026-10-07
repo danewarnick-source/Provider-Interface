@@ -6,7 +6,8 @@
 import { personNeedsSupportStrategies } from "@/lib/audit-evidence";
 import { computeRestrictionCompletion, type RestrictionRecord } from "./hrc";
 import { isActiveCodeRow, loadActiveCodes } from "./codes";
-import { guardianSatisfied, loadClientContacts } from "./contacts";
+import { loadClientContacts } from "./contacts";
+import { guardianGap, guardianStatus } from "./guardian";
 import { todayYmd } from "./dates";
 import { loadClientFileView } from "./file-packs.server";
 import { fileAttention } from "./file-rows";
@@ -128,7 +129,7 @@ export async function loadClientOverview(
       setup: {
         staffCount: team.length,
         hasPin: client.home_latitude != null && client.home_longitude != null,
-        guardianOk: guardianSatisfied(client.is_own_guardian, contacts, now),
+        guardianGap: guardianGap(guardianStatus(client.is_own_guardian, contacts, now)),
       },
     },
     now,
