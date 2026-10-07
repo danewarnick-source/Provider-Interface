@@ -6529,6 +6529,63 @@ export type Database = {
         }
         Relationships: []
       }
+      evidence_client_packs: {
+        Row: {
+          added_at: string
+          added_by: string | null
+          client_id: string
+          id: string
+          organization_id: string
+          origin: string
+          pack_key: string
+          removed_at: string | null
+          removed_by: string | null
+          removed_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          added_at?: string
+          added_by?: string | null
+          client_id: string
+          id?: string
+          organization_id: string
+          origin?: string
+          pack_key: string
+          removed_at?: string | null
+          removed_by?: string | null
+          removed_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string | null
+          client_id?: string
+          id?: string
+          organization_id?: string
+          origin?: string
+          pack_key?: string
+          removed_at?: string | null
+          removed_by?: string | null
+          removed_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_client_packs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_client_packs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evidence_files: {
         Row: {
           attestation_text_snapshot: string | null
@@ -6603,10 +6660,12 @@ export type Database = {
       }
       evidence_items: {
         Row: {
+          added_by_hand: boolean
           attestation_text: string | null
           cadence: string
           created_at: string
           created_by: string | null
+          description: string | null
           document_date: string | null
           dual_link_key: string | null
           dual_link_peer_id: string | null
@@ -6634,10 +6693,12 @@ export type Database = {
           visible_to_staff_id: string | null
         }
         Insert: {
+          added_by_hand?: boolean
           attestation_text?: string | null
           cadence?: string
           created_at?: string
           created_by?: string | null
+          description?: string | null
           document_date?: string | null
           dual_link_key?: string | null
           dual_link_peer_id?: string | null
@@ -6665,10 +6726,12 @@ export type Database = {
           visible_to_staff_id?: string | null
         }
         Update: {
+          added_by_hand?: boolean
           attestation_text?: string | null
           cadence?: string
           created_at?: string
           created_by?: string | null
+          description?: string | null
           document_date?: string | null
           dual_link_key?: string | null
           dual_link_peer_id?: string | null
