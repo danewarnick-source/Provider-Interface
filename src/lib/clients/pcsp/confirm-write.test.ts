@@ -66,7 +66,7 @@ const args = (review: ReturnType<typeof initialReview>) => ({
 });
 const review = () => initialReview(parse, proposeCarryOver(parse.goals.map((g) => g.goal), [{ id: "g-cook", goal_text: parse.goals[0].goal }], parse.lastYearGoals));
 
-test("confirm creates the plan, goals, supports, authorizations, must-knows, about-me and contacts", async () => {
+test("confirm creates the plan, goals, supports, authorizations, must-knows and contacts; about me is left alone", async () => {
   const db = fakeDb(seed());
   // The plan year in the sample is in the future relative to "today" in some runs; force it current.
   const r = review();
@@ -90,7 +90,7 @@ test("confirm creates the plan, goals, supports, authorizations, must-knows, abo
   assert.equal(db.tables.client_billing_codes.length, 3);
   const client = db.tables.clients[0];
   assert.match(String(client.special_directions), /^Allergic to cats\.\n\nFrom PCSP 2000-01-01 – 2027-08-31:\n- Choking/);
-  assert.match(String(client.about_me), /^From PCSP .*\n- Healthy Living · Likes outdoors/);
+  assert.equal(client.about_me, null);
   assert.equal(db.tables.client_contacts[1].role, "other_provider");
 });
 

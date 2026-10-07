@@ -1,7 +1,7 @@
-// More details: the agency's custom client fields in one panel (shown only
-// when the agency has any). Editors can change values, add a field or
-// delete fields; a delete removes the field for every client. Select all /
-// Delete selected work on the whole list.
+// More details: the agency's custom client fields as small tiles (shown only
+// when the agency has any). Editors open edit mode to change values, add a
+// field or delete fields; a delete removes the field for every client.
+// Select all / Delete selected work on the whole list.
 
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,9 +23,10 @@ import { useAccess } from "@/hooks/use-access";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { deleteCustomFieldDefinitions } from "@/lib/clients/custom-fields.functions";
 import { chunkIds, customFieldDeleteCopy } from "@/lib/clients/custom-fields-delete";
-import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
+import { DetailTile } from "./detail-tile";
 import { AddCustomFieldButton, CustomFieldRow } from "./more-details-parts";
 
 export function MoreDetailsCard({ clientId }: { clientId: string }) {
@@ -36,6 +37,7 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
   const fields = useMemo(() => care.data?.custom_fields ?? [], [care.data]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirm, setConfirm] = useState<{ ids: string[]; labels: string[] } | null>(null);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     const valid = new Set(fields.map((f) => f.id));
@@ -114,9 +116,14 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
     <SectionCard
       {...card}
       actions={
-        canEdit && orgId ? (
+        canEdit && orgId && !editing ? (
+          <EditButton label="Edit more details" onClick={() => setEditing(true)} />
+        ) : canEdit && orgId ? (
           <>
             <AddCustomFieldButton clientId={clientId} orgId={orgId} />
+            <Button variant="outline" onClick={() => setEditing(false)}>
+              Done editing
+            </Button>
             <RowMenu
               label="More actions for More details"
               items={[
@@ -132,7 +139,14 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
         ) : null
       }
     >
-      {canEdit ? (
+      {!editing ? (
+        <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3" data-testid="client-more-details">
+          {fields.map((f) => (
+            <DetailTile key={f.id} field={f} />
+          ))}
+        </ul>
+      ) : null}
+      {editing ? (
         <div className="mb-2 flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-2 text-sm">
             <Checkbox
@@ -147,27 +161,29 @@ export function MoreDetailsCard({ clientId }: { clientId: string }) {
           <span className="text-xs text-muted-foreground">{selected.size} selected</span>
         </div>
       ) : null}
-      <ul className="space-y-2" data-testid="client-more-details">
-        {fields.map((f) => (
-          <CustomFieldRow
-            key={f.id}
-            clientId={clientId}
-            orgId={orgId}
-            field={f}
-            selected={selected.has(f.id)}
-            onSelectedChange={(checked) =>
-              setSelected((prev) => {
-                const next = new Set(prev);
-                if (checked) next.add(f.id);
-                else next.delete(f.id);
-                return next;
-              })
-            }
-            onDelete={() => requestDelete([f.id])}
-            deletePending={delMut.isPending && (confirm?.ids.includes(f.id) ?? false)}
-          />
-        ))}
-      </ul>
+      {editing ? (
+        <ul className="space-y-2" data-testid="client-more-details-edit">
+          {fields.map((f) => (
+            <CustomFieldRow
+              key={f.id}
+              clientId={clientId}
+              orgId={orgId}
+              field={f}
+              selected={selected.has(f.id)}
+              onSelectedChange={(checked) =>
+                setSelected((prev) => {
+                  const next = new Set(prev);
+                  if (checked) next.add(f.id);
+                  else next.delete(f.id);
+                  return next;
+                })
+              }
+              onDelete={() => requestDelete([f.id])}
+              deletePending={delMut.isPending && (confirm?.ids.includes(f.id) ?? false)}
+            />
+          ))}
+        </ul>
+      ) : null}
 
       <AlertDialog
         open={confirm !== null}

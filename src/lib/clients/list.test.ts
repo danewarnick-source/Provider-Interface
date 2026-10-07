@@ -76,8 +76,16 @@ describe("listReadiness", () => {
     );
     const r = listReadiness({ codes: [], staffCount: 0, hasPin: false, guardianOk: false });
     assert.equal(r.ready, false);
-    assert.equal(r.missing.length, 4);
+    assert.equal(r.missing.length, 3);
     assert.equal(r.missing[0], "No authorized service code");
+  });
+  it("needs a home pin only for a client with an EVV code", () => {
+    const base = { staffCount: 1, hasPin: false, guardianOk: true };
+    assert.deepEqual(listReadiness({ ...base, codes: ["SLH"] }), {
+      ready: false,
+      missing: ["No home pin (address not found)"],
+    });
+    assert.deepEqual(listReadiness({ ...base, codes: ["DSI", "HHS"] }), { ready: true, missing: [] });
   });
   it("says authorizations ended (with the date) when codes ended rather than never existed", () => {
     const r = listReadiness({

@@ -1,5 +1,5 @@
-// Client Overview: needs-attention cards (click → section), units left per
-// code with today's pace, must-knows, coming up, team and the last notes.
+// Client Overview: the collapsed "Needs attention (N)" button, must-knows
+// (lead, full width), then Units left | Coming up, then Team | Last notes.
 // Draws getClientOverview as it is; no counting here.
 
 import type { ClientOverview } from "@/lib/clients/overview";
@@ -32,23 +32,23 @@ export function OverviewSection({
       ) : (
         <AttentionCards items={overview?.attention ?? []} loading={loading} onSelect={onSelect} />
       )}
+      <MustKnowsCard
+        orgId={orgId}
+        clientId={data.client.id}
+        text={data.client.special_directions}
+      />
       <div className="grid gap-5 md:grid-cols-2">
-        <MustKnowsCard
-          orgId={orgId}
-          clientId={data.client.id}
-          text={data.client.special_directions}
-        />
         <UnitsCard
           paces={overview?.paces ?? []}
           loading={loading}
           onOpenServices={() => onSelect("services")}
         />
+        <ComingUpCard items={overview?.comingUp ?? []} onSelect={onSelect} />
       </div>
       <div className="grid gap-5 md:grid-cols-2">
-        <ComingUpCard items={overview?.comingUp ?? []} onSelect={onSelect} />
         <TeamCard team={overview?.team ?? []} onSelect={onSelect} />
+        <LastNotesCard notes={overview?.lastNotes ?? []} onSelect={onSelect} />
       </div>
-      <LastNotesCard notes={overview?.lastNotes ?? []} onSelect={onSelect} />
     </div>
   );
 }

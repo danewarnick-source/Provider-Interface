@@ -73,3 +73,10 @@ export function planYearTile(
   }
   return { value, note: null, warn: !endDate };
 }
+
+/** "•••• 1234": an ID with all but the last four characters hidden; null when blank. */
+export function maskId(value: string | null | undefined): string | null {
+  const s = (value ?? "").trim();
+  if (!s) return null;
+  return s.length <= 4 ? s : `•••• ${s.slice(-4)}`;
+}

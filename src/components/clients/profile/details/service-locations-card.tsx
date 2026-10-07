@@ -24,9 +24,18 @@ import {
 import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
+import { EvvNote } from "./evv-note";
 import { LocationDialog } from "./location-dialog";
 
-export function ServiceLocationsCard({ orgId, clientId }: { orgId: string; clientId: string }) {
+export function ServiceLocationsCard({
+  orgId,
+  clientId,
+  codes,
+}: {
+  orgId: string;
+  clientId: string;
+  codes: readonly string[];
+}) {
   const qc = useQueryClient();
   const canEdit = useAccess().canCategory("clients", "edit");
   const addFn = useServerFn(addServiceLocation);
@@ -90,6 +99,7 @@ export function ServiceLocationsCard({ orgId, clientId }: { orgId: string; clien
         ) : null
       }
     >
+      <EvvNote codes={codes} />
       {q.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : locations.length === 0 ? (

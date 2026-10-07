@@ -4,6 +4,7 @@
 import { neutralizeCsvFormula } from "../csv-safe.ts";
 import { isClockableServiceCode } from "../service-billing.ts";
 import { daysUntil, formatDate } from "./dates.ts";
+import { clientEvvCodes } from "./evv.ts";
 import type { UnitsLeft } from "./units.ts";
 
 export const LIST_VIEWS = ["active", "discharged"] as const;
@@ -87,7 +88,10 @@ export function nextDueItem(
   return best;
 }
 
-/** What a client still needs before staff can be scheduled and clock in. */
+/**
+ * What a client still needs before staff can be scheduled and clock in.
+ * A home pin is only needed when a code uses EVV (the clock-in circle).
+ */
 export function listReadiness(args: {
   codes: readonly string[];
   staffCount: number;
@@ -105,7 +109,8 @@ export function listReadiness(args: {
     );
   }
   if (args.staffCount === 0) missing.push("No team member assigned");
-  if (!args.hasPin) missing.push("No home pin (address not found)");
+  if (!args.hasPin && clientEvvCodes(args.codes).length)
+    missing.push("No home pin (address not found)");
   if (!args.guardianOk) missing.push("Guardian not on file");
   return { ready: missing.length === 0, missing };
 }

@@ -98,8 +98,17 @@ describe("clientAttention", () => {
     const by = Object.fromEntries(items.map((i) => [i.detail, i.section]));
     assert.equal(by["No authorized service code"], "services");
     assert.equal(by["No team member assigned"], "team");
-    assert.equal(by["No home pin (address not found)"], "profile");
     assert.equal(by["Guardian not on file"], "contacts");
+  });
+
+  it("flags a missing home pin only for a client with an EVV code", () => {
+    const noPin = { staffCount: 1, hasPin: false, guardianOk: true };
+    const evv = clientAttention(input({ codes: ["SLN"], setup: noPin }), NOW);
+    assert.deepEqual(
+      evv.map((i) => [i.detail, i.section]),
+      [["No home pin (address not found)", "profile"]],
+    );
+    assert.deepEqual(clientAttention(input({ codes: ["DSI"], setup: noPin }), NOW), []);
   });
 
   it("flags units running out, ahead of pace and waiting on the 1056", () => {

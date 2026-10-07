@@ -4,6 +4,7 @@ import {
   goesByLine,
   guardianTile,
   headerReadiness,
+  maskId,
   planYearTile,
   preferredNameFrom,
 } from "./profile-header.ts";
@@ -113,5 +114,14 @@ describe("planYearTile", () => {
       note: null,
       warn: true,
     });
+  });
+});
+
+describe("maskId", () => {
+  it("hides all but the last four characters", () => {
+    assert.equal(maskId("0012345678"), "•••• 5678");
+    assert.equal(maskId(" 123 "), "123");
+    assert.equal(maskId(""), null);
+    assert.equal(maskId(null), null);
   });
 });

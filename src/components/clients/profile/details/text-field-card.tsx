@@ -1,5 +1,5 @@
-// One editable free-text field on the clients row (mailing address, About
-// me): read view, pencil, textarea, Save/Cancel. Saves through updateClient.
+// One editable free-text field on the clients row (the mailing address):
+// read view, pencil, textarea, Save/Cancel. Saves through updateClient.
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -28,7 +28,7 @@ export function TextFieldCard({
 }: {
   orgId: string;
   clientId: string;
-  field: "mailing_address" | "about_me";
+  field: "mailing_address";
   icon: LucideIcon;
   title: string;
   subtitle: string;
