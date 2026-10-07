@@ -2,7 +2,8 @@
 // Side-menu sections (?section=), header with the ⋯ menu, and the one
 // needs-attention list (lib/clients/readiness.ts) feeding Overview and the
 // menu badges. A discharged client's sections are read-only, with the
-// discharge card on top.
+// discharge card on top. A newly added client shows "Finish setting up"
+// (setup/client-setup.tsx; ?setup=open opens the steps).
 
 import { useEffect, useRef } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
@@ -31,12 +32,13 @@ import { DischargeCard } from "./discharge/discharge-card";
 import { SectionBody } from "./section-body";
 import { useClientProfile } from "./use-client-profile";
 import { useClientMoneyPresence } from "./money/use-client-money";
+import { ClientSetup } from "./setup/client-setup";
 
 const profileRoute = getRouteApi("/dashboard/clients/$clientId");
 
 export function ClientProfilePage() {
   const { clientId } = profileRoute.useParams();
-  const { section } = profileRoute.useSearch();
+  const { section, setup } = profileRoute.useSearch();
   const navigate = profileRoute.useNavigate();
   const { data: org, isLoading: orgLoading } = useCurrentOrg();
   const { canCategory } = useAccess();
@@ -156,6 +158,23 @@ export function ClientProfilePage() {
         {discharged ? (
           <DischargeCard orgId={orgId} clientId={clientId} onChanged={refresh} />
         ) : null}
+        <ClientSetup
+          orgId={orgId}
+          data={data}
+          overview={overviewQ.data ?? null}
+          open={setup === "open"}
+          discharged={discharged}
+          onOpenChange={(o) =>
+            navigate({ replace: true, search: (prev) => ({ ...prev, setup: o ? "open" : undefined }) })
+          }
+          onSelect={select}
+          onDraftAbout={() =>
+            navigate({
+              replace: true,
+              search: (prev) => ({ ...prev, section: "profile", about: "draft", setup: undefined }),
+            })
+          }
+        />
         <RecordReadOnlyProvider readOnly={discharged}>
           <SectionBody
             section={active}
