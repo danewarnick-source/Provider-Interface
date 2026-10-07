@@ -50,6 +50,7 @@ function useOrgStaffOptions(orgId: string | undefined) {
       const { data: members, error: mErr } = await supabase
         .from("organization_members")
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true);
       if (mErr) throw mErr;

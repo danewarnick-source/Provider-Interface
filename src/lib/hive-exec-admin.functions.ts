@@ -204,6 +204,7 @@ export const listAllMembers = createServerFn({ method: "GET" })
     const { data: members, error } = await supabaseAdmin
       .from("organization_members")
       .select("id, organization_id, user_id, access_level, active, is_company_executive")
+      .is("deleted_at", null)
       .order("organization_id");
     if (error) throw error;
 

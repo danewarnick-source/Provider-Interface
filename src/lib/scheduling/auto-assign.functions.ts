@@ -53,6 +53,7 @@ export const autoAssignRange = createServerFn({ method: "POST" })
     const { data: members } = await sb
       .from("organization_members")
       .select("user_id, active")
+      .is("deleted_at", null)
       .eq("organization_id", orgId).eq("active", true);
     const userIds = (members ?? []).map((m: any) => m.user_id).filter(Boolean);
     let profMap = new Map<string, any>();
@@ -103,7 +104,7 @@ export const autoAssignRange = createServerFn({ method: "POST" })
     // 4) client metadata for names + assignments
     const clientIds = Array.from(new Set(openShifts.map((s: any) => s.client_id)));
     const { data: clients } = await sb
-      .from("clients").select("id, first_name, last_name").in("id", clientIds);
+      .from("clients").select("id, first_name, last_name").is("deleted_at", null).in("id", clientIds);
     const clientName = new Map<string, string>((clients ?? []).map((c: any) =>
       [c.id as string, (`${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || "Client") as string]));
 

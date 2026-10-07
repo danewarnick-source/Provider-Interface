@@ -799,6 +799,7 @@ export async function loadEvaluateInput(
   const { data: members, error: mErr } = await supabase
     .from("organization_members")
     .select("id, user_id, access_level, manager_id, active, is_company_executive")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId)
     .eq("active", true);
   if (mErr) throw new Error(mErr.message);

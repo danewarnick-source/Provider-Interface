@@ -157,6 +157,7 @@ function RestrictionsPanel({ canManage, orgId }: { canManage: boolean; orgId: st
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .order("first_name", { ascending: true });
       if (error) throw error;
@@ -567,6 +568,7 @@ function CommitteeRoster({ canEditAccess, orgId }: { canEditAccess: boolean; org
       const { data: members, error } = await supabase
         .from("organization_members")
         .select("user_id, access_presets!inner(seed_key)")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true)
         .eq("access_presets.seed_key", "hrc_committee");

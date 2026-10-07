@@ -117,6 +117,7 @@ import { Route as DashboardSettingsSubscriptionRouteImport } from './routes/dash
 import { Route as DashboardSettingsServiceCodesRouteImport } from './routes/dashboard.settings.service-codes'
 import { Route as DashboardSettingsServiceCatalogRouteImport } from './routes/dashboard.settings.service-catalog'
 import { Route as DashboardSettingsRetentionRouteImport } from './routes/dashboard.settings.retention'
+import { Route as DashboardSettingsRecentlyDeletedRouteImport } from './routes/dashboard.settings.recently-deleted'
 import { Route as DashboardSettingsPhiAccessAuditRouteImport } from './routes/dashboard.settings.phi-access-audit'
 import { Route as DashboardSettingsLicensingRouteImport } from './routes/dashboard.settings.licensing'
 import { Route as DashboardSettingsGmailRouteImport } from './routes/dashboard.settings.gmail'
@@ -762,6 +763,12 @@ const DashboardSettingsRetentionRoute =
     path: '/retention',
     getParentRoute: () => DashboardSettingsRoute,
   } as any)
+const DashboardSettingsRecentlyDeletedRoute =
+  DashboardSettingsRecentlyDeletedRouteImport.update({
+    id: '/recently-deleted',
+    path: '/recently-deleted',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
 const DashboardSettingsPhiAccessAuditRoute =
   DashboardSettingsPhiAccessAuditRouteImport.update({
     id: '/phi-access-audit',
@@ -1378,6 +1385,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/gmail': typeof DashboardSettingsGmailRoute
   '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
   '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
+  '/dashboard/settings/recently-deleted': typeof DashboardSettingsRecentlyDeletedRoute
   '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
   '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
   '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
@@ -1561,6 +1569,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings/gmail': typeof DashboardSettingsGmailRoute
   '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
   '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
+  '/dashboard/settings/recently-deleted': typeof DashboardSettingsRecentlyDeletedRoute
   '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
   '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
   '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
@@ -1753,6 +1762,7 @@ export interface FileRoutesById {
   '/dashboard/settings/gmail': typeof DashboardSettingsGmailRoute
   '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
   '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
+  '/dashboard/settings/recently-deleted': typeof DashboardSettingsRecentlyDeletedRoute
   '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
   '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
   '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
@@ -1946,6 +1956,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/gmail'
     | '/dashboard/settings/licensing'
     | '/dashboard/settings/phi-access-audit'
+    | '/dashboard/settings/recently-deleted'
     | '/dashboard/settings/retention'
     | '/dashboard/settings/service-catalog'
     | '/dashboard/settings/service-codes'
@@ -2129,6 +2140,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/gmail'
     | '/dashboard/settings/licensing'
     | '/dashboard/settings/phi-access-audit'
+    | '/dashboard/settings/recently-deleted'
     | '/dashboard/settings/retention'
     | '/dashboard/settings/service-catalog'
     | '/dashboard/settings/service-codes'
@@ -2320,6 +2332,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/gmail'
     | '/dashboard/settings/licensing'
     | '/dashboard/settings/phi-access-audit'
+    | '/dashboard/settings/recently-deleted'
     | '/dashboard/settings/retention'
     | '/dashboard/settings/service-catalog'
     | '/dashboard/settings/service-codes'
@@ -3157,6 +3170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSettingsRetentionRouteImport
       parentRoute: typeof DashboardSettingsRoute
     }
+    '/dashboard/settings/recently-deleted': {
+      id: '/dashboard/settings/recently-deleted'
+      path: '/recently-deleted'
+      fullPath: '/dashboard/settings/recently-deleted'
+      preLoaderRoute: typeof DashboardSettingsRecentlyDeletedRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
     '/dashboard/settings/phi-access-audit': {
       id: '/dashboard/settings/phi-access-audit'
       path: '/phi-access-audit'
@@ -3960,6 +3980,7 @@ interface DashboardSettingsRouteChildren {
   DashboardSettingsGmailRoute: typeof DashboardSettingsGmailRoute
   DashboardSettingsLicensingRoute: typeof DashboardSettingsLicensingRoute
   DashboardSettingsPhiAccessAuditRoute: typeof DashboardSettingsPhiAccessAuditRoute
+  DashboardSettingsRecentlyDeletedRoute: typeof DashboardSettingsRecentlyDeletedRoute
   DashboardSettingsRetentionRoute: typeof DashboardSettingsRetentionRoute
   DashboardSettingsServiceCatalogRoute: typeof DashboardSettingsServiceCatalogRoute
   DashboardSettingsServiceCodesRoute: typeof DashboardSettingsServiceCodesRoute
@@ -3976,6 +3997,7 @@ const DashboardSettingsRouteChildren: DashboardSettingsRouteChildren = {
   DashboardSettingsGmailRoute: DashboardSettingsGmailRoute,
   DashboardSettingsLicensingRoute: DashboardSettingsLicensingRoute,
   DashboardSettingsPhiAccessAuditRoute: DashboardSettingsPhiAccessAuditRoute,
+  DashboardSettingsRecentlyDeletedRoute: DashboardSettingsRecentlyDeletedRoute,
   DashboardSettingsRetentionRoute: DashboardSettingsRetentionRoute,
   DashboardSettingsServiceCatalogRoute: DashboardSettingsServiceCatalogRoute,
   DashboardSettingsServiceCodesRoute: DashboardSettingsServiceCodesRoute,

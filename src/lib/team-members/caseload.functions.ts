@@ -168,7 +168,7 @@ export const getMemberCaseload = createServerFn({ method: "POST" })
         .eq("organization_id", orgId)
         .eq("staff_id", data.staffId),
       // The viewer's own client (RLS can_access_client_phi) → only clients they can see.
-      (supabase as Sb).from("clients").select(CLIENT_SELECT).eq("organization_id", orgId),
+      (supabase as Sb).from("clients").select(CLIENT_SELECT).is("deleted_at", null).eq("organization_id", orgId),
       admin
         .from("evidence_items")
         .select("*")
@@ -191,7 +191,7 @@ export const getMemberCaseload = createServerFn({ method: "POST" })
     const hiddenIds = assignRows.map((a) => a.client_id).filter((id) => !visible.has(id));
     const hidden = await selectIn<ClientRow>(
       (ids) =>
-        admin.from("clients").select(CLIENT_SELECT).eq("organization_id", orgId).in("id", ids),
+        admin.from("clients").select(CLIENT_SELECT).is("deleted_at", null).eq("organization_id", orgId).in("id", ids),
       hiddenIds,
     );
     const allClients = new Map(visible);

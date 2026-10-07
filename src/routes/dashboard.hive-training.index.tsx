@@ -192,6 +192,7 @@ function AdminView({ orgId }: { orgId: string }) {
       const { data: mems } = await (supabase as any)
         .from("organization_members")
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .eq("active", true);
       const ids = ((mems ?? []) as Array<{ user_id: string }>).map((m) => m.user_id);

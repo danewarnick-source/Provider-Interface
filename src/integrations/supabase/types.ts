@@ -4649,6 +4649,9 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           day_program_provider: string | null
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           dentist_address: string | null
           dentist_name: string | null
           dentist_phone: string | null
@@ -4786,6 +4789,9 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           day_program_provider?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           dentist_address?: string | null
           dentist_name?: string | null
           dentist_phone?: string | null
@@ -4923,6 +4929,9 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           day_program_provider?: string | null
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           dentist_address?: string | null
           dentist_name?: string | null
           dentist_phone?: string | null
@@ -12768,6 +12777,9 @@ export type Database = {
           access_scope: string
           active: boolean
           created_at: string
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           end_date: string | null
           id: string
           is_company_executive: boolean
@@ -12785,6 +12797,9 @@ export type Database = {
           access_scope: string
           active?: boolean
           created_at?: string
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           end_date?: string | null
           id?: string
           is_company_executive?: boolean
@@ -12802,6 +12817,9 @@ export type Database = {
           access_scope?: string
           active?: boolean
           created_at?: string
+          delete_reason?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           end_date?: string | null
           id?: string
           is_company_executive?: boolean
@@ -16672,6 +16690,9 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           day_program_provider: string | null
+          delete_reason: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           dentist_address: string | null
           dentist_name: string | null
           dentist_phone: string | null
@@ -17142,6 +17163,18 @@ export type Database = {
       }
       org_setup_allows_create: { Args: { p_org_id: string }; Returns: boolean }
       org_setup_is_complete: { Args: { p_org_id: string }; Returns: boolean }
+      people_delete_allowed: {
+        Args: { _org: string; _user: string }
+        Returns: boolean
+      }
+      people_delete_assert: {
+        Args: { _id: string; _kind: string }
+        Returns: string
+      }
+      person_service_history: {
+        Args: { _id: string; _kind: string }
+        Returns: Json
+      }
       purge_aged_referrals: {
         Args: { _organization_id: string }
         Returns: number
@@ -17155,6 +17188,10 @@ export type Database = {
         Args: { _notes: string; _proposal_id: string }
         Returns: undefined
       }
+      restore_deleted_person: {
+        Args: { _id: string; _kind: string }
+        Returns: undefined
+      }
       seed_standard_service_codes: {
         Args: { _org: string }
         Returns: undefined
@@ -17165,6 +17202,10 @@ export type Database = {
       }
       set_hive_executive: {
         Args: { _grant: boolean; _user_id: string }
+        Returns: undefined
+      }
+      soft_delete_person: {
+        Args: { _id: string; _kind: string; _reason: string }
         Returns: undefined
       }
       staff_assigned_to_client: {

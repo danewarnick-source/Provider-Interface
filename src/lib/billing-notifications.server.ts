@@ -23,6 +23,7 @@ async function getOrgAdminEmails(orgId: string): Promise<string[]> {
   const { data: members } = await (supabaseAdmin as any)
     .from("organization_members")
     .select("user_id")
+    .is("deleted_at", null)
     .eq("organization_id", orgId)
     .eq("active", true)
     .eq("access_level", "owner");
@@ -43,6 +44,7 @@ async function getOrgStaffEmails(orgId: string): Promise<string[]> {
   const { data: members } = await (supabaseAdmin as any)
     .from("organization_members")
     .select("user_id")
+    .is("deleted_at", null)
     .eq("organization_id", orgId)
     .eq("active", true);
   const ids = (members ?? []).map((m: { user_id: string }) => m.user_id);

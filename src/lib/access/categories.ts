@@ -1,4 +1,4 @@
-// The 18 access categories. Keys are stored in access_presets.categories and
+// The 19 access categories. Keys are stored in access_presets.categories and
 // organization_members.access_overrides, and mirrored in SQL access_categories().
 
 export type CategoryValue = "off" | "view" | "edit";
@@ -34,6 +34,7 @@ export const CATEGORY_IDS = [
   "loans",
   "agency_settings",
   "phone_app",
+  "delete_people",
 ] as const;
 
 export type CategoryId = (typeof CATEGORY_IDS)[number];
@@ -220,6 +221,17 @@ export const CATEGORIES: AccessCategory[] = [
       off: "Can't use the phone app's work features.",
       view: "(On/Off only)",
       edit: "On: can clock in/out, see own timesheets, write shift notes and daily logs, submit forms, report incidents, pass meds (eMAR), and do their own training and certs. Only their own work and today's clients.",
+    },
+  },
+  {
+    id: "delete_people",
+    label: "Delete people",
+    covers: "Deleting a client or team member added by mistake (no service records).",
+    onOff: true,
+    explain: {
+      off: "Can't delete clients or team members. Owners always can.",
+      view: "(On/Off only)",
+      edit: "On: can delete a client or team member who was added by mistake and has no shifts, punches, notes, daily logs, billing, signed documents or summaries. Their data is kept and an Owner can restore them.",
     },
   },
 ];

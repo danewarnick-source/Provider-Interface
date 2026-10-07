@@ -77,6 +77,7 @@ export async function loadOrgClientFileIndex(
         .select(
           "id, first_name, last_name, account_status, is_own_guardian, grievance_acknowledged, grievance_signed_date, client_photo_url, client_photo_taken_on",
         )
+        .is("deleted_at", null)
         .eq("organization_id", organizationId),
     [] as ClientRow[],
   );

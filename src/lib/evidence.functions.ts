@@ -81,6 +81,7 @@ async function listStaffPeople(
     const { data: members, error } = await sb
       .from("organization_members")
       .select("user_id, role:access_level, job_title, active")
+      .is("deleted_at", null)
       .eq("organization_id", organizationId);
     if (error) return { people: [], error: error.message };
     const rows = (members ?? []) as Array<{
@@ -151,6 +152,7 @@ async function listClientPeople(
       sb
         .from("clients")
         .select(columns)
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .order("last_name", { ascending: true }),
     (ids) => loadActiveCodes(sb, ids),

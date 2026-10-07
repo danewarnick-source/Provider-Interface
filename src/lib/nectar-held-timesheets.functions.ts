@@ -148,7 +148,7 @@ export const listHeldTimesheets = createServerFn({ method: "POST" })
 
     const [clientsQ, profilesQ] = await Promise.all([
       clientIds.size
-        ? supabase.from("clients").select("id, first_name, last_name").in("id", Array.from(clientIds))
+        ? supabase.from("clients").select("id, first_name, last_name").is("deleted_at", null).in("id", Array.from(clientIds))
         : Promise.resolve({ data: [] as unknown[], error: null }),
       staffIds.size
         ? supabase.from("profiles").select("id, first_name, last_name, email").in("id", Array.from(staffIds))

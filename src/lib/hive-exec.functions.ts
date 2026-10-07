@@ -284,6 +284,7 @@ async function loadExecUsageAggregates(
       const clientRes = await admin
         .from("clients")
         .select("id", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("organization_id", orgId);
       if (clientRes.error) throw new Error(clientRes.error.message);
       let hours = 0;
@@ -359,6 +360,7 @@ export const listCompanies = createServerFn({ method: "GET" })
           supabase
             .from("organization_members")
             .select("id", { count: "exact", head: true })
+            .is("deleted_at", null)
             .eq("organization_id", orgId)
             .eq("active", true),
           supabase
@@ -527,6 +529,7 @@ export const getCompanyDetail = createServerFn({ method: "POST" })
       supabase
         .from("organization_members")
         .select("id", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("organization_id", data.organizationId)
         .eq("active", true),
       supabase

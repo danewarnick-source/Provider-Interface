@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PersonAvatar } from "@/components/person/person-avatar";
+import { DeletePersonDialog } from "@/components/people/delete-person-dialog";
 import { useAccess } from "@/hooks/use-access";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
@@ -116,6 +117,10 @@ export function ProfileHeader({
   const reactivateFn = useServerFn(reactivateMember);
   const [resetTarget, setResetTarget] = useState<ResetPasswordTarget | null>(null);
   const [deactivating, setDeactivating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  // Made-by-mistake delete: never yourself or an Owner (the server refuses too).
+  const canDelete =
+    canCategory("delete_people", "edit") && m.userId !== user?.id && m.accessLevel !== "owner";
 
   const badges = useMemo(
     () =>
@@ -355,6 +360,15 @@ export function ProfileHeader({
             {menu.includes("reactivate") ? (
               <DropdownMenuItem onSelect={() => reactivate.mutate()}>Reactivate</DropdownMenuItem>
             ) : null}
+            {canDelete ? (
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => setDeleting(true)}
+                data-testid="profile-delete"
+              >
+                Delete team member…
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -363,6 +377,14 @@ export function ProfileHeader({
         organizationId={orgId}
         target={resetTarget}
         onClose={() => setResetTarget(null)}
+      />
+      <DeletePersonDialog
+        open={deleting}
+        onOpenChange={setDeleting}
+        orgId={orgId}
+        kind="member"
+        id={m.userId}
+        onDeleted={() => void navigate({ to: "/dashboard/team-members", search: backSearch })}
       />
       <DeactivateDialog
         name={deactivating ? p.displayName : null}

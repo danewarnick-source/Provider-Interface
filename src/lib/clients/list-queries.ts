@@ -55,6 +55,7 @@ export async function loadClients(sb: Sb, orgId: string, f: ListFilters): Promis
     .select(
       "id, first_name, last_name, client_photo_url, medicaid_id, client_pid, account_status, team_id, home_latitude, home_longitude, is_own_guardian",
     )
+    .is("deleted_at", null)
     .eq("organization_id", orgId);
   q =
     f.view === "discharged"
@@ -72,6 +73,7 @@ export async function countView(sb: Sb, orgId: string, discharged: boolean): Pro
   let q = sb
     .from("clients")
     .select("id", { count: "exact", head: true })
+    .is("deleted_at", null)
     .eq("organization_id", orgId);
   q = discharged
     ? q.in("account_status", [...DISCHARGED_STATUSES])

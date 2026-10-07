@@ -133,6 +133,7 @@ export function EvvArchivePage() {
       const { data } = await supabase
         .from("organization_members")
         .select("user_id, profiles:user_id(first_name, last_name)")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true);
       type R = { user_id: string; profiles: { first_name: string; last_name: string } | null };
@@ -154,6 +155,7 @@ export function EvvArchivePage() {
       const { data } = await supabase
         .from("clients")
         .select("id, first_name, last_name, team_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .order("last_name");
       return (data ?? []).map((c) => ({
@@ -581,6 +583,7 @@ async function fetchArchive(args: {
     const { data } = await supabase
       .from("clients")
       .select("id")
+      .is("deleted_at", null)
       .eq("organization_id", args.orgId)
       .in("team_id", args.team);
     const teamClientIds = (data ?? []).map((c) => c.id);
@@ -680,6 +683,7 @@ async function fetchArchiveForExport(args: {
     const { data } = await supabase
       .from("clients")
       .select("id")
+      .is("deleted_at", null)
       .eq("organization_id", args.orgId)
       .in("team_id", args.team);
     const teamClientIds = (data ?? []).map((c) => c.id);

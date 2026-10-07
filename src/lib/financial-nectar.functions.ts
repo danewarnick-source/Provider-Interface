@@ -171,6 +171,7 @@ async function w2StaffIds(ctx: Ctx, organizationId: string): Promise<Set<string>
   const { data } = await ctx.supabase
     .from("organization_members")
     .select("user_id, employment_type")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId);
   const set = new Set<string>();
   for (const r of (data ?? []) as Array<{ user_id: string; employment_type: string | null }>) {

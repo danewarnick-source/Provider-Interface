@@ -15,6 +15,7 @@ export async function fetchEvidenceEmployees(
   const members = await sb
     .from("organization_members")
     .select("user_id, role:access_level, job_title, active")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId);
   if (members.error) {
     return { people: [], error: members.error.message };

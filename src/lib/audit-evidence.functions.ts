@@ -86,6 +86,7 @@ export async function getAuditEvidenceSnapshotInternal(
           .select(
             "id, first_name, last_name, team_id, has_abi, grievance_acknowledged, grievance_signed_date, account_status",
           )
+          .is("deleted_at", null)
           .eq("organization_id", organizationId)
           .eq("account_status", "active"),
       [] as Array<{

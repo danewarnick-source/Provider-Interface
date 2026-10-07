@@ -130,6 +130,7 @@ export function useDeadlines(opts?: { enabled?: boolean }) {
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!);
       if (error) throw error;
       return (data ?? []) as Array<{ id: string; first_name: string; last_name: string }>;
