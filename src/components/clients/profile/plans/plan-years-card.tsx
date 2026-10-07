@@ -9,7 +9,13 @@ import { CalendarClock, CalendarRange } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate, todayYmd } from "@/lib/clients/dates";
 import { planYearRows, strategiesDueOn, type PlanYearRow } from "@/lib/clients/plan-dates";
-import { codesNeeding1056, expiredBadge, pcspSentence, pcspState, pcspWords } from "@/lib/clients/pcsp-status";
+import {
+  codesNeeding1056,
+  expiredBadge,
+  pcspSentence,
+  pcspState,
+  pcspWords,
+} from "@/lib/clients/pcsp-status";
 import type { ClientPlan } from "@/lib/clients/plans";
 import { useClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
 import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
@@ -23,7 +29,8 @@ const NOTE = "flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text
 function kindBadge(r: PlanYearRow) {
   if (r.kind === "current") return <StatusTag tone="ok">Current</StatusTag>;
   if (r.kind === "upcoming") return <StatusTag tone="info">Upcoming</StatusTag>;
-  if (r.kind === "waiting") return <StatusTag tone="danger">{expiredBadge(r.waitingDays ?? 0)}</StatusTag>;
+  if (r.kind === "waiting")
+    return <StatusTag tone="danger">{expiredBadge(r.waitingDays ?? 0)}</StatusTag>;
   return <StatusTag>Past</StatusTag>;
 }
 
@@ -53,7 +60,13 @@ export function PlanYearsCard({
   const need1056 = auths && plans.length ? codesNeeding1056(planCodes, auths, todayYmd()) : [];
   const upload = (variant: "default" | "outline" = "default", testId = "pcsp-upload-input") =>
     canEdit ? (
-      <PcspUploadButton clientId={clientId} orgId={orgId} label="Upload PCSP" variant={variant} inputTestId={testId} />
+      <PcspUploadButton
+        clientId={clientId}
+        orgId={orgId}
+        label="Upload PCSP"
+        variant={variant}
+        inputTestId={testId}
+      />
     ) : null;
 
   return (
@@ -66,17 +79,29 @@ export function PlanYearsCard({
     >
       <div className="space-y-3" data-testid="client-plan-years">
         {words && rows.length ? (
-          <div className={`${NOTE} border-hive-gold/50 bg-hive-gold-soft`} data-testid="plan-reminder">
+          <div
+            className={`${NOTE} border-hive-gold/50 bg-hive-gold-soft`}
+            data-testid="plan-reminder"
+          >
             <CalendarClock className="h-4 w-4 shrink-0" aria-hidden />
             <span className="min-w-0 flex-1">{pcspSentence(words)}</span>
             {words.fix === "upload" ? upload("outline", "plan-reminder-pcsp-input") : null}
           </div>
         ) : null}
         {need1056.length ? (
-          <div className={`${NOTE} border-hive-border bg-[var(--hive-info-soft)]`} data-testid="plan-next-1056">
-            <span className="min-w-0 flex-1">Next: add the new 1056 for {need1056.join(", ")}.</span>
+          <div
+            className={`${NOTE} border-hive-border bg-[var(--hive-info-soft)]`}
+            data-testid="plan-next-1056"
+          >
+            <span className="min-w-0 flex-1">
+              Next: add the new 1056 for {need1056.join(", ")}.
+            </span>
             <Button asChild variant="outline">
-              <Link to="/dashboard/clients/$clientId" params={{ clientId }} search={{ section: "services" }}>
+              <Link
+                to="/dashboard/clients/$clientId"
+                params={{ clientId }}
+                search={{ section: "services" }}
+              >
                 Open Services &amp; billing
               </Link>
             </Button>
@@ -93,14 +118,19 @@ export function PlanYearsCard({
                     {planName(r.plan)} {kindBadge(r)}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Activated {formatDate(r.plan.activated_on)} · Meeting {formatDate(r.plan.meeting_date)}
-                    {r.kind === "current" && r.daysLeft != null ? ` · ${days(r.daysLeft)} left` : ""}
+                    Activated {formatDate(r.plan.activated_on)} · Meeting{" "}
+                    {formatDate(r.plan.meeting_date)}
+                    {r.kind === "current" && r.daysLeft != null
+                      ? ` · ${days(r.daysLeft)} left`
+                      : ""}
                     {r.kind === "current" && strategiesDueOn(r.plan)
                       ? ` · Support strategies due ${formatDate(strategiesDueOn(r.plan))}`
                       : ""}
                   </div>
                 </div>
-                {canEdit ? <EditButton label="Edit plan dates" onClick={() => setEditing(r.plan)} /> : null}
+                {canEdit ? (
+                  <EditButton label="Edit plan dates" onClick={() => setEditing(r.plan)} />
+                ) : null}
               </li>
             ))}
           </ul>

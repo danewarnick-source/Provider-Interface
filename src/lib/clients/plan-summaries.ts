@@ -60,3 +60,33 @@ export function noteAddressesGoal(note: NoteGoalTags, goal: Pick<SummaryGoal, "i
 export function noteAddressesAny(note: NoteGoalTags, goals: ReadonlyArray<Pick<SummaryGoal, "id" | "goal">>): boolean {
   return goals.some((g) => noteAddressesGoal(note, g));
 }
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** "2026-Q4" → "Q4 2026"; "2026-10" (or a statement's "2026-10-FS") → "Oct 2026"; null when unreadable. */
+export function summaryPeriodName(label: string | null | undefined): string | null {
+  const q = /^(\d{4})-Q([1-4])$/.exec(label ?? "");
+  if (q) return `Q${q[2]} ${q[1]}`;
+  const m = /^(\d{4})-(\d{2})(?:-FS)?$/.exec(label ?? "");
+  if (m && Number(m[2]) >= 1 && Number(m[2]) <= 12) return `${MONTHS[Number(m[2]) - 1]} ${m[1]}`;
+  return null;
+}
+
+/** "View Q3 2026 summary" once finalized, otherwise "Open Q4 2026 summary". */
+export function summaryButtonLabel(row: { period_label: string | null; status: string | null }): string {
+  const name = summaryPeriodName(row.period_label);
+  const verb = row.status === "finalized" ? "View" : "Open";
+  return name ? `${verb} ${name} summary` : `${verb} summary`;
+}
+
+/** The period a summary started today covers: this month when any code owes monthly ones, else this quarter. */
+export function currentSummaryPeriod(
+  cadences: readonly string[],
+  now: Date = new Date(),
+): { kind: "monthly" | "quarterly"; label: string } {
+  const y = now.getFullYear();
+  if (cadences.includes("monthly")) {
+    return { kind: "monthly", label: `${y}-${String(now.getMonth() + 1).padStart(2, "0")}` };
+  }
+  return { kind: "quarterly", label: `${y}-Q${Math.floor(now.getMonth() / 3) + 1}` };
+}

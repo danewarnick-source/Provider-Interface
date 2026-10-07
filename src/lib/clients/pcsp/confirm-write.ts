@@ -3,7 +3,7 @@
 // the old current plan becomes 'past' (insertPlan), its goals stay with it,
 // and authorizations are upserted per code.
 
-import { normalizeCodes, OTHER_NEEDS_GOAL } from "../plans.ts";
+import { normalizeCodes } from "../plans.ts";
 import { insertPlan } from "../plans-write.ts";
 import { assertRowsChanged } from "../writes.ts";
 import {
@@ -13,6 +13,9 @@ import type { ReviewedPcsp, ReviewSupport } from "./review.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = { from: (table: string) => any };
+
+/** goal_text of the row that holds a plan's non-goal supports (client_goals.kind 'other_need'). */
+export const OTHER_NEEDS_GOAL = "Other needs in the PCSP";
 
 export interface ConfirmArgs {
   organizationId: string;

@@ -15,7 +15,12 @@ export type PcspState =
   | { kind: "none" }
   /** In effect and more than 60 days from its end (or no end date). */
   | { kind: "ok"; endDate: string | null; days: number | null }
-  | { kind: "expiring"; endDate: string; days: number; threshold: (typeof PLAN_REMINDER_DAYS)[number] }
+  | {
+      kind: "expiring";
+      endDate: string;
+      days: number;
+      threshold: (typeof PLAN_REMINDER_DAYS)[number];
+    }
   | { kind: "overdue"; endDate: string | null; days: number; followUp: boolean };
 
 /** What the client's plan years say today. */
@@ -25,7 +30,13 @@ export function pcspState(plans: readonly ClientPlan[], now: Date = new Date()):
   if (!effect) {
     // Only a plan year that hasn't started yet: nothing is due.
     const next = plans.find((p) => p.start_date && p.start_date.slice(0, 10) > today);
-    return next ? { kind: "ok", endDate: next.end_date?.slice(0, 10) ?? null, days: daysUntil(next.end_date, now) } : { kind: "none" };
+    return next
+      ? {
+          kind: "ok",
+          endDate: next.end_date?.slice(0, 10) ?? null,
+          days: daysUntil(next.end_date, now),
+        }
+      : { kind: "none" };
   }
   const endDate = effect.plan.end_date ? effect.plan.end_date.slice(0, 10) : null;
   if (effect.status === "ended") {
@@ -63,7 +74,8 @@ export type PcspWords = {
 
 /** The message for a PCSP state; null when there is nothing to say. */
 export function pcspWords(s: PcspState): PcspWords | null {
-  if (s.kind === "none") return { headline: "No PCSP on file", action: "Upload the PCSP.", fix: "upload" };
+  if (s.kind === "none")
+    return { headline: "No PCSP on file", action: "Upload the PCSP.", fix: "upload" };
   if (s.kind === "expiring") {
     return {
       headline: pcspDueHeadline(s.days, s.endDate),
@@ -99,7 +111,11 @@ export function expiredBadge(days: number): string {
  */
 export function codesNeeding1056(
   planCodes: readonly string[],
-  auths: readonly { service_code: string; service_start_date: string | null; service_end_date: string | null }[],
+  auths: readonly {
+    service_code: string;
+    service_start_date: string | null;
+    service_end_date: string | null;
+  }[],
   today: string,
 ): string[] {
   const covered = new Set(

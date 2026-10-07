@@ -26,7 +26,10 @@ function StrategyItem({
 }) {
   const [draft, setDraft] = useState<string | null>(null);
   return (
-    <li className="space-y-2 rounded-xl border border-hive-border p-3" data-testid="support-strategy">
+    <li
+      className="space-y-2 rounded-xl border border-hive-border p-3"
+      data-testid="support-strategy"
+    >
       <div className="flex items-start gap-2">
         <SupportLines support={v.support} details={v.details} codes={v.codes} />
         {canEdit && draft === null ? (
@@ -36,7 +39,9 @@ function StrategyItem({
         ) : null}
       </div>
       {!current ? (
-        <p className="text-xs text-muted-foreground">This support is no longer in the current PCSP.</p>
+        <p className="text-xs text-muted-foreground">
+          This support is no longer in the current PCSP.
+        </p>
       ) : null}
       <div className="space-y-1">
         <p className="text-xs font-medium text-muted-foreground">Support strategy</p>
@@ -83,7 +88,8 @@ export function SupportStrategiesList({
       {groupByGoal(views).map((g, i) => (
         <div key={`${g.goal}-${i}`} className="space-y-2">
           <p className="text-sm">
-            <span className="font-medium text-hive-ink">Goal:</span> {g.goal || "Not linked to a goal"}
+            <span className="font-medium text-hive-ink">Goal:</span>{" "}
+            {g.goal || "Not linked to a goal"}
           </p>
           <ul className="space-y-2">
             {g.items.map((v) => (

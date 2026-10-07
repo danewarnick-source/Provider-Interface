@@ -5,7 +5,9 @@ import type { Issue } from "@/lib/clients/pcsp/parser-shared";
 import { checkGroups } from "@/lib/clients/pcsp/review";
 
 const ICON = {
-  error: <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" aria-label="Must fix" />,
+  error: (
+    <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" aria-label="Must fix" />
+  ),
   warn: <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-hive-ink" aria-label="Check" />,
   info: <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-label="Note" />,
 };
@@ -37,11 +39,19 @@ function Group({ title, issues, tone }: { title: string; issues: Issue[]; tone: 
 export function PcspReviewChecks({ issues }: { issues: readonly Issue[] }) {
   const { fix, check } = checkGroups(issues);
   if (!fix.length && !check.length) {
-    return <p className="text-xs text-muted-foreground">Nothing to check: everything matched the usual layout.</p>;
+    return (
+      <p className="text-xs text-muted-foreground">
+        Nothing to check: everything matched the usual layout.
+      </p>
+    );
   }
   return (
     <section className="space-y-2" data-testid="pcsp-review-checks">
-      <Group title="Fix before confirming" issues={fix} tone="border-[var(--hive-danger)]/30 bg-[var(--hive-danger-soft)]" />
+      <Group
+        title="Fix before confirming"
+        issues={fix}
+        tone="border-[var(--hive-danger)]/30 bg-[var(--hive-danger-soft)]"
+      />
       <Group title="Check these" issues={check} tone="border-hive-gold/50 bg-hive-gold-soft" />
     </section>
   );

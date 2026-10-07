@@ -44,7 +44,7 @@ export function PlansSection({ orgId, data }: { orgId: string; data: ClientProfi
         supports={supports}
         canEdit={access.isAdminLevel}
       />
-      <SummariesPanel clientId={clientId} orgId={orgId} codes={data.codes} />
+      <SummariesPanel clientId={clientId} clientName={data.name} orgId={orgId} codes={data.codes} />
       {access.canCategory("hrc") ? <RestrictionsCard orgId={orgId} data={data} /> : null}
       {needsBehaviorSupportPlan(data.codes, current.goals) ? (
         <BspCard orgId={orgId} clientId={clientId} />

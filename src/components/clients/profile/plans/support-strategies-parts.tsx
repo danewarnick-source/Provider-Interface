@@ -23,8 +23,8 @@ export function PcspFirstDialog({
         <DialogHeader>
           <DialogTitle>Upload the PCSP first</DialogTitle>
           <DialogDescription>
-            This client has no PCSP on file. Support strategies are written for the PCSP's
-            supports, so upload it first with "Upload PCSP" on the Plan years card.
+            This client has no PCSP on file. Support strategies are written for the PCSP's supports,
+            so upload it first with "Upload PCSP" on the Plan years card.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

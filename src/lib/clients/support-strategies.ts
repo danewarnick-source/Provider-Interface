@@ -30,7 +30,10 @@ export type StrategySupport = {
 
 /** Every current-plan support with at least one of the agency's codes, in plan order (other needs last). */
 export function agencySupports(goals: readonly GoalView[]): StrategySupport[] {
-  const ordered = [...goals.filter((g) => g.kind !== "other_need"), ...goals.filter((g) => g.kind === "other_need")];
+  const ordered = [
+    ...goals.filter((g) => g.kind !== "other_need"),
+    ...goals.filter((g) => g.kind === "other_need"),
+  ];
   return ordered.flatMap((g) =>
     g.supports
       .filter((s) => s.our_codes.length > 0)
@@ -74,7 +77,11 @@ export function strategyView(sec: CSTSection): StrategyView {
 }
 
 /** A section for one support with its strategy text. */
-export function strategySection(s: StrategySupport, strategy: string, keep?: { id: string; edited: boolean }): CSTSection {
+export function strategySection(
+  s: StrategySupport,
+  strategy: string,
+  keep?: { id: string; edited: boolean },
+): CSTSection {
   return {
     id: keep?.id ?? `ss_${s.supportId}`,
     title: (s.support || "Support strategy").slice(0, 200),
@@ -124,7 +131,10 @@ export function editedFor(
 }
 
 /** Supports with no edited section: the ones Nectar drafts on a rebuild. */
-export function supportsToDraft(supports: readonly StrategySupport[], existing: readonly CSTSection[]): StrategySupport[] {
+export function supportsToDraft(
+  supports: readonly StrategySupport[],
+  existing: readonly CSTSection[],
+): StrategySupport[] {
   const kept = editedFor(supports, existing);
   return supports.filter((s) => !kept.has(s.supportId));
 }
@@ -162,7 +172,10 @@ export function strategyCoverage(
   sections: readonly CSTSection[],
 ): { covered: number; total: number; missing: StrategySupport[] } {
   const written = new Set(
-    sections.map(strategyView).filter((v) => v.supportId && v.strategy.trim()).map((v) => v.supportId!),
+    sections
+      .map(strategyView)
+      .filter((v) => v.supportId && v.strategy.trim())
+      .map((v) => v.supportId!),
   );
   const missing = supports.filter((s) => !written.has(s.supportId));
   return { covered: supports.length - missing.length, total: supports.length, missing };
@@ -179,7 +192,8 @@ export function withStrategy(content: CSTContent, sectionId: string, text: strin
             ...sec,
             edited: true,
             items: sec.items.map((i) =>
-              i.kind === "text" && (i.label === STRATEGY_LABEL.strategy || i.label === LEGACY_LABEL.strategy)
+              i.kind === "text" &&
+              (i.label === STRATEGY_LABEL.strategy || i.label === LEGACY_LABEL.strategy)
                 ? { ...i, value: text }
                 : i,
             ),
@@ -222,7 +236,9 @@ export function strategyStatusText(s: StrategyStatus): string {
 }
 
 /** Sections in display groups, one per goal, in order. */
-export function groupByGoal(views: readonly StrategyView[]): { goal: string; items: StrategyView[] }[] {
+export function groupByGoal(
+  views: readonly StrategyView[],
+): { goal: string; items: StrategyView[] }[] {
   const out: { goal: string; items: StrategyView[] }[] = [];
   for (const v of views) {
     const last = out[out.length - 1];

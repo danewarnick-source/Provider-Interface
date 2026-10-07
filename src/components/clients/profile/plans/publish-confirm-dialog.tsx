@@ -12,15 +12,30 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
 import { loadActiveCodes } from "@/lib/clients/codes";
 import { useOrgStaff } from "@/components/clients/shared/hooks/use-org-staff";
 import { invalidateTeam } from "@/components/clients/profile/team/team-changes";
+import { GapsReason, StaffQuestions } from "./publish-confirm-parts";
 
 export function PublishConfirmDialog({
-  open, onOpenChange, clientId, orgId, kindLabel, isPublishing, publishAsync, questions, gaps,
+  open,
+  onOpenChange,
+  clientId,
+  orgId,
+  kindLabel,
+  isPublishing,
+  publishAsync,
+  questions,
+  gaps,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -103,7 +118,12 @@ export function PublishConfirmDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!busy && !isPublishing) onOpenChange(v); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!busy && !isPublishing) onOpenChange(v);
+      }}
+    >
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Approve &amp; publish — who will get this?</DialogTitle>
@@ -113,50 +133,31 @@ export function PublishConfirmDialog({
         </DialogHeader>
 
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-          {needReason && (
-            <div className="space-y-2 rounded-xl border border-hive-gold/50 bg-hive-gold-soft p-3 text-sm text-hive-ink">
-              <p className="font-medium">
-                {gaps!.length} support{gaps!.length === 1 ? " has" : "s have"} no strategy yet:
-              </p>
-              <ul className="list-disc space-y-0.5 pl-5 text-xs">
-                {gaps!.map((g, i) => <li key={i}>{g}</li>)}
-              </ul>
-              <label className="block text-xs font-medium" htmlFor="approve-gap-reason">
-                Why approve without them?
-              </label>
-              <Textarea id="approve-gap-reason" rows={2} value={reason} onChange={(e) => setReason(e.target.value)} />
-            </div>
-          )}
-          {questions && questions.length > 0 && (
-            <div className="rounded-md border border-border/60 bg-muted/30 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                Questions staff will complete with the client ({questions.length})
-              </p>
-              <ol className="list-decimal pl-5 space-y-2.5 text-sm leading-relaxed marker:text-muted-foreground">
-                {questions.map((q) => (
-                  <li key={q.id} className="pl-1">{q.prompt}</li>
-                ))}
-              </ol>
-              <p className="mt-3 border-t border-border/60 pt-2 text-xs text-muted-foreground">
-                Staff complete these together with the person and attest the responses reflect the individual's own perspective.
-              </p>
-            </div>
-          )}
+          {needReason ? <GapsReason gaps={gaps!} reason={reason} onReason={setReason} /> : null}
+          {questions?.length ? <StaffQuestions questions={questions} /> : null}
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
               Currently assigned
             </p>
 
             {loading ? (
-              <p className="text-sm text-muted-foreground"><Loader2 className="inline h-3.5 w-3.5 animate-spin mr-1.5" />Loading…</p>
+              <p className="text-sm text-muted-foreground">
+                <Loader2 className="inline h-3.5 w-3.5 animate-spin mr-1.5" />
+                Loading…
+              </p>
             ) : assignedStaff.length === 0 ? (
               <p className="text-sm text-muted-foreground italic">No staff assigned yet.</p>
             ) : (
               <ul className="space-y-1">
                 {assignedStaff.map((s) => (
-                  <li key={s.id} className="flex items-center justify-between gap-2 text-sm rounded border border-border/60 bg-muted/30 px-2 py-1">
+                  <li
+                    key={s.id}
+                    className="flex items-center justify-between gap-2 text-sm rounded border border-border/60 bg-muted/30 px-2 py-1"
+                  >
                     <span>{s.name}</span>
-                    <span className="text-xs text-muted-foreground">will receive automatically</span>
+                    <span className="text-xs text-muted-foreground">
+                      will receive automatically
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -172,19 +173,25 @@ export function PublishConfirmDialog({
                 This client has no authorized codes yet. Add a code before assigning staff.
               </p>
             ) : availableStaff.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">All active staff are already assigned.</p>
+              <p className="text-sm text-muted-foreground italic">
+                All active staff are already assigned.
+              </p>
             ) : (
               <div className="space-y-1 max-h-48 overflow-y-auto rounded border p-2">
                 {availableStaff.map((s) => {
                   const checked = stagedAdds.has(s.id);
                   return (
-                    <label key={s.id} className="flex items-center gap-2 text-sm cursor-pointer rounded px-1.5 py-1 hover:bg-muted">
+                    <label
+                      key={s.id}
+                      className="flex items-center gap-2 text-sm cursor-pointer rounded px-1.5 py-1 hover:bg-muted"
+                    >
                       <Checkbox
                         checked={checked}
                         onCheckedChange={(v) => {
                           setStagedAdds((prev) => {
                             const next = new Set(prev);
-                            if (v) next.add(s.id); else next.delete(s.id);
+                            if (v) next.add(s.id);
+                            else next.delete(s.id);
                             return next;
                           });
                         }}
@@ -205,19 +212,29 @@ export function PublishConfirmDialog({
 
           {zeroWarn && !loading && (
             <div className="rounded-xl border border-hive-gold/50 bg-hive-gold-soft px-3 py-2 text-xs text-hive-ink">
-              No staff are assigned to this client yet. You can publish now — staff will receive this {kindLabel} automatically once you assign them. Publish anyway?
+              No staff are assigned to this client yet. You can publish now — staff will receive
+              this {kindLabel} automatically once you assign them. Publish anyway?
             </div>
           )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy || isPublishing}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={busy || isPublishing}
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirm} disabled={busy || isPublishing || loading || !orgId || (needReason && !reason.trim())}>
-            {(busy || isPublishing)
-              ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
+          <Button
+            onClick={handleConfirm}
+            disabled={busy || isPublishing || loading || !orgId || (needReason && !reason.trim())}
+          >
+            {busy || isPublishing ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+            )}
             Approve &amp; publish
           </Button>
         </DialogFooter>
