@@ -4,7 +4,7 @@
 
 import { isDailyServiceCode } from "../../service-billing.ts";
 import type { CarryKind, CarryOver } from "./carry-over.ts";
-import type { AboutMeRow, HealthNeed, Issue, PcspResult, Provider, Risk } from "./parser-shared.ts";
+import type { HealthNeed, Issue, PcspResult, Provider, Risk } from "./parser-shared.ts";
 
 export type ReviewSupport = {
   support: string; details: string; start: string | null; end: string | null;
@@ -28,7 +28,6 @@ export type ReviewedPcsp = {
   goals: ReviewGoal[];
   budget: ReviewBudgetLine[];
   risks: (Risk & { include: boolean })[];
-  aboutMe: (AboutMeRow & { include: boolean })[];
   otherProviders: ReviewOtherProvider[];
 };
 
@@ -89,7 +88,6 @@ export function initialReview(parse: PcspResult, carry: CarryOver): ReviewedPcsp
       rate: b.rate, maxMonthlyUnits: b.maxMonthlyUnits, annualUnits: b.annualUnits,
     })),
     risks: parse.risks.map((r) => ({ ...r, include: true })),
-    aboutMe: parse.aboutMe.map((a) => ({ ...a, include: true })),
     otherProviders: otherProvidersFrom(parse),
   };
 }

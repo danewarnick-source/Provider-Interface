@@ -2095,6 +2095,60 @@ export type Database = {
         }
         Relationships: []
       }
+      client_about_me: {
+        Row: {
+          approved_at: string
+          approved_by: string
+          based_on_doc_ids: string[]
+          client_id: string
+          created_at: string
+          drafted_by_nectar: boolean
+          id: string
+          items: Json
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string
+          approved_by: string
+          based_on_doc_ids?: string[]
+          client_id: string
+          created_at?: string
+          drafted_by_nectar?: boolean
+          id?: string
+          items?: Json
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string
+          based_on_doc_ids?: string[]
+          client_id?: string
+          created_at?: string
+          drafted_by_nectar?: boolean
+          id?: string
+          items?: Json
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_about_me_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_about_me_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_absences: {
         Row: {
           archived_at: string | null
@@ -16335,14 +16389,6 @@ export type Database = {
       }
     }
     Functions: {
-      active_client_staff_exclusions: {
-        Args: { _client?: string; _org: string }
-        Returns: {
-          client_id: string
-          reason: string
-          staff_user_id: string
-        }[]
-      }
       accept_invitation: { Args: { _token: string }; Returns: string }
       access_can_see_client: {
         Args: { _client: string; _user: string }
@@ -16365,6 +16411,14 @@ export type Database = {
         Returns: boolean
       }
       access_seed_presets: { Args: { _org: string }; Returns: undefined }
+      active_client_staff_exclusions: {
+        Args: { _client?: string; _org: string }
+        Returns: {
+          client_id: string
+          reason: string
+          staff_user_id: string
+        }[]
+      }
       apply_med_change_proposal: {
         Args: { _proposal_id: string }
         Returns: string
@@ -16392,13 +16446,16 @@ export type Database = {
           service_end_date: string
         }[]
       }
-      client_goal_client: { Args: { _goal: string }; Returns: string }
       client_discharge_assert: { Args: { _client: string }; Returns: string }
-      client_discharge_cutoff: { Args: { _discharge_date: string }; Returns: string }
+      client_discharge_cutoff: {
+        Args: { _discharge_date: string }
+        Returns: string
+      }
       client_discharge_preview: {
         Args: { _client: string; _discharge_date: string }
         Returns: Json
       }
+      client_goal_client: { Args: { _goal: string }; Returns: string }
       client_has_med_admin_code: {
         Args: { _client_id: string }
         Returns: boolean
@@ -16410,6 +16467,7 @@ export type Database = {
           account_status: string
           admin_hours_per_week: number | null
           admission_date: string | null
+          advance_directive_notes: string | null
           advanced_directives: boolean | null
           allergies: string[]
           authorized_dspd_codes: string[]

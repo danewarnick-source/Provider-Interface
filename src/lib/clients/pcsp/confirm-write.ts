@@ -7,7 +7,7 @@ import { normalizeCodes } from "../plans.ts";
 import { insertPlan } from "../plans-write.ts";
 import { assertRowsChanged } from "../writes.ts";
 import {
-  aboutMeLines, billingRows, blockHeading, carriedFrom, confirmProblems, contactRows, mergePcspBlock, riskLines,
+  billingRows, blockHeading, carriedFrom, confirmProblems, contactRows, mergePcspBlock, riskLines,
 } from "./confirm-plan.ts";
 import type { ReviewedPcsp } from "./review.ts";
 
@@ -101,15 +101,13 @@ export async function applyReviewedPcsp(sb: Sb, a: ConfirmArgs): Promise<Confirm
   }
 
   const { data: client, error: cErr } = await sb
-    .from("clients").select("special_directions, about_me").eq("id", a.clientId).maybeSingle();
+    .from("clients").select("special_directions").eq("id", a.clientId).maybeSingle();
   fail(cErr);
-  const c = (client ?? {}) as { special_directions?: string | null; about_me?: string | null };
-  const heading = blockHeading(a.review);
+  const c = (client ?? {}) as { special_directions?: string | null };
   const patch = {
-    special_directions: mergePcspBlock(c.special_directions, heading, riskLines(a.review)),
-    about_me: mergePcspBlock(c.about_me, heading, aboutMeLines(a.review)),
+    special_directions: mergePcspBlock(c.special_directions, blockHeading(a.review), riskLines(a.review)),
   };
-  if (patch.special_directions !== (c.special_directions ?? null) || patch.about_me !== (c.about_me ?? null)) {
+  if (patch.special_directions !== (c.special_directions ?? null)) {
     const { data, error } = await sb.from("clients").update(patch).eq("id", a.clientId).select("id");
     fail(error);
     assertRowsChanged(data as unknown[]);

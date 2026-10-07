@@ -34,6 +34,5 @@ export const reviewedPcspSchema = z.object({
     annualUnits: z.number().int().min(0).max(10_000_000),
   })).max(40),
   risks: z.array(z.object({ include: z.boolean(), risk: text(), response: text(), responseTime: text(200), notes: text() })).max(60),
-  aboutMe: z.array(z.object({ include: z.boolean(), domain: text(200), label: text(500), note: text(), source: text(200) })).max(200),
   otherProviders: z.array(z.object({ include: z.boolean(), code, provider: text(300), note: text() })).max(40),
 }) satisfies z.ZodType<ReviewedPcsp>;

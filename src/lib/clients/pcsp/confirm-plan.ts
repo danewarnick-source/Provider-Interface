@@ -1,6 +1,6 @@
 // What confirming a reviewed PCSP writes, worked out without touching the
-// database: authorization rows from OUR budget lines, the "From PCSP" blocks
-// for must-knows (risks) and about-me, other-provider contacts, and checks
+// database: authorization rows from OUR budget lines, the "From PCSP" block
+// for must-knows (risks), other-provider contacts, and checks
 // that must pass before anything is written.
 
 import type { ReviewedPcsp } from "./review.ts";
@@ -70,10 +70,12 @@ export function billingRows(
 const BLOCK_HEAD = /^From PCSP\b.*:$/;
 
 /**
- * Replace the "From PCSP …:" block in a free-text field (or add one at the
- * end). Text a person typed outside the block is kept as is.
+ * Remove every "From PCSP …:" block (the heading and its "- " lines) from a
+ * free-text field, keeping what a person typed. null when nothing is left.
+ * The about_me backfill migration (…_clients_about_me_strip_pcsp_blocks.sql)
+ * runs this same rule in SQL.
  */
-export function mergePcspBlock(existing: string | null | undefined, heading: string, lines: string[]): string | null {
+export function stripPcspBlocks(existing: string | null | undefined): string | null {
   const kept: string[] = [];
   let inBlock = false;
   for (const line of (existing ?? "").split("\n")) {
@@ -82,8 +84,13 @@ export function mergePcspBlock(existing: string | null | undefined, heading: str
     inBlock = false;
     kept.push(line);
   }
-  const base = kept.join("\n").trim();
-  if (!lines.length) return base || null;
+  return kept.join("\n").trim() || null;
+}
+
+/** Replace the "From PCSP …:" block in must-knows (or add one at the end). */
+export function mergePcspBlock(existing: string | null | undefined, heading: string, lines: string[]): string | null {
+  const base = stripPcspBlocks(existing);
+  if (!lines.length) return base;
   const block = [`From PCSP ${heading}:`, ...lines.map((l) => `- ${l}`)].join("\n");
   return base ? `${base}\n\n${block}` : block;
 }
@@ -97,14 +104,6 @@ export function riskLines(r: ReviewedPcsp): string[] {
     if (x.responseTime.trim()) parts.push(`Response time: ${x.responseTime.trim()}.`);
     if (x.notes.trim()) parts.push(sentence(x.notes));
     return parts.join(" ");
-  });
-}
-
-export function aboutMeLines(r: ReviewedPcsp): string[] {
-  return r.aboutMe.filter((x) => x.include && (x.label.trim() || x.note.trim())).map((x) => {
-    const where = [x.domain, x.label].filter((s) => s.trim()).join(" · ");
-    const from = x.source.trim() ? ` (from ${x.source.trim()})` : "";
-    return `${where}${where ? ": " : ""}${x.note.trim()}${from}`;
   });
 }
 

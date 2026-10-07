@@ -4,7 +4,7 @@ import { parsePcsp } from "./parser.ts";
 import { proposeCarryOver } from "./carry-over.ts";
 import { initialReview } from "./review.ts";
 import {
-  aboutMeLines, billingRows, blockHeading, carriedFrom, confirmProblems, contactRows, mergePcspBlock, riskLines,
+  billingRows, blockHeading, carriedFrom, confirmProblems, contactRows, mergePcspBlock, riskLines, stripPcspBlocks,
 } from "./confirm-plan.ts";
 import { SAMPLE_AGENCY, SAMPLE_PCSP_PAGES } from "./fixture/sample-pages.ts";
 
@@ -48,14 +48,19 @@ test("the From PCSP block replaces the old one and keeps typed text", () => {
   assert.equal(mergePcspBlock(null, "2026", []), null);
 });
 
-test("risk and about-me lines read plainly", () => {
+test("stripPcspBlocks removes every From PCSP block and keeps typed text", () => {
+  const typed = "Likes the park.\n\nFrom PCSP 2025-09-01 – 2026-08-31:\n- Where can I learn more: classes\n- Likes: music\nWrote this later.";
+  assert.equal(stripPcspBlocks(typed), "Likes the park.\n\nWrote this later.");
+  assert.equal(stripPcspBlocks("From PCSP ? – ?:\n- Only copied rows"), null);
+  assert.equal(stripPcspBlocks("  From PCSP 2026:  \r\n- a\r"), null);
+  assert.equal(stripPcspBlocks("No block here.\n- a typed dash line"), "No block here.\n- a typed dash line");
+  assert.equal(stripPcspBlocks(null), null);
+});
+
+test("risk lines read plainly", () => {
   const r = review();
   assert.deepEqual(riskLines(r), [
     "Choking on large bites of food. Response: Cut food into small pieces. Response time: Immediate. Staff watch during all meals.",
-  ]);
-  assert.deepEqual(aboutMeLines(r), [
-    "Healthy Living · Likes outdoors: Pat enjoys gardening and music. Morning walks help. (from Pat)",
-    "Safety & Security · Does not like: Loud crowded rooms. (from Guardian)",
   ]);
   assert.equal(blockHeading(r), "2026-09-01 – 2027-08-31");
 });
