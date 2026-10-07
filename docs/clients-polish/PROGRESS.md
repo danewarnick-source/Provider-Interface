@@ -75,3 +75,12 @@
 - Added 24 (lib/clients/activity.ts, authorization-renewal.ts, health-tiles.ts + tests; section headers/cards). Deleted 11 (shifts/daily-logs/incidents/office-notes panels, activity record-dialog, contact-row, care-card, authorization-row, authorizations-card, team-codes-card, code-scope-popover).
 - Client-area lines 42,938 → 44,219.
 - Blockers: none. Notes: Team saves per person (Save team / Undo removed); office notes keep lock + edit-only visibility; 1056 review "Confirm" → "Save authorizations from the 1056".
+
+### C7 — Remove Smart Import, one Add client, spreadsheet templates — MERGED
+- PR #464 (https://github.com/danewarnick-source/Provider-Interface/pull/464), squash-merged as d2a48fba.
+- Checks: build passes (routeTree regenerated); tsc 203 (= baseline); unit 1963 tests, only the 5 baseline failures. E2E not run. Re-verified before merge.
+- Migrations applied: none. **PHASE B (apply only after this reaches main):** supabase/migrations/20261007160000_smart_import_phase_b_discard_drafts_and_reminders.sql — sets discarded_at on the 1 open client draft and unschedules the smart-import-reminders pg_cron job (production main still runs Smart Import until then). No DELETE.
+- Deleted 32 files (17,346 lines): all Smart Import routes/components (incl. timesheet and daily-note wizards), lib/smart-import*, reminders hook + chip, import-validation, clients/import-template.ts, lifecycle.functions.ts, client-needs-attention.tsx, Company Migration page, Smart Import e2e spec. Net −16,655 lines repo-wide.
+- Added 15: shared lib/spreadsheet-import/ + components/spreadsheet-import/, lib/clients/import-sheet*.ts (+test), add-client-start.tsx, import-clients-dialog.tsx, import-client-row.tsx, use-import-clients.ts, team-members import-columns/import-template/import-member-row.
+- Client-area lines 44,219 → 44,939 (+720, new spreadsheet import).
+- Blockers: none. Follow-ups: team member template drift fixed (Supervisor, Worker type added; Job title removed); import_merge_flags still written by document upload but nothing resolves them; hireTeamMemberInternal keeps an unused "smart_import" branch; one open employee draft left as is.
