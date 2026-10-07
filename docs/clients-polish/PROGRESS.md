@@ -32,3 +32,11 @@
 - Added 10: cards/section-card.tsx, cards/card-parts.tsx, cards/row-menu.tsx, profile-shell/tones.ts, header-pills.tsx, plans/pcsp-upload-button.tsx, activity/office-note-composer.tsx, activity/add-note-button.tsx, lib/clients/profile-header.ts (+ .test.ts). Deleted: cards/card-shell.tsx (CardShell, HexMarker, GroupHeader, Row, fmtDate); SkeletonCard, StrategiesTitle removed. Zero remaining imports.
 - Client-area lines 37,295 → 38,167 (+872; 737 in new files).
 - Blockers: none. Note: e2e/clients-new-client-pcsp.spec.ts:146 expects a link named "Import" (now "Import clients"); e2e not maintained per runbook, and C7 removes Import anyway.
+
+### C2 — Clients list page — MERGED
+- PR #459 (https://github.com/danewarnick-source/Provider-Interface/pull/459), squash-merged as 432a227e.
+- Checks: build passes; tsc 203 (= baseline); unit 1868 tests, only the 5 baseline failures (12 new). E2E not run. Re-verified before merge.
+- Migrations: none.
+- Added 3: list/list-shortcut.tsx, lib/clients/list-display.ts (+ .test.ts). Deleted 0. Removed exports rowNeedsAttention, CodeBadges (zero imports). needsAttention now only in Smart Import.
+- Client-area lines 38,167 → 38,680 (+513).
+- Blockers: none. Note: list makes one extra best-effort read of the preferred_name custom field for "Goes by".
