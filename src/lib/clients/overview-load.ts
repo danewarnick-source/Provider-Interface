@@ -11,7 +11,7 @@ import { todayYmd } from "./dates";
 import { loadOrgClientFileIndex } from "./file-index";
 import { loadUsage, rows, type AuthRow, type Sb } from "./list-queries";
 import { comingUpItems, lastNotes, type ClientOverview } from "./overview";
-import { loadOverviewTeam } from "./overview-team";
+import { loadOverviewTeam, loadPeopleNames } from "./overview-team";
 import type { ClientPlan } from "./plans";
 import { clientAttention, codePace } from "./readiness";
 import { usedUnitsForCode } from "./units";
@@ -121,7 +121,10 @@ export async function loadClientOverview(
     loadUpcomingShifts(sb, orgId, clientId, now),
     loadRecentNotes(sb, orgId, clientId),
   ]);
-  const teamNames = new Map(team.map((t) => [t.id, t.name]));
+  const names = await loadPeopleNames(sb, [
+    ...shifts.map((s) => s.staff_id ?? ""),
+    ...notes.map((n) => n.authorId ?? ""),
+  ]);
   const current = plans.find((p) => p.status === "current");
   return {
     attention,
@@ -131,7 +134,7 @@ export async function loadClientOverview(
       {
         shifts: shifts.map((s) => ({
           ...s,
-          staffName: s.staff_id ? (teamNames.get(s.staff_id) ?? "Team member") : null,
+          staffName: s.staff_id ? (names.get(s.staff_id) ?? "Team member") : null,
         })),
         due: [
           ...(current?.end_date
@@ -161,10 +164,16 @@ export async function loadClientOverview(
       now,
     ),
     team,
-    lastNotes: lastNotes(notes),
+    lastNotes: lastNotes(
+      notes.map(({ authorId, ...n }) => ({
+        ...n,
+        author: authorId ? (names.get(authorId) ?? "Team member") : null,
+      })),
+    ),
   };
 }
 
+/** Published, not cancelled shifts from now on, soonest first. */
 async function loadUpcomingShifts(sb: Sb, orgId: string, clientId: string, now: Date) {
   return rows<{
     id: string;
@@ -177,33 +186,42 @@ async function loadUpcomingShifts(sb: Sb, orgId: string, clientId: string, now: 
       .select("id, starts_at, service_code, staff_id")
       .eq("organization_id", orgId)
       .eq("client_id", clientId)
+      .eq("published", true)
+      .neq("status", "cancelled")
       .gte("starts_at", now.toISOString())
       .order("starts_at", { ascending: true })
       .limit(10),
   ).catch(() => []);
 }
 
+/** Newest shift notes (author = the punch's team member) and daily logs (author = user_id). */
 async function loadRecentNotes(sb: Sb, orgId: string, clientId: string) {
   const [sheets, logs] = await Promise.all([
     rows<{
       id: string;
       clock_in_timestamp: string | null;
+      staff_id: string | null;
       service_type_code: string | null;
       shift_note_text: string | null;
     }>(
       sb
         .from("evv_timesheets")
-        .select("id, clock_in_timestamp, service_type_code, shift_note_text")
+        .select("id, clock_in_timestamp, staff_id, service_type_code, shift_note_text")
         .eq("organization_id", orgId)
         .eq("client_id", clientId)
         .not("shift_note_text", "is", null)
         .order("clock_in_timestamp", { ascending: false })
         .limit(6),
     ).catch(() => []),
-    rows<{ id: string; log_date: string | null; narrative: string | null }>(
+    rows<{
+      id: string;
+      log_date: string | null;
+      user_id: string | null;
+      narrative: string | null;
+    }>(
       sb
         .from("daily_logs")
-        .select("id, log_date, narrative")
+        .select("id, log_date, user_id, narrative")
         .eq("organization_id", orgId)
         .eq("client_id", clientId)
         .order("log_date", { ascending: false })
@@ -216,7 +234,7 @@ async function loadRecentNotes(sb: Sb, orgId: string, clientId: string) {
       date: s.clock_in_timestamp ? todayYmd(new Date(s.clock_in_timestamp)) : "",
       kind: "shift" as const,
       code: s.service_type_code,
-      author: null,
+      authorId: s.staff_id,
       text: s.shift_note_text ?? "",
     })),
     ...logs.map((l) => ({
@@ -224,7 +242,7 @@ async function loadRecentNotes(sb: Sb, orgId: string, clientId: string) {
       date: l.log_date ?? "",
       kind: "daily" as const,
       code: null,
-      author: null,
+      authorId: l.user_id,
       text: l.narrative ?? "",
     })),
   ];

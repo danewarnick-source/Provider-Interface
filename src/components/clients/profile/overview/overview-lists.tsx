@@ -1,13 +1,19 @@
-// Overview lists: what's coming up, the team (ready to work alone) and the
-// last notes. Each row can open the section it belongs to.
+// Overview lists: what's coming up (published shifts and due dates), the
+// team (ready to work alone) and the last notes with their authors. Each row
+// links to the section it belongs to.
 
-import { CalendarDays, NotebookPen, Users, type LucideIcon } from "lucide-react";
+import { ArrowRight, CalendarDays, NotebookPen, Users, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/clients/dates";
-import type { ComingUpItem, OverviewNote, OverviewTeamMember } from "@/lib/clients/overview";
-import type { ClientProfileSection } from "@/lib/clients/profile-sections";
+import {
+  comingUpWhen,
+  noteHeading,
+  type ComingUpItem,
+  type OverviewNote,
+  type OverviewTeamMember,
+} from "@/lib/clients/overview";
+import { CLIENT_SECTION_LABEL, type ClientProfileSection } from "@/lib/clients/profile-sections";
 import { SectionCard, type CardTone } from "@/components/clients/profile/cards/section-card";
 import { EmptyState, StatusTag } from "@/components/clients/profile/cards/card-parts";
 
@@ -34,24 +40,34 @@ function ListCard(props: {
   );
 }
 
+/** Small link to the section a row belongs to ("Open Activity"). */
+function SectionLink({
+  section,
+  label,
+  onSelect,
+}: {
+  section: ClientProfileSection;
+  label?: string;
+  onSelect: (s: ClientProfileSection) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(section)}
+      className="inline-flex min-h-8 items-center gap-1 text-xs font-medium text-[var(--hive-info-fg)] hover:underline max-md:min-h-11"
+    >
+      {label ?? `Open ${CLIENT_SECTION_LABEL[section]}`}{" "}
+      <ArrowRight className="h-3 w-3" aria-hidden />
+    </button>
+  );
+}
+
 function OpenButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <Button variant="outline" onClick={onClick}>
       {label}
     </Button>
   );
-}
-
-function whenText(i: ComingUpItem): string {
-  const day =
-    i.days === 0
-      ? "Today"
-      : i.days === 1
-        ? "Tomorrow"
-        : formatDate(i.date, { weekday: "short", month: "short", day: "numeric" });
-  if (!i.startsAt) return i.days < 0 ? `${formatDate(i.date)} (overdue)` : day;
-  const time = new Date(i.startsAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  return `${day}, ${time}`;
 }
 
 export function ComingUpCard({
@@ -66,7 +82,7 @@ export function ComingUpCard({
       icon={CalendarDays}
       tone="neutral"
       title="Coming up"
-      description="Shifts, due dates and reviews in the next 30 days."
+      description="Published shifts, due dates and reviews in the next 30 days."
       testId="client-coming-up"
     >
       {items.length === 0 ? (
@@ -74,22 +90,24 @@ export function ComingUpCard({
       ) : (
         <ul className="divide-y divide-border/60">
           {items.map((i) => (
-            <li key={i.key} className="flex items-center justify-between gap-3 py-1.5 text-sm">
-              <button
-                type="button"
-                className="min-h-8 min-w-0 truncate text-left hover:underline max-md:min-h-11"
-                onClick={() => onSelect(i.section)}
-              >
-                {i.label}
-              </button>
-              <span
-                className={cn(
-                  "shrink-0 text-xs tabular-nums",
-                  i.days < 0 ? "font-medium text-destructive" : "text-muted-foreground",
-                )}
-              >
-                {whenText(i)}
+            <li
+              key={i.key}
+              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2 text-sm"
+              data-testid="client-coming-up-row"
+            >
+              <span className="min-w-0">
+                <span className="font-medium text-hive-ink">{i.label}</span>
+                <span
+                  className={cn(
+                    "tabular-nums",
+                    i.days < 0 ? "font-medium text-destructive" : "text-muted-foreground",
+                  )}
+                >
+                  {" "}
+                  · {comingUpWhen(i)}
+                </span>
               </span>
+              <SectionLink section={i.section} onSelect={onSelect} />
             </li>
           ))}
         </ul>
@@ -160,21 +178,18 @@ export function LastNotesCard({
       icon={NotebookPen}
       tone="neutral"
       title="Last notes"
-      description="The newest daily and shift notes."
+      description="The newest daily and shift notes, and who wrote them."
       testId="client-last-notes"
-      action={<OpenButton label="Open Activity" onClick={() => onSelect("activity")} />}
     >
       {notes.length === 0 ? (
         <EmptyState>No notes yet.</EmptyState>
       ) : (
-        <ul className="space-y-3">
+        <ul className="divide-y divide-border/60">
           {notes.map((n) => (
-            <li key={n.key} className="text-sm">
-              <p className="text-xs text-muted-foreground">
-                {formatDate(n.date)} ·{" "}
-                {n.kind === "daily" ? "Daily note" : `${n.code ?? "Shift"} note`}
-              </p>
-              <p className="line-clamp-3 whitespace-pre-wrap">{n.text}</p>
+            <li key={n.key} className="py-2 text-sm" data-testid="client-last-note">
+              <p className="text-xs font-medium text-muted-foreground">{noteHeading(n)}</p>
+              <p className="mt-0.5 line-clamp-3 whitespace-pre-wrap">{n.text}</p>
+              <SectionLink section="activity" label="Open in Activity" onSelect={onSelect} />
             </li>
           ))}
         </ul>

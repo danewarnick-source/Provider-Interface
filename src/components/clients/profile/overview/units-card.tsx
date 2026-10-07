@@ -23,7 +23,7 @@ export function UnitsCard({
       icon={Gauge}
       tone="profile"
       title="Units left"
-      description="Units left per code. The line marks where today's pace should be."
+      description="How much of each authorization is used, and the pace. The line marks where today's pace should be."
       testId="client-units-card"
     >
       <div className="space-y-3">
