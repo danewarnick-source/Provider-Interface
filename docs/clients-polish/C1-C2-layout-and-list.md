@@ -53,7 +53,7 @@ Go through **every** `Button` in `src/components/clients/profile/` and `src/comp
 - **Never** lay out two independent columns that grow to different heights (that's what leaves the big empty gap under Identity today).
 - Empty cards use `EmptyState`: one sentence and the button that fills them ("No contacts yet. Add contact").
 
-**Done when:** every card in the client profile uses `SectionCard`; `CardShell` and direct `ui/card` imports are gone from `src/components/clients/` (grep); the header matches the description above; the Team Members profile still loads; the profile e2e smoke test opens every section; build/tsc/unit pass vs. baseline; run the roster and staff go-live e2e suites.
+**Done when:** every card in the client profile uses `SectionCard`; `CardShell` and direct `ui/card` imports are gone from `src/components/clients/` (grep); the header matches the description above; the Team Members profile still loads; build/tsc/unit pass vs. baseline.
 
 ---
 
@@ -74,7 +74,7 @@ Jeff doesn't want it. Remove it completely:
 
 1. Delete the toggle in `list-toolbar.tsx` and its state in `clients-page.tsx` and `use-client-list.ts`.
 2. Remove `needsAttention` from the list filters, the server function input (`list.functions.ts`), the row type and the row loaders (`list.ts`, `list-load.ts`, `list-queries.ts`); delete `rowNeedsAttention` and its tests in `list.test.ts`.
-3. Update `e2e/helpers/clients-list-mock.ts` and any e2e test that clicks the toggle.
+3. Remove the toggle's references from `e2e/helpers/clients-list-mock.ts` so it still type-checks (don't run e2e).
 4. **Keep** `LOW_UNITS_PCT` and `DUE_SOON_DAYS`: `list-cells.tsx` still uses them to color the units-left and next-due cells. Don't touch the Team Members constants or Smart Import's own `needsAttention`.
 
 Afterwards, grep `needsAttention` and `rowNeedsAttention` under `src/` and `e2e/`: only Smart Import's remains.
@@ -108,4 +108,4 @@ Today a client whose authorizations all ended (example: a client whose plan year
 3. **Next due** uses the same wording as the Plans section (C4): "PCSP is N days overdue" / "PCSP expires in N days".
 4. **No rule changes:** ended codes still can't be scheduled or billed after their end date. Display only. Never end-date or delete anything because a plan expired.
 
-**Done when:** the list page and phone cards match the new look; the filter is gone (grep); shortcuts open the right section and respect permissions; unit tests cover the codes cell (active, ended, plan expired, never had codes) and readiness wording; build/tsc/unit pass vs. baseline; run the roster e2e suite.
+**Done when:** the list page and phone cards match the new look; the filter is gone (grep); shortcuts open the right section and respect permissions; unit tests cover the codes cell (active, ended, plan expired, never had codes) and readiness wording; build/tsc/unit pass vs. baseline.
