@@ -83,7 +83,7 @@ describe("hire auto-assign", () => {
     assert.match(importWriter, /reevaluateStaffAssignedToClientInternal/);
     assert.match(hireHook, /onClientDutyFactsChanged/);
     const profileTab = readFileSync(
-      fileURLToPath(new URL("../components/clients/profile/health/care-card.tsx", import.meta.url)),
+      fileURLToPath(new URL("../components/clients/profile/health/care-needs-card.tsx", import.meta.url)),
       "utf8",
     );
     assert.match(profileTab, /onClientDutyFactsChanged/);
