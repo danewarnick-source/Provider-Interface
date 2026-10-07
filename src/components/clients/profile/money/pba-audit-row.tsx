@@ -100,8 +100,7 @@ export function PbaAuditRow({
           <span className="text-muted-foreground">Not in this quarter's sample.</span>
           {canEdit ? (
             <Button
-              size="sm"
-              variant="ghost"
+              variant="outline"
               className="ml-auto"
               onClick={() => pickM.mutate()}
               disabled={pickM.isPending}
@@ -126,8 +125,8 @@ export function PbaAuditRow({
             Picked — needs independent verification
           </Badge>
           {canEdit && user && canVerifyPbaSample(account.created_by, user.id) ? (
-            <Button size="sm" className="ml-auto" onClick={() => setVerifying(true)}>
-              <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Verify
+            <Button className="ml-auto" onClick={() => setVerifying(true)}>
+              <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Verify audit sample
             </Button>
           ) : null}
         </>

@@ -3,12 +3,25 @@
 
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function RecordDialog({
   title,
+  saveLabel,
   open,
   saving,
   problem,
@@ -17,6 +30,7 @@ export function RecordDialog({
   children,
 }: {
   title: string;
+  saveLabel: string;
   open: boolean;
   saving: boolean;
   problem: string | null;
@@ -33,11 +47,11 @@ export function RecordDialog({
         <div className="grid gap-3">{children}</div>
         {problem ? <p className="text-xs text-amber-700">{problem}</p> : null}
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button disabled={saving || !!problem} onClick={onSave}>
-            {saving ? "Saving…" : "Save"}
+            {saving ? "Saving…" : saveLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,9 +1,8 @@
-// Small read-only pieces shared by the profile sections that list records
-// (activity, summaries, host-home certifications): a loading card and a table
-// whose rows can open their record.
+// A read-only table shared by the profile sections that list records
+// (activity, summaries, host-home certifications), whose rows can open
+// their record. Wide tables scroll inside their own box.
 
 import type { ReactNode } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,16 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-export function SkeletonCard() {
-  return (
-    <Card>
-      <CardContent className="py-10 text-center text-sm text-muted-foreground">
-        Loading…
-      </CardContent>
-    </Card>
-  );
-}
+import { EmptyState } from "./cards/card-parts";
 
 export type Col<R> = { header: string; cell: (row: R) => ReactNode };
 export function ReadOnlyTable<R extends Record<string, unknown>>({
@@ -42,7 +32,7 @@ export function ReadOnlyTable<R extends Record<string, unknown>>({
     return <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>;
   }
   if (!rows.length) {
-    return <div className="py-10 text-center text-sm text-muted-foreground">{empty}</div>;
+    return <EmptyState>{empty}</EmptyState>;
   }
   return (
     <div className="overflow-x-auto">

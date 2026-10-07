@@ -1,10 +1,11 @@
 // One section (income / expenses / other) of a client's monthly budget, and
 // the totals tiles. Removing a line archives it (never deleted).
 
-import { Archive, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fmt$, sortLines, type BudgetLine, type BudgetSection } from "./budget-model";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 
 export function BudgetLinesTable({
   title,
@@ -45,8 +46,8 @@ export function BudgetLinesTable({
             Subtotal: <span className="font-medium">{fmt$(subtotal)}</span>
           </div>
           {canEdit && (
-            <Button size="sm" variant="outline" onClick={onAdd}>
-              <Plus className="mr-1 h-3 w-3" /> Add line
+            <Button variant="outline" onClick={onAdd}>
+              <Plus className="h-4 w-4" /> Add line
             </Button>
           )}
         </div>
@@ -118,15 +119,16 @@ export function BudgetLinesTable({
                 </td>
                 {canEdit && (
                   <td className="py-2 text-right">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => onArchive(l.id)}
-                      aria-label="Remove line"
-                      title="Remove line (kept in the record)"
-                    >
-                      <Archive className="h-4 w-4" />
-                    </Button>
+                    <RowMenu
+                      label="More actions for this line"
+                      items={[
+                        {
+                          label: "Remove line (kept in the record)",
+                          danger: true,
+                          onSelect: () => onArchive(l.id),
+                        },
+                      ]}
+                    />
                   </td>
                 )}
               </tr>

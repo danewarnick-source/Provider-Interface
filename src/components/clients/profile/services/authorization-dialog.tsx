@@ -216,7 +216,7 @@ export function AuthorizationDialog({
               Cancel
             </Button>
             <Button onClick={save} disabled={saving || problems.length > 0}>
-              {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}Save
+              {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}Save authorization
             </Button>
           </div>
         </DialogFooter>

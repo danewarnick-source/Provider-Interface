@@ -10,7 +10,7 @@ import type { ClientProfileData } from "@/components/clients/profile/use-client-
 export function ServicesSection({ orgId, data }: { orgId: string; data: ClientProfileData }) {
   const canEdit = useAccess().canCategory("billing", "edit");
   return (
-    <div className="space-y-4" data-testid="client-section-services">
+    <div className="flex flex-col gap-5" data-testid="client-section-services">
       <AuthorizationsCard orgId={orgId} clientId={data.client.id} canEdit={canEdit} />
       <MonthlyBudget clientId={data.client.id} clientName={data.name} />
     </div>

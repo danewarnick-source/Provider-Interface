@@ -25,7 +25,7 @@ export function PlansSection({ orgId, data }: { orgId: string; data: ClientProfi
   const current = currentPlan(plans);
   const currentGoals = (bundle?.goals ?? []).filter((g) => g.plan_id === current?.id);
   return (
-    <div className="space-y-4" data-testid="client-section-plans">
+    <div className="flex flex-col gap-5" data-testid="client-section-plans">
       <PlanYearsCard
         orgId={orgId}
         clientId={clientId}

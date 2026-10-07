@@ -159,10 +159,10 @@ export function RestrictionDialog({
           )}
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>Close</Button>
           {canManage && (
             <Button disabled={save.isPending} onClick={() => save.mutate()}>
-              Save
+              Save restriction
             </Button>
           )}
         </DialogFooter>

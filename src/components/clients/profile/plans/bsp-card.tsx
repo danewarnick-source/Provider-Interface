@@ -2,7 +2,8 @@
 // consultation (BC1–BC3, from us or another agency).
 
 import { NectarAsk } from "@/components/clients/shared/nectar-ask";
-import { CardShell } from "@/components/clients/profile/cards/card-shell";
+import { Brain } from "lucide-react";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { useLatestDocument } from "./use-latest-document";
 
 const BSP_TYPES = ["bsp", "behavior_support_plan"] as const;
@@ -10,7 +11,12 @@ const BSP_TYPES = ["bsp", "behavior_support_plan"] as const;
 export function BspCard({ orgId, clientId }: { orgId: string; clientId: string }) {
   const doc = useLatestDocument(orgId, clientId, BSP_TYPES);
   return (
-    <CardShell title="Behavior support plan" subtitle="Needed because this client receives behavior consultation (BC1–BC3).">
+    <SectionCard
+      icon={Brain}
+      tone="ok"
+      title="Behavior support plan"
+      description="Needed because this client receives behavior consultation (BC1–BC3)."
+    >
       <div data-testid="client-bsp">
         <NectarAsk
           question={doc.data ? "Behavior support plan" : "Upload the current behavior support plan"}
@@ -20,6 +26,6 @@ export function BspCard({ orgId, clientId }: { orgId: string; clientId: string }
           answeredSummary={doc.data ? `On file: ${doc.data.file_name}` : null}
         />
       </div>
-    </CardShell>
+    </SectionCard>
   );
 }

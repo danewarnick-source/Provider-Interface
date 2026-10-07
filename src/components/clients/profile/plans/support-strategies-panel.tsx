@@ -8,12 +8,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ClipboardList } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import {
   SectionsView,
   PublishConfirmDialog,
 } from "@/components/clients/profile/client-specific-training-card";
-import { SkeletonCard } from "@/components/clients/profile/read-only-table";
 import {
   attachSupportStrategyDocument,
   draftSupportStrategies,
@@ -29,11 +30,12 @@ import {
   isUploadDoc,
 } from "./support-strategies-parts";
 import {
+  StrategiesDescription,
   StrategiesEmpty,
-  StrategiesTitle,
   StrategiesToolbar,
   StrategiesUploaded,
 } from "./support-strategies-cards";
+import { useHasPcsp } from "./use-latest-document";
 
 type SSRow = { id: string; content: CSTContent; status: string; version: number };
 
@@ -62,20 +64,7 @@ export function SupportStrategiesPanel({
   const [publishDialog, setPublishDialog] = useState(false);
   const queryKey = useMemo(() => ["support-strategies-training", clientId], [clientId]);
 
-  const { data: hasPcsp } = useQuery({
-    queryKey: ["client-has-pcsp", clientId],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("client_documents")
-        .select("id", { count: "exact", head: true })
-        .eq("client_id", clientId)
-        .ilike("document_type", "pcsp");
-      if (error) throw error;
-      return (count ?? 0) > 0;
-    },
-    staleTime: 30_000,
-  });
-  const pcspReady = hasPcsp === true;
+  const pcspReady = useHasPcsp(clientId);
   const { data, isLoading } = useQuery({ queryKey, queryFn: () => getSS({ data: { clientId } }) });
   const training = (data?.training ?? null) as SSRow | null;
 
@@ -139,8 +128,6 @@ export function SupportStrategiesPanel({
   );
   const pickFile = needPcsp(() => fileInputRef.current?.click());
 
-  if (isLoading) return <SkeletonCard />;
-
   const content = training?.content as CSTContent | undefined;
   const uploaded = !!content && isUploadDoc(content);
   const link = uploaded ? content!.sections[0].items[0] : null;
@@ -150,17 +137,18 @@ export function SupportStrategiesPanel({
 
   return (
     <>
-      <Card>
-        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-          <StrategiesTitle
-            open={bodyOpen || !training}
-            onToggle={() => setBodyOpen((v) => !v)}
-            dueOn={training?.status === "published" ? null : dueOn}
-          />
-          {training ? (
-            <div className="flex flex-wrap items-center gap-2">
+      <SectionCard
+        icon={ClipboardList}
+        tone="ok"
+        title="Support strategies"
+        description={
+          <StrategiesDescription dueOn={training?.status === "published" ? null : dueOn} />
+        }
+        actions={
+          training ? (
+            <>
               <SSStatusBadge status={training.status} version={training.version} />
-              {!uploaded ? (
+              {!uploaded && bodyOpen ? (
                 <StrategiesToolbar
                   editing={editing}
                   published={published}
@@ -187,22 +175,28 @@ export function SupportStrategiesPanel({
                   }
                 />
               ) : null}
-            </div>
-          ) : null}
-        </CardHeader>
-        {!training ? (
-          <CardContent>
-            <StrategiesEmpty
-              pcspReady={pcspReady}
-              drafting={draftMut.isPending}
-              uploading={uploading || !orgId}
-              onDraft={(mode) => needPcsp(() => draftMut.mutate(mode))()}
-              onUpload={pickFile}
-              fileInput={fileInput}
-            />
-          </CardContent>
+              {!editing ? (
+                <Button variant="outline" onClick={() => setBodyOpen((v) => !v)}>
+                  {bodyOpen ? "Hide strategies" : "Show strategies"}
+                </Button>
+              ) : null}
+            </>
+          ) : null
+        }
+      >
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : !training ? (
+          <StrategiesEmpty
+            pcspReady={pcspReady}
+            drafting={draftMut.isPending}
+            uploading={uploading || !orgId}
+            onDraft={(mode) => needPcsp(() => draftMut.mutate(mode))()}
+            onUpload={pickFile}
+            fileInput={fileInput}
+          />
         ) : bodyOpen ? (
-          <CardContent className="space-y-4">
+          <div className="space-y-4">
             {uploaded ? (
               <StrategiesUploaded
                 fileName={fileName}
@@ -228,9 +222,9 @@ export function SupportStrategiesPanel({
                 />
               </>
             )}
-          </CardContent>
+          </div>
         ) : null}
-      </Card>
+      </SectionCard>
       <PcspFirstDialog open={pcspPrompt} onOpenChange={setPcspPrompt} />
       {training ? (
         <PublishConfirmDialog
