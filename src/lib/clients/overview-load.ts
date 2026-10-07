@@ -8,7 +8,8 @@ import { computeRestrictionCompletion, type RestrictionRecord } from "./hrc";
 import { isActiveCodeRow, loadActiveCodes } from "./codes";
 import { guardianSatisfied, loadClientContacts } from "./contacts";
 import { todayYmd } from "./dates";
-import { loadOrgClientFileIndex } from "./file-index";
+import { loadClientFileView } from "./file-packs.server";
+import { fileAttention } from "./file-rows";
 import { loadUsage, rows, type AuthRow, type Sb } from "./list-queries";
 import { comingUpItems, lastNotes, type ClientOverview } from "./overview";
 import { loadOverviewTeam, loadPeopleNames } from "./overview-team";
@@ -18,8 +19,6 @@ import { agencySupports, isUploadDoc, strategyCoverage, type StrategySupport } f
 import type { CSTContent } from "./training.functions";
 import { clientAttention, codePace } from "./readiness";
 import { usedUnitsForCode } from "./units";
-
-const SKIP_FILE_CARDS = new Set(["photograph", "support_strategies", "service_summary"]);
 
 /** Approved or not, and "N of M supports have a strategy" (an uploaded document covers all). */
 function strategiesFacts(
@@ -61,7 +60,7 @@ export async function loadClientOverview(
   );
   const client = clientRows[0];
   if (!client) throw new Error("Client not found in this organization");
-  const [codes, auths, contacts, plans, summaries, restrictions, strategies, fileIndex, team, bundle] =
+  const [codes, auths, contacts, plans, summaries, restrictions, strategies, fileView, team, bundle] =
     await Promise.all([
       loadActiveCodes(sb, ids),
       rows<AuthRow>(
@@ -94,7 +93,7 @@ export async function loadClientOverview(
           .eq("client_id", clientId)
           .eq("training_type", "support_strategies"),
       ).catch(() => []),
-      loadOrgClientFileIndex(sb, orgId, ids),
+      loadClientFileView(sb, orgId, clientId, now),
       loadOverviewTeam(sb, orgId, clientId, client.has_abi === true),
       loadPlanBundle(sb, clientId),
     ]);
@@ -109,9 +108,7 @@ export async function loadClientOverview(
     {
       codes: clientCodes,
       paces,
-      fileCards: (fileIndex.cardsByClient.get(clientId) ?? []).filter(
-        (c) => !SKIP_FILE_CARDS.has(c.key),
-      ),
+      fileCards: fileAttention(fileView.groups),
       photo: { url: client.client_photo_url, takenOn: client.client_photo_taken_on },
       plans,
       strategies: personNeedsSupportStrategies(clientCodes)

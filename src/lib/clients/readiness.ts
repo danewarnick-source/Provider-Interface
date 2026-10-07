@@ -105,7 +105,7 @@ export function photoStatus(
 export type ReadinessInput = {
   codes: readonly string[];
   paces: readonly CodePace[];
-  /** Client file cards (file.ts) other than photo, strategies and summaries. */
+  /** Client file rows that need attention (file-rows.ts fileAttention); Not needed rows never count. */
   fileCards: readonly { key: string; title: string; status: string; dueAt: string | null }[];
   photo: { url: string | null; takenOn: string | null };
   plans: readonly ClientPlan[];
