@@ -1,5 +1,5 @@
 // The Health header: purpose, "Log a health event", and four tiles
-// (Allergies, Diet incl. swallowing, Mobility, Emergency plan), each with
+// (Allergies, Diet and swallowing, Mobility, Emergency plan), each with
 // one line of detail and a link to its card.
 
 import { HeartPulse, Plus } from "lucide-react";
@@ -26,18 +26,22 @@ export function HealthHeader({
   canEdit,
   onLog,
   onOpenProfile,
+  directiveShown,
 }: {
   clientId: string;
   firstName: string;
   health: ClientHealthRow | null;
   canEdit: boolean;
-  onLog: () => void;
+  /** Undefined when health events are hidden (family handles doctor visits). */
+  onLog?: () => void;
   onOpenProfile: () => void;
+  /** False when the setup answers hide the advance directive card. */
+  directiveShown: boolean;
 }) {
   const care = useClientCareData(clientId);
   const custom = (key: string) =>
     care.data?.custom_fields.find((f) => f.field_key === key)?.value?.value_text ?? null;
-  const tile = (label: string, t: HealthTile, link: { label: string; onClick: () => void }) => (
+  const tile = (label: string, t: HealthTile, link?: { label: string; onClick: () => void }) => (
     <InfoTile label={label} value={t.value} note={t.note} warn={t.warn} link={link} />
   );
   return (
@@ -48,7 +52,7 @@ export function HealthHeader({
       description={`What staff need to keep ${firstName} safe.`}
       testId="client-health-header"
       actions={
-        canEdit ? (
+        canEdit && onLog ? (
           <Button onClick={onLog}>
             <Plus className="h-4 w-4" /> Log a health event
           </Button>
@@ -68,7 +72,7 @@ export function HealthHeader({
               swallowingAlerts: health.swallowing_alerts,
               diet: custom("dietary_restrictions"),
             }),
-            { label: "See swallowing", onClick: scrollTo("health-swallowing") },
+            { label: "See diet", onClick: scrollTo("health-diet") },
           )}
           {tile(
             "Mobility",
@@ -85,7 +89,9 @@ export function HealthHeader({
               polstStatus: health.polst_status,
               treatmentAuthorization: health.emergency_medical_treatment_authorization,
             }),
-            { label: "See advance directive", onClick: scrollTo("health-directive") },
+            directiveShown
+              ? { label: "See advance directive", onClick: scrollTo("health-directive") }
+              : undefined,
           )}
         </div>
       ) : null}

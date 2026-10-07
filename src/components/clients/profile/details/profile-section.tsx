@@ -1,10 +1,14 @@
 // Profile section: "About <first name>" (lead, full width), then Identity |
 // Service address side by side, extra service locations | mailing address,
-// and More details (custom fields). The photo lives in the header.
+// and More details (custom fields). The photo lives in the header; "Person
+// prefers no photo" (setup) is listed under "Show hidden sections".
 
 import { Mail } from "lucide-react";
 import { HomePinCard } from "@/components/clients/profile/home-pin-card";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
+import { HiddenSections } from "@/components/clients/profile/setup/hidden-sections";
+import { useSupportScope } from "@/components/clients/profile/setup/use-support-scope";
+import { hiddenCards } from "@/lib/clients/support-scope";
 import { AboutCard } from "./about-card";
 import { IdentityCard } from "./identity-card";
 import { MoreDetailsCard } from "./more-details-card";
@@ -21,6 +25,7 @@ export function ProfileSection({
   onChanged: () => void;
 }) {
   const clientId = data.client.id;
+  const scope = useSupportScope(clientId).data ?? null;
   return (
     <div className="flex flex-col gap-5" data-testid="client-section-profile">
       <AboutCard
@@ -49,6 +54,7 @@ export function ProfileSection({
         />
       </div>
       <MoreDetailsCard clientId={clientId} />
+      <HiddenSections orgId={orgId} clientId={clientId} cards={hiddenCards("profile", scope)} />
     </div>
   );
 }
