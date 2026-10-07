@@ -46,16 +46,15 @@ export function ClientListCards({
             <div className="flex items-center justify-between gap-2 pt-1" data-no-row-nav>
               {discharged ? (
                 <Button
-                  size="sm"
                   variant="outline"
-                  className="h-8 text-xs"
+                  className="max-md:min-h-11"
                   disabled={!canEditClients || reactivate.isPending}
                   onClick={() => reactivate.mutate(c.id)}
                 >
                   {reactivate.isPending && reactivate.variables === c.id && (
                     <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                   )}
-                  Reactivate
+                  Reactivate client
                 </Button>
               ) : (
                 <span />
@@ -63,9 +62,9 @@ export function ClientListCards({
               <button
                 type="button"
                 onClick={open}
-                className="flex items-center gap-1 text-sm font-medium text-primary"
+                className="flex min-h-11 items-center gap-1 text-sm font-medium text-primary"
               >
-                {c.kind === "draft" ? "Finish setup" : "Open"}{" "}
+                {c.kind === "draft" ? "Finish setup" : "Open profile"}{" "}
                 <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
