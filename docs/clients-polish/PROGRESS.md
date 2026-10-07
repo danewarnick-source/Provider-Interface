@@ -103,3 +103,12 @@
 - Added 17 (lib/clients/support-scope*.ts, client-setup.ts + tests, health/diet-card.tsx, 12 files under profile/setup/). Deleted 1: health/swallowing-card.tsx (merged into Diet and swallowing).
 - Client-area lines 46,297 → 47,978.
 - Blockers: none. Judgment calls for Jeff: "No" on BSP hides the BSP card even for BC1–BC3 clients; "No" on advance directive doesn't hide it if a DNR/POLST is recorded; new Needs attention item "Signed DNR / POLST form missing".
+
+### C10 — Delete made-by-mistake people — MERGED
+- PR #467 (https://github.com/danewarnick-source/Provider-Interface/pull/467), squash-merged as dadae185.
+- Checks: build passes (routeTree regenerated); tsc 203 (= baseline); unit 2008 tests, only the 5 baseline failures (14 new). E2E not run. Re-verified before merge (incl. reading the SECURITY DEFINER functions).
+- Migrations applied: 20261007190000_people_soft_delete_columns.sql (nullable deleted_at/deleted_by/delete_reason on clients, organization_members); 20261007190100_people_soft_delete_functions.sql (new functions only: people_delete_allowed, people_delete_assert, person_service_history, soft_delete_person, restore_deleted_person; org + permission + visibility checks, no anon). 0 rows. Nothing NEEDS JEFF.
+- Added 9 (lib/people/delete-rules.ts + test, delete.functions.ts, components/people/delete-person-dialog.tsx, settings/recently-deleted-list.tsx, dashboard.settings.recently-deleted route…). "Delete people" category in lib/access/categories.ts. Deleted-people filter on ~180 reads in 105 files (listed in PR).
+- MCP table_write was already removed Sep 27 (606dfdb5); new unit test guards against its return and against .delete() on clients/organization_members.
+- Client-area lines 47,978 → 48,018.
+- Blockers: none. Judgment calls: deleting a team member also deactivates them (restore keeps them deactivated); Restore is Owners only; uploaded documents, authorizations and auto-created summary slots don't count as service history. Note: production main doesn't filter deleted_at until this ships.
