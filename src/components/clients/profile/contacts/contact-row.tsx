@@ -1,8 +1,9 @@
 // One contact in the Contacts list: initials, name (★ = main for the role),
-// role and relationship, phone, and Edit / End for editors.
+// role and relationship, phone, and Edit (End in the ⋯ menu) for editors.
 
-import { Pencil, Star, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Star } from "lucide-react";
+import { EditButton } from "@/components/clients/profile/cards/section-card";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { CONTACT_ROLE_LABELS, type ClientContact } from "@/lib/clients/contacts";
 
 function initials(name: string): string {
@@ -47,26 +48,12 @@ export function ContactRow({
       </div>
       <div className="text-right text-xs tabular-nums text-muted-foreground">{c.phone || "—"}</div>
       {canEdit && (
-        <div className="flex gap-0.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            aria-label={`Edit ${c.name}`}
-            onClick={onEdit}
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            aria-label={`End ${c.name}`}
-            disabled={ending}
-            onClick={onEnd}
-          >
-            <X className="h-3.5 w-3.5" />
-          </Button>
+        <div className="flex gap-2">
+          <EditButton label={`Edit ${c.name}`} onClick={onEdit} />
+          <RowMenu
+            label={`More actions for ${c.name}`}
+            items={[{ label: "End as a contact", danger: true, disabled: ending, onSelect: onEnd }]}
+          />
         </div>
       )}
     </li>

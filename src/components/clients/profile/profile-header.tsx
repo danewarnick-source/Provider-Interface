@@ -1,111 +1,139 @@
-// Client profile header: back link, photo, name, status, codes, home, plan
-// year and support coordinator; the ⋯ menu holds the rarer actions.
+// Client profile header, the "soft panel": muted surface with an ink top
+// stripe. Top row: photo, name, "Goes by · age · home", code and readiness
+// pills; Upload PCSP, Add note and the ⋯ menu (rarer actions). Bottom row:
+// Guardian, Support coordinator and Plan year ends tiles, each opening the
+// section that holds it.
 
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PersonAvatar } from "@/components/person/person-avatar";
-import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/clients/dates";
-import { displayMedicaidId } from "@/lib/medicaid-id";
+import { useAccess } from "@/hooks/use-access";
+import { useClientCareData } from "@/hooks/use-client-care-data";
+import { ageOn, formatDate } from "@/lib/clients/dates";
 import { DISCHARGED_STATUSES } from "@/lib/clients/list";
+import type { AttentionItem } from "@/lib/clients/readiness";
+import type { ClientProfileSection } from "@/lib/clients/profile-sections";
+import {
+  goesByLine,
+  guardianTile,
+  headerReadiness,
+  planYearTile,
+  preferredNameFrom,
+} from "@/lib/clients/profile-header";
+import { InfoTile } from "./cards/card-parts";
 import type { ClientProfileData } from "./use-client-profile";
 import { HeaderMenu } from "./header-menu";
-
-const CHIP = "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium";
-const MUTED = "border-border bg-muted text-muted-foreground";
+import { HeaderPills } from "./header-pills";
+import { PcspUploadButton } from "./plans/pcsp-upload-button";
+import { AddNoteButton } from "./activity/add-note-button";
 
 export function isDischarged(status: string | null | undefined): boolean {
   return (DISCHARGED_STATUSES as readonly string[]).includes(status ?? "");
 }
 
-function planYear(plan: ClientProfileData["plan"]): string | null {
-  if (!plan) return null;
-  if (plan.start_date && plan.end_date) {
-    const o = { month: "short", year: "numeric" } as const;
-    return `Plan year ${formatDate(plan.start_date, o)} – ${formatDate(plan.end_date, o)}`;
-  }
-  return plan.label ? `Plan year ${plan.label}` : null;
-}
-
 export function ClientProfileHeader({
   orgId,
   data,
+  attention,
+  onSelect,
   onChanged,
 }: {
   orgId: string;
   data: ClientProfileData;
+  /** The needs-attention list; null while it loads. */
+  attention: AttentionItem[] | null;
+  onSelect: (section: ClientProfileSection) => void;
   onChanged: () => void;
 }) {
   const { client } = data;
+  const canEdit = useAccess().canCategory("clients", "edit");
+  const care = useClientCareData(client.id);
   const discharged = isDischarged(client.account_status);
-  const medicaid = displayMedicaidId(client.medicaid_id);
-  const parts = [
-    data.home?.name ?? null,
-    planYear(data.plan),
-    data.supportCoordinator ? `SC ${data.supportCoordinator}` : null,
-    medicaid ? `Medicaid ${medicaid}` : null,
-  ].filter((p): p is string => !!p);
+  const subtitle = goesByLine({
+    preferredName: preferredNameFrom(care.data?.custom_fields),
+    firstName: client.first_name,
+    age: ageOn(client.date_of_birth),
+    home: data.home?.name,
+  });
+  const guardian = guardianTile(client.is_own_guardian, data.guardian);
+  const plan = planYearTile(data.plan?.end_date, data.pcspOverdueDays, (d) => formatDate(d));
 
   return (
     <div className="space-y-3" data-testid="client-profile-header">
-      <Button variant="ghost" size="sm" asChild className="-ml-2">
+      <Button variant="ghost" asChild className="-ml-2">
         <Link to="/dashboard/clients" data-testid="client-profile-back">
-          <ArrowLeft className="mr-1 h-4 w-4" /> Clients
+          <ArrowLeft className="h-4 w-4" /> Clients
         </Link>
       </Button>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <PersonAvatar
-            bucket="client-photos"
-            path={client.client_photo_url}
-            name={data.name}
-            className="h-14 w-14 shrink-0"
-          />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
+      <section className="relative min-w-0 overflow-hidden rounded-2xl border border-hive-border bg-[var(--hive-muted-surface)] p-5 pt-6 md:p-6 md:pt-7">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-hive-ink" />
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-1 basis-72 items-start gap-4">
+            <PersonAvatar
+              bucket="client-photos"
+              path={client.client_photo_url}
+              name={data.name}
+              className="h-[76px] w-[76px] shrink-0 border-0 bg-hive-ink text-xl text-white shadow-md ring-4 ring-white"
+            />
+            <div className="min-w-0">
               <h1
-                className="text-xl font-semibold leading-tight"
+                className="break-words text-[26px] font-bold leading-tight text-hive-ink"
                 data-testid="client-profile-heading"
               >
                 {data.name}
               </h1>
-              <span
-                className={cn(
-                  CHIP,
+              {subtitle ? <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p> : null}
+              <HeaderPills
+                codes={data.codes}
+                readiness={headerReadiness(attention)}
+                discharged={
                   discharged
-                    ? MUTED
-                    : "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300",
-                )}
-                data-testid="client-profile-status"
-              >
-                {discharged
-                  ? `Discharged${client.discharge_date ? ` ${formatDate(client.discharge_date)}` : ""}`
-                  : "Active"}
-              </span>
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-              {data.codes.length ? (
-                data.codes.map((c) => (
-                  <span
-                    key={c}
-                    className={cn(CHIP, MUTED, "font-mono")}
-                    data-testid="client-profile-code"
-                  >
-                    {c}
-                  </span>
-                ))
-              ) : (
-                <span className={cn(CHIP, "border-amber-300 bg-amber-50 text-amber-800")}>
-                  No codes
-                </span>
-              )}
-              {parts.length ? <span>{parts.join(" · ")}</span> : null}
+                    ? `Discharged${client.discharge_date ? ` ${formatDate(client.discharge_date)}` : ""}`
+                    : null
+                }
+              />
             </div>
           </div>
+          <div className="flex flex-wrap items-center gap-2 max-md:w-full max-md:[&_button]:min-h-11">
+            {canEdit && !discharged ? (
+              <>
+                <PcspUploadButton
+                  clientId={client.id}
+                  orgId={orgId}
+                  label="Upload PCSP"
+                  inputTestId="header-pcsp-upload-input"
+                />
+                <AddNoteButton orgId={orgId} clientId={client.id} />
+              </>
+            ) : null}
+            <HeaderMenu orgId={orgId} data={data} discharged={discharged} onChanged={onChanged} />
+          </div>
         </div>
-        <HeaderMenu orgId={orgId} data={data} discharged={discharged} onChanged={onChanged} />
-      </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          <InfoTile
+            label="Guardian"
+            value={guardian.value}
+            warn={guardian.missing}
+            link={{ label: "Open Contacts", onClick: () => onSelect("contacts") }}
+            testId="client-header-guardian"
+          />
+          <InfoTile
+            label="Support coordinator"
+            value={data.supportCoordinator ?? "Not on file"}
+            link={{ label: "Open Contacts", onClick: () => onSelect("contacts") }}
+            testId="client-header-coordinator"
+          />
+          <InfoTile
+            label="Plan year ends"
+            value={plan.value}
+            note={plan.note}
+            warn={plan.warn}
+            link={{ label: "Open Plans", onClick: () => onSelect("plans") }}
+            testId="client-header-plan-year"
+          />
+        </div>
+      </section>
     </div>
   );
 }

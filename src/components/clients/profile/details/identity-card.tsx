@@ -7,16 +7,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { IdCard } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { ageOn } from "@/lib/clients/dates";
+import { useAccess } from "@/hooks/use-access";
+import { ageOn, formatDate } from "@/lib/clients/dates";
 import { displayMedicaidId } from "@/lib/medicaid-id";
 import { updateClient } from "@/lib/clients/writes.functions";
-import {
-  CardShell,
-  LabeledInput,
-  Row,
-  fmtDate,
-} from "@/components/clients/profile/cards/card-shell";
+import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
+import { Field, FieldGrid, LabeledInput } from "@/components/clients/profile/cards/card-parts";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
 
 type Draft = {
@@ -66,6 +64,7 @@ export function IdentityCard({
   onChanged: () => void;
 }) {
   const c = data.client;
+  const canEdit = useAccess().canCategory("clients", "edit");
   const updateFn = useServerFn(updateClient);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Draft>(() => baseline(data));
@@ -103,31 +102,39 @@ export function IdentityCard({
   const age = ageOn(c.date_of_birth);
 
   return (
-    <CardShell
+    <SectionCard
+      icon={IdCard}
+      tone="profile"
       title="Identity"
-      editing={editing}
-      onEdit={() => {
-        setDraft(baseline(data));
-        setEditing(true);
-      }}
-      onSave={() => save.mutate()}
-      onCancel={() => setEditing(false)}
-      saving={save.isPending}
+      description="Name, birthday and the IDs used for billing."
+      actions={
+        canEdit && !editing ? (
+          <EditButton
+            label="Edit identity"
+            onClick={() => {
+              setDraft(baseline(data));
+              setEditing(true);
+            }}
+          />
+        ) : null
+      }
     >
       {!editing ? (
         <div data-testid="client-identity">
-          <Row label="Name">{data.name}</Row>
-          <Row label="Date of birth">
-            {c.date_of_birth
-              ? `${fmtDate(c.date_of_birth)}${age != null ? ` · age ${age}` : ""}`
-              : null}
-          </Row>
-          <Row label="Phone">{c.phone_number || null}</Row>
-          <Row label="Medicaid ID">{displayMedicaidId(c.medicaid_id) || null}</Row>
-          <Row label="PID">{c.client_pid || null}</Row>
-          <Row label="Insurance">{c.insurance || null}</Row>
-          <Row label="Admitted">{c.admission_date ? fmtDate(c.admission_date) : null}</Row>
-          <Row label="Home">{data.home?.name ?? null}</Row>
+          <FieldGrid>
+            <Field label="Name">{data.name}</Field>
+            <Field label="Date of birth">
+              {c.date_of_birth
+                ? `${formatDate(c.date_of_birth)}${age != null ? ` · age ${age}` : ""}`
+                : null}
+            </Field>
+            <Field label="Phone">{c.phone_number || null}</Field>
+            <Field label="Medicaid ID">{displayMedicaidId(c.medicaid_id) || null}</Field>
+            <Field label="PID">{c.client_pid || null}</Field>
+            <Field label="Insurance">{c.insurance || null}</Field>
+            <Field label="Admitted">{c.admission_date ? formatDate(c.admission_date) : null}</Field>
+            <Field label="Home">{data.home?.name ?? null}</Field>
+          </FieldGrid>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -159,7 +166,7 @@ export function IdentityCard({
             </Label>
             <select
               id="client-home"
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+              className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
               value={draft.team_id}
               onChange={(e) => set("team_id")(e.target.value)}
             >
@@ -173,6 +180,14 @@ export function IdentityCard({
           </div>
         </div>
       )}
-    </CardShell>
+      {editing ? (
+        <SaveBar
+          onCancel={() => setEditing(false)}
+          onSave={() => save.mutate()}
+          saving={save.isPending}
+          saveLabel="Save identity"
+        />
+      ) : null}
+    </SectionCard>
   );
 }

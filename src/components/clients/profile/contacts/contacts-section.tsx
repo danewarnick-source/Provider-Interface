@@ -7,12 +7,10 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AlertTriangle, Plus, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Plus, ShieldCheck, UsersRound } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
 import { useAccess } from "@/hooks/use-access";
 import { ContactDialog } from "@/components/clients/dialogs/contact-dialog";
 import {
@@ -36,6 +34,8 @@ import {
   updateClientContact,
 } from "@/lib/clients/contacts.functions";
 import { updateClient } from "@/lib/clients/writes.functions";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { ContactRow } from "./contact-row";
 
 const FILTER_ROLE: Record<ContactFilter, ContactRole> = {
@@ -93,29 +93,21 @@ export function ContactsSection({ orgId, data }: { orgId: string; data: ClientPr
   const shown = contactsForFilter(contacts, filter);
 
   return (
-    <div className="space-y-4" data-testid="client-section-contacts">
-      <Card>
-        <CardContent
-          className={cn(
-            "flex flex-wrap items-center justify-between gap-3 p-4 text-sm",
-            !isOwn && !hasGuardian && "text-amber-800 dark:text-amber-300",
-          )}
-          data-testid="client-guardian-note"
-        >
-          <span className="flex items-center gap-2">
-            {isOwn || hasGuardian ? (
-              <ShieldCheck className="h-4 w-4 text-emerald-600" aria-hidden />
-            ) : (
-              <AlertTriangle className="h-4 w-4" aria-hidden />
-            )}
-            {isOwn
-              ? `${data.name} is their own guardian.`
-              : hasGuardian
-                ? `${data.name} has a guardian (listed below).`
-                : `No guardian on file. Add the guardian, or mark ${data.name} as their own guardian.`}
-          </span>
-          {canEdit ? (
-            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+    <div className="flex flex-col gap-5" data-testid="client-section-contacts">
+      <SectionCard
+        icon={isOwn || hasGuardian ? ShieldCheck : AlertTriangle}
+        tone={isOwn || hasGuardian ? "ok" : "danger"}
+        title="Guardian"
+        description={
+          isOwn
+            ? `${data.name} is their own guardian.`
+            : hasGuardian
+              ? `${data.name} has a guardian (listed below).`
+              : `No guardian on file. Add the guardian, or mark ${data.name} as their own guardian.`
+        }
+        actions={
+          canEdit ? (
+            <label className="flex min-h-10 items-center gap-2 text-sm text-muted-foreground">
               Their own guardian
               <Switch
                 checked={isOwn}
@@ -124,36 +116,51 @@ export function ContactsSection({ orgId, data }: { orgId: string; data: ClientPr
                 aria-label="Their own guardian"
               />
             </label>
-          ) : null}
-        </CardContent>
-      </Card>
+          ) : null
+        }
+        testId="client-guardian-note"
+      />
 
-      <Card>
-        <CardContent className="space-y-3 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap gap-1" role="group" aria-label="Filter contacts by role">
-              {CONTACT_FILTERS.map((f) => (
-                <Button
-                  key={f}
-                  size="sm"
-                  variant={filter === f ? "secondary" : "ghost"}
-                  aria-pressed={filter === f}
-                  onClick={() => setFilter(f)}
-                >
-                  {CONTACT_FILTER_LABELS[f]}
-                </Button>
-              ))}
-            </div>
-            {canEdit ? (
-              <Button size="sm" variant="outline" onClick={() => setDialog({ contact: null })}>
-                <Plus className="mr-1 h-3.5 w-3.5" /> Add contact
+      <SectionCard
+        icon={UsersRound}
+        tone="info"
+        title="Contacts"
+        description="Family, emergency contacts, the support coordinator, doctors and other providers."
+        actions={
+          canEdit ? (
+            <Button onClick={() => setDialog({ contact: null })}>
+              <Plus className="h-4 w-4" /> Add contact
+            </Button>
+          ) : null
+        }
+      >
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-1" role="group" aria-label="Filter contacts by role">
+            {CONTACT_FILTERS.map((f) => (
+              <Button
+                key={f}
+                variant={filter === f ? "secondary" : "ghost"}
+                aria-pressed={filter === f}
+                onClick={() => setFilter(f)}
+              >
+                {CONTACT_FILTER_LABELS[f]}
               </Button>
-            ) : null}
+            ))}
           </div>
           {contactsQ.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : shown.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No contacts here yet.</p>
+            <EmptyState
+              action={
+                canEdit ? (
+                  <Button variant="outline" onClick={() => setDialog({ contact: null })}>
+                    <Plus className="h-4 w-4" /> Add contact
+                  </Button>
+                ) : null
+              }
+            >
+              No contacts here yet.
+            </EmptyState>
           ) : (
             <ul className="divide-y divide-border/60">
               {shown.map((c) => (
@@ -168,8 +175,8 @@ export function ContactsSection({ orgId, data }: { orgId: string; data: ClientPr
               ))}
             </ul>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </SectionCard>
 
       <ContactDialog
         open={!!dialog}

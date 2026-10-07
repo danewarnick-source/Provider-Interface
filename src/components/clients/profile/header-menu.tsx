@@ -59,6 +59,7 @@ export function HeaderMenu({
           <Button
             variant="outline"
             size="icon"
+            className="h-10 w-10 max-md:h-11 max-md:w-11"
             aria-label="More actions"
             data-testid="client-profile-menu"
           >
@@ -68,7 +69,7 @@ export function HeaderMenu({
         <DropdownMenuContent align="end">
           {canMedical ? (
             <DropdownMenuItem disabled={faceSheet.busy} onSelect={() => void faceSheet.open()}>
-              {faceSheet.busy ? "Building face sheet…" : "Face sheet PDF"}
+              {faceSheet.busy ? "Building face sheet…" : "Open face sheet PDF"}
             </DropdownMenuItem>
           ) : null}
           {canEdit && !discharged ? (
@@ -82,7 +83,7 @@ export function HeaderMenu({
               onSelect={() => setDischarging(true)}
               data-testid="client-profile-discharge"
             >
-              Discharge
+              Discharge client
             </DropdownMenuItem>
           ) : null}
           {canEdit && discharged ? (
@@ -90,7 +91,7 @@ export function HeaderMenu({
               onSelect={() => setReactivating(true)}
               data-testid="client-profile-reactivate"
             >
-              Reactivate
+              Reactivate client
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuContent>

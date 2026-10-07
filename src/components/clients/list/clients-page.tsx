@@ -95,20 +95,17 @@ export function ClientsPage({
                 <Button
                   asChild
                   variant="outline"
-                  size="sm"
-                  className="border-primary/40 text-primary hover:bg-primary/5"
                 >
                   <Link to="/dashboard/smart-import" search={{ mode: "client" }}>
-                    <Sparkles className="mr-2 h-4 w-4" /> Import
+                    <Sparkles className="h-4 w-4" /> Import clients
                   </Link>
                 </Button>
                 <Button
-                  size="sm"
                   disabled={createBlocked}
                   data-testid="add-client-button"
                   onClick={() => setAdd({ open: true, draftId: null })}
                 >
-                  <UserPlus className="mr-2 h-4 w-4" /> Add client
+                  <UserPlus className="h-4 w-4" /> Add client
                 </Button>
               </>
             )}

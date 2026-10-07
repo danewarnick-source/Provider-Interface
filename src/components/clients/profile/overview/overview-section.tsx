@@ -26,19 +26,25 @@ export function OverviewSection({
   onSelect: (section: ClientProfileSection) => void;
 }) {
   return (
-    <div className="space-y-4" data-testid="client-section-overview">
+    <div className="flex flex-col gap-5" data-testid="client-section-overview">
       {error ? (
         <p className="text-sm text-destructive">Couldn't load the overview. Please try again.</p>
       ) : (
         <AttentionCards items={overview?.attention ?? []} loading={loading} onSelect={onSelect} />
       )}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2">
         <MustKnowsCard
           orgId={orgId}
           clientId={data.client.id}
           text={data.client.special_directions}
         />
-        <UnitsCard paces={overview?.paces ?? []} loading={loading} />
+        <UnitsCard
+          paces={overview?.paces ?? []}
+          loading={loading}
+          onOpenServices={() => onSelect("services")}
+        />
+      </div>
+      <div className="grid gap-5 md:grid-cols-2">
         <ComingUpCard items={overview?.comingUp ?? []} onSelect={onSelect} />
         <TeamCard team={overview?.team ?? []} onSelect={onSelect} />
       </div>

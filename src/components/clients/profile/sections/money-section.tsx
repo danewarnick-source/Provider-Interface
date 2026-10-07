@@ -14,7 +14,7 @@ export function MoneySection({ orgId, data }: { orgId: string; data: ClientProfi
   const { data: org } = useCurrentOrg();
   const clientId = data.client.id;
   return (
-    <div className="space-y-4" data-testid="client-section-money">
+    <div className="flex flex-col gap-5" data-testid="client-section-money">
       <PbaCard
         orgId={orgId}
         clientId={clientId}

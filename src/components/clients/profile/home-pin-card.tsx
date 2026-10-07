@@ -5,11 +5,10 @@
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2 } from "lucide-react";
+import { House, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -29,6 +28,7 @@ import {
   isHomePinDraftDirty,
   resolveGeofenceRadiusFeet,
 } from "@/lib/geo";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import "leaflet/dist/leaflet.css";
 
 type HomePinMapProps = {
@@ -185,15 +185,15 @@ export function HomePinCard({ clientId }: { clientId: string }) {
   });
 
   return (
-    <Card className="overflow-hidden" data-testid="home-location-section" id="home-location">
-      <CardContent className="p-0">
-        <div className="flex items-start gap-2.5 border-b border-border/60 px-5 py-4">
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold leading-tight">Home location</h3>
-          </div>
-        </div>
-
-        <div className="space-y-3 p-5">
+    <SectionCard
+      icon={House}
+      tone="profile"
+      title="Home location"
+      description="The service address. Staff clock in within the circle around the pin."
+      id="home-location"
+      testId="home-location-section"
+    >
+        <div className="space-y-3">
           <div className="space-y-1">
             <Label htmlFor="home-pin-address" className="text-xs">Physical address</Label>
             <div className="flex flex-col gap-2 sm:flex-row">
@@ -205,7 +205,6 @@ export function HomePinCard({ clientId }: { clientId: string }) {
                 disabled={q.isLoading}
               />
               <Button
-                size="sm"
                 variant="outline"
                 className="shrink-0"
                 onClick={() => saveAddr.mutate()}
@@ -276,7 +275,6 @@ export function HomePinCard({ clientId }: { clientId: string }) {
                 The pin moved. Save it so clock-in uses this house.
               </p>
               <Button
-                size="sm"
                 onClick={() => saveDraft.mutate()}
                 disabled={saveDraft.isPending}
                 data-testid="save-home-pin"
@@ -293,7 +291,6 @@ export function HomePinCard({ clientId }: { clientId: string }) {
             </p>
           )}
         </div>
-      </CardContent>
-    </Card>
+    </SectionCard>
   );
 }

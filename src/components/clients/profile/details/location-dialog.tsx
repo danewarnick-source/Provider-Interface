@@ -102,7 +102,7 @@ export function LocationDialog({
           </Button>
           <Button onClick={submit} disabled={saving}>
             {saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}
-            Save
+            Save location
           </Button>
         </DialogFooter>
       </DialogContent>

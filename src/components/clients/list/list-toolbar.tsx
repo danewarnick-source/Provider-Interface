@@ -86,9 +86,7 @@ export function ListToolbar({
         )}
         <Button
           type="button"
-          size="sm"
           variant={filters.needsAttention ? "default" : "outline"}
-          className="h-9"
           aria-pressed={filters.needsAttention}
           onClick={() => onChange({ needsAttention: !filters.needsAttention })}
         >
@@ -96,9 +94,8 @@ export function ListToolbar({
         </Button>
         <Button
           type="button"
-          size="sm"
-          variant="ghost"
-          className="h-9 sm:ml-auto"
+          variant="outline"
+          className="sm:ml-auto"
           disabled={exportDisabled}
           onClick={onExport}
         >

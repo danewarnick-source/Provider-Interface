@@ -1,13 +1,14 @@
 // Plan goals: the current plan year's goals → supports → codes, with add /
 // edit / end and "View as" a code (what a team member working that code
 // sees). Nothing is deleted: goals are ended, supports get an end date.
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { FileUp, Loader2, Pencil, Plus, X } from "lucide-react";
+import { Loader2, Plus, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { FieldVisibilityToggle } from "@/components/clients/profile/visibility-toggles";
 import { clientPlansKey, useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,8 +17,7 @@ import { currentPlan, goalView, supportsForCode, type GoalView } from "@/lib/cli
 import { addClientPlan, endClientGoal, endGoalSupport } from "@/lib/clients/plans.functions";
 import { GoalTree } from "./goal-tree";
 import { GoalDialog, SupportDialog } from "./goal-dialogs";
-import { usePcspImport } from "./use-pcsp-import";
-import { PcspReview } from "./pcsp-review";
+import { PcspUploadButton } from "./pcsp-upload-button";
 
 type Support = GoalView["supports"][number];
 
@@ -27,8 +27,6 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
   const addPlanFn = useServerFn(addClientPlan);
   const endGoalFn = useServerFn(endClientGoal);
   const endSupportFn = useServerFn(endGoalSupport);
-  const pcsp = usePcspImport(clientId, orgId);
-  const fileRef = useRef<HTMLInputElement>(null);
   const [goalDlg, setGoalDlg] = useState<{ goal: GoalView | null; planId: string } | null>(null);
   const [supportDlg, setSupportDlg] = useState<{ goal: GoalView; support: Support | null } | null>(null);
   const [viewAs, setViewAs] = useState("all");
@@ -56,12 +54,15 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-base">Plan goals</CardTitle>
+    <SectionCard
+      icon={Target}
+      tone="ok"
+      title="Plan goals"
+      description="This plan year's goals and supports. View as a code to see what a team member on it sees."
+      actions={
+        <>
           <Select value={viewAs} onValueChange={setViewAs}>
-            <SelectTrigger className="h-8 w-44" aria-label="View as" data-testid="plan-view-as">
+            <SelectTrigger className="h-10 w-44" aria-label="View as" data-testid="plan-view-as">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -73,36 +74,17 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
               ))}
             </SelectContent>
           </Select>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3 text-sm">
-        <input
-          ref={fileRef}
-          type="file"
-          className="hidden"
-          accept=".pdf,application/pdf"
-          data-testid="pcsp-upload-input"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) void pcsp.upload(f);
-            e.target.value = "";
-          }}
-        />
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button" size="sm" variant="outline" className="gap-1.5"
-            disabled={pcsp.reading || !orgId} onClick={() => fileRef.current?.click()}
-          >
-            {pcsp.reading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5" />}
-            {pcsp.reading ? "Reading the PCSP…" : "Upload new PCSP"}
-          </Button>
-          <Button type="button" size="sm" className="gap-1.5" disabled={!scope} onClick={act(async () => {
+          <PcspUploadButton clientId={clientId} orgId={orgId} label="Upload new PCSP" variant="outline" inputTestId="pcsp-upload-input" />
+          <Button type="button" disabled={!scope} onClick={act(async () => {
             const planId = await ensurePlanId();
             if (planId) setGoalDlg({ goal: null, planId });
           })}>
-            <Plus className="h-3.5 w-3.5" /> Add goal
+            <Plus className="h-4 w-4" /> Add goal
           </Button>
-        </div>
+        </>
+      }
+    >
+      <div className="space-y-3 text-sm">
         {plansQ.isLoading ? (
           <p className="text-muted-foreground"><Loader2 className="mr-1 inline h-3.5 w-3.5 animate-spin" />Loading…</p>
         ) : (
@@ -110,44 +92,30 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
             goals={goals}
             empty={viewAs === "all" ? "No goals yet — upload the PCSP or add them." : `No supports list ${viewAs} — a team member working ${viewAs} sees no goals.`}
             goalActions={(g) => (
-              <div className="flex shrink-0 items-center gap-0.5">
+              <div className="flex shrink-0 items-center gap-2">
                 <FieldVisibilityToggle clientId={clientId} section="care_plan" kind="goal" id={g.id} label="this goal" />
-                <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Add support" onClick={() => setSupportDlg({ goal: g, support: null })}>
-                  <Plus className="h-3.5 w-3.5" />
+                <Button size="icon" variant="outline" className="h-10 w-10 max-md:h-11 max-md:w-11" aria-label="Add support" title="Add support" onClick={() => setSupportDlg({ goal: g, support: null })}>
+                  <Plus className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Edit goal" onClick={() => plan && setGoalDlg({ goal: g, planId: plan.id })}>
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  size="icon" variant="ghost" className="h-7 w-7" aria-label="End goal" disabled={!scope}
-                  onClick={act(() => endGoalFn({ data: { ...scope!, goalId: g.id } }))}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
+                <EditButton label="Edit goal" onClick={() => plan && setGoalDlg({ goal: g, planId: plan.id })} />
+                <RowMenu
+                  label="More actions for this goal"
+                  items={[{ label: "End goal", danger: true, disabled: !scope, onSelect: act(() => endGoalFn({ data: { ...scope!, goalId: g.id } })) }]}
+                />
               </div>
             )}
             supportActions={(g, s) => (
-              <div className="flex shrink-0 items-center gap-0.5">
-                <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Edit support" onClick={() => setSupportDlg({ goal: g, support: s })}>
-                  <Pencil className="h-3 w-3" />
-                </Button>
-                <Button
-                  size="icon" variant="ghost" className="h-7 w-7" aria-label="End support" disabled={!scope}
-                  onClick={act(() => endSupportFn({ data: { ...scope!, goalId: g.id, supportId: s.id } }))}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
+              <div className="flex shrink-0 items-center gap-2">
+                <EditButton label="Edit support" onClick={() => setSupportDlg({ goal: g, support: s })} />
+                <RowMenu
+                  label="More actions for this support"
+                  items={[{ label: "End support", danger: true, disabled: !scope, onSelect: act(() => endSupportFn({ data: { ...scope!, goalId: g.id, supportId: s.id } })) }]}
+                />
               </div>
             )}
           />
         )}
-      </CardContent>
-      {pcsp.read && pcsp.review && (
-        <PcspReview
-          read={pcsp.read} review={pcsp.review} onChange={pcsp.setReview}
-          saving={pcsp.saving} onConfirm={() => void pcsp.confirm()} onClose={pcsp.close}
-        />
-      )}
+      </div>
       {scope && (
         <>
           {goalDlg && (
@@ -159,7 +127,7 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
           />
         </>
       )}
-    </Card>
+    </SectionCard>
   );
 }
 

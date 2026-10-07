@@ -112,7 +112,7 @@ export function DocumentUploadDialog({
           </Button>
           <Button onClick={save} disabled={saving || !file}>
             {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-            {replacing ? "Replace" : "Upload"}
+            {replacing ? "Replace file" : "Upload file"}
           </Button>
         </DialogFooter>
       </DialogContent>

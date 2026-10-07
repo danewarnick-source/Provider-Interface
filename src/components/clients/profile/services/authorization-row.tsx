@@ -6,6 +6,8 @@ import { useState } from "react";
 import { AlertTriangle, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EditButton } from "@/components/clients/profile/cards/section-card";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { formatDate } from "@/lib/clients/dates";
 import { UNIT_TYPES, type AuthorizationView } from "@/lib/clients/authorizations";
 import { isVariableRateCode } from "@/lib/variable-rate-codes";
@@ -69,18 +71,17 @@ export function AuthorizationRow({
           )}
         </div>
         {canEdit && v.state !== "ended" && (
-          <div className="flex gap-1">
-            <Button size="sm" variant="ghost" className="h-7" onClick={onEdit}>
-              Edit
-            </Button>
-            <Button size="sm" variant="ghost" className="h-7" onClick={onEnd}>
-              End
-            </Button>
+          <div className="flex gap-2">
+            <EditButton label={`Edit ${row.service_code} authorization`} onClick={onEdit} />
+            <RowMenu
+              label={`More actions for ${row.service_code}`}
+              items={[{ label: "End authorization", danger: true, onSelect: onEnd }]}
+            />
           </div>
         )}
         {canEdit && v.state === "ended" && (
-          <Button size="sm" variant="ghost" className="h-7" onClick={onEdit}>
-            Renew
+          <Button variant="outline" onClick={onEdit}>
+            Renew {row.service_code}
           </Button>
         )}
       </div>
@@ -134,7 +135,7 @@ export function AuthorizationRow({
         <div>
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+            className="inline-flex min-h-8 items-center gap-1 text-xs text-muted-foreground hover:text-foreground max-md:min-h-11"
             onClick={() => setShowHistory((s) => !s)}
           >
             <History className="h-3 w-3" /> Rate history ({history.length})

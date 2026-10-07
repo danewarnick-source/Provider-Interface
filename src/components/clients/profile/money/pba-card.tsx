@@ -7,28 +7,23 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Plus, Wallet } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState, StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
+import { formatDate } from "@/lib/clients/dates";
 import { writeClientRecord } from "@/lib/clients/writes.functions";
 import { formatMoney, pbaHeadroomPercent, pbaTone, type PbaTone } from "@/lib/clients/money";
 import { PbaAuditRow } from "./pba-audit-row";
 import { PbaLedgerDialog } from "./pba-ledger-dialog";
 import { pbaAccountKey, useClientPba } from "./use-client-money";
 
-const TONE: Record<PbaTone, { label: string; cls: string }> = {
-  healthy: {
-    label: "Healthy",
-    cls: "border-emerald-500/40 text-emerald-700 dark:text-emerald-300",
-  },
-  watch: { label: "Watch", cls: "border-amber-500/40 text-amber-700 dark:text-amber-300" },
-  near_limit: {
-    label: "Near the Medicaid limit",
-    cls: "border-red-500/40 text-red-700 dark:text-red-300",
-  },
+const TONE: Record<PbaTone, { label: string; tone: "ok" | "profile" | "danger" }> = {
+  healthy: { label: "Healthy", tone: "ok" },
+  watch: { label: "Watch", tone: "profile" },
+  near_limit: { label: "Near the Medicaid limit", tone: "danger" },
 };
 
 export function PbaCard({
@@ -70,47 +65,57 @@ export function PbaCard({
   });
 
   return (
-    <Card data-testid="client-money-pba">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Wallet className="h-4 w-4" /> PBA trust account
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <SectionCard
+      icon={Wallet}
+      tone="neutral"
+      title="PBA trust account"
+      description="The client's money the agency holds, against the Medicaid limit."
+      testId="client-money-pba"
+      actions={
+        account ? (
+          <Button variant="outline" onClick={() => setLedgerOpen(true)}>
+            Open ledger
+          </Button>
+        ) : null
+      }
+    >
+      <div className="space-y-3">
         {q.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : !account ? (
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">No PBA account is open for this client.</p>
-            {canEdit ? (
-              <div className="flex flex-wrap items-end gap-2">
-                <div className="grid gap-1">
-                  <Label htmlFor="pba-threshold" className="text-xs">
-                    Medicaid limit (USD)
-                  </Label>
-                  <Input
-                    id="pba-threshold"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="w-40"
-                    value={threshold}
-                    onChange={(e) => setThreshold(e.target.value)}
-                  />
+          <EmptyState
+            action={
+              canEdit ? (
+                <div className="flex flex-wrap items-end gap-2">
+                  <div className="grid gap-1">
+                    <Label htmlFor="pba-threshold" className="text-xs">
+                      Medicaid limit (USD)
+                    </Label>
+                    <Input
+                      id="pba-threshold"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      className="h-10 w-40"
+                      value={threshold}
+                      onChange={(e) => setThreshold(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    onClick={() => openM.mutate()}
+                    disabled={!(Number(threshold) > 0) || openM.isPending}
+                  >
+                    <Plus className="h-4 w-4" /> Open PBA account
+                  </Button>
                 </div>
-                <Button
-                  size="sm"
-                  onClick={() => openM.mutate()}
-                  disabled={!(Number(threshold) > 0) || openM.isPending}
-                >
-                  <Plus className="mr-1 h-4 w-4" /> Open PBA account
-                </Button>
-              </div>
-            ) : null}
-          </div>
+              ) : null
+            }
+          >
+            No PBA account is open for this client.
+          </EmptyState>
         ) : (
           <>
-            <AccountSummary account={account} onOpen={() => setLedgerOpen(true)} />
+            <AccountSummary account={account} />
             <PbaAuditRow
               orgId={orgId}
               clientId={clientId}
@@ -128,17 +133,15 @@ export function PbaCard({
             />
           </>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </SectionCard>
   );
 }
 
 function AccountSummary({
   account,
-  onOpen,
 }: {
   account: { current_balance: number; medicaid_threshold: number; opened_on: string };
-  onOpen: () => void;
 }) {
   const bal = Number(account.current_balance);
   const thr = Number(account.medicaid_threshold);
@@ -148,13 +151,8 @@ function AccountSummary({
       <Stat label="Balance" value={formatMoney(bal)} />
       <Stat label="Medicaid limit" value={formatMoney(thr)} />
       <Stat label="Room left" value={`${pbaHeadroomPercent(bal, thr)}%`} />
-      <Badge variant="outline" className={tone.cls}>
-        {tone.label}
-      </Badge>
-      <span className="text-xs text-muted-foreground">Opened {account.opened_on}</span>
-      <Button size="sm" variant="outline" className="ml-auto" onClick={onOpen}>
-        Open ledger
-      </Button>
+      <StatusTag tone={tone.tone}>{tone.label}</StatusTag>
+      <span className="text-xs text-muted-foreground">Opened {formatDate(account.opened_on)}</span>
     </div>
   );
 }

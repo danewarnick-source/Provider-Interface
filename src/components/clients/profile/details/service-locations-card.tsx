@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { MapPin, Pencil, Plus, X } from "lucide-react";
+import { MapPin, MapPinned, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,9 @@ import {
   endServiceLocation,
   updateServiceLocation,
 } from "@/lib/clients/locations.functions";
-import { CardShell } from "@/components/clients/profile/cards/card-shell";
+import { EditButton, SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 import { LocationDialog } from "./location-dialog";
 
 export function ServiceLocationsCard({ orgId, clientId }: { orgId: string; clientId: string }) {
@@ -75,13 +77,15 @@ export function ServiceLocationsCard({ orgId, clientId }: { orgId: string; clien
 
   const locations = q.data ?? [];
   return (
-    <CardShell
+    <SectionCard
+      icon={MapPinned}
+      tone="profile"
       title="Extra service locations"
-      subtitle="Other places staff can clock in for this client."
-      headerRight={
-        canEdit ? (
-          <Button size="sm" variant="outline" onClick={() => setDialog({ location: null })}>
-            <Plus className="mr-1 h-3.5 w-3.5" /> Add
+      description="Other places staff can clock in for this client."
+      actions={
+        canEdit && locations.length > 0 ? (
+          <Button onClick={() => setDialog({ location: null })}>
+            <Plus className="h-4 w-4" /> Add location
           </Button>
         ) : null
       }
@@ -89,7 +93,17 @@ export function ServiceLocationsCard({ orgId, clientId }: { orgId: string; clien
       {q.isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : locations.length === 0 ? (
-        <p className="text-sm text-muted-foreground">None. Staff can only clock in at home.</p>
+        <EmptyState
+          action={
+            canEdit ? (
+              <Button onClick={() => setDialog({ location: null })}>
+                <Plus className="h-4 w-4" /> Add location
+              </Button>
+            ) : null
+          }
+        >
+          None yet. Staff can only clock in at home.
+        </EmptyState>
       ) : (
         <ul className="divide-y divide-border/60" data-testid="client-service-locations">
           {locations.map((l) => (
@@ -102,28 +116,24 @@ export function ServiceLocationsCard({ orgId, clientId }: { orgId: string; clien
                 </p>
               </div>
               {canEdit ? (
-                <div className="flex gap-0.5">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    aria-label={`Change ${l.label}`}
+                <div className="flex gap-2">
+                  <EditButton
+                    label={`Edit ${l.label}`}
                     onClick={() => setDialog({ location: l })}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    aria-label={`End ${l.label}`}
-                    disabled={end.isPending}
-                    onClick={() =>
-                      window.confirm(`Stop allowing clock-in at ${l.label}?`) && end.mutate(l.id)
-                    }
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
+                  />
+                  <RowMenu
+                    label={`More actions for ${l.label}`}
+                    items={[
+                      {
+                        label: "Stop clock-ins here",
+                        danger: true,
+                        disabled: end.isPending,
+                        onSelect: () =>
+                          window.confirm(`Stop allowing clock-in at ${l.label}?`) &&
+                          end.mutate(l.id),
+                      },
+                    ]}
+                  />
                 </div>
               ) : null}
             </li>
@@ -137,6 +147,6 @@ export function ServiceLocationsCard({ orgId, clientId }: { orgId: string; clien
         onOpenChange={(o) => !o && setDialog(null)}
         onSave={(d) => save.mutate(d)}
       />
-    </CardShell>
+    </SectionCard>
   );
 }

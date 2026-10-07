@@ -96,16 +96,14 @@ export function ClientListTable({
                 <TableCell className="py-2 text-right" data-no-row-nav>
                   {discharged ? (
                     <Button
-                      size="sm"
                       variant="outline"
-                      className="h-7 text-xs"
                       disabled={!canEditClients || reactivate.isPending}
                       onClick={() => reactivate.mutate(c.id)}
                     >
                       {reactivate.isPending && reactivate.variables === c.id && (
                         <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                       )}
-                      Reactivate
+                      Reactivate client
                     </Button>
                   ) : (
                     <ReadinessTag row={c} />

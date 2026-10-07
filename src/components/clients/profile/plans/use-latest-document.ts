@@ -22,3 +22,21 @@ export function useLatestDocument(orgId: string, clientId: string, types: readon
     },
   });
 }
+
+/** Is any PCSP on file for the client? (Drafting support strategies needs one.) */
+export function useHasPcsp(clientId: string): boolean {
+  const q = useQuery({
+    queryKey: ["client-has-pcsp", clientId],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("client_documents")
+        .select("id", { count: "exact", head: true })
+        .eq("client_id", clientId)
+        .ilike("document_type", "pcsp");
+      if (error) throw error;
+      return (count ?? 0) > 0;
+    },
+    staleTime: 30_000,
+  });
+  return q.data === true;
+}

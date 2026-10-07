@@ -19,7 +19,7 @@ export function HealthSection({ orgId, data }: { orgId: string; data: ClientProf
   const clientId = data.client.id;
   const health = useClientHealth(orgId, clientId);
   return (
-    <div className="space-y-4" data-testid="client-section-health">
+    <div className="flex flex-col gap-5" data-testid="client-section-health">
       <MustKnowsCard orgId={orgId} clientId={clientId} text={data.client.special_directions} />
       {health.isLoading ? (
         <p className="text-sm text-muted-foreground">
@@ -27,12 +27,10 @@ export function HealthSection({ orgId, data }: { orgId: string; data: ClientProf
         </p>
       ) : health.data ? (
         <>
-          <div className="grid gap-4 md:grid-cols-2">
-            <MedicalListsCard orgId={orgId} health={health.data} />
-            <div className="space-y-4">
-              <SwallowingCard orgId={orgId} health={health.data} />
-              <AdvanceDirectiveCard orgId={orgId} health={health.data} />
-            </div>
+          <MedicalListsCard orgId={orgId} health={health.data} />
+          <div className="grid gap-5 md:grid-cols-2">
+            <SwallowingCard orgId={orgId} health={health.data} />
+            <AdvanceDirectiveCard orgId={orgId} health={health.data} />
           </div>
           <CareCard orgId={orgId} health={health.data} clientName={data.name} />
         </>

@@ -8,10 +8,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Save, Search, X } from "lucide-react";
+import { Save, Search, Users, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
@@ -80,36 +80,34 @@ export function TeamCodesCard({
   };
 
   return (
-    <Card data-testid="client-team-codes">
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <CardTitle className="text-base">Team and codes</CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Team members can only be scheduled for, and clock into, the codes checked here. A new
-            code adds nobody automatically.
-          </p>
-        </div>
-        {canEdit ? (
-          <div className="flex gap-2">
+    <SectionCard
+      icon={Users}
+      tone="ok"
+      title="Team and codes"
+      description="Team members can only be scheduled for, and clock into, the codes checked here."
+      testId="client-team-codes"
+      actions={
+        canEdit ? (
+          <>
             <Button
-              variant="ghost"
-              size="sm"
+              variant="outline"
               onClick={() => setState(new Map(original))}
               disabled={!changes.dirty || saveM.isPending}
             >
-              <X className="mr-1 h-4 w-4" /> Reset
+              <X className="h-4 w-4" /> Undo changes
             </Button>
             <Button
-              size="sm"
               onClick={() => saveM.mutate()}
               disabled={!changes.dirty || missing.length > 0 || saveM.isPending}
             >
-              <Save className="mr-1 h-4 w-4" /> {saveM.isPending ? "Saving…" : "Save"}
+              <Save className="h-4 w-4" /> {saveM.isPending ? "Saving…" : "Save team"}
             </Button>
-          </div>
-        ) : null}
-      </CardHeader>
-      <CardContent className="space-y-3">
+          </>
+        ) : null
+      }
+    >
+      <div className="space-y-3">
+        <p className="text-xs text-muted-foreground">A new code adds nobody automatically.</p>
         {!teamQ.isLoading && codes.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             This client has no active codes yet. Add one in Services & billing before assigning team
@@ -117,7 +115,7 @@ export function TeamCodesCard({
           </p>
         ) : null}
         {noStaffFor.map((code) => (
-          <p key={code} className="text-xs text-amber-700 dark:text-amber-400">
+          <p key={code} className="text-xs font-medium text-[var(--hive-danger-fg)]">
             Nobody is assigned <span className="font-mono">{code}</span> yet
           </p>
         ))}
@@ -141,7 +139,7 @@ export function TeamCodesCard({
         {staffQ.isLoading || teamQ.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading team…</p>
         ) : (
-          <ul className="max-h-[480px] divide-y overflow-y-auto rounded border">
+          <ul className="max-h-[480px] divide-y overflow-y-auto rounded-xl border">
             {staff.map((s) => {
               const checked = state.has(s.id);
               const isExcluded = excluded.has(s.id);
@@ -183,7 +181,7 @@ export function TeamCodesCard({
             })}
           </ul>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </SectionCard>
   );
 }

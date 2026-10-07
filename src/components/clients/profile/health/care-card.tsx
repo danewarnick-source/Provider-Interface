@@ -4,18 +4,28 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
+import { Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { medicationSupportLabel } from "@/lib/clients/health";
 import { onClientDutyFactsChanged } from "@/lib/staff-assignment-hooks.functions";
 import { MarEmarTab } from "@/components/workspace/mar-emar-tab";
-import { CardShell, Row } from "@/components/clients/profile/cards/card-shell";
+import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
+import { Field, FieldGrid } from "@/components/clients/profile/cards/card-parts";
 import { useCanEditMedical, useSaveHealth, type ClientHealthRow } from "./use-client-health";
 
 type Draft = { treatment: boolean; abi: boolean };
 
-export function CareCard({ orgId, health, clientName }: { orgId: string; health: ClientHealthRow; clientName: string }) {
+export function CareCard({
+  orgId,
+  health,
+  clientName,
+}: {
+  orgId: string;
+  health: ClientHealthRow;
+  clientName: string;
+}) {
   const dutyFactsFn = useServerFn(onClientDutyFactsChanged);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [showMeds, setShowMeds] = useState(false);
@@ -34,22 +44,39 @@ export function CareCard({ orgId, health, clientName }: { orgId: string; health:
   });
   const toggle = (id: keyof Draft, label: string) => (
     <div className="flex items-center gap-3">
-      <Switch id={`care-${id}`} checked={draft?.[id] ?? false} onCheckedChange={(v) => setDraft((d) => (d ? { ...d, [id]: v } : d))} />
+      <Switch
+        id={`care-${id}`}
+        checked={draft?.[id] ?? false}
+        onCheckedChange={(v) => setDraft((d) => (d ? { ...d, [id]: v } : d))}
+      />
       <Label htmlFor={`care-${id}`} className="text-sm">
         {label}
       </Label>
     </div>
   );
   return (
-    <CardShell
+    <SectionCard
+      icon={Pill}
+      tone="danger"
       title="Care and medications"
-      editing={draft !== null}
-      canEdit={canEdit}
-      onEdit={() => setDraft({ treatment: health.emergency_medical_treatment_authorization === true, abi: abiBefore })}
-      onCancel={() => setDraft(null)}
-      saving={save.isPending}
-      onSave={() =>
-        draft && save.mutate({ emergency_medical_treatment_authorization: draft.treatment, has_abi: draft.abi })
+      description="Emergency treatment, brain injury and how much help they need with medications."
+      actions={
+        <>
+          <Button variant="outline" asChild>
+            <Link to="/dashboard/emar">Open eMAR board</Link>
+          </Button>
+          {canEdit && draft === null ? (
+            <EditButton
+              label="Edit care and medications"
+              onClick={() =>
+                setDraft({
+                  treatment: health.emergency_medical_treatment_authorization === true,
+                  abi: abiBefore,
+                })
+              }
+            />
+          ) : null}
+        </>
       }
     >
       {draft ? (
@@ -58,20 +85,38 @@ export function CareCard({ orgId, health, clientName }: { orgId: string; health:
           {toggle("abi", "Acquired brain injury (team members need ABI training)")}
         </div>
       ) : (
-        <>
-          <Row label="Emergency treatment authorization">
+        <FieldGrid>
+          <Field label="Emergency treatment authorization">
             {health.emergency_medical_treatment_authorization ? "Signed" : "Not on file"}
-          </Row>
-          <Row label="Acquired brain injury (ABI)">{health.has_abi ? "Yes — ABI training needed" : "No"}</Row>
-          <Row label="Medication support">{medicationSupportLabel(health.self_admin_med_support)}</Row>
-        </>
+          </Field>
+          <Field label="Acquired brain injury (ABI)">
+            {health.has_abi ? "Yes, ABI training needed" : "No"}
+          </Field>
+          <Field label="Medication support">
+            {medicationSupportLabel(health.self_admin_med_support)}
+          </Field>
+        </FieldGrid>
       )}
-      <div className="flex flex-wrap gap-2 pt-3">
-        <Button size="sm" variant="outline" onClick={() => setShowMeds((v) => !v)} data-testid="client-meds-toggle">
-          {showMeds ? "Hide medications" : "Medications and eMAR"}
-        </Button>
-        <Button size="sm" variant="ghost" asChild>
-          <Link to="/dashboard/emar">Open the eMAR board</Link>
+      {draft ? (
+        <SaveBar
+          onCancel={() => setDraft(null)}
+          saving={save.isPending}
+          saveLabel="Save care details"
+          onSave={() =>
+            save.mutate({
+              emergency_medical_treatment_authorization: draft.treatment,
+              has_abi: draft.abi,
+            })
+          }
+        />
+      ) : null}
+      <div className="flex flex-wrap gap-2 pt-4">
+        <Button
+          variant="outline"
+          onClick={() => setShowMeds((v) => !v)}
+          data-testid="client-meds-toggle"
+        >
+          {showMeds ? "Hide medications" : "Show medications and eMAR"}
         </Button>
       </div>
       {showMeds ? (
@@ -79,6 +124,6 @@ export function CareCard({ orgId, health, clientName }: { orgId: string; health:
           <MarEmarTab clientId={health.id} clientName={clientName} />
         </div>
       ) : null}
-    </CardShell>
+    </SectionCard>
   );
 }

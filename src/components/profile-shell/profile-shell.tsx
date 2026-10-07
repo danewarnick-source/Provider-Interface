@@ -1,6 +1,7 @@
-// Profile layout shared by person profiles (Team members now, Clients later).
-// Generic on purpose: no team-member imports. Left section menu (236px card)
-// on desktop, a horizontal scroll row under 768px, an attention strip, and an
+// Profile layout shared by person profiles (Team members and Clients).
+// Generic on purpose: no team-member imports. Left section menu (white card,
+// 44 px items, each icon in a tile tinted by the section's tone) on desktop,
+// a horizontal scroll row of pills under 768px, an attention strip, and an
 // optional right-side Sheet panel. Theme tokens only.
 
 import type { ReactNode } from "react";
@@ -8,6 +9,7 @@ import { ArrowRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { TONE_TAG, TONE_TILE, type ProfileTone } from "./tones";
 
 export type ProfileShellBadgeTone = "bad" | "warn" | "ok" | "muted";
 
@@ -15,15 +17,17 @@ export type ProfileShellSection<K extends string = string> = {
   key: K;
   label: string;
   icon: LucideIcon;
+  /** Tints the icon tile; neutral when left out. */
+  tone?: ProfileTone;
   badge?: { count: number; tone: ProfileShellBadgeTone } | null;
   visible: boolean;
 };
 
 const BADGE_TONE: Record<ProfileShellBadgeTone, string> = {
-  bad: "bg-destructive/10 text-destructive",
-  warn: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
-  ok: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
-  muted: "bg-muted text-muted-foreground",
+  bad: TONE_TAG.danger,
+  warn: TONE_TAG.profile,
+  ok: TONE_TAG.ok,
+  muted: TONE_TAG.neutral,
 };
 
 function SectionBadge({ badge }: { badge: ProfileShellSection["badge"] }) {
@@ -31,7 +35,7 @@ function SectionBadge({ badge }: { badge: ProfileShellSection["badge"] }) {
   return (
     <span
       className={cn(
-        "ml-auto inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
+        "ml-auto inline-flex min-w-5 items-center justify-center rounded-full border px-1.5 text-[11px] font-semibold tabular-nums",
         BADGE_TONE[badge.tone],
       )}
       data-testid="profile-section-badge"
@@ -72,17 +76,17 @@ export function ProfileShell<K extends string>({
   const onHome = attentionHomeKey === undefined || activeKey === attentionHomeKey;
 
   return (
-    <div className="min-w-0 max-w-full space-y-4" data-testid="profile-shell">
+    <div className="min-w-0 max-w-full space-y-5" data-testid="profile-shell">
       {header}
 
-      <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start">
+      <div className="flex min-w-0 flex-col gap-5 md:flex-row md:items-start">
         <nav
           aria-label="Profile sections"
           className="min-w-0 md:sticky md:top-4 md:w-[236px] md:shrink-0"
           data-testid="profile-section-menu"
         >
           {/* Phone: one scrolling row. Desktop: a card with a vertical list. */}
-          <ul className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:gap-0.5 md:overflow-visible md:rounded-lg md:border md:bg-card md:p-2 md:shadow-sm">
+          <ul className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:rounded-2xl md:border md:border-hive-border md:bg-hive-surface md:p-2">
             {shown.map((s) => {
               const active = s.key === activeKey;
               const Icon = s.icon;
@@ -94,19 +98,21 @@ export function ProfileShell<K extends string>({
                     aria-current={active ? "page" : undefined}
                     data-testid={`profile-section-${s.key}`}
                     className={cn(
-                      "relative flex w-full items-center gap-2 whitespace-nowrap rounded-md border px-3 py-2 text-left text-sm transition-colors md:border-0",
+                      "flex min-h-11 w-full items-center gap-2.5 whitespace-nowrap rounded-full border px-2 py-1.5 pr-3.5 text-left text-sm text-hive-ink transition-colors md:rounded-xl md:border-transparent md:pr-2",
                       active
-                        ? "border-border bg-muted font-medium text-foreground"
-                        : "border-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                        ? "border-hive-gold/50 bg-hive-gold-soft font-semibold"
+                        : "border-hive-border bg-hive-surface hover:bg-[var(--hive-muted-surface)] md:bg-transparent",
                     )}
                   >
-                    {active ? (
-                      <span
-                        aria-hidden
-                        className="absolute inset-x-2 bottom-0 h-[3px] rounded-full bg-hive-gold md:inset-x-auto md:inset-y-1.5 md:left-0 md:h-auto md:w-[3px]"
-                      />
-                    ) : null}
-                    <Icon className="h-4 w-4 shrink-0" aria-hidden />
+                    <span
+                      aria-hidden
+                      className={cn(
+                        "grid h-7 w-7 shrink-0 place-items-center rounded-lg",
+                        TONE_TILE[s.tone ?? "neutral"],
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </span>
                     <span>{s.label}</span>
                     <SectionBadge badge={s.badge} />
                   </button>
@@ -116,7 +122,7 @@ export function ProfileShell<K extends string>({
           </ul>
         </nav>
 
-        <div className="min-w-0 flex-1 space-y-4" data-testid="profile-section-content">
+        <div className="min-w-0 flex-1 space-y-5" data-testid="profile-section-content">
           {attentionCount > 0 ? (
             onHome ? (
               attention
@@ -124,7 +130,10 @@ export function ProfileShell<K extends string>({
               <button
                 type="button"
                 onClick={() => onSelect(attentionHomeKey)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 hover:underline dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300"
+                className={cn(
+                  "inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium hover:underline max-md:min-h-11",
+                  TONE_TAG.profile,
+                )}
                 data-testid="profile-attention-pill"
               >
                 {attentionCount} {attentionCount === 1 ? "thing needs" : "things need"} attention

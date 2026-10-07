@@ -6,9 +6,11 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileBarChart } from "lucide-react";
+import { formatDate } from "@/lib/clients/dates";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { summariesOwed } from "@/lib/progress-summaries";
 import { ReadOnlyTable } from "@/components/clients/profile/read-only-table";
 
@@ -50,23 +52,26 @@ export function SummariesPanel({
   });
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-base">Progress summaries</CardTitle>
-        <Button size="sm" onClick={() => setOpen(true)} disabled={!orgId}>
+    <SectionCard
+      icon={FileBarChart}
+      tone="ok"
+      title="Progress summaries"
+      description="Which codes owe a summary and how often, and the summaries on file."
+      actions={
+        <Button onClick={() => setOpen(true)} disabled={!orgId}>
           New summary
         </Button>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="flex flex-wrap gap-1.5 px-6 pb-3 text-xs" data-testid="client-summaries-owed">
+      }
+    >
+        <div className="flex flex-wrap gap-1.5 pb-3 text-xs" data-testid="client-summaries-owed">
           {summariesOwed(codes).length === 0 ? (
             <span className="text-muted-foreground">None of this client's codes owe a summary.</span>
           ) : (
             summariesOwed(codes).map((o) => (
-              <Badge key={o.code} variant="outline" className="font-normal">
+              <StatusTag key={o.code}>
                 {o.code} · {CADENCE[o.cadence]}
                 {o.upi ? " · enter in UPI" : ""}
-              </Badge>
+              </StatusTag>
             ))
           )}
         </div>
@@ -77,31 +82,31 @@ export function SummariesPanel({
           columns={[
             {
               header: "Kind",
-              cell: (r) => <Badge variant="outline">{r.summary_kind ?? "—"}</Badge>,
+              cell: (r) => <StatusTag>{r.summary_kind ?? "—"}</StatusTag>,
             },
             { header: "Cadence", cell: (r) => r.period_kind ?? "—" },
             {
               header: "Period",
-              cell: (r) => r.period_label ?? `${r.period_start ?? "—"} → ${r.period_end ?? "—"}`,
+              cell: (r) =>
+                r.period_label ?? `${formatDate(r.period_start)} – ${formatDate(r.period_end)}`,
             },
             { header: "Status", cell: (r) => r.status ?? "—" },
             {
               header: "Finalized",
-              cell: (r) => (r.finalized_at ? new Date(r.finalized_at).toLocaleDateString() : "—"),
+              cell: (r) => formatDate(r.finalized_at),
             },
             {
               header: "",
               cell: (r) => (
-                <Button asChild size="sm" variant="outline">
+                <Button asChild variant="outline">
                   <Link to="/dashboard/summaries" search={{ client: clientId, open: r.id }}>
-                    {r.status === "finalized" ? "View" : "Open editor"}
+                    {r.period_label ? `Open ${r.period_label} summary` : "Open summary"}
                   </Link>
                 </Button>
               ),
             },
           ]}
         />
-      </CardContent>
       {open ? (
         <NewSummaryDialog
           clientId={clientId}
@@ -115,6 +120,6 @@ export function SummariesPanel({
           }}
         />
       ) : null}
-    </Card>
+    </SectionCard>
   );
 }

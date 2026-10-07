@@ -27,7 +27,6 @@ export function SummaryFields({
         {onDraft ? (
           <Button
             type="button"
-            size="sm"
             variant="outline"
             disabled={drafting}
             onClick={onDraft}

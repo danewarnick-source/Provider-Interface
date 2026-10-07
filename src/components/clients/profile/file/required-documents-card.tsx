@@ -5,12 +5,14 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Archive, Eye, Upload } from "lucide-react";
+import { Eye, FileCheck2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { StatusTag } from "@/components/clients/profile/cards/card-parts";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
+import { CLIENT_SECTION_LABEL, isClientProfileSection } from "@/lib/clients/profile-sections";
 import { formatDate } from "@/lib/clients/dates";
 import { clientFileStatusLabel, type ClientFileStatus } from "@/lib/clients/file";
 import type { RequiredDocRow } from "@/lib/clients/file-required";
@@ -20,11 +22,17 @@ import { DocumentUploadDialog } from "./document-upload-dialog";
 
 const requiredDocsKey = (clientId: string) => ["client-required-docs", clientId] as const;
 
-const TONE: Record<ClientFileStatus, string> = {
-  on_file: "border-emerald-300 bg-emerald-50 text-emerald-800",
-  due_soon: "border-amber-300 bg-amber-50 text-amber-900",
-  missing: "border-rose-200 bg-rose-50 text-rose-800",
+const TONE: Record<ClientFileStatus, "ok" | "profile" | "danger"> = {
+  on_file: "ok",
+  due_soon: "profile",
+  missing: "danger",
 };
+
+/** "Open Plans" for a link to another profile section. */
+function openLabel(href: string): string {
+  const section = new URLSearchParams(href.split("?")[1] ?? "").get("section");
+  return isClientProfileSection(section) ? `Open ${CLIENT_SECTION_LABEL[section]}` : "Open record";
+}
 
 async function openFile(path: string) {
   const { data, error } = await supabase.storage
@@ -76,94 +84,89 @@ export function RequiredDocumentsCard({
   }
 
   return (
-    <Card data-testid="client-required-documents">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">Required documents</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {q.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
-        ) : q.error ? (
-          <p className="text-sm text-destructive">
-            {q.error instanceof Error ? q.error.message : "Couldn't load the client file."}
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
-                <tr>
-                  <th className="py-1 pr-2">Document</th>
-                  <th className="py-1 pr-2">Status</th>
-                  <th className="py-1 pr-2">Expires / due</th>
-                  <th className="py-1" />
-                </tr>
-              </thead>
-              <tbody>
-                {(q.data ?? []).map((row) => (
-                  <tr key={row.key} className="border-t" data-testid="client-required-document">
-                    <td className="py-2 pr-2">
-                      <p className="font-medium">{row.label}</p>
-                      {row.current?.file_name && (
-                        <p className="text-xs text-muted-foreground">{row.current.file_name}</p>
+    <SectionCard
+      icon={FileCheck2}
+      tone="info"
+      title="Required documents"
+      description="Every document the client file needs, with its status and due date."
+      testId="client-required-documents"
+    >
+      {q.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : q.error ? (
+        <p className="text-sm text-destructive">
+          {q.error instanceof Error ? q.error.message : "Couldn't load the client file."}
+        </p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-left text-xs text-muted-foreground">
+              <tr>
+                <th className="py-1 pr-2">Document</th>
+                <th className="py-1 pr-2">Status</th>
+                <th className="py-1 pr-2">Expires / due</th>
+                <th className="py-1" />
+              </tr>
+            </thead>
+            <tbody>
+              {(q.data ?? []).map((row) => (
+                <tr key={row.key} className="border-t" data-testid="client-required-document">
+                  <td className="py-2 pr-2">
+                    <p className="font-medium">{row.label}</p>
+                    {row.current?.file_name && (
+                      <p className="text-xs text-muted-foreground">{row.current.file_name}</p>
+                    )}
+                  </td>
+                  <td className="py-2 pr-2">
+                    <StatusTag tone={TONE[row.status]}>
+                      {clientFileStatusLabel(row.status)}
+                    </StatusTag>
+                  </td>
+                  <td className="whitespace-nowrap py-2 pr-2 text-muted-foreground">
+                    {formatDate(row.dueOn)}
+                  </td>
+                  <td className="py-2 text-right">
+                    <div className="flex justify-end gap-2">
+                      {row.current?.storage_path && (
+                        <Button
+                          variant="outline"
+                          onClick={() => void openFile(row.current!.storage_path!)}
+                        >
+                          <Eye className="h-4 w-4" />
+                          Open file
+                        </Button>
                       )}
-                    </td>
-                    <td className="py-2 pr-2">
-                      <Badge variant="outline" className={TONE[row.status]}>
-                        {clientFileStatusLabel(row.status)}
-                      </Badge>
-                    </td>
-                    <td className="whitespace-nowrap py-2 pr-2 text-muted-foreground">
-                      {formatDate(row.dueOn)}
-                    </td>
-                    <td className="py-2 text-right">
-                      <div className="flex justify-end gap-1">
-                        {row.current?.storage_path && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7"
-                            onClick={() => void openFile(row.current!.storage_path!)}
-                          >
-                            <Eye className="mr-1 h-3.5 w-3.5" />
-                            View
-                          </Button>
-                        )}
-                        {row.docType && canEdit && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7"
-                            onClick={() => setUploading(row)}
-                          >
-                            <Upload className="mr-1 h-3.5 w-3.5" />
-                            {row.current ? "Replace" : "Upload"}
-                          </Button>
-                        )}
-                        {row.docType && canEdit && row.current?.id && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7"
-                            aria-label={`Archive ${row.label}`}
-                            onClick={() => void archive(row)}
-                          >
-                            <Archive className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
-                        {row.href && (
-                          <Button size="sm" variant="ghost" className="h-7" asChild>
-                            <a href={row.href}>Open</a>
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </CardContent>
+                      {row.docType && canEdit && (
+                        <Button variant="outline" onClick={() => setUploading(row)}>
+                          <Upload className="h-4 w-4" />
+                          {row.current ? "Replace file" : "Upload file"}
+                        </Button>
+                      )}
+                      {row.href && (
+                        <Button variant="outline" asChild>
+                          <a href={row.href}>{openLabel(row.href)}</a>
+                        </Button>
+                      )}
+                      {row.docType && canEdit && row.current?.id ? (
+                        <RowMenu
+                          label={`More actions for ${row.label}`}
+                          items={[
+                            {
+                              label: "Archive document",
+                              danger: true,
+                              onSelect: () => void archive(row),
+                            },
+                          ]}
+                        />
+                      ) : null}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       {uploading && (
         <DocumentUploadDialog
           orgId={orgId}
@@ -173,6 +176,6 @@ export function RequiredDocumentsCard({
           onSaved={refresh}
         />
       )}
-    </Card>
+    </SectionCard>
   );
 }

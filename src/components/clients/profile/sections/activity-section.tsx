@@ -11,7 +11,7 @@ import { OfficeNotesCard } from "@/components/clients/profile/activity/office-no
 export function ActivitySection({ clientId, orgId }: { clientId: string; orgId: string }) {
   const { canCategory } = useAccess();
   return (
-    <div className="space-y-4" data-testid="client-section-activity">
+    <div className="flex flex-col gap-5" data-testid="client-section-activity">
       {canCategory("clients", "edit") ? (
         <OfficeNotesCard clientId={clientId} orgId={orgId} />
       ) : null}

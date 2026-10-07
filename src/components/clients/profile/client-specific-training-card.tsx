@@ -174,7 +174,7 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setShowPcspPrompt(false)}>Got it</Button>
+          <Button variant="outline" onClick={() => setShowPcspPrompt(false)}>Close</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -187,18 +187,18 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
           No client-specific training yet. NECTAR will assemble a draft from this client's own authoritative data (intake, PCSP goals, billing codes, active meds, BSP status & published behaviors, rights summary, documents). NECTAR <strong>presents verbatim</strong> — it does not author care guidance.
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={() => pcspReady ? draftMut.mutate(false) : setShowPcspPrompt(true)} disabled={draftMut.isPending}>
+          <Button onClick={() => pcspReady ? draftMut.mutate(false) : setShowPcspPrompt(true)} disabled={draftMut.isPending}>
             {draftMut.isPending
               ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
               : <Sparkles className="mr-1.5 h-3.5 w-3.5 text-amber-500" />}
-            Build from PCSP goals (NECTAR)
+            Build from PCSP goals with Nectar
           </Button>
-          <Button size="sm" variant="outline" onClick={() => pcspReady ? blankMut.mutate() : setShowPcspPrompt(true)} disabled={blankMut.isPending}>
+          <Button variant="outline" onClick={() => pcspReady ? blankMut.mutate() : setShowPcspPrompt(true)} disabled={blankMut.isPending}>
             {blankMut.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-            Write manually
+            Write training manually
           </Button>
           <Button
-            size="sm"
+           
             variant="outline"
             onClick={() => pcspReady ? fileInputRef.current?.click() : setShowPcspPrompt(true)}
             disabled={uploading || !orgId}
@@ -240,25 +240,25 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
         <div className="ml-auto flex flex-wrap gap-2">
           {!editing && (
             <>
-              <Button variant="outline" size="sm" onClick={() => pcspReady ? startEdit() : setShowPcspPrompt(true)}><Pencil className="mr-1.5 h-3.5 w-3.5" />Edit</Button>
-              <Button variant="outline" size="sm" onClick={() => pcspReady ? draftMut.mutate(true) : setShowPcspPrompt(true)} disabled={draftMut.isPending}>
+              <Button variant="outline" onClick={() => pcspReady ? startEdit() : setShowPcspPrompt(true)}><Pencil className="mr-1.5 h-3.5 w-3.5" />Edit training</Button>
+              <Button variant="outline" onClick={() => pcspReady ? draftMut.mutate(true) : setShowPcspPrompt(true)} disabled={draftMut.isPending}>
                 {draftMut.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-1.5 h-3.5 w-3.5" />}
-                Rebuild with NECTAR
+                Rebuild with Nectar
               </Button>
               {training.status !== "published" && (
-                <Button size="sm" onClick={() => pcspReady ? setShowPublishDialog(true) : setShowPcspPrompt(true)} disabled={publishMut.isPending}>
+                <Button onClick={() => pcspReady ? setShowPublishDialog(true) : setShowPcspPrompt(true)} disabled={publishMut.isPending}>
                   {publishMut.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
-                  Approve & Publish
+                  Approve and publish
                 </Button>
               )}
             </>
           )}
           {editing && (
             <>
-              <Button variant="ghost" size="sm" onClick={cancelEdit}>Cancel</Button>
-              <Button size="sm" onClick={saveEdit} disabled={updateMut.isPending}>
+              <Button variant="outline" onClick={cancelEdit}>Cancel</Button>
+              <Button onClick={saveEdit} disabled={updateMut.isPending}>
                 {updateMut.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-                Save changes
+                Save training
               </Button>
             </>
           )}
@@ -318,12 +318,12 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
           </span>
           <div className="ml-auto">
             {!editingQuestions ? (
-              <Button variant="outline" size="sm" onClick={() => setEditingQuestions(true)}>
+              <Button variant="outline" onClick={() => setEditingQuestions(true)}>
                 <Pencil className="mr-1.5 h-3.5 w-3.5" />
                 {(training.review_questions ?? []).length > 0 ? "Edit questions" : "Add questions"}
               </Button>
             ) : (
-              <Button variant="ghost" size="sm" onClick={() => setEditingQuestions(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setEditingQuestions(false)}>Cancel</Button>
             )}
           </div>
         </div>
@@ -429,9 +429,9 @@ export function SectionsView({
             )}
             {editing && (
               <div className="flex gap-1">
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveSection(idx, -1)} disabled={idx === 0}><ArrowUp className="h-3.5 w-3.5" /></Button>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveSection(idx, 1)} disabled={idx === sections.length - 1}><ArrowDown className="h-3.5 w-3.5" /></Button>
-                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deleteSection(idx)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveSection(idx, -1)} disabled={idx === 0} aria-label="Move section up"><ArrowUp className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveSection(idx, 1)} disabled={idx === sections.length - 1} aria-label="Move section down"><ArrowDown className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deleteSection(idx)} aria-label="Remove section"><Trash2 className="h-3.5 w-3.5" /></Button>
               </div>
             )}
           </header>
@@ -450,7 +450,7 @@ export function SectionsView({
               />
             ))}
             {editing && (
-              <Button variant="outline" size="sm" onClick={() => patchSection(idx, { items: [...sec.items, { kind: "text", label: "Note", value: "" }] })}>
+              <Button variant="outline" onClick={() => patchSection(idx, { items: [...sec.items, { kind: "text", label: "Note", value: "" }] })}>
                 <Plus className="mr-1.5 h-3.5 w-3.5" />Add note
               </Button>
             )}
@@ -513,7 +513,7 @@ function ItemView({
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
           {editing && (
-            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete}><Trash2 className="h-3 w-3" /></Button>
+            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete} aria-label="Remove item"><Trash2 className="h-3 w-3" /></Button>
           )}
         </div>
         {editing ? (
@@ -534,7 +534,7 @@ function ItemView({
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
           {editing && (
-            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete}><Trash2 className="h-3 w-3" /></Button>
+            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete} aria-label="Remove item"><Trash2 className="h-3 w-3" /></Button>
           )}
         </div>
         {editing ? (
@@ -557,7 +557,7 @@ function ItemView({
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
           {editing && (
-            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete}><Trash2 className="h-3 w-3" /></Button>
+            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete} aria-label="Remove item"><Trash2 className="h-3 w-3" /></Button>
           )}
         </div>
         <div className="rounded-md border border-border/40 divide-y divide-border/40">
@@ -571,7 +571,7 @@ function ItemView({
                   <Textarea value={p.value} rows={1} className="flex-1 min-h-[36px]" onChange={(e) => {
                     const pairs = [...item.pairs]; pairs[i] = { ...p, value: e.target.value }; onChange({ ...item, pairs });
                   }} />
-                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => {
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" aria-label="Remove row" onClick={() => {
                     onChange({ ...item, pairs: item.pairs.filter((_, j) => j !== i) });
                   }}><Trash2 className="h-3 w-3" /></Button>
                 </>
@@ -585,7 +585,7 @@ function ItemView({
           ))}
           {editing && (
             <div className="px-2 py-1.5">
-              <Button size="sm" variant="ghost" onClick={() => onChange({ ...item, pairs: [...item.pairs, { label: "", value: "" }] })}>
+              <Button variant="ghost" onClick={() => onChange({ ...item, pairs: [...item.pairs, { label: "", value: "" }] })}>
                 <Plus className="mr-1 h-3 w-3" />Add row
               </Button>
             </div>
@@ -600,7 +600,7 @@ function ItemView({
       <div className="flex items-center gap-2">
         <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
         {editing && (
-          <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete}><Trash2 className="h-3 w-3" /></Button>
+          <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete} aria-label="Remove item"><Trash2 className="h-3 w-3" /></Button>
         )}
       </div>
       <ul className="text-sm space-y-0.5">
@@ -665,7 +665,7 @@ export function ReviewQuestionsEditor({
         <div key={q.id} className="rounded-lg border border-border/60 bg-card p-3 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-medium text-muted-foreground">Question {idx + 1}</span>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => removeQ(idx)}>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => removeQ(idx)} aria-label="Remove question">
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -689,10 +689,10 @@ export function ReviewQuestionsEditor({
         </div>
       ))}
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={addQ}>
+        <Button variant="outline" onClick={addQ}>
           <Plus className="mr-1.5 h-3.5 w-3.5" />Add question
         </Button>
-        <Button size="sm" onClick={save} disabled={saving}>
+        <Button onClick={save} disabled={saving}>
           {saving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
           Save questions
         </Button>

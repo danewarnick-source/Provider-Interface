@@ -34,8 +34,8 @@ export function CodeScopePopover({
         <Button
           type="button"
           variant="outline"
-          size="sm"
-          className="h-7 gap-1 px-2 text-[11px]"
+          className="h-10 gap-1 px-3 text-xs max-md:h-11"
+          title="Choose codes"
           disabled={disabled}
         >
           <Tag className="h-3 w-3" />

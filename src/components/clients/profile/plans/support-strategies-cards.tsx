@@ -2,54 +2,31 @@
 // nothing yet, an uploaded document, and the toolbar over a written draft.
 // State and mutations live in support-strategies-panel.tsx.
 
-import { formatDate } from "@/lib/clients/dates";
 import type { ReactNode } from "react";
-import {
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  Loader2,
-  RefreshCw,
-  Sparkles,
-  Upload,
-} from "lucide-react";
+import { formatDate } from "@/lib/clients/dates";
+import { CheckCircle2, Loader2, RefreshCw, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CardTitle } from "@/components/ui/card";
+import { EditButton } from "@/components/clients/profile/cards/section-card";
 
 const PCSP_NOTE =
-  "rounded-md border border-amber-300/60 bg-amber-50/60 px-3 py-2 text-xs text-amber-900";
+  "rounded-xl border border-hive-gold/50 bg-hive-gold-soft px-3 py-2 text-xs text-hive-ink";
 
 function Spin({ on, icon }: { on: boolean; icon: ReactNode }) {
   return on ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <>{icon}</>;
 }
 
-/** Collapsible card title row. */
-export function StrategiesTitle({
-  open,
-  onToggle,
-  dueOn,
-}: {
-  open: boolean;
-  onToggle: () => void;
-  dueOn: string | null;
-}) {
+/** Card description, with the due date until published. */
+export function StrategiesDescription({ dueOn }: { dueOn: string | null }) {
   return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-label={open ? "Collapse" : "Expand"}
-        className="rounded p-1 hover:bg-muted"
-      >
-        {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-      </button>
-      <CardTitle className="text-base">Support strategies</CardTitle>
+    <>
+      Each PCSP goal needs support strategies. Nectar pulls your goals word for word; you write the
+      staff instructions.
       {dueOn ? (
-        <span className="text-xs text-muted-foreground" data-testid="strategies-due">
-          Due {formatDate(dueOn)}
+        <span className="ml-1 font-medium text-hive-ink" data-testid="strategies-due">
+          Due {formatDate(dueOn)}.
         </span>
       ) : null}
-    </div>
+    </>
   );
 }
 
@@ -70,24 +47,20 @@ export function StrategiesEmpty({
 }) {
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
-        Each PCSP goal needs support strategies. Nectar pulls your goals word for word; you write
-        the staff instructions.
-      </p>
       {!pcspReady && (
         <div className={PCSP_NOTE}>
           Upload a PCSP to get started. Drafting is off until a PCSP is on file.
         </div>
       )}
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" onClick={() => onDraft("nectar")} disabled={drafting}>
-          <Spin on={drafting} icon={<Sparkles className="mr-1.5 h-3.5 w-3.5 text-amber-500" />} />
-          Build from PCSP goals (Nectar)
+        <Button onClick={() => onDraft("nectar")} disabled={drafting}>
+          <Spin on={drafting} icon={<Sparkles className="mr-1.5 h-3.5 w-3.5" />} />
+          Build from PCSP goals with Nectar
         </Button>
-        <Button size="sm" variant="outline" onClick={() => onDraft("blank")} disabled={drafting}>
-          Write manually
+        <Button variant="outline" onClick={() => onDraft("blank")} disabled={drafting}>
+          Write strategies manually
         </Button>
-        <Button size="sm" variant="outline" onClick={onUpload} disabled={uploading}>
+        <Button variant="outline" onClick={onUpload} disabled={uploading}>
           <Spin on={uploading} icon={<Upload className="mr-1.5 h-3.5 w-3.5" />} />
           Upload document
         </Button>
@@ -118,7 +91,7 @@ export function StrategiesUploaded({
 }) {
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/30 p-3 text-sm">
+      <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-muted/30 p-3 text-sm">
         <Upload className="h-4 w-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0">
           <p className="truncate font-medium">{fileName}</p>
@@ -127,19 +100,19 @@ export function StrategiesUploaded({
       </div>
       <div className="flex flex-wrap gap-2">
         {!published && (
-          <Button size="sm" onClick={onPublish} disabled={publishing}>
+          <Button onClick={onPublish} disabled={publishing}>
             <Spin on={publishing} icon={<CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />} />
-            Approve & Publish
+            Approve and publish
           </Button>
         )}
-        <Button size="sm" variant="outline" onClick={onReplace} disabled={uploading}>
+        <Button variant="outline" onClick={onReplace} disabled={uploading}>
           <Spin on={uploading} icon={<Upload className="mr-1.5 h-3.5 w-3.5" />} />
-          Replace
+          Replace document
         </Button>
         {fileInput}
       </div>
       {!pcspReady && (
-        <p className="text-xs text-amber-700">
+        <p className="text-xs font-medium text-hive-ink">
           Upload a PCSP to get started. Publishing is off until a PCSP is on file.
         </p>
       )}
@@ -173,31 +146,29 @@ export function StrategiesToolbar({
   if (editing) {
     return (
       <>
-        <Button variant="ghost" size="sm" onClick={onCancel}>
+        <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button size="sm" onClick={onSave} disabled={saving}>
+        <Button onClick={onSave} disabled={saving}>
           {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-          Save
+          Save strategies
         </Button>
       </>
     );
   }
   return (
     <>
-      <Button variant="outline" size="sm" onClick={onEdit}>
-        Edit
-      </Button>
-      <Button variant="outline" size="sm" onClick={onRebuild} disabled={rebuilding}>
+      <Button variant="outline" onClick={onRebuild} disabled={rebuilding}>
         <Spin on={rebuilding} icon={<RefreshCw className="mr-1.5 h-3.5 w-3.5" />} />
         Rebuild from goals
       </Button>
       {!published && (
-        <Button size="sm" onClick={onPublish} disabled={publishing}>
+        <Button onClick={onPublish} disabled={publishing}>
           <Spin on={publishing} icon={<CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />} />
-          Approve & Publish
+          Approve and publish
         </Button>
       )}
+      <EditButton label="Edit support strategies" onClick={onEdit} />
     </>
   );
 }

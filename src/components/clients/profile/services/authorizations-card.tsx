@@ -3,9 +3,10 @@
 // Ended authorizations stay listed (never deleted).
 
 import { useRef, useState } from "react";
-import { FileUp, Loader2, Plus } from "lucide-react";
+import { FileUp, Loader2, Plus, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import type { AuthorizationRow as Row } from "@/lib/clients/authorizations";
 import { AuthorizationRow } from "./authorization-row";
 import { money } from "./money";
@@ -48,20 +49,32 @@ export function AuthorizationsCard({
     />
   );
 
+  const addButton = (
+    <Button onClick={() => setEditing({ row: null, renew: false })}>
+      <Plus className="h-4 w-4" />
+      Add authorization
+    </Button>
+  );
+
   return (
-    <Card data-testid="client-authorizations-card">
-      <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2 pb-2">
-        <div>
-          <CardTitle className="text-base">Authorizations</CardTitle>
-          {data && data.totals.authorized > 0 && (
-            <p className="text-xs text-muted-foreground tabular-nums">
-              Budget {money(data.totals.authorized)} · used {money(data.totals.used)} ·{" "}
-              <strong>{money(data.totals.left)} left</strong>
-            </p>
-          )}
-        </div>
-        {canEdit && (
-          <div className="flex gap-2">
+    <SectionCard
+      icon={Receipt}
+      tone="profile"
+      title="Authorizations"
+      description={
+        data && data.totals.authorized > 0 ? (
+          <span className="tabular-nums">
+            Budget {money(data.totals.authorized)} · used {money(data.totals.used)} ·{" "}
+            <strong>{money(data.totals.left)} left</strong>
+          </span>
+        ) : (
+          "Each code the 1056 authorizes, with units used and left."
+        )
+      }
+      testId="client-authorizations-card"
+      actions={
+        canEdit ? (
+          <>
             <input
               ref={fileRef}
               type="file"
@@ -74,26 +87,23 @@ export function AuthorizationsCard({
               }}
             />
             <Button
-              size="sm"
               variant="outline"
               disabled={imp.reading}
               onClick={() => fileRef.current?.click()}
             >
               {imp.reading ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <FileUp className="mr-1.5 h-3.5 w-3.5" />
+                <FileUp className="h-4 w-4" />
               )}
-              {imp.reading ? "Reading…" : "Fill from 1056"}
+              {imp.reading ? "Reading the 1056…" : "Fill from 1056"}
             </Button>
-            <Button size="sm" onClick={() => setEditing({ row: null, renew: false })}>
-              <Plus className="mr-1.5 h-3.5 w-3.5" />
-              Add
-            </Button>
-          </div>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-3">
+            {addButton}
+          </>
+        ) : null
+      }
+    >
+      <div className="space-y-3">
         {q.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : q.error ? (
@@ -101,25 +111,21 @@ export function AuthorizationsCard({
             {q.error instanceof Error ? q.error.message : "Couldn't load authorizations."}
           </p>
         ) : open.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <EmptyState action={canEdit ? addButton : null}>
             No open authorizations. Without one, this client can't be scheduled or billed.
-          </p>
+          </EmptyState>
         ) : (
           open.map(row)
         )}
         {ended.length > 0 && (
           <div>
-            <button
-              type="button"
-              className="text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => setShowEnded((s) => !s)}
-            >
+            <Button variant="ghost" onClick={() => setShowEnded((s) => !s)}>
               {showEnded ? "Hide" : "Show"} ended authorizations ({ended.length})
-            </button>
+            </Button>
             {showEnded && <div className="mt-2 space-y-2">{ended.map(row)}</div>}
           </div>
         )}
-      </CardContent>
+      </div>
 
       {editing && (
         <AuthorizationDialog
@@ -151,6 +157,6 @@ export function AuthorizationsCard({
           onClose={imp.close}
         />
       )}
-    </Card>
+    </SectionCard>
   );
 }

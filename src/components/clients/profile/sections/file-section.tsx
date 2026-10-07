@@ -21,7 +21,7 @@ export function FileSection({ orgId, data }: { orgId: string; data: ClientProfil
     "host_home",
   );
   return (
-    <div className="space-y-4" data-testid="client-section-file">
+    <div className="flex flex-col gap-5" data-testid="client-section-file">
       <RequiredDocumentsCard orgId={orgId} clientId={clientId} canEdit={canEdit} />
       {codesHas(data.codes, BELONGINGS_CODES) && (
         <BelongingsInventoryCard clientId={clientId} clientName={data.name} />
