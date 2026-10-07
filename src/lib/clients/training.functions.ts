@@ -942,7 +942,7 @@ async function assertStaffMayViewClient(
   if (direct && direct.length) return;
   // Group-home fallback via the SECURITY DEFINER RPC.
   const { data: scoped, error: rpcErr } = await supabase
-    .rpc("clients_for_staff", { _org: orgId, _staff: userId });
+    .rpc("clients_for_staff", { _org: orgId, _staff: userId }).is("deleted_at", null);
   if (rpcErr) throw new Error("Access check failed.");
   const list = (scoped as Array<{ id: string }> | null) ?? [];
   if (!list.some((c) => c.id === clientId)) {
@@ -1315,7 +1315,7 @@ export const getMyClientTrainingStatuses = createServerFn({ method: "GET" })
       clientIds = [...new Set((assigns ?? []).map((a: { client_id: string }) => a.client_id))] as string[];
       // Group-home fallback via RPC.
       try {
-        const { data: rpcClients } = await supabase.rpc("clients_for_staff", { _org: m.organization_id, _staff: userId });
+        const { data: rpcClients } = await supabase.rpc("clients_for_staff", { _org: m.organization_id, _staff: userId }).is("deleted_at", null);
         if (Array.isArray(rpcClients)) {
           const rpcIds = (rpcClients as Array<{ id: string }>).map((c) => c.id);
           clientIds = [...new Set([...clientIds, ...rpcIds])];
@@ -1328,6 +1328,7 @@ export const getMyClientTrainingStatuses = createServerFn({ method: "GET" })
     const { data: clients } = await supabase
       .from("clients")
       .select("id, first_name, last_name")
+      .is("deleted_at", null)
       .in("id", clientIds);
     const clientMap: Record<string, string> = {};
     for (const c of (clients ?? []) as Array<{ id: string; first_name: string | null; last_name: string | null }>) {

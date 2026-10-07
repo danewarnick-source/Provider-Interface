@@ -101,6 +101,7 @@ function HomeDetailPage() {
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name, team_id, account_status")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .order("last_name");
       if (error) throw error;
@@ -122,6 +123,7 @@ function HomeDetailPage() {
       const { data: mems } = await supabase
         .from("organization_members")
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true);
       const ids = (mems ?? []).map((m) => m.user_id);

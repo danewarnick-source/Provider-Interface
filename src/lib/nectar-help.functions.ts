@@ -353,6 +353,7 @@ async function memberOrgDirectory(
   const mem = await supabase
     .from("organization_members")
     .select("organization_id")
+    .is("deleted_at", null)
     .eq("user_id", userId)
     .eq("active", true);
   const ids = Array.from(
@@ -405,15 +406,18 @@ async function gatherFacts(
       supabase
         .from("clients")
         .select("id", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .eq("account_status", "active"),
       supabase
         .from("clients")
         .select("id", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("organization_id", orgId),
       supabase
         .from("organization_members")
         .select("id", { count: "exact", head: true })
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .eq("active", true),
       supabase
@@ -475,6 +479,7 @@ async function gatherFacts(
         const r = await supabase
           .from("clients")
           .select("id,first_name,last_name,account_status")
+          .is("deleted_at", null)
           .eq("organization_id", orgId)
           .ilike("last_name", `${tok}%`)
           .limit(5);

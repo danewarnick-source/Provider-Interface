@@ -275,6 +275,7 @@ function DocumentPull({ orgId }: { orgId?: string }) {
       const { data } = await supabase
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .order("last_name", { ascending: true })
         .limit(500);
@@ -289,6 +290,7 @@ function DocumentPull({ orgId }: { orgId?: string }) {
       const { data } = await supabase
         .from("organization_members")
         .select("user_id, profiles(id, full_name, email)")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true)
         .limit(500);

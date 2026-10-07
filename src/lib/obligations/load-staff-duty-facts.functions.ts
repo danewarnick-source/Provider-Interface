@@ -39,6 +39,7 @@ export async function loadStaffDutyFactsInternal(
     const full = await supabase
       .from("organization_members")
       .select("user_id, access_level, manager_id")
+      .is("deleted_at", null)
       .eq("organization_id", organizationId)
       .eq("active", true)
       .in("user_id", ids);
@@ -47,6 +48,7 @@ export async function loadStaffDutyFactsInternal(
       const retry = await supabase
         .from("organization_members")
         .select("user_id, access_level")
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .eq("active", true)
         .in("user_id", ids);
@@ -118,6 +120,7 @@ export async function loadStaffDutyFactsInternal(
     const { data, error } = await supabase
       .from("clients")
       .select("id, has_abi")
+      .is("deleted_at", null)
       .eq("organization_id", organizationId)
       .in("id", allClientIds);
     if (error) {

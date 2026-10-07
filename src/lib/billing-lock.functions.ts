@@ -111,6 +111,7 @@ export const getBillingLockFn = createServerFn({ method: "POST" })
     const { data: memberships } = await context.supabase
       .from("organization_members")
       .select("organization_id, access_level, organizations(name, is_demo, display_acronym)")
+      .is("deleted_at", null)
       .eq("user_id", context.userId)
       .eq("active", true);
     const ms = (memberships ?? []) as Array<{

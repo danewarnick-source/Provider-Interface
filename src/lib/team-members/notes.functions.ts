@@ -82,6 +82,7 @@ export const listStaffNotes = createServerFn({ method: "POST" })
         const { data: mems, error: memErr } = await admin
           .from("organization_members")
           .select("user_id")
+          .is("deleted_at", null)
           .eq("organization_id", data.organizationId)
           .in("user_id", missing);
         if (memErr) throw new Error(memErr.message);

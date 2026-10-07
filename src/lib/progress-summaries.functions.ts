@@ -160,11 +160,13 @@ export const ensureCurrentSummaryPeriods = createServerFn({ method: "POST" })
       const withHive = await (supabase as any)
         .from("clients")
         .select("id, hive_start_date, created_at")
+        .is("deleted_at", null)
         .eq("organization_id", data.organizationId);
       if (withHive.error && /hive_start_date/i.test(withHive.error.message)) {
         const { data: fallback, error: fbErr } = await supabase
           .from("clients")
           .select("id, created_at")
+          .is("deleted_at", null)
           .eq("organization_id", data.organizationId);
         if (fbErr) throw new Error(fbErr.message);
         clientRows = (fallback ?? []).map((c) => ({

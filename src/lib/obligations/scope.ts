@@ -219,6 +219,7 @@ export async function loadOrgScopeSnapshot(
   const { data: orgMembers, error: omErr } = await supabase
     .from("organization_members")
     .select("user_id")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId)
     .eq("active", true);
   if (omErr) throw new Error(omErr.message);

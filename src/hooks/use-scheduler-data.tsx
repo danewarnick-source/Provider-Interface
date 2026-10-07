@@ -58,9 +58,14 @@ export function useSchedulerData(weekStart: Date) {
             .from("clients")
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .select("id, first_name, last_name, team_id, admin_hours_per_week, has_abi" as any)
+            .is("deleted_at", null)
             .eq("organization_id", orgId!),
           supabase.from("teams").select("id, team_name, setting").eq("organization_id", orgId!),
-          supabase.from("organization_members").select("user_id").eq("organization_id", orgId!),
+          supabase
+            .from("organization_members")
+            .select("user_id")
+            .is("deleted_at", null)
+            .eq("organization_id", orgId!),
           supabase
             .from("scheduled_shifts")
             .select(

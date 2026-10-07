@@ -56,6 +56,7 @@ export async function loadClientOverview(
       .select(
         "special_directions, client_photo_url, client_photo_taken_on, home_latitude, home_longitude, is_own_guardian, has_abi",
       )
+      .is("deleted_at", null)
       .eq("id", clientId)
       .eq("organization_id", orgId),
   );

@@ -112,7 +112,12 @@ const FAILED = "Nectar couldn't draft the summary right now. Try again in a minu
 /** Nectar's draft from the client's readable documents. Saves nothing. */
 export async function draftAboutMe(sb: Sb, orgId: string, clientId: string): Promise<AboutDraft> {
   const [client] = await rows<{ first_name: string | null }>(
-    sb.from("clients").select("first_name").eq("organization_id", orgId).eq("id", clientId),
+    sb
+      .from("clients")
+      .select("first_name")
+      .is("deleted_at", null)
+      .eq("organization_id", orgId)
+      .eq("id", clientId),
   );
   const docRows = (await clientDocs(sb, orgId, clientId)).slice(0, MAX_DOCS);
   const docs: AboutDoc[] = await Promise.all(

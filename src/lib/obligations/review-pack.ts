@@ -213,11 +213,13 @@ export async function loadReviewDayMeta(
     supabase
       .from("clients")
       .select("id", { count: "exact", head: true })
+      .is("deleted_at", null)
       .eq("organization_id", organizationId)
       .eq("account_status", "active"),
     supabase
       .from("organization_members")
       .select("id", { count: "exact", head: true })
+      .is("deleted_at", null)
       .eq("organization_id", organizationId)
       .eq("active", true),
   ]);

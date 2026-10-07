@@ -84,6 +84,7 @@ export async function loadOrgPersonnelFileIndex(
   const { data: members, error: mErr } = await supabase
     .from("organization_members")
     .select("user_id, role:access_level, job_title, active")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId);
   if (mErr) throw new Error(mErr.message);
 

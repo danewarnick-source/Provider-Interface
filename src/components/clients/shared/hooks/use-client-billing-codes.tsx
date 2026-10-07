@@ -76,6 +76,7 @@ export function useAllClientBillingCodes() {
       const { data: clients, error: clientsError } = await supabase
         .from("clients")
         .select("id")
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id);
       if (clientsError) throw clientsError;
       return billingCodesForLiveClients(

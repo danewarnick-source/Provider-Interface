@@ -96,6 +96,7 @@ function SummariesPage() {
       const { data, error } = await supabase
         .from("clients")
         .select("id, first_name, last_name, created_at")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .order("last_name", { ascending: true });
       if (error) throw error;

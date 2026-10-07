@@ -111,7 +111,7 @@ export const listMyMissingDailyNotes = createServerFn({ method: "POST" })
     const { data: caseload, error } = await (supabase as Sb).rpc("clients_for_staff", {
       _org: data.organizationId,
       _staff: userId,
-    });
+    }).is("deleted_at", null);
     if (error) throw new Error(error.message);
     const rows = (caseload ?? []) as Array<{ id: string }>;
     const codes = await loadActiveCodes(supabase as Sb, rows.map((c) => c.id));

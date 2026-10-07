@@ -503,6 +503,7 @@ function AdminLogDialog({
       const { data: members } = await supabase
         .from("organization_members" as never)
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id);
       const ids = ((members ?? []) as Array<{ user_id: string }>).map((m) => m.user_id);
       if (!ids.length) return [];

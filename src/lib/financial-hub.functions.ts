@@ -33,6 +33,7 @@ export const getBillingSnapshot = createServerFn({ method: "POST" })
       supabase
         .from("clients")
         .select("id")
+        .is("deleted_at", null)
         .eq("organization_id", data.organizationId),
       supabase
         .from("evv_timesheets")

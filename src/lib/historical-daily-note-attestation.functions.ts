@@ -150,6 +150,7 @@ export const listFormerStaffHistoricalDailyNotes = createServerFn({ method: "GET
       supabase
         .from("organization_members")
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", data.organization_id)
         .eq("active", true),
     ]);

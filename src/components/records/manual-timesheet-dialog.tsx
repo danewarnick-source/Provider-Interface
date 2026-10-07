@@ -57,6 +57,7 @@ export function ManualTimesheetDialog({
       const { data } = await supabase
         .from("clients")
         .select("id, first_name, last_name, medicaid_id")
+        .is("deleted_at", null)
         .eq("organization_id", organizationId)
         .order("last_name");
       return (data ?? []) as Array<{ id: string; first_name: string | null; last_name: string | null; medicaid_id: string | null }>;

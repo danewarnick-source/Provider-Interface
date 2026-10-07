@@ -236,7 +236,7 @@ export const askNectarReport = createServerFn({ method: "POST" })
         ? supabase.from("profiles").select("id, first_name, last_name").in("id", staffIds)
         : Promise.resolve({ data: [], error: null }),
       clientIds.length
-        ? supabase.from("clients").select("id, first_name, last_name, medicaid_id").in("id", clientIds)
+        ? supabase.from("clients").select("id, first_name, last_name, medicaid_id").is("deleted_at", null).in("id", clientIds)
         : Promise.resolve({ data: [], error: null }),
     ]);
     const profileById = new Map<string, ProfileRow>(
@@ -406,7 +406,7 @@ async function runBudgetStatus(
 
   const clientIds = [...new Set(codes.map((c) => c.client_id))];
   const clientsRes = clientIds.length
-    ? await supabase.from("clients").select("id, first_name, last_name, medicaid_id").in("id", clientIds)
+    ? await supabase.from("clients").select("id, first_name, last_name, medicaid_id").is("deleted_at", null).in("id", clientIds)
     : { data: [], error: null };
   const clientById = new Map<string, ClientRow>(
     ((clientsRes.data ?? []) as ClientRow[]).map((c) => [c.id, c]),

@@ -98,7 +98,7 @@ async function caseloadClients(
   orgId: string,
   staffId: string,
 ): Promise<ClientNameRow[]> {
-  const { data, error } = await supabase.rpc("clients_for_staff", { _org: orgId, _staff: staffId });
+  const { data, error } = await supabase.rpc("clients_for_staff", { _org: orgId, _staff: staffId }).is("deleted_at", null);
   const rows = !error ? ((data ?? []) as ClientNameRow[]) : await directCaseload(admin, orgId, staffId);
   const codes = await loadActiveCodesAsService(admin, rows.map((r) => r.id));
   return rows.map((r) => ({ id: r.id, first_name: r.first_name, last_name: r.last_name, codes: codes.get(r.id) ?? [] }));
@@ -117,6 +117,7 @@ async function directCaseload(admin: Sb, orgId: string, staffId: string): Promis
       admin
         .from("clients")
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .in("id", ids),
     [...new Set(((assigns ?? []) as Array<{ client_id: string }>).map((a) => a.client_id))],
@@ -182,6 +183,7 @@ export const getMemberOverview = createServerFn({ method: "POST" })
         admin
           .from("clients")
           .select("id, first_name, last_name")
+          .is("deleted_at", null)
           .eq("organization_id", orgId)
           .in("id", ids),
       otherIds,

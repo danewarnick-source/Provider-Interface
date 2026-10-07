@@ -43,6 +43,7 @@ export function useClientCodeAssignments(clientId: string | undefined) {
         supabase
           .from("organization_members")
           .select("user_id")
+          .is("deleted_at", null)
           .eq("organization_id", orgId!)
           .eq("active", true),
       ]);

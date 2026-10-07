@@ -35,6 +35,7 @@ export async function medicaidMatches(
   const { data, error } = await sb
     .from("clients")
     .select("id, first_name, last_name, medicaid_id")
+    .is("deleted_at", null)
     .eq("organization_id", organizationId)
     .not("medicaid_id", "is", null);
   if (error) throw new Error(error.message);
