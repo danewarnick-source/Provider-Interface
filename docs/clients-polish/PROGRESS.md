@@ -2,8 +2,8 @@
 
 ## Notes for the run
 - PR #457 (clients-rebuild → staging) was **already merged on Oct 6, 2026**. No open "Production:" PR exists for clients-rebuild, so pushes to clients-rebuild do not auto-sync to staging. The polish PRs land on clients-rebuild; shipping them needs a new clients-rebuild → staging PR later (the user decides).
-- Prompt files C3-C4 and C5-C6 were not provided; this run covers C1–C2 only.
-- E2E: the configs' own `webServer` starts in `e2e/configs` (staff-go-live can't resolve its harness config; the others time out). Use `docs/clients-polish/run-e2e.sh <outdir> <suites…>`: starts both servers from the repo root, warms routes, runs each suite, retries its failures once. A test counts as failing only if it fails on the retry too (first-hit Vite compiles exceed test timeouts).
+- **Runbook updated (Oct 7, 2026):** the run is now C1 → C10, and **no e2e (Playwright) tests** are run, added or fixed. Checks are build, tsc and unit tests vs. the baseline, plus a "Check on staging" click-through list at the end of every PR body. The e2e baseline below is kept for reference only and is not a merge gate. (run-e2e.sh removed.)
+- Prompt files: C1-C2 is in this folder. C3-C4, C5-C6 and C7-C10 have **not been provided yet**. The run stops after C2 until they're added here.
 
 ## Baseline (clients-rebuild @ d14b63ff, Oct 7, 2026)
 - `npx tsc --noEmit`: **203** errors (none under src/components/clients or src/lib/clients).
@@ -13,6 +13,7 @@
   - notification-bell.test.ts › Admin notification bell › keeps the Admin-only mount and the chrome conditions that clip in-tree panels
   - org-subscription-activate.test.ts › confirm and webhook share the upsert › confirmCheckout upserts via activateSubscriptionFromCheckout
   - sow-index.test.ts › SOW index › builds about 300 rows from catalog + perimeters + standing + codes
+- _E2E (reference only, not a gate):_
 - E2E roster (20 tests): **3 failing**
   - clients-staff-roster.spec.ts:176 › 4. Team Members list loads; staff profile shows role at a glance
   - clients-staff-roster.spec.ts:671 › Caseload lives on the profile; /dashboard/assignments redirects
