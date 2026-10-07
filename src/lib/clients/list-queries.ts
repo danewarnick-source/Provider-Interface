@@ -139,16 +139,59 @@ export async function loadDrafts(sb: Sb, orgId: string, f: ListFilters): Promise
         kind: "draft" as const,
         first_name: first,
         last_name: rest.join(" "),
+        preferred_name: null,
         photo_url: null,
         medicaid_id: null,
         client_pid: null,
         account_status: null,
         codes: [],
+        endedCodes: null,
+        planExpired: false,
         home: null,
         unitsLeft: null,
+        needsUnits: false,
         nextDue: null,
         staff: [],
         readiness: { ready: false, missing: ["Finish setup"] },
       };
     });
+}
+
+/** The "preferred_name" custom field per client (client_id → text). Empty on any error. */
+export async function loadPreferredNames(
+  sb: Sb,
+  orgId: string,
+  ids: string[],
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (!ids.length) return out;
+  try {
+    const defs = await rows<{ id: string }>(
+      sb
+        .from("custom_field_definitions")
+        .select("id")
+        .eq("organization_id", orgId)
+        .eq("entity_kind", "client")
+        .eq("field_key", "preferred_name"),
+    );
+    if (!defs.length) return out;
+    const values = await rows<{ entity_id: string; value_text: string | null }>(
+      sb
+        .from("custom_field_values")
+        .select("entity_id, value_text")
+        .eq("entity_kind", "client")
+        .in(
+          "definition_id",
+          defs.map((d) => d.id),
+        )
+        .in("entity_id", ids),
+    );
+    for (const v of values) {
+      const text = v.value_text?.trim();
+      if (text) out.set(v.entity_id, text);
+    }
+  } catch {
+    return out;
+  }
+  return out;
 }

@@ -4,8 +4,10 @@ import {
   applyListFilters,
   clientListCsv,
   draftMatches,
+  endedCodesFor,
   listReadiness,
   nextDueItem,
+  planHasExpired,
   searchTerms,
   sortRows,
   type ClientListRow,
@@ -19,13 +21,17 @@ function row(p: Partial<ClientListRow> = {}): ClientListRow {
     kind: "client",
     first_name: "Pat",
     last_name: "Example",
+    preferred_name: null,
     photo_url: null,
     medicaid_id: "0000000001",
     client_pid: null,
     account_status: "active",
     codes: ["DSI"],
+    endedCodes: null,
+    planExpired: false,
     home: { id: "h1", name: "Maple" },
     unitsLeft: null,
+    needsUnits: false,
     nextDue: null,
     staff: [{ id: "s1", name: "Sam Staff" }],
     readiness: { ready: true, missing: [] },
@@ -45,16 +51,19 @@ describe("nextDueItem", () => {
   it("returns the earliest date with days from today", () => {
     const d = nextDueItem(
       [
-        { label: "Plan renews", date: "2026-12-01" },
-        { label: "Summary due", date: "2026-10-15" },
-        { label: "Nothing", date: null },
+        { kind: "plan", label: "Plan renews", date: "2026-12-01" },
+        { kind: "summary", label: "Summary due", date: "2026-10-15" },
+        { kind: "summary", label: "Nothing", date: null },
       ],
       NOW,
     );
-    assert.deepEqual(d, { label: "Summary due", date: "2026-10-15", days: 9 });
+    assert.deepEqual(d, { kind: "summary", label: "Summary due", date: "2026-10-15", days: 9 });
   });
   it("keeps overdue items (negative days)", () => {
-    assert.equal(nextDueItem([{ label: "Summary due", date: "2026-10-01" }], NOW)?.days, -5);
+    assert.equal(
+      nextDueItem([{ kind: "summary", label: "Summary due", date: "2026-10-01" }], NOW)?.days,
+      -5,
+    );
     assert.equal(nextDueItem([], NOW), null);
   });
 });
@@ -68,6 +77,36 @@ describe("listReadiness", () => {
     const r = listReadiness({ codes: [], staffCount: 0, hasPin: false, guardianOk: false });
     assert.equal(r.ready, false);
     assert.equal(r.missing.length, 4);
+    assert.equal(r.missing[0], "No authorized service code");
+  });
+  it("says authorizations ended (with the date) when codes ended rather than never existed", () => {
+    const r = listReadiness({
+      codes: [],
+      staffCount: 1,
+      hasPin: true,
+      guardianOk: true,
+      endedOn: "2026-08-31",
+    });
+    assert.deepEqual(r.missing, ["Authorizations ended Aug 31, 2026"]);
+  });
+});
+
+describe("endedCodesFor and planHasExpired", () => {
+  const ended = [
+    { service_code: "dsi", service_end_date: "2026-08-31" },
+    { service_code: "SEI", service_end_date: "2026-07-31" },
+    { service_code: "DSI", service_end_date: "2026-06-30" },
+  ];
+  it("lists ended codes with the latest end date only when no code is active", () => {
+    assert.deepEqual(endedCodesFor([], ended), { codes: ["DSI", "SEI"], endedOn: "2026-08-31" });
+    assert.equal(endedCodesFor(["HHS"], ended), null);
+    assert.equal(endedCodesFor([], []), null);
+  });
+  it("treats no current plan or a past end date as expired", () => {
+    assert.equal(planHasExpired([], "2026-10-06"), true);
+    assert.equal(planHasExpired([{ end_date: "2026-08-31" }], "2026-10-06"), true);
+    assert.equal(planHasExpired([{ end_date: "2026-10-06" }], "2026-10-06"), false);
+    assert.equal(planHasExpired([{ end_date: null }], "2026-10-06"), false);
   });
 });
 

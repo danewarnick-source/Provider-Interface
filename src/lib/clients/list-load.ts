@@ -8,8 +8,10 @@ import { guardianSatisfied, loadClientContacts, type ClientContact } from "./con
 import { todayYmd } from "./dates";
 import {
   applyListFilters,
+  endedCodesFor,
   listReadiness,
   nextDueItem,
+  planHasExpired,
   sortRows,
   type ClientListRow,
   type ListFilters,
@@ -19,6 +21,7 @@ import {
   groupBy,
   loadClients,
   loadDrafts,
+  loadPreferredNames,
   loadUsage,
   rows,
   type AuthRow,
@@ -63,7 +66,7 @@ export async function loadClientList(
       : Promise.resolve(0),
   ]);
   const ids = clients.map((c) => c.id);
-  const [codes, auths, assignments, contacts, plans, summaries] = await Promise.all([
+  const [codes, auths, assignments, contacts, plans, summaries, preferred] = await Promise.all([
     loadActiveCodes(sb, ids),
     ids.length
       ? rows<AuthRow>(
@@ -106,8 +109,13 @@ export async function loadClientList(
             .is("completed_at", null),
         )
       : [],
+    loadPreferredNames(sb, orgId, ids),
   ]);
   const activeAuths = auths.filter((a) => isActiveCodeRow(a, today));
+  const endedBy = groupBy(
+    auths.filter((a) => !isActiveCodeRow(a, today)),
+    (a) => a.client_id,
+  );
   const usage = await loadUsage(sb, orgId, ids, activeAuths);
   const staffIds = [...new Set(assignments.map((a) => a.staff_id))];
   const profiles = staffIds.length
@@ -137,6 +145,8 @@ export async function loadClientList(
   const built: ClientListRow[] = clients.map((c) => {
     const clientCodes = codes.get(c.id) ?? authCodes.get(c.id) ?? [];
     const clientAuths = authBy.get(c.id) ?? [];
+    const clientPlans = planBy.get(c.id) ?? [];
+    const endedCodes = endedCodesFor(clientCodes, endedBy.get(c.id) ?? []);
     const staff = [
       ...new Map(
         (staffBy.get(c.id) ?? []).map((a) => [
@@ -147,12 +157,21 @@ export async function loadClientList(
     ].sort((a, b) => a.name.localeCompare(b.name));
     const nextDue = nextDueItem(
       [
-        ...(planBy.get(c.id) ?? []).map((p) => ({ label: "Plan renews", date: p.end_date })),
+        ...clientPlans.map((p) => ({
+          kind: "plan" as const,
+          label: "Plan renews",
+          date: p.end_date,
+        })),
         ...clientAuths.map((a) => ({
+          kind: "authorization" as const,
           label: `${a.service_code} authorization ends`,
           date: a.service_end_date,
         })),
-        ...(summaryBy.get(c.id) ?? []).map((s) => ({ label: "Summary due", date: s.due_date })),
+        ...(summaryBy.get(c.id) ?? []).map((s) => ({
+          kind: "summary" as const,
+          label: "Summary due",
+          date: s.due_date,
+        })),
       ],
       now,
     );
@@ -161,16 +180,22 @@ export async function loadClientList(
       kind: "client",
       first_name: c.first_name,
       last_name: c.last_name,
+      preferred_name: preferred.get(c.id) ?? null,
       photo_url: c.client_photo_url,
       medicaid_id: c.medicaid_id,
       client_pid: c.client_pid,
       account_status: c.account_status,
       codes: clientCodes,
+      endedCodes,
+      planExpired: planHasExpired(clientPlans, today),
       home:
         c.team_id && homeName.has(c.team_id)
           ? { id: c.team_id, name: homeName.get(c.team_id)! }
           : null,
       unitsLeft: worstUnitsLeft(clientAuths, sheetBy.get(c.id) ?? [], dayBy.get(c.id) ?? []),
+      needsUnits: clientAuths.some(
+        (a) => !a.authorization_pending && !(Number(a.annual_unit_authorization) > 0),
+      ),
       nextDue,
       staff,
       readiness: listReadiness({
@@ -178,6 +203,7 @@ export async function loadClientList(
         staffCount: staff.length,
         hasPin: c.home_latitude != null && c.home_longitude != null,
         guardianOk: guardianSatisfied(c.is_own_guardian, contactBy.get(c.id) ?? [], now),
+        endedOn: endedCodes?.endedOn ?? null,
       }),
     };
     return row;
