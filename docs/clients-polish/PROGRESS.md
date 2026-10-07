@@ -48,3 +48,12 @@
 - Added 13 code files (lib/clients/about-me*.ts, evv.ts, details/about-card.tsx, about-editor.tsx, agency-notes.tsx, use-about-me.ts, evv-note.tsx, detail-tile.tsx, profile/use-home-pin.ts + tests). Deleted: aboutMeLines, PCSP-review About rows, whenText (no files; client-photo-card.tsx kept, used by workspace/about-tab.tsx).
 - Client-area lines 38,680 → 39,970 (+1,290).
 - Blockers: none. Notes: client_about_me FKs have no ON DELETE (C10 is soft-delete only, so fine).
+
+### C4 — Plans section and PCSP review — MERGED
+- PR #461 (https://github.com/danewarnick-source/Provider-Interface/pull/461), squash-merged as 26d87e95.
+- Checks: build passes; tsc 203 (= baseline); unit 1917 tests, only the 5 baseline failures. E2E not run. Re-verified before merge.
+- Migration applied: 20261007130000_clients_goals_other_needs_kind.sql (client_goals.kind text default 'goal', check goal/other_need). Types regenerated (adds kind only). Nothing NEEDS JEFF.
+- Added 20 files incl. lib/clients/pcsp-status.ts (one plan-year wording for Plans card, Overview, header tile, list Next due) and support-strategies.ts (+ tests); summary editor moved to src/components/summaries/ and reused as a profile side panel. Deleted: strategy-coverage.ts.
+- Client-area lines 39,970 → 41,238. dashboard.summaries.tsx 1057 → 444; client-specific-training-card.tsx 895 → 645.
+- Size: plans.ts 301 (+3, old file lightly touched; reported). Already oversized: training.functions.ts 1381, client-specific-training-card.tsx 645, dashboard.summaries.tsx 444.
+- Blockers: none. Non-goal supports stored under one "Other needs in the PCSP" goal row (kind='other_need').
