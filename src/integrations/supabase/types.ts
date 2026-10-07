@@ -2339,12 +2339,16 @@ export type Database = {
       }
       client_billing_code_rate_history: {
         Row: {
+          annual_unit_authorization: number | null
+          authorization_approved_on: string | null
+          authorization_number: string | null
           billing_code_id: string
           client_id: string
           created_at: string
           effective_end: string | null
           effective_start: string | null
           id: string
+          monthly_max_units: number | null
           organization_id: string
           rate_per_unit: number
           rate_source: string | null
@@ -2357,12 +2361,16 @@ export type Database = {
           unit_type: string
         }
         Insert: {
+          annual_unit_authorization?: number | null
+          authorization_approved_on?: string | null
+          authorization_number?: string | null
           billing_code_id: string
           client_id: string
           created_at?: string
           effective_end?: string | null
           effective_start?: string | null
           id?: string
+          monthly_max_units?: number | null
           organization_id: string
           rate_per_unit: number
           rate_source?: string | null
@@ -2375,12 +2383,16 @@ export type Database = {
           unit_type: string
         }
         Update: {
+          annual_unit_authorization?: number | null
+          authorization_approved_on?: string | null
+          authorization_number?: string | null
           billing_code_id?: string
           client_id?: string
           created_at?: string
           effective_end?: string | null
           effective_start?: string | null
           id?: string
+          monthly_max_units?: number | null
           organization_id?: string
           rate_per_unit?: number
           rate_source?: string | null
