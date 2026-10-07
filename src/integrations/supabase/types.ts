@@ -3037,6 +3037,7 @@ export type Database = {
           ended_on: string | null
           goal_text: string
           id: string
+          kind: string
           organization_id: string
           plan_id: string
           sort: number
@@ -3056,6 +3057,7 @@ export type Database = {
           ended_on?: string | null
           goal_text: string
           id?: string
+          kind?: string
           organization_id: string
           plan_id: string
           sort?: number
@@ -3075,6 +3077,7 @@ export type Database = {
           ended_on?: string | null
           goal_text?: string
           id?: string
+          kind?: string
           organization_id?: string
           plan_id?: string
           sort?: number

@@ -4,7 +4,7 @@
 // is stitched back onto the same goal.
 
 import {
-  indent, LABEL, squash, supportDates,
+  addProviderTo, indent, LABEL, parseProvider, squash, supportDates,
   type Goal, type Issue, type L, type Support,
 } from "./parser-shared.ts";
 
@@ -20,14 +20,9 @@ export function readGoals(lines: L[], isOurs: (provider: string) => boolean, iss
   let successQ = 0;
 
   function addProvider(s: Support, v: string) {
-    const pm = v.trim().match(/^([A-Z0-9]{2,4})\s+(.+)$/);
-    if (!pm) {
-      if (v.trim()) issues.push({ level: "warn", message: `Paid provider line not understood: "${v.trim()}"` });
-      return;
-    }
-    const ours = isOurs(pm[2]);
-    s.providers.push({ code: pm[1], provider: squash(pm[2]), ours });
-    if (ours && !s.ourCodes.includes(pm[1])) s.ourCodes.push(pm[1]);
+    const p = parseProvider(v, isOurs);
+    if (p) addProviderTo(s, p);
+    else if (v.trim()) issues.push({ level: "warn", message: `Paid provider line not understood: "${v.trim()}"` });
   }
 
   const flushHealth = () => {

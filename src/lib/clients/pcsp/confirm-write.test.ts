@@ -72,14 +72,18 @@ test("confirm creates the plan, goals, supports, authorizations, must-knows and 
   const r = review();
   r.plan.start = "2000-01-01";
   const out = await applyReviewedPcsp(db, args(r));
-  assert.deepEqual({ ...out, planId: typeof out.planId }, { planId: "string", goals: 2, supports: 5, codes: ["DSI", "HHS", "SEI"], contacts: 1 });
+  assert.deepEqual({ ...out, planId: typeof out.planId }, { planId: "string", goals: 3, supports: 6, codes: ["DSI", "HHS", "SEI"], contacts: 1 });
   const plans = db.tables.client_plans;
   assert.equal(plans.find((p) => p.id === "old")!.status, "past");
   const plan = plans.find((p) => p.id === out.planId)!;
   assert.equal(plan.document_id, "doc-1");
   assert.equal(plan.source, "pcsp_upload");
   const goals = db.tables.client_goals.filter((g) => g.plan_id === out.planId);
-  assert.deepEqual(goals.map((g) => g.carried_from_goal_id), ["g-cook", null]);
+  assert.deepEqual(goals.map((g) => g.carried_from_goal_id ?? null), ["g-cook", null, null]);
+  // The non-goal support paid to the agency is kept under "Other needs in the PCSP".
+  assert.deepEqual([goals[2].goal_text, goals[2].kind], ["Other needs in the PCSP", "other_need"]);
+  const other = db.tables.client_goal_supports.filter((x) => x.goal_id === goals[2].id);
+  assert.deepEqual(other.map((x) => [x.support_text, x.our_codes]), [["Host home helps Pat with daily living.", ["HHS"]]]);
   const sup = db.tables.client_goal_supports;
   assert.deepEqual(sup[1].other_providers, [{ code: "BC2", provider: "Sample Behavior Group Inc" }]);
   assert.deepEqual(sup[0].health_needs, ["Kitchen safety: Staff stay within reach at the stove.", "Burns: Check that burners are off."]);

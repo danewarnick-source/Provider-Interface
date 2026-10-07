@@ -1,6 +1,7 @@
 // Client profile header ("soft panel"): the pure pieces behind the subtitle
 // line, the readiness pill and the three info tiles. No React, no Supabase.
 
+import { pcspWords, type PcspState } from "./pcsp-status.ts";
 import type { AttentionItem } from "./readiness.ts";
 
 export type HeaderReadiness = { ready: boolean; missing: string[] };
@@ -60,18 +61,22 @@ export function guardianTile(
   return { value: "Not on file", missing: true };
 }
 
-/** Plan year tile: amber with "PCSP is N days overdue" once the plan year has ended. */
+/**
+ * Plan year tile: the end date, with the PCSP wording (pcsp-status.ts) when
+ * it expires within 60 days or is overdue. Amber when overdue or missing.
+ */
 export function planYearTile(
   endDate: string | null | undefined,
-  overdueDays: number | null | undefined,
+  pcsp: PcspState,
   format: (ymd: string) => string,
 ): { value: string; note: string | null; warn: boolean } {
-  const value = endDate ? format(endDate) : "No plan year on file";
-  const days = overdueDays ?? 0;
-  if (days > 0) {
-    return { value, note: `PCSP is ${days} day${days === 1 ? "" : "s"} overdue`, warn: true };
-  }
-  return { value, note: null, warn: !endDate };
+  const words = pcspWords(pcsp);
+  if (pcsp.kind === "none") return { value: words!.headline, note: null, warn: true };
+  return {
+    value: endDate ? format(endDate) : "No end date on file",
+    note: pcsp.kind === "ok" ? null : (words?.headline ?? null),
+    warn: pcsp.kind === "overdue" || !endDate,
+  };
 }
 
 /** "•••• 1234": an ID with all but the last four characters hidden; null when blank. */

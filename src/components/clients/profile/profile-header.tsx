@@ -57,7 +57,11 @@ export function ClientProfileHeader({
     home: data.home?.name,
   });
   const guardian = guardianTile(client.is_own_guardian, data.guardian);
-  const plan = planYearTile(data.plan?.end_date, data.pcspOverdueDays, (d) => formatDate(d));
+  const plan = planYearTile(
+    data.pcsp.kind === "none" ? null : data.pcsp.endDate,
+    data.pcsp,
+    (d) => formatDate(d),
+  );
 
   return (
     <div className="space-y-3" data-testid="client-profile-header">

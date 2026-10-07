@@ -144,7 +144,7 @@ describe("clientAttention", () => {
           { key: "pcsp", title: "PCSP", status: "on_file", dueAt: null },
         ],
         plans: [plan({ start_date: "2025-09-01", end_date: "2026-08-31", status: "current" })],
-        strategies: { published: false },
+        strategies: { published: false, covered: 0, total: 2 },
         summaries: [
           { label: "2026-Q3", dueDate: "2026-10-15" },
           { label: "2026-Q4", dueDate: "2027-01-15" },
@@ -167,7 +167,8 @@ describe("clientAttention", () => {
     assert.ok(keys.includes("hrc:Locked pantry"));
     assert.ok(keys.includes("hrc:Door alarm"));
     const waiting = items.find((i) => i.key === "pcsp-waiting");
-    assert.equal(waiting?.detail, "36 days since the plan year ended");
+    assert.equal(waiting?.title, "PCSP is 36 days overdue");
+    assert.equal(waiting?.detail, "Upload it, or contact the support coordinator if you don't have it yet.");
     assert.equal(waiting?.tone, "bad");
     // Worst first.
     assert.equal(items[0].tone, "bad");
@@ -178,20 +179,35 @@ describe("clientAttention", () => {
 
   it("counts strategies due 30 days after the current plan starts", () => {
     const items = clientAttention(
-      input({ plans: [plan({ activated_on: "2026-09-20" })], strategies: { published: false } }),
+      input({ plans: [plan({ activated_on: "2026-09-20" })], strategies: { published: false, covered: 0, total: 2 } }),
       NOW,
     );
     const s = items.find((i) => i.key === "strategies");
+    assert.equal(s?.title, "Support strategies: 0 of 2 supports have a strategy");
     assert.equal(s?.detail, "Due in 14 days");
     assert.equal(s?.tone, "warn");
+  });
+
+  it("asks for approval once every support has a strategy, and is quiet when approved", () => {
+    const draft = clientAttention(input({ strategies: { published: false, covered: 2, total: 2 } }), NOW);
+    assert.equal(draft.find((i) => i.key === "strategies")?.title, "Support strategies not approved");
+    const done = clientAttention(input({ strategies: { published: true, covered: 2, total: 2 } }), NOW);
+    assert.ok(!done.some((i) => i.key === "strategies"));
   });
 });
 
 describe("plan-year reminders in needs attention", () => {
+  it("flags a client with no PCSP on file", () => {
+    const items = clientAttention(input({ plans: [] }), NOW);
+    const n = items.find((i) => i.key === "pcsp-none");
+    assert.equal(n?.title, "No PCSP on file");
+    assert.equal(n?.section, "plans");
+  });
   it("reminds 60 days before the plan year ends", () => {
     const items = clientAttention(input({ plans: [plan({ end_date: "2026-11-30" })] }), NOW);
     const r = items.find((i) => i.key === "plan-ending:60");
-    assert.equal(r?.detail, "Ends in 55 days");
+    assert.equal(r?.title, "PCSP expires in 55 days (Nov 30)");
+    assert.equal(r?.detail, "Schedule the PCSP meeting with the support coordinator.");
     assert.equal(r?.section, "plans");
   });
   it("turns waiting into an office follow-up from day 10", () => {
@@ -200,7 +216,7 @@ describe("plan-year reminders in needs attention", () => {
       NOW,
     );
     const w = items.find((i) => i.key === "pcsp-waiting");
-    assert.equal(w?.title, "Office: follow up on the new PCSP");
+    assert.equal(w?.title, "PCSP is 10 days overdue");
     assert.equal(w?.tone, "bad");
   });
 });

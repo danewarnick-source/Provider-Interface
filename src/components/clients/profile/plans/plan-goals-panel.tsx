@@ -1,6 +1,7 @@
-// Plan goals: the current plan year's goals → supports → codes, with add /
-// edit / end and "View as" a code (what a team member working that code
-// sees). Nothing is deleted: goals are ended, supports get an end date.
+// Goals and supports: the current plan year's goals → supports → codes
+// (plus "Other needs in the PCSP"), with add / edit / end for people who can
+// edit, and "View as" a code (what a team member working that code sees).
+// Nothing is deleted: goals are ended, supports get an end date.
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,11 +18,20 @@ import { currentPlan, goalView, supportsForCode, type GoalView } from "@/lib/cli
 import { addClientPlan, endClientGoal, endGoalSupport } from "@/lib/clients/plans.functions";
 import { GoalTree } from "./goal-tree";
 import { GoalDialog, SupportDialog } from "./goal-dialogs";
-import { PcspUploadButton } from "./pcsp-upload-button";
 
 type Support = GoalView["supports"][number];
 
-export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; orgId?: string; codes: string[] }) {
+export function PlanGoalsPanel({
+  clientId,
+  orgId,
+  codes,
+  canEdit,
+}: {
+  clientId: string;
+  orgId?: string;
+  codes: string[];
+  canEdit: boolean;
+}) {
   const qc = useQueryClient();
   const plansQ = useClientPlans(clientId);
   const addPlanFn = useServerFn(addClientPlan);
@@ -57,8 +67,8 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
     <SectionCard
       icon={Target}
       tone="ok"
-      title="Plan goals"
-      description="This plan year's goals and supports. View as a code to see what a team member on it sees."
+      title="Goals and supports"
+      description="This plan year's PCSP goals and the supports for each. View as a code to see what a team member on it sees."
       actions={
         <>
           <Select value={viewAs} onValueChange={setViewAs}>
@@ -74,13 +84,14 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
               ))}
             </SelectContent>
           </Select>
-          <PcspUploadButton clientId={clientId} orgId={orgId} label="Upload new PCSP" variant="outline" inputTestId="pcsp-upload-input" />
-          <Button type="button" disabled={!scope} onClick={act(async () => {
-            const planId = await ensurePlanId();
-            if (planId) setGoalDlg({ goal: null, planId });
-          })}>
-            <Plus className="h-4 w-4" /> Add goal
-          </Button>
+          {canEdit ? (
+            <Button type="button" variant="outline" disabled={!scope} onClick={act(async () => {
+              const planId = await ensurePlanId();
+              if (planId) setGoalDlg({ goal: null, planId });
+            })}>
+              <Plus className="h-4 w-4" /> Add goal
+            </Button>
+          ) : null}
         </>
       }
     >
@@ -91,7 +102,7 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
           <GoalTree
             goals={goals}
             empty={viewAs === "all" ? "No goals yet — upload the PCSP or add them." : `No supports list ${viewAs} — a team member working ${viewAs} sees no goals.`}
-            goalActions={(g) => (
+            goalActions={!canEdit ? undefined : (g) => (
               <div className="flex shrink-0 items-center gap-2">
                 <FieldVisibilityToggle clientId={clientId} section="care_plan" kind="goal" id={g.id} label="this goal" />
                 <Button size="icon" variant="outline" className="h-10 w-10 max-md:h-11 max-md:w-11" aria-label="Add support" title="Add support" onClick={() => setSupportDlg({ goal: g, support: null })}>
@@ -104,7 +115,7 @@ export function PlanGoalsPanel({ clientId, orgId, codes }: { clientId: string; o
                 />
               </div>
             )}
-            supportActions={(g, s) => (
+            supportActions={!canEdit ? undefined : (g, s) => (
               <div className="flex shrink-0 items-center gap-2">
                 <EditButton label="Edit support" onClick={() => setSupportDlg({ goal: g, support: s })} />
                 <RowMenu

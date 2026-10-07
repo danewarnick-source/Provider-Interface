@@ -1,7 +1,9 @@
-// Read-only goals → supports → codes for one plan year. Used by the care
-// plan panel, the client-specific training card and the staff training page.
+// Read-only goals → supports → codes for one plan year. Used by the Goals
+// and supports card, the client-specific training card and the staff
+// training page. Supports read "Support: … + codes" / "Support details: …".
 import type { ReactNode } from "react";
 import type { GoalView } from "@/lib/clients/plans";
+import { SupportLines } from "./support-lines";
 
 export function GoalTree({
   goals,
@@ -27,29 +29,28 @@ export function GoalTree({
         <li key={g.id} className="rounded-lg border border-border/60 bg-card p-3">
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
-              <div className="mb-0.5 text-xs font-medium text-muted-foreground">Goal{g.domain ? ` · ${g.domain}` : ""}</div>
-              <p className="whitespace-pre-wrap text-sm">{g.goal}</p>
+              {g.kind === "other_need" ? (
+                <p className="text-sm font-medium">Other needs in the PCSP</p>
+              ) : (
+                <>
+                  <div className="mb-0.5 text-xs font-medium text-muted-foreground">Goal{g.domain ? ` · ${g.domain}` : ""}</div>
+                  <p className="whitespace-pre-wrap text-sm">{g.goal}</p>
+                </>
+              )}
             </div>
             {goalActions?.(g)}
           </div>
-          <ul className="mt-2 space-y-1.5 border-l-2 border-border pl-3">
+          <ul className="mt-2 space-y-2.5 border-l-2 border-border pl-3">
             {g.supports.length === 0 && <li className="text-xs italic text-muted-foreground">No supports yet.</li>}
             {g.supports.map((s) => (
               <li key={s.id} className="flex items-start gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="whitespace-pre-wrap text-sm">
-                    {s.support_text.trim() || <span className="italic text-muted-foreground">Support not written yet</span>}
-                  </p>
-                  {s.details?.trim() && <p className="whitespace-pre-wrap text-xs text-muted-foreground">{s.details}</p>}
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {s.our_codes.length === 0 ? (
-                      <span className="text-[11px] text-amber-700">No codes — no team member sees this support.</span>
-                    ) : (
-                      s.our_codes.map((c) => (
-                        <span key={c} className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">{c}</span>
-                      ))
-                    )}
-                  </div>
+                  <SupportLines
+                    support={s.support_text}
+                    details={s.details}
+                    codes={s.our_codes}
+                    noCodes={<span className="text-[11px] text-muted-foreground">No agency code: no team member sees this support.</span>}
+                  />
                 </div>
                 {supportActions?.(g, s)}
               </li>

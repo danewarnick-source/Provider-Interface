@@ -22,12 +22,13 @@ export const reviewedPcspSchema = z.object({
     goal: text(), domain: text(300), currentStatus: text(), strengths: text(), barriers: text(),
     successPerson: text(), successTeam: text(), page: z.number().int().min(0).max(10_000),
     carry: z.object({
-      kind: z.enum(["continuing", "changed", "new"]),
+      kind: z.enum(["carried", "new"]),
       fromGoalId: z.string().uuid().nullable(),
       fromGoalText: text().nullable(),
     }),
     supports: z.array(support).max(40),
   })).max(60),
+  otherNeeds: z.array(support.extend({ include: z.boolean() })).max(40),
   budget: z.array(z.object({
     include: z.boolean(), code, unitType: z.enum(["Q", "day", "hourly"]), start: ymd, end: ymd,
     rate: z.number().min(0).max(100_000), maxMonthlyUnits: z.number().int().min(0).max(1_000_000).nullable(),

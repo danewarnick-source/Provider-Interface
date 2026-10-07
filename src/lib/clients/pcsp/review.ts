@@ -21,11 +21,14 @@ export type ReviewBudgetLine = {
   include: boolean; code: string; unitType: string; start: string | null; end: string | null;
   rate: number; maxMonthlyUnits: number | null; annualUnits: number;
 };
+/** A non-goal support ("other need in the PCSP"); kept ones are saved under the plan's "Other needs" row. */
+export type ReviewOtherNeed = ReviewSupport & { include: boolean };
 export type ReviewOtherProvider = { include: boolean; code: string; provider: string; note: string };
 
 export type ReviewedPcsp = {
   plan: { start: string | null; end: string | null; activatedOn: string | null; meetingDate: string | null };
   goals: ReviewGoal[];
+  otherNeeds: ReviewOtherNeed[];
   budget: ReviewBudgetLine[];
   risks: (Risk & { include: boolean })[];
   otherProviders: ReviewOtherProvider[];
@@ -83,6 +86,11 @@ export function initialReview(parse: PcspResult, carry: CarryOver): ReviewedPcsp
         })),
       };
     }),
+    otherNeeds: parse.nonGoalSupports.map((s) => ({
+      include: s.ourCodes.length > 0,
+      support: s.support, details: s.details, start: s.start, end: s.end,
+      ourCodes: [...s.ourCodes], providers: s.providers.map((p) => ({ ...p })), healthNeeds: [],
+    })),
     budget: parse.budget.filter((b) => b.ours).map((b) => ({
       include: true, code: b.code, unitType: unitTypeFor(b.code, unitFor(b.code)), start: b.start, end: b.end,
       rate: b.rate, maxMonthlyUnits: b.maxMonthlyUnits, annualUnits: b.annualUnits,
@@ -96,8 +104,8 @@ export interface ReviewSummary {
   goals: number;
   supports: number;
   supportsForUs: number;
-  continuing: number;
-  changed: number;
+  /** Goals carried over from last year (progress history continues). */
+  carried: number;
   newGoals: number;
   budgetTotalForUs: number;
 }
@@ -110,18 +118,24 @@ export function reviewSummary(parse: PcspResult, review: ReviewedPcsp): ReviewSu
     goals: goals.length,
     supports: supports.length,
     supportsForUs: supports.filter((s) => s.ourCodes.length > 0).length,
-    continuing: kinds("continuing"),
-    changed: kinds("changed"),
+    carried: kinds("carried"),
     newGoals: kinds("new"),
     budgetTotalForUs: parse.budget.filter((b) => b.ours).reduce((sum, b) => sum + b.total, 0),
   };
 }
 
-const LEVEL_ORDER: Record<Issue["level"], number> = { error: 0, warn: 1, info: 2 };
+const byPage = (a: Issue, b: Issue) => (a.page ?? 999) - (b.page ?? 999);
 
-/** "Things to check": errors first, then by page (unpaged last). */
-export function thingsToCheck(issues: readonly Issue[]): Issue[] {
-  return [...issues].sort(
-    (a, b) => LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level] || (a.page ?? 999) - (b.page ?? 999),
-  );
+/**
+ * The review's issue groups: "Fix before confirming" (errors) and "Check
+ * these" (warnings and notes, warnings first), each by page (unpaged last).
+ */
+export function checkGroups(issues: readonly Issue[]): { fix: Issue[]; check: Issue[] } {
+  return {
+    fix: issues.filter((i) => i.level === "error").sort(byPage),
+    check: [
+      ...issues.filter((i) => i.level === "warn").sort(byPage),
+      ...issues.filter((i) => i.level === "info").sort(byPage),
+    ],
+  };
 }

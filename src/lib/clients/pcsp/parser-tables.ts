@@ -3,7 +3,7 @@
 // last year's goals. Each reader takes that section's lines.
 
 import {
-  DOMAINS, readFields, squash, supportDates, usDate,
+  addProviderTo, DOMAINS, noteObsolete, parseProvider, readFields, squash, supportDates, usDate,
   type AboutMeRow, type BudgetLine, type Issue, type L, type LastYearGoal,
   type NonGoalSupport, type PcspResult, type PurchasedService, type Risk,
 } from "./parser-shared.ts";
@@ -38,38 +38,46 @@ export function readMeetingMinutes(lines: L[], plan: PcspResult["plan"]): void {
   }
 }
 
-export function readNonGoalSupports(lines: L[]): NonGoalSupport[] {
+export function readNonGoalSupports(lines: L[], isOurs: (provider: string) => boolean): NonGoalSupport[] {
   const out: NonGoalSupport[] = [];
   let cur: NonGoalSupport | null = null;
   for (const x of readFields(lines)) {
-    if (x.label === "Support") { cur = { support: x.value, details: "", start: null, end: null }; out.push(cur); }
-    else if (cur && x.label === "Support Details") cur.details = x.value;
+    if (x.label === "Support") {
+      cur = { support: x.value, details: "", start: null, end: null, providers: [], ourCodes: [] };
+      out.push(cur);
+    } else if (cur && x.label === "Support Details") cur.details = x.value;
     else if (cur && x.label === "Support Dates") Object.assign(cur, supportDates(x.value));
+    else if (cur && x.label === "Paid Provider") {
+      const p = parseProvider(x.value, isOurs);
+      if (p) addProviderTo(cur, p);
+    }
   }
   return out;
 }
 
-/** "BC2   Behavior Consultation II", then Type / Amount / Duration lines. */
+/** "BC2   Behavior Consultation II", "HHS Host Home Support" or "SLN - Supported Living". */
+const SERVICE_HEAD = /^([A-Z][A-Z0-9]{1,3})(?:\s*-\s*|\s+)([A-Z][^:]*[a-z][^:]*)$/;
+const SERVICE_FIELD = /^(Type|Amount|Duration|Frequency):\s+(.*)$/;
+
+/** Code heading, then Type / Amount / Duration lines. */
 export function readPurchasedServices(lines: L[], issues: Issue[]): PurchasedService[] {
   const out: PurchasedService[] = [];
   let svc: PurchasedService | null = null;
   for (const l of lines) {
     const t = l.text.trim();
-    const head = t.match(/^([A-Z][A-Z0-9]{1,3})\s{2,}([A-Z].+)$/);
-    if (head && !/:/.test(t)) {
+    if (/obsolete/i.test(t)) { noteObsolete(t, l.page, issues); continue; }
+    const head = t.match(SERVICE_HEAD);
+    if (head) {
       svc = { code: head[1], name: head[2].trim(), unitType: "", units: null, start: null, end: null, page: l.page };
       out.push(svc);
       continue;
     }
-    const m = t.match(/^(Type|Amount|Duration|Frequency):\s+(.*)$/);
-    if (!m) {
-      if (/obsolete/i.test(t)) issues.push({ level: "warn", page: l.page, message: `The PCSP prints "${t}". Confirm which service this applies to.` });
-      continue;
-    }
+    const m = t.match(SERVICE_FIELD);
+    if (!m) continue;
+    // A second "Type:" starts another entry: a reprint on the next page, or a service whose code line is missing.
     if (!svc || (m[1] === "Type" && svc.unitType)) {
       svc = { code: "", name: "", unitType: "", units: null, start: null, end: null, page: l.page };
       out.push(svc);
-      issues.push({ level: "error", page: l.page, message: "A purchased service is listed without its code (the code line is missing in the PDF). Enter the code by hand." });
     }
     if (m[1] === "Type") svc.unitType = m[2].trim();
     if (m[1] === "Amount") svc.units = Number((m[2].match(/(\d+)/) || [])[1] ?? NaN);
@@ -77,6 +85,33 @@ export function readPurchasedServices(lines: L[], issues: Issue[]): PurchasedSer
       const d = m[2].match(/(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/);
       if (d) { svc.start = usDate(d[1]); svc.end = usDate(d[2]); }
     }
+  }
+  return settleCodeless(out, issues);
+}
+
+/**
+ * Entries read without a code: a service continued across a page break is
+ * folded back into it (a full reprint is dropped; the rest of a service cut
+ * off at the bottom of a page fills it in). Only an entry whose units and
+ * dates belong to no coded service is reported.
+ */
+function settleCodeless(list: PurchasedService[], issues: Issue[]): PurchasedService[] {
+  const coded = list.filter((s) => s.code);
+  const out: PurchasedService[] = [];
+  for (const s of list) {
+    if (s.code) { out.push(s); continue; }
+    const reprint = s.units != null && coded.some((c) =>
+      c.units === s.units && c.start === s.start && c.end === s.end && (!s.unitType || !c.unitType || c.unitType === s.unitType));
+    if (reprint) continue;
+    const prev = out[out.length - 1];
+    if (prev?.code && prev.page < s.page && (prev.units == null || !prev.start)) {
+      prev.unitType ||= s.unitType;
+      if (prev.units == null) prev.units = s.units;
+      if (!prev.start) { prev.start = s.start; prev.end = s.end; }
+      continue;
+    }
+    out.push(s);
+    issues.push({ level: "error", page: s.page, message: "A purchased service is listed without its code (the code line is missing in the PDF). Enter the code by hand." });
   }
   return out;
 }
@@ -90,7 +125,7 @@ export function readBudget(lines: L[], isOurs: (provider: string) => boolean, is
   lines.forEach((l, i) => {
     const m = l.text.match(BUDGET_ROW);
     if (!m) {
-      if (/obsolete/i.test(l.text)) issues.push({ level: "warn", page: l.page, message: `The budget prints "${l.text.trim()}". Confirm whether a budget line is retired.` });
+      if (/obsolete/i.test(l.text)) noteObsolete(l.text, l.page, issues);
       return;
     }
     const provider = squash(
