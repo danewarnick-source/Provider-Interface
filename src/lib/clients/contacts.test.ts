@@ -5,12 +5,16 @@ import {
   cleanContactFields,
   contactLine,
   contactsByClient,
-  contactsForFilter,
+  contactCardOrder,
+  contactInitials,
+  contactTag,
+  pastContacts,
   contactsWithRole,
   guardianSatisfied,
   primaryContact,
   setContactParts,
   type ClientContact,
+  type ContactRole,
 } from "./contacts.ts";
 
 const NOW = new Date(2026, 9, 6, 12);
@@ -59,15 +63,46 @@ describe("contactsWithRole / primaryContact", () => {
   });
 });
 
-describe("contactsForFilter", () => {
-  it("filters by role group and keeps role order, primary first", () => {
-    const ids = (f: Parameters<typeof contactsForFilter>[1]) =>
-      contactsForFilter(list, f, NOW).map((x) => x.id);
-    assert.deepEqual(ids("all"), ["4", "2", "1", "5"]);
-    assert.deepEqual(ids("emergency"), ["2", "1"]);
-    assert.deepEqual(ids("family"), ["4"]);
-    assert.deepEqual(ids("medical"), ["5"]);
-    assert.deepEqual(ids("coordinator"), []);
+describe("contact cards", () => {
+  it("orders guardian first, then support coordinator, then everyone else by name", () => {
+    const c = (id: string, role: ContactRole, name: string, is_primary = false) => ({
+      id,
+      role,
+      name,
+      is_primary,
+      sort: 0,
+      ended_on: null,
+    });
+    const order = contactCardOrder([
+      c("1", "emergency", "Zed"),
+      c("2", "primary_doctor", "Amy"),
+      c("3", "support_coordinator", "Cole"),
+      c("4", "guardian", "Gus"),
+      c("5", "guardian", "Bea", true),
+    ]).map((x) => x.id);
+    assert.deepEqual(order, ["5", "4", "3", "2", "1"]);
+  });
+  it("tags roles in plain words", () => {
+    assert.deepEqual(contactTag("primary_doctor"), { label: "Doctor", tone: "ok" });
+    assert.equal(contactTag("support_coordinator").label, "Support coordinator");
+    assert.equal(contactTag("emergency").label, "Emergency");
+    assert.equal(contactTag("guardian").label, "Guardian");
+  });
+  it("lists ended contacts as past, newest first; never drops them", () => {
+    const past = pastContacts(
+      [
+        { id: "a", ended_on: "2026-01-01" },
+        { id: "b", ended_on: null },
+        { id: "c", ended_on: "2026-05-01" },
+        { id: "d", ended_on: "2099-01-01" },
+      ],
+      NOW,
+    ).map((x) => x.id);
+    assert.deepEqual(past, ["c", "a"]);
+  });
+  it("makes initials", () => {
+    assert.equal(contactInitials("Ada Lovelace King"), "AL");
+    assert.equal(contactInitials("  "), "?");
   });
 });
 

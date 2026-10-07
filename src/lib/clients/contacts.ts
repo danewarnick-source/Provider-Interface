@@ -114,33 +114,60 @@ export function primaryContact<T extends Sortable>(
   return contactsWithRole(contacts, role, now)[0] ?? null;
 }
 
-/** Role filters on the profile Contacts section. */
-export const CONTACT_FILTERS = ["all", "family", "emergency", "coordinator", "medical"] as const;
-export type ContactFilter = (typeof CONTACT_FILTERS)[number];
+export type ContactTone = "profile" | "info" | "ok" | "danger" | "neutral";
 
-export const CONTACT_FILTER_LABELS: Record<ContactFilter, string> = {
-  all: "All",
-  family: "Guardian & representative",
-  emergency: "Emergency",
-  coordinator: "Support coordinator",
-  medical: "Doctors & providers",
-};
+/** The one role tag on a contact card: a short label and a tone. */
+export function contactTag(role: ContactRole): { label: string; tone: ContactTone } {
+  if (role === "guardian" || role === "representative")
+    return { label: CONTACT_ROLE_LABELS[role], tone: "profile" };
+  if (role === "support_coordinator") return { label: "Support coordinator", tone: "info" };
+  if (role === "emergency") return { label: "Emergency", tone: "danger" };
+  if (role === "other_provider") return { label: "Other provider", tone: "neutral" };
+  return {
+    label: role === "primary_doctor" ? "Doctor" : CONTACT_ROLE_LABELS[role],
+    tone: "ok",
+  };
+}
 
-const FILTER_ROLES: Record<Exclude<ContactFilter, "all">, readonly ContactRole[]> = {
-  family: ["guardian", "representative"],
-  emergency: ["emergency"],
-  coordinator: ["support_coordinator"],
-  medical: PROVIDER_ROLES,
-};
+const CARD_RANK: Partial<Record<ContactRole, number>> = { guardian: 0, support_coordinator: 1 };
 
-/** Active contacts for a filter, in role order, primary first within a role. */
-export function contactsForFilter<T extends Sortable>(
+/**
+ * The Contacts grid order: guardian first, then the support coordinator,
+ * then everyone else by name (primary first within guardians/coordinators).
+ */
+export function contactCardOrder<T extends Sortable & Pick<ClientContact, "name">>(
   contacts: readonly T[],
-  filter: ContactFilter,
+): T[] {
+  const rank = (c: T) => CARD_RANK[c.role] ?? 2;
+  return [...contacts].sort(
+    (a, b) =>
+      rank(a) - rank(b) ||
+      (rank(a) < 2 ? byPriority(a, b) : 0) ||
+      a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+  );
+}
+
+/** Contacts ended on or before `now` (the "Past contacts" list), newest end first. */
+export function pastContacts<T extends Pick<ClientContact, "ended_on">>(
+  contacts: readonly T[],
   now: Date = new Date(),
 ): T[] {
-  const roles = filter === "all" ? CONTACT_ROLES : FILTER_ROLES[filter];
-  return roles.flatMap((role) => contactsWithRole(contacts, role, now));
+  const today = todayYmd(now);
+  return contacts
+    .filter((c) => !!c.ended_on && c.ended_on <= today)
+    .sort((a, b) => (b.ended_on ?? "").localeCompare(a.ended_on ?? ""));
+}
+
+/** Up to two initials for an avatar ("?" when the name is blank). */
+export function contactInitials(name: string): string {
+  return (
+    name
+      .split(/\s+/)
+      .map((p) => p[0] ?? "")
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?"
+  );
 }
 
 /** Group a mixed list (many clients) by client_id. */

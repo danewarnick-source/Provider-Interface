@@ -23,6 +23,15 @@ export function useClientContacts(clientId: string | undefined) {
   });
 }
 
+/** Every contact, ended ones too (the profile's "Past contacts"). */
+export function useAllClientContacts(clientId: string | undefined) {
+  return useQuery({
+    enabled: isRouteUuid(clientId),
+    queryKey: [...clientContactsKey(clientId), "all"],
+    queryFn: (): Promise<ClientContact[]> => loadClientContacts(supabase, [clientId!]),
+  });
+}
+
 type ContactInput = Partial<ContactFields> & Pick<ContactFields, "role" | "name">;
 
 /**
