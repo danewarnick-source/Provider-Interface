@@ -8,18 +8,22 @@ import { computeRestrictionCompletion, type RestrictionRecord } from "./hrc";
 import { isActiveCodeRow, loadActiveCodes } from "./codes";
 import { guardianSatisfied, loadClientContacts } from "./contacts";
 import { todayYmd } from "./dates";
-import { loadOrgClientFileIndex } from "./file-index";
+import { loadClientFileView } from "./file-packs.server";
+import { fileAttention } from "./file-rows";
 import { loadUsage, rows, type AuthRow, type Sb } from "./list-queries";
 import { comingUpItems, lastNotes, type ClientOverview } from "./overview";
 import { loadOverviewTeam, loadPeopleNames } from "./overview-team";
 import { activeGoalViewsOn, type ClientPlan } from "./plans";
 import { loadPlanBundle } from "./plans-load";
-import { agencySupports, isUploadDoc, strategyCoverage, type StrategySupport } from "./support-strategies";
+import {
+  agencySupports,
+  isUploadDoc,
+  strategyCoverage,
+  type StrategySupport,
+} from "./support-strategies";
 import type { CSTContent } from "./training.functions";
 import { clientAttention, codePace } from "./readiness";
 import { usedUnitsForCode } from "./units";
-
-const SKIP_FILE_CARDS = new Set(["photograph", "support_strategies", "service_summary"]);
 
 /** Approved or not, and "N of M supports have a strategy" (an uploaded document covers all). */
 function strategiesFacts(
@@ -27,7 +31,8 @@ function strategiesFacts(
   supports: StrategySupport[],
 ): { published: boolean; covered: number; total: number } {
   const published = row?.status === "published";
-  if (row && isUploadDoc(row.content)) return { published, covered: supports.length, total: supports.length };
+  if (row && isUploadDoc(row.content))
+    return { published, covered: supports.length, total: supports.length };
   const c = strategyCoverage(supports, row?.content?.sections ?? []);
   return { published, covered: c.covered, total: c.total };
 }
@@ -61,43 +66,53 @@ export async function loadClientOverview(
   );
   const client = clientRows[0];
   if (!client) throw new Error("Client not found in this organization");
-  const [codes, auths, contacts, plans, summaries, restrictions, strategies, fileIndex, team, bundle] =
-    await Promise.all([
-      loadActiveCodes(sb, ids),
-      rows<AuthRow>(
-        sb
-          .from("client_billing_codes")
-          .select(
-            "client_id, service_code, service_start_date, service_end_date, annual_unit_authorization, authorization_pending",
-          )
-          .eq("organization_id", orgId)
-          .eq("client_id", clientId),
-      ).catch(() => [] as AuthRow[]),
-      loadClientContacts(sb, ids),
-      rows<ClientPlan>(sb.from("client_plans").select("*").eq("client_id", clientId)),
-      rows<{ period_label: string | null; due_date: string | null }>(
-        sb
-          .from("client_progress_summaries")
-          .select("period_label, due_date")
-          .eq("organization_id", orgId)
-          .eq("client_id", clientId)
-          .is("completed_at", null)
-          .is("finalized_at", null),
-      ),
-      rows<RestrictionRecord>(
-        sb.from("hrc_restriction_records").select("*").eq("client_id", clientId).eq("active", true),
-      ).catch(() => [] as RestrictionRecord[]),
-      rows<{ status: string | null; content: CSTContent | null }>(
-        sb
-          .from("client_specific_trainings")
-          .select("status, content")
-          .eq("client_id", clientId)
-          .eq("training_type", "support_strategies"),
-      ).catch(() => []),
-      loadOrgClientFileIndex(sb, orgId, ids),
-      loadOverviewTeam(sb, orgId, clientId, client.has_abi === true),
-      loadPlanBundle(sb, clientId),
-    ]);
+  const [
+    codes,
+    auths,
+    contacts,
+    plans,
+    summaries,
+    restrictions,
+    strategies,
+    fileView,
+    team,
+    bundle,
+  ] = await Promise.all([
+    loadActiveCodes(sb, ids),
+    rows<AuthRow>(
+      sb
+        .from("client_billing_codes")
+        .select(
+          "client_id, service_code, service_start_date, service_end_date, annual_unit_authorization, authorization_pending",
+        )
+        .eq("organization_id", orgId)
+        .eq("client_id", clientId),
+    ).catch(() => [] as AuthRow[]),
+    loadClientContacts(sb, ids),
+    rows<ClientPlan>(sb.from("client_plans").select("*").eq("client_id", clientId)),
+    rows<{ period_label: string | null; due_date: string | null }>(
+      sb
+        .from("client_progress_summaries")
+        .select("period_label, due_date")
+        .eq("organization_id", orgId)
+        .eq("client_id", clientId)
+        .is("completed_at", null)
+        .is("finalized_at", null),
+    ),
+    rows<RestrictionRecord>(
+      sb.from("hrc_restriction_records").select("*").eq("client_id", clientId).eq("active", true),
+    ).catch(() => [] as RestrictionRecord[]),
+    rows<{ status: string | null; content: CSTContent | null }>(
+      sb
+        .from("client_specific_trainings")
+        .select("status, content")
+        .eq("client_id", clientId)
+        .eq("training_type", "support_strategies"),
+    ).catch(() => []),
+    loadClientFileView(sb, orgId, clientId, now),
+    loadOverviewTeam(sb, orgId, clientId, client.has_abi === true),
+    loadPlanBundle(sb, clientId),
+  ]);
   const clientCodes = codes.get(clientId) ?? [];
   const activeAuths = auths.filter((a) => isActiveCodeRow(a, today));
   const usage = await loadUsage(sb, orgId, ids, activeAuths);
@@ -109,9 +124,7 @@ export async function loadClientOverview(
     {
       codes: clientCodes,
       paces,
-      fileCards: (fileIndex.cardsByClient.get(clientId) ?? []).filter(
-        (c) => !SKIP_FILE_CARDS.has(c.key),
-      ),
+      fileCards: fileAttention(fileView.groups),
       photo: { url: client.client_photo_url, takenOn: client.client_photo_taken_on },
       plans,
       strategies: personNeedsSupportStrategies(clientCodes)
