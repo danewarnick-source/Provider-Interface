@@ -1,17 +1,19 @@
-// Upload a USTEPS PCSP → read it (plain code) → review → confirm.
-// readPcsp saves only the PDF (a 'pcsp' client document) and returns the
-// parse for review; nothing else is written until confirmPcsp. Both need
-// clients:edit for this client (assertCanManageClient).
+// Upload PCSP in Plans: the browser uploads the PDF to the client's pcsp
+// folder → readPcsp reads it (plain code), saves it as a 'pcsp' client
+// document and returns the parse for review (or the plain reason it couldn't)
+// → confirmPcsp writes the review and files the PCSP in the Client file.
+// Both need clients:edit for this client (assertCanManageClient).
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertCanManageClient } from "../guards.server";
-import { assertRowsChanged } from "../writes";
 import { proposeCarryOver, type CarryOver } from "./carry-over";
 import type { FallbackSection } from "./nectar-fallback";
-import { pcspBytes, readPcspPdf } from "./read-pdf.server";
+import { fileCurrentPcsp, insertPcspDocument } from "./file-pcsp.server";
+import { readUploadedPcsp } from "./read-pdf.server";
+import { pcspFolder, type FiledOutcome } from "./read-report";
 import type { PcspResult } from "./parser-shared";
 import { applyReviewedPcsp, type ConfirmResult } from "./confirm-write";
 import { reviewedPcspSchema } from "./review-schema";
@@ -29,39 +31,40 @@ const scope = { organizationId: z.string().uuid(), clientId: z.string().uuid() }
 export interface PcspRead {
   documentId: string;
   fileName: string;
+  /** Where the uploaded PDF is stored (client-documents). */
+  storagePath: string;
   parse: PcspResult;
   carry: CarryOver;
   currentPlan: { id: string; start_date: string | null; end_date: string | null } | null;
   /** Sections Nectar read because they didn't match the usual layout. */
   nectarSections: FallbackSection[];
+  /** The agency's legal name, for "No purchased services for …". */
+  agencyName: string;
 }
+
+export type PcspReadResult = { ok: true; read: PcspRead } | { ok: false; message: string };
 
 export const readPcsp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ ...scope, fileName: z.string().min(1).max(255), fileBase64: z.string().min(10).max(21_000_000) }).parse(d),
+    z.object({ ...scope, fileName: z.string().min(1).max(255), storagePath: z.string().min(1).max(1024) }).parse(d),
   )
-  .handler(async ({ data, context }): Promise<PcspRead> => {
+  .handler(async ({ data, context }): Promise<PcspReadResult> => {
     const { sb, userId } = ctx(context);
     const { organizationId, clientId } = data;
     await assertCanManageClient({ supabase: sb, actorId: userId, organizationId, clientId, action: "edit" });
 
-    const bytes = pcspBytes(data.fileBase64);
-    const { parse, nectarSections } = await readPcspPdf(sb, organizationId, bytes);
+    const res = await readUploadedPcsp(sb, {
+      organizationId, userId, source: "plans", storagePath: data.storagePath, prefix: pcspFolder(organizationId, clientId),
+    });
+    if (!res.ok) return res;
+    const { parse, nectarSections, agencyName } = res;
 
-    // Save the PDF (kept in the client's file even if the review is cancelled).
-    const safe = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const path = `${organizationId}/${clientId}/pcsp/${Date.now()}_${safe}`;
-    const up = await sb.storage.from("client-documents").upload(path, bytes, { contentType: "application/pdf", upsert: false });
-    if (up.error) throw new Error(`Upload failed: ${up.error.message}`);
-    const dated = parse.plan.start && parse.plan.end;
-    const { data: docRows, error: docErr } = await sb.from("client_documents").insert({
-      organization_id: organizationId, client_id: clientId, document_type: "pcsp", file_name: data.fileName,
-      file_url: path, storage_path: path, file_size_bytes: bytes.byteLength, uploaded_by: userId,
-      ...(dated ? { effective_from: parse.plan.start, effective_to: parse.plan.end, effective_to_mode: "fixed_date", date_source: "from_document" } : {}),
-    }).select("id");
-    if (docErr) throw new Error(docErr.message);
-    const documentId = (assertRowsChanged(docRows as unknown[])[0] as { id: string }).id;
+    // The PDF is kept in the client's documents even if the review is cancelled.
+    const documentId = await insertPcspDocument(sb, {
+      organizationId, clientId, userId, fileName: data.fileName, storagePath: data.storagePath,
+      sizeBytes: res.sizeBytes, start: parse.plan.start, end: parse.plan.end,
+    });
 
     const { data: plan } = await sb
       .from("client_plans").select("id, start_date, end_date").eq("client_id", clientId).eq("status", "current").maybeSingle();
@@ -72,18 +75,33 @@ export const readPcsp = createServerFn({ method: "POST" })
       currentGoals = (g ?? []) as typeof currentGoals;
     }
     const carry = proposeCarryOver(parse.goals.map((g) => g.goal), currentGoals, parse.lastYearGoals);
-    return { documentId, fileName: data.fileName, parse, carry, currentPlan, nectarSections };
+    return {
+      ok: true,
+      read: { documentId, fileName: data.fileName, storagePath: data.storagePath, parse, carry, currentPlan, nectarSections, agencyName },
+    };
   });
 
-/** Write the reviewed PCSP: new current plan, goals/supports, authorizations, must-knows, about-me, contacts. */
+export type PcspSaved = ConfirmResult & { filed: FiledOutcome };
+
+/** Write the reviewed PCSP (confirm-write.ts), then file it as the client's current PCSP. */
 export const confirmPcsp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ ...scope, parseId: z.string().uuid(), edits: reviewedPcspSchema }).parse(d))
-  .handler(async ({ data, context }): Promise<ConfirmResult> => {
+  .handler(async ({ data, context }): Promise<PcspSaved> => {
     const { sb, userId } = ctx(context);
     const { organizationId, clientId } = data;
     await assertCanManageClient({ supabase: sb, actorId: userId, organizationId, clientId, action: "edit" });
-    return applyReviewedPcsp(sb, {
+    const saved = await applyReviewedPcsp(sb, {
       organizationId, clientId, userId, documentId: data.parseId, review: data.edits, now: new Date().toISOString(),
     });
+    const { data: doc } = await sb
+      .from("client_documents").select("file_name, storage_path").eq("id", data.parseId).maybeSingle();
+    const d = (doc ?? {}) as { file_name?: string | null; storage_path?: string | null };
+    const filed: FiledOutcome = d.storage_path
+      ? await fileCurrentPcsp(sb, {
+          organizationId, clientId, userId, fileName: d.file_name || "PCSP.pdf", storagePath: d.storage_path,
+          start: data.edits.plan.start, end: data.edits.plan.end,
+        })
+      : "no_file_row";
+    return { ...saved, filed };
   });

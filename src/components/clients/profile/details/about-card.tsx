@@ -12,7 +12,7 @@ import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { AboutEditor } from "./about-editor";
 import { AgencyNotes } from "./agency-notes";
-import { useAboutMe } from "./use-about-me";
+import { useAboutMe, useAutoDraft } from "./use-about-me";
 
 export function AboutCard({
   orgId,
@@ -29,6 +29,7 @@ export function AboutCard({
 }) {
   const canEdit = useAccess().canCategory("clients", "edit");
   const { view, draft, setDraft, startDraft, approve } = useAboutMe(orgId, clientId);
+  useAutoDraft(clientId, canEdit, !view.isLoading && !draft && !startDraft.isPending, startDraft.mutate);
   const summary = view.data?.summary ?? null;
   const docs = view.data?.docs ?? [];
   const label = summary ? "Refresh with Nectar" : "Draft with Nectar";

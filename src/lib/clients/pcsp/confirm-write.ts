@@ -1,5 +1,8 @@
-// Writes a confirmed PCSP review. Takes the caller's Supabase client; the
-// server function runs assertCanManageClient first. Nothing is deleted:
+// Writes a confirmed PCSP review: the one writer for everything a PCSP fills
+// (plan year, goals, supports, authorizations, must-knows, blank profile
+// fields, support coordinator and other-provider contacts). Takes the
+// caller's Supabase client; the server function runs assertCanManageClient
+// first. Nothing is deleted:
 // the old current plan becomes 'past' (insertPlan), its goals stay with it,
 // and authorizations are upserted per code.
 
@@ -9,6 +12,7 @@ import { assertRowsChanged } from "../writes.ts";
 import {
   billingRows, blockHeading, carriedFrom, confirmProblems, contactRows, mergePcspBlock, riskLines,
 } from "./confirm-plan.ts";
+import { coordinatorRow, profilePatch, type ClientProfileRow } from "./confirm-profile.ts";
 import type { ReviewedPcsp, ReviewSupport } from "./review.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,6 +36,8 @@ export interface ConfirmResult {
   supports: number;
   codes: string[];
   contacts: number;
+  /** Profile fields filled from the PCSP ("PID", "phone", …). */
+  profile: string[];
 }
 
 function fail(error: { message: string } | null | undefined) {
@@ -111,29 +117,42 @@ export async function applyReviewedPcsp(sb: Sb, a: ConfirmArgs): Promise<Confirm
   }
 
   const { data: client, error: cErr } = await sb
-    .from("clients").select("special_directions").eq("id", a.clientId).maybeSingle();
+    .from("clients").select("special_directions, client_pid, date_of_birth, phone_number, physical_address")
+    .eq("id", a.clientId).maybeSingle();
   fail(cErr);
-  const c = (client ?? {}) as { special_directions?: string | null };
+  const c = (client ?? {}) as Partial<ClientProfileRow> & { special_directions?: string | null };
+  const profile = profilePatch(a.review.person, c);
+  const special = mergePcspBlock(c.special_directions, blockHeading(a.review), riskLines(a.review));
   const patch = {
-    special_directions: mergePcspBlock(c.special_directions, blockHeading(a.review), riskLines(a.review)),
+    ...profile.patch,
+    ...(special !== (c.special_directions ?? null) ? { special_directions: special } : {}),
   };
-  if (patch.special_directions !== (c.special_directions ?? null)) {
+  if (Object.keys(patch).length) {
     const { data, error } = await sb.from("clients").update(patch).eq("id", a.clientId).select("id");
     fail(error);
     assertRowsChanged(data as unknown[]);
   }
 
-  const { data: existing, error: eErr } = await sb.from("client_contacts").select("name, sort").eq("client_id", a.clientId);
+  const { data: existing, error: eErr } = await sb.from("client_contacts").select("name, role, sort").eq("client_id", a.clientId);
   fail(eErr);
-  const ex = (existing ?? []) as { name: string; sort: number }[];
-  const contacts = contactRows(a.review, {
-    organizationId: a.organizationId, clientId: a.clientId,
-    existingNames: ex.map((x) => x.name), startSort: ex.reduce((m, x) => Math.max(m, (x.sort ?? 0) + 1), 0),
+  const ex = (existing ?? []) as { name: string; role: string | null; sort: number }[];
+  const startSort = ex.reduce((m, x) => Math.max(m, (x.sort ?? 0) + 1), 0);
+  const coordinator = coordinatorRow(a.review, {
+    organizationId: a.organizationId, clientId: a.clientId, existing: ex, sort: startSort,
   });
+  const contacts = [
+    ...(coordinator ? [coordinator] : []),
+    ...contactRows(a.review, {
+      organizationId: a.organizationId, clientId: a.clientId,
+      existingNames: ex.map((x) => x.name), startSort: startSort + (coordinator ? 1 : 0),
+    }),
+  ];
   if (contacts.length) {
     const { error } = await sb.from("client_contacts").insert(contacts.map((x) => ({ ...x, created_by: a.userId })));
     fail(error);
   }
 
-  return { planId, goals, supports, codes: codes.map((x) => x.service_code), contacts: contacts.length };
+  return {
+    planId, goals, supports, codes: codes.map((x) => x.service_code), contacts: contacts.length, profile: profile.filled,
+  };
 }

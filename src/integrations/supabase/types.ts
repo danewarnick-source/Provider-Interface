@@ -13119,6 +13119,56 @@ export type Database = {
           },
         ]
       }
+      pcsp_read_log: {
+        Row: {
+          codes_found: string[]
+          duration_ms: number
+          error_kind: string | null
+          goals_found: number | null
+          id: string
+          nectar_sections: string[]
+          organization_id: string
+          page_count: number | null
+          read_at: string
+          read_by: string
+          source: string
+        }
+        Insert: {
+          codes_found?: string[]
+          duration_ms?: number
+          error_kind?: string | null
+          goals_found?: number | null
+          id?: string
+          nectar_sections?: string[]
+          organization_id: string
+          page_count?: number | null
+          read_at?: string
+          read_by: string
+          source: string
+        }
+        Update: {
+          codes_found?: string[]
+          duration_ms?: number
+          error_kind?: string | null
+          goals_found?: number | null
+          id?: string
+          nectar_sections?: string[]
+          organization_id?: string
+          page_count?: number | null
+          read_at?: string
+          read_by?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pcsp_read_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       phi_access_audit_log: {
         Row: {
           action: string

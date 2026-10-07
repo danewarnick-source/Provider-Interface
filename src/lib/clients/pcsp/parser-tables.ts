@@ -15,6 +15,7 @@ export function readPerson(lines: L[], person: PcspResult["person"]): void {
     if (!inSc) {
       if (x.label === "Legal Name") person.name = x.value;
       if (x.label === "PID") person.pid = x.value;
+      if (/^(Date of Birth|Birth Date|DOB)$/i.test(x.label)) person.dob = usDate(x.value);
       if (x.label === "Mailing Address") person.mailingAddress = x.value;
       if (x.label === "Residential Address") person.residentialAddress = x.value;
       if (x.label === "Phone") person.phone = x.value;

@@ -45,6 +45,7 @@ import {
   type AnySupabase,
   type StoreV1,
 } from "./evidence/store.server.ts";
+import { saveUploadOnItem } from "./evidence/record-upload.server.ts";
 import { latestFileForItem } from "./evidence/status.ts";
 import {
   EVIDENCE_PUSH_BODY,
@@ -536,55 +537,17 @@ export const recordEvidenceUpload = createServerFn({ method: "POST" })
       (found.subject_type === "staff" && found.subject_id === userId) ||
       found.visible_to_staff_id === userId;
     const accepts = !ownUpload && hasCategory(access.categories, "staff_compliance", "edit");
-    const uploadedAt = nowIso();
-    const row: EvidenceFileRow = {
-      id: newId(),
-      organization_id: data.organizationId,
-      item_id: data.itemId,
-      storage_path: data.storagePath,
+    await saveUploadOnItem(sb, viaTables, {
+      organizationId: data.organizationId,
+      userId,
+      item: found,
+      storagePath: data.storagePath,
       filename: data.filename,
-      attested_at: null,
-      attested_by: null,
-      attestation_text_snapshot: null,
-      uploaded_by: userId,
-      uploaded_at: uploadedAt,
-      notes: data.notes ?? null,
-      review_status: accepts ? "accepted" : "pending",
-      reviewed_by: accepts ? userId : null,
-      reviewed_at: accepts ? uploadedAt : null,
-      review_note: null,
-    };
-    await insertFileRow(sb, viaTables, data.organizationId, row);
-    const documentDate = parseIsoDate(data.documentDate) ?? found.document_date;
-    const nextDue =
-      parseIsoDate(data.nextDueOn) ??
-      parseIsoDate(data.expiresOn) ??
-      applyDueDraft({
-        draft: {
-          firstDueRule: found.first_due_rule ?? "set_date",
-          firstDueOn: found.first_due_on,
-          renewYears: found.renew_years,
-          nextDueMode: found.renew_years ? "years" : found.next_due_on ? "set_date" : "none",
-          nextDueOn: found.next_due_on,
-        },
-        hireDate: null,
-        documentDate,
-        hasFile: true,
-      }).next_due_on;
-    const duePatch = {
-      document_date: documentDate,
-      next_due_on: nextDue,
-      expires_on: nextDue,
-    };
-    await patchItem(sb, viaTables, data.organizationId, data.itemId, duePatch);
-    if (found.dual_link_peer_id) {
-      await patchItem(sb, viaTables, data.organizationId, found.dual_link_peer_id, duePatch);
-      await insertFileRow(sb, viaTables, data.organizationId, {
-        ...row,
-        id: newId(),
-        item_id: found.dual_link_peer_id,
-      });
-    }
+      accepted: accepts,
+      documentDate: data.documentDate,
+      nextDueOn: parseIsoDate(data.nextDueOn) ?? parseIsoDate(data.expiresOn),
+      notes: data.notes,
+    });
     return { ok: true as const };
   });
 

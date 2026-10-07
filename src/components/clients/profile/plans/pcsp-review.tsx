@@ -1,7 +1,8 @@
 // Review a PCSP that was just read: issues first ("Fix before confirming",
 // "Check these", with page numbers), then the plan year, counts, our budget,
 // goals (carried over or new) and other needs. Every field can be fixed
-// here. Nothing is saved until "Confirm PCSP".
+// here. Nothing is saved until "Confirm PCSP" (or Add client's "Save client
+// and plan"). Shared by Upload PCSP in Plans and Add client.
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,20 +16,28 @@ import { PcspReviewChecks } from "./pcsp-review-checks";
 import { PcspReviewBudget } from "./pcsp-review-budget";
 import { PcspReviewGoals } from "./pcsp-review-goals";
 import { PcspReviewExtras } from "./pcsp-review-extras";
+import { PcspReviewPerson } from "./pcsp-review-person";
+import { PcspReadSummary } from "@/components/clients/shared/pcsp-read-notes";
 
 export type ReviewEdit = (change: (draft: ReviewedPcsp) => void) => void;
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
 export function PcspReview({
-  read, review, onChange, saving, onConfirm, onClose,
+  read, review, onChange, saving, error = null, onConfirm, onClose,
+  confirmLabel = "Confirm PCSP", showPerson = true,
 }: {
   read: PcspRead;
   review: ReviewedPcsp;
   onChange: (next: ReviewedPcsp) => void;
   saving: boolean;
+  /** Why the last save failed (the review stays open to try again). */
+  error?: string | null;
   onConfirm: () => void;
   onClose: () => void;
+  confirmLabel?: string;
+  /** Add client fills the profile from its own form, so it hides this part. */
+  showPerson?: boolean;
 }) {
   const edit: ReviewEdit = (change) => {
     const draft = structuredClone(review);
@@ -58,6 +67,7 @@ export function PcspReview({
           </DialogDescription>
         </DialogHeader>
 
+        <PcspReadSummary parse={read.parse} agencyName={read.agencyName} />
         <PcspReviewChecks issues={read.parse.issues} />
 
         <section className="space-y-2">
@@ -90,16 +100,17 @@ export function PcspReview({
           </p>
         )}
 
+        {showPerson && <PcspReviewPerson review={review} edit={edit} />}
         <PcspReviewBudget review={review} edit={edit} />
         <PcspReviewGoals read={read} review={review} edit={edit} />
         <PcspReviewExtras review={review} edit={edit} />
 
         <DialogFooter className="flex-col items-stretch gap-2 border-t border-hive-border pt-4 sm:flex-row sm:items-center sm:justify-between max-md:[&_button]:min-h-11">
-          <p className="text-xs text-destructive">{problems[0] ?? ""}</p>
+          <p className="text-xs text-destructive" role={error ? "alert" : undefined}>{error ?? problems[0] ?? ""}</p>
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
             <Button onClick={onConfirm} disabled={saving || problems.length > 0}>
-              {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}Confirm PCSP
+              {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}{confirmLabel}
             </Button>
           </div>
         </DialogFooter>

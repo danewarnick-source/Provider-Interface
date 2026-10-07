@@ -1,12 +1,14 @@
 // Upload a PCSP → review → confirm, from one button. Used by the profile
 // header ("Upload PCSP") and the Plan goals card ("Upload new PCSP").
-// Nothing about the plan is written until the review's Confirm.
+// Nothing about the plan is written until the review's Confirm. A failed
+// read or the saved result stays on screen in PcspOutcomeDialog.
 
 import { useRef } from "react";
 import { FileUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePcspImport } from "./use-pcsp-import";
 import { PcspReview } from "./pcsp-review";
+import { PcspOutcomeDialog } from "./pcsp-outcome-dialog";
 
 export function PcspUploadButton({
   clientId,
@@ -56,8 +58,18 @@ export function PcspUploadButton({
           review={pcsp.review}
           onChange={pcsp.setReview}
           saving={pcsp.saving}
+          error={pcsp.saveError}
           onConfirm={() => void pcsp.confirm()}
           onClose={pcsp.close}
+        />
+      ) : null}
+      {pcsp.outcome ? (
+        <PcspOutcomeDialog
+          clientId={clientId}
+          outcome={pcsp.outcome}
+          retrying={pcsp.reading}
+          onRetry={pcsp.retry}
+          onClose={pcsp.dismiss}
         />
       ) : null}
     </>

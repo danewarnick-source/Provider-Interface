@@ -3,7 +3,6 @@
 
 import { FileSpreadsheet, FileText, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { PcspResult } from "@/lib/clients/pcsp/parser-shared";
 import { FillFromPcsp } from "./fill-from-pcsp";
 
 const TILE = "h-auto w-full flex-col items-start gap-1 whitespace-normal p-4 text-left";
@@ -18,13 +17,13 @@ function TileText({ title, line }: { title: string; line: string }) {
 }
 
 export function AddClientStart({
-  organizationId,
+  reading,
   onPcsp,
   onByHand,
   onSpreadsheet,
 }: {
-  organizationId: string;
-  onPcsp: (p: PcspResult) => void;
+  reading: boolean;
+  onPcsp: (file: File) => void;
   onByHand: () => void;
   onSpreadsheet: () => void;
 }) {
@@ -32,14 +31,14 @@ export function AddClientStart({
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
         <FillFromPcsp
-          organizationId={organizationId}
-          onRead={onPcsp}
+          reading={reading}
+          onPick={onPcsp}
           buttonProps={{ variant: "outline", size: "default", className: TILE }}
         >
           <FileText className="h-5 w-5 text-primary" />
           <TileText
             title="Start from their PCSP"
-            line="Upload the PCSP PDF. We fill in what it says; you check it before saving."
+            line="Upload the PCSP PDF. It fills the profile, contacts, plan year, goals and codes; you check it all before saving."
           />
         </FillFromPcsp>
         <Button type="button" variant="outline" className={TILE} onClick={onByHand}>

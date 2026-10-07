@@ -6,7 +6,8 @@
 // Pure: the server function makes the call.
 
 import type { PcspSection } from "./parser.ts";
-import { ourAgencyMatcher, squash, usDate, type PcspResult } from "./parser-shared.ts";
+import { ourAgencyMatcher } from "./agency-match.ts";
+import { squash, usDate, type PcspResult } from "./parser-shared.ts";
 
 export const NECTAR_FALLBACK_FLAG = "pcsp_nectar_fallback";
 
@@ -84,7 +85,7 @@ export function applyFallback(
   name: FallbackSection,
   reply: unknown,
   sectionText: string,
-  agencyName: string,
+  agencyNames: string | readonly string[],
 ): number {
   const hay = squash(sectionText.replace(/\[page \d+\] /g, "")).toLowerCase();
   const rows = Array.isArray((reply as { rows?: unknown })?.rows) ? ((reply as { rows: unknown[] }).rows) : [];
@@ -93,7 +94,7 @@ export function applyFallback(
     for (const f of FIELDS[name]) out[f] = cell((row as Record<string, unknown>)?.[f], hay);
     return out;
   });
-  const isOurs = ourAgencyMatcher(agencyName);
+  const isOurs = ourAgencyMatcher(agencyNames);
   const firstPage = (c: Record<string, Cell>) => Object.values(c).find((x) => x.page !== null)?.page ?? undefined;
   let used = 0;
 
