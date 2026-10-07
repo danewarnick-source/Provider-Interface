@@ -5,7 +5,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, FileSpreadsheet, Trash2, Upload } from "lucide-react";
+import { FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import {
   importTeamMembers,
@@ -13,44 +13,36 @@ import {
   type TeamImportRowResult,
 } from "@/lib/team-members/members.functions";
 import {
-  EMAIL_MATCH_LABEL,
   EMAIL_TAKEN_MESSAGE,
   IMPORT_MAX_ROWS,
   type EmailMatch,
 } from "@/lib/team-members/add-member";
 import {
-  downloadTeamImportTemplateCsv,
-  downloadTeamImportTemplateXlsx,
   importPayloadRow,
-  normalizeImportDate,
   parseTeamImportFile,
   parseTeamImportText,
-  rowHasIssue,
   validateTeamImportRows,
-  type ImportAgency,
   type ParsedTeamImport,
   type TeamImportDraft,
-  type TeamImportIssueField,
 } from "@/lib/team-members/import";
+import type { ImportAgency } from "@/lib/team-members/import-columns";
+import {
+  downloadTeamImportTemplateCsv,
+  downloadTeamImportTemplateXlsx,
+} from "@/lib/team-members/import-template";
+import {
+  SpreadsheetDrop,
+  TemplateButtons,
+} from "@/components/spreadsheet-import/spreadsheet-entry";
 import { rosterQueryKey, teamInvitesQueryKey } from "@/lib/team-members/roster";
 import { normalizeSignupEmail } from "@/lib/signup-email";
-import { PresetSelect, useAgencyPresets } from "./preset-select";
+import { useAgencyPresets } from "./preset-select";
+import { ImportMemberRow } from "./import-member-row";
 import { useTeamMemberFormOptions } from "./add-member-dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckboxMultiSelect } from "@/components/ui/checkbox-multi-select";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -59,32 +51,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-const NONE = "__none__";
-
-type TextField =
-  | "first_name"
-  | "last_name"
-  | "email"
-  | "phone"
-  | "hire_date"
-  | "date_of_birth"
-  | "job_title";
-
-const TEXT_FIELDS: Array<{
-  field: TextField;
-  label: string;
-  issue?: TeamImportIssueField;
-  type?: string;
-}> = [
-  { field: "first_name", label: "First name", issue: "name" },
-  { field: "last_name", label: "Last name", issue: "name" },
-  { field: "email", label: "Email", issue: "email" },
-  { field: "phone", label: "Phone" },
-  { field: "hire_date", label: "Hire date", issue: "hire_date" },
-  { field: "date_of_birth", label: "Date of birth", issue: "date_of_birth" },
-  { field: "job_title", label: "Job title" },
-];
 
 type DoneState = {
   results: TeamImportRowResult[];
@@ -112,6 +78,7 @@ export function ImportTeamMembersDialog({
       presets,
       homes: optionsQ.data?.homes ?? [],
       positions: optionsQ.data?.positions ?? [],
+      supervisors: optionsQ.data?.supervisors ?? [],
       viewerIsOwner: isOwner,
     }),
     [presets, optionsQ.data, isOwner],
@@ -120,7 +87,6 @@ export function ImportTeamMembersDialog({
 
   const [step, setStep] = useState<"entry" | "review" | "done">("entry");
   const [paste, setPaste] = useState("");
-  const [dragging, setDragging] = useState(false);
   const [rows, setRows] = useState<TeamImportDraft[]>([]);
   const [ignoredColumns, setIgnoredColumns] = useState<string[]>([]);
   const [sendInvites, setSendInvites] = useState(true);
@@ -169,8 +135,7 @@ export function ImportTeamMembersDialog({
     setStep("review");
   };
 
-  const onFile = async (file: File | undefined) => {
-    if (!file) return;
+  const onFile = async (file: File) => {
     try {
       showReview(await parseTeamImportFile(file, agency));
     } catch (e) {
@@ -253,7 +218,8 @@ export function ImportTeamMembersDialog({
                 />
                 <p className="text-xs text-muted-foreground">
                   A header row is fine. Without one, use this order: name, email, phone, hire date,
-                  preset, home, job title, position, date of birth, transports (yes/no).
+                  position, access, home, supervisor, date of birth, worker type, transports clients
+                  (yes/no).
                 </p>
               </div>
               <Button
@@ -264,59 +230,12 @@ export function ImportTeamMembersDialog({
               >
                 Review pasted rows
               </Button>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={!agencyReady}
-                  onClick={() => {
-                    void downloadTeamImportTemplateXlsx(agency).catch(() =>
-                      toast.error("Could not build the Excel template."),
-                    );
-                  }}
-                >
-                  <Download className="mr-2 h-4 w-4" /> Download Excel template
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={!agencyReady}
-                  onClick={() => downloadTeamImportTemplateCsv(agency)}
-                >
-                  <Download className="mr-2 h-4 w-4" /> Download CSV template
-                </Button>
-              </div>
-              <label
-                data-testid="import-drop-zone"
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setDragging(true);
-                }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragging(false);
-                  if (!agencyReady) return;
-                  void onFile(e.dataTransfer.files?.[0]);
-                }}
-                className={
-                  "grid cursor-pointer gap-2 rounded-md border border-dashed p-6 text-center text-sm " +
-                  (dragging ? "border-[var(--hive-primary)] bg-muted/50" : "border-border")
-                }
-              >
-                <Upload className="mx-auto h-5 w-5 text-muted-foreground" />
-                <span>Drop a CSV or Excel file, or click to choose</span>
-                <input
-                  type="file"
-                  accept=".csv,.xlsx,.xls,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                  className="sr-only"
-                  disabled={!agencyReady}
-                  onChange={(e) => {
-                    void onFile(e.target.files?.[0]);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
+              <TemplateButtons
+                disabled={!agencyReady}
+                onExcel={() => downloadTeamImportTemplateXlsx(agency)}
+                onCsv={() => downloadTeamImportTemplateCsv(agency)}
+              />
+              <SpreadsheetDrop disabled={!agencyReady} onFile={(f) => void onFile(f)} />
             </div>
           </>
         )}
@@ -341,141 +260,17 @@ export function ImportTeamMembersDialog({
               </p>
             )}
             <div className="grid gap-3">
-              {rows.map((row) => {
-                const match = matchFor(row);
-                const rowIssues = match === "new" ? (issues.get(row.id) ?? []) : [];
-                const bad = (f?: TeamImportIssueField) =>
-                  !!f && match === "new" && rowHasIssue(issues, row.id, f);
-                return (
-                  <div
-                    key={row.id}
-                    className="grid gap-2 rounded-md border border-border p-3"
-                    data-testid="import-row"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <Badge variant={match === "new" ? "outline" : "secondary"}>
-                        {EMAIL_MATCH_LABEL[match]}
-                        {match !== "new" && " — skipped"}
-                      </Badge>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={() => setRows((prev) => prev.filter((r) => r.id !== row.id))}
-                      >
-                        <Trash2 className="mr-1 h-3.5 w-3.5" /> Remove row
-                      </Button>
-                    </div>
-                    <div className="grid gap-2 sm:grid-cols-3">
-                      {TEXT_FIELDS.map(({ field, label, issue }) => (
-                        <div key={field} className="grid gap-1">
-                          <Label className="text-xs" htmlFor={`${field}-${row.id}`}>
-                            {label}
-                          </Label>
-                          <Input
-                            id={`${field}-${row.id}`}
-                            value={row[field]}
-                            onChange={(e) => patchRow(row.id, { [field]: e.target.value })}
-                            onBlur={
-                              field === "hire_date" || field === "date_of_birth"
-                                ? (e) =>
-                                    patchRow(row.id, {
-                                      [field]: normalizeImportDate(e.target.value),
-                                    })
-                                : undefined
-                            }
-                            className={"h-8 text-sm " + (bad(issue) ? "border-destructive" : "")}
-                          />
-                        </div>
-                      ))}
-                      <div className="grid gap-1">
-                        <Label className="text-xs" htmlFor={`preset-${row.id}`}>
-                          Access
-                        </Label>
-                        <PresetSelect
-                          id={`preset-${row.id}`}
-                          value={row.access}
-                          onChange={(access) =>
-                            patchRow(row.id, {
-                              access,
-                              preset: presets.find((p) => p.id === access)?.name ?? "",
-                            })
-                          }
-                          presets={presets}
-                          isOwner={isOwner}
-                          includeOwner={false}
-                          invalid={bad("preset")}
-                          className="h-8 text-sm"
-                        />
-                      </div>
-                      <div className="grid gap-1">
-                        <Label className="text-xs" htmlFor={`home-${row.id}`}>
-                          Home
-                        </Label>
-                        <Select
-                          value={row.homeId || NONE}
-                          onValueChange={(v) => {
-                            const home = agency.homes.find((h) => h.id === v);
-                            patchRow(row.id, { homeId: home?.id ?? "", home: home?.name ?? "" });
-                          }}
-                        >
-                          <SelectTrigger
-                            id={`home-${row.id}`}
-                            className={"h-8 text-sm " + (bad("home") ? "border-destructive" : "")}
-                          >
-                            <SelectValue placeholder="None" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value={NONE}>None</SelectItem>
-                            {agency.homes.map((h) => (
-                              <SelectItem key={h.id} value={h.id}>
-                                {h.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid gap-1">
-                        <Label className="text-xs">Position</Label>
-                        <CheckboxMultiSelect
-                          value={row.positions}
-                          onChange={(positions) =>
-                            patchRow(row.id, {
-                              positions,
-                              position: positions
-                                .map((k) => agency.positions.find((p) => p.key === k)?.label ?? k)
-                                .join("; "),
-                            })
-                          }
-                          options={agency.positions.map((p) => ({ value: p.key, label: p.label }))}
-                          placeholder="None"
-                          maxChips={2}
-                        />
-                      </div>
-                      <label className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-1.5 text-xs">
-                        <span className={bad("transports") ? "text-destructive" : ""}>
-                          Transports clients
-                        </span>
-                        <Switch
-                          checked={row.transports}
-                          onCheckedChange={(v) =>
-                            patchRow(row.id, { transports: v, transportsRaw: v ? "yes" : "no" })
-                          }
-                          aria-label="Transports clients"
-                        />
-                      </label>
-                    </div>
-                    {rowIssues.length > 0 && (
-                      <ul className="list-disc pl-5 text-xs text-destructive">
-                        {rowIssues.map((issue) => (
-                          <li key={`${row.id}-${issue.field}-${issue.message}`}>{issue.message}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                );
-              })}
+              {rows.map((row) => (
+                <ImportMemberRow
+                  key={row.id}
+                  row={row}
+                  match={matchFor(row)}
+                  issues={issues}
+                  agency={agency}
+                  onPatch={(patch) => patchRow(row.id, patch)}
+                  onRemove={() => setRows((prev) => prev.filter((r) => r.id !== row.id))}
+                />
+              ))}
             </div>
             <DialogFooter className="gap-3 sm:items-center sm:justify-between">
               <Button type="button" variant="ghost" onClick={() => setStep("entry")}>

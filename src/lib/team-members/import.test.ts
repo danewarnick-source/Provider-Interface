@@ -1,28 +1,29 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
+import { normalizeImportDate, parseYesNo } from "../spreadsheet-import/cells.ts";
 import {
-  TEAM_IMPORT_HEADERS,
-  buildTeamImportTemplateCsv,
-  buildTeamImportTemplateXlsx,
-  columnForHeader,
   importPayloadRow,
-  isHeaderRow,
-  normalizeImportDate,
   parseTeamImportGrid,
   parseTeamImportText,
-  parseYesNo,
+  validateTeamImportRows,
+} from "./import.ts";
+import {
+  TEAM_IMPORT_HEADERS,
+  columnForHeader,
+  isHeaderRow,
   resolvePresetCell,
   templatePresetNames,
-  validateTeamImportRows,
   type ImportAgency,
-} from "./import.ts";
+} from "./import-columns.ts";
+import { buildTeamImportTemplateCsv, buildTeamImportTemplateXlsx } from "./import-template.ts";
 
 const DSP = "11111111-1111-4111-8111-111111111111";
 const LEAD = "22222222-2222-4222-8222-222222222222";
 const PM = "33333333-3333-4333-8333-333333333333";
 const CUSTOM = "44444444-4444-4444-8444-444444444444";
 const MAPLE = "55555555-5555-4555-8555-555555555555";
+const HARVEY = "66666666-6666-4666-8666-666666666666";
 
 const AGENCY: ImportAgency = {
   presets: [
@@ -36,6 +37,7 @@ const AGENCY: ImportAgency = {
     { key: "dsp", label: "Direct Support Professional" },
     { key: "hhp", label: "Host Home Provider" },
   ],
+  supervisors: [{ memberId: HARVEY, name: "Harvey Lead" }],
   viewerIsOwner: false,
 };
 const OWNER_AGENCY: ImportAgency = { ...AGENCY, viewerIsOwner: true };
@@ -57,6 +59,68 @@ describe("import dates", () => {
     assert.equal(normalizeImportDate("2/30/2026"), "2/30/2026");
     assert.equal(normalizeImportDate("next Tuesday"), "next Tuesday");
     assert.equal(normalizeImportDate("12"), "12");
+  });
+});
+
+describe("template columns match the Add team member form", () => {
+  it("has the form's fields in its order and wording", () => {
+    assert.deepEqual(TEAM_IMPORT_HEADERS, [
+      "First name",
+      "Last name",
+      "Email",
+      "Phone",
+      "Hire date",
+      "Position",
+      "Access",
+      "Home",
+      "Supervisor",
+      "Date of birth",
+      "Worker type",
+      "Transports clients",
+    ]);
+    for (const h of TEAM_IMPORT_HEADERS) assert.ok(columnForHeader(h), h);
+  });
+
+  it("reads a template file back, skipping a title line above the header", () => {
+    const { rows } = parseTeamImportGrid(
+      [
+        ["Team roster export"],
+        [...TEAM_IMPORT_HEADERS],
+        [
+          "Jane",
+          "Doe",
+          "jane@x.test",
+          "",
+          "Sep 1, 2026",
+          "",
+          "DSP",
+          "",
+          "harvey lead",
+          "",
+          "Volunteer",
+          "Y",
+        ],
+      ],
+      AGENCY,
+    );
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].hire_date, "2026-09-01");
+    assert.equal(rows[0].supervisorId, HARVEY);
+    assert.equal(rows[0].workerType, "volunteer");
+    assert.equal(rows[0].transports, true);
+    assert.equal(validateTeamImportRows(rows, AGENCY, TODAY).size, 0);
+  });
+
+  it("flags a supervisor who isn't on the team", () => {
+    const { rows } = parseTeamImportText(
+      "name,email,hire date,supervisor\nJane Doe,jane@x.test,7/1/2026,Nobody Here",
+      AGENCY,
+    );
+    const issues = validateTeamImportRows(rows, AGENCY, TODAY).get(rows[0].id) ?? [];
+    assert.deepEqual(
+      issues.map((i) => i.field),
+      ["supervisor"],
+    );
   });
 });
 
@@ -95,14 +159,15 @@ describe("header detector", () => {
 
   it("uses the paste column order without a header", () => {
     const { rows } = parseTeamImportText(
-      "Sam Rivera\tsam@x.test\t555-0100\t2026-07-01\tLead DSP\tMaple House\tCoach\tHost Home Provider\t1/2/1990\tyes",
+      "Sam Rivera\tsam@x.test\t555-0100\t2026-07-01\tHost Home Provider\tLead DSP\tMaple House\tHarvey Lead\t1/2/1990\t1099\tyes",
       AGENCY,
     );
     const [r] = rows;
     assert.equal(r.email, "sam@x.test");
     assert.equal(r.access, LEAD);
     assert.equal(r.homeId, MAPLE);
-    assert.equal(r.job_title, "Coach");
+    assert.equal(r.supervisorId, HARVEY);
+    assert.equal(r.workerType, "1099");
     assert.deepEqual(r.positions, ["hhp"]);
     assert.equal(r.date_of_birth, "1990-01-02");
     assert.equal(r.transports, true);
@@ -188,7 +253,7 @@ describe("review", () => {
       access: LEAD,
       positions: ["hhp"],
       homeId: MAPLE,
-      jobTitle: "",
+      supervisorId: null,
       workerType: "w2",
       transportsClients: true,
     });
@@ -235,17 +300,18 @@ describe("templates from the agency", () => {
 
 describe("Import team members dialog source lock", () => {
   it("reviews editable, removable rows, previews emails, invites everyone, then Evidence", () => {
-    const src = readFileSync(
-      new URL("../../components/team-members/add/import-members-dialog.tsx", import.meta.url),
-      "utf8",
-    );
+    const src = ["import-members-dialog.tsx", "import-member-row.tsx"]
+      .map((f) =>
+        readFileSync(new URL(`../../components/team-members/add/${f}`, import.meta.url), "utf8"),
+      )
+      .join("\n");
     for (const text of [
       "Import team members",
       "Remove row",
       "Email invites to everyone",
       "Invites sent to",
       "Review evidence packs for",
-      "onDrop",
+      "SpreadsheetDrop",
       "previewTeamImport",
       "importTeamMembers",
       "includeOwner={false}",
@@ -257,7 +323,6 @@ describe("Import team members dialog source lock", () => {
       /applyEmployeeRosterRow/,
       /Finish setup/,
       /add_and_update|update_only/,
-      /smart-import/,
       /guardian|pcsp/i,
       /lib\/temp-password/,
     ]) {
