@@ -18,6 +18,7 @@ export function SwallowingCard({ orgId, health }: { orgId: string; health: Clien
   const alerts = health.swallowing_alerts ?? [];
   return (
     <SectionCard
+      id="health-swallowing"
       icon={Utensils}
       tone="danger"
       title="Swallowing"

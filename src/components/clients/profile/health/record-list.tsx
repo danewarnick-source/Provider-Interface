@@ -22,6 +22,8 @@ export function RecordList<T extends { id: string }>({
   onRemove,
   render,
   children,
+  id,
+  addInCard = true,
 }: {
   icon: LucideIcon;
   title: string;
@@ -37,6 +39,9 @@ export function RecordList<T extends { id: string }>({
   onRemove: (row: T) => void;
   render: (row: T) => ReactNode;
   children?: ReactNode;
+  id?: string;
+  /** false when the section header already has the add button. */
+  addInCard?: boolean;
 }) {
   const add = (
     <Button onClick={onAdd}>
@@ -49,7 +54,8 @@ export function RecordList<T extends { id: string }>({
       tone="danger"
       title={title}
       description={subtitle}
-      actions={canEdit && rows.length > 0 ? add : null}
+      id={id}
+      actions={canEdit && addInCard && rows.length > 0 ? add : null}
     >
       <div data-testid={testId}>
         {loading ? (

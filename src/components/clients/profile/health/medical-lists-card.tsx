@@ -28,10 +28,11 @@ export function MedicalListsCard({ orgId, health }: { orgId: string; health: Cli
     });
   return (
     <SectionCard
+      id="health-conditions"
       icon={ClipboardPlus}
       tone="danger"
       title="Allergies, diagnoses and conditions"
-      description="The first diagnosis is the primary one."
+      description="What they are allergic to and their diagnoses. The first diagnosis is the primary one."
       actions={
         canEdit && draft === null ? (
           <EditButton label="Edit allergies, diagnoses and conditions" onClick={start} />

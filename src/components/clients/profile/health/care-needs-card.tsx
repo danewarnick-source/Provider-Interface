@@ -1,34 +1,21 @@
-// Emergency treatment authorization, acquired brain injury (ABI) and the
-// medication support level, with the client's medications and eMAR below.
+// Care needs: emergency treatment authorization and acquired brain injury
+// (ABI), which changes who may work alone with the client.
 
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Link } from "@tanstack/react-router";
-import { Pill } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { HandHeart } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { medicationSupportLabel } from "@/lib/clients/health";
 import { onClientDutyFactsChanged } from "@/lib/staff-assignment-hooks.functions";
-import { MarEmarTab } from "@/components/workspace/mar-emar-tab";
 import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { Field, FieldGrid } from "@/components/clients/profile/cards/card-parts";
 import { useCanEditMedical, useSaveHealth, type ClientHealthRow } from "./use-client-health";
 
 type Draft = { treatment: boolean; abi: boolean };
 
-export function CareCard({
-  orgId,
-  health,
-  clientName,
-}: {
-  orgId: string;
-  health: ClientHealthRow;
-  clientName: string;
-}) {
+export function CareNeedsCard({ orgId, health }: { orgId: string; health: ClientHealthRow }) {
   const dutyFactsFn = useServerFn(onClientDutyFactsChanged);
   const [draft, setDraft] = useState<Draft | null>(null);
-  const [showMeds, setShowMeds] = useState(false);
   const canEdit = useCanEditMedical();
   const abiBefore = health.has_abi === true;
   const save = useSaveHealth(orgId, health.id, async () => {
@@ -56,27 +43,23 @@ export function CareCard({
   );
   return (
     <SectionCard
-      icon={Pill}
+      id="health-care-needs"
+      icon={HandHeart}
       tone="danger"
-      title="Care and medications"
-      description="Emergency treatment, brain injury and how much help they need with medications."
+      title="Care needs"
+      description="Emergency treatment consent and brain injury, which decides who may work alone with them."
       actions={
-        <>
-          <Button variant="outline" asChild>
-            <Link to="/dashboard/emar">Open eMAR board</Link>
-          </Button>
-          {canEdit && draft === null ? (
-            <EditButton
-              label="Edit care and medications"
-              onClick={() =>
-                setDraft({
-                  treatment: health.emergency_medical_treatment_authorization === true,
-                  abi: abiBefore,
-                })
-              }
-            />
-          ) : null}
-        </>
+        canEdit && draft === null ? (
+          <EditButton
+            label="Edit care needs"
+            onClick={() =>
+              setDraft({
+                treatment: health.emergency_medical_treatment_authorization === true,
+                abi: abiBefore,
+              })
+            }
+          />
+        ) : null
       }
     >
       {draft ? (
@@ -92,16 +75,13 @@ export function CareCard({
           <Field label="Acquired brain injury (ABI)">
             {health.has_abi ? "Yes, ABI training needed" : "No"}
           </Field>
-          <Field label="Medication support">
-            {medicationSupportLabel(health.self_admin_med_support)}
-          </Field>
         </FieldGrid>
       )}
       {draft ? (
         <SaveBar
           onCancel={() => setDraft(null)}
           saving={save.isPending}
-          saveLabel="Save care details"
+          saveLabel="Save care needs"
           onSave={() =>
             save.mutate({
               emergency_medical_treatment_authorization: draft.treatment,
@@ -109,20 +89,6 @@ export function CareCard({
             })
           }
         />
-      ) : null}
-      <div className="flex flex-wrap gap-2 pt-4">
-        <Button
-          variant="outline"
-          onClick={() => setShowMeds((v) => !v)}
-          data-testid="client-meds-toggle"
-        >
-          {showMeds ? "Hide medications" : "Show medications and eMAR"}
-        </Button>
-      </div>
-      {showMeds ? (
-        <div className="pt-3">
-          <MarEmarTab clientId={health.id} clientName={clientName} />
-        </div>
       ) : null}
     </SectionCard>
   );
