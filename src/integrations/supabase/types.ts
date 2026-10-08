@@ -4575,6 +4575,80 @@ export type Database = {
           },
         ]
       }
+      client_strategy_sends: {
+        Row: {
+          client_id: string
+          evidence_file_id: string | null
+          id: string
+          organization_id: string
+          plan_id: string
+          recorded_at: string
+          recorded_by: string
+          sent_on: string
+          sent_to: string | null
+          source: string
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          client_id: string
+          evidence_file_id?: string | null
+          id?: string
+          organization_id: string
+          plan_id: string
+          recorded_at?: string
+          recorded_by: string
+          sent_on: string
+          sent_to?: string | null
+          source: string
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          client_id?: string
+          evidence_file_id?: string | null
+          id?: string
+          organization_id?: string
+          plan_id?: string
+          recorded_at?: string
+          recorded_by?: string
+          sent_on?: string
+          sent_to?: string | null
+          source?: string
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_strategy_sends_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_strategy_sends_evidence_file_id_fkey"
+            columns: ["evidence_file_id"]
+            isOneToOne: false
+            referencedRelation: "evidence_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_strategy_sends_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_strategy_sends_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "client_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_support_scope: {
         Row: {
           answered_at: string | null
