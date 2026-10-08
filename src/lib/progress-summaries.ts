@@ -249,3 +249,39 @@ export function finalizeOpensMessage(periodEnd: string): string {
   });
   return `You can finalize on ${label}.`;
 }
+
+/** Days after period_end when an unsent Support Coordinator summary starts to be reminded. */
+export const SC_REMIND_AFTER_DAYS = 10;
+
+export type ScSendReminder = "remind" | "overdue";
+
+function addDaysYmd(ymd: string, days: number): string {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d + days));
+  return t.toISOString().slice(0, 10);
+}
+
+/**
+ * Reminder for a narrative summary filed to the Support Coordinator that is
+ * not marked sent: "remind" from 10 days after period_end, "overdue" from
+ * due_date. Finalized or not does not matter; it clears the moment "Mark
+ * sent to Support Coordinator" is recorded. UPI summaries keep their own
+ * rule. Remind only, never blocks. `todayYmd` is the Denver date.
+ */
+export function scSendReminder(
+  s: {
+    summary_kind: string;
+    service_codes: string[];
+    period_end: string;
+    due_date: string;
+    sc_sent_at: string | null;
+    completed_at: string | null;
+  },
+  todayYmd: string,
+): ScSendReminder | null {
+  if (summaryFilingDestination(s.summary_kind, s.service_codes) !== "support_coordinator") return null;
+  if (s.summary_kind !== "narrative" || s.sc_sent_at || s.completed_at) return null;
+  if (todayYmd >= s.due_date) return "overdue";
+  if (todayYmd >= addDaysYmd(s.period_end, SC_REMIND_AFTER_DAYS)) return "remind";
+  return null;
+}

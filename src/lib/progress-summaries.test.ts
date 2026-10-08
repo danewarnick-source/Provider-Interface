@@ -1,9 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { JOBY_ROW } from "./progress-summary-joby.fixture.ts";
 import {
   bucketCodes,
   canFinalizeSummary,
   finalizeOpensMessage,
+  scSendReminder,
   summaryFinalizeOpensOn,
   summariesOwed,
   summaryCadenceForCode,
@@ -72,4 +74,31 @@ test("canFinalizeSummary uses Denver time; late is fine", () => {
   assert.equal(canFinalizeSummary("2026-12-31", new Date("2027-01-20T18:00:00Z")), true);
   assert.equal(canFinalizeSummary("2026-03-31", new Date("2026-03-30T18:00:00Z")), false);
   assert.equal(canFinalizeSummary("2028-02-29", new Date("2028-02-29T18:00:00Z")), true);
+});
+
+test("Support Coordinator reminder: day 10 after the period, overdue at the due date, clears when sent", () => {
+  const row = JOBY_ROW;
+  assert.equal(scSendReminder(row, "2027-01-09"), null, "day 9: nothing yet");
+  assert.equal(scSendReminder(row, "2027-01-10"), "remind", "day 10");
+  assert.equal(scSendReminder(row, "2027-01-14"), "remind");
+  assert.equal(scSendReminder(row, "2027-01-15"), "overdue", "day 15 = due_date");
+  assert.equal(scSendReminder(row, "2027-02-20"), "overdue");
+  assert.equal(
+    scSendReminder({ ...row, sc_sent_at: "2027-01-12T10:00:00Z" }, "2027-01-20"),
+    null,
+    "marked sent clears it",
+  );
+});
+
+test("Support Coordinator reminder leaves UPI summaries and financial statements alone", () => {
+  const row = {
+    summary_kind: "narrative",
+    service_codes: ["SEI"],
+    period_end: "2026-12-31",
+    due_date: "2027-01-15",
+    sc_sent_at: null,
+    completed_at: null,
+  };
+  assert.equal(scSendReminder(row, "2027-01-20"), null);
+  assert.equal(scSendReminder({ ...row, summary_kind: "financial_statement", service_codes: ["PBA"] }, "2027-01-20"), null);
 });
