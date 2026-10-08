@@ -2,15 +2,21 @@
 // the section badges and the Smart Import done page all read its output.
 // Covers units pacing, documents due or missing (photo older than 5 years
 // included), plan-year reminders (60 / 30 days before the end), PCSP waiting
-// (with the office follow-up from day 10), support strategies due (plan
-// activation + 30 days), summaries due, HRC reviews and finish-setup gaps.
+// (with the office follow-up from day 10), support strategies not sent to
+// the support coordinator (strategy-sends.ts: from day 25 after the PCSP's
+// activation, overdue after day 30), summaries due, HRC reviews, a recorded DNR/POLST
+// with no signed form, and finish-setup gaps. Cards the setup answers hide
+// (support-scope.ts) never count.
 // Advisory only: it never blocks a save.
 
 import { listReadiness } from "./list.ts";
 import { daysUntil, parseLocalDate } from "./dates.ts";
-import { addDaysYmd, planReminder, strategiesDueOn } from "./plan-dates.ts";
-import { currentPlan, type ClientPlan } from "./plans.ts";
+import { addDaysYmd } from "./plan-dates.ts";
+import { pcspState, pcspWords } from "./pcsp-status.ts";
+import type { ClientPlan } from "./plans.ts";
 import type { ClientProfileSection } from "./profile-sections.ts";
+import { strategyAttention, type StrategySendState } from "./strategy-sends.ts";
+import type { ScopeCard } from "./support-scope.ts";
 
 export type AttentionTone = "bad" | "warn";
 
@@ -104,15 +110,19 @@ export function photoStatus(
 export type ReadinessInput = {
   codes: readonly string[];
   paces: readonly CodePace[];
-  /** Client file cards (file.ts) other than photo, strategies and summaries. */
+  /** Client file rows that need attention (file-rows.ts fileAttention); Not needed rows never count. */
   fileCards: readonly { key: string; title: string; status: string; dueAt: string | null }[];
   photo: { url: string | null; takenOn: string | null };
   plans: readonly ClientPlan[];
-  /** null when the client's codes don't need support strategies. */
-  strategies: { published: boolean } | null;
+  /** Support strategies sent to the support coordinator (strategy-sends.ts). */
+  strategies: StrategySendState;
   summaries: readonly { label: string; dueDate: string | null }[];
   restrictions: readonly { title: string; nextReview: string | null; complete: boolean }[];
-  setup: { staffCount: number; hasPin: boolean; guardianOk: boolean };
+  setup: { staffCount: number; hasPin: boolean; guardianGap: string | null };
+  /** Cards the client's setup answers hide (support-scope.ts); they never count here. */
+  hidden?: readonly ScopeCard[];
+  /** A DNR or POLST is recorded, so the signed form must be on file. */
+  directive?: { required: boolean; onFile: boolean };
 };
 
 function dueText(days: number): string {
@@ -165,14 +175,26 @@ export function clientAttention(input: ReadinessInput, now: Date = new Date()): 
     }
   }
 
+  const hidden = new Set(input.hidden ?? []);
   const photo = photoStatus(input.photo, now);
-  if (photo !== "ok") {
+  if (photo !== "ok" && !hidden.has("photo")) {
     add({
       key: "photo",
       title: photo === "missing" ? "Photo missing" : "Photo is over 5 years old",
       detail: photo === "missing" ? "Add a current photo" : "Take a new photo",
       tone: "warn",
       section: "profile",
+    });
+  }
+
+  const dir = input.directive;
+  if (dir?.required && !dir.onFile && !hidden.has("advance_directive")) {
+    add({
+      key: "directive",
+      title: "Signed DNR / POLST form missing",
+      detail: "Upload it on the Advance directive card",
+      tone: "bad",
+      section: "health",
     });
   }
 
@@ -193,33 +215,30 @@ export function clientAttention(input: ReadinessInput, now: Date = new Date()): 
     });
   }
 
-  const reminder = planReminder(input.plans, now);
-  if (reminder?.kind === "waiting") {
-    const d = reminder.days;
+  const pcsp = pcspState(input.plans, now);
+  const words = pcspWords(pcsp);
+  if (words) {
     add({
-      key: "pcsp-waiting",
-      title: reminder.officeTask ? "Office: follow up on the new PCSP" : "Waiting on the new PCSP",
-      detail: `${d} day${d === 1 ? "" : "s"} since the plan year ended`,
-      tone: reminder.officeTask ? "bad" : "warn",
-      section: "plans",
-    });
-  } else if (reminder?.kind === "ending") {
-    add({
-      key: `plan-ending:${reminder.threshold}`,
-      title: "Plan year ending — schedule the PCSP meeting",
-      detail: `Ends in ${reminder.days} day${reminder.days === 1 ? "" : "s"}`,
-      tone: "warn",
+      key:
+        pcsp.kind === "overdue"
+          ? "pcsp-waiting"
+          : pcsp.kind === "expiring"
+            ? `plan-ending:${pcsp.threshold}`
+            : "pcsp-none",
+      title: words.headline,
+      detail: words.action ?? "",
+      tone: pcsp.kind === "expiring" || (pcsp.kind === "overdue" && !pcsp.followUp) ? "warn" : "bad",
       section: "plans",
     });
   }
 
-  if (input.strategies && !input.strategies.published) {
-    const days = daysUntil(strategiesDueOn(currentPlan(input.plans, now)), now);
+  const st = strategyAttention(input.strategies);
+  if (st) {
     add({
       key: "strategies",
-      title: "Support strategies not published",
-      detail: days == null ? "Add the plan's activation date" : dueText(days),
-      tone: days != null && days < 0 ? "bad" : "warn",
+      title: st.title,
+      detail: st.detail,
+      tone: st.overdue ? "bad" : "warn",
       section: "plans",
     });
   }

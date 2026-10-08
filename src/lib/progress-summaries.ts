@@ -10,6 +10,8 @@
 // Goal-progress section is omitted entirely for clients whose only services
 // are in GOAL_PROGRESS_EXCLUDED_CODES (ELS, MTP, PBA, PM1/PM2, RP/RL respite).
 
+import { daysInCalendarMonth, denverYmd, parseYmd, ymdFromParts } from "./denver-date.ts";
+
 export const MONTHLY_SUMMARY_CODES = new Set(["SEI", "SJD", "PN1", "PN2", "CMP", "CMS"]);
 export const FINANCIAL_STATEMENT_CODES = new Set(["PBA"]);
 /** Codes that owe no progress summary at all. */
@@ -39,26 +41,6 @@ export function summariesOwed(codes: readonly string[]): OwedSummary[] {
   }
   return out;
 }
-
-/**
- * Lightweight per-code required-field guidance surfaced to Nectar's draft
- * prompt for monthly narrative summaries. Freeform prose otherwise — this
- * only nudges which topics must be covered for codes with specific content
- * requirements (SEI, SJD). Codes not listed here get no extra guidance.
- */
-export const MONTHLY_SUMMARY_REQUIRED_FIELDS: Record<string, string[]> = {
-  SJD: [
-    "Person's name",
-    "Service code: SJD",
-    "Date range covered",
-    "All employment activities during the period",
-    "Person's response to the service",
-    "Progress toward employment goals",
-    "Documentation of weekly assessment data",
-    "Staff name",
-    "USOR contact date and current funding status",
-  ],
-};
 
 /** "2026-06" -> "June 2026". Shared by the deadlines panel and notification bell. */
 export function formatPeriodMonthYear(yyyyMm: string): string {
@@ -238,4 +220,68 @@ export function filterPeriodsByFloor<T extends { period_end: string }>(
 ): T[] {
   if (!floor) return periods;
   return periods.filter((p) => p.period_end >= floor);
+}
+
+/**
+ * The first day a summary may be finalized: the last day of the period's
+ * final month (Q1 → Mar 31, Q4 → Dec 31, a monthly summary → that month's
+ * last day). Finalizing later is fine.
+ */
+export function summaryFinalizeOpensOn(periodEnd: string): string {
+  const p = parseYmd(periodEnd.slice(0, 10));
+  if (!p) return periodEnd.slice(0, 10);
+  return ymdFromParts(p.year, p.month, daysInCalendarMonth(p.year, p.month));
+}
+
+/** True once it is that day or later in Denver (Utah) time. */
+export function canFinalizeSummary(periodEnd: string, now: Date = new Date()): boolean {
+  return denverYmd(now) >= summaryFinalizeOpensOn(periodEnd);
+}
+
+/** "You can finalize on Dec 31, 2026." */
+export function finalizeOpensMessage(periodEnd: string): string {
+  const p = parseYmd(summaryFinalizeOpensOn(periodEnd));
+  if (!p) return "You can finalize once the period ends.";
+  const label = new Date(p.year, p.month - 1, p.day).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return `You can finalize on ${label}.`;
+}
+
+/** Days after period_end when an unsent Support Coordinator summary starts to be reminded. */
+export const SC_REMIND_AFTER_DAYS = 10;
+
+export type ScSendReminder = "remind" | "overdue";
+
+function addDaysYmd(ymd: string, days: number): string {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d + days));
+  return t.toISOString().slice(0, 10);
+}
+
+/**
+ * Reminder for a narrative summary filed to the Support Coordinator that is
+ * not marked sent: "remind" from 10 days after period_end, "overdue" from
+ * due_date. Finalized or not does not matter; it clears the moment "Mark
+ * sent to Support Coordinator" is recorded. UPI summaries keep their own
+ * rule. Remind only, never blocks. `todayYmd` is the Denver date.
+ */
+export function scSendReminder(
+  s: {
+    summary_kind: string;
+    service_codes: string[];
+    period_end: string;
+    due_date: string;
+    sc_sent_at: string | null;
+    completed_at: string | null;
+  },
+  todayYmd: string,
+): ScSendReminder | null {
+  if (summaryFilingDestination(s.summary_kind, s.service_codes) !== "support_coordinator") return null;
+  if (s.summary_kind !== "narrative" || s.sc_sent_at || s.completed_at) return null;
+  if (todayYmd >= s.due_date) return "overdue";
+  if (todayYmd >= addDaysYmd(s.period_end, SC_REMIND_AFTER_DAYS)) return "remind";
+  return null;
 }

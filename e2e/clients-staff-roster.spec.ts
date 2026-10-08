@@ -52,7 +52,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     const perRowReads: string[] = [];
     page.on("request", (req) => {
       const url = req.url();
-      if (/rest\/v1\/(client_billing_codes|staff_assignments|client_contacts|import_subjects)|rpc\/client_active_codes/.test(url)) {
+      if (/rest\/v1\/(client_billing_codes|staff_assignments|client_contacts)|rpc\/client_active_codes/.test(url)) {
         perRowReads.push(url);
       }
     });
@@ -67,7 +67,6 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(rosterName(page, "Marcus Rivera")).toBeVisible();
     await expect(page.locator("table").getByText("DSI").first()).toBeVisible();
     await expect(page.locator("table").getByText("Maple House").first()).toBeVisible();
-    await expect(page.locator("table").getByText("Finish setup").first()).toBeVisible();
     expect(clientListCalls.list).toBe(1);
     expect(perRowReads).toHaveLength(0);
 
@@ -122,19 +121,6 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page.getByText("Oak SLH").first()).toBeVisible();
     await expect(page.getByText(/Tommy/i).first()).toBeVisible();
     await shot(page, "client_chart_codes_and_homes");
-  });
-
-  test("3. Old pending page redirects; imported drafts show Finish setup and open Add client", async ({ page }) => {
-    await gotoAdmin(page, "/dashboard/clients/pending");
-    await page.waitForURL(/\/dashboard\/clients\/?(\?.*)?$/);
-    const draft = page.getByTestId("client-draft-row");
-    await expect(draft).toContainText("Finish setup", { timeout: 20_000 });
-    await draft.getByRole("button", { name: /Jordan Draftsample/i }).click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog.getByText(/Finish setup — Jordan Draftsample/i)).toBeVisible();
-    await expect(dialog.getByLabel(/First name/i)).toHaveValue("Jordan");
-    await expect(dialog.getByTestId("code-line-DSI")).toBeVisible();
-    await shot(page, "clients_draft_finish_setup");
   });
 
   test("Add client: duplicate Medicaid ID blocks save with a link to the existing client", async ({ page }) => {

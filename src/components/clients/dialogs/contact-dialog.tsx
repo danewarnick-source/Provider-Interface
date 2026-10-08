@@ -108,7 +108,7 @@ export function ContactDialog({
           </Button>
           <Button onClick={() => onSave(d)} disabled={saving || !d.name.trim()}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save
+            Save contact
           </Button>
         </DialogFooter>
       </DialogContent>

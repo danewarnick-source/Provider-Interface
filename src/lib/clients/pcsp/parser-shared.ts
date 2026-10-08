@@ -14,7 +14,9 @@ export type Goal = {
   goal: string; domain: string; currentStatus: string; strengths: string; barriers: string;
   successPerson: string; successTeam: string; supports: Support[]; page: number;
 };
-export type NonGoalSupport = { support: string; details: string; start: string | null; end: string | null };
+export type NonGoalSupport = {
+  support: string; details: string; start: string | null; end: string | null; providers: Provider[]; ourCodes: string[];
+};
 export type PurchasedService = {
   code: string; name: string; unitType: string; units: number | null; start: string | null; end: string | null; page: number;
 };
@@ -28,7 +30,7 @@ export type LastYearGoal = { goal: string; ongoing: boolean | null; status: stri
 
 export type PcspResult = {
   plan: { start: string | null; end: string | null; activatedOn: string | null; status: string | null; meetingDate: string | null };
-  person: { name: string; pid: string; residentialAddress: string; mailingAddress: string; phone: string;
+  person: { name: string; pid: string; dob: string | null; residentialAddress: string; mailingAddress: string; phone: string;
     supportCoordinator: { name: string; email: string; phone: string; company: string } };
   goals: Goal[];
   nonGoalSupports: NonGoalSupport[];
@@ -40,7 +42,13 @@ export type PcspResult = {
   issues: Issue[];
 };
 
-export type PcspOptions = { agencyName: string; agencyCodes: string[] };
+export type PcspOptions = {
+  /** The agency's legal name (Settings); also used in "no purchased services for …". */
+  agencyName: string;
+  /** Other names the agency goes by; a provider matching any of them is "ours". */
+  otherNames?: string[];
+  agencyCodes: string[];
+};
 
 /** One body line with the page it came from. */
 export type L = { page: number; y: number; text: string };
@@ -55,8 +63,6 @@ export const DOMAINS = ["Daily Life Employment", "Community Living", "Safety & S
   "Social Spirituality", "Citizenship & Advocacy"];
 export const LABEL = /^(\s*)([A-Z][A-Za-z ()/&'?-]{1,40}?):(\s+(.*))?$/;
 
-export const norm = (s: string) =>
-  s.toUpperCase().replace(/[^A-Z0-9 ]/g, " ").replace(/\b(LLC|INC|CORP|CO)\b/g, "").replace(/\s+/g, " ").trim();
 export const squash = (s: string) => s.replace(/\s+/g, " ").trim();
 export const usDate = (s: string | undefined | null) => {
   const m = s && s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
@@ -71,13 +77,31 @@ export const longDate = (s: string) => {
 };
 export const indent = (t: string) => t.length - t.trimStart().length;
 
-/** "Is this provider name our agency?" by normalized legal name. */
-export function ourAgencyMatcher(agencyName: string): (provider: string) => boolean {
-  const agency = norm(agencyName);
-  return (p: string) => {
-    const n = norm(p);
-    return !!agency && !!n && (n.includes(agency) || agency.includes(n));
-  };
+/** "DSI  Example Supports, LLC" → the paid provider; null when the line isn't one. */
+export function parseProvider(v: string, isOurs: (provider: string) => boolean): Provider | null {
+  const pm = v.trim().match(/^([A-Z0-9]{2,4})\s+(.+)$/);
+  return pm ? { code: pm[1], provider: squash(pm[2]), ours: isOurs(pm[2]) } : null;
+}
+
+/** Add a provider to a support, and its code to ourCodes when it's the agency. */
+export function addProviderTo(s: { providers: Provider[]; ourCodes: string[] }, p: Provider): void {
+  s.providers.push(p);
+  if (p.ours && !s.ourCodes.includes(p.code)) s.ourCodes.push(p.code);
+}
+
+/** Words in capitals that aren't service codes. */
+const NOT_CODES = new Set(["THE", "AND", "FOR", "ARE", "NOT", "NOW", "ALL", "ANY", "HAS", "WAS", "ITS", "USE", "SEE"]);
+
+/**
+ * USTEPS prints a standard "now obsolete" line on the Purchased Services and
+ * Plan Budget pages of every PCSP; that says nothing about this client. Only
+ * a line naming a code is worth a warning (once per code).
+ */
+export function noteObsolete(text: string, page: number, issues: Issue[]): void {
+  const code = (text.match(/\b[A-Z][A-Z0-9]{2}\b/g) ?? []).find((c) => !NOT_CODES.has(c));
+  if (!code) return;
+  const message = `The PCSP says ${code} is obsolete. Check whether this client still has ${code}.`;
+  if (!issues.some((i) => i.message === message)) issues.push({ level: "warn", page, message });
 }
 
 export type Field = { label: string; value: string; page: number; y: number; idx: number };

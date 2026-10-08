@@ -150,10 +150,12 @@ export const runInternalAudit = createServerFn({ method: "POST" })
         .from("clients")
 
         .select("id, first_name, last_name")
+        .is("deleted_at", null)
         .eq("organization_id", orgId),
       supabase
         .from("organization_members")
         .select("user_id, role:access_level, job_title")
+        .is("deleted_at", null)
         .eq("organization_id", orgId)
         .eq("active", true),
       supabase
@@ -776,6 +778,7 @@ export const listAuditableStaff = createServerFn({ method: "GET" })
     const { data: members, error } = await supabase
       .from("organization_members")
       .select("user_id, role:access_level, job_title, active")
+      .is("deleted_at", null)
       .eq("organization_id", data.organizationId)
       .eq("active", true);
     if (error) throw error;

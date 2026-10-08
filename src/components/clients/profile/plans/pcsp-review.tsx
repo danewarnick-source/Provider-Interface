@@ -1,6 +1,8 @@
-// Review a PCSP that was just read: plan year, activation, counts, our
-// budget, goals compared with last year, and things to check (with page
-// numbers). Every field can be fixed here. Nothing is saved until Confirm.
+// Review a PCSP that was just read: issues first ("Fix before confirming",
+// "Check these", with page numbers), then the plan year, counts, our budget,
+// goals (carried over or new) and other needs. Every field can be fixed
+// here. Nothing is saved until "Confirm PCSP" (or Add client's "Save client
+// and plan"). Shared by Upload PCSP in Plans and Add client.
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,20 +16,28 @@ import { PcspReviewChecks } from "./pcsp-review-checks";
 import { PcspReviewBudget } from "./pcsp-review-budget";
 import { PcspReviewGoals } from "./pcsp-review-goals";
 import { PcspReviewExtras } from "./pcsp-review-extras";
+import { PcspReviewPerson } from "./pcsp-review-person";
+import { PcspReadSummary } from "@/components/clients/shared/pcsp-read-notes";
 
 export type ReviewEdit = (change: (draft: ReviewedPcsp) => void) => void;
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
 export function PcspReview({
-  read, review, onChange, saving, onConfirm, onClose,
+  read, review, onChange, saving, error = null, onConfirm, onClose,
+  confirmLabel = "Confirm PCSP", showPerson = true,
 }: {
   read: PcspRead;
   review: ReviewedPcsp;
   onChange: (next: ReviewedPcsp) => void;
   saving: boolean;
+  /** Why the last save failed (the review stays open to try again). */
+  error?: string | null;
   onConfirm: () => void;
   onClose: () => void;
+  confirmLabel?: string;
+  /** Add client fills the profile from its own form, so it hides this part. */
+  showPerson?: boolean;
 }) {
   const edit: ReviewEdit = (change) => {
     const draft = structuredClone(review);
@@ -41,7 +51,7 @@ export function PcspReview({
     <div className="space-y-1">
       <Label htmlFor={`pcsp-${key}`} className="text-xs">{label}</Label>
       <Input
-        id={`pcsp-${key}`} type="date" className="h-8" value={plan[key] ?? ""}
+        id={`pcsp-${key}`} type="date" className="h-9" value={plan[key] ?? ""}
         onChange={(e) => edit((d) => { d.plan[key] = e.target.value || null; })}
       />
     </div>
@@ -56,6 +66,9 @@ export function PcspReview({
             {read.fileName} · Check what was read, fix anything that's wrong, then confirm. Nothing is saved to the plan until you confirm.
           </DialogDescription>
         </DialogHeader>
+
+        <PcspReadSummary parse={read.parse} agencyName={read.agencyName} />
+        <PcspReviewChecks issues={read.parse.issues} />
 
         <section className="space-y-2">
           <h3 className="text-sm font-semibold">
@@ -77,27 +90,27 @@ export function PcspReview({
         <section className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4" aria-label="Counts">
           <Stat label="Goals" value={String(sum.goals)} />
           <Stat label="Supports" value={`${sum.supports} (${sum.supportsForUs} for us)`} />
-          <Stat label="Compared with last year" value={`${sum.continuing} continuing · ${sum.changed} changed · ${sum.newGoals} new`} />
+          <Stat label="Compared with last year" value={`${sum.carried} carried over · ${sum.newGoals} new`} />
           <Stat label="Budget for us" value={money(sum.budgetTotalForUs)} />
         </section>
 
         {read.nectarSections.length > 0 && (
-          <p className="rounded-md border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
+          <p className="rounded-xl border border-hive-gold/50 bg-hive-gold-soft p-2 text-xs text-hive-ink">
             Nectar read {read.nectarSections.join(", ")} because the layout was unusual. Every value it read quotes the PDF — check them.
           </p>
         )}
 
-        <PcspReviewChecks issues={read.parse.issues} />
+        {showPerson && <PcspReviewPerson review={review} edit={edit} />}
         <PcspReviewBudget review={review} edit={edit} />
         <PcspReviewGoals read={read} review={review} edit={edit} />
         <PcspReviewExtras review={review} edit={edit} />
 
-        <DialogFooter className="flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-destructive">{problems[0] ?? ""}</p>
+        <DialogFooter className="flex-col items-stretch gap-2 border-t border-hive-border pt-4 sm:flex-row sm:items-center sm:justify-between max-md:[&_button]:min-h-11">
+          <p className="text-xs text-destructive" role={error ? "alert" : undefined}>{error ?? problems[0] ?? ""}</p>
           <div className="flex gap-2">
             <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
             <Button onClick={onConfirm} disabled={saving || problems.length > 0}>
-              {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}Confirm
+              {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}{confirmLabel}
             </Button>
           </div>
         </DialogFooter>

@@ -71,6 +71,29 @@ export function moneyTotal(rows: readonly { amount: number | string | null }[]):
   return cents / 100;
 }
 
+/** Spending dated in the same calendar month as `now` (local time). */
+export function spentThisMonth(
+  rows: readonly { amount: number | string | null; spent_at: string }[],
+  now: Date = new Date(),
+): number {
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return moneyTotal(rows.filter((r) => localMonth(r.spent_at) === month));
+}
+
+function localMonth(iso: string): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso.slice(0, 7);
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+const CLOSED_LOAN = new Set(["closed", "paid", "paid_off", "repaid", "void", "cancelled", "canceled"]);
+
+/** A loan still open (drafts count: the agreement is on file, not settled). */
+export function isOpenLoan(status: string | null | undefined): boolean {
+  return !CLOSED_LOAN.has((status ?? "").trim().toLowerCase());
+}
+
 export function formatMoney(n: number): string {
   return `$${n.toFixed(2)}`;
 }

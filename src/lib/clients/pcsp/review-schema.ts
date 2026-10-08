@@ -16,24 +16,29 @@ const support = z.object({
 });
 
 export const reviewedPcspSchema = z.object({
+  person: z.object({
+    pid: text(50), dob: ymd, phone: text(50), address: text(255),
+    supportCoordinator: z.object({
+      include: z.boolean(), name: text(200), phone: text(50), email: text(200), company: text(200),
+    }),
+  }),
   plan: z.object({ start: ymd, end: ymd, activatedOn: ymd, meetingDate: ymd }),
   goals: z.array(z.object({
     include: z.boolean(),
     goal: text(), domain: text(300), currentStatus: text(), strengths: text(), barriers: text(),
     successPerson: text(), successTeam: text(), page: z.number().int().min(0).max(10_000),
     carry: z.object({
-      kind: z.enum(["continuing", "changed", "new"]),
+      kind: z.enum(["carried", "new"]),
       fromGoalId: z.string().uuid().nullable(),
       fromGoalText: text().nullable(),
     }),
     supports: z.array(support).max(40),
   })).max(60),
+  otherNeeds: z.array(support.extend({ include: z.boolean() })).max(40),
   budget: z.array(z.object({
     include: z.boolean(), code, unitType: z.enum(["Q", "day", "hourly"]), start: ymd, end: ymd,
     rate: z.number().min(0).max(100_000), maxMonthlyUnits: z.number().int().min(0).max(1_000_000).nullable(),
     annualUnits: z.number().int().min(0).max(10_000_000),
   })).max(40),
-  risks: z.array(z.object({ include: z.boolean(), risk: text(), response: text(), responseTime: text(200), notes: text() })).max(60),
-  aboutMe: z.array(z.object({ include: z.boolean(), domain: text(200), label: text(500), note: text(), source: text(200) })).max(200),
   otherProviders: z.array(z.object({ include: z.boolean(), code, provider: text(300), note: text() })).max(40),
 }) satisfies z.ZodType<ReviewedPcsp>;

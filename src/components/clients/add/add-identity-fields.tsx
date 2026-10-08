@@ -74,11 +74,18 @@ export function AddIdentityFields({
             maxLength={100}
           />
         </Field>
-        <Field label="Birth date">
+        <Field label="Date of birth" tag={has("date_of_birth")}>
           <Input
             type="date"
             value={form.date_of_birth ?? ""}
             onChange={(e) => set({ date_of_birth: e.target.value || null })}
+          />
+        </Field>
+        <Field label="Start date">
+          <Input
+            type="date"
+            value={form.start_date ?? ""}
+            onChange={(e) => set({ start_date: e.target.value || null })}
           />
         </Field>
         <Field label="Phone" tag={has("phone")}>

@@ -1,7 +1,9 @@
 // ⋯ menu on the client profile header: Face sheet PDF, Update from a
-// document, Discharge (the guided flow in ./discharge/), Reactivate.
+// document, Discharge (the guided flow in ./discharge/), Reactivate, and
+// Delete (made by mistake; the shared people dialog).
 
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -25,6 +27,7 @@ import { useAccess } from "@/hooks/use-access";
 import { UpdateFromDocumentDialog } from "@/components/clients/dialogs/update-from-document-dialog";
 import { useOpenFaceSheet } from "./face-sheet-button";
 import type { ClientProfileData } from "./use-client-profile";
+import { DeletePersonDialog } from "@/components/people/delete-person-dialog";
 import { DischargeDialog } from "./discharge/discharge-dialog";
 import { useDischargeWrites } from "./discharge/use-discharge";
 
@@ -45,12 +48,15 @@ export function HeaderMenu({
   const [updating, setUpdating] = useState(false);
   const [discharging, setDischarging] = useState(false);
   const [reactivating, setReactivating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const navigate = useNavigate();
   const { reactivate } = useDischargeWrites(orgId, clientId, onChanged);
 
   const canMedical = canCategory("client_medical");
   const canEdit = canCategory("clients", "edit");
+  const canDelete = canCategory("delete_people", "edit");
 
-  if (!canMedical && !canEdit) return null;
+  if (!canMedical && !canEdit && !canDelete) return null;
 
   return (
     <>
@@ -59,6 +65,7 @@ export function HeaderMenu({
           <Button
             variant="outline"
             size="icon"
+            className="h-10 w-10 max-md:h-11 max-md:w-11"
             aria-label="More actions"
             data-testid="client-profile-menu"
           >
@@ -68,7 +75,7 @@ export function HeaderMenu({
         <DropdownMenuContent align="end">
           {canMedical ? (
             <DropdownMenuItem disabled={faceSheet.busy} onSelect={() => void faceSheet.open()}>
-              {faceSheet.busy ? "Building face sheet…" : "Face sheet PDF"}
+              {faceSheet.busy ? "Building face sheet…" : "Open face sheet PDF"}
             </DropdownMenuItem>
           ) : null}
           {canEdit && !discharged ? (
@@ -82,7 +89,7 @@ export function HeaderMenu({
               onSelect={() => setDischarging(true)}
               data-testid="client-profile-discharge"
             >
-              Discharge
+              Discharge client
             </DropdownMenuItem>
           ) : null}
           {canEdit && discharged ? (
@@ -90,7 +97,16 @@ export function HeaderMenu({
               onSelect={() => setReactivating(true)}
               data-testid="client-profile-reactivate"
             >
-              Reactivate
+              Reactivate client
+            </DropdownMenuItem>
+          ) : null}
+          {canDelete ? (
+            <DropdownMenuItem
+              className="text-destructive"
+              onSelect={() => setDeleting(true)}
+              data-testid="client-profile-delete"
+            >
+              Delete client…
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuContent>
@@ -111,6 +127,15 @@ export function HeaderMenu({
         clientId={clientId}
         name={data.name}
         onChanged={onChanged}
+      />
+
+      <DeletePersonDialog
+        open={deleting}
+        onOpenChange={setDeleting}
+        orgId={orgId}
+        kind="client"
+        id={clientId}
+        onDeleted={() => void navigate({ to: "/dashboard/clients" })}
       />
 
       <AlertDialog open={reactivating} onOpenChange={setReactivating}>

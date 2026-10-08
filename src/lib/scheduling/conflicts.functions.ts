@@ -134,6 +134,7 @@ export const evaluateRange = createServerFn({ method: "POST" })
       const { data: members } = await supabase
         .from("organization_members")
         .select("user_id, active")
+        .is("deleted_at", null)
         .eq("organization_id", data.organizationId)
         .in("user_id", staffIds);
       const { data: profs } = await supabase

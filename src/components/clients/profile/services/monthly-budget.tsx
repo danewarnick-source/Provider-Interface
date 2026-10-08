@@ -7,13 +7,14 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Plus } from "lucide-react";
+import { Plus, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useAccess } from "@/hooks/use-access";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { writeClientRecord } from "@/lib/clients/writes.functions";
@@ -123,16 +124,15 @@ export function MonthlyBudget({ clientId, clientName }: { clientId: string; clie
     year: "numeric",
   });
   return (
-    <Card data-testid="client-monthly-budget">
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
-          <CardTitle className="text-base">Monthly budget</CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Income and spending plan for the month. Separate from the PBA ledger.
-          </p>
-        </div>
-        <div>
-          <Label htmlFor="budget-month" className="text-xs">
+    <SectionCard
+      icon={Wallet}
+      tone="profile"
+      title="Monthly budget"
+      description="Income and spending plan for the month. Separate from the PBA ledger."
+      testId="client-monthly-budget"
+      actions={
+        <div className="flex items-center gap-2">
+          <Label htmlFor="budget-month" className="text-xs text-muted-foreground">
             Month
           </Label>
           <Input
@@ -140,44 +140,44 @@ export function MonthlyBudget({ clientId, clientName }: { clientId: string; clie
             type="month"
             value={month}
             onChange={(e) => setMonth(e.target.value || thisMonth())}
-            className="w-[140px]"
+            className="h-10 w-[150px]"
           />
         </div>
-      </CardHeader>
-      <CardContent>
-        {budgetQ.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
-        ) : !budget ? (
-          <div className="rounded-md border border-dashed p-6 text-center">
-            <p className="text-sm text-muted-foreground">No budget for {monthName}.</p>
-            {canEdit ? (
-              <Button
-                className="mt-3"
-                onClick={() => start.mutate()}
-                disabled={start.isPending || !orgId}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Start a budget for this month
-              </Button>
-            ) : null}
-            {canEdit && (sourcesQ.data?.length ?? 0) > 0 && (
-              <p className="mt-3 text-xs text-muted-foreground">
-                Income lines start from the saved income sources: {sourcesQ.data!.join(", ")}
-              </p>
-            )}
-          </div>
-        ) : (
-          <BudgetEditor
-            budget={budget}
-            lines={linesQ.data ?? []}
-            canEdit={canEdit}
-            clientId={clientId}
-            organizationId={orgId}
-            orgName={org?.organization_name ?? "Organization"}
-            clientName={clientName}
-          />
-        )}
-      </CardContent>
-    </Card>
+      }
+    >
+      {budgetQ.isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : !budget ? (
+        <div className="space-y-2">
+          <EmptyState
+            action={
+              canEdit ? (
+                <Button onClick={() => start.mutate()} disabled={start.isPending || !orgId}>
+                  <Plus className="h-4 w-4" />
+                  Start {monthName} budget
+                </Button>
+              ) : null
+            }
+          >
+            No budget for {monthName}.
+          </EmptyState>
+          {canEdit && (sourcesQ.data?.length ?? 0) > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Income lines start from the saved income sources: {sourcesQ.data!.join(", ")}
+            </p>
+          )}
+        </div>
+      ) : (
+        <BudgetEditor
+          budget={budget}
+          lines={linesQ.data ?? []}
+          canEdit={canEdit}
+          clientId={clientId}
+          organizationId={orgId}
+          orgName={org?.organization_name ?? "Organization"}
+          clientName={clientName}
+        />
+      )}
+    </SectionCard>
   );
 }

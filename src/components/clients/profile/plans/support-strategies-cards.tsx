@@ -1,52 +1,94 @@
-// The three states of the Support strategies card that don't edit content:
-// nothing yet, an uploaded document, and the toolbar over a written draft.
-// State and mutations live in support-strategies-panel.tsx.
+// The parts of the Support strategies card around the list: the status line
+// (in plain words, with the button that goes with it, coverage and the due
+// date), the empty state and an uploaded strategies document (approve, pull
+// its strategies in with Nectar, replace, mark as sent). State and
+// mutations live in support-strategies-panel.tsx.
 
-import { formatDate } from "@/lib/clients/dates";
 import type { ReactNode } from "react";
-import {
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  Loader2,
-  RefreshCw,
-  Sparkles,
-  Upload,
-} from "lucide-react";
+import { CheckCircle2, FileSearch, Loader2, RefreshCw, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CardTitle } from "@/components/ui/card";
+import { formatDate } from "@/lib/clients/dates";
+import { strategyStatusText, type StrategyStatus } from "@/lib/clients/support-strategies";
+import { StatusTag } from "@/components/clients/profile/cards/card-parts";
+import { StrategiesDocumentButton } from "./strategies-document-dialog";
 
 const PCSP_NOTE =
-  "rounded-md border border-amber-300/60 bg-amber-50/60 px-3 py-2 text-xs text-amber-900";
+  "rounded-xl border border-hive-gold/50 bg-hive-gold-soft px-3 py-2 text-xs text-hive-ink";
 
 function Spin({ on, icon }: { on: boolean; icon: ReactNode }) {
-  return on ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <>{icon}</>;
+  return on ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{icon}</>;
 }
 
-/** Collapsible card title row. */
-export function StrategiesTitle({
-  open,
-  onToggle,
+const TONE: Record<StrategyStatus["kind"], "profile" | "ok" | "danger"> = {
+  draft: "profile",
+  approved: "ok",
+  outdated: "danger",
+};
+
+/**
+ * "Draft: review and approve" + Approve, or "Out of date…" + Rebuild; a new
+ * plan year: "New plan year: review strategies" + "Draft missing
+ * strategies"; coverage and the due date beside it. Once approved: "View &
+ * download document".
+ */
+export function StrategiesStatus({
+  clientId,
+  status,
+  covered,
+  total,
   dueOn,
+  canEdit,
+  busy,
+  onApprove,
+  onRebuild,
+  onDraftMissing,
 }: {
-  open: boolean;
-  onToggle: () => void;
+  clientId: string;
+  status: StrategyStatus;
+  covered: number;
+  total: number;
   dueOn: string | null;
+  canEdit: boolean;
+  busy: { approving: boolean; rebuilding: boolean };
+  onApprove: () => void;
+  onRebuild: () => void;
+  /** New plan year: keep carried-over strategies, draft the rest. */
+  onDraftMissing: () => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-label={open ? "Collapse" : "Expand"}
-        className="rounded p-1 hover:bg-muted"
-      >
-        {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-      </button>
-      <CardTitle className="text-base">Support strategies</CardTitle>
-      {dueOn ? (
-        <span className="text-xs text-muted-foreground" data-testid="strategies-due">
-          Due {formatDate(dueOn)}
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-hive-border bg-[var(--hive-muted-surface)] px-3 py-2 text-sm max-md:[&_button]:min-h-11">
+      <StatusTag tone={TONE[status.kind]} testId="strategies-status">
+        {strategyStatusText(status)}
+      </StatusTag>
+      {total > 0 ? (
+        <span className="text-xs text-muted-foreground" data-testid="strategies-coverage">
+          {covered} of {total} supports have a strategy
+        </span>
+      ) : null}
+      {dueOn && status.kind !== "approved" ? (
+        <span className="text-xs font-medium text-hive-ink" data-testid="strategies-due">
+          Due to the support coordinator by {formatDate(dueOn)}
+        </span>
+      ) : null}
+      {canEdit ? (
+        <span className="ml-auto flex flex-wrap gap-2">
+          {status.kind === "outdated" && status.newPlan ? (
+            <Button onClick={onDraftMissing} disabled={busy.rebuilding}>
+              <Spin on={busy.rebuilding} icon={<Sparkles className="h-4 w-4" />} />
+              Draft missing strategies
+            </Button>
+          ) : null}
+          <Button variant="outline" onClick={onRebuild} disabled={busy.rebuilding}>
+            <Spin on={busy.rebuilding} icon={<RefreshCw className="h-4 w-4" />} />
+            Rebuild from PCSP supports
+          </Button>
+          {status.kind === "draft" ? (
+            <Button onClick={onApprove} disabled={busy.approving}>
+              <Spin on={busy.approving} icon={<CheckCircle2 className="h-4 w-4" />} />
+              Approve
+            </Button>
+          ) : null}
+          {status.kind === "approved" ? <StrategiesDocumentButton clientId={clientId} /> : null}
         </span>
       ) : null}
     </div>
@@ -55,6 +97,7 @@ export function StrategiesTitle({
 
 export function StrategiesEmpty({
   pcspReady,
+  supportCount,
   drafting,
   uploading,
   onDraft,
@@ -62,6 +105,7 @@ export function StrategiesEmpty({
   fileInput,
 }: {
   pcspReady: boolean;
+  supportCount: number;
   drafting: boolean;
   uploading: boolean;
   onDraft: (mode: "nectar" | "blank") => void;
@@ -70,26 +114,24 @@ export function StrategiesEmpty({
 }) {
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
-        Each PCSP goal needs support strategies. Nectar pulls your goals word for word; you write
-        the staff instructions.
-      </p>
-      {!pcspReady && (
-        <div className={PCSP_NOTE}>
-          Upload a PCSP to get started. Drafting is off until a PCSP is on file.
-        </div>
-      )}
-      <div className="flex flex-wrap gap-2">
-        <Button size="sm" onClick={() => onDraft("nectar")} disabled={drafting}>
-          <Spin on={drafting} icon={<Sparkles className="mr-1.5 h-3.5 w-3.5 text-amber-500" />} />
-          Build from PCSP goals (Nectar)
+      <div className={PCSP_NOTE}>
+        {!pcspReady
+          ? "Upload the PCSP first. Strategies are written for each of its supports paid to the agency."
+          : supportCount === 0
+            ? "No support in the current plan year has one of the agency's codes, so no strategy is needed yet."
+            : `${supportCount} support${supportCount === 1 ? "" : "s"} paid to the agency need a strategy.`}
+      </div>
+      <div className="flex flex-wrap gap-2 max-md:[&_button]:min-h-11">
+        <Button onClick={() => onDraft("nectar")} disabled={drafting}>
+          <Spin on={drafting} icon={<Sparkles className="h-4 w-4" />} />
+          Draft strategies with Nectar
         </Button>
-        <Button size="sm" variant="outline" onClick={() => onDraft("blank")} disabled={drafting}>
-          Write manually
+        <Button variant="outline" onClick={() => onDraft("blank")} disabled={drafting}>
+          Write strategies by hand
         </Button>
-        <Button size="sm" variant="outline" onClick={onUpload} disabled={uploading}>
-          <Spin on={uploading} icon={<Upload className="mr-1.5 h-3.5 w-3.5" />} />
-          Upload document
+        <Button variant="outline" onClick={onUpload} disabled={uploading}>
+          <Spin on={uploading} icon={<Upload className="h-4 w-4" />} />
+          Upload strategies document
         </Button>
         {fileInput}
       </div>
@@ -100,104 +142,55 @@ export function StrategiesEmpty({
 export function StrategiesUploaded({
   fileName,
   published,
-  pcspReady,
   publishing,
   uploading,
+  pulling,
   onPublish,
   onReplace,
+  onPull,
   fileInput,
+  sendRow,
 }: {
   fileName: string;
   published: boolean;
-  pcspReady: boolean;
   publishing: boolean;
   uploading: boolean;
+  pulling: boolean;
   onPublish: () => void;
   onReplace: () => void;
+  /** Nectar copies the document's strategies under each support (a draft to approve). */
+  onPull: () => void;
   fileInput: ReactNode;
+  /** "Mark as sent to support coordinator", or the "Sent to …" line. */
+  sendRow: ReactNode;
 }) {
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/30 p-3 text-sm">
+      <div className="flex items-center gap-2 rounded-xl border border-hive-border bg-[var(--hive-muted-surface)] p-3 text-sm">
         <Upload className="h-4 w-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0">
           <p className="truncate font-medium">{fileName}</p>
-          <p className="text-xs text-muted-foreground">Uploaded provider document</p>
+          <p className="text-xs text-muted-foreground">Uploaded strategies document</p>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 max-md:[&_button]:min-h-11">
         {!published && (
-          <Button size="sm" onClick={onPublish} disabled={publishing}>
-            <Spin on={publishing} icon={<CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />} />
-            Approve & Publish
+          <Button onClick={onPublish} disabled={publishing}>
+            <Spin on={publishing} icon={<CheckCircle2 className="h-4 w-4" />} />
+            Approve
           </Button>
         )}
-        <Button size="sm" variant="outline" onClick={onReplace} disabled={uploading}>
-          <Spin on={uploading} icon={<Upload className="mr-1.5 h-3.5 w-3.5" />} />
-          Replace
+        <Button variant="outline" onClick={onPull} disabled={pulling}>
+          <Spin on={pulling} icon={<FileSearch className="h-4 w-4" />} />
+          Pull strategies from this document
+        </Button>
+        <Button variant="outline" onClick={onReplace} disabled={uploading}>
+          <Spin on={uploading} icon={<Upload className="h-4 w-4" />} />
+          Replace document
         </Button>
         {fileInput}
       </div>
-      {!pcspReady && (
-        <p className="text-xs text-amber-700">
-          Upload a PCSP to get started. Publishing is off until a PCSP is on file.
-        </p>
-      )}
+      {sendRow}
     </div>
-  );
-}
-
-export function StrategiesToolbar({
-  editing,
-  published,
-  rebuilding,
-  publishing,
-  saving,
-  onEdit,
-  onRebuild,
-  onPublish,
-  onCancel,
-  onSave,
-}: {
-  editing: boolean;
-  published: boolean;
-  rebuilding: boolean;
-  publishing: boolean;
-  saving: boolean;
-  onEdit: () => void;
-  onRebuild: () => void;
-  onPublish: () => void;
-  onCancel: () => void;
-  onSave: () => void;
-}) {
-  if (editing) {
-    return (
-      <>
-        <Button variant="ghost" size="sm" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button size="sm" onClick={onSave} disabled={saving}>
-          {saving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-          Save
-        </Button>
-      </>
-    );
-  }
-  return (
-    <>
-      <Button variant="outline" size="sm" onClick={onEdit}>
-        Edit
-      </Button>
-      <Button variant="outline" size="sm" onClick={onRebuild} disabled={rebuilding}>
-        <Spin on={rebuilding} icon={<RefreshCw className="mr-1.5 h-3.5 w-3.5" />} />
-        Rebuild from goals
-      </Button>
-      {!published && (
-        <Button size="sm" onClick={onPublish} disabled={publishing}>
-          <Spin on={publishing} icon={<CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />} />
-          Approve & Publish
-        </Button>
-      )}
-    </>
   );
 }

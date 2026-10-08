@@ -188,6 +188,7 @@ export function RecordsTab() {
       const { data: members } = await supabase
         .from("organization_members")
         .select("user_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .eq("active", true);
       const userIds = Array.from(
@@ -223,6 +224,7 @@ export function RecordsTab() {
       const { data } = await supabase
         .from("clients")
         .select("id, first_name, last_name, team_id")
+        .is("deleted_at", null)
         .eq("organization_id", orgId!)
         .order("last_name");
       return (data ?? []).map((c) => ({
@@ -290,6 +292,7 @@ export function RecordsTab() {
       if (team.length > 0) {
         const { data } = await supabase
           .from("clients").select("id")
+          .is("deleted_at", null)
           .eq("organization_id", orgId!).in("team_id", team);
         const t = (data ?? []).map((c) => c.id);
         clientIds = clientIds.length ? clientIds.filter((id) => t.includes(id)) : t;

@@ -2,11 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   addDaysYmd,
-  planReminder,
   planYearRows,
   strategiesDueOn,
 } from "./plan-dates.ts";
-import { waitingDays, type ClientPlan } from "./plans.ts";
+import type { ClientPlan } from "./plans.ts";
 
 const NOW = new Date(2026, 9, 6); // Oct 6, 2026, local
 
@@ -38,37 +37,6 @@ describe("strategiesDueOn", () => {
   it("adds calendar days", () => {
     assert.equal(addDaysYmd("2026-02-27", 2), "2026-03-01");
     assert.equal(addDaysYmd("not a date", 2), null);
-  });
-});
-
-describe("plan waiting days", () => {
-  it("counts days since the plan year ended with no newer plan", () => {
-    assert.equal(waitingDays([plan({})], NOW), 6);
-    const r = planReminder([plan({})], NOW);
-    assert.deepEqual(r, { kind: "waiting", days: 6, officeTask: false });
-  });
-  it("creates the office follow-up on day 10 of waiting", () => {
-    const nine = planReminder([plan({ end_date: "2026-09-27" })], NOW);
-    assert.deepEqual(nine, { kind: "waiting", days: 9, officeTask: false });
-    const ten = planReminder([plan({ end_date: "2026-09-26" })], NOW);
-    assert.deepEqual(ten, { kind: "waiting", days: 10, officeTask: true });
-  });
-  it("stops waiting once a newer plan has started", () => {
-    const plans = [plan({ status: "past" }), plan({ id: "p2", start_date: "2026-10-01", end_date: "2027-09-30" })];
-    assert.equal(waitingDays(plans, NOW), 0);
-    assert.equal(planReminder(plans, NOW), null);
-  });
-});
-
-describe("planReminder before the end", () => {
-  it("reminds at 60 and then 30 days before the plan year ends", () => {
-    assert.equal(planReminder([plan({ start_date: "2026-01-01", end_date: "2026-12-31" })], NOW), null);
-    assert.deepEqual(planReminder([plan({ start_date: "2026-01-01", end_date: "2026-12-01" })], NOW), {
-      kind: "ending", days: 56, threshold: 60, endDate: "2026-12-01",
-    });
-    assert.deepEqual(planReminder([plan({ start_date: "2026-01-01", end_date: "2026-11-05" })], NOW), {
-      kind: "ending", days: 30, threshold: 30, endDate: "2026-11-05",
-    });
   });
 });
 

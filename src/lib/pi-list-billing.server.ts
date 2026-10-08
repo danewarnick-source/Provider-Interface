@@ -70,6 +70,7 @@ export async function loadBillableClientRows(orgId: string): Promise<BillableCli
   const { data, error } = await supabaseAdmin
     .from("clients")
     .select("created_at, discharge_date")
+    .is("deleted_at", null)
     .eq("organization_id", orgId);
   if (error) throw new Error(error.message);
   return ((data ?? []) as BillableClientRow[]).map((row) => ({

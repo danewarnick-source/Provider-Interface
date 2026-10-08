@@ -1,10 +1,10 @@
 // Client list: pure pieces shared by the server call (list.functions.ts) and
-// the page — next due item, readiness, "needs attention", filters, search
-// terms and CSV. No Supabase here.
+// the page — next due item, readiness, filters, search terms and CSV. No Supabase here.
 
 import { neutralizeCsvFormula } from "../csv-safe.ts";
 import { isClockableServiceCode } from "../service-billing.ts";
-import { daysUntil } from "./dates.ts";
+import { daysUntil, formatDate } from "./dates.ts";
+import { clientEvvCodes } from "./evv.ts";
 import type { UnitsLeft } from "./units.ts";
 
 export const LIST_VIEWS = ["active", "discharged"] as const;
@@ -13,7 +13,12 @@ export type ListView = (typeof LIST_VIEWS)[number];
 /** account_status values that mean the client has left the agency. */
 export const DISCHARGED_STATUSES = ["archived", "discharged"] as const;
 
-export type DueItem = { label: string; date: string; days: number };
+/** What a due date belongs to: the plan year (PCSP), an authorization or a summary. */
+export type DueKind = "plan" | "authorization" | "summary";
+export type DueItem = { kind: DueKind; label: string; date: string; days: number };
+
+/** Authorizations that have all ended (no active code left): the codes and the latest end date. */
+export type EndedCodes = { codes: string[]; endedOn: string };
 
 export type Readiness = {
   ready: boolean;
@@ -23,20 +28,25 @@ export type Readiness = {
 
 export type ClientListRow = {
   id: string;
-  kind: "client" | "draft";
   first_name: string;
   last_name: string;
+  preferred_name: string | null;
   photo_url: string | null;
   medicaid_id: string | null;
   client_pid: string | null;
   account_status: string | null;
   codes: string[];
+  /** Set only when there are no active codes but some ended. */
+  endedCodes: EndedCodes | null;
+  /** No current plan, or its plan year has ended. */
+  planExpired: boolean;
   home: { id: string; name: string } | null;
   unitsLeft: UnitsLeft | null;
+  /** An active code has no yearly units on file. */
+  needsUnits: boolean;
   nextDue: DueItem | null;
   staff: { id: string; name: string }[];
   readiness: Readiness;
-  needsAttention: boolean;
 };
 
 export type ListFilters = {
@@ -45,7 +55,6 @@ export type ListFilters = {
   code: string | null;
   homeId: string | null;
   staffId: string | null;
-  needsAttention: boolean;
 };
 
 /** Days before a due date that the list starts flagging it. */
@@ -65,71 +74,96 @@ export function searchTerms(search: string): string[] {
 
 /** The earliest upcoming (or overdue) item among the candidates; null when none. */
 export function nextDueItem(
-  candidates: readonly { label: string; date: string | null | undefined }[],
+  candidates: readonly { kind: DueKind; label: string; date: string | null | undefined }[],
   now: Date = new Date(),
 ): DueItem | null {
   let best: DueItem | null = null;
   for (const c of candidates) {
     const days = daysUntil(c.date, now);
     if (days == null || !c.date) continue;
-    if (!best || days < best.days) best = { label: c.label, date: c.date.slice(0, 10), days };
+    if (!best || days < best.days)
+      best = { kind: c.kind, label: c.label, date: c.date.slice(0, 10), days };
   }
   return best;
 }
 
-/** What a client still needs before staff can be scheduled and clock in. */
+/**
+ * What a client still needs before staff can be scheduled and clock in.
+ * A home pin is only needed when a code uses EVV (the clock-in circle).
+ */
 export function listReadiness(args: {
   codes: readonly string[];
   staffCount: number;
   hasPin: boolean;
-  guardianOk: boolean;
+  /** guardianGap(): "Guardian not on file" / "Guardian has no phone", or null. */
+  guardianGap: string | null;
+  /** When every authorization has ended: the latest end date. */
+  endedOn?: string | null;
 }): Readiness {
   const missing: string[] = [];
-  if (!args.codes.some((c) => isClockableServiceCode(c)))
-    missing.push("No authorized service code");
+  if (!args.codes.some((c) => isClockableServiceCode(c))) {
+    missing.push(
+      args.codes.length === 0 && args.endedOn
+        ? `Authorizations ended ${formatDate(args.endedOn)}`
+        : "No authorized service code",
+    );
+  }
   if (args.staffCount === 0) missing.push("No team member assigned");
-  if (!args.hasPin) missing.push("No home pin (address not found)");
-  if (!args.guardianOk) missing.push("Guardian not on file");
+  if (!args.hasPin && clientEvvCodes(args.codes).length)
+    missing.push("No home pin (address not found)");
+  if (args.guardianGap) missing.push(args.guardianGap);
   return { ready: missing.length === 0, missing };
 }
 
-export function rowNeedsAttention(
-  row: Pick<ClientListRow, "kind" | "readiness" | "unitsLeft" | "nextDue">,
-): boolean {
-  if (row.kind === "draft") return true;
-  if (!row.readiness.ready) return true;
-  if (row.unitsLeft && row.unitsLeft.pct <= LOW_UNITS_PCT) return true;
-  return !!row.nextDue && row.nextDue.days <= DUE_SOON_DAYS;
+/**
+ * Codes from authorization rows that have all ended, for a client with no
+ * active code. null when any code is still active or none ever existed.
+ */
+export function endedCodesFor(
+  activeCodes: readonly string[],
+  endedRows: readonly { service_code: string | null; service_end_date: string | null }[],
+): EndedCodes | null {
+  if (activeCodes.length) return null;
+  const codes = new Set<string>();
+  let endedOn = "";
+  for (const r of endedRows) {
+    const code = String(r.service_code ?? "")
+      .trim()
+      .toUpperCase();
+    const end = r.service_end_date?.slice(0, 10) ?? "";
+    if (!code || !end) continue;
+    codes.add(code);
+    if (end > endedOn) endedOn = end;
+  }
+  return codes.size ? { codes: [...codes].sort(), endedOn } : null;
 }
 
-/** Code / home / staff / needs-attention filters (search and view are applied in the query). */
+/** True when there is no current plan or its end date is before today (YYYY-MM-DD). */
+export function planHasExpired(
+  plans: readonly { end_date: string | null }[],
+  today: string,
+): boolean {
+  if (!plans.length) return true;
+  return !plans.some((p) => !p.end_date || p.end_date.slice(0, 10) >= today);
+}
+
+/** Code / home / staff filters (search and view are applied in the query). */
 export function applyListFilters(
   rows: readonly ClientListRow[],
   f: Omit<ListFilters, "view" | "search">,
 ): ClientListRow[] {
   const code = f.code?.toUpperCase() ?? null;
   return rows.filter((r) => {
-    if (r.kind === "draft") return !code && !f.homeId && !f.staffId;
     if (code && !r.codes.includes(code)) return false;
     if (f.homeId && r.home?.id !== f.homeId) return false;
     if (f.staffId && !r.staff.some((s) => s.id === f.staffId)) return false;
-    if (f.needsAttention && !r.needsAttention) return false;
     return true;
   });
 }
 
-/** Does a draft's display name match every search term? */
-export function draftMatches(name: string, terms: readonly string[]): boolean {
-  const n = name.toLowerCase();
-  return terms.every((t) => n.includes(t));
-}
-
 export function sortRows(rows: ClientListRow[]): ClientListRow[] {
   return rows.sort(
-    (a, b) =>
-      (a.kind === "draft" ? 0 : 1) - (b.kind === "draft" ? 0 : 1) ||
-      a.last_name.localeCompare(b.last_name) ||
-      a.first_name.localeCompare(b.first_name),
+    (a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name),
   );
 }
 
@@ -150,7 +184,7 @@ export function clientListCsv(rows: readonly ClientListRow[]): string {
     "Next due",
     "Due date",
     "Team members",
-    "Ready",
+    "Ready to schedule",
   ];
   const lines = rows.map((r) =>
     [
@@ -163,11 +197,7 @@ export function clientListCsv(rows: readonly ClientListRow[]): string {
       r.nextDue?.label ?? "",
       r.nextDue?.date ?? "",
       r.staff.map((s) => s.name).join("; "),
-      r.kind === "draft"
-        ? "Finish setup"
-        : r.readiness.ready
-          ? "Yes"
-          : r.readiness.missing.join("; "),
+      r.readiness.ready ? "Yes" : r.readiness.missing.join("; "),
     ]
       .map(csvCell)
       .join(","),

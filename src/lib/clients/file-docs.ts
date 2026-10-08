@@ -8,7 +8,8 @@ export const CLINICAL_LEGAL_DOC_TYPES = new Set([
   "contract",
   "guardian",
 ]);
-export const STRATEGY_DOC_TYPES = new Set(["support_strategies", "bsp", "behavior_support_plan"]);
+/** An uploaded strategies document (the file only; strategy-sends.ts decides if they were sent). */
+export const STRATEGY_DOC_TYPES = new Set(["support_strategy", "support_strategies"]);
 export const RNB_DOC_TYPES = new Set(["room_board_agreement"]);
 export const LEASE_DOC_TYPES = new Set(["lease_agreement", "lease"]);
 export const HOUSEMATE_DOC_TYPES = new Set(["housemate", "housemate_discussion", "housemate_informed_choice"]);

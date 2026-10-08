@@ -3,20 +3,21 @@
 // last notes. Runs with the caller's RLS-scoped client; called only from
 // overview.functions.ts.
 
-import { personNeedsSupportStrategies } from "@/lib/audit-evidence";
 import { computeRestrictionCompletion, type RestrictionRecord } from "./hrc";
 import { isActiveCodeRow, loadActiveCodes } from "./codes";
-import { guardianSatisfied, loadClientContacts } from "./contacts";
+import { loadClientContacts } from "./contacts";
+import { guardianGap, guardianStatus } from "./guardian";
 import { todayYmd } from "./dates";
-import { loadOrgClientFileIndex } from "./file-index";
+import { loadClientFileView } from "./file-packs.server";
+import { fileAttention } from "./file-rows";
 import { loadUsage, rows, type AuthRow, type Sb } from "./list-queries";
 import { comingUpItems, lastNotes, type ClientOverview } from "./overview";
-import { loadOverviewTeam } from "./overview-team";
+import { loadOverviewTeam, loadPeopleNames } from "./overview-team";
 import type { ClientPlan } from "./plans";
+import { loadStrategyStates } from "./strategy-sends.server";
 import { clientAttention, codePace } from "./readiness";
+import { loadAttentionScope } from "./support-scope.server";
 import { usedUnitsForCode } from "./units";
-
-const SKIP_FILE_CARDS = new Set(["photograph", "support_strategies", "service_summary"]);
 
 type ClientFacts = {
   special_directions: string | null;
@@ -42,12 +43,13 @@ export async function loadClientOverview(
       .select(
         "special_directions, client_photo_url, client_photo_taken_on, home_latitude, home_longitude, is_own_guardian, has_abi",
       )
+      .is("deleted_at", null)
       .eq("id", clientId)
       .eq("organization_id", orgId),
   );
   const client = clientRows[0];
   if (!client) throw new Error("Client not found in this organization");
-  const [codes, auths, contacts, plans, summaries, restrictions, strategies, fileIndex, team] =
+  const [codes, auths, contacts, plans, summaries, restrictions, fileView, team, scope] =
     await Promise.all([
       loadActiveCodes(sb, ids),
       rows<AuthRow>(
@@ -73,17 +75,14 @@ export async function loadClientOverview(
       rows<RestrictionRecord>(
         sb.from("hrc_restriction_records").select("*").eq("client_id", clientId).eq("active", true),
       ).catch(() => [] as RestrictionRecord[]),
-      rows<{ status: string | null }>(
-        sb
-          .from("client_specific_trainings")
-          .select("status")
-          .eq("client_id", clientId)
-          .eq("training_type", "support_strategies"),
-      ).catch(() => []),
-      loadOrgClientFileIndex(sb, orgId, ids),
+      loadClientFileView(sb, orgId, clientId, now),
       loadOverviewTeam(sb, orgId, clientId, client.has_abi === true),
+      loadAttentionScope(sb, orgId, clientId),
     ]);
   const clientCodes = codes.get(clientId) ?? [];
+  const strategies = (
+    await loadStrategyStates(sb, orgId, ids, { codes, plans: new Map([[clientId, plans]]) }, now)
+  ).get(clientId) ?? { kind: "not_needed" as const };
   const activeAuths = auths.filter((a) => isActiveCodeRow(a, today));
   const usage = await loadUsage(sb, orgId, ids, activeAuths);
   const paces = activeAuths
@@ -94,24 +93,22 @@ export async function loadClientOverview(
     {
       codes: clientCodes,
       paces,
-      fileCards: (fileIndex.cardsByClient.get(clientId) ?? []).filter(
-        (c) => !SKIP_FILE_CARDS.has(c.key),
-      ),
+      fileCards: fileAttention(fileView.groups),
       photo: { url: client.client_photo_url, takenOn: client.client_photo_taken_on },
       plans,
-      strategies: personNeedsSupportStrategies(clientCodes)
-        ? { published: strategies.some((s) => s.status === "published") }
-        : null,
+      strategies,
       summaries: summaries.map((s) => ({ label: s.period_label ?? "", dueDate: s.due_date })),
       restrictions: restrictions.map((r) => ({
         title: r.restriction_title,
         nextReview: r.next_review_date,
         complete: computeRestrictionCompletion(r).isComplete,
       })),
+      hidden: scope.hidden,
+      directive: scope.directive,
       setup: {
         staffCount: team.length,
         hasPin: client.home_latitude != null && client.home_longitude != null,
-        guardianOk: guardianSatisfied(client.is_own_guardian, contacts, now),
+        guardianGap: guardianGap(guardianStatus(client.is_own_guardian, contacts, now)),
       },
     },
     now,
@@ -121,17 +118,21 @@ export async function loadClientOverview(
     loadUpcomingShifts(sb, orgId, clientId, now),
     loadRecentNotes(sb, orgId, clientId),
   ]);
-  const teamNames = new Map(team.map((t) => [t.id, t.name]));
+  const names = await loadPeopleNames(sb, [
+    ...shifts.map((s) => s.staff_id ?? ""),
+    ...notes.map((n) => n.authorId ?? ""),
+  ]);
   const current = plans.find((p) => p.status === "current");
   return {
     attention,
+    strategies,
     paces,
     mustKnows: client.special_directions?.trim() || null,
     comingUp: comingUpItems(
       {
         shifts: shifts.map((s) => ({
           ...s,
-          staffName: s.staff_id ? (teamNames.get(s.staff_id) ?? "Team member") : null,
+          staffName: s.staff_id ? (names.get(s.staff_id) ?? "Team member") : null,
         })),
         due: [
           ...(current?.end_date
@@ -161,10 +162,16 @@ export async function loadClientOverview(
       now,
     ),
     team,
-    lastNotes: lastNotes(notes),
+    lastNotes: lastNotes(
+      notes.map(({ authorId, ...n }) => ({
+        ...n,
+        author: authorId ? (names.get(authorId) ?? "Team member") : null,
+      })),
+    ),
   };
 }
 
+/** Published, not cancelled shifts from now on, soonest first. */
 async function loadUpcomingShifts(sb: Sb, orgId: string, clientId: string, now: Date) {
   return rows<{
     id: string;
@@ -177,33 +184,42 @@ async function loadUpcomingShifts(sb: Sb, orgId: string, clientId: string, now: 
       .select("id, starts_at, service_code, staff_id")
       .eq("organization_id", orgId)
       .eq("client_id", clientId)
+      .eq("published", true)
+      .neq("status", "cancelled")
       .gte("starts_at", now.toISOString())
       .order("starts_at", { ascending: true })
       .limit(10),
   ).catch(() => []);
 }
 
+/** Newest shift notes (author = the punch's team member) and daily logs (author = user_id). */
 async function loadRecentNotes(sb: Sb, orgId: string, clientId: string) {
   const [sheets, logs] = await Promise.all([
     rows<{
       id: string;
       clock_in_timestamp: string | null;
+      staff_id: string | null;
       service_type_code: string | null;
       shift_note_text: string | null;
     }>(
       sb
         .from("evv_timesheets")
-        .select("id, clock_in_timestamp, service_type_code, shift_note_text")
+        .select("id, clock_in_timestamp, staff_id, service_type_code, shift_note_text")
         .eq("organization_id", orgId)
         .eq("client_id", clientId)
         .not("shift_note_text", "is", null)
         .order("clock_in_timestamp", { ascending: false })
         .limit(6),
     ).catch(() => []),
-    rows<{ id: string; log_date: string | null; narrative: string | null }>(
+    rows<{
+      id: string;
+      log_date: string | null;
+      user_id: string | null;
+      narrative: string | null;
+    }>(
       sb
         .from("daily_logs")
-        .select("id, log_date, narrative")
+        .select("id, log_date, user_id, narrative")
         .eq("organization_id", orgId)
         .eq("client_id", clientId)
         .order("log_date", { ascending: false })
@@ -216,7 +232,7 @@ async function loadRecentNotes(sb: Sb, orgId: string, clientId: string) {
       date: s.clock_in_timestamp ? todayYmd(new Date(s.clock_in_timestamp)) : "",
       kind: "shift" as const,
       code: s.service_type_code,
-      author: null,
+      authorId: s.staff_id,
       text: s.shift_note_text ?? "",
     })),
     ...logs.map((l) => ({
@@ -224,7 +240,7 @@ async function loadRecentNotes(sb: Sb, orgId: string, clientId: string) {
       date: l.log_date ?? "",
       kind: "daily" as const,
       code: null,
-      author: null,
+      authorId: l.user_id,
       text: l.narrative ?? "",
     })),
   ];

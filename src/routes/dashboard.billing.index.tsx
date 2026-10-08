@@ -28,6 +28,7 @@ function BillingOverviewPage() {
         .from("clients")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .select("id, first_name, last_name, medicaid_id" as any)
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id)
         .order("last_name");
       if (error) throw error;

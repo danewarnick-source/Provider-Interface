@@ -41,6 +41,7 @@ export interface GoalSupport {
 
 export interface ClientGoal {
   id: string;
+  kind?: "goal" | "other_need"; // other_need = the row holding the plan's non-goal supports
   client_id: string;
   plan_id: string;
   carried_from_goal_id: string | null;
@@ -253,6 +254,7 @@ export function goalSupportOptions(
 /** A goal and its supports as screens and prompts show them. */
 export interface GoalView {
   id: string;
+  kind?: ClientGoal["kind"];
   goal: string;
   domain: string | null;
   supports: Array<{ id: string; support_text: string; details: string | null; our_codes: string[] }>;
@@ -261,6 +263,7 @@ export interface GoalView {
 export function goalView(goal: ClientGoal, supports: readonly GoalSupport[] = goal.supports): GoalView {
   return {
     id: goal.id,
+    kind: goal.kind ?? "goal",
     goal: goal.goal_text,
     domain: goal.domain,
     supports: supports.map((s) => ({ id: s.id, support_text: s.support_text, details: s.details, our_codes: s.our_codes })),

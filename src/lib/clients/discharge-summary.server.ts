@@ -33,6 +33,7 @@ export async function draftDischargeSummaryText(
     sb
       .from("clients")
       .select("first_name, admission_date")
+      .is("deleted_at", null)
       .eq("organization_id", org)
       .eq("id", clientId),
   );

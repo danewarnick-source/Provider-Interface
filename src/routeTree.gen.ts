@@ -44,7 +44,6 @@ import { Route as DashboardTimeclockRouteImport } from './routes/dashboard.timec
 import { Route as DashboardTeamsRouteImport } from './routes/dashboard.teams'
 import { Route as DashboardSummariesRouteImport } from './routes/dashboard.summaries'
 import { Route as DashboardStateAuditRouteImport } from './routes/dashboard.state-audit'
-import { Route as DashboardSmartImportRouteImport } from './routes/dashboard.smart-import'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardSchedulingRouteImport } from './routes/dashboard.scheduling'
 import { Route as DashboardSchedulerRouteImport } from './routes/dashboard.scheduler'
@@ -102,7 +101,6 @@ import { Route as ClientsNewRouteImport } from './routes/clients.new'
 import { Route as AuditPortalSetPasswordRouteImport } from './routes/audit-portal.set-password'
 import { Route as AuditPortalPackageIdRouteImport } from './routes/audit-portal.$packageId'
 import { Route as DashboardTeamMembersIndexRouteImport } from './routes/dashboard.team-members.index'
-import { Route as DashboardSmartImportIndexRouteImport } from './routes/dashboard.smart-import.index'
 import { Route as DashboardHiveTrainingIndexRouteImport } from './routes/dashboard.hive-training.index'
 import { Route as DashboardHiveExecIndexRouteImport } from './routes/dashboard.hive-exec.index'
 import { Route as DashboardFormsIndexRouteImport } from './routes/dashboard.forms.index'
@@ -113,13 +111,13 @@ import { Route as DashboardBillingIndexRouteImport } from './routes/dashboard.bi
 import { Route as E2eHhsHubClientIdRouteImport } from './routes/e2e.hhs-hub.$clientId'
 import { Route as DashboardWorkspaceClientIdRouteImport } from './routes/dashboard.workspace.$clientId'
 import { Route as DashboardTeamMembersStaffIdRouteImport } from './routes/dashboard.team-members.$staffId'
-import { Route as DashboardSmartImportHistoryRouteImport } from './routes/dashboard.smart-import.history'
 import { Route as DashboardShiftShiftIdRouteImport } from './routes/dashboard.shift.$shiftId'
 import { Route as DashboardSettingsTeamAccessRouteImport } from './routes/dashboard.settings.team-access'
 import { Route as DashboardSettingsSubscriptionRouteImport } from './routes/dashboard.settings.subscription'
 import { Route as DashboardSettingsServiceCodesRouteImport } from './routes/dashboard.settings.service-codes'
 import { Route as DashboardSettingsServiceCatalogRouteImport } from './routes/dashboard.settings.service-catalog'
 import { Route as DashboardSettingsRetentionRouteImport } from './routes/dashboard.settings.retention'
+import { Route as DashboardSettingsRecentlyDeletedRouteImport } from './routes/dashboard.settings.recently-deleted'
 import { Route as DashboardSettingsPhiAccessAuditRouteImport } from './routes/dashboard.settings.phi-access-audit'
 import { Route as DashboardSettingsLicensingRouteImport } from './routes/dashboard.settings.licensing'
 import { Route as DashboardSettingsGmailRouteImport } from './routes/dashboard.settings.gmail'
@@ -147,7 +145,6 @@ import { Route as DashboardHiveExecKnowledgeRouteImport } from './routes/dashboa
 import { Route as DashboardHiveExecHealthRouteImport } from './routes/dashboard.hive-exec.health'
 import { Route as DashboardHiveExecFunctionalityRouteImport } from './routes/dashboard.hive-exec.functionality'
 import { Route as DashboardHiveExecFeaturesRouteImport } from './routes/dashboard.hive-exec.features'
-import { Route as DashboardHiveExecCompanyMigrationRouteImport } from './routes/dashboard.hive-exec.company-migration'
 import { Route as DashboardHiveExecCommandRouteImport } from './routes/dashboard.hive-exec.command'
 import { Route as DashboardHiveExecClassesRouteImport } from './routes/dashboard.hive-exec.classes'
 import { Route as DashboardHiveExecBillingApprovalsRouteImport } from './routes/dashboard.hive-exec.billing-approvals'
@@ -185,8 +182,6 @@ import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhoo
 import { Route as ApiPublicRuntimeConfigRouteImport } from './routes/api/public/runtime-config'
 import { Route as ApiComplianceUrgentRouteImport } from './routes/api/compliance/urgent'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
-import { Route as DashboardSmartImportJobIdReviewRouteImport } from './routes/dashboard.smart-import.$jobId.review'
-import { Route as DashboardSmartImportJobIdDoneRouteImport } from './routes/dashboard.smart-import.$jobId.done'
 import { Route as DashboardMyObligationsCourseInstanceIdRouteImport } from './routes/dashboard.my-obligations_.course.$instanceId'
 import { Route as DashboardHiveTrainingCourseAssignmentIdRouteImport } from './routes/dashboard.hive-training.course.$assignmentId'
 import { Route as DashboardHiveExecStatesStateCodeRouteImport } from './routes/dashboard.hive-exec.states.$stateCode'
@@ -198,7 +193,6 @@ import { Route as DashboardFormsFormIdEditRouteImport } from './routes/dashboard
 import { Route as DashboardCoursesPolicyDocumentIdRouteImport } from './routes/dashboard.courses.policy.$documentId'
 import { Route as DashboardComplianceCertReviewCompletionIdRouteImport } from './routes/dashboard.compliance_.cert-review.$completionId'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
-import { Route as ApiPublicHooksSmartImportRemindersRouteImport } from './routes/api/public/hooks/smart-import-reminders'
 import { Route as ApiPublicHooksNectarSchedulesRouteImport } from './routes/api/public/hooks/nectar-schedules'
 import { Route as ApiPublicHooksNectarDraftTickRouteImport } from './routes/api/public/hooks/nectar-draft-tick'
 import { Route as ApiPublicHooksGmailIngestRouteImport } from './routes/api/public/hooks/gmail-ingest'
@@ -379,11 +373,6 @@ const DashboardSummariesRoute = DashboardSummariesRouteImport.update({
 const DashboardStateAuditRoute = DashboardStateAuditRouteImport.update({
   id: '/state-audit',
   path: '/state-audit',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardSmartImportRoute = DashboardSmartImportRouteImport.update({
-  id: '/smart-import',
-  path: '/smart-import',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
@@ -686,12 +675,6 @@ const DashboardTeamMembersIndexRoute =
     path: '/team-members/',
     getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardSmartImportIndexRoute =
-  DashboardSmartImportIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => DashboardSmartImportRoute,
-  } as any)
 const DashboardHiveTrainingIndexRoute =
   DashboardHiveTrainingIndexRouteImport.update({
     id: '/hive-training/',
@@ -745,12 +728,6 @@ const DashboardTeamMembersStaffIdRoute =
     path: '/team-members/$staffId',
     getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardSmartImportHistoryRoute =
-  DashboardSmartImportHistoryRouteImport.update({
-    id: '/history',
-    path: '/history',
-    getParentRoute: () => DashboardSmartImportRoute,
-  } as any)
 const DashboardShiftShiftIdRoute = DashboardShiftShiftIdRouteImport.update({
   id: '/shift/$shiftId',
   path: '/shift/$shiftId',
@@ -784,6 +761,12 @@ const DashboardSettingsRetentionRoute =
   DashboardSettingsRetentionRouteImport.update({
     id: '/retention',
     path: '/retention',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
+const DashboardSettingsRecentlyDeletedRoute =
+  DashboardSettingsRecentlyDeletedRouteImport.update({
+    id: '/recently-deleted',
+    path: '/recently-deleted',
     getParentRoute: () => DashboardSettingsRoute,
   } as any)
 const DashboardSettingsPhiAccessAuditRoute =
@@ -935,12 +918,6 @@ const DashboardHiveExecFeaturesRoute =
   DashboardHiveExecFeaturesRouteImport.update({
     id: '/features',
     path: '/features',
-    getParentRoute: () => DashboardHiveExecRoute,
-  } as any)
-const DashboardHiveExecCompanyMigrationRoute =
-  DashboardHiveExecCompanyMigrationRouteImport.update({
-    id: '/company-migration',
-    path: '/company-migration',
     getParentRoute: () => DashboardHiveExecRoute,
   } as any)
 const DashboardHiveExecCommandRoute =
@@ -1150,18 +1127,6 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardSmartImportJobIdReviewRoute =
-  DashboardSmartImportJobIdReviewRouteImport.update({
-    id: '/$jobId/review',
-    path: '/$jobId/review',
-    getParentRoute: () => DashboardSmartImportRoute,
-  } as any)
-const DashboardSmartImportJobIdDoneRoute =
-  DashboardSmartImportJobIdDoneRouteImport.update({
-    id: '/$jobId/done',
-    path: '/$jobId/done',
-    getParentRoute: () => DashboardSmartImportRoute,
-  } as any)
 const DashboardMyObligationsCourseInstanceIdRoute =
   DashboardMyObligationsCourseInstanceIdRouteImport.update({
     id: '/my-obligations_/course/$instanceId',
@@ -1227,12 +1192,6 @@ const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
   path: '/api/public/webhooks/stripe',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicHooksSmartImportRemindersRoute =
-  ApiPublicHooksSmartImportRemindersRouteImport.update({
-    id: '/api/public/hooks/smart-import-reminders',
-    path: '/api/public/hooks/smart-import-reminders',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicHooksNectarSchedulesRoute =
   ApiPublicHooksNectarSchedulesRouteImport.update({
     id: '/api/public/hooks/nectar-schedules',
@@ -1351,7 +1310,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/scheduler': typeof DashboardSchedulerRoute
   '/dashboard/scheduling': typeof DashboardSchedulingRoute
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
-  '/dashboard/smart-import': typeof DashboardSmartImportRouteWithChildren
   '/dashboard/state-audit': typeof DashboardStateAuditRoute
   '/dashboard/summaries': typeof DashboardSummariesRoute
   '/dashboard/teams': typeof DashboardTeamsRoute
@@ -1400,7 +1358,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/hive-exec/billing-approvals': typeof DashboardHiveExecBillingApprovalsRoute
   '/dashboard/hive-exec/classes': typeof DashboardHiveExecClassesRoute
   '/dashboard/hive-exec/command': typeof DashboardHiveExecCommandRoute
-  '/dashboard/hive-exec/company-migration': typeof DashboardHiveExecCompanyMigrationRoute
   '/dashboard/hive-exec/features': typeof DashboardHiveExecFeaturesRoute
   '/dashboard/hive-exec/functionality': typeof DashboardHiveExecFunctionalityRoute
   '/dashboard/hive-exec/health': typeof DashboardHiveExecHealthRoute
@@ -1428,13 +1385,13 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/gmail': typeof DashboardSettingsGmailRoute
   '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
   '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
+  '/dashboard/settings/recently-deleted': typeof DashboardSettingsRecentlyDeletedRoute
   '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
   '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
   '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
   '/dashboard/settings/subscription': typeof DashboardSettingsSubscriptionRoute
   '/dashboard/settings/team-access': typeof DashboardSettingsTeamAccessRoute
   '/dashboard/shift/$shiftId': typeof DashboardShiftShiftIdRoute
-  '/dashboard/smart-import/history': typeof DashboardSmartImportHistoryRoute
   '/dashboard/team-members/$staffId': typeof DashboardTeamMembersStaffIdRoute
   '/dashboard/workspace/$clientId': typeof DashboardWorkspaceClientIdRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
@@ -1445,13 +1402,11 @@ export interface FileRoutesByFullPath {
   '/dashboard/forms/': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec/': typeof DashboardHiveExecIndexRoute
   '/dashboard/hive-training/': typeof DashboardHiveTrainingIndexRoute
-  '/dashboard/smart-import/': typeof DashboardSmartImportIndexRoute
   '/dashboard/team-members/': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
-  '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/dashboard/compliance/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
@@ -1463,8 +1418,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/hive-exec/states/$stateCode': typeof DashboardHiveExecStatesStateCodeRouteWithChildren
   '/dashboard/hive-training/course/$assignmentId': typeof DashboardHiveTrainingCourseAssignmentIdRoute
   '/dashboard/my-obligations/course/$instanceId': typeof DashboardMyObligationsCourseInstanceIdRoute
-  '/dashboard/smart-import/$jobId/done': typeof DashboardSmartImportJobIdDoneRoute
-  '/dashboard/smart-import/$jobId/review': typeof DashboardSmartImportJobIdReviewRoute
   '/api/public/oauth/gmail/callback': typeof ApiPublicOauthGmailCallbackRoute
   '/dashboard/hive-exec/states/$stateCode/onboarding': typeof DashboardHiveExecStatesStateCodeOnboardingRoute
 }
@@ -1589,7 +1542,6 @@ export interface FileRoutesByTo {
   '/dashboard/hive-exec/billing-approvals': typeof DashboardHiveExecBillingApprovalsRoute
   '/dashboard/hive-exec/classes': typeof DashboardHiveExecClassesRoute
   '/dashboard/hive-exec/command': typeof DashboardHiveExecCommandRoute
-  '/dashboard/hive-exec/company-migration': typeof DashboardHiveExecCompanyMigrationRoute
   '/dashboard/hive-exec/features': typeof DashboardHiveExecFeaturesRoute
   '/dashboard/hive-exec/functionality': typeof DashboardHiveExecFunctionalityRoute
   '/dashboard/hive-exec/health': typeof DashboardHiveExecHealthRoute
@@ -1617,13 +1569,13 @@ export interface FileRoutesByTo {
   '/dashboard/settings/gmail': typeof DashboardSettingsGmailRoute
   '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
   '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
+  '/dashboard/settings/recently-deleted': typeof DashboardSettingsRecentlyDeletedRoute
   '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
   '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
   '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
   '/dashboard/settings/subscription': typeof DashboardSettingsSubscriptionRoute
   '/dashboard/settings/team-access': typeof DashboardSettingsTeamAccessRoute
   '/dashboard/shift/$shiftId': typeof DashboardShiftShiftIdRoute
-  '/dashboard/smart-import/history': typeof DashboardSmartImportHistoryRoute
   '/dashboard/team-members/$staffId': typeof DashboardTeamMembersStaffIdRoute
   '/dashboard/workspace/$clientId': typeof DashboardWorkspaceClientIdRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
@@ -1634,13 +1586,11 @@ export interface FileRoutesByTo {
   '/dashboard/forms': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec': typeof DashboardHiveExecIndexRoute
   '/dashboard/hive-training': typeof DashboardHiveTrainingIndexRoute
-  '/dashboard/smart-import': typeof DashboardSmartImportIndexRoute
   '/dashboard/team-members': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
-  '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/dashboard/compliance/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
@@ -1652,8 +1602,6 @@ export interface FileRoutesByTo {
   '/dashboard/hive-exec/states/$stateCode': typeof DashboardHiveExecStatesStateCodeRouteWithChildren
   '/dashboard/hive-training/course/$assignmentId': typeof DashboardHiveTrainingCourseAssignmentIdRoute
   '/dashboard/my-obligations/course/$instanceId': typeof DashboardMyObligationsCourseInstanceIdRoute
-  '/dashboard/smart-import/$jobId/done': typeof DashboardSmartImportJobIdDoneRoute
-  '/dashboard/smart-import/$jobId/review': typeof DashboardSmartImportJobIdReviewRoute
   '/api/public/oauth/gmail/callback': typeof ApiPublicOauthGmailCallbackRoute
   '/dashboard/hive-exec/states/$stateCode/onboarding': typeof DashboardHiveExecStatesStateCodeOnboardingRoute
 }
@@ -1739,7 +1687,6 @@ export interface FileRoutesById {
   '/dashboard/scheduler': typeof DashboardSchedulerRoute
   '/dashboard/scheduling': typeof DashboardSchedulingRoute
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
-  '/dashboard/smart-import': typeof DashboardSmartImportRouteWithChildren
   '/dashboard/state-audit': typeof DashboardStateAuditRoute
   '/dashboard/summaries': typeof DashboardSummariesRoute
   '/dashboard/teams': typeof DashboardTeamsRoute
@@ -1788,7 +1735,6 @@ export interface FileRoutesById {
   '/dashboard/hive-exec/billing-approvals': typeof DashboardHiveExecBillingApprovalsRoute
   '/dashboard/hive-exec/classes': typeof DashboardHiveExecClassesRoute
   '/dashboard/hive-exec/command': typeof DashboardHiveExecCommandRoute
-  '/dashboard/hive-exec/company-migration': typeof DashboardHiveExecCompanyMigrationRoute
   '/dashboard/hive-exec/features': typeof DashboardHiveExecFeaturesRoute
   '/dashboard/hive-exec/functionality': typeof DashboardHiveExecFunctionalityRoute
   '/dashboard/hive-exec/health': typeof DashboardHiveExecHealthRoute
@@ -1816,13 +1762,13 @@ export interface FileRoutesById {
   '/dashboard/settings/gmail': typeof DashboardSettingsGmailRoute
   '/dashboard/settings/licensing': typeof DashboardSettingsLicensingRoute
   '/dashboard/settings/phi-access-audit': typeof DashboardSettingsPhiAccessAuditRoute
+  '/dashboard/settings/recently-deleted': typeof DashboardSettingsRecentlyDeletedRoute
   '/dashboard/settings/retention': typeof DashboardSettingsRetentionRoute
   '/dashboard/settings/service-catalog': typeof DashboardSettingsServiceCatalogRoute
   '/dashboard/settings/service-codes': typeof DashboardSettingsServiceCodesRoute
   '/dashboard/settings/subscription': typeof DashboardSettingsSubscriptionRoute
   '/dashboard/settings/team-access': typeof DashboardSettingsTeamAccessRoute
   '/dashboard/shift/$shiftId': typeof DashboardShiftShiftIdRoute
-  '/dashboard/smart-import/history': typeof DashboardSmartImportHistoryRoute
   '/dashboard/team-members/$staffId': typeof DashboardTeamMembersStaffIdRoute
   '/dashboard/workspace/$clientId': typeof DashboardWorkspaceClientIdRoute
   '/e2e/hhs-hub/$clientId': typeof E2eHhsHubClientIdRoute
@@ -1833,13 +1779,11 @@ export interface FileRoutesById {
   '/dashboard/forms/': typeof DashboardFormsIndexRoute
   '/dashboard/hive-exec/': typeof DashboardHiveExecIndexRoute
   '/dashboard/hive-training/': typeof DashboardHiveTrainingIndexRoute
-  '/dashboard/smart-import/': typeof DashboardSmartImportIndexRoute
   '/dashboard/team-members/': typeof DashboardTeamMembersIndexRoute
   '/api/public/hooks/billing-daily-check': typeof ApiPublicHooksBillingDailyCheckRoute
   '/api/public/hooks/gmail-ingest': typeof ApiPublicHooksGmailIngestRoute
   '/api/public/hooks/nectar-draft-tick': typeof ApiPublicHooksNectarDraftTickRoute
   '/api/public/hooks/nectar-schedules': typeof ApiPublicHooksNectarSchedulesRoute
-  '/api/public/hooks/smart-import-reminders': typeof ApiPublicHooksSmartImportRemindersRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
   '/dashboard/compliance_/cert-review/$completionId': typeof DashboardComplianceCertReviewCompletionIdRoute
   '/dashboard/courses/policy/$documentId': typeof DashboardCoursesPolicyDocumentIdRoute
@@ -1851,8 +1795,6 @@ export interface FileRoutesById {
   '/dashboard/hive-exec/states/$stateCode': typeof DashboardHiveExecStatesStateCodeRouteWithChildren
   '/dashboard/hive-training/course/$assignmentId': typeof DashboardHiveTrainingCourseAssignmentIdRoute
   '/dashboard/my-obligations_/course/$instanceId': typeof DashboardMyObligationsCourseInstanceIdRoute
-  '/dashboard/smart-import/$jobId/done': typeof DashboardSmartImportJobIdDoneRoute
-  '/dashboard/smart-import/$jobId/review': typeof DashboardSmartImportJobIdReviewRoute
   '/api/public/oauth/gmail/callback': typeof ApiPublicOauthGmailCallbackRoute
   '/dashboard/hive-exec/states/$stateCode/onboarding': typeof DashboardHiveExecStatesStateCodeOnboardingRoute
 }
@@ -1939,7 +1881,6 @@ export interface FileRouteTypes {
     | '/dashboard/scheduler'
     | '/dashboard/scheduling'
     | '/dashboard/settings'
-    | '/dashboard/smart-import'
     | '/dashboard/state-audit'
     | '/dashboard/summaries'
     | '/dashboard/teams'
@@ -1988,7 +1929,6 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/billing-approvals'
     | '/dashboard/hive-exec/classes'
     | '/dashboard/hive-exec/command'
-    | '/dashboard/hive-exec/company-migration'
     | '/dashboard/hive-exec/features'
     | '/dashboard/hive-exec/functionality'
     | '/dashboard/hive-exec/health'
@@ -2016,13 +1956,13 @@ export interface FileRouteTypes {
     | '/dashboard/settings/gmail'
     | '/dashboard/settings/licensing'
     | '/dashboard/settings/phi-access-audit'
+    | '/dashboard/settings/recently-deleted'
     | '/dashboard/settings/retention'
     | '/dashboard/settings/service-catalog'
     | '/dashboard/settings/service-codes'
     | '/dashboard/settings/subscription'
     | '/dashboard/settings/team-access'
     | '/dashboard/shift/$shiftId'
-    | '/dashboard/smart-import/history'
     | '/dashboard/team-members/$staffId'
     | '/dashboard/workspace/$clientId'
     | '/e2e/hhs-hub/$clientId'
@@ -2033,13 +1973,11 @@ export interface FileRouteTypes {
     | '/dashboard/forms/'
     | '/dashboard/hive-exec/'
     | '/dashboard/hive-training/'
-    | '/dashboard/smart-import/'
     | '/dashboard/team-members/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
     | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
-    | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
     | '/dashboard/compliance/cert-review/$completionId'
     | '/dashboard/courses/policy/$documentId'
@@ -2051,8 +1989,6 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/states/$stateCode'
     | '/dashboard/hive-training/course/$assignmentId'
     | '/dashboard/my-obligations/course/$instanceId'
-    | '/dashboard/smart-import/$jobId/done'
-    | '/dashboard/smart-import/$jobId/review'
     | '/api/public/oauth/gmail/callback'
     | '/dashboard/hive-exec/states/$stateCode/onboarding'
   fileRoutesByTo: FileRoutesByTo
@@ -2177,7 +2113,6 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/billing-approvals'
     | '/dashboard/hive-exec/classes'
     | '/dashboard/hive-exec/command'
-    | '/dashboard/hive-exec/company-migration'
     | '/dashboard/hive-exec/features'
     | '/dashboard/hive-exec/functionality'
     | '/dashboard/hive-exec/health'
@@ -2205,13 +2140,13 @@ export interface FileRouteTypes {
     | '/dashboard/settings/gmail'
     | '/dashboard/settings/licensing'
     | '/dashboard/settings/phi-access-audit'
+    | '/dashboard/settings/recently-deleted'
     | '/dashboard/settings/retention'
     | '/dashboard/settings/service-catalog'
     | '/dashboard/settings/service-codes'
     | '/dashboard/settings/subscription'
     | '/dashboard/settings/team-access'
     | '/dashboard/shift/$shiftId'
-    | '/dashboard/smart-import/history'
     | '/dashboard/team-members/$staffId'
     | '/dashboard/workspace/$clientId'
     | '/e2e/hhs-hub/$clientId'
@@ -2222,13 +2157,11 @@ export interface FileRouteTypes {
     | '/dashboard/forms'
     | '/dashboard/hive-exec'
     | '/dashboard/hive-training'
-    | '/dashboard/smart-import'
     | '/dashboard/team-members'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
     | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
-    | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
     | '/dashboard/compliance/cert-review/$completionId'
     | '/dashboard/courses/policy/$documentId'
@@ -2240,8 +2173,6 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/states/$stateCode'
     | '/dashboard/hive-training/course/$assignmentId'
     | '/dashboard/my-obligations/course/$instanceId'
-    | '/dashboard/smart-import/$jobId/done'
-    | '/dashboard/smart-import/$jobId/review'
     | '/api/public/oauth/gmail/callback'
     | '/dashboard/hive-exec/states/$stateCode/onboarding'
   id:
@@ -2326,7 +2257,6 @@ export interface FileRouteTypes {
     | '/dashboard/scheduler'
     | '/dashboard/scheduling'
     | '/dashboard/settings'
-    | '/dashboard/smart-import'
     | '/dashboard/state-audit'
     | '/dashboard/summaries'
     | '/dashboard/teams'
@@ -2375,7 +2305,6 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/billing-approvals'
     | '/dashboard/hive-exec/classes'
     | '/dashboard/hive-exec/command'
-    | '/dashboard/hive-exec/company-migration'
     | '/dashboard/hive-exec/features'
     | '/dashboard/hive-exec/functionality'
     | '/dashboard/hive-exec/health'
@@ -2403,13 +2332,13 @@ export interface FileRouteTypes {
     | '/dashboard/settings/gmail'
     | '/dashboard/settings/licensing'
     | '/dashboard/settings/phi-access-audit'
+    | '/dashboard/settings/recently-deleted'
     | '/dashboard/settings/retention'
     | '/dashboard/settings/service-catalog'
     | '/dashboard/settings/service-codes'
     | '/dashboard/settings/subscription'
     | '/dashboard/settings/team-access'
     | '/dashboard/shift/$shiftId'
-    | '/dashboard/smart-import/history'
     | '/dashboard/team-members/$staffId'
     | '/dashboard/workspace/$clientId'
     | '/e2e/hhs-hub/$clientId'
@@ -2420,13 +2349,11 @@ export interface FileRouteTypes {
     | '/dashboard/forms/'
     | '/dashboard/hive-exec/'
     | '/dashboard/hive-training/'
-    | '/dashboard/smart-import/'
     | '/dashboard/team-members/'
     | '/api/public/hooks/billing-daily-check'
     | '/api/public/hooks/gmail-ingest'
     | '/api/public/hooks/nectar-draft-tick'
     | '/api/public/hooks/nectar-schedules'
-    | '/api/public/hooks/smart-import-reminders'
     | '/api/public/webhooks/stripe'
     | '/dashboard/compliance_/cert-review/$completionId'
     | '/dashboard/courses/policy/$documentId'
@@ -2438,8 +2365,6 @@ export interface FileRouteTypes {
     | '/dashboard/hive-exec/states/$stateCode'
     | '/dashboard/hive-training/course/$assignmentId'
     | '/dashboard/my-obligations_/course/$instanceId'
-    | '/dashboard/smart-import/$jobId/done'
-    | '/dashboard/smart-import/$jobId/review'
     | '/api/public/oauth/gmail/callback'
     | '/dashboard/hive-exec/states/$stateCode/onboarding'
   fileRoutesById: FileRoutesById
@@ -2483,7 +2408,6 @@ export interface RootRouteChildren {
   ApiPublicHooksGmailIngestRoute: typeof ApiPublicHooksGmailIngestRoute
   ApiPublicHooksNectarDraftTickRoute: typeof ApiPublicHooksNectarDraftTickRoute
   ApiPublicHooksNectarSchedulesRoute: typeof ApiPublicHooksNectarSchedulesRoute
-  ApiPublicHooksSmartImportRemindersRoute: typeof ApiPublicHooksSmartImportRemindersRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
   ApiPublicOauthGmailCallbackRoute: typeof ApiPublicOauthGmailCallbackRoute
 }
@@ -2733,13 +2657,6 @@ declare module '@tanstack/react-router' {
       path: '/state-audit'
       fullPath: '/dashboard/state-audit'
       preLoaderRoute: typeof DashboardStateAuditRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/smart-import': {
-      id: '/dashboard/smart-import'
-      path: '/smart-import'
-      fullPath: '/dashboard/smart-import'
-      preLoaderRoute: typeof DashboardSmartImportRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/settings': {
@@ -3141,13 +3058,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardTeamMembersIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/smart-import/': {
-      id: '/dashboard/smart-import/'
-      path: '/'
-      fullPath: '/dashboard/smart-import/'
-      preLoaderRoute: typeof DashboardSmartImportIndexRouteImport
-      parentRoute: typeof DashboardSmartImportRoute
-    }
     '/dashboard/hive-training/': {
       id: '/dashboard/hive-training/'
       path: '/hive-training'
@@ -3218,13 +3128,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardTeamMembersStaffIdRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/smart-import/history': {
-      id: '/dashboard/smart-import/history'
-      path: '/history'
-      fullPath: '/dashboard/smart-import/history'
-      preLoaderRoute: typeof DashboardSmartImportHistoryRouteImport
-      parentRoute: typeof DashboardSmartImportRoute
-    }
     '/dashboard/shift/$shiftId': {
       id: '/dashboard/shift/$shiftId'
       path: '/shift/$shiftId'
@@ -3265,6 +3168,13 @@ declare module '@tanstack/react-router' {
       path: '/retention'
       fullPath: '/dashboard/settings/retention'
       preLoaderRoute: typeof DashboardSettingsRetentionRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/recently-deleted': {
+      id: '/dashboard/settings/recently-deleted'
+      path: '/recently-deleted'
+      fullPath: '/dashboard/settings/recently-deleted'
+      preLoaderRoute: typeof DashboardSettingsRecentlyDeletedRouteImport
       parentRoute: typeof DashboardSettingsRoute
     }
     '/dashboard/settings/phi-access-audit': {
@@ -3454,13 +3364,6 @@ declare module '@tanstack/react-router' {
       path: '/features'
       fullPath: '/dashboard/hive-exec/features'
       preLoaderRoute: typeof DashboardHiveExecFeaturesRouteImport
-      parentRoute: typeof DashboardHiveExecRoute
-    }
-    '/dashboard/hive-exec/company-migration': {
-      id: '/dashboard/hive-exec/company-migration'
-      path: '/company-migration'
-      fullPath: '/dashboard/hive-exec/company-migration'
-      preLoaderRoute: typeof DashboardHiveExecCompanyMigrationRouteImport
       parentRoute: typeof DashboardHiveExecRoute
     }
     '/dashboard/hive-exec/command': {
@@ -3722,20 +3625,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/smart-import/$jobId/review': {
-      id: '/dashboard/smart-import/$jobId/review'
-      path: '/$jobId/review'
-      fullPath: '/dashboard/smart-import/$jobId/review'
-      preLoaderRoute: typeof DashboardSmartImportJobIdReviewRouteImport
-      parentRoute: typeof DashboardSmartImportRoute
-    }
-    '/dashboard/smart-import/$jobId/done': {
-      id: '/dashboard/smart-import/$jobId/done'
-      path: '/$jobId/done'
-      fullPath: '/dashboard/smart-import/$jobId/done'
-      preLoaderRoute: typeof DashboardSmartImportJobIdDoneRouteImport
-      parentRoute: typeof DashboardSmartImportRoute
-    }
     '/dashboard/my-obligations_/course/$instanceId': {
       id: '/dashboard/my-obligations_/course/$instanceId'
       path: '/my-obligations/course/$instanceId'
@@ -3811,13 +3700,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/webhooks/stripe'
       fullPath: '/api/public/webhooks/stripe'
       preLoaderRoute: typeof ApiPublicWebhooksStripeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/smart-import-reminders': {
-      id: '/api/public/hooks/smart-import-reminders'
-      path: '/api/public/hooks/smart-import-reminders'
-      fullPath: '/api/public/hooks/smart-import-reminders'
-      preLoaderRoute: typeof ApiPublicHooksSmartImportRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/nectar-schedules': {
@@ -4023,7 +3905,6 @@ interface DashboardHiveExecRouteChildren {
   DashboardHiveExecBillingApprovalsRoute: typeof DashboardHiveExecBillingApprovalsRoute
   DashboardHiveExecClassesRoute: typeof DashboardHiveExecClassesRoute
   DashboardHiveExecCommandRoute: typeof DashboardHiveExecCommandRoute
-  DashboardHiveExecCompanyMigrationRoute: typeof DashboardHiveExecCompanyMigrationRoute
   DashboardHiveExecFeaturesRoute: typeof DashboardHiveExecFeaturesRoute
   DashboardHiveExecFunctionalityRoute: typeof DashboardHiveExecFunctionalityRoute
   DashboardHiveExecHealthRoute: typeof DashboardHiveExecHealthRoute
@@ -4049,8 +3930,6 @@ const DashboardHiveExecRouteChildren: DashboardHiveExecRouteChildren = {
     DashboardHiveExecBillingApprovalsRoute,
   DashboardHiveExecClassesRoute: DashboardHiveExecClassesRoute,
   DashboardHiveExecCommandRoute: DashboardHiveExecCommandRoute,
-  DashboardHiveExecCompanyMigrationRoute:
-    DashboardHiveExecCompanyMigrationRoute,
   DashboardHiveExecFeaturesRoute: DashboardHiveExecFeaturesRoute,
   DashboardHiveExecFunctionalityRoute: DashboardHiveExecFunctionalityRoute,
   DashboardHiveExecHealthRoute: DashboardHiveExecHealthRoute,
@@ -4101,6 +3980,7 @@ interface DashboardSettingsRouteChildren {
   DashboardSettingsGmailRoute: typeof DashboardSettingsGmailRoute
   DashboardSettingsLicensingRoute: typeof DashboardSettingsLicensingRoute
   DashboardSettingsPhiAccessAuditRoute: typeof DashboardSettingsPhiAccessAuditRoute
+  DashboardSettingsRecentlyDeletedRoute: typeof DashboardSettingsRecentlyDeletedRoute
   DashboardSettingsRetentionRoute: typeof DashboardSettingsRetentionRoute
   DashboardSettingsServiceCatalogRoute: typeof DashboardSettingsServiceCatalogRoute
   DashboardSettingsServiceCodesRoute: typeof DashboardSettingsServiceCodesRoute
@@ -4117,6 +3997,7 @@ const DashboardSettingsRouteChildren: DashboardSettingsRouteChildren = {
   DashboardSettingsGmailRoute: DashboardSettingsGmailRoute,
   DashboardSettingsLicensingRoute: DashboardSettingsLicensingRoute,
   DashboardSettingsPhiAccessAuditRoute: DashboardSettingsPhiAccessAuditRoute,
+  DashboardSettingsRecentlyDeletedRoute: DashboardSettingsRecentlyDeletedRoute,
   DashboardSettingsRetentionRoute: DashboardSettingsRetentionRoute,
   DashboardSettingsServiceCatalogRoute: DashboardSettingsServiceCatalogRoute,
   DashboardSettingsServiceCodesRoute: DashboardSettingsServiceCodesRoute,
@@ -4126,23 +4007,6 @@ const DashboardSettingsRouteChildren: DashboardSettingsRouteChildren = {
 
 const DashboardSettingsRouteWithChildren =
   DashboardSettingsRoute._addFileChildren(DashboardSettingsRouteChildren)
-
-interface DashboardSmartImportRouteChildren {
-  DashboardSmartImportHistoryRoute: typeof DashboardSmartImportHistoryRoute
-  DashboardSmartImportIndexRoute: typeof DashboardSmartImportIndexRoute
-  DashboardSmartImportJobIdDoneRoute: typeof DashboardSmartImportJobIdDoneRoute
-  DashboardSmartImportJobIdReviewRoute: typeof DashboardSmartImportJobIdReviewRoute
-}
-
-const DashboardSmartImportRouteChildren: DashboardSmartImportRouteChildren = {
-  DashboardSmartImportHistoryRoute: DashboardSmartImportHistoryRoute,
-  DashboardSmartImportIndexRoute: DashboardSmartImportIndexRoute,
-  DashboardSmartImportJobIdDoneRoute: DashboardSmartImportJobIdDoneRoute,
-  DashboardSmartImportJobIdReviewRoute: DashboardSmartImportJobIdReviewRoute,
-}
-
-const DashboardSmartImportRouteWithChildren =
-  DashboardSmartImportRoute._addFileChildren(DashboardSmartImportRouteChildren)
 
 interface DashboardRouteChildren {
   DashboardAgencyDocumentsRoute: typeof DashboardAgencyDocumentsRoute
@@ -4198,7 +4062,6 @@ interface DashboardRouteChildren {
   DashboardSchedulerRoute: typeof DashboardSchedulerRoute
   DashboardSchedulingRoute: typeof DashboardSchedulingRoute
   DashboardSettingsRoute: typeof DashboardSettingsRouteWithChildren
-  DashboardSmartImportRoute: typeof DashboardSmartImportRouteWithChildren
   DashboardStateAuditRoute: typeof DashboardStateAuditRoute
   DashboardSummariesRoute: typeof DashboardSummariesRoute
   DashboardTeamsRoute: typeof DashboardTeamsRoute
@@ -4283,7 +4146,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardSchedulerRoute: DashboardSchedulerRoute,
   DashboardSchedulingRoute: DashboardSchedulingRoute,
   DashboardSettingsRoute: DashboardSettingsRouteWithChildren,
-  DashboardSmartImportRoute: DashboardSmartImportRouteWithChildren,
   DashboardStateAuditRoute: DashboardStateAuditRoute,
   DashboardSummariesRoute: DashboardSummariesRoute,
   DashboardTeamsRoute: DashboardTeamsRoute,
@@ -4373,8 +4235,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksGmailIngestRoute: ApiPublicHooksGmailIngestRoute,
   ApiPublicHooksNectarDraftTickRoute: ApiPublicHooksNectarDraftTickRoute,
   ApiPublicHooksNectarSchedulesRoute: ApiPublicHooksNectarSchedulesRoute,
-  ApiPublicHooksSmartImportRemindersRoute:
-    ApiPublicHooksSmartImportRemindersRoute,
   ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
   ApiPublicOauthGmailCallbackRoute: ApiPublicOauthGmailCallbackRoute,
 }

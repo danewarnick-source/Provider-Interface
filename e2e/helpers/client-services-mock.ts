@@ -1,13 +1,12 @@
-// Mocked Services & billing and Client file payloads for the client profile
-// e2e (made-up data, no PHI). Built with the real pure helpers so the shapes
-// match src/lib/clients/services-load.ts and file-required.ts.
+// Mocked Services & billing payload for the client profile e2e (made-up
+// data, no PHI). Built with the real pure helpers so the shapes match
+// src/lib/clients/services-load.ts.
 import {
   authorizationView,
   servicesTotals,
   type AuthorizationRow,
 } from "../../src/lib/clients/authorizations";
 import type { ClientServices } from "../../src/lib/clients/services-load";
-import type { RequiredDocRow } from "../../src/lib/clients/file-required";
 
 const row = (over: Partial<AuthorizationRow>): AuthorizationRow => ({
   id: "00000000-0000-4000-a000-0000000009a1",
@@ -57,45 +56,4 @@ export function clientServicesPayload(): ClientServices {
     },
     agencyCodes: ["DSI", "SEI", "HHS", "SLH", "SLN"],
   };
-}
-
-export function requiredDocumentsPayload(): RequiredDocRow[] {
-  return [
-    {
-      key: "1056",
-      label: "1056 (service authorization)",
-      status: "on_file",
-      dueOn: null,
-      docType: "1056_budget",
-      yearly: false,
-      current: {
-        id: "00000000-0000-4000-a000-0000000009c1",
-        document_type: "1056_budget",
-        file_name: "sample-1056.pdf",
-        storage_path: "org/client/1056/sample-1056.pdf",
-        uploaded_at: "2026-06-21T15:00:00.000Z",
-      },
-      href: null,
-    },
-    {
-      key: "medical_exam",
-      label: "Medical exam",
-      status: "missing",
-      dueOn: null,
-      docType: "medical_exam",
-      yearly: true,
-      current: null,
-      href: null,
-    },
-    {
-      key: "photograph",
-      label: "Photograph",
-      status: "due_soon",
-      dueOn: "2026-10-12",
-      docType: null,
-      yearly: false,
-      current: null,
-      href: "/dashboard/clients/x?section=profile",
-    },
-  ];
 }

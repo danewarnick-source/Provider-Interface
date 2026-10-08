@@ -153,7 +153,7 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
         </Group>
 
         <Group header="Enrollment">
-          <Row label="Admitted">{identity?.admission_date ? fmtDate(identity.admission_date) : null}</Row>
+          <Row label="Start date">{identity?.admission_date ? fmtDate(identity.admission_date) : null}</Row>
           <Row label="Discharge date">
             {identity?.admission_date || identity?.discharge_date
               ? (identity?.discharge_date
@@ -195,7 +195,7 @@ export function AboutTab({ client }: { client: CaseloadClient }) {
               </span>
             ) : null}
           </Row>
-          <Row label="Admitted">{identity?.admission_date ? fmtDate(identity.admission_date) : null}</Row>
+          <Row label="Start date">{identity?.admission_date ? fmtDate(identity.admission_date) : null}</Row>
         </Card>
       )}
 

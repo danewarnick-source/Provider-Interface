@@ -1,228 +1,125 @@
-import jsPDF from "jspdf";
+// Renders the progress summary document (progress-summary-doc.ts) as a PDF
+// with the support strategies PDF layout (strategies-pdf-layout.ts): title
+// block (with the agency logo when there is one), the details table, the
+// draft mark, each goal with its supports, progress and evidence, General,
+// Incidents, general notes and the sign-off. Pure (no Supabase), node --test.
 
-export type SummaryPdfPayload = {
-  clientName: string;
-  periodLabel: string;
-  periodStart: string;
-  periodEnd: string;
-  services: string[];
-  content: string;
-  finalizedByName: string;
-  finalizedAt: string;
-  /** Provider display name (org / legal). Never invented. */
-  providerName: string;
-  providerAddress?: string | null;
-  providerPhone?: string | null;
-  supportCoordinatorName?: string | null;
-  supportCoordinatorEmail?: string | null;
-  staffNames?: string[];
-  /** Data-URL or raw base64 image; omit when no uploaded logo. */
-  logoDataUrl?: string | null;
-  aiReviewAttested?: boolean;
-  filingNote?: string | null;
-};
+import { PDFDocument } from "pdf-lib";
+import {
+  ACCENT,
+  MARGIN,
+  MUTED,
+  PAGE_H,
+  PAGE_W,
+  PdfCursor,
+  embedFonts,
+  factsGrid,
+  pdfSafe,
+  stampPageNumbers,
+  titleBlock,
+} from "./clients/strategies-pdf-layout.ts";
+import {
+  NO_PROGRESS_TEXT,
+  evidenceHeading,
+  manualIncidentLine,
+  type SummaryDoc,
+} from "./progress-summary-doc.ts";
 
-const PAGE_MARGIN = 48;
-const PAGE_WIDTH = 612;
-const PAGE_HEIGHT = 792;
-const CONTENT_WIDTH = PAGE_WIDTH - PAGE_MARGIN * 2;
-const NAVY: [number, number, number] = [13, 17, 43];
-const MUTED: [number, number, number] = [92, 100, 120];
+export type PdfLogo = { bytes: Uint8Array; type: "png" | "jpg" };
 
-function fmtDate(iso: string): string {
-  const d = new Date(`${iso.slice(0, 10)}T12:00:00`);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-}
+export async function renderSummaryPdf(
+  doc: SummaryDoc,
+  o: { clientName: string; logo?: PdfLogo | null } = { clientName: "" },
+): Promise<Uint8Array> {
+  const pdf = await PDFDocument.create();
+  pdf.setTitle(pdfSafe(`${doc.title} - ${o.clientName}`));
+  pdf.setCreator("Provider Interface");
+  const fonts = await embedFonts(pdf);
+  const c = new PdfCursor(
+    pdf,
+    fonts,
+    `${doc.provider} · ${doc.title} · ${o.clientName} · Confidential`,
+  );
 
-export function renderSummaryPdf(p: SummaryPdfPayload): Blob {
-  const doc = new jsPDF({ unit: "pt", format: "letter" });
-  let y = PAGE_MARGIN;
-
-  const ensure = (need: number) => {
-    if (y + need > PAGE_HEIGHT - PAGE_MARGIN) {
-      doc.addPage();
-      y = PAGE_MARGIN;
-    }
-  };
-
-  const writeLine = (
-    text: string,
-    opts: {
-      size?: number;
-      bold?: boolean;
-      gap?: number;
-      color?: [number, number, number];
-      maxWidth?: number;
-    } = {},
-  ) => {
-    const size = opts.size ?? 10;
-    const color = opts.color ?? NAVY;
-    doc.setTextColor(...color);
-    doc.setFont("helvetica", opts.bold ? "bold" : "normal");
-    doc.setFontSize(size);
-    const lines = doc.splitTextToSize(text, opts.maxWidth ?? CONTENT_WIDTH) as string[];
-    for (const line of lines) {
-      ensure(size + 4);
-      doc.text(line, PAGE_MARGIN, y);
-      y += size + 4;
-    }
-    if (opts.gap) y += opts.gap;
-  };
-
-  // ── Letterhead ──────────────────────────────────────────────────────────
-  const provider = (p.providerName || "Provider").trim();
-  let logoDrawn = false;
-  if (p.logoDataUrl) {
+  if (o.logo) {
     try {
-      const fmt = p.logoDataUrl.includes("image/png") ? "PNG" : "JPEG";
-      doc.addImage(p.logoDataUrl, fmt, PAGE_MARGIN, y - 4, 48, 48);
-      logoDrawn = true;
+      const img =
+        o.logo.type === "png" ? await pdf.embedPng(o.logo.bytes) : await pdf.embedJpg(o.logo.bytes);
+      const s = img.scaleToFit(110, 40);
+      c.page.drawImage(img, {
+        x: PAGE_W - MARGIN - s.width,
+        y: PAGE_H - MARGIN - 22 - s.height,
+        ...s,
+      });
     } catch {
-      logoDrawn = false;
+      // An unreadable logo never blocks the document.
     }
   }
 
-  const brandX = logoDrawn ? PAGE_MARGIN + 58 : PAGE_MARGIN;
-  doc.setTextColor(...NAVY);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text(provider, brandX, y + 12);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(...MUTED);
-  doc.text("Utah DSPD · Confidential · PHI", brandX, y + 26);
-  if (p.providerAddress || p.providerPhone) {
-    doc.text(
-      [p.providerAddress, p.providerPhone].filter(Boolean).join(" · "),
-      brandX,
-      y + 38,
-      { maxWidth: CONTENT_WIDTH - (logoDrawn ? 58 : 0) - 120 },
-    );
+  titleBlock(c, doc.provider, doc.title);
+  if (doc.draftMark) {
+    c.text(doc.draftMark.toUpperCase(), { size: 9, bold: true, color: ACCENT });
+    c.gap(4);
   }
+  factsGrid(c, doc.facts);
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...NAVY);
-  doc.text("Periodic Progress Summary", PAGE_WIDTH - PAGE_MARGIN, y + 12, { align: "right" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(...MUTED);
-  doc.text("Prepared in PI", PAGE_WIDTH - PAGE_MARGIN, y + 26, { align: "right" });
-  if (p.aiReviewAttested) {
-    doc.text("Draft assist: Nectar", PAGE_WIDTH - PAGE_MARGIN, y + 38, { align: "right" });
-  }
+  const evidence = (lines: string[], indent = 8) => {
+    c.gap(2);
+    c.text(evidenceHeading(lines.length), { size: 8, bold: true, color: MUTED, indent });
+    if (lines.length) for (const l of lines) c.bullet(l, indent + 6, 8.5);
+    else c.text("None.", { size: 9, color: MUTED, indent: indent + 6 });
+  };
 
-  y += 56;
-  doc.setDrawColor(...NAVY);
-  doc.setLineWidth(1.5);
-  doc.line(PAGE_MARGIN, y, PAGE_WIDTH - PAGE_MARGIN, y);
-  y += 16;
-
-  // ── Meta grid ───────────────────────────────────────────────────────────
-  const meta: Array<[string, string]> = [
-    ["Person", p.clientName],
-    ["Period", `${p.periodLabel} · ${fmtDate(p.periodStart)} – ${fmtDate(p.periodEnd)}`],
-    ["Service / billing codes", p.services.join(" · ") || "(none)"],
-    ["Provider", provider],
-    [
-      "Support Coordinator",
-      [p.supportCoordinatorName, p.supportCoordinatorEmail].filter(Boolean).join(" · ") || "Not on file",
-    ],
-    [
-      "Staff who delivered support",
-      (p.staffNames ?? []).filter(Boolean).join(", ") || "See source documentation",
-    ],
-  ];
-
-  const colW = CONTENT_WIDTH / 2;
-  for (let i = 0; i < meta.length; i += 2) {
-    ensure(28);
-    const left = meta[i];
-    const right = meta[i + 1];
-    const drawCell = (cell: [string, string], x: number) => {
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(7);
-      doc.setTextColor(...MUTED);
-      doc.text(cell[0].toUpperCase(), x, y);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(...NAVY);
-      const lines = doc.splitTextToSize(cell[1], colW - 8) as string[];
-      doc.text(lines[0] ?? "", x, y + 12);
-      return lines.length;
-    };
-    const lh = drawCell(left, PAGE_MARGIN);
-    const rh = right ? drawCell(right, PAGE_MARGIN + colW) : 1;
-    y += 12 + Math.max(lh, rh) * 11 + 6;
-  }
-
-  y += 4;
-  doc.setDrawColor(228, 231, 239);
-  doc.setLineWidth(0.5);
-  doc.line(PAGE_MARGIN, y, PAGE_WIDTH - PAGE_MARGIN, y);
-  y += 14;
-
-  // ── Body ────────────────────────────────────────────────────────────────
-  const paragraphs = p.content.split(/\n+/);
-  for (const para of paragraphs) {
-    const trimmed = para.trim();
-    if (!trimmed) {
-      y += 6;
-      continue;
+  doc.goals.forEach((g, gi) => {
+    c.gap(8);
+    c.ensure(60);
+    c.text(`Goal ${gi + 1}`, { size: 8, bold: true, color: MUTED });
+    c.text(g.goal, { size: 12, bold: true, color: ACCENT, lead: 16 });
+    for (const s of g.supports) {
+      c.gap(4);
+      c.ensure(40);
+      c.text(`Support: ${s.support}`, { size: 10.5, bold: true, indent: 8 });
+      if (s.details) c.text(`Support details: ${s.details}`, { size: 9, color: MUTED, indent: 8 });
     }
-    const isHeading =
-      /^[A-Z0-9 ()/.,:-]{3,80}$/.test(trimmed) && trimmed === trimmed.toUpperCase();
-    const isSubHeading = /^Goal:/i.test(trimmed);
-    if (isHeading) {
-      y += 6;
-      writeLine(trimmed, { size: 10, bold: true, gap: 2, color: NAVY });
-    } else if (isSubHeading) {
-      writeLine(trimmed, { size: 10, bold: true, color: NAVY });
-    } else {
-      writeLine(trimmed, { size: 10, gap: 4, color: [42, 47, 66] });
-    }
-  }
-
-  // ── Attestation footer ──────────────────────────────────────────────────
-  y += 14;
-  ensure(110);
-  doc.setDrawColor(228, 231, 239);
-  doc.line(PAGE_MARGIN, y, PAGE_WIDTH - PAGE_MARGIN, y);
-  y += 12;
-
-  doc.setFillColor(250, 251, 254);
-  doc.roundedRect(PAGE_MARGIN, y, CONTENT_WIDTH, 72, 4, 4, "F");
-  doc.setDrawColor(228, 231, 239);
-  doc.roundedRect(PAGE_MARGIN, y, CONTENT_WIDTH, 72, 4, 4, "S");
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
-  doc.setTextColor(...NAVY);
-  const attest =
-    "I reviewed this summary against PI documentation for this person and period. " +
-    "Nectar drafted the narrative from staff/admin records in PI only; I confirm " +
-    "the content is accurate and complete to the best of my knowledge.";
-  const attestLines = doc.splitTextToSize(
-    (p.aiReviewAttested ? "☑ " : "☐ ") + attest,
-    CONTENT_WIDTH - 16,
-  ) as string[];
-  let ay = y + 14;
-  for (const line of attestLines.slice(0, 4)) {
-    doc.text(line, PAGE_MARGIN + 8, ay);
-    ay += 11;
-  }
-
-  y += 84;
-  ensure(40);
-  writeLine(`Prepared by: ${p.finalizedByName}`, { size: 10, bold: true });
-  writeLine(`Finalized: ${new Date(p.finalizedAt).toLocaleString()}`, {
-    size: 9,
-    color: MUTED,
+    c.gap(4);
+    c.text("Progress / summary of services", { size: 8, bold: true, color: MUTED, indent: 8 });
+    c.text(g.progress || NO_PROGRESS_TEXT, { size: 10, indent: 8 });
+    evidence(g.evidence);
   });
-  if (p.filingNote) {
-    writeLine(p.filingNote, { size: 8, color: MUTED, gap: 2 });
+
+  if (doc.general.evidence.length) {
+    c.gap(10);
+    c.rule();
+    c.text("General", { size: 12, bold: true, color: ACCENT, lead: 16 });
+    evidence(doc.general.evidence, 0);
   }
 
-  return doc.output("blob");
+  const { records, manual, notes } = doc.incidents;
+  c.gap(10);
+  c.rule();
+  c.text(`Incidents (${records.length + manual.length})`, {
+    size: 12,
+    bold: true,
+    color: ACCENT,
+    lead: 16,
+  });
+  for (const r of records) c.bullet(r, 6, 9.5);
+  for (const m of manual) c.bullet(manualIncidentLine(m), 6, 9.5);
+  if (notes) c.text(notes, { size: 10 });
+  if (!records.length && !manual.length && !notes)
+    c.text("No incidents this period.", { color: MUTED });
+
+  c.gap(10);
+  c.rule();
+  c.text("General notes", { size: 12, bold: true, color: ACCENT, lead: 16 });
+  c.text(doc.general.notes || "None.", { size: 10, color: doc.general.notes ? undefined : MUTED });
+
+  if (doc.signoff.length) {
+    c.gap(12);
+    c.rule();
+    for (const line of doc.signoff) c.text(line, { size: 8.5, color: MUTED, lead: 12 });
+  }
+
+  stampPageNumbers(pdf, fonts.regular);
+  return pdf.save();
 }

@@ -1,7 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useClientBillingCodes } from "@/components/clients/shared/hooks/use-client-billing-codes";
 import {
   getClientSpecificTraining,
   draftClientSpecificTrainingWithNectar,
@@ -22,17 +21,13 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Sparkles, Loader2, CheckCircle2, RefreshCw, Pencil, Trash2, Plus, ArrowUp, ArrowDown, Shield, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { setStaffClientCodes } from "@/lib/scheduler/setup.functions";
-import { loadActiveCodes } from "@/lib/clients/codes";
 import { todayYmd } from "@/lib/clients/dates";
 import { activeGoalViewsOn } from "@/lib/clients/plans";
 import { GoalTree } from "@/components/clients/profile/plans/goal-tree";
 import { useClientPlans } from "@/components/clients/shared/hooks/use-plan-goals";
-import { useOrgStaff } from "@/components/clients/shared/hooks/use-org-staff";
-import { invalidateTeam } from "@/components/clients/profile/team/team-changes";
+import { PublishConfirmDialog } from "@/components/clients/profile/plans/publish-confirm-dialog";
 
 type Training = {
   id: string;
@@ -174,7 +169,7 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setShowPcspPrompt(false)}>Got it</Button>
+          <Button variant="outline" onClick={() => setShowPcspPrompt(false)}>Close</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -187,18 +182,18 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
           No client-specific training yet. NECTAR will assemble a draft from this client's own authoritative data (intake, PCSP goals, billing codes, active meds, BSP status & published behaviors, rights summary, documents). NECTAR <strong>presents verbatim</strong> — it does not author care guidance.
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={() => pcspReady ? draftMut.mutate(false) : setShowPcspPrompt(true)} disabled={draftMut.isPending}>
+          <Button onClick={() => pcspReady ? draftMut.mutate(false) : setShowPcspPrompt(true)} disabled={draftMut.isPending}>
             {draftMut.isPending
               ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
               : <Sparkles className="mr-1.5 h-3.5 w-3.5 text-amber-500" />}
-            Build from PCSP goals (NECTAR)
+            Build from PCSP goals with Nectar
           </Button>
-          <Button size="sm" variant="outline" onClick={() => pcspReady ? blankMut.mutate() : setShowPcspPrompt(true)} disabled={blankMut.isPending}>
+          <Button variant="outline" onClick={() => pcspReady ? blankMut.mutate() : setShowPcspPrompt(true)} disabled={blankMut.isPending}>
             {blankMut.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-            Write manually
+            Write training manually
           </Button>
           <Button
-            size="sm"
+           
             variant="outline"
             onClick={() => pcspReady ? fileInputRef.current?.click() : setShowPcspPrompt(true)}
             disabled={uploading || !orgId}
@@ -240,25 +235,25 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
         <div className="ml-auto flex flex-wrap gap-2">
           {!editing && (
             <>
-              <Button variant="outline" size="sm" onClick={() => pcspReady ? startEdit() : setShowPcspPrompt(true)}><Pencil className="mr-1.5 h-3.5 w-3.5" />Edit</Button>
-              <Button variant="outline" size="sm" onClick={() => pcspReady ? draftMut.mutate(true) : setShowPcspPrompt(true)} disabled={draftMut.isPending}>
+              <Button variant="outline" onClick={() => pcspReady ? startEdit() : setShowPcspPrompt(true)}><Pencil className="mr-1.5 h-3.5 w-3.5" />Edit training</Button>
+              <Button variant="outline" onClick={() => pcspReady ? draftMut.mutate(true) : setShowPcspPrompt(true)} disabled={draftMut.isPending}>
                 {draftMut.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-1.5 h-3.5 w-3.5" />}
-                Rebuild with NECTAR
+                Rebuild with Nectar
               </Button>
               {training.status !== "published" && (
-                <Button size="sm" onClick={() => pcspReady ? setShowPublishDialog(true) : setShowPcspPrompt(true)} disabled={publishMut.isPending}>
+                <Button onClick={() => pcspReady ? setShowPublishDialog(true) : setShowPcspPrompt(true)} disabled={publishMut.isPending}>
                   {publishMut.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
-                  Approve & Publish
+                  Approve and publish
                 </Button>
               )}
             </>
           )}
           {editing && (
             <>
-              <Button variant="ghost" size="sm" onClick={cancelEdit}>Cancel</Button>
-              <Button size="sm" onClick={saveEdit} disabled={updateMut.isPending}>
+              <Button variant="outline" onClick={cancelEdit}>Cancel</Button>
+              <Button onClick={saveEdit} disabled={updateMut.isPending}>
                 {updateMut.isPending ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-                Save changes
+                Save training
               </Button>
             </>
           )}
@@ -318,12 +313,12 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
           </span>
           <div className="ml-auto">
             {!editingQuestions ? (
-              <Button variant="outline" size="sm" onClick={() => setEditingQuestions(true)}>
+              <Button variant="outline" onClick={() => setEditingQuestions(true)}>
                 <Pencil className="mr-1.5 h-3.5 w-3.5" />
                 {(training.review_questions ?? []).length > 0 ? "Edit questions" : "Add questions"}
               </Button>
             ) : (
-              <Button variant="ghost" size="sm" onClick={() => setEditingQuestions(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setEditingQuestions(false)}>Cancel</Button>
             )}
           </div>
         </div>
@@ -371,19 +366,13 @@ export function ClientSpecificTrainingCard({ clientId }: { clientId: string }) {
 
 // ── Sections rendering & edit controls ─────────────────────────────────────
 export function SectionsView({
-  content, editing, onChange, clientId, showJobCodes,
+  content, editing, onChange,
 }: {
   content: CSTContent;
   editing: boolean;
   onChange: (next: CSTContent) => void;
-  /** When set together with showJobCodes, enables the per-section service
-   *  code picker (support strategies coverage — SOW §1.24(5)). */
-  clientId?: string;
-  showJobCodes?: boolean;
 }) {
   const sections = content.sections ?? [];
-  const { data: billingCodes } = useClientBillingCodes(showJobCodes ? clientId : undefined);
-  const availableCodes = (billingCodes ?? []).map((r) => r.service_code);
 
   function update(next: CSTSection[]) { onChange({ sections: next }); }
   function moveSection(idx: number, dir: -1 | 1) {
@@ -404,12 +393,6 @@ export function SectionsView({
     next[idx] = { ...next[idx], ...patch };
     update(next);
   }
-  function toggleSectionCode(idx: number, code: string) {
-    const current = sections[idx].job_codes ?? [];
-    const next = current.includes(code) ? current.filter((c) => c !== code) : [...current, code];
-    patchSection(idx, { job_codes: next });
-  }
-
   return (
     <div className="space-y-3">
       {sections.length === 0 && (
@@ -429,9 +412,9 @@ export function SectionsView({
             )}
             {editing && (
               <div className="flex gap-1">
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveSection(idx, -1)} disabled={idx === 0}><ArrowUp className="h-3.5 w-3.5" /></Button>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveSection(idx, 1)} disabled={idx === sections.length - 1}><ArrowDown className="h-3.5 w-3.5" /></Button>
-                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deleteSection(idx)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveSection(idx, -1)} disabled={idx === 0} aria-label="Move section up"><ArrowUp className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveSection(idx, 1)} disabled={idx === sections.length - 1} aria-label="Move section down"><ArrowDown className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deleteSection(idx)} aria-label="Remove section"><Trash2 className="h-3.5 w-3.5" /></Button>
               </div>
             )}
           </header>
@@ -449,51 +432,6 @@ export function SectionsView({
                 onDelete={() => patchSection(idx, { items: sec.items.filter((_, j) => j !== i) })}
               />
             ))}
-            {editing && (
-              <Button variant="outline" size="sm" onClick={() => patchSection(idx, { items: [...sec.items, { kind: "text", label: "Note", value: "" }] })}>
-                <Plus className="mr-1.5 h-3.5 w-3.5" />Add note
-              </Button>
-            )}
-            {showJobCodes && (
-              <div className="space-y-1 pt-1">
-                <span className="text-xs font-medium text-muted-foreground">Service codes covered</span>
-                {editing ? (
-                  availableCodes.length === 0 ? (
-                    <p className="text-xs text-amber-700 bg-amber-50/70 border border-amber-200 rounded px-2 py-1.5">
-                      No authorized service codes on file for this client.
-                    </p>
-                  ) : (
-                    <div className="flex flex-wrap gap-1.5">
-                      {availableCodes.map((code) => {
-                        const selected = (sec.job_codes ?? []).includes(code);
-                        return (
-                          <button
-                            key={code}
-                            type="button"
-                            onClick={() => toggleSectionCode(idx, code)}
-                            className={`rounded px-2 py-0.5 text-xs font-mono border transition-colors ${
-                              selected
-                                ? "bg-primary text-primary-foreground border-primary"
-                                : "bg-muted text-muted-foreground border-border hover:border-primary/60 hover:text-foreground"
-                            }`}
-                          >
-                            {code}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )
-                ) : (sec.job_codes ?? []).length > 0 ? (
-                  <div className="flex flex-wrap gap-1">
-                    {(sec.job_codes ?? []).map((c) => (
-                      <span key={c} className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{c}</span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground italic">No codes assigned</p>
-                )}
-              </div>
-            )}
           </div>
         </section>
       ))}
@@ -513,7 +451,7 @@ function ItemView({
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
           {editing && (
-            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete}><Trash2 className="h-3 w-3" /></Button>
+            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete} aria-label="Remove item"><Trash2 className="h-3 w-3" /></Button>
           )}
         </div>
         {editing ? (
@@ -534,7 +472,7 @@ function ItemView({
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
           {editing && (
-            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete}><Trash2 className="h-3 w-3" /></Button>
+            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete} aria-label="Remove item"><Trash2 className="h-3 w-3" /></Button>
           )}
         </div>
         {editing ? (
@@ -557,7 +495,7 @@ function ItemView({
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
           {editing && (
-            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete}><Trash2 className="h-3 w-3" /></Button>
+            <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete} aria-label="Remove item"><Trash2 className="h-3 w-3" /></Button>
           )}
         </div>
         <div className="rounded-md border border-border/40 divide-y divide-border/40">
@@ -571,7 +509,7 @@ function ItemView({
                   <Textarea value={p.value} rows={1} className="flex-1 min-h-[36px]" onChange={(e) => {
                     const pairs = [...item.pairs]; pairs[i] = { ...p, value: e.target.value }; onChange({ ...item, pairs });
                   }} />
-                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => {
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" aria-label="Remove row" onClick={() => {
                     onChange({ ...item, pairs: item.pairs.filter((_, j) => j !== i) });
                   }}><Trash2 className="h-3 w-3" /></Button>
                 </>
@@ -585,7 +523,7 @@ function ItemView({
           ))}
           {editing && (
             <div className="px-2 py-1.5">
-              <Button size="sm" variant="ghost" onClick={() => onChange({ ...item, pairs: [...item.pairs, { label: "", value: "" }] })}>
+              <Button variant="ghost" onClick={() => onChange({ ...item, pairs: [...item.pairs, { label: "", value: "" }] })}>
                 <Plus className="mr-1 h-3 w-3" />Add row
               </Button>
             </div>
@@ -600,7 +538,7 @@ function ItemView({
       <div className="flex items-center gap-2">
         <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
         {editing && (
-          <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete}><Trash2 className="h-3 w-3" /></Button>
+          <Button size="icon" variant="ghost" className="h-6 w-6 ml-auto text-destructive" onClick={onDelete} aria-label="Remove item"><Trash2 className="h-3 w-3" /></Button>
         )}
       </div>
       <ul className="text-sm space-y-0.5">
@@ -665,7 +603,7 @@ export function ReviewQuestionsEditor({
         <div key={q.id} className="rounded-lg border border-border/60 bg-card p-3 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-medium text-muted-foreground">Question {idx + 1}</span>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => removeQ(idx)}>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => removeQ(idx)} aria-label="Remove question">
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -689,207 +627,14 @@ export function ReviewQuestionsEditor({
         </div>
       ))}
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={addQ}>
+        <Button variant="outline" onClick={addQ}>
           <Plus className="mr-1.5 h-3.5 w-3.5" />Add question
         </Button>
-        <Button size="sm" onClick={save} disabled={saving}>
+        <Button onClick={save} disabled={saving}>
           {saving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
           Save questions
         </Button>
       </div>
     </div>
-  );
-}
-
-// ── Publish confirmation dialog ────────────────────────────────────────────
-// Shown when admin clicks "Approve & Publish" on a draft training. Confirms
-// who currently receives the training (= assigned caseload) and optionally
-// assigns additional staff before publishing. Assignment remains the single
-// source of truth for access.
-export function PublishConfirmDialog({
-  open, onOpenChange, clientId, orgId, kindLabel, isPublishing, publishAsync, questions,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  clientId: string;
-  orgId?: string;
-  kindLabel: string;
-  isPublishing: boolean;
-  publishAsync: () => Promise<unknown>;
-  questions?: Array<{ id: string; prompt: string }>;
-}) {
-
-  const qc = useQueryClient();
-  const setStaffCodesFn = useServerFn(setStaffClientCodes);
-  const [stagedAdds, setStagedAdds] = useState<Set<string>>(new Set());
-  const [busy, setBusy] = useState(false);
-
-  const staffQ = useOrgStaff(open ? orgId : undefined);
-
-  const currentQ = useQuery({
-    enabled: !!orgId && !!clientId && open,
-    queryKey: ["client-team-publish", orgId, clientId],
-    queryFn: async (): Promise<{ staffIds: string[]; codes: string[] }> => {
-      const [a, c] = await Promise.all([
-        supabase
-          .from("staff_assignments")
-          .select("staff_id")
-          .eq("organization_id", orgId!)
-          .eq("client_id", clientId),
-        loadActiveCodes(supabase, [clientId]),
-      ]);
-      if (a.error) throw a.error;
-      return {
-        staffIds: (a.data ?? []).map((r) => (r as { staff_id: string }).staff_id),
-        codes: c.get(clientId) ?? [],
-      };
-    },
-  });
-
-  const staff = staffQ.data ?? [];
-  const currentIds = currentQ.data?.staffIds ?? [];
-  // New staff get every authorized code, listed explicitly (narrow later on
-  // the client's Caseload). No authorized codes → nobody can be added.
-  const clientCodes = currentQ.data?.codes ?? [];
-  const currentSet = new Set(currentIds);
-  const assignedStaff = staff.filter((s) => currentSet.has(s.id));
-  const availableStaff = staff.filter((s) => !currentSet.has(s.id));
-  const totalAfter = currentIds.length + stagedAdds.size;
-  const zeroWarn = totalAfter === 0;
-  const loading = staffQ.isLoading || currentQ.isLoading;
-
-  async function handleConfirm() {
-    if (!orgId) return;
-    setBusy(true);
-    try {
-      const adds = Array.from(stagedAdds);
-      if (adds.length > 0) {
-        for (const staffId of adds) {
-          await setStaffCodesFn({
-            data: { organizationId: orgId, staffId, clientId, codes: clientCodes },
-          });
-        }
-        qc.invalidateQueries({ queryKey: ["client-team-publish"] });
-        invalidateTeam(qc);
-      }
-      await publishAsync();
-      const total = currentIds.length + adds.length;
-      toast.success(`Published — ${total} assigned staff will receive it.`);
-      setStagedAdds(new Set());
-      onOpenChange(false);
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Publish failed.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={(v) => { if (!busy && !isPublishing) onOpenChange(v); }}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Approve &amp; publish — who will get this?</DialogTitle>
-          <DialogDescription>
-            Staff assigned to this client automatically receive this {kindLabel} when published.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-          {questions && questions.length > 0 && (
-            <div className="rounded-md border border-border/60 bg-muted/30 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                Questions staff will complete with the client ({questions.length})
-              </p>
-              <ol className="list-decimal pl-5 space-y-2.5 text-sm leading-relaxed marker:text-muted-foreground">
-                {questions.map((q) => (
-                  <li key={q.id} className="pl-1">{q.prompt}</li>
-                ))}
-              </ol>
-              <p className="mt-3 border-t border-border/60 pt-2 text-xs text-muted-foreground">
-                Staff complete these together with the person and attest the responses reflect the individual's own perspective.
-              </p>
-            </div>
-          )}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-              Currently assigned
-            </p>
-
-            {loading ? (
-              <p className="text-sm text-muted-foreground"><Loader2 className="inline h-3.5 w-3.5 animate-spin mr-1.5" />Loading…</p>
-            ) : assignedStaff.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">No staff assigned yet.</p>
-            ) : (
-              <ul className="space-y-1">
-                {assignedStaff.map((s) => (
-                  <li key={s.id} className="flex items-center justify-between gap-2 text-sm rounded border border-border/60 bg-muted/30 px-2 py-1">
-                    <span>{s.name}</span>
-                    <span className="text-xs text-muted-foreground">will receive automatically</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-              Add more staff (assigns them to this client)
-            </p>
-            {loading ? null : clientCodes.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">
-                This client has no authorized codes yet. Add a code before assigning staff.
-              </p>
-            ) : availableStaff.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">All active staff are already assigned.</p>
-            ) : (
-              <div className="space-y-1 max-h-48 overflow-y-auto rounded border p-2">
-                {availableStaff.map((s) => {
-                  const checked = stagedAdds.has(s.id);
-                  return (
-                    <label key={s.id} className="flex items-center gap-2 text-sm cursor-pointer rounded px-1.5 py-1 hover:bg-muted">
-                      <Checkbox
-                        checked={checked}
-                        onCheckedChange={(v) => {
-                          setStagedAdds((prev) => {
-                            const next = new Set(prev);
-                            if (v) next.add(s.id); else next.delete(s.id);
-                            return next;
-                          });
-                        }}
-                      />
-                      <span>{s.name}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-            {!loading && clientCodes.length > 0 && availableStaff.length > 0 && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                Added staff get all of this client&apos;s codes ({clientCodes.join(", ")}). Narrow
-                them on the Caseload tab.
-              </p>
-            )}
-          </div>
-
-          {zeroWarn && !loading && (
-            <div className="rounded-md border border-amber-300/60 bg-amber-50/60 px-3 py-2 text-xs text-amber-900">
-              No staff are assigned to this client yet. You can publish now — staff will receive this {kindLabel} automatically once you assign them. Publish anyway?
-            </div>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy || isPublishing}>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm} disabled={busy || isPublishing || loading || !orgId}>
-            {(busy || isPublishing)
-              ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-              : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
-            Approve &amp; publish
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }

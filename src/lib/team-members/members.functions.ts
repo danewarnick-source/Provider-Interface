@@ -84,9 +84,8 @@ export type HireTeamMemberResult = {
 };
 
 /**
- * One hire path for Add team member, Import team members and Smart Import.
- * Generates the password on the server. Never sends email. Manual adds refuse
- * an existing account; Smart Import links it.
+ * One hire path for Add team member and Import team members. Generates the
+ * password on the server. Never sends email. Refuses an existing account.
  */
 export async function hireTeamMemberInternal(
   data: HireTeamMemberInput,
@@ -265,7 +264,8 @@ async function loadHireContext(organizationId: string): Promise<HireContext> {
       .from("organization_members")
       .select("id, user_id")
       .eq("organization_id", organizationId)
-      .eq("active", true),
+      .eq("active", true)
+      .is("deleted_at", null),
   ]);
   for (const r of [presets, staffTypes, teams, members]) {
     if (r.error) throw new Error(r.error.message);
@@ -692,7 +692,8 @@ export const listTeamMemberFormOptions = createServerFn({ method: "POST" })
         .from("organization_members")
         .select("id, user_id")
         .eq("organization_id", data.organizationId)
-        .eq("active", true),
+        .eq("active", true)
+        .is("deleted_at", null),
     ]);
     for (const r of [teams, staffTypes, members]) {
       if (r.error) throw new Error(r.error.message);
@@ -756,6 +757,7 @@ export const loadTeamMemberEvidenceFacts = createServerFn({ method: "POST" })
     const { data: mems, error: memErr } = await supabaseAdmin
       .from("organization_members")
       .select("user_id")
+      .is("deleted_at", null)
       .eq("organization_id", data.organizationId)
       .in("user_id", data.userIds);
     if (memErr) throw new Error(memErr.message);
@@ -1118,6 +1120,7 @@ export const bulkSetStaffHireDates = createServerFn({ method: "POST" })
     const { data: members, error } = await supabaseAdmin
       .from("organization_members")
       .select("user_id")
+      .is("deleted_at", null)
       .eq("organization_id", data.organizationId)
       .eq("active", true)
       .in(

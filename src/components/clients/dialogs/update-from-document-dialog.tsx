@@ -1,6 +1,7 @@
-// "Update from a document" (profile ⋯ menu): upload a PCSP, 1056 or intake
+// "Update from a document" (profile ⋯ menu): upload a 1056 or intake
 // document, Nectar proposes field updates, the person reviews them against
-// the current values and applies only the ones they tick.
+// the current values and applies only the ones they tick. A PCSP goes
+// through "Upload PCSP" (review → Confirm) instead.
 
 import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -24,7 +25,7 @@ import {
 } from "@/lib/import-checklist.functions";
 import { UpdateProposalsList, type UpdateProposal } from "./update-proposals-list";
 
-type DocType = "pcsp" | "1056_budget" | "other";
+type DocType = "1056_budget" | "other";
 
 export function UpdateFromDocumentDialog({
   open,
@@ -40,7 +41,7 @@ export function UpdateFromDocumentDialog({
   onApplied: () => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [documentType, setDocumentType] = useState<DocType>("pcsp");
+  const [documentType, setDocumentType] = useState<DocType>("1056_budget");
   const [busy, setBusy] = useState<"uploading" | "reading" | null>(null);
   const [reason, setReason] = useState<string | null>(null);
   const [proposals, setProposals] = useState<UpdateProposal[] | null>(null);
@@ -132,10 +133,10 @@ export function UpdateFromDocumentDialog({
                 onChange={(e) => setDocumentType(e.target.value as DocType)}
                 disabled={busy !== null}
               >
-                <option value="pcsp">PCSP</option>
                 <option value="1056_budget">1056</option>
                 <option value="other">Intake / other</option>
               </select>
+              <p className="text-xs text-muted-foreground">For a PCSP, use Upload PCSP.</p>
             </div>
             <div className="rounded-md border border-dashed p-6 text-center">
               <input

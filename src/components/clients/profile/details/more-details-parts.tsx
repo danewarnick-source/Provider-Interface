@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,6 +26,7 @@ import {
   setCustomFieldValue,
 } from "@/lib/clients/custom-fields.functions";
 import { SECTION_LABEL, SECTION_NAMES, type SectionName } from "@/lib/clients/staff-visibility";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
 
 type DataType = "text" | "number" | "boolean" | "date";
 
@@ -99,30 +100,31 @@ export function CustomFieldRow({
             }
             value={value === null || value === false || value === true ? "" : String(value)}
             onChange={(e) => setValue(e.target.value)}
-            className="h-8"
+            className="h-10"
           />
         )}
       </div>
 
       <Button
         type="button"
-        size="sm"
+        variant="outline"
         onClick={() => saveMut.mutate(value)}
         disabled={saveMut.isPending}
+        aria-label={`Save ${field.field_label}`}
       >
         {saveMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
       </Button>
-      <Button
-        type="button"
-        size="icon"
-        variant="ghost"
-        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-        aria-label={`Delete ${field.field_label}`}
-        disabled={deletePending}
-        onClick={onDelete}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
+      <RowMenu
+        label={`More actions for ${field.field_label}`}
+        items={[
+          {
+            label: "Delete field for every client",
+            danger: true,
+            disabled: deletePending,
+            onSelect: onDelete,
+          },
+        ]}
+      />
     </li>
   );
 }
@@ -175,8 +177,8 @@ export function AddCustomFieldButton({ clientId, orgId }: { clientId: string; or
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
-          <Plus className="mr-1 h-3.5 w-3.5" /> Add a detail
+        <Button>
+          <Plus className="h-4 w-4" /> Add detail field
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -200,7 +202,7 @@ export function AddCustomFieldButton({ clientId, orgId }: { clientId: string; or
             <Label htmlFor="cf-type">Type</Label>
             <select
               id="cf-type"
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+              className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
               value={dataType}
               onChange={(e) => setDataType(e.target.value as DataType)}
             >
@@ -214,7 +216,7 @@ export function AddCustomFieldButton({ clientId, orgId }: { clientId: string; or
             <Label htmlFor="cf-section">Staff visibility group</Label>
             <select
               id="cf-section"
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+              className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm"
               value={section}
               onChange={(e) => setSection(e.target.value as SectionName)}
             >
@@ -231,7 +233,7 @@ export function AddCustomFieldButton({ clientId, orgId }: { clientId: string; or
             Cancel
           </Button>
           <Button onClick={() => mut.mutate()} disabled={!label.trim() || mut.isPending}>
-            {mut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Add"}
+            {mut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Add field"}
           </Button>
         </DialogFooter>
       </DialogContent>

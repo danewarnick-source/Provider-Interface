@@ -9,7 +9,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Ban, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
+import { RowMenu } from "@/components/clients/profile/cards/row-menu";
+import { formatDate } from "@/lib/clients/dates";
 import {
   Dialog,
   DialogContent,
@@ -86,51 +89,50 @@ export function DoNotScheduleCard({
   });
 
   return (
-    <Card data-testid="client-do-not-schedule">
-      <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <div>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Ban className="h-4 w-4" /> Do not schedule
-          </CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">
-            The scheduler won't place these team members with this client and says why.
-          </p>
-        </div>
-        {canEdit ? (
-          <Button size="sm" variant="outline" onClick={() => setAdding(true)}>
-            <Plus className="mr-1 h-4 w-4" /> Add
+    <SectionCard
+      icon={Ban}
+      tone="ok"
+      title="Do not schedule"
+      description="Team members who must never work with this client, and why. The scheduler refuses them."
+      testId="client-do-not-schedule"
+      actions={
+        canEdit ? (
+          <Button variant="outline" onClick={() => setAdding(true)}>
+            <Plus className="h-4 w-4" /> Add to do-not-schedule list
           </Button>
-        ) : null}
-      </CardHeader>
-      <CardContent>
-        {exclusions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nobody is on the list.</p>
-        ) : (
-          <ul className="divide-y rounded border">
-            {exclusions.map((e) => (
-              <li key={e.id} className="flex flex-wrap items-start gap-2 px-3 py-2 text-sm">
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium">{names?.get(e.staff_user_id) ?? "Team member"}</p>
-                  <p className="whitespace-pre-wrap text-xs text-muted-foreground">{e.reason}</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Since {new Date(e.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-                {canEdit ? (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={endM.isPending}
-                    onClick={() => endM.mutate(e.id)}
-                  >
-                    End
-                  </Button>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
+        ) : null
+      }
+    >
+      {exclusions.length === 0 ? (
+        <EmptyState>Nobody is on the list.</EmptyState>
+      ) : (
+        <ul className="divide-y rounded-xl border">
+          {exclusions.map((e) => (
+            <li key={e.id} className="flex flex-wrap items-start gap-2 px-3 py-2 text-sm">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium">{names?.get(e.staff_user_id) ?? "Team member"}</p>
+                <p className="whitespace-pre-wrap text-xs text-muted-foreground">{e.reason}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Since {formatDate(e.created_at)}
+                </p>
+              </div>
+              {canEdit ? (
+                <RowMenu
+                  label={`More actions for ${names?.get(e.staff_user_id) ?? "this team member"}`}
+                  items={[
+                    {
+                      label: "Take off the list",
+                      danger: true,
+                      disabled: endM.isPending,
+                      onSelect: () => endM.mutate(e.id),
+                    },
+                  ]}
+                />
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
       <Dialog open={adding} onOpenChange={setAdding}>
         <DialogContent>
           <DialogHeader>
@@ -154,7 +156,7 @@ export function DoNotScheduleCard({
                 </SelectContent>
               </Select>
               {onTeam ? (
-                <p className="text-xs text-amber-700 dark:text-amber-400">
+                <p className="text-xs font-medium text-[var(--hive-danger-fg)]">
                   This also takes them off the client's codes.
                 </p>
               ) : null}
@@ -180,6 +182,6 @@ export function DoNotScheduleCard({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+    </SectionCard>
   );
 }

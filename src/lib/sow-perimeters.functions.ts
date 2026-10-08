@@ -199,6 +199,7 @@ export const computeSowAlerts = createServerFn({ method: "POST" })
     const { data: memberRows } = await sb
       .from("organization_members")
       .select("user_id")
+      .is("deleted_at", null)
       .eq("organization_id", orgId);
     const memberIds: string[] = (memberRows ?? [])
       .map((m: { user_id: string | null }) => m.user_id)
@@ -225,7 +226,11 @@ export const computeSowAlerts = createServerFn({ method: "POST" })
           .from("nectar_requirements")
           .select("id, title, review_status, metadata")
           .eq("organization_id", orgId),
-        sb.from("clients").select("id, first_name, last_name").eq("organization_id", orgId),
+        sb
+          .from("clients")
+          .select("id, first_name, last_name")
+          .is("deleted_at", null)
+          .eq("organization_id", orgId),
       ]);
 
     type Profile = {
@@ -375,6 +380,7 @@ export const getMissingThirtyDayStaffIds = createServerFn({ method: "POST" })
     const { data: memberRows } = await sb
       .from("organization_members")
       .select("user_id")
+      .is("deleted_at", null)
       .eq("organization_id", orgId);
     const memberIds: string[] = (memberRows ?? [])
       .map((m: { user_id: string | null }) => m.user_id)
@@ -417,6 +423,7 @@ export const getMissingAbiStaffIds = createServerFn({ method: "POST" })
     const { data: memberRows } = await sb
       .from("organization_members")
       .select("user_id")
+      .is("deleted_at", null)
       .eq("organization_id", orgId);
     const memberIds: string[] = (memberRows ?? [])
       .map((m: { user_id: string | null }) => m.user_id)

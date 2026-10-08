@@ -1,5 +1,5 @@
 // =============================================================
-// Prompt 15 — provider scoping for Smart Import.
+// Provider scoping for PCSP service lines (document uploads, PCSP reader).
 //
 // Classifies an extracted PCSP service line into one of three buckets,
 // using:

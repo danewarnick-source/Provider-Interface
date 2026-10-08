@@ -2,7 +2,6 @@
 // Missing), the facts behind them and the audit pack. Built from existing
 // client artifacts (file-index-queries.ts); no tables of its own.
 
-import { personNeedsSupportStrategies } from "@/lib/audit-evidence";
 import {
   buildClientFileCards,
   tallyClientFileCards,
@@ -11,9 +10,9 @@ import {
   type ClientFileSummary,
 } from "./file";
 import type { ClientFileDoc } from "./file-docs";
-import { strategiesDueOn } from "./plan-dates";
 import { currentPlan, type ClientPlan } from "./plans";
-import { loadFileRows, loadObligationStatus, maybe, type AnySupabase } from "./file-index-queries";
+import { loadFileRows, loadHousemateStatus, maybe, type AnySupabase } from "./file-index-queries";
+import { loadStrategyStates } from "./strategy-sends.server";
 
 export type ClientFileMatrixRow = {
   client_id: string;
@@ -77,6 +76,7 @@ export async function loadOrgClientFileIndex(
         .select(
           "id, first_name, last_name, account_status, is_own_guardian, grievance_acknowledged, grievance_signed_date, client_photo_url, client_photo_taken_on",
         )
+        .is("deleted_at", null)
         .eq("organization_id", organizationId),
     [] as ClientRow[],
   );
@@ -88,7 +88,7 @@ export async function loadOrgClientFileIndex(
 
   const clientIds = scoped.map((c) => c.id);
 
-  const { codeRows, docRows, belongRows, summaryRows, pbaRows, ssRows, planRows } =
+  const { codeRows, docRows, belongRows, summaryRows, pbaRows, planRows } =
     await loadFileRows(supabase, organizationId, clientIds);
 
   const plansByClient = new Map<string, ClientPlan[]>();
@@ -129,16 +129,11 @@ export async function loadOrgClientFileIndex(
   }
 
   const pbaClients = new Set(pbaRows.map((r) => r.client_id));
-  const publishedStrategies = new Set(
-    ssRows
-      .filter((r) => r.status === "published" || r.status === "approved")
-      .map((r) => r.client_id),
-  );
-  const { strategyStatuses, housemateByClient } = await loadObligationStatus(
-    supabase,
-    organizationId,
-    clientIds,
-  );
+  const housemateByClient = await loadHousemateStatus(supabase, organizationId, clientIds);
+  const strategyStates = await loadStrategyStates(supabase, organizationId, clientIds, {
+    codes: new Map([...codesByClient].map(([id, set]) => [id, [...set]])),
+    plans: plansByClient,
+  });
 
   const now = new Date();
   const clients: ClientFileMatrixRow[] = [];
@@ -150,16 +145,6 @@ export async function loadOrgClientFileIndex(
     const codes = Array.from(codesByClient.get(c.id) ?? []).sort();
     const plan = currentPlan(plansByClient.get(c.id) ?? [], now);
     const docs = docsByClient.get(c.id) ?? [];
-    const strategyList = strategyStatuses.get(c.id) ?? [];
-    let supportOk = false;
-    if (!personNeedsSupportStrategies(codes)) {
-      supportOk = false;
-    } else if (strategyList.some((s) => s === "completed")) {
-      supportOk = true;
-    } else if (publishedStrategies.has(c.id)) {
-      supportOk = true;
-    }
-
     const facts: ClientFileFacts = {
       codes,
       photoPath: c.client_photo_url || null,
@@ -169,8 +154,7 @@ export async function loadOrgClientFileIndex(
       planEndDate: plan?.end_date?.slice(0, 10) ?? null,
       docs,
       belongingsOn: belongByClient.get(c.id) ?? null,
-      supportStrategiesOk: supportOk,
-      supportStrategiesDueAt: strategiesDueOn(plan),
+      strategies: strategyStates.get(c.id) ?? { kind: "not_needed" },
       housemateOnFile: housemateByClient.get(c.id)?.onFile ?? false,
       housemateDueAt: housemateByClient.get(c.id)?.dueAt ?? null,
       summaries: summariesByClient.get(c.id) ?? [],

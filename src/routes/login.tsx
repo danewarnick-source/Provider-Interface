@@ -157,6 +157,7 @@ function LoginPage() {
               .select(
                 "access_level, organization_id, organizations(name, is_demo, display_acronym)",
               )
+              .is("deleted_at", null)
               .eq("user_id", session.user.id)
               .eq("active", true);
             if (error) {
@@ -185,6 +186,7 @@ function LoginPage() {
             .select(
               "id, organization_id, access_level, organizations(name, is_demo, display_acronym)",
             )
+            .is("deleted_at", null)
             .eq("user_id", session.user.id)
             .eq("active", true);
           let rows = memberships ?? [];
@@ -203,6 +205,7 @@ function LoginPage() {
               .select(
                 "id, organization_id, access_level, organizations(name, is_demo, display_acronym)",
               )
+              .is("deleted_at", null)
               .eq("user_id", session.user.id)
               .eq("active", true);
             rows = refreshed ?? [];

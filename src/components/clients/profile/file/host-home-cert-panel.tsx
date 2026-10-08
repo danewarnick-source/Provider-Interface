@@ -2,8 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BadgeCheck } from "lucide-react";
+import { formatDate } from "@/lib/clients/dates";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { ReadOnlyTable } from "@/components/clients/profile/read-only-table";
 
 export function HostHomeCertPanel({ clientId, orgId }: { clientId: string; orgId?: string }) {
@@ -23,27 +25,27 @@ export function HostHomeCertPanel({ clientId, orgId }: { clientId: string; orgId
     },
   });
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Host-home certifications</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <ReadOnlyTable
-          loading={q.isLoading}
-          empty="No host-home certifications on file."
-          rows={q.data ?? []}
-          columns={[
-            { header: "Inspection", cell: (r) => r.inspection_date ?? "—" },
-            { header: "Cert type", cell: (r) => r.cert_type ?? "—" },
-            { header: "Next due", cell: (r) => r.next_due_date ?? "—" },
-            {
-              header: "Determination",
-              cell: (r) => <Badge variant="outline">{r.determination ?? "—"}</Badge>,
-            },
-            { header: "Inspector", cell: (r) => r.inspector_name ?? "—" },
-          ]}
-        />
-      </CardContent>
-    </Card>
+    <SectionCard
+      icon={BadgeCheck}
+      tone="info"
+      title="Host-home certifications"
+      description="Inspections of the host home and when the next one is due."
+    >
+      <ReadOnlyTable
+        loading={q.isLoading}
+        empty="No host-home certifications on file."
+        rows={q.data ?? []}
+        columns={[
+          { header: "Inspection", cell: (r) => formatDate(r.inspection_date) },
+          { header: "Cert type", cell: (r) => r.cert_type ?? "—" },
+          { header: "Next due", cell: (r) => formatDate(r.next_due_date) },
+          {
+            header: "Determination",
+            cell: (r) => <StatusTag>{r.determination ?? "—"}</StatusTag>,
+          },
+          { header: "Inspector", cell: (r) => r.inspector_name ?? "—" },
+        ]}
+      />
+    </SectionCard>
   );
 }

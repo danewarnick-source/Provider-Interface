@@ -1,25 +1,44 @@
 // Units left per authorized code, with a marker for where today's pace
 // says usage should be (share of the authorization year gone by).
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Gauge } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SectionCard } from "@/components/clients/profile/cards/section-card";
+import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { formatDate } from "@/lib/clients/dates";
 import type { CodePace } from "@/lib/clients/readiness";
 import { UnitsBar } from "../services/units-bar";
 
-export function UnitsCard({ paces, loading }: { paces: CodePace[]; loading: boolean }) {
+export function UnitsCard({
+  paces,
+  loading,
+  onOpenServices,
+}: {
+  paces: CodePace[];
+  loading: boolean;
+  onOpenServices: () => void;
+}) {
   return (
-    <Card data-testid="client-units-card">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">Units left</CardTitle>
-        <p className="text-xs text-muted-foreground">
-          The line marks where today's pace should be.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <SectionCard
+      icon={Gauge}
+      tone="profile"
+      title="Units left"
+      description="How much of each authorization is used, and the pace. The line marks where today's pace should be."
+      testId="client-units-card"
+    >
+      <div className="space-y-3">
         {loading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : paces.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No active authorizations.</p>
+          <EmptyState
+            action={
+              <Button variant="outline" onClick={onOpenServices}>
+                Open Services
+              </Button>
+            }
+          >
+            No active authorizations.
+          </EmptyState>
         ) : (
           paces.map((p) => (
             <div key={`${p.code}-${p.start}`} data-testid="client-units-row">
@@ -42,7 +61,7 @@ export function UnitsCard({ paces, loading }: { paces: CodePace[]; loading: bool
             </div>
           ))
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </SectionCard>
   );
 }

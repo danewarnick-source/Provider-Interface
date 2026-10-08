@@ -1,13 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
-  addClientFormSchema,
   authorizationRows,
   clientValues,
   contactRows,
   emptyAddClientForm,
   findMedicaidDuplicate,
-  formFromDraftValues,
   formProblems,
   normalizeMedicaidId,
   prefillFromPcsp,
@@ -65,8 +63,11 @@ describe("formProblems", () => {
 
 describe("row mapping", () => {
   it("maps clients values and blanks to null", () => {
-    const v = clientValues(filledForm({ client_pid: " ", phone: "555-0100" }));
+    const v = clientValues(
+      filledForm({ client_pid: " ", phone: "555-0100", start_date: "2026-09-01" }),
+    );
     assert.equal(v.client_pid, null);
+    assert.equal(v.admission_date, "2026-09-01");
     assert.equal(v.phone_number, "555-0100");
     assert.equal(v.physical_address, "100 Sample St");
     assert.equal(v.account_status, "active");
@@ -144,6 +145,7 @@ describe("prefillFromPcsp", () => {
     person: {
       name: "Pat Q. Example",
       pid: "0000000",
+      dob: "1990-01-02",
       residentialAddress: "100 Sample Street",
       mailingAddress: "",
       phone: "555-0100",
@@ -189,23 +191,21 @@ describe("prefillFromPcsp", () => {
     issues: [],
   } as PcspResult;
 
-  it("fills empty fields and tags them; only our codes", () => {
+  it("fills empty fields and tags them; codes are left to the PCSP review", () => {
     const { form, filled } = prefillFromPcsp(emptyAddClientForm(), pcsp);
     assert.equal(form.first_name, "Pat");
     assert.equal(form.last_name, "Example");
     assert.equal(form.client_pid, "0000000");
     assert.equal(form.support_coordinator.company, "Sample Co");
-    assert.deepEqual(
-      form.codes.map((c) => [c.code, c.units, c.waiting]),
-      [["DSI", 2000, false]],
-    );
+    assert.equal(form.date_of_birth, "1990-01-02");
+    assert.deepEqual(form.codes, []);
     assert.deepEqual(filled, [
       "name",
       "client_pid",
+      "date_of_birth",
       "phone",
       "address",
       "support_coordinator",
-      "codes",
     ]);
   });
   it("never overwrites what was typed", () => {
@@ -214,32 +214,5 @@ describe("prefillFromPcsp", () => {
     assert.equal(form.phone, "555-9999");
     assert.equal(form.address, "100 Sample St");
     assert.ok(!filled.includes("name") && !filled.includes("phone") && !filled.includes("address"));
-  });
-});
-
-describe("formFromDraftValues", () => {
-  it("maps imported fields and parses the form schema", () => {
-    const f = formFromDraftValues({
-      first_name: "Pat",
-      last_name: "Example",
-      medicaid_id: "0000000001",
-      physical_address: "100 Sample St",
-      is_own_guardian: "false",
-      guardian_name: "Gale",
-      guardian_phone: "555-0102",
-      authorized_dspd_codes: "dsi, HHS;DSI",
-      date_of_birth: "not a date",
-    });
-    assert.equal(f.is_own_guardian, false);
-    assert.equal(f.guardian.name, "Gale");
-    assert.equal(f.date_of_birth, null);
-    assert.deepEqual(
-      f.codes.map((c) => [c.code, c.waiting]),
-      [
-        ["DSI", true],
-        ["HHS", true],
-      ],
-    );
-    assert.equal(addClientFormSchema.safeParse(f).success, true);
   });
 });

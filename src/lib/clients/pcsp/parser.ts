@@ -3,11 +3,12 @@
 // plus a list of issues for a person to review. Anything the reader can't
 // place is reported, never guessed.
 
+import { ourAgencyMatcher } from "./agency-match.ts";
 import type { LayoutPage } from "./layout.ts";
 import { readGoals } from "./parser-goals.ts";
 import { runChecks } from "./parser-checks.ts";
 import {
-  indent, longDate, ourAgencyMatcher, SECTIONS, squash, usDate,
+  indent, longDate, SECTIONS, squash, usDate,
   type Issue, type L, type PcspOptions, type PcspResult,
 } from "./parser-shared.ts";
 import {
@@ -44,8 +45,8 @@ function pageBodies(pages: LayoutPage[], res: PcspResult, issues: Issue[]): L[] 
       const cut = heads.length > 1 ? heads[1] : 0;
       keep = keep.slice(0, cut);
       issues.push({ level: "warn", page: p.index, message: cut
-        ? "The bottom of this page is printed on top of itself. The readable top part was used; the overlapping part was skipped. Check it by eye."
-        : "This page's text is printed on top of itself and was skipped. Check it by eye." });
+        ? `Page ${p.index} didn't print cleanly in this PDF, so part of it couldn't be read. Open page ${p.index} of the PCSP and check that the goals and supports from that page are listed below.`
+        : `Page ${p.index} couldn't be read at all. Open page ${p.index} of the PCSP and add anything from it by hand.` });
     }
     for (const l of keep) if (!FOOTER.test(l.text.trim())) body.push(l);
   }
@@ -74,7 +75,7 @@ function splitSections(body: L[]): PcspSection[] {
 function emptyResult(): PcspResult {
   return {
     plan: { start: null, end: null, activatedOn: null, status: null, meetingDate: null },
-    person: { name: "", pid: "", residentialAddress: "", mailingAddress: "", phone: "", supportCoordinator: { name: "", email: "", phone: "", company: "" } },
+    person: { name: "", pid: "", dob: null, residentialAddress: "", mailingAddress: "", phone: "", supportCoordinator: { name: "", email: "", phone: "", company: "" } },
     goals: [], nonGoalSupports: [], purchasedServices: [], budget: [], risks: [], aboutMe: [], lastYearGoals: [], issues: [],
   };
 }
@@ -83,7 +84,7 @@ function emptyResult(): PcspResult {
 export function readPcspPages(pages: LayoutPage[], opts: PcspOptions): { result: PcspResult; sections: PcspSection[] } {
   const res = emptyResult();
   const { issues } = res;
-  const isOurs = ourAgencyMatcher(opts.agencyName);
+  const isOurs = ourAgencyMatcher([opts.agencyName, ...(opts.otherNames ?? [])]);
   const body = pageBodies(pages, res, issues);
 
   // Plan dates from the cover line "09/01/2026 - 08/31/2027".
@@ -98,7 +99,7 @@ export function readPcspPages(pages: LayoutPage[], opts: PcspOptions): { result:
   readPerson(get("Personal Information"), res.person);
   readMeetingMinutes(get("Plan Meeting Minutes"), res.plan);
   res.goals = readGoals(get("Goals and Supports"), isOurs, issues);
-  res.nonGoalSupports = readNonGoalSupports(get("Non Goal Supports"));
+  res.nonGoalSupports = readNonGoalSupports(get("Non Goal Supports"), isOurs);
   res.purchasedServices = readPurchasedServices(get("DSPD Purchased Services"), issues);
   res.budget = readBudget(get("Plan Budget"), isOurs, issues);
   res.risks = readRisks(get("List of Identified Risks"));

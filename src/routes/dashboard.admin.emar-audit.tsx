@@ -51,7 +51,7 @@ function AuditPage() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         supabase.from("emar_logs" as any).select("*").eq("organization_id", org!.organization_id).order("scheduled_for", { ascending: false }).limit(2000),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        supabase.from("clients").select("id, first_name, last_name, team_id").eq("organization_id", org!.organization_id) as any,
+        supabase.from("clients").select("id, first_name, last_name, team_id").is("deleted_at", null).eq("organization_id", org!.organization_id) as any,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         supabase.from("client_medications" as any).select("id, medication_name, dosage").eq("organization_id", org!.organization_id),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

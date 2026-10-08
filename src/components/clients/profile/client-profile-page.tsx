@@ -2,7 +2,8 @@
 // Side-menu sections (?section=), header with the ⋯ menu, and the one
 // needs-attention list (lib/clients/readiness.ts) feeding Overview and the
 // menu badges. A discharged client's sections are read-only, with the
-// discharge card on top.
+// discharge card on top. A newly added client shows "Finish setting up"
+// (setup/client-setup.tsx; ?setup=open opens the steps).
 
 import { useEffect, useRef } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
@@ -10,7 +11,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useAccess } from "@/hooks/use-access";
 import { RecordReadOnlyProvider } from "@/hooks/use-record-read-only";
 import { useCurrentOrg } from "@/hooks/use-org";
@@ -25,18 +25,20 @@ import {
   visibleClientSections,
   type ClientProfileSection,
 } from "@/lib/clients/profile-sections";
+import { SectionCard } from "./cards/section-card";
 import { ClientProfileShell } from "./profile-shell";
 import { ClientProfileHeader, isDischarged } from "./profile-header";
 import { DischargeCard } from "./discharge/discharge-card";
 import { SectionBody } from "./section-body";
 import { useClientProfile } from "./use-client-profile";
 import { useClientMoneyPresence } from "./money/use-client-money";
+import { ClientSetup } from "./setup/client-setup";
 
 const profileRoute = getRouteApi("/dashboard/clients/$clientId");
 
 export function ClientProfilePage() {
   const { clientId } = profileRoute.useParams();
-  const { section } = profileRoute.useSearch();
+  const { section, setup } = profileRoute.useSearch();
   const navigate = profileRoute.useNavigate();
   const { data: org, isLoading: orgLoading } = useCurrentOrg();
   const { canCategory } = useAccess();
@@ -96,19 +98,24 @@ export function ClientProfilePage() {
   }
   if (!orgId || !profileQ.data) {
     return (
-      <Card className="m-6 border-rose-200 bg-rose-50/30" data-testid="client-profile-not-found">
-        <CardContent className="space-y-3 p-6 text-sm text-rose-700">
-          <p>
-            <ShieldAlert className="mr-2 inline h-4 w-4" />
-            {profileQ.isError
-              ? "Couldn't load this client. Please try again."
-              : "This client isn't in your agency."}
-          </p>
-          <Button size="sm" variant="outline" asChild>
-            <Link to="/dashboard/clients">Back to Clients</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="container mx-auto max-w-3xl px-4 py-6">
+        <SectionCard
+          icon={ShieldAlert}
+          tone="danger"
+          title={profileQ.isError ? "Couldn't load this client" : "Client not found"}
+          description={
+            profileQ.isError
+              ? "Something went wrong loading the profile. Please try again."
+              : "This client isn't in your agency."
+          }
+          testId="client-profile-not-found"
+          actions={
+            <Button variant="outline" asChild>
+              <Link to="/dashboard/clients">Back to Clients</Link>
+            </Button>
+          }
+        />
+      </div>
     );
   }
 
@@ -133,7 +140,15 @@ export function ClientProfilePage() {
       data-active-section={active}
     >
       <ClientProfileShell
-        header={<ClientProfileHeader orgId={orgId} data={data} onChanged={refresh} />}
+        header={
+          <ClientProfileHeader
+            orgId={orgId}
+            data={data}
+            attention={overviewQ.data?.attention ?? null}
+            onSelect={select}
+            onChanged={refresh}
+          />
+        }
         visible={visible}
         attentionCounts={attentionBySection(attention)}
         attentionTotal={attention.length}
@@ -143,6 +158,23 @@ export function ClientProfilePage() {
         {discharged ? (
           <DischargeCard orgId={orgId} clientId={clientId} onChanged={refresh} />
         ) : null}
+        <ClientSetup
+          orgId={orgId}
+          data={data}
+          overview={overviewQ.data ?? null}
+          open={setup === "open"}
+          discharged={discharged}
+          onOpenChange={(o) =>
+            navigate({ replace: true, search: (prev) => ({ ...prev, setup: o ? "open" : undefined }) })
+          }
+          onSelect={select}
+          onDraftAbout={() =>
+            navigate({
+              replace: true,
+              search: (prev) => ({ ...prev, section: "profile", about: "draft", setup: undefined }),
+            })
+          }
+        />
         <RecordReadOnlyProvider readOnly={discharged}>
           <SectionBody
             section={active}

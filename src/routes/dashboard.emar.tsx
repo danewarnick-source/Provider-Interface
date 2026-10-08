@@ -100,6 +100,7 @@ function EmarPage() {
       let clientsQ = (supabase as any)
         .from("clients")
         .select("id, first_name, last_name, allergies, dysphagia, swallowing_alerts, self_admin_med_support")
+        .is("deleted_at", null)
         .eq("organization_id", org!.organization_id)
         .eq("self_admin_med_support", true);
       if (scopedClientIds) clientsQ = clientsQ.in("id", scopedClientIds);

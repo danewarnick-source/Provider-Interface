@@ -1,6 +1,5 @@
 // Shared text extractors for PDF / DOCX uploads. Server-only.
-// Promoted out of smart-import.functions.ts so multiple flows (Smart Import,
-// per-client uploads, NectarAsk upload+extract) can reuse one path.
+// Shared by per-client uploads and NectarAsk upload+extract.
 
 export async function extractPdfText(buf: Buffer): Promise<string> {
   // unpdf is Worker-compatible (no native deps).
