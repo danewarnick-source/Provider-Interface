@@ -5,7 +5,6 @@
 // and reads that text back into blocks for the card. No Supabase here.
 
 import { docKindLabel, docsPrompt, type AboutDoc } from "./about-me.ts";
-import { formatDate } from "./dates.ts";
 
 export const MUST_KNOW_SECTIONS = [
   { key: "health", heading: "Health" },
@@ -128,31 +127,10 @@ export function formatMustKnows(items: readonly Pick<MustKnowItem, "section" | "
     .join("\n\n");
 }
 
-export type MustKnowBullet = { text: string; details: { label: string; value: string }[] };
-export type MustKnowBlock = { heading: string | null; bullets: MustKnowBullet[]; text: string[] };
+export type MustKnowBlock = { heading: string | null; bullets: string[]; text: string[] };
 
 const BULLET = /^\s*[-•*]\s+/;
 const HEADING = /^[^-•*\s].{0,78}:$/;
-const PCSP_HEAD = /^From PCSP (\d{4}-\d{2}-\d{2}) – (\d{4}-\d{2}-\d{2})$/;
-const DETAILS = /\s(Response time|Response):\s/;
-
-/** "From PCSP 2026-10-01 – 2027-09-30" → "From PCSP Oct 1, 2026 – Sep 30, 2027". */
-function headingLabel(line: string): string {
-  const h = line.replace(/:$/, "").trim();
-  const m = PCSP_HEAD.exec(h);
-  return m ? `From PCSP ${formatDate(m[1])} – ${formatDate(m[2])}` : h;
-}
-
-/** "Risk. Response: Do this. Response time: Immediate." → text + labeled parts. */
-export function splitBullet(line: string): MustKnowBullet {
-  const parts = line.split(DETAILS);
-  const details: MustKnowBullet["details"] = [];
-  for (let i = 1; i + 1 < parts.length; i += 2) {
-    const value = parts[i + 1].trim();
-    if (value) details.push({ label: parts[i], value });
-  }
-  return { text: parts[0].trim(), details };
-}
 
 /** special_directions → blocks: a heading (or none), its bullets and any plain lines. */
 export function parseMustKnows(text: string | null | undefined): MustKnowBlock[] {
@@ -167,9 +145,9 @@ export function parseMustKnows(text: string | null | undefined): MustKnowBlock[]
     if (!line) continue;
     const last: MustKnowBlock | undefined = blocks[blocks.length - 1];
     if (BULLET.test(line)) {
-      (last ?? open(null)).bullets.push(splitBullet(line.replace(BULLET, "")));
+      (last ?? open(null)).bullets.push(line.replace(BULLET, ""));
     } else if (HEADING.test(line)) {
-      open(headingLabel(line));
+      open(line.replace(/:$/, ""));
     } else {
       (last && !last.bullets.length ? last : open(null)).text.push(line);
     }

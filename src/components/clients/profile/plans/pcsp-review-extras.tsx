@@ -1,10 +1,10 @@
-// Risks (→ must-knows) and other agencies' risk/behavior/
-// nursing providers (→ contacts). Each row can be left out.
+// Other agencies' risk/behavior/nursing providers (→ contacts).
+// Each row can be left out.
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ReviewedPcsp } from "@/lib/clients/pcsp/review";
 import type { ReviewEdit } from "./pcsp-review";
 
-type ListKey = "risks" | "otherProviders";
+type ListKey = "otherProviders";
 
 export function PcspReviewExtras({ review, edit }: { review: ReviewedPcsp; edit: ReviewEdit }) {
   const group = (key: ListKey, title: string, where: string, line: (i: number) => string) => (
@@ -31,10 +31,6 @@ export function PcspReviewExtras({ review, edit }: { review: ReviewedPcsp; edit:
   return (
     <section className="space-y-2">
       <h3 className="text-sm font-semibold">Also from the PCSP</h3>
-      {group("risks", "Risks", "Must-knows for staff (marked “From PCSP”)", (i) => {
-        const r = review.risks[i];
-        return [r.risk, r.response && `Response: ${r.response}`, r.responseTime].filter(Boolean).join(" · ");
-      })}
       {group("otherProviders", "Other providers", "Contacts", (i) => {
         const p = review.otherProviders[i];
         return `${p.provider} (${p.code})${p.note ? ` — ${p.note}` : ""}`;

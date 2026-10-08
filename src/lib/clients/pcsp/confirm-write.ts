@@ -1,5 +1,5 @@
 // Writes a confirmed PCSP review: the one writer for everything a PCSP fills
-// (plan year, goals, supports, authorizations, must-knows, blank profile
+// (plan year, goals, supports, authorizations, blank profile
 // fields, support coordinator and other-provider contacts). Takes the
 // caller's Supabase client; the server function runs assertCanManageClient
 // first. Nothing is deleted:
@@ -10,7 +10,7 @@ import { normalizeCodes } from "../plans.ts";
 import { insertPlan } from "../plans-write.ts";
 import { assertRowsChanged } from "../writes.ts";
 import {
-  billingRows, blockHeading, carriedFrom, confirmProblems, contactRows, mergePcspBlock, riskLines,
+  billingRows, carriedFrom, confirmProblems, contactRows,
 } from "./confirm-plan.ts";
 import { coordinatorRow, profilePatch, type ClientProfileRow } from "./confirm-profile.ts";
 import type { ReviewedPcsp, ReviewSupport } from "./review.ts";
@@ -117,16 +117,11 @@ export async function applyReviewedPcsp(sb: Sb, a: ConfirmArgs): Promise<Confirm
   }
 
   const { data: client, error: cErr } = await sb
-    .from("clients").select("special_directions, client_pid, date_of_birth, phone_number, physical_address")
+    .from("clients").select("client_pid, date_of_birth, phone_number, physical_address")
     .eq("id", a.clientId).maybeSingle();
   fail(cErr);
-  const c = (client ?? {}) as Partial<ClientProfileRow> & { special_directions?: string | null };
-  const profile = profilePatch(a.review.person, c);
-  const special = mergePcspBlock(c.special_directions, blockHeading(a.review), riskLines(a.review));
-  const patch = {
-    ...profile.patch,
-    ...(special !== (c.special_directions ?? null) ? { special_directions: special } : {}),
-  };
+  const profile = profilePatch(a.review.person, (client ?? {}) as Partial<ClientProfileRow>);
+  const patch = profile.patch;
   if (Object.keys(patch).length) {
     const { data, error } = await sb.from("clients").update(patch).eq("id", a.clientId).select("id");
     fail(error);

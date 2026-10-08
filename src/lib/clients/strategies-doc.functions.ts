@@ -1,7 +1,8 @@
 // Server function for the support strategies document: reads the APPROVED
 // strategies with the agency, client, plan year, support coordinator and
-// approver, and returns the preview model plus the PDF. Read-only; the
-// caller must be able to view the client (assertCanManageClient "view").
+// approver, and returns the preview model plus the PDF. Read-only, but for
+// editors only (assertCanManageClient "edit"): staff see strategies on the
+// time clock and daily notes, never this document.
 
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -42,7 +43,7 @@ export const getSupportStrategiesDocument = createServerFn({ method: "POST" })
         actorId: userId,
         organizationId: client.organization_id,
         clientId: client.id,
-        action: "view",
+        action: "edit",
       });
 
       const [orgRes, trainingRes, planRes, contacts] = await Promise.all([

@@ -10,7 +10,6 @@ import {
   mustKnowSource,
   mustKnowsPrompt,
   parseMustKnows,
-  splitBullet,
 } from "./must-knows.ts";
 
 const doc = (id: string, type: string, pages: string[]): AboutDoc => ({
@@ -109,7 +108,7 @@ describe("special_directions text", () => {
   it("reads approved text back into the same headings and bullets", () => {
     const blocks = parseMustKnows(formatMustKnows(items));
     assert.deepEqual(
-      blocks.map((b) => [b.heading, b.bullets.map((x) => x.text)]),
+      blocks.map((b) => [b.heading, b.bullets]),
       [
         ["Health", ["Choking risk: cut food small."]],
         ["How to support", ["Stay within arm's reach at meals."]],
@@ -117,31 +116,13 @@ describe("special_directions text", () => {
     );
   });
 
-  it("reads PCSP risk blocks and plain text readably", () => {
-    const blocks = parseMustKnows(
-      "Allergic to cats.\nUses a walker.\n\nFrom PCSP 2026-10-01 – 2027-09-30:\n- Sam has GI problems. Response: Help with meals. Response time: Immediate.",
-    );
-    assert.equal(blocks.length, 2);
-    assert.deepEqual(blocks[0], {
-      heading: null,
-      bullets: [],
-      text: ["Allergic to cats.", "Uses a walker."],
-    });
-    assert.equal(blocks[1].heading, "From PCSP Oct 1, 2026 – Sep 30, 2027");
-    assert.deepEqual(blocks[1].bullets, [
-      {
-        text: "Sam has GI problems.",
-        details: [
-          { label: "Response", value: "Help with meals." },
-          { label: "Response time", value: "Immediate." },
-        ],
-      },
+  it("reads plain text and headed bullets readably", () => {
+    const blocks = parseMustKnows("Allergic to cats.\nUses a walker.\n\nHealth:\n- Has seizures.\n• Uses an inhaler.");
+    assert.deepEqual(blocks, [
+      { heading: null, bullets: [], text: ["Allergic to cats.", "Uses a walker."] },
+      { heading: "Health", bullets: ["Has seizures.", "Uses an inhaler."], text: [] },
     ]);
     assert.deepEqual(parseMustKnows(null), []);
-  });
-
-  it("leaves a bullet without response parts whole", () => {
-    assert.deepEqual(splitBullet("Needs a ramp."), { text: "Needs a ramp.", details: [] });
   });
 });
 

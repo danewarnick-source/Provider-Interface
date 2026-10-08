@@ -66,7 +66,7 @@ const args = (review: ReturnType<typeof initialReview>) => ({
 });
 const review = () => initialReview(parse, proposeCarryOver(parse.goals.map((g) => g.goal), [{ id: "g-cook", goal_text: parse.goals[0].goal }], parse.lastYearGoals));
 
-test("confirm creates the plan, goals, supports, authorizations, must-knows and contacts; about me is left alone", async () => {
+test("confirm creates the plan, goals, supports, and contacts; must-knows and about me are left alone", async () => {
   const db = fakeDb(seed());
   // The plan year in the sample is in the future relative to "today" in some runs; force it current.
   const r = review();
@@ -96,7 +96,7 @@ test("confirm creates the plan, goals, supports, authorizations, must-knows and 
   assert.equal(dsi.rate_per_unit, 8.5);
   assert.equal(db.tables.client_billing_codes.length, 3);
   const client = db.tables.clients[0];
-  assert.match(String(client.special_directions), /^Allergic to cats\.\n\nFrom PCSP 2000-01-01 – 2027-08-31:\n- Choking/);
+  assert.equal(client.special_directions, "Allergic to cats.");
   assert.equal(client.about_me, null);
   // Blank profile fields are filled; the phone a person typed is kept.
   assert.deepEqual([client.client_pid, client.date_of_birth, client.phone_number], ["0000000", "1990-01-02", "555-0199"]);

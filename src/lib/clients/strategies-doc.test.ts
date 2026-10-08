@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { PDFDocument } from "pdf-lib";
 import { buildStrategiesDoc, planYearText, strategiesFileName } from "./strategies-doc.ts";
@@ -101,5 +102,13 @@ describe("renderStrategiesPdf", () => {
 
   it("keeps text the standard fonts can draw", () => {
     assert.equal(pdfSafe("A → B ✓ §–"), "A - B ? §–");
+  });
+});
+
+describe("who can get the document", () => {
+  it("is editors only, never staff", () => {
+    const src = readFileSync(new URL("./strategies-doc.functions.ts", import.meta.url), "utf8");
+    assert.match(src, /action: "edit"/);
+    assert.doesNotMatch(src, /action: "view"/);
   });
 });

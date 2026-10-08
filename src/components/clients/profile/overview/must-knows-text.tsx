@@ -1,6 +1,5 @@
 // Must-knows text (clients.special_directions) drawn as headings and bullet
-// lists; "Response:" parts of a PCSP risk show on their own line. Plain text
-// still shows as written.
+// lists. Plain text still shows as written.
 
 import { parseMustKnows } from "@/lib/clients/must-knows";
 
@@ -26,14 +25,7 @@ export function MustKnowsText({ text }: { text: string }) {
                     aria-hidden
                     className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-hive-gold"
                   />
-                  <div className="min-w-0 break-words">
-                    <span>{bullet.text}</span>
-                    {bullet.details.map((d) => (
-                      <p key={d.label} className="text-muted-foreground">
-                        <span className="font-medium text-hive-ink">{d.label}:</span> {d.value}
-                      </p>
-                    ))}
-                  </div>
+                  <span className="min-w-0 break-words">{bullet}</span>
                 </li>
               ))}
             </ul>
