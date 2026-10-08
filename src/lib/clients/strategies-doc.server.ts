@@ -13,7 +13,7 @@ import type { CSTContent } from "./training.functions";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = any;
 
-export const fullName = (
+const fullName = (
   p: { first_name?: string | null; last_name?: string | null } | null,
 ): string => [p?.first_name, p?.last_name].filter(Boolean).join(" ").trim();
 

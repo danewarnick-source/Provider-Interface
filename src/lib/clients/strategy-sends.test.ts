@@ -3,7 +3,6 @@ import { describe, it } from "node:test";
 import type { EvidenceItemRow } from "../evidence/types.ts";
 import {
   evidenceChip,
-  sendStateText,
   sentLine,
   strategiesApprovedFor,
   strategyAttention,
@@ -36,10 +35,8 @@ describe("support strategies send rule", () => {
   it("asks for the activation date (or the PCSP) before anything else", () => {
     const s = strategySendState(input({ plan: { id: "p2", activated_on: null } }));
     assert.deepEqual(s, { kind: "no_activation", hasPlan: true });
-    assert.equal(sendStateText(s), "Add the PCSP activation date");
     assert.equal(strategyAttention(s)?.detail, "Add the PCSP activation date");
     const none = strategySendState(input({ plan: null }));
-    assert.equal(sendStateText(none), "Upload the PCSP first");
     assert.equal(strategyAttention(none), null);
   });
 
@@ -84,7 +81,6 @@ describe("support strategies send rule", () => {
     assert.equal(s.kind === "sent" && s.late, true);
     if (s.kind === "sent") {
       assert.equal(sentLine(s), "Sent to Angela Duty · Oct 8, 2026 · Dane Warnick");
-      assert.equal(sendStateText(s), "Sent to Angela Duty · Oct 8, 2026 · Dane Warnick · late");
     }
     assert.deepEqual(strategyFileFact(s), { onFile: true, dueOn: null });
     assert.equal(strategyAttention(s), null);

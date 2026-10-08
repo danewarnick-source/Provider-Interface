@@ -45,7 +45,7 @@ const fullName = (p: { first_name: string | null; last_name: string | null }) =>
   [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
 
 /** Names by user id (profiles), for "· Dane Warnick". */
-export async function loadNames(sb: AnySupabase, ids: string[]): Promise<Map<string, string>> {
+async function loadNames(sb: AnySupabase, ids: string[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
   for (const chunk of chunkIds([...new Set(ids.filter(Boolean))])) {
     const rows = await maybe(

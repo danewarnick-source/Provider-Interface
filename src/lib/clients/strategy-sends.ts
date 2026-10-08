@@ -111,22 +111,6 @@ export function sentLine(s: Extract<StrategySendState, { kind: "sent" }>): strin
   ].join(" · ");
 }
 
-/** The status in a few words (strategies card, File row). */
-export function sendStateText(s: StrategySendState): string {
-  switch (s.kind) {
-    case "not_needed":
-      return "Not needed for this client's codes";
-    case "no_activation":
-      return s.hasPlan ? "Add the PCSP activation date" : "Upload the PCSP first";
-    case "not_approved":
-      return `Not approved yet · due ${formatDate(s.dueOn)}`;
-    case "not_sent":
-      return `Not sent to the support coordinator · due ${formatDate(s.dueOn)}`;
-    case "sent":
-      return sentLine(s) + (s.late ? " · late" : "");
-  }
-}
-
 /** Needs attention: from day 25 (or when the activation date is missing); nothing otherwise. */
 export function strategyAttention(
   s: StrategySendState,
