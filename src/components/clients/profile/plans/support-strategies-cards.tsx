@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/clients/dates";
 import { strategyStatusText, type StrategyStatus } from "@/lib/clients/support-strategies";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
+import { StrategiesDocumentButton } from "./strategies-document-dialog";
 
 const PCSP_NOTE =
   "rounded-xl border border-hive-gold/50 bg-hive-gold-soft px-3 py-2 text-xs text-hive-ink";
@@ -23,8 +24,12 @@ const TONE: Record<StrategyStatus["kind"], "profile" | "ok" | "danger"> = {
   outdated: "danger",
 };
 
-/** "Draft: review and approve" + Approve, or "Out of date…" + Rebuild; coverage and the due date beside it. */
+/**
+ * "Draft: review and approve" + Approve, or "Out of date…" + Rebuild; coverage
+ * and the due date beside it. Once approved: "View & download document".
+ */
 export function StrategiesStatus({
+  clientId,
   status,
   covered,
   total,
@@ -34,6 +39,7 @@ export function StrategiesStatus({
   onApprove,
   onRebuild,
 }: {
+  clientId: string;
   status: StrategyStatus;
   covered: number;
   total: number;
@@ -70,6 +76,7 @@ export function StrategiesStatus({
               Approve
             </Button>
           ) : null}
+          {status.kind === "approved" ? <StrategiesDocumentButton clientId={clientId} /> : null}
         </span>
       ) : null}
     </div>

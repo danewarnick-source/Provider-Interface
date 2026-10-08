@@ -26,6 +26,7 @@ import { ClientPhoto } from "@/components/client-photo";
 import { useClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
 import { contactLine, primaryContact } from "@/lib/clients/contacts";
 import { useClientCareData } from "@/hooks/use-client-care-data";
+import { ShiftFocus } from "@/components/clients/shared/shift-focus";
 
 export const Route = createFileRoute("/dashboard/shift/$shiftId")({
   head: () => ({ meta: [{ title: "Shift Overview — Provider Interface" }] }),
@@ -187,25 +188,13 @@ function ClientProfileCard({ shift, clientName }: { shift: Shift; clientName: st
           <Link to="/dashboard/workspace/$clientId" params={{ clientId: shift.client_id }}>Full profile</Link>
         </Button>
       </div>
-      {(c?.special_directions || goals.length > 0 || emergency) && (
+      <ShiftFocus clientId={shift.client_id} groups={goals} serviceCode={shiftCode} className="mt-3" />
+      {(c?.special_directions || emergency) && (
         <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
           {c?.special_directions && (
             <div className="rounded-md bg-amber-50 p-2 text-amber-900">
               <p className="font-semibold mb-0.5">Special directions</p>
               <p className="whitespace-pre-wrap">{c.special_directions}</p>
-            </div>
-          )}
-          {goals.length > 0 && (
-            <div className="rounded-md bg-muted/40 p-2">
-              <p className="font-semibold mb-0.5">Goals for {shiftCode}</p>
-              <ul className="space-y-1">
-                {goals.map((g) => (
-                  <li key={g.id}>
-                    <span className="font-medium">{g.goal}</span>
-                    {g.supports.map((s) => s.support_text.trim() && <span key={s.id} className="block text-muted-foreground">• {s.support_text}</span>)}
-                  </li>
-                ))}
-              </ul>
             </div>
           )}
           {emergency && (

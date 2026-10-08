@@ -2,10 +2,13 @@
 // with each PCSP support paid to the agency. One section per support (with
 // its goal, codes and details, read-only) plus the one field a person writes,
 // "Support strategy". Sections a person edited are never overwritten when the
-// strategies are rebuilt. Pure (no Supabase), importable by node --test.
+// strategies are rebuilt. The strategy is 4–6 "- " bullet lines; supports
+// whose codes need no strategy (strategy-rules.ts) are listed with the reason.
+// Pure (no Supabase), importable by node --test.
 
 import { formatDate } from "./dates.ts";
 import type { GoalView } from "./plans.ts";
+import { parseBullets, strategyNeed, type StrategyNeed } from "./strategy-rules.ts";
 import type { CSTContent, CSTSection } from "./training.functions.ts";
 
 export const STRATEGY_LABEL = {
@@ -27,6 +30,10 @@ export type StrategySupport = {
   details: string;
   codes: string[];
 };
+
+/** Whether this support needs a strategy of its own (§1.24(5)). */
+export const supportNeedsStrategy = (s: { codes: readonly string[] }) =>
+  strategyNeed(s.codes).kind === "needed";
 
 /** Every current-plan support with at least one of the agency's codes, in plan order (other needs last). */
 export function agencySupports(goals: readonly GoalView[]): StrategySupport[] {
@@ -56,7 +63,13 @@ export type StrategyView = {
   details: string;
   codes: string[];
   strategy: string;
+  /** The strategy's bullet points. */
+  bullets: string[];
+  /** Needed, or why not (exempt / covered by the BSP or Medical Care Plan). */
+  need: StrategyNeed;
   edited: boolean;
+  /** Nectar drafted it and no person has edited it since. */
+  nectar: boolean;
 };
 
 export function strategyView(sec: CSTSection): StrategyView {
@@ -72,15 +85,19 @@ export function strategyView(sec: CSTSection): StrategyView {
     details: text(STRATEGY_LABEL.details),
     codes: sec.job_codes ?? [],
     strategy: text(STRATEGY_LABEL.strategy, LEGACY_LABEL.strategy),
+    bullets: parseBullets(text(STRATEGY_LABEL.strategy, LEGACY_LABEL.strategy)),
+    need: strategyNeed(sec.job_codes ?? []),
     edited: sec.edited === true,
+    nectar: sec.nectar === true && sec.edited !== true,
   };
 }
 
-/** A section for one support with its strategy text. */
+/** A section for one support with its strategy text (`nectar`: a Nectar draft). */
 export function strategySection(
   s: StrategySupport,
   strategy: string,
   keep?: { id: string; edited: boolean },
+  nectar = false,
 ): CSTSection {
   return {
     id: keep?.id ?? `ss_${s.supportId}`,
@@ -88,6 +105,7 @@ export function strategySection(
     support_id: s.supportId,
     job_codes: [...s.codes],
     ...(keep?.edited ? { edited: true } : {}),
+    ...(nectar && !keep?.edited ? { nectar: true } : {}),
     items: [
       { kind: "text", label: STRATEGY_LABEL.goal, value: s.goal },
       { kind: "text", label: STRATEGY_LABEL.support, value: s.support },
@@ -130,13 +148,13 @@ export function editedFor(
   return out;
 }
 
-/** Supports with no edited section: the ones Nectar drafts on a rebuild. */
+/** Supports needing a strategy with no edited section: the ones Nectar drafts on a rebuild. */
 export function supportsToDraft(
   supports: readonly StrategySupport[],
   existing: readonly CSTSection[],
 ): StrategySupport[] {
   const kept = editedFor(supports, existing);
-  return supports.filter((s) => !kept.has(s.supportId));
+  return supports.filter((s) => supportNeedsStrategy(s) && !kept.has(s.supportId));
 }
 
 /**
@@ -154,7 +172,7 @@ export function buildStrategySections(
     const k = kept.get(s.supportId);
     return k
       ? strategySection(s, strategyView(k).strategy, { id: k.id, edited: true })
-      : strategySection(s, drafts.get(s.supportId) ?? "");
+      : strategySection(s, drafts.get(s.supportId) ?? "", undefined, !!drafts.get(s.supportId));
   });
   const usedIds = new Set([...kept.values()].map((k) => k.id));
   return [...out, ...existing.filter((e) => e.edited && !usedIds.has(e.id))];
@@ -166,11 +184,12 @@ export function isUploadDoc(content: CSTContent | null | undefined): boolean {
   return s.length === 1 && s[0].items.length === 1 && s[0].items[0].kind === "link";
 }
 
-/** "N of M supports have a strategy", and which don't. */
+/** "N of M supports have a strategy", and which don't (supports needing none are not counted). */
 export function strategyCoverage(
-  supports: readonly StrategySupport[],
+  all: readonly StrategySupport[],
   sections: readonly CSTSection[],
 ): { covered: number; total: number; missing: StrategySupport[] } {
+  const supports = all.filter(supportNeedsStrategy);
   const written = new Set(
     sections
       .map(strategyView)
@@ -191,6 +210,7 @@ export function withStrategy(content: CSTContent, sectionId: string, text: strin
         : {
             ...sec,
             edited: true,
+            nectar: undefined,
             items: sec.items.map((i) =>
               i.kind === "text" &&
               (i.label === STRATEGY_LABEL.strategy || i.label === LEGACY_LABEL.strategy)

@@ -122,6 +122,7 @@ import {
 import { gpsFixFromPosition, HIGH_ACCURACY_GPS_OPTIONS } from "@/lib/gps";
 import { selectedPill, unselectedPill } from "@/components/evv/toggle-styles";
 import { BASELINE_GOAL, GoalSupportChecklist } from "@/components/evv/goal-support-checklist";
+import { ShiftFocus } from "@/components/clients/shared/shift-focus";
 import { goalSupportOptions } from "@/lib/clients/plans";
 import { isAdminLevel } from "@/lib/access/levels";
 
@@ -2115,6 +2116,11 @@ export function PunchPad({
           </div>
         )}
 
+        {/* ── Focus for this shift: goals + approved support strategies (pre-clock-in) ── */}
+        {!isRunning && clientForPunch && serviceCode && (
+          <ShiftFocus clientId={clientForPunch.id} groups={goalGroups} serviceCode={serviceCode} className="mb-4" />
+        )}
+
         {/* ── NECTAR Shift Pre-Flight (pre-clock-in only) ── */}
         {!isRunning && clientForPunch && serviceCode && (
           <NectarInfusionLock
@@ -2643,6 +2649,12 @@ export function PunchPad({
 
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 pb-6 sm:px-6">
               <div className="grid gap-4">
+                <ShiftFocus
+                  clientId={active?.client_id}
+                  groups={goalGroups}
+                  serviceCode={active?.service_type_code ?? null}
+                />
+
                 {/* PCSP goals */}
                 <div className="grid gap-2">
                   <h3 className="text-sm font-semibold">Goals worked on this shift</h3>

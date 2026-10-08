@@ -49,6 +49,7 @@ import {
 } from "@/lib/nectar-completeness";
 import { ClientAccessGate } from "@/components/clients/shared/client-access-gate";
 import { useSupportsForCode } from "@/components/clients/shared/hooks/use-plan-goals";
+import { ShiftFocus } from "@/components/clients/shared/shift-focus";
 
 const hhsSearch = z.object({
   tab: z.string().optional(),
@@ -444,6 +445,7 @@ function DailyNoteTab({
 
         {/* Goals → HHS supports — phone-friendly tap rows (≥44px), full-width, easy to check */}
         <div>
+          <ShiftFocus clientId={client.id} groups={supports.groups} serviceCode="HHS" className="mb-3" />
           <Label>Goals worked on today</Label>
           <div className="mt-2 space-y-3">
             {supports.groups.length === 0 && (
