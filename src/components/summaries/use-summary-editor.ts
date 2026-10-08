@@ -121,6 +121,9 @@ export function useSummaryEditor({
   const bundleQ = useQuery({
     queryKey: ["summary", summaryId],
     queryFn: () => getBundleFn({ data: { organizationId, summaryId } }),
+    // Always read the saved copy when the editor opens: a cached bundle from
+    // an earlier open would show the text from before the last save.
+    refetchOnMount: "always",
   });
   const b = bundleQ.data;
 
@@ -133,16 +136,18 @@ export function useSummaryEditor({
   const [showFinalize, setShowFinalize] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
 
-  // The editor's fields load once; refetches (after a draft, finalize or an
-  // attestation) never replace what is on screen.
+  // The editor's fields load once, from a fetch made after this open (never a
+  // cached copy); later refetches (after a draft, finalize or an attestation)
+  // never replace what is on screen.
   const lastSaved = useRef<string>("");
+  const fresh = bundleQ.isFetchedAfterMount;
   useEffect(() => {
-    if (!b || editor) return;
+    if (!b || !fresh || editor) return;
     setEditor(b.editor);
     setReview(b.review);
     lastSaved.current = JSON.stringify(b.editor);
     setAiAttested(!!b.summary.ai_review_attested_at);
-  }, [b, editor]);
+  }, [b, fresh, editor]);
 
   useEffect(() => {
     if (finalizerName || !user) return;
@@ -200,12 +205,35 @@ export function useSummaryEditor({
     return () => clearTimeout(t);
   }, [editor, locked, flush]);
 
+  /** The Save button: save now and say so (a failed save already shows its error). */
+  const save = useCallback(async () => {
+    await flush();
+    if (JSON.stringify(latest.current.editor) === lastSaved.current) toast.success("Summary saved");
+  }, [flush]);
+
+  // Warn before leaving the page with unsaved changes.
+  useEffect(() => {
+    const warn = (e: BeforeUnloadEvent) => {
+      const { editor: ed, locked: isLocked } = latest.current;
+      if (!ed || isLocked || JSON.stringify(ed) === lastSaved.current) return;
+      void flush();
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [flush]);
+
   // Save whatever is pending when the editor closes.
   useEffect(
     () => () => {
-      void flush().then(() => qc.invalidateQueries({ queryKey: ["summaries"] }));
+      void flush().then(() =>
+        Promise.all([
+          qc.invalidateQueries({ queryKey: ["summaries"] }),
+          qc.invalidateQueries({ queryKey: ["summary", summaryId] }),
+        ]),
+      );
     },
-    [flush, qc],
+    [flush, qc, summaryId],
   );
 
   // ─── Nectar ──────────────────────────────────────────────────────────────
@@ -437,6 +465,7 @@ export function useSummaryEditor({
     finalizeMut,
     finalizerName,
     flush,
+    save,
     handleDownload,
     locked,
     saveState,

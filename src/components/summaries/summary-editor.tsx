@@ -3,7 +3,8 @@
 // evidence, incidents, general notes), autosaved as it is typed. Nectar is a
 // helper, never a gate: "Draft with Nectar" on each box, "Draft all boxes"
 // and an optional "Review with Nectar" at the top, a small Reminders list;
-// "View & download" (preview + PDF); Finalize (it asks first when a goal is
+// "View & download" (preview + PDF); Save (autosave also runs as you type);
+// Finalize (it asks first when a goal is
 // blank, and blocks on nothing but the period not being over); and the
 // filing attestations. /dashboard/summaries opens it as a dialog; the client
 // profile's Progress summaries card opens the same editor as a side panel.
@@ -17,6 +18,7 @@ import {
   FileText,
   Loader2,
   RotateCcw,
+  Save,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -136,6 +138,7 @@ export function SummaryEditor({
     finalizeMut,
     finalizerName,
     flush,
+    save,
     handleDownload,
     locked,
     saveState,
@@ -269,6 +272,17 @@ export function SummaryEditor({
                   <Button variant="outline" size="sm" onClick={() => setPreview(true)}>
                     <Eye className="size-4 mr-1" /> View &amp; download
                   </Button>
+                  {!locked && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void save()}
+                      disabled={saveState === "saving"}
+                      data-testid="summary-save"
+                    >
+                      <Save className="size-4 mr-1" /> Save
+                    </Button>
+                  )}
                   {!locked && (
                     <Button
                       size="sm"

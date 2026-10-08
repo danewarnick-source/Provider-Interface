@@ -142,3 +142,21 @@ describe("evidence (progress-summary-source.server.ts)", () => {
     assert.match(src, /from\("profiles"\)\s*\.select\("id, first_name, last_name"\)/);
   });
 });
+
+describe("saving the editor (use-summary-editor.ts, summary-editor.tsx)", () => {
+  const hook = read("../components/summaries/use-summary-editor.ts");
+  const ui = read("../components/summaries/summary-editor.tsx");
+  it("loads the saved copy on every open, never a cached bundle", () => {
+    assert.match(hook, /refetchOnMount: "always"/);
+    assert.match(hook, /if \(!b \|\| !fresh \|\| editor\) return;/);
+    assert.match(hook, /invalidateQueries\(\{ queryKey: \["summary", summaryId\] \}\)/);
+  });
+  it("has a Save button between View & download and Finalize, plus a leave warning", () => {
+    const view = ui.indexOf("View &amp; download");
+    const saveBtn = ui.indexOf('data-testid="summary-save"');
+    const fin = ui.indexOf('data-testid="summary-finalize"');
+    assert.ok(view > 0 && view < saveBtn && saveBtn < fin, String([view, saveBtn, fin]));
+    assert.match(ui, /onClick=\{\(\) => void save\(\)\}/);
+    assert.match(hook, /addEventListener\("beforeunload"/);
+  });
+});
