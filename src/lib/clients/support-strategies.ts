@@ -148,6 +148,21 @@ export function editedFor(
   return out;
 }
 
+/**
+ * A new plan year: sections with a written strategy whose support carried
+ * over (same id or wording) are kept, marked edited so the rebuild leaves
+ * them; supports that are new or changed get drafted.
+ */
+export function carryForward(
+  supports: readonly StrategySupport[],
+  existing: readonly CSTSection[],
+): CSTSection[] {
+  const written = existing
+    .filter((e) => strategyView(e).strategy.trim())
+    .map((e) => ({ ...e, edited: true }));
+  return [...editedFor(supports, written).values()];
+}
+
 /** Supports needing a strategy with no edited section: the ones Nectar drafts on a rebuild. */
 export function supportsToDraft(
   supports: readonly StrategySupport[],
@@ -225,7 +240,8 @@ export function withStrategy(content: CSTContent, sectionId: string, text: strin
 export type StrategyStatus =
   | { kind: "draft" }
   | { kind: "approved"; at: string; by: string }
-  | { kind: "outdated" };
+  /** `newPlan`: a newer plan year than the approval. */
+  | { kind: "outdated"; newPlan: boolean };
 
 /**
  * Draft until approved; out of date once the PCSP changed after approval
@@ -241,17 +257,22 @@ export function strategyStatus(
   if (training.status !== "published" || !training.approved_at) return { kind: "draft" };
   const ids = new Set(supports.map((s) => s.supportId));
   const linked = sections.map((s) => s.support_id).filter((x): x is string => !!x);
+  const newPlan = !!plan?.created_at && plan.created_at > training.approved_at;
   const changed =
-    (!!plan?.created_at && plan.created_at > training.approved_at) ||
+    newPlan ||
     linked.some((id) => !ids.has(id)) ||
     supports.some((s) => !linked.includes(s.supportId));
-  if (changed) return { kind: "outdated" };
+  if (changed) return { kind: "outdated", newPlan };
   return { kind: "approved", at: training.approved_at, by: approverName ?? "a team member" };
 }
 
 export function strategyStatusText(s: StrategyStatus): string {
   if (s.kind === "draft") return "Draft: review and approve";
-  if (s.kind === "outdated") return "Out of date: the PCSP changed since these were approved";
+  if (s.kind === "outdated") {
+    return s.newPlan
+      ? "New plan year: review strategies"
+      : "Out of date: the PCSP changed since these were approved";
+  }
   return `Approved ${formatDate(s.at)} by ${s.by}`;
 }
 

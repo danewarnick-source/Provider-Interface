@@ -34,7 +34,7 @@ export function OverviewSection({
       ) : (
         <AttentionCards items={overview?.attention ?? []} loading={loading} onSelect={onSelect} />
       )}
-      {overview?.strategies.kind === "sent" ? (
+      {overview?.strategies?.kind === "sent" ? (
         <button
           type="button"
           className="self-start text-left text-sm text-muted-foreground hover:underline"

@@ -3,7 +3,9 @@
 // §1.24(6), §18.3(2)(E)). The goals for the shift's code with the first
 // strategy bullets, consolidated to at most 3 lines, plus everything (goal,
 // support, details, all bullets) behind "See all". Only APPROVED strategies
-// are used; without them staff see the goals and supports only.
+// are used, including ones Nectar copied from an uploaded strategies
+// document; an uploaded document alone has no bullets, so staff see the
+// goals and supports only.
 // Pure (no Supabase), node --test.
 
 import type { GoalView } from "./plans.ts";

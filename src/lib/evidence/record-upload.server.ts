@@ -20,11 +20,12 @@ export interface UploadOnItem {
   notes?: string | null;
 }
 
+/** Returns the new evidence_files id. */
 export async function saveUploadOnItem(
   sb: AnySupabase,
   viaTables: boolean,
   u: UploadOnItem,
-): Promise<void> {
+): Promise<string> {
   const uploadedAt = nowIso();
   const row: EvidenceFileRow = {
     id: newId(),
@@ -70,4 +71,5 @@ export async function saveUploadOnItem(
       item_id: found.dual_link_peer_id,
     });
   }
+  return row.id;
 }

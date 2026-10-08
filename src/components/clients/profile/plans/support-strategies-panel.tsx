@@ -3,7 +3,10 @@
 // grouped under its goal and open by default. Nectar drafts; a person edits
 // each one in place and approves. Sections someone edited survive a rebuild.
 // Admins manage them; due to the support coordinator 30 days after the PCSP
-// is activated.
+// is activated, then marked as sent (support-strategies-send.tsx). A new
+// plan year keeps carried-over strategies and drafts only the missing ones.
+// An uploaded strategies document can be sent as is, or Nectar copies its
+// strategies in per support for staff to see on shift.
 
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -30,7 +33,9 @@ import {
   updateClientSpecificTraining,
   type CSTContent,
 } from "@/lib/clients/training.functions";
+import { pullStrategiesFromDocument } from "@/lib/clients/strategies-pull.functions";
 import { PcspFirstDialog } from "./support-strategies-parts";
+import { StrategiesSendRow, strategySendKey } from "./support-strategies-send";
 import { StrategiesEmpty, StrategiesStatus, StrategiesUploaded } from "./support-strategies-cards";
 import { SupportStrategiesList } from "./support-strategies-list";
 import { PublishConfirmDialog } from "./publish-confirm-dialog";
@@ -64,6 +69,7 @@ export function SupportStrategiesPanel({
   const attachSS = useServerFn(attachSupportStrategyDocument);
   const updateFn = useServerFn(updateClientSpecificTraining);
   const publishFn = useServerFn(publishClientSpecificTraining);
+  const pullFn = useServerFn(pullStrategiesFromDocument);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -77,11 +83,15 @@ export function SupportStrategiesPanel({
     queryFn: () => getSS({ data: { clientId } }),
   });
   const training = (data?.training ?? null) as SSRow | null;
-  const refresh = () => qc.invalidateQueries({ queryKey });
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: strategySendKey(clientId) });
+    return qc.invalidateQueries({ queryKey });
+  };
   const fail = (e: Error) => toast.error(e.message);
 
   const draftMut = useMutation({
-    mutationFn: (mode: "nectar" | "blank" | "rebuild") => draftSS({ data: { clientId, mode } }),
+    mutationFn: (mode: "nectar" | "blank" | "rebuild" | "missing") =>
+      draftSS({ data: { clientId, mode } }),
     onSuccess: async (res) => {
       await refresh();
       const missed = res?.nectarMissed ?? [];
@@ -101,6 +111,18 @@ export function SupportStrategiesPanel({
     onSuccess: () => {
       refresh();
       toast.success("Strategy saved.");
+    },
+    onError: fail,
+  });
+  const pullMut = useMutation({
+    mutationFn: () => pullFn({ data: { clientId } }),
+    onSuccess: async (res) => {
+      await refresh();
+      if (res.blank.length) {
+        toast.warning(
+          `Copied strategies for ${res.copied} support${res.copied === 1 ? "" : "s"}. Nothing found in the document for: ${res.blank.join("; ")}. Write ${res.blank.length === 1 ? "that one" : "those"} by hand.`,
+        );
+      } else toast.success("Strategies copied from the document. Review each one, then approve.");
     },
     onError: fail,
   });
@@ -197,9 +219,12 @@ export function SupportStrategiesPanel({
           published={training.status === "published"}
           publishing={publishMut.isPending}
           uploading={uploading || !orgId}
+          pulling={pullMut.isPending}
           onPublish={needPcsp(() => setPublishDialog(true))}
           onReplace={pickFile}
+          onPull={needPcsp(() => pullMut.mutate())}
           fileInput={fileInput}
+          sendRow={<StrategiesSendRow clientId={clientId} fromUpload />}
         />
       ) : (
         <div className="space-y-3" ref={listRef}>
@@ -213,7 +238,15 @@ export function SupportStrategiesPanel({
             busy={{ approving: publishMut.isPending, rebuilding: draftMut.isPending }}
             onApprove={needPcsp(() => setPublishDialog(true))}
             onRebuild={rebuild}
+            onDraftMissing={needPcsp(() => draftMut.mutate("missing"))}
           />
+          {content?.source_document_id ? (
+            <p className="text-xs text-muted-foreground">
+              Copied by Nectar from the uploaded strategies document, which stays the official
+              copy.
+            </p>
+          ) : null}
+          <StrategiesSendRow clientId={clientId} fromUpload={!!content?.source_document_id} />
           <SupportStrategiesList
             views={sections.map(strategyView)}
             currentIds={new Set(supports.map((s) => s.supportId))}

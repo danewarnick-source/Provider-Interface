@@ -42,6 +42,27 @@ describe("approvedStrategies", () => {
       ["s1", "s3"],
     );
   });
+
+  it("uses strategies copied from an uploaded document once approved, but not the bare upload", () => {
+    const copied = { ...row, content: { ...row.content, source_document_id: "doc-1" } };
+    assert.deepEqual(
+      approvedStrategies(copied).map((s) => s.supportId),
+      ["s1", "s3"],
+    );
+    const upload = {
+      ...row,
+      content: {
+        sections: [
+          {
+            id: "u",
+            title: "Uploaded support strategy",
+            items: [{ kind: "link" as const, label: "Provider document", links: [{ label: "ss.pdf", href: null }] }],
+          },
+        ],
+      },
+    };
+    assert.deepEqual(approvedStrategies(upload), []);
+  });
 });
 
 describe("shiftFocus", () => {

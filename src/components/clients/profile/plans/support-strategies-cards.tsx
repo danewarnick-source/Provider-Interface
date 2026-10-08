@@ -1,10 +1,11 @@
 // The parts of the Support strategies card around the list: the status line
 // (in plain words, with the button that goes with it, coverage and the due
-// date), the empty state and an uploaded strategies document. State and
+// date), the empty state and an uploaded strategies document (approve, pull
+// its strategies in with Nectar, replace, mark as sent). State and
 // mutations live in support-strategies-panel.tsx.
 
 import type { ReactNode } from "react";
-import { CheckCircle2, Loader2, RefreshCw, Sparkles, Upload } from "lucide-react";
+import { CheckCircle2, FileSearch, Loader2, RefreshCw, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/clients/dates";
 import { strategyStatusText, type StrategyStatus } from "@/lib/clients/support-strategies";
@@ -25,8 +26,10 @@ const TONE: Record<StrategyStatus["kind"], "profile" | "ok" | "danger"> = {
 };
 
 /**
- * "Draft: review and approve" + Approve, or "Out of date…" + Rebuild; coverage
- * and the due date beside it. Once approved: "View & download document".
+ * "Draft: review and approve" + Approve, or "Out of date…" + Rebuild; a new
+ * plan year: "New plan year: review strategies" + "Draft missing
+ * strategies"; coverage and the due date beside it. Once approved: "View &
+ * download document".
  */
 export function StrategiesStatus({
   clientId,
@@ -38,6 +41,7 @@ export function StrategiesStatus({
   busy,
   onApprove,
   onRebuild,
+  onDraftMissing,
 }: {
   clientId: string;
   status: StrategyStatus;
@@ -48,6 +52,8 @@ export function StrategiesStatus({
   busy: { approving: boolean; rebuilding: boolean };
   onApprove: () => void;
   onRebuild: () => void;
+  /** New plan year: keep carried-over strategies, draft the rest. */
+  onDraftMissing: () => void;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-xl border border-hive-border bg-[var(--hive-muted-surface)] px-3 py-2 text-sm max-md:[&_button]:min-h-11">
@@ -66,6 +72,12 @@ export function StrategiesStatus({
       ) : null}
       {canEdit ? (
         <span className="ml-auto flex flex-wrap gap-2">
+          {status.kind === "outdated" && status.newPlan ? (
+            <Button onClick={onDraftMissing} disabled={busy.rebuilding}>
+              <Spin on={busy.rebuilding} icon={<Sparkles className="h-4 w-4" />} />
+              Draft missing strategies
+            </Button>
+          ) : null}
           <Button variant="outline" onClick={onRebuild} disabled={busy.rebuilding}>
             <Spin on={busy.rebuilding} icon={<RefreshCw className="h-4 w-4" />} />
             Rebuild from PCSP supports
@@ -132,17 +144,25 @@ export function StrategiesUploaded({
   published,
   publishing,
   uploading,
+  pulling,
   onPublish,
   onReplace,
+  onPull,
   fileInput,
+  sendRow,
 }: {
   fileName: string;
   published: boolean;
   publishing: boolean;
   uploading: boolean;
+  pulling: boolean;
   onPublish: () => void;
   onReplace: () => void;
+  /** Nectar copies the document's strategies under each support (a draft to approve). */
+  onPull: () => void;
   fileInput: ReactNode;
+  /** "Mark as sent to support coordinator", or the "Sent to …" line. */
+  sendRow: ReactNode;
 }) {
   return (
     <div className="space-y-3">
@@ -160,12 +180,17 @@ export function StrategiesUploaded({
             Approve
           </Button>
         )}
+        <Button variant="outline" onClick={onPull} disabled={pulling}>
+          <Spin on={pulling} icon={<FileSearch className="h-4 w-4" />} />
+          Pull strategies from this document
+        </Button>
         <Button variant="outline" onClick={onReplace} disabled={uploading}>
           <Spin on={uploading} icon={<Upload className="h-4 w-4" />} />
           Replace document
         </Button>
         {fileInput}
       </div>
+      {sendRow}
     </div>
   );
 }

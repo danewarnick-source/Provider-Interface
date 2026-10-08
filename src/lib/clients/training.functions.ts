@@ -7,7 +7,7 @@ import { CLIENT_FORM_LABEL, clientFormKindForTitle } from "@/lib/clients/form-ob
 import { isAdminLevel } from "@/lib/access/levels";
 import { todayYmd } from "./dates";
 import { activeGoalViewsOn, type GoalView } from "./plans";
-import { agencySupports, buildStrategySections, supportsToDraft, type StrategySupport } from "./support-strategies";
+import { agencySupports, buildStrategySections, carryForward, supportsToDraft, type StrategySupport } from "./support-strategies";
 import { formatBullets } from "./strategy-rules";
 import { STRATEGY_SYSTEM_PROMPT, parseStrategyReply, strategyUserPrompt, type StrategyReply } from "./strategy-prompt";
 import { loadPlanBundle } from "./plans-load";
@@ -81,6 +81,11 @@ export type CSTContent = {
   sections: CSTSection[];
   /** Support strategies: why they were approved with supports still lacking one. */
   approval_note?: string;
+  /**
+   * Support strategies: the uploaded strategies document (client_documents
+   * id), the official copy. Kept when Nectar copies its strategies in.
+   */
+  source_document_id?: string;
 };
 
 // Applied-reasoning prompt shown to staff per tab.
@@ -118,6 +123,7 @@ const SectionSchema = z.object({
 const ContentSchema = z.object({
   sections: z.array(SectionSchema).max(60),
   approval_note: z.string().max(2000).optional(),
+  source_document_id: z.string().uuid().optional(),
 });
 const ReviewQuestionSchema = z.object({
   id: z.string(),
@@ -739,20 +745,22 @@ async function draftStrategyBullets(
 
 /**
  * One section per support paid to the agency (support-strategies.ts). Edited
- * sections are kept; with `nectar`, the others needing a strategy get a fresh
- * Nectar draft. `missed`: supports Nectar could not draft.
+ * sections are kept (with `carry`, a new plan year: every written strategy
+ * whose support carried over); with `nectar`, the others needing a strategy
+ * get a fresh Nectar draft. `missed`: supports Nectar could not draft.
  */
 async function assembleSupportStrategyStubs(
   supabase: AnySupabase,
   orgId: string,
   clientId: string,
   existing: CSTSection[],
-  nectar: boolean,
+  opts: { nectar: boolean; carry: boolean },
 ): Promise<{ content: CSTContent; missed: string[] }> {
   const supports = agencySupports(await planGoals(supabase, clientId));
-  const toDraft = nectar ? supportsToDraft(supports, existing) : [];
+  const kept = opts.carry ? carryForward(supports, existing) : existing.filter((x) => x.edited);
+  const toDraft = opts.nectar ? supportsToDraft(supports, kept) : [];
   const { drafts, missed } = await draftStrategyBullets(toDraft, orgId);
-  return { content: { sections: buildStrategySections(supports, existing, drafts) }, missed };
+  return { content: { sections: buildStrategySections(supports, kept, drafts) }, missed };
 }
 
 export const getSupportStrategiesTraining = createServerFn({ method: "GET" })
@@ -787,7 +795,8 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({
     clientId: z.string().uuid(),
-    mode: z.enum(["nectar", "blank", "rebuild"]),
+    /** "missing": a new plan year; carried-over strategies stay, the rest are drafted. */
+    mode: z.enum(["nectar", "blank", "rebuild", "missing"]),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
@@ -802,9 +811,10 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
       .eq("client_id", data.clientId)
       .eq("training_type", "support_strategies")
       .maybeSingle();
-    const kept = ((current?.content as CSTContent | undefined)?.sections ?? []).filter((x) => x.edited);
+    const sections = (current?.content as CSTContent | undefined)?.sections ?? [];
     const { content, missed } = await assembleSupportStrategyStubs(
-      supabase, m.organization_id, data.clientId, kept, data.mode !== "blank",
+      supabase, m.organization_id, data.clientId, sections,
+      { nectar: data.mode !== "blank", carry: data.mode === "missing" },
     );
 
     const { data: existing } = await supabase
@@ -820,7 +830,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
         .update({
           content: content as unknown,
           status: "draft",
-          version: (existing.version ?? 1) + (data.mode === "rebuild" ? 1 : 0),
+          version: (existing.version ?? 1) + (data.mode === "rebuild" || data.mode === "missing" ? 1 : 0),
           approved_by: null,
           approved_at: null,
         })
@@ -882,7 +892,7 @@ export const attachSupportStrategyDocument = createServerFn({ method: "POST" })
       { id: sid(), title: "Uploaded support strategy", items: [
         { kind: "link", label: "Provider document", links: [{ label: data.fileName, href: null }] },
       ] },
-    ] };
+    ], ...(doc?.id ? { source_document_id: doc.id as string } : {}) };
 
     const { data: existing } = await supabase
       .from("client_specific_trainings")

@@ -4,6 +4,7 @@ import type { GoalView } from "./plans.ts";
 import {
   agencySupports,
   buildStrategySections,
+  carryForward,
   groupByGoal,
   isUploadDoc,
   strategyCoverage,
@@ -162,6 +163,41 @@ describe("buildStrategySections", () => {
   });
 });
 
+describe("carryForward (new plan year)", () => {
+  it("keeps written strategies whose support carried over and drafts only new or changed ones", () => {
+    const supports = agencySupports(goals);
+    const last = buildStrategySections(
+      supports,
+      [],
+      new Map([
+        ["s1", "- Show each step."],
+        ["s4", "- Ride along."],
+      ]),
+    );
+    const next: StrategySupport[] = [
+      { ...supports[0], supportId: "n1" },
+      { ...supports[2], supportId: "n4", support: "Job coach helps Pat find a new job." },
+    ];
+    const kept = carryForward(next, last);
+    assert.deepEqual(
+      kept.map((k) => strategyView(k).strategy),
+      ["- Show each step."],
+    );
+    assert.deepEqual(
+      supportsToDraft(next, kept).map((s) => s.supportId),
+      ["n4"],
+    );
+    const rebuilt = buildStrategySections(next, kept, new Map([["n4", "- New draft."]]));
+    assert.deepEqual(
+      rebuilt.map((r) => [r.support_id, strategyView(r).strategy, strategyView(r).nectar]),
+      [
+        ["n1", "- Show each step.", false],
+        ["n4", "- New draft.", true],
+      ],
+    );
+  });
+});
+
 describe("coverage, status and grouping", () => {
   const supports = agencySupports(goals);
   const secs = buildStrategySections(
@@ -206,10 +242,7 @@ describe("coverage, status and grouping", () => {
       supports,
       secs,
     );
-    assert.equal(
-      strategyStatusText(newer),
-      "Out of date: the PCSP changed since these were approved",
-    );
+    assert.equal(strategyStatusText(newer), "New plan year: review strategies");
     const added = strategyStatus(
       { status: "published", approved_at: "2026-09-25T15:00:00Z" },
       "R",
@@ -217,7 +250,7 @@ describe("coverage, status and grouping", () => {
       supports,
       secs.slice(1),
     );
-    assert.equal(added.kind, "outdated");
+    assert.equal(strategyStatusText(added), "Out of date: the PCSP changed since these were approved");
   });
 
   it("groups strategies under their goal", () => {
