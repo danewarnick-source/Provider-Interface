@@ -1,24 +1,12 @@
 // The summary editor's left column (the period's evidence in full) and
-// its two banners: no approved documentation, and the PBA financial statement.
+// the PBA financial statement banner.
 
-import { AlertTriangle, CheckCircle2, Receipt } from "lucide-react";
+import { CheckCircle2, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { SummarySourceBundle } from "@/lib/progress-summaries.functions";
 import { EVIDENCE_KIND_LABEL, groupEvidence, type SummaryEvidence } from "@/lib/progress-summary-doc";
 import { summaryCadenceLabel } from "@/lib/progress-summaries";
 import { cn } from "@/lib/utils";
-
-export function NoSourceBanner() {
-  return (
-    <div className="rounded border bg-red-50 px-3 py-2 text-sm text-red-800 flex gap-2">
-      <AlertTriangle className="size-4 mt-0.5 shrink-0" />
-      <div>
-        <div className="font-semibold">No approved documentation found for this period.</div>
-        <div>Write the summary manually below. Nectar will not draft from missing data.</div>
-      </div>
-    </div>
-  );
-}
 
 export function PbaPanel({
   status,

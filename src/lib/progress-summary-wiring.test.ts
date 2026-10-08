@@ -8,25 +8,22 @@ import { describe, it } from "node:test";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 
-describe("Nectar draft (progress-summary-draft.functions.ts)", () => {
+describe("Nectar draft / review (progress-summary-draft.functions.ts)", () => {
   const src = read("./progress-summary-draft.functions.ts");
-  it("drafts from the editor as typed and merges, never writing empty text over it", () => {
-    assert.match(src, /editor: z\.record/);
-    assert.match(src, /mergeEditorDraft\(/);
-    assert.doesNotMatch(
-      src,
-      /draft_content/,
-      "the draft never writes draft_content (autosave does)",
-    );
-    assert.doesNotMatch(src, /goalId/, "no per-goal drafting");
+  it("drafts when the period has records, reviews what was typed when it has none — no early exit", () => {
+    assert.match(src, /source\.evidence\.length > 0 \? "draft" : "review"/);
+    assert.doesNotMatch(src, /your text is unchanged/);
+    assert.doesNotMatch(src, /mergeEditorDraft/);
   });
-  it("with no evidence it saves the editor unchanged and never calls Nectar", () => {
-    const guard = src.indexOf("if (!has.general && !has.incidents)");
-    const ai = src.indexOf("await callAI(system");
-    assert.ok(guard > 0 && guard < ai, "the no-evidence return comes before the Nectar call");
-    assert.match(src.slice(guard, ai), /editor,\n[\s\S]*return \{ status: "no_source", editor \}/);
+  it("rewrites are validated suggestions, never written into the editor", () => {
+    assert.match(src, /buildSuggestions\(/);
+    assert.doesNotMatch(src, /draft_content/, "Nectar never writes draft_content (autosave does)");
+    const run = src.slice(src.indexOf("export const runSummaryNectar"), src.indexOf("export const updateSummaryReview"));
+    assert.match(run, /editor,\n\s+review,/, "the editor is saved as typed alongside the review");
   });
-  it("refuses a finalized summary", () => {
+  it("Keep as is records who and when, and refuses a finalized summary", () => {
+    assert.match(src, /dismissFinding\(/);
+    assert.match(src, /by: userId, byName, at: now/);
     assert.match(src, /row\.status === "finalized"/);
   });
 });
@@ -45,6 +42,10 @@ describe("autosave and finalize (progress-summaries.functions.ts)", () => {
   });
   it("finalize keeps the finalized document for its PDF", () => {
     assert.match(fin, /final_doc: data\.doc/);
+  });
+  it("finalize is refused while a finding is open", () => {
+    assert.match(fin, /await assertNoOpenFindings\(/);
+    assert.match(src, /finalizeBlockers\(/);
   });
   it("the editor loads saved fields, or reads an older text draft back into fields", () => {
     assert.match(src, /readEditorState\(draftSource\.editor\) \?\?\s+editorFromLegacyText/);

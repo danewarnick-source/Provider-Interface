@@ -9,11 +9,9 @@ import {
   evidenceFromRows,
   evidenceLine,
   groupEvidence,
+  hasNectarText,
   manualIncidentLine,
-  mergeDraftText,
-  mergeEditorDraft,
   oneLine,
-  personText,
   readEditorState,
   summaryDocText,
   summaryFileName,
@@ -43,111 +41,16 @@ const ev = (over: Partial<SummaryEvidence>): SummaryEvidence => ({
   ...over,
 });
 
-describe("mergeDraftText — a draft never blanks out or overwrites typed text", () => {
-  it("no evidence: the field stays exactly as typed, whatever Nectar returned", () => {
-    assert.deepEqual(mergeDraftText("Typed by me", "Invented text", false), {
-      text: "Typed by me",
-      nectar: "",
-    });
-    assert.deepEqual(mergeDraftText("", "Invented text", false), { text: "", nectar: "" });
-  });
-  it("empty or no-documentation draft: the field stays as typed", () => {
-    assert.equal(mergeDraftText("Typed", "", true).text, "Typed");
-    assert.equal(mergeDraftText("Typed", "   ", true).text, "Typed");
-    assert.equal(mergeDraftText("Typed", null, true).text, "Typed");
-    assert.equal(mergeDraftText("Typed", NO_PROGRESS_TEXT, true).text, "Typed");
-  });
-  it("nothing typed and evidence: Nectar's text", () => {
-    assert.deepEqual(mergeDraftText("  ", "Pat cooked twice.", true), {
-      text: "Pat cooked twice.",
-      nectar: "Pat cooked twice.",
-    });
-  });
-  it("typed and evidence: the person's text first, Nectar's after it", () => {
+describe("hasNectarText", () => {
+  it("true while a field still holds the Nectar suggestion it took", () => {
+    const e = emptyEditorState();
+    assert.equal(hasNectarText(e), false);
+    assert.equal(hasNectarText({ ...e, general: "N", nectar: { ...e.nectar, general: "N" } }), true);
+    assert.equal(hasNectarText({ ...e, general: "edited", nectar: { ...e.nectar, general: "N" } }), false);
     assert.equal(
-      mergeDraftText("Pat chose the recipe.", "Pat cooked pasta twice.", true).text,
-      "Pat chose the recipe.\n\nPat cooked pasta twice.",
+      hasNectarText({ ...e, goals: { g1: "N" }, nectar: { ...e.nectar, goals: { g1: "N" } } }),
+      true,
     );
-  });
-  it("a draft that already contains the typed text word for word is used as is", () => {
-    assert.equal(
-      mergeDraftText("Pat chose  the recipe.", "Pat chose the recipe. Pat cooked twice.", true)
-        .text,
-      "Pat chose the recipe. Pat cooked twice.",
-    );
-  });
-});
-
-describe("personText", () => {
-  it("strips the text Nectar last added, keeps what the person wrote", () => {
-    assert.equal(personText("Mine\n\nNectar's", "Nectar's"), "Mine");
-    assert.equal(personText("Nectar's", "Nectar's"), "");
-    assert.equal(personText("Mine, edited Nectar's", "Nectar's x"), "Mine, edited Nectar's");
-    assert.equal(personText(" Mine ", ""), "Mine");
-  });
-});
-
-describe("mergeEditorDraft", () => {
-  const typed = {
-    ...emptyEditorState(),
-    general: "General I typed",
-    goals: { g1: "Goal 1 typed", g2: "Goal 2 typed" },
-    incidentNotes: "",
-  };
-  it("goals without evidence keep the typed text; with evidence get it combined; nothing is blanked", () => {
-    const out = mergeEditorDraft(
-      typed,
-      {
-        general: "",
-        goals: { g1: "Drafted g1", g2: "Drafted g2" },
-        incidentNotes: "Drafted incidents",
-      },
-      { goals: { g1: true, g2: false }, general: true, incidents: false },
-    );
-    assert.equal(out.goals.g1, "Goal 1 typed\n\nDrafted g1");
-    assert.equal(out.goals.g2, "Goal 2 typed");
-    assert.equal(out.general, "General I typed");
-    assert.equal(out.incidentNotes, "");
-    assert.deepEqual(out.nectar, { general: "", incidentNotes: "", goals: { g1: "Drafted g1" } });
-  });
-  it("a re-draft replaces Nectar's earlier text instead of stacking it", () => {
-    const once = mergeEditorDraft(
-      typed,
-      { goals: { g1: "First draft" } },
-      { goals: { g1: true }, general: true, incidents: false },
-    );
-    const twice = mergeEditorDraft(
-      once,
-      { goals: { g1: "Second draft" } },
-      { goals: { g1: true }, general: true, incidents: false },
-    );
-    assert.equal(twice.goals.g1, "Goal 1 typed\n\nSecond draft");
-  });
-  it("an empty draft keeps every field and the earlier Nectar text", () => {
-    const once = mergeEditorDraft(
-      typed,
-      { goals: { g1: "First draft" } },
-      { goals: { g1: true }, general: true, incidents: false },
-    );
-    const again = mergeEditorDraft(
-      once,
-      { goals: { g1: "" } },
-      { goals: { g1: true }, general: true, incidents: false },
-    );
-    assert.deepEqual(again, once);
-  });
-  it("manual incidents are untouched", () => {
-    const withInc = {
-      ...typed,
-      incidents: [{ id: "m1", date: "2026-10-02", what: "Fell", followUp: "" }],
-    };
-    const out = mergeEditorDraft(
-      withInc,
-      { incidentNotes: "Pat fell once." },
-      { goals: {}, general: true, incidents: true },
-    );
-    assert.deepEqual(out.incidents, withInc.incidents);
-    assert.equal(out.incidentNotes, "Pat fell once.");
   });
 });
 

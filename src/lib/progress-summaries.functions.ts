@@ -5,8 +5,12 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { toIsoDateDay } from "@/lib/iso-date-day";
+import { loadPlanBundle } from "@/lib/clients/plans-load";
+import { summaryGoals } from "@/lib/clients/plan-summaries";
+import { finalizeBlockers, readReviewState, type SummaryReviewState } from "@/lib/progress-summary-review";
 import {
   editorFromLegacyText,
+  emptyEditorState,
   readEditorState,
   type SummaryDoc,
   type SummaryEditorState,
@@ -489,6 +493,8 @@ export type SummarySourceBundle = {
   editor: SummaryEditorState;
   /** The document as finalized, when it was finalized from this editor. */
   finalDoc: SummaryDoc | null;
+  /** Nectar's last review: findings, suggestions and "Keep as is" records. */
+  review: SummaryReviewState;
 };
 
 export const getSummaryWithSource = createServerFn({ method: "POST" })
@@ -568,6 +574,7 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
     const draftSource = (await mergedDraftSource(supabase, data.organizationId, data.summaryId, {})) as {
       editor?: unknown;
       final_doc?: SummaryDoc;
+      review?: unknown;
     };
 
     return {
@@ -596,6 +603,7 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
         readEditorState(draftSource.editor) ??
         editorFromLegacyText(summaryRow.final_content ?? summaryRow.draft_content, source.goals),
       finalDoc: draftSource.final_doc ?? null,
+      review: readReviewState(draftSource.review),
     };
   });
 
@@ -655,6 +663,48 @@ export const saveSummaryDraft = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Finalize gate, as on a clock-out shift note: every check (goals with no
+ * progress, missing required content, dates outside the period) and every
+ * Nectar finding still in the text must be fixed or kept with "Keep as is".
+ */
+async function assertNoOpenFindings(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  organizationId: string,
+  summaryId: string,
+  rawEditor: Record<string, unknown>,
+): Promise<void> {
+  const { data: row, error } = await supabase
+    .from("client_progress_summaries")
+    .select("client_id, period_start, period_end, service_codes, summary_kind, include_goal_progress, draft_source")
+    .eq("id", summaryId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!row) throw new Error("Summary not found");
+  if (row.summary_kind !== "narrative") return;
+  const codes = ((row.service_codes ?? []) as string[]).map((c) => c.toUpperCase());
+  const { goals } = summaryGoals(await loadPlanBundle(supabase, row.client_id), row.period_end, codes);
+  const open = finalizeBlockers(
+    {
+      periodStart: row.period_start,
+      periodEnd: row.period_end,
+      serviceCodes: codes,
+      summaryKind: row.summary_kind,
+      includeGoalProgress: !!row.include_goal_progress,
+      goals,
+    },
+    readEditorState(rawEditor) ?? emptyEditorState(),
+    readReviewState((row.draft_source ?? {}).review),
+  );
+  if (open.length) {
+    throw new Error(
+      `Resolve ${open.length} Nectar item${open.length === 1 ? "" : "s"} first: fix each one or choose "Keep as is".`,
+    );
+  }
+}
+
 export const finalizeSummary = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => z.object({
@@ -674,6 +724,7 @@ export const finalizeSummary = createServerFn({ method: "POST" })
     if (!data.aiReviewAttested) {
       throw new Error("Confirm you reviewed the Nectar draft against PI documentation before finalizing.");
     }
+    await assertNoOpenFindings(supabase, data.organizationId, data.summaryId, data.editor);
     const ts = new Date().toISOString();
 
     // Finalize content now; deadline clears only after UPI or SC send attestation.

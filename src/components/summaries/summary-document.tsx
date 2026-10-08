@@ -19,6 +19,7 @@ import {
   type SummaryDoc,
   type SummaryEditorState,
 } from "@/lib/progress-summary-doc";
+import type { FieldKey } from "@/lib/progress-summary-review";
 
 export interface DocEditing {
   editor: SummaryEditorState;
@@ -26,6 +27,8 @@ export interface DocEditing {
   /** Goal ids in the same order as doc.goals. */
   goalIds: string[];
   disabled: boolean;
+  /** Nectar's findings and suggested rewrite for one field, shown under it. */
+  review?: (field: FieldKey) => ReactNode;
 }
 
 const Kicker = ({ children }: { children: ReactNode }) => (
@@ -114,6 +117,7 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
                     placeholder="Progress on this goal…"
                     data-testid={`summary-goal-${id}`}
                   />
+                  {edit.review?.(`goal:${id}`)}
                   {!g.evidence.length ? (
                     <p className="text-xs text-muted-foreground">{NO_EVIDENCE_TEXT}</p>
                   ) : null}
@@ -178,6 +182,7 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
                   disabled={edit.disabled}
                   placeholder="Follow-up"
                 />
+                <div className="sm:col-span-2">{edit.review?.(`incident:${m.id}`)}</div>
               </div>
             ))}
             <Button
@@ -204,6 +209,7 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
               className={fieldClass}
               placeholder="About the incidents this period…"
             />
+            {edit.review?.("incidentNotes")}
           </>
         ) : (
           <>
@@ -229,14 +235,17 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
       <section className="space-y-2 border-t border-hive-border pt-3">
         <p className="font-semibold text-hive-ink">General notes</p>
         {edit ? (
-          <Textarea
-            value={edit.editor.general}
-            onChange={(e) => set?.((p) => ({ ...p, general: e.target.value }))}
-            disabled={edit.disabled}
-            className={fieldClass}
-            placeholder="Overall status and services this period…"
-            data-testid="summary-general"
-          />
+          <>
+            <Textarea
+              value={edit.editor.general}
+              onChange={(e) => set?.((p) => ({ ...p, general: e.target.value }))}
+              disabled={edit.disabled}
+              className={fieldClass}
+              placeholder="Overall status and services this period…"
+              data-testid="summary-general"
+            />
+            {edit.review?.("general")}
+          </>
         ) : (
           <p className="whitespace-pre-wrap">{doc.general.notes || "None."}</p>
         )}

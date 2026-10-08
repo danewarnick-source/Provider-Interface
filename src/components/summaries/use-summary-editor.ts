@@ -1,8 +1,9 @@
 // State and actions behind the progress summary editor (summary-editor.tsx):
 // load the summary with its evidence, keep the editor's fields (autosaved,
-// debounced and on blur / close), draft with Nectar (merged into what was
-// typed, never over it), finalize (then download the PDF), and the UPI /
-// support coordinator attestations.
+// debounced and on blur / close), Nectar (draft from the records, or review
+// what was typed: suggestions to Accept / Keep mine, findings to fix or keep
+// as is), finalize once nothing is open (then download the PDF), and the
+// UPI / support coordinator attestations.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,7 +19,16 @@ import {
   saveSummaryDraft,
   type SummarySourceBundle,
 } from "@/lib/progress-summaries.functions";
-import { draftProgressSummary } from "@/lib/progress-summary-draft.functions";
+import { runSummaryNectar, updateSummaryReview } from "@/lib/progress-summary-draft.functions";
+import {
+  acceptSuggestion,
+  emptyReviewState,
+  liveNectarFindings,
+  openFindings,
+  summaryChecks,
+  type FieldKey,
+  type SummaryReviewState,
+} from "@/lib/progress-summary-review";
 import {
   buildSummaryDoc,
   summaryDocText,
@@ -82,7 +92,8 @@ export function useSummaryEditor({
   const qc = useQueryClient();
   const { user } = useAuth();
   const getBundleFn = useServerFn(getSummaryWithSource);
-  const draftFn = useServerFn(draftProgressSummary);
+  const nectarFn = useServerFn(runSummaryNectar);
+  const reviewFn = useServerFn(updateSummaryReview);
   const saveFn = useServerFn(saveSummaryDraft);
   const finalizeFn = useServerFn(finalizeSummary);
   const upiFn = useServerFn(attestSummaryUpiEntered);
@@ -95,6 +106,7 @@ export function useSummaryEditor({
   const b = bundleQ.data;
 
   const [editor, setEditor] = useState<SummaryEditorState | null>(null);
+  const [review, setReview] = useState<SummaryReviewState>(emptyReviewState());
   const [finalizerName, setFinalizerName] = useState("");
   const [aiAttested, setAiAttested] = useState(false);
   const [showFinalize, setShowFinalize] = useState(false);
@@ -106,6 +118,7 @@ export function useSummaryEditor({
   useEffect(() => {
     if (!b || editor) return;
     setEditor(b.editor);
+    setReview(b.review);
     lastSaved.current = JSON.stringify(b.editor);
     setAiAttested(!!b.summary.ai_review_attested_at);
   }, [b, editor]);
@@ -175,19 +188,27 @@ export function useSummaryEditor({
   );
 
   // ─── Nectar ──────────────────────────────────────────────────────────────
-  const draftMut = useMutation({
+  const hasRecords = (b?.evidence.length ?? 0) > 0;
+  const nectarMut = useMutation({
     mutationFn: () => {
       const ed = latest.current.editor;
       if (!ed) throw new Error("Still loading.");
-      return draftFn({
+      return nectarFn({
         data: { organizationId, summaryId, editor: ed as unknown as Record<string, unknown> },
       });
     },
     onSuccess: (res) => {
-      setEditor(res.editor);
-      if (res.status === "no_source") {
+      setReview(res.review);
+      const n = res.review.suggestions.length;
+      const f = res.review.findings.length;
+      toast.success(
+        n || f
+          ? `Nectar: ${n} suggestion${n === 1 ? "" : "s"}, ${f} item${f === 1 ? "" : "s"} to check.`
+          : "Nectar found nothing to change.",
+      );
+      if (res.rejected) {
         toast.info(
-          "No approved daily logs, shift notes or incidents this period — your text is unchanged.",
+          `Nectar's rewrite of ${res.rejected} field${res.rejected === 1 ? "" : "s"} was dropped: it had dates or numbers not in your text or the records.`,
         );
       }
       void bundleQ.refetch();
@@ -196,11 +217,73 @@ export function useSummaryEditor({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const reviewOp = useMutation({
+    mutationFn: (
+      op:
+        | { op: "accept" | "keep"; field: FieldKey }
+        | { op: "dismiss"; key: string; reason: string | null },
+    ) =>
+      reviewFn({ data: { organizationId, summaryId, op } }),
+    onSuccess: (res) => setReview(res.review),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const accept = (field: FieldKey) => {
+    if (!editor) return;
+    try {
+      const res = acceptSuggestion(editor, review, field);
+      setEditor(res.editor);
+      setReview(res.review);
+      reviewOp.mutate({ op: "accept", field });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+  const keep = (field: FieldKey) => reviewOp.mutate({ op: "keep", field });
+  const dismiss = (key: string, reason: string | null) =>
+    reviewOp.mutate({ op: "dismiss", key, reason });
+
+  const checks = useMemo(
+    () =>
+      b && editor
+        ? summaryChecks(
+            {
+              periodStart: b.summary.period_start,
+              periodEnd: b.summary.period_end,
+              serviceCodes: b.summary.service_codes,
+              summaryKind: b.summary.summary_kind,
+              includeGoalProgress: b.summary.include_goal_progress,
+              goals: b.goals,
+            },
+            editor,
+          )
+        : [],
+    [b, editor],
+  );
+  const open = useMemo(
+    () => (editor ? openFindings(checks, review, editor) : []),
+    [checks, review, editor],
+  );
+  /** Everything to show next to the fields: open, kept as is, and Nectar's notes on pending rewrites. */
+  const shown = useMemo(
+    () =>
+      editor
+        ? [
+            ...checks,
+            ...liveNectarFindings(review, editor),
+            ...review.findings.filter((f) => f.onSuggestion),
+          ]
+        : [],
+    [checks, review, editor],
+  );
+
   const autoDrafted = useRef(false);
   useEffect(() => {
     if (!b || !editor || autoDrafted.current) return;
     autoDrafted.current = true;
-    if (b.summary.summary_kind === "narrative" && b.summary.status === "pending") draftMut.mutate();
+    if (b.summary.summary_kind === "narrative" && b.summary.status === "pending" && hasRecords) {
+      nectarMut.mutate();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [b, editor]);
 
@@ -267,11 +350,20 @@ export function useSummaryEditor({
     : "none";
 
   return {
+    accept,
     aiAttested,
     bundleQ,
+    checks,
+    dismiss,
     doc,
-    draftMut,
     editor,
+    hasRecords,
+    keep,
+    nectarMut,
+    open,
+    review,
+    shown,
+    reviewOp,
     filing,
     finalizeMut,
     finalizerName,

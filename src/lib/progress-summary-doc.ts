@@ -6,9 +6,9 @@
 // that goal (approved daily logs, submitted shift notes), then General
 // (evidence not tied to a goal), Incidents and general notes.
 //
-// Also the editor state saved with the draft and the one merge rule for
-// Nectar drafts: a draft never blanks out or overwrites what a person typed.
-// Pure (no Supabase), node --test.
+// Also the editor state saved with the draft. Nectar never writes into it
+// directly: its rewrites are suggestions (progress-summary-review.ts) the
+// person accepts or keeps their own text. Pure (no Supabase), node --test.
 
 import { formatDate } from "./clients/dates.ts";
 import {
@@ -208,7 +208,7 @@ export interface SummaryEditorState {
   goals: Record<string, string>;
   incidents: ManualIncident[];
   incidentNotes: string;
-  /** The text Nectar last added to each field, so a re-draft replaces it instead of stacking. */
+  /** The Nectar suggestion each field last took (Accept); marks the summary as a draft until Finalize. */
   nectar: { general: string; incidentNotes: string; goals: Record<string, string> };
 }
 
@@ -288,91 +288,19 @@ export function editorFromLegacyText(
   return state;
 }
 
-// ─── The merge rule for Nectar drafts ──────────────────────────────────────
+// ─── Nectar text ───────────────────────────────────────────────────────────
 
 export const NO_EVIDENCE_TEXT =
   "No approved daily logs, shift notes or incidents for this goal this period — type the progress.";
 
-const NO_DOC_RE = /^no documentation in this period supports/i;
-const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
-
-/** What the person wrote in a field: the field minus the text Nectar last added to it. */
-export function personText(current: string, lastNectar: string | null | undefined): string {
-  const cur = current.trim();
-  const last = (lastNectar ?? "").trim();
-  if (!last) return cur;
-  if (cur === last) return "";
-  if (cur.endsWith(last)) return cur.slice(0, cur.length - last.length).trim();
-  return cur;
-}
-
-/**
- * One field after a Nectar draft. With no evidence, or an empty draft, the
- * field stays exactly as typed. With evidence: Nectar's text alone when the
- * person typed nothing, otherwise the person's text first and Nectar's
- * evidence-based text after it (unless the draft already contains it word
- * for word) — the person's facts are always kept.
- */
-export function mergeDraftText(
-  typed: string,
-  drafted: string | null | undefined,
-  hasEvidence: boolean,
-): { text: string; nectar: string } {
-  const t = typed.trim();
-  const d = (drafted ?? "").trim();
-  if (!hasEvidence || !d || NO_DOC_RE.test(d)) return { text: typed, nectar: "" };
-  if (!t) return { text: d, nectar: d };
-  if (norm(d).includes(norm(t))) return { text: d, nectar: d };
-  return { text: `${t}\n\n${d}`, nectar: d };
-}
-
-export interface NectarDraft {
-  general?: string | null;
-  incidentNotes?: string | null;
-  goals?: Record<string, string | null | undefined>;
-}
-
-/**
- * The editor after a Nectar draft, field by field (mergeDraftText). A field
- * Nectar did not touch keeps the person's text and its earlier Nectar text.
- */
-export function mergeEditorDraft(
-  current: SummaryEditorState,
-  draft: NectarDraft,
-  has: { goals: Record<string, boolean>; general: boolean; incidents: boolean },
-): SummaryEditorState {
-  const field = (cur: string, last: string, drafted: string | null | undefined, ok: boolean) => {
-    if (!ok || !(drafted ?? "").trim()) return { text: cur, nectar: last };
-    const m = mergeDraftText(personText(cur, last), drafted, ok);
-    return m.nectar ? m : { text: cur, nectar: last };
-  };
-  const general = field(current.general, current.nectar.general, draft.general, has.general);
-  const incidents = field(
-    current.incidentNotes,
-    current.nectar.incidentNotes,
-    draft.incidentNotes,
-    has.incidents,
+/** True when a field still holds text taken from a Nectar suggestion (shown as a draft until Finalize). */
+export function hasNectarText(editor: SummaryEditorState): boolean {
+  const same = (cur: string, n: string) => !!n.trim() && cur.trim() === n.trim();
+  return (
+    same(editor.general, editor.nectar.general) ||
+    same(editor.incidentNotes, editor.nectar.incidentNotes) ||
+    Object.entries(editor.nectar.goals).some(([id, n]) => same(editor.goals[id] ?? "", n))
   );
-  const goals: Record<string, string> = { ...current.goals };
-  const nectarGoals: Record<string, string> = { ...current.nectar.goals };
-  for (const id of Object.keys({ ...current.goals, ...(draft.goals ?? {}) })) {
-    const m = field(
-      current.goals[id] ?? "",
-      current.nectar.goals[id] ?? "",
-      draft.goals?.[id],
-      !!has.goals[id],
-    );
-    goals[id] = m.text;
-    if (m.nectar) nectarGoals[id] = m.nectar;
-    else delete nectarGoals[id];
-  }
-  return {
-    ...current,
-    general: general.text,
-    incidentNotes: incidents.text,
-    goals,
-    nectar: { general: general.nectar, incidentNotes: incidents.nectar, goals: nectarGoals },
-  };
 }
 
 /** Manual incident entries with something written. */
@@ -460,7 +388,7 @@ export function buildSummaryDoc(input: SummaryDocInput): SummaryDoc {
       ["Due", formatDate(s.due_date)],
       ["Team members", input.teamMembers.join(", ") || "None"],
     ],
-    draftMark: !finalized && s.drafted_at ? DRAFT_MARK : null,
+    draftMark: !finalized && (s.drafted_at || hasNectarText(input.editor)) ? DRAFT_MARK : null,
     goals: goals.map((g) => ({
       goal: g.goal,
       supports: g.supports.map((x) => ({ support: x.support || "Support", details: x.details })),
