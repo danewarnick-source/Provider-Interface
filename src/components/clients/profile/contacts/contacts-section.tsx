@@ -140,7 +140,7 @@ export function ContactsSection({ orgId, data }: { orgId: string; data: ClientPr
           to call.
         </EmptyState>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-4">
           {contacts.map((c) => (
             <ContactCard
               key={c.id}

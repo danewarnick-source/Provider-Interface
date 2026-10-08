@@ -4,6 +4,7 @@ import {
   activeContacts,
   cleanContactFields,
   contactLine,
+  contactTelHref,
   contactsByClient,
   contactCardOrder,
   contactInitials,
@@ -110,6 +111,16 @@ describe("contactsByClient", () => {
     const m = contactsByClient(list);
     assert.equal(m.get("a")?.length, 4);
     assert.equal(m.get("b")?.length, 1);
+  });
+});
+
+describe("contactTelHref", () => {
+  it("dials the first number in the field", () => {
+    assert.equal(contactTelHref("(801) 555-0100"), "tel:8015550100");
+    assert.equal(contactTelHref("(801) 555-0100 (w) (801) 555-0101 (c)"), "tel:8015550100");
+    assert.equal(contactTelHref("+1 801-555-0100"), "tel:+18015550100");
+    assert.equal(contactTelHref("call the office"), null);
+    assert.equal(contactTelHref(null), null);
   });
 });
 

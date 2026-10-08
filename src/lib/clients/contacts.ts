@@ -192,6 +192,15 @@ export function contactLine(
   return c.phone ? `${who} · ${c.phone}` : who;
 }
 
+/**
+ * A tel: link for the first number in a phone field, which may hold several
+ * ("(801) 555-0100 (w) (801) 555-0101 (c)"). Null when there's no number.
+ */
+export function contactTelHref(phone: string | null | undefined): string | null {
+  const first = (phone ?? "").match(/\+?\d[\d\s().-]{5,}\d/);
+  return first ? `tel:${first[0].replace(/[^\d+]/g, "")}` : null;
+}
+
 /** Trimmed fields with blanks as null; throws when the name is empty. */
 export function cleanContactFields(input: Partial<ContactFields> & { role: ContactRole }): ContactFields {
   const t = (v: string | null | undefined) => {
