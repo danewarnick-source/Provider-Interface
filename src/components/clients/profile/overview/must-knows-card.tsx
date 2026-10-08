@@ -1,17 +1,20 @@
 // Must-knows: the few things every team member needs before working with
-// this client (clients.special_directions). Staff see the same text on shift.
+// this client (clients.special_directions), as headings and bullets. Staff
+// see the same text on shift. Editors draft with Nectar from the client's
+// documents and approve, or write the text by hand.
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
+import { AlertTriangle, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAccess } from "@/hooks/use-access";
-import { updateClient } from "@/lib/clients/writes.functions";
+import { approvalLine } from "@/lib/clients/must-knows";
+import { formatDate, todayYmd } from "@/lib/clients/dates";
 import { EditButton, SaveBar, SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
+import { MustKnowsReview } from "./must-knows-review";
+import { MustKnowsText } from "./must-knows-text";
+import { useMustKnows } from "./use-must-knows";
 
 export function MustKnowsCard({
   orgId,
@@ -22,70 +25,95 @@ export function MustKnowsCard({
   clientId: string;
   text: string | null;
 }) {
-  const qc = useQueryClient();
   const canEdit = useAccess().canCategory("clients", "edit");
-  const updateFn = useServerFn(updateClient);
-  const [draft, setDraft] = useState<string | null>(null);
-  const save = useMutation({
-    mutationFn: (value: string) =>
-      updateFn({
-        data: {
-          organizationId: orgId,
-          clientId,
-          patch: { special_directions: value.trim() || null },
-        },
-      }),
-    onSuccess: () => {
-      toast.success("Must-knows saved.");
-      void qc.invalidateQueries({ queryKey: ["client-profile"] });
-      setDraft(null);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+  const { view, draft, setDraft, startDraft, approve, save } = useMustKnows(orgId, clientId);
+  const [typing, setTyping] = useState<string | null>(null);
+  const approved = approvalLine(view.data?.approval ?? null, text, (iso) =>
+    formatDate(todayYmd(new Date(iso))),
+  );
+  const idle = canEdit && !draft && typing === null;
+  const nectarButton = (
+    <Button
+      variant={text ? "outline" : "default"}
+      onClick={() => startDraft.mutate()}
+      disabled={startDraft.isPending}
+      data-testid="client-must-knows-draft"
+    >
+      {startDraft.isPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
+      {startDraft.isPending ? "Nectar is reading…" : "Draft with Nectar"}
+    </Button>
+  );
 
   return (
     <SectionCard
       icon={AlertTriangle}
       tone={text ? "profile" : "neutral"}
       title="Must-knows"
-      description="What every team member needs to know before working with them."
+      description="Health, behaviors, trauma and supports every team member needs to know first."
       className={text ? "border-hive-gold" : undefined}
       testId="client-must-knows"
       actions={
-        canEdit && draft === null && text ? (
-          <EditButton label="Edit must-knows" onClick={() => setDraft(text ?? "")} />
+        idle && text ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {nectarButton}
+            <EditButton label="Edit must-knows" onClick={() => setTyping(text)} />
+          </div>
         ) : null
       }
     >
-      {draft !== null ? (
+      {draft ? (
+        <MustKnowsReview
+          items={draft.items}
+          docs={view.data?.docs ?? []}
+          skipped={draft.skipped}
+          saving={approve.isPending}
+          onCancel={() => setDraft(null)}
+          onApprove={(items) => approve.mutate(items)}
+        />
+      ) : typing !== null ? (
         <>
           <Textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            rows={4}
+            value={typing}
+            onChange={(e) => setTyping(e.target.value)}
+            rows={8}
             aria-label="Must-knows"
-            placeholder="Allergies, seizure plan, how they communicate, what upsets them…"
+            placeholder={"Health:\n- Allergic to peanuts. Carry the EpiPen on outings."}
           />
           <SaveBar
-            onCancel={() => setDraft(null)}
-            onSave={() => save.mutate(draft)}
+            onCancel={() => setTyping(null)}
+            onSave={() => save.mutate(typing, { onSuccess: () => setTyping(null) })}
             saving={save.isPending}
             saveLabel="Save must-knows"
           />
         </>
       ) : text ? (
-        <p className="whitespace-pre-wrap text-sm">{text}</p>
+        <>
+          <MustKnowsText text={text} />
+          {approved ? (
+            <p
+              className="mt-4 text-xs text-muted-foreground"
+              data-testid="client-must-knows-approved"
+            >
+              {approved}
+            </p>
+          ) : null}
+        </>
       ) : (
         <EmptyState
           action={
             canEdit ? (
-              <Button variant="outline" onClick={() => setDraft("")}>
-                Write must-knows
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                {nectarButton}
+                <Button variant="outline" onClick={() => setTyping("")}>
+                  Write must-knows
+                </Button>
+              </div>
             ) : null
           }
         >
-          Nothing written yet.
+          {canEdit
+            ? "Nothing written yet. Nectar can draft them from the PCSP, BSP, medical records and other files in the Client file."
+            : "Nothing written yet."}
         </EmptyState>
       )}
     </SectionCard>

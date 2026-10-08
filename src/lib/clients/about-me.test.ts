@@ -6,6 +6,7 @@ import {
   boldLead,
   checkAboutItems,
   docKindLabel,
+  docsPrompt,
   hasNewKeyDocs,
   parseAboutReply,
   sourceLabel,
@@ -83,6 +84,7 @@ describe("prompt and unreadable documents", () => {
     const p = aboutPrompt("Pat", DOCS);
     assert.match(p, /\[DOCUMENT pcsp-1 · PCSP · page 2\]\nWalks every morning\./);
     assert.doesNotMatch(p, /scan-1/);
+    assert.match(docsPrompt("HEADER", DOCS), /^HEADER\n\n\[DOCUMENT pcsp-1 · PCSP · page 1\]/);
     assert.deepEqual(
       unreadableDocs(DOCS).map((d) => d.id),
       ["scan-1"],
