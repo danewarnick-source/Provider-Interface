@@ -3,7 +3,6 @@
 // last notes. Runs with the caller's RLS-scoped client; called only from
 // overview.functions.ts.
 
-import { personNeedsSupportStrategies } from "@/lib/audit-evidence";
 import { computeRestrictionCompletion, type RestrictionRecord } from "./hrc";
 import { isActiveCodeRow, loadActiveCodes } from "./codes";
 import { loadClientContacts } from "./contacts";
@@ -14,24 +13,11 @@ import { fileAttention } from "./file-rows";
 import { loadUsage, rows, type AuthRow, type Sb } from "./list-queries";
 import { comingUpItems, lastNotes, type ClientOverview } from "./overview";
 import { loadOverviewTeam, loadPeopleNames } from "./overview-team";
-import { activeGoalViewsOn, type ClientPlan } from "./plans";
-import { loadPlanBundle } from "./plans-load";
-import { agencySupports, isUploadDoc, strategyCoverage, type StrategySupport } from "./support-strategies";
-import type { CSTContent } from "./training.functions";
+import type { ClientPlan } from "./plans";
+import { loadStrategyStates } from "./strategy-sends.server";
 import { clientAttention, codePace } from "./readiness";
 import { loadAttentionScope } from "./support-scope.server";
 import { usedUnitsForCode } from "./units";
-
-/** Approved or not, and "N of M supports have a strategy" (an uploaded document covers all). */
-function strategiesFacts(
-  row: { status: string | null; content: CSTContent | null } | null,
-  supports: StrategySupport[],
-): { published: boolean; covered: number; total: number } {
-  const published = row?.status === "published";
-  if (row && isUploadDoc(row.content)) return { published, covered: supports.length, total: supports.length };
-  const c = strategyCoverage(supports, row?.content?.sections ?? []);
-  return { published, covered: c.covered, total: c.total };
-}
 
 type ClientFacts = {
   special_directions: string | null;
@@ -63,7 +49,7 @@ export async function loadClientOverview(
   );
   const client = clientRows[0];
   if (!client) throw new Error("Client not found in this organization");
-  const [codes, auths, contacts, plans, summaries, restrictions, strategies, fileView, team, bundle, scope] =
+  const [codes, auths, contacts, plans, summaries, restrictions, fileView, team, scope] =
     await Promise.all([
       loadActiveCodes(sb, ids),
       rows<AuthRow>(
@@ -89,19 +75,14 @@ export async function loadClientOverview(
       rows<RestrictionRecord>(
         sb.from("hrc_restriction_records").select("*").eq("client_id", clientId).eq("active", true),
       ).catch(() => [] as RestrictionRecord[]),
-      rows<{ status: string | null; content: CSTContent | null }>(
-        sb
-          .from("client_specific_trainings")
-          .select("status, content")
-          .eq("client_id", clientId)
-          .eq("training_type", "support_strategies"),
-      ).catch(() => []),
       loadClientFileView(sb, orgId, clientId, now),
       loadOverviewTeam(sb, orgId, clientId, client.has_abi === true),
-      loadPlanBundle(sb, clientId),
       loadAttentionScope(sb, orgId, clientId),
     ]);
   const clientCodes = codes.get(clientId) ?? [];
+  const strategies = (
+    await loadStrategyStates(sb, orgId, ids, { codes, plans: new Map([[clientId, plans]]) }, now)
+  ).get(clientId) ?? { kind: "not_needed" as const };
   const activeAuths = auths.filter((a) => isActiveCodeRow(a, today));
   const usage = await loadUsage(sb, orgId, ids, activeAuths);
   const paces = activeAuths
@@ -115,9 +96,7 @@ export async function loadClientOverview(
       fileCards: fileAttention(fileView.groups),
       photo: { url: client.client_photo_url, takenOn: client.client_photo_taken_on },
       plans,
-      strategies: personNeedsSupportStrategies(clientCodes)
-        ? strategiesFacts(strategies[0] ?? null, agencySupports(activeGoalViewsOn(bundle, today)))
-        : null,
+      strategies,
       summaries: summaries.map((s) => ({ label: s.period_label ?? "", dueDate: s.due_date })),
       restrictions: restrictions.map((r) => ({
         title: r.restriction_title,
@@ -146,6 +125,7 @@ export async function loadClientOverview(
   const current = plans.find((p) => p.status === "current");
   return {
     attention,
+    strategies,
     paces,
     mustKnows: client.special_directions?.trim() || null,
     comingUp: comingUpItems(

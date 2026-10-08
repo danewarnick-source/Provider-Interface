@@ -5,10 +5,10 @@ import {
   codeNeedsStrategy,
   formatBullets,
   parseBullets,
+  personNeedsSupportStrategies,
   strategyNeed,
   strategyNeedText,
 } from "./strategy-rules.ts";
-import { personNeedsSupportStrategies } from "../audit-evidence.ts";
 
 describe("which codes need a support strategy (§1.24(5))", () => {
   it("exempts ELS, MTP, PBA, PM1/PM2 and respite", () => {
@@ -31,7 +31,7 @@ describe("which codes need a support strategy (§1.24(5))", () => {
     assert.equal(strategyNeedText(strategyNeed(["SLH"])), "");
   });
 
-  it("is the one list the audit evidence uses", () => {
+  it("is the one list for the whole client", () => {
     assert.equal(personNeedsSupportStrategies(["MTP", "RP2"]), false);
     assert.equal(personNeedsSupportStrategies(["BC2"]), false);
     assert.equal(personNeedsSupportStrategies(["MTP", "HHS"]), true);

@@ -46,6 +46,8 @@ import {
   type StoreV1,
 } from "./evidence/store.server.ts";
 import { saveUploadOnItem } from "./evidence/record-upload.server.ts";
+import { loadStrategyStates } from "./clients/strategy-sends.server";
+import type { StrategySendState } from "./clients/strategy-sends";
 import { latestFileForItem } from "./evidence/status.ts";
 import {
   EVIDENCE_PUSH_BODY,
@@ -201,6 +203,8 @@ export type EvidenceBoard = {
   files: EvidenceFileRow[];
   staffPicker: EvidencePerson[];
   peopleError: string | null;
+  /** Clients: support strategies send state by client id (strategy-sends.ts). */
+  strategyStates: Record<string, StrategySendState>;
 };
 
 function boardFromStore(args: {
@@ -210,6 +214,7 @@ function boardFromStore(args: {
   store: StoreV1;
   staffPicker: EvidencePerson[];
   peopleError?: string | null;
+  strategyStates?: Record<string, StrategySendState>;
 }): EvidenceBoard {
   const items = args.store.items.filter((i) => i.subject_type === args.subject);
   return {
@@ -220,6 +225,7 @@ function boardFromStore(args: {
     files: args.store.files.filter((f) => items.some((i) => i.id === f.item_id)),
     staffPicker: args.staffPicker,
     peopleError: args.peopleError ?? null,
+    strategyStates: args.strategyStates ?? {},
   };
 }
 
@@ -251,10 +257,17 @@ export const loadEvidenceBoard = createServerFn({ method: "POST" })
     const staff = staffListed.people;
     let people: EvidencePerson[] = staff;
     let peopleError: string | null = data.subject === "staff" ? staffListed.error : null;
+    let strategyStates: Record<string, StrategySendState> = {};
     if (data.subject === "client") {
       const listed = await listClientPeople(sb, data.organizationId);
       people = listed.people;
       peopleError = listed.error;
+      const states = await loadStrategyStates(
+        sb,
+        data.organizationId,
+        people.map((p) => p.id),
+      );
+      strategyStates = Object.fromEntries(states);
     }
     if (data.subject === "company") {
       try {
@@ -277,6 +290,7 @@ export const loadEvidenceBoard = createServerFn({ method: "POST" })
       store,
       staffPicker: staff,
       peopleError,
+      strategyStates,
     });
   });
 

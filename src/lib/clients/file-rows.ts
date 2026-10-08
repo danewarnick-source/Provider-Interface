@@ -48,6 +48,8 @@ export type ClientFileRow = {
   keptIn: ClientProfileSection | null;
   /** Kept in this section's own card (belongings inventory). */
   keptHere: boolean;
+  /** A line from where it is kept ("Sent to Angela Duty · Oct 8, 2026 · Dane Warnick"). */
+  note: string | null;
   optional: boolean;
   addedByHand: boolean;
 };
@@ -77,7 +79,14 @@ const NOT_IN_ATTENTION = new Set(Object.keys(KEPT_IN));
 
 export const DUE_SOON_DAYS = 30;
 
-export type ElsewhereFacts = Partial<Record<string, { onFile: boolean; dueOn: string | null }>>;
+/**
+ * Status from where a record is kept. `ruled`: that status is the only rule
+ * (support strategies sent to the support coordinator, strategy-sends.ts), so
+ * an older Evidence file on the row doesn't count by itself.
+ */
+export type ElsewhereFacts = Partial<
+  Record<string, { onFile: boolean; dueOn: string | null; note?: string | null; ruled?: boolean }>
+>;
 
 /** "SOW §1.10(11)" when the cite names one section; vague cites get no hint. */
 export function sowHint(cite: string | null | undefined): string | null {
@@ -116,6 +125,13 @@ function labelFor(state: ClientFileRowState, expiresOn: string | null, reason: s
   }
 }
 
+/** A ruled row has a due date, not an expiry: "On file", "Due Oct 20, 2026", "Overdue (due …)". */
+function ruledLabel(onFile: boolean, dueOn: string | null, today: string): string {
+  if (onFile) return "On file";
+  if (!dueOn) return "Missing";
+  return dueOn >= today ? `Due ${formatDate(dueOn)}` : `Overdue (due ${formatDate(dueOn)})`;
+}
+
 export type RowInput = {
   key: string;
   item: EvidenceItemRow | null;
@@ -138,9 +154,11 @@ export function buildRow({
   const file = item ? latestFileForItem(files, item.id) : null;
   const optional = !!def?.optional;
   const fact = elsewhere[key];
-  const done = !!item && itemHasCompletedEvidence(item, file);
+  const ruled = !!fact?.ruled;
+  const done = !ruled && !!item && itemHasCompletedEvidence(item, file);
   const expiresOn =
-    (item &&
+    (!ruled &&
+      item &&
       effectiveAttentionDate({
         hasFile: done,
         firstDueOn: item.first_due_on,
@@ -151,7 +169,9 @@ export function buildRow({
     null;
   let state: ClientFileRowState;
   if (notNeeded) state = "not_needed";
-  else {
+  else if (ruled) {
+    state = fact!.onFile ? "on_file" : expiresOn && expiresOn >= today ? "due_soon" : "missing";
+  } else {
     const cell = item ? cellStatus({ item, file, today }) : "missing";
     if (cell === "awaiting_review" || cell === "sent_back") state = cell;
     else state = stateFor(done || !!fact?.onFile, expiresOn, today);
@@ -164,16 +184,20 @@ export function buildRow({
     why: def?.why ?? item?.description ?? "",
     sowHint: sowHint(def?.sowCite ?? item?.sow_cite),
     state,
-    label: labelFor(state, expiresOn, notNeeded),
+    label:
+      ruled && !notNeeded
+        ? ruledLabel(fact!.onFile, expiresOn, today)
+        : labelFor(state, expiresOn, notNeeded),
     reason: notNeeded,
     expiresOn,
     evidenceType: item?.evidence_type ?? def?.evidenceType ?? "upload",
     file:
-      file && (file.storage_path || file.filename)
+      file && (file.storage_path || file.filename) && !(ruled && !fact?.onFile)
         ? { path: file.storage_path, filename: file.filename }
         : null,
     keptIn: KEPT_IN[key] ?? null,
     keptHere: KEPT_HERE.has(key),
+    note: fact?.note ?? null,
     optional,
     addedByHand: !!item?.added_by_hand,
   };

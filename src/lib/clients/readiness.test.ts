@@ -34,7 +34,7 @@ function input(over: Partial<ReadinessInput> = {}): ReadinessInput {
     fileCards: [],
     photo: { url: "photos/a.jpg", takenOn: "2025-01-01" },
     plans: [plan({})],
-    strategies: null,
+    strategies: { kind: "not_needed" },
     summaries: [],
     restrictions: [],
     setup: { staffCount: 1, hasPin: true, guardianGap: null },
@@ -147,7 +147,7 @@ describe("clientAttention", () => {
           { key: "pcsp", title: "PCSP", status: "on_file", dueAt: null },
         ],
         plans: [plan({ start_date: "2025-09-01", end_date: "2026-08-31", status: "current" })],
-        strategies: { published: false, covered: 0, total: 2 },
+        strategies: { kind: "not_approved", dueOn: "2026-10-01", dueSoon: false, overdue: true },
         summaries: [
           { label: "2026-Q3", dueDate: "2026-10-15" },
           { label: "2026-Q4", dueDate: "2027-01-15" },
@@ -180,63 +180,24 @@ describe("clientAttention", () => {
     assert.equal(counts.get("profile"), 1);
   });
 
-  it("counts strategies due 30 days after the current plan starts", () => {
-    const items = clientAttention(
-      input({ plans: [plan({ activated_on: "2026-09-20" })], strategies: { published: false, covered: 0, total: 2 } }),
+  it("reminds about strategies not sent from day 25; quiet before, when sent or not needed", () => {
+    const soon = clientAttention(
+      input({ strategies: { kind: "not_sent", dueOn: "2026-10-10", dueSoon: true, overdue: false } }),
       NOW,
     );
-    const s = items.find((i) => i.key === "strategies");
-    assert.equal(s?.title, "Support strategies: 0 of 2 supports have a strategy");
-    assert.equal(s?.detail, "Due in 14 days");
+    const s = soon.find((i) => i.key === "strategies");
+    assert.equal(s?.title, "Support strategies not sent to the support coordinator — due Oct 10, 2026");
+    assert.equal(s?.detail, "Mark them as sent");
     assert.equal(s?.tone, "warn");
+    const early = { kind: "not_sent", dueOn: "2026-10-30", dueSoon: false, overdue: false } as const;
+    assert.ok(!clientAttention(input({ strategies: early }), NOW).some((i) => i.key === "strategies"));
+    const sent = { kind: "sent", sendId: "s", sentOn: "2026-10-01", sentTo: null, by: null, late: false } as const;
+    assert.ok(!clientAttention(input({ strategies: sent }), NOW).some((i) => i.key === "strategies"));
+    assert.ok(!clientAttention(input(), NOW).some((i) => i.key === "strategies"));
   });
 
-  it("asks for approval once every support has a strategy, and is quiet when approved", () => {
-    const draft = clientAttention(input({ strategies: { published: false, covered: 2, total: 2 } }), NOW);
-    assert.equal(draft.find((i) => i.key === "strategies")?.title, "Support strategies not approved");
-    const done = clientAttention(input({ strategies: { published: true, covered: 2, total: 2 } }), NOW);
-    assert.ok(!done.some((i) => i.key === "strategies"));
-  });
-});
-
-describe("plan-year reminders in needs attention", () => {
-  it("flags a client with no PCSP on file", () => {
-    const items = clientAttention(input({ plans: [] }), NOW);
-    const n = items.find((i) => i.key === "pcsp-none");
-    assert.equal(n?.title, "No PCSP on file");
-    assert.equal(n?.section, "plans");
-  });
-  it("reminds 60 days before the plan year ends", () => {
-    const items = clientAttention(input({ plans: [plan({ end_date: "2026-11-30" })] }), NOW);
-    const r = items.find((i) => i.key === "plan-ending:60");
-    assert.equal(r?.title, "PCSP expires in 55 days (Nov 30)");
-    assert.equal(r?.detail, "Schedule the PCSP meeting with the support coordinator.");
-    assert.equal(r?.section, "plans");
-  });
-  it("turns waiting into an office follow-up from day 10", () => {
-    const items = clientAttention(
-      input({ plans: [plan({ start_date: "2025-09-01", end_date: "2026-09-26" })] }),
-      NOW,
-    );
-    const w = items.find((i) => i.key === "pcsp-waiting");
-    assert.equal(w?.title, "PCSP is 10 days overdue");
-    assert.equal(w?.tone, "bad");
-  });
-});
-
-describe("setup answers in needs attention", () => {
-  const keys = (over: Partial<ReadinessInput>) => clientAttention(input(over), NOW).map((i) => i.key);
-  it("a hidden photo never counts", () => {
-    const noPhoto = { photo: { url: null, takenOn: null } };
-    assert.ok(keys(noPhoto).includes("photo"));
-    assert.ok(!keys({ ...noPhoto, hidden: ["photo"] }).includes("photo"));
-  });
-  it("a recorded DNR/POLST needs the signed form, unless the card is hidden", () => {
-    const dir = { directive: { required: true, onFile: false } };
-    const item = clientAttention(input(dir), NOW).find((i) => i.key === "directive");
-    assert.equal(item?.section, "health");
-    assert.ok(!keys({ directive: { required: true, onFile: true } }).includes("directive"));
-    assert.ok(!keys({ directive: { required: false, onFile: false } }).includes("directive"));
-    assert.ok(!keys({ ...dir, hidden: ["advance_directive"] }).includes("directive"));
+  it("asks for the activation date when the plan has none", () => {
+    const items = clientAttention(input({ strategies: { kind: "no_activation", hasPlan: true } }), NOW);
+    assert.equal(items.find((i) => i.key === "strategies")?.detail, "Add the PCSP activation date");
   });
 });

@@ -5,6 +5,7 @@
 import { daysUntil, formatDate, todayYmd } from "./dates.ts";
 import type { AttentionItem, CodePace } from "./readiness.ts";
 import type { ClientProfileSection } from "./profile-sections.ts";
+import type { StrategySendState } from "./strategy-sends.ts";
 
 export type ComingUpItem = {
   key: string;
@@ -39,6 +40,8 @@ export type OverviewNote = {
 
 export type ClientOverview = {
   attention: AttentionItem[];
+  /** Support strategies sent to the support coordinator (strategy-sends.ts). */
+  strategies: StrategySendState;
   paces: CodePace[];
   mustKnows: string | null;
   comingUp: ComingUpItem[];

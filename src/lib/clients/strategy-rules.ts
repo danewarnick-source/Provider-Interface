@@ -48,6 +48,11 @@ export function codeNeedsStrategy(code: string): boolean {
   return !!c && !STRATEGY_EXEMPT_CODES.has(c) && !STRATEGY_OTHER_PLAN[c];
 }
 
+/** A client needs support strategies when any code does (no codes yet: assume yes). */
+export function personNeedsSupportStrategies(codes: readonly string[]): boolean {
+  return !codes.length || codes.some(codeNeedsStrategy);
+}
+
 /** A support needs a strategy when any of its codes does; otherwise why not. */
 export function strategyNeed(codes: readonly string[]): StrategyNeed {
   const cs = codes.map(up).filter(Boolean);

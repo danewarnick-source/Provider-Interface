@@ -154,6 +154,36 @@ describe("Client file rows", () => {
     );
   });
 
+  it("support strategies follow the send rule, not an older Evidence file", () => {
+    const ss = item("support_strategies");
+    const old = file(ss.id);
+    const notSent = buildClientFile(
+      fileFor({
+        items: [ss],
+        files: [old],
+        elsewhere: { support_strategies: { onFile: false, dueOn: "2026-10-20", ruled: true } },
+      }),
+    )
+      .flatMap((g) => g.rows)
+      .find((r) => r.key === "support_strategies")!;
+    assert.equal(notSent.state, "due_soon");
+    assert.equal(notSent.file, null);
+    const sent = buildClientFile(
+      fileFor({
+        items: [ss],
+        files: [old],
+        elsewhere: {
+          support_strategies: { onFile: true, dueOn: null, ruled: true, note: "Sent to Angela Duty" },
+        },
+      }),
+    )
+      .flatMap((g) => g.rows)
+      .find((r) => r.key === "support_strategies")!;
+    assert.equal(sent.state, "on_file");
+    assert.equal(sent.note, "Sent to Angela Duty");
+    assert.equal(sent.file?.filename, "a.pdf");
+  });
+
   it("groups rows by pack, each key once, with where the pack came from", () => {
     const packs: ClientPackRow[] = [
       core,

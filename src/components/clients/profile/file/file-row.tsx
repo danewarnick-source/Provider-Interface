@@ -72,6 +72,11 @@ export function FileRow({
         {row.file?.filename && !waived ? (
           <p className="mt-1 truncate text-xs text-muted-foreground">{row.file.filename}</p>
         ) : null}
+        {row.note && !waived ? (
+          <p className="mt-1 text-xs text-muted-foreground" data-testid="client-file-row-note">
+            {row.note}
+          </p>
+        ) : null}
         {row.keptHere && !waived ? (
           <p className="mt-1 text-xs text-muted-foreground">
             Kept in the belongings inventory below.

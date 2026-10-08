@@ -1,8 +1,10 @@
-// Client Overview: the collapsed "Needs attention (N)" button, must-knows
+// Client Overview: the collapsed "Needs attention (N)" button, the support
+// strategies "Sent to …" line once sent, must-knows
 // (lead, full width), then Units left | Coming up, then Team | Last notes.
 // Draws getClientOverview as it is; no counting here.
 
 import type { ClientOverview } from "@/lib/clients/overview";
+import { sentLine } from "@/lib/clients/strategy-sends";
 import type { ClientProfileSection } from "@/lib/clients/profile-sections";
 import type { ClientProfileData } from "@/components/clients/profile/use-client-profile";
 import { AttentionCards } from "./attention-cards";
@@ -32,6 +34,16 @@ export function OverviewSection({
       ) : (
         <AttentionCards items={overview?.attention ?? []} loading={loading} onSelect={onSelect} />
       )}
+      {overview?.strategies.kind === "sent" ? (
+        <button
+          type="button"
+          className="self-start text-left text-sm text-muted-foreground hover:underline"
+          onClick={() => onSelect("plans")}
+          data-testid="overview-strategies-sent"
+        >
+          Support strategies: {sentLine(overview.strategies)}
+        </button>
+      ) : null}
       <MustKnowsCard
         orgId={orgId}
         clientId={data.client.id}

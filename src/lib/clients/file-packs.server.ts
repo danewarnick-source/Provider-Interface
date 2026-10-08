@@ -27,6 +27,7 @@ import {
   type PackPlan,
 } from "./file-packs";
 import { buildClientFile, type ClientFileGroup, type ElsewhereFacts } from "./file-rows";
+import { sentLine, type StrategySendState } from "./strategy-sends";
 
 async function rowsOf<T>(query: PromiseLike<{ data: unknown; error: { message: string } | null }>) {
   const { data, error } = await query;
@@ -176,7 +177,11 @@ export async function loadClientFileView(
     clientPacks: packs,
     activeCodes,
     ownGuardian,
-    elsewhere: elsewhereFacts(index.cardsByClient.get(clientId) ?? [], facts?.grievanceOk ?? false),
+    elsewhere: elsewhereFacts(
+      index.cardsByClient.get(clientId) ?? [],
+      facts?.grievanceOk ?? false,
+      facts?.strategies ?? null,
+    ),
     today,
   });
   const pending =
@@ -220,10 +225,14 @@ const ELSEWHERE_CARD: Record<string, string[]> = {
   belongings: ["belongings_inventory_hhs", "belongings_inventory_rhs", "belongings_inventory_pps"],
 };
 
-/** Status of records the profile keeps elsewhere (photo, plan, strategies, belongings, signed grievance). */
+/**
+ * Status of records the profile keeps elsewhere (photo, plan, strategies,
+ * belongings, signed grievance). Support strategies follow the send rule only.
+ */
 function elsewhereFacts(
   cards: readonly { key: string; status: string; dueAt: string | null }[],
   grievanceOk: boolean,
+  strategies: StrategySendState | null,
 ): ElsewhereFacts {
   const out: ElsewhereFacts = {};
   for (const card of cards) {
@@ -232,6 +241,10 @@ function elsewhereFacts(
     }
   }
   if (grievanceOk) out.grievance_receipt = { onFile: true, dueOn: null };
+  if (out.support_strategies) {
+    out.support_strategies.ruled = true;
+    out.support_strategies.note = strategies?.kind === "sent" ? sentLine(strategies) : null;
+  }
   return out;
 }
 

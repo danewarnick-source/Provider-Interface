@@ -21,6 +21,7 @@ export function clientOverviewPayload(): ClientOverview {
         section: "contacts",
       },
     ],
+    strategies: { kind: "not_needed" },
     paces: [
       {
         code: "DSI",

@@ -2,18 +2,20 @@
 // the section badges and the Smart Import done page all read its output.
 // Covers units pacing, documents due or missing (photo older than 5 years
 // included), plan-year reminders (60 / 30 days before the end), PCSP waiting
-// (with the office follow-up from day 10), support strategies due (plan
-// activation + 30 days), summaries due, HRC reviews, a recorded DNR/POLST
+// (with the office follow-up from day 10), support strategies not sent to
+// the support coordinator (strategy-sends.ts: from day 25 after the PCSP's
+// activation, overdue after day 30), summaries due, HRC reviews, a recorded DNR/POLST
 // with no signed form, and finish-setup gaps. Cards the setup answers hide
 // (support-scope.ts) never count.
 // Advisory only: it never blocks a save.
 
 import { listReadiness } from "./list.ts";
 import { daysUntil, parseLocalDate } from "./dates.ts";
-import { addDaysYmd, strategiesDueOn } from "./plan-dates.ts";
+import { addDaysYmd } from "./plan-dates.ts";
 import { pcspState, pcspWords } from "./pcsp-status.ts";
-import { currentPlan, type ClientPlan } from "./plans.ts";
+import type { ClientPlan } from "./plans.ts";
 import type { ClientProfileSection } from "./profile-sections.ts";
+import { strategyAttention, type StrategySendState } from "./strategy-sends.ts";
 import type { ScopeCard } from "./support-scope.ts";
 
 export type AttentionTone = "bad" | "warn";
@@ -112,12 +114,8 @@ export type ReadinessInput = {
   fileCards: readonly { key: string; title: string; status: string; dueAt: string | null }[];
   photo: { url: string | null; takenOn: string | null };
   plans: readonly ClientPlan[];
-  /**
-   * Support strategies (support-strategies.ts coverage): approved or not, and
-   * how many of the agency's supports have one. null when the client's codes
-   * don't need them.
-   */
-  strategies: { published: boolean; covered: number; total: number } | null;
+  /** Support strategies sent to the support coordinator (strategy-sends.ts). */
+  strategies: StrategySendState;
   summaries: readonly { label: string; dueDate: string | null }[];
   restrictions: readonly { title: string; nextReview: string | null; complete: boolean }[];
   setup: { staffCount: number; hasPin: boolean; guardianGap: string | null };
@@ -234,17 +232,13 @@ export function clientAttention(input: ReadinessInput, now: Date = new Date()): 
     });
   }
 
-  const st = input.strategies;
-  if (st && (!st.published || st.covered < st.total)) {
-    const days = daysUntil(strategiesDueOn(currentPlan(input.plans, now)), now);
+  const st = strategyAttention(input.strategies);
+  if (st) {
     add({
       key: "strategies",
-      title:
-        st.covered < st.total
-          ? `Support strategies: ${st.covered} of ${st.total} supports have a strategy`
-          : "Support strategies not approved",
-      detail: days == null ? "Add the plan's activation date" : dueText(days),
-      tone: days != null && days < 0 ? "bad" : "warn",
+      title: st.title,
+      detail: st.detail,
+      tone: st.overdue ? "bad" : "warn",
       section: "plans",
     });
   }
