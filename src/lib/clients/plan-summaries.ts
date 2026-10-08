@@ -8,8 +8,14 @@ export interface SummaryGoal {
   goal: string;
   /** Codes on this goal's supports that the summary covers. */
   job_codes: string[];
-  /** Support texts for those codes (blank ones dropped). */
-  supports: string[];
+  /** The supports for those codes, as the support strategies document shows them (blank ones dropped). */
+  supports: SummarySupport[];
+}
+
+export interface SummarySupport {
+  support: string;
+  details: string;
+  codes: string[];
 }
 
 /**
@@ -33,7 +39,9 @@ export function summaryGoals(
       id: goal.id,
       goal: goal.goal_text,
       job_codes: [...new Set(supports.flatMap((s) => s.our_codes))].filter((c) => !want.size || want.has(c)).sort(),
-      supports: supports.map((s) => s.support_text.trim()).filter(Boolean),
+      supports: supports
+        .map((s) => ({ support: s.support_text.trim(), details: (s.details ?? "").trim(), codes: s.our_codes }))
+        .filter((s) => s.support || s.details),
     })),
   };
 }

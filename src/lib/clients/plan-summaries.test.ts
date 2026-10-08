@@ -37,13 +37,23 @@ describe("summaryGoals", () => {
   it("uses the plan in effect at the period end and the summary's codes", () => {
     const q4 = summaryGoals(bundle, "2025-12-31", ["HHS"]);
     assert.equal(q4.planId, "old");
-    assert.deepEqual(q4.goals, [{ id: "a", goal: "Goal a", job_codes: ["HHS"], supports: ["Support s0"] }]);
+    assert.deepEqual(q4.goals, [{ id: "a", goal: "Goal a", job_codes: ["HHS"], supports: [{ support: "Support s0", details: "", codes: ["HHS"] }] }]);
     const q1 = summaryGoals(bundle, "2026-03-31", ["dsi"]);
     assert.deepEqual(q1.goals, [
       { id: "c", goal: "Goal c", job_codes: ["DSI"], supports: [] },
-      { id: "b", goal: "Goal b", job_codes: ["DSI"], supports: ["Support s2"] },
+      { id: "b", goal: "Goal b", job_codes: ["DSI"], supports: [{ support: "Support s2", details: "", codes: ["DSI"] }] },
     ]);
   });
+  it("supports carry their details and codes; blank supports drop out", () => {
+    const b: ClientPlanBundle = {
+      plans: [plan("p", "2026-01-01", "2026-12-31")],
+      goals: [goal("x", "p", [{ ...support("s1", "x", ["SLN"], " Coaching "), details: " Twice a week " }, support("s2", "x", ["SLN"], " ")])],
+    };
+    assert.deepEqual(summaryGoals(b, "2026-12-31", ["SLN"]).goals[0].supports, [
+      { support: "Coaching", details: "Twice a week", codes: ["SLN"] },
+    ]);
+  });
+
   it("no codes → every goal with all supports; no plan → nothing", () => {
     assert.deepEqual(summaryGoals(bundle, "2026-03-31", []).goals.map((g) => [g.id, g.job_codes]), [["c", ["DSI"]], ["b", ["DSI", "HHS"]]]);
     assert.deepEqual(summaryGoals(null, "2026-03-31", ["HHS"]), { planId: null, goals: [] });

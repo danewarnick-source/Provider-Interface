@@ -1,19 +1,78 @@
 // The progress summary editor: source documentation on the left, the
-// summary (Nectar draft, goal progress, finalize, filing attestations) on the
-// right. /dashboard/summaries opens it as a dialog; the client profile's
-// Progress summaries card opens the same editor as a side panel.
+// summary as a document on the right (goals → supports → progress →
+// evidence, incidents, general notes), autosaved as it is typed. One "Draft
+// with Nectar" button, "View & download" (preview + PDF), Finalize, and the
+// filing attestations. /dashboard/summaries opens it as a dialog; the client
+// profile's Progress summaries card opens the same editor as a side panel.
 
-import { CheckCircle2, Download, FileText, Loader2, Save, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, Download, Eye, FileText, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { summaryCadenceLabel } from "@/lib/progress-summaries";
+import type { SummaryDoc } from "@/lib/progress-summary-doc";
 import { EmploymentAttestation } from "./employment-attestation";
 import { EditorShell } from "./editor-shell";
 import { FinalizeDialog } from "./finalize-dialog";
+import { SummaryDocument } from "./summary-document";
 import { NoSourceBanner, PbaPanel, SourcePanel } from "./summary-source-panel";
-import { useSummaryEditor } from "./use-summary-editor";
+import { useSummaryEditor, type SaveState } from "./use-summary-editor";
+
+const PBA_TEXT = "Monthly financial statement generated and sent to Support Coordinator.";
+
+const SAVE_LABEL: Record<SaveState, string> = {
+  idle: "",
+  saving: "Saving…",
+  saved: "Saved",
+  error: "Not saved",
+};
+
+function PreviewDialog({
+  doc,
+  onClose,
+  onDownload,
+}: {
+  doc: SummaryDoc;
+  onClose: () => void;
+  onDownload: () => Promise<void>;
+}) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <Dialog open onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="flex max-h-[calc(100dvh-1rem)] max-w-2xl flex-col">
+        <DialogHeader>
+          <DialogTitle>Progress summary</DialogTitle>
+          <DialogDescription>The document as the PDF prints it.</DialogDescription>
+        </DialogHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <SummaryDocument doc={doc} />
+        </div>
+        <DialogFooter className="max-md:[&_button]:min-h-11">
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+          <Button
+            disabled={busy}
+            onClick={() => {
+              setBusy(true);
+              void onDownload().finally(() => setBusy(false));
+            }}
+          >
+            {busy ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+            Download PDF
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export function SummaryEditor({
   summaryId,
@@ -34,166 +93,112 @@ export function SummaryEditor({
   const {
     aiAttested,
     bundleQ,
-    content,
+    doc,
     draftMut,
+    editor,
     filing,
     finalizeMut,
     finalizerName,
-    generalDraft,
-    goalDrafts,
+    flush,
     handleDownload,
     locked,
-    saveMut,
+    saveState,
     scMut,
     setAiAttested,
-    setContent,
+    setEditor,
     setFinalizerName,
-    setGeneralDraft,
-    setGoalDrafts,
     setShowFinalize,
     showFinalize,
     upiMut,
   } = useSummaryEditor({ summaryId, organizationId, orgName, clientName });
+  const [preview, setPreview] = useState(false);
+  const b = bundleQ.data;
+  const close = () => void flush().finally(onClose);
 
   return (
-    <EditorShell panel={panel} onClose={onClose}>
+    <EditorShell panel={panel} onClose={close}>
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <FileText className="size-5" /> {clientName} —{" "}
-          {bundleQ.data?.summary.period_label.replace(/-FS$/, "")}
+          {b?.summary.period_label.replace(/-FS$/, "")}
         </DialogTitle>
         <DialogDescription>
-          {bundleQ.data
-            ? summaryCadenceLabel(
-                bundleQ.data.summary.period_kind,
-                bundleQ.data.summary.service_codes,
-              )
-            : "Loading…"}
+          {b ? summaryCadenceLabel(b.summary.period_kind, b.summary.service_codes) : "Loading…"}
         </DialogDescription>
       </DialogHeader>
 
-      {bundleQ.isLoading || !bundleQ.data ? (
+      {bundleQ.isLoading || !b || !editor || !doc ? (
         <div className="py-12 text-center">
           <Loader2 className="size-5 animate-spin inline" />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-hidden min-h-0">
           <div className="overflow-y-auto pr-2 space-y-3 border-r min-h-0">
-            <SourcePanel bundle={bundleQ.data} />
+            <SourcePanel bundle={b} />
           </div>
 
-          <div className="overflow-y-auto pl-2 flex flex-col gap-3 min-h-0">
-            {bundleQ.data.summary.summary_kind === "financial_statement" ? (
+          <div
+            className="overflow-y-auto pl-2 flex flex-col gap-3 min-h-0"
+            onBlur={() => void flush()}
+          >
+            {b.summary.summary_kind === "financial_statement" ? (
               <PbaPanel
-                status={bundleQ.data.summary.status}
+                status={b.summary.status}
                 onMarkComplete={() => {
-                  setContent(
-                    "Monthly financial statement generated and sent to Support Coordinator.",
-                  );
+                  setEditor((p) => (p ? { ...p, general: PBA_TEXT } : p));
                   setAiAttested(true);
                   setShowFinalize(true);
                 }}
               />
-            ) : bundleQ.data.summary.status === "no_source" ? (
-              <NoSourceBanner />
             ) : draftMut.isPending ? (
               <div className="rounded border bg-blue-50 px-3 py-2 text-sm text-blue-800 flex items-center gap-2">
-                <Loader2 className="size-4 animate-spin" /> Nectar is drafting from code-tagged
-                notes…
+                <Loader2 className="size-4 animate-spin" /> Nectar is drafting from this
+                period&apos;s documentation…
               </div>
+            ) : b.summary.status === "no_source" ? (
+              <NoSourceBanner />
             ) : null}
 
-            {bundleQ.data.summary.summary_kind === "narrative" && (
+            {b.summary.summary_kind === "narrative" && (
               <>
-                {bundleQ.data.summary.include_goal_progress && bundleQ.data.goals.length > 0 ? (
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-                        General summary
-                      </Label>
-                      <Textarea
-                        value={generalDraft}
-                        onChange={(e) => setGeneralDraft(e.target.value)}
-                        className="mt-1 min-h-[100px] text-sm"
-                        disabled={locked}
-                        placeholder="Overall status and services this period…"
-                      />
-                    </div>
-                    {bundleQ.data.goals.map((g) => (
-                      <div key={g.id} className="rounded-lg border p-3 space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium leading-snug">{g.goal}</div>
-                            <div className="text-[11px] text-muted-foreground mt-0.5">
-                              {g.job_codes.length
-                                ? `Codes: ${g.job_codes.join(", ")}`
-                                : "No job codes tagged — Nectar uses period services"}
-                            </div>
-                          </div>
-                          {!locked && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={draftMut.isPending}
-                              onClick={() => draftMut.mutate(g.id)}
-                            >
-                              <Sparkles className="size-3.5 mr-1" /> Draft
-                            </Button>
-                          )}
-                        </div>
-                        <Textarea
-                          value={goalDrafts[g.id] ?? ""}
-                          onChange={(e) =>
-                            setGoalDrafts((prev) => ({ ...prev, [g.id]: e.target.value }))
-                          }
-                          className="min-h-[88px] text-sm"
-                          disabled={locked}
-                          placeholder="Progress on this goal…"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <Textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Draft will appear here once Nectar finishes…"
-                    className="min-h-[420px] font-mono text-sm"
-                    disabled={locked}
-                  />
-                )}
+                <SummaryDocument
+                  doc={doc}
+                  edit={
+                    locked
+                      ? undefined
+                      : {
+                          editor,
+                          setEditor: (fn) => setEditor((p) => (p ? fn(p) : p)),
+                          goalIds: b.summary.include_goal_progress ? b.goals.map((g) => g.id) : [],
+                          disabled: draftMut.isPending || finalizeMut.isPending,
+                        }
+                  }
+                />
 
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => draftMut.mutate(undefined)}
-                    disabled={draftMut.isPending || locked}
-                  >
-                    <Sparkles className="size-4 mr-1" />
-                    {bundleQ.data.summary.status === "no_source"
-                      ? "Try Nectar again"
-                      : "Re-draft all with Nectar"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => saveMut.mutate()}
-                    disabled={saveMut.isPending || locked}
-                  >
-                    <Save className="size-4 mr-1" /> Save draft
+                <div className="flex flex-wrap items-center gap-2">
+                  {!locked && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => draftMut.mutate()}
+                      disabled={draftMut.isPending}
+                      data-testid="summary-draft-nectar"
+                    >
+                      <Sparkles className="size-4 mr-1" /> Draft with Nectar
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" onClick={() => setPreview(true)}>
+                    <Eye className="size-4 mr-1" /> View &amp; download
                   </Button>
                   {!locked && (
-                    <Button size="sm" onClick={() => setShowFinalize(true)}>
+                    <Button
+                      size="sm"
+                      onClick={() => void flush().then(() => setShowFinalize(true))}
+                    >
                       <CheckCircle2 className="size-4 mr-1" /> Finalize
                     </Button>
                   )}
-                  {locked && (
-                    <Button size="sm" onClick={() => void handleDownload()}>
-                      <Download className="size-4 mr-1" /> Download PDF
-                    </Button>
-                  )}
-                  {locked && filing === "upi" && !bundleQ.data.summary.upi_entered_at && (
+                  {locked && filing === "upi" && !b.summary.upi_entered_at && (
                     <Button
                       size="sm"
                       variant="secondary"
@@ -203,25 +208,39 @@ export function SummaryEditor({
                       Mark entered in UPI
                     </Button>
                   )}
-                  {locked &&
-                    filing === "support_coordinator" &&
-                    !bundleQ.data.summary.sc_sent_at && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => scMut.mutate()}
-                        disabled={scMut.isPending}
-                      >
-                        Mark sent to Support Coordinator
-                      </Button>
-                    )}
+                  {locked && filing === "support_coordinator" && !b.summary.sc_sent_at && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => scMut.mutate()}
+                      disabled={scMut.isPending}
+                    >
+                      Mark sent to Support Coordinator
+                    </Button>
+                  )}
+                  {!locked && saveState !== "idle" && (
+                    <span
+                      className={`text-xs ${saveState === "error" ? "text-hive-danger" : "text-muted-foreground"}`}
+                      data-testid="summary-save-state"
+                    >
+                      {SAVE_LABEL[saveState]}
+                    </span>
+                  )}
                 </div>
               </>
             )}
 
-            <EmploymentAttestation organizationId={organizationId} summary={bundleQ.data.summary} />
+            <EmploymentAttestation organizationId={organizationId} summary={b.summary} />
           </div>
         </div>
+      )}
+
+      {preview && doc && (
+        <PreviewDialog
+          doc={doc}
+          onClose={() => setPreview(false)}
+          onDownload={() => handleDownload()}
+        />
       )}
 
       {showFinalize && (

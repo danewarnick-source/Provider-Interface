@@ -1,9 +1,10 @@
-// The summary editor's left column (the period's source documentation) and
+// The summary editor's left column (the period's evidence in full) and
 // its two banners: no approved documentation, and the PBA financial statement.
 
 import { AlertTriangle, CheckCircle2, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { SummarySourceBundle } from "@/lib/progress-summaries.functions";
+import { EVIDENCE_KIND_LABEL, groupEvidence, type SummaryEvidence } from "@/lib/progress-summary-doc";
 import { summaryCadenceLabel } from "@/lib/progress-summaries";
 import { cn } from "@/lib/utils";
 
@@ -47,19 +48,43 @@ export function PbaPanel({
   );
 }
 
+function EvidenceCard({
+  title,
+  items,
+  tone,
+}: {
+  title: string;
+  items: SummaryEvidence[];
+  tone: string;
+}) {
+  return (
+    <div className="rounded-lg border p-3 text-xs space-y-2">
+      <div className="font-semibold text-sm">
+        {title} ({items.length})
+      </div>
+      <div className="max-h-80 overflow-y-auto space-y-2">
+        {items.length === 0 && <div className="text-muted-foreground">None.</div>}
+        {items.map((e) => (
+          <div key={e.id} className={cn("border-l-2 pl-2", tone)}>
+            <div className="font-medium">
+              {e.date} — {e.who ?? EVIDENCE_KIND_LABEL[e.kind]}
+              {e.code ? ` · ${e.code}` : ""}
+            </div>
+            {e.labels.length > 0 && (
+              <div className="text-muted-foreground">Goals: {e.labels.join(" | ")}</div>
+            )}
+            <div className="whitespace-pre-wrap">{e.text}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function SourcePanel({ bundle }: { bundle: SummarySourceBundle }) {
-  const {
-    client,
-    servicesInPeriod,
-    dailyLogs,
-    shiftReports,
-    incidents,
-    summary,
-    goals,
-    organization,
-    staffNames,
-    untaggedSourceCount,
-  } = bundle;
+  const { client, servicesInPeriod, evidence, summary, goals, organization, staffNames } = bundle;
+  const general = groupEvidence(summary.include_goal_progress ? goals : [], evidence).general.length;
+  const of = (...kinds: SummaryEvidence["kind"][]) => evidence.filter((e) => kinds.includes(e.kind));
   return (
     <div className="space-y-3 text-sm">
       <div className="rounded-lg border p-3 text-xs space-y-1">
@@ -85,16 +110,15 @@ export function SourcePanel({ bundle }: { bundle: SummarySourceBundle }) {
           {client.support_coordinator?.name || "Not on file"}
         </div>
         <div>
-          <span className="text-muted-foreground">Staff:</span> {staffNames.join(", ") || "—"}
+          <span className="text-muted-foreground">Team members:</span> {staffNames.join(", ") || "—"}
         </div>
         <div>
           <span className="text-muted-foreground">Cadence:</span>{" "}
           {summaryCadenceLabel(summary.period_kind, summary.service_codes)}
         </div>
-        {untaggedSourceCount > 0 && (
+        {general > 0 && (
           <div className={cn("mt-1 rounded px-2 py-1", "bg-amber-50 text-amber-900")}>
-            {untaggedSourceCount} source(s) untagged for service code / goal — shown for review;
-            Nectar will not invent codes.
+            {general} log(s) or shift note(s) not tied to a goal — listed under General.
           </div>
         )}
       </div>
@@ -115,56 +139,13 @@ export function SourcePanel({ bundle }: { bundle: SummarySourceBundle }) {
         )}
       </div>
 
-      <div className="rounded-lg border p-3 text-xs space-y-2">
-        <div className="font-semibold text-sm">Approved daily logs ({dailyLogs.length})</div>
-        <div className="max-h-80 overflow-y-auto space-y-2">
-          {dailyLogs.length === 0 && <div className="text-muted-foreground">None.</div>}
-          {dailyLogs.map((l) => (
-            <div key={l.id} className="border-l-2 border-blue-300 pl-2">
-              <div className="font-medium">
-                {l.log_date} — {l.staff_name ?? "Staff"}
-              </div>
-              <div className="text-muted-foreground">
-                Goals: {l.pcsp_goals_addressed.join(" | ") || "(none)"}
-              </div>
-              <div className="whitespace-pre-wrap">{l.narrative}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-lg border p-3 text-xs space-y-2">
-        <div className="font-semibold text-sm">Submitted shift reports ({shiftReports.length})</div>
-        <div className="max-h-60 overflow-y-auto space-y-2">
-          {shiftReports.length === 0 && <div className="text-muted-foreground">None.</div>}
-          {shiftReports
-            .filter((r) => r.narrative)
-            .map((r) => (
-              <div key={r.id} className="border-l-2 border-violet-300 pl-2">
-                <div className="font-medium">
-                  {r.created_at.slice(0, 10)} — {r.staff_name ?? "Staff"}
-                  {r.service_code ? ` · ${r.service_code}` : " · untagged"}
-                </div>
-                <div className="whitespace-pre-wrap">{r.narrative}</div>
-              </div>
-            ))}
-        </div>
-      </div>
-
-      <div className="rounded-lg border p-3 text-xs space-y-2">
-        <div className="font-semibold text-sm">Incidents ({incidents.length})</div>
-        <div className="max-h-60 overflow-y-auto space-y-2">
-          {incidents.length === 0 && <div className="text-muted-foreground">None.</div>}
-          {incidents.map((i) => (
-            <div key={i.id} className="border-l-2 border-red-300 pl-2">
-              <div className="font-medium">
-                {i.incident_date} — #{i.report_number} ({i.incident_types.join(", ")})
-              </div>
-              <div className="whitespace-pre-wrap">{i.narrative_during}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <EvidenceCard title="Approved daily logs" items={of("daily_log")} tone="border-blue-300" />
+      <EvidenceCard
+        title="Submitted shift notes"
+        items={of("shift_note", "shift_report")}
+        tone="border-violet-300"
+      />
+      <EvidenceCard title="Incidents" items={of("incident")} tone="border-red-300" />
     </div>
   );
 }
