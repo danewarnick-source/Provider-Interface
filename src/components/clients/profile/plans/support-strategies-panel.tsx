@@ -82,9 +82,14 @@ export function SupportStrategiesPanel({
 
   const draftMut = useMutation({
     mutationFn: (mode: "nectar" | "blank" | "rebuild") => draftSS({ data: { clientId, mode } }),
-    onSuccess: async () => {
+    onSuccess: async (res) => {
       await refresh();
-      toast.success("Support strategies drafted. Review each one below, then approve.");
+      const missed = res?.nectarMissed ?? [];
+      if (missed.length) {
+        toast.warning(
+          `Nectar couldn't draft clear strategies for: ${missed.join("; ")}. Write ${missed.length === 1 ? "that one" : "those"} by hand.`,
+        );
+      } else toast.success("Support strategies drafted. Review each one below, then approve.");
       requestAnimationFrame(() =>
         listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
       );
@@ -199,6 +204,7 @@ export function SupportStrategiesPanel({
       ) : (
         <div className="space-y-3" ref={listRef}>
           <StrategiesStatus
+            clientId={clientId}
             status={status!}
             covered={coverage.covered}
             total={coverage.total}

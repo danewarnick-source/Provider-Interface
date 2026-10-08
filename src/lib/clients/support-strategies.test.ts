@@ -102,7 +102,10 @@ describe("buildStrategySections", () => {
         details: "Use the picture binder.",
         codes: ["DSI"],
         strategy: "Show each step.",
+        bullets: ["Show each step."],
+        need: { kind: "needed" },
         edited: false,
+        nectar: true,
       },
     );
     assert.equal(strategyView(secs[1]).strategy, "");
@@ -125,6 +128,7 @@ describe("buildStrategySections", () => {
     );
     assert.equal(strategyView(rebuilt[1]).strategy, "Hand Pat the towel first.");
     assert.equal(rebuilt[1].edited, true);
+    assert.equal(strategyView(rebuilt[1]).nectar, false);
     assert.equal(strategyView(rebuilt[0]).strategy, "New draft");
   });
 
@@ -241,6 +245,49 @@ describe("coverage, status and grouping", () => {
       [legacy.goal, legacy.strategy, legacy.supportId],
       ["Old goal", "Old text", null],
     );
+  });
+});
+
+describe("supports that need no strategy (§1.24(5))", () => {
+  const extra: GoalView[] = [
+    {
+      id: "g5",
+      kind: "goal",
+      goal: "Pat will get to appointments.",
+      domain: null,
+      supports: [
+        { id: "t1", support_text: "Rides to the clinic.", details: null, our_codes: ["MTP"] },
+        { id: "t2", support_text: "Behavior plan follow-up.", details: null, our_codes: ["BC2"] },
+        { id: "t3", support_text: "Coaching at home.", details: null, our_codes: ["SLH", "RP2"] },
+      ],
+    },
+  ];
+  const supports = agencySupports(extra);
+
+  it("are listed but never drafted or counted", () => {
+    assert.deepEqual(
+      supportsToDraft(supports, []).map((s) => s.supportId),
+      ["t3"],
+    );
+    const secs = buildStrategySections(supports, [], new Map());
+    const c = strategyCoverage(supports, secs);
+    assert.deepEqual([c.covered, c.total], [0, 1]);
+    assert.deepEqual(
+      secs.map((x) => strategyView(x).need.kind),
+      ["exempt", "other_plan", "needed"],
+    );
+  });
+
+  it("reads a bullet strategy back as bullets and clears the Nectar mark when edited", () => {
+    const secs = buildStrategySections(
+      supports,
+      [],
+      new Map([["t3", "- Offer choices\n- Model the step"]]),
+    );
+    const v = strategyView(secs[2]);
+    assert.deepEqual([v.bullets, v.nectar], [["Offer choices", "Model the step"], true]);
+    const edited = withStrategy({ sections: secs }, v.id, "- One\n- Two").sections[2];
+    assert.equal(strategyView(edited).nectar, false);
   });
 });
 

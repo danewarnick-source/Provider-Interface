@@ -5,6 +5,7 @@
 // without a second round-trip.
 
 import type { AuditItem } from "./dspd-audit-tool";
+import { codeNeedsStrategy } from "./clients/strategy-rules.ts";
 
 export type AuditVerdict = "yes" | "no" | "na" | "open" | "unknown";
 
@@ -62,23 +63,10 @@ export const EMPTY_AUDIT_EVIDENCE: AuditEvidenceSnapshot = {
   homes: [],
 };
 
-const SUPPORT_STRATEGY_EXCLUDED = new Set([
-  "ELS",
-  "MTP",
-  "PBA",
-  "PM1",
-  "PM2",
-  "RP2",
-  "RP3",
-  "RP4",
-  "RP5",
-  "RL6",
-  "RPS",
-]);
-
+/** A person needs support strategies when any code does (§1.24(5); BC/PN use the BSP / Medical Care Plan). */
 export function personNeedsSupportStrategies(codes: string[]): boolean {
   if (!codes.length) return true;
-  return codes.some((c) => !SUPPORT_STRATEGY_EXCLUDED.has(c.toUpperCase()));
+  return codes.some(codeNeedsStrategy);
 }
 
 function yes(label: string, detail?: string, href?: string): AuditEvidenceItem {

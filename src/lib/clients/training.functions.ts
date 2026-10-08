@@ -8,6 +8,8 @@ import { isAdminLevel } from "@/lib/access/levels";
 import { todayYmd } from "./dates";
 import { activeGoalViewsOn, type GoalView } from "./plans";
 import { agencySupports, buildStrategySections, supportsToDraft, type StrategySupport } from "./support-strategies";
+import { formatBullets } from "./strategy-rules";
+import { STRATEGY_SYSTEM_PROMPT, parseStrategyReply, strategyUserPrompt, type StrategyReply } from "./strategy-prompt";
 import { loadPlanBundle } from "./plans-load";
 
 /** Active goals (with supports) of the client's plan in effect today. */
@@ -72,6 +74,8 @@ export type CSTSection = {
   support_id?: string;
   /** Support strategies: a person edited it, so a rebuild keeps it. */
   edited?: boolean;
+  /** Support strategies: Nectar drafted it (cleared once a person edits it). */
+  nectar?: boolean;
 };
 export type CSTContent = {
   sections: CSTSection[];
@@ -109,6 +113,7 @@ const SectionSchema = z.object({
   job_codes: z.array(z.string()).optional(),
   support_id: z.string().max(64).optional(),
   edited: z.boolean().optional(),
+  nectar: z.boolean().optional(),
 });
 const ContentSchema = z.object({
   sections: z.array(SectionSchema).max(60),
@@ -692,49 +697,50 @@ export const checkAnswerRelevance = createServerFn({ method: "POST" })
 // One row per client (training_type='support_strategies'). Admin-authored:
 // stub from PCSP goals (NECTAR verbatim), blank, or uploaded provider doc.
 
-// NECTAR drafts the "Support strategy" for each PCSP support paid to the
-// agency. This is an AI-drafted starting point only — the agency admin MUST
-// review, edit, and approve. NECTAR never auto-publishes; status stays "draft".
-async function draftSupportStrategyInstructions(supports: StrategySupport[], orgId?: string | null): Promise<string[]> {
-  if (!supports.length) return [];
+// NECTAR drafts 4–6 bullet points per PCSP support paid to the agency
+// (strategy-prompt.ts holds the prompt, contract rules and the check). An
+// AI-drafted starting point only — the agency admin MUST review, edit and
+// approve. NECTAR never auto-publishes; status stays "draft". Supports whose
+// bullets fail the check are retried once, then left blank and reported.
+async function askNectarForStrategies(supports: StrategySupport[], orgId?: string | null): Promise<StrategyReply> {
   try {
     const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
-    const system = [
-      "You are NECTAR, drafting staff support strategies for a Utah DSPD direct-support worker.",
-      "For each PCSP support (with its goal and support details), write clear, practical instructions — what the worker should DO on shift to provide that support.",
-      "Ground every instruction in the goal, support and details as written; do not invent diagnoses, clinical interventions, behavioral protocols, or medical procedures.",
-      "Write in plain, natural language a support worker can follow. 2–5 sentences per support.",
-      "This is a DRAFT the agency admin will review, edit, and approve before it reaches staff.",
-      'Respond ONLY with JSON: { "strategies": [ { "support": "...", "instructions": "..." } ] } preserving the order given.',
-      "No preamble, no markdown fences.",
-    ].join("\n");
-    const user = `PCSP SUPPORTS (in order):\n${supports
-      .map((s, i) => `${i + 1}. Goal: ${s.goal}\n   Support: ${s.support}\n   Support details: ${s.details || "None listed"}`)
-      .join("\n")}`;
     const res = await gatewayFetch({
       messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
+        { role: "system", content: STRATEGY_SYSTEM_PROMPT },
+        { role: "user", content: strategyUserPrompt(supports) },
       ],
       response_format: { type: "json_object" },
     }, { orgId });
-    if (!res.ok) return supports.map(() => "");
+    if (!res.ok) return parseStrategyReply("", supports);
     const body = await res.json();
-    const content: string = body?.choices?.[0]?.message?.content ?? "{}";
-    const clean = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-    const parsed = JSON.parse(clean || "{}") as {
-      strategies?: Array<{ support?: string; instructions?: string }>;
-    };
-    const rows = Array.isArray(parsed.strategies) ? parsed.strategies : [];
-    return supports.map((_, i) => String(rows[i]?.instructions ?? "").slice(0, 4000));
+    return parseStrategyReply(String(body?.choices?.[0]?.message?.content ?? ""), supports);
   } catch {
-    return supports.map(() => "");
+    return parseStrategyReply("", supports);
   }
+}
+
+async function draftStrategyBullets(
+  supports: StrategySupport[],
+  orgId?: string | null,
+): Promise<{ drafts: Map<string, string>; missed: string[] }> {
+  if (!supports.length) return { drafts: new Map(), missed: [] };
+  const first = await askNectarForStrategies(supports, orgId);
+  const retry = first.failed.length
+    ? await askNectarForStrategies(first.failed.map((f) => f.support), orgId)
+    : null;
+  const drafts = new Map<string, string>();
+  for (const [id, bullets] of [...first.drafts, ...(retry?.drafts ?? [])]) {
+    drafts.set(id, formatBullets(bullets));
+  }
+  const missed = (retry?.failed ?? []).map((f) => f.support.support || "Support");
+  return { drafts, missed };
 }
 
 /**
  * One section per support paid to the agency (support-strategies.ts). Edited
- * sections are kept; with `nectar`, the others get a fresh Nectar draft.
+ * sections are kept; with `nectar`, the others needing a strategy get a fresh
+ * Nectar draft. `missed`: supports Nectar could not draft.
  */
 async function assembleSupportStrategyStubs(
   supabase: AnySupabase,
@@ -742,12 +748,11 @@ async function assembleSupportStrategyStubs(
   clientId: string,
   existing: CSTSection[],
   nectar: boolean,
-): Promise<CSTContent> {
+): Promise<{ content: CSTContent; missed: string[] }> {
   const supports = agencySupports(await planGoals(supabase, clientId));
   const toDraft = nectar ? supportsToDraft(supports, existing) : [];
-  const texts = await draftSupportStrategyInstructions(toDraft, orgId);
-  const drafts = new Map(toDraft.map((s, i) => [s.supportId, texts[i] ?? ""]));
-  return { sections: buildStrategySections(supports, existing, drafts) };
+  const { drafts, missed } = await draftStrategyBullets(toDraft, orgId);
+  return { content: { sections: buildStrategySections(supports, existing, drafts) }, missed };
 }
 
 export const getSupportStrategiesTraining = createServerFn({ method: "GET" })
@@ -786,7 +791,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: AnySupabase | null; userId: string | null };
-    if (!supabase || !userId) return { training: null };
+    if (!supabase || !userId) return { training: null, nectarMissed: [] as string[] };
     const m = await getMembership(supabase, userId);
     adminGuard(m.access_level);
     await assertClientInOrg(supabase, data.clientId, m.organization_id);
@@ -798,7 +803,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
       .eq("training_type", "support_strategies")
       .maybeSingle();
     const kept = ((current?.content as CSTContent | undefined)?.sections ?? []).filter((x) => x.edited);
-    const content = await assembleSupportStrategyStubs(
+    const { content, missed } = await assembleSupportStrategyStubs(
       supabase, m.organization_id, data.clientId, kept, data.mode !== "blank",
     );
 
@@ -823,7 +828,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
         .select("*")
         .maybeSingle();
       if (uErr) throw new Error(uErr.message);
-      return { training: updated };
+      return { training: updated, nectarMissed: missed };
     }
 
     const { data: inserted, error: iErr } = await supabase
@@ -841,7 +846,7 @@ export const draftSupportStrategies = createServerFn({ method: "POST" })
       .select("*")
       .maybeSingle();
     if (iErr) throw new Error(iErr.message);
-    return { training: inserted };
+    return { training: inserted, nectarMissed: missed };
   });
 
 export const attachSupportStrategyDocument = createServerFn({ method: "POST" })

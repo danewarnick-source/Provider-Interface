@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { useCaseload } from "@/hooks/use-caseload";
 import { useSupportsForCode } from "@/components/clients/shared/hooks/use-plan-goals";
+import { ShiftFocus } from "@/components/clients/shared/shift-focus";
 import { useEffectiveView } from "@/hooks/use-effective-view";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -758,6 +759,7 @@ function DailyLogDialog({
 
               {/* Goals → supports for this log's code */}
               <div>
+                <ShiftFocus clientId={client?.id} groups={supports.groups} serviceCode={program} className="mb-3" />
                 <Label className="mb-2 block text-sm font-medium">Goals worked on today ({program})</Label>
                 {supports.groups.length > 0 ? (
                   <div className="space-y-3">
