@@ -325,9 +325,6 @@ export function editorFromLegacyText(
 
 // ─── Nectar text ───────────────────────────────────────────────────────────
 
-export const NO_EVIDENCE_TEXT =
-  "No approved daily logs, shift notes or incidents for this goal this period — type the progress.";
-
 /** True when a field still holds text taken from a Nectar suggestion (shown as a draft until Finalize). */
 export function hasNectarText(editor: SummaryEditorState): boolean {
   const same = (cur: string, n: string) => !!n.trim() && cur.trim() === n.trim();

@@ -5,13 +5,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { toIsoDateDay } from "@/lib/iso-date-day";
-import { loadPlanBundle } from "@/lib/clients/plans-load";
-import { summaryGoals } from "@/lib/clients/plan-summaries";
 import { FINALIZE_COLUMNS, readReopenHistory, reopenPatch, type ReopenEvent } from "@/lib/progress-summary-reopen";
-import { finalizeBlockers, readReviewState, type SummaryReviewState } from "@/lib/progress-summary-review";
+import { readReviewState, type SummaryReviewState } from "@/lib/progress-summary-review";
 import {
   editorFromLegacyText,
-  emptyEditorState,
   readEditorState,
   type SummaryDoc,
   type SummaryEditorState,
@@ -496,7 +493,7 @@ export type SummarySourceBundle = {
   editor: SummaryEditorState;
   /** The document as finalized, when it was finalized from this editor. */
   finalDoc: SummaryDoc | null;
-  /** Nectar's last review: findings, suggestions and "Keep as is" records. */
+  /** Nectar's last run: suggestions waiting, reminders and suggestions hidden with the x. */
   review: SummaryReviewState;
   /** Each time the summary was reopened after finalizing, newest first. */
   reopens: ReopenEvent[];
@@ -670,47 +667,24 @@ export const saveSummaryDraft = createServerFn({ method: "POST" })
   });
 
 /**
- * Finalize gate. The period must have reached its last day (Denver time;
- * canFinalizeSummary). Then, as on a clock-out shift note: every check (goals with no
- * progress, missing required content, dates outside the period) and every
- * Nectar finding still in the text must be fixed or kept with "Keep as is".
+ * Finalize gate: the period must have reached its last day (Denver time;
+ * canFinalizeSummary). Nothing else blocks it. Nectar's review is optional.
  */
 async function assertCanFinalize(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   organizationId: string,
   summaryId: string,
-  rawEditor: Record<string, unknown>,
 ): Promise<void> {
   const { data: row, error } = await supabase
     .from("client_progress_summaries")
-    .select("client_id, period_start, period_end, service_codes, summary_kind, include_goal_progress, draft_source")
+    .select("period_end")
     .eq("id", summaryId)
     .eq("organization_id", organizationId)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!row) throw new Error("Summary not found");
   if (!canFinalizeSummary(row.period_end)) throw new Error(finalizeOpensMessage(row.period_end));
-  if (row.summary_kind !== "narrative") return;
-  const codes = ((row.service_codes ?? []) as string[]).map((c) => c.toUpperCase());
-  const { goals } = summaryGoals(await loadPlanBundle(supabase, row.client_id), row.period_end, codes);
-  const open = finalizeBlockers(
-    {
-      periodStart: row.period_start,
-      periodEnd: row.period_end,
-      serviceCodes: codes,
-      summaryKind: row.summary_kind,
-      includeGoalProgress: !!row.include_goal_progress,
-      goals,
-    },
-    readEditorState(rawEditor) ?? emptyEditorState(),
-    readReviewState((row.draft_source ?? {}).review),
-  );
-  if (open.length) {
-    throw new Error(
-      `Resolve ${open.length} Nectar item${open.length === 1 ? "" : "s"} first: fix each one or choose "Keep as is".`,
-    );
-  }
 }
 
 export const finalizeSummary = createServerFn({ method: "POST" })
@@ -730,9 +704,9 @@ export const finalizeSummary = createServerFn({ method: "POST" })
     if (!supabase || !userId) return { ok: true };
     await requireOrgMembership(supabase, userId, data.organizationId, "admin");
     if (!data.aiReviewAttested) {
-      throw new Error("Confirm you reviewed the Nectar draft against PI documentation before finalizing.");
+      throw new Error("Confirm you reviewed this summary and take responsibility for it before finalizing.");
     }
-    await assertCanFinalize(supabase, data.organizationId, data.summaryId, data.editor);
+    await assertCanFinalize(supabase, data.organizationId, data.summaryId);
     const ts = new Date().toISOString();
 
     // Finalize content now; deadline clears only after UPI or SC send attestation.

@@ -1,29 +1,25 @@
-// Reviewing a progress summary the way a clock-out shift note is reviewed:
-// findings next to the field they are about, each one fixed (it clears on
-// the next check) or kept on purpose ("Keep as is", recorded with who and
-// when), and Finalize blocked while any is open.
+// Nectar as a helper on a progress summary, never a gate.
 //
 // This module is the pure part:
-//   - the checks that need no AI (summaryChecks): goals with no progress,
-//     required contents that are missing (progress-summary-requirements.ts),
-//     and dates outside the period (findDates);
-//   - the guards on Nectar's suggested rewrites: every date and number in a
-//     rewrite must come from the typed text or the period's records
+//   - the guards on Nectar's per-box rewrites: every date and number in a
+//     rewrite must come from that box's text (or its goal's records)
 //     (unsupportedFacts), the person's own dates and numbers must survive
-//     (droppedFacts), sentences are never repeated (dedupeFields), and a
-//     field whose text moved into other fields is accepted together with
-//     them (linkSuggestions);
-//   - the review state saved in client_progress_summaries.draft_source.review
-//     and the Finalize gate (openFindings).
-// Node --test.
+//     (droppedFacts), sentences are never repeated (dedupeFields);
+//   - the goal check, decided in code (goalCovered): a goal is covered when
+//     its progress shares a meaningful word, stem or synonym with the goal
+//     or its supports. Only zero overlap is ever put to Nectar, as a yes/no;
+//   - reminders (summaryReminders): fixed wording written here, never by
+//     the AI, max one per goal and two for the general notes;
+//   - Accept / Undo of a rewrite and the review state saved in
+//     client_progress_summaries.draft_source.review.
+// Nothing here blocks Finalize. Node --test.
 
-import { formatDate } from "./clients/dates.ts";
 import type { SummaryEditorState } from "./progress-summary-doc.ts";
 import { summaryRequirements } from "./progress-summary-requirements.ts";
 
 // ─── Fields ────────────────────────────────────────────────────────────────
 
-/** A place in the editor a finding or a suggestion is about. */
+/** A place in the editor a reminder or a suggestion is about. */
 export type FieldKey = "general" | "incidentNotes" | `goal:${string}` | `incident:${string}`;
 
 export const goalField = (id: string): FieldKey => `goal:${id}`;
@@ -46,26 +42,6 @@ export function fieldText(editor: SummaryEditorState, field: FieldKey): string {
 /** The writable text fields (general, incident notes, each goal), goals first. */
 export function textFields(goalIds: readonly string[]): FieldKey[] {
   return [...goalIds.map(goalField), "general", "incidentNotes"];
-}
-
-function setFieldText(
-  editor: SummaryEditorState,
-  field: FieldKey,
-  text: string,
-): SummaryEditorState {
-  if (field === "general") {
-    return { ...editor, general: text, nectar: { ...editor.nectar, general: text } };
-  }
-  if (field === "incidentNotes") {
-    return { ...editor, incidentNotes: text, nectar: { ...editor.nectar, incidentNotes: text } };
-  }
-  const goalId = fieldGoalId(field);
-  if (goalId === null) return editor;
-  return {
-    ...editor,
-    goals: { ...editor.goals, [goalId]: text },
-    nectar: { ...editor.nectar, goals: { ...editor.nectar.goals, [goalId]: text } },
-  };
 }
 
 // ─── Dates in text ─────────────────────────────────────────────────────────
@@ -183,43 +159,6 @@ export function findDates(text: string | null | undefined): FoundDate[] {
     }
   }
   return out.sort((a, b) => a.index - b.index);
-}
-
-const pad2 = (n: number) => String(n).padStart(2, "0");
-const lastDay = (y: number, m: number) => new Date(y, m, 0).getDate();
-
-/**
- * The days a written date can mean, as ISO strings. With no year it takes
- * the period's year (the end year when only that one puts it in the period).
- */
-export function dateSpan(
-  d: FoundDate,
-  periodStart: string,
-  periodEnd: string,
-): { from: string; to: string } {
-  const span = (y: number) => ({
-    from: `${y}-${pad2(d.month)}-${pad2(d.day ?? 1)}`,
-    to: `${y}-${pad2(d.month)}-${pad2(d.day ?? lastDay(y, d.month))}`,
-  });
-  if (d.year !== null) return span(d.year);
-  const years = [...new Set([+periodStart.slice(0, 4), +periodEnd.slice(0, 4)])];
-  for (const y of years) {
-    const s = span(y);
-    if (s.to >= periodStart && s.from <= periodEnd) return s;
-  }
-  return span(years[0]);
-}
-
-/** Dates in `text` that fall wholly outside periodStart…periodEnd. */
-export function datesOutsidePeriod(
-  text: string,
-  periodStart: string,
-  periodEnd: string,
-): FoundDate[] {
-  return findDates(text).filter((d) => {
-    const s = dateSpan(d, periodStart, periodEnd);
-    return s.to < periodStart || s.from > periodEnd;
-  });
 }
 
 // ─── Facts (dates and numbers) ─────────────────────────────────────────────
@@ -342,11 +281,79 @@ export function dedupeFields(fields: ReadonlyArray<[FieldKey, string]>): Map<Fie
   return out;
 }
 
-const STOP = new Set([
-  "that",
-  "this",
+// ─── Suggestions ───────────────────────────────────────────────────────────
+
+/** Nectar's rewrite of one box, offered as Accept / x. */
+export interface FieldSuggestion {
+  field: FieldKey;
+  text: string;
+  /** Dates / numbers the person typed that this rewrite loses. No one-click accept when set. */
+  drops: string[];
+}
+
+export interface SuggestionInput {
+  /** The text each box holds now. */
+  current: ReadonlyMap<FieldKey, string>;
+  /** Nectar's text per box (only the boxes it rewrote). */
+  proposed: ReadonlyMap<FieldKey, string>;
+  /** Extra text a box's rewrite may take dates and numbers from (a goal's records and supports). */
+  extra: (field: FieldKey) => readonly string[];
+  /** Box order for dedupe (goals first). */
+  order: readonly FieldKey[];
+}
+
+export interface SuggestionResult {
+  suggestions: FieldSuggestion[];
+  /** Boxes whose rewrite was dropped, with the dates / numbers it made up. */
+  rejected: { field: FieldKey; facts: string[] }[];
+}
+
+/**
+ * Nectar's rewrites made safe to offer: a rewrite with a date or number
+ * that is in neither its own box nor that box's records is dropped;
+ * repeated sentences are removed; a rewrite equal to the box is not
+ * offered; each suggestion lists what the person typed that it would lose.
+ */
+export function buildSuggestions(input: SuggestionInput): SuggestionResult {
+  const rejected: SuggestionResult["rejected"] = [];
+  const valid = new Map<FieldKey, string>();
+  for (const [field, raw] of input.proposed) {
+    const text = String(raw ?? "").trim();
+    if (!text || !input.current.has(field)) continue;
+    const facts = unsupportedFacts(text, [input.current.get(field) ?? "", ...input.extra(field)]);
+    if (facts.length) {
+      rejected.push({ field, facts });
+      continue;
+    }
+    valid.set(field, text);
+  }
+  const merged = new Map(input.current);
+  for (const [f, t] of valid) merged.set(f, t);
+  const deduped = dedupeFields(
+    input.order.filter((f) => merged.has(f)).map((f) => [f, merged.get(f) ?? ""]),
+  );
+  const suggestions: FieldSuggestion[] = [];
+  for (const field of valid.keys()) {
+    const text = deduped.get(field) ?? "";
+    const typed = input.current.get(field) ?? "";
+    if (!text || text.replace(/\s+/g, " ").trim() === typed.replace(/\s+/g, " ").trim()) continue;
+    suggestions.push({ field, text, drops: droppedFacts(typed, [text]) });
+  }
+  return { suggestions, rejected };
+}
+
+// ─── Goal check (in code) ──────────────────────────────────────────────────
+
+const GOAL_STOP = new Set([
+  "would",
+  "like",
+  "work",
+  "goal",
+  "skill",
   "with",
   "from",
+  "that",
+  "this",
   "have",
   "were",
   "will",
@@ -360,7 +367,6 @@ const STOP = new Set([
   "what",
   "also",
   "been",
-  "being",
   "each",
   "more",
   "some",
@@ -372,382 +378,248 @@ const STOP = new Set([
   "while",
   "there",
   "which",
-  "would",
   "could",
   "should",
+  "staff",
+  "support",
+  "help",
+  "continue",
+  "person",
+  "week",
+  "time",
+  "she",
+  "her",
+  "his",
+  "him",
+  "the",
+  "and",
 ]);
-const contentWords = (s: string) =>
+
+/** A rough stem: "painting", "painted", "paints" -> "paint". */
+export function stem(raw: string): string {
+  let w = raw.toLowerCase().replace(/[^a-z]/g, "");
+  if (w.length > 5 && w.endsWith("ing")) w = w.slice(0, -3);
+  else if (w.length > 4 && w.endsWith("ed")) w = w.slice(0, -2);
+  else if (w.length > 4 && w.endsWith("ies")) w = `${w.slice(0, -3)}y`;
+  else if (w.length > 4 && w.endsWith("es")) w = w.slice(0, -2);
+  else if (w.length > 3 && w.endsWith("s") && !w.endsWith("ss")) w = w.slice(0, -1);
+  if (w.length > 3 && /([^aeiou])\1$/.test(w)) w = w.slice(0, -1);
+  return w;
+}
+
+const stems = (text: string, ignore: ReadonlySet<string>) =>
   new Set(
-    s
+    text
       .toLowerCase()
-      .split(/[^a-z0-9]+/)
-      .filter((w) => w.length >= 4 && !STOP.has(w)),
+      .split(/[^a-z]+/)
+      .filter((w) => w.length >= 3 && !GOAL_STOP.has(w) && !ignore.has(w))
+      .map(stem)
+      .filter((w) => w.length >= 3 && !GOAL_STOP.has(w)),
   );
 
-/** Share of a sentence's content words that `text` contains (1 when it has none). */
-function coverage(sentence: string, text: string): number {
-  const words = contentWords(sentence);
-  if (!words.size) return 1;
-  const have = contentWords(text);
-  let n = 0;
-  for (const w of words) if (have.has(w)) n++;
-  return n / words.size;
-}
-
-const COVERED = 0.6;
-
-// ─── Suggestions ───────────────────────────────────────────────────────────
-
-/** Nectar's rewrite of one field, offered as Accept / Keep mine. */
-export interface FieldSuggestion {
-  field: FieldKey;
-  text: string;
-  /** Dates / numbers the person typed that this rewrite (with the others) loses. No one-click accept when set. */
-  drops: string[];
-  /** Fields that received this field's text; accepted together with it. */
-  linked: FieldKey[];
-}
-
-/**
- * Which other suggestions took something out of each field: a date or
- * number, or a sentence, the field's own suggestion no longer has but
- * another suggestion does.
- */
-export function linkSuggestions(
-  typed: ReadonlyMap<FieldKey, string>,
-  proposed: ReadonlyMap<FieldKey, string>,
-): Map<FieldKey, FieldKey[]> {
-  const out = new Map<FieldKey, FieldKey[]>();
-  for (const [field, text] of proposed) {
-    const before = typed.get(field) ?? "";
-    const own = factTokens(text, true);
-    const lostFacts = [...factTokens(before).keys()].filter((k) => !own.has(k));
-    const lostSentences = before
-      .split("\n")
-      .flatMap(splitSentences)
-      .filter((s) => coverage(s, text) < COVERED);
-    const links: FieldKey[] = [];
-    for (const [other, otherText] of proposed) {
-      if (other === field) continue;
-      const theirs = factTokens(otherText, true);
-      if (
-        lostFacts.some((k) => theirs.has(k)) ||
-        lostSentences.some((s) => coverage(s, otherText) >= COVERED)
-      ) {
-        links.push(other);
-      }
-    }
-    out.set(field, links);
-  }
-  return out;
-}
-
-export interface SuggestionInput {
-  /** The text each field holds now. */
-  current: ReadonlyMap<FieldKey, string>;
-  /** Nectar's text per field (only the fields it rewrote). */
-  proposed: ReadonlyMap<FieldKey, string>;
-  /** The period's records, goal and support text: where a rewrite's dates and numbers may come from. */
-  records: readonly string[];
-  /** Field order for dedupe (goals first). */
-  order: readonly FieldKey[];
-}
-
-export interface SuggestionResult {
-  suggestions: FieldSuggestion[];
-  /** Fields whose rewrite was dropped, with the dates / numbers it made up. */
-  rejected: { field: FieldKey; facts: string[] }[];
-}
-
-/**
- * Nectar's rewrites made safe to offer: a rewrite with a date or number
- * that is in neither the typed text nor the records is dropped; repeated
- * sentences are removed; a rewrite equal to the field is not offered; each
- * suggestion lists what the person typed that would be lost (drops) and the
- * fields that took its text (linked).
- */
-export function buildSuggestions(input: SuggestionInput): SuggestionResult {
-  const typedAll = [...input.current.values()];
-  const rejected: SuggestionResult["rejected"] = [];
-  const valid = new Map<FieldKey, string>();
-  for (const [field, raw] of input.proposed) {
-    const text = String(raw ?? "").trim();
-    if (!text || !input.current.has(field)) continue;
-    const facts = unsupportedFacts(text, [...typedAll, ...input.records]);
-    if (facts.length) {
-      rejected.push({ field, facts });
-      continue;
-    }
-    valid.set(field, text);
-  }
-  const merged = new Map(input.current);
-  for (const [f, t] of valid) merged.set(f, t);
-  const deduped = dedupeFields(
-    input.order.filter((f) => merged.has(f)).map((f) => [f, merged.get(f) ?? ""]),
-  );
-  const proposed = new Map<FieldKey, string>();
-  for (const f of valid.keys()) {
-    const t = deduped.get(f) ?? "";
-    if (
-      t.replace(/\s+/g, " ").trim() !== (input.current.get(f) ?? "").replace(/\s+/g, " ").trim()
-    ) {
-      proposed.set(f, t);
-    }
-  }
-  const after = [...input.order].map((f) =>
-    proposed.has(f) ? proposed.get(f)! : (input.current.get(f) ?? ""),
-  );
-  const links = linkSuggestions(input.current, proposed);
-  const suggestions: FieldSuggestion[] = [...proposed].map(([field, text]) => ({
-    field,
-    text,
-    drops: droppedFacts(input.current.get(field) ?? "", after),
-    linked: links.get(field) ?? [],
-  }));
-  return { suggestions, rejected };
-}
-
-// ─── Findings ──────────────────────────────────────────────────────────────
-
-export type FindingKind =
-  | "missing_progress"
-  | "missing_required"
-  | "out_of_period"
-  | "misplaced"
-  | "off_goal"
-  | "vague";
-
-export const FINDING_KINDS: readonly FindingKind[] = [
-  "missing_progress",
-  "missing_required",
-  "out_of_period",
-  "misplaced",
-  "off_goal",
-  "vague",
+/** Words that mean the same general area. Compared by stem. */
+const AREA_WORDS: readonly (readonly string[])[] = [
+  [
+    "talent",
+    "music",
+    "musical",
+    "art",
+    "artist",
+    "paint",
+    "ukulele",
+    "piano",
+    "instrument",
+    "sing",
+    "song",
+    "draw",
+    "guitar",
+    "drum",
+    "band",
+    "craft",
+    "creative",
+  ],
+  [
+    "independent",
+    "living",
+    "cook",
+    "meal",
+    "laundry",
+    "clean",
+    "budget",
+    "shop",
+    "grocery",
+    "kitchen",
+    "chore",
+    "money",
+    "bill",
+    "bank",
+    "apartment",
+    "recipe",
+  ],
 ];
+const AREAS = AREA_WORDS.map((g) => new Set(g.map(stem)));
 
-export interface SummaryFinding {
-  /** Stable across re-checks, so a "Keep as is" sticks to the same finding. */
-  key: string;
-  field: FieldKey;
-  kind: FindingKind;
-  message: string;
-  suggestion?: string;
-  /** The words in the field the finding is about; once they are gone the finding is fixed. */
-  quote?: string;
-  /** Goal id the text belongs under ("Move to <goal>"). */
-  moveTo?: string;
-  cite?: string;
-  source: "check" | "nectar";
-  /** Missing required content: "Keep as is" needs a short reason. */
-  needsReason: boolean;
-  /** About a pending suggestion's text, not the field as typed; applies once the suggestion is accepted. */
-  onSuggestion?: boolean;
+const areasOf = (words: ReadonlySet<string>) =>
+  AREAS.map((a, i) => ({ a, i })).filter(({ a }) => [...words].some((w) => a.has(w)));
+
+export interface ReviewGoal {
+  id: string;
+  goal: string;
+  supports?: ReadonlyArray<{ support: string; details?: string | null }>;
 }
+
+/**
+ * Whether a goal's progress text is about the goal: it shares at least one
+ * meaningful word or stem with the goal text or its supports, or both fall
+ * in the same synonym area (painting or ukulele under a piano goal is
+ * fine). `ignore` holds words to skip, such as the person's first name.
+ */
+export function goalCovered(
+  progress: string,
+  goal: ReviewGoal,
+  ignore: readonly string[] = [],
+): boolean {
+  const skip = new Set(ignore.map((w) => w.toLowerCase()).filter(Boolean));
+  const mine = stems(progress, skip);
+  if (!mine.size) return true; // nothing written: not this check's business
+  const about = stems(
+    [goal.goal, ...(goal.supports ?? []).flatMap((s) => [s.support, s.details ?? ""])].join(" "),
+    skip,
+  );
+  for (const w of mine) if (about.has(w)) return true;
+  const theirAreas = new Set(areasOf(about).map((x) => x.i));
+  return areasOf(mine).some((x) => theirAreas.has(x.i));
+}
+
+// ─── Reminders (fixed wording) ─────────────────────────────────────────────
 
 export interface ReviewContext {
-  periodStart: string;
-  periodEnd: string;
   serviceCodes: readonly string[];
   summaryKind: string;
   includeGoalProgress: boolean;
-  goals: ReadonlyArray<{ id: string; goal: string }>;
+  goals: readonly ReviewGoal[];
+  /** The person's first name, left out of the goal word match. */
+  firstName?: string;
 }
 
-const periodText = (ctx: Pick<ReviewContext, "periodStart" | "periodEnd">) =>
-  `${formatDate(ctx.periodStart, { month: "short", day: "numeric" })} – ${formatDate(ctx.periodEnd)}`;
+export type ReminderKind = "no_progress" | "off_area" | "response" | "events";
 
-/** The checks that need no AI, on the editor as it is now. */
-export function summaryChecks(ctx: ReviewContext, editor: SummaryEditorState): SummaryFinding[] {
-  if (ctx.summaryKind !== "narrative") return [];
-  const out: SummaryFinding[] = [];
-  const reqs = summaryRequirements(ctx.serviceCodes);
-  const goalReq = reqs.items.find((r) => r.id === "goal_progress");
-  const goals = ctx.includeGoalProgress ? ctx.goals : [];
-
-  if (goalReq && ctx.includeGoalProgress) {
-    if (!goals.length) {
-      out.push({
-        key: "check:no_goals",
-        field: "general",
-        kind: "missing_progress",
-        message: "No plan goals on file. The summary must show progress toward each goal.",
-        cite: goalReq.cite,
-        source: "check",
-        needsReason: true,
-      });
-    }
-    for (const g of goals) {
-      if ((editor.goals[g.id] ?? "").trim()) continue;
-      out.push({
-        key: `check:missing_progress:${g.id}`,
-        field: goalField(g.id),
-        kind: "missing_progress",
-        message: "No progress written for this goal.",
-        cite: goalReq.cite,
-        source: "check",
-        needsReason: true,
-      });
-    }
-  }
-
-  const generalReqs = reqs.items.filter((r) => r.source === "general");
-  if (generalReqs.length && !editor.general.trim()) {
-    out.push({
-      key: "check:missing_required:general",
-      field: "general",
-      kind: "missing_required",
-      message: `General notes are empty. Required: ${generalReqs.map((r) => r.label.toLowerCase()).join("; ")}.`,
-      cite: [...new Set(generalReqs.map((r) => r.cite))].join("; "),
-      source: "check",
-      needsReason: true,
-    });
-  }
-  const allText = [
-    editor.general,
-    editor.incidentNotes,
-    ...goals.map((g) => editor.goals[g.id] ?? ""),
-  ].join("\n");
-  for (const r of reqs.items) {
-    if (!r.detect || r.detect.test(allText)) continue;
-    out.push({
-      key: `check:missing_required:${r.id}`,
-      field: "general",
-      kind: "missing_required",
-      message: `Not found: ${r.label.toLowerCase()}.`,
-      cite: r.cite,
-      source: "check",
-      needsReason: true,
-    });
-  }
-
-  for (const field of textFields(goals.map((g) => g.id))) {
-    const seen = new Set<string>();
-    for (const d of datesOutsidePeriod(fieldText(editor, field), ctx.periodStart, ctx.periodEnd)) {
-      const k = d.raw.toLowerCase();
-      if (seen.has(k)) continue;
-      seen.add(k);
-      out.push({
-        key: `check:out_of_period:${field}:${k}`,
-        field,
-        kind: "out_of_period",
-        message: `"${d.raw}" is outside this period (${periodText(ctx)}).`,
-        suggestion: "Take it out, or keep it if it explains this period.",
-        quote: d.raw,
-        source: "check",
-        needsReason: false,
-      });
-    }
-  }
-  for (const m of editor.incidents) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(m.date)) continue;
-    if (m.date >= ctx.periodStart && m.date <= ctx.periodEnd) continue;
-    out.push({
-      key: `check:out_of_period:incident:${m.id}:${m.date}`,
-      field: `incident:${m.id}`,
-      kind: "out_of_period",
-      message: `This incident's date (${formatDate(m.date)}) is outside this period (${periodText(ctx)}).`,
-      source: "check",
-      needsReason: false,
-    });
-  }
-  return out;
+export interface Reminder {
+  /** Stable, so a dismissed reminder stays hidden. */
+  key: string;
+  kind: ReminderKind;
+  field: FieldKey;
+  text: string;
 }
 
-const squash = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
-const slug = (s: string) =>
-  squash(s)
-    .replace(/[^a-z0-9]+/g, "-")
-    .slice(0, 80);
+const RESPONSE_RE =
+  /\b(respon\w*|react\w*|enjoy\w*|engag\w*|mood|participat\w*|receptive|happy|happier|excited|upset|anxious|calm|proud|motivat\w*|comfortable|positive|interest\w*|tolerat\w*|welcom\w*|resist\w*|refus\w*|eager|willing|cooperat\w*|smil\w*|laugh\w*|did well|doing well|does well|thriv\w*|stable|status)\b/i;
+const EVENTS_RE =
+  /\b(incident\w*|event\w*|trip\w*|vacation|holiday\w*|moved|moving|hospital\w*|appointment\w*|birthday|party|graduat\w*|celebrat\w*|concert|visit\w*|outing\w*|attended|went|fair|show|injur\w*|illness|sick|surgery|new job|hired|started|began|completed|sold|won|met|family|camp|fell|emergency|nothing notable|no notable|none)\b/i;
+
+export const mentionsResponse = (text: string) => RESPONSE_RE.test(text);
+export const mentionsEvents = (text: string) => EVENTS_RE.test(text);
+
+const narrativeGoals = (ctx: ReviewContext) =>
+  ctx.summaryKind === "narrative" && ctx.includeGoalProgress ? ctx.goals : [];
+
+/** Goals with no progress text yet. Finalize asks before going on, never blocks. */
+export function blankGoals(ctx: ReviewContext, editor: SummaryEditorState): ReviewGoal[] {
+  return narrativeGoals(ctx).filter((g) => !(editor.goals[g.id] ?? "").trim());
+}
+
+/** Goals with progress text that shares nothing with the goal: the only ones put to Nectar. */
+export function goalsNeedingAreaCheck(ctx: ReviewContext, editor: SummaryEditorState): ReviewGoal[] {
+  return narrativeGoals(ctx).filter((g) => {
+    const text = (editor.goals[g.id] ?? "").trim();
+    return !!text && !goalCovered(text, g, ctx.firstName ? [ctx.firstName] : []);
+  });
+}
 
 /**
- * Nectar's findings, kept only where they make sense: a known field and
- * kind, a goal id that exists, a quote that is really in the field (else
- * the finding is about the whole field), and no repeat of a date the
- * checks already flag.
+ * The reminders to show: max one per goal, max two for the general notes,
+ * minus the ones dismissed. Never required, never recorded as who / when.
  */
-export function cleanNectarFindings(
-  raw: unknown,
-  fields: ReadonlyMap<FieldKey, string>,
-  goalIds: ReadonlySet<string>,
-  cites: ReadonlyMap<string, string> = new Map(),
-): SummaryFinding[] {
-  if (!Array.isArray(raw)) return [];
-  const out: SummaryFinding[] = [];
-  const keys = new Set<string>();
-  for (const item of raw) {
-    if (!item || typeof item !== "object") continue;
-    const r = item as Record<string, unknown>;
-    const field = String(r.field ?? "") as FieldKey;
-    const kind = String(r.kind ?? "") as FindingKind;
-    const message = typeof r.message === "string" ? r.message.trim().slice(0, 400) : "";
-    if (!fields.has(field) || !FINDING_KINDS.includes(kind) || !message) continue;
-    if (kind === "missing_progress") continue; // the checks own this one
-    let quote = typeof r.quote === "string" ? r.quote.trim().slice(0, 300) : "";
-    if (quote && !squash(fields.get(field) ?? "").includes(squash(quote))) quote = "";
-    if (kind === "out_of_period" && quote && findDates(quote).length) continue;
-    const moveTo = typeof r.moveTo === "string" && goalIds.has(r.moveTo) ? r.moveTo : undefined;
-    if (moveTo && field === goalField(moveTo)) continue;
-    const requirement = typeof r.requirement === "string" ? r.requirement : "";
-    const suggestion = typeof r.suggestion === "string" ? r.suggestion.trim().slice(0, 400) : "";
-    const key = `nectar:${kind}:${field}:${slug(quote || requirement || message)}`;
-    if (keys.has(key)) continue;
-    keys.add(key);
-    out.push({
-      key,
-      field,
-      kind,
-      message,
-      ...(suggestion ? { suggestion } : {}),
-      ...(quote ? { quote } : {}),
-      ...(moveTo ? { moveTo } : {}),
-      ...(cites.get(requirement) ? { cite: cites.get(requirement) } : {}),
-      source: "nectar",
-      needsReason: false,
-    });
+export function summaryReminders(
+  ctx: ReviewContext,
+  editor: SummaryEditorState,
+  review: SummaryReviewState,
+): Reminder[] {
+  if (ctx.summaryKind !== "narrative") return [];
+  const out: Reminder[] = [];
+  const needArea = new Set(goalsNeedingAreaCheck(ctx, editor).map((g) => g.id));
+  for (const g of narrativeGoals(ctx)) {
+    const text = (editor.goals[g.id] ?? "").trim();
+    if (!text) {
+      out.push({
+        key: `rem:no_progress:${g.id}`,
+        kind: "no_progress",
+        field: goalField(g.id),
+        text: `No progress written for ${g.goal} yet.`,
+      });
+    } else if (needArea.has(g.id) && review.offArea[g.id] === text) {
+      out.push({
+        key: `rem:off_area:${g.id}`,
+        kind: "off_area",
+        field: goalField(g.id),
+        text: `What's written for ${g.goal} may be about a different area. Check it is under the right goal.`,
+      });
+    }
   }
-  return out;
+  const reqs = summaryRequirements(ctx.serviceCodes);
+  const wants = (id: string) => reqs.items.some((r) => r.id === id);
+  const anyTyped =
+    !!(editor.general.trim() || editor.incidentNotes.trim()) ||
+    Object.values(editor.goals).some((t) => t.trim());
+  if (anyTyped) {
+    if (wants("status_response") && !mentionsResponse(editor.general)) {
+      out.push({
+        key: "rem:response",
+        kind: "response",
+        field: "general",
+        text: "General notes say nothing yet about how the person responded to services.",
+      });
+    }
+    const hasIncidents = !!editor.incidentNotes.trim() || editor.incidents.length > 0;
+    if (wants("notable_events") && !mentionsEvents(editor.general) && !hasIncidents) {
+      out.push({
+        key: "rem:events",
+        kind: "events",
+        field: "general",
+        text: "General notes say nothing yet about notable events.",
+      });
+    }
+  }
+  return out.filter((r) => !review.dismissed.includes(r.key));
 }
 
 // ─── Review state (draft_source.review) ────────────────────────────────────
 
-export interface Dismissal {
-  by: string;
-  byName: string | null;
-  at: string;
-  reason: string | null;
-}
-
 export interface SummaryReviewState {
-  mode: "draft" | "review" | null;
   reviewedAt: string | null;
-  /** Nectar's findings from the last run (the checks are recomputed live). */
-  findings: SummaryFinding[];
+  /** Nectar's rewrites waiting for Accept or x, one per box. */
   suggestions: FieldSuggestion[];
-  /** "Keep as is" by finding key. */
-  dismissals: Record<string, Dismissal>;
+  /** Reminder and suggestion keys hidden with the x. Hides only; blocks nothing. */
+  dismissed: string[];
+  /** Goals Nectar answered "no" to (goal id -> the progress text it was asked about). */
+  offArea: Record<string, string>;
 }
 
 export function emptyReviewState(): SummaryReviewState {
-  return { mode: null, reviewedAt: null, findings: [], suggestions: [], dismissals: {} };
+  return { reviewedAt: null, suggestions: [], dismissed: [], offArea: {} };
 }
 
 const obj = (v: unknown): Record<string, unknown> =>
   v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
 const strOrNull = (v: unknown) => (typeof v === "string" && v ? v : null);
 
-/** The saved review state, normalized; empty when there is none. */
+/**
+ * The saved review state, normalized; empty when there is none. Older
+ * saves (findings, "Keep as is" records, linked suggestions) load fine:
+ * what no longer applies is ignored.
+ */
 export function readReviewState(raw: unknown): SummaryReviewState {
   const r = obj(raw);
-  const findings = (Array.isArray(r.findings) ? r.findings : [])
-    .map(obj)
-    .filter(
-      (f) =>
-        typeof f.key === "string" &&
-        typeof f.field === "string" &&
-        FINDING_KINDS.includes(f.kind as FindingKind) &&
-        typeof f.message === "string",
-    ) as unknown as SummaryFinding[];
   const suggestions = (Array.isArray(r.suggestions) ? r.suggestions : [])
     .map(obj)
     .filter((s) => typeof s.field === "string" && typeof s.text === "string")
@@ -755,142 +627,114 @@ export function readReviewState(raw: unknown): SummaryReviewState {
       field: s.field as FieldKey,
       text: s.text as string,
       drops: Array.isArray(s.drops) ? s.drops.map(String) : [],
-      linked: (Array.isArray(s.linked) ? s.linked.map(String) : []) as FieldKey[],
     }));
-  const dismissals: Record<string, Dismissal> = {};
-  for (const [k, v] of Object.entries(obj(r.dismissals))) {
-    const d = obj(v);
-    if (typeof d.by !== "string" || typeof d.at !== "string") continue;
-    dismissals[k] = {
-      by: d.by,
-      at: d.at,
-      byName: strOrNull(d.byName),
-      reason: strOrNull(d.reason),
-    };
-  }
+  const offArea: Record<string, string> = {};
+  for (const [k, v] of Object.entries(obj(r.offArea))) if (typeof v === "string") offArea[k] = v;
   return {
-    mode: r.mode === "draft" || r.mode === "review" ? r.mode : null,
     reviewedAt: strOrNull(r.reviewedAt),
-    findings,
     suggestions,
-    dismissals,
+    dismissed: [
+      ...new Set((Array.isArray(r.dismissed) ? r.dismissed : []).filter((k) => typeof k === "string")),
+    ] as string[],
+    offArea,
   };
 }
 
-/** Nectar findings that still apply: not waiting on a suggestion, and their quoted words still in the field. */
-export function liveNectarFindings(
+/** A key for one suggestion card: the box plus a short hash of the text, so a new draft shows again. */
+export function suggestionKey(s: Pick<FieldSuggestion, "field" | "text">): string {
+  let h = 5381;
+  for (let i = 0; i < s.text.length; i++) h = ((h * 33) ^ s.text.charCodeAt(i)) >>> 0;
+  return `sug:${s.field}:${h.toString(36)}`;
+}
+
+/** The suggestion to show on a box: not dismissed with the x. */
+export function visibleSuggestion(
   review: SummaryReviewState,
+  field: FieldKey,
+): FieldSuggestion | null {
+  const s = review.suggestions.find((x) => x.field === field);
+  return s && !review.dismissed.includes(suggestionKey(s)) ? s : null;
+}
+
+/** The review with one reminder or suggestion key hidden for this summary. */
+export function dismissKey(review: SummaryReviewState, key: string): SummaryReviewState {
+  return review.dismissed.includes(key)
+    ? review
+    : { ...review, dismissed: [...review.dismissed, key] };
+}
+
+/** The review without the suggestion for `field` (after Accept). */
+export function takeSuggestion(review: SummaryReviewState, field: FieldKey): SummaryReviewState {
+  return { ...review, suggestions: review.suggestions.filter((s) => s.field !== field) };
+}
+
+// ─── Accept and Undo ───────────────────────────────────────────────────────
+
+/** What a box held before Accept: its text and the Nectar mark it carried. */
+export interface UndoEntry {
+  text: string;
+  nectar: string;
+}
+
+export type UndoStacks = Partial<Record<FieldKey, UndoEntry[]>>;
+
+function nectarMark(editor: SummaryEditorState, field: FieldKey): string {
+  if (field === "general") return editor.nectar.general;
+  if (field === "incidentNotes") return editor.nectar.incidentNotes;
+  const id = fieldGoalId(field);
+  return id === null ? "" : (editor.nectar.goals[id] ?? "");
+}
+
+function writeField(
   editor: SummaryEditorState,
-): SummaryFinding[] {
-  return review.findings.filter(
-    (f) =>
-      !f.onSuggestion && (!f.quote || squash(fieldText(editor, f.field)).includes(squash(f.quote))),
-  );
-}
-
-/** What blocks Finalize: every check and live Nectar finding not kept with "Keep as is". */
-export function openFindings(
-  checks: readonly SummaryFinding[],
-  review: SummaryReviewState,
-  editor: SummaryEditorState,
-): SummaryFinding[] {
-  return [...checks, ...liveNectarFindings(review, editor)].filter(
-    (f) => !review.dismissals[f.key],
-  );
-}
-
-/** What blocks Finalize for the editor as it is: the checks plus the saved review. */
-export function finalizeBlockers(
-  ctx: ReviewContext,
-  editor: SummaryEditorState,
-  review: SummaryReviewState,
-): SummaryFinding[] {
-  return openFindings(summaryChecks(ctx, editor), review, editor);
-}
-
-/** Missing required content (a check, never Nectar): "Keep as is" needs a reason. Read from the key alone. */
-export function findingNeedsReason(key: string): boolean {
-  return /^check:(missing_|no_goals)/.test(key);
-}
-
-export const MIN_DISMISS_REASON = 5;
-
-/** Whether "Keep as is" may be recorded for `finding` with `reason`. */
-export function canDismiss(
-  finding: Pick<SummaryFinding, "needsReason">,
-  reason: string | null | undefined,
-): boolean {
-  return !finding.needsReason || (reason ?? "").trim().length >= MIN_DISMISS_REASON;
-}
-
-/** The review with "Keep as is" recorded for one finding. */
-export function dismissFinding(
-  review: SummaryReviewState,
-  finding: Pick<SummaryFinding, "key" | "needsReason">,
-  who: { by: string; byName: string | null; at: string },
-  reason: string | null,
-): SummaryReviewState {
-  if (!canDismiss(finding, reason)) throw new Error("Give a short reason to keep this as is.");
-  return {
-    ...review,
-    dismissals: {
-      ...review.dismissals,
-      [finding.key]: { ...who, reason: reason?.trim() ? reason.trim().slice(0, 500) : null },
-    },
-  };
-}
-
-/** `field` plus every suggestion linked from it, transitively. */
-export function suggestionGroup(review: SummaryReviewState, field: FieldKey): FieldKey[] {
-  const byField = new Map(review.suggestions.map((s) => [s.field, s]));
-  const out: FieldKey[] = [];
-  const queue = [field];
-  while (queue.length) {
-    const f = queue.shift()!;
-    if (out.includes(f) || !byField.has(f)) continue;
-    out.push(f);
-    queue.push(...byField.get(f)!.linked);
+  field: FieldKey,
+  text: string,
+  mark: string,
+): SummaryEditorState {
+  if (field === "general") return { ...editor, general: text, nectar: { ...editor.nectar, general: mark } };
+  if (field === "incidentNotes") {
+    return { ...editor, incidentNotes: text, nectar: { ...editor.nectar, incidentNotes: mark } };
   }
-  return out;
+  const id = fieldGoalId(field);
+  if (id === null) return editor;
+  return {
+    ...editor,
+    goals: { ...editor.goals, [id]: text },
+    nectar: { ...editor.nectar, goals: { ...editor.nectar.goals, [id]: mark } },
+  };
 }
 
 /**
- * Accept a suggestion (and the ones it is linked to): the fields take
- * Nectar's text, marked as Nectar's until Finalize, and the findings Nectar
- * made on that text start to apply. Refused when one of them drops
- * something the person wrote.
+ * Accept a suggestion: the box takes Nectar's text (marked as Nectar's
+ * until Finalize). Returns what to put on the box's undo stack. Refused
+ * when the rewrite drops something the person wrote.
  */
 export function acceptSuggestion(
   editor: SummaryEditorState,
-  review: SummaryReviewState,
-  field: FieldKey,
-): { editor: SummaryEditorState; review: SummaryReviewState; accepted: FieldKey[] } {
-  const group = suggestionGroup(review, field);
-  if (!group.length) return { editor, review, accepted: [] };
-  const list = review.suggestions.filter((s) => group.includes(s.field));
-  if (list.some((s) => s.drops.length)) {
+  suggestion: FieldSuggestion,
+): { editor: SummaryEditorState; undo: UndoEntry } {
+  if (suggestion.drops.length) {
     throw new Error("This rewrite drops something you wrote. Copy what you want instead.");
   }
-  let next = editor;
-  for (const s of list) next = setFieldText(next, s.field, s.text);
-  return {
-    editor: next,
-    review: {
-      ...review,
-      suggestions: review.suggestions.filter((s) => !group.includes(s.field)),
-      findings: review.findings.map((f) =>
-        f.onSuggestion && group.includes(f.field) ? { ...f, onSuggestion: false } : f,
-      ),
-    },
-    accepted: group,
-  };
+  const undo = { text: fieldText(editor, suggestion.field), nectar: nectarMark(editor, suggestion.field) };
+  return { editor: writeField(editor, suggestion.field, suggestion.text, suggestion.text), undo };
 }
 
-/** "Keep mine": drop the suggestion for `field` and Nectar's findings on its text. */
-export function keepMine(review: SummaryReviewState, field: FieldKey): SummaryReviewState {
+export function pushUndo(stacks: UndoStacks, field: FieldKey, entry: UndoEntry): UndoStacks {
+  return { ...stacks, [field]: [...(stacks[field] ?? []), entry] };
+}
+
+/** Undo the last Accept on a box: exactly the text it had before. */
+export function undoAccept(
+  editor: SummaryEditorState,
+  stacks: UndoStacks,
+  field: FieldKey,
+): { editor: SummaryEditorState; stacks: UndoStacks } {
+  const list = stacks[field] ?? [];
+  const entry = list[list.length - 1];
+  if (!entry) return { editor, stacks };
   return {
-    ...review,
-    suggestions: review.suggestions.filter((s) => s.field !== field),
-    findings: review.findings.filter((f) => !(f.onSuggestion && f.field === field)),
+    editor: writeField(editor, field, entry.text, entry.nectar),
+    stacks: { ...stacks, [field]: list.slice(0, -1) },
   };
 }

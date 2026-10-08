@@ -1,7 +1,6 @@
 // What a progress summary must contain under DHHS91172 (eff 7/1/26), by
 // the codes it covers. One place for the contract's content rules: the
-// deterministic review (progress-summary-review.ts) checks the items it can
-// see in the text, and Nectar's review is given the full list with cites.
+// reminders (progress-summary-review.ts) look at which items apply.
 //
 //   QUARTERLY (§1.25, every code that owes a summary unless replaced below):
 //     (1) name (2) each service (3) date range (4) general summary of
@@ -38,13 +37,6 @@ export interface SummaryRequirement {
   /** Contract cite, e.g. "DHHS91172 §1.25(4)". */
   cite: string;
   source: RequirementSource;
-  /**
-   * A text pattern that must appear somewhere in the typed summary for the
-   * item to count as present. Only set where a word check is reliable
-   * (USOR, weekly assessment, Medical Care Plan, employment activity);
-   * the rest is left to Nectar's review.
-   */
-  detect?: RegExp;
 }
 
 const doc = (id: string, label: string, cite: string): SummaryRequirement => ({
@@ -119,9 +111,6 @@ const CMP_CMS: SummaryRequirement[] = [
   },
 ];
 
-const EMPLOYMENT_WORDS =
-  /\b(job|jobs|work|worked|working|employ\w*|employer|shift|hours|interview\w*|applica\w*|resume|coworker\w*|supervisor|hired|task\w*)\b/i;
-
 function employment(
   sec: string,
   letters: {
@@ -141,7 +130,6 @@ function employment(
       label: "Details of all employment activities",
       cite: `DHHS91172 ${sec}${letters.acts}`,
       source: "general" as const,
-      detect: EMPLOYMENT_WORDS,
     },
     {
       id: "status_response",
@@ -183,14 +171,12 @@ const SJD: SummaryRequirement[] = [
     label: "Data from the weekly in-person assessment, with progress on each job strategy",
     cite: "DHHS91172 §33.3(4)(G), §33.2(j)",
     source: "general",
-    detect: /\b(weekly|each week|every week|week of)\b|\bassess(ed|ment|ments)?\b/i,
   },
   {
     id: "usor_contact",
     label: "USOR contact date and the person's funding status with USOR",
     cite: "DHHS91172 §33.3(4)(I)",
     source: "general",
-    detect: /\bUSOR\b|vocational rehab/i,
   },
 ];
 
@@ -201,7 +187,6 @@ const PN2: SummaryRequirement[] = [
     label: "A status note on each item in the Medical Care Plan",
     cite: "DHHS91172 §19.2(10)",
     source: "general",
-    detect: /\b(medical )?care plan\b|\bMCP\b/i,
   },
 ];
 
@@ -247,11 +232,4 @@ export function summaryRequirements(
     .filter((r) => goalProgress || r.id !== "goal_progress")
     .sort((a, b) => Number(a.source !== "document") - Number(b.source !== "document"));
   return { cadence, items, goalProgress };
-}
-
-/** "Progress toward each goal (DHHS91172 §1.25(5))" — one line per item for Nectar's prompt. */
-export function requirementLines(items: readonly SummaryRequirement[]): string[] {
-  return items
-    .filter((r) => r.source !== "document")
-    .map((r) => `[${r.id}] ${r.label} (${r.cite})`);
 }

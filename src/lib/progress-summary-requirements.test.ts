@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
-  requirementLines,
   requirementsForCode,
   summaryRequirements,
 } from "./progress-summary-requirements.ts";
@@ -31,7 +30,6 @@ describe("summaryRequirements — DHHS91172 summary contents", () => {
     assert.equal(r.cadence, "monthly");
     const acts = r.items.find((i) => i.id === "employment_activities");
     assert.equal(acts?.cite, "DHHS91172 §30.3(4)(D)");
-    assert.ok(acts?.detect?.test("She worked three shifts."));
     assert.equal(r.items.find((i) => i.id === "goal_progress")?.cite, "DHHS91172 §30.3(4)(F)");
   });
   it("SJD adds the weekly assessment and the USOR contact", () => {
@@ -41,7 +39,6 @@ describe("summaryRequirements — DHHS91172 summary contents", () => {
       r.items.find((i) => i.id === "weekly_assessment")?.cite ?? "",
       /§33\.3\(4\)\(G\), §33\.2\(j\)/,
     );
-    assert.ok(r.items.find((i) => i.id === "usor_contact")?.detect?.test("Called USOR on 10/4"));
   });
   it("CMP/CMS cite §32.3(2); PN2 adds the Medical Care Plan status (§19.2(10))", () => {
     assert.equal(
@@ -62,10 +59,5 @@ describe("summaryRequirements — DHHS91172 summary contents", () => {
     const r = summaryRequirements(["ELS"]);
     assert.equal(r.goalProgress, false);
     assert.ok(!r.items.some((i) => i.id === "goal_progress"));
-  });
-  it("requirementLines lists only what has to be typed, with cites", () => {
-    const lines = requirementLines(summaryRequirements(["SLN"]).items);
-    assert.ok(lines.every((l) => /DHHS91172 §/.test(l)));
-    assert.ok(!lines.some((l) => l.startsWith("[name]")));
   });
 });

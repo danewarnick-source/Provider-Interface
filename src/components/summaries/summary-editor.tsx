@@ -1,10 +1,11 @@
 // The progress summary editor: source documentation on the left, the
 // summary as a document on the right (goals → supports → progress →
-// evidence, incidents, general notes), autosaved as it is typed. One Nectar
-// button ("Draft with Nectar" when the period has records, "Review with
-// Nectar" when it has none) whose findings and suggested rewrites show under
-// each field; "View & download" (preview + PDF); Finalize, blocked while a
-// finding is open; and the filing attestations. /dashboard/summaries opens it as a dialog; the client
+// evidence, incidents, general notes), autosaved as it is typed. Nectar is a
+// helper, never a gate: "Draft with Nectar" on each box, "Draft all boxes"
+// and an optional "Review with Nectar" at the top, a small Reminders list;
+// "View & download" (preview + PDF); Finalize (it asks first when a goal is
+// blank, and blocks on nothing but the period not being over); and the
+// filing attestations. /dashboard/summaries opens it as a dialog; the client
 // profile's Progress summaries card opens the same editor as a side panel.
 
 import { useMemo, useState } from "react";
@@ -33,14 +34,15 @@ import {
   summaryCadenceLabel,
 } from "@/lib/progress-summaries";
 import type { SummaryDoc } from "@/lib/progress-summary-doc";
-import type { FieldKey } from "@/lib/progress-summary-review";
+import { fieldText, visibleSuggestion, type FieldKey } from "@/lib/progress-summary-review";
 import { EmploymentAttestation } from "./employment-attestation";
 import { EditorShell } from "./editor-shell";
 import { FinalizeDialog } from "./finalize-dialog";
 import { SummaryDocument } from "./summary-document";
 import { reopenEventLine } from "@/lib/progress-summary-reopen";
 import { ReopenDialog } from "./reopen-dialog";
-import { FieldReview } from "./summary-review-panel";
+import { BlankGoalsDialog } from "./blank-goals-dialog";
+import { BoxTools, RemindersList } from "./summary-review-panel";
 import { PbaPanel, SourcePanel } from "./summary-source-panel";
 import { useSummaryEditor, type SaveState } from "./use-summary-editor";
 
@@ -112,18 +114,24 @@ export function SummaryEditor({
   const {
     accept,
     aiAttested,
+    blank,
     bundleQ,
-    dismiss,
+    canDraft,
     doc,
+    draftAll,
+    draftBox,
+    draftMut,
     editor,
     hasRecords,
-    keep,
+    hideKey,
+    hideSuggestion,
     nectarMut,
-    open,
+    reminders,
     reopenMut,
     review,
     reviewOp,
-    shown,
+    undo,
+    undoStacks,
     filing,
     finalizeMut,
     finalizerName,
@@ -141,25 +149,28 @@ export function SummaryEditor({
   } = useSummaryEditor({ summaryId, organizationId, orgName, clientName });
   const [preview, setPreview] = useState(false);
   const [reopening, setReopening] = useState(false);
+  const [confirmBlank, setConfirmBlank] = useState(false);
   const b = bundleQ.data;
   const close = () => void flush().finally(onClose);
   const goalNames = useMemo(
     () => Object.fromEntries((b?.goals ?? []).map((g) => [g.id, g.goal])),
     [b?.goals],
   );
-  const busy = nectarMut.isPending || reviewOp.isPending;
+  const busy = nectarMut.isPending || draftMut.isPending || reviewOp.isPending;
   const finalizeOpen = !b || canFinalizeSummary(b.summary.period_end);
   const renderReview = (field: FieldKey) => (
-    <FieldReview
+    <BoxTools
       field={field}
-      findings={shown.filter((f) => f.field === field)}
-      dismissals={review.dismissals}
-      suggestion={review.suggestions.find((x) => x.field === field) ?? null}
-      goalNames={goalNames}
+      current={editor ? fieldText(editor, field) : ""}
+      suggestion={visibleSuggestion(review, field)}
+      canUndo={(undoStacks[field]?.length ?? 0) > 0}
+      canDraft={canDraft(field)}
+      drafting={draftMut.isPending && !!draftMut.variables?.includes(field)}
       busy={busy}
+      onDraft={(f) => void flush().then(() => draftBox(f))}
       onAccept={accept}
-      onKeepMine={keep}
-      onDismiss={dismiss}
+      onUndo={undo}
+      onHideSuggestion={hideSuggestion}
     />
   );
 
@@ -202,28 +213,40 @@ export function SummaryEditor({
                   setShowFinalize(true);
                 }}
               />
-            ) : nectarMut.isPending ? (
+            ) : draftMut.isPending || nectarMut.isPending ? (
               <div className="rounded border bg-blue-50 px-3 py-2 text-sm text-blue-800 flex items-center gap-2">
                 <Loader2 className="size-4 animate-spin" />{" "}
-                {hasRecords
-                  ? "Nectar is drafting from your text and this period's records…"
-                  : "Nectar is reviewing your text…"}
+                {draftMut.isPending ? "Nectar is drafting…" : "Nectar is reviewing…"}
               </div>
-            ) : !locked && !hasRecords ? (
+            ) : null}
+            {!locked && !hasRecords && b.summary.summary_kind === "narrative" ? (
               <p className="rounded border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                No approved daily logs, shift notes or incidents this period. Type the summary, then
-                Review with Nectar.
+                No approved daily logs, shift notes or incidents this period.
               </p>
             ) : null}
-            {!locked && b.summary.summary_kind === "narrative" && open.length > 0 ? (
-              <p
-                className="rounded border border-amber-400 bg-amber-50 px-3 py-2 text-xs text-amber-900"
-                data-testid="summary-open-findings"
-              >
-                {open.length} item{open.length === 1 ? "" : "s"} to resolve before Finalize. Fix each
-                one or choose Keep as is.
-              </p>
+            {!locked && b.summary.summary_kind === "narrative" ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void flush().then(() => draftAll())}
+                  disabled={busy}
+                  data-testid="summary-draft-all"
+                >
+                  <Sparkles className="size-4 mr-1" /> Draft all boxes
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => void flush().then(() => nectarMut.mutate())}
+                  disabled={busy}
+                  data-testid="summary-draft-nectar"
+                >
+                  Review with Nectar
+                </Button>
+              </div>
             ) : null}
+            {!locked ? <RemindersList reminders={reminders} onHide={hideKey} /> : null}
 
             {b.summary.summary_kind === "narrative" && (
               <>
@@ -236,25 +259,13 @@ export function SummaryEditor({
                           editor,
                           setEditor: (fn) => setEditor((p) => (p ? fn(p) : p)),
                           goalIds: b.summary.include_goal_progress ? b.goals.map((g) => g.id) : [],
-                          disabled: nectarMut.isPending || finalizeMut.isPending,
+                          disabled: draftMut.isPending || nectarMut.isPending || finalizeMut.isPending,
                           review: renderReview,
                         }
                   }
                 />
 
                 <div className="flex flex-wrap items-center gap-2">
-                  {!locked && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => void flush().then(() => nectarMut.mutate())}
-                      disabled={busy}
-                      data-testid="summary-draft-nectar"
-                    >
-                      <Sparkles className="size-4 mr-1" />{" "}
-                      {hasRecords ? "Draft with Nectar" : "Review with Nectar"}
-                    </Button>
-                  )}
                   <Button variant="outline" size="sm" onClick={() => setPreview(true)}>
                     <Eye className="size-4 mr-1" /> View &amp; download
                   </Button>
@@ -262,13 +273,7 @@ export function SummaryEditor({
                     <Button
                       size="sm"
                       onClick={() => {
-                        if (open.length) {
-                          toast.error(
-                            `Resolve ${open.length} item${open.length === 1 ? "" : "s"} first: fix each one or choose Keep as is.`,
-                          );
-                          return;
-                        }
-                        void flush().then(() => setShowFinalize(true));
+                        void flush().then(() => (blank.length ? setConfirmBlank(true) : setShowFinalize(true)));
                       }}
                       disabled={!finalizeOpen}
                       data-testid="summary-finalize"
@@ -350,6 +355,17 @@ export function SummaryEditor({
           pending={reopenMut.isPending}
           onCancel={() => setReopening(false)}
           onReopen={(reason) => reopenMut.mutate(reason, { onSuccess: () => setReopening(false) })}
+        />
+      )}
+
+      {confirmBlank && (
+        <BlankGoalsDialog
+          goals={blank.map((g) => g.goal)}
+          onBack={() => setConfirmBlank(false)}
+          onContinue={() => {
+            setConfirmBlank(false);
+            setShowFinalize(true);
+          }}
         />
       )}
 

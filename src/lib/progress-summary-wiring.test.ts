@@ -9,23 +9,61 @@ import { FINALIZE_COLUMNS } from "./progress-summary-reopen.ts";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 
-describe("Nectar draft / review (progress-summary-draft.functions.ts)", () => {
+describe("Nectar helper (progress-summary-draft.functions.ts)", () => {
   const src = read("./progress-summary-draft.functions.ts");
-  it("drafts when the period has records, reviews what was typed when it has none — no early exit", () => {
-    assert.match(src, /source\.evidence\.length > 0 \? "draft" : "review"/);
-    assert.doesNotMatch(src, /your text is unchanged/);
-    assert.doesNotMatch(src, /mergeEditorDraft/);
-  });
-  it("rewrites are validated suggestions, never written into the editor", () => {
+  it("drafts per box as validated suggestions, never written into the editor", () => {
+    assert.match(src, /export const draftSummaryBoxes/);
     assert.match(src, /buildSuggestions\(/);
+    assert.match(src, /extra: recordsFor/, "only that goal's records");
     assert.doesNotMatch(src, /draft_content/, "Nectar never writes draft_content (autosave does)");
-    const run = src.slice(src.indexOf("export const runSummaryNectar"), src.indexOf("export const updateSummaryReview"));
-    assert.match(run, /editor,\n\s+review,/, "the editor is saved as typed alongside the review");
+    const run = src.slice(src.indexOf("export const draftSummaryBoxes"), src.indexOf("export const runSummaryNectar"));
+    assert.match(run, /saveReview\(sb, row, \{ status, plan_id: source\.planId \}, editor, review/);
   });
-  it("Keep as is records who and when, and refuses a finalized summary", () => {
-    assert.match(src, /dismissFinding\(/);
-    assert.match(src, /by: userId, byName, at: now/);
+  it("Review with Nectar only asks yes/no for goals with zero overlap, and only a 'no' counts", () => {
+    assert.match(src, /goalsNeedingAreaCheck\(/);
+    assert.match(src, /same_area/);
+    assert.match(src, /ans === "no"/);
+  });
+  it("hiding is saved with the review; there is no Keep as is, reason or who/when", () => {
+    assert.match(src, /dismissKey\(prior, data\.op\.key\)/);
+    assert.doesNotMatch(src, /dismissFinding|byName|Keep as is|reason:/);
     assert.match(src, /row\.status === "finalized"/);
+  });
+  it("nothing from the old gate is left", () => {
+    assert.doesNotMatch(src, /off_goal|misplaced|moveTo|out_of_period|"vague"|linkSuggestions|cleanNectarFindings/);
+  });
+});
+
+describe("the editor never blocks (summary-editor.tsx, use-summary-editor.ts)", () => {
+  const editor = read("../components/summaries/summary-editor.tsx");
+  const hook = read("../components/summaries/use-summary-editor.ts");
+  it("no 'resolve before Finalize' message or toast, no auto-draft on open", () => {
+    assert.doesNotMatch(editor, /to resolve before Finalize|Resolve \$\{/);
+    assert.doesNotMatch(hook, /openFindings|finalizeBlockers|autoDrafted/);
+  });
+  it("Finalize asks first when a goal is blank, then goes on", () => {
+    assert.match(editor, /blank\.length \? setConfirmBlank\(true\) : setShowFinalize\(true\)/);
+    assert.match(editor, /BlankGoalsDialog/);
+  });
+  it("Draft all boxes and per-box drafting are in the editor", () => {
+    assert.match(editor, /Draft all boxes/);
+    assert.match(read("../components/summaries/summary-review-panel.tsx"), /Draft with Nectar/);
+  });
+  it("the finalize dialog attests the summary, not the Nectar draft", () => {
+    const d = read("../components/summaries/finalize-dialog.tsx");
+    assert.match(d, /I reviewed this summary and take responsibility for it/);
+    assert.doesNotMatch(d, /Nectar draft/);
+  });
+  it("the empty-records message shows once, not per goal", () => {
+    assert.doesNotMatch(read("../components/summaries/summary-document.tsx"), /NO_EVIDENCE_TEXT|No approved daily logs/);
+    assert.equal((editor.match(/No approved daily logs, shift notes or incidents this period/g) ?? []).length, 1);
+  });
+});
+
+describe("Support Coordinator reminder (use-deadlines.tsx, NotificationBell.tsx)", () => {
+  it("is built from scSendReminder and reaches the bell every day, not only on fire days", () => {
+    assert.match(read("../hooks/use-deadlines.tsx"), /scSendReminder\(s, denverYmd\(now\)\)/);
+    assert.match(read("../components/NotificationBell.tsx"), /i\.scReminder \|\| \(fireDay && i\.cadenceReminder\)/);
   });
 });
 
@@ -44,10 +82,11 @@ describe("autosave and finalize (progress-summaries.functions.ts)", () => {
   it("finalize keeps the finalized document for its PDF", () => {
     assert.match(fin, /final_doc: data\.doc/);
   });
-  it("finalize is refused before the period's last day and while a finding is open", () => {
+  it("finalize is refused before the period's last day and for nothing else", () => {
     assert.match(fin, /await assertCanFinalize\(/);
     assert.match(src, /if \(!canFinalizeSummary\(row\.period_end\)\) throw new Error\(finalizeOpensMessage/);
-    assert.match(src, /finalizeBlockers\(/);
+    assert.doesNotMatch(src, /finalizeBlockers|openFindings|readReviewState\(\(row\.draft_source/);
+    assert.match(fin, /take responsibility for it/);
   });
   it("reopen keeps the finalized copy and clears every finalize column through reopenPatch", () => {
     const re = src.slice(src.indexOf("export const reopenSummary"));

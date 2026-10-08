@@ -1,5 +1,5 @@
 // Finalizing a progress summary: the preparer's name and the attestation
-// that they reviewed Nectar's draft against the period's documentation.
+// that they reviewed the summary and take responsibility for it.
 
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -59,8 +59,7 @@ export function FinalizeDialog({
               className="mt-0.5"
             />
             <span>
-              I reviewed the Nectar draft against PI notes, shifts, and incidents for this period. I
-              take responsibility for the finalized summary.
+              I reviewed this summary and take responsibility for it.
             </span>
           </label>
         </div>

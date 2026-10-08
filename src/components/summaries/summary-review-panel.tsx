@@ -1,213 +1,192 @@
-// Nectar's review next to one field of the progress summary, the way the
-// clock-out shift note shows its Nectar triggers: each finding is amber
-// until it is fixed (it disappears) or kept with "Keep as is" (green, with
-// who and when); missing required content needs a short reason. Nectar's
-// suggested rewrite of the field is a marked draft: Accept or Keep mine.
+// Nectar as a helper next to the progress summary's text boxes. Each box
+// has its own "Draft with Nectar"; the rewrite comes back as a marked
+// suggestion with the changes shown (added words green, removed words
+// struck through red), Accept, and an x. After Accept the box shows Undo.
+// Reminders are one small list; each has an x. None of it blocks Finalize.
 
-import { useState } from "react";
-import { AlertTriangle, CheckCircle2, Sparkles } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Loader2, Sparkles, Undo2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  MIN_DISMISS_REASON,
-  canDismiss,
-  fieldGoalId,
-  type Dismissal,
-  type FieldKey,
-  type FieldSuggestion,
-  type SummaryFinding,
-} from "@/lib/progress-summary-review";
+import { wordDiff } from "@/lib/progress-summary-diff";
+import type { FieldKey, FieldSuggestion, Reminder } from "@/lib/progress-summary-review";
 
-export interface FieldReviewProps {
-  field: FieldKey;
-  findings: SummaryFinding[];
-  dismissals: Record<string, Dismissal>;
-  suggestion: FieldSuggestion | null;
-  goalNames: Record<string, string>;
-  busy: boolean;
-  onAccept: (field: FieldKey) => void;
-  onKeepMine: (field: FieldKey) => void;
-  onDismiss: (key: string, reason: string | null) => void;
-}
+const hideButton =
+  "absolute right-1 top-1 inline-flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground";
 
-const fieldName = (f: FieldKey, goalNames: Record<string, string>) => {
-  const id = fieldGoalId(f);
-  if (id !== null) return goalNames[id] ?? "a goal";
-  return f === "general" ? "General notes" : f === "incidentNotes" ? "Incident notes" : "Incident";
-};
-
-function FindingRow({
-  f,
-  dismissal,
-  goalNames,
-  busy,
-  onDismiss,
+export function RemindersList({
+  reminders,
+  onHide,
 }: {
-  f: SummaryFinding;
-  dismissal: Dismissal | undefined;
-  goalNames: Record<string, string>;
-  busy: boolean;
-  onDismiss: (key: string, reason: string | null) => void;
+  reminders: Reminder[];
+  onHide: (key: string) => void;
 }) {
-  const [asking, setAsking] = useState(false);
-  const [reason, setReason] = useState("");
-  const kept = !!dismissal;
+  if (!reminders.length) return null;
   return (
     <div
-      className={`rounded-md border p-2 text-xs ${
-        kept
-          ? "border-emerald-300 bg-emerald-50 dark:bg-emerald-950/30"
-          : "border-amber-400 bg-amber-50 dark:bg-amber-950/30"
-      }`}
-      data-testid="summary-finding"
+      className="space-y-1 rounded-md border bg-muted/30 p-2 text-xs"
+      data-testid="summary-reminders"
     >
-      <div className="flex items-start gap-1.5">
-        {kept ? (
-          <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-600" />
-        ) : (
-          <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-600" />
-        )}
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className="font-medium">
-            {f.message}
-            {f.cite ? <span className="font-normal text-muted-foreground"> ({f.cite})</span> : null}
-          </p>
-          {f.quote && f.source === "nectar" ? (
-            <p className="text-muted-foreground">“{f.quote}”</p>
-          ) : null}
-          {f.moveTo ? <p>Move to {goalNames[f.moveTo] ?? "that goal"}.</p> : null}
-          {f.suggestion ? <p className="text-muted-foreground">{f.suggestion}</p> : null}
-          {kept ? (
-            <p className="text-emerald-700 dark:text-emerald-300">
-              Kept as is by {dismissal.byName ?? "a team member"},{" "}
-              {new Date(dismissal.at).toLocaleDateString()}
-              {dismissal.reason ? ` — ${dismissal.reason}` : ""}.
-            </p>
-          ) : asking ? (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <Input
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder={f.needsReason ? "Why keep it? (required)" : "Why keep it? (optional)"}
-                className="h-8 min-w-0 flex-1 text-xs"
-                maxLength={500}
-              />
-              <Button
-                type="button"
-                size="sm"
-                className="h-8"
-                disabled={busy || !canDismiss(f, reason)}
-                onClick={() => onDismiss(f.key, reason.trim() || null)}
-              >
-                Keep as is
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="h-8"
-                onClick={() => setAsking(false)}
-              >
-                Cancel
-              </Button>
-              {f.needsReason && !canDismiss(f, reason) ? (
-                <p className="w-full text-muted-foreground">
-                  At least {MIN_DISMISS_REASON} characters.
-                </p>
-              ) : null}
-            </div>
-          ) : (
-            <Button
+      <p className="font-semibold text-muted-foreground">Reminders</p>
+      <ul className="space-y-1">
+        {reminders.map((r) => (
+          <li key={r.key} className="relative rounded bg-background py-1 pl-2 pr-8">
+            {r.text}
+            <button
               type="button"
-              size="sm"
-              variant="outline"
-              className="h-7 text-xs"
-              disabled={busy}
-              onClick={() => setAsking(true)}
+              className={hideButton}
+              aria-label="Hide reminder"
+              onClick={() => onHide(r.key)}
             >
-              Keep as is
-            </Button>
-          )}
-        </div>
+              <X className="size-3.5" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SuggestionCard({
+  suggestion,
+  current,
+  busy,
+  onAccept,
+  onHide,
+}: {
+  suggestion: FieldSuggestion;
+  current: string;
+  busy: boolean;
+  onAccept: () => void;
+  onHide: () => void;
+}) {
+  const [original, setOriginal] = useState(false);
+  const parts = useMemo(() => wordDiff(current, suggestion.text), [current, suggestion.text]);
+  return (
+    <div
+      className="relative space-y-1.5 rounded-md border border-amber-500/40 bg-amber-500/5 p-2 pr-8 text-xs"
+      data-testid="summary-suggestion"
+    >
+      <button type="button" className={hideButton} aria-label="Hide suggestion" onClick={onHide}>
+        <X className="size-3.5" />
+      </button>
+      <p className="flex items-center gap-1 font-semibold text-amber-900 dark:text-amber-100">
+        <Sparkles className="size-3.5" /> Nectar draft
+      </p>
+      <p className="whitespace-pre-wrap text-sm">
+        {parts.map((p, i) =>
+          p.kind === "same" ? (
+            <span key={i}>{p.text}</span>
+          ) : p.kind === "add" ? (
+            <span key={i} className="rounded-sm bg-green-100 dark:bg-green-900/40">
+              {p.text}
+            </span>
+          ) : (
+            <span key={i} className="rounded-sm bg-red-100 line-through dark:bg-red-900/40">
+              {p.text}
+            </span>
+          ),
+        )}
+      </p>
+      {original ? (
+        <p className="whitespace-pre-wrap rounded bg-muted/50 p-1.5 text-muted-foreground">
+          {current || "(empty)"}
+        </p>
+      ) : null}
+      {suggestion.drops.length ? (
+        <p className="font-medium text-hive-danger">
+          Drops something you wrote: {suggestion.drops.join(", ")}. Copy what you want instead.
+        </p>
+      ) : null}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {!suggestion.drops.length ? (
+          <Button type="button" size="sm" className="h-8" disabled={busy} onClick={onAccept}>
+            Accept
+          </Button>
+        ) : null}
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="h-8 text-xs"
+          onClick={() => setOriginal((v) => !v)}
+        >
+          {original ? "Hide original" : "Show original"}
+        </Button>
       </div>
     </div>
   );
 }
 
-export function FieldReview({
+export interface BoxToolsProps {
+  field: FieldKey;
+  /** The text in the box now. */
+  current: string;
+  suggestion: FieldSuggestion | null;
+  canUndo: boolean;
+  /** Whether this box can be drafted (has text, or a goal with records). */
+  canDraft: boolean;
+  /** This box is being drafted right now. */
+  drafting: boolean;
+  busy: boolean;
+  onDraft: (field: FieldKey) => void;
+  onAccept: (field: FieldKey) => void;
+  onUndo: (field: FieldKey) => void;
+  onHideSuggestion: (suggestion: FieldSuggestion) => void;
+}
+
+/** Draft with Nectar, Undo and the suggestion card for one text box. */
+export function BoxTools({
   field,
-  findings,
-  dismissals,
+  current,
   suggestion,
-  goalNames,
+  canUndo,
+  canDraft,
+  drafting,
   busy,
+  onDraft,
   onAccept,
-  onKeepMine,
-  onDismiss,
-}: FieldReviewProps) {
-  const pending = findings.filter((f) => f.onSuggestion);
-  const shown = findings.filter((f) => !f.onSuggestion);
-  if (!shown.length && !suggestion) return null;
+  onUndo,
+  onHideSuggestion,
+}: BoxToolsProps) {
   return (
-    <div className="space-y-1.5" data-testid={`summary-review-${field}`}>
-      {shown.map((f) => (
-        <FindingRow
-          key={f.key}
-          f={f}
-          dismissal={dismissals[f.key]}
-          goalNames={goalNames}
-          busy={busy}
-          onDismiss={onDismiss}
-        />
-      ))}
+    <div className="space-y-1.5" data-testid={`summary-box-tools-${field}`}>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-7 text-xs"
+          disabled={busy || !canDraft}
+          onClick={() => onDraft(field)}
+        >
+          {drafting ? (
+            <Loader2 className="mr-1 size-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="mr-1 size-3.5" />
+          )}
+          Draft with Nectar
+        </Button>
+        {canUndo ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs"
+            disabled={busy}
+            onClick={() => onUndo(field)}
+          >
+            <Undo2 className="mr-1 size-3.5" /> Undo
+          </Button>
+        ) : null}
+      </div>
       {suggestion ? (
-        <div className="space-y-1.5 rounded-md border border-amber-500/40 bg-amber-500/5 p-2 text-xs">
-          <p className="flex items-center gap-1 font-semibold text-amber-900 dark:text-amber-100">
-            <Sparkles className="size-3.5" /> Suggested rewrite — Nectar draft
-          </p>
-          <p className="whitespace-pre-wrap text-sm">{suggestion.text}</p>
-          {suggestion.linked.length ? (
-            <p className="text-muted-foreground">
-              Accepting also updates{" "}
-              {suggestion.linked.map((l) => fieldName(l, goalNames)).join(", ")}.
-            </p>
-          ) : null}
-          {suggestion.drops.length ? (
-            <p className="font-medium text-hive-danger">
-              Drops something you wrote: {suggestion.drops.join(", ")}. Copy what you want instead.
-            </p>
-          ) : null}
-          {pending.length ? (
-            <ul className="list-disc pl-4 text-muted-foreground">
-              {pending.map((f) => (
-                <li key={f.key}>Nectar on this rewrite: {f.message}</li>
-              ))}
-            </ul>
-          ) : null}
-          <div className="flex flex-wrap gap-1.5">
-            {!suggestion.drops.length ? (
-              <Button
-                type="button"
-                size="sm"
-                className="h-8"
-                disabled={busy}
-                onClick={() => onAccept(field)}
-              >
-                Accept
-              </Button>
-            ) : null}
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="h-8"
-              disabled={busy}
-              onClick={() => onKeepMine(field)}
-            >
-              Keep mine
-            </Button>
-          </div>
-        </div>
+        <SuggestionCard
+          suggestion={suggestion}
+          current={current}
+          busy={busy}
+          onAccept={() => onAccept(field)}
+          onHide={() => onHideSuggestion(suggestion)}
+        />
       ) : null}
     </div>
   );

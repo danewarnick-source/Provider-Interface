@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  NO_EVIDENCE_TEXT,
   NO_PROGRESS_TEXT,
   evidenceHeading,
   manualIncidentLine,
@@ -27,7 +26,7 @@ export interface DocEditing {
   /** Goal ids in the same order as doc.goals. */
   goalIds: string[];
   disabled: boolean;
-  /** Nectar's findings and suggested rewrite for one field, shown under it. */
+  /** Draft with Nectar, Undo and the suggestion for one box, shown under it. */
   review?: (field: FieldKey) => ReactNode;
 }
 
@@ -118,17 +117,16 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
                     data-testid={`summary-goal-${id}`}
                   />
                   {edit.review?.(`goal:${id}`)}
-                  {!g.evidence.length ? (
-                    <p className="text-xs text-muted-foreground">{NO_EVIDENCE_TEXT}</p>
-                  ) : null}
                 </>
               ) : (
                 <p className="whitespace-pre-wrap">{g.progress || NO_PROGRESS_TEXT}</p>
               )}
             </div>
-            <div className="pl-2">
-              <EvidenceList lines={g.evidence} />
-            </div>
+            {edit && !g.evidence.length ? null : (
+              <div className="pl-2">
+                <EvidenceList lines={g.evidence} />
+              </div>
+            )}
           </section>
         );
       })}
@@ -182,7 +180,6 @@ export function SummaryDocument({ doc, edit }: { doc: SummaryDoc; edit?: DocEdit
                   disabled={edit.disabled}
                   placeholder="Follow-up"
                 />
-                <div className="sm:col-span-2">{edit.review?.(`incident:${m.id}`)}</div>
               </div>
             ))}
             <Button

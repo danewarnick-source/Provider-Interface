@@ -1,9 +1,10 @@
 // State and actions behind the progress summary editor (summary-editor.tsx):
 // load the summary with its evidence, keep the editor's fields (autosaved,
-// debounced and on blur / close), Nectar (draft from the records, or review
-// what was typed: suggestions to Accept / Keep mine, findings to fix or keep
-// as is), finalize once nothing is open (then download the PDF), and the
-// UPI / support coordinator attestations.
+// debounced and on blur / close), Nectar as a helper (draft one box or all
+// boxes into suggestions to Accept or hide, Undo after Accept, an optional
+// review, reminders hidden with an x), finalize (a soft confirm when a goal
+// is blank; nothing blocks), then download the PDF, and the UPI / support
+// coordinator attestations.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -20,18 +21,33 @@ import {
   saveSummaryDraft,
   type SummarySourceBundle,
 } from "@/lib/progress-summaries.functions";
-import { runSummaryNectar, updateSummaryReview } from "@/lib/progress-summary-draft.functions";
+import {
+  draftSummaryBoxes,
+  runSummaryNectar,
+  updateSummaryReview,
+} from "@/lib/progress-summary-draft.functions";
 import {
   acceptSuggestion,
+  blankGoals,
+  dismissKey,
   emptyReviewState,
-  liveNectarFindings,
-  openFindings,
-  summaryChecks,
+  fieldText,
+  pushUndo,
+  summaryReminders,
+  suggestionKey,
+  takeSuggestion,
+  textFields,
+  undoAccept,
+  visibleSuggestion,
   type FieldKey,
+  type FieldSuggestion,
+  type ReviewContext,
   type SummaryReviewState,
+  type UndoStacks,
 } from "@/lib/progress-summary-review";
 import {
   buildSummaryDoc,
+  groupEvidence,
   summaryDocText,
   type SummaryDoc,
   type SummaryEditorState,
@@ -94,6 +110,7 @@ export function useSummaryEditor({
   const { user } = useAuth();
   const getBundleFn = useServerFn(getSummaryWithSource);
   const nectarFn = useServerFn(runSummaryNectar);
+  const draftFn = useServerFn(draftSummaryBoxes);
   const reviewFn = useServerFn(updateSummaryReview);
   const saveFn = useServerFn(saveSummaryDraft);
   const finalizeFn = useServerFn(finalizeSummary);
@@ -109,6 +126,8 @@ export function useSummaryEditor({
 
   const [editor, setEditor] = useState<SummaryEditorState | null>(null);
   const [review, setReview] = useState<SummaryReviewState>(emptyReviewState());
+  // What each box held before an Accept, for Undo (this session only).
+  const [undoStacks, setUndoStacks] = useState<UndoStacks>({});
   const [finalizerName, setFinalizerName] = useState("");
   const [aiAttested, setAiAttested] = useState(false);
   const [showFinalize, setShowFinalize] = useState(false);
@@ -191,6 +210,41 @@ export function useSummaryEditor({
 
   // ─── Nectar ──────────────────────────────────────────────────────────────
   const hasRecords = (b?.evidence.length ?? 0) > 0;
+  const goalIds = useMemo(
+    () => (b?.summary.include_goal_progress ? b.goals.map((g) => g.id) : []),
+    [b],
+  );
+  const byGoal = useMemo(() => (b ? groupEvidence(b.goals, b.evidence).byGoal : {}), [b]);
+  const evidenceFor = (field: FieldKey) =>
+    field.startsWith("goal:") ? (byGoal[field.slice(5)]?.length ?? 0) > 0 : false;
+
+  /** Draft one box, or several in one request. */
+  const draftMut = useMutation({
+    mutationFn: (fields: FieldKey[]) => {
+      const ed = latest.current.editor;
+      if (!ed) throw new Error("Still loading.");
+      return draftFn({
+        data: { organizationId, summaryId, editor: ed as unknown as Record<string, unknown>, fields },
+      });
+    },
+    onSuccess: (res) => {
+      setReview(res.review);
+      toast.success(
+        res.review.suggestions.length
+          ? "Nectar has a draft for you to look at."
+          : "Nectar found nothing to change.",
+      );
+      if (res.rejected) {
+        toast.info(
+          `Nectar's draft for ${res.rejected} box${res.rejected === 1 ? "" : "es"} was dropped: it had dates or numbers that were not in that box.`,
+        );
+      }
+      qc.invalidateQueries({ queryKey: ["summaries"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  /** Optional "Review with Nectar": the goal-area yes/no for goals that share nothing with their goal. */
   const nectarMut = useMutation({
     mutationFn: () => {
       const ed = latest.current.editor;
@@ -201,93 +255,87 @@ export function useSummaryEditor({
     },
     onSuccess: (res) => {
       setReview(res.review);
-      const n = res.review.suggestions.length;
-      const f = res.review.findings.length;
       toast.success(
-        n || f
-          ? `Nectar: ${n} suggestion${n === 1 ? "" : "s"}, ${f} item${f === 1 ? "" : "s"} to check.`
-          : "Nectar found nothing to change.",
+        res.flagged
+          ? "Nectar added a reminder."
+          : res.asked
+            ? "Nectar found nothing to flag."
+            : "Nothing to check. Every goal has matching words.",
       );
-      if (res.rejected) {
-        toast.info(
-          `Nectar's rewrite of ${res.rejected} field${res.rejected === 1 ? "" : "s"} was dropped: it had dates or numbers not in your text or the records.`,
-        );
-      }
-      void bundleQ.refetch();
-      qc.invalidateQueries({ queryKey: ["summaries"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const reviewOp = useMutation({
-    mutationFn: (
-      op:
-        | { op: "accept" | "keep"; field: FieldKey }
-        | { op: "dismiss"; key: string; reason: string | null },
-    ) =>
+    mutationFn: (op: { op: "accept"; field: FieldKey } | { op: "dismiss"; key: string }) =>
       reviewFn({ data: { organizationId, summaryId, op } }),
-    onSuccess: (res) => setReview(res.review),
     onError: (e: Error) => toast.error(e.message),
   });
 
   const accept = (field: FieldKey) => {
     if (!editor) return;
+    const suggestion = visibleSuggestion(review, field);
+    if (!suggestion) return;
     try {
-      const res = acceptSuggestion(editor, review, field);
+      const res = acceptSuggestion(editor, suggestion);
       setEditor(res.editor);
-      setReview(res.review);
+      setUndoStacks((u) => pushUndo(u, field, res.undo));
+      setReview((r) => takeSuggestion(r, field));
       reviewOp.mutate({ op: "accept", field });
     } catch (e) {
       toast.error((e as Error).message);
     }
   };
-  const keep = (field: FieldKey) => reviewOp.mutate({ op: "keep", field });
-  const dismiss = (key: string, reason: string | null) =>
-    reviewOp.mutate({ op: "dismiss", key, reason });
+  /** Undo the last Accept on a box; the autosave saves it like any edit. */
+  const undo = (field: FieldKey) => {
+    if (!editor) return;
+    const res = undoAccept(editor, undoStacks, field);
+    setEditor(res.editor);
+    setUndoStacks(res.stacks);
+  };
+  /** The x on a reminder or a suggestion card: hidden for this summary, saved with the review. */
+  const hideKey = (key: string) => {
+    setReview((r) => dismissKey(r, key));
+    reviewOp.mutate({ op: "dismiss", key });
+  };
+  const hideSuggestion = (s: FieldSuggestion) => hideKey(suggestionKey(s));
 
-  const checks = useMemo(
-    () =>
-      b && editor
-        ? summaryChecks(
-            {
-              periodStart: b.summary.period_start,
-              periodEnd: b.summary.period_end,
-              serviceCodes: b.summary.service_codes,
-              summaryKind: b.summary.summary_kind,
-              includeGoalProgress: b.summary.include_goal_progress,
-              goals: b.goals,
-            },
-            editor,
-          )
-        : [],
-    [b, editor],
-  );
-  const open = useMemo(
-    () => (editor ? openFindings(checks, review, editor) : []),
-    [checks, review, editor],
-  );
-  /** Everything to show next to the fields: open, kept as is, and Nectar's notes on pending rewrites. */
-  const shown = useMemo(
-    () =>
-      editor
-        ? [
-            ...checks,
-            ...liveNectarFindings(review, editor),
-            ...review.findings.filter((f) => f.onSuggestion),
-          ]
-        : [],
-    [checks, review, editor],
-  );
-
-  const autoDrafted = useRef(false);
-  useEffect(() => {
-    if (!b || !editor || autoDrafted.current) return;
-    autoDrafted.current = true;
-    if (b.summary.summary_kind === "narrative" && b.summary.status === "pending" && hasRecords) {
-      nectarMut.mutate();
+  const draftBox = (field: FieldKey) => draftMut.mutate([field]);
+  /** Draft all boxes: every box with text, in one request. */
+  const draftAll = () => {
+    if (!editor) return;
+    const fields = textFields(goalIds).filter((f) => fieldText(editor, f).trim());
+    if (!fields.length) {
+      toast.info("Nothing typed yet to draft.");
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [b, editor]);
+    draftMut.mutate(fields);
+  };
+  const canDraft = (field: FieldKey) =>
+    !!editor && (!!fieldText(editor, field).trim() || evidenceFor(field));
+
+  const reviewCtx = useMemo<ReviewContext | null>(
+    () =>
+      b
+        ? {
+            serviceCodes: b.summary.service_codes,
+            summaryKind: b.summary.summary_kind,
+            includeGoalProgress: b.summary.include_goal_progress,
+            goals: b.goals,
+            firstName: b.client.first_name,
+          }
+        : null,
+    [b],
+  );
+  const reminders = useMemo(
+    () => (reviewCtx && editor ? summaryReminders(reviewCtx, editor, review) : []),
+    [reviewCtx, editor, review],
+  );
+  /** Goals with no progress text: Finalize asks first, never blocks. */
+  const blank = useMemo(
+    () => (reviewCtx && editor ? blankGoals(reviewCtx, editor) : []),
+    [reviewCtx, editor],
+  );
 
   // ─── Finalize, download, attestations ────────────────────────────────────
   const handleDownload = async (d: SummaryDoc | null = doc) => {
@@ -367,19 +415,24 @@ export function useSummaryEditor({
   return {
     accept,
     aiAttested,
+    blank,
     bundleQ,
-    checks,
-    dismiss,
+    canDraft,
     doc,
+    draftAll,
+    draftBox,
+    draftMut,
     editor,
     hasRecords,
-    keep,
+    hideKey,
+    hideSuggestion,
     nectarMut,
-    open,
+    reminders,
     reopenMut,
     review,
-    shown,
     reviewOp,
+    undo,
+    undoStacks,
     filing,
     finalizeMut,
     finalizerName,
