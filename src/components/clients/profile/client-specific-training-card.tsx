@@ -432,11 +432,6 @@ export function SectionsView({
                 onDelete={() => patchSection(idx, { items: sec.items.filter((_, j) => j !== i) })}
               />
             ))}
-            {editing && (
-              <Button variant="outline" onClick={() => patchSection(idx, { items: [...sec.items, { kind: "text", label: "Note", value: "" }] })}>
-                <Plus className="mr-1.5 h-3.5 w-3.5" />Add note
-              </Button>
-            )}
           </div>
         </section>
       ))}
