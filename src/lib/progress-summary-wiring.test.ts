@@ -64,8 +64,13 @@ describe("evidence (progress-summary-source.server.ts)", () => {
     assert.match(src, /from\("shift_reports"\)[\s\S]*?submitted_at", "is", null\)/);
     assert.match(src, /incidentInvolvesClientOr\(row\.client_id\)/);
   });
+  it("team members: every active member assigned to the client, joined in JS", () => {
+    assert.match(src, /from\("staff_assignments"\)\s*\.select\("staff_id"\)/);
+    assert.match(src, /from\("organization_members"\)\s*\.select\("user_id, active, deleted_at, end_date"\)/);
+    assert.match(src, /assignedTeamMemberNames\(/);
+    assert.doesNotMatch(src, /organization_members\([^)]*profiles|profiles\([^)]*organization_members/);
+  });
   it("names come from profiles in a separate query (no embed)", () => {
     assert.match(src, /from\("profiles"\)\s*\.select\("id, first_name, last_name"\)/);
-    assert.doesNotMatch(src, /organization_members/);
   });
 });

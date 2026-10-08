@@ -8,6 +8,7 @@ import {
   emptyEditorState,
   evidenceFromRows,
   evidenceLine,
+  assignedTeamMemberNames,
   groupEvidence,
   hasNectarText,
   manualIncidentLine,
@@ -320,5 +321,38 @@ describe("the document", () => {
       "progress-summary-joby-austin-2026-q4.pdf",
     );
     assert.equal(summaryFileName("Pat", "2026-10-FS"), "progress-summary-pat-2026-10.pdf");
+  });
+});
+
+describe("assignedTeamMemberNames", () => {
+  it("every active assigned team member, once, sorted; inactive, deleted and separated left out", () => {
+    const m = (user_id: string, over = {}) => ({ user_id, active: true, deleted_at: null, end_date: null, ...over });
+    const names = assignedTeamMemberNames({
+      assignments: [
+        { staff_id: "u1" },
+        { staff_id: "u2" },
+        { staff_id: "u1" },
+        { staff_id: "u3" },
+        { staff_id: "u4" },
+        { staff_id: "u5" },
+        { staff_id: "u6" },
+        { staff_id: null },
+      ],
+      members: [
+        m("u1"),
+        m("u2"),
+        m("u3", { active: false }),
+        m("u4", { deleted_at: "2026-01-01T00:00:00Z" }),
+        m("u5", { end_date: "2026-10-07" }),
+        m("u6", { end_date: "2026-10-08" }),
+      ],
+      profiles: [
+        { id: "u1", first_name: "Zed", last_name: "Young" },
+        { id: "u2", first_name: "Amy", last_name: "Ames" },
+        { id: "u6", first_name: "Bo", last_name: null },
+      ],
+      today: "2026-10-08",
+    });
+    assert.deepEqual(names, ["Amy Ames", "Bo", "Zed Young"]);
   });
 });

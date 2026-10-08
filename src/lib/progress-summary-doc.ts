@@ -194,6 +194,41 @@ export function evidenceFromRows(r: EvidenceRows): SummaryEvidence[] {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+// ─── Team members ──────────────────────────────────────────────────────────
+
+/**
+ * Every team member assigned to the client (staff_assignments), for the
+ * summary header: active members only — not inactive, deleted, or separated
+ * (an end date before `today`). Names from profiles; sorted, each once.
+ */
+export function assignedTeamMemberNames(input: {
+  assignments: ReadonlyArray<{ staff_id: string | null }>;
+  members: ReadonlyArray<{
+    user_id: string;
+    active: boolean | null;
+    deleted_at: string | null;
+    end_date: string | null;
+  }>;
+  profiles: ReadonlyArray<{ id: string; first_name: string | null; last_name: string | null }>;
+  /** YYYY-MM-DD (Denver). */
+  today: string;
+}): string[] {
+  const active = new Set(
+    input.members
+      .filter((m) => m.active !== false && !m.deleted_at && (!m.end_date || m.end_date >= input.today))
+      .map((m) => m.user_id),
+  );
+  const names = new Map(
+    input.profiles.map((p) => [p.id, [p.first_name, p.last_name].filter(Boolean).join(" ").trim()]),
+  );
+  const out = new Set<string>();
+  for (const a of input.assignments) {
+    if (!a.staff_id || !active.has(a.staff_id)) continue;
+    out.add(names.get(a.staff_id) || "Team member");
+  }
+  return [...out].sort((a, b) => a.localeCompare(b));
+}
+
 // ─── Editor state (saved in client_progress_summaries.draft_source.editor) ──
 
 export interface ManualIncident {

@@ -8,7 +8,9 @@
 import { loadPlanBundle } from "@/lib/clients/plans-load";
 import { summaryGoals, type SummaryGoal } from "@/lib/clients/plan-summaries";
 import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
+import { denverYmd } from "@/lib/denver-date";
 import {
+  assignedTeamMemberNames,
   evidenceFromRows,
   type EvidenceRows,
   type SummaryEvidence,
@@ -21,7 +23,7 @@ export interface SummarySource {
   planId: string | null;
   goals: SummaryGoal[];
   evidence: SummaryEvidence[];
-  /** Team members who wrote the period's logs, notes and reports. */
+  /** Every active team member assigned to the client. */
   staffNames: string[];
 }
 
@@ -147,15 +149,44 @@ export async function loadSummarySource(
     incidents,
     names,
   });
-  const staffNames = [
-    ...new Set(
-      evidence
-        .filter((e) => e.kind !== "incident")
-        .map((e) => e.who)
-        .filter(Boolean),
-    ),
-  ]
-    .map(String)
-    .sort();
+  const staffNames = await loadAssignedTeamMembers(sb, organizationId, row.client_id);
   return { planId, goals, evidence, staffNames };
+}
+
+/**
+ * Every active team member assigned to the client (staff_assignments).
+ * organization_members and profiles are separate queries joined here —
+ * never an embed.
+ */
+async function loadAssignedTeamMembers(
+  sb: AnySupabase,
+  organizationId: string,
+  clientId: string,
+): Promise<string[]> {
+  const { data: assignments, error } = await sb
+    .from("staff_assignments")
+    .select("staff_id")
+    .eq("organization_id", organizationId)
+    .eq("client_id", clientId);
+  if (error) throw new Error(error.message);
+  const ids = [
+    ...new Set(((assignments ?? []) as Array<{ staff_id: string | null }>).map((a) => a.staff_id)),
+  ].filter(Boolean) as string[];
+  if (!ids.length) return [];
+  const [membersRes, profilesRes] = await Promise.all([
+    sb
+      .from("organization_members")
+      .select("user_id, active, deleted_at, end_date")
+      .eq("organization_id", organizationId)
+      .in("user_id", ids),
+    sb.from("profiles").select("id, first_name, last_name").in("id", ids),
+  ]);
+  if (membersRes.error) throw new Error(membersRes.error.message);
+  if (profilesRes.error) throw new Error(profilesRes.error.message);
+  return assignedTeamMemberNames({
+    assignments: assignments ?? [],
+    members: membersRes.data ?? [],
+    profiles: profilesRes.data ?? [],
+    today: denverYmd(),
+  });
 }
