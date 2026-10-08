@@ -1,8 +1,9 @@
-// Page layout helpers for the support strategies PDF (pdf-lib): a cursor that
-// wraps text, starts new pages with the running header, and stamps page
-// numbers at the end. Pure (no Supabase), node --test.
+// Page layout helpers for the support strategies and progress summary PDFs
+// (pdf-lib): a cursor that wraps text, starts new pages with the running
+// header, the title block and two-column details table both documents open
+// with, and page numbers stamped at the end. Pure (no Supabase), node --test.
 
-import { rgb, type PDFDocument, type PDFFont, type PDFPage } from "pdf-lib";
+import { StandardFonts, rgb, type PDFDocument, type PDFFont, type PDFPage } from "pdf-lib";
 
 export const PAGE_W = 612;
 export const PAGE_H = 792;
@@ -18,11 +19,12 @@ export const ACCENT = rgb(0.1, 0.17, 0.28);
 
 const WIN_ANSI_EXTRA = "€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ";
 
-/** Text the standard fonts can encode (others become "?"; arrows become "-"). */
+/** Text the standard fonts can encode (others become "?"; arrows become "-"); line breaks kept. */
 export function pdfSafe(s: string): string {
   return Array.from(String(s ?? ""))
     .map((ch) => {
       if (ch === "\t") return " ";
+      if (ch === "\n" || ch === "\r") return ch; // wrapText splits paragraphs on these
       if (ch === "→") return "-";
       const c = ch.codePointAt(0) ?? 0;
       if ((c >= 0x20 && c <= 0x7e) || (c >= 0xa0 && c <= 0xff) || WIN_ANSI_EXTRA.includes(ch)) {
@@ -52,6 +54,14 @@ export function wrapText(text: string, font: PDFFont, size: number, width: numbe
 }
 
 export type Fonts = { regular: PDFFont; bold: PDFFont };
+
+/** Helvetica regular and bold, embedded in `pdf`. */
+export async function embedFonts(pdf: PDFDocument): Promise<Fonts> {
+  return {
+    regular: await pdf.embedFont(StandardFonts.Helvetica),
+    bold: await pdf.embedFont(StandardFonts.HelveticaBold),
+  };
+}
 
 /** A top-to-bottom writer across pages. */
 export class PdfCursor {
@@ -166,4 +176,36 @@ export function stampPageNumbers(pdf: PDFDocument, font: PDFFont) {
     const w = font.widthOfTextAtSize(label, 8);
     p.drawText(label, { x: PAGE_W - MARGIN - w, y: MARGIN - 8, size: 8, font, color: MUTED });
   });
+}
+
+/** Provider line, document title and a heavy rule. */
+export function titleBlock(c: PdfCursor, provider: string, title: string) {
+  c.text(provider, { size: 11, bold: true, color: MUTED });
+  c.text(title, { size: 20, bold: true, color: ACCENT, lead: 26 });
+  c.rule(ACCENT, 1.2);
+  c.gap(4);
+}
+
+/** Label / value pairs in two columns (long values cut to one line), then a rule. */
+export function factsGrid(c: PdfCursor, rows: ReadonlyArray<readonly [string, string]>) {
+  const colW = CONTENT_W / 2;
+  for (let i = 0; i < rows.length; i += 2) {
+    c.ensure(30);
+    const y = c.y;
+    rows.slice(i, i + 2).forEach(([label, value], j) => {
+      const x = MARGIN + j * colW;
+      c.page.drawText(pdfSafe(label.toUpperCase()), {
+        x,
+        y: y - 10,
+        size: 7,
+        font: c.fonts.bold,
+        color: MUTED,
+      });
+      const fit = wrapText(value, c.fonts.regular, 10, colW - 12);
+      const shown = fit.length > 1 ? `${fit[0]}…` : fit[0];
+      c.page.drawText(shown, { x, y: y - 23, size: 10, font: c.fonts.regular });
+    });
+    c.y = y - 30;
+  }
+  c.rule();
 }

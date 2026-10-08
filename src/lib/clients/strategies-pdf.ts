@@ -3,69 +3,40 @@
 // strategy bullets, services needing no strategy, and the footer notes.
 // Pure (no Supabase), node --test.
 
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
 import type { StrategiesDoc } from "./strategies-doc.ts";
 import { NO_STRATEGY_TEXT } from "./strategies-doc.ts";
 import {
   ACCENT,
-  CONTENT_W,
-  MARGIN,
   MUTED,
   PdfCursor,
+  embedFonts,
+  factsGrid,
   pdfSafe,
   stampPageNumbers,
-  wrapText,
+  titleBlock,
 } from "./strategies-pdf-layout.ts";
 
 export async function renderStrategiesPdf(doc: StrategiesDoc): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   pdf.setTitle(pdfSafe(`${doc.title} - ${doc.client}`));
   pdf.setCreator("Provider Interface");
-  const fonts = {
-    regular: await pdf.embedFont(StandardFonts.Helvetica),
-    bold: await pdf.embedFont(StandardFonts.HelveticaBold),
-  };
+  const fonts = await embedFonts(pdf);
   const c = new PdfCursor(
     pdf,
     fonts,
     `${doc.provider} · ${doc.title} · ${doc.client} · Confidential`,
   );
 
-  // Title block
-  c.text(doc.provider, { size: 11, bold: true, color: MUTED });
-  c.text(doc.title, { size: 20, bold: true, color: ACCENT, lead: 26 });
-  c.rule(ACCENT, 1.2);
-  c.gap(4);
-
-  // Details: two columns of label / value
-  const rows: [string, string][] = [
+  titleBlock(c, doc.provider, doc.title);
+  factsGrid(c, [
     ["Client", doc.client],
     ["Service provider", doc.provider],
     ["PCSP plan year", doc.planYear],
     ["Support coordinator", doc.coordinator],
     ["Date prepared", doc.prepared],
     ["Approved", doc.approved],
-  ];
-  const colW = CONTENT_W / 2;
-  for (let i = 0; i < rows.length; i += 2) {
-    c.ensure(30);
-    const y = c.y;
-    rows.slice(i, i + 2).forEach(([label, value], j) => {
-      const x = MARGIN + j * colW;
-      c.page.drawText(pdfSafe(label.toUpperCase()), {
-        x,
-        y: y - 10,
-        size: 7,
-        font: fonts.bold,
-        color: MUTED,
-      });
-      const fit = wrapText(value, fonts.regular, 10, colW - 12);
-      const shown = fit.length > 1 ? `${fit[0]}…` : fit[0];
-      c.page.drawText(shown, { x, y: y - 23, size: 10, font: fonts.regular });
-    });
-    c.y = y - 30;
-  }
-  c.rule();
+  ]);
 
   // Goals and supports
   doc.goals.forEach((g, gi) => {
