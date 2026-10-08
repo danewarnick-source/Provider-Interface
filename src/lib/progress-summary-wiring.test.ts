@@ -5,6 +5,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
+import { FINALIZE_COLUMNS } from "./progress-summary-reopen.ts";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 
@@ -47,6 +48,34 @@ describe("autosave and finalize (progress-summaries.functions.ts)", () => {
     assert.match(fin, /await assertCanFinalize\(/);
     assert.match(src, /if \(!canFinalizeSummary\(row\.period_end\)\) throw new Error\(finalizeOpensMessage/);
     assert.match(src, /finalizeBlockers\(/);
+  });
+  it("reopen keeps the finalized copy and clears every finalize column through reopenPatch", () => {
+    const re = src.slice(src.indexOf("export const reopenSummary"));
+    assert.match(re, /requireOrgMembership\(supabase, userId, data\.organizationId, "admin"\)/);
+    assert.match(re, /select\(`status, draft_source, \$\{FINALIZE_COLUMNS\.join/);
+    assert.match(re, /reopenPatch\(/);
+    assert.doesNotMatch(re, /\.delete\(/);
+  });
+  it("finalize and the attestations only write columns reopen clears", () => {
+    const writers = [
+      "export const markSummaryCompleted",
+      "export const attestSummaryUpiEntered",
+      "export const attestSummarySentToSc",
+      "export const finalizeSummary",
+    ].map((start) => {
+      const from = src.indexOf(start);
+      assert.ok(from > 0, start);
+      return src.slice(from, src.indexOf("\nexport const", from + 1));
+    });
+    const keys = new Set<string>();
+    for (const w of writers) {
+      for (const m of w.matchAll(/\b([a-z_]+(?:_at|_by|_by_name|_content)):/g)) keys.add(m[1]);
+    }
+    keys.delete("updated_at");
+    assert.ok(keys.size >= 10);
+    for (const k of keys) {
+      assert.ok(FINALIZE_COLUMNS.includes(k as (typeof FINALIZE_COLUMNS)[number]), `reopen must clear ${k}`);
+    }
   });
   it("the editor loads saved fields, or reads an older text draft back into fields", () => {
     assert.match(src, /readEditorState\(draftSource\.editor\) \?\?\s+editorFromLegacyText/);

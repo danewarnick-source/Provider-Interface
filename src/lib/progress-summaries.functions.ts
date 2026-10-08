@@ -7,6 +7,7 @@ import { requireOrgMembership } from "@/integrations/supabase/require-org";
 import { toIsoDateDay } from "@/lib/iso-date-day";
 import { loadPlanBundle } from "@/lib/clients/plans-load";
 import { summaryGoals } from "@/lib/clients/plan-summaries";
+import { FINALIZE_COLUMNS, readReopenHistory, reopenPatch, type ReopenEvent } from "@/lib/progress-summary-reopen";
 import { finalizeBlockers, readReviewState, type SummaryReviewState } from "@/lib/progress-summary-review";
 import {
   editorFromLegacyText,
@@ -497,6 +498,8 @@ export type SummarySourceBundle = {
   finalDoc: SummaryDoc | null;
   /** Nectar's last review: findings, suggestions and "Keep as is" records. */
   review: SummaryReviewState;
+  /** Each time the summary was reopened after finalizing, newest first. */
+  reopens: ReopenEvent[];
 };
 
 export const getSummaryWithSource = createServerFn({ method: "POST" })
@@ -606,6 +609,7 @@ export const getSummaryWithSource = createServerFn({ method: "POST" })
         editorFromLegacyText(summaryRow.final_content ?? summaryRow.draft_content, source.goals),
       finalDoc: draftSource.final_doc ?? null,
       review: readReviewState(draftSource.review),
+      reopens: readReopenHistory(draftSource),
     };
   });
 
@@ -764,6 +768,55 @@ export const finalizeSummary = createServerFn({ method: "POST" })
         .eq("id", data.summaryId)
         .eq("organization_id", data.organizationId));
     }
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/**
+ * Reopen a finalized summary for edits (progress-summary-reopen.ts): the
+ * finalized copy is kept as a superseded version, who / when / why and any
+ * withdrawn filing attestation are recorded, and the row returns to
+ * in_review with every finalize and attestation column cleared — so the
+ * summaries list, deadlines and the client file count it as not done.
+ */
+export const reopenSummary = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({
+    organizationId: z.string().uuid(),
+    summaryId: z.string().uuid(),
+    reason: z.string().max(500).nullable(),
+  }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    if (!supabase || !userId) throw new Error("Sign in again.");
+    await requireOrgMembership(supabase, userId, data.organizationId, "admin");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const { data: row, error: rErr } = await sb
+      .from("client_progress_summaries")
+      .select(`status, draft_source, ${FINALIZE_COLUMNS.join(", ")}`)
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId)
+      .maybeSingle();
+    if (rErr) throw new Error(rErr.message);
+    if (!row) throw new Error("Summary not found");
+    const { data: me } = await supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", userId)
+      .maybeSingle();
+    const byName = [me?.first_name, me?.last_name].filter(Boolean).join(" ").trim() || null;
+    const patch = reopenPatch(
+      row,
+      row.draft_source,
+      { by: userId, byName, at: new Date().toISOString() },
+      data.reason,
+    );
+    const { error } = await sb
+      .from("client_progress_summaries")
+      .update(patch)
+      .eq("id", data.summaryId)
+      .eq("organization_id", data.organizationId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

@@ -16,6 +16,7 @@ import {
   attestSummaryUpiEntered,
   finalizeSummary,
   getSummaryWithSource,
+  reopenSummary,
   saveSummaryDraft,
   type SummarySourceBundle,
 } from "@/lib/progress-summaries.functions";
@@ -98,6 +99,7 @@ export function useSummaryEditor({
   const finalizeFn = useServerFn(finalizeSummary);
   const upiFn = useServerFn(attestSummaryUpiEntered);
   const scFn = useServerFn(attestSummarySentToSc);
+  const reopenFn = useServerFn(reopenSummary);
 
   const bundleQ = useQuery({
     queryKey: ["summary", summaryId],
@@ -345,6 +347,19 @@ export function useSummaryEditor({
     attestation(scFn, "Sent to Support Coordinator attested. Deadline cleared."),
   );
 
+  const reopenMut = useMutation({
+    mutationFn: (reason: string | null) =>
+      reopenFn({ data: { organizationId, summaryId, reason } }),
+    onSuccess: async () => {
+      toast.success("Summary reopened. Finalize again when it's ready.");
+      setAiAttested(false);
+      qc.invalidateQueries({ queryKey: ["summaries"] });
+      qc.invalidateQueries({ queryKey: ["deadlines"] });
+      await bundleQ.refetch();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const filing = b
     ? summaryFilingDestination(b.summary.summary_kind, b.summary.service_codes)
     : "none";
@@ -361,6 +376,7 @@ export function useSummaryEditor({
     keep,
     nectarMut,
     open,
+    reopenMut,
     review,
     shown,
     reviewOp,

@@ -9,7 +9,15 @@
 
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, Download, Eye, FileText, Loader2, Sparkles } from "lucide-react";
+import {
+  CheckCircle2,
+  Download,
+  Eye,
+  FileText,
+  Loader2,
+  RotateCcw,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,6 +38,8 @@ import { EmploymentAttestation } from "./employment-attestation";
 import { EditorShell } from "./editor-shell";
 import { FinalizeDialog } from "./finalize-dialog";
 import { SummaryDocument } from "./summary-document";
+import { reopenEventLine } from "@/lib/progress-summary-reopen";
+import { ReopenDialog } from "./reopen-dialog";
 import { FieldReview } from "./summary-review-panel";
 import { PbaPanel, SourcePanel } from "./summary-source-panel";
 import { useSummaryEditor, type SaveState } from "./use-summary-editor";
@@ -110,6 +120,7 @@ export function SummaryEditor({
     keep,
     nectarMut,
     open,
+    reopenMut,
     review,
     reviewOp,
     shown,
@@ -129,6 +140,7 @@ export function SummaryEditor({
     upiMut,
   } = useSummaryEditor({ summaryId, organizationId, orgName, clientName });
   const [preview, setPreview] = useState(false);
+  const [reopening, setReopening] = useState(false);
   const b = bundleQ.data;
   const close = () => void flush().finally(onClose);
   const goalNames = useMemo(
@@ -284,6 +296,16 @@ export function SummaryEditor({
                       Mark sent to Support Coordinator
                     </Button>
                   )}
+                  {locked && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setReopening(true)}
+                      data-testid="summary-reopen"
+                    >
+                      <RotateCcw className="size-4 mr-1" /> Reopen for edits
+                    </Button>
+                  )}
                   {!locked && !finalizeOpen && (
                     <span className="text-xs text-muted-foreground" data-testid="summary-finalize-opens">
                       {finalizeOpensMessage(b.summary.period_end)}
@@ -301,6 +323,14 @@ export function SummaryEditor({
               </>
             )}
 
+            {b.reopens.length > 0 && (
+              <div className="space-y-0.5 text-xs text-muted-foreground" data-testid="summary-reopens">
+                {b.reopens.map((e) => (
+                  <p key={e.at}>{reopenEventLine(e)}</p>
+                ))}
+              </div>
+            )}
+
             <EmploymentAttestation organizationId={organizationId} summary={b.summary} />
           </div>
         </div>
@@ -311,6 +341,15 @@ export function SummaryEditor({
           doc={doc}
           onClose={() => setPreview(false)}
           onDownload={() => handleDownload()}
+        />
+      )}
+
+      {reopening && b && (
+        <ReopenDialog
+          attested={b.summary.upi_entered_at ? "upi" : b.summary.sc_sent_at ? "sc" : null}
+          pending={reopenMut.isPending}
+          onCancel={() => setReopening(false)}
+          onReopen={(reason) => reopenMut.mutate(reason, { onSuccess: () => setReopening(false) })}
         />
       )}
 
