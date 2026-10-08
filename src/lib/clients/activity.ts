@@ -1,16 +1,14 @@
-// Activity & notes: one timeline of shifts, daily logs, incidents and office
-// notes, newest first, with filter pills. Office notes are office-only
-// (Clients: Edit); incidents need Incidents: View. Whoever can't see a kind
-// gets neither its pill nor its rows. Pure — importable by node --test.
+// Activity & notes: one timeline of shifts, daily logs and incidents, newest
+// first, with filter pills. Incidents need Incidents: View; whoever can't see
+// them gets neither the pill nor the rows. Pure — importable by node --test.
 
-export type ActivityKind = "shift" | "daily_log" | "incident" | "office_note";
+export type ActivityKind = "shift" | "daily_log" | "incident";
 export type ActivityFilter = "all" | ActivityKind;
 
 export const ACTIVITY_KIND_LABELS: Record<ActivityKind, string> = {
   shift: "Shift note",
   daily_log: "Daily log",
   incident: "Incident",
-  office_note: "Office note",
 };
 
 const FILTER_LABELS: Record<ActivityFilter, string> = {
@@ -18,16 +16,14 @@ const FILTER_LABELS: Record<ActivityFilter, string> = {
   shift: "Shift notes",
   daily_log: "Daily logs",
   incident: "Incidents",
-  office_note: "Office notes",
 };
 
-export type ActivityViewer = { canSeeIncidents: boolean; canSeeOfficeNotes: boolean };
+export type ActivityViewer = { canSeeIncidents: boolean };
 
 /** The kinds this viewer may see. */
 export function visibleKinds(v: ActivityViewer): ActivityKind[] {
-  return (["shift", "daily_log", "incident", "office_note"] as const).filter(
-    (k) =>
-      (k !== "incident" || v.canSeeIncidents) && (k !== "office_note" || v.canSeeOfficeNotes),
+  return (["shift", "daily_log", "incident"] as const).filter(
+    (k) => k !== "incident" || v.canSeeIncidents,
   );
 }
 
@@ -48,8 +44,6 @@ export type ActivityEntry = {
   authorId: string | null;
   code: string | null;
   preview: string;
-  /** Office notes: only people who can edit clients see them. */
-  officeOnly: boolean;
 };
 
 export type ShiftSource = {
@@ -67,7 +61,6 @@ export type IncidentSource = {
   incident_types: string[] | null;
   description: string | null;
 };
-export type NoteSource = { id: string; created_at: string; created_by: string | null; body: string };
 
 const PREVIEW = 160;
 
@@ -93,7 +86,6 @@ export function buildTimeline(
     shifts?: readonly ShiftSource[];
     logs?: readonly LogSource[];
     incidents?: readonly IncidentSource[];
-    notes?: readonly NoteSource[];
   },
   viewer: ActivityViewer,
 ): ActivityEntry[] {
@@ -106,7 +98,6 @@ export function buildTimeline(
       authorId: s.staff_id,
       code: s.service_type_code,
       preview: previewText(s.shift_note_text, "No shift note."),
-      officeOnly: false,
     })),
     ...(sources.logs ?? []).map((l) => ({
       key: `daily_log:${l.id}`,
@@ -116,7 +107,6 @@ export function buildTimeline(
       authorId: l.user_id,
       code: null,
       preview: previewText(l.narrative, "No note text."),
-      officeOnly: false,
     })),
     ...(sources.incidents ?? []).map((i) => ({
       key: `incident:${i.id}`,
@@ -129,17 +119,6 @@ export function buildTimeline(
         [(i.incident_types ?? []).join(", "), i.description].filter(Boolean).join(": "),
         "No details.",
       ),
-      officeOnly: false,
-    })),
-    ...(sources.notes ?? []).map((n) => ({
-      key: `office_note:${n.id}`,
-      kind: "office_note" as const,
-      id: n.id,
-      at: n.created_at,
-      authorId: n.created_by,
-      code: null,
-      preview: previewText(n.body, ""),
-      officeOnly: true,
     })),
   ];
   const allowed = new Set(visibleKinds(viewer));
@@ -150,4 +129,12 @@ export function buildTimeline(
 
 export function filterTimeline(entries: readonly ActivityEntry[], filter: ActivityFilter): ActivityEntry[] {
   return filter === "all" ? [...entries] : entries.filter((e) => e.kind === filter);
+}
+
+/** Clock-in to clock-out in hours (one decimal), or null while open. */
+export function shiftHours(clockIn: string | null, clockOut: string | null): number | null {
+  if (!clockIn || !clockOut) return null;
+  const ms = Date.parse(clockOut) - Date.parse(clockIn);
+  if (!Number.isFinite(ms) || ms < 0) return null;
+  return Math.round((ms / 3_600_000) * 10) / 10;
 }

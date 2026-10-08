@@ -64,7 +64,6 @@ test("client profile opens every section from the side menu", async ({ page }) =
       await expect(page.getByTestId("client-do-not-schedule")).toBeVisible();
     }
     if (key === "activity") {
-      await expect(page.getByTestId("client-office-notes")).toBeVisible();
       await expect(page.getByTestId("client-activity-shifts")).toBeVisible();
       await expect(page.getByTestId("client-activity-logs")).toBeVisible();
     }

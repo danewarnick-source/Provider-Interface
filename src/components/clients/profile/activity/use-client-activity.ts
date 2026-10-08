@@ -1,13 +1,11 @@
 // The rows behind the Activity timeline: shifts (EVV timesheets), daily
-// logs, incidents (only with Incidents: View) and office notes (only with
-// Clients: Edit; staff never load them). Each query keeps the full rows so
-// the side panel can show the whole record.
+// logs and incidents (only with Incidents: View). Each query keeps the full
+// rows so the side panel can show the whole record.
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { incidentInvolvesClientOr } from "@/lib/incident-visibility";
-import type { ActivityViewer, IncidentSource, LogSource, NoteSource, ShiftSource } from "@/lib/clients/activity";
-import { officeNotesKey } from "./office-note-composer";
+import type { ActivityViewer, IncidentSource, LogSource, ShiftSource } from "@/lib/clients/activity";
 
 export type ShiftRow = ShiftSource & {
   status: string | null;
@@ -27,7 +25,6 @@ export type IncidentRow = IncidentSource & {
   is_fatality: boolean | null;
   report_number: string | null;
 };
-export type NoteRow = NoteSource & { archived_at: string | null };
 
 async function rows<T>(q: PromiseLike<{ data: unknown; error: unknown }>): Promise<T[]> {
   const { data, error } = await q;
@@ -80,26 +77,10 @@ export function useClientActivity(orgId: string, clientId: string, viewer: Activ
           .limit(100),
       ),
   });
-  const notes = useQuery({
-    enabled: viewer.canSeeOfficeNotes,
-    queryKey: officeNotesKey(orgId, clientId),
-    queryFn: () =>
-      rows<NoteRow>(
-        supabase
-          .from("client_notes")
-          .select("id, body, created_at, created_by, archived_at")
-          .eq("organization_id", orgId)
-          .eq("client_id", clientId)
-          .is("archived_at", null)
-          .order("created_at", { ascending: false })
-          .limit(200),
-      ),
-  });
   return {
     shifts: shifts.data ?? [],
     logs: logs.data ?? [],
     incidents: viewer.canSeeIncidents ? (incidents.data ?? []) : [],
-    notes: viewer.canSeeOfficeNotes ? (notes.data ?? []) : [],
     loading: shifts.isLoading || logs.isLoading,
     failed: shifts.isError || logs.isError,
   };

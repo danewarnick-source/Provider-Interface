@@ -1,6 +1,6 @@
 // Client profile header, the "soft panel": muted surface with an ink top
 // stripe. Top row: photo, name, "Goes by · age · home", code and readiness
-// pills; Upload PCSP, Add note and the ⋯ menu (rarer actions). Bottom row:
+// pills; Upload PCSP and the ⋯ menu (rarer actions). Bottom row:
 // Guardian, Support coordinator and Plan year ends tiles, each opening the
 // section that holds it.
 
@@ -29,7 +29,6 @@ import type { ClientProfileData } from "./use-client-profile";
 import { HeaderMenu } from "./header-menu";
 import { HeaderPills } from "./header-pills";
 import { PcspUploadButton } from "./plans/pcsp-upload-button";
-import { AddNoteButton } from "./activity/add-note-button";
 
 export function isDischarged(status: string | null | undefined): boolean {
   return (DISCHARGED_STATUSES as readonly string[]).includes(status ?? "");
@@ -111,15 +110,12 @@ export function ClientProfileHeader({
           </div>
           <div className="flex flex-wrap items-center gap-2 max-md:w-full max-md:[&_button]:min-h-11">
             {canEdit && !discharged ? (
-              <>
-                <PcspUploadButton
-                  clientId={client.id}
-                  orgId={orgId}
-                  label="Upload PCSP"
-                  inputTestId="header-pcsp-upload-input"
-                />
-                <AddNoteButton orgId={orgId} clientId={client.id} />
-              </>
+              <PcspUploadButton
+                clientId={client.id}
+                orgId={orgId}
+                label="Upload PCSP"
+                inputTestId="header-pcsp-upload-input"
+              />
             ) : null}
             <HeaderMenu orgId={orgId} data={data} discharged={discharged} onChanged={onChanged} />
           </div>

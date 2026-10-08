@@ -1,7 +1,6 @@
-// One timeline entry: type tag, date, author, code and a preview. Office
-// notes carry the lock. The whole row opens the record in the side panel.
+// One timeline entry: type tag, date, author, code and a preview. The whole
+// row opens the record in the side panel.
 
-import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusTag } from "@/components/clients/profile/cards/card-parts";
 import { formatDate } from "@/lib/clients/dates";
@@ -11,13 +10,11 @@ const TONE: Record<ActivityKind, "info" | "ok" | "danger" | "neutral"> = {
   shift: "info",
   daily_log: "ok",
   incident: "danger",
-  office_note: "neutral",
 };
 const DOT: Record<ActivityKind, string> = {
   shift: "bg-[var(--hive-info)]",
   daily_log: "bg-[var(--hive-ok)]",
   incident: "bg-[var(--hive-danger)]",
-  office_note: "bg-hive-ink",
 };
 
 export function ActivityEntryRow({
@@ -40,10 +37,7 @@ export function ActivityEntryRow({
         <span aria-hidden className={cn("mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full", DOT[e.kind])} />
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-            <StatusTag tone={TONE[e.kind]}>
-              {e.officeOnly ? <Lock className="h-3 w-3" aria-label="Office only" /> : null}
-              {ACTIVITY_KIND_LABELS[e.kind]}
-            </StatusTag>
+            <StatusTag tone={TONE[e.kind]}>{ACTIVITY_KIND_LABELS[e.kind]}</StatusTag>
             <span className="font-medium text-hive-ink">{formatDate(e.at)}</span>
             {author ? <span className="text-muted-foreground">{author}</span> : null}
             {e.code ? <span className="font-mono text-xs text-muted-foreground">{e.code}</span> : null}

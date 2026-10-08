@@ -1,26 +1,20 @@
-// Activity & notes: one timeline of shifts, daily logs, incidents (needs
-// Incidents: View) and office notes (Clients: Edit only; staff never see
-// them), newest first, with filter pills. Each entry opens its full record
-// in a side panel.
+// Activity & notes: one timeline of shifts, daily logs and incidents (needs
+// Incidents: View), newest first, with filter pills. Each entry opens its
+// full record in a side panel.
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { History } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAccess } from "@/hooks/use-access";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { useProfileNames } from "@/components/clients/shared/hooks/use-org-staff";
-import { AddNoteButton } from "@/components/clients/profile/activity/add-note-button";
 import { ActivityEntryRow } from "@/components/clients/profile/activity/activity-entry";
 import {
   ActivityRecordPanel,
   recordFor,
   type OpenRecord,
 } from "@/components/clients/profile/activity/activity-record-panel";
-import { officeNotesKey } from "@/components/clients/profile/activity/office-note-composer";
 import { useClientActivity } from "@/components/clients/profile/activity/use-client-activity";
 import {
   activityFilters,
@@ -29,26 +23,18 @@ import {
   type ActivityEntry,
   type ActivityFilter,
 } from "@/lib/clients/activity";
-import { openNotes } from "@/lib/clients/notes";
-import { archiveClientNote } from "@/lib/clients/team.functions";
 
 const PAGE = 40;
 
 export function ActivitySection({ clientId, orgId }: { clientId: string; orgId: string }) {
   const { canCategory } = useAccess();
-  const qc = useQueryClient();
-  const archiveFn = useServerFn(archiveClientNote);
-  const viewer = {
-    canSeeIncidents: canCategory("incidents"),
-    canSeeOfficeNotes: canCategory("clients", "edit"),
-  };
+  const viewer = { canSeeIncidents: canCategory("incidents") };
   const a = useClientActivity(orgId, clientId, viewer);
-  const notes = openNotes(a.notes);
   const [filter, setFilter] = useState<ActivityFilter>("all");
   const [shown, setShown] = useState(PAGE);
   const [open, setOpen] = useState<OpenRecord | null>(null);
   const timeline = buildTimeline(
-    { shifts: a.shifts, logs: a.logs, incidents: a.incidents, notes },
+    { shifts: a.shifts, logs: a.logs, incidents: a.incidents },
     viewer,
   );
   const entries = filterTimeline(timeline, filter);
@@ -58,18 +44,8 @@ export function ActivitySection({ clientId, orgId }: { clientId: string; orgId: 
   const author = (e: ActivityEntry) =>
     e.authorId ? (names?.get(e.authorId) ?? "Team member") : null;
 
-  const archiveM = useMutation({
-    mutationFn: (noteId: string) => archiveFn({ data: { organizationId: orgId, clientId, noteId } }),
-    onSuccess: () => {
-      toast.success("Note archived");
-      setOpen(null);
-      void qc.invalidateQueries({ queryKey: officeNotesKey(orgId, clientId) });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   const openEntry = (e: ActivityEntry) =>
-    setOpen(recordFor(e, { shifts: a.shifts, logs: a.logs, incidents: a.incidents, notes }));
+    setOpen(recordFor(e, { shifts: a.shifts, logs: a.logs, incidents: a.incidents }));
 
   return (
     <div className="flex flex-col gap-5" data-testid="client-section-activity">
@@ -77,13 +53,8 @@ export function ActivitySection({ clientId, orgId }: { clientId: string; orgId: 
         icon={History}
         tone="neutral"
         title="Activity & notes"
-        description="Shifts, daily logs, incidents and office notes, newest first."
+        description="Shifts, daily logs and incidents, newest first."
         testId="client-activity-timeline"
-        actions={
-          viewer.canSeeOfficeNotes ? (
-            <AddNoteButton orgId={orgId} clientId={clientId} primary />
-          ) : null
-        }
       >
         <div
           className="mb-3 flex gap-1 overflow-x-auto pb-1"
@@ -137,8 +108,6 @@ export function ActivitySection({ clientId, orgId }: { clientId: string; orgId: 
         record={open}
         author={open ? (author(open.entry) ?? "—") : "—"}
         clientId={clientId}
-        archiving={archiveM.isPending}
-        onArchive={(id) => archiveM.mutate(id)}
         onClose={() => setOpen(null)}
       />
     </div>
