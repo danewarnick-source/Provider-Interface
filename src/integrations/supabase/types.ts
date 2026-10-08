@@ -3802,6 +3802,63 @@ export type Database = {
           },
         ]
       }
+      client_must_knows: {
+        Row: {
+          approved_at: string
+          approved_by: string
+          approved_text: string
+          based_on_doc_ids: string[]
+          client_id: string
+          created_at: string
+          drafted_by_nectar: boolean
+          id: string
+          items: Json
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string
+          approved_by: string
+          approved_text: string
+          based_on_doc_ids?: string[]
+          client_id: string
+          created_at?: string
+          drafted_by_nectar?: boolean
+          id?: string
+          items?: Json
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string
+          approved_text?: string
+          based_on_doc_ids?: string[]
+          client_id?: string
+          created_at?: string
+          drafted_by_nectar?: boolean
+          id?: string
+          items?: Json
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_must_knows_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_must_knows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_notes: {
         Row: {
           archived_at: string | null

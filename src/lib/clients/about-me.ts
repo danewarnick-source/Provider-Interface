@@ -70,8 +70,13 @@ export const ABOUT_SYSTEM = [
 
 /** The documents as Nectar reads them, page by page, trimmed to ABOUT_MAX_PROMPT_CHARS. */
 export function aboutPrompt(firstName: string, docs: readonly AboutDoc[]): string {
-  const parts: string[] = [`PERSON: ${firstName.trim() || "the client"}`];
-  let used = parts[0].length;
+  return docsPrompt(`PERSON: ${firstName.trim() || "the client"}`, docs);
+}
+
+/** `header`, then every readable page labeled with its document id, kind and page number. */
+export function docsPrompt(header: string, docs: readonly AboutDoc[]): string {
+  const parts: string[] = [header];
+  let used = header.length;
   for (const d of docs) {
     for (let i = 0; i < d.pages.length; i++) {
       const text = d.pages[i].trim();

@@ -4,8 +4,8 @@
 // Nectar only drafts; approveAboutMe needs a person and records who and when.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { pdfToLayout, type UnpdfLike } from "./pcsp/layout";
 import { rows } from "./list-queries";
+import { askNectarJson, clientDocInfos, readClientDocs } from "./client-doc-texts.server";
 import { loadPeopleNames } from "./overview-team";
 import { assertRowsChanged } from "./writes";
 import {
@@ -14,9 +14,6 @@ import {
   checkAboutItems,
   hasNewKeyDocs,
   parseAboutReply,
-  unreadableDocs,
-  type AboutDoc,
-  type AboutDocInfo,
   type AboutDraft,
   type AboutItem,
   type AboutSummary,
@@ -25,56 +22,6 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = SupabaseClient<any>;
-
-const MAX_DOCS = 12;
-const MAX_BYTES = 20 * 1024 * 1024;
-
-type DocRow = {
-  id: string;
-  document_type: string | null;
-  file_name: string | null;
-  storage_path: string | null;
-  uploaded_at: string | null;
-};
-
-/** The client's current documents in the Client file (archived and replaced ones left out). */
-async function clientDocs(sb: Sb, orgId: string, clientId: string): Promise<DocRow[]> {
-  return rows<DocRow>(
-    sb
-      .from("client_documents")
-      .select("id, document_type, file_name, storage_path, uploaded_at")
-      .eq("organization_id", orgId)
-      .eq("client_id", clientId)
-      .is("archived_at", null)
-      .neq("status", "outdated")
-      .order("uploaded_at", { ascending: false }),
-  );
-}
-
-const info = (d: DocRow): AboutDocInfo => ({
-  id: d.id,
-  type: d.document_type,
-  name: d.file_name,
-  uploadedAt: d.uploaded_at,
-});
-
-/** Page texts of one stored file: PDFs page by page, plain text as one page, anything else none. */
-async function readPages(sb: Sb, d: DocRow): Promise<string[]> {
-  if (!d.storage_path) return [];
-  const { data: blob, error } = await sb.storage.from("client-documents").download(d.storage_path);
-  if (error || !blob || blob.size > MAX_BYTES) return [];
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  if (Buffer.from(bytes.subarray(0, 5)).toString("latin1") === "%PDF-") {
-    try {
-      const unpdf = (await import("unpdf")) as unknown as UnpdfLike;
-      const pages = await pdfToLayout(bytes, unpdf);
-      return pages.map((p) => p.lines.map((l) => l.text.trim()).join("\n"));
-    } catch {
-      return [];
-    }
-  }
-  return /\.(txt|md|csv)$/i.test(d.file_name ?? "") ? [new TextDecoder().decode(bytes)] : [];
-}
 
 export async function loadAboutView(sb: Sb, orgId: string, clientId: string): Promise<AboutView> {
   const [found, docs] = await Promise.all([
@@ -91,10 +38,10 @@ export async function loadAboutView(sb: Sb, orgId: string, clientId: string): Pr
         .eq("organization_id", orgId)
         .eq("client_id", clientId),
     ),
-    clientDocs(sb, orgId, clientId),
+    clientDocInfos(sb, orgId, clientId),
   ]);
   const row = found[0];
-  if (!row) return { summary: null, docs: docs.map(info), newDocs: false };
+  if (!row) return { summary: null, docs, newDocs: false };
   const names = await loadPeopleNames(sb, [row.approved_by]);
   const summary: AboutSummary = {
     items: Array.isArray(row.items) ? (row.items as AboutItem[]) : [],
@@ -103,8 +50,7 @@ export async function loadAboutView(sb: Sb, orgId: string, clientId: string): Pr
     approverName: names.get(row.approved_by) ?? "Team member",
     basedOn: row.based_on_doc_ids ?? [],
   };
-  const docInfo = docs.map(info);
-  return { summary, docs: docInfo, newDocs: hasNewKeyDocs(summary, docInfo) };
+  return { summary, docs, newDocs: hasNewKeyDocs(summary, docs) };
 }
 
 const FAILED = "Nectar couldn't draft the summary right now. Try again in a minute.";
@@ -119,31 +65,15 @@ export async function draftAboutMe(sb: Sb, orgId: string, clientId: string): Pro
       .eq("organization_id", orgId)
       .eq("id", clientId),
   );
-  const docRows = (await clientDocs(sb, orgId, clientId)).slice(0, MAX_DOCS);
-  const docs: AboutDoc[] = await Promise.all(
-    docRows.map(async (d) => ({ ...info(d), pages: await readPages(sb, d) })),
-  );
-  const skipped = unreadableDocs(docs).map((d) => d.name ?? "Untitled document");
-  const readable = docs.filter((d) => d.pages.some((p) => p.trim()));
+  const { readable, skipped } = await readClientDocs(sb, orgId, clientId);
   if (!readable.length) return { items: [], basedOn: [], skipped };
-
-  const { gatewayFetch } = await import("@/lib/ai-bedrock.server");
-  const res = await gatewayFetch(
-    {
-      messages: [
-        { role: "system", content: ABOUT_SYSTEM },
-        { role: "user", content: aboutPrompt(client?.first_name ?? "", readable) },
-      ],
-      response_format: { type: "json_object" },
-    },
-    { orgId },
+  const reply = await askNectarJson(
+    orgId,
+    ABOUT_SYSTEM,
+    aboutPrompt(client?.first_name ?? "", readable),
+    FAILED,
   );
-  if (!res.ok) throw new Error(FAILED);
-  const body = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-  const items = checkAboutItems(
-    parseAboutReply(body?.choices?.[0]?.message?.content ?? ""),
-    readable,
-  );
+  const items = checkAboutItems(parseAboutReply(reply), readable);
   return { items, basedOn: readable.map((d) => d.id), skipped };
 }
 
@@ -159,7 +89,7 @@ export async function approveAboutMe(
     draftedByNectar: boolean;
   },
 ): Promise<void> {
-  const docs = await clientDocs(sb, a.orgId, a.clientId);
+  const docs = await clientDocInfos(sb, a.orgId, a.clientId);
   const ids = new Set(docs.map((d) => d.id));
   const checked = checkAboutItems(
     a.items,
