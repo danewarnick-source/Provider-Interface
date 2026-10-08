@@ -63,7 +63,6 @@ export function PlanYearsCard({
       <PcspUploadButton
         clientId={clientId}
         orgId={orgId}
-        label="Upload PCSP"
         variant={variant}
         inputTestId={testId}
       />

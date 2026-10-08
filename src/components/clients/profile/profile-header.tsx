@@ -113,7 +113,6 @@ export function ClientProfileHeader({
               <PcspUploadButton
                 clientId={client.id}
                 orgId={orgId}
-                label="Upload PCSP"
                 inputTestId="header-pcsp-upload-input"
               />
             ) : null}

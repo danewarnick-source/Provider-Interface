@@ -2,7 +2,15 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { FileText, FolderOpen, Loader2, Sparkles, Upload, ExternalLink } from "lucide-react";
+import {
+  FileText,
+  FileUp,
+  FolderOpen,
+  Loader2,
+  Sparkles,
+  Upload,
+  ExternalLink,
+} from "lucide-react";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
 import { EmptyState } from "@/components/clients/profile/cards/card-parts";
 import { RowMenu } from "@/components/clients/profile/cards/row-menu";
@@ -34,12 +42,12 @@ import {
   getDocument,
 } from "@/lib/nectar-documents.functions";
 import { retireDocument } from "@/lib/document-effective-dating.functions";
-import { attachClientDocument } from "@/lib/import-checklist.functions";
 import { NectarDocumentActionsDialog } from "@/components/nectar/document-actions-dialog";
 import { DocumentPreviewDialog } from "../dialogs/document-preview-dialog";
 import { DocumentEffectiveDatingDialog } from "@/components/documents/document-effective-dating-dialog";
 import { OutdatedDocumentsSection } from "@/components/documents/outdated-documents-section";
 import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
+import { usePcspUploadFlow } from "@/components/clients/profile/plans/pcsp-upload-button";
 
 const CLIENT_DOC_TYPES = [
   { value: "pcsp", label: "PCSP" },
@@ -98,6 +106,8 @@ export function ClientDocumentsCard({
   const getDocFn = useServerFn(getDocument);
   const recordAccessFn = useServerFn(recordPhiAccess);
   const [uploadOpen, setUploadOpen] = useState(false);
+  // A PCSP goes through the same review → Confirm as "Upload PCSP".
+  const pcspFlow = usePcspUploadFlow(clientId, orgId, "documents-pcsp-upload-input");
   const [offerDocId, setOfferDocId] = useState<string | null>(null);
   const [preview, setPreview] = useState<{
     fileName: string;
@@ -223,6 +233,11 @@ export function ClientDocumentsCard({
             clientName={clientName}
             open={uploadOpen}
             onOpenChange={setUploadOpen}
+            pcspLabel={pcspFlow.label}
+            onPcsp={() => {
+              setUploadOpen(false);
+              pcspFlow.start();
+            }}
             onUploaded={(docId, sourceKind, docType) => {
               invalidateAll();
               if (docId && docType) {
@@ -237,6 +252,7 @@ export function ClientDocumentsCard({
               if (docId && sourceKind === "nectar") setOfferDocId(docId);
             }}
           />
+          {pcspFlow.element}
           <NectarDocumentActionsDialog
             documentId={offerDocId}
             open={!!offerDocId}
@@ -406,6 +422,8 @@ function UploadDocDialog({
   clientName,
   open,
   onOpenChange,
+  pcspLabel,
+  onPcsp,
   onUploaded,
 }: {
   orgId: string | undefined;
@@ -413,14 +431,18 @@ function UploadDocDialog({
   clientName: string;
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  /** "Upload PCSP" or "Upload new PCSP". */
+  pcspLabel: string;
+  /** Type PCSP: close this and start the PCSP review flow. */
+  onPcsp: () => void;
   onUploaded: (docId?: string, sourceKind?: "nectar" | "client", docType?: string) => void;
 }) {
   const ingest = useServerFn(ingestDocument);
-  const attachClient = useServerFn(attachClientDocument);
   const [title, setTitle] = useState("");
   const [docType, setDocType] = useState("pcsp");
   const [fiscalYear, setFiscalYear] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const isPcsp = docType === "pcsp";
 
   const defaultTitle = useMemo(() => {
     const t = CLIENT_DOC_TYPES.find((x) => x.value === docType)?.label ?? "Document";
@@ -430,29 +452,6 @@ function UploadDocDialog({
   const mut = useMutation({
     mutationFn: async () => {
       if (!orgId || !file) throw new Error("Pick a file first");
-      // PCSP is a single source of truth — write into client_documents +
-      // client-documents bucket so it shows in BOTH Care and Files and is
-      // usable by goal extraction. Everything else stays in nectar_documents.
-      if (docType === "pcsp") {
-        const safe = file.name.replace(/[^\w.\-]+/g, "_");
-        const path = `${orgId}/${clientId}/pcsp/${Date.now()}_${safe}`;
-        const up = await supabase.storage
-          .from("client-documents")
-          .upload(path, file, {
-            contentType: file.type || "application/octet-stream",
-            upsert: false,
-          });
-        if (up.error) throw up.error;
-        const att = await attachClient({
-          data: {
-            clientId,
-            documentType: "pcsp",
-            fileName: file.name,
-            storagePath: path,
-          },
-        });
-        return { __pcsp: true, id: att.id as string } as const;
-      }
       const b64 = await fileToBase64(file);
       return ingest({
         data: {
@@ -471,18 +470,6 @@ function UploadDocDialog({
       });
     },
     onSuccess: (res) => {
-      const pcsp = res as { __pcsp?: boolean; id?: string };
-      if (pcsp?.__pcsp) {
-        toast.success(`PCSP uploaded — visible in Care and Files`);
-        const newId = pcsp.id;
-        const chosenType = docType;
-        setTitle("");
-        setFile(null);
-        setFiscalYear("");
-        onOpenChange(false);
-        onUploaded(newId, "client", chosenType);
-        return;
-      }
       const r = res as {
         document?: { id?: string };
         extracted?: unknown[];
@@ -520,14 +507,6 @@ function UploadDocDialog({
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label>File (PDF, Word, text, CSV)</Label>
-            <Input
-              type="file"
-              accept=".pdf,.doc,.docx,.txt,.csv,.md,.json,.html,.htm,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            />
-          </div>
-          <div className="space-y-1">
             <Label>Document type</Label>
             <Select value={docType} onValueChange={setDocType}>
               <SelectTrigger>
@@ -542,37 +521,61 @@ function UploadDocDialog({
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label>Title (optional)</Label>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder={defaultTitle}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label>Fiscal year</Label>
-              <Input
-                value={fiscalYear}
-                onChange={(e) => setFiscalYear(e.target.value)}
-                placeholder="FY26"
-              />
-            </div>
-          </div>
+          {isPcsp ? (
+            <p className="text-sm text-muted-foreground" data-testid="documents-pcsp-hint">
+              A PCSP is read and checked before it's saved: Nectar reads the plan, you review it,
+              then Confirm.
+            </p>
+          ) : (
+            <>
+              <div className="space-y-1">
+                <Label>File (PDF, Word, text, CSV)</Label>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt,.csv,.md,.json,.html,.htm,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Title (optional)</Label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder={defaultTitle}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Fiscal year</Label>
+                  <Input
+                    value={fiscalYear}
+                    onChange={(e) => setFiscalYear(e.target.value)}
+                    placeholder="FY26"
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button disabled={!file || mut.isPending} onClick={() => mut.mutate()}>
-            {mut.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Sparkles className="mr-2 h-4 w-4" />
-            )}
-            Upload &amp; parse
-          </Button>
+          {isPcsp ? (
+            <Button disabled={!orgId} onClick={onPcsp}>
+              <FileUp className="mr-2 h-4 w-4" />
+              {pcspLabel}
+            </Button>
+          ) : (
+            <Button disabled={!file || mut.isPending} onClick={() => mut.mutate()}>
+              {mut.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 h-4 w-4" />
+              )}
+              Upload &amp; parse
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
