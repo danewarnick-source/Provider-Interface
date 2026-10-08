@@ -18,7 +18,9 @@ import {
 } from "@/lib/progress-summary-doc";
 import { loadSummarySource } from "@/lib/progress-summary-source.server";
 import {
+  canFinalizeSummary,
   clientNeedsGoalProgress,
+  finalizeOpensMessage,
   filterPeriodsByFloor,
   recentMonthlyPeriods,
   recentQuarterlyPeriods,
@@ -664,11 +666,12 @@ export const saveSummaryDraft = createServerFn({ method: "POST" })
   });
 
 /**
- * Finalize gate, as on a clock-out shift note: every check (goals with no
+ * Finalize gate. The period must have reached its last day (Denver time;
+ * canFinalizeSummary). Then, as on a clock-out shift note: every check (goals with no
  * progress, missing required content, dates outside the period) and every
  * Nectar finding still in the text must be fixed or kept with "Keep as is".
  */
-async function assertNoOpenFindings(
+async function assertCanFinalize(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   organizationId: string,
@@ -683,6 +686,7 @@ async function assertNoOpenFindings(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!row) throw new Error("Summary not found");
+  if (!canFinalizeSummary(row.period_end)) throw new Error(finalizeOpensMessage(row.period_end));
   if (row.summary_kind !== "narrative") return;
   const codes = ((row.service_codes ?? []) as string[]).map((c) => c.toUpperCase());
   const { goals } = summaryGoals(await loadPlanBundle(supabase, row.client_id), row.period_end, codes);
@@ -724,7 +728,7 @@ export const finalizeSummary = createServerFn({ method: "POST" })
     if (!data.aiReviewAttested) {
       throw new Error("Confirm you reviewed the Nectar draft against PI documentation before finalizing.");
     }
-    await assertNoOpenFindings(supabase, data.organizationId, data.summaryId, data.editor);
+    await assertCanFinalize(supabase, data.organizationId, data.summaryId, data.editor);
     const ts = new Date().toISOString();
 
     // Finalize content now; deadline clears only after UPI or SC send attestation.

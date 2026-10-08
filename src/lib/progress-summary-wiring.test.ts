@@ -43,8 +43,9 @@ describe("autosave and finalize (progress-summaries.functions.ts)", () => {
   it("finalize keeps the finalized document for its PDF", () => {
     assert.match(fin, /final_doc: data\.doc/);
   });
-  it("finalize is refused while a finding is open", () => {
-    assert.match(fin, /await assertNoOpenFindings\(/);
+  it("finalize is refused before the period's last day and while a finding is open", () => {
+    assert.match(fin, /await assertCanFinalize\(/);
+    assert.match(src, /if \(!canFinalizeSummary\(row\.period_end\)\) throw new Error\(finalizeOpensMessage/);
     assert.match(src, /finalizeBlockers\(/);
   });
   it("the editor loads saved fields, or reads an older text draft back into fields", () => {

@@ -10,6 +10,8 @@
 // Goal-progress section is omitted entirely for clients whose only services
 // are in GOAL_PROGRESS_EXCLUDED_CODES (ELS, MTP, PBA, PM1/PM2, RP/RL respite).
 
+import { daysInCalendarMonth, denverYmd, parseYmd, ymdFromParts } from "./denver-date.ts";
+
 export const MONTHLY_SUMMARY_CODES = new Set(["SEI", "SJD", "PN1", "PN2", "CMP", "CMS"]);
 export const FINANCIAL_STATEMENT_CODES = new Set(["PBA"]);
 /** Codes that owe no progress summary at all. */
@@ -218,4 +220,32 @@ export function filterPeriodsByFloor<T extends { period_end: string }>(
 ): T[] {
   if (!floor) return periods;
   return periods.filter((p) => p.period_end >= floor);
+}
+
+/**
+ * The first day a summary may be finalized: the last day of the period's
+ * final month (Q1 → Mar 31, Q4 → Dec 31, a monthly summary → that month's
+ * last day). Finalizing later is fine.
+ */
+export function summaryFinalizeOpensOn(periodEnd: string): string {
+  const p = parseYmd(periodEnd.slice(0, 10));
+  if (!p) return periodEnd.slice(0, 10);
+  return ymdFromParts(p.year, p.month, daysInCalendarMonth(p.year, p.month));
+}
+
+/** True once it is that day or later in Denver (Utah) time. */
+export function canFinalizeSummary(periodEnd: string, now: Date = new Date()): boolean {
+  return denverYmd(now) >= summaryFinalizeOpensOn(periodEnd);
+}
+
+/** "You can finalize on Dec 31, 2026." */
+export function finalizeOpensMessage(periodEnd: string): string {
+  const p = parseYmd(summaryFinalizeOpensOn(periodEnd));
+  if (!p) return "You can finalize once the period ends.";
+  const label = new Date(p.year, p.month - 1, p.day).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return `You can finalize on ${label}.`;
 }

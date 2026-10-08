@@ -2,6 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   bucketCodes,
+  canFinalizeSummary,
+  finalizeOpensMessage,
+  summaryFinalizeOpensOn,
   summariesOwed,
   summaryCadenceForCode,
   summaryCadenceLabel,
@@ -49,4 +52,24 @@ test("bucketCodes follows the same cadence rules", () => {
 test("cadence label says where the summary goes", () => {
   assert.match(summaryCadenceLabel("monthly", ["SEI"]), /UPI/);
   assert.match(summaryCadenceLabel("quarterly", ["HHS"]), /15 days after quarter end/);
+});
+
+test("finalize opens on the last day of the period's final month", () => {
+  assert.equal(summaryFinalizeOpensOn("2026-03-31"), "2026-03-31");
+  assert.equal(summaryFinalizeOpensOn("2026-12-31"), "2026-12-31");
+  assert.equal(summaryFinalizeOpensOn("2026-12-15"), "2026-12-31");
+  assert.equal(summaryFinalizeOpensOn("2028-02-01"), "2028-02-29", "leap year");
+  assert.equal(summaryFinalizeOpensOn("2027-02-10"), "2027-02-28");
+  assert.equal(summaryFinalizeOpensOn("2026-04-30"), "2026-04-30");
+  assert.equal(finalizeOpensMessage("2026-12-31"), "You can finalize on Dec 31, 2026.");
+});
+
+test("canFinalizeSummary uses Denver time; late is fine", () => {
+  // Dec 31 00:30 UTC is still Dec 30 in Denver.
+  assert.equal(canFinalizeSummary("2026-12-31", new Date("2026-12-31T00:30:00Z")), false);
+  // Dec 31 08:00 UTC is Dec 31 01:00 in Denver.
+  assert.equal(canFinalizeSummary("2026-12-31", new Date("2026-12-31T08:00:00Z")), true);
+  assert.equal(canFinalizeSummary("2026-12-31", new Date("2027-01-20T18:00:00Z")), true);
+  assert.equal(canFinalizeSummary("2026-03-31", new Date("2026-03-30T18:00:00Z")), false);
+  assert.equal(canFinalizeSummary("2028-02-29", new Date("2028-02-29T18:00:00Z")), true);
 });

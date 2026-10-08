@@ -19,7 +19,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { summaryCadenceLabel } from "@/lib/progress-summaries";
+import {
+  canFinalizeSummary,
+  finalizeOpensMessage,
+  summaryCadenceLabel,
+} from "@/lib/progress-summaries";
 import type { SummaryDoc } from "@/lib/progress-summary-doc";
 import type { FieldKey } from "@/lib/progress-summary-review";
 import { EmploymentAttestation } from "./employment-attestation";
@@ -132,6 +136,7 @@ export function SummaryEditor({
     [b?.goals],
   );
   const busy = nectarMut.isPending || reviewOp.isPending;
+  const finalizeOpen = !b || canFinalizeSummary(b.summary.period_end);
   const renderReview = (field: FieldKey) => (
     <FieldReview
       field={field}
@@ -176,6 +181,10 @@ export function SummaryEditor({
               <PbaPanel
                 status={b.summary.status}
                 onMarkComplete={() => {
+                  if (!finalizeOpen) {
+                    toast.info(finalizeOpensMessage(b.summary.period_end));
+                    return;
+                  }
                   setEditor((p) => (p ? { ...p, general: PBA_TEXT } : p));
                   setAiAttested(true);
                   setShowFinalize(true);
@@ -249,6 +258,7 @@ export function SummaryEditor({
                         }
                         void flush().then(() => setShowFinalize(true));
                       }}
+                      disabled={!finalizeOpen}
                       data-testid="summary-finalize"
                     >
                       <CheckCircle2 className="size-4 mr-1" /> Finalize
@@ -273,6 +283,11 @@ export function SummaryEditor({
                     >
                       Mark sent to Support Coordinator
                     </Button>
+                  )}
+                  {!locked && !finalizeOpen && (
+                    <span className="text-xs text-muted-foreground" data-testid="summary-finalize-opens">
+                      {finalizeOpensMessage(b.summary.period_end)}
+                    </span>
                   )}
                   {!locked && saveState !== "idle" && (
                     <span
