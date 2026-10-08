@@ -45,3 +45,6 @@ playwright-report/
 blob-report/
 playwright/.cache/
 e2e/artifacts/
+
+# Local mp3 cache for scripts/generate-training-audio.ts
+.training-audio/

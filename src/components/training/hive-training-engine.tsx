@@ -8,6 +8,7 @@ import {
   THIRTY_DAY_SAS_TOPICS,
 } from "@/lib/in-hive-training-thirty-day-sas";
 import { PI_THEME } from "@/lib/pi-theme";
+import { TRAINING_AUDIO_RATES } from "@/lib/training-audio";
 import { choiceFollowUp, scoreSegmentGate, shouldPersistResumeStep, shuffleCopy, SEGMENT_GATE_PASS, SEGMENT_GATE_TOTAL } from "@/lib/in-hive-training";
 import { TrainingDiagram, type DiagramId } from "@/components/training/in-hive-diagrams";
 import { SafeHtml } from "@/components/safe-html";
@@ -2053,8 +2054,8 @@ export function TrainingModule({
   const gate = scoreSegmentGate(scoreFlags);
   const firstScoredIndex = flow.findIndex((s) => s.type === "check" || s.type === "scenario");
 
-  // ── Read aloud (on-device Web Speech only) ──
-  const { supported: ttsSupported, speaking, speak, stop } = useTrainingSpeech();
+  // ── Read aloud (pre-generated clips, browser voice fallback) ──
+  const { supported: ttsSupported, speaking, speak, stop, rate, setRate } = useTrainingSpeech();
   const [autoRead, setAutoReadState] = useState<boolean>(() => getSessionAutoRead());
   const [showOptIn, setShowOptIn] = useState<boolean>(false);
   const [openDrop, setOpenDrop] = useState<number | null>(null);
@@ -2162,7 +2163,23 @@ export function TrainingModule({
 
       {ttsSupported && (
         <div style={{ background: "#f7f8fb", borderBottom: "1px solid #e4e7ef", padding: "8px 17px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 11.5, color: "#5b6172" }}>Auto read-aloud</span>
+          <span style={{ fontSize: 11.5, color: "#5b6172" }}>Speed</span>
+          <span role="group" aria-label="Read-aloud speed" style={{ display: "inline-flex", gap: 4 }}>
+            {TRAINING_AUDIO_RATES.map((r) => (
+              <button
+                key={r}
+                type="button"
+                aria-pressed={rate === r}
+                onClick={() => setRate(r)}
+                style={{
+                  font: "inherit", fontSize: 11.5, fontWeight: 600, padding: "3px 8px", borderRadius: 999, cursor: "pointer",
+                  border: `1px solid ${rate === r ? NAVY : "#cdd2e0"}`,
+                  background: rate === r ? NAVY : "#fff", color: rate === r ? "#fff" : NAVY,
+                }}
+              >{r}x</button>
+            ))}
+          </span>
+          <span style={{ fontSize: 11.5, color: "#5b6172", marginLeft: 6 }}>Auto read-aloud</span>
           <button
             type="button"
             role="switch"

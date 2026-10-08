@@ -1,45 +1,125 @@
-// On-device text-to-speech for the training player.
-// Uses window.speechSynthesis only. No network, no audio files.
+// Read-aloud for the training player.
+// Plays a pre-generated narration clip (looked up by hash of the spoken text) when one exists;
+// otherwise falls back to the browser's on-device voice (window.speechSynthesis).
 import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  DEFAULT_TRAINING_AUDIO_RATE,
+  TRAINING_AUDIO_RATES,
+  lookupTrainingClip,
+} from "@/lib/training-audio";
 
 const SESSION_KEY = "hive-training-autoread";
+const RATE_KEY = "hive-training-speech-rate";
+
+function readStoredRate(): number {
+  if (typeof window === "undefined") return DEFAULT_TRAINING_AUDIO_RATE;
+  try {
+    const n = Number(window.localStorage.getItem(RATE_KEY));
+    return (TRAINING_AUDIO_RATES as readonly number[]).includes(n) ? n : DEFAULT_TRAINING_AUDIO_RATE;
+  } catch {
+    return DEFAULT_TRAINING_AUDIO_RATE;
+  }
+}
 
 export function useTrainingSpeech() {
   const [speaking, setSpeaking] = useState(false);
   const [supported, setSupported] = useState(false);
+  const [rate, setRateState] = useState<number>(DEFAULT_TRAINING_AUDIO_RATE);
   const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const rateRef = useRef<number>(DEFAULT_TRAINING_AUDIO_RATE);
+  // Bumped by every speak/stop so a slow clip lookup can't start after a newer request or a stop.
+  const tokenRef = useRef(0);
 
   useEffect(() => {
-    setSupported(typeof window !== "undefined" && "speechSynthesis" in window);
+    setSupported(
+      typeof window !== "undefined" &&
+        ("speechSynthesis" in window || typeof Audio !== "undefined"),
+    );
+    const r = readStoredRate();
+    rateRef.current = r;
+    setRateState(r);
   }, []);
 
-  const stop = useCallback(() => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    setSpeaking(false);
-  }, []);
-
-  const speak = useCallback((text: string) => {
-    if (!text || typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.rate = 1;
-    u.pitch = 1;
-    u.onend = () => setSpeaking(false);
-    u.onerror = () => setSpeaking(false);
-    utterRef.current = u;
-    setSpeaking(true);
-    window.speechSynthesis.speak(u);
-  }, []);
-
-  // Always cancel on unmount.
-  useEffect(() => () => {
+  const halt = useCallback(() => {
+    tokenRef.current++;
+    const a = audioRef.current;
+    if (a) {
+      a.onended = null;
+      a.onerror = null;
+      a.pause();
+      a.removeAttribute("src");
+      audioRef.current = null;
+    }
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
   }, []);
 
-  return { supported, speaking, speak, stop };
+  const stop = useCallback(() => {
+    halt();
+    setSpeaking(false);
+  }, [halt]);
+
+  const speakWithBrowserVoice = useCallback((text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setSpeaking(false);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = rateRef.current;
+    u.pitch = 1;
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => setSpeaking(false);
+    utterRef.current = u;
+    window.speechSynthesis.speak(u);
+  }, []);
+
+  const speak = useCallback(
+    (text: string) => {
+      if (!text || typeof window === "undefined") return;
+      halt();
+      const token = tokenRef.current;
+      setSpeaking(true);
+      void lookupTrainingClip(text).then((url) => {
+        if (token !== tokenRef.current) return;
+        if (!url || typeof Audio === "undefined") {
+          speakWithBrowserVoice(text);
+          return;
+        }
+        const a = new Audio(url);
+        a.playbackRate = rateRef.current;
+        a.onended = () => {
+          if (token === tokenRef.current) setSpeaking(false);
+        };
+        a.onerror = () => {
+          if (token !== tokenRef.current) return;
+          audioRef.current = null;
+          speakWithBrowserVoice(text);
+        };
+        audioRef.current = a;
+        a.play().catch(() => {
+          if (token !== tokenRef.current) return;
+          audioRef.current = null;
+          speakWithBrowserVoice(text);
+        });
+      });
+    },
+    [halt, speakWithBrowserVoice],
+  );
+
+  const setRate = useCallback((r: number) => {
+    rateRef.current = r;
+    setRateState(r);
+    if (audioRef.current) audioRef.current.playbackRate = r;
+    try { window.localStorage.setItem(RATE_KEY, String(r)); } catch {}
+  }, []);
+
+  // Always cancel on unmount.
+  useEffect(() => () => { halt(); }, [halt]);
+
+  return { supported, speaking, speak, stop, rate, setRate };
 }
 
 export function getSessionAutoRead(): boolean {
