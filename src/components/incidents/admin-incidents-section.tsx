@@ -376,7 +376,7 @@ function IncidentCard({
               <Badge className="bg-danger-600 text-white">Abuse/Neglect</Badge>
             )}
             {!ir.upi_submitted_at && <Badge variant="outline">UPI not submitted</Badge>}
-            {closed && <Badge className="bg-success-600 text-white">Completed</Badge>}
+            {closed && <Badge className="bg-acc text-white">Completed</Badge>}
           </div>
         </CardContent>
       )}
@@ -404,7 +404,7 @@ function IncidentCard({
           {detail.restraint_used && (
             <Badge className="bg-warning-600 text-white">RESTRAINT</Badge>
           )}
-          {closed && <Badge className="bg-success-600 text-white">Completed</Badge>}
+          {closed && <Badge className="bg-acc text-white">Completed</Badge>}
         </div>
 
         {(ir.upi_submitted_at || ir.guardian_notified_at) && (
@@ -552,7 +552,7 @@ export function AdminIncidentsSection({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2">
+        <h3 className="font-display text-sm font-semibold tracking-[-0.01em] text-deep flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-warning-600" />
           Incidents
         </h3>

@@ -127,7 +127,7 @@ export function CompanyPoliciesTab({ orgId }: { orgId: string }) {
     <div className="space-y-6" data-testid="company-policies-tab">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-semibold text-[var(--hive-text)]">
+          <h2 className="font-display text-lg font-semibold text-deep">
             Company policies
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
@@ -158,7 +158,7 @@ export function CompanyPoliciesTab({ orgId }: { orgId: string }) {
 
       {open && (
         <section className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]" data-testid="policies-add-form">
-          <h3 className="mb-3 text-sm font-semibold">New policy</h3>
+          <h3 className="mb-3 font-display text-sm font-semibold text-deep">New policy</h3>
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-1.5 md:col-span-2">
               <Label htmlFor="company-policy-title">Title</Label>

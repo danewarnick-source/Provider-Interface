@@ -139,7 +139,7 @@ export function ReferralsPage() {
     <div className="space-y-4">
       <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Referrals</h2>
+          <h2 className="font-display text-lg font-bold tracking-[-0.025em] text-deep">Referrals</h2>
           <p className="text-sm text-muted-foreground">
             Prospective-client intake inquiries. Move through the pipeline; log
             every contact, meeting, and note. Matching and follow-up email land
@@ -194,7 +194,7 @@ export function ReferralsPage() {
               className="min-w-0 rounded-md border border-border bg-card p-3"
             >
               <header className="mb-2 flex items-center justify-between">
-                <h3 className="text-sm font-semibold">{cat.label}</h3>
+                <h3 className="font-display text-sm font-semibold text-deep">{cat.label}</h3>
                 <Badge variant="secondary">{rows.length}</Badge>
               </header>
               {referrals.isLoading ? (
@@ -676,7 +676,7 @@ function NewReferralDialog({ organizationId }: { organizationId: string }) {
         <div className="rounded-md border border-dashed border-border bg-muted/30 p-3 space-y-3">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h4 className="text-sm font-semibold flex items-center gap-1">
+              <h4 className="font-display text-sm font-semibold text-deep flex items-center gap-1">
                 <Sparkles className="h-4 w-4 text-primary" /> NECTAR pre-fill (optional)
               </h4>
               <p className="text-xs text-muted-foreground">

@@ -117,8 +117,8 @@ function Inner({ field, id, value, onChange, disabled }: { field: FormField; id:
         <div className="flex flex-wrap gap-1">
           {Array.from({ length: scale }, (_, i) => i + 1).map((n) => (
             <button key={n} type="button" disabled={disabled} onClick={() => onChange(n)}
-              className="min-h-[44px] min-w-[44px] grid place-items-center rounded-md hover:bg-muted">
-              <Star className={`h-6 w-6 ${n <= v ? "fill-warning-400 text-warning-400" : "text-muted-foreground"}`} />
+              className="min-h-[44px] min-w-[44px] grid place-items-center rounded-full hover:bg-pt">
+              <Star className={`h-6 w-6 ${n <= v ? "fill-acc text-acc" : "text-muted-foreground"}`} />
             </button>
           ))}
         </div>

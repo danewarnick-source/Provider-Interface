@@ -415,11 +415,11 @@ export function BillingDetailDialog(props: BillingDetailDialogProps) {
           ) : (
             <div className="space-y-5">
               {lines.map((l) => (
-                <section key={l.code} className="rounded-lg border border-border">
-                  <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/30 px-3 py-2 text-sm">
+                <section key={l.code} className="overflow-hidden rounded-[var(--denim-r)] border border-line bg-card shadow-[var(--denim-shadow-sm)]">
+                  <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-pt0 px-3 py-2 text-sm">
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-semibold">{l.code}</span>
-                      <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${l.isDaily ? "bg-[#fde9c8] text-[#7a4308]" : "bg-[#e1efff] text-[#11498e]"}`}>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${l.isDaily ? "bg-acct text-accd ring-1 ring-acctb" : "bg-pt text-pri"}`}>
                         {l.isDaily ? "DAILY" : "Q"}
                       </span>
                       <span className="text-muted-foreground">

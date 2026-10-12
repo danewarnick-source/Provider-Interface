@@ -52,7 +52,7 @@ export function HubShell({ title, subtitle, tabs, basePath }: Props) {
                     onClick={() => t.feature && setUpgradeFeatureKey(t.feature)}
                     className={`inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
                       isActive
-                        ? "border-[var(--hive-accent)] text-[var(--hive-text)]"
+                        ? "border-acc text-deep"
                         : "border-transparent text-muted-foreground/60 hover:border-border hover:text-muted-foreground"
                     }`}
                   >
@@ -69,7 +69,7 @@ export function HubShell({ title, subtitle, tabs, basePath }: Props) {
                   replace
                   className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? "border-[var(--hive-accent)] text-[var(--hive-text)]"
+                      ? "border-acc text-deep"
                       : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
                   }`}
                 >

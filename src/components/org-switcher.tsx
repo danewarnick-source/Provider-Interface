@@ -101,7 +101,7 @@ export function DemoBadge({ subtle = false }: { subtle?: boolean }) {
         "inline-flex items-center gap-1 rounded-full border px-1.5 py-0 text-[9px] font-bold uppercase tracking-wider",
         subtle
           ? "border-warning-300 bg-warning-50 text-warning-800"
-          : "border-warning-400 bg-warning-100 text-warning-900 shadow-sm",
+          : "border-warning-400 bg-warning-100 text-warning-900 shadow-[var(--denim-shadow-sm)]",
       )}
       title="Sandbox / demo organization — no real records"
     >
@@ -124,7 +124,7 @@ export function DemoBadge({ subtle = false }: { subtle?: boolean }) {
 export function DemoOrgBanner() {
   const { data: org, isLoading } = useCurrentOrg();
   // While loading, or before we have a definitive org, reserve the row but
-  // show nothing — never default-on to the amber banner.
+  // show nothing — never default-on to the warning banner.
   if (isLoading || !org) {
     return <div className="h-8 border-b border-transparent" aria-hidden="true" />;
   }

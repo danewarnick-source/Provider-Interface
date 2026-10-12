@@ -204,7 +204,7 @@ export function OrgClientFileMatrix({
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-border bg-card">
           <table className="min-w-full text-sm">
-            <thead className="bg-muted/30 text-xs uppercase tracking-wide text-muted-foreground">
+            <thead className="bg-pt0 text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
               <tr>
                 <th className="w-10 px-3 py-2 text-left">
                   <Checkbox
@@ -305,7 +305,7 @@ function MatrixRow({
 function StatusCount({ count, tone }: { count: number; tone: "missing" | "due_soon" | "on_file" }) {
   const cls =
     tone === "on_file"
-      ? "border-success-300 bg-success-50 text-success-800"
+      ? "border-acctb bg-acct text-accd"
       : tone === "due_soon"
         ? "border-warning-300 bg-warning-50 text-warning-900"
         : count > 0

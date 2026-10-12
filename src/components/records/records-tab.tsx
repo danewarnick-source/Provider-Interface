@@ -726,7 +726,7 @@ export function RecordsTab() {
     <div className="space-y-3">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <h3 className="text-base font-semibold text-[var(--hive-text)]">Records review</h3>
+          <h3 className="font-display text-base font-semibold tracking-[-0.01em] text-deep">Records review</h3>
           <p className="text-xs text-muted-foreground">
             Every work record in one place. Click any row to view and edit every field. Switch to Needs attention to work the exception queue.
           </p>
@@ -734,12 +734,12 @@ export function RecordsTab() {
       </div>
 
       {/* Mode toggle — two-way */}
-      <div className="inline-flex overflow-hidden rounded-md border border-border">
+      <div className="inline-flex overflow-hidden rounded-full border border-line">
         <button
           type="button"
           onClick={() => setMode("all")}
           className={`flex min-h-[36px] items-center gap-2 px-3 py-1.5 text-xs font-medium transition ${
-            mode === "all" ? "bg-[var(--hive-ink)] text-white" : "bg-card text-muted-foreground hover:bg-[var(--hive-hover)]"
+            mode === "all" ? "bg-pri text-white" : "bg-card text-muted-foreground hover:bg-[var(--hive-hover)]"
           }`}
         >
           <ListChecks className="h-3.5 w-3.5" /> All records
@@ -748,18 +748,18 @@ export function RecordsTab() {
           type="button"
           onClick={() => setMode("attention")}
           className={`flex min-h-[36px] items-center gap-2 border-l border-border px-3 py-1.5 text-xs font-medium transition ${
-            mode === "attention" ? "bg-[var(--hive-ink)] text-white" : "bg-card text-muted-foreground hover:bg-[var(--hive-hover)]"
+            mode === "attention" ? "bg-pri text-white" : "bg-card text-muted-foreground hover:bg-[var(--hive-hover)]"
           }`}
         >
           <AlertCircle className="h-3.5 w-3.5" /> Needs attention
-          <span className={`rounded px-1.5 py-0.5 text-[10px] ${mode === "attention" ? "bg-white/20" : "bg-muted text-foreground"}`}>
+          <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${mode === "attention" ? "bg-white/20" : "bg-pt text-pri"}`}>
             {attentionCount}
           </span>
         </button>
       </div>
 
       {/* Type control — 5 buttons, fixed order */}
-      <div className="flex flex-wrap items-center gap-1 rounded-md border border-border bg-card p-1">
+      <div className="flex flex-wrap items-center gap-1 rounded-full border border-line bg-card p-1">
         {([
           ["all", "All types"],
           ["evv", "EVV timesheets"],
@@ -771,8 +771,8 @@ export function RecordsTab() {
             key={k}
             type="button"
             onClick={() => setType(k)}
-            className={`min-h-[36px] rounded px-3 py-1 text-xs font-medium transition ${
-              type === k ? "bg-[var(--hive-ink)] text-white" : "text-muted-foreground hover:bg-[var(--hive-hover)]"
+            className={`min-h-[36px] rounded-full px-3 py-1 text-xs font-medium transition ${
+              type === k ? "bg-pri text-white" : "text-muted-foreground hover:bg-[var(--hive-hover)]"
             }`}
           >
             {label}
@@ -869,7 +869,7 @@ export function RecordsTab() {
           {type === "evv" && (
             <section className="rounded-xl border border-border bg-card p-3 space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-[var(--hive-text)]">EVV Export Batches</h3>
+                <h3 className="font-display text-base font-semibold tracking-[-0.01em] text-deep">EVV Export Batches</h3>
                 <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
                   Show archived
@@ -914,7 +914,7 @@ export function RecordsTab() {
           {type === "non_billable" ? (
             <div className="overflow-x-auto rounded-lg border border-border bg-card">
               <table className="w-full min-w-[700px] text-sm">
-                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <thead className="bg-pt0 text-left text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2">Caregiver</th>
                     <th className="px-3 py-2">Category</th>
@@ -953,7 +953,7 @@ export function RecordsTab() {
             /* Results table — client records (evv_timesheets) */
             <div className="overflow-x-auto rounded-lg border border-border bg-card">
               <table className="w-full min-w-[900px] text-sm">
-                <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <thead className="bg-pt0 text-left text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2">Caregiver</th>
                     <th className="px-3 py-2">Client</th>

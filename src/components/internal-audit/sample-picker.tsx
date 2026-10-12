@@ -72,7 +72,7 @@ export function SamplePicker({
             <span
               className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] ${
                 selected.length === targetCount
-                  ? "bg-success-50 text-success-700"
+                  ? "bg-acct text-accd"
                   : "bg-warning-50 text-warning-700"
               }`}
             >
@@ -145,7 +145,7 @@ export function SamplePicker({
                     <span
                       className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
                         checked
-                          ? "border-[var(--hive-text)] bg-[var(--hive-text)] text-white"
+                          ? "border-pri bg-pri text-white"
                           : "border-border bg-background"
                       }`}
                     >

@@ -137,10 +137,10 @@ export function TimeCorrectionReviewSection({ organizationId }: { organizationId
   if (rows.length === 0) return null;
 
   return (
-    <section className="rounded-xl border-l-4 border-l-warning-500 border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-[var(--denim-r)] border-l-4 border-l-warning-500 border border-line bg-card p-5 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-[var(--hive-text)]">
+          <h3 className="flex items-center gap-2 font-display text-sm font-semibold text-deep">
             <Clock className="h-4 w-4 text-warning-600" /> Time-correction requests
           </h3>
           <p className="mt-0.5 text-[11px] text-muted-foreground">

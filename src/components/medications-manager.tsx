@@ -454,7 +454,7 @@ export function MedicationsManager({
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <Pill className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-sm">Active prescriptions</h3>
+            <h3 className="font-display font-semibold text-sm text-deep">Active prescriptions</h3>
             <Badge variant="outline">{visible.length}</Badge>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -571,19 +571,19 @@ export function MedicationsManager({
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {m.is_controlled && (
-                        <Badge className="bg-denim-100 text-denim-800 text-[10px] dark:bg-denim-950/40 dark:text-denim-200">Controlled</Badge>
+                        <Badge className="bg-pt text-pri text-[10px]">Controlled</Badge>
                       )}
                       {m.is_prn && (
-                        <Badge className="bg-warning-100 text-warning-800 text-[10px] dark:bg-warning-950/40 dark:text-warning-200">PRN</Badge>
+                        <Badge className="bg-acct text-accd ring-1 ring-acctb text-[10px]">PRN</Badge>
                       )}
                       {m.choking_risk && (
-                        <Badge className="bg-danger-100 text-danger-800 text-[10px] dark:bg-danger-950/40 dark:text-danger-200">Choking Risk</Badge>
+                        <Badge className="bg-danger-50 text-danger-700 text-[10px]">Choking Risk</Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     {m.is_active
-                      ? <Badge className="bg-success-100 text-success-800 hover:bg-success-100 dark:bg-success-950/40 dark:text-success-200">Active</Badge>
+                      ? <Badge className="bg-acct text-accd ring-1 ring-acctb hover:bg-acct">Active</Badge>
                       : <Badge variant="outline">Discontinued</Badge>}
                   </TableCell>
                   {!readOnly && (
@@ -920,7 +920,7 @@ function MedFormDialog({
                   value={v.choking_risk_details}
                   onChange={(e) => setV({ ...v, choking_risk_details: e.target.value })}
                   placeholder="Describe the choking or swallowing risk and any required precautions (e.g., crush medication, upright position required)..."
-                  className="ml-6 text-sm bg-white dark:bg-haze-900"
+                  className="ml-6 text-sm bg-paper"
                 />
               )}
             </div>
@@ -929,7 +929,7 @@ function MedFormDialog({
             <div className="grid grid-cols-2 gap-3">
               <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 transition ${
                 v.is_controlled
-                  ? "border-denim-500 bg-denim-50 dark:bg-denim-950/20"
+                  ? "border-pri bg-pt"
                   : "border-border hover:bg-muted/40"
               }`}>
                 <Checkbox
@@ -937,7 +937,7 @@ function MedFormDialog({
                   onCheckedChange={(c) => setV({ ...v, is_controlled: !!c })}
                 />
                 <div>
-                  <p className={`text-sm font-medium ${v.is_controlled ? "text-denim-800 dark:text-denim-200" : ""}`}>
+                  <p className={`text-sm font-medium ${v.is_controlled ? "text-pri" : ""}`}>
                     Controlled Substance
                   </p>
                   <p className="text-[10px] text-muted-foreground">Requires pill count verification</p>
@@ -945,7 +945,7 @@ function MedFormDialog({
               </label>
               <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 transition ${
                 v.is_prn
-                  ? "border-warning-500 bg-warning-50 dark:bg-warning-950/20"
+                  ? "border-acc bg-acct"
                   : "border-border hover:bg-muted/40"
               }`}>
                 <Checkbox
@@ -953,7 +953,7 @@ function MedFormDialog({
                   onCheckedChange={(c) => setV({ ...v, is_prn: !!c })}
                 />
                 <div>
-                  <p className={`text-sm font-medium ${v.is_prn ? "text-warning-800 dark:text-warning-200" : ""}`}>
+                  <p className={`text-sm font-medium ${v.is_prn ? "text-accd" : ""}`}>
                     PRN / As Needed
                   </p>
                   <p className="text-[10px] text-muted-foreground">Reason required at each administration</p>
@@ -1168,7 +1168,7 @@ function PendingProposalsPanel({
     <div className="rounded-lg border-2 border-warning-500/60 bg-warning-50/40 p-4 space-y-3 dark:bg-warning-950/10">
       <div className="flex items-center gap-2">
         <ClipboardCheck className="h-4 w-4 text-warning-700 dark:text-warning-300" />
-        <h3 className="text-sm font-semibold text-warning-900 dark:text-warning-100">
+        <h3 className="font-display text-sm font-semibold text-warning-900 dark:text-warning-100">
           Pending medication change proposals
         </h3>
         <Badge className="bg-warning-200 text-warning-900 dark:bg-warning-900/50 dark:text-warning-100">{proposals.length}</Badge>
@@ -1305,7 +1305,7 @@ function EditDiff({ before, after }: { before: Medication; after: Record<string,
   return (
     <div className="rounded-md border border-border overflow-hidden">
       <table className="w-full text-xs">
-        <thead className="bg-muted/40">
+        <thead className="bg-pt0">
           <tr>
             <th className="px-2 py-1 text-left font-medium">Field</th>
             <th className="px-2 py-1 text-left font-medium text-muted-foreground">Current</th>

@@ -61,12 +61,12 @@ function ChannelIcon({ ch }: { ch: string | null }) {
 
 export function ReferralStageBadge({ stage }: { stage: ReferralStage }) {
   const tone: Record<ReferralStage, string> = {
-    new: "bg-haze-100 text-haze-700",
-    reviewing: "bg-denim-100 text-denim-800",
-    initial_contact: "bg-denim-100 text-denim-800",
-    iso_meeting: "bg-denim-100 text-denim-800",
-    follow_up: "bg-warning-100 text-warning-800",
-    decision: "bg-success-100 text-success-800",
+    new: "bg-pt0 text-muted-foreground ring-1 ring-line",
+    reviewing: "bg-pt text-pri",
+    initial_contact: "bg-pt text-pri",
+    iso_meeting: "bg-pt text-pri",
+    follow_up: "bg-warning-50 text-warning-700",
+    decision: "bg-acct text-accd ring-1 ring-acctb",
   };
   return (
     <span

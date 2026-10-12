@@ -42,19 +42,19 @@ function timeAgo(iso: string): string {
 function urgencyRing(urgency: Urgency) {
   if (urgency === "critical") return "border-l-4 border-l-danger-500 bg-danger-50 dark:bg-danger-950/40";
   if (urgency === "urgent") return "border-l-4 border-l-warning-500 bg-warning-50 dark:bg-warning-950/40";
-  return "border-l-4 border-l-denim-400 bg-denim-50 dark:bg-denim-950/30";
+  return "border-l-4 border-l-steel bg-pt0";
 }
 
 function urgencyIcon(urgency: Urgency) {
   if (urgency === "critical") return <AlertTriangle className="h-4 w-4 shrink-0 text-danger-500" />;
   if (urgency === "urgent") return <Clock className="h-4 w-4 shrink-0 text-warning-500" />;
-  return <CheckCircle2 className="h-4 w-4 shrink-0 text-denim-400" />;
+  return <CheckCircle2 className="h-4 w-4 shrink-0 text-steel" />;
 }
 
 function badgeColor(urgency: Urgency) {
   if (urgency === "critical") return "bg-danger-500 text-white";
   if (urgency === "urgent") return "bg-warning-500 text-white";
-  return "bg-denim-500 text-white";
+  return "bg-pri text-white";
 }
 
 export function NotificationBell({
@@ -257,7 +257,7 @@ export function NotificationBell({
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--hive-accent)] px-1 text-[10px] font-bold leading-none text-[var(--hive-sidebar)] ring-2 ring-[var(--hive-sidebar)]">
+            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-acc px-1 text-[10px] font-bold leading-none text-white ring-2 ring-[var(--hive-sidebar)]">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -268,12 +268,12 @@ export function NotificationBell({
         align="end"
         sideOffset={8}
         collisionPadding={8}
-        className="z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-background p-0 text-foreground shadow-xl"
+        className="z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[var(--denim-r)] border border-line bg-paper p-0 text-foreground shadow-[var(--denim-shadow)]"
       >
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-2">
               <Bell className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-semibold">Notifications</span>
+              <span className="font-display text-sm font-semibold text-deep">Notifications</span>
               {unreadCount > 0 && (
                 <Badge className={`text-[10px] px-1.5 py-0 ${badgeColor(critical.length > 0 ? "critical" : "normal")}`}>
                   {unreadCount} new
@@ -281,7 +281,7 @@ export function NotificationBell({
               )}
             </div>
             <button type="button" onClick={() => setOpen(false)}
-              className="rounded p-1 text-muted-foreground hover:bg-[var(--hive-hover)] hover:text-foreground">
+              className="rounded-full p-1 text-muted-foreground hover:bg-[var(--hive-hover)] hover:text-foreground">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -297,7 +297,7 @@ export function NotificationBell({
                 {merged.map((n) => {
                   const synthetic = n.id.startsWith("__");
                   return (
-                  <li key={n.id} className={`group ${!n.read_at ? "bg-muted/30" : ""}`}>
+                  <li key={n.id} className={`group ${!n.read_at ? "bg-pt0" : ""}`}>
                     <div className={`${urgencyRing(n.urgency)} relative`}>
                       <button type="button" onClick={() => handleClick(n)}
                         className="w-full px-4 py-3 text-left transition hover:bg-[var(--hive-hover)]">

@@ -86,11 +86,11 @@ export function KnowledgePage() {
   const content = (
     <div className="space-y-6">
       <header className="space-y-2">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--hive-accent-text)]">
+        <div className="flex items-center gap-2 denim-eyebrow">
           <BookOpen className="h-3.5 w-3.5" />
           Knowledge
         </div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--hive-text)]">
+        <h1 className="font-display text-2xl font-bold tracking-[-0.025em] text-deep">
           Agency documents for Nectar
         </h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
@@ -112,7 +112,7 @@ export function KnowledgePage() {
           <DocumentList orgId={orgId} />
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
+        <div className="rounded-[var(--denim-r)] border border-line bg-card p-6 text-center text-sm text-muted-foreground">
           <Loader2 className="mx-auto mb-2 h-4 w-4 animate-spin" />
           Loading…
         </div>
@@ -140,9 +140,9 @@ function DocumentList({ orgId }: { orgId: string }) {
   const sources = (data?.sources ?? []) as SourceRow[];
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-[var(--denim-r)] border border-line bg-card p-5 shadow-[var(--denim-shadow-sm)]">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-display text-sm font-semibold text-[var(--hive-text)]">
+        <h2 className="font-display text-sm font-semibold text-deep">
           Documents on file
         </h2>
         <Badge variant="outline" className="text-[10px]">
@@ -266,7 +266,7 @@ function ParseBadge({
 }) {
   if (status === "parsed") {
     return (
-      <Badge className="bg-success-500/15 text-[10px] text-success-700 hover:bg-success-500/15 dark:text-success-300">
+      <Badge className="rounded-full bg-acct text-[10px] text-accd ring-1 ring-acctb hover:bg-acct">
         In knowledge base
       </Badge>
     );
@@ -274,7 +274,7 @@ function ParseBadge({
   if (status === "parsing" || status === "pending") {
     return (
       <>
-        <Badge className="bg-[var(--hive-accent)]/15 text-[10px] text-[var(--hive-accent-text)] hover:bg-[var(--hive-accent)]/15">
+        <Badge className="rounded-full bg-acct text-[10px] text-accd ring-1 ring-acctb hover:bg-acct">
           Ingesting…
         </Badge>
         <button
@@ -397,8 +397,8 @@ function UploadCard({
   const isUrlMode = mode === "url";
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
-      <h2 className="mb-1 flex items-center gap-2 font-display text-sm font-semibold text-[var(--hive-text)]">
+    <section className="rounded-[var(--denim-r)] border border-line bg-card p-5 shadow-[var(--denim-shadow-sm)]">
+      <h2 className="mb-1 flex items-center gap-2 font-display text-sm font-semibold text-deep">
         <Upload className="h-4 w-4 text-[var(--hive-accent-text)]" /> Upload a document
       </h2>
       <p className="mb-3 text-xs text-muted-foreground">
@@ -406,13 +406,13 @@ function UploadCard({
         and adds it to search.
       </p>
 
-      <div className="mb-3 inline-flex rounded-lg border border-border bg-background p-0.5 text-xs">
+      <div className="mb-3 inline-flex rounded-full border border-line bg-pt0 p-0.5 text-xs">
         <button
           type="button"
           onClick={() => setMode("file")}
-          className={`rounded-md px-3 py-1.5 transition ${
+          className={`rounded-full px-3 py-1.5 transition ${
             mode === "file"
-              ? "bg-[var(--hive-accent)] text-[var(--hive-on-accent)]"
+              ? "bg-pri text-white"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -421,9 +421,9 @@ function UploadCard({
         <button
           type="button"
           onClick={() => setMode("url")}
-          className={`rounded-md px-3 py-1.5 transition ${
+          className={`rounded-full px-3 py-1.5 transition ${
             mode === "url"
-              ? "bg-[var(--hive-accent)] text-[var(--hive-on-accent)]"
+              ? "bg-pri text-white"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -476,7 +476,7 @@ function UploadCard({
               />
             </div>
             <Button
-              className="w-full bg-[var(--hive-accent)] text-[var(--hive-on-accent)] hover:bg-[#b8651a]"
+              className="w-full bg-pri text-white hover:bg-deep"
               onClick={() => captureUrl.mutate()}
               disabled={submitting || !url.trim() || !title.trim()}
             >
@@ -503,7 +503,7 @@ function UploadCard({
               />
             </div>
             <Button
-              className="w-full bg-[var(--hive-accent)] text-[var(--hive-on-accent)] hover:bg-[#b8651a]"
+              className="w-full bg-pri text-white hover:bg-deep"
               onClick={() => upload.mutate()}
               disabled={submitting || !file}
             >

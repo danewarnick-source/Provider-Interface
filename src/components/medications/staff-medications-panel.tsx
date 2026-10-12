@@ -31,11 +31,11 @@ const STATUS_LABEL: Record<StatusChoice, string> = {
 };
 
 const STATUS_BADGE_CLASS: Record<string, string> = {
-  observed: "bg-success-100 text-success-800 border-success-300",
-  refused: "bg-danger-100 text-danger-800 border-danger-300",
-  missed: "bg-warning-100 text-warning-900 border-warning-300",
-  loa: "bg-denim-100 text-denim-800 border-denim-300",
-  omitted: "bg-warning-100 text-warning-900 border-warning-300",
+  observed: "bg-acct text-accd border-acctb",
+  refused: "bg-danger-50 text-danger-700 border-danger-200",
+  missed: "bg-warning-50 text-warning-700 border-warning-200",
+  loa: "bg-pt text-pri border-pt2",
+  omitted: "bg-warning-50 text-warning-700 border-warning-200",
 };
 
 type ClientHeader = {
@@ -252,7 +252,7 @@ export function StaffMedicationsPanel({
 
       {/* 2. Due today */}
       <Card className="p-4">
-        <h3 className="text-base font-semibold">Due today</h3>
+        <h3 className="font-display text-base font-semibold text-deep">Due today</h3>
         <div className="mt-3">
           {rows.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nothing due right now.</p>

@@ -1131,7 +1131,7 @@ export function IncidentReportDialog({
       : "Not applicable";
     return (
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs text-denim-700 dark:text-denim-300">
+        <div className="flex items-center gap-2 text-xs text-pri">
           <ShieldCheck className="h-3.5 w-3.5" />
           <span className="font-semibold">NECTAR follow-up {idx + 1} of {nectarIssues!.length}</span>
           <Badge variant={q.severity === "must_fix" ? "destructive" : "outline"} className="text-[10px]">
@@ -1139,11 +1139,11 @@ export function IncidentReportDialog({
           </Badge>
           {answered && <Badge variant="outline" className="border-success-400 text-[10px] text-success-700">Answered</Badge>}
         </div>
-        <div className="rounded-md border border-denim-300 bg-denim-50/50 p-3 text-sm dark:bg-denim-950/30 dark:border-denim-800">
-          <p className="text-[11px] uppercase tracking-wide text-denim-700 dark:text-denim-300">Nectar's question — generated from what you wrote</p>
+        <div className="rounded-md border border-pt2 bg-pt0 p-3 text-sm">
+          <p className="text-[11px] uppercase tracking-wide text-pri">Nectar's question — generated from what you wrote</p>
           <p className="mt-1 font-medium">{q.question}</p>
           {ownGuardianApplies && (
-            <p className="mt-2 text-[11px] text-denim-800 dark:text-denim-200">
+            <p className="mt-2 text-[11px] text-pri">
               {clientFirst} is their own guardian — no guardian notification is required.
             </p>
           )}
@@ -1343,12 +1343,12 @@ export function IncidentReportDialog({
               {currentKey === "narrative" && (
                 <div className="space-y-3">
                   {aiEnabled && (
-                    <div className="rounded-md border-2 border-denim-300 bg-denim-50/60 p-3 dark:bg-denim-950/30 dark:border-denim-800">
-                      <div className="mb-2 flex items-center gap-2 text-denim-900 dark:text-denim-100">
+                    <div className="rounded-md border-2 border-pt2 bg-pt/60 p-3">
+                      <div className="mb-2 flex items-center gap-2 text-deep">
                         <Sparkles className="h-4 w-4" />
                         <span className="text-sm font-semibold">Draft with NECTAR</span>
                       </div>
-                      <p className="text-[11px] text-denim-900/80 dark:text-denim-100/80">
+                      <p className="text-[11px] text-deep/80">
                         Type rough shorthand — Nectar expands it into a UPI-grade narrative you edit before continuing.
                         Example: "client hit roommate, cops came, arrested".
                       </p>
@@ -1383,8 +1383,8 @@ export function IncidentReportDialog({
                         )}
                       </div>
                       {nectarDraft && (
-                        <div className="mt-2 rounded border border-denim-200 bg-background p-2 text-xs dark:border-denim-900">
-                          <p className="mb-1 text-[10px] uppercase tracking-wide text-denim-700 dark:text-denim-300">NECTAR draft — review then click "Use this draft"</p>
+                        <div className="mt-2 rounded border border-pt2 bg-background p-2 text-xs">
+                          <p className="mb-1 text-[10px] uppercase tracking-wide text-pri">NECTAR draft — review then click "Use this draft"</p>
                           <p className="whitespace-pre-wrap">{nectarDraft}</p>
                         </div>
                       )}
@@ -1444,12 +1444,12 @@ export function IncidentReportDialog({
                     </p>
                   </div>
                   {aiEnabled && (
-                    <div className="rounded-md border-2 border-denim-300 bg-denim-50/40 p-3 dark:bg-denim-950/30 dark:border-denim-800">
-                      <div className="mb-2 flex items-center gap-2 text-denim-900 dark:text-denim-100">
+                    <div className="rounded-md border-2 border-pt2 bg-pt0 p-3">
+                      <div className="mb-2 flex items-center gap-2 text-deep">
                         <ShieldCheck className="h-4 w-4" />
                         <span className="text-sm font-semibold">Review with NECTAR</span>
                       </div>
-                      <p className="text-[11px] text-denim-900/80 dark:text-denim-100/80">
+                      <p className="text-[11px] text-deep/80">
                         NECTAR reads your narrative and asks for anything a UPI reviewer would push back on.
                         You must run a review before continuing — NECTAR will NOT make up information for you.
                       </p>
@@ -1573,10 +1573,10 @@ export function IncidentReportDialog({
                   {liveNudges.length > 0 && (
                     <div className="space-y-2">
                       {liveNudges.map((n) => (
-                        <div key={n.term} className="flex items-start gap-2 rounded-md border border-warning-300 bg-warning-50 p-2 text-xs dark:bg-warning-950/30">
-                          <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning-600" />
+                        <div key={n.term} className="flex items-start gap-2 rounded-[10px] border border-pt2 bg-pt p-2 text-xs">
+                          <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-pri" />
                           <div className="min-w-0 flex-1">
-                            <p className="text-warning-900 dark:text-warning-100">
+                            <p className="text-deep">
                               Nectar noticed you mentioned <span className="font-mono">"{n.term}"</span> —
                               {detailKey === n.categoryKey
                                 ? <> {n.categoryName} details will be required on the next step.</>
@@ -1673,17 +1673,17 @@ export function IncidentReportDialog({
               )}
 
               {currentKey === "nectar-interview" && (
-                <div className="space-y-3 rounded-md border border-denim-300 bg-denim-50/40 p-4 dark:bg-denim-950/30 dark:border-denim-800">
-                  <div className="flex items-center gap-2 text-denim-900 dark:text-denim-100">
+                <div className="space-y-3 rounded-md border border-pt2 bg-pt0 p-4">
+                  <div className="flex items-center gap-2 text-deep">
                     <ShieldCheck className="h-4 w-4" />
                     <span className="text-sm font-semibold">NECTAR is reviewing your narrative</span>
                   </div>
-                  <p className="text-[11px] text-denim-900/70 dark:text-denim-100/70">
+                  <p className="text-[11px] text-deep/70">
                     NECTAR reviews every narrative — whether you used its draft or wrote your own — and will ask follow-ups before you can submit. It never makes up information for you.
                   </p>
 
                   {nectarReviewing ? (
-                    <p className="flex items-center gap-2 text-xs text-denim-900/80 dark:text-denim-100/80">
+                    <p className="flex items-center gap-2 text-xs text-deep/80">
                       <Loader2 className="h-3 w-3 animate-spin" />
                       Generating follow-up questions specific to what you wrote…
                     </p>
@@ -1797,8 +1797,8 @@ export function IncidentReportDialog({
                     )}
 
                     {/* NECTAR Completeness Check */}
-                    <div className="rounded-md border border-denim-300 bg-denim-50/60 p-3 text-xs dark:bg-denim-950/30 dark:border-denim-800">
-                      <div className="mb-2 flex flex-wrap items-center gap-2 text-denim-900 dark:text-denim-100">
+                    <div className="rounded-md border border-pt2 bg-pt/60 p-3 text-xs">
+                      <div className="mb-2 flex flex-wrap items-center gap-2 text-deep">
                         <ShieldCheck className="h-3.5 w-3.5" />
                         <span className="font-semibold">NECTAR Completeness Check</span>
                         {nectarStatus === "skipped" && (
@@ -1814,7 +1814,7 @@ export function IncidentReportDialog({
                           <Badge variant="outline" className="text-[10px]">Follow-ups answered</Badge>
                         )}
                       </div>
-                      <p className="text-[11px] text-denim-900/80 dark:text-denim-100/80">
+                      <p className="text-[11px] text-deep/80">
                         Re-run NECTAR on the enriched draft (narrative + your answers) to surface any remaining gaps before submit.
                       </p>
                       <Button type="button" size="sm" variant="outline" className="mt-2" onClick={runCompletenessCheck} disabled={completenessBusy || !aiEnabled}>

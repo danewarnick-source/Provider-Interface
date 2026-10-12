@@ -19,7 +19,7 @@ import {
 import { ManualCompletionDrawer } from "@/components/company-obligations/manual-completion-drawer";
 
 function statusBadgeClass(status: AgencyDocStatus): string {
-  if (status === "on_file") return "border-success-300 bg-success-50 text-success-800";
+  if (status === "on_file") return "border-acctb bg-acct text-accd";
   if (status === "due_soon") return "border-warning-300 bg-warning-50 text-warning-900";
   return "border-danger-200 bg-danger-50 text-danger-800";
 }
@@ -238,7 +238,7 @@ function CardTable({
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-border bg-card">
           <table className="min-w-full text-sm">
-            <thead className="bg-muted/30 text-xs uppercase tracking-wide text-muted-foreground">
+            <thead className="bg-pt0 text-[12.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-left font-medium">Item</th>
                 <th className="px-3 py-2 text-left font-medium">Status</th>

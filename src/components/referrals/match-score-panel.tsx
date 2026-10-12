@@ -37,10 +37,10 @@ const ALL_COMPONENTS: ScoredComponent[] = [
 ];
 
 function scoreTone(score: number): { bg: string; text: string; label: string } {
-  if (score >= 8) return { bg: "bg-success-100", text: "text-success-900", label: "Strong" };
-  if (score >= 6) return { bg: "bg-warning-100", text: "text-warning-900", label: "Middling" };
-  if (score >= 4) return { bg: "bg-warning-100", text: "text-warning-900", label: "Weak" };
-  return { bg: "bg-danger-100", text: "text-danger-900", label: "Poor" };
+  if (score >= 8) return { bg: "bg-acct", text: "text-accd", label: "Strong" };
+  if (score >= 6) return { bg: "bg-warning-50", text: "text-warning-700", label: "Middling" };
+  if (score >= 4) return { bg: "bg-warning-50", text: "text-warning-700", label: "Weak" };
+  return { bg: "bg-danger-50", text: "text-danger-700", label: "Poor" };
 }
 
 function ReasonIcon({ s }: { s: MatchReason["severity"] }) {

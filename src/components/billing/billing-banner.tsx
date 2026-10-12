@@ -158,7 +158,7 @@ function BannerView({
       }
       case "past_due_warn":
         return {
-          tone: "bg-warning-500 text-[#0F1A2E] border-warning-600",
+          tone: "bg-warning-100 text-warning-900 border-warning-300",
           icon: <AlertTriangle className="h-5 w-5 shrink-0" />,
           title: `Payment required — your account is ${daysPastDue} ${daysPastDue === 1 ? "day" : "days"} past due.`,
           body: "Update your payment method to avoid a service interruption.",
@@ -166,7 +166,7 @@ function BannerView({
         };
       case "past_due_soft":
         return {
-          tone: "bg-warning-400 text-[#0F1A2E] border-warning-500",
+          tone: "bg-warning-50 text-warning-800 border-warning-200",
           icon: <AlertTriangle className="h-5 w-5 shrink-0" />,
           title: "Payment failed — we'll retry automatically.",
           body: "Update your payment method if your card details have changed.",
@@ -174,7 +174,7 @@ function BannerView({
         };
       case "card_expiring_7":
         return {
-          tone: "bg-warning-400 text-[#0F1A2E] border-warning-500",
+          tone: "bg-warning-50 text-warning-800 border-warning-200",
           icon: <CreditCard className="h-5 w-5 shrink-0" />,
           title: `Your card on file expires on ${expiryDate}.`,
           body: "Update it now to avoid a payment failure.",
@@ -182,7 +182,7 @@ function BannerView({
         };
       case "card_expiring_30":
         return {
-          tone: "bg-warning-100 text-warning-900 border-warning-300",
+          tone: "bg-warning-50 text-warning-700 border-warning-200",
           icon: <CreditCard className="h-5 w-5 shrink-0" />,
           title: "Your card on file expires soon.",
           body: `Update it before ${expiryDate} to keep your service uninterrupted.${daysToExpiry != null ? ` (${daysToExpiry} days)` : ""}`,
@@ -203,7 +203,7 @@ function BannerView({
           type="button"
           onClick={onAction}
           size="sm"
-          className="shrink-0 bg-white text-[#0F1A2E] hover:bg-white/90 border border-white/40"
+          className="shrink-0 rounded-full bg-white text-ink hover:bg-pt0 border border-line"
         >
           {cfg.cta}
         </Button>

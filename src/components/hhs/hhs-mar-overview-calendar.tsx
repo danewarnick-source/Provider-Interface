@@ -19,10 +19,10 @@ type LogRow = {
 };
 
 const DOT: Record<EmarStatus, string> = {
-  self_administered: "bg-success-500",
+  self_administered: "bg-acc",
   refused: "bg-danger-500",
   missed: "bg-warning-500",
-  loa: "bg-denim-500",
+  loa: "bg-steel",
   omitted: "bg-warning-600",
 };
 
@@ -101,7 +101,7 @@ export function HhsMarOverviewCalendar({
           legend={
             <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-success-500" aria-hidden />
+                <span className="h-2.5 w-2.5 rounded-full bg-acc" aria-hidden />
                 Self administered
               </span>
               <span className="inline-flex items-center gap-1.5">
@@ -113,7 +113,7 @@ export function HhsMarOverviewCalendar({
                 Refused
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-denim-500" aria-hidden />
+                <span className="h-2.5 w-2.5 rounded-full bg-steel" aria-hidden />
                 LOA
               </span>
             </div>

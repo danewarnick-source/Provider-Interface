@@ -131,14 +131,14 @@ export function HostCertificationPanel({
     const ms = due.getTime() - Date.now();
     const days = Math.round(ms / 86_400_000);
     if (ms < 0) return { label: `Overdue by ${Math.abs(days)}d`, tone: "rose" as const };
-    if (days <= 30) return { label: `Due in ${days}d`, tone: "amber" as const };
+    if (days <= 30) return { label: `Due in ${days}d`, tone: "warning" as const };
     return { label: `Certified through ${latest.next_due_date}`, tone: "emerald" as const };
   }, [latest]);
 
   const toneClasses =
-    status.tone === "rose" ? "bg-danger-100 text-danger-800 border-danger-300"
-    : status.tone === "amber" ? "bg-warning-100 text-warning-800 border-warning-300"
-    : "bg-success-100 text-success-800 border-success-300";
+    status.tone === "rose" ? "bg-danger-50 text-danger-700 border-danger-200"
+    : status.tone === "warning" ? "bg-warning-50 text-warning-700 border-warning-200"
+    : "bg-acct text-accd border-acctb";
 
   return (
     <section className="space-y-3 rounded-md border border-border bg-card p-3">
@@ -223,11 +223,11 @@ export function HostCertBadge({ orgId, hostCardId }: { orgId: string; hostCardId
   const days = Math.round((due.getTime() - Date.now()) / 86_400_000);
   if (days < 0) return <Badge variant="destructive" className="text-[10px]">Cert overdue</Badge>;
   if (days <= 30) return <Badge className="bg-warning-500 text-[10px] hover:bg-warning-500">Cert due {days}d</Badge>;
-  return <Badge className="bg-success-600 text-[10px] hover:bg-success-600">Cert ✓</Badge>;
+  return <Badge className="bg-acc text-[10px] text-white hover:bg-acc">Cert ✓</Badge>;
 }
 
 function determinationBadge(d: CertRow["determination"]) {
-  if (d === "certified") return <Badge className="bg-success-600 hover:bg-success-600">Certified</Badge>;
+  if (d === "certified") return <Badge className="bg-acc text-white hover:bg-acc">Certified</Badge>;
   if (d === "certified_with_corrections") return <Badge className="bg-warning-500 hover:bg-warning-500">Cert. w/ corrections</Badge>;
   return <Badge variant="destructive">Not certified</Badge>;
 }
