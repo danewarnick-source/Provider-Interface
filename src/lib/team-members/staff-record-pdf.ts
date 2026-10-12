@@ -22,6 +22,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase as defaultSupabase } from "@/integrations/supabase/client";
 import { inHiveRefUuid } from "@/lib/in-hive-training";
+import { DENIM, hexToRgb } from "@/lib/design-tokens";
 import {
   PDFDocument,
   StandardFonts,
@@ -282,11 +283,20 @@ async function loadEmployeeSheetData(sb: SupabaseClient, staffId: string, organi
 
 // ─── PDF drawing ───────────────────────────────────────────────────────────
 
-const INK = rgb(0.08, 0.09, 0.12);
-const MUTED = rgb(0.42, 0.45, 0.5);
-const BORDER = rgb(0.82, 0.84, 0.88);
-const ZEBRA = rgb(0.975, 0.98, 0.99);
-const ACCENT = rgb(0.06, 0.28, 0.5);
+/** Denim hex → pdf-lib color (PDFs can't read CSS variables). */
+function pdfColor(hex: string) {
+  const [r, g, b] = hexToRgb(hex);
+  return rgb(r / 255, g / 255, b / 255);
+}
+const INK = pdfColor(DENIM.ink);
+const HEADING = pdfColor(DENIM.deep);
+const MUTED = pdfColor(DENIM.muted);
+const BORDER = pdfColor(DENIM.line);
+const ZEBRA = pdfColor(DENIM.bg);
+const ACCENT = pdfColor(DENIM.pri);
+const NIB = pdfColor(DENIM.acc);
+const SECTION_FILL = pdfColor(DENIM.pt);
+const TABLE_HEAD_FILL = pdfColor(DENIM.pt0);
 const PAGE_W = 612;
 const PAGE_H = 792;
 const M = 40;
@@ -447,14 +457,14 @@ function sectionHeader(
   helvB: PDFFont,
 ): number {
   const barH = 16;
-  page.drawRectangle({ x, y: y - barH, width: w, height: barH, color: rgb(0.945, 0.96, 0.975) });
-  page.drawRectangle({ x, y: y - barH, width: 2.5, height: barH, color: ACCENT });
+  page.drawRectangle({ x, y: y - barH, width: w, height: barH, color: SECTION_FILL });
+  page.drawRectangle({ x, y: y - barH, width: 2.5, height: barH, color: NIB });
   page.drawText(title.toUpperCase(), {
     x: x + 10,
     y: y - barH + 5.5,
     size: 7.8,
     font: helvB,
-    color: ACCENT,
+    color: HEADING,
   });
   return y - barH - 6;
 }
@@ -520,7 +530,7 @@ export async function generateEmployeeFaceSheet(
     const end = drawText(page, orgName, M, headerTop, {
       font: helvB,
       size: 18,
-      color: INK,
+      color: HEADING,
       maxWidth: 320,
       maxLines: 1,
     });
@@ -609,7 +619,7 @@ export async function generateEmployeeFaceSheet(
   iy = drawText(page, name, M, iy, {
     font: helvB,
     size: 22,
-    color: INK,
+    color: HEADING,
     maxWidth: idW,
     maxLines: 2,
   });
@@ -726,7 +736,7 @@ export async function generateEmployeeFaceSheet(
         y: y - rowH,
         width: PAGE_W - M * 2,
         height: rowH,
-        color: rgb(0.95, 0.955, 0.965),
+        color: TABLE_HEAD_FILL,
       });
     } else if (rowIndex % 2 === 1) {
       page.drawRectangle({

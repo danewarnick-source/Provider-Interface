@@ -4,6 +4,7 @@
 // with, and page numbers stamped at the end. Pure (no Supabase), node --test.
 
 import { StandardFonts, rgb, type PDFDocument, type PDFFont, type PDFPage } from "pdf-lib";
+import { DENIM, hexToRgb } from "../design-tokens.ts";
 
 export const PAGE_W = 612;
 export const PAGE_H = 792;
@@ -12,10 +13,19 @@ export const CONTENT_W = PAGE_W - MARGIN * 2;
 const TOP = PAGE_H - MARGIN - 22; // below the running header
 const BOTTOM = MARGIN + 18; // above the page number
 
-export const INK = rgb(0.08, 0.09, 0.12);
-export const MUTED = rgb(0.4, 0.43, 0.48);
-export const RULE = rgb(0.82, 0.84, 0.88);
-export const ACCENT = rgb(0.1, 0.17, 0.28);
+/** Denim hex → pdf-lib color. */
+export function pdfColor(hex: string) {
+  const [r, g, b] = hexToRgb(hex);
+  return rgb(r / 255, g / 255, b / 255);
+}
+
+export const INK = pdfColor(DENIM.ink);
+export const MUTED = pdfColor(DENIM.muted);
+export const RULE = pdfColor(DENIM.line);
+/** Headings (Denim deep navy). */
+export const ACCENT = pdfColor(DENIM.deep);
+/** Accent rules and bullet markers (Denim primary blue). */
+export const ACCENT_RULE = pdfColor(DENIM.pri);
 
 const WIN_ANSI_EXTRA = "€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ";
 
@@ -142,7 +152,7 @@ export class PdfCursor {
           y: this.y,
           size,
           font: this.fonts.bold,
-          color: ACCENT,
+          color: ACCENT_RULE,
         });
       }
       this.page.drawText(line, {
@@ -182,7 +192,7 @@ export function stampPageNumbers(pdf: PDFDocument, font: PDFFont) {
 export function titleBlock(c: PdfCursor, provider: string, title: string) {
   c.text(provider, { size: 11, bold: true, color: MUTED });
   c.text(title, { size: 20, bold: true, color: ACCENT, lead: 26 });
-  c.rule(ACCENT, 1.2);
+  c.rule(ACCENT_RULE, 1.2);
   c.gap(4);
 }
 
@@ -203,7 +213,7 @@ export function factsGrid(c: PdfCursor, rows: ReadonlyArray<readonly [string, st
       });
       const fit = wrapText(value, c.fonts.regular, 10, colW - 12);
       const shown = fit.length > 1 ? `${fit[0]}…` : fit[0];
-      c.page.drawText(shown, { x, y: y - 23, size: 10, font: c.fonts.regular });
+      c.page.drawText(shown, { x, y: y - 23, size: 10, font: c.fonts.regular, color: INK });
     });
     c.y = y - 30;
   }

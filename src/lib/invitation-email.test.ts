@@ -43,17 +43,19 @@ describe("centered card invite email", () => {
     inviterName: "Jake Probert",
   });
 
-  it("is a 600px table email with the landing palette and a plain-text alternative", () => {
+  it("is a 600px table email with the Denim palette and a plain-text alternative", () => {
     assert.match(email.html, /width="600"/);
     assert.match(email.html, /role="presentation"/);
-    assert.match(email.html, /#0a0f1c/);
-    assert.match(email.html, /#0f182b/);
-    assert.match(email.html, /#1f2b44/);
-    assert.match(email.html, /#f4efe3/);
-    assert.match(email.html, /#c4a35a/);
-    assert.match(email.html, /bgcolor="#c4a35a"/);
-    assert.match(email.html, /Iowan Old Style/);
-    assert.match(email.html, /Inter,Arial/);
+    assert.match(email.html, /#F6F8FA/);
+    assert.match(email.html, /#1B3350/);
+    assert.match(email.html, /#E1E7EE/);
+    assert.match(email.html, /#17283D/);
+    assert.match(email.html, /#274C77/);
+    assert.match(email.html, /bgcolor="#274C77"/);
+    assert.match(email.html, /border-radius:999px/);
+    assert.match(email.html, /Manrope/);
+    assert.match(email.html, /Figtree,Arial|Figtree, Arial/);
+    assert.doesNotMatch(email.html, /Inter,|Iowan Old Style|#c4a35a|gold/i);
     assert.match(email.html, /Accept invitation/);
     assert.match(email.html, /What happens next/);
     assert.match(email.html, />Now</);

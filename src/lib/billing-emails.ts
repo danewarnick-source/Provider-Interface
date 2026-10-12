@@ -1,15 +1,20 @@
 // PI-branded billing email templates.
 //
 // Pure render functions — no provider dependencies. Returns subject + html + text.
-// Branded with PI dark-navy header, amber accent, and clean transactional layout.
+// Branded with the Denim deep-navy header, green accent rule, and clean transactional layout.
 // Wired into src/lib/billing-notifications.server.ts.
 
-const NAVY = "#0F1A2E";
-const AMBER = "#F5A524";
-const TEXT = "#1F2937";
-const MUTED = "#6B7280";
-const BORDER = "#E5E7EB";
-const BG = "#F9FAFB";
+import { DENIM, DENIM_FONTS, DENIM_STATUS } from "./design-tokens";
+
+const NAVY = DENIM.deep;
+const PRI = DENIM.pri;
+const ACCENT = DENIM.acc;
+const INK = DENIM.ink;
+const TEXT = DENIM.text;
+const MUTED = DENIM.muted;
+const BORDER = DENIM.line;
+const BG = DENIM.bg;
+const DANGER = DENIM_STATUS.dangerText;
 
 interface ShellOptions {
   preheader: string;
@@ -24,7 +29,7 @@ function shell({ preheader, heading, bodyHtml, ctaLabel, ctaHref, footerNote }: 
   const cta =
     ctaLabel && ctaHref
       ? `<tr><td align="left" style="padding:8px 32px 24px;">
-          <a href="${ctaHref}" style="display:inline-block;background:${AMBER};color:${NAVY};font-weight:700;text-decoration:none;padding:14px 24px;border-radius:8px;font-size:15px;">${ctaLabel}</a>
+          <a href="${ctaHref}" style="display:inline-block;background:${PRI};color:#FFFFFF;font-family:${DENIM_FONTS.emailBody};font-weight:600;text-decoration:none;padding:14px 26px;border-radius:999px;font-size:15px;">${ctaLabel}</a>
         </td></tr>`
       : "";
   const foot = footerNote
@@ -32,28 +37,28 @@ function shell({ preheader, heading, bodyHtml, ctaLabel, ctaHref, footerNote }: 
     : "";
   return `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${heading}</title></head>
-<body style="margin:0;padding:0;background:${BG};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:${TEXT};">
+<body style="margin:0;padding:0;background:${BG};font-family:${DENIM_FONTS.emailBody};color:${TEXT};">
 <span style="display:none;font-size:1px;color:${BG};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</span>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BG};padding:32px 16px;">
   <tr><td align="center">
-    <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border:1px solid ${BORDER};border-radius:12px;overflow:hidden;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${DENIM.paper};border:1px solid ${BORDER};border-radius:14px;overflow:hidden;">
       <tr><td style="background:${NAVY};padding:24px 32px;">
         <table role="presentation" width="100%"><tr>
-          <td style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#ffffff;">
+          <td style="font-family:${DENIM_FONTS.emailHeading};font-size:22px;font-weight:700;letter-spacing:-0.025em;color:#FFFFFF;">
             Provider Interface
           </td>
-          <td align="right" style="font-size:12px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;">Billing</td>
+          <td align="right" style="font-size:12.5px;font-weight:600;color:${DENIM.ondarkp};text-transform:uppercase;letter-spacing:.12em;">Billing</td>
         </tr></table>
       </td></tr>
-      <tr><td style="height:4px;background:${AMBER};"></td></tr>
+      <tr><td style="height:4px;background:${ACCENT};"></td></tr>
       <tr><td style="padding:32px 32px 8px;">
-        <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:${NAVY};font-weight:700;">${heading}</h1>
+        <h1 style="margin:0 0 16px;font-family:${DENIM_FONTS.emailHeading};font-size:22px;line-height:1.3;letter-spacing:-0.01em;color:${NAVY};font-weight:700;">${heading}</h1>
       </td></tr>
       <tr><td style="padding:0 32px 24px;font-size:15px;line-height:1.6;color:${TEXT};">${bodyHtml}</td></tr>
       ${cta}
       ${foot}
       <tr><td style="background:${BG};padding:20px 32px;border-top:1px solid ${BORDER};font-size:12px;color:${MUTED};">
-        Need help? Email <a href="mailto:support@hive.app" style="color:${NAVY};text-decoration:underline;">support@hive.app</a>. <br>
+        Need help? Email <a href="mailto:support@hive.app" style="color:${PRI};text-decoration:underline;">support@hive.app</a>. <br>
         © Provider Interface.
       </td></tr>
     </table>
@@ -141,7 +146,7 @@ export function renderBillingEmail(kind: BillingEmailKind, vars: BillingEmailVar
       const subject = `Reminder — update your payment method (${days} days remaining)`;
       const body = `
         <p style="margin:0 0 16px;">This is a second notice that your most recent payment of <strong>${money(vars.amountCents)}</strong> hasn't gone through.</p>
-        <p style="margin:0 0 16px;font-size:18px;"><strong style="color:${NAVY};">${days} days</strong> remaining until your account is locked.</p>
+        <p style="margin:0 0 16px;font-size:18px;"><strong style="color:${INK};">${days} days</strong> remaining until your account is locked.</p>
         <p style="margin:0;">Updating your card takes about a minute and restores billing immediately.</p>`;
       return {
         subject,
@@ -164,10 +169,10 @@ export function renderBillingEmail(kind: BillingEmailKind, vars: BillingEmailVar
       const days = vars.daysRemaining ?? 9;
       const subject = `Urgent — your Provider Interface account locks in ${days} days`;
       const body = `
-        <p style="margin:0 0 16px;color:#B91C1C;"><strong>This is an urgent notice.</strong></p>
+        <p style="margin:0 0 16px;color:${DANGER};"><strong>This is an urgent notice.</strong></p>
         <p style="margin:0 0 16px;">Your Provider Interface account will be <strong>locked in ${days} days</strong>. After 30 days of non-payment, every staff member at ${agency} will lose access to the platform — schedules, eMAR, daily logs, and reports will all be unavailable until billing is restored.</p>
         <p style="margin:0 0 16px;">To prevent disruption to your team and clients, please update your payment method today.</p>
-        <p style="margin:0;color:${MUTED};font-size:13px;">If you're having trouble updating, reply to this email or contact <a href="mailto:support@hive.app" style="color:${NAVY};">support@hive.app</a>.</p>`;
+        <p style="margin:0;color:${MUTED};font-size:13px;">If you're having trouble updating, reply to this email or contact <a href="mailto:support@hive.app" style="color:${PRI};">support@hive.app</a>.</p>`;
       return {
         subject,
         html: shell({
@@ -200,7 +205,7 @@ export function renderBillingEmail(kind: BillingEmailKind, vars: BillingEmailVar
           bodyHtml: body,
           ctaLabel: "Restore access",
           ctaHref: link,
-          footerNote: `Need to talk to a human? Email <a href="mailto:support@hive.app" style="color:${NAVY};">support@hive.app</a> and we'll get you back online.`,
+          footerNote: `Need to talk to a human? Email <a href="mailto:support@hive.app" style="color:${PRI};">support@hive.app</a> and we'll get you back online.`,
         }),
         text: plain([
           `Your Provider Interface account for ${agency} has been locked due to 30+ days of unpaid balance.`,
@@ -244,7 +249,7 @@ export function renderBillingEmail(kind: BillingEmailKind, vars: BillingEmailVar
           ? "Your card on file expires soon — update to avoid interruption"
           : "Heads up — your card on file expires in 60 days";
       const lead = urgent
-        ? `<p style="margin:0 0 16px;color:#B91C1C;"><strong>Your card expires in 7 days.</strong> If it isn't updated before then, your next billing cycle will fail and the 30-day grace period will begin.</p>`
+        ? `<p style="margin:0 0 16px;color:${DANGER};"><strong>Your card expires in 7 days.</strong> If it isn't updated before then, your next billing cycle will fail and the 30-day grace period will begin.</p>`
         : kind === "card_expiry_30"
           ? `<p style="margin:0 0 16px;">A heads up: the card on file expires in about 30 days. Update it now to avoid any interruption to ${agency}'s service.</p>`
           : `<p style="margin:0 0 16px;">A friendly reminder: the card on file is set to expire in about 60 days.</p>`;

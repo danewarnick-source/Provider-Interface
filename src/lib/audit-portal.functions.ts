@@ -8,6 +8,7 @@ import {
   assertPackageAccessViaChild,
 } from "@/lib/audit-package-access";
 import { resolveAuthOrigin } from "@/lib/auth-redirect";
+import { DENIM, DENIM_FONTS } from "@/lib/design-tokens";
 import { DEFAULT_AUDIT_FROM_NAME, formatFromHeader } from "@/lib/managed-from";
 
 // ============================================================
@@ -1145,31 +1146,36 @@ async function sendAuditorPackageInvite(args: {
 
   const subject = `You've been invited to view ${packageLabel}`;
   const html = `
-    <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#243040">
-      <div style="border-bottom:2px solid #fed7aa;padding-bottom:12px;margin-bottom:20px">
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9a3412">PI — State Audit Portal</div>
-        <div style="font-size:20px;font-weight:700;margin-top:4px">${escapeHtml(packageLabel)}</div>
+    <div style="background:${DENIM.bg};padding:24px 12px;font-family:${DENIM_FONTS.emailBody};color:${DENIM.text}">
+    <div style="max-width:560px;margin:0 auto;background:${DENIM.paper};border:1px solid ${DENIM.line};border-radius:14px;overflow:hidden">
+      <div style="background:${DENIM.deep};padding:20px 24px">
+        <div style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:${DENIM.ondarkp}">PI — State Audit Portal</div>
+        <div style="font-family:${DENIM_FONTS.emailHeading};font-size:20px;font-weight:700;letter-spacing:-0.01em;color:#FFFFFF;margin-top:4px">${escapeHtml(packageLabel)}</div>
       </div>
+      <div style="height:3px;background:${DENIM.acc}"></div>
+      <div style="padding:24px;font-size:15px;line-height:1.6">
       <p>Hello ${escapeHtml((aud.full_name as string) ?? "auditor")},</p>
       <p>${escapeHtml(orgName)} has released an audit package for your review:
-        <strong>${escapeHtml(packageLabel)}</strong>
+        <strong style="color:${DENIM.ink}">${escapeHtml(packageLabel)}</strong>
         (${escapeHtml(pkg.date_range_start as string)} → ${escapeHtml(pkg.date_range_end as string)}).</p>
       <p>Click the button below to set your password and open the package directly. This is a
         read-only auditor portal — it is separate from ${escapeHtml(orgName)}'s regular application.</p>
       <p style="margin:28px 0">
         <a href="${actionLink}"
-           style="display:inline-block;background:#c9a227;color:#243040;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:600">
+           style="display:inline-block;background:${DENIM.pri};color:#FFFFFF;text-decoration:none;padding:12px 26px;border-radius:999px;font-weight:600">
           Set password & open audit package
         </a>
       </p>
-      <p style="color:#666;font-size:12px">If the button doesn't work, copy and paste this link into your browser:<br/>
-        <span style="word-break:break-all">${actionLink}</span>
+      <p style="color:${DENIM.muted};font-size:12px">If the button doesn't work, copy and paste this link into your browser:<br/>
+        <span style="word-break:break-all;color:${DENIM.pri}">${actionLink}</span>
       </p>
-      <p style="color:#666;font-size:12px;margin-top:24px">
+      <p style="color:${DENIM.muted};font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid ${DENIM.line}">
         You received this because a PI-provisioned auditor account was created for
         <strong>${escapeHtml(aud.email as string)}</strong>. If you did not expect this,
         you can ignore this email.
       </p>
+      </div>
+    </div>
     </div>
   `;
 
