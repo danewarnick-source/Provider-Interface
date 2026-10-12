@@ -11,29 +11,32 @@ const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8"
 
 describe("Nectar helper (progress-summary-draft.functions.ts)", () => {
   const src = read("./progress-summary-draft.functions.ts");
+  const prompt = read("./progress-summary-draft-prompt.ts");
   it("drafts per box, checked by buildDrafts, from that box's text and records", () => {
     assert.match(src, /export const draftSummaryBoxes/);
-    assert.match(src, /buildDrafts\(/);
-    assert.match(src, /extra: recordsFor/, "only that box's records");
-    assert.match(src, /if \(f === "incidentNotes"\) return \[\.\.\.reportLines, \.\.\.addedIncidents\]/);
-    assert.match(src, /if \(f === "general"\) return grouped\.general\.map\(line\)/);
-    assert.match(src, /hasIncidents: reportLines\.length \+ addedIncidents\.length > 0/);
-    assert.match(src, /NEVER write that there were no incidents/);
+    assert.match(src, /planDraft\(/);
+    assert.match(src, /plan\.check\(await callAI\(plan\.system, plan\.user/);
+    assert.match(prompt, /buildDrafts\(/);
+    assert.match(prompt, /extra: recordsFor/, "only that box's records");
+    assert.match(prompt, /if \(f === "incidentNotes"\) return \[\.\.\.reportLines, \.\.\.addedIncidents\]/);
+    assert.match(prompt, /if \(f === "general"\) return grouped\.general\.map\(line\)/);
+    assert.match(prompt, /hasIncidents: reportLines\.length \+ addedIncidents\.length > 0/);
+    assert.match(prompt, /NEVER write that there were no incidents/);
     assert.doesNotMatch(src, /draft_content/, "Nectar never writes draft_content (autosave does)");
     const run = src.slice(src.indexOf("export const draftSummaryBoxes"), src.indexOf("export const runSummaryNectar"));
     assert.match(run, /const patch: Record<string, unknown> = \{ status, plan_id: source\.planId \}/);
     assert.match(run, /saveReview\(sb, row, patch, editor, review/);
   });
   it("drafts a summary of the whole period, not a log: no dates, staff names or retelling", () => {
-    assert.match(src, /WRITE A SUMMARY OF THE WHOLE PERIOD, NOT A LOG/);
-    assert.match(src, /NO dates, times or days of the week\. NO staff names\. NO report numbers\./);
-    assert.match(src, /At most one short quote per box/);
-    assert.match(src, /Goal boxes: one paragraph, 3–6 sentences/);
-    assert.match(src, /General notes: one paragraph, 2–4 sentences/);
-    assert.match(src, /whether restraint was used/);
-    assert.match(src, /recommendations or plans that are not in/);
-    assert.doesNotMatch(src, /Keep EVERY fact written/, "summaries drop dates on purpose");
-    assert.match(src, /EVIDENCE_KIND_LABEL\[e\.kind\]/, "records go to Nectar without staff names");
+    assert.match(prompt, /WRITE A SUMMARY OF THE WHOLE PERIOD, NOT A LOG/);
+    assert.match(prompt, /NO dates, times or days of the week\. NO staff names\. NO report numbers\./);
+    assert.match(prompt, /At most one short quote per box/);
+    assert.match(prompt, /Goal boxes: one paragraph, 3–6 sentences/);
+    assert.match(prompt, /General notes: one paragraph, 2–4 sentences/);
+    assert.match(prompt, /whether restraint was used/);
+    assert.match(prompt, /recommendations or plans that are not in/);
+    assert.doesNotMatch(prompt, /Keep EVERY fact written/, "summaries drop dates on purpose");
+    assert.match(prompt, /EVIDENCE_KIND_LABEL\[e\.kind\]/, "records go to Nectar without staff names");
   });
   it("Review with Nectar only asks yes/no for goals with zero overlap, and only a 'no' counts", () => {
     assert.match(src, /goalsNeedingAreaCheck\(/);
