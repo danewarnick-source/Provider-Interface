@@ -32,9 +32,22 @@ export const INST_CONDUCT_ID = "e2e00000-0000-4000-a000-000000000034";
 export const INST_THIRTY_ID = "e2e00000-0000-4000-a000-000000000035";
 export const INST_CLIENT_ID = "e2e00000-0000-4000-a000-000000000036";
 
-const PROJECT_REF = "mmknqtdrefbzwfdtykza";
+// supabase-js keys the persisted session as `sb-<project ref>-auth-token`,
+// where the ref is the subdomain of VITE_SUPABASE_URL. .env now points at
+// the live project dhrrukdcigiiqksibdfb; older mocks used mmknqtdrefbzwfdtykza.
+// A session under the wrong key reads as "signed out" and the dashboard
+// guard bounces to /login, so seed every known ref (plus the env one).
+function refFromUrl(url: string | undefined): string | null {
+  const m = url?.match(/^https?:\/\/([a-z0-9]+)\.supabase\.co/i);
+  return m ? m[1] : null;
+}
+const PROJECT_REF =
+  refFromUrl(process.env.VITE_SUPABASE_URL) ?? "dhrrukdcigiiqksibdfb";
+const PROJECT_REFS = Array.from(
+  new Set([PROJECT_REF, "dhrrukdcigiiqksibdfb", "mmknqtdrefbzwfdtykza"]),
+);
 const SUPABASE_HOST = `${PROJECT_REF}.supabase.co`;
-const AUTH_STORAGE_KEY = `sb-${PROJECT_REF}-auth-token`;
+const AUTH_STORAGE_KEYS = PROJECT_REFS.map((ref) => `sb-${ref}-auth-token`);
 
 export type MockPersona = "admin" | "employee";
 
@@ -59,6 +72,13 @@ const ORG = {
   services_offered: ["HHS", "SLH", "SLN", "SEI", "DSI"],
   created_at: "2025-01-15T00:00:00.000Z",
   welcome_dismissed_at: null as string | null,
+};
+
+const EMPTY_AUDIT_EVIDENCE = {
+  generated_at: new Date().toISOString(),
+  items: {},
+  people: [],
+  homes: [],
 };
 
 const EMPTY_AUDIT_SUMMARY = {
@@ -579,15 +599,20 @@ function tableRows(
       last_name: "Chen",
       intake_status: "complete",
       account_status: "active",
+      authorized_dspd_codes: ["HHS", "SLH", "DSI"],
       disability_category: null,
       has_abi: false,
       home_latitude: null,
       home_longitude: null,
+      pcsp_goals: [],
+      job_code: null,
       medicaid_id: "000111222",
       physical_address: "1 Hive Way, Salt Lake City, UT",
       special_directions: null,
-      client_photo_url: null,
+      profile_photo_url: null,
       feature_config: null,
+      emergency_contact_name: null,
+      emergency_contact_phone: null,
       date_of_birth: "1999-04-12",
     },
   ];
@@ -806,6 +831,9 @@ function decodeDevServerFnExport(urlStr: string): string | null {
   }
 }
 
+/** Set by serverFnResult when no named case matched (heuristic fallback). */
+let lastServerFnWasFallback = false;
+
 function serverFnName(url: string, postText: string): string | null {
   const fromId = decodeDevServerFnExport(url);
   const names = [
@@ -818,6 +846,7 @@ function serverFnName(url: string, postText: string): string | null {
     "getMyEntitlements",
     "checkHiveExecutive",
     "getMyOrgFeatures",
+    "getAuditEvidenceSnapshot",
     "getOrgServiceFootprint",
     "listStaffGroups",
     "getInboxUnreadCount",
@@ -917,6 +946,91 @@ function entitlementsPayload() {
       "hive_training",
     ],
     isExecutive: false,
+  };
+}
+
+/** Team Members roster rows (RosterRow shape, src/lib/team-members/roster.ts). */
+function teamRosterRows() {
+  const evidence = (done: number, missing: number, dueSoon: number) => ({
+    hasPack: true,
+    total: done + missing,
+    done,
+    dueSoon,
+    missing,
+    awaitingReview: 0,
+    skipped: 0,
+  });
+  const row = (
+    userId: string,
+    first: string,
+    last: string,
+    accessLevel: "owner" | "admin" | "staff",
+    jobTitle: string,
+    positions: Array<{ key: string; label: string }>,
+    hireDate: string,
+    ev: ReturnType<typeof evidence>,
+  ) => ({
+    userId,
+    memberId: `mem-${userId}`,
+    displayName: `${first} ${last}`,
+    firstName: first,
+    lastName: last,
+    email: `${first.toLowerCase()}.${last.toLowerCase()}@truenorth.example`,
+    phone: "(801) 555-0100",
+    employeeId: `TNS-${userId.slice(-3)}`,
+    photoPath: null,
+    jobTitle,
+    accessLevel,
+    positions,
+    homeId: "e2e-home-1",
+    homeName: "Maple House",
+    supervisorId: accessLevel === "staff" ? ADMIN_USER_ID : null,
+    supervisorName: accessLevel === "staff" ? "Dana Admin" : null,
+    hireDate,
+    active: true,
+    mustChangePassword: false,
+    lastSignInAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    lastSignInKnown: true,
+    pendingInviteId: null,
+    evidence: ev,
+    missingInfo: [],
+  });
+  return [
+    row(ADMIN_USER_ID, "Dana", "Admin", "owner", "Owner", [], "2024-02-01", evidence(6, 0, 0)),
+    row(STAFF_USER_ID, "Jordan", "Lee", "staff", "DSP", [{ key: "dsp", label: "DSP" }], "2025-06-15", evidence(4, 1, 1)),
+    row(DSP_USER_ID, "Sam", "Rivera", "staff", "House Manager", [{ key: "house_manager", label: "House Manager" }], "2025-01-10", evidence(5, 0, 1)),
+  ];
+}
+
+/** True North has answered every required agency-setup fact (DHHS91172 gate). */
+function agencySetupStatusPayload() {
+  const answeredKeys = [
+    "awarded_service_codes",
+    "operates_ol_site",
+    "uses_volunteers",
+    "has_governing_board",
+    "approx_client_count",
+    "service_area",
+  ];
+  return {
+    complete: true,
+    answeredCount: answeredKeys.length,
+    requiredCount: answeredKeys.length,
+    unanswered: [],
+    answeredKeys,
+    progressLabel: `${answeredKeys.length} of ${answeredKeys.length}`,
+    message: null,
+    createGateExempt: false,
+    createAllowed: true,
+    organizationId: TNS_ORG_ID,
+    facts: {
+      operates_ol_site: true,
+      uses_volunteers: false,
+      has_governing_board: false,
+      servicesOffered: ["HHS", "SLN", "SLH", "SEI", "DSI"],
+      approxClientCount: 24,
+      serviceArea: "Salt Lake, Davis",
+    },
   };
 }
 
@@ -1062,6 +1176,19 @@ function serverFnResult(
       return { isExecutive: mockIsExecutive };
     case "getMyOrgFeatures":
       return orgFeaturesPayload();
+    case "listTeamRoster":
+      return teamRosterRows();
+    case "listTeamInvites":
+      return [];
+    case "rosterOrgHasHomes":
+      return true;
+    case "getAgencySetupStatus":
+      // Without this the generic `{ organizationId } → []` fallback reads as
+      // "0 of 6 setup facts", which locks Team Members / Clients / Scheduler
+      // and redirects /dashboard/clients to Agency setup.
+      return agencySetupStatusPayload();
+    case "getAuditEvidenceSnapshot":
+      return EMPTY_AUDIT_EVIDENCE;
     case "getOrgServiceFootprint":
       return { codes: ["DSI", "HHS", "SEI", "SLH", "SLN"], hasAbiClients: false };
     case "listStaffGroups":
@@ -1262,6 +1389,10 @@ function serverFnResult(
       break;
   }
 
+  // Heuristic fallbacks below are guesses for functions the mock does not
+  // name. They are sent unwrapped (resolve to `undefined` in the app), so a
+  // wrong-shaped guess cannot crash a page — see handleServerFn.
+  lastServerFnWasFallback = true;
   if ("activeOrganizationId" in body) return orgFeaturesPayload();
   if ("organization_id" in body && !("organizationId" in body)) return { count: 0 };
   if ("area" in body || "dateFrom" in body || "clientIds" in body) return EMPTY_AUDIT_SUMMARY;
@@ -1311,12 +1442,6 @@ async function handleSupabase(route: Route, persona: MockPersona, fx: ReturnType
   }
 
   if (url.pathname.startsWith("/rest/v1/rpc/")) {
-    if (url.pathname.endsWith("/client_active_codes")) {
-      return fulfillJson(
-        route,
-        ["HHS", "SLH", "DSI"].map((service_code) => ({ client_id: CLIENT_ID, service_code, service_end_date: null })),
-      );
-    }
     return fulfillJson(route, []);
   }
 
@@ -1385,15 +1510,28 @@ async function handleServerFn(route: Route, persona: MockPersona, fx: ReturnType
   const blob = `${postText}\n${queryText}`;
   const name = serverFnName(req.url(), blob);
   const body = { ...parseBody(queryText), ...parseBody(postText) };
+  lastServerFnWasFallback = false;
   const result = serverFnResult(name, body, persona, fx) ?? null;
+  const fromFallback = lastServerFnWasFallback;
   if (!name) {
     console.log(
       `[hive-mock] unmatched server fn ${method} ${req.url()} body=${postText.slice(0, 180)}`,
     );
   }
   // TanStack Start's client returns application/json payloads as-is when
-  // `x-tss-serialized` is absent (see serverFnFetcher getResponse).
-  return fulfillJson(route, result);
+  // `x-tss-serialized` is absent (see serverFnFetcher getResponse), BUT the
+  // client middleware chain (serverFnBaseToMiddleware → next(json)) only
+  // keeps `json.result` — a bare payload resolves the server fn to
+  // `undefined`. That silently failed getMyOrgFeatures (every gated nav item
+  // locked) and getAgencySetupStatus (Clients bounced to Agency setup).
+  // Wrap anything that is not already `{ result }`-shaped.
+  // Unnamed functions answered by a heuristic fallback stay unwrapped
+  // (resolve to undefined, as before) so a wrong-shaped guess cannot crash a
+  // page (e.g. listOrgPersonnelFileMatrix receiving the entitlements blob).
+  if (fromFallback) return fulfillJson(route, result);
+  const alreadyWrapped =
+    !!result && typeof result === "object" && !Array.isArray(result) && "result" in result;
+  return fulfillJson(route, alreadyWrapped ? result : { result });
 }
 
 export async function installHiveMocks(page: Page, opts: HiveMockOptions = {}) {
@@ -1404,9 +1542,9 @@ export async function installHiveMocks(page: Page, opts: HiveMockOptions = {}) {
   const session = sessionRecord(persona);
 
   await page.addInitScript(
-    ({ storageKey, sessionJson, orgId, view }) => {
+    ({ storageKeys, sessionJson, orgId, view }) => {
       try {
-        window.localStorage.setItem(storageKey, sessionJson);
+        for (const storageKey of storageKeys) window.localStorage.setItem(storageKey, sessionJson);
         window.localStorage.setItem("hive.activeOrgId", orgId);
         window.localStorage.setItem("portal-view", view);
       } catch {
@@ -1414,7 +1552,7 @@ export async function installHiveMocks(page: Page, opts: HiveMockOptions = {}) {
       }
     },
     {
-      storageKey: AUTH_STORAGE_KEY,
+      storageKeys: AUTH_STORAGE_KEYS,
       sessionJson: JSON.stringify(session),
       orgId: TNS_ORG_ID,
       view: persona === "admin" ? "admin" : "staff",
