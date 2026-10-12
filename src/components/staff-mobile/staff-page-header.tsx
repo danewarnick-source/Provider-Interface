@@ -3,12 +3,12 @@ import { PiMark } from "@/components/pi-landing/pi-mark";
 
 /**
  * Crisp page header for staff app pages — eyebrow + title + subhead.
- * Default mark is the cream π, not a honeycomb.
+ * Default mark is the brand π tile, not a honeycomb.
  *
  * Mobile-first: title scales from text-xl → text-2xl at sm.
  */
 function DefaultEyebrowMark({ className }: { className?: string; strokeWidth?: number }) {
-  return <PiMark className={className} title="Provider Interface" />;
+  return <PiMark variant="brand" className={className} title="Provider Interface" />;
 }
 
 export function StaffPageHeader({
@@ -24,13 +24,10 @@ export function StaffPageHeader({
   title: ReactNode;
   subtitle?: ReactNode;
   actions?: ReactNode;
-  /** "nectar" tints the eyebrow with the NECTAR violet/amber treatment. */
+  /** "nectar" tints the eyebrow with the NECTAR (info / pri) treatment. */
   variant?: "default" | "nectar";
 }) {
-  const eyebrowColor =
-    variant === "nectar"
-      ? "text-[oklch(var(--accent-3))]"
-      : "text-accent";
+  const eyebrowColor = variant === "nectar" ? "text-pri" : "text-accd";
 
   return (
     <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

@@ -103,32 +103,28 @@ export function TodayHero() {
     return (
       <section
         aria-label="Active shift"
-        className={`rounded-2xl border p-5 shadow-[var(--shadow-card)] ${
-          needsClockOut
-            ? "border-warning-400/60 bg-warning-500/10"
-            : "border-[#15a06a]/50 bg-[#15a06a]/5"
+        className={`rounded-[20px] border p-5 shadow-[var(--denim-shadow)] ${
+          needsClockOut ? "border-warning-200 bg-warning-50" : "border-acctb bg-acct"
         }`}
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <span
               className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${
-                needsClockOut
-                  ? "bg-warning-500/20 text-warning-800"
-                  : "bg-[#15a06a]/15 text-[#0d5c3d]"
+                needsClockOut ? "bg-warning-100 text-warning-700" : "bg-accl text-accd"
               }`}
             >
               {needsClockOut ? <AlertTriangle className="h-6 w-6" /> : <Clock className="h-6 w-6" />}
             </span>
             <div className="min-w-0">
               <p
-                className={`text-xs font-semibold uppercase tracking-wide ${
-                  needsClockOut ? "text-warning-800" : "text-[#0d5c3d]"
+                className={`text-xs font-semibold uppercase tracking-[0.1em] ${
+                  needsClockOut ? "text-warning-700" : "text-accd"
                 }`}
               >
                 {needsClockOut ? "Shift in progress · Needs your attention" : "Shift in progress"}
               </p>
-              <h2 className="mt-0.5 text-lg font-semibold leading-snug">
+              <h2 className="mt-0.5 font-display text-lg font-bold leading-snug tracking-[-0.01em] text-deep">
                 {needsClockOut ? (
                   <>You've been on the clock for {Math.round(hoursOpen)}h — clock out now</>
                 ) : (
@@ -159,7 +155,7 @@ export function TodayHero() {
               />
             </div>
           ) : (
-            <Button asChild size="lg" className="h-12 shrink-0 px-5 text-base">
+            <Button asChild size="lg" className="h-12 shrink-0 rounded-full px-5 text-base">
               <Link
                 to="/dashboard/workspace/$clientId"
                 params={{ clientId: active.client_id }}
@@ -178,7 +174,7 @@ export function TodayHero() {
     return (
       <section
         aria-label="Today"
-        className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+        className="rounded-[20px] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]"
       >
         <p className="text-sm text-muted-foreground">Loading today's schedule…</p>
       </section>
@@ -201,14 +197,14 @@ export function TodayHero() {
     return (
       <section
         aria-label="Today"
-        className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
+        className="rounded-[20px] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]"
       >
         <div className="flex items-start gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-pt text-pri">
             <Sun className="h-5 w-5" />
           </span>
           <div>
-            <h2 className="text-base font-semibold">No open work on today's schedule</h2>
+            <h2 className="font-display text-base font-semibold text-deep">No open work on today's schedule</h2>
             <p className="mt-0.5 text-xs text-muted-foreground">
               Clocked-out shifts and finished daily notes leave this list. Your assigned people stay in the caseload below. Start a new punch from the Punch pad tab.
             </p>
@@ -257,12 +253,12 @@ export function TodayHero() {
 
   const tone =
     primaryDaily || !primary
-      ? "border-warning-400/50 bg-warning-500/5"
+      ? "border-pt2 bg-pt0"
       : state === "now"
-        ? "border-[#15a06a]/50 bg-[#15a06a]/5"
+        ? "border-acctb bg-acct"
         : state === "soon"
-          ? "border-warning-400/50 bg-warning-500/5"
-          : "border-border bg-card";
+          ? "border-warning-200 bg-warning-50"
+          : "border-line bg-paper";
 
   const eyebrow = primaryDaily || !primary
     ? "Host home"
@@ -285,19 +281,19 @@ export function TodayHero() {
   return (
     <section
       aria-label="Today's shift"
-      className={`rounded-2xl border ${tone} p-5 shadow-[var(--shadow-card)]`}
+      className={`rounded-[20px] border ${tone} p-5 shadow-[var(--denim-shadow)]`}
     >
       {leadClientId && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3 min-w-0">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-background text-foreground">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-paper text-pri shadow-[var(--denim-shadow-sm)]">
               {primaryDaily || !primary ? <Home className="h-6 w-6" /> : state === "now" ? <Clock className="h-6 w-6" /> : <CalendarCheck2 className="h-6 w-6" />}
             </span>
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-accd">
                 {eyebrow}
               </p>
-              <h2 className="mt-0.5 break-words text-lg font-semibold leading-snug">
+              <h2 className="mt-0.5 break-words font-display text-lg font-bold leading-snug tracking-[-0.01em] text-deep">
                 {leadName}
                 {primary && code ? (
                   <span className="ml-2 font-mono text-base text-muted-foreground">
@@ -344,7 +340,7 @@ export function TodayHero() {
               );
             }
             return (
-              <Button asChild size="lg" className="h-12 shrink-0 px-5 text-base">
+              <Button asChild size="lg" className="h-12 shrink-0 rounded-full px-5 text-base">
                 {isHostHomeLead ? (
                   <Link
                     to="/dashboard/hhs-hub/$clientId"

@@ -20,14 +20,17 @@
   border: 0;
   padding: 8px 0;
   margin-bottom: -1px;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   border-bottom: 2px solid transparent;
-  transition: color 150ms ease, border-color 150ms ease;
+  transition: color 150ms var(--denim-ease), border-color 150ms var(--denim-ease);
 }
 
 .home-tab[aria-selected="true"] {
-  border-bottom-color: var(--hive-accent);
+  font-weight: 600;
+  color: var(--denim-pri);
+  border-bottom-color: var(--denim-pri);
 }

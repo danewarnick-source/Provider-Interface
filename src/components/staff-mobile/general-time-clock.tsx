@@ -105,7 +105,7 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
 
   if (!settings.allow_non_client_clockins) {
     return (
-      <section className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
+      <section className="rounded-[var(--denim-r)] border border-line bg-paper p-6 text-center text-sm text-muted-foreground shadow-[var(--denim-shadow-sm)]">
         Non-client clock-ins are turned off for your organization. Use My
         Caseload to clock into a client shift with EVV.
       </section>
@@ -114,7 +114,7 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
 
   if (!cats.length) {
     return (
-      <section className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
+      <section className="rounded-[var(--denim-r)] border border-line bg-paper p-6 text-center text-sm text-muted-foreground shadow-[var(--denim-shadow-sm)]">
         No clock-in categories are enabled. Ask your administrator to enable
         at least one category in Time & Pay settings.
       </section>
@@ -169,7 +169,7 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
   return (
     <section
       aria-label="General Time Clock"
-      className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-card)] sm:p-4"
+      className="rounded-[var(--denim-r)] border border-line bg-paper p-3 shadow-[var(--denim-shadow)] sm:p-4"
     >
       {/* Status bar */}
       <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -209,7 +209,7 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
                     <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
                     <span>{c.label}</span>
                     {c.requires_description && (
-                      <span className="ml-1 rounded bg-warning-100 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wider text-warning-700">
+                      <span className="ml-1 rounded-full bg-warning-50 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wider text-warning-700">
                         Note req.
                       </span>
                     )}
@@ -234,7 +234,7 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
         <Label htmlFor="general-note" className="mb-1 flex items-center gap-1 text-xs font-medium">
           <span>Describe this shift</span>
           <span aria-hidden className="text-danger-600">*</span>
-          <span className="ml-1 rounded bg-danger-100 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wider text-danger-700">
+          <span className="ml-1 rounded-full bg-danger-50 px-1.5 py-0 text-[10px] font-bold uppercase tracking-wider text-danger-700">
             Required
           </span>
         </Label>
@@ -276,9 +276,9 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
 
 
       {/* Timer */}
-      <div className="mb-3 flex items-center justify-center rounded-xl border border-border bg-background/70 py-2.5">
+      <div className="mb-3 flex items-center justify-center rounded-xl border border-line bg-pt0 py-2.5">
         <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-        <span className="font-mono text-2xl font-bold tabular-nums tracking-tight">
+        <span className="font-mono text-2xl font-bold tabular-nums tracking-tight text-deep">
           {elapsed}
         </span>
       </div>
@@ -290,8 +290,8 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
             type="button"
             onClick={onStop}
             disabled={stopping}
-            style={{ backgroundColor: "#dc2626", color: "#ffffff" }}
-            className="relative z-10 flex h-14 w-full items-center justify-center gap-2 rounded-xl !bg-danger-600 text-base font-bold uppercase tracking-wider !text-white shadow-lg shadow-danger-600/30 transition-all duration-150 hover:!bg-danger-700 active:scale-[0.98]"
+            style={{ backgroundColor: "var(--denim-danger)", color: "#ffffff" }}
+            className="relative z-10 flex h-14 w-full items-center justify-center gap-2 rounded-full !bg-danger-600 text-base font-bold uppercase tracking-wider !text-white shadow-[0_10px_24px_-10px_rgba(27,51,80,0.45)] transition-all duration-150 hover:!bg-danger-700 active:scale-[0.98]"
           >
             <Square className="h-5 w-5 fill-current" /> End {shift!.category} Shift
           </Button>
@@ -300,8 +300,8 @@ export function GeneralTimeClock({ autoConfirmEnd = false }: { autoConfirmEnd?: 
             type="button"
             onClick={onStart}
             disabled={!canStart}
-            style={{ backgroundColor: "#059669", color: "#ffffff" }}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl !bg-success-600 text-base font-bold uppercase tracking-wider !text-white shadow-lg shadow-success-600/30 transition-all duration-150 hover:!bg-success-700 active:scale-[0.98] disabled:opacity-60"
+            style={{ backgroundColor: "var(--denim-acc)", color: "#ffffff" }}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-full !bg-acc text-base font-bold uppercase tracking-wider !text-white shadow-[var(--denim-btn-shadow)] transition-all duration-150 hover:!bg-accd active:scale-[0.98] disabled:opacity-60"
           >
             <Play className="h-5 w-5 fill-current" /> Clock In · {active?.label ?? "—"}
           </Button>

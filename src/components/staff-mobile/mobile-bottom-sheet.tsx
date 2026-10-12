@@ -54,19 +54,19 @@ export function MobileBottomSheet({
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute inset-0 bg-black/50 animate-in fade-in-0"
+        className="absolute inset-0 bg-[var(--denim-overlay)] backdrop-blur-[4px] animate-in fade-in-0"
       />
 
       {/* Sheet — width 100% of shell, internal scroll */}
       <div
-        className={`relative z-10 w-full ${maxHeightClass} overflow-y-auto overscroll-contain rounded-t-2xl border-t-4 border-[color:var(--color-warning-500,var(--hive-accent))] bg-background shadow-2xl animate-in slide-in-from-bottom`}
+        className={`relative z-10 w-full ${maxHeightClass} overflow-y-auto overscroll-contain rounded-t-[28px] border-t border-line bg-paper shadow-[0_-12px_40px_-16px_rgba(27,51,80,0.35)] animate-in slide-in-from-bottom`}
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close sheet"
-          className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/5 text-foreground hover:bg-black/10"
+          className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-pt text-pri hover:bg-pt2"
         >
           <X className="h-4 w-4" />
         </button>

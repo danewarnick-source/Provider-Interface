@@ -36,7 +36,7 @@ export type ProfileShellSection<K extends string = string> = {
 
 const BADGE_TONE: Record<ProfileShellBadgeTone, string> = {
   bad: TONE_TAG.danger,
-  warn: TONE_TAG.profile,
+  warn: TONE_TAG.warn,
   ok: TONE_TAG.ok,
   muted: TONE_TAG.neutral,
 };
@@ -118,7 +118,7 @@ export function ProfileShell<K extends string>({
             data-testid="profile-section-menu"
           >
             {/* Phone: one scrolling row. Desktop: a card with a vertical list. */}
-            <ul className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:rounded-2xl md:border md:border-hive-border md:bg-hive-surface md:p-2">
+            <ul className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:rounded-[var(--denim-r)] md:border md:border-line md:bg-paper md:p-2 md:shadow-[var(--denim-shadow-sm)]">
               {shown.map((s) => {
                 const active = s.key === activeKey;
                 const Icon = s.icon;
@@ -130,10 +130,10 @@ export function ProfileShell<K extends string>({
                       aria-current={active ? "page" : undefined}
                       data-testid={`profile-section-${s.key}`}
                       className={cn(
-                        "flex min-h-11 w-full items-center gap-2.5 whitespace-nowrap rounded-full border px-2 py-1.5 pr-3.5 text-left text-sm text-hive-ink transition-colors md:rounded-xl md:border-transparent md:pr-2",
+                        "flex min-h-11 w-full items-center gap-2.5 whitespace-nowrap rounded-full border px-2 py-1.5 pr-3.5 text-left text-sm text-deep transition-colors md:border-transparent md:pr-2",
                         active
-                          ? "border-hive-accent/50 bg-hive-accent-soft font-semibold"
-                          : "border-hive-border bg-hive-surface hover:bg-[var(--hive-muted-surface)] md:bg-transparent",
+                          ? "border-pt2 bg-pt font-semibold text-pri"
+                          : "border-line bg-paper hover:bg-pt0 md:bg-transparent",
                       )}
                     >
                       <span
@@ -165,7 +165,7 @@ export function ProfileShell<K extends string>({
                 onClick={() => onSelect(attentionHomeKey)}
                 className={cn(
                   "inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium hover:underline max-md:min-h-11",
-                  TONE_TAG.profile,
+                  TONE_TAG.warn,
                 )}
                 data-testid="profile-attention-pill"
               >

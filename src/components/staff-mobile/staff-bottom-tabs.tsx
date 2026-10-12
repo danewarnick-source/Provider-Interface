@@ -39,7 +39,7 @@ export function StaffBottomTabs({ framed = false }: { framed?: boolean }) {
   return (
     <nav
       aria-label="Primary"
-      className={`${positioning} border-t border-[color-mix(in_srgb,white_14%,var(--hive-sidebar))] bg-[var(--hive-sidebar)] text-[var(--hive-chrome-text)]`}
+      className={`${positioning} denim-glass rounded-none border-x-0 border-b-0 text-muted-foreground`}
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
@@ -57,7 +57,7 @@ export function StaffBottomTabs({ framed = false }: { framed?: boolean }) {
                 <button
                   type="button"
                   onClick={() => setUpgradeFeatureKey(t.feature!)}
-                  className="relative flex min-h-[56px] w-full flex-col items-center justify-center gap-0.5 px-1 py-2 text-[11px] font-medium tracking-tight text-[var(--hive-chrome-text)]/35 transition-all duration-150 active:scale-[0.95]"
+                  className="relative flex min-h-[56px] w-full flex-col items-center justify-center gap-0.5 px-1 py-2 text-[11px] font-medium tracking-tight text-muted-foreground/45 transition-all duration-150 active:scale-[0.95]"
                   aria-label={`${t.label} — locked. Click to request upgrade.`}
                 >
                   <Icon className="h-5 w-5" strokeWidth={2} />
@@ -70,8 +70,8 @@ export function StaffBottomTabs({ framed = false }: { framed?: boolean }) {
                   data-tour={`nav.${t.to.replace(/^\/dashboard\/?/, "") || "home"}`}
                   className={`relative flex min-h-[56px] flex-col items-center justify-center gap-0.5 px-1 py-2 text-[11px] font-medium tracking-tight transition-all duration-150 active:scale-[0.95] ${
                     active
-                      ? "text-[#f3efe6]"
-                      : "text-[var(--hive-chrome-text)]/65 hover:text-[var(--hive-chrome-text)]"
+                      ? "font-semibold text-pri"
+                      : "text-muted-foreground hover:text-pri"
                   }`}
                 >
                   <span className="relative">
@@ -79,7 +79,7 @@ export function StaffBottomTabs({ framed = false }: { framed?: boolean }) {
                     {t.code === "obligations" && obligationAttention > 0 && (
                       <span
                         aria-label={`${obligationAttention} staff file items need attention`}
-                        className="absolute -right-2.5 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--hive-danger)] px-1 text-[9px] font-bold leading-none text-white"
+                        className="absolute -right-2.5 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-danger-600 px-1 text-[9px] font-bold leading-none text-white ring-2 ring-white"
                       >
                         {obligationAttention > 99 ? "99+" : obligationAttention}
                       </span>
@@ -87,7 +87,7 @@ export function StaffBottomTabs({ framed = false }: { framed?: boolean }) {
                   </span>
                   <span className="truncate">{t.label}</span>
                   {active && (
-                    <span className="absolute top-0 h-0.5 w-8 rounded-full bg-[#f3efe6]" />
+                    <span aria-hidden className="absolute top-1.5 h-1.5 w-1.5 rounded-full bg-acc" />
                   )}
                 </Link>
               )}

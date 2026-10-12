@@ -87,14 +87,14 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
         <header className="space-y-1 px-5 pt-3 text-left">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="break-words text-lg font-semibold leading-tight">{fullName}</h2>
+              <h2 className="break-words font-display text-lg font-bold leading-tight tracking-[-0.01em] text-deep">{fullName}</h2>
               <p className="break-words text-xs text-muted-foreground">Quick info · safety first</p>
             </div>
             {isOnTheClock && (
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#117a52]/10 px-2.5 py-1 text-[11px] font-semibold text-[#0d5c3d]">
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-acct px-2.5 py-1 text-[11px] font-semibold text-accd ring-1 ring-acctb">
                 <span className="relative inline-flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#15a06a] opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#15a06a]" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-acc opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-acc" />
                 </span>
                 On the clock · <span className="font-mono tabular-nums">{elapsed}</span>
               </span>
@@ -125,13 +125,13 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
           <Section tone="success" icon={<Target className="h-4 w-4" />} title="Goals">
             {todaysGoal ? (
               <>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#0d5c3d]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-accd">
                   Today&apos;s focus
                 </p>
                 <p className="mt-0.5 text-sm font-medium text-foreground">{todaysGoal}</p>
                 {goals.length > 1 && (
                   <details className="mt-3">
-                    <summary className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-[#0d5c3d] hover:underline">
+                    <summary className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-accd hover:underline">
                       View all {goals.length} goals
                       <ChevronRight className="h-3 w-3" />
                     </summary>
@@ -139,7 +139,7 @@ export function ClientQuickInfoSheet({ client, trigger }: Props) {
                       {goals.slice(1).map((g, i) => (
                         <li
                           key={i}
-                          className="rounded-md border border-success-200 bg-white px-2.5 py-1.5 text-sm"
+                          className="rounded-lg border border-acctb bg-paper px-2.5 py-1.5 text-sm"
                         >
                           {g}
                         </li>
@@ -200,29 +200,29 @@ function Section({
 }) {
   const palette = {
     caution: {
-      wrap: "border-danger-300 bg-danger-50",
-      head: "text-danger-800",
-      icon: "bg-danger-500 text-white",
+      wrap: "border-danger-200 bg-danger-50",
+      head: "text-danger-700",
+      icon: "bg-danger-600 text-white",
     },
     success: {
-      wrap: "border-success-300 bg-success-50",
-      head: "text-success-800",
-      icon: "bg-[#117a52] text-white",
+      wrap: "border-acctb bg-acct",
+      head: "text-accd",
+      icon: "bg-acc text-white",
     },
     info: {
-      wrap: "border-denim-300 bg-denim-50",
-      head: "text-denim-800",
-      icon: "bg-denim-600 text-white",
+      wrap: "border-pt2 bg-pt",
+      head: "text-pri",
+      icon: "bg-pri text-white",
     },
     neutral: {
-      wrap: "border-border bg-card",
-      head: "text-foreground",
-      icon: "bg-[color:var(--navy-900,var(--hive-text))] text-white",
+      wrap: "border-line bg-paper",
+      head: "text-deep",
+      icon: "bg-deep text-white",
     },
   }[tone];
 
   return (
-    <section className={`rounded-xl border p-3 ${palette.wrap}`}>
+    <section className={`rounded-[var(--denim-r)] border p-3 ${palette.wrap}`}>
       <header className="mb-2 flex items-center gap-2">
         <span
           className={`inline-flex h-6 w-6 items-center justify-center rounded-md ${palette.icon}`}
@@ -252,7 +252,7 @@ function ContactRow({
     return <p className="text-sm text-muted-foreground">{label}: not on file</p>;
   }
   return (
-    <div className="flex items-center justify-between gap-3 rounded-md bg-white/70 px-2.5 py-2">
+    <div className="flex items-center justify-between gap-3 rounded-xl bg-paper/80 px-2.5 py-2">
       <div className="min-w-0">
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           {label}
@@ -266,7 +266,7 @@ function ContactRow({
       {phone ? (
         <a
           href={`tel:${phone}`}
-          className="inline-flex min-h-[40px] shrink-0 items-center gap-1 rounded-md bg-denim-600 px-3 text-xs font-semibold text-white hover:bg-denim-700"
+          className="inline-flex min-h-[40px] shrink-0 items-center gap-1 rounded-full bg-pri px-3.5 text-xs font-semibold text-white hover:bg-deep"
         >
           <Phone className="h-3.5 w-3.5" /> Call
         </a>

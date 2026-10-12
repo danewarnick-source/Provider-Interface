@@ -169,7 +169,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
   return (
     <div
       data-ask-nectar-chat
-      className="flex h-full min-h-0 flex-col overflow-hidden overscroll-none bg-card"
+      className="flex h-full min-h-0 flex-col overflow-hidden overscroll-none bg-[var(--hive-canvas)]"
     >
       <div
         ref={scrollRef}
@@ -177,7 +177,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
       >
         {isEmpty && (
           <div className="space-y-3">
-            <div className="flex items-start gap-2 rounded-lg border border-[var(--hive-accent)]/30 bg-[#fff7ed] px-3 py-2 text-[11px] leading-snug text-[#7a4a0a]">
+            <div className="flex items-start gap-2 rounded-xl border border-pt2 bg-pt px-3 py-2 text-[11px] leading-snug text-pri">
               <Shield className="mt-0.5 h-3 w-3 shrink-0" />
               <span>
                 I only know your assignments, your shifts, and your policies.
@@ -190,7 +190,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
               Hours and pay stay on Caseload.
             </p>
             <div className="space-y-1.5">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-accd">
                 Try asking
               </p>
               {STARTERS.map((s) => (
@@ -198,7 +198,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
                   key={s}
                   type="button"
                   onClick={() => send(s)}
-                  className="block min-h-[40px] w-full rounded-lg border border-border bg-card px-3 py-2 text-left text-[13px] leading-snug text-foreground transition hover:border-[var(--hive-accent)]/50 hover:bg-[#fff7ed] active:scale-[0.99]"
+                  className="block min-h-[40px] w-full rounded-xl border border-line bg-paper px-3 py-2 text-left text-[13px] leading-snug text-body shadow-[var(--denim-shadow-sm)] transition hover:border-pt2 hover:bg-pt0 hover:text-pri active:scale-[0.99]"
                 >
                   {s}
                 </button>
@@ -210,16 +210,16 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
         {messages.map((m) =>
           m.role === "user" ? (
             <div key={m.id} className="flex justify-end">
-              <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-[var(--hive-text)] px-3.5 py-2 text-sm text-white shadow-sm">
+              <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-pri px-3.5 py-2 text-sm text-white shadow-[var(--denim-shadow-sm)]">
                 {m.text}
               </div>
             </div>
           ) : (
             <div key={m.id} className="flex gap-2">
               <NectarMark size="sm" className="mt-0.5" ornament={false} />
-              <div className="max-w-[85%] flex-1 rounded-2xl rounded-tl-sm border border-border bg-card px-3.5 py-2.5 shadow-sm">
+              <div className="max-w-[85%] flex-1 rounded-2xl rounded-tl-sm border border-line bg-paper px-3.5 py-2.5 shadow-[var(--denim-shadow-sm)]">
                 {m.reply?.refused && (
-                  <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#9a3412]">
+                  <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-700">
                     <AlertTriangle className="h-3 w-3" />
                     Out of scope
                   </div>
@@ -228,7 +228,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
                 {m.reply?.deepLink?.path === STAFF_PAY_PERIOD_PATH && (
                   <Link
                     to="/dashboard"
-                    className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-[var(--hive-accent)] px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#b8651a]"
+                    className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-pri px-4 py-1.5 text-xs font-semibold text-white shadow-[var(--denim-btn-shadow)] hover:bg-deep"
                   >
                     {m.reply.deepLink.label || STAFF_PAY_PERIOD_LINK_LABEL}
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -239,7 +239,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
                     {m.reply.citations.map((c, i) => (
                       <span
                         key={`${c.type}-${c.id}-${i}`}
-                        className="inline-flex items-center rounded border border-[#fed7aa] bg-[#fff7ed] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[#9a3412]"
+                        className="inline-flex items-center rounded-full border border-pt2 bg-pt px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-pri"
                         title={c.title}
                       >
                         {c.type === "pcsp"
@@ -263,7 +263,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
         {mutation.isPending && (
           <div className="flex gap-2">
             <NectarMark size="sm" className="mt-0.5" ornament={false} />
-            <div className="rounded-2xl rounded-tl-sm border border-border bg-card px-3.5 py-2 text-sm text-muted-foreground shadow-sm">
+            <div className="rounded-2xl rounded-tl-sm border border-line bg-paper px-3.5 py-2 text-sm text-muted-foreground shadow-[var(--denim-shadow-sm)]">
               <Loader2 className="mr-1 inline h-3.5 w-3.5 animate-spin" />
               Thinking…
             </div>
@@ -277,7 +277,7 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
           e.preventDefault();
           send(input);
         }}
-        className="shrink-0 border-t border-border bg-background/98 px-3 pt-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/92"
+        className="denim-glass shrink-0 rounded-none border-x-0 border-b-0 px-3 pt-2.5"
         style={{ paddingBottom: chromePadCss }}
       >
         <div className="flex items-end gap-2">
@@ -293,12 +293,12 @@ export function AskNectarStaff({ clientId, initialQuestion }: AskNectarStaffProp
             }}
             placeholder="Ask about your schedule, caseload, or training…"
             rows={1}
-            className="min-h-[48px] max-h-32 flex-1 resize-none rounded-full border border-input bg-background px-4 py-3 text-sm leading-snug focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hive-accent)]/40"
+            className="min-h-[48px] max-h-32 flex-1 resize-none rounded-full border border-line bg-paper px-4 py-3 text-sm leading-snug focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-pri/15 focus-visible:border-pri"
             disabled={mutation.isPending}
           />
           <NectarButton
             type="submit"
-            variant="amber"
+            variant="primary"
             loading={mutation.isPending}
             icon={<Send className="h-4 w-4" />}
             disabled={!input.trim() || mutation.isPending}

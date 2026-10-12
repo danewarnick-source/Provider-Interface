@@ -25,19 +25,21 @@ export function OnboardingPipelineCard({ counts }: { counts: PipelineCounts }) {
   // Every stage opens the roster; Invited lands on its Invited view.
 
   return (
-    <section className="rounded-2xl border border-border bg-card/80 p-5 shadow-card backdrop-blur">
+    <section className="rounded-[var(--denim-r)] border border-line bg-paper p-5 shadow-[var(--denim-shadow)]">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="font-display text-base font-semibold tracking-tight">Onboarding pipeline</h2>
+        <h2 className="font-display text-base font-semibold tracking-[-0.01em] text-deep">
+          Onboarding pipeline
+        </h2>
         <Link
           to="/dashboard/team-members"
-          className="inline-flex items-center gap-1 text-xs font-medium text-[#7a4a0a] hover:underline"
+          className="inline-flex items-center gap-1 text-xs font-medium text-pri hover:underline"
         >
           View all <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
 
       {total === 0 ? (
-        <p className="rounded-lg border border-dashed border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+        <p className="rounded-xl border border-dashed border-pt2 bg-pt0 p-4 text-sm text-muted-foreground">
           No one in the pipeline yet — invite your first staff member from Quick actions.
         </p>
       ) : (
@@ -49,16 +51,16 @@ export function OnboardingPipelineCard({ counts }: { counts: PipelineCounts }) {
                 <Link
                   to="/dashboard/team-members"
                   search={s.view ? { view: s.view } : {}}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-3 transition hover:border-[var(--hive-accent)]/40"
+                  className="flex items-center gap-3 rounded-xl border border-line bg-paper px-3 py-3 transition hover:border-pt2 hover:bg-pt0"
                 >
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--hive-text)] text-[var(--hive-accent-text)]">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-pt text-pri">
                     <Icon className="h-4 w-4" strokeWidth={2} />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    <p className="text-xs font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                       {s.label}
                     </p>
-                    <p className="font-display text-xl font-bold tabular-nums text-[var(--hive-text)]">
+                    <p className="font-display text-xl font-bold tabular-nums text-deep">
                       {s.value}
                     </p>
                   </div>

@@ -50,15 +50,15 @@ export function ClientSpendingShiftPanel({ shiftId, clientId }: Props) {
   return (
     <section
       aria-label="Client Spending Log"
-      className="rounded-2xl border border-border bg-card/80 p-4 shadow-[var(--shadow-card)] backdrop-blur-sm"
+      className="rounded-[var(--denim-r)] border border-line bg-paper p-4 shadow-[var(--denim-shadow)]"
     >
       <header className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-warning-100 text-warning-800">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-pt text-pri">
             <Wallet className="h-4 w-4" />
           </span>
           <div className="leading-tight">
-            <h3 className="text-sm font-semibold">Client Spending</h3>
+            <h3 className="font-display text-sm font-semibold text-deep">Client Spending</h3>
             <p className="text-[11px] text-muted-foreground">
               Track the client's own money spent during this shift
             </p>
@@ -67,7 +67,7 @@ export function ClientSpendingShiftPanel({ shiftId, clientId }: Props) {
         <Button
           size="sm"
           onClick={() => setOpenNew(true)}
-          className="h-9 gap-1 bg-warning-500 text-white hover:bg-warning-600"
+          className="h-9 gap-1 rounded-full"
         >
           <Plus className="h-4 w-4" /> Entry
         </Button>
@@ -76,7 +76,7 @@ export function ClientSpendingShiftPanel({ shiftId, clientId }: Props) {
       {entries.isLoading ? (
         <p className="py-3 text-center text-xs text-muted-foreground">Loading…</p>
       ) : !entries.data?.length ? (
-        <p className="rounded-md border border-dashed border-border bg-muted/40 px-3 py-3 text-center text-[12px] text-muted-foreground">
+        <p className="rounded-xl border border-dashed border-pt2 bg-pt0 px-3 py-3 text-center text-[12px] text-muted-foreground">
           No client spending logged yet for this shift.
         </p>
       ) : (
@@ -91,7 +91,7 @@ export function ClientSpendingShiftPanel({ shiftId, clientId }: Props) {
               />
             ))}
           </ul>
-          <div className="mt-3 flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2 text-[12px]">
+          <div className="mt-3 flex items-center justify-between rounded-xl border border-line bg-pt0 px-3 py-2 text-[12px]">
             <span className="text-muted-foreground">Shift total</span>
             <span className="font-semibold tabular-nums">${total.toFixed(2)}</span>
           </div>
@@ -170,14 +170,14 @@ function EntryCard({
             <p className="mt-1 text-[11px] text-muted-foreground italic">{entry.notes}</p>
           )}
         </div>
-        <span className="shrink-0 rounded-md bg-warning-100 px-2 py-1 text-xs font-semibold tabular-nums text-warning-900">
+        <span className="shrink-0 rounded-full bg-pt px-2.5 py-1 text-xs font-semibold tabular-nums text-pri">
           ${Number(entry.amount).toFixed(2)}
         </span>
       </div>
 
       <div className="mt-2 flex items-center gap-2">
         {entry.receipt_path ? (
-          <span className="inline-flex items-center gap-1 rounded border border-border bg-muted/40 px-2 py-0.5 text-[10px] text-muted-foreground">
+          <span className="inline-flex items-center gap-1 rounded-full border border-line bg-pt0 px-2 py-0.5 text-[10px] text-muted-foreground">
             <FileText className="h-3 w-3" /> Receipt attached
           </span>
         ) : canEdit ? (
@@ -290,7 +290,7 @@ function NewEntryDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-warning-600" />
+            <Wallet className="h-4 w-4 text-pri" />
             Log Client Spending
           </DialogTitle>
           <DialogDescription>
@@ -362,7 +362,7 @@ function NewEntryDialog({
           <Button
             onClick={() => submit.mutate()}
             disabled={submit.isPending}
-            className="bg-warning-500 text-white hover:bg-warning-600"
+            className="rounded-full"
           >
             {submit.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save entry

@@ -6,9 +6,9 @@ import { isDailyServiceCode } from "@/lib/service-billing";
 import { capTone, unitsToHours, fmtHours, fmtUnits } from "@/lib/billing-units";
 
 function toneClasses(tone: "ok" | "warn" | "over") {
-  if (tone === "over") return { bar: "bg-[#dc2626]", chip: "bg-[#fde2e2] text-[#991b1b]" };
-  if (tone === "warn") return { bar: "bg-[var(--hive-accent)]", chip: "bg-[#fde9c8] text-[#7a4308]" };
-  return { bar: "bg-[#15a06a]", chip: "bg-[#dff5e8] text-[#0d5c3d]" };
+  if (tone === "over") return { bar: "bg-danger-600", chip: "bg-danger-50 text-danger-700" };
+  if (tone === "warn") return { bar: "bg-warning-500", chip: "bg-warning-50 text-warning-700" };
+  return { bar: "bg-acc", chip: "bg-acct text-accd" };
 }
 
 /**
@@ -50,10 +50,10 @@ export function ClientCapBars({
           const t = toneClasses(tone);
           const left = Math.max(0, cap - used);
           return (
-            <li key={b.service_code} className="rounded-lg border border-border bg-background/60 p-2">
+            <li key={b.service_code} className="rounded-xl border border-line bg-pt0 p-2">
               <div className="flex items-center justify-between gap-2">
                 <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
-                  <CalendarDays className="h-3.5 w-3.5 text-[color:var(--color-warning-700,var(--hive-accent))]" />
+                  <CalendarDays className="h-3.5 w-3.5 text-pri" />
                   {b.service_code}
                 </span>
                 <span className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold tabular-nums ${t.chip}`}>
@@ -83,10 +83,10 @@ export function ClientCapBars({
         const t = toneClasses(tone);
         const left = Math.max(0, capHours - used);
         return (
-          <li key={b.service_code} className="rounded-lg border border-border bg-background/60 p-2">
+          <li key={b.service_code} className="rounded-xl border border-line bg-pt0 p-2">
             <div className="flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
-                <Clock className="h-3.5 w-3.5 text-[color:var(--color-warning-700,var(--hive-accent))]" />
+                <Clock className="h-3.5 w-3.5 text-pri" />
                 {b.service_code}
               </span>
               <span className={`rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold tabular-nums ${t.chip}`}>
