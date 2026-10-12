@@ -8,6 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PersonAvatar } from "@/components/person/person-avatar";
+import { armClientListReturn, clientListReturnView } from "@/lib/clients/list-return";
 import { useAccess } from "@/hooks/use-access";
 import { useClientCareData } from "@/hooks/use-client-care-data";
 import { useAllClientContacts } from "@/components/clients/shared/hooks/use-client-contacts";
@@ -74,8 +75,14 @@ export function ClientProfileHeader({
 
   return (
     <div className="space-y-3" data-testid="client-profile-header">
-      <Button variant="ghost" asChild className="-ml-2">
-        <Link to="/dashboard/clients" data-testid="client-profile-back">
+      {/* Phones only: on desktop "← All clients" is in the sidebar. */}
+      <Button variant="ghost" asChild className="-ml-2 md:hidden">
+        <Link
+          to="/dashboard/clients"
+          search={{ view: clientListReturnView() }}
+          onClick={armClientListReturn}
+          data-testid="client-profile-back"
+        >
           <ArrowLeft className="h-4 w-4" /> Clients
         </Link>
       </Button>

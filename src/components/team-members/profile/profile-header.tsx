@@ -215,7 +215,8 @@ export function ProfileHeader({
 
   return (
     <div className="space-y-3" data-testid="profile-header">
-      <Button variant="ghost" size="sm" asChild className="-ml-2">
+      {/* Phones only: on desktop "← All team members" is in the sidebar. */}
+      <Button variant="ghost" size="sm" asChild className="-ml-2 md:hidden">
         <Link to="/dashboard/team-members" search={backSearch} data-testid="profile-back">
           <ArrowLeft className="mr-1 h-4 w-4" /> Team Members
         </Link>

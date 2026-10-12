@@ -19,6 +19,7 @@ import { recordPhiAccess } from "@/lib/phi-access-audit.functions";
 import { getClientOverview } from "@/lib/clients/overview.functions";
 import { clientOverviewKey } from "@/lib/clients/overview";
 import { attentionBySection } from "@/lib/clients/readiness";
+import { armClientListReturn, clientListReturnView } from "@/lib/clients/list-return";
 import {
   clientSectionSearchValue,
   resolveClientSection,
@@ -154,6 +155,20 @@ export function ClientProfilePage() {
         attentionTotal={attention.length}
         active={active}
         onSelect={select}
+        sidebar={{
+          back: {
+            label: "All clients",
+            to: "/dashboard/clients",
+            search: { view: clientListReturnView() },
+            onClick: armClientListReturn,
+            testId: "client-profile-sidebar-back",
+          },
+          person: {
+            name: data.name,
+            subline: [data.codes.join(", "), data.home?.name].filter(Boolean).join(" · ") || null,
+            photo: { bucket: "client-photos", path: data.client.client_photo_url },
+          },
+        }}
       >
         {discharged ? (
           <DischargeCard orgId={orgId} clientId={clientId} onChanged={refresh} />
@@ -165,7 +180,10 @@ export function ClientProfilePage() {
           open={setup === "open"}
           discharged={discharged}
           onOpenChange={(o) =>
-            navigate({ replace: true, search: (prev) => ({ ...prev, setup: o ? "open" : undefined }) })
+            navigate({
+              replace: true,
+              search: (prev) => ({ ...prev, setup: o ? "open" : undefined }),
+            })
           }
           onSelect={select}
           onDraftAbout={() =>

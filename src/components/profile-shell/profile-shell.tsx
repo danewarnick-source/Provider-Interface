@@ -1,8 +1,13 @@
 // Profile layout shared by person profiles (Team members and Clients).
-// Generic on purpose: no team-member imports. Left section menu (white card,
-// 44 px items, each icon in a tile tinted by the section's tone) on desktop,
-// a horizontal scroll row of pills under 768px, an attention strip, and an
-// optional right-side Sheet panel. Theme tokens only.
+// Generic on purpose: no team-member imports.
+//
+// Desktop (768px and up) inside the dashboard: the dark main sidebar becomes
+// this person's section menu (sidebar-takeover.tsx; drawn by the dashboard
+// layout), and the page content uses the full width. Under 768px: a
+// horizontal scroll row of pills above the content. Outside the dashboard
+// (no takeover) the desktop menu is a white card on the left instead.
+// Also an attention strip / pill and an optional right-side Sheet panel.
+// Theme tokens only.
 
 import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
@@ -10,6 +15,12 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TONE_TAG, TONE_TILE, type ProfileTone } from "./tones";
+import {
+  useHasSidebarTakeover,
+  useIsDesktop,
+  useSidebarTakeover,
+  type SidebarProfile,
+} from "./sidebar-takeover";
 
 export type ProfileShellBadgeTone = "bad" | "warn" | "ok" | "muted";
 
@@ -56,6 +67,7 @@ export function ProfileShell<K extends string>({
   children,
   panel,
   onPanelClose,
+  sidebar,
 }: {
   header: ReactNode;
   /** Full attention strip, drawn on the home section (attentionHomeKey). */
@@ -71,56 +83,77 @@ export function ProfileShell<K extends string>({
   /** Right-side Sheet content; null keeps it closed. */
   panel: ReactNode | null;
   onPanelClose?: () => void;
+  /** The back link and the person shown at the top of the sidebar menu (desktop). */
+  sidebar?: Pick<SidebarProfile, "back" | "person">;
 }) {
   const shown = sections.filter((s) => s.visible);
   const onHome = attentionHomeKey === undefined || activeKey === attentionHomeKey;
+  const canTakeOver = useHasSidebarTakeover() && !!sidebar;
+  const desktop = useIsDesktop();
+  const inSidebar = canTakeOver && desktop === true;
+  useSidebarTakeover(
+    inSidebar && sidebar
+      ? {
+          ...sidebar,
+          sections: shown.map(({ key, label, icon, badge }) => ({ key, label, icon, badge })),
+          activeKey,
+          onSelect: (key) => onSelect(key as K),
+        }
+      : null,
+  );
 
   return (
     <div className="min-w-0 max-w-full space-y-5" data-testid="profile-shell">
       {header}
 
       <div className="flex min-w-0 flex-col gap-5 md:flex-row md:items-start">
-        <nav
-          aria-label="Profile sections"
-          className="min-w-0 md:sticky md:top-4 md:w-[236px] md:shrink-0"
-          data-testid="profile-section-menu"
-        >
-          {/* Phone: one scrolling row. Desktop: a card with a vertical list. */}
-          <ul className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:rounded-2xl md:border md:border-hive-border md:bg-hive-surface md:p-2">
-            {shown.map((s) => {
-              const active = s.key === activeKey;
-              const Icon = s.icon;
-              return (
-                <li key={s.key} className="shrink-0 md:shrink">
-                  <button
-                    type="button"
-                    onClick={() => onSelect(s.key)}
-                    aria-current={active ? "page" : undefined}
-                    data-testid={`profile-section-${s.key}`}
-                    className={cn(
-                      "flex min-h-11 w-full items-center gap-2.5 whitespace-nowrap rounded-full border px-2 py-1.5 pr-3.5 text-left text-sm text-hive-ink transition-colors md:rounded-xl md:border-transparent md:pr-2",
-                      active
-                        ? "border-hive-gold/50 bg-hive-gold-soft font-semibold"
-                        : "border-hive-border bg-hive-surface hover:bg-[var(--hive-muted-surface)] md:bg-transparent",
-                    )}
-                  >
-                    <span
-                      aria-hidden
+        {/* On desktop in the dashboard the menu is in the sidebar instead (never both). */}
+        {inSidebar ? null : (
+          <nav
+            aria-label="Profile sections"
+            className={cn(
+              "min-w-0 md:sticky md:top-4 md:w-[236px] md:shrink-0",
+              canTakeOver && "md:hidden",
+            )}
+            data-testid="profile-section-menu"
+          >
+            {/* Phone: one scrolling row. Desktop: a card with a vertical list. */}
+            <ul className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:gap-1 md:overflow-visible md:rounded-2xl md:border md:border-hive-border md:bg-hive-surface md:p-2">
+              {shown.map((s) => {
+                const active = s.key === activeKey;
+                const Icon = s.icon;
+                return (
+                  <li key={s.key} className="shrink-0 md:shrink">
+                    <button
+                      type="button"
+                      onClick={() => onSelect(s.key)}
+                      aria-current={active ? "page" : undefined}
+                      data-testid={`profile-section-${s.key}`}
                       className={cn(
-                        "grid h-7 w-7 shrink-0 place-items-center rounded-lg",
-                        TONE_TILE[s.tone ?? "neutral"],
+                        "flex min-h-11 w-full items-center gap-2.5 whitespace-nowrap rounded-full border px-2 py-1.5 pr-3.5 text-left text-sm text-hive-ink transition-colors md:rounded-xl md:border-transparent md:pr-2",
+                        active
+                          ? "border-hive-gold/50 bg-hive-gold-soft font-semibold"
+                          : "border-hive-border bg-hive-surface hover:bg-[var(--hive-muted-surface)] md:bg-transparent",
                       )}
                     >
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <span>{s.label}</span>
-                    <SectionBadge badge={s.badge} />
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+                      <span
+                        aria-hidden
+                        className={cn(
+                          "grid h-7 w-7 shrink-0 place-items-center rounded-lg",
+                          TONE_TILE[s.tone ?? "neutral"],
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span>{s.label}</span>
+                      <SectionBadge badge={s.badge} />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        )}
 
         <div className="min-w-0 flex-1 space-y-5" data-testid="profile-section-content">
           {attentionCount > 0 ? (

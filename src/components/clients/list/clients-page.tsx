@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Contact2, Loader2, UserPlus } from "lucide-react";
 import { SectionCard } from "@/components/clients/profile/cards/section-card";
@@ -14,6 +14,7 @@ import { useAgencySetup } from "@/hooks/use-agency-setup";
 import { useCurrentOrg } from "@/hooks/use-org";
 import { shouldBlockStaffClientCreate } from "@/lib/agency-setup-gate";
 import type { ListFilters } from "@/lib/clients/list";
+import { rememberClientList, takeClientListReturn } from "@/lib/clients/list-return";
 import { AddClientSheet } from "@/components/clients/add/add-client-sheet";
 import { ImportClientsDialog } from "@/components/clients/add/import-clients-dialog";
 import { ClientListCards } from "./client-list-cards";
@@ -46,8 +47,29 @@ export function ClientsPage({
   const { can, canCategory } = useAccess();
   const canEditClients = can("edit_client_records");
   const navigate = useNavigate();
-  const [view, setView] = useState<PageView>(startView);
-  const [filters, setFilters] = useState<ListFilters>(NO_FILTERS);
+  // "← All clients" on a profile brings back the list as it was left.
+  const [restored] = useState(() => takeClientListReturn());
+  const [view, setView] = useState<PageView>(restored?.view ?? startView);
+  const [filters, setFilters] = useState<ListFilters>(() =>
+    restored
+      ? {
+          ...NO_FILTERS,
+          search: restored.search,
+          code: restored.code,
+          homeId: restored.homeId,
+          staffId: restored.staffId,
+        }
+      : NO_FILTERS,
+  );
+  useEffect(() => {
+    rememberClientList({
+      view,
+      search: filters.search,
+      code: filters.code,
+      homeId: filters.homeId,
+      staffId: filters.staffId,
+    });
+  }, [view, filters.search, filters.code, filters.homeId, filters.staffId]);
   const [addOpen, setAddOpen] = useState(startWithAddOpen);
   const [importOpen, setImportOpen] = useState(false);
   const listView = view === "discharged" ? "discharged" : "active";

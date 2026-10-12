@@ -81,6 +81,58 @@ test("client profile opens every section from the side menu", async ({ page }) =
   await expect(page.getByTestId("client-guardian-note")).toBeVisible();
 });
 
+test("desktop: the dark sidebar becomes the profile menu; All clients returns to the list as left", async ({
+  page,
+}) => {
+  await installHiveMocks(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/dashboard/clients", { waitUntil: "domcontentloaded" });
+  await waitForDashboard(page);
+  const search = page.getByPlaceholder("Search by name, Medicaid ID or PID...");
+  await search.fill("Tommy");
+  await expect(page.getByTestId("client-row")).toHaveCount(1, { timeout: 20_000 });
+  await page.getByTestId("client-row").first().getByText(/Tommy/).first().click();
+  await expect(page.getByTestId("client-profile-page")).toBeVisible({ timeout: 30_000 });
+
+  // One menu, in the sidebar: person, sections with aria-current, no white card in the page.
+  const aside = page.locator("aside");
+  await expect(page.getByTestId("profile-section-menu")).toHaveCount(1);
+  await expect(aside.getByTestId("profile-section-menu")).toBeVisible();
+  await expect(aside.getByTestId("profile-sidebar-person")).toContainText(/Tommy Jones/i);
+  await expect(aside.getByTestId("profile-sidebar-subline")).toContainText("DSI");
+  await expect(aside.getByTestId("profile-section-overview")).toHaveAttribute("aria-current", "page");
+  await expect(page.getByTestId("client-profile-back")).toBeHidden();
+  await aside.getByTestId("profile-section-plans").click();
+  await expect(page).toHaveURL(/section=plans/);
+  await expect(aside.getByTestId("profile-section-plans")).toHaveAttribute("aria-current", "page");
+  await expect(aside.getByTestId("profile-section-overview")).not.toHaveAttribute("aria-current", "page");
+  await aside.getByTestId("profile-section-team").focus();
+  await expect(aside.getByTestId("profile-section-team")).toBeFocused();
+
+  // ← All clients: the list keeps its search; the main menu is back.
+  await aside.getByTestId("client-profile-sidebar-back").click();
+  await expect(page).toHaveURL(/\/dashboard\/clients\/?(\?|$)/);
+  await expect(search).toHaveValue("Tommy");
+  await expect(page.getByTestId("profile-section-menu")).toHaveCount(0);
+  await expect(aside.locator('[data-tour^="nav."]').first()).toBeVisible();
+});
+
+test("phone: section pills above the profile; the drawer keeps the main menu", async ({ page }) => {
+  await installHiveMocks(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/dashboard/clients/${CLIENTS.tommy.id}`, { waitUntil: "domcontentloaded" });
+  await waitForDashboard(page);
+  await expect(page.getByTestId("client-profile-page")).toBeVisible({ timeout: 30_000 });
+  const menu = page.getByTestId("profile-section-menu");
+  await expect(menu).toHaveCount(1);
+  await expect(menu.locator("ul")).toHaveCSS("flex-direction", "row");
+  await expect(page.getByTestId("client-profile-back")).toBeVisible();
+  await menu.getByTestId("profile-section-contacts").click();
+  await expect(page).toHaveURL(/section=contacts/);
+  const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+  expect(pageWidth).toBeLessThanOrEqual(390);
+});
+
 test("old ?tab= links land on the matching section", async ({ page }) => {
   await installHiveMocks(page);
   await page.goto(`/dashboard/clients/${CLIENTS.tommy.id}?tab=identity`, {

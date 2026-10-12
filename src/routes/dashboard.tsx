@@ -92,6 +92,11 @@ import {
 } from "@/lib/auth-session-boot";
 import { PortalViewSwitcher } from "@/components/portal-view-switcher";
 import { PiBrand } from "@/components/brand/pi-brand";
+import { ProfileSidebar } from "@/components/profile-shell/profile-sidebar";
+import {
+  SidebarTakeoverProvider,
+  useSidebarProfile,
+} from "@/components/profile-shell/sidebar-takeover";
 import { PiMark } from "@/components/pi-landing/pi-mark";
 
 import { BillingBanner } from "@/components/billing/billing-banner";
@@ -708,6 +713,7 @@ function DashboardLayout() {
   return (
     <GuidedTourProvider>
       <DraftJobsProvider>
+        <SidebarTakeoverProvider>
         <div className="flex h-screen h-[100dvh] flex-col overflow-hidden">
           <ImpersonationBanner />
           {isCognitoAuth() && (orgError || awsDbFailed) && (
@@ -737,7 +743,7 @@ function DashboardLayout() {
             }
           >
             <aside className="hive-chrome hidden h-full flex-col overflow-y-auto border-r border-[var(--hive-chrome-border)] md:flex">
-              <SidebarBody {...sidebarProps} />
+              <DesktopSidebar {...sidebarProps} />
             </aside>
 
             <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
@@ -954,6 +960,7 @@ function DashboardLayout() {
             </div>
           </div>
         </div>
+        </SidebarTakeoverProvider>
       </DraftJobsProvider>
     </GuidedTourProvider>
   );
@@ -1387,41 +1394,82 @@ function SidebarBody({
         />
       )}
 
-      <div className="border-t border-sidebar-border p-4">
-        <div className="mb-3 text-xs text-sidebar-foreground/60">
-          <div className="font-medium text-sidebar-foreground">
-            {user?.user_metadata?.full_name ?? user?.email}
-          </div>
-          <div className="mt-2">
-            {isHiveExecView ? (
-              <div className="flex items-center justify-between">
-                <span className="truncate">Provider Interface</span>
-                <span className="ml-2 rounded-full bg-sidebar-accent px-2 py-0.5 text-[10px] uppercase tracking-wider">
-                  Exec
+      <SidebarFooter
+        user={user}
+        accessLabel={accessLabel}
+        isHiveExecView={isHiveExecView}
+        signOut={signOut}
+      />
+    </>
+  );
+}
+
+/** User, org and sign-out at the bottom of the sidebar (the main menu and a profile's menu). */
+function SidebarFooter({
+  user,
+  accessLabel,
+  isHiveExecView,
+  signOut,
+}: Pick<SidebarBodyProps, "user" | "accessLabel" | "isHiveExecView" | "signOut">) {
+  return (
+    <div className="border-t border-sidebar-border p-4">
+      <div className="mb-3 text-xs text-sidebar-foreground/60">
+        <div className="font-medium text-sidebar-foreground">
+          {user?.user_metadata?.full_name ?? user?.email}
+        </div>
+        <div className="mt-2">
+          {isHiveExecView ? (
+            <div className="flex items-center justify-between">
+              <span className="truncate">Provider Interface</span>
+              <span className="ml-2 rounded-full bg-sidebar-accent px-2 py-0.5 text-[10px] uppercase tracking-wider">
+                Exec
+              </span>
+            </div>
+          ) : (
+            <>
+              <OrgSwitcher />
+              <div className="mt-1.5 flex justify-end">
+                <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-[10px] uppercase tracking-wider">
+                  {accessLabel}
                 </span>
               </div>
-            ) : (
-              <>
-                <OrgSwitcher />
-                <div className="mt-1.5 flex justify-end">
-                  <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-[10px] uppercase tracking-wider">
-                    {accessLabel}
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
+            </>
+          )}
         </div>
-
-        <Button
-          onClick={signOut}
-          variant="outline"
-          size="sm"
-          className="w-full border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-        >
-          <LogOut className="mr-2 h-3.5 w-3.5" /> Sign out
-        </Button>
       </div>
-    </>
+
+      <Button
+        onClick={signOut}
+        variant="outline"
+        size="sm"
+        className="w-full border-sidebar-border bg-transparent text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+      >
+        <LogOut className="mr-2 h-3.5 w-3.5" /> Sign out
+      </Button>
+    </div>
+  );
+}
+
+/**
+ * The desktop sidebar: the main menu, or the open profile's section menu
+ * while a client or team member profile has taken it over
+ * (profile-shell/sidebar-takeover.tsx). The phone drawer always uses
+ * SidebarBody, so it keeps the main menu.
+ */
+function DesktopSidebar(props: Omit<SidebarBodyProps, "onNavigate">) {
+  const profile = useSidebarProfile();
+  if (!profile) return <SidebarBody {...props} />;
+  return (
+    <ProfileSidebar
+      profile={profile}
+      footer={
+        <SidebarFooter
+          user={props.user}
+          accessLabel={props.accessLabel}
+          isHiveExecView={props.isHiveExecView}
+          signOut={props.signOut}
+        />
+      }
+    />
   );
 }

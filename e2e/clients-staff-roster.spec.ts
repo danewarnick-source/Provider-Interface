@@ -334,7 +334,7 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
     await expect(page.getByTestId("roster-filter-missing")).toHaveAttribute("aria-pressed", "true");
     await nameLink(page, "Harvey Alisa").click();
-    await page.getByTestId("profile-back").click();
+    await page.locator("aside").getByTestId("profile-sidebar-back").click();
     await expect(page).toHaveURL(/\/dashboard\/team-members\/?\?.*filter=missing/);
     await expect(page).toHaveURL(/sort=-?evidence/);
     await page.getByRole("button", { name: "Clear filter" }).click();
@@ -362,6 +362,13 @@ test.describe("Clients + Staff roster — mocked admin", () => {
       await expect(menu.getByRole("button", { name: new RegExp(`^${label}`) })).toBeVisible();
     }
     await expect(page.getByRole("tab")).toHaveCount(0);
+    // Desktop: the menu is the dark sidebar (one menu only), with the person on top.
+    await expect(menu).toHaveCount(1);
+    await expect(page.locator("aside").getByTestId("profile-section-menu")).toBeVisible();
+    await expect(page.locator("aside").getByTestId("profile-sidebar-person")).toContainText(
+      "Jake Probert",
+    );
+    await expect(page.getByTestId("profile-back")).toBeHidden();
     await expect(page.getByTestId("profile-section-overview")).toHaveAttribute(
       "aria-current",
       "page",
@@ -449,6 +456,8 @@ test.describe("Clients + Staff roster — mocked admin", () => {
     await shot(page, "team_member_face_sheet_desktop");
     await page.setViewportSize({ width: 390, height: 844 });
     // Phone: the section menu is one horizontal scroll row above the content.
+    await expect(page.getByTestId("profile-section-menu")).toHaveCount(1);
+    await expect(page.locator("aside").getByTestId("profile-section-menu")).toHaveCount(0);
     const menuList = page.getByTestId("profile-section-menu").locator("ul");
     await expect(menuList).toHaveCSS("flex-direction", "row");
     await expect(menuList).toHaveCSS("overflow-x", "auto");
